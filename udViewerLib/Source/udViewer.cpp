@@ -99,13 +99,13 @@ void udViewer_RegisterCallback(udViewerCallbackType type, udViewerCallback *pCal
 // Author: Manu Evans, May 2015
 void udViewer_Init(const udViewerInitParams &initParams)
 {
+  udRender_Create(&s_renderEngine, initParams.renderThreadCount);
+
   s_initParams = initParams;
   udViewerDriver_Init(initParams.argc, initParams.argv);
 
   udInput_Init();
   udInput_LockMouseOnButtons(1 << udMC_LeftButton);
-
-  udRender_Create(&s_renderEngine, initParams.renderThreadCount);
 
   // crete a vertex buffer to render the quad to the screen
   udVertexElement elements[] = {

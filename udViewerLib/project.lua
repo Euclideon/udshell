@@ -14,7 +14,8 @@ project "udViewerLib"
 
 	defines { "GLEW_STATIC" }
 
---	configuration { "windows" }
+	configuration { "windows" }
+		includedirs { "../3rdParty/sdl2/include" }
 
 	-- include common stuff
 	dofile "../common-proj.lua"

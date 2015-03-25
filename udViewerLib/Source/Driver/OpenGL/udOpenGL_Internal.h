@@ -7,6 +7,10 @@
 #if UDWINDOW_DRIVER == UDDRIVER_GLUT
 # include "GL/glew.h"
 //# include "GL/wglew.h"
+#elif UDWINDOW_DRIVER == UDDRIVER_SDL
+//# include <SDL2/SDL_opengl.h>
+# include "GL/glew.h"
+//# include "GL/wglew.h"
 #else
 # if defined(USE_GLES)
 #   include <GLES2/gl2ext.h>
