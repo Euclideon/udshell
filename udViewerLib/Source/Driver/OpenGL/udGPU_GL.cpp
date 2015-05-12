@@ -53,7 +53,17 @@ const int s_attribNameLen[] = // HAX: this length is used to overwrite the '\0' 
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udGPU_RenderVertices(udShaderProgram *pProgram, udVertexBuffer *pVB, udPrimitiveType primType, size_t numVertices)
+void udGPU_RenderVertices(udShaderProgram *pProgram, udVertexBuffer *pVB, udPrimitiveType primType, size_t vertexCount, size_t firstVertex)
+{
+  udVertexRange r;
+  r.firstVertex = (uint32_t)firstVertex;
+  r.vertexCount = (uint32_t)vertexCount;
+  udGPU_RenderRanges(pProgram, pVB, primType, &r, 1);
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+void udGPU_RenderRanges(struct udShaderProgram *pProgram, struct udVertexBuffer *pVB, udPrimitiveType primType, udVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
 {
   udVertexElement *pElements = pVB->pVertexDeclaration->pElements;
   udVertexElementData *pElementData = pVB->pVertexDeclaration->pElementData;
@@ -89,7 +99,12 @@ void udGPU_RenderVertices(udShaderProgram *pProgram, udVertexBuffer *pVB, udPrim
   }
 
   // issue the draw call
-  glDrawArrays(s_PrimTypes[primType], 0, (GLsizei)numVertices);
+  for(size_t i=0; i<rangeCount; ++i)
+  {
+    if(pCallback)
+      pCallback(i, pCallbackData);
+    glDrawArrays(s_PrimTypes[primType], (GLint)pRanges[i].firstVertex, (GLsizei)pRanges[i].vertexCount);
+  }
 
   // unbind the attributes  TODO: perhaps we can remove this...?
   for(int a=0; a<pVB->pVertexDeclaration->numElements; ++a)

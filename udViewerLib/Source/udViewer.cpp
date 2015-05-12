@@ -15,6 +15,8 @@
 void udViewerDriver_Init(int argc, char* argv[]);
 void udViewerDriver_RunMainLoop();
 void udViewerDriver_Quit();
+void udDebugFont_InitModule();
+void udDebugFont_DeinitModule();
 
 udViewerInitParams s_initParams;
 
@@ -47,39 +49,39 @@ RegisteredCallback s_udViewerCallbacks[udVCT_Max];
 
 // shaders for blitting
 const char s_vertexShader[] =
-"attribute vec2 a_position;"
-"varying vec2 v_texcoord;"
-"varying vec2 v_texcoord2;"
-"uniform vec4 u_rect;"
-"uniform vec4 u_textureScale;"
-"uniform vec4 u_textureScale2;"
-"void main()"
-"{"
-"  v_texcoord = u_textureScale.xy + a_position*u_textureScale.zw;"
-"  v_texcoord2 = u_textureScale2.xy + a_position*u_textureScale2.zw;"
-"  vec2 pos = u_rect.xy + a_position*u_rect.zw;"
-"  gl_Position = vec4(pos.x, pos.y, 1, 1);"
-"}";
+"attribute vec2 a_position;\n"
+"varying vec2 v_texcoord;\n"
+"varying vec2 v_texcoord2;\n"
+"uniform vec4 u_rect;\n"
+"uniform vec4 u_textureScale;\n"
+"uniform vec4 u_textureScale2;\n"
+"void main()\n"
+"{\n"
+"  v_texcoord = u_textureScale.xy + a_position*u_textureScale.zw;\n"
+"  v_texcoord2 = u_textureScale2.xy + a_position*u_textureScale2.zw;\n"
+"  vec2 pos = u_rect.xy + a_position*u_rect.zw;\n"
+"  gl_Position = vec4(pos.x, pos.y, 1, 1);\n"
+"}\n";
 
 const char s_blitShader[] =
 #if defined(USE_GLES)
-"#extension GL_EXT_frag_depth : require"
-"precision mediump float;"
+"#extension GL_EXT_frag_depth : require\n"
+"precision mediump float;\n"
 #endif
-"varying vec2 v_texcoord;"
-"uniform sampler2D u_texture;"
-"uniform sampler2D u_zbuffer;"
-"void main()"
-"{"
-"  float depthSample = texture2D(u_zbuffer, v_texcoord).x;"
-"  float z = (gl_DepthRange.diff*depthSample + gl_DepthRange.near + gl_DepthRange.far) / 2.0;"
+"varying vec2 v_texcoord;\n"
+"uniform sampler2D u_texture;\n"
+"uniform sampler2D u_zbuffer;\n"
+"void main()\n"
+"{\n"
+"  float depthSample = texture2D(u_zbuffer, v_texcoord).x;\n"
+"  float z = (gl_DepthRange.diff*depthSample + gl_DepthRange.near + gl_DepthRange.far) / 2.0;\n"
 #if defined(USE_GLES)
-"  gl_FragDepthEXT = z;"
+"  gl_FragDepthEXT = z;\n"
 #else
-"  gl_FragDepth = z;"
+"  gl_FragDepth = z;\n"
 #endif
-"  gl_FragColor = texture2D(u_texture, v_texcoord);"
-"}";
+"  gl_FragColor = texture2D(u_texture, v_texcoord);\n"
+"}\n";
 
 
 //-----------------------------------------------------
@@ -126,12 +128,16 @@ void udViewer_Init(const udViewerInitParams &initParams)
   udShader *pVS = udShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), udST_VertexShader);
   udShader *pPS = udShader_CreateShader(s_blitShader, sizeof(s_blitShader), udST_PixelShader);
   s_shader = udShader_CreateShaderProgram(pVS, pPS);
+
+  udDebugFont_InitModule();
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 void udViewer_Deinit()
 {
+  udDebugFont_DeinitModule();
+
   udRender_Destroy(&s_renderEngine);
 
 //  udInput_Deinit();
