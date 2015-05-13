@@ -221,9 +221,9 @@ void udViewer_ResizeFrame(int width, int height)
   udRender_CreateView(&s_renderView, s_renderEngine, width, height);
 
   if (s_colorBuffer)
-    free(s_colorBuffer);
+    udFree(s_colorBuffer);
   if (s_depthBuffer)
-    free(s_depthBuffer);
+    udFree(s_depthBuffer);
   size_t pitch = width * sizeof(uint32_t);
   s_colorBuffer = udAlloc(pitch * height);
   s_depthBuffer = udAlloc(pitch * height);

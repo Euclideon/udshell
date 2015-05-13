@@ -17,7 +17,7 @@ struct udDebugFont;
 void udDebugFont_BeginRender(const udFloat4x4 *pWVP = nullptr);
 
 /** Render a string */
-void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, float y, const udFloat4 &color = udFloat4::one());
+void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, float y, float scale = 1.f, const udFloat4 &color = udFloat4::one());
 
 /** Complete rendering */
 void udDebugFont_EndRender();

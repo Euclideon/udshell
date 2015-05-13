@@ -55,10 +55,10 @@ static int s_colorConstant;
 const char s_vertexShader[] =
 "attribute vec2 a_position;\n"
 "uniform mat4 u_wvp;\n"
-"uniform vec4 u_posOffset;\n"
+"uniform vec4 u_posScale;\n"
 "void main()\n"
 "{\n"
-"  gl_Position = mul(u_posOffset + vec4(a_position, 0, 1), u_wvp);\n"
+"  gl_Position = mul(u_wvp, vec4(u_posScale.xy + a_position*u_posScale.zw, 0.5, 1));\n"
 "}\n";
 
 const char s_pixelShader[] =
@@ -103,7 +103,7 @@ void udDebugFont_BeginRender(const udFloat4x4 *pWVP)
 
   if(!pWVP)
   {
-    udFloat4x4 wvpMat = udFloat4x4::ortho(0, 1280, 720, 0, 0, 1);
+    udFloat4x4 wvpMat = udFloat4x4::orthoForScreeen(1280, 720, 0, 1);
     udShader_SetProgramData(wvp, wvpMat);
   }
   else
@@ -125,7 +125,7 @@ void UpdateOffset(size_t i, void *pUserData)
 }
 
 //-------------------------------------------------------------------
-void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, float y, const udFloat4 &color)
+void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, float y, float scale, const udFloat4 &color)
 {
   if (!pFont)
     pFont = pRomanSimplex;
@@ -136,11 +136,11 @@ void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, 
 
   CharOffset loopData;
   loopData.pOffsets = offsets;
-  loopData.constantSlot = udShader_FindShaderParameter(pShader, "u_posOffset");
+  loopData.constantSlot = udShader_FindShaderParameter(pShader, "u_posScale");
 
   udShader_SetProgramData(s_colorConstant, color);
 
-  udFloat4 offset = { x, y, 0.f, 0.f };
+  udFloat4 offset = { x, y, scale, scale };
 
   for (int c = *pString; c; c = *++pString)
   {
@@ -155,7 +155,7 @@ void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, 
         ++numRanges;
       }
       float width = (float)pFont->pCharacters[c].width;
-      offset.x = offset.x + width;
+      offset.x = offset.x + width*scale;
     }
   }
 
