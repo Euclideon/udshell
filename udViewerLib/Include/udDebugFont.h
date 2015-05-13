@@ -1,28 +1,22 @@
-/**
- * @file udDebugFont.h
- * @author Dave Pevreal
- * @date 11/02/2009
- * @brief Interface to sets of graphics shaders (vertex shaders and pixel shaders)
- *
- * Copyright (c) Dave Pevreal
- */
-
 #pragma once
 #ifndef UDDEBUG_FONT
 #define UDDEBUG_FONT
 
 struct udDebugFont;
 
-/** Begin a series of font renders */
 void udDebugFont_BeginRender(const udFloat4x4 *pWVP = nullptr);
 
-/** Render a string */
-void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, float y, float scale = 1.f, const udFloat4 &color = udFloat4::one());
+float udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, float y, float scale = 1.f, const udFloat4 &color = udFloat4::one());
 
-/** Complete rendering */
 void udDebugFont_EndRender();
 
-/** Get the height */
 int udDebugFont_GetHeight(udDebugFont *pFont);
+
+
+void udDebugConsole_SetCursorPos(float x, float y);
+void udDebugConsole_SetTextScale(float scale);
+void udDebugConsole_SetTextColor(const udFloat4 &color);
+void udDebugConsole_Print(const char *pString);
+void udDebugConsole_Printf(const char *pFormat, ...);
 
 #endif // UDDEBUG_FONT

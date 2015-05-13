@@ -1,9 +1,15 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "udPlatform.h"
+#include "udPlatformUtil.h"
 #include "udMath.h"
 #include "udDebugFont.h"
 #include "udShader.h"
 #include "udVertex.h"
 #include "udGPU.h"
+
+#include <stdarg.h>
+#include <malloc.h>
 
 //-------------------------------------------------------------------
 struct udDebugFontVertex
@@ -49,6 +55,9 @@ static udShader *pFontShaderV;
 static udShader *pFontShaderP;
 static udShaderProgram *pShader;
 
+float s_consoleX, s_consoleY, s_consoleSize;
+udFloat4 s_consoleColor = udFloat4::one();
+
 static int s_colorConstant;
 
 // shaders for rendering
@@ -93,7 +102,7 @@ void udDebugFont_DeinitModule()
   udVertex_DestroyVertexDeclaration(&pVertexFormat);
 }
 
-//-------------------------------------------------------------------
+//*******************************************************************
 void udDebugFont_BeginRender(const udFloat4x4 *pWVP)
 {
   int wvp = udShader_FindShaderParameter(pShader, "u_wvp");
@@ -112,7 +121,6 @@ void udDebugFont_BeginRender(const udFloat4x4 *pWVP)
   }
 }
 
-//-------------------------------------------------------------------
 struct CharOffset
 {
   int constantSlot;
@@ -124,14 +132,15 @@ void UpdateOffset(size_t i, void *pUserData)
   udShader_SetProgramData(pOffset->constantSlot, pOffset->pOffsets[i]);
 }
 
-//-------------------------------------------------------------------
-void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, float y, float scale, const udFloat4 &color)
+//*******************************************************************
+float udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, float y, float scale, const udFloat4 &color)
 {
   if (!pFont)
     pFont = pRomanSimplex;
 
-  udFloat4 offsets[128];
-  udVertexRange ranges[128];
+  size_t len = udStrlen(pString);
+  udFloat4 *offsets = (udFloat4*)alloca(sizeof(udFloat4) * len);
+  udVertexRange *ranges = (udVertexRange*)alloca(sizeof(udVertexRange) * len);
   size_t numRanges = 0;
 
   CharOffset loopData;
@@ -141,9 +150,17 @@ void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, 
   udShader_SetProgramData(s_colorConstant, color);
 
   udFloat4 offset = { x, y, scale, scale };
+  float h = (float)pFont->height * scale;
+  float height = h;
 
   for (int c = *pString; c; c = *++pString)
   {
+    if(c == '\n')
+    {
+      height += h;
+      offset.x = x;
+      offset.y += h;
+    }
     if (c >= 32 && c < (32 + pFont->nCharacters))
     {
       c -= 32;
@@ -160,20 +177,68 @@ void udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, 
   }
 
   udGPU_RenderRanges(pShader, pFont->pGeoBuffer, udPT_Lines, ranges, numRanges, UpdateOffset, &loopData);
+
+  return height;
 }
 
-//-------------------------------------------------------------------
+//*******************************************************************
 void udDebugFont_EndRender()
 {
   //...?
 }
 
-//-------------------------------------------------------------------
+//*******************************************************************
 int udDebugFont_GetHeight(udDebugFont *pFont)
 {
   if (!pFont)
     pFont = pRomanSimplex;
   return pFont->height;
+}
+
+//*******************************************************************
+void udDebugConsole_SetCursorPos(float x, float y)
+{
+  s_consoleX = x;
+  s_consoleY = y;
+}
+
+//*******************************************************************
+void udDebugConsole_SetTextScale(float scale)
+{
+  s_consoleSize = scale;
+}
+
+//*******************************************************************
+void udDebugConsole_SetTextColor(const udFloat4 &color)
+{
+  s_consoleColor = color;
+}
+
+//*******************************************************************
+void udDebugConsole_Print(const char *pString)
+{
+  s_consoleY += udDebugFont_RenderString(NULL, pString, s_consoleX, s_consoleY, s_consoleSize, s_consoleColor);
+}
+
+//*******************************************************************
+void udDebugConsole_Printf(const char *pFormat, ...)
+{
+  va_list args;
+  va_start(args, pFormat);
+  size_t len;
+#if UDPLATFORM_NACL
+  len = vsprintf(nullptr, pFormat, args);
+#else
+  len = vsnprintf(nullptr, 0, pFormat, args);
+#endif
+  char *pBuffer = (char*)alloca(len+1);
+#if UDPLATFORM_NACL
+  len = vsprintf(pBuffer, pFormat, args);
+#else
+  len = vsnprintf(pBuffer, len+1, pFormat, args);
+#endif
+  udDebugConsole_Print(pBuffer);
+  va_end(args);
 }
 
 //-------------------------------------------------------------------
