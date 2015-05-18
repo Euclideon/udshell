@@ -67,7 +67,7 @@ const char s_vertexShader[] =
 "uniform vec4 u_posScale;\n"
 "void main()\n"
 "{\n"
-"  gl_Position = mul(u_wvp, vec4(u_posScale.xy + a_position*u_posScale.zw, 0.5, 1));\n"
+"  gl_Position = u_wvp * vec4(u_posScale.xy + a_position*u_posScale.zw, 0.5, 1);\n"
 "}\n";
 
 const char s_pixelShader[] =
