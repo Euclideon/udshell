@@ -58,6 +58,8 @@ bool udInput_WasPressed(udInputDevice device, int control, int deviceIndex)
       return state.mouse[deviceIndex][control] && !prev.mouse[deviceIndex][control];;
     case udID_Gamepad:
       return state.gamepad[deviceIndex][control] && !prev.gamepad[deviceIndex][control];
+    default:
+      UDUNREACHABLE();
   }
   return false;
 }
@@ -84,6 +86,8 @@ bool udInput_WasReleased(udInputDevice device, int control, int deviceIndex)
       return !state.mouse[deviceIndex][control] && prev.mouse[deviceIndex][control];
     case udID_Gamepad:
       return !state.gamepad[deviceIndex][control] && prev.gamepad[deviceIndex][control];
+    default:
+      UDUNREACHABLE();
   }
   return false;
 }
@@ -113,6 +117,8 @@ float udInput_State(udInputDevice device, int control, int deviceIndex)
 //    case udID_Accelerometer:
 //    case udID_Compas:
       // etc...
+    default:
+      UDUNREACHABLE();
   }
   return 0.0;
 }

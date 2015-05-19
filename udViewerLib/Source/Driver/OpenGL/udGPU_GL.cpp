@@ -37,10 +37,12 @@ struct udVertexDataFormatGL
 
 char *s_attribNames[] =
 {
-  "a_position\0",
-  "a_normal\0",
-  "a_colour\0",
-  "a_texcoord\0"
+  // MAD HAX: we reserved an extra '\0' on the end of each attrib name
+  //          we'll overwrite that with the stream index temporarily...
+  (char*)"a_position\0",
+  (char*)"a_normal\0",
+  (char*)"a_colour\0",
+  (char*)"a_texcoord\0"
 };
 const int s_attribNameLen[] = // HAX: this length is used to overwrite the '\0' with an index at runtime
 {
@@ -119,7 +121,9 @@ void udGPU_RenderRanges(struct udShaderProgram *pProgram, struct udVertexBuffer 
 // Author: Manu Evans, May 2015
 void udGPU_Init()
 {
+#if defined(USE_GLEW)
   glewInit();
+#endif
 }
 
 #endif // UDRENDER_DRIVER == UDDRIVER_OPENGL

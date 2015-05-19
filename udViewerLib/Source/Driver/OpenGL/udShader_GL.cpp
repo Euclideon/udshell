@@ -196,4 +196,4 @@ void udShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
   glUniformMatrix4fv(param, (GLsizei)count, 0, (GLfloat*)pValues);
 }
 
-#endif UDRENDER_DRIVER == UDDRIVER_OPENGL
+#endif // UDRENDER_DRIVER == UDDRIVER_OPENGL
