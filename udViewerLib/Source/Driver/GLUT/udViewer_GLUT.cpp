@@ -31,9 +31,16 @@ static void udViewerGLUT_Display()
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_Init(int argc, char* argv[])
+udViewerInstance* udViewerDriver_CreateInstance()
 {
-  glutInit(&argc, argv);
+  return udAllocType(udViewerInstance, 1, udAF_Zero);
+}
+
+// ---------------------------------------------------------------------------------------
+// Author: Manu Evans, May 2015
+void udViewerDriver_Init(udViewerInstance *pInstance)
+{
+  glutInit(&pInstance->initParams.argc, pInstance->initParams.argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
   // TODO: split this out into udWindow or something
@@ -47,14 +54,22 @@ void udViewerDriver_Init(int argc, char* argv[])
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_RunMainLoop()
+void udViewerDriver_Deinit(udViewerInstance *)
+{
+  // deinit renderer
+  //...
+}
+
+// ---------------------------------------------------------------------------------------
+// Author: Manu Evans, May 2015
+void udViewerDriver_RunMainLoop(udViewerInstance *)
 {
   glutMainLoop();
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_Quit()
+void udViewerDriver_Quit(udViewerInstance *)
 {
   glutLeaveMainLoop();
 }

@@ -1,5 +1,5 @@
 #include "udPlatform.h"
-#include "udViewer.h"
+#include "udViewer_Internal.h"
 #include "udCamera.h"
 #include "udInput.h"
 
@@ -7,6 +7,9 @@
 // Author: Manu Evans, May 2015
 void udCamera::update()
 {
+  udViewerInstance *pInstance = udViewer_GetCurrentInstance();
+  double timeDelta = pInstance->data.timeDelta;
+
   // update the camera
   double s;
 
@@ -14,7 +17,7 @@ void udCamera::update()
   double tx = 0.0, ty = 0.0, tz = 0.0;
 
   // rotations
-  double rotSpeed = 3.14159*0.5*s_timeDelta;
+  double rotSpeed = 3.14159*0.5*timeDelta;
   if(fabs(s = udInput_State(udID_Gamepad, udGC_AxisRY)) > 0.2f)
     pitch += s*yInvert*rotSpeed;
   if(fabs(s = udInput_State(udID_Gamepad, udGC_AxisRX)) > 0.2f)
@@ -63,9 +66,9 @@ void udCamera::update()
   if((s = -udInput_State(udID_Mouse, udMC_Wheel)) != 0.0)
     speed = pow(1.2, s);
   if(udInput_State(udID_Gamepad, udGC_ButtonA) || udInput_State(udID_Keyboard, udKC_Equals) || udInput_State(udID_Keyboard, udKC_NumpadPlus))
-    speed = 1.0 + 1.0*s_timeDelta;
+    speed = 1.0 + 1.0*timeDelta;
   if(udInput_State(udID_Gamepad, udGC_ButtonB) || udInput_State(udID_Keyboard, udKC_Hyphen) || udInput_State(udID_Keyboard, udKC_NumpadMinus))
-    speed = 1.0 - 0.5*s_timeDelta;
+    speed = 1.0 - 0.5*timeDelta;
   this->speed = udClamp(this->speed * speed, 0.001, 999.0);
 
   float multiplier = 1.f;
@@ -74,7 +77,7 @@ void udCamera::update()
   if(udInput_State(udID_Gamepad, udGC_ButtonLB))
     multiplier *= 0.333f;
 
-  speed = this->speed * multiplier * s_timeDelta;
+  speed = this->speed * multiplier * timeDelta;
 
   // update the camera
   ypr.y += pitch;

@@ -71,6 +71,9 @@ const char s_vertexShader[] =
 "}\n";
 
 const char s_pixelShader[] =
+#if defined(USE_GLES)
+"precision mediump float;\n"
+#endif
 "uniform vec4 u_color;\n"
 "void main()\n"
 "{\n"

@@ -13,20 +13,16 @@ SDL_Window* s_window = nullptr;
 SDL_GLContext s_context = nullptr;
 bool s_done = false;
 
-/*
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-static void udViewerGLUT_Resize(int width, int height)
+udViewerInstance* udViewerDriver_CreateInstance()
 {
-  udViewer_ResizeFrame(width, height);
-
-  // Update the view port with the new screen dimensions and cause a refresh
-  glViewport(0, 0, width, height);
+  return udAllocType(udViewerInstance, 1, udAF_Zero);
 }
-*/
+
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_Init(int, char*[])
+void udViewerDriver_Init(udViewerInstance *)
 {
   SDL_Init(SDL_INIT_VIDEO);
   s_window = SDL_CreateWindow("udPointCloud Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL);
@@ -39,7 +35,15 @@ void udViewerDriver_Init(int, char*[])
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_RunMainLoop()
+void udViewerDriver_Deinit(udViewerInstance *)
+{
+  // deinit renderer
+  //...
+}
+
+// ---------------------------------------------------------------------------------------
+// Author: Manu Evans, May 2015
+void udViewerDriver_RunMainLoop(udViewerInstance *)
 {
   while (!s_done)
   {
@@ -57,6 +61,7 @@ void udViewerDriver_RunMainLoop()
           {
             case SDL_WINDOWEVENT_RESIZED:
               udViewer_ResizeFrame(event.window.data1, event.window.data2);
+              glViewport(0, 0, event.window.data1, event.window.data2);
               break;
           }
           break;
@@ -74,7 +79,7 @@ void udViewerDriver_RunMainLoop()
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_Quit()
+void udViewerDriver_Quit(udViewerInstance *)
 {
   s_done = true;
 }

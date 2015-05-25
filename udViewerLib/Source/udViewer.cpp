@@ -12,40 +12,27 @@
 #include "udCamera.h"
 
 
-void udViewerDriver_Init(int argc, char* argv[]);
-void udViewerDriver_RunMainLoop();
-void udViewerDriver_Quit();
 void udDebugFont_InitModule();
 void udDebugFont_DeinitModule();
 
-udViewerInitParams s_initParams;
 
-udRenderEngine *s_renderEngine;
-udRenderView *s_renderView;
+struct MessageHandler
+{
+  char name[64];
+  udViewer_MessageCallback *pCallback;
+  void *pUserData;
+};
 
-/*static*/ void *s_colorBuffer;
-/*static*/ void *s_depthBuffer;
-static int s_viewWidth, s_viewHeight;
+MessageHandler *s_pMessageHandlers = nullptr;
+size_t s_numMessageHandlers = 0, s_numMessageHandlersAllocated = 0;
 
-int s_viewW, s_viewH; // <-- *** DELETE MEE ***
+
+UDTHREADLOCAL udViewerInstance *s_pCurrentInstance;
 
 udVertexDeclaration *s_pPosUV;
-
 udVertexBuffer *s_pQuadVB;
-udTexture *s_pColor;
-udTexture *s_pDepth;
 udShaderProgram *s_shader;
 
-double s_timeDelta;
-
-static udSemaphore *s_pRenderSemaphore;
-static udSemaphore *s_pPresentSemaphore;
-
-static udRenderModel s_renderModels[16];
-static size_t s_numRenderModels;
-static udRenderOptions s_options;
-
-RegisteredCallback s_udViewerCallbacks[udVCT_Max];
 
 // shaders for blitting
 const char s_vertexShader[] =
@@ -89,20 +76,18 @@ const char s_blitShader[] =
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udViewer_RegisterCallback(udViewerCallbackType type, udViewerCallback *pCallback, void *pUserData)
-{
-  s_udViewerCallbacks[type].pCallback = pCallback;
-  s_udViewerCallbacks[type].pUserData = pUserData;
-}
-
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
 void udViewer_Init(const udViewerInitParams &initParams)
 {
-  udRender_Create(&s_renderEngine, initParams.renderThreadCount);
+  udViewerInstance *pInstance = udViewerDriver_CreateInstance();
+  s_pCurrentInstance = pInstance;
 
-  s_initParams = initParams;
-  udViewerDriver_Init(initParams.argc, initParams.argv);
+  pInstance->initParams = initParams;
+  pInstance->data.pUserData = initParams.pUserData;
+
+  if (initParams.renderThreadCount >= 0)
+    udRender_Create(&pInstance->data.pRenderEngine, initParams.renderThreadCount);
+
+  udViewerDriver_Init(pInstance);
 
   udInput_Init();
   udInput_LockMouseOnButtons(1 << udMC_LeftButton);
@@ -136,9 +121,13 @@ void udViewer_Init(const udViewerInitParams &initParams)
 // Author: Manu Evans, May 2015
 void udViewer_Deinit()
 {
+  udRender_DestroyView(&s_pCurrentInstance->data.pRenderView);
+
+  udViewerDriver_Deinit(s_pCurrentInstance);
+
   udDebugFont_DeinitModule();
 
-  udRender_Destroy(&s_renderEngine);
+  udRender_Destroy(&s_pCurrentInstance->data.pRenderEngine);
 
 //  udInput_Deinit();
 }
@@ -147,33 +136,123 @@ void udViewer_Deinit()
 // Author: Manu Evans, May 2015
 void udViewer_RunMainLoop()
 {
-  udViewerDriver_RunMainLoop();
+  udViewerDriver_RunMainLoop(s_pCurrentInstance);
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 void udViewer_Quit()
 {
-  udViewerDriver_Quit();
+  udViewerDriver_Quit(s_pCurrentInstance);
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+void udViewer_SetMatrix(udRenderMatrixType type, const udFloat4x4& proj)
+{
+  udRender_SetMatrixF32(s_pCurrentInstance->data.pRenderView, type, proj.a);
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 void udViewer_SetRenderModels(udRenderModel models[], size_t numModels)
 {
-  for(size_t i = 0; i < numModels; ++i)
-    s_renderModels[i] = models[i];
-  s_numRenderModels = numModels;
+  for (size_t i = 0; i < numModels; ++i)
+    s_pCurrentInstance->renderModels[i] = models[i];
+  s_pCurrentInstance->numRenderModels = numModels;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 void udViewer_SetRenderOptions(const udRenderOptions &options)
 {
-  s_options = options;
+  s_pCurrentInstance->options = options;
 }
 
+const udViewerInstanceData* udViewer_GetInstanceData()
+{
+  return &s_pCurrentInstance->data;
+}
 
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+void udViewer_RegisterMessageHandler(const char *pTargetName, udViewer_MessageCallback *pCallback, void *pUserData)
+{
+  if (s_pMessageHandlers == nullptr)
+  {
+    s_numMessageHandlersAllocated = 8;
+    s_pMessageHandlers = udAllocType(MessageHandler, s_numMessageHandlersAllocated, udAF_None);
+  }
+  else if (s_numMessageHandlers == s_numMessageHandlersAllocated)
+  {
+    s_numMessageHandlersAllocated *= 2;
+    s_pMessageHandlers = udReallocType(s_pMessageHandlers, MessageHandler, s_numMessageHandlersAllocated);
+  }
+
+  MessageHandler &m = s_pMessageHandlers[s_numMessageHandlers++];
+  udStrcpy(m.name, sizeof(m.name), pTargetName);
+  m.pCallback = pCallback;
+  m.pUserData = pUserData;
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+void udViewer_PostMessage(const char *pTarget, const char *pMessageType, const char *pFormat, ...)
+{
+  // find message handler
+  MessageHandler *pHandler = nullptr;
+  for (size_t i=0; i<s_numMessageHandlers; ++i)
+  {
+    if (!udStrcmp(pTarget, s_pMessageHandlers[i].name))
+    {
+      pHandler = &s_pMessageHandlers[i];
+      break;
+    }
+  }
+  if (!pHandler)
+    return;
+
+  // construct message
+# define LOG_BUFFER_LEN 4096
+  char buffer[LOG_BUFFER_LEN];
+
+  va_list args;
+  va_start(args, pFormat);
+
+  size_t prefixLen = 0;
+  size_t size = sizeof(buffer);
+  if (pMessageType)
+  {
+    udStrcpy(buffer, sizeof(buffer), pMessageType);
+    prefixLen = strlen(pMessageType) + 1;
+    buffer[prefixLen-1] = ':';
+    size -= prefixLen;
+  }
+
+#if UDPLATFORM_NACL
+  vasnprintf(buffer+prefixLen, &size, pFormat, args);
+#else
+  vsnprintf_s(buffer+prefixLen, size, size, pFormat, args);
+#endif
+  buffer[LOG_BUFFER_LEN - 1] = 0;
+  va_end(args);
+
+  pHandler->pCallback(buffer, pHandler->pUserData);
+}
+
+// ---------------------------------------------------------------------------------------
+// Author: Manu Evans, May 2015
+udViewerInstance* udViewer_GetCurrentInstance()
+{
+  return s_pCurrentInstance;
+}
+
+// ---------------------------------------------------------------------------------------
+// Author: Manu Evans, May 2015
+void udViewer_SetCurrentInstance(udViewerInstance* pInstance)
+{
+  s_pCurrentInstance = pInstance;
+}
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
@@ -191,8 +270,8 @@ void udViewer_BeginFrame()
 {
   static uint64_t lastFrame = 0;
   uint64_t now = udPerfCounterStart();
-  if(lastFrame != 0)
-    s_timeDelta = (double)udPerfCounterMilliseconds(lastFrame, now) / 1000.0;
+  if (lastFrame != 0)
+    s_pCurrentInstance->data.timeDelta = (double)udPerfCounterMilliseconds(lastFrame, now) / 1000.0;
   lastFrame = now;
 
   udInput_Update();
@@ -208,49 +287,48 @@ void udViewer_EndFrame()
 // Author: Manu Evans, May 2015
 void udViewer_Update()
 {
-  if(s_udViewerCallbacks[udVCT_Update].pCallback)
-    s_udViewerCallbacks[udVCT_Update].pCallback(s_udViewerCallbacks[udVCT_Update].pUserData);
+  if (s_pCurrentInstance->initParams.pUpdateCallback)
+    s_pCurrentInstance->initParams.pUpdateCallback(s_pCurrentInstance->data.pUserData);
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
 void udViewer_ResizeFrame(int width, int height)
 {
-  if (s_renderView)
-    udRender_DestroyView(&s_renderView);
-  udRender_CreateView(&s_renderView, s_renderEngine, width, height);
+  if (s_pCurrentInstance->data.pRenderView)
+    udRender_DestroyView(&s_pCurrentInstance->data.pRenderView);
+  udRender_CreateView(&s_pCurrentInstance->data.pRenderView, s_pCurrentInstance->data.pRenderEngine, width, height);
 
-  if (s_colorBuffer)
-    udFree(s_colorBuffer);
-  if (s_depthBuffer)
-    udFree(s_depthBuffer);
+  if (s_pCurrentInstance->data.pColorBuffer)
+    udFree(s_pCurrentInstance->data.pColorBuffer);
+  if (s_pCurrentInstance->data.pDepthBuffer)
+    udFree(s_pCurrentInstance->data.pDepthBuffer);
   size_t pitch = width * sizeof(uint32_t);
-  s_colorBuffer = udAlloc(pitch * height);
-  s_depthBuffer = udAlloc(pitch * height);
-  udRender_SetTarget(s_renderView, udRTT_Color32, s_colorBuffer, (uint32_t)pitch, 0x80202080);
-  udRender_SetTarget(s_renderView, udRTT_Depth32, s_depthBuffer, (uint32_t)pitch, 0x3f800000);
+  s_pCurrentInstance->data.pColorBuffer = udAlloc(pitch * height);
+  s_pCurrentInstance->data.pDepthBuffer = udAlloc(pitch * height);
+  udRender_SetTarget(s_pCurrentInstance->data.pRenderView, udRTT_Color32, s_pCurrentInstance->data.pColorBuffer, (uint32_t)pitch, 0x80202080);
+  udRender_SetTarget(s_pCurrentInstance->data.pRenderView, udRTT_Depth32, s_pCurrentInstance->data.pDepthBuffer, (uint32_t)pitch, 0x3f800000);
 
-  s_viewWidth = width;
-  s_viewHeight = height;
-  s_viewW = width; // DELETE MEEEE!
-  s_viewH = height;
+  s_pCurrentInstance->data.displayWidth = width;
+  s_pCurrentInstance->data.displayHeight = height;
 
-  if(s_pColor)
-    udTexture_DestroyTexture(&s_pColor);
-  s_pColor = udTexture_CreateTexture(udTT_2D, width, height, 1, udIF_BGRA8);
+#if 0
+  // TODO: we can calculate a render width/height here if we want to render lower-res than the display
+#else
+  s_pCurrentInstance->data.renderWidth = s_pCurrentInstance->data.displayWidth;
+  s_pCurrentInstance->data.renderHeight = s_pCurrentInstance->data.displayHeight;
+#endif
 
-  if(s_pDepth)
-    udTexture_DestroyTexture(&s_pDepth);
-  s_pDepth = udTexture_CreateTexture(udTT_2D, width, height, 1, udIF_R_F32);
+  if (s_pCurrentInstance->pColorTexture)
+    udTexture_DestroyTexture(&s_pCurrentInstance->pColorTexture);
+  s_pCurrentInstance->pColorTexture = udTexture_CreateTexture(udTT_2D, width, height, 1, udIF_BGRA8);
 
-  if(s_udViewerCallbacks[udVCT_Resize].pCallback)
-  {
-    udResizeCallbackData data;
-    data.pUserData = s_udViewerCallbacks[udVCT_Resize].pUserData;
-    data.width = width;
-    data.height = height;
-    s_udViewerCallbacks[udVCT_Resize].pCallback(&data);
-  }
+  if (s_pCurrentInstance->pDepthTexture)
+    udTexture_DestroyTexture(&s_pCurrentInstance->pDepthTexture);
+  s_pCurrentInstance->pDepthTexture = udTexture_CreateTexture(udTT_2D, width, height, 1, udIF_R_F32);
+
+  if (s_pCurrentInstance->initParams.pResizeCallback)
+    s_pCurrentInstance->initParams.pResizeCallback(width, height, s_pCurrentInstance->data.pUserData);
 }
 
 /*
@@ -374,39 +452,35 @@ static uint32_t RenderThread(void *pThis)
 // Author: Manu Evans, May 2015
 void udViewer_Draw()
 {
-  udRenderModel *pRenderModels[16];
-  for(int i=0; i<s_numRenderModels; ++i)
-    pRenderModels[i] = &s_renderModels[i];
-
-  udRender_Render(s_renderView, pRenderModels, (int)s_numRenderModels, &s_options);
-
-  // render ud scene
-  udTexture_SetImageData(s_pColor, -1, 0, s_colorBuffer);
-  udTexture_SetImageData(s_pDepth, -1, 0, s_depthBuffer);
-
-  udShader_SetCurrent(s_shader);
-
-  int u_texture = udShader_FindShaderParameter(s_shader, "u_texture");
-  udShader_SetProgramData(0, u_texture, s_pColor);
-  int u_zbuffer = udShader_FindShaderParameter(s_shader, "u_zbuffer");
-  udShader_SetProgramData(1, u_zbuffer, s_pDepth);
-
-  int u_rect = udShader_FindShaderParameter(s_shader, "u_rect");
-  udShader_SetProgramData(u_rect, udFloat4::create(-1, 1, 2, -2));
-  int u_textureScale = udShader_FindShaderParameter(s_shader, "u_textureScale");
-  udShader_SetProgramData(u_textureScale, udFloat4::create(0, 0, 1, 1));
-
-  udGPU_RenderVertices(s_shader, s_pQuadVB, udPT_TriangleFan, 4);
-
-  udShader_SetCurrent(NULL);
-
-  if(s_udViewerCallbacks[udVCT_Draw].pCallback)
+  if (s_pCurrentInstance->numRenderModels)
   {
-    udRenderCallbackData renderData;
-    renderData.pUserData = s_udViewerCallbacks[udVCT_Draw].pUserData;
-    renderData.pRenderOptions = &s_options;
-    renderData.pRenderModels = s_renderModels;
-    renderData.numRenderModels = s_numRenderModels;
-    s_udViewerCallbacks[udVCT_Draw].pCallback(&renderData);
+    udRenderModel *pRenderModels[16];
+    for(int i=0; i<s_pCurrentInstance->numRenderModels; ++i)
+      pRenderModels[i] = &s_pCurrentInstance->renderModels[i];
+
+    udRender_Render(s_pCurrentInstance->data.pRenderView, pRenderModels, (int)s_pCurrentInstance->numRenderModels, &s_pCurrentInstance->options);
+
+    // render ud scene
+    udTexture_SetImageData(s_pCurrentInstance->pColorTexture, -1, 0, s_pCurrentInstance->data.pColorBuffer);
+    udTexture_SetImageData(s_pCurrentInstance->pDepthTexture, -1, 0, s_pCurrentInstance->data.pDepthBuffer);
+
+    udShader_SetCurrent(s_shader);
+
+    int u_texture = udShader_FindShaderParameter(s_shader, "u_texture");
+    udShader_SetProgramData(0, u_texture, s_pCurrentInstance->pColorTexture);
+    int u_zbuffer = udShader_FindShaderParameter(s_shader, "u_zbuffer");
+    udShader_SetProgramData(1, u_zbuffer, s_pCurrentInstance->pDepthTexture);
+
+    int u_rect = udShader_FindShaderParameter(s_shader, "u_rect");
+    udShader_SetProgramData(u_rect, udFloat4::create(-1, 1, 2, -2));
+    int u_textureScale = udShader_FindShaderParameter(s_shader, "u_textureScale");
+    udShader_SetProgramData(u_textureScale, udFloat4::create(0, 0, 1, 1));
+
+    udGPU_RenderVertices(s_shader, s_pQuadVB, udPT_TriangleFan, 4);
+
+    udShader_SetCurrent(nullptr);
   }
+
+  if (s_pCurrentInstance->initParams.pRenderCallback)
+    s_pCurrentInstance->initParams.pRenderCallback(&s_pCurrentInstance->options, s_pCurrentInstance->renderModels, s_pCurrentInstance->numRenderModels, s_pCurrentInstance->data.pUserData);
 }

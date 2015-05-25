@@ -22,6 +22,7 @@ extern GLenum s_textureType[udTT_Max];
 // Author: Manu Evans, May 2015
 udShader* udShader_CreateShaderFromFile(const char *pFilename, udShaderType type)
 {
+  udUnused(pFilename);
   // load file
   //...
   GLchar *pSource = nullptr;

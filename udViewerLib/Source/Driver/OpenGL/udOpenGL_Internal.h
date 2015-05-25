@@ -32,6 +32,12 @@
 # define GL_BGRA 0x80E1
 #endif
 
+#if UD_DEBUG
+# define udCheckGLError() { GLenum err = glGetError(); if(err != GL_NO_ERROR) udDebugPrintf("%s(%d): GL error %04X", __FILE__, __LINE__, err); }
+#else
+# define udCheckGLError()
+#endif
+
 #include "udTexture.h"
 #include "udVertex.h"
 
