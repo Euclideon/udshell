@@ -80,6 +80,23 @@ void udCamera::update()
   ypr.y += pitch;
   ypr.x += yaw;
 
+  // normalise pitch
+  while (ypr.y < 0)
+    ypr.y += UD_2PI;
+  while (ypr.y >= UD_2PI)
+    ypr.y -= UD_2PI;
+
+  // clamp the pitch
+  if (ypr.y > UD_HALF_PI && ypr.y < (UD_2PI - UD_HALF_PI))
+    ypr.y = (ypr.y < UD_PI) ? UD_HALF_PI : (UD_2PI - UD_HALF_PI);
+
+  // normalise yaw
+  while (ypr.x < 0)
+    ypr.x += UD_2PI;
+  while (ypr.x >= UD_2PI)
+    ypr.x -= UD_2PI;
+
+
   udDouble4x4 cam = getMatrix();
 
   udDouble3 forward = cam.axis.y.toVector3();
