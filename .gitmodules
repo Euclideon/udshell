@@ -1,0 +1,3 @@
+[submodule "ud"]
+	path = ud
+	url = git@bne-fs-git-001.euclideon.local:rnd/ud.git
