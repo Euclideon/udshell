@@ -1,4 +1,4 @@
-#include "udViewerPlatform.h"
+#include "udDriver.h"
 
 #if UDRENDER_DRIVER == UDDRIVER_OPENGL
 

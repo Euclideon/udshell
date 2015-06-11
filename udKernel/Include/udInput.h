@@ -26,6 +26,7 @@ enum udInputDeviceState
 
 udInputDeviceState udInput_GetDeviceState(udInputDevice device, int deviceIndex);
 
+// TODO: remove these, input is strictly event driven!
 bool udInput_WasPressed(udInputDevice device, int control, int deviceIndex = -1);
 bool udInput_WasReleased(udInputDevice device, int control, int deviceIndex = -1);
 float udInput_State(udInputDevice device, int control, int deviceIndex = -1);
@@ -207,6 +208,49 @@ enum udKeyCodes
   udKC_NumpadEquals,
 
   udKC_Max
+};
+
+
+
+struct udInputEvent
+{
+  udInputDevice deviceType;
+  int deviceId;
+
+  enum EventType
+  {
+    Move,
+    Key,
+    Text
+  };
+
+  struct MoveEvent
+  {
+    int32_t xDelta;
+    int32_t yDelta;
+
+    int32_t xAbsolute;
+    int32_t yAbsolute;
+  };
+
+  struct KeyEvent
+  {
+    int key;
+    int state;
+  };
+
+  struct TextEvent
+  {
+  };
+
+  EventType eventType;
+
+  union
+  {
+    MoveEvent move;
+    KeyEvent key;
+    TextEvent text;
+  };
 };
 
 

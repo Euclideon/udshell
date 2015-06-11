@@ -2,14 +2,96 @@
 #include "udViewer_Internal.h"
 #include "udCamera.h"
 #include "udInput.h"
+#include "udKernel.h"
+
+
+static const udPropertyDesc props[] =
+{
+  {
+    "pos", // id
+    "Position", // displayName
+    "Position of camera", // description
+    udPropertyType::Float , // type
+    3, // arrayLength
+    udPF_NoRead, // flags
+    udPropertyDisplayType::Default // displayType
+  }
+};
+const udComponentDesc udCamera::descriptor =
+{
+  UDSHELL_APIVERSION, // udVersion
+  UDSHELL_PLUGINVERSION, // pluginVersion
+
+  udComponentType::Camera, // type
+
+  "camera",      // id
+  "node",        // parentId
+  "udCamera",    // displayName
+  "Is a camera", // description
+
+  [](){ return udR_Success; },  // pInit
+  [](){ return udR_Success; },  // pInitRender
+  udCamera::Create,             // pCreateInstance
+
+  props,                           // pProperties
+  sizeof(props) / sizeof(props[0]) // numProperties
+};
+
+
+static const udPropertyDesc simpleCameraProps[] =
+{
+  {
+    "pos", // id
+    "Position", // displayName
+    "Base camera class", // description
+    udPropertyType::Float, // type
+    3, // arrayLength
+    udPF_NoRead, // flags
+    udPropertyDisplayType::Default // displayType
+  }
+};
+const udComponentDesc udSimpleCamera::descriptor =
+{
+  UDSHELL_APIVERSION, // udVersion
+  UDSHELL_PLUGINVERSION, // pluginVersion
+
+  udComponentType::Camera, // type
+
+  "simplecamera",       // id
+  "camera",             // parentId
+  "udSimpleCamera",     // displayName
+  "Is a simple camera", // description
+
+  [](){ return udR_Success; },  // pInit
+  [](){ return udR_Success; },  // pInitRender
+  udSimpleCamera::Create,       // pCreateInstance
+
+  simpleCameraProps, // pProperties
+  sizeof(simpleCameraProps) / sizeof(simpleCameraProps[0]) // numProperties
+};
+
+
+void udCamera::GetProjectionMatrix(float aspectRatio, udDouble4x4 *pMatrix)
+{
+  if (!bOrtho)
+    *pMatrix = udDouble4x4::perspective(fovY, aspectRatio, zNear, zFar);
+  else
+    *pMatrix = udDouble4x4::ortho(-orthoHeight*aspectRatio*0.5, orthoHeight*aspectRatio*0.5, -orthoHeight*0.5, orthoHeight*0.5, zNear, zFar);
+}
+
+
+
+udResult udSimpleCamera::InputEvent(const udInputEvent &ev)
+{
+  // TODO: rejig of code from below...
+
+  return udR_Success;
+}
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udCamera::update()
+udResult udSimpleCamera::Update(double timeDelta)
 {
-  udViewerInstance *pInstance = udViewer_GetCurrentInstance();
-  double timeDelta = pInstance->data.timeDelta;
-
   // update the camera
   double s;
 
@@ -56,12 +138,13 @@ void udCamera::update()
         -udInput_State(udID_Gamepad, udGC_ButtonLT);
 
   // mode switch
+#if 0
   bool bToggle = !!udInput_WasPressed(udID_Gamepad, udGC_ButtonY);
   if(udInput_State(udID_Keyboard, udKC_1) || (bToggle && bHelicopter))
     helicopterMode(false);
   else if(udInput_State(udID_Keyboard, udKC_2) || (bToggle && !bHelicopter))
     helicopterMode(true);
-
+#endif // 0
   double speed = 1.0;
   if((s = -udInput_State(udID_Mouse, udMC_Wheel)) != 0.0)
     speed = pow(1.2, s);
@@ -100,7 +183,8 @@ void udCamera::update()
     ypr.x -= UD_2PI;
 
 
-  udDouble4x4 cam = getMatrix();
+  udDouble4x4 cam;
+  GetCameraMatrix(&cam);
 
   udDouble3 forward = cam.axis.y.toVector3();
   udDouble3 xAxis = cam.axis.x.toVector3();
@@ -110,4 +194,13 @@ void udCamera::update()
   pos += forward*ty*speed;
   pos += xAxis*tx*speed;
   pos.z += tz*speed;
+
+  return udR_Success;
 }
+
+// ***************************************************************************************
+udComponent *udSimpleCamera::CreateInstance(udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
+{
+  return udNew(udSimpleCamera, pType, pKernel, uid, initParams);
+}
+

@@ -15,6 +15,7 @@
 void udDebugFont_InitModule();
 void udDebugFont_DeinitModule();
 
+#if 0
 
 struct MessageHandler
 {
@@ -484,3 +485,5 @@ void udViewer_Draw()
   if (s_pCurrentInstance->initParams.pRenderCallback)
     s_pCurrentInstance->initParams.pRenderCallback(&s_pCurrentInstance->options, s_pCurrentInstance->renderModels, s_pCurrentInstance->numRenderModels, s_pCurrentInstance->data.pUserData);
 }
+
+#endif

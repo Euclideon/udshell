@@ -2,7 +2,7 @@
 #if !defined(UD_GLUT)
 #define UD_GLUT
 
-#include "udViewerPlatform.h"
+#include "udDriver.h"
 
 #if UDWINDOW_DRIVER == UDDRIVER_GLUT
 

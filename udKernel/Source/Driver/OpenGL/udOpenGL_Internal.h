@@ -2,30 +2,25 @@
 #if !defined(UD_OPENGL)
 #define UD_OPENGL
 
-#include "udViewerPlatform.h"
+#include "udDriver.h"
 
-#if UDWINDOW_DRIVER == UDDRIVER_GLUT
-// ** Uses GLEW instead
-//# define FREEGLUT_STATIC
-//# define FREEGLUT_LIB_PRAGMAS 0
-//# define FREEGLUT_BUILDING_LIB
-//# include "GL/freeglut.h"
-//# include "GL/glext.h"
-#elif UDWINDOW_DRIVER == UDDRIVER_SDL
-// ** Uses GLEW instead
-//# include <SDL2/SDL_opengl.h>
-#else
-# if defined(USE_GLES)
-#   include <GLES2/gl2.h>
-#   include <GLES2/gl2ext.h>
-# else
-#   include <GL/gl.h>
-#   include <GL/glext.h>
-# endif
-#endif
 #if defined(USE_GLEW)
 # include "GL/glew.h"
 //# include "GL/wglew.h"
+#elif defined(USE_GLES)
+# include <GLES2/gl2.h>
+# include <GLES2/gl2ext.h>
+#elif UDWINDOW_DRIVER == UDDRIVER_GLUT
+# define FREEGLUT_STATIC
+# define FREEGLUT_LIB_PRAGMAS 0
+# define FREEGLUT_BUILDING_LIB
+# include "GL/freeglut.h"
+# include "GL/glext.h"
+#elif UDWINDOW_DRIVER == UDDRIVER_SDL
+# include <SDL2/SDL_opengl.h>
+#else
+# include <GL/gl.h>
+# include <GL/glext.h>
 #endif
 
 #if !defined(GL_BGRA)
