@@ -27,9 +27,6 @@ solution "udShell"
 		language "C++"
 		flags { "StaticRuntime" }
 
-		objdir "Output/intermediate/%{prj.name}/%{cfg.buildcfg}_%{cfg.platform}"
-		targetdir "Output/bin/%{cfg.buildcfg}_%{cfg.platform}"
-
 		files { "src/**.cpp", "src/**.h" }
 		files { "res/**.qrc", "res/**.qml" }
 --		files { "**.pro", "**.pri" }
@@ -58,5 +55,8 @@ solution "udShell"
 
 		-- include common stuff
 		dofile "ud/common-proj.lua"
-
 		configuration { }
+
+		-- common-proj.lua set objdir and targetdir, we'll reset them correctly for udShell
+		objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
+		targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
