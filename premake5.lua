@@ -16,11 +16,11 @@ solution "udShell"
 	defines { "UD_USE_QT" }
 
 	if os.get() == "windows" then
---		dofile "ud/3rdParty/GL/glew/project.lua"
+		dofile "ud/3rdParty/GL/glew/project.lua"
 	end
 	dofile "ud/udPlatform/project.lua"
 	dofile "ud/udPointCloud/project.lua"
-	dofile "ud/udViewerLib/project.lua"
+	dofile "ud/udKernel/project.lua"
 
 	project "udShell"
 		kind "WindowedApp"
@@ -34,16 +34,16 @@ solution "udShell"
 
 		includedirs { "ud/udPlatform/Include" }
 		includedirs { "ud/udPointCloud/Include" }
-		includedirs { "ud/udViewerLib/Include" }
+		includedirs { "ud/udKernel/Include" }
 		includedirs { "ud/3rdParty" }
---		includedirs { "ud/3rdParty/GL/glew/include" }
+		includedirs { "ud/3rdParty/GL/glew/include" }
 
---		links { "GLEW" }
+		links { "GLEW" }
 		links { "udPlatform" }
 		links { "udPointCloud" }
-		links { "udViewerLib" }
+		links { "udKernel" }
 
---		defines { "GLEW_STATIC" }
+		defines { "GLEW_STATIC" }
 
 		qt.enable()
 --		qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
@@ -52,6 +52,7 @@ solution "udShell"
 
 		configuration { "windows" }
 			links { "ws2_32.lib", "opengl32.lib", "glu32.lib", "winmm.lib" }
+			disablewarnings { "4481", "4127" } -- silence some Qt warnings
 
 		-- include common stuff
 		dofile "ud/common-proj.lua"
