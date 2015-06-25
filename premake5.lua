@@ -49,6 +49,8 @@ solution "udShell"
 --		qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
 		qtmodules { "core", "qml", "quick", "gui" }
 		qtprefix "Qt5"
+    configuration { "Debug or DebugOpt" }
+      qtsuffix "d"
 
 		configuration { "windows" }
 			links { "ws2_32.lib", "opengl32.lib", "glu32.lib", "winmm.lib" }
