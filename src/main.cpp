@@ -24,6 +24,9 @@ int main(int argc, char *argv[])
   // run Qt app
   QGuiApplication app(argc, argv);
 
+  // make sure we cleanup the kernel when we're about to quit
+  QObject::connect(&app, &QCoreApplication::aboutToQuit, []{ s_pKernel->Destroy(); });
+
   QQmlApplicationEngine engine;
 
   qmlRegisterType<RenderView>("udShell", 0, 1, "RenderView");
