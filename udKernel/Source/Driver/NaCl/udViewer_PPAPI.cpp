@@ -85,6 +85,37 @@ udResult udKernel::DestroyInstanceInternal()
   return udR_Success;
 }
 
+udView *udKernel::SetFocusView(udView *pView)
+{
+  udView *pOld = pFocusView;
+  pFocusView = pView;
+  return pOld;
+}
+
+udResult udKernel::RunMainLoop()
+{
+  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
+
+  // kick off the main loop (which is asynchronous)
+  pInternal->pPepperInstance->RenderFrame(0);
+
+  // wait for the main loop to terminate
+  //  udWaitSemaphore(pInternal->pPepperInstance->pTerminateSem, -1);
+
+  return udR_Success;
+}
+
+udResult udKernel::Terminate()
+{
+  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
+
+  // signal to exit the main loop
+  pInternal->pPepperInstance->bQuit = true;
+
+  return udR_Success;
+}
+
+
 // ---------------------------------------------------------------------------------------
 udNewPepperInstance::udNewPepperInstance(PP_Instance instance)
   : pp::Instance(instance),
@@ -435,31 +466,6 @@ void udViewerDriver_Deinit(udViewerInstance *pInstance)
 
   // deinit renderer
   //...
-}
-
-// ---------------------------------------------------------------------------------------
-// Author: Manu Evans, May 2015
-void udViewerDriver_RunMainLoop(udViewerInstance *pInstance)
-{
-  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
-
-
-
-  // kick off the main loop (which is asynchronous)
-  pInternal->pPepperInstance->RenderFrame(0);
-
-  // wait for the main loop to terminate
-//  udWaitSemaphore(pInternal->pPepperInstance->pTerminateSem, -1);
-}
-
-// ---------------------------------------------------------------------------------------
-// Author: Manu Evans, May 2015
-void udViewerDriver_Quit(udViewerInstance *pInstance)
-{
-  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
-
-  // signal to exit the main loop
-  pInternal->pPepperInstance->bQuit = true;
 }
 
 

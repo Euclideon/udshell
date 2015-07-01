@@ -289,7 +289,7 @@ void udFixedSlice<T, Count>::reserve(size_t count)
   if ((count > Count || numAllocated) && count > numAllocated)
   {
     T* pNew = (T*)udAlloc(sizeof(T) * count);
-    for (int i = 0; i < this->length; ++i)
+    for (size_t i = 0; i < this->length; ++i)
       new((void*)&(pNew[i])) T(this->ptr[i]);
     if (numAllocated)
       udFree(pAllocation);
@@ -333,7 +333,7 @@ inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::operator =(udSlice<U> rh)
 {
   reserve(rh.length);
   this->length = rh.length;
-  for (int i = 0; i < this->length; ++i)
+  for (size_t i = 0; i < this->length; ++i)
     new((void*)&(this->ptr[i])) T(rh.ptr[i]);
   return *this;
 }

@@ -6,6 +6,7 @@
 
 struct udRenderEngine;
 class udBlockStreamer;
+class udView;
 
 typedef void (udMessageHandler)(udString senderUID, udString message, udString data, void *pUserData);
 
@@ -33,6 +34,13 @@ public:
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
 
+  // other functions
+  udView *GetFocusView() const { return pFocusView; }
+  udView *SetFocusView(udView *pView);
+
+  udResult RunMainLoop();
+  udResult Terminate();
+
 protected:
   struct MessageHandler
   {
@@ -58,14 +66,11 @@ protected:
   udRenderEngine *pRenderEngine;
   udBlockStreamer *pStreamer;
 
+  udView *pFocusView;
+
   static udKernel *CreateInstanceInternal(udInitParams commandLine);
   udResult DestroyInstanceInternal();
 };
 
-// Forward declaration of the entry point function
-int EntryInit(const char *pCommandString);// Should this be void? Are we going to check the return value and bail?
-
-udResult udKernel_RunMainLoop(udKernel *pKernel);
-udResult udKernel_Quit();
 
 #endif // UDKERNEL_H

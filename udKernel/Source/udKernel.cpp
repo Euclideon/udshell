@@ -123,7 +123,7 @@ udResult udKernel::CreateComponent(udString typeId, udString initParams, udCompo
 
   instanceRegistry.Add(pComponent->uid.toStringz(buffer, sizeof(buffer)), pComponent);
 
-  // TODO: inform partners that I created a component
+  // TODO: inform partner kernels that I created a component
   //...
 
   *ppNewInstance = pComponent;

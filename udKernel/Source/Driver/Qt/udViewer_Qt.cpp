@@ -16,20 +16,22 @@ udResult udKernel::DestroyInstanceInternal()
   return udR_Success;
 }
 
-
-// ---------------------------------------------------------------------------------------
-// Author: Manu Evans, May 2015
-udResult udKernel_RunMainLoop(udKernel *pKernel)
+udView *udKernel::SetFocusView(udView *pView)
 {
-  // block and return when done...
+  udView *pOld = pFocusView;
+  pFocusView = pView;
+  return pOld;
+}
+
+udResult udKernel::RunMainLoop()
+{
+  // TODO: should we execute the Qt main loop here or leave it to the frontend?
+
   return udR_Success;
 }
 
-// ---------------------------------------------------------------------------------------
-// Author: Manu Evans, May 2015
-udResult udKernel_Quit()
+udResult udKernel::Terminate()
 {
-  // cause a quit
   return udR_Success;
 }
 

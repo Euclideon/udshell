@@ -41,6 +41,10 @@ public:
   void GetDimensions(int *pWidth, int *pHeight) const;
   float GetAspectRatio() const { return (float)displayWidth / (float)displayHeight; }
 
+  // TODO: remove these!
+  void RegisterResizeCallback(void (*pCallback)(udView *pView, int w, int h)) { pResizeCallback = pCallback; }
+  void RegisterRenderCallback(void (*pCallback)(udView *pView, udScene *pScene)) { pRenderCallback = pCallback; }
+
   static const udComponentDesc descriptor;
 
 protected:
@@ -62,6 +66,10 @@ protected:
 
   udSemaphore *pRenderSemaphore;
   udSemaphore *pPresentSemaphore;
+
+  // TODO: remove these!
+  void (*pResizeCallback)(udView*, int, int);
+  void (*pRenderCallback)(udView*, udScene*);
 
   udView(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
     : udComponent(pType, pKernel, uid, initParams) {}

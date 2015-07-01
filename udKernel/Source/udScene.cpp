@@ -64,7 +64,7 @@ udResult udScene::Render(udView *pView)
   udRenderView *pRenderView = pView->GetUDRenderView();
 
   udRenderModel *pRenderModels[16];
-  for (int i = 0; i < numRenderModels; ++i)
+  for (size_t i = 0; i < numRenderModels; ++i)
     pRenderModels[i] = &renderModels[i];
 
   udRender_Render(pRenderView, pRenderModels, (int)numRenderModels, &options);
