@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
   udString_Test();
 
   // create a kernel
-  udResult r = udKernel::create(&s_pKernel, argc, argv, 8);
+  udResult r = udKernel::Create(&s_pKernel, udParseCommandLine(argc, argv), 8);
   if (r == udR_Failure_)
     return 1;
 
