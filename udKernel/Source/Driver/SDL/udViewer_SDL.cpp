@@ -35,6 +35,11 @@ udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
   return new udKernel;
 }
 
+udResult udKernel::InitInstanceInternal()
+{
+  return InitRender();
+}
+
 udResult udKernel::DestroyInstanceInternal()
 {
   // this

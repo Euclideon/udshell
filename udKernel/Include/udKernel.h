@@ -4,6 +4,7 @@
 
 #include "udComponent.h"
 
+
 struct udRenderEngine;
 class udBlockStreamer;
 class udView;
@@ -17,8 +18,8 @@ public:
   static udResult Create(udKernel **ppInstance, udInitParams commandLine, int renderThreadCount = 0);
   udResult Destroy();
 
-  virtual udResult SendKernelMessage(udString targetUID, udString message, udString data);
-  virtual udResult ReceiveKernelMessage(udString senderUID, udString message, udString data);
+  udResult SendMessage(udString target, udString sender, udString message, udString data);
+  udResult ReceiveMessage(udString sender, udString message, udString data);
 
   void RegisterMessageHandler(udRCString name, udMessageHandler *pMessageHandler, void *pUserData);
 
@@ -27,8 +28,6 @@ public:
 
   udResult CreateComponent(udString typeId, udString initParams, udComponent **ppNewInstance);
   udResult DestroyComponent(udComponent **ppInstance);
-
-  udResult SendComponentMessage(udString targetUID, udString sender, udString message, udString data);
 
   udComponent *Find(udString uid);
 
@@ -69,6 +68,7 @@ protected:
   udView *pFocusView;
 
   static udKernel *CreateInstanceInternal(udInitParams commandLine);
+  udResult InitInstanceInternal();
   udResult DestroyInstanceInternal();
 
   udResult InitComponents();

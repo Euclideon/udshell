@@ -10,6 +10,12 @@ udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
   return new udKernel;
 }
 
+udResult udKernel::InitInstanceInternal()
+{
+  // TODO: *** MOVE THIS TO RENDER THREAD!! ***
+  return InitRender();
+}
+
 udResult udKernel::DestroyInstanceInternal()
 {
   delete this;

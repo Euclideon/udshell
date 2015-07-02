@@ -9,6 +9,10 @@
 
 #include <stdio.h>
 
+#if defined(SendMessage)
+# undef SendMessage
+#endif
+
 enum { UDSHELL_APIVERSION = 100 };
 enum { UDSHELL_PLUGINVERSION = UDSHELL_APIVERSION };
 
@@ -112,7 +116,7 @@ public:
 
   virtual udResult ReceiveMessage(udString message, udString sender, udString data);
 
-  udResult SendMessage(udString targetUID, udString message, udString data);
+  udResult SendMessage(udString target, udString message, udString data);
   udResult SendMessage(udComponent *pComponent, udString message, udString data) { return SendMessage(pComponent->uid, message, data); }
 
   // convenience overloads

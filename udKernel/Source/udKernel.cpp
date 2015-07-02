@@ -37,7 +37,9 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
 
   // init the components
   pKernel->InitComponents();
-  pKernel->InitRender();
+
+  // platform init
+  pKernel->InitInstanceInternal();
 
   return udR_Success;
 }
@@ -58,31 +60,61 @@ udResult udKernel::Destroy()
   return DestroyInstanceInternal();
 }
 
-udResult udKernel::SendKernelMessage(udString targetUID, udString message, udString data)
+udResult udKernel::SendMessage(udString target, udString sender, udString message, udString data)
 {
-  // default kernel has no friends... :(
-  return udR_Success;
-}
+  if (target.empty())
+    return udR_Failure_; // TODO: no target!!
 
-udResult udKernel::ReceiveKernelMessage(udString senderUID, udString message, udString data)
-{
-  if (message.length > 3 && message.beginsWithInsensitive("msg"))
+  char targetType = target.popFront();
+  if (targetType == '@')
   {
-    if (message[4] == '@')
+    // component message
+    char buffer[64];
+    udComponent **ppComponent = instanceRegistry.Get(target.toStringz(buffer, 64));
+    if (ppComponent)
     {
-      // message is destined for a registered message handler
-      // registered message handlers receive messages in the form:
-      //   message = "msg@target:subMsg"
-      //   data = "data..."
+      return (*ppComponent)->ReceiveMessage(message, sender, data);
+    }
+    else
+    {
+      // TODO: check if it's in the foreign component registry and send it there
 
-      message.stripFront(4); // strip the "msg@"
-      udString target = message.popToken<false>(":"); // target shall preceed a ':'
-
-      MessageHandler *pHandler = messageHandlers.Get(target.toStringz());
-      if (pHandler)
-        pHandler->pHandler(senderUID, message, data, pHandler->pUserData);
+      return udR_Failure_; // TODO: no component!
     }
   }
+  else if (targetType == '#')
+  {
+    // kernel message
+    if (target.eq(uid))
+    {
+      // it's for me!
+      return ReceiveMessage(sender, message, data);
+    }
+    else
+    {
+      // TODO: foreign kernels?!
+
+      return udR_Failure_; // TODO: invalid kernel!
+    }
+  }
+  else if (targetType == '$')
+  {
+    // registered message
+    MessageHandler *pHandler = messageHandlers.Get(target.toStringz());
+    if (pHandler)
+    {
+      pHandler->pHandler(sender, message, data, pHandler->pUserData);
+      return udR_Success;
+    }
+    else
+      return udR_Failure_; // TODO: no message handler
+  }
+
+  return udR_Failure_; // TODO: error, invalid target!
+}
+
+udResult udKernel::ReceiveMessage(udString sender, udString message, udString data)
+{
 
   return udR_Success;
 }
@@ -145,23 +177,6 @@ udResult udKernel::DestroyComponent(udComponent **ppInstance)
   return udR_Success;
 }
 
-
-udResult udKernel::SendComponentMessage(udString targetUID, udString sender, udString message, udString data)
-{
-  char buffer[64];
-  udComponent **ppComponent = instanceRegistry.Get(targetUID.toStringz(buffer, 64));
-  if (ppComponent)
-  {
-    (*ppComponent)->ReceiveMessage(message, sender, data);
-    return udR_Success;
-  }
-
-  // TODO: check if it's in the foreign component registry and send it there
-  //...
-
-  return udR_Failure_; // TODO: better result?
-}
-
 udComponent *udKernel::Find(udString uid)
 {
   char buffer[64];
@@ -178,7 +193,7 @@ udResult udKernel::InitComponents()
     {
       r = i->pInit();
       if (r != udR_Success)
-        return r;
+        break;
     }
   }
   return r;
@@ -193,7 +208,7 @@ udResult udKernel::InitRender()
     {
       r = i->pInitRender();
       if (r != udR_Success)
-        return r;
+        break;
     }
   }
   return r;

@@ -66,9 +66,9 @@ udResult udComponent::ReceiveMessage(udString message, udString sender, udString
   return udR_Success;
 }
 
-udResult udComponent::SendMessage(udString targetUID, udString message, udString data)
+udResult udComponent::SendMessage(udString target, udString message, udString data)
 {
-  return pKernel->SendComponentMessage(targetUID, uid, message, data);
+  return pKernel->SendMessage(target, uid, message, data);
 }
 
 udResult udComponent::SetProperty(udString property, int64_t value)
