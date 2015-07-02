@@ -137,6 +137,17 @@ inline udSlice<udString> udString::tokenise(udSlice<udString> tokens, udString d
   return udSlice<const char>::tokenise<skipEmptyTokens>(tokens, delimiters);
 }
 
+inline uint32_t udString::hash(uint32_t hash) const
+{
+  size_t i = 0;
+  while (i < length)
+  {
+    hash ^= (uint32_t)ptr[i++];
+    hash *= 0x01000193;
+  }
+  return hash;
+}
+
 
 // udFixedString
 template<size_t Size>

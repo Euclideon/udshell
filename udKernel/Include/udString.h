@@ -74,6 +74,8 @@ struct udString : public udSlice<const char>
 
   int64_t parseInt(bool bDetectBase = true, int base = 10) const;
   double parseFloat() const;
+
+  uint32_t hash(uint32_t hash = 0) const;
 };
 
 

@@ -69,8 +69,7 @@ udResult udKernel::SendMessage(udString target, udString sender, udString messag
   if (targetType == '@')
   {
     // component message
-    char buffer[64];
-    udComponent **ppComponent = instanceRegistry.Get(target.toStringz(buffer, 64));
+    udComponent **ppComponent = instanceRegistry.Get(target.hash());
     if (ppComponent)
     {
       return (*ppComponent)->ReceiveMessage(message, sender, data);
@@ -100,7 +99,7 @@ udResult udKernel::SendMessage(udString target, udString sender, udString messag
   else if (targetType == '$')
   {
     // registered message
-    MessageHandler *pHandler = messageHandlers.Get(target.toStringz());
+    MessageHandler *pHandler = messageHandlers.Get(target.hash());
     if (pHandler)
     {
       pHandler->pHandler(sender, message, data, pHandler->pUserData);
