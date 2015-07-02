@@ -34,6 +34,11 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
   //...
 
   *ppInstance = pKernel;
+
+  // init the components
+  pKernel->InitComponents();
+  pKernel->InitRender();
+
   return udR_Success;
 }
 
@@ -162,4 +167,34 @@ udComponent *udKernel::Find(udString uid)
   char buffer[64];
   udComponent **ppComponent = instanceRegistry.Get(uid.toStringz(buffer, 64));
   return ppComponent ? *ppComponent : nullptr;
+}
+
+udResult udKernel::InitComponents()
+{
+  udResult r = udR_Success;
+  for (auto i : componentRegistry)
+  {
+    if (i->pInit)
+    {
+      r = i->pInit();
+      if (r != udR_Success)
+        return r;
+    }
+  }
+  return r;
+}
+
+udResult udKernel::InitRender()
+{
+  udResult r = udR_Success;
+  for (auto i : componentRegistry)
+  {
+    if (i->pInitRender)
+    {
+      r = i->pInitRender();
+      if (r != udR_Success)
+        return r;
+    }
+  }
+  return r;
 }
