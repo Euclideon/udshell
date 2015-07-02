@@ -70,21 +70,40 @@ public:
 
   static void DebugPrintfCallback(const char *pString);
   static UDTHREADLOCAL udNewPepperInstance *pThreadLocalInstance;
+  static void SendToJsCallback(udString senderUID, udString message, udString data, void *pUserData);
 };
 
 UDTHREADLOCAL udNewPepperInstance* udNewPepperInstance::pThreadLocalInstance = NULL; // This can't be nullptr it creates a compile error.
 
 
+// ---------------------------------------------------------------------------------------
 udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
 {
   return udNewPepperInstance::pThreadLocalInstance;
 }
 
+// ---------------------------------------------------------------------------------------
+void udNewPepperInstance::SendToJsCallback(udString sender, udString message, udString data, void *pUserData)
+{
+  udNewPepperInstance *pThis = (udNewPepperInstance*)(udKernel*)pUserData;
+  // TODO: Need to wrangle this to include the sender
+  pThis->PostMessageToJS(message.toStringz(), ":%s", (const char*)data.toStringz());
+}
+
+// ---------------------------------------------------------------------------------------
+udResult udKernel::InitInstanceInternal()
+{
+  RegisterMessageHandler("js", udNewPepperInstance::SendToJsCallback, this);
+  return udR_Success;
+}
+
+// ---------------------------------------------------------------------------------------
 udResult udKernel::DestroyInstanceInternal()
 {
   return udR_Success;
 }
 
+// ---------------------------------------------------------------------------------------
 udView *udKernel::SetFocusView(udView *pView)
 {
   udView *pOld = pFocusView;
@@ -94,23 +113,23 @@ udView *udKernel::SetFocusView(udView *pView)
 
 udResult udKernel::RunMainLoop()
 {
-  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
-
-  // kick off the main loop (which is asynchronous)
-  pInternal->pPepperInstance->RenderFrame(0);
-
-  // wait for the main loop to terminate
-  //  udWaitSemaphore(pInternal->pPepperInstance->pTerminateSem, -1);
+//  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
+//
+//  // kick off the main loop (which is asynchronous)
+//  pInternal->pPepperInstance->RenderFrame(0);
+//
+//  // wait for the main loop to terminate
+//  udWaitSemaphore(pInternal->pPepperInstance->pTerminateSem, -1);
 
   return udR_Success;
 }
 
 udResult udKernel::Terminate()
 {
-  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
-
-  // signal to exit the main loop
-  pInternal->pPepperInstance->bQuit = true;
+//  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
+//
+//  // signal to exit the main loop
+//  pInternal->pPepperInstance->bQuit = true;
 
   return udR_Success;
 }
@@ -142,7 +161,7 @@ bool udNewPepperInstance::Init(uint32_t argc, const char* argn[], const char* ar
   RequestFilteringInputEvents(PP_INPUTEVENT_CLASS_KEYBOARD);
   RequestInputEvents(PP_INPUTEVENT_CLASS_MOUSE);
 
-  udFile_RegisterNaclHTTP(this);
+  udFile_RegisterNaclHTTP((pp::Instance*)this);
 
   InitRenderer();
 
@@ -198,12 +217,9 @@ void udNewPepperInstance::DidChangeView(const pp::View& view)
     udUnused(result); // Correctly handle this
     glViewport(0, 0, width, height);
 
-    udComponent *pComponent = Find("pepperView");
-    if (pComponent)
-    {
-      udView *pView = static_cast<udView*>(pComponent);
+    udView *pView = GetFocusView();
+    if (pView)
       pView->Resize(width, height);
-    }
   }
 
   if (!hasRenderFrameRun)
@@ -243,13 +259,8 @@ void udNewPepperInstance::PostMessageToJS(const char *pPrefix, const char* pForm
 // ---------------------------------------------------------------------------------------
 void udNewPepperInstance::RenderFrame(int32_t)
 {
-  if (pStreamer)
-  {
-    udStreamerStatus status;
-    pStreamer->Update(&status);
-  }
+  udView *pView = GetFocusView();
 
-  udView *pView = static_cast<udView*>(Find("pepperView"));
   if (pView)
     pView->Render();
 
@@ -265,7 +276,7 @@ static inline int32_t MapPPKeyToUDKey(int32_t )
 // ---------------------------------------------------------------------------------------
 bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
 {
-  udView *pView = static_cast<udView*>(Find("pepperView"));
+  udView *pView = GetFocusView();
   if (!pView)
     return false;
 
@@ -367,30 +378,14 @@ void udNewPepperInstance::HandleMessage(const pp::Var& message)
   if (message.is_string())
   {
     std::string str = message.AsString();
+    udString data(str.c_str(), str.size());
 
-    // split it into bits...
-    udString msg(str.c_str(), str.size());
-    udString data(msg.find('#').stripFront(1));
-    msg.stripBack(data.length + 1);
-
-    ReceiveKernelMessage("js", msg, data);
+    // TODO: js needs to be adapted to include the destination (ie, $webview)
+    udString msg = data.popToken(':');
+    SendMessage("$webview", "$js", msg, data);
   }
 }
 
-
-// ---------------------------------------------------------------------------------------
-udResult udNewPepperInstance::SendKernelMessage(udString targetUID, udString message, udString data)
-{
-  if(targetUID.eqi("js"))
-  {
-    udRCString s = udRCString::concat(message, "#", data);
-
-    PostMessage((const char*)s.toStringz());
-    return udR_Success;
-  }
-
-  return udKernel::SendKernelMessage(targetUID, message, data);
-}
 
 #if 0
 struct udNaClInstance : public udViewerInstance

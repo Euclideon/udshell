@@ -187,7 +187,7 @@ inline udSlice<T> udSlice<T>::popToken(udSlice<T> delimiters)
       return udSlice<T>();
   }
   size_t end = offset;
-  while (end < length && !delimiters.canFind(ptr[offset]))
+  while (end < length && !delimiters.canFind(ptr[end]))
     ++end;
   udSlice<T> token = slice(offset, end);
   if (end < length)

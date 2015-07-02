@@ -19,6 +19,10 @@ void udInput_UpdateInternal()
   InputState &input = gInputState[gCurrentInputState];
   InputState &prev = gInputState[1 - gCurrentInputState];
 
+  // Temp hack to stop warnings
+  udUnused(input);
+  udUnused(prev);
+
   // poll keyboard
   //...
 

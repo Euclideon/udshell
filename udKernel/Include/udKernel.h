@@ -32,6 +32,7 @@ public:
   udComponent *Find(udString uid);
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
+  udBlockStreamer *GetStreamer() const { return pStreamer; }
 
   // other functions
   udView *GetFocusView() const { return pFocusView; }

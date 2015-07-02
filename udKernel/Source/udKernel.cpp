@@ -10,19 +10,23 @@
 
 udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
+  udResult result;
   udKernel *pKernel = CreateInstanceInternal(commandLine);
+  const int streamerBuffer = 350*1048576; // TODO : make this an optional command string input
+
+  UD_ERROR_NULL(pKernel, udR_Failure_);
 
   pKernel->componentRegistry.Init(256);
   pKernel->instanceRegistry.Init(256);
   pKernel->foreignInstanceRegistry.Init(256);
   pKernel->messageHandlers.Init(64);
 
-  // TODO : make renderThreadCount an optional command string input
-//  renderThreadCount = ???;
-  udResult result = udRender_Create(&pKernel->pRenderEngine, renderThreadCount);
-
-  const int streamerBuffer = 350*1048576; // TODO : make this an optional command string input
-  pKernel->pStreamer = udNew(udBlockStreamer, streamerBuffer);
+  // TODO: Remove this once webview is properly integrated
+  if (renderThreadCount != -1)
+  {
+    UD_ERROR_CHECK(udRender_Create(&pKernel->pRenderEngine, renderThreadCount));
+    pKernel->pStreamer = udNew(udBlockStreamer, streamerBuffer);
+  }
 
   // register all the builtin component types
   pKernel->RegisterComponentType(&udComponent::descriptor);
@@ -33,6 +37,8 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
   pKernel->RegisterComponentType(&udSimpleCamera::descriptor);
   //...
 
+  // TODO: check out WTF is going on here?!
+epilogue:
   *ppInstance = pKernel;
 
   // init the components
@@ -46,6 +52,8 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
 
 udResult udKernel::Destroy()
 {
+  udResult result;
+
   // unregister components, free stuff
   //...
 
@@ -54,10 +62,13 @@ udResult udKernel::Destroy()
   instanceRegistry.Deinit();
   foreignInstanceRegistry.Deinit();
 
-  udResult result = udRender_Destroy(&pRenderEngine);
+  UD_ERROR_CHECK(udRender_Destroy(&pRenderEngine));
   udDelete(pStreamer);
 
-  return DestroyInstanceInternal();
+  UD_ERROR_CHECK(DestroyInstanceInternal());
+
+epilogue:
+  return result;
 }
 
 udResult udKernel::SendMessage(udString target, udString sender, udString message, udString data)
@@ -124,7 +135,7 @@ void udKernel::RegisterMessageHandler(udRCString name, udMessageHandler *pMessag
   handler.name = name;
   handler.pHandler = pMessageHandler;
   handler.pUserData = pUserData;
-  messageHandlers.Add(uid.toStringz(), handler);
+  messageHandlers.Add(name.hash(), handler);
 }
 
 udResult udKernel::RegisterComponentType(const udComponentDesc *pDesc)

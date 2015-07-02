@@ -130,6 +130,8 @@ struct udFixedString : public udFixedSlice<char, Size>
   int64_t parseInt(bool bDetectBase = true, int base = 10) const                        { return ((udString*)this)->parseInt(bDetectBase, base); }
   double parseFloat() const                                                             { return ((udString*)this)->parseFloat(); }
 
+  uint32_t hash(uint32_t hash = 0) const                                                { return ((udString*)this)->hash(hash); }
+
 private:
   void concat(udString *pStrings, size_t numStrings);
 };
@@ -195,6 +197,8 @@ struct udRCString : public udRCSlice<const char>
 
   int64_t parseInt(bool bDetectBase = true, int base = 10) const                        { return ((udString*)this)->parseInt(bDetectBase, base); }
   double parseFloat() const                                                             { return ((udString*)this)->parseFloat(); }
+
+  uint32_t hash(uint32_t hash = 0) const                                                { return ((udString*)this)->hash(hash); }
 
 private:
   udRCString(const char *ptr, size_t length, udRC *rc);

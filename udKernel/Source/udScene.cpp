@@ -43,7 +43,7 @@ udResult udScene::InputEvent(const udInputEvent &ev)
   // pass input to the hierarchy...
   if (pRootNode)
     return pRootNode->InputEvent(ev);
-  return udR_Success;
+  return udR_EventNotHandled;
 }
 
 udResult udScene::Update(double timeDelta)
