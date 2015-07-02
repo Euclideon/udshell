@@ -101,6 +101,9 @@ udResult udView::Render()
     // resize(w, h);
   }
 
+  if (pPreRenderCallback)
+    pPreRenderCallback(this, pScene);
+
   udResult r = udR_Success;
 
   // prepare the render view
@@ -146,8 +149,8 @@ udResult udView::Render()
     }
   }
 
-  if (pRenderCallback)
-    pRenderCallback(this, pScene);
+  if (pPostRenderCallback)
+    pPostRenderCallback(this, pScene);
 
   return r;
 }
@@ -158,4 +161,12 @@ void udView::GetDimensions(int *pWidth, int *pHeight) const
     *pWidth = displayWidth;
   if (pHeight)
     *pHeight = displayHeight;
+}
+
+void udView::GetRenderDimensions(int *pWidth, int *pHeight) const
+{
+  if (pWidth)
+    *pWidth = renderWidth;
+  if (pHeight)
+    *pHeight = renderHeight;
 }

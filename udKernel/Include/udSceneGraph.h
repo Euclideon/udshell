@@ -24,6 +24,12 @@ public:
   virtual udResult Update(double timeStep) { return udR_Success; }
   virtual udResult Render(const udDouble4x4 &mat) { return udR_Success; }
 
+  virtual void SetMatrix(const udDouble4x4 &mat) { matrix = mat; }
+  const udDouble4x4& GetMatrix() const { return matrix; }
+
+  virtual void SetPosition(const udDouble3 &pos) { matrix.axis.t = udDouble4::create(pos, matrix.axis.t.w); }
+  const udDouble3& GetPosition() const { return matrix.axis.t.toVector3(); }
+
   void CalculateWorldMatrix(udDouble4x4 *pMatrix) const;
 
   static const udComponentDesc descriptor;

@@ -16,24 +16,27 @@ public:
 
   virtual udResult Render(udView *pView);
 
+  // TODO: HACK: fix this api!
   udResult SetRenderModels(struct udRenderModel models[], size_t numModels);
   udResult SetRenderOptions(const struct udRenderOptions &options);
+  const udRenderModel* GetRenderModels(size_t *pNumModels) const { if (pNumModels) { *pNumModels = numRenderModels; } return renderModels; }
+  const udRenderOptions& GetRenderOptions() const { return options; }
 
   udRenderScene *GetRenderScene(); // TODO: return immutable renderable scene, rebuild if bDirty
 
   static const udComponentDesc descriptor;
 
 protected:
-  double timeStep;
+  double timeStep = 0.0;
 
-  udNode *pRootNode;
-  bool bDirty; // becomes dirty when scene changes
+  udNode *pRootNode = nullptr;
+  bool bDirty = false; // becomes dirty when scene changes
 
-  udRenderScene *pRenderScene;
+  udRenderScene *pRenderScene = nullptr;
 
   udRenderOptions options;
   udRenderModel renderModels[16];
-  size_t numRenderModels;
+  size_t numRenderModels = 0;
 
   udScene(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams);
   virtual ~udScene();

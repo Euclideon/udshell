@@ -17,11 +17,13 @@ SDL_GLContext s_context = nullptr;
 bool s_done = false;
 static int s_displayWidth, s_displayHeight;
 
-udView *pView;
-
-
 
 udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
+{
+  return new udKernel;
+}
+
+udResult udKernel::InitInstanceInternal()
 {
   s_displayWidth = 1280;
   s_displayHeight = 720;
@@ -32,11 +34,6 @@ udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
 
   udGPU_Init();
 
-  return new udKernel;
-}
-
-udResult udKernel::InitInstanceInternal()
-{
   return InitRender();
 }
 
@@ -77,7 +74,7 @@ udResult udKernel::RunMainLoop()
             case SDL_WINDOWEVENT_RESIZED:
               s_displayWidth = event.window.data1;
               s_displayHeight = event.window.data2;
-              pView->Resize(s_displayWidth, s_displayHeight);
+              pFocusView->Resize(s_displayWidth, s_displayHeight);
               glViewport(0, 0, s_displayWidth, s_displayHeight);
               break;
           }
@@ -89,7 +86,7 @@ udResult udKernel::RunMainLoop()
     // TODO: need to translate input polling into messages...
     udInput_Update();
 
-    pView->Render();
+    pFocusView->Render();
     SDL_GL_SwapWindow(s_window);
   }
   return udR_Success;

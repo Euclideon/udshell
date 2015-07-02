@@ -49,9 +49,10 @@ class udSimpleCamera : public udCamera
 public:
   static udComponent *CreateInstance(udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams);
 
-  void SetPosition(udDouble3 _pos) { pos = _pos; matrix = udDouble4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos); }
+  virtual void SetMatrix(const udDouble4x4 &matrix) { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); udCamera::SetMatrix(matrix); }
+  virtual void SetPosition(const udDouble3 &pos) { this->pos = pos; udCamera::SetPosition(pos); }
+
   void SetOrientation(udDouble3 _ypr) { ypr = _ypr; matrix = udDouble4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos); }
-  void SetFromMatrix(const udDouble4x4 &matrix) { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); this->matrix = matrix; }
   void SetSpeed(double speed) { this->speed = speed; }
 
   void InvertYAxis(bool bInvert) { yInvert = bInvert ? -1.0 : 1.0; }

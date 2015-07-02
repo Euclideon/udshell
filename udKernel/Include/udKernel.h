@@ -62,10 +62,10 @@ protected:
   udHashMap<ForeignInstance> foreignInstanceRegistry;
   udHashMap<MessageHandler> messageHandlers;
 
-  udRenderEngine *pRenderEngine;
-  udBlockStreamer *pStreamer;
+  udRenderEngine *pRenderEngine = nullptr;
+  udBlockStreamer *pStreamer = nullptr;
 
-  udView *pFocusView;
+  udView *pFocusView = nullptr;
 
   static udKernel *CreateInstanceInternal(udInitParams commandLine);
   udResult InitInstanceInternal();

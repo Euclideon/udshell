@@ -39,37 +39,43 @@ public:
   udCamera *GetCamera() const { return pCamera; }
 
   void GetDimensions(int *pWidth, int *pHeight) const;
+  void GetRenderDimensions(int *pWidth, int *pHeight) const;
   float GetAspectRatio() const { return (float)displayWidth / (float)displayHeight; }
+
+  void* GetColorBuffer() const { return pColorBuffer; }
+  void* GetDepthBuffer() const { return pDepthBuffer; }
 
   // TODO: remove these!
   void RegisterResizeCallback(void (*pCallback)(udView *pView, int w, int h)) { pResizeCallback = pCallback; }
-  void RegisterRenderCallback(void (*pCallback)(udView *pView, udScene *pScene)) { pRenderCallback = pCallback; }
+  void RegisterPreRenderCallback(void(*pCallback)(udView *pView, udScene *pScene)) { pPreRenderCallback = pCallback; }
+  void RegisterPostRenderCallback(void(*pCallback)(udView *pView, udScene *pScene)) { pPostRenderCallback = pCallback; }
 
   static const udComponentDesc descriptor;
 
 protected:
-  udScene *pScene;
-  udCamera *pCamera;
+  udScene *pScene = nullptr;
+  udCamera *pCamera = nullptr;
 
-  udRenderableView *pRenderableView;
+  udRenderableView *pRenderableView = nullptr;
 
   // --- possibly derived stuff? ---
-  struct udRenderView *pRenderView;
+  struct udRenderView *pRenderView = nullptr;
 
-  void *pColorBuffer;
-  void *pDepthBuffer;
-  int displayWidth, displayHeight;
-  int renderWidth, renderHeight;
+  void *pColorBuffer = nullptr;
+  void *pDepthBuffer = nullptr;
+  int displayWidth = 0, displayHeight = 0;
+  int renderWidth = 0, renderHeight = 0;
 
-  struct udTexture *pColorTexture;
-  struct udTexture *pDepthTexture;
+  struct udTexture *pColorTexture = nullptr;
+  struct udTexture *pDepthTexture = nullptr;
 
-  udSemaphore *pRenderSemaphore;
-  udSemaphore *pPresentSemaphore;
+  udSemaphore *pRenderSemaphore = nullptr;
+  udSemaphore *pPresentSemaphore = nullptr;
 
   // TODO: remove these!
-  void (*pResizeCallback)(udView*, int, int);
-  void (*pRenderCallback)(udView*, udScene*);
+  void(*pResizeCallback)(udView*, int, int) = nullptr;
+  void(*pPreRenderCallback)(udView*, udScene*) = nullptr;
+  void(*pPostRenderCallback)(udView*, udScene*) = nullptr;
 
   udView(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
     : udComponent(pType, pKernel, uid, initParams) {}
