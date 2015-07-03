@@ -81,7 +81,7 @@ const char s_pixelShader[] =
 "}\n";
 
 //-------------------------------------------------------------------
-void udDebugFont_InitModule()
+void udDebugFont_Init()
 {
   pFontShaderV = udShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), udST_VertexShader);
   pFontShaderP = udShader_CreateShader(s_pixelShader, sizeof(s_pixelShader), udST_PixelShader);
@@ -99,7 +99,7 @@ void udDebugFont_InitModule()
 }
 
 //-------------------------------------------------------------------
-void udDebugFont_DeinitModule()
+void udDebugFont_Deinit()
 {
   udDelete(pRomanSimplex);
   udVertex_DestroyVertexDeclaration(&pVertexFormat);

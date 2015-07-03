@@ -3,6 +3,7 @@
 #include "udRender.h"
 #include "udBlockStreamer.h"
 
+#include "udHAL.h"
 #include "udScene.h"
 #include "udView.h"
 #include "udCamera.h"
@@ -41,11 +42,14 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
 epilogue:
   *ppInstance = pKernel;
 
-  // init the components
-  pKernel->InitComponents();
+  // init the HAL
+  udHAL_Init();
 
   // platform init
   pKernel->InitInstanceInternal();
+
+  // init the components
+  pKernel->InitComponents();
 
   return udR_Success;
 }
@@ -62,7 +66,7 @@ udResult udKernel::Destroy()
   instanceRegistry.Deinit();
   foreignInstanceRegistry.Deinit();
 
-  UD_ERROR_CHECK(udRender_Destroy(&pRenderEngine));
+  UD_ERROR_CHECK(DestroyInstanceInternal());
 
   if (pStreamer)
   {
@@ -70,7 +74,9 @@ udResult udKernel::Destroy()
     udDelete(pStreamer);
   }
 
-  UD_ERROR_CHECK(DestroyInstanceInternal());
+  UD_ERROR_CHECK(udRender_Destroy(&pRenderEngine));
+
+  udHAL_Deinit();
 
 epilogue:
   return result;
@@ -216,6 +222,8 @@ udResult udKernel::InitComponents()
 
 udResult udKernel::InitRender()
 {
+  udHAL_InitRender();
+
   udResult r = udR_Success;
   for (auto i : componentRegistry)
   {

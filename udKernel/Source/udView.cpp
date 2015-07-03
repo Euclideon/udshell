@@ -47,6 +47,15 @@ const udComponentDesc udView::descriptor =
   sizeof(props) / sizeof(props[0]) // numProperties
 };
 
+udView::~udView()
+{
+  if (pRenderView)
+    udRender_DestroyView(&pRenderView);
+  if (pColorBuffer)
+    udFree(pColorBuffer);
+  if (pDepthBuffer)
+    udFree(pDepthBuffer);
+}
 
 udResult udView::InputEvent(const udInputEvent &ev)
 {

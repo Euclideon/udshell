@@ -23,4 +23,10 @@ void udGPU_Init()
 {
 }
 
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+void udGPU_Deinit()
+{
+}
+
 #endif // UDRENDER_DRIVER == UDDRIVER_OPENGL

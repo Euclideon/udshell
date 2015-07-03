@@ -12,8 +12,8 @@
 #include "udCamera.h"
 
 
-void udDebugFont_InitModule();
-void udDebugFont_DeinitModule();
+void udDebugFont_Init();
+void udDebugFont_Deinit();
 
 #if 0
 
@@ -115,7 +115,7 @@ void udViewer_Init(const udViewerInitParams &initParams)
   udShader *pPS = udShader_CreateShader(s_blitShader, sizeof(s_blitShader), udST_PixelShader);
   s_shader = udShader_CreateShaderProgram(pVS, pPS);
 
-  udDebugFont_InitModule();
+  udDebugFont_Init();
 }
 
 // ***************************************************************************************
@@ -126,7 +126,7 @@ void udViewer_Deinit()
 
   udViewerDriver_Deinit(s_pCurrentInstance);
 
-  udDebugFont_DeinitModule();
+  udDebugFont_Deinit();
 
   udRender_Destroy(&s_pCurrentInstance->data.pRenderEngine);
 

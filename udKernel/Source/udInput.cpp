@@ -132,6 +132,13 @@ void udInput_Init()
 
 // ********************************************************
 // Author: Manu Evans, March 2015
+void udInput_Deinit()
+{
+  // TODO: deinit internal?
+}
+
+// ********************************************************
+// Author: Manu Evans, March 2015
 void udInput_Update()
 {
   // switch input frame

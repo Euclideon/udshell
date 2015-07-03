@@ -10,8 +10,6 @@
 
 #include "../../udViewer_Internal.h"
 
-void udGPU_Init();
-
 SDL_Window* s_window = nullptr;
 SDL_GLContext s_context = nullptr;
 bool s_done = false;
@@ -32,18 +30,11 @@ udResult udKernel::InitInstanceInternal()
   s_window = SDL_CreateWindow("udPointCloud Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_displayWidth, s_displayHeight, SDL_WINDOW_OPENGL);
   SDL_GL_CreateContext(s_window);
 
-  udInput_Init();
-
   return InitRenderInternal();
 }
 
 udResult udKernel::InitRenderInternal()
 {
-  udGPU_Init();
-
-  void udDebugFont_InitModule();
-  udDebugFont_InitModule();
-
   return InitRender();
 }
 

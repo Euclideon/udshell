@@ -79,7 +79,7 @@ protected:
 
   udView(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
     : udComponent(pType, pKernel, uid, initParams) {}
-  virtual ~udView() {}
+  virtual ~udView();
 
   static udComponent *Create(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
   {
