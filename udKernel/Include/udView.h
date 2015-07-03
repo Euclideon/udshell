@@ -85,6 +85,7 @@ protected:
   {
     return udNew(udView, pType, pKernel, uid, initParams);
   }
+  static udResult InitRender();
 };
 
 #endif // UDVIEW_H

@@ -12,7 +12,7 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
 {
   udResult result;
   udKernel *pKernel = CreateInstanceInternal(commandLine);
-  const int streamerBuffer = 350*1048576; // TODO : make this an optional command string input
+  const int streamerBuffer = 550*1048576; // TODO : make this an optional command string input
 
   UD_ERROR_NULL(pKernel, udR_Failure_);
 
@@ -63,7 +63,12 @@ udResult udKernel::Destroy()
   foreignInstanceRegistry.Deinit();
 
   UD_ERROR_CHECK(udRender_Destroy(&pRenderEngine));
-  udDelete(pStreamer);
+
+  if (pStreamer)
+  {
+    pStreamer->Destroy();
+    udDelete(pStreamer);
+  }
 
   UD_ERROR_CHECK(DestroyInstanceInternal());
 

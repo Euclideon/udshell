@@ -70,6 +70,7 @@ protected:
 
   static udKernel *CreateInstanceInternal(udInitParams commandLine);
   udResult InitInstanceInternal();
+  udResult InitRenderInternal();
   udResult DestroyInstanceInternal();
 
   udResult InitComponents();
