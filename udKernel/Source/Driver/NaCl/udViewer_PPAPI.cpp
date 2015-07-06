@@ -51,10 +51,6 @@ public:
   virtual bool HandleInputEvent(const pp::InputEvent& pepperEvent);
   virtual void HandleMessage(const pp::Var& message);
 
-  // Kernel overrides
-  virtual udResult SendKernelMessage(udString targetUID, udString message, udString data);
-//  virtual udResult ReceiveKernelMessage(udString senderUID, udString message, udString data);
-
   void InitRenderer();
   void RenderFrame(int32_t);
   // Temporary Plumbing : This will be removed
@@ -381,7 +377,7 @@ void udNewPepperInstance::HandleMessage(const pp::Var& message)
     udString data(str.c_str(), str.size());
 
     // TODO: js needs to be adapted to include the destination (ie, $webview)
-    udString msg = data.popToken(':');
+    udString msg = data.popToken(":");
     SendMessage("$webview", "$js", msg, data);
   }
 }
