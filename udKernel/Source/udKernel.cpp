@@ -87,10 +87,10 @@ udResult udKernel::SendMessage(udString target, udString sender, udString messag
   if (targetType == '@')
   {
     // component message
-    udComponent **ppComponent = instanceRegistry.Get(target.hash());
-    if (ppComponent)
+    udComponentRef *pComponent = instanceRegistry.Get(target.hash());
+    if (pComponent)
     {
-      return (*ppComponent)->ReceiveMessage(message, sender, data);
+      return (*pComponent)->ReceiveMessage(message, sender, data);
     }
     else
     {
@@ -151,17 +151,27 @@ udResult udKernel::RegisterComponentType(const udComponentDesc *pDesc)
   return udR_Success;
 }
 
-udResult udKernel::CreateComponent(udString typeId, udString initParams, udComponent **ppNewInstance)
+udResult udKernel::CreateComponent(udString typeId, udString initParams, udComponentRef *pNewInstance)
 {
-  char buffer[64];
-  const udComponentDesc **ppDesc = componentRegistry.Get(typeId.toStringz(buffer, sizeof(buffer)));
+  const udComponentDesc **ppDesc = componentRegistry.Get(typeId.hash());
   if (!ppDesc)
     return udR_Failure_;
 
   udComponent *pComponent = nullptr;
   try
   {
-    pComponent = (*ppDesc)->pCreateInstance(*ppDesc, this, nullptr, udInitParams());
+    udComponentRef pComponent((*ppDesc)->pCreateInstance(*ppDesc, this, nullptr, udInitParams()));
+
+    if (!pComponent)
+      return udR_MemoryAllocationFailure;
+
+    instanceRegistry.Add(pComponent->uid.hash(), pComponent);
+
+    // TODO: inform partner kernels that I created a component
+    //...
+
+    *pNewInstance = pComponent;
+    return udR_Success;
   }
   catch (udResult r)
   {
@@ -171,34 +181,26 @@ udResult udKernel::CreateComponent(udString typeId, udString initParams, udCompo
   {
     return udR_Failure_;
   }
-
-  if (!pComponent)
-    return udR_MemoryAllocationFailure;
-
-  instanceRegistry.Add(pComponent->uid.toStringz(buffer, sizeof(buffer)), pComponent);
-
-  // TODO: inform partner kernels that I created a component
-  //...
-
-  *ppNewInstance = pComponent;
-  return udR_Success;
 }
 
-udResult udKernel::DestroyComponent(udComponent **ppInstance)
+udResult udKernel::DestroyComponent(udComponentRef *pInstance)
 {
+  // TODO: remove from component registry
+//  instanceRegistry.Destroy(...);
+
   // TODO: inform partners that I destroyed a component
   //...
 
-  delete *ppInstance;
-  ppInstance = nullptr;
+  pInstance->reset();
+  pInstance = nullptr;
   return udR_Success;
 }
 
-udComponent *udKernel::Find(udString uid)
+udComponentRef udKernel::Find(udString uid)
 {
   char buffer[64];
-  udComponent **ppComponent = instanceRegistry.Get(uid.toStringz(buffer, 64));
-  return ppComponent ? *ppComponent : nullptr;
+  udComponentRef *pComponent = instanceRegistry.Get(uid.toStringz(buffer, 64));
+  return pComponent ? *pComponent : udComponentRef();
 }
 
 udResult udKernel::InitComponents()

@@ -5,10 +5,14 @@
 #include "udComponent.h"
 #include "udSceneGraph.h"
 
+PROTOTYPE_COMPONENT(udCamera);
+PROTOTYPE_COMPONENT(udSimpleCamera);
+
 
 class udCamera : public udNode
 {
 public:
+  UD_COMPONENT(udCamera);
 
   virtual udResult InputEvent(const udInputEvent &ev) { return udR_Success; }
   virtual udResult Update(double timeStep) { return udR_Success; }
@@ -22,8 +26,6 @@ public:
   void SetPerspective(float fovY) { bOrtho = false; this->fovY = fovY;  }
   void SetOrtho(float orthoHeight) { bOrtho = true; this->orthoHeight = orthoHeight;  }
   void SetDepthPlanes(float zNear, float zFar) { this->zNear = zNear; this->zFar = zFar; }
-
-  static const udComponentDesc descriptor;
 
 protected:
   bool bOrtho = false;
@@ -47,6 +49,8 @@ protected:
 class udSimpleCamera : public udCamera
 {
 public:
+  UD_COMPONENT(udSimpleCamera);
+
   static udComponent *CreateInstance(udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams);
 
   virtual void SetMatrix(const udDouble4x4 &matrix) { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); udCamera::SetMatrix(matrix); }
@@ -57,8 +61,6 @@ public:
 
   void InvertYAxis(bool bInvert) { yInvert = bInvert ? -1.0 : 1.0; }
   void HelicopterMode(bool bEnable) { bHelicopter = bEnable; }
-
-  static const udComponentDesc descriptor;
 
 protected:
   udDouble3 pos = udDouble3::zero();

@@ -48,9 +48,9 @@ udResult udKernel::DestroyInstanceInternal()
   return udR_Success;
 }
 
-udView *udKernel::SetFocusView(udView *pView)
+udViewRef udKernel::SetFocusView(udViewRef pView)
 {
-  udView *pOld = pFocusView;
+  udViewRef pOld = pFocusView;
   pFocusView = pView;
   pFocusView->Resize(s_displayWidth, s_displayHeight);
   return pOld;

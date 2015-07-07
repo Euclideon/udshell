@@ -20,6 +20,8 @@ class udRenderable
 class udNode : public udComponent
 {
 public:
+  UD_COMPONENT(udNode);
+
   virtual udResult InputEvent(const udInputEvent &ev) { return udR_Success; }
   virtual udResult Update(double timeStep) { return udR_Success; }
   virtual udResult Render(const udDouble4x4 &mat) { return udR_Success; }
@@ -31,8 +33,6 @@ public:
   const udDouble3& GetPosition() const { return matrix.axis.t.toVector3(); }
 
   void CalculateWorldMatrix(udDouble4x4 *pMatrix) const;
-
-  static const udComponentDesc descriptor;
 
 protected:
   udNode(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)

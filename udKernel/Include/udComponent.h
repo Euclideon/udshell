@@ -6,6 +6,7 @@
 #include "udHashMap.h"
 #include "udString.h"
 #include "udHelpers.h"
+#include "udSharedPtr.h"
 
 #include <stdio.h>
 
@@ -27,9 +28,20 @@ class udComponent;
 struct udComponentDesc;
 
 
+#define UD_COMPONENT(Name) \
+  static const udComponentDesc descriptor; \
+  typedef udSharedPtr<Name> Ref;
+
+#define PROTOTYPE_COMPONENT(Name) \
+  class Name; \
+  typedef udSharedPtr<Name> Name##Ref;
+
+
 typedef udResult (InitComponent)();
 typedef udResult (InitRender)();
 typedef udComponent *(CreateInstanceCallback)(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams);
+
+PROTOTYPE_COMPONENT(udComponent);
 
 
 enum class udComponentType : uint32_t
@@ -102,13 +114,14 @@ struct udComponentDesc
 };
 
 
-class udComponent
+class udComponent : public udRefCounted
 {
 public:
   friend class udKernel;
+  UD_COMPONENT(udComponent);
 
-  const udComponentDesc * const pType;
-  class udKernel * const pKernel;
+  const udComponentDesc* const pType;
+  class udKernel* const pKernel;
   const udRCString uid;
 
   virtual udResult SetProperty(udString property, udString value) { return udR_Success; }
@@ -124,10 +137,8 @@ public:
   udResult GetProperty(udString property, int64_t *pValue);
   udResult SetProperty(udString property, double value);
   udResult GetProperty(udString property, double *pValue);
-  udResult SetProperty(udString property, udComponent *pComponent);
-  udResult GetProperty(udString property, udComponent **ppComponent);
-
-  static const udComponentDesc descriptor;
+  udResult SetProperty(udString property, udComponentRef component);
+  udResult GetProperty(udString property, udComponentRef *pComponent);
 
 protected:
   udComponent(const udComponentDesc *_pType, udKernel *_pKernel, udRCString _uid, udInitParams initParams)
@@ -139,11 +150,19 @@ private:
   void operator=(const udComponent &) = delete;
 };
 
+
 template<typename T>
-inline T* component_cast(udComponent *pComponent)
+inline udSharedPtr<T> component_cast(udComponentRef pComponent)
 {
-  // TODO: check that pComponent is derived from T...
-  return (T*)pComponent;
+  if (!pComponent)
+    return udSharedPtr<T>();
+  const udComponentDesc *pDesc = pComponent->pType;
+  while (pDesc)
+  {
+    if (pDesc->id.eq(T::descriptor.id))
+      return static_pointer_cast<T>(pComponent);
+  }
+  return nullptr;
 }
 
 #endif // UDCOMPONENT_H

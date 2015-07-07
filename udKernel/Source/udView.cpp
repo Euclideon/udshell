@@ -131,7 +131,7 @@ udResult udView::Render()
   }
 
   if (pPreRenderCallback)
-    pPreRenderCallback(this, pScene);
+    pPreRenderCallback(this, pScene.ptr());
 
   udResult r = udR_Success;
 
@@ -178,7 +178,7 @@ udResult udView::Render()
   }
 
   if (pPostRenderCallback)
-    pPostRenderCallback(this, pScene);
+    pPostRenderCallback(this, pScene.ptr());
 
   return r;
 }

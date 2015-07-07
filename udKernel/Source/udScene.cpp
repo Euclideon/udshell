@@ -1,5 +1,6 @@
 
 #include "udScene.h"
+#include "udView.h"
 
 
 static const udPropertyDesc props[] =

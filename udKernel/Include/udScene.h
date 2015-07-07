@@ -4,13 +4,18 @@
 
 #include "udComponent.h"
 #include "udSceneGraph.h"
-#include "udView.h"
+#include "udRender.h"
+
+PROTOTYPE_COMPONENT(udView);
+PROTOTYPE_COMPONENT(udScene);
 
 
 class udScene : public udComponent
 {
   friend class udView;
 public:
+  UD_COMPONENT(udScene);
+
   virtual udResult InputEvent(const udInputEvent &ev);
   virtual udResult Update(double timeDelta);
 
@@ -23,8 +28,6 @@ public:
   const udRenderOptions& GetRenderOptions() const { return options; }
 
   udRenderScene *GetRenderScene(); // TODO: return immutable renderable scene, rebuild if bDirty
-
-  static const udComponentDesc descriptor;
 
 protected:
   double timeStep = 0.0;

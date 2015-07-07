@@ -109,21 +109,21 @@ udResult udComponent::GetProperty(udString property, double *pValue)
   return udR_Success;
 }
 
-udResult udComponent::SetProperty(udString property, udComponent *pObject)
+udResult udComponent::SetProperty(udString property, udComponentRef object)
 {
-  SetProperty(property, pObject->uid);
+  SetProperty(property, object->uid);
   return udR_Success;
 }
 
-udResult udComponent::GetProperty(udString property, udComponent **ppObject)
+udResult udComponent::GetProperty(udString property, udComponentRef *pObject)
 {
   char mem[64], mem2[64];
   udSlice<char> buffer(mem, sizeof(mem));
   GetProperty(property, &buffer);
-  udComponent **ppComponent = pKernel->instanceRegistry.Get(udString(buffer).toStringz(mem2, 64));
-  if(!ppComponent)
+  udComponentRef *pComponent = pKernel->instanceRegistry.Get(udString(buffer).toStringz(mem2, 64));
+  if(!pComponent)
     return udR_Failure_; // TODO: better error type... (object not found!)
-  if(ppObject)
-    *ppObject = *ppComponent;
+  if(pObject)
+    *pObject = *pComponent;
   return udR_Success;
 }

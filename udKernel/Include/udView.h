@@ -7,8 +7,10 @@
 #include "udRender.h"
 #include "udMath.h"
 
-class udScene;
-class udCamera;
+PROTOTYPE_COMPONENT(udScene);
+PROTOTYPE_COMPONENT(udCamera);
+PROTOTYPE_COMPONENT(udView);
+
 
 class udRenderableView
 {
@@ -25,6 +27,8 @@ protected:
 class udView : public udComponent
 {
 public:
+  UD_COMPONENT(udView);
+
   virtual udResult InputEvent(const udInputEvent &ev);
   virtual udResult Resize(int width, int height);
 
@@ -33,10 +37,10 @@ public:
 
   udRenderView *GetRenderView(); // TODO: return an immutable object that the render thread can render
 
-  void SetScene(udScene *pScene) { this->pScene = pScene; }
-  void SetCamera(udCamera *pCamera) { this->pCamera = pCamera; }
-  udScene *GetScene() const { return pScene; }
-  udCamera *GetCamera() const { return pCamera; }
+  void SetScene(udSceneRef pScene) { this->pScene = pScene; }
+  void SetCamera(udCameraRef pCamera) { this->pCamera = pCamera; }
+  udSceneRef GetScene() const { return pScene; }
+  udCameraRef GetCamera() const { return pCamera; }
 
   void GetDimensions(int *pWidth, int *pHeight) const;
   void GetRenderDimensions(int *pWidth, int *pHeight) const;
@@ -50,11 +54,9 @@ public:
   void RegisterPreRenderCallback(void(*pCallback)(udView *pView, udScene *pScene)) { pPreRenderCallback = pCallback; }
   void RegisterPostRenderCallback(void(*pCallback)(udView *pView, udScene *pScene)) { pPostRenderCallback = pCallback; }
 
-  static const udComponentDesc descriptor;
-
 protected:
-  udScene *pScene = nullptr;
-  udCamera *pCamera = nullptr;
+  udSceneRef pScene;
+  udCameraRef pCamera;
 
   udRenderableView *pRenderableView = nullptr;
 

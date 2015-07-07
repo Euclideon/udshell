@@ -3,11 +3,12 @@
 #define UDKERNEL_H
 
 #include "udComponent.h"
+#include "udView.h"
 
 
 struct udRenderEngine;
 class udBlockStreamer;
-class udView;
+PROTOTYPE_COMPONENT(udView);
 
 typedef void (udMessageHandler)(udString senderUID, udString message, udString data, void *pUserData);
 
@@ -26,16 +27,19 @@ public:
   // component registry
   udResult RegisterComponentType(const udComponentDesc *pDesc);
 
-  udResult CreateComponent(udString typeId, udString initParams, udComponent **ppNewInstance);
-  udResult DestroyComponent(udComponent **ppInstance);
+  udResult CreateComponent(udString typeId, udString initParams, udComponentRef *pNewInstance);
+  udResult DestroyComponent(udComponentRef *pInstance);
 
-  udComponent *Find(udString uid);
+  template<typename T>
+  udSharedPtr<T> CreateComponent(udString initParams = nullptr);
+
+  udComponentRef Find(udString uid);
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
 
   // other functions
-  udView *GetFocusView() const { return pFocusView; }
-  udView *SetFocusView(udView *pView);
+  udViewRef GetFocusView() const { return pFocusView; }
+  udViewRef SetFocusView(udViewRef pView);
 
   udResult RunMainLoop();
   udResult Terminate();
@@ -58,13 +62,13 @@ protected:
   udRCString uid;
 
   udHashMap<const udComponentDesc*> componentRegistry;
-  udHashMap<udComponent*> instanceRegistry;
+  udHashMap<udComponentRef> instanceRegistry;
   udHashMap<ForeignInstance> foreignInstanceRegistry;
   udHashMap<MessageHandler> messageHandlers;
 
   udRenderEngine *pRenderEngine = nullptr;
 
-  udView *pFocusView = nullptr;
+  udViewRef pFocusView;
 
   static udKernel *CreateInstanceInternal(udInitParams commandLine);
   udResult InitInstanceInternal();
@@ -75,5 +79,14 @@ protected:
   udResult InitRender();
 };
 
+template<typename T>
+udSharedPtr<T> udKernel::CreateComponent(udString initParams)
+{
+  udComponentRef c;
+  udResult r = CreateComponent(T::descriptor.id, initParams, &c);
+  if (r != udR_Success)
+    return udSharedPtr<T>();
+  return static_pointer_cast<T>(c);
+}
 
 #endif // UDKERNEL_H
