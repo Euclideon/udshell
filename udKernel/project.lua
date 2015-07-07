@@ -11,6 +11,7 @@ project "udKernel"
 	includedirs { "../udPointCloud/Include" }
 	includedirs { "../3rdParty/GL/freeglut/static/Include" }
 	includedirs { "../3rdParty/GL/glew/include" }
+	includedirs { "../3rdParty/lua/" .. luaPath .. "/src"}
 
 	defines { "GLEW_STATIC" }
 

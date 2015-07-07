@@ -1,0 +1,120 @@
+#pragma once
+#if !defined(_LUA_H)
+
+#include "udComponent.h"
+
+#include "lua.hpp"
+
+
+enum class LuaType : int
+{
+  None = LUA_TNONE,
+  Nil = LUA_TNIL,
+  Boolean = LUA_TBOOLEAN,
+  LightUserData = LUA_TLIGHTUSERDATA,
+  Number = LUA_TNUMBER,
+  String = LUA_TSTRING,
+  Table = LUA_TTABLE,
+  Function = LUA_TFUNCTION,
+  UserData = LUA_TUSERDATA,
+  Thread = LUA_TTHREAD,
+
+  Max = LUA_NUMTAGS
+};
+
+
+struct LuaState
+{
+private:
+  lua_State *L;
+
+  static int udLuaPanic(lua_State *L);
+  static void* udLuaAlloc(void *, void *ptr, size_t, size_t nsize);
+
+public:
+  LuaState(udKernel *pKernel);
+  ~LuaState();
+
+  lua_State *state() { return L; }
+
+  void exec(udString code);
+
+  LuaType getType(int idx = -1);
+  const char *getTypeName(LuaType type);
+
+  // to***
+  bool toBool(int idx = -1);
+  lua_Number toFloat(int idx = -1);
+  lua_Integer toInt(int idx = -1);
+  udString toString(int idx = -1);
+  lua_CFunction toFunction(int idx = -1);
+  void* toUserData(int idx = -1);
+
+  // pop***
+  bool popBool(int idx = -1, int num = 1);
+  lua_Number popFloat(int idx = -1, int num = 1);
+  lua_Integer popInt(int idx = -1, int num = 1);
+  udString popString(int idx = -1, int num = 1);
+  lua_CFunction popFunction(int idx = -1, int num = 1);
+  void* popUserData(int idx = -1, int num = 1);
+
+  // push***
+  void pushNil();
+  void pushBool(bool val);
+  void pushFloat(lua_Number val);
+  void pushInt(lua_Integer val);
+  void pushString(udString val);
+  void pushLightUserData(void *val);
+};
+
+
+struct LuaObject
+{
+private:
+  int r = LUA_REFNIL;
+  lua_State *L = nullptr;
+
+protected:
+  LuaObject(lua_State *L, int idx) : L(L)
+  {
+    lua_pushvalue(L, idx);
+    r = luaL_ref(L, LUA_REGISTRYINDEX);
+  }
+
+  void push() const
+  {
+    lua_rawgeti(L, LUA_REGISTRYINDEX, r);
+  }
+
+public:
+  LuaObject(const LuaObject& o) : L(o.L)
+  {
+    o.push();
+    r = luaL_ref(L, LUA_REGISTRYINDEX);
+  }
+  ~LuaObject()
+  {
+    luaL_unref(L, LUA_REGISTRYINDEX, r);
+  }
+
+  lua_State* state() const
+  {
+    return L;
+  }
+
+  LuaType type() const
+  {
+    push();
+    auto result = (LuaType)lua_type(L, -1);
+    lua_pop(L, 1);
+    return result;
+  }
+
+  bool isNil() const
+  {
+    return r == LUA_REFNIL;
+  }
+};
+
+
+#endif
