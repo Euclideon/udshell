@@ -18,6 +18,7 @@ solution "udShell"
 	if os.get() == "windows" then
 		dofile "ud/3rdParty/GL/glew/project.lua"
 	end
+	dofile "ud/3rdParty/lua/project.lua"
 	dofile "ud/udPlatform/project.lua"
 	dofile "ud/udPointCloud/project.lua"
 	dofile "ud/udKernel/project.lua"
