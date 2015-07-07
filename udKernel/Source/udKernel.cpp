@@ -26,7 +26,7 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
   if (renderThreadCount != -1)
   {
     UD_ERROR_CHECK(udRender_Create(&pKernel->pRenderEngine, renderThreadCount));
-    pKernel->pStreamer = udNew(udBlockStreamer, streamerBuffer);
+    udOctree_Init(streamerBuffer);
   }
 
   // register all the builtin component types
@@ -68,11 +68,7 @@ udResult udKernel::Destroy()
 
   UD_ERROR_CHECK(DestroyInstanceInternal());
 
-  if (pStreamer)
-  {
-    pStreamer->Destroy();
-    udDelete(pStreamer);
-  }
+  udOctree_Shutdown();
 
   UD_ERROR_CHECK(udRender_Destroy(&pRenderEngine));
 

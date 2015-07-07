@@ -61,16 +61,20 @@ udResult udView::InputEvent(const udInputEvent &ev)
 {
   // if view wants to handle anything personally
   //...
-
-  // pass to scene
-  udResult r = pScene->InputEvent(ev);
-  if (r == udR_EventNotHandled)
+  if (pScene)
   {
-    // pass to camera
-    r = pCamera->InputEvent(ev);
+      // pass to scene
+    udResult r = pScene->InputEvent(ev);
+    if (r == udR_EventNotHandled)
+    {
+      // pass to camera
+      r = pCamera->InputEvent(ev);
+    }
+
+    return r;
   }
 
-  return r;
+  return udR_EventNotHandled;
 }
 
 udResult udView::Resize(int width, int height)
@@ -131,7 +135,7 @@ udResult udView::Render()
 
   udResult r = udR_Success;
 
-  if (pKernel->GetRenderEngine()) // HACK: REMOVE THIS IF BLOCK! (hack for udWebView)
+  if (pScene)
   {
     // prepare the render view
     udDouble4x4 mat;
@@ -144,35 +148,32 @@ udResult udView::Render()
     udRender_SetTarget(pRenderView, udRTT_Color32, pColorBuffer, renderWidth*sizeof(uint32_t));//, 0xff000080);
     udRender_SetTarget(pRenderView, udRTT_Depth32, pDepthBuffer, renderWidth*sizeof(float), 0x3F800000);
 
-    if (pScene)
+    // render the scene
+    r = pScene->Render(this);
+
+    if (r == udR_Success)
     {
-      // render the scene
-      r = pScene->Render(this);
+      // blit the scene to the viewport
+      udTexture_SetImageData(pColorTexture, -1, 0, pColorBuffer);
+      udTexture_SetImageData(pDepthTexture, -1, 0, pDepthBuffer);
 
-      if (r == udR_Success)
-      {
-        // blit the scene to the viewport
-        udTexture_SetImageData(pColorTexture, -1, 0, pColorBuffer);
-        udTexture_SetImageData(pDepthTexture, -1, 0, pDepthBuffer);
+      udShader_SetCurrent(s_shader);
 
-        udShader_SetCurrent(s_shader);
+      int u_texture = udShader_FindShaderParameter(s_shader, "u_texture");
+      udShader_SetProgramData(0, u_texture, pColorTexture);
+      int u_zbuffer = udShader_FindShaderParameter(s_shader, "u_zbuffer");
+      udShader_SetProgramData(1, u_zbuffer, pDepthTexture);
 
-        int u_texture = udShader_FindShaderParameter(s_shader, "u_texture");
-        udShader_SetProgramData(0, u_texture, pColorTexture);
-        int u_zbuffer = udShader_FindShaderParameter(s_shader, "u_zbuffer");
-        udShader_SetProgramData(1, u_zbuffer, pDepthTexture);
+      int u_rect = udShader_FindShaderParameter(s_shader, "u_rect");
+      udShader_SetProgramData(u_rect, udFloat4::create(-1, 1, 2, -2));
+      int u_textureScale = udShader_FindShaderParameter(s_shader, "u_textureScale");
+      udShader_SetProgramData(u_textureScale, udFloat4::create(0, 0, 1, 1));
 
-        int u_rect = udShader_FindShaderParameter(s_shader, "u_rect");
-        udShader_SetProgramData(u_rect, udFloat4::create(-1, 1, 2, -2));
-        int u_textureScale = udShader_FindShaderParameter(s_shader, "u_textureScale");
-        udShader_SetProgramData(u_textureScale, udFloat4::create(0, 0, 1, 1));
-
-        udGPU_RenderVertices(s_shader, s_pQuadVB, udPT_TriangleFan, 4);
-      }
-      else
-      {
-        // TODO: render something to indicate a failed render...
-      }
+      udGPU_RenderVertices(s_shader, s_pQuadVB, udPT_TriangleFan, 4);
+    }
+    else
+    {
+      // TODO: render something to indicate a failed render...
     }
   }
 
