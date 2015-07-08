@@ -22,8 +22,6 @@ const udComponentDesc udNode::descriptor =
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
-  udComponentType::Node, // type
-
   "node",      // id
   "udNode",    // displayName
   "Is a scene node", // description

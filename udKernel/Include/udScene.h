@@ -19,7 +19,7 @@ public:
   virtual udResult InputEvent(const udInputEvent &ev);
   virtual udResult Update(double timeDelta);
 
-  virtual udResult Render(udView *pView);
+  virtual udResult Render(udViewRef pView);
 
   // TODO: HACK: fix this api!
   udResult SetRenderModels(struct udRenderModel models[], size_t numModels);

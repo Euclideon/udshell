@@ -26,8 +26,6 @@ const udComponentDesc udCamera::descriptor =
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
-  udComponentType::Camera, // type
-
   "camera",      // id
   "udCamera",    // displayName
   "Is a camera", // description
@@ -60,8 +58,6 @@ const udComponentDesc udSimpleCamera::descriptor =
 
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
-
-  udComponentType::Camera, // type
 
   "simplecamera",       // id
   "udSimpleCamera",     // displayName

@@ -24,8 +24,6 @@ const udComponentDesc udScene::descriptor =
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
-  udComponentType::Scene, // type
-
   "scene",      // id
   "udScene",    // displayName
   "Is a scene", // description
@@ -60,7 +58,7 @@ udResult udScene::Update(double timeDelta)
   return udR_Success;
 }
 
-udResult udScene::Render(udView *pView)
+udResult udScene::Render(udViewRef pView)
 {
   // TODO: this will go away, and be represented by
 

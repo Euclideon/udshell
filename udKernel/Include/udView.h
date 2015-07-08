@@ -20,6 +20,9 @@ public:
   udDouble4x4 view;
   udDouble4x4 projection;
 
+  int displayWidth = 0, displayHeight = 0;
+  int renderWidth = 0, renderHeight = 0;
+
 protected:
   int refCount;
 };
@@ -35,7 +38,7 @@ public:
   udResult Render(); // TODO: REMOVE ME
   udRenderView *GetUDRenderView() { return pRenderView; } // TODO: REMOVE ME
 
-  udRenderView *GetRenderView(); // TODO: return an immutable object that the render thread can render
+  udRenderableView *GetRenderableView(); // TODO: return an immutable object that the render thread can render
 
   void SetScene(udSceneRef pScene) { this->pScene = pScene; }
   void SetCamera(udCameraRef pCamera) { this->pCamera = pCamera; }
@@ -50,9 +53,9 @@ public:
   void* GetDepthBuffer() const { return pDepthBuffer; }
 
   // TODO: remove these!
-  void RegisterResizeCallback(void (*pCallback)(udView *pView, int w, int h)) { pResizeCallback = pCallback; }
-  void RegisterPreRenderCallback(void(*pCallback)(udView *pView, udScene *pScene)) { pPreRenderCallback = pCallback; }
-  void RegisterPostRenderCallback(void(*pCallback)(udView *pView, udScene *pScene)) { pPostRenderCallback = pCallback; }
+  void RegisterResizeCallback(void (*pCallback)(udViewRef pView, int w, int h)) { pResizeCallback = pCallback; }
+  void RegisterPreRenderCallback(void(*pCallback)(udViewRef pView, udSceneRef pScene)) { pPreRenderCallback = pCallback; }
+  void RegisterPostRenderCallback(void(*pCallback)(udViewRef pView, udSceneRef pScene)) { pPostRenderCallback = pCallback; }
 
 protected:
   udSceneRef pScene;
@@ -75,9 +78,9 @@ protected:
   udSemaphore *pPresentSemaphore = nullptr;
 
   // TODO: remove these!
-  void(*pResizeCallback)(udView*, int, int) = nullptr;
-  void(*pPreRenderCallback)(udView*, udScene*) = nullptr;
-  void(*pPostRenderCallback)(udView*, udScene*) = nullptr;
+  void(*pResizeCallback)(udViewRef, int, int) = nullptr;
+  void(*pPreRenderCallback)(udViewRef, udSceneRef) = nullptr;
+  void(*pPostRenderCallback)(udViewRef, udSceneRef) = nullptr;
 
   udView(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
     : udComponent(pType, pKernel, uid, initParams) {}

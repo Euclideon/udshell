@@ -20,7 +20,40 @@ static const udPropertyDesc props[] =
     udPF_NoWrite, // flags
     udPropertyDisplayType::Default, // displayType
     udGetter(&udComponent::getUid),
-    udSetter(&udComponent::setUid)
+    nullptr
+  },
+  {
+    "type", // id
+    "Type", // displayName
+    "Component Type", // description
+    udPropertyType::String, // type
+    0, // arrayLength
+    udPF_NoWrite, // flags
+    udPropertyDisplayType::Default, // displayType
+    udGetter(&udComponent::getType),
+    nullptr
+  },
+  {
+    "displayname", // id
+    "Display Name", // displayName
+    "Component Display Name", // description
+    udPropertyType::String, // type
+    0, // arrayLength
+    udPF_NoWrite, // flags
+    udPropertyDisplayType::Default, // displayType
+    udGetter(&udComponent::getDisplayName),
+    nullptr
+  },
+  {
+    "description", // id
+    "Description", // displayName
+    "Component Description", // description
+    udPropertyType::String, // type
+    0, // arrayLength
+    udPF_NoWrite, // flags
+    udPropertyDisplayType::Default, // displayType
+    udGetter(&udComponent::getDescription),
+    nullptr
   }
 };
 const udComponentDesc udComponent::descriptor =
@@ -29,8 +62,6 @@ const udComponentDesc udComponent::descriptor =
 
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
-
-  udComponentType::Component, // type
 
   "component", // id
   "udComponent",    // displayName
@@ -44,7 +75,19 @@ const udComponentDesc udComponent::descriptor =
 };
 
 
-const udPropertyDesc *udComponent::FindProperty(udString name)
+bool udComponent::IsType(udString type) const
+{
+  const udComponentDesc *pDesc = pType;
+  while (pDesc)
+  {
+    if (pType->id.eq(type))
+      return true;
+    pDesc = pDesc->pSuperDesc;
+  }
+  return false;
+}
+
+const udPropertyDesc *udComponent::FindProperty(udString name) const
 {
   const udComponentDesc *pDesc = pType;
   while (pDesc)
@@ -153,7 +196,7 @@ udResult udComponent::SetProperty(udString property, udVariant value)
   return r;
 }
 
-udResult udComponent::GetPropertyBool(udString property, bool &result)
+udResult udComponent::GetPropertyBool(udString property, bool &result) const
 {
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
@@ -168,7 +211,7 @@ udResult udComponent::GetPropertyBool(udString property, bool &result)
   return pDesc->getter.get(this, result);
 }
 
-udResult udComponent::GetPropertyInt(udString property, int64_t &result)
+udResult udComponent::GetPropertyInt(udString property, int64_t &result) const
 {
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
@@ -183,7 +226,7 @@ udResult udComponent::GetPropertyInt(udString property, int64_t &result)
   return pDesc->getter.get(this, result);
 }
 
-udResult udComponent::GetPropertyIntArray(udString property, udSlice<int64_t> result)
+udResult udComponent::GetPropertyIntArray(udString property, udSlice<int64_t> result) const
 {
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
@@ -200,7 +243,7 @@ udResult udComponent::GetPropertyIntArray(udString property, udSlice<int64_t> re
    return pDesc->getter.getArray(this, result);
 }
 
-udResult udComponent::GetPropertyFloat(udString property, double &result)
+udResult udComponent::GetPropertyFloat(udString property, double &result) const
 {
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
@@ -215,7 +258,7 @@ udResult udComponent::GetPropertyFloat(udString property, double &result)
   return pDesc->getter.get(this, result);
 }
 
-udResult udComponent::GetPropertyFloatArray(udString property, udSlice<double> result)
+udResult udComponent::GetPropertyFloatArray(udString property, udSlice<double> result) const
 {
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
@@ -232,7 +275,7 @@ udResult udComponent::GetPropertyFloatArray(udString property, udSlice<double> r
   return pDesc->getter.getArray(this, result);
 }
 
-udResult udComponent::GetPropertyString(udString property, udString &result)
+udResult udComponent::GetPropertyString(udString property, udString &result) const
 {
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
@@ -247,7 +290,7 @@ udResult udComponent::GetPropertyString(udString property, udString &result)
   return pDesc->getter.get(this, result);
 }
 
-udResult udComponent::GetPropertyStringArray(udString property, udSlice<udString> result)
+udResult udComponent::GetPropertyStringArray(udString property, udSlice<udString> result) const
 {
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
@@ -264,7 +307,7 @@ udResult udComponent::GetPropertyStringArray(udString property, udSlice<udString
   return pDesc->getter.getArray(this, result);
 }
 
-udResult udComponent::GetPropertyComponent(udString property, udComponentRef &result)
+udResult udComponent::GetPropertyComponent(udString property, udComponentRef &result) const
 {
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)

@@ -45,68 +45,29 @@ struct udComponentDesc;
 PROTOTYPE_COMPONENT(udComponent);
 
 
-typedef udResult (InitComponent)();
-typedef udResult (InitRender)();
-typedef udComponent *(CreateInstanceCallback)(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams);
-
-
-enum class udComponentType : uint32_t
-{
-  Component,
-  Command,
-  View,
-  Scene,
-  Node,
-  Camera,
-  Gizmo,
-  UI
-};
-
-enum class udPropertyType : uint32_t
-{
-  Boolean,
-  Integer,
-  Float,
-  String,
-  Component,
-};
-
-enum udPropertyFlags : uint32_t
-{
-  udPF_NoRead = 1<<0,
-  udPF_NoWrite = 1<<1,
-  udPF_MustInit = 1<<2,
-  udPF_Immutable = udPF_MustInit | udPF_NoWrite | udPF_NoRead,
-};
-
-enum class udPropertyDisplayType : uint32_t
-{
-  Default
-};
-
 struct udGetter
 {
 public:
   udGetter(nullptr_t) {}
   template <class X, class Type>
-  udGetter(udResult(X::*func)(Type))
+  udGetter(udResult(X::*func)(Type) const)
   {
     m = MakeDelegate((X*)nullptr, func).GetMemento();
   }
   template<typename Type>
-  udResult get(udComponent *pThis, Type &value) const
+  udResult get(const udComponent *pThis, Type &value) const
   {
     auto m = this->m;
-    m.SetThis(pThis);
+    m.SetThis((void*)pThis);
     FastDelegate<udResult(Type&)> d;
     d.SetMemento(m);
     return d(value);
   }
   template<typename Type>
-  udResult getArray(udComponent *pThis, udSlice<Type> value) const
+  udResult getArray(const udComponent *pThis, udSlice<Type> value) const
   {
     auto m = this->m;
-    m.SetThis(pThis);
+    m.SetThis((void*)pThis);
     FastDelegate<udResult(udSlice<Type>)> d;
     d.SetMemento(m);
     return d(value);
@@ -136,6 +97,35 @@ private:
   DelegateMemento m;
 };
 
+
+typedef udResult (InitComponent)();
+typedef udResult (InitRender)();
+typedef udComponent *(CreateInstanceCallback)(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams);
+
+
+enum class udPropertyType : uint32_t
+{
+  Boolean,
+  Integer,
+  Float,
+  String,
+  Component,
+};
+
+enum udPropertyFlags : uint32_t
+{
+  udPF_NoRead = 1<<0,
+  udPF_NoWrite = 1<<1,
+  udPF_MustInit = 1<<2,
+  udPF_Immutable = udPF_MustInit | udPF_NoWrite | udPF_NoRead,
+};
+
+enum class udPropertyDisplayType : uint32_t
+{
+  Default
+};
+
+
 struct udPropertyDesc
 {
   udString id;
@@ -159,8 +149,6 @@ struct udComponentDesc
 
   int udVersion;
   int pluginVersion;
-
-  udComponentType type;
 
   udString id;          // an id for this component
   udString displayName; // display name
@@ -187,33 +175,31 @@ public:
   class udKernel* const pKernel;
   const udRCString uid;
 
-  const udPropertyDesc *FindProperty(udString name);
+  bool IsType(udString type) const;
+  template<typename T>
+  bool IsType() const { return IsType(T::descriptor.id); }
+
+  const udPropertyDesc *FindProperty(udString name) const;
 
   udResult SetProperty(udString property, udVariant value);
 
-  udResult GetPropertyBool(udString property, bool &result);
-  udResult GetPropertyInt(udString property, int64_t &result);
-  udResult GetPropertyIntArray(udString property, udSlice<int64_t> result);
-  udResult GetPropertyFloat(udString property, double &result);
-  udResult GetPropertyFloatArray(udString property, udSlice<double> result);
-  udResult GetPropertyString(udString property, udString &result);
-  udResult GetPropertyStringArray(udString property, udSlice<udString> result);
-  udResult GetPropertyComponent(udString property, udComponentRef &result);
+  udResult GetPropertyBool(udString property, bool &result) const;
+  udResult GetPropertyInt(udString property, int64_t &result) const;
+  udResult GetPropertyIntArray(udString property, udSlice<int64_t> result) const;
+  udResult GetPropertyFloat(udString property, double &result) const;
+  udResult GetPropertyFloatArray(udString property, udSlice<double> result) const;
+  udResult GetPropertyString(udString property, udString &result) const;
+  udResult GetPropertyStringArray(udString property, udSlice<udString> result) const;
+  udResult GetPropertyComponent(udString property, udComponentRef &result) const;
 
   udResult SendMessage(udString target, udString message, udVariant data);
   udResult SendMessage(udComponent *pComponent, udString message, udVariant data) { return SendMessage(pComponent->uid, message, data); }
 
   // properties
-  udResult getUid(udString &uid)
-  {
-    uid = this->uid;
-    return udR_Success;
-  }
-  udResult setUid(udString uid)
-  {
-    return udR_Success;
-  }
-
+  udResult getUid(udString &uid) const { uid = this->uid; return udR_Success; }
+  udResult getType(udString &type) const { type = this->descriptor.id; return udR_Success; }
+  udResult getDisplayName(udString &displayName) const { displayName = this->descriptor.displayName; return udR_Success; }
+  udResult getDescription(udString &description) const { description = this->descriptor.description; return udR_Success; }
 
 protected:
   udComponent(const udComponentDesc *_pType, udKernel *_pKernel, udRCString _uid, udInitParams initParams)

@@ -36,8 +36,6 @@ const udComponentDesc udView::descriptor =
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
-  udComponentType::View, // type
-
   "view",      // id
   "udView",    // displayName
   "Is a view", // description
@@ -120,7 +118,7 @@ udResult udView::Resize(int width, int height)
   }
 
   if (pResizeCallback)
-    pResizeCallback(this, width, height);
+    pResizeCallback(udViewRef(this), width, height);
 
   return udR_Success;
 }
@@ -133,7 +131,7 @@ udResult udView::Render()
   }
 
   if (pPreRenderCallback)
-    pPreRenderCallback(this, pScene.ptr());
+    pPreRenderCallback(udViewRef(this), pScene);
 
   udResult r = udR_Success;
 
@@ -151,7 +149,7 @@ udResult udView::Render()
     udRender_SetTarget(pRenderView, udRTT_Depth32, pDepthBuffer, renderWidth*sizeof(float), 0x3F800000);
 
     // render the scene
-    r = pScene->Render(this);
+    r = pScene->Render(udViewRef(this));
 
     if (r == udR_Success)
     {
@@ -180,7 +178,7 @@ udResult udView::Render()
   }
 
   if (pPostRenderCallback)
-    pPostRenderCallback(this, pScene.ptr());
+    pPostRenderCallback(udViewRef(this), pScene);
 
   return r;
 }
