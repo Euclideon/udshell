@@ -22,7 +22,9 @@ LuaState::LuaState(udKernel *pKernel)
   L = lua_newstate(udLuaAlloc, pKernel);
   lua_atpanic(L, udLuaPanic);
 
-  // register things
+  luaL_openlibs(L);
+
+  // TODO: register things
 
 }
 
@@ -64,7 +66,10 @@ LuaType LuaState::getType(int idx)
 {
   return (LuaType)lua_type(L, idx);
 }
-
+const char *LuaState::getTypeName(int idx)
+{
+  return s_luaTypes[(size_t)getType(idx) + 1];
+}
 const char *LuaState::getTypeName(LuaType type)
 {
   return s_luaTypes[(size_t)type + 1];
@@ -106,40 +111,44 @@ void* LuaState::toUserData(int idx)
 }
 
 // pop***
-bool LuaState::popBool(int idx, int num)
+void LuaState::pop(int count)
 {
-  bool r = toBool(idx);
-  lua_pop(L, num);
+  lua_pop(L, count);
+}
+bool LuaState::popBool()
+{
+  bool r = toBool(-1);
+  lua_pop(L, 1);
   return r;
 }
-lua_Number LuaState::popFloat(int idx, int num)
+lua_Number LuaState::popFloat()
 {
-  lua_Number r = toFloat(idx);
-  lua_pop(L, num);
+  lua_Number r = toFloat(-1);
+  lua_pop(L, 1);
   return r;
 }
-lua_Integer LuaState::popInt(int idx, int num)
+lua_Integer LuaState::popInt()
 {
-  lua_Integer r = toInt(idx);
-  lua_pop(L, num);
+  lua_Integer r = toInt(-1);
+  lua_pop(L, 1);
   return r;
 }
-udString LuaState::popString(int idx, int num)
+udString LuaState::popString()
 {
-  udString r = toString(idx);
-  lua_pop(L, num);
+  udString r = toString(-1);
+  lua_pop(L, 1);
   return r;
 }
-lua_CFunction LuaState::popFunction(int idx, int num)
+lua_CFunction LuaState::popFunction()
 {
-  lua_CFunction r = toFunction(idx);
-  lua_pop(L, num);
+  lua_CFunction r = toFunction(-1);
+  lua_pop(L, 1);
   return r;
 }
-void* LuaState::popUserData(int idx, int num)
+void* LuaState::popUserData()
 {
-  void* r = toUserData(idx);
-  lua_pop(L, num);
+  void* r = toUserData(-1);
+  lua_pop(L, 1);
   return r;
 }
 

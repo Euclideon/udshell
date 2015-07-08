@@ -4,13 +4,19 @@
 
 #include "udComponent.h"
 #include "udView.h"
+#include "udHelpers.h"
+
+#include "3rdparty\FastDelegate.h"
+using namespace fastdelegate;
 
 
 struct udRenderEngine;
 class udBlockStreamer;
 PROTOTYPE_COMPONENT(udView);
 
-typedef void (udMessageHandler)(udString senderUID, udString message, udString data, void *pUserData);
+// TODO: udMessageHandler returns void, should we return some error state??
+typedef FastDelegate<void(udString senderUID, udString message, udVariant data)> udMessageHandler;
+
 
 class udKernel
 {
@@ -19,10 +25,10 @@ public:
   static udResult Create(udKernel **ppInstance, udInitParams commandLine, int renderThreadCount = 0);
   udResult Destroy();
 
-  udResult SendMessage(udString target, udString sender, udString message, udString data);
-  udResult ReceiveMessage(udString sender, udString message, udString data);
+  udResult SendMessage(udString target, udString sender, udString message, udVariant data);
+  udResult ReceiveMessage(udString sender, udString message, udVariant data);
 
-  void RegisterMessageHandler(udRCString name, udMessageHandler *pMessageHandler, void *pUserData);
+  void RegisterMessageHandler(udRCString name, udMessageHandler messageHandler);
 
   // component registry
   udResult RegisterComponentType(const udComponentDesc *pDesc);
@@ -48,8 +54,7 @@ protected:
   struct MessageHandler
   {
     udRCString name;
-    udMessageHandler *pHandler;
-    void *pUserData;
+    udMessageHandler callback;
   };
 
   struct ForeignInstance

@@ -40,23 +40,8 @@ public:
   void exec(udString code);
 
   LuaType getType(int idx = -1);
+  const char *getTypeName(int idx = -1);
   const char *getTypeName(LuaType type);
-
-  // to***
-  bool toBool(int idx = -1);
-  lua_Number toFloat(int idx = -1);
-  lua_Integer toInt(int idx = -1);
-  udString toString(int idx = -1);
-  lua_CFunction toFunction(int idx = -1);
-  void* toUserData(int idx = -1);
-
-  // pop***
-  bool popBool(int idx = -1, int num = 1);
-  lua_Number popFloat(int idx = -1, int num = 1);
-  lua_Integer popInt(int idx = -1, int num = 1);
-  udString popString(int idx = -1, int num = 1);
-  lua_CFunction popFunction(int idx = -1, int num = 1);
-  void* popUserData(int idx = -1, int num = 1);
 
   // push***
   void pushNil();
@@ -65,6 +50,23 @@ public:
   void pushInt(lua_Integer val);
   void pushString(udString val);
   void pushLightUserData(void *val);
+
+  // pop***
+  void pop(int count = 1);
+  bool popBool();
+  lua_Number popFloat();
+  lua_Integer popInt();
+  udString popString();
+  lua_CFunction popFunction();
+  void* popUserData();
+
+  // to***
+  bool toBool(int idx = -1);
+  lua_Number toFloat(int idx = -1);
+  lua_Integer toInt(int idx = -1);
+  udString toString(int idx = -1);
+  lua_CFunction toFunction(int idx = -1);
+  void* toUserData(int idx = -1);
 };
 
 

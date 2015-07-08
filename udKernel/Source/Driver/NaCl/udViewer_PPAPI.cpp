@@ -79,11 +79,12 @@ udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
 }
 
 // ---------------------------------------------------------------------------------------
-void udNewPepperInstance::SendToJsCallback(udString sender, udString message, udString data, void *pUserData)
+void udNewPepperInstance::SendToJsCallback(udString sender, udString message, udVariant data)
 {
   udNewPepperInstance *pThis = (udNewPepperInstance*)(udKernel*)pUserData;
   // TODO: Need to wrangle this to include the sender
-  pThis->PostMessageToJS(message.toStringz(), ":%s", (const char*)data.toStringz());
+  udRCString s = data.stringify();
+  pThis->PostMessageToJS(message.toStringz(), ":%s", (const char*)s.toStringz());
 }
 
 // ---------------------------------------------------------------------------------------

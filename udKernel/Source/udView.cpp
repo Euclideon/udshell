@@ -24,18 +24,21 @@ static const udPropertyDesc props[] =
     udPropertyType::Integer, // type
     0, // arrayLength
     udPF_NoRead, // flags
-    udPropertyDisplayType::Default // displayType
+    udPropertyDisplayType::Default, // displayType
+    nullptr,
+    nullptr
   }
 };
 const udComponentDesc udView::descriptor =
 {
+  &udComponent::descriptor, // pSuperDesc
+
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   udComponentType::View, // type
 
   "view",      // id
-  "component", // parentId
   "udView",    // displayName
   "Is a view", // description
 
@@ -43,8 +46,7 @@ const udComponentDesc udView::descriptor =
   udView::InitRender,           // pInitRender
   udView::Create,               // pCreateInstance
 
-  props,                           // pProperties
-  sizeof(props) / sizeof(props[0]) // numProperties
+  udSlice<const udPropertyDesc>(props, ARRAY_LENGTH(props)) // propeties
 };
 
 udView::~udView()

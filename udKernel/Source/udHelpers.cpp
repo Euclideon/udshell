@@ -36,7 +36,7 @@ udRCSlice<udKeyValuePair> udParseCommandLine(int argc, char *argv[])
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
   for (int i = 0; i < argc; ++i)
-    output.pushBack(udKeyValuePair(nullptr, argv[i]));
+    output.pushBack(udKeyValuePair(nullptr, udString(argv[i])));
 
   return udRCSlice<udKeyValuePair>(output.slice(0, argc));
 }
@@ -47,7 +47,7 @@ udRCSlice<udKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], 
   output.reserve(argc);
 
   for (uint32_t i = 0; i < argc; ++i)
-    output.pushBack(udKeyValuePair(argn[i], argv[i]));
+    output.pushBack(udKeyValuePair(argn[i], udString(argv[i])));
 
   return udRCSlice<udKeyValuePair>(output.slice(0, argc));
 }

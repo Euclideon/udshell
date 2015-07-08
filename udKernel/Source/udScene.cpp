@@ -12,18 +12,21 @@ static const udPropertyDesc props[] =
     udPropertyType::Integer, // type
     0, // arrayLength
     udPF_NoRead, // flags
-    udPropertyDisplayType::Default // displayType
+    udPropertyDisplayType::Default, // displayType
+    nullptr,
+    nullptr
   }
 };
 const udComponentDesc udScene::descriptor =
 {
+  &udComponent::descriptor, // pSuperDesc
+
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   udComponentType::Scene, // type
 
   "scene",      // id
-  "component",  // parentId
   "udScene",    // displayName
   "Is a scene", // description
 
@@ -31,8 +34,7 @@ const udComponentDesc udScene::descriptor =
   [](){ return udR_Success; },             // pInitRender
   udScene::Create, // pCreateInstance
 
-  props,                           // pProperties
-  sizeof(props) / sizeof(props[0]) // numProperties
+  udSlice<const udPropertyDesc>(props, ARRAY_LENGTH(props)) // propeties
 };
 
 

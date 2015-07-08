@@ -78,7 +78,7 @@ epilogue:
   return result;
 }
 
-udResult udKernel::SendMessage(udString target, udString sender, udString message, udString data)
+udResult udKernel::SendMessage(udString target, udString sender, udString message, udVariant data)
 {
   if (target.empty())
     return udR_Failure_; // TODO: no target!!
@@ -120,7 +120,7 @@ udResult udKernel::SendMessage(udString target, udString sender, udString messag
     MessageHandler *pHandler = messageHandlers.Get(target.hash());
     if (pHandler)
     {
-      pHandler->pHandler(sender, message, data, pHandler->pUserData);
+      pHandler->callback(sender, message, data);
       return udR_Success;
     }
     else
@@ -130,24 +130,23 @@ udResult udKernel::SendMessage(udString target, udString sender, udString messag
   return udR_Failure_; // TODO: error, invalid target!
 }
 
-udResult udKernel::ReceiveMessage(udString sender, udString message, udString data)
+udResult udKernel::ReceiveMessage(udString sender, udString message, udVariant data)
 {
 
   return udR_Success;
 }
 
-void udKernel::RegisterMessageHandler(udRCString name, udMessageHandler *pMessageHandler, void *pUserData)
+void udKernel::RegisterMessageHandler(udRCString name, udMessageHandler messageHandler)
 {
   MessageHandler handler;
   handler.name = name;
-  handler.pHandler = pMessageHandler;
-  handler.pUserData = pUserData;
+  handler.callback = messageHandler;
   messageHandlers.Add(name.hash(), handler);
 }
 
 udResult udKernel::RegisterComponentType(const udComponentDesc *pDesc)
 {
-  componentRegistry.Add(pDesc->id, pDesc);
+  componentRegistry.Add(pDesc->id.hash(), pDesc);
   return udR_Success;
 }
 
@@ -157,7 +156,6 @@ udResult udKernel::CreateComponent(udString typeId, udString initParams, udCompo
   if (!ppDesc)
     return udR_Failure_;
 
-  udComponent *pComponent = nullptr;
   try
   {
     udComponentRef pComponent((*ppDesc)->pCreateInstance(*ppDesc, this, nullptr, udInitParams()));

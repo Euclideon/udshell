@@ -14,18 +14,21 @@ static const udPropertyDesc props[] =
     udPropertyType::Float , // type
     3, // arrayLength
     udPF_NoRead, // flags
-    udPropertyDisplayType::Default // displayType
+    udPropertyDisplayType::Default, // displayType
+    nullptr,
+    nullptr
   }
 };
 const udComponentDesc udCamera::descriptor =
 {
+  &udNode::descriptor, // pSuperDesc
+
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   udComponentType::Camera, // type
 
   "camera",      // id
-  "node",        // parentId
   "udCamera",    // displayName
   "Is a camera", // description
 
@@ -33,8 +36,7 @@ const udComponentDesc udCamera::descriptor =
   [](){ return udR_Success; },  // pInitRender
   udCamera::Create,             // pCreateInstance
 
-  props,                           // pProperties
-  sizeof(props) / sizeof(props[0]) // numProperties
+  udSlice<const udPropertyDesc>(props, ARRAY_LENGTH(props)) // propeties
 };
 
 
@@ -47,18 +49,21 @@ static const udPropertyDesc simpleCameraProps[] =
     udPropertyType::Float, // type
     3, // arrayLength
     udPF_NoRead, // flags
-    udPropertyDisplayType::Default // displayType
+    udPropertyDisplayType::Default, // displayType
+    nullptr,
+    nullptr
   }
 };
 const udComponentDesc udSimpleCamera::descriptor =
 {
+  &udCamera::descriptor, // pSuperDesc
+
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   udComponentType::Camera, // type
 
   "simplecamera",       // id
-  "camera",             // parentId
   "udSimpleCamera",     // displayName
   "Is a simple camera", // description
 
@@ -66,8 +71,7 @@ const udComponentDesc udSimpleCamera::descriptor =
   [](){ return udR_Success; },  // pInitRender
   udSimpleCamera::Create,       // pCreateInstance
 
-  simpleCameraProps, // pProperties
-  sizeof(simpleCameraProps) / sizeof(simpleCameraProps[0]) // numProperties
+  udSlice<const udPropertyDesc>(simpleCameraProps, ARRAY_LENGTH(simpleCameraProps)) // propeties
 };
 
 

@@ -175,7 +175,7 @@ private:
 template<class T, class U>
 udSharedPtr<T> static_pointer_cast(const udSharedPtr<U> &ptr)
 {
-  return (udSharedPtr<T>&)ptr;
+  return udSharedPtr<T>((T*)ptr.ptr());
 }
 
 
