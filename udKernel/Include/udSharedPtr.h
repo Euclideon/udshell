@@ -50,10 +50,7 @@ public:
   {
     return count() == 1;
   }
-  size_t count() const
-  {
-    return pInstance ? ((udRefCounted*)pInstance)->rc : 0;
-  }
+  inline size_t count() const;
 
   inline T& operator*() const { return *pInstance; }
   inline T* operator->() const { return pInstance; }
@@ -62,24 +59,8 @@ public:
 private:
   template<class U> friend class udSharedPtr;
 
-  inline void acquire()
-  {
-    if (pInstance)
-    {
-      udRefCounted *pRC = (udRefCounted*)pInstance;
-      ++pRC->rc;
-    }
-  }
-  inline void release()
-  {
-    if (pInstance)
-    {
-      udRefCounted *pRC = (udRefCounted*)pInstance;
-      if (--pRC->rc == 0)
-        delete pRC;
-      pInstance = nullptr;
-    }
-  }
+  inline void acquire();
+  inline void release();
 
   T *pInstance = nullptr;
 };
@@ -193,5 +174,35 @@ template<class T, class U> inline bool operator<=(const udUniquePtr<T> &l, const
 template<class T, class U> inline bool operator<(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() < r.ptr(); }
 template<class T, class U> inline bool operator>=(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() >= r.ptr(); }
 template<class T, class U> inline bool operator>(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() > r.ptr(); }
+
+
+
+template<class T>
+inline size_t udSharedPtr<T>::count() const
+{
+  return pInstance ? ((udRefCounted*)pInstance)->rc : 0;
+}
+
+template<class T>
+inline void udSharedPtr<T>::acquire()
+{
+  if (pInstance)
+  {
+    udRefCounted *pRC = (udRefCounted*)pInstance;
+    ++pRC->rc;
+  }
+}
+
+template<class T>
+inline void udSharedPtr<T>::release()
+{
+  if (pInstance)
+  {
+    udRefCounted *pRC = (udRefCounted*)pInstance;
+    if (--pRC->rc == 0)
+      delete pRC;
+    pInstance = nullptr;
+  }
+}
 
 #endif // _SHAREDPTR_H

@@ -51,7 +51,14 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include <memory.h> // to allow <,> comparisons
+// to allow <,> comparisons
+#if defined(__clang__) || defined(__GNUC__)
+#include <string.h>
+#define attributeUnused __attribute__ ((unused))
+#else // defined(__clang__)
+#include <memory.h>
+#define attributeUnused
+#endif // defined(__clang__)
 
 ////////////////////////////////////////////////////////////////////////////////
 //						Configuration options
@@ -176,7 +183,7 @@ inline OutputClass horrible_cast(const InputClass input){
 	// If the compile fails here, it means the compiler has peculiar
 	// unions which would prevent the cast from working.
 	typedef int ERROR_CantUseHorrible_cast[sizeof(InputClass)==sizeof(u)
-		&& sizeof(InputClass)==sizeof(OutputClass) ? 1 : -1];
+		&& sizeof(InputClass)==sizeof(OutputClass) ? 1 : -1] attributeUnused;
 	u.in = input;
 	return u.out;
 }
@@ -292,7 +299,7 @@ struct SimplifyMemFunc {
 		GenericMemFuncType &bound_func) {
 		// Unsupported member function type -- force a compile failure.
 	    // (it's illegal to have a array with negative size).
-		typedef char ERROR_Unsupported_member_function_pointer_on_this_compiler[N-100];
+		typedef char ERROR_Unsupported_member_function_pointer_on_this_compiler[N-100] attributeUnused;
 		return 0;
 	}
 };
@@ -627,7 +634,7 @@ public:
 		return right.IsLess(*this);
 	}
 	DelegateMemento (const DelegateMemento &right)  :
-		m_pFunction(right.m_pFunction), m_pthis(right.m_pthis)
+		m_pthis(right.m_pthis), m_pFunction(right.m_pFunction)
 #if !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)
 		, m_pStaticFunction (right.m_pStaticFunction)
 #endif
@@ -781,7 +788,7 @@ public:
 		// Ensure that there's a compilation failure if function pointers
 		// and data pointers have different sizes.
 		// If you get this error, you need to #undef FASTDELEGATE_USESTATICFUNCTIONHACK.
-		typedef int ERROR_CantUseEvilMethod[sizeof(GenericClass *)==sizeof(function_to_bind) ? 1 : -1];
+		typedef int ERROR_CantUseEvilMethod[sizeof(GenericClass *)==sizeof(function_to_bind) ? 1 : -1] attributeUnused;
 		m_pthis = horrible_cast<GenericClass *>(function_to_bind);
 		// MSVC, SunC++ and DMC accept the following (non-standard) code:
 //		m_pthis = static_cast<GenericClass *>(static_cast<void *>(function_to_bind));
@@ -796,7 +803,7 @@ public:
 		// Ensure that there's a compilation failure if function pointers
 		// and data pointers have different sizes.
 		// If you get this error, you need to #undef FASTDELEGATE_USESTATICFUNCTIONHACK.
-		typedef int ERROR_CantUseEvilMethod[sizeof(UnvoidStaticFuncPtr)==sizeof(this) ? 1 : -1];
+		typedef int ERROR_CantUseEvilMethod[sizeof(UnvoidStaticFuncPtr)==sizeof(this) ? 1 : -1] attributeUnused;
 		return horrible_cast<UnvoidStaticFuncPtr>(this);
 	}
 #endif // !defined(FASTDELEGATE_USESTATICFUNCTIONHACK)

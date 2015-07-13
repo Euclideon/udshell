@@ -66,7 +66,7 @@ public:
 
   static void DebugPrintfCallback(const char *pString);
   static UDTHREADLOCAL udNewPepperInstance *pThreadLocalInstance;
-  static void SendToJsCallback(udString senderUID, udString message, udString data, void *pUserData);
+  void SendToJsCallback(udString senderUID, udString message, udVariant data);
 };
 
 UDTHREADLOCAL udNewPepperInstance* udNewPepperInstance::pThreadLocalInstance = NULL; // This can't be nullptr it creates a compile error.
@@ -81,16 +81,15 @@ udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
 // ---------------------------------------------------------------------------------------
 void udNewPepperInstance::SendToJsCallback(udString sender, udString message, udVariant data)
 {
-  udNewPepperInstance *pThis = (udNewPepperInstance*)(udKernel*)pUserData;
   // TODO: Need to wrangle this to include the sender
   udRCString s = data.stringify();
-  pThis->PostMessageToJS(message.toStringz(), ":%s", (const char*)s.toStringz());
+  PostMessageToJS(message.toStringz(), ":%s", (const char*)s.toStringz());
 }
 
 // ---------------------------------------------------------------------------------------
 udResult udKernel::InitInstanceInternal()
 {
-  RegisterMessageHandler("js", udNewPepperInstance::SendToJsCallback, this);
+  RegisterMessageHandler("js", MakeDelegate((udNewPepperInstance*)this, &udNewPepperInstance::SendToJsCallback));
   return udR_Success;
 }
 
@@ -101,11 +100,11 @@ udResult udKernel::DestroyInstanceInternal()
 }
 
 // ---------------------------------------------------------------------------------------
-udView *udKernel::SetFocusView(udView *pView)
+udViewRef udKernel::SetFocusView(udViewRef spView)
 {
-  udView *pOld = pFocusView;
-  pFocusView = pView;
-  return pOld;
+  udViewRef spOld = pFocusView;
+  pFocusView = spView;
+  return spOld;
 }
 
 udResult udKernel::RunMainLoop()
@@ -214,9 +213,9 @@ void udNewPepperInstance::DidChangeView(const pp::View& view)
     udUnused(result); // Correctly handle this
     glViewport(0, 0, width, height);
 
-    udView *pView = GetFocusView();
-    if (pView)
-      pView->Resize(width, height);
+    udViewRef spView = GetFocusView();
+    if (spView )
+      spView->Resize(width, height);
   }
 
   if (!hasRenderFrameRun)
@@ -256,10 +255,10 @@ void udNewPepperInstance::PostMessageToJS(const char *pPrefix, const char* pForm
 // ---------------------------------------------------------------------------------------
 void udNewPepperInstance::RenderFrame(int32_t)
 {
-  udView *pView = GetFocusView();
+  udViewRef spView = GetFocusView();
 
-  if (pView)
-    pView->Render();
+  if (spView)
+    spView->Render();
 
   glContext.SwapBuffers(callbackFactory.NewCallback(&udNewPepperInstance::RenderFrame));
 }
@@ -273,8 +272,8 @@ static inline int32_t MapPPKeyToUDKey(int32_t )
 // ---------------------------------------------------------------------------------------
 bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
 {
-  udView *pView = GetFocusView();
-  if (!pView)
+  udViewRef spView = GetFocusView();
+  if (!spView)
     return false;
 
   udInputEvent inputEvent;
@@ -310,7 +309,7 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
 
       inputEvent.key.state = key;
       inputEvent.key.state = pepperEvent.GetType() == PP_INPUTEVENT_TYPE_MOUSEDOWN ? 1 : 0;
-      pView->InputEvent(inputEvent);
+      spView->InputEvent(inputEvent);
     }
     case PP_INPUTEVENT_TYPE_MOUSEMOVE:
     {
@@ -326,7 +325,7 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
       inputEvent.move.yAbsolute = absolute.y();
       inputEvent.move.xDelta = delta.x();
       inputEvent.move.yDelta = delta.y();
-      pView->InputEvent(inputEvent);
+      spView->InputEvent(inputEvent);
     }
     break;
 
@@ -351,7 +350,7 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
 
       inputEvent.key.key = MapPPKeyToUDKey(keyEvent.GetKeyCode());
       inputEvent.key.state = pepperEvent.GetType() == PP_INPUTEVENT_TYPE_KEYDOWN ? 1 : 0;
-      pView->InputEvent(inputEvent);
+      spView->InputEvent(inputEvent);
     }
     break;
 

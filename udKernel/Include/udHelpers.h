@@ -55,12 +55,12 @@ public:
         return f != 0;
       case Type::String:
       {
-        udString s((const char*)s.ptr, s.length);
-        if (s.eqi("true"))
+        udString str((const char*)s.ptr, s.length);
+        if (str.eqi("true"))
           return true;
-        else if (s.eqi("false"))
+        else if (str.eqi("false"))
           return false;
-        return !s.empty();
+        return !str.empty();
       }
       default:
         UDASSERT(t == Type::Array, "Wrong type!");

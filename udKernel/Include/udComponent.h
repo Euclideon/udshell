@@ -13,7 +13,6 @@ using namespace fastdelegate;
 
 #include <stdio.h>
 
-
 #if defined(SendMessage)
 # undef SendMessage
 #endif
@@ -21,7 +20,13 @@ using namespace fastdelegate;
 // TODO: remove this!
 #if UDPLATFORM_WINDOWS
 #pragma warning(disable: 4100)
-#endif //
+#endif // UDPLATFORM_WINDOWS
+
+
+#if !defined(_MSC_VER)
+#include <cstddef>
+using std::nullptr_t;
+#endif //!defined(_MSC_VER)
 
 #define ARRAY_LENGTH(arr) (sizeof((arr)) / sizeof((arr)[0]))
 

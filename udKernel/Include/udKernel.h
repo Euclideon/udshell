@@ -15,8 +15,7 @@ class udBlockStreamer;
 PROTOTYPE_COMPONENT(udView);
 
 // TODO: udMessageHandler returns void, should we return some error state??
-typedef FastDelegate<void(udString senderUID, udString message, udVariant data)> udMessageHandler;
-
+typedef FastDelegate3<udString , udString , udVariant , void> udMessageHandler;
 
 class udKernel
 {

@@ -26,32 +26,34 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
   if (renderThreadCount != -1)
   {
     UD_ERROR_CHECK(udRender_Create(&pKernel->pRenderEngine, renderThreadCount));
-    udOctree_Init(streamerBuffer);
+    UD_ERROR_CHECK(udOctree_Init(streamerBuffer));
   }
 
   // register all the builtin component types
-  pKernel->RegisterComponentType(&udComponent::descriptor);
-  pKernel->RegisterComponentType(&udView::descriptor);
-  pKernel->RegisterComponentType(&udScene::descriptor);
-  pKernel->RegisterComponentType(&udNode::descriptor);
-  pKernel->RegisterComponentType(&udCamera::descriptor);
-  pKernel->RegisterComponentType(&udSimpleCamera::descriptor);
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udComponent::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udView::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udScene::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udNode::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udCamera::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udSimpleCamera::descriptor));
   //...
 
-  // TODO: check out WTF is going on here?!
-epilogue:
-  *ppInstance = pKernel;
-
   // init the HAL
-  udHAL_Init();
+  UD_ERROR_CHECK(udHAL_Init());
 
   // platform init
-  pKernel->InitInstanceInternal();
+  UD_ERROR_CHECK(pKernel->InitInstanceInternal());
 
   // init the components
-  pKernel->InitComponents();
+  UD_ERROR_CHECK(pKernel->InitComponents());
 
-  return udR_Success;
+epilogue:
+  if (result != udR_Success)
+  {
+    // TODO: clean up code
+  }
+  *ppInstance = pKernel;
+  return result;
 }
 
 udResult udKernel::Destroy()
@@ -232,3 +234,4 @@ udResult udKernel::InitRender()
   }
   return r;
 }
+
