@@ -14,7 +14,7 @@ SDL_Window* s_window = nullptr;
 SDL_GLContext s_context = nullptr;
 bool s_done = false;
 static int s_displayWidth, s_displayHeight;
-
+static int s_sdlEvent = -1;
 
 udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
 {
@@ -27,7 +27,11 @@ udResult udKernel::InitInstanceInternal()
   s_displayHeight = 720;
 
   SDL_Init(SDL_INIT_VIDEO);
+
+  s_sdlEvent = SDL_RegisterEvents(1);
+
   s_window = SDL_CreateWindow("udPointCloud Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_displayWidth, s_displayHeight, SDL_WINDOW_OPENGL);
+
   SDL_GL_CreateContext(s_window);
 
   return InitRenderInternal();
@@ -56,6 +60,44 @@ udViewRef udKernel::SetFocusView(udViewRef pView)
   return pOld;
 }
 
+
+struct DelegateWithSemaphore
+{
+  DelegateMemento m;
+  udSemaphore *pSem;
+};
+
+void udKernel::DispatchToMainThread(MainThreadCallback callback)
+{
+  DelegateMemento m = callback.GetMemento();
+  void **ppPtrs = (void**)&m;
+
+  SDL_Event e;
+  SDL_zero(e);
+  e.type = s_sdlEvent;
+  e.user.code = 0;
+  e.user.data1 = ppPtrs[0];
+  e.user.data2 = ppPtrs[1];
+  SDL_PushEvent(&e);
+}
+void udKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+{
+  DelegateWithSemaphore dispatch;
+  void **ppPtrs = (void**)&dispatch.m;
+
+  dispatch.pSem = udCreateSemaphore(1, 0);
+
+  SDL_Event e;
+  SDL_zero(e);
+  e.type = s_sdlEvent;
+  e.user.code = 1;
+  e.user.data1 = &dispatch;
+  SDL_PushEvent(&e);
+
+  udWaitSemaphore(dispatch.pSem);
+  udDestroySemaphore(&dispatch.pSem);
+}
+
 udResult udKernel::RunMainLoop()
 {
   while (!s_done)
@@ -63,23 +105,50 @@ udResult udKernel::RunMainLoop()
     SDL_Event event;
     if (SDL_PollEvent(&event))
     {
-      switch (event.type)
+      if (event.type == s_sdlEvent)
       {
-        case SDL_QUIT:
-          s_done = true;
-          break;
-        case SDL_WINDOWEVENT:
+        if (event.user.code == 0)
         {
-          switch (event.window.event)
+          DelegateMemento m;
+          void **ppPtrs = (void**)&m;
+          ppPtrs[0] = event.user.data1;
+          ppPtrs[1] = event.user.data2;
+
+          MainThreadCallback d;
+          d.SetMemento(m);
+          d(this);
+        }
+        else if (event.user.code == 1)
+        {
+          DelegateWithSemaphore *pDispatch = (DelegateWithSemaphore*)event.user.data1;
+
+          MainThreadCallback d;
+          d.SetMemento(pDispatch->m);
+          d(this);
+
+          udIncrementSemaphore(pDispatch->pSem);
+        }
+      }
+      else
+      {
+        switch (event.type)
+        {
+          case SDL_QUIT:
+            s_done = true;
+            break;
+          case SDL_WINDOWEVENT:
           {
-            case SDL_WINDOWEVENT_RESIZED:
-              s_displayWidth = event.window.data1;
-              s_displayHeight = event.window.data2;
-              pFocusView->Resize(s_displayWidth, s_displayHeight);
-              glViewport(0, 0, s_displayWidth, s_displayHeight);
-              break;
+            switch (event.window.event)
+            {
+              case SDL_WINDOWEVENT_RESIZED:
+                s_displayWidth = event.window.data1;
+                s_displayHeight = event.window.data2;
+                pFocusView->Resize(s_displayWidth, s_displayHeight);
+                glViewport(0, 0, s_displayWidth, s_displayHeight);
+                break;
+            }
+            break;
           }
-          break;
         }
       }
     }

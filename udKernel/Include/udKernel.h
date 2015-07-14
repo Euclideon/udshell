@@ -9,6 +9,7 @@
 #include "3rdparty\FastDelegate.h"
 using namespace fastdelegate;
 
+class LuaState;
 
 struct udRenderEngine;
 class udBlockStreamer;
@@ -25,22 +26,29 @@ public:
   udResult Destroy();
 
   udResult SendMessage(udString target, udString sender, udString message, udVariant data);
-  udResult ReceiveMessage(udString sender, udString message, udVariant data);
 
   void RegisterMessageHandler(udRCString name, udMessageHandler messageHandler);
+
+  // synchronisation
+  typedef FastDelegate1<udKernel*, void> MainThreadCallback;
+  void DispatchToMainThread(MainThreadCallback callback);
+  void DispatchToMainThreadAndWait(MainThreadCallback callback);
 
   // component registry
   udResult RegisterComponentType(const udComponentDesc *pDesc);
 
-  udResult CreateComponent(udString typeId, udString initParams, udComponentRef *pNewInstance);
+  udResult CreateComponent(udString typeId, udInitParams initParams, udComponentRef *pNewInstance);
   udResult DestroyComponent(udComponentRef *pInstance);
 
   template<typename T>
-  udSharedPtr<T> CreateComponent(udString initParams = nullptr);
+  udSharedPtr<T> CreateComponent(udInitParams initParams = nullptr);
 
-  udComponentRef Find(udString uid);
+  udComponentRef FindComponent(udString uid);
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
+
+  // script
+  void Exec(udString code);
 
   // other functions
   udViewRef GetFocusView() const { return pFocusView; }
@@ -50,6 +58,11 @@ public:
   udResult Terminate();
 
 protected:
+  struct ComponentType
+  {
+    const udComponentDesc *pDesc;
+    size_t createCount;
+  };
   struct MessageHandler
   {
     udRCString name;
@@ -65,10 +78,12 @@ protected:
 
   udRCString uid;
 
-  udHashMap<const udComponentDesc*> componentRegistry;
+  udHashMap<ComponentType> componentRegistry;
   udHashMap<udComponentRef> instanceRegistry;
   udHashMap<ForeignInstance> foreignInstanceRegistry;
   udHashMap<MessageHandler> messageHandlers;
+
+  LuaState *pLua;
 
   udRenderEngine *pRenderEngine = nullptr;
 
@@ -81,10 +96,14 @@ protected:
 
   udResult InitComponents();
   udResult InitRender();
+
+  udResult ReceiveMessage(udString sender, udString message, udVariant data);
+
+  int SendMessage(LuaState L);
 };
 
 template<typename T>
-udSharedPtr<T> udKernel::CreateComponent(udString initParams)
+udSharedPtr<T> udKernel::CreateComponent(udInitParams initParams)
 {
   udComponentRef c;
   udResult r = CreateComponent(T::descriptor.id, initParams, &c);

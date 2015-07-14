@@ -23,7 +23,7 @@ enum class LuaType : int
 };
 
 
-struct LuaState
+class LuaState
 {
 private:
   lua_State *L;
@@ -35,13 +35,18 @@ public:
   LuaState(udKernel *pKernel);
   ~LuaState();
 
-  lua_State *state() { return L; }
+  lua_State *state();
+  udKernel *kernel();
 
   void exec(udString code);
+
+  int top();
 
   LuaType getType(int idx = -1);
   const char *getTypeName(int idx = -1);
   const char *getTypeName(LuaType type);
+
+  bool isInteger(int idx = -1);
 
   // push***
   void pushNil();
@@ -50,6 +55,7 @@ public:
   void pushInt(lua_Integer val);
   void pushString(udString val);
   void pushLightUserData(void *val);
+  void pushComponent(udComponentRef c);
 
   // pop***
   void pop(int count = 1);
@@ -118,5 +124,6 @@ public:
   }
 };
 
+#include "udLua.inl"
 
 #endif

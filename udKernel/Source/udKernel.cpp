@@ -9,6 +9,9 @@
 #include "udCamera.h"
 #include "udSceneGraph.h"
 
+#include "udLua.h"
+
+
 udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
   udResult result;
@@ -46,6 +49,8 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
 
   // init the components
   UD_ERROR_CHECK(pKernel->InitComponents());
+
+  pKernel->pLua = new LuaState(pKernel);
 
 epilogue:
   if (result != udR_Success)
@@ -148,19 +153,31 @@ void udKernel::RegisterMessageHandler(udRCString name, udMessageHandler messageH
 
 udResult udKernel::RegisterComponentType(const udComponentDesc *pDesc)
 {
-  componentRegistry.Add(pDesc->id.hash(), pDesc);
+  if (pDesc->id.canFind('@') || pDesc->id.canFind('$') || pDesc->id.canFind('#'))
+  {
+    UDASSERT(false, "Invalid component id");
+    return udR_Failure_;
+  }
+
+  ComponentType t = { pDesc, 0 };
+  componentRegistry.Add(pDesc->id.hash(), t);
   return udR_Success;
 }
 
-udResult udKernel::CreateComponent(udString typeId, udString initParams, udComponentRef *pNewInstance)
+udResult udKernel::CreateComponent(udString typeId, udInitParams initParams, udComponentRef *pNewInstance)
 {
-  const udComponentDesc **ppDesc = componentRegistry.Get(typeId.hash());
-  if (!ppDesc)
+  ComponentType *pType = componentRegistry.Get(typeId.hash());
+  if (!pType)
     return udR_Failure_;
 
   try
   {
-    udComponentRef pComponent((*ppDesc)->pCreateInstance(*ppDesc, this, nullptr, udInitParams()));
+    const udComponentDesc *pDesc = pType->pDesc;
+
+    // TODO: should we have a better uid generator than this?
+    udFixedString64 uid = udFixedString64::format("%s%d", pDesc->id.ptr, pType->createCount++);
+
+    udComponentRef pComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
 
     if (!pComponent)
       return udR_MemoryAllocationFailure;
@@ -196,10 +213,13 @@ udResult udKernel::DestroyComponent(udComponentRef *pInstance)
   return udR_Success;
 }
 
-udComponentRef udKernel::Find(udString uid)
+udComponentRef udKernel::FindComponent(udString uid)
 {
-  char buffer[64];
-  udComponentRef *pComponent = instanceRegistry.Get(uid.toStringz(buffer, 64));
+  if (uid.empty() || uid[0] == '$' || uid[0] == '#')
+    return udComponentRef();
+  if (uid[0] == '@')
+    uid.popFront();
+  udComponentRef *pComponent = instanceRegistry.Get(uid.toStringz());
   return pComponent ? *pComponent : udComponentRef();
 }
 
@@ -208,9 +228,9 @@ udResult udKernel::InitComponents()
   udResult r = udR_Success;
   for (auto i : componentRegistry)
   {
-    if (i->pInit)
+    if (i.pDesc->pInit)
     {
-      r = i->pInit();
+      r = i.pDesc->pInit();
       if (r != udR_Success)
         break;
     }
@@ -225,9 +245,9 @@ udResult udKernel::InitRender()
   udResult r = udR_Success;
   for (auto i : componentRegistry)
   {
-    if (i->pInitRender)
+    if (i.pDesc->pInitRender)
     {
-      r = i->pInitRender();
+      r = i.pDesc->pInitRender();
       if (r != udR_Success)
         break;
     }
@@ -235,3 +255,7 @@ udResult udKernel::InitRender()
   return r;
 }
 
+void udKernel::Exec(udString code)
+{
+  pLua->exec(code);
+}

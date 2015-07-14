@@ -141,7 +141,18 @@ udResult udComponent::SetProperty(udString property, udVariant value)
       case udPropertyType::String:
         return pDesc->setter.set(this, value.asString());
       case udPropertyType::Component:
-        return pDesc->setter.set(this, value.asComponent());
+        if (value.type() == udVariant::Type::String)
+        {
+          udString s = value.asString();
+          if (s.beginsWith("@"))
+          {
+            udComponentRef c(pKernel->FindComponent(s));
+            if (c)
+              return pDesc->setter.set(this, c);
+          }
+        }
+        else
+          return pDesc->setter.set(this, value.asComponent());
       default:
         return udR_Failure_;
     }
@@ -185,7 +196,18 @@ udResult udComponent::SetProperty(udString property, udVariant value)
       return pDesc->setter.set(this, udSlice<udString>((udString*)pMem, count));
     case udPropertyType::Component:
       for (size_t i = 0; i < count; ++i)
-        new((udComponentRef*)pMem + i) udComponentRef(array[i].asComponent());
+      {
+        if (array[i].type() == udVariant::Type::String)
+        {
+          udString s = array[i].asString();
+          if (s.beginsWith("@"))
+            new((udComponentRef*)pMem + i) udComponentRef(pKernel->FindComponent(s));
+          else
+            new((udComponentRef*)pMem + i) udComponentRef();
+        }
+        else
+          new((udComponentRef*)pMem + i) udComponentRef(array[i].asComponent());
+      }
       r = pDesc->setter.set(this, udSlice<udComponentRef>((udComponentRef*)pMem, count));
       for (size_t i = 0; i < count; ++i)
         ((udComponentRef*)pMem)[i].~udComponentRef();
