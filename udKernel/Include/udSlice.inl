@@ -6,6 +6,11 @@ inline udSlice<T>::udSlice()
 {}
 
 template<typename T>
+inline udSlice<T>::udSlice(nullptr_t)
+  : length(0), ptr(nullptr)
+{}
+
+template<typename T>
 inline udSlice<T>::udSlice(T* ptr, size_t length)
   : length(length), ptr(ptr)
 {}

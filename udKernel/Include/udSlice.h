@@ -31,6 +31,7 @@ struct udSlice
 
   // constructors
   udSlice<T>();
+  udSlice<T>(nullptr_t);
   udSlice<T>(T* ptr, size_t length);
   template <typename U> udSlice<T>(udSlice<U> rh);
 
