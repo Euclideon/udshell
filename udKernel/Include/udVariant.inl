@@ -3,6 +3,10 @@ inline udVariant::udVariant()
   : t(Type::Null)
   , length(0)
 {}
+inline udVariant::udVariant(nullptr_t)
+  : t(Type::Null)
+  , length(0)
+{}
 inline udVariant::udVariant(bool b)
   : t(Type::Bool)
   , length(0)

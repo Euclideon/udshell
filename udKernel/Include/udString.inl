@@ -354,14 +354,14 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, uint64_t i);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, double i);
 
-struct udRCString::Proxy
+struct udRCString::VarArg
 {
   typedef ptrdiff_t(ProxyFunc)(udSlice<char>, udString, const void*);
   ProxyFunc *pProxy;
   const void *pArg;
 
   template<typename T>
-  Proxy(const T& arg)
+  VarArg(const T& arg)
     : pProxy(&stringifyProxy<T>)
     , pArg(&arg)
   {}
@@ -370,44 +370,23 @@ struct udRCString::Proxy
   {
     return udStringify(buffer, format, *(T*)pData);
   }
-
-  // make the numeric types promote explicitly
-  template<> static ptrdiff_t stringifyProxy<uint8_t>(udSlice<char> buffer, udString format, const void *pData)
-  {
-    return udStringify(buffer, format, (uint64_t)*(uint8_t*)pData);
-  }
-  template<> static ptrdiff_t stringifyProxy<int8_t>(udSlice<char> buffer, udString format, const void *pData)
-  {
-    return udStringify(buffer, format, (int64_t)*(int8_t*)pData);
-  }
-  template<> static ptrdiff_t stringifyProxy<uint16_t>(udSlice<char> buffer, udString format, const void *pData)
-  {
-    return udStringify(buffer, format, (uint64_t)*(uint16_t*)pData);
-  }
-  template<> static ptrdiff_t stringifyProxy<int16_t>(udSlice<char> buffer, udString format, const void *pData)
-  {
-    return udStringify(buffer, format, (int64_t)*(int16_t*)pData);
-  }
-  template<> static ptrdiff_t stringifyProxy<uint32_t>(udSlice<char> buffer, udString format, const void *pData)
-  {
-    return udStringify(buffer, format, (uint64_t)*(uint32_t*)pData);
-  }
-  template<> static ptrdiff_t stringifyProxy<int32_t>(udSlice<char> buffer, udString format, const void *pData)
-  {
-    return udStringify(buffer, format, (int64_t)*(int32_t*)pData);
-  }
-  template<> static ptrdiff_t stringifyProxy<float>(udSlice<char> buffer, udString format, const void *pData)
-  {
-    return udStringify(buffer, format, (double)*(float*)pData);
-  }
 };
 
+// make the numeric types promote explicitly
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<uint8_t>(udSlice<char> buffer, udString format, const void *pData);
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<int8_t>(udSlice<char> buffer, udString format, const void *pData);
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<uint16_t>(udSlice<char> buffer, udString format, const void *pData);
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<int16_t>(udSlice<char> buffer, udString format, const void *pData);
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<uint32_t>(udSlice<char> buffer, udString format, const void *pData);
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<int32_t>(udSlice<char> buffer, udString format, const void *pData);
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<float>(udSlice<char> buffer, udString format, const void *pData);
+
 template<typename... Args>
-static udRCString udRCString::format(const char *pFormat, const Args&... args)
+inline udRCString udRCString::format(const char *pFormat, const Args&... args)
 {
   // collect varargs into abstract arg list
-  Proxy proxies[] = { Proxy(args)... };
+  VarArg proxies[] = { VarArg(args)... };
 
   // call the internal function to do the work
-  return formatInternal(pFormat, udSlice<Proxy>(proxies, UDARRAYSIZE(proxies)));
+  return formatInternal(pFormat, udSlice<VarArg>(proxies, UDARRAYSIZE(proxies)));
 }

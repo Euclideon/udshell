@@ -22,12 +22,6 @@ using namespace fastdelegate;
 #pragma warning(disable: 4100)
 #endif // UDPLATFORM_WINDOWS
 
-
-#if !defined(_MSC_VER)
-#include <cstddef>
-using std::nullptr_t;
-#endif //!defined(_MSC_VER)
-
 #define ARRAY_LENGTH(arr) (sizeof((arr)) / sizeof((arr)[0]))
 
 #define UD_COMPONENT(Name) \

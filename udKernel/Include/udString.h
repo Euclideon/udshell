@@ -204,8 +204,8 @@ private:
   udRCString(const char *ptr, size_t length, udRC *rc);
   static udRCString concat(udString *pStrings, size_t numStrings);
 
-  struct Proxy;
-  static udRCString formatInternal(const char *pFormat, udSlice<Proxy> args);
+  struct VarArg;
+  static udRCString formatInternal(const char *pFormat, udSlice<VarArg> args);
 };
 
 // unit tests

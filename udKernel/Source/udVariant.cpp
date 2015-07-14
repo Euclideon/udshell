@@ -32,12 +32,12 @@ bool udVariant::asBool() const
     return f != 0;
   case Type::String:
   {
-    udString s(s, length);
-    if (s.eqi("true"))
+    udString str(s, length);
+    if (str.eqi("true"))
       return true;
-    else if (s.eqi("false"))
+    else if (str.eqi("false"))
       return false;
-    return !s.empty();
+    return !str.empty();
   }
   default:
     UDASSERT(type() == Type::Bool, "Wrong type!");

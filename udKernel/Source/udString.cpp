@@ -136,7 +136,36 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, double i)
   return 0;
 }
 
-udRCString udRCString::formatInternal(const char *pFormat, udSlice<Proxy> args)
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<uint8_t>(udSlice<char> buffer, udString format, const void *pData)
+{
+  return udStringify(buffer, format, (uint64_t)*(uint8_t*)pData);
+}
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<int8_t>(udSlice<char> buffer, udString format, const void *pData)
+{
+  return udStringify(buffer, format, (int64_t)*(int8_t*)pData);
+}
+template<> inline ptrdiff_t udRCString::VarArg::stringifyProxy<uint16_t>(udSlice<char> buffer, udString format, const void *pData)
+{
+  return udStringify(buffer, format, (uint64_t)*(uint16_t*)pData);
+}
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<int16_t>(udSlice<char> buffer, udString format, const void *pData)
+{
+  return udStringify(buffer, format, (int64_t)*(int16_t*)pData);
+}
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<uint32_t>(udSlice<char> buffer, udString format, const void *pData)
+{
+  return udStringify(buffer, format, (uint64_t)*(uint32_t*)pData);
+}
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<int32_t>(udSlice<char> buffer, udString format, const void *pData)
+{
+  return udStringify(buffer, format, (int64_t)*(int32_t*)pData);
+}
+template<> ptrdiff_t udRCString::VarArg::stringifyProxy<float>(udSlice<char> buffer, udString format, const void *pData)
+{
+  return udStringify(buffer, format, (double)*(float*)pData);
+}
+
+udRCString udRCString::formatInternal(const char *pFormat, udSlice<VarArg> args)
 {
   size_t allocated = 2048;
   size_t offset = 0;
@@ -177,7 +206,7 @@ udRCString udRCString::formatInternal(const char *pFormat, udSlice<Proxy> args)
         goto bail_out; // TODO: error bad format string!
 
       // append the arg
-      Proxy &p = args[arg];
+      VarArg &p = args[arg];
       ptrdiff_t len;
       do
       {
@@ -457,3 +486,4 @@ udResult udString_Test()
 
   return udR_Success;
 }
+

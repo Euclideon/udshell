@@ -29,6 +29,7 @@ public:
   };
 
   udVariant();
+  udVariant(nullptr_t);
   udVariant(bool b);
   udVariant(int64_t i);
   udVariant(double f);
