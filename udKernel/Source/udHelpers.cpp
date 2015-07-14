@@ -47,7 +47,7 @@ udRCSlice<udKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], 
   output.reserve(argc);
 
   for (uint32_t i = 0; i < argc; ++i)
-    output.pushBack(udKeyValuePair(argn[i], udString(argv[i])));
+    output.pushBack(udKeyValuePair(udString(argn[i]), udString(argv[i])));
 
   return udRCSlice<udKeyValuePair>(output.slice(0, argc));
 }
