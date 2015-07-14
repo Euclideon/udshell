@@ -465,6 +465,7 @@ inline udRCSlice<T>& udRCSlice<T>::operator =(udRCSlice<T> &&rval)
   this->ptr = rval.ptr;
   this->length = rval.length;
   rc = rval.rc;
+  ++rc->refCount;
   return *this;
 }
 
