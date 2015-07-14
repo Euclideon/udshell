@@ -132,7 +132,7 @@ template<typename U>
 struct udVariant_Cast < udMatrix4x4<U> > {
   static udMatrix4x4<U> as(const udVariant &v)
   {
-    udMatrix4x4<U> r = udMatrix4x4<U>::zero();
+    udMatrix4x4<U> r = udMatrix4x4<U>::identity();
     if (udVariant::Type::AssocArray)
     {
       auto aa = v.asAssocArraySeries();
