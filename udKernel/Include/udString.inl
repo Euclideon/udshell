@@ -202,22 +202,30 @@ inline udFixedString<Size> udFixedString<Size>::format(const char *pFormat, ...)
   va_list args;
   va_start(args, pFormat);
 
+#if defined(_MSC_VER)
+  size_t len = _vscprintf(pFormat, args) + 1;
+#else
   size_t len = vsprintf(nullptr, pFormat, args) + 1;
+#endif
 
   udFixedString<Size> r;
   r.length = len;
   if (len < Size)
   {
     r.numAllocated = 0;
-    r.ptr = (const char*)r.buffer;
+    r.ptr = (char*)r.buffer;
   }
   else
   {
     r.numAllocated = udFixedSlice<char, Size>::numToAlloc(len + 1);
-    r.ptr = (const char*)udAlloc(sizeof(const char) * r.numAllocated);
+    r.ptr = (char*)udAlloc(sizeof(char) * r.numAllocated);
   }
 
-  r.length = vsnprintf((char*)r.ptr, len, pFormat, args);
+#if defined(_MSC_VER)
+  r.length = vsnprintf_s(r.ptr, len, len, pFormat, args);
+#else
+  r.length = vsnprintf(r.ptr, len, pFormat, args);
+#endif
 
   va_end(args);
 
@@ -238,7 +246,7 @@ inline udFixedString<Size>& udFixedString<Size>::concat(const Strings&... string
   udString args[] = { udString(strings)... };
 
   // call the (non-template) array version
-  concat(args, sizeof(args) / sizeof(args[0]));
+  concat(args, UDARRAYSIZE(args));
   return *this;
 }
 
@@ -336,34 +344,70 @@ inline udRCString udRCString::concat(const Strings&... strings)
   // call the (non-template) array version
   return concat(args, sizeof(args) / sizeof(args[0]));
 }
-/*
-template<typename... Things>
-inline udRCString udRCString::format(const char *pFormat, const Things&... things)
+
+
+
+
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s);
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, const char *s);
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i);
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, uint64_t i);
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, double i);
+
+struct udRCString::Proxy
 {
-  udString args[] = { udString(things)... };
-  size_t numArgs = sizeof(args) / sizeof(args[0]);
+  typedef ptrdiff_t(ProxyFunc)(udSlice<char>, udString, const void*);
+  ProxyFunc *pProxy;
+  const void *pArg;
 
-//  for(
+  template<typename T>
+  Proxy(const T& arg)
+    : pProxy(&stringifyProxy<T>)
+    , pArg(&arg)
+  {}
 
-  size_t len = 0;
-  const char *pC = pFormat;
-  while (*pC)
+  template<typename T> static ptrdiff_t stringifyProxy(udSlice<char> buffer, udString format, const void *pData)
   {
-    if (*pC == '\\' && pC[1] != 0)
-      ++pC;
-    else if (*pC == '{')
-    {
-      ++pC;
-      while(isNumeric(*pC))
-      size_t index;
-      while (*pC && *pC != '}')
-        ++pC;
-      continue;
-    }
-    ++len;
-    ++pC;
+    return udStringify(buffer, format, *(T*)pData);
   }
 
-  return udRCString();
+  // make the numeric types promote explicitly
+  template<> static ptrdiff_t stringifyProxy<uint8_t>(udSlice<char> buffer, udString format, const void *pData)
+  {
+    return udStringify(buffer, format, (uint64_t)*(uint8_t*)pData);
+  }
+  template<> static ptrdiff_t stringifyProxy<int8_t>(udSlice<char> buffer, udString format, const void *pData)
+  {
+    return udStringify(buffer, format, (int64_t)*(int8_t*)pData);
+  }
+  template<> static ptrdiff_t stringifyProxy<uint16_t>(udSlice<char> buffer, udString format, const void *pData)
+  {
+    return udStringify(buffer, format, (uint64_t)*(uint16_t*)pData);
+  }
+  template<> static ptrdiff_t stringifyProxy<int16_t>(udSlice<char> buffer, udString format, const void *pData)
+  {
+    return udStringify(buffer, format, (int64_t)*(int16_t*)pData);
+  }
+  template<> static ptrdiff_t stringifyProxy<uint32_t>(udSlice<char> buffer, udString format, const void *pData)
+  {
+    return udStringify(buffer, format, (uint64_t)*(uint32_t*)pData);
+  }
+  template<> static ptrdiff_t stringifyProxy<int32_t>(udSlice<char> buffer, udString format, const void *pData)
+  {
+    return udStringify(buffer, format, (int64_t)*(int32_t*)pData);
+  }
+  template<> static ptrdiff_t stringifyProxy<float>(udSlice<char> buffer, udString format, const void *pData)
+  {
+    return udStringify(buffer, format, (double)*(float*)pData);
+  }
+};
+
+template<typename... Args>
+static udRCString udRCString::format(const char *pFormat, const Args&... args)
+{
+  // collect varargs into abstract arg list
+  Proxy proxies[] = { Proxy(args)... };
+
+  // call the internal function to do the work
+  return formatInternal(pFormat, udSlice<Proxy>(proxies, UDARRAYSIZE(proxies)));
 }
-*/

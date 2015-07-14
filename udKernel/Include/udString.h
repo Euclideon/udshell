@@ -159,7 +159,7 @@ struct udRCString : public udRCSlice<const char>
 
   // static constructors (make proper constructors?)
   template<typename... Strings> static udRCString concat(const Strings&... strings);
-//  template<typename... Things> static udRCString format(const char *pFormat, const Things&...);
+  template<typename... Args> static udRCString format(const char *pFormat, const Args&... args);
 
   // assignment
   udRCString& operator =(const udRCSlice<const char> &rh);
@@ -203,6 +203,9 @@ struct udRCString : public udRCSlice<const char>
 private:
   udRCString(const char *ptr, size_t length, udRC *rc);
   static udRCString concat(udString *pStrings, size_t numStrings);
+
+  struct Proxy;
+  static udRCString formatInternal(const char *pFormat, udSlice<Proxy> args);
 };
 
 // unit tests

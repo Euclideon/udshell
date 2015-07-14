@@ -51,6 +51,162 @@ udRCString udRCString::format(const char *pFormat, ...)
   return r;
 }
 
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s)
+{
+  // TODO: what formats are interesting for strings?
+  if (buffer.length < s.length)
+    return buffer.length - s.length;
+  for (size_t i = 0; i < s.length; ++i)
+    buffer.ptr[i] = s.ptr[i];
+  return s.length;
+}
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, const char *s)
+{
+  // TODO: what formats are interesting for strings?
+  size_t i = 0;
+  for (; s[i]; ++i)
+  {
+    if (i == buffer.length)
+      return -1;
+    buffer.ptr[i] = s[i];
+  }
+  return i;
+}
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i)
+{
+  // TODO: what formats are interesting for ints?
+
+  // TODO: this will crash if buffer runs out of space!
+  size_t start;
+  size_t len;
+  if (i < 0)
+  {
+    buffer.ptr[0] = '-';
+    start = len = 1;
+    do
+    {
+      buffer.ptr[len++] = '0' - i%10;
+    } while ((i /= 10) != 0);
+  }
+  else
+  {
+    start = len = 0;
+    do
+    {
+      buffer.ptr[len++] = '0' + i%10;
+    } while ((i /= 10) != 0);
+  }
+
+  // number is written little endian, so we need to reverse it
+  size_t end = len-1;
+  while (start < end)
+  {
+    char t = buffer.ptr[end];
+    buffer.ptr[end--] = buffer.ptr[start];
+    buffer.ptr[start++] = t;
+  }
+  return len;
+}
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, uint64_t i)
+{
+  // TODO: what formats are interesting for ints?
+
+  // TODO: this will crash if buffer runs out of space!
+  size_t len = 0;
+  do
+  {
+    buffer.ptr[len++] = '0' + i % 10;
+  } while ((i /= 10) != 0);
+
+  // number is written little endian, so we need to reverse it
+  size_t start = 0;
+  size_t end = len - 1;
+  while (start < end)
+  {
+    char t = buffer.ptr[end];
+    buffer.ptr[end--] = buffer.ptr[start];
+    buffer.ptr[start++] = t;
+  }
+  return len;
+}
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, double i)
+{
+  // TODO: what formats are interesting for floats?
+  UDASSERT(false, "No fun!");
+  return 0;
+}
+
+udRCString udRCString::formatInternal(const char *pFormat, udSlice<Proxy> args)
+{
+  size_t allocated = 2048;
+  size_t offset = 0;
+  char *pBuffer = (char*)alloca(allocated);
+
+  const char *pC = pFormat;
+  while (*pC)
+  {
+    if (*pC == '\\' && pC[1] != 0)
+    {
+      // print escaped characters directly
+      ++pC;
+    }
+    else if (*pC == '{')
+    {
+      ++pC;
+
+      // get the arg index
+      if (!isNumeric(*pC))
+        goto bail_out; // TODO: error bad format string!
+      size_t arg = 0;
+      while (isNumeric(*pC))
+        arg = arg*10 + (*pC++ - '0');
+      if (arg >= args.length)
+        goto bail_out; // TODO: error, invalid arg index!
+
+      // get the format string (if present)
+      udString format;
+      if (*pC == ',')
+      {
+        format.ptr = pC + 1;
+        do { pC++; } while (*pC && *pC != '}');
+        format.length = pC - format.ptr;
+      }
+
+      // expect terminating '}'
+      if (*pC++ != '}')
+        goto bail_out; // TODO: error bad format string!
+
+      // append the arg
+      Proxy &p = args[arg];
+      ptrdiff_t len;
+      do
+      {
+        len = p.pProxy(udSlice<char>(pBuffer + offset, allocated - offset), format, p.pArg);
+        if (len < 0)
+        {
+          // TODO: realloc (at least 'len')
+          continue;
+        }
+      } while (0);
+      offset += len;
+      continue;
+    }
+    if (offset < allocated)
+      pBuffer[offset++] = *pC++;
+    else
+    {
+      // TODO: realloc
+    }
+  }
+
+  return udString(pBuffer, offset);
+
+bail_out:
+  if (allocated > 2048)
+    udFree(pBuffer);
+  return nullptr;
+}
+
 int64_t udString::parseInt(bool bDetectBase, int base) const
 {
   udString s = trim(true, false);
