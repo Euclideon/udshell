@@ -18,8 +18,10 @@ private:
   const char *pCStr;
   udCString(udString str)
   {
-    pCStr = (const char*)udAlloc(str.length + 1);
-    udStrncpy((char*)pCStr, str.length + 1, str.ptr, str.length);
+    char *buf = (char*)udAlloc(str.length + 1);
+    memcpy(buf, str.ptr, str.length);
+    buf[str.length] = 0;
+    pCStr = buf;
   }
 };
 
