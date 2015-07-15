@@ -104,9 +104,7 @@ udString udVariant::asString() const
   case Type::String:
     return udString(s, length);
   case Type::Component:
-  {
-    return c->getUid();
-  }
+    return c->GetUid();
   default:
     UDASSERT(type() == Type::String, "Wrong type!");
     return udString();
@@ -145,14 +143,19 @@ udSlice<udKeyValuePair> udVariant::asAssocArraySeries() const
   case Type::Null:
     return udSlice<udKeyValuePair>();
   case Type::AssocArray:
-  {
-    size_t i = 0;
-    while (i < length && aa[i].key.t == Type::Int && aa[i].key.i == i + 1)
-      ++i;
-    return udSlice<udKeyValuePair>(aa, i);
-  }
+    return udSlice<udKeyValuePair>(aa, assocArraySeriesLen());
   default:
     UDASSERT(type() == Type::AssocArray, "Wrong type!");
     return udSlice<udKeyValuePair>();
   }
+}
+
+size_t udVariant::assocArraySeriesLen() const
+{
+  if (t != Type::AssocArray)
+    return 0;
+  size_t i = 0;
+  while (i < length && aa[i].key.t == Type::Int && aa[i].key.i == i + 1)
+    ++i;
+  return i;
 }

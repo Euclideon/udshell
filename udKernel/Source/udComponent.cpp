@@ -19,7 +19,7 @@ static const udPropertyDesc props[] =
     0, // arrayLength
     udPF_NoWrite, // flags
     udPropertyDisplayType::Default, // displayType
-    udGetter(&udComponent::getUid),
+    udGetter(&udComponent::GetUid),
     nullptr
   },
   {
@@ -30,7 +30,7 @@ static const udPropertyDesc props[] =
     0, // arrayLength
     udPF_NoWrite, // flags
     udPropertyDisplayType::Default, // displayType
-    udGetter(&udComponent::getType),
+    udGetter(&udComponent::GetType),
     nullptr
   },
   {
@@ -41,7 +41,7 @@ static const udPropertyDesc props[] =
     0, // arrayLength
     udPF_NoWrite, // flags
     udPropertyDisplayType::Default, // displayType
-    udGetter(&udComponent::getDisplayName),
+    udGetter(&udComponent::GetDisplayName),
     nullptr
   },
   {
@@ -52,7 +52,7 @@ static const udPropertyDesc props[] =
     0, // arrayLength
     udPF_NoWrite, // flags
     udPropertyDisplayType::Default, // displayType
-    udGetter(&udComponent::getDescription),
+    udGetter(&udComponent::GetDescription),
     nullptr
   }
 };

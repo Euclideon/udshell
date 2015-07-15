@@ -40,10 +40,10 @@ public:
   udResult SendMessage(udComponent *pComponent, udString message, udVariant data) { return SendMessage(pComponent->uid, message, data); }
 
   // properties
-  udString getUid() const { return uid; }
-  udString getType() const { return descriptor.id; }
-  udString getDisplayName() const { return descriptor.displayName; }
-  udString getDescription() const { return descriptor.description; }
+  udString GetUid() const { return uid; }
+  udString GetType() const { return descriptor.id; }
+  udString GetDisplayName() const { return descriptor.displayName; }
+  udString GetDescription() const { return descriptor.description; }
 
 protected:
   udComponent(const udComponentDesc *_pType, udKernel *_pKernel, udRCString _uid, udInitParams initParams)

@@ -63,6 +63,8 @@ public:
   udSlice<udKeyValuePair> asAssocArray() const;
   udSlice<udKeyValuePair> asAssocArraySeries() const;
 
+  size_t assocArraySeriesLen() const;
+
 private:
   size_t t : 3;
   size_t ownsArray : 1;
