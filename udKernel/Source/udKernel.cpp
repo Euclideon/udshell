@@ -73,13 +73,13 @@ udResult udKernel::Destroy()
   instanceRegistry.Deinit();
   foreignInstanceRegistry.Deinit();
 
-  UD_ERROR_CHECK(DestroyInstanceInternal());
-
   udOctree_Shutdown();
 
   UD_ERROR_CHECK(udRender_Destroy(&pRenderEngine));
 
   udHAL_Deinit();
+
+  UD_ERROR_CHECK(DestroyInstanceInternal());
 
 epilogue:
   return result;
