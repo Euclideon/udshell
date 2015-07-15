@@ -113,6 +113,16 @@ inline T& udSlice<T>::back() const
   return ptr[length-1];
 }
 template<typename T>
+inline udSlice<T> udSlice<T>::front(size_t n) const
+{
+  return slice(0, n);
+}
+template<typename T>
+inline udSlice<T> udSlice<T>::back(size_t n) const
+{
+  return slice(length-n, length);
+}
+template<typename T>
 inline T& udSlice<T>::popFront()
 {
   *this = slice(1, length);
@@ -125,16 +135,27 @@ inline T& udSlice<T>::popBack()
   return ptr[length];
 }
 template<typename T>
-inline udSlice<T> udSlice<T>::stripFront(size_t n)
+inline udSlice<T> udSlice<T>::popFront(size_t n)
 {
   *this = slice(n, length);
   return udSlice<T>(ptr - n, n);
 }
 template<typename T>
-inline udSlice<T> udSlice<T>::stripBack(size_t n)
+inline udSlice<T> udSlice<T>::popBack(size_t n)
 {
   *this = slice(0, length - n);
   return udSlice<T>(ptr + length, n);
+}
+
+template<typename T>
+inline udSlice<T> udSlice<T>::stripFront(size_t n) const
+{
+  return slice(n, length);
+}
+template<typename T>
+inline udSlice<T> udSlice<T>::stripBack(size_t n) const
+{
+  return slice(0, length-n);
 }
 
 template<typename T>
@@ -235,6 +256,15 @@ udSlice<udSlice<T>> udSlice<T>::tokenise(udSlice<udSlice<T>> tokens, udSlice<T> 
   ptr += offset;
   length -= offset;
   return tokens.slice(0, numTokens);
+}
+
+template<typename T>
+template<typename U>
+void udSlice<T>::copyTo(udSlice<U> dest) const
+{
+  UDASSERT(length >= dest.length, "Not enough elements!");
+  for (size_t i = 0; i<dest.length; ++i)
+    dest.ptr[i] = ptr[i];
 }
 
 

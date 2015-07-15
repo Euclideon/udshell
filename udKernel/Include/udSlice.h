@@ -61,10 +61,15 @@ struct udSlice
   // useful functions
   T& front() const;
   T& back() const;
+  udSlice<T> front(size_t n) const;
+  udSlice<T> back(size_t n) const;
   T& popFront();
   T& popBack();
-  udSlice<T> stripFront(size_t n);
-  udSlice<T> stripBack(size_t n);
+  udSlice<T> popFront(size_t n);
+  udSlice<T> popBack(size_t n);
+
+  udSlice<T> stripFront(size_t n) const;
+  udSlice<T> stripBack(size_t n) const;
 
   ptrdiff_t offsetOf(T c) const;
   ptrdiff_t offsetOfLast(T c) const;
@@ -79,6 +84,9 @@ struct udSlice
 
   template<bool skipEmptyTokens = false>
   udSlice<udSlice<T>> tokenise(udSlice<udSlice<T>> tokens, udSlice<T> delimiters);
+
+  template<typename U>
+  void copyTo(udSlice<U> dest) const;
 };
 
 

@@ -1,6 +1,7 @@
 
 // getter stuff
 inline udGetter::udGetter(nullptr_t)
+  : shim(nullptr)
 {
 }
 template <class X, class Type>
@@ -29,6 +30,7 @@ static const udVariant udGetter::shimFunc(const udGetter * const pGetter, const 
 
 // setter stuff
 inline udSetter::udSetter(nullptr_t)
+  : shim(nullptr)
 {
 }
 template <class X, class Type>

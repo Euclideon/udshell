@@ -60,6 +60,7 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s)
     buffer.ptr[i] = s.ptr[i];
   return s.length;
 }
+
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, const char *s)
 {
   // TODO: what formats are interesting for strings?
@@ -72,6 +73,25 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, const char *s)
   }
   return i;
 }
+
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, bool b)
+{
+  if (b == true)
+  {
+    if (buffer.length < 4)
+      return buffer.length - 4;
+    udString("true", 4).copyTo(buffer);
+    return 4;
+  }
+  else
+  {
+    if (buffer.length < 5)
+      return buffer.length - 5;
+    udString("false", 5).copyTo(buffer);
+    return 5;
+  }
+}
+
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i)
 {
   // TODO: what formats are interesting for ints?
@@ -107,6 +127,7 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i)
   }
   return len;
 }
+
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, uint64_t i)
 {
   // TODO: what formats are interesting for ints?
@@ -248,7 +269,7 @@ int64_t udString::parseInt(bool bDetectBase, int base) const
   {
     // hex number
     if (s.eqi("0x"))
-      s.stripFront(2);
+      s.popFront(2);
     else if (s.eq("$"))
       s.popFront();
 

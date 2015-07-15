@@ -350,6 +350,7 @@ inline udRCString udRCString::concat(const Strings&... strings)
 
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, const char *s);
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, bool b);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, uint64_t i);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, double i);
