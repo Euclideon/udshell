@@ -23,9 +23,6 @@ public:
     String,
     Array,
     AssocArray
-
-    // NOTE: key-value-pair's union the value pointer with the type
-    // if 't' is a real pointer (a big number), assume type == AssocArray
   };
 
   udVariant();
@@ -37,6 +34,18 @@ public:
   udVariant(udString s);
   udVariant(udSlice<udVariant> a);
   udVariant(udSlice<udKeyValuePair> aa);
+
+  // math types
+  template<typename U>
+  udVariant(const udVector2<U> &v);
+  template<typename U>
+  udVariant(const udVector3<U> &v);
+  template<typename U>
+  udVariant(const udVector4<U> &v);
+  template<typename U>
+  udVariant(const udMatrix4x4<U> &m);
+
+  ~udVariant();
 
   Type type() const;
 
@@ -56,7 +65,8 @@ public:
 
 private:
   size_t t : 3;
-  size_t length : (sizeof(size_t)*8)-3;
+  size_t ownsArray : 1;
+  size_t length : (sizeof(size_t)*8)-4;
   union
   {
     bool b;

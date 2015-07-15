@@ -105,9 +105,7 @@ udString udVariant::asString() const
     return udString(s, length);
   case Type::Component:
   {
-    udString s;
-    udResult r = c->getUid(s);
-    return r == udR_Success ? s : nullptr;
+    return c->getUid();
   }
   default:
     UDASSERT(type() == Type::String, "Wrong type!");

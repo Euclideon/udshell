@@ -8,14 +8,25 @@
 static const udPropertyDesc props[] =
 {
   {
-    "pos", // id
+    "cameramatrix", // id
     "Position", // displayName
     "Position of camera", // description
     udPropertyType::Float , // type
-    3, // arrayLength
-    udPF_NoRead, // flags
+    16, // arrayLength
+    udPF_NoWrite, // flags
     udPropertyDisplayType::Default, // displayType
-    nullptr,
+    udGetter(&udCamera::GetCameraMatrix),
+    nullptr
+  },
+  {
+    "viewmatrix", // id
+    "Position", // displayName
+    "Position of camera", // description
+    udPropertyType::Float, // type
+    16, // arrayLength
+    udPF_NoWrite, // flags
+    udPropertyDisplayType::Default, // displayType
+    udGetter(&udCamera::GetViewMatrix),
     nullptr
   }
 };
@@ -34,22 +45,55 @@ const udComponentDesc udCamera::descriptor =
   [](){ return udR_Success; },  // pInitRender
   udCamera::Create,             // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, ARRAY_LENGTH(props)) // propeties
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 
 static const udPropertyDesc simpleCameraProps[] =
 {
   {
-    "pos", // id
+    "matrix", // id
+    "Matrix", // displayName
+    "Local matrix", // description
+    udPropertyType::Float, // type
+    16, // arrayLength
+    0, // flags
+    udPropertyDisplayType::Default, // displayType
+    udGetter(&udSimpleCamera::GetMatrix),
+    udSetter(&udSimpleCamera::SetMatrix)
+  },
+  {
+    "position", // id
     "Position", // displayName
-    "Base camera class", // description
+    "Local position", // description
     udPropertyType::Float, // type
     3, // arrayLength
-    udPF_NoRead, // flags
+    0, // flags
+    udPropertyDisplayType::Default, // displayType
+    udGetter(&udSimpleCamera::GetPosition),
+    udSetter(&udSimpleCamera::SetPosition)
+  },
+  {
+    "orientation", // id
+    "Orientation", // displayName
+    "Camera orientation (YPR)", // description
+    udPropertyType::Float, // type
+    3, // arrayLength
+    0, // flags
     udPropertyDisplayType::Default, // displayType
     nullptr,
-    nullptr
+    udSetter(&udSimpleCamera::SetOrientation)
+  },
+  {
+    "speed", // id
+    "Speed", // displayName
+    "Camera speed", // description
+    udPropertyType::Float, // type
+    0, // arrayLength
+    0, // flags
+    udPropertyDisplayType::Default, // displayType
+    nullptr,
+    udSetter(&udSimpleCamera::SetSpeed)
   }
 };
 const udComponentDesc udSimpleCamera::descriptor =
@@ -67,11 +111,11 @@ const udComponentDesc udSimpleCamera::descriptor =
   [](){ return udR_Success; },  // pInitRender
   udSimpleCamera::Create,       // pCreateInstance
 
-  udSlice<const udPropertyDesc>(simpleCameraProps, ARRAY_LENGTH(simpleCameraProps)) // propeties
+  udSlice<const udPropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
 };
 
 
-void udCamera::GetProjectionMatrix(float aspectRatio, udDouble4x4 *pMatrix)
+void udCamera::GetProjectionMatrix(float aspectRatio, udDouble4x4 *pMatrix) const
 {
   if (!bOrtho)
     *pMatrix = udDouble4x4::perspective(fovY, aspectRatio, zNear, zFar);
@@ -183,8 +227,7 @@ udResult udSimpleCamera::Update(double timeDelta)
     ypr.x -= UD_2PI;
 
 
-  udDouble4x4 cam;
-  GetCameraMatrix(&cam);
+  udDouble4x4 cam = GetCameraMatrix();
 
   udDouble3 forward = cam.axis.y.toVector3();
   udDouble3 xAxis = cam.axis.x.toVector3();

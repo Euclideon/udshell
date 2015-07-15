@@ -9,11 +9,22 @@ static const udPropertyDesc props[] =
     "Local matrix", // description
     udPropertyType::Float, // type
     16, // arrayLength
-    udPF_NoRead, // flags
+    0, // flags
     udPropertyDisplayType::Default, // displayType
-    nullptr,
-    nullptr
-  }
+    udGetter(&udNode::GetMatrix),
+    udSetter(&udNode::SetMatrix)
+  },
+  {
+    "position", // id
+    "Position", // displayName
+    "Local position", // description
+    udPropertyType::Float, // type
+    3, // arrayLength
+    0, // flags
+    udPropertyDisplayType::Default, // displayType
+    udGetter(&udNode::GetPosition),
+    udSetter(&udNode::SetPosition)
+  },
 };
 const udComponentDesc udNode::descriptor =
 {
@@ -30,7 +41,7 @@ const udComponentDesc udNode::descriptor =
   [](){ return udR_Success; },             // pInitRender
   udNode::Create, // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, ARRAY_LENGTH(props)) // propeties
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 

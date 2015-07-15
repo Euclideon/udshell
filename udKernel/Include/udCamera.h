@@ -18,10 +18,10 @@ public:
   virtual udResult Update(double timeStep) { return udR_Success; }
   virtual udResult Render(const udDouble4x4 &mat) { return udR_Success; } // TODO: render a basic camera image
 
-  void GetCameraMatrix(udDouble4x4 *pMatrix) { CalculateWorldMatrix(pMatrix); }
-  void GetViewMatrix(udDouble4x4 *pMatrix) { GetCameraMatrix(pMatrix); pMatrix->inverse(); }
+  udDouble4x4 GetCameraMatrix() const { udDouble4x4 m; CalculateWorldMatrix(&m); return m; }
+  udDouble4x4 GetViewMatrix() const { return GetCameraMatrix().inverse(); }
 
-  void GetProjectionMatrix(float aspectRatio, udDouble4x4 *pMatrix);
+  void GetProjectionMatrix(float aspectRatio, udDouble4x4 *pMatrix) const;
 
   void SetPerspective(float fovY) { bOrtho = false; this->fovY = fovY;  }
   void SetOrtho(float orthoHeight) { bOrtho = true; this->orthoHeight = orthoHeight;  }
@@ -56,7 +56,7 @@ public:
   virtual void SetMatrix(const udDouble4x4 &matrix) { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); udCamera::SetMatrix(matrix); }
   virtual void SetPosition(const udDouble3 &pos) { this->pos = pos; udCamera::SetPosition(pos); }
 
-  void SetOrientation(udDouble3 _ypr) { ypr = _ypr; matrix = udDouble4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos); }
+  void SetOrientation(const udDouble3 &_ypr) { ypr = _ypr; matrix = udDouble4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos); }
   void SetSpeed(double speed) { this->speed = speed; }
 
   void InvertYAxis(bool bInvert) { yInvert = bInvert ? -1.0 : 1.0; }

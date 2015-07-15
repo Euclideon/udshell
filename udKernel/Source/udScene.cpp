@@ -32,7 +32,7 @@ const udComponentDesc udScene::descriptor =
   [](){ return udR_Success; },             // pInitRender
   udScene::Create, // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, ARRAY_LENGTH(props)) // propeties
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 

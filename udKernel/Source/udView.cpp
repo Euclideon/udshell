@@ -44,7 +44,7 @@ const udComponentDesc udView::descriptor =
   udView::InitRender,           // pInitRender
   udView::Create,               // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, ARRAY_LENGTH(props)) // propeties
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 udView::~udView()
@@ -142,7 +142,7 @@ udResult udView::Render()
     pCamera->GetProjectionMatrix(GetAspectRatio(), &mat);
     udRender_SetMatrixF64(pRenderView, udRMT_Projection, mat.a);
 
-    pCamera->GetCameraMatrix(&mat);
+    mat = pCamera->GetCameraMatrix();
     udRender_SetMatrixF64(pRenderView, udRMT_Camera, mat.a);
 
     udRender_SetTarget(pRenderView, udRTT_Color32, pColorBuffer, renderWidth*sizeof(uint32_t));//, 0xff000080);
