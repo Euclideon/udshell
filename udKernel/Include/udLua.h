@@ -22,15 +22,15 @@ enum class LuaType : int
   Max = LUA_NUMTAGS
 };
 
+enum class LuaLocation : int
+{
+  Global = 0,
+  Top = 1
+};
+
 
 class LuaState
 {
-private:
-  lua_State *L;
-
-  static int udLuaPanic(lua_State *L);
-  static void* udLuaAlloc(void *, void *ptr, size_t, size_t nsize);
-
 public:
   LuaState(udKernel *pKernel);
   ~LuaState();
@@ -55,7 +55,10 @@ public:
   void pushInt(lua_Integer val);
   void pushString(udString val);
   void pushLightUserData(void *val);
+
   void pushComponent(udComponentRef c);
+
+  void push(const udVariant &v);
 
   // pop***
   void pop(int count = 1);
@@ -73,6 +76,34 @@ public:
   udString toString(int idx = -1);
   lua_CFunction toFunction(int idx = -1);
   void* toUserData(int idx = -1);
+
+  udComponentRef toComponent(int idx = -1);
+
+  udVariant get(int idx = -1);
+
+  // set
+  void setNil(udVariant key, LuaLocation loc = LuaLocation::Global);
+  void setComponent(udComponentRef c, udVariant key, LuaLocation loc = LuaLocation::Global);
+
+  void set(udVariant v, udVariant key, LuaLocation loc = LuaLocation::Global);
+
+private:
+  lua_State *L;
+
+  static int udLuaPanic(lua_State *L);
+  static void* udLuaAlloc(void *, void *ptr, size_t, size_t nsize);
+
+  void pushComponentMetatable(const udComponentDesc &desc);
+  void pushGetters(const udComponentDesc &desc);
+  void pushSetters(const udComponentDesc &desc);
+
+  static int componentCleaner(lua_State* L);
+  static int componentToString(lua_State* L);
+  static int componentCompare(lua_State* L);
+  static int componentIndex(lua_State* L);
+  static int componentNewIndex(lua_State* L);
+  static int getter(lua_State *L);
+  static int setter(lua_State *L);
 };
 
 

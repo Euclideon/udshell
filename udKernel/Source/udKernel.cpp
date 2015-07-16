@@ -184,6 +184,8 @@ udResult udKernel::CreateComponent(udString typeId, udInitParams initParams, udC
 
     instanceRegistry.Add(pComponent->uid.hash(), pComponent);
 
+    pLua->setComponent(pComponent, udString(pComponent->uid));
+
     // TODO: inform partner kernels that I created a component
     //...
 
@@ -202,6 +204,8 @@ udResult udKernel::CreateComponent(udString typeId, udInitParams initParams, udC
 
 udResult udKernel::DestroyComponent(udComponentRef *pInstance)
 {
+  pLua->setNil(udString((*pInstance)->uid));
+
   // TODO: remove from component registry
 //  instanceRegistry.Destroy(...);
 

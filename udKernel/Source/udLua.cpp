@@ -18,6 +18,22 @@ const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
 };
 
 
+static udString s_luaInit(
+  "function tprint (tbl, indent)                              \n"
+  "  if not indent then indent = 0 end                        \n"
+  "  for k, v in pairs(tbl) do                                \n"
+  "    formatting = string.rep(\"  \", indent) .. k .. \": \" \n"
+  "    if type(v) == \"table\" then                           \n"
+  "      print(formatting)                                    \n"
+  "      tprint(v, indent+1)                                  \n"
+  "    else                                                   \n"
+  "      print(formatting .. tostring(v))                     \n"
+  "    end                                                    \n"
+  "  end                                                      \n"
+  "end                                                        \n"
+);
+
+
 static int SendMessage(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
@@ -206,6 +222,8 @@ LuaState::LuaState(udKernel *pKernel)
 
   luaL_openlibs(L);
 
+  exec(s_luaInit);
+
   // TODO: register things
 
   lua_register(L, "SendMessage", (lua_CFunction)SendMessage);
@@ -257,8 +275,260 @@ void LuaState::exec(udString code)
   }
 }
 
+udVariant LuaState::get(int idx)
+{
+  return udVariant::luaGet(*this, idx);
+}
+
+void LuaState::set(udVariant v, udVariant key, LuaLocation loc)
+{
+  int idx;
+  switch (loc)
+  {
+    case LuaLocation::Global:
+      idx = LUA_RIDX_GLOBALS; break;
+    case LuaLocation::Top:
+      idx = -3; break;
+    default:
+      UDASSERT(false, "Invalid location");
+      return;
+  }
+  push(key);
+  push(v);
+  lua_settable(L, idx);
+}
+
+void LuaState::setNil(udVariant key, LuaLocation loc)
+{
+  int idx;
+  switch (loc)
+  {
+    case LuaLocation::Global:
+      idx = LUA_RIDX_GLOBALS; break;
+    case LuaLocation::Top:
+      idx = -3; break;
+    default:
+      UDASSERT(false, "Invalid location");
+      return;
+  }
+  push(key);
+  pushNil();
+  lua_settable(L, idx);
+}
+
+void LuaState::setComponent(udComponentRef c, udVariant key, LuaLocation loc)
+{
+  int idx;
+  switch (loc)
+  {
+    case LuaLocation::Global:
+      lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+      idx = -3; break;
+    case LuaLocation::Top:
+      idx = -3; break;
+    default:
+      UDASSERT(false, "Invalid location");
+      return;
+  }
+  push(key);
+  pushComponent(c);
+  lua_settable(L, idx);
+}
+
+
+// *** bind components to Lua ***
+void LuaState::pushComponentMetatable(const udComponentDesc &desc)
+{
+  if (luaL_newmetatable(L, desc.id.ptr) == 0)
+    return;
+
+  // record the type
+  pushString(desc.id);
+  lua_setfield(L, -2, "__type");
+
+  // push the descriptor
+  // TODO: we should push the descriptor to lua, so the metadata is accessible
+//  ...pushDescriptor(desc);
+//  lua_setfield(L, -2, "__desc");
+
+  // push a destructor
+  lua_pushcfunction(L, &componentCleaner);
+  lua_setfield(L, -2, "__gc");
+
+  pushGetters(desc);
+  lua_setfield(L, -2, "__index");
+  pushSetters(desc);
+  lua_setfield(L, -2, "__newindex");
+
+  lua_pushcfunction(L, &componentCompare);
+  lua_setfield(L, -2, "__eq");
+
+  lua_pushcfunction(L, &componentToString);
+  lua_setfield(L, -2, "__tostring");
+
+  // set the parent metatable
+  if (desc.pSuperDesc)
+  {
+    pushComponentMetatable(*desc.pSuperDesc);
+    lua_setmetatable(L, -2);
+  }
+
+  // create a '__metatable' entry to protect the metatable against modification
+  lua_pushvalue(L, -1);
+  lua_setfield(L, -2, "__metatable");
+}
+void LuaState::pushGetters(const udComponentDesc &desc)
+{
+  lua_newtable(L); // -2 is getters
+  lua_newtable(L); // -1 is methods
+
+  // populate getters
+  for (auto &p : desc.properties)
+  {
+    if (p.getter) // TODO: we should possibly push a function that reports an "unreadable" error
+    {
+      lua_pushlightuserdata(L, (void*)&p);
+      lua_pushcclosure(L, &getter, 1);
+      lua_setfield(L, -3, p.id.ptr);
+    }
+  }
+
+  // TODO: push methods
+/*
+  pushMethod!(T, member)(L);
+  lua_setfield(L, -2, member.ptr);
+*/
+
+  lua_pushcclosure(L, &componentIndex, 2);
+}
+void LuaState::pushSetters(const udComponentDesc &desc)
+{
+  lua_newtable(L);
+
+  // populate setters
+  for (auto &p : desc.properties)
+  {
+    if (p.setter) // TODO: we should possibly push a function that reports an "unwritable" error
+    {
+      lua_pushlightuserdata(L, (void*)&p);
+      lua_pushcclosure(L, &setter, 1);
+      lua_setfield(L, -2, p.id.ptr);
+    }
+  }
+  lua_pushcclosure(L, &componentNewIndex, 1);
+}
+
 void LuaState::pushComponent(udComponentRef c)
 {
-  // TODO: push a component, setting the metatable appropriately (which may mean creating one)
-  //...
+  if (!c)
+  {
+    lua_pushnil(L);
+    return;
+  }
+
+  udComponentRef *pC = new(lua_newuserdata(L, sizeof(udComponentRef))) udComponentRef(c);
+  pushComponentMetatable(*c->pType);
+  lua_setmetatable(L, -2);
+}
+
+static void verifyComponentType(lua_State* L, int idx)
+{
+  if (lua_getmetatable(L, idx) == 0)
+    luaL_error(L, "attempt to get 'userdata: %p' as a udComponent", lua_topointer(L, idx));
+/*
+  // TODO: this should actually check that types are supported!
+  lua_getfield(L, -1, "__type"); // must be a udComponent
+  auto type = lua_tostring(L, -1);
+
+  // find type in the descriptor hierarchy
+
+  luaL_error(L, `attempt to get instance %s as type "%s"`, cname, T.stringof.ptr);
+*/
+}
+udComponentRef LuaState::toComponent(int idx)
+{
+  verifyComponentType(state(), idx);
+  return *(udComponentRef*)lua_touserdata(L, idx);
+}
+
+int LuaState::componentCleaner(lua_State* L)
+{
+  udComponentRef *pComponent = (udComponentRef*)lua_touserdata(L, 1);
+  pComponent->~udComponentRef();
+  return 0;
+}
+int LuaState::componentToString(lua_State* L)
+{
+  udComponentRef *pComponent = (udComponentRef*)lua_touserdata(L, 1);
+  udFixedString64 s;
+  s.concat("@", (*pComponent)->GetUid());
+  lua_pushlstring(L, s.ptr, s.length);
+  return 1;
+}
+int LuaState::componentCompare(lua_State* L)
+{
+  udComponentRef *pComponent1 = (udComponentRef*)lua_touserdata(L, 1);
+  udComponentRef *pComponent2 = (udComponentRef*)lua_touserdata(L, 2);
+  lua_pushboolean(L, (*pComponent1).ptr() == (*pComponent2).ptr());
+  return 1;
+}
+
+int LuaState::componentIndex(lua_State* L)
+{
+  auto field = lua_tostring(L, 2);
+
+  // check the getter table
+  lua_getfield(L, lua_upvalueindex(1), field);
+  if (!lua_isnil(L, -1))
+  {
+    lua_pushvalue(L, 1);
+    lua_call(L, 1, LUA_MULTRET);
+    return lua_gettop(L) - 2;
+  }
+  else
+    lua_pop(L, 1);
+
+  // return method
+  lua_getfield(L, lua_upvalueindex(2), field);
+  return 1;
+}
+int LuaState::componentNewIndex(lua_State* L)
+{
+  auto field = lua_tostring(L, 2);
+
+  // call setter
+  lua_getfield(L, lua_upvalueindex(1), field);
+  if (!lua_isnil(L, -1))
+  {
+    lua_pushvalue(L, 1);
+    lua_pushvalue(L, 3);
+    lua_call(L, 2, LUA_MULTRET);
+  }
+  else
+  {
+    // TODO: error?
+  }
+  return 0;
+}
+
+int LuaState::getter(lua_State *L)
+{
+  LuaState &l = (LuaState&)L;
+  const udPropertyDesc *pProp = (const udPropertyDesc*)l.toUserData(lua_upvalueindex(1));
+
+  udComponentRef c = l.toComponent(1);
+  udVariant v(pProp->getter.get(c.ptr()));
+
+  ((LuaState&)L).push(v);
+  return 1;
+}
+int LuaState::setter(lua_State *L)
+{
+  LuaState &l = (LuaState&)L;
+  const udPropertyDesc *pProp = (const udPropertyDesc*)l.toUserData(lua_upvalueindex(1));
+
+  udComponentRef c = l.toComponent(1);
+
+  pProp->setter.set(c.ptr(), l.get(2));
+  return 0;
 }

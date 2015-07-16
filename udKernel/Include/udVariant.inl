@@ -51,6 +51,15 @@ inline udVariant::udVariant(udSlice<udKeyValuePair> aa)
   , length(aa.length)
   , aa(aa.ptr)
 {}
+inline udVariant::udVariant(udVariant &&rval)
+  : t(rval.t)
+  , ownsArray(rval.ownsArray)
+  , length(rval.length)
+  , p(rval.p)
+{
+  rval.ownsArray = false;
+}
+
 
 // math types
 template<typename U>

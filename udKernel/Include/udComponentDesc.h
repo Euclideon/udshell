@@ -42,16 +42,18 @@ public:
   template <class X, class Type>
   udGetter(Type(X::*func)() const);
 
-  const udVariant get(const udComponent *pThis) const;
+  operator bool() const { return shim != nullptr; }
+
+  udVariant get(const udComponent *pThis) const;
 
 protected:
-  typedef const udVariant(Shim)(const udGetter* const, const udComponent*);
+  typedef udVariant(Shim)(const udGetter* const, const udComponent*);
 
   DelegateMemento m;
   Shim *shim;
 
   template<typename T>
-  static const udVariant shimFunc(const udGetter * const pGetter, const udComponent *pThis);
+  static udVariant shimFunc(const udGetter * const pGetter, const udComponent *pThis);
 };
 
 // setter glue
@@ -62,16 +64,18 @@ public:
   template <class X, class Type>
   udSetter(void(X::*func)(Type));
 
-  void set(udComponent *pThis, const udVariant value) const;
+  operator bool() const { return shim != nullptr; }
+
+  void set(udComponent *pThis, const udVariant &value) const;
 
 private:
-  typedef void(Shim)(const udSetter* const, udComponent*, const udVariant);
+  typedef void(Shim)(const udSetter* const, udComponent*, const udVariant&);
 
   DelegateMemento m;
   Shim *shim;
 
   template<typename T>
-  static void shimFunc(const udSetter * const pSetter, udComponent *pThis, const udVariant value);
+  static void shimFunc(const udSetter * const pSetter, udComponent *pThis, const udVariant &value);
 };
 
 

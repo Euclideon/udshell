@@ -1,6 +1,7 @@
 
 #include "udVariant.h"
 #include "udComponent.h"
+#include "udLua.h"
 
 udRCString udVariant::stringify() const
 {
@@ -158,4 +159,157 @@ size_t udVariant::assocArraySeriesLen() const
   while (i < length && aa[i].key.t == Type::Int && aa[i].key.i == i + 1)
     ++i;
   return i;
+}
+
+size_t udVariant::arrayLen() const
+{
+  if (t == Type::Array)
+    return length;
+  if (t == Type::AssocArray)
+    return assocArraySeriesLen();
+  return 0;
+}
+
+udVariant udVariant::operator[](size_t i) const
+{
+  if (t == Type::Array)
+  {
+    UDASSERT(i < length, "Index out of range!");
+    return a[i];
+  }
+  if (t == Type::AssocArray)
+  {
+    UDASSERT(i < assocArraySeriesLen(), "Index out of range!");
+    return aa[i].value;
+  }
+  return udVariant(nullptr);
+}
+
+udVariant udVariant::operator[](udString key) const
+{
+  if (t == Type::AssocArray)
+  {
+    size_t i = assocArraySeriesLen();
+    for (; i<length; ++i)
+    {
+      udVariant &k = aa[i].key;
+      if (k.t != Type::String)
+        continue;
+      if (udString(k.s, k.length).eq(key))
+        return aa[i].value;
+    }
+  }
+  return udVariant(nullptr);
+}
+
+void udVariant::luaPush(LuaState &l) const
+{
+  switch (t)
+  {
+    case Type::Null:
+      l.pushNil();
+      break;
+    case Type::Bool:
+      l.pushBool(b);
+      break;
+    case Type::Int:
+      l.pushInt(i);
+      break;
+    case Type::Float:
+      l.pushFloat(f);
+      break;
+    case Type::Component:
+      l.pushComponent(udComponentRef(c));
+      break;
+    case Type::String:
+      l.pushString(udString(s, length));
+      break;
+    case Type::Array:
+    {
+      lua_State *L = l.state();
+      lua_createtable(L, length, 0);
+      for (size_t i = 0; i<length; ++i)
+      {
+        l.push(a[i]);
+        lua_seti(L, -2, i+1);
+      }
+      break;
+    }
+    case Type::AssocArray:
+    {
+      lua_State *L = l.state();
+      lua_createtable(L, 0, 0); // TODO: estimate narr and nrec?
+      for (size_t i = 0; i<length; ++i)
+      {
+        l.push(aa[i].key);
+        l.push(aa[i].value);
+        lua_settable(L, -3);
+      }
+      break;
+    }
+  }
+}
+
+udVariant udVariant::luaGet(LuaState &l, int idx)
+{
+  LuaType t = l.getType(idx);
+  switch (t)
+  {
+    case LuaType::Nil:
+      return udVariant();
+    case LuaType::Boolean:
+      return udVariant(l.toBool(idx));
+    case LuaType::LightUserData:
+      return udVariant();
+    case LuaType::Number:
+      if (l.isInteger(-1))
+        return udVariant(l.toInt(idx));
+      else
+        return udVariant(l.toFloat(idx));
+    case LuaType::String:
+      return udVariant(l.toString(idx));
+    case LuaType::Function:
+      return udVariant();
+    case LuaType::UserData:
+    {
+      // find out if is component...
+      UDASSERT(false, "TODO!");
+      return udVariant();
+    }
+    case LuaType::Table:
+    {
+      lua_State *L = l.state();
+
+      int pos = idx < 0 ? idx-1 : idx;
+
+      // work out how many items are in the table
+      // HACK: we are doing a brute-force count! this should be replaced with better stuff
+      size_t numElements = 0;
+      l.pushNil();  // first key
+      while (lua_next(L, pos) != 0)
+      {
+        ++numElements;
+        l.pop();
+      }
+
+      // populate the table
+      udKeyValuePair *pAA = (udKeyValuePair*)udAlloc(sizeof(udKeyValuePair)*numElements);
+      // TODO: check pAA i not nullptr!
+      udVariant v(udSlice<udKeyValuePair>(pAA, numElements));
+      v.ownsArray = true;
+      l.pushNil();  // first key
+      int i = 0;
+      while (lua_next(L, pos) != 0)
+      {
+        new(&v.aa[i].key) udVariant(l.get(-2));
+        new(&v.aa[i].value) udVariant(l.get(-1));
+        l.pop();
+        ++i;
+      }
+      return v;
+    }
+    default:
+      // TODO: make a noise of some sort...?
+      return udVariant();
+  }
 }

@@ -9,6 +9,7 @@
 struct udKeyValuePair;
 class udComponent;
 typedef udSharedPtr<udComponent> udComponentRef;
+class LuaState;
 
 struct udVariant
 {
@@ -35,6 +36,8 @@ public:
   udVariant(udSlice<udVariant> a);
   udVariant(udSlice<udKeyValuePair> aa);
 
+  udVariant(udVariant &&rval);
+
   // math types
   template<typename U>
   udVariant(const udVector2<U> &v);
@@ -46,6 +49,7 @@ public:
   udVariant(const udMatrix4x4<U> &m);
 
   ~udVariant();
+
 
   Type type() const;
 
@@ -65,6 +69,14 @@ public:
 
   size_t assocArraySeriesLen() const;
 
+  size_t arrayLen() const;
+
+  udVariant operator[](size_t i) const;
+  udVariant operator[](udString key) const;
+
+  void luaPush(LuaState &l) const;
+  static udVariant luaGet(LuaState &l, int idx = -1);
+
 private:
   size_t t : 3;
   size_t ownsArray : 1;
@@ -78,6 +90,7 @@ private:
     const char *s;
     udVariant *a;
     udKeyValuePair *aa;
+    void *p;
   };
 };
 

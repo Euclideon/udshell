@@ -11,13 +11,13 @@ inline udGetter::udGetter(Type(X::*func)() const)
   shim = &shimFunc<Type>;
 }
 
-inline const udVariant udGetter::get(const udComponent *pThis) const
+inline udVariant udGetter::get(const udComponent *pThis) const
 {
   return shim(this, pThis);
 }
 
 template<typename T>
-static const udVariant udGetter::shimFunc(const udGetter * const pGetter, const udComponent *pThis)
+static udVariant udGetter::shimFunc(const udGetter * const pGetter, const udComponent *pThis)
 {
   auto m = pGetter->m;
   m.SetThis((void*)pThis);
@@ -40,13 +40,13 @@ inline udSetter::udSetter(void(X::*func)(Type))
   shim = &shimFunc<Type>;
 }
 
-inline void udSetter::set(udComponent *pThis, const udVariant value) const
+inline void udSetter::set(udComponent *pThis, const udVariant &value) const
 {
   shim(this, pThis, value);
 }
 
 template<typename T>
-static void udSetter::shimFunc(const udSetter * const pSetter, udComponent *pThis, const udVariant value)
+static void udSetter::shimFunc(const udSetter * const pSetter, udComponent *pThis, const udVariant &value)
 {
   auto m = pSetter->m;
   m.SetThis((void*)pThis);

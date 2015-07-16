@@ -56,6 +56,11 @@ public:
   inline T* operator->() const { return pInstance; }
   inline T* ptr() const { return pInstance; }
 
+  template <class U> // the U allows us to accept const
+  inline bool operator==(udSharedPtr<U> rh) const { return pInstance == rh.pInstance; }
+  template <class U> // the U allows us to accept const
+  inline bool operator!=(udSharedPtr<U> rh) const { return pInstance != rh.pInstance; }
+
 private:
   template<class U> friend class udSharedPtr;
 
