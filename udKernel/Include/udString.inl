@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include <utility>
+
 class udCString
 {
   friend struct udString;
@@ -157,8 +159,13 @@ inline udFixedString<Size>::udFixedString()
 {}
 
 template<size_t Size>
-inline udFixedString<Size>::udFixedString(udFixedSlice<const char, Size> &&rval)
-  : udFixedSlice<char, Size>(rval)
+inline udFixedString<Size>::udFixedString(udFixedString<Size> &&rval)
+  : udFixedSlice<char, Size>(std::move(rval))
+{}
+
+template<size_t Size>
+inline udFixedString<Size>::udFixedString(udFixedSlice<char, Size> &&rval)
+  : udFixedSlice<char, Size>(std::move(rval))
 {}
 
 template<size_t Size>
@@ -179,9 +186,15 @@ inline udFixedString<Size>::udFixedString(const char *pString)
 {}
 
 template<size_t Size>
-inline udFixedString<Size>& udFixedString<Size>::operator =(udFixedSlice<const char, Size> &&rval)
+inline udFixedString<Size>& udFixedString<Size>::operator =(udFixedString<Size> &&rval)
 {
-  udFixedSlice<char, Size>::operator=(rval);
+  udFixedSlice<char, Size>::operator=(std::move(rval));
+  return *this;
+}
+template<size_t Size>
+inline udFixedString<Size>& udFixedString<Size>::operator =(udFixedSlice<char, Size> &&rval)
+{
+  udFixedSlice<char, Size>::operator=(std::move(rval));
   return *this;
 }
 template<size_t Size>
@@ -260,7 +273,7 @@ inline void udFixedString<Size>::concat(udString *pStrings, size_t numStrings)
   for (size_t i = 0; i < numStrings; ++i)
     len += pStrings[i].length;
 
-  this->reserve(len);
+  this->reserve(len+1);
 
   // concatenate the strings
   char *pC = this->ptr + this->length;
@@ -269,6 +282,7 @@ inline void udFixedString<Size>::concat(udString *pStrings, size_t numStrings)
     for (size_t j = 0; j < pStrings[i].length; ++j)
       *pC++ = pStrings[i].ptr[j];
   }
+  *pC = 0; // null terminate for good measure
 
   this->length = len;
 }
@@ -278,8 +292,12 @@ inline void udFixedString<Size>::concat(udString *pStrings, size_t numStrings)
 inline udRCString::udRCString()
 {}
 
+inline udRCString::udRCString(udRCString &&rval)
+  : udRCSlice<const char>(std::move(rval))
+{}
+
 inline udRCString::udRCString(udRCSlice<const char> &&rval)
-  : udRCSlice<const char>(rval)
+  : udRCSlice<const char>(std::move(rval))
 {}
 
 inline udRCString::udRCString(const udRCSlice<const char> &rcstr)
@@ -305,9 +323,14 @@ inline udRCString& udRCString::operator =(const udRCSlice<const char> &rh)
   udRCSlice<const char>::operator=(rh);
   return *this;
 }
+inline udRCString& udRCString::operator =(udRCString &&rval)
+{
+  udRCSlice<const char>::operator=(std::move(rval));
+  return *this;
+}
 inline udRCString& udRCString::operator =(udRCSlice<const char> &&rval)
 {
-  udRCSlice<const char>::operator=(rval);
+  udRCSlice<const char>::operator=(std::move(rval));
   return *this;
 }
 template <typename U>

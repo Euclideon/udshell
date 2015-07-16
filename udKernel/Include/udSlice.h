@@ -92,7 +92,7 @@ struct udSlice
 
 // udFixedSlice introduces static-sized and/or stack-based ownership. this is useful anywhere that fixed-length arrays are appropriate
 // udFixedSlice will fail-over to an allocated buffer if the contents exceed the fixed size
-template <typename T, size_t Count = 64>
+template <typename T, size_t Count = 64 - sizeof(size_t)*3>
 struct udFixedSlice : public udSlice <T>
 {
   size_t numAllocated;

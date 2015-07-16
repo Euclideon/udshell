@@ -87,7 +87,8 @@ struct udFixedString : public udFixedSlice<char, Size>
 {
   // constructors
   udFixedString();
-  udFixedString(udFixedSlice<const char, Size> &&rval);
+  udFixedString(udFixedString<Size> &&rval);
+  udFixedString(udFixedSlice<char, Size> &&rval);
   template <typename U>
   udFixedString(U *ptr, size_t length);
   template <typename U>
@@ -95,7 +96,8 @@ struct udFixedString : public udFixedSlice<char, Size>
   udFixedString(const char *pString);
 
   // assignment
-  udFixedString& operator =(udFixedSlice<const char, Size> &&rval);
+  udFixedString& operator =(udFixedString<Size> &&rval);
+  udFixedString& operator =(udFixedSlice<char, Size> &&rval);
   template <typename U>
   udFixedString& operator =(udSlice<U> rh);
   udFixedString& operator =(const char *pString);
@@ -149,6 +151,7 @@ struct udRCString : public udRCSlice<const char>
 {
   // constructors
   udRCString();
+  udRCString(udRCString &&rval);
   udRCString(udRCSlice<const char> &&rval);
   udRCString(const udRCSlice<const char> &rcstr);
   template <typename U>
@@ -163,6 +166,7 @@ struct udRCString : public udRCSlice<const char>
 
   // assignment
   udRCString& operator =(const udRCSlice<const char> &rh);
+  udRCString& operator =(udRCString &&rval);
   udRCString& operator =(udRCSlice<const char> &&rval);
   template <typename U>
   udRCString& operator =(udSlice<U> rh);
