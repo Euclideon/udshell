@@ -91,10 +91,7 @@ enum class udPropertyType : uint32_t
 
 enum udPropertyFlags : uint32_t
 {
-  udPF_NoRead = 1<<0,
-  udPF_NoWrite = 1<<1,
-  udPF_MustInit = 1<<2,
-  udPF_Immutable = udPF_MustInit | udPF_NoWrite | udPF_NoRead,
+  udPF_Immutable = 1<<0 // must be initialised during construction
 };
 
 enum class udPropertyDisplayType : uint32_t

@@ -1,4 +1,4 @@
-#include "udSceneGraph.h"
+#include "udNode.h"
 
 
 static const udPropertyDesc props[] =
@@ -20,6 +20,28 @@ static const udPropertyDesc props[] =
     "Local position", // description
     udPropertyType::Float, // type
     3, // arrayLength
+    0, // flags
+    udPropertyDisplayType::Default, // displayType
+    udGetter(&udNode::GetPosition),
+    udSetter(&udNode::SetPosition)
+  },
+  {
+    "parent", // id
+    "Parent", // displayName
+    "Parent node", // description
+    udPropertyType::Component, // type
+    0, // arrayLength
+    0, // flags
+    udPropertyDisplayType::Default, // displayType
+    udGetter(&udNode::GetPosition),
+    udSetter(&udNode::SetPosition)
+  },
+  {
+    "children", // id
+    "Children", // displayName
+    "Child nodes", // description
+    udPropertyType::Component, // type
+    -1, // arrayLength
     0, // flags
     udPropertyDisplayType::Default, // displayType
     udGetter(&udNode::GetPosition),

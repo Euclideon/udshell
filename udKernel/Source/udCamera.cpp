@@ -13,7 +13,7 @@ static const udPropertyDesc props[] =
     "Position of camera", // description
     udPropertyType::Float , // type
     16, // arrayLength
-    udPF_NoWrite, // flags
+    0, // flags
     udPropertyDisplayType::Default, // displayType
     udGetter(&udCamera::GetCameraMatrix),
     nullptr
@@ -24,7 +24,7 @@ static const udPropertyDesc props[] =
     "Position of camera", // description
     udPropertyType::Float, // type
     16, // arrayLength
-    udPF_NoWrite, // flags
+    0, // flags
     udPropertyDisplayType::Default, // displayType
     udGetter(&udCamera::GetViewMatrix),
     nullptr

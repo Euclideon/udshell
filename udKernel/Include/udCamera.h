@@ -3,7 +3,7 @@
 #define UDCAMERA_H
 
 #include "udComponent.h"
-#include "udSceneGraph.h"
+#include "udNode.h"
 
 PROTOTYPE_COMPONENT(udCamera);
 PROTOTYPE_COMPONENT(udSimpleCamera);

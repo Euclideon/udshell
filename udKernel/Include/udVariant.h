@@ -31,7 +31,7 @@ public:
   udVariant(bool b);
   udVariant(int64_t i);
   udVariant(double f);
-  udVariant(udComponentRef &_c);
+  udVariant(udComponentRef &c);
   udVariant(udString s);
   udVariant(udSlice<udVariant> a);
   udVariant(udSlice<udKeyValuePair> aa);

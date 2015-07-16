@@ -17,7 +17,7 @@ static const udPropertyDesc props[] =
     "Component UID", // description
     udPropertyType::String, // type
     0, // arrayLength
-    udPF_NoWrite, // flags
+    0, // flags
     udPropertyDisplayType::Default, // displayType
     udGetter(&udComponent::GetUid),
     nullptr
@@ -28,7 +28,7 @@ static const udPropertyDesc props[] =
     "Component Type", // description
     udPropertyType::String, // type
     0, // arrayLength
-    udPF_NoWrite, // flags
+    0, // flags
     udPropertyDisplayType::Default, // displayType
     udGetter(&udComponent::GetType),
     nullptr
@@ -39,7 +39,7 @@ static const udPropertyDesc props[] =
     "Component Display Name", // description
     udPropertyType::String, // type
     0, // arrayLength
-    udPF_NoWrite, // flags
+    0, // flags
     udPropertyDisplayType::Default, // displayType
     udGetter(&udComponent::GetDisplayName),
     nullptr
@@ -50,7 +50,7 @@ static const udPropertyDesc props[] =
     "Component Description", // description
     udPropertyType::String, // type
     0, // arrayLength
-    udPF_NoWrite, // flags
+    0, // flags
     udPropertyDisplayType::Default, // displayType
     udGetter(&udComponent::GetDescription),
     nullptr
@@ -107,7 +107,7 @@ void udComponent::SetProperty(udString property, const udVariant &value)
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
     return; // TODO: make noise
-  if (pDesc->flags & udPropertyFlags::udPF_NoWrite)
+  if (!pDesc->setter)
     return; // TODO: make noise
   pDesc->setter.set(this, value);
 }
@@ -117,7 +117,7 @@ udVariant udComponent::GetProperty(udString property) const
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
     return udVariant(); // TODO: make noise
-  if (pDesc->flags & udPropertyFlags::udPF_NoRead)
+  if (!pDesc->getter)
     return udVariant(); // TODO: make noise
   return pDesc->getter.get(this);
 }

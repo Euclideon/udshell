@@ -7,7 +7,7 @@
 #include "udScene.h"
 #include "udView.h"
 #include "udCamera.h"
-#include "udSceneGraph.h"
+#include "udNode.h"
 
 #include "udLua.h"
 

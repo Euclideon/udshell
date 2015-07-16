@@ -134,8 +134,23 @@ inline udVariant::udVariant(const udMatrix4x4<U> &m)
 
 inline udVariant::~udVariant()
 {
-  if (t >= Type::Array && ownsArray)
+  if (ownsArray && t >= Type::Array)
+  {
+    if (t == Type::Array)
+    {
+      for (size_t i = 0; i < length; ++i)
+        a[i].~udVariant();
+    }
+    else if (t == Type::AssocArray)
+    {
+      for (size_t i = 0; i < length; ++i)
+      {
+        aa[i].key.~udVariant();
+        aa[i].value.~udVariant();
+      }
+    }
     udFree(a);
+  }
 }
 
 inline udVariant& udVariant::operator=(udVariant &&rval)

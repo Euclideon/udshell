@@ -11,7 +11,7 @@ static const udPropertyDesc props[] =
     "Model to render", // description
     udPropertyType::Integer, // type
     0, // arrayLength
-    udPF_NoRead, // flags
+    0, // flags
     udPropertyDisplayType::Default, // displayType
     nullptr,
     nullptr

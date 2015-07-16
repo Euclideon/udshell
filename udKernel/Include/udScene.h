@@ -3,7 +3,7 @@
 #define UDSCENE_H
 
 #include "udComponent.h"
-#include "udSceneGraph.h"
+#include "udNode.h"
 #include "udRender.h"
 
 PROTOTYPE_COMPONENT(udView);

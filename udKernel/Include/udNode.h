@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UDSCENEGRAPH_H
-#define UDSCENEGRAPH_H
+#ifndef UDNODE_H
+#define UDNODE_H
 
 #include "udComponent.h"
 #include "udInput.h"
@@ -17,6 +17,9 @@ class udRenderable
   // * render states
 };
 
+class udNode;
+PROTOTYPE_COMPONENT(udNode);
+
 class udNode : public udComponent
 {
 public:
@@ -32,6 +35,9 @@ public:
   virtual void SetPosition(const udDouble3 &pos) { matrix.axis.t = udDouble4::create(pos, matrix.axis.t.w); }
   const udDouble3& GetPosition() const { return matrix.axis.t.toVector3(); }
 
+  udNodeRef Parent() const { return parent; }
+  const udSlice<udNodeRef> Children() const { return children; }
+
   void CalculateWorldMatrix(udDouble4x4 *pMatrix) const;
 
 protected:
@@ -41,8 +47,8 @@ protected:
 
   udDouble4x4 matrix = udDouble4x4::identity();
 
-  udNode *pParent = nullptr;
-  udRCSlice<udNode> children;
+  udNodeRef parent;
+  udRCSlice<udNodeRef> children;
 
   // TODO: enable/visible/etc flags
 
@@ -60,4 +66,4 @@ protected:
   int refCount;
 };
 
-#endif
+#endif // UDNODE_H
