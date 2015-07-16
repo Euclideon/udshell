@@ -208,9 +208,12 @@ static uint32_t StdinThread(void *data)
   while (1)
   {
     Dispatch *pDispatch = new Dispatch;
+    putc('>', stdout);
+    putc(' ', stdout);
     gets(pDispatch->buffer);
     pDispatch->s = pDispatch->buffer;
-    pKernel->DispatchToMainThread(MakeDelegate(pDispatch, &Dispatch::Exec));
+    pKernel->DispatchToMainThreadAndWait(MakeDelegate(pDispatch, &Dispatch::Exec));
+    putc('\n', stdout);
   }
 }
 #endif

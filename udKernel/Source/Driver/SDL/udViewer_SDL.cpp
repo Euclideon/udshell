@@ -83,8 +83,7 @@ void udKernel::DispatchToMainThread(MainThreadCallback callback)
 void udKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   DelegateWithSemaphore dispatch;
-  void **ppPtrs = (void**)&dispatch.m;
-
+  dispatch.m = callback.GetMemento();
   dispatch.pSem = udCreateSemaphore(1, 0);
 
   SDL_Event e;
