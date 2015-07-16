@@ -1,5 +1,5 @@
 require "qt"
-local qt = premake.extensions.qt
+qt = premake.extensions.qt
 
 solution "udShell"
 
@@ -15,9 +15,10 @@ solution "udShell"
 
 	defines { "UD_USE_QT" }
 
-	if os.get() == "windows" then
-		dofile "ud/3rdParty/GL/glew/project.lua"
-	end
+--	if os.get() == "windows" then
+--		dofile "ud/3rdParty/GL/glew/project.lua"
+--	end
+
 	dofile "ud/3rdParty/lua/project.lua"
 	dofile "ud/udPlatform/project.lua"
 	dofile "ud/udPointCloud/project.lua"
@@ -37,14 +38,15 @@ solution "udShell"
 		includedirs { "ud/udPointCloud/Include" }
 		includedirs { "ud/udKernel/Include" }
 		includedirs { "ud/3rdParty" }
-		includedirs { "ud/3rdParty/GL/glew/include" }
+--		includedirs { "ud/3rdParty/GL/glew/include" }
 
-		links { "GLEW" }
+--		links { "GLEW" }
 		links { "udPlatform" }
 		links { "udPointCloud" }
 		links { "udKernel" }
+		links { luaPath }
 
-		defines { "GLEW_STATIC" }
+--		defines { "GLEW_STATIC" }
 
 		qt.enable()
 --		qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
@@ -54,7 +56,7 @@ solution "udShell"
 			qtsuffix "d"
 
 		configuration { "windows" }
-			links { "ws2_32.lib", "opengl32.lib", "glu32.lib", "winmm.lib" }
+			links { "ws2_32.lib", "winmm.lib" }
 			disablewarnings { "4481", "4127" } -- silence some Qt warnings
 
 		-- include common stuff

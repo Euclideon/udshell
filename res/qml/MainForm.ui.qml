@@ -1,17 +1,49 @@
 import QtQuick 2.4
-import QtQuick.Controls 1.3
-import QtQuick.Layouts 1.1
+//import QtQuick.Controls 1.3
+//import QtQuick.Layouts 1.1
 import udShell 0.1
 
 Item {
     width: 640
     height: 480
 
-    property alias button3: button3
-    property alias button2: button2
-    property alias button1: button1
+    //property alias button3: button3
+    //property alias button2: button2
+    //property alias button1: button1
 
-    RowLayout {
+    RenderView {
+        id: viewport
+        x: 10
+        y: 10
+        width: 400
+        height: 400
+    }
+
+    /*RenderView {
+        id: viewport2
+        x: 100
+        y: 10
+        width: 100
+        height: 100
+    }
+
+    RenderView {
+        id: viewport3
+        x: 200
+        y: 10
+        width: 100
+        height: 100
+    }
+
+    RenderView {
+        id: viewport4
+        x: 300
+        y: 10
+        width: 100
+        height: 100
+    }*/
+
+    /*RowLayout {
         anchors.centerIn: parent
 
         Button {
@@ -83,13 +115,5 @@ Item {
         y: 0
         width: 300
         height: 300
-    }
-
-    RenderView {
-        id: viewport
-        x: 10
-        y: 10
-        width: 100
-        height: 100
-    }
+    }*/
 }

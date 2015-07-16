@@ -1,4 +1,9 @@
-#include <QQuickFramebufferObject>
+#ifndef RENDERVIEW_H
+#define RENDERVIEW_H
+
+#include <QtQuick/QQuickFramebufferObject>
+
+class FboRenderer;
 
 class RenderView : public QQuickFramebufferObject
 {
@@ -10,13 +15,12 @@ public:
 
   Renderer *createRenderer() const;
 
-protected:
-  class Renderer : public QQuickFramebufferObject::Renderer
-  {
-  protected:
-//    ~Renderer();
-//    QOpenGLFramebufferObject *createFramebufferObject(const QSize &size);
-//    void synchronize(QQuickFramebufferObject *);
-    void render();
-  };
+private:
+  // TODO: Avoid this crap
+  friend class FboRenderer;
+
+  void componentComplete();
 };
+
+
+#endif  // RENDERVIEW_H

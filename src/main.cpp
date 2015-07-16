@@ -1,18 +1,18 @@
-#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QDebug>
 #include <QLoggingCategory>
 
-#include "quick/renderview.h"
-
-#include "udResult.h"
 #include "udKernel.h"
+
+#include "quick/window.h"
 
 udKernel *s_pKernel;
 
-// TODO: Replace this with something more robust - maybe a full logging system and status console
+
+// ---------------------------------------------------------------------------------------
 void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+  // TODO: replace this with something more robust - maybe a full logging system and status console
   switch (type) {
   case QtDebugMsg:
     udDebugPrintf("Dbg: %s (%s:%d, %s)\n", msg.toLatin1().data(), context.file, context.line, context.function);
@@ -30,6 +30,7 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
 }
 
 
+// ---------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
   // unit test
@@ -43,20 +44,17 @@ int main(int argc, char *argv[])
   if (r == udR_Failure_)
     return 1;
 
+  // install our qt message handler
   qInstallMessageHandler(DbgMessageHandler);
   //QLoggingCategory::setFilterRules("qt.*=true");
 
-  // create the Qt app
-  QGuiApplication app(argc, argv);
+  // create the main window
+  Window w;
+  w.setResizeMode(QQuickView::SizeRootObjectToView);
+  w.setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
+  w.resize(800, 600);
+  w.show();
+  w.raise();
 
-  // make sure we cleanup the kernel when we're about to quit
-  QObject::connect(&app, &QCoreApplication::aboutToQuit, []{ s_pKernel->Destroy(); });
-
-  // create the qml engine and load our script
-  QQmlApplicationEngine engine;
-  qmlRegisterType<RenderView>("udShell", 0, 1, "RenderView");
-  engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
-
-  // run the Qt event loop
-  return app.exec();
+  return s_pKernel->RunMainLoop();
 }
