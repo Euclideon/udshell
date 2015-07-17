@@ -170,7 +170,7 @@ static int CreateComponent(lua_State *L)
   // TODO: support optional a table in arg2 for init params
 
   udComponentRef c;
-  /*udResult r = */l.kernel()->CreateComponent(type, nullptr, &c);
+  udResult r = l.kernel()->CreateComponent(type, nullptr, &c);
   if (r == udR_Failure_)
     l.pushNil();
   else
