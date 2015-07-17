@@ -93,15 +93,14 @@ public:
   udVariant call(udComponent *pThis, udSlice<udVariant> args) const;
 
 private:
-  typedef udVariant(Shim)(const udMethod* const, udComponent*, udSlice<udVariant>) const;
+  typedef udVariant(Shim)(const udMethod* const, udComponent*, udSlice<udVariant>);
 
   DelegateMemento m;
   Shim *shim;
 
-  template<typename Ret>
+  template<typename Ret, typename... Args>
   struct Partial
   {
-    template<typename... Args>
     static udVariant shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value);
   };
 };

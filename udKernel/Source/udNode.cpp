@@ -41,7 +41,7 @@ static const udPropertyDesc props[] =
     "Children", // displayName
     "Child nodes", // description
     udPropertyType::Component, // type
-    -1, // arrayLength
+    ~0U, // arrayLength
     0, // flags
     udPropertyDisplayType::Default, // displayType
     udGetter(&udNode::GetPosition),

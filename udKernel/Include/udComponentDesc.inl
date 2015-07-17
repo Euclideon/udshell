@@ -66,13 +66,13 @@ template <typename X, typename Ret, typename... Args>
 inline udMethod::udMethod(Ret(X::*func)(Args...))
 {
   m = MakeDelegate((X*)nullptr, func).GetMemento();
-  shim = &Partial<Ret>::shimFunc<Args...>;
+  shim = &Partial<Ret, Args...>::shimFunc;
 }
 template <typename X, typename Ret, typename... Args>
 inline udMethod::udMethod(Ret(X::*func)(Args...) const)
 {
   m = MakeDelegate((X*)nullptr, func).GetMemento();
-  shim = &Partial<Ret>::shimFunc<Args...>;
+  shim = &Partial<Ret, Args...>::shimFunc;
 }
 
 inline udVariant udMethod::call(udComponent *pThis, udSlice<udVariant> args) const
@@ -80,9 +80,8 @@ inline udVariant udMethod::call(udComponent *pThis, udSlice<udVariant> args) con
   return shim(this, pThis, args);
 }
 
-template<typename Ret>
-template<typename... Args>
-inline udVariant udMethod::Partial<Ret>::shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value)
+template<typename Ret, typename... Args>
+inline udVariant udMethod::Partial<Ret, Args ...>::shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value)
 {
   auto m = pSetter->m;
   m.SetThis((void*)pThis);
@@ -94,10 +93,9 @@ inline udVariant udMethod::Partial<Ret>::shimFunc(const udMethod * const pSetter
   return udVariant(d(value[i++].as<Args>()...));
 }
 
-template<>
-struct udMethod::Partial<void>
+template<typename... Args>
+struct udMethod::Partial<void, Args...>
 {
-  template<typename... Args>
   inline static udVariant shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value)
   {
     auto m = pSetter->m;
