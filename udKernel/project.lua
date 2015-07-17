@@ -21,7 +21,7 @@ project "udKernel"
 		includedirs { "../3rdParty/sdl2/include" }
 
 	configuration { "PNaCl" }
-		buildoptions { "-std=gnu++11" }
+		buildoptions { "-std=c++11" }
 
 	-- include common stuff
 	dofile "../common-proj.lua"
