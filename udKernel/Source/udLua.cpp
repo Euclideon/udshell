@@ -49,6 +49,10 @@ static int SendMessage(lua_State *L)
   udString sender = l.toString(2);
   udString message = l.toString(3);
 
+  int i;
+  udKeyValuePair *pAA;
+  size_t numElements;
+
   udVariant args;
   if (numArgs > 4)
     l.pop(numArgs-4); // we will only take the 4th arg as payload
@@ -98,7 +102,7 @@ read_value:
     case LuaType::Table:
       // work out how many items are in the table
       // HACK: we are doing a brute-force count! this should be replaced with better stuff
-      size_t numElements = 0;
+      numElements = 0;
       l.pushNil();  // first key
       while (lua_next(l.state(), -2) != 0)
       {
@@ -107,11 +111,11 @@ read_value:
       }
 
       // populate the table
-      udKeyValuePair *pAA = (udKeyValuePair*)alloca(sizeof(udKeyValuePair)*numElements);
+      pAA = (udKeyValuePair*)alloca(sizeof(udKeyValuePair)*numElements);
       // TODO: check pAA i not nullptr!
       *a = udVariant(udSlice<udKeyValuePair>(pAA, numElements));
       l.pushNil();  // first key
-      int i = 0;
+      i = 0;
       while (lua_next(l.state(), -2) != 0)
       {
         stack[depth++] = Frame(a, i, 0);
@@ -130,6 +134,9 @@ finished_element:
         i = stack[depth].i + 1;
       }
       break;
+    default:
+      UDASSERT(false, "You shouldn't be here");
+      break;
     }
 
     if (depth--)
@@ -141,7 +148,7 @@ finished_element:
     }
   }
 
-  udResult r = l.kernel()->SendMessage(target, sender, message, args);
+  /*udResult r = */l.kernel()->SendMessage(target, sender, message, args);
 
   // TODO: push result and return 1?
   return 0;  // number of results
@@ -163,7 +170,7 @@ static int CreateComponent(lua_State *L)
   // TODO: support optional a table in arg2 for init params
 
   udComponentRef c;
-  udResult r = l.kernel()->CreateComponent(type, nullptr, &c);
+  /*udResult r = */l.kernel()->CreateComponent(type, nullptr, &c);
 
   l.pushComponent(c);
   return 1;
@@ -429,7 +436,7 @@ void LuaState::pushComponent(udComponentRef c)
     return;
   }
 
-  udComponentRef *pC = new(lua_newuserdata(L, sizeof(udComponentRef))) udComponentRef(c);
+  new(lua_newuserdata(L, sizeof(udComponentRef))) udComponentRef(c);
   pushComponentMetatable(*c->pType);
   lua_setmetatable(L, -2);
 }

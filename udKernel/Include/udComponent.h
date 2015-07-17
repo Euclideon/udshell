@@ -33,11 +33,11 @@ public:
 
   const udPropertyDesc *FindProperty(udString name) const;
 
-  void SetProperty(udString property, const udVariant value);
+  void SetProperty(udString property, const udVariant &value);
   udVariant GetProperty(udString property) const;
 
-  udResult SendMessage(udString target, udString message, udVariant data);
-  udResult SendMessage(udComponent *pComponent, udString message, udVariant data) { return SendMessage(pComponent->uid, message, data); }
+  udResult SendMessage(udString target, udString message, const udVariant &data);
+  udResult SendMessage(udComponent *pComponent, udString message, const udVariant &data) { return SendMessage(pComponent->uid, message, data); }
 
   // properties
   udString GetUid() const { return uid; }
@@ -50,7 +50,7 @@ protected:
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
   virtual ~udComponent() {}
 
-  virtual udResult ReceiveMessage(udString message, udString sender, udVariant data);
+  virtual udResult ReceiveMessage(udString message, udString sender, const udVariant &data);
 
 private:
   udComponent(const udComponent &) = delete;    // Still not sold on this

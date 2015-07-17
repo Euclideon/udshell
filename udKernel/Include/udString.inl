@@ -292,6 +292,11 @@ inline void udFixedString<Size>::concat(udString *pStrings, size_t numStrings)
 inline udRCString::udRCString()
 {}
 
+inline udRCString::udRCString(const udRCString &val)
+  : udRCSlice<const char>(val)
+{}
+
+
 inline udRCString::udRCString(udRCString &&rval)
   : udRCSlice<const char>(std::move(rval))
 {}
@@ -323,6 +328,12 @@ inline udRCString& udRCString::operator =(const udRCSlice<const char> &rh)
   udRCSlice<const char>::operator=(rh);
   return *this;
 }
+inline udRCString& udRCString::operator =(const udRCString &val)
+{
+  udRCSlice<const char>::operator=(val);
+  return *this;
+}
+
 inline udRCString& udRCString::operator =(udRCString &&rval)
 {
   udRCSlice<const char>::operator=(std::move(rval));

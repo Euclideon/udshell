@@ -17,7 +17,7 @@ inline udVariant udGetter::get(const udComponent *pThis) const
 }
 
 template<typename T>
-static udVariant udGetter::shimFunc(const udGetter * const pGetter, const udComponent *pThis)
+inline udVariant udGetter::shimFunc(const udGetter * const pGetter, const udComponent *pThis)
 {
   auto m = pGetter->m;
   m.SetThis((void*)pThis);
@@ -46,7 +46,7 @@ inline void udSetter::set(udComponent *pThis, const udVariant &value) const
 }
 
 template<typename T>
-static void udSetter::shimFunc(const udSetter * const pSetter, udComponent *pThis, const udVariant &value)
+inline void udSetter::shimFunc(const udSetter * const pSetter, udComponent *pThis, const udVariant &value)
 {
   auto m = pSetter->m;
   m.SetThis((void*)pThis);
@@ -54,5 +54,5 @@ static void udSetter::shimFunc(const udSetter * const pSetter, udComponent *pThi
   FastDelegate1<T> d;
   d.SetMemento(m);
 
-  d(value.as<std::remove_reference<T>::type>());
+  d(value.as<typename std::remove_reference<T>::type>());
 }

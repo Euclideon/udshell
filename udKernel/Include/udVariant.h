@@ -37,6 +37,8 @@ public:
   udVariant(udSlice<udKeyValuePair> aa);
 
   udVariant(udVariant &&rval);
+  udVariant(const udVariant &rval);
+
 
   // math types
   template<typename U>
@@ -50,7 +52,11 @@ public:
 
   ~udVariant();
 
+  // assignment operators
+  udVariant& operator=(udVariant &&rval);
+  udVariant& operator=(const udVariant &rval);
 
+  // actual methods
   Type type() const;
 
   udRCString stringify() const;
@@ -96,7 +102,11 @@ private:
 
 struct udKeyValuePair
 {
-  udKeyValuePair(udVariant key, udVariant value) : key(key), value(value) {}
+  udKeyValuePair() {}
+  udKeyValuePair(udKeyValuePair &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
+  udKeyValuePair(const udKeyValuePair &val) : key(val.key), value(val.value) {}
+  udKeyValuePair(const udVariant &key, const udVariant &value) : key(key), value(value) {}
+  udKeyValuePair(udVariant &&key, udVariant &&value) : key(std::move(key)), value(std::move(value)) {}
 
   udVariant key;
   udVariant value;

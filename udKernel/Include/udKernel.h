@@ -16,7 +16,7 @@ class udBlockStreamer;
 PROTOTYPE_COMPONENT(udView);
 
 // TODO: udMessageHandler returns void, should we return some error state??
-typedef FastDelegate3<udString , udString , udVariant , void> udMessageHandler;
+typedef FastDelegate3<udString , udString , const udVariant &, void> udMessageHandler;
 
 class udKernel
 {
@@ -25,7 +25,7 @@ public:
   static udResult Create(udKernel **ppInstance, udInitParams commandLine, int renderThreadCount = 0);
   udResult Destroy();
 
-  udResult SendMessage(udString target, udString sender, udString message, udVariant data);
+  udResult SendMessage(udString target, udString sender, udString message, const udVariant &data);
 
   void RegisterMessageHandler(udRCString name, udMessageHandler messageHandler);
 
@@ -97,7 +97,7 @@ protected:
   udResult InitComponents();
   udResult InitRender();
 
-  udResult ReceiveMessage(udString sender, udString message, udVariant data);
+  udResult ReceiveMessage(udString sender, udString message, const udVariant &data);
 
   int SendMessage(LuaState L);
 };

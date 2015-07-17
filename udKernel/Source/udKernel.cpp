@@ -85,7 +85,7 @@ epilogue:
   return result;
 }
 
-udResult udKernel::SendMessage(udString target, udString sender, udString message, udVariant data)
+udResult udKernel::SendMessage(udString target, udString sender, udString message, const udVariant &data)
 {
   if (target.empty())
     return udR_Failure_; // TODO: no target!!
@@ -137,7 +137,7 @@ udResult udKernel::SendMessage(udString target, udString sender, udString messag
   return udR_Failure_; // TODO: error, invalid target!
 }
 
-udResult udKernel::ReceiveMessage(udString sender, udString message, udVariant data)
+udResult udKernel::ReceiveMessage(udString sender, udString message, const udVariant &data)
 {
 
   return udR_Success;

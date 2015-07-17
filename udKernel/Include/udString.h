@@ -152,6 +152,7 @@ struct udRCString : public udRCSlice<const char>
   // constructors
   udRCString();
   udRCString(udRCString &&rval);
+  udRCString(const udRCString &val);
   udRCString(udRCSlice<const char> &&rval);
   udRCString(const udRCSlice<const char> &rcstr);
   template <typename U>
@@ -166,6 +167,7 @@ struct udRCString : public udRCSlice<const char>
 
   // assignment
   udRCString& operator =(const udRCSlice<const char> &rh);
+  udRCString& operator =(const udRCString &rval);
   udRCString& operator =(udRCString &&rval);
   udRCString& operator =(udRCSlice<const char> &&rval);
   template <typename U>

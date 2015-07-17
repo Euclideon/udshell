@@ -60,10 +60,36 @@ inline udVariant::udVariant(udVariant &&rval)
   rval.ownsArray = false;
 }
 
+inline udVariant::udVariant(const udVariant &val)
+  : t(val.t)
+  , ownsArray(val.ownsArray)
+  , length(val.length)
+  , p(val.p)
+{
+  if (ownsArray)
+  {
+    if(t == Type::Array)
+    {
+      a = (udVariant*)udAlloc(sizeof(udVariant)*length);
+      for(size_t i = 0; i<length; ++i)
+        new((void*)&a[i]) udVariant(val.a[i]);
+    }
+    else if(t == Type::AssocArray)
+    {
+      aa = (udKeyValuePair*)udAlloc(sizeof(udKeyValuePair)*length);
+      for(size_t i = 0; i<length; ++i)
+      {
+        new((void*)&aa[i].key) udVariant(val.aa[i].key);
+        new((void*)&aa[i].value) udVariant(val.aa[i].value);
+      }
+    }
+  }
+}
+
 
 // math types
 template<typename U>
-udVariant::udVariant(const udVector2<U> &v)
+inline udVariant::udVariant(const udVector2<U> &v)
   : t(Type::Array)
   , ownsArray(1)
   , length(2)
@@ -73,7 +99,7 @@ udVariant::udVariant(const udVector2<U> &v)
   new(&a[1]) udVariant(v.y);
 }
 template<typename U>
-udVariant::udVariant(const udVector3<U> &v)
+inline udVariant::udVariant(const udVector3<U> &v)
   : t(Type::Array)
   , ownsArray(1)
   , length(3)
@@ -84,7 +110,7 @@ udVariant::udVariant(const udVector3<U> &v)
   new(&a[2]) udVariant(v.z);
 }
 template<typename U>
-udVariant::udVariant(const udVector4<U> &v)
+inline udVariant::udVariant(const udVector4<U> &v)
   : t(Type::Array)
   , ownsArray(1)
   , length(4)
@@ -96,7 +122,7 @@ udVariant::udVariant(const udVector4<U> &v)
   new(&a[3]) udVariant(v.w);
 }
 template<typename U>
-udVariant::udVariant(const udMatrix4x4<U> &m)
+inline udVariant::udVariant(const udMatrix4x4<U> &m)
   : t(Type::Array)
   , ownsArray(1)
   , length(16)
@@ -110,6 +136,26 @@ inline udVariant::~udVariant()
 {
   if (t >= Type::Array && ownsArray)
     udFree(a);
+}
+
+inline udVariant& udVariant::operator=(udVariant &&rval)
+{
+  this->~udVariant();
+
+  t = rval.t;
+  ownsArray = rval.ownsArray;
+  length = rval.length;
+  p = rval.p;
+
+  rval.ownsArray = false;
+  return *this;
+}
+
+inline udVariant& udVariant::operator=(const udVariant &rval)
+{
+  this->~udVariant();
+  new(this) udVariant(rval);
+  return *this;
 }
 
 inline udVariant::Type udVariant::type() const

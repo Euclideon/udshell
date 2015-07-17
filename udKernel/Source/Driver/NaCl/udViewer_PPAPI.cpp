@@ -66,7 +66,7 @@ public:
 
   static void DebugPrintfCallback(const char *pString);
   static UDTHREADLOCAL udNewPepperInstance *pThreadLocalInstance;
-  void SendToJsCallback(udString senderUID, udString message, udVariant data);
+  void SendToJsCallback(udString senderUID, udString message, const udVariant &data);
 };
 
 UDTHREADLOCAL udNewPepperInstance* udNewPepperInstance::pThreadLocalInstance = NULL; // This can't be nullptr it creates a compile error.
@@ -79,7 +79,7 @@ udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
 }
 
 // ---------------------------------------------------------------------------------------
-void udNewPepperInstance::SendToJsCallback(udString sender, udString message, udVariant data)
+void udNewPepperInstance::SendToJsCallback(udString sender, udString message, const udVariant &data)
 {
   // TODO: Need to wrangle this to include the sender
   udRCString s = data.stringify();

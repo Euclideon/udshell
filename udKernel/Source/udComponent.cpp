@@ -102,22 +102,7 @@ const udPropertyDesc *udComponent::FindProperty(udString name) const
   return nullptr;
 }
 
-static size_t BytesForArray(udPropertyType type, size_t count)
-{
-  switch (type)
-  {
-    case udPropertyType::Boolean: return sizeof(bool)*count;
-    case udPropertyType::Integer: return sizeof(int64_t)*count;
-    case udPropertyType::Float: return sizeof(double)*count;
-    case udPropertyType::String: return sizeof(udString)*count;
-    case udPropertyType::Component: return sizeof(udComponentRef)*count;
-    default:
-      UDASSERT(false, "Shouldn't be here?");
-  }
-  return 0;
-}
-
-void udComponent::SetProperty(udString property, const udVariant value)
+void udComponent::SetProperty(udString property, const udVariant &value)
 {
   const udPropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
@@ -138,7 +123,7 @@ udVariant udComponent::GetProperty(udString property) const
 }
 
 
-udResult udComponent::ReceiveMessage(udString message, udString sender, udVariant data)
+udResult udComponent::ReceiveMessage(udString message, udString sender, const udVariant &data)
 {
   if (message.eqi("set"))
   {
@@ -159,7 +144,7 @@ udResult udComponent::ReceiveMessage(udString message, udString sender, udVarian
   return udR_Success;
 }
 
-udResult udComponent::SendMessage(udString target, udString message, udVariant data)
+udResult udComponent::SendMessage(udString target, udString message, const udVariant &data)
 {
   return pKernel->SendMessage(target, uid, message, data);
 }
