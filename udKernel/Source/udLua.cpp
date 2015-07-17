@@ -49,104 +49,10 @@ static int SendMessage(lua_State *L)
   udString sender = l.toString(2);
   udString message = l.toString(3);
 
-  int i;
-  udKeyValuePair *pAA;
-  size_t numElements;
-
+  // get args (is present)
   udVariant args;
-  if (numArgs > 4)
-    l.pop(numArgs-4); // we will only take the 4th arg as payload
-  if (numArgs == 4)
-  {
-    struct Frame
-    {
-      Frame() {}
-      Frame(udVariant *v, int i, int step) : v(v), i(i), step(step) {}
-      udVariant *v;
-      int i;
-      int step;
-    };
-    Frame stack[64];
-    int depth = 0;
-
-    udVariant *a = &args;
-
-read_value:
-    LuaType t = l.getType(-1);
-    switch (t)
-    {
-    case LuaType::Nil:
-      *a = udVariant();
-      break;
-    case LuaType::Boolean:
-      *a = udVariant(l.toBool(-1));
-      break;
-    case LuaType::LightUserData:
-      *a = udVariant();
-      break;
-    case LuaType::Number:
-      if (l.isInteger(-1))
-        *a = udVariant(l.toInt(-1));
-      else
-        *a = udVariant(l.toFloat(-1));
-      break;
-    case LuaType::String:
-      *a = udVariant(l.toString(-1));
-      break;
-    case LuaType::Function:
-      *a = udVariant();
-      break;
-    case LuaType::UserData:
-      *a = udVariant();
-      break;
-    case LuaType::Table:
-      // work out how many items are in the table
-      // HACK: we are doing a brute-force count! this should be replaced with better stuff
-      numElements = 0;
-      l.pushNil();  // first key
-      while (lua_next(l.state(), -2) != 0)
-      {
-        ++numElements;
-        l.pop();
-      }
-
-      // populate the table
-      pAA = (udKeyValuePair*)alloca(sizeof(udKeyValuePair)*numElements);
-      // TODO: check pAA i not nullptr!
-      *a = udVariant(udSlice<udKeyValuePair>(pAA, numElements));
-      l.pushNil();  // first key
-      i = 0;
-      while (lua_next(l.state(), -2) != 0)
-      {
-        stack[depth++] = Frame(a, i, 0);
-        a = &a->asAssocArray()[i].value;
-        goto read_value;
-resume_element:
-        a = stack[depth].v;
-        i = stack[depth].i;
-        l.pop();
-
-        stack[depth++] = Frame(a, i, 1);
-        a = &a->asAssocArray()[i].key;
-        goto read_value;
-finished_element:
-        a = stack[depth].v;
-        i = stack[depth].i + 1;
-      }
-      break;
-    default:
-      UDASSERT(false, "You shouldn't be here");
-      break;
-    }
-
-    if (depth--)
-    {
-      if (stack[depth].step == 0)
-        goto resume_element;
-      else
-        goto finished_element;
-    }
-  }
+  if (numArgs >= 4)
+    new(&args) udVariant(udVariant::luaGet(l, 4));
 
   /*udResult r = */l.kernel()->SendMessage(target, sender, message, args);
 
@@ -165,12 +71,21 @@ static int CreateComponent(lua_State *L)
     return 0;
   }
 
+  // get the type
   udString type = l.toString(1);
 
-  // TODO: support optional a table in arg2 for init params
+  // get the init params
+  udInitParams init;
+  udVariant args;
+  if (numArgs >= 2)
+  {
+    new(&args) udVariant(udVariant::luaGet(l, 2));
+    if (args.type() == udVariant::Type::AssocArray)
+      init = args.asAssocArray();
+  }
 
   udComponentRef c;
-  udResult r = l.kernel()->CreateComponent(type, nullptr, &c);
+  udResult r = l.kernel()->CreateComponent(type, init, &c);
   if (r == udR_Failure_)
     l.pushNil();
   else

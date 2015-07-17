@@ -27,6 +27,9 @@ public:
   };
 
   udVariant();
+  udVariant(udVariant &&rval);
+  udVariant(const udVariant &rval);
+
   udVariant(nullptr_t);
   udVariant(bool b);
   udVariant(int64_t i);
@@ -35,10 +38,6 @@ public:
   udVariant(udString s);
   udVariant(udSlice<udVariant> a);
   udVariant(udSlice<udKeyValuePair> aa);
-
-  udVariant(udVariant &&rval);
-  udVariant(const udVariant &rval);
-
 
   // math types
   template<typename U>
@@ -104,7 +103,10 @@ struct udKeyValuePair
   udKeyValuePair() {}
   udKeyValuePair(udKeyValuePair &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
   udKeyValuePair(const udKeyValuePair &val) : key(val.key), value(val.value) {}
+
   udKeyValuePair(const udVariant &key, const udVariant &value) : key(key), value(value) {}
+  udKeyValuePair(const udVariant &key, udVariant &&value) : key(key), value(std::move(value)) {}
+  udKeyValuePair(udVariant &&key, const udVariant &value) : key(std::move(key)), value(value) {}
   udKeyValuePair(udVariant &&key, udVariant &&value) : key(std::move(key)), value(std::move(value)) {}
 
   udVariant key;
