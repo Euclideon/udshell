@@ -30,6 +30,15 @@ static const udPropertyDesc props[] =
     nullptr
   }
 };
+static const udMethodDesc methods[] =
+{
+  {
+    "setdepthplanes",
+    "SetDepthPlanes",
+    "Set the near and far depth planes:\n  setdepthplanes(near, far)",
+    udMethod(&udCamera::SetDepthPlanes)
+  }
+};
 const udComponentDesc udCamera::descriptor =
 {
   &udNode::descriptor, // pSuperDesc
@@ -45,7 +54,8 @@ const udComponentDesc udCamera::descriptor =
   [](){ return udR_Success; },  // pInitRender
   udCamera::Create,             // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  udSlice<const udMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 

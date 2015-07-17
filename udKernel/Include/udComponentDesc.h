@@ -39,7 +39,7 @@ struct udGetter
 {
 public:
   udGetter(nullptr_t);
-  template <class X, class Type>
+  template <typename X, typename Type>
   udGetter(Type(X::*func)() const);
 
   operator bool() const { return shim != nullptr; }
@@ -61,7 +61,7 @@ struct udSetter
 {
 public:
   udSetter(nullptr_t);
-  template <class X, class Type>
+  template <typename X, typename Type>
   udSetter(void(X::*func)(Type));
 
   operator bool() const { return shim != nullptr; }
@@ -76,6 +76,34 @@ private:
 
   template<typename T>
   static void shimFunc(const udSetter * const pSetter, udComponent *pThis, const udVariant &value);
+};
+
+// method glue
+struct udMethod
+{
+public:
+  udMethod(nullptr_t);
+  template <typename X, typename Ret, typename... Args>
+  udMethod(Ret(X::*func)(Args...));
+  template <typename X, typename Ret, typename... Args>
+  udMethod(Ret(X::*func)(Args...) const);
+
+  operator bool() const { return shim != nullptr; }
+
+  udVariant call(udComponent *pThis, udSlice<udVariant> args) const;
+
+private:
+  typedef udVariant(Shim)(const udMethod* const, udComponent*, udSlice<udVariant>) const;
+
+  DelegateMemento m;
+  Shim *shim;
+
+  template<typename Ret>
+  struct Partial
+  {
+    template<typename... Args>
+    static udVariant shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value);
+  };
 };
 
 
@@ -116,6 +144,15 @@ struct udPropertyDesc
   udSetter setter;
 };
 
+struct udMethodDesc
+{
+  udString id;
+  udString displayName;
+  udString description;
+
+  udMethod method;
+};
+
 
 // component description
 enum { UDSHELL_APIVERSION = 100 };
@@ -144,6 +181,7 @@ struct udComponentDesc
   CreateInstanceCallback *pCreateInstance;
 
   const udSlice<const udPropertyDesc> properties;
+  const udSlice<const udMethodDesc> methods;
 };
 
 

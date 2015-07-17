@@ -56,6 +56,15 @@ static const udPropertyDesc props[] =
     nullptr
   }
 };
+static const udMethodDesc methods[] =
+{
+  {
+    "getuid",
+    "GetUid",
+    "Get the UID",
+    udMethod(&udComponent::GetUid)
+  }
+};
 const udComponentDesc udComponent::descriptor =
 {
   nullptr, // pSuperDesc
@@ -71,7 +80,8 @@ const udComponentDesc udComponent::descriptor =
   nullptr, // pInitRender
   nullptr, // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  udSlice<const udMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 

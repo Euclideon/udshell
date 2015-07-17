@@ -94,6 +94,7 @@ private:
   static void* udLuaAlloc(void *, void *ptr, size_t, size_t nsize);
 
   void pushComponentMetatable(const udComponentDesc &desc);
+  void pushDescriptor(const udComponentDesc &desc);
   void pushGetters(const udComponentDesc &desc);
   void pushSetters(const udComponentDesc &desc);
 
@@ -104,6 +105,7 @@ private:
   static int componentNewIndex(lua_State* L);
   static int getter(lua_State *L);
   static int setter(lua_State *L);
+  static int method(lua_State *L);
 };
 
 

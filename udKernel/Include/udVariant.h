@@ -73,9 +73,8 @@ public:
   udSlice<udKeyValuePair> asAssocArray() const;
   udSlice<udKeyValuePair> asAssocArraySeries() const;
 
-  size_t assocArraySeriesLen() const;
-
   size_t arrayLen() const;
+  size_t assocArraySeriesLen() const;
 
   udVariant operator[](size_t i) const;
   udVariant operator[](udString key) const;

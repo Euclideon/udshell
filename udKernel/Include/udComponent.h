@@ -41,9 +41,9 @@ public:
 
   // properties
   udString GetUid() const { return uid; }
-  udString GetType() const { return descriptor.id; }
-  udString GetDisplayName() const { return descriptor.displayName; }
-  udString GetDescription() const { return descriptor.description; }
+  udString GetType() const { return pType->id; }
+  udString GetDisplayName() const { return pType->displayName; }
+  udString GetDescription() const { return pType->description; }
 
 protected:
   udComponent(const udComponentDesc *_pType, udKernel *_pKernel, udRCString _uid, udInitParams initParams)

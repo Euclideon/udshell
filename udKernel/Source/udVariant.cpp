@@ -151,6 +151,14 @@ udSlice<udKeyValuePair> udVariant::asAssocArraySeries() const
   }
 }
 
+size_t udVariant::arrayLen() const
+{
+  if (t == Type::Array)
+    return length;
+  if (t == Type::AssocArray)
+    return assocArraySeriesLen();
+  return 0;
+}
 size_t udVariant::assocArraySeriesLen() const
 {
   if (t != Type::AssocArray)
@@ -159,15 +167,6 @@ size_t udVariant::assocArraySeriesLen() const
   while (i < length && aa[i].key.t == Type::Int && aa[i].key.i == i + 1)
     ++i;
   return i;
-}
-
-size_t udVariant::arrayLen() const
-{
-  if (t == Type::Array)
-    return length;
-  if (t == Type::AssocArray)
-    return assocArraySeriesLen();
-  return 0;
 }
 
 udVariant udVariant::operator[](size_t i) const
@@ -184,7 +183,6 @@ udVariant udVariant::operator[](size_t i) const
   }
   return udVariant(nullptr);
 }
-
 udVariant udVariant::operator[](udString key) const
 {
   if (t == Type::AssocArray)

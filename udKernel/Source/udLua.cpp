@@ -171,8 +171,10 @@ static int CreateComponent(lua_State *L)
 
   udComponentRef c;
   /*udResult r = */l.kernel()->CreateComponent(type, nullptr, &c);
-
-  l.pushComponent(c);
+  if (r == udR_Failure_)
+    l.pushNil();
+  else
+    l.pushComponent(c);
   return 1;
 }
 
@@ -356,25 +358,9 @@ void LuaState::pushComponentMetatable(const udComponentDesc &desc)
   pushString(desc.id);
   lua_setfield(L, -2, "__type");
 
-  // push the descriptor
-  // TODO: we should push the descriptor to lua, so the metadata is accessible
-//  ...pushDescriptor(desc);
-//  lua_setfield(L, -2, "__desc");
-
   // push a destructor
   lua_pushcfunction(L, &componentCleaner);
   lua_setfield(L, -2, "__gc");
-
-  pushGetters(desc);
-  lua_setfield(L, -2, "__index");
-  pushSetters(desc);
-  lua_setfield(L, -2, "__newindex");
-
-  lua_pushcfunction(L, &componentCompare);
-  lua_setfield(L, -2, "__eq");
-
-  lua_pushcfunction(L, &componentToString);
-  lua_setfield(L, -2, "__tostring");
 
   // set the parent metatable
   if (desc.pSuperDesc)
@@ -383,14 +369,34 @@ void LuaState::pushComponentMetatable(const udComponentDesc &desc)
     lua_setmetatable(L, -2);
   }
 
+  // push getters and setters
+  pushString("__index");
+  pushGetters(desc);
+  lua_rawset(L, -3);
+  pushString("__newindex");
+  pushSetters(desc);
+  lua_rawset(L, -3);
+
+  // compare operator
+  pushString("__eq");
+  lua_pushcfunction(L, &componentCompare);
+  lua_rawset(L, -3);
+
+  // to string function
+  pushString("__tostring");
+  lua_pushcfunction(L, &componentToString);
+  lua_rawset(L, -3);
+
   // create a '__metatable' entry to protect the metatable against modification
-  lua_pushvalue(L, -1);
-  lua_setfield(L, -2, "__metatable");
+  pushString("__metatable");
+  lua_pushvalue(L, -2);
+  lua_rawset(L, -3);
 }
+
 void LuaState::pushGetters(const udComponentDesc &desc)
 {
-  lua_newtable(L); // -2 is getters
-  lua_newtable(L); // -1 is methods
+  lua_newtable(L); // upvalue(1) == getters table
+  lua_newtable(L); // upvalue(2) == members/methods table
 
   // populate getters
   for (auto &p : desc.properties)
@@ -403,13 +409,26 @@ void LuaState::pushGetters(const udComponentDesc &desc)
     }
   }
 
-  // TODO: push methods
-/*
-  pushMethod!(T, member)(L);
-  lua_setfield(L, -2, member.ptr);
-*/
+  // add type and descriptor as members
+  pushDescriptor(desc);
+  lua_setfield(L, -2, "descriptor");
 
-  lua_pushcclosure(L, &componentIndex, 2);
+  // populate methods
+  for (auto &m : desc.methods)
+  {
+    if (m.method) // TODO: we should possibly push a function that reports an "unreadable" error
+    {
+      lua_pushlightuserdata(L, (void*)&m);
+      lua_pushcclosure(L, &method, 1);
+      lua_setfield(L, -2, m.id.ptr);
+    }
+  }
+
+  // upvalue(3) is super.__index
+  if (luaL_getmetafield(L, -4, "__index") == LUA_TNIL)
+    lua_pushnil(L);
+
+  lua_pushcclosure(L, &componentIndex, 3);
 }
 void LuaState::pushSetters(const udComponentDesc &desc)
 {
@@ -425,7 +444,57 @@ void LuaState::pushSetters(const udComponentDesc &desc)
       lua_setfield(L, -2, p.id.ptr);
     }
   }
-  lua_pushcclosure(L, &componentNewIndex, 1);
+
+  if (luaL_getmetafield(L, -3, "__newindex") == LUA_TNIL)
+    lua_pushnil(L);
+
+  lua_pushcclosure(L, &componentNewIndex, 2);
+}
+void LuaState::pushDescriptor(const udComponentDesc &desc)
+{
+  lua_createtable(L, 0, 6);
+
+  pushInt(desc.udVersion);
+  lua_setfield(L, -2, "apiversion");
+  pushInt(desc.pluginVersion);
+  lua_setfield(L, -2, "pluginversion");
+  pushString(desc.id);
+  lua_setfield(L, -2, "id");
+  pushString(desc.displayName);
+  lua_setfield(L, -2, "displayname");
+  pushString(desc.description);
+  lua_setfield(L, -2, "description");
+
+  // TODO: parent descriptor should also be here...
+
+  if (desc.properties.empty())
+    return;
+
+  lua_createtable(L, 0, 0);
+  size_t i = 1;
+  for (auto &p : desc.properties)
+  {
+    lua_createtable(L, 0, 0);
+
+    pushString(p.id);
+    lua_setfield(L, -2, "id");
+    pushString(p.displayName);
+    lua_setfield(L, -2, "displayname");
+    pushString(p.description);
+    lua_setfield(L, -2, "description");
+
+    pushInt((int)p.type);
+    lua_setfield(L, -2, "type");
+    pushInt(p.arrayLength);
+    lua_setfield(L, -2, "arraylength");
+    pushInt(p.flags);
+    lua_setfield(L, -2, "flags");
+    pushInt((int)p.displayType);
+    lua_setfield(L, -2, "displaytype");
+
+    lua_seti(L, -2, i++);
+  }
+  lua_setfield(L, -2, "properties");
 }
 
 void LuaState::pushComponent(udComponentRef c)
@@ -495,11 +564,25 @@ int LuaState::componentIndex(lua_State* L)
     lua_call(L, 1, LUA_MULTRET);
     return lua_gettop(L) - 2;
   }
-  else
-    lua_pop(L, 1);
+  lua_pop(L, 1);
 
-  // return method
+  // check the members/method table
   lua_getfield(L, lua_upvalueindex(2), field);
+  if (!lua_isnil(L, -1))
+    return 1;
+  lua_pop(L, 1);
+
+  // call super.__index
+  lua_pushvalue(L, lua_upvalueindex(3));
+  if (!lua_isnil(L, -1))
+  {
+    lua_pushvalue(L, 1);
+    lua_pushvalue(L, 2);
+    lua_call(L, 2, LUA_MULTRET);
+    return lua_gettop(L) - 2;
+  }
+
+  // return nil (already on stack)
   return 1;
 }
 int LuaState::componentNewIndex(lua_State* L)
@@ -513,10 +596,16 @@ int LuaState::componentNewIndex(lua_State* L)
     lua_pushvalue(L, 1);
     lua_pushvalue(L, 3);
     lua_call(L, 2, LUA_MULTRET);
+    return 0;
   }
-  else
+
+  // call super.__newindex
+  lua_pushvalue(L, lua_upvalueindex(2));
+  if (!lua_isnil(L, -1))
   {
-    // TODO: error?
+    lua_pushvalue(L, 1);
+    lua_pushvalue(L, 3);
+    lua_call(L, 2, LUA_MULTRET);
   }
   return 0;
 }
@@ -541,4 +630,25 @@ int LuaState::setter(lua_State *L)
 
   pProp->setter.set(c.ptr(), l.get(2));
   return 0;
+}
+int LuaState::method(lua_State *L)
+{
+  LuaState &l = (LuaState&)L;
+  const udMethodDesc *pM = (const udMethodDesc*)l.toUserData(lua_upvalueindex(1));
+
+  udComponentRef c = l.toComponent(1);
+
+  int numArgs = l.top() - 2;
+  udVariant *pArgs = numArgs > 0 ? (udVariant*)alloca(sizeof(udVariant)*numArgs) : nullptr;
+
+  for (int i = 0; i < numArgs; ++i)
+    new(&pArgs[i]) udVariant(udVariant::luaGet(l, 2 + i));
+
+  udVariant v(pM->method.call(c.ptr(), udSlice<udVariant>(pArgs, numArgs)));
+
+  for (int i = 0; i < numArgs; ++i)
+    pArgs[i].~udVariant();
+
+  v.luaPush(l);
+  return 1;
 }
