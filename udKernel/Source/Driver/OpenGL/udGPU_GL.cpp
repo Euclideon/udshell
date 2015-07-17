@@ -35,21 +35,21 @@ struct udVertexDataFormatGL
   { GL_BGRA,  GL_UNSIGNED_BYTE, GL_TRUE },  // udVDF_UByte4N_BGRA,
 };
 
-char *s_attribNames[] =
+char s_attribNames[][16] =
 {
   // MAD HAX: we reserved an extra '\0' on the end of each attrib name
   //          we'll overwrite that with the stream index temporarily...
-  (char*)"a_position\0",
-  (char*)"a_normal\0",
-  (char*)"a_colour\0",
-  (char*)"a_texcoord\0"
+  "a_position\0",
+  "a_normal\0",
+  "a_colour\0",
+  "a_texcoord\0"
 };
 const int s_attribNameLen[] = // HAX: this length is used to overwrite the '\0' with an index at runtime
 {
-  9,
-  7,
-  7,
-  9
+  10,
+  8,
+  8,
+  10
 };
 
 
