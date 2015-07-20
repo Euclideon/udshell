@@ -32,7 +32,15 @@ public:
 
   udVariant(nullptr_t);
   udVariant(bool b);
+  udVariant(int8_t i);
+  udVariant(uint8_t i);
+  udVariant(int16_t i);
+  udVariant(uint16_t i);
+  udVariant(int32_t i);
+  udVariant(uint32_t i);
   udVariant(int64_t i);
+  udVariant(uint64_t i);
+  udVariant(float f);
   udVariant(double f);
   udVariant(udComponentRef &c);
   udVariant(udString s);
