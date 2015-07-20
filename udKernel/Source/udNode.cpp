@@ -7,45 +7,33 @@ static const udPropertyDesc props[] =
     "matrix", // id
     "Matrix", // displayName
     "Local matrix", // description
-    udPropertyType::Float, // type
-    16, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udNode::GetMatrix),
-    udSetter(&udNode::SetMatrix)
+    udGetter(&udNode::GetMatrix), // getter
+    udSetter(&udNode::SetMatrix), // setter
+    udTypeDesc(udPropertyType::Float, 16) // type
   },
   {
     "position", // id
     "Position", // displayName
     "Local position", // description
-    udPropertyType::Float, // type
-    3, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udNode::GetPosition),
-    udSetter(&udNode::SetPosition)
+    udGetter(&udNode::GetPosition), // getter
+    udSetter(&udNode::SetPosition), // setter
+    udTypeDesc(udPropertyType::Float, 3) // type
   },
   {
     "parent", // id
     "Parent", // displayName
     "Parent node", // description
-    udPropertyType::Component, // type
-    0, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udNode::GetPosition),
-    udSetter(&udNode::SetPosition)
+    udGetter(&udNode::GetPosition), // getter
+    udSetter(&udNode::SetPosition), // setter
+    udTypeDesc(udPropertyType::Component) // type
   },
   {
     "children", // id
     "Children", // displayName
     "Child nodes", // description
-    udPropertyType::Component, // type
-    ~0U, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udNode::GetPosition),
-    udSetter(&udNode::SetPosition)
+    udGetter(&udNode::GetPosition), // getter
+    udSetter(&udNode::SetPosition), // setter
+    udTypeDesc(udPropertyType::Component, ~0U) // type
   },
 };
 const udComponentDesc udNode::descriptor =

@@ -11,6 +11,11 @@ inline udSlice<T>::udSlice(nullptr_t)
 {}
 
 template<typename T>
+inline udSlice<T>::udSlice(std::initializer_list<T> list)
+  : length(list.size()) , ptr(list.begin())
+{}
+
+template<typename T>
 inline udSlice<T>::udSlice(T* ptr, size_t length)
   : length(length), ptr(ptr)
 {}

@@ -109,11 +109,14 @@ private:
 // property description
 enum class udPropertyType : uint32_t
 {
+  Void,
   Boolean,
   Integer,
   Float,
   String,
   Component,
+  Enum,
+  Flags,
 };
 
 enum udPropertyFlags : uint32_t
@@ -121,9 +124,24 @@ enum udPropertyFlags : uint32_t
   udPF_Immutable = 1<<0 // must be initialised during construction
 };
 
-enum class udPropertyDisplayType : uint32_t
+struct udEnumKVP
 {
-  Default
+  udEnumKVP(udString key, int64_t v) : key(key), value(v) {}
+
+  udString key;
+  int64_t value;
+};
+#define EnumKVP(e) udEnumKVP( #e, (int64_t)e )
+
+struct udTypeDesc
+{
+  udTypeDesc(udPropertyType type, uint32_t arrayLength = 0, const udSlice<const udEnumKVP> kvp = nullptr)
+    : type(type), arrayLength(arrayLength), kvp(kvp)
+  {}
+
+  udPropertyType type;
+  uint32_t arrayLength;
+  const udSlice<const udEnumKVP> kvp;
 };
 
 struct udPropertyDesc
@@ -132,15 +150,12 @@ struct udPropertyDesc
   udString displayName;
   udString description;
 
-  udPropertyType type;
-  uint32_t arrayLength;
-
-  uint32_t flags;
-
-  udPropertyDisplayType displayType;
-
   udGetter getter;
   udSetter setter;
+
+  udTypeDesc type;
+  udString displayType;
+  uint32_t flags;
 };
 
 struct udMethodDesc
@@ -150,6 +165,9 @@ struct udMethodDesc
   udString description;
 
   udMethod method;
+
+  udTypeDesc result;
+  const udSlice<const udTypeDesc> args;
 };
 
 

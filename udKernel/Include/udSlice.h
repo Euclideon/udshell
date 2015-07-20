@@ -4,6 +4,8 @@
 #include "udPlatform.h"
 #include "udResult.h"
 
+#include <initializer_list>
+
 // slices are bounded arrays, unlike C's conventional unbounded pointers (typically, with separate length stored in parallel)
 // no attempt is made to create a one-size-fits-all implementation, as it is recognised that usages offer distinct advantages/disadvantages
 // slise is the basis of the suite however, and everything is based on udSlice. derived types address specifics in usage and/or ownership patterns
@@ -32,6 +34,7 @@ struct udSlice
   // constructors
   udSlice<T>();
   udSlice<T>(nullptr_t);
+  udSlice<T>(std::initializer_list<T> list);
   udSlice<T>(T* ptr, size_t length);
   template <typename U> udSlice<T>(udSlice<U> rh);
 

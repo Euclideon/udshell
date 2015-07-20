@@ -11,23 +11,17 @@ static const udPropertyDesc props[] =
     "cameramatrix", // id
     "Position", // displayName
     "Position of camera", // description
-    udPropertyType::Float , // type
-    16, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
     udGetter(&udCamera::GetCameraMatrix),
-    nullptr
+    nullptr,
+    udTypeDesc(udPropertyType::Float, 16)
   },
   {
     "viewmatrix", // id
     "Position", // displayName
     "Position of camera", // description
-    udPropertyType::Float, // type
-    16, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
     udGetter(&udCamera::GetViewMatrix),
-    nullptr
+    nullptr,
+    udTypeDesc(udPropertyType::Float, 16)
   }
 };
 static const udMethodDesc methods[] =
@@ -36,7 +30,12 @@ static const udMethodDesc methods[] =
     "setdepthplanes",
     "SetDepthPlanes",
     "Set the near and far depth planes:\n  setdepthplanes(near, far)",
-    udMethod(&udCamera::SetDepthPlanes)
+    udMethod(&udCamera::SetDepthPlanes),
+    udTypeDesc(udPropertyType::Void), // result
+    { // args
+      udTypeDesc(udPropertyType::Float),
+      udTypeDesc(udPropertyType::Float)
+    }
   }
 };
 const udComponentDesc udCamera::descriptor =
@@ -65,45 +64,33 @@ static const udPropertyDesc simpleCameraProps[] =
     "matrix", // id
     "Matrix", // displayName
     "Local matrix", // description
-    udPropertyType::Float, // type
-    16, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udSimpleCamera::GetMatrix),
-    udSetter(&udSimpleCamera::SetMatrix)
+    udGetter(&udSimpleCamera::GetMatrix), // getter
+    udSetter(&udSimpleCamera::SetMatrix), // setter
+    udTypeDesc(udPropertyType::Float, 16) // type
   },
   {
     "position", // id
     "Position", // displayName
     "Local position", // description
-    udPropertyType::Float, // type
-    3, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udSimpleCamera::GetPosition),
-    udSetter(&udSimpleCamera::SetPosition)
+    udGetter(&udSimpleCamera::GetPosition), // getter
+    udSetter(&udSimpleCamera::SetPosition), // setter
+    udTypeDesc(udPropertyType::Float, 3) // type
   },
   {
     "orientation", // id
     "Orientation", // displayName
     "Camera orientation (YPR)", // description
-    udPropertyType::Float, // type
-    3, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    nullptr,
-    udSetter(&udSimpleCamera::SetOrientation)
+    nullptr, // getter
+    udSetter(&udSimpleCamera::SetOrientation), // setter
+    udTypeDesc(udPropertyType::Float, 3) // type
   },
   {
     "speed", // id
     "Speed", // displayName
     "Camera speed", // description
-    udPropertyType::Float, // type
-    0, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    nullptr,
-    udSetter(&udSimpleCamera::SetSpeed)
+    nullptr, // getter
+    udSetter(&udSimpleCamera::SetSpeed), // setter
+    udTypeDesc(udPropertyType::Float) // type
   }
 };
 const udComponentDesc udSimpleCamera::descriptor =

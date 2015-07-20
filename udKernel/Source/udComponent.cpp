@@ -9,51 +9,40 @@
 #endif // UDPLATFORM_WINDOWS
 
 
+
 static const udPropertyDesc props[] =
 {
   {
     "uid", // id
     "UID", // displayName
     "Component UID", // description
-    udPropertyType::String, // type
-    0, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udComponent::GetUid),
-    nullptr
+    udGetter(&udComponent::GetUid), // getter
+    nullptr, // setter
+    udTypeDesc(udPropertyType::String) // type
   },
   {
     "type", // id
     "Type", // displayName
     "Component Type", // description
-    udPropertyType::String, // type
-    0, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udComponent::GetType),
-    nullptr
+    udGetter(&udComponent::GetType), // getter
+    nullptr, // setter
+    udTypeDesc(udPropertyType::String) // type
   },
   {
     "displayname", // id
     "Display Name", // displayName
     "Component Display Name", // description
-    udPropertyType::String, // type
-    0, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udComponent::GetDisplayName),
-    nullptr
+    udGetter(&udComponent::GetDisplayName), // getter
+    nullptr, // setter
+    udTypeDesc(udPropertyType::String) // type
   },
   {
     "description", // id
     "Description", // displayName
     "Component Description", // description
-    udPropertyType::String, // type
-    0, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    udGetter(&udComponent::GetDescription),
-    nullptr
+    udGetter(&udComponent::GetDescription), // getter
+    nullptr, // setter
+    udTypeDesc(udPropertyType::String) // type
   }
 };
 static const udMethodDesc methods[] =
@@ -62,7 +51,8 @@ static const udMethodDesc methods[] =
     "getuid",
     "GetUid",
     "Get the UID",
-    udMethod(&udComponent::GetUid)
+    udMethod(&udComponent::GetUid),
+    udTypeDesc(udPropertyType::Void) // result
   }
 };
 const udComponentDesc udComponent::descriptor =

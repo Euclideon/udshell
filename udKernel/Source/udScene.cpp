@@ -9,12 +9,9 @@ static const udPropertyDesc props[] =
     "model", // id
     "Model", // displayName
     "Model to render", // description
-    udPropertyType::Integer, // type
-    0, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    nullptr,
-    nullptr
+    nullptr, // getter
+    nullptr, // setter
+    udTypeDesc(udPropertyType::Integer) // type
   }
 };
 const udComponentDesc udScene::descriptor =

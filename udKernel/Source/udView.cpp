@@ -21,12 +21,9 @@ static const udPropertyDesc props[] =
     "camera", // id
     "Camera", // displayName
     "Camera for viewport", // description
-    udPropertyType::Integer, // type
-    0, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    nullptr,
-    nullptr
+    nullptr, // getter
+    nullptr, // setter
+    udTypeDesc(udPropertyType::Component) // type
   }
 };
 const udComponentDesc udView::descriptor =

@@ -398,13 +398,13 @@ void LuaState::pushDescriptor(const udComponentDesc &desc)
     pushString(p.description);
     lua_setfield(L, -2, "description");
 
-    pushInt((int)p.type);
+    pushInt((int)p.type.type);
     lua_setfield(L, -2, "type");
-    pushInt(p.arrayLength);
+    pushInt(p.type.arrayLength);
     lua_setfield(L, -2, "arraylength");
     pushInt(p.flags);
     lua_setfield(L, -2, "flags");
-    pushInt((int)p.displayType);
+    pushString(p.displayType);
     lua_setfield(L, -2, "displaytype");
 
     lua_seti(L, -2, i++);
