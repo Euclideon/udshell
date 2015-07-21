@@ -16,7 +16,7 @@ static const udPropertyDesc props[] =
     "uid", // id
     "UID", // displayName
     "Component UID", // description
-    udGetter(&udComponent::GetUid), // getter
+    &udComponent::GetUid, // getter
     nullptr, // setter
     udTypeDesc(udPropertyType::String) // type
   },
@@ -24,7 +24,7 @@ static const udPropertyDesc props[] =
     "type", // id
     "Type", // displayName
     "Component Type", // description
-    udGetter(&udComponent::GetType), // getter
+    &udComponent::GetType, // getter
     nullptr, // setter
     udTypeDesc(udPropertyType::String) // type
   },
@@ -32,7 +32,7 @@ static const udPropertyDesc props[] =
     "displayname", // id
     "Display Name", // displayName
     "Component Display Name", // description
-    udGetter(&udComponent::GetDisplayName), // getter
+    &udComponent::GetDisplayName, // getter
     nullptr, // setter
     udTypeDesc(udPropertyType::String) // type
   },
@@ -40,19 +40,9 @@ static const udPropertyDesc props[] =
     "description", // id
     "Description", // displayName
     "Component Description", // description
-    udGetter(&udComponent::GetDescription), // getter
+    &udComponent::GetDescription, // getter
     nullptr, // setter
     udTypeDesc(udPropertyType::String) // type
-  }
-};
-static const udMethodDesc methods[] =
-{
-  {
-    "getuid",
-    "GetUid",
-    "Get the UID",
-    udMethod(&udComponent::GetUid),
-    udTypeDesc(udPropertyType::Void) // result
   }
 };
 const udComponentDesc udComponent::descriptor =
@@ -63,15 +53,13 @@ const udComponentDesc udComponent::descriptor =
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "component", // id
-  "udComponent",    // displayName
+  "udComponent", // displayName
   "Is a component", // description
 
   nullptr, // pInit
-  nullptr, // pInitRender
   nullptr, // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<const udMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 

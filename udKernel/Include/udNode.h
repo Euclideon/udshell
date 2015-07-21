@@ -6,16 +6,7 @@
 #include "udInput.h"
 #include "udMath.h"
 
-
-class udRenderable
-{
-  // TODO: has stuff
-  // * textures
-  // * vertex data
-  // * shader
-  // * constants
-  // * render states
-};
+struct udRenderScene;
 
 class udNode;
 PROTOTYPE_COMPONENT(udNode);
@@ -27,6 +18,8 @@ public:
 
   virtual udResult InputEvent(const udInputEvent &ev) { return udR_Success; }
   virtual udResult Update(double timeStep) { return udR_Success; }
+  virtual udResult Render(udRenderScene *pScene, const udDouble4x4 &mat);
+
   virtual udResult Render(const udDouble4x4 &mat) { return udR_Success; }
 
   virtual void SetMatrix(const udDouble4x4 &mat) { matrix = mat; }
@@ -38,6 +31,11 @@ public:
   udNodeRef Parent() const { return parent; }
   const udSlice<udNodeRef> Children() const { return children; }
 
+  void AddChild(udNodeRef c);
+  void RemoveChild(udNodeRef c);
+
+  void Detach();
+
   void CalculateWorldMatrix(udDouble4x4 *pMatrix) const;
 
 protected:
@@ -45,10 +43,10 @@ protected:
     : udComponent(pType, pKernel, uid, initParams) {}
   virtual ~udNode() {}
 
-  udDouble4x4 matrix = udDouble4x4::identity();
-
   udNodeRef parent;
-  udRCSlice<udNodeRef> children;
+  udFixedSlice<udNodeRef, 3> children;
+
+  udDouble4x4 matrix = udDouble4x4::identity();
 
   // TODO: enable/visible/etc flags
 
@@ -56,14 +54,6 @@ protected:
   {
     return udNew(udNode, pType, pKernel, uid, initParams);
   }
-};
-
-class udRenderScene
-{
-public:
-
-protected:
-  int refCount;
 };
 
 #endif // UDNODE_H

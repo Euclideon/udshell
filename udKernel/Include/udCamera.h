@@ -21,18 +21,18 @@ public:
   udDouble4x4 GetCameraMatrix() const { udDouble4x4 m; CalculateWorldMatrix(&m); return m; }
   udDouble4x4 GetViewMatrix() const { return GetCameraMatrix().inverse(); }
 
-  void GetProjectionMatrix(float aspectRatio, udDouble4x4 *pMatrix) const;
+  void GetProjectionMatrix(double aspectRatio, udDouble4x4 *pMatrix) const;
 
-  void SetPerspective(float fovY) { bOrtho = false; this->fovY = fovY;  }
-  void SetOrtho(float orthoHeight) { bOrtho = true; this->orthoHeight = orthoHeight;  }
-  void SetDepthPlanes(float zNear, float zFar) { this->zNear = zNear; this->zFar = zFar; }
+  void SetPerspective(double fovY) { bOrtho = false; this->fovY = fovY; }
+  void SetOrtho(double orthoHeight) { bOrtho = true; this->orthoHeight = orthoHeight; }
+  void SetDepthPlanes(double zNear, double zFar) { this->zNear = zNear; this->zFar = zFar; }
 
 protected:
   bool bOrtho = false;
-  float fovY = UD_DEG2RADf(60);
-  float orthoHeight = 1.f;
-  float zNear = 0.1f;
-  float zFar = 1000.f;
+  double fovY = UD_DEG2RAD(60);
+  double orthoHeight = 1.0;
+  double zNear = 0.1;
+  double zFar = 1000.0;
 
 protected:
   udCamera(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)

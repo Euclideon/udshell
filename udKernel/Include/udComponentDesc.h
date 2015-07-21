@@ -177,7 +177,6 @@ enum { UDSHELL_APIVERSION = 100 };
 enum { UDSHELL_PLUGINVERSION = UDSHELL_APIVERSION };
 
 typedef udResult(InitComponent)();
-typedef udResult(InitRender)();
 typedef udComponent *(CreateInstanceCallback)(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams);
 
 struct udComponentDesc
@@ -195,7 +194,6 @@ struct udComponentDesc
 
 //  this
   InitComponent *pInit;
-  InitRender *pInitRender;
   CreateInstanceCallback *pCreateInstance;
 
   const udSlice<const udPropertyDesc> properties;

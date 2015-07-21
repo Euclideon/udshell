@@ -11,7 +11,7 @@ static const udPropertyDesc props[] =
     "cameramatrix", // id
     "Position", // displayName
     "Position of camera", // description
-    udGetter(&udCamera::GetCameraMatrix),
+    &udCamera::GetCameraMatrix,
     nullptr,
     udTypeDesc(udPropertyType::Float, 16)
   },
@@ -19,7 +19,7 @@ static const udPropertyDesc props[] =
     "viewmatrix", // id
     "Position", // displayName
     "Position of camera", // description
-    udGetter(&udCamera::GetViewMatrix),
+    &udCamera::GetViewMatrix,
     nullptr,
     udTypeDesc(udPropertyType::Float, 16)
   }
@@ -50,7 +50,6 @@ const udComponentDesc udCamera::descriptor =
   "Is a camera", // description
 
   [](){ return udR_Success; },  // pInit
-  [](){ return udR_Success; },  // pInitRender
   udCamera::Create,             // pCreateInstance
 
   udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
@@ -64,16 +63,16 @@ static const udPropertyDesc simpleCameraProps[] =
     "matrix", // id
     "Matrix", // displayName
     "Local matrix", // description
-    udGetter(&udSimpleCamera::GetMatrix), // getter
-    udSetter(&udSimpleCamera::SetMatrix), // setter
+    &udSimpleCamera::GetMatrix, // getter
+    &udSimpleCamera::SetMatrix, // setter
     udTypeDesc(udPropertyType::Float, 16) // type
   },
   {
     "position", // id
     "Position", // displayName
     "Local position", // description
-    udGetter(&udSimpleCamera::GetPosition), // getter
-    udSetter(&udSimpleCamera::SetPosition), // setter
+    &udSimpleCamera::GetPosition, // getter
+    &udSimpleCamera::SetPosition, // setter
     udTypeDesc(udPropertyType::Float, 3) // type
   },
   {
@@ -81,7 +80,7 @@ static const udPropertyDesc simpleCameraProps[] =
     "Orientation", // displayName
     "Camera orientation (YPR)", // description
     nullptr, // getter
-    udSetter(&udSimpleCamera::SetOrientation), // setter
+    &udSimpleCamera::SetOrientation, // setter
     udTypeDesc(udPropertyType::Float, 3) // type
   },
   {
@@ -89,7 +88,7 @@ static const udPropertyDesc simpleCameraProps[] =
     "Speed", // displayName
     "Camera speed", // description
     nullptr, // getter
-    udSetter(&udSimpleCamera::SetSpeed), // setter
+    &udSimpleCamera::SetSpeed, // setter
     udTypeDesc(udPropertyType::Float) // type
   }
 };
@@ -105,14 +104,13 @@ const udComponentDesc udSimpleCamera::descriptor =
   "Is a simple camera", // description
 
   [](){ return udR_Success; },  // pInit
-  [](){ return udR_Success; },  // pInitRender
   udSimpleCamera::Create,       // pCreateInstance
 
   udSlice<const udPropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
 };
 
 
-void udCamera::GetProjectionMatrix(float aspectRatio, udDouble4x4 *pMatrix) const
+void udCamera::GetProjectionMatrix(double aspectRatio, udDouble4x4 *pMatrix) const
 {
   if (!bOrtho)
     *pMatrix = udDouble4x4::perspective(fovY, aspectRatio, zNear, zFar);

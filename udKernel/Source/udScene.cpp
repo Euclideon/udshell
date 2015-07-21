@@ -1,15 +1,17 @@
 
 #include "udScene.h"
 #include "udView.h"
+#include "udKernel.h"
+#include "udRenderScene.h"
 
 
 static const udPropertyDesc props[] =
 {
   {
-    "model", // id
-    "Model", // displayName
-    "Model to render", // description
-    nullptr, // getter
+    "rootnode", // id
+    "RootNode", // displayName
+    "Scene root node", // description
+    &udScene::GetRootNode, // getter
     nullptr, // setter
     udTypeDesc(udPropertyType::Integer) // type
   }
@@ -26,7 +28,6 @@ const udComponentDesc udScene::descriptor =
   "Is a scene", // description
 
   [](){ return udR_Success; },             // pInit
-  [](){ return udR_Success; },             // pInitRender
   udScene::Create, // pCreateInstance
 
   udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
@@ -39,9 +40,7 @@ udResult udScene::InputEvent(const udInputEvent &ev)
   //...
 
   // pass input to the hierarchy...
-  if (pRootNode)
-    return pRootNode->InputEvent(ev);
-  return udR_EventNotHandled;
+  return rootNode->InputEvent(ev);
 }
 
 udResult udScene::Update(double timeDelta)
@@ -50,24 +49,23 @@ udResult udScene::Update(double timeDelta)
   //...
 
   // update the hierarchy...
-  if (pRootNode)
-    return pRootNode->Update(timeDelta);
-  return udR_Success;
+  return rootNode->Update(timeDelta);
 }
 
-udResult udScene::Render(udViewRef pView)
+udSharedPtr<const udRenderScene> udScene::GetRenderScene()
 {
-  // TODO: this will go away, and be represented by
+  if (!bDirty)
+    return spCache;
 
-  udRenderView *pRenderView = pView->GetUDRenderView();
+  udRenderScene *pScene = new udRenderScene;
 
-  udRenderModel *pRenderModels[16];
-  for (size_t i = 0; i < numRenderModels; ++i)
-    pRenderModels[i] = &renderModels[i];
+  // build scene
+  rootNode->Render(pScene, rootNode->GetMatrix());
 
-  udRender_Render(pRenderView, pRenderModels, (int)numRenderModels, &options);
+  spCache = udSharedPtr<const udRenderScene>(pScene);
+  bDirty = false;
 
-  return udR_Success;
+  return spCache;
 }
 
 udResult udScene::SetRenderModels(struct udRenderModel models[], size_t numModels)
@@ -86,29 +84,11 @@ udResult udScene::SetRenderOptions(const struct udRenderOptions &options)
   return udR_Success;
 }
 
-udRenderScene *udScene::GetRenderScene()
-{
-  if (!bDirty && pRenderScene)
-    return pRenderScene;
-
-  // begin a new hierarchy...
-  pRenderScene = nullptr; // TODO: create a new empty one...
-
-  // call into the hierarchy to populate the render scene with renderables...
-  if (pRootNode)
-    pRootNode->Render(udDouble4x4::identity());
-
-  return pRenderScene;
-}
-
 udScene::udScene(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams) :
   udComponent(pType, pKernel, uid, initParams)
 {
   timeStep = 1.0 / 30.0;
-  pRootNode = nullptr;
-  bDirty = false;
-
-  pRenderScene = nullptr;
+  rootNode = pKernel->CreateComponent<udNode>();
 
   memset(&options, 0, sizeof(options));
   memset(&renderModels, 0, sizeof(renderModels));

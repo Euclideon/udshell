@@ -247,17 +247,10 @@ udResult udKernel::InitRender()
 {
   udHAL_InitRender();
 
-  udResult r = udR_Success;
-  for (auto i : componentRegistry)
-  {
-    if (i.pDesc->pInitRender)
-    {
-      r = i.pDesc->pInitRender();
-      if (r != udR_Success)
-        break;
-    }
-  }
-  return r;
+  void udRenderScene_InitRender();
+  udRenderScene_InitRender();
+
+  return udR_Success;
 }
 
 void udKernel::Exec(udString code)
