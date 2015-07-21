@@ -3,6 +3,8 @@
 #define UDQT_INTERNAL_H
 
 #include "udDriver.h"
+#include "udTexture.h"
+#include "udVertex.h"
 
 #include <QOpenGLFunctions_2_0>
 #include <QOpenGLDebugLogger>
@@ -16,4 +18,51 @@ struct udQtGLContext
 
 extern udQtGLContext s_QtGLContext;
 
-#endif
+
+class QOpenGLTexture;
+class QOpenGLShader;
+class QOpenGLShaderProgram;
+class QOpenGLBuffer;
+
+struct udTexture
+{
+  udTextureType type;
+  udImageFormat format;
+  size_t width, height, depth;
+  size_t elements;
+  int levels;
+  QOpenGLTexture *pTexture;
+  //GLuint texture;
+};
+
+struct udVertexElementData
+{
+  int offset;
+  int stride;
+};
+
+struct udVertexDeclaration
+{
+  udVertexElement *pElements;
+  udVertexElementData *pElementData;
+  int numElements;
+};
+
+struct udVertexBuffer
+{
+  udVertexDeclaration *pVertexDeclaration;
+
+  QOpenGLBuffer *pVB;
+};
+
+struct udShader
+{
+  QOpenGLShader *pShader;
+};
+
+struct udShaderProgram
+{
+  QOpenGLShaderProgram *pProgram;
+};
+
+#endif  // UDQT_INTERNAL_H
