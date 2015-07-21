@@ -177,19 +177,20 @@ udResult udKernel::CreateComponent(udString typeId, udInitParams initParams, udC
     // TODO: should we have a better uid generator than this?
     udFixedString64 uid = udFixedString64::format("%s%d", pDesc->id.ptr, pType->createCount++);
 
-    udComponentRef pComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
+    udComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
+    spComponent->Init(initParams);
 
-    if (!pComponent)
+    if (!spComponent)
       return udR_MemoryAllocationFailure;
 
-    instanceRegistry.Add(pComponent->uid.hash(), pComponent);
+    instanceRegistry.Add(spComponent->uid.hash(), spComponent);
 
-    pLua->setComponent(pComponent, udString(pComponent->uid));
+    pLua->setComponent(spComponent, udString(spComponent->uid));
 
     // TODO: inform partner kernels that I created a component
     //...
 
-    *pNewInstance = pComponent;
+    *pNewInstance = spComponent;
     return udR_Success;
   }
   catch (udResult r)

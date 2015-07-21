@@ -4,98 +4,120 @@ inline udVariant::udVariant()
   , ownsArray(0)
   , length(0)
 {}
+
+template<>
 inline udVariant::udVariant(nullptr_t)
   : t(Type::Null)
   , ownsArray(0)
   , length(0)
 {}
+template<>
 inline udVariant::udVariant(bool b)
   : t(Type::Bool)
   , ownsArray(0)
   , length(0)
   , b(b)
 {}
+template<>
 inline udVariant::udVariant(int8_t i)
   : t(Type::Int)
   , ownsArray(0)
   , length(0)
   , i(i)
 {}
+template<>
 inline udVariant::udVariant(uint8_t i)
   : t(Type::Int)
   , ownsArray(0)
   , length(0)
   , i(i)
 {}
+template<>
 inline udVariant::udVariant(int16_t i)
   : t(Type::Int)
   , ownsArray(0)
   , length(0)
   , i(i)
 {}
+template<>
 inline udVariant::udVariant(uint16_t i)
   : t(Type::Int)
   , ownsArray(0)
   , length(0)
   , i(i)
 {}
+template<>
 inline udVariant::udVariant(int32_t i)
   : t(Type::Int)
   , ownsArray(0)
   , length(0)
   , i(i)
 {}
+template<>
 inline udVariant::udVariant(uint32_t i)
   : t(Type::Int)
   , ownsArray(0)
   , length(0)
   , i(i)
 {}
+template<>
 inline udVariant::udVariant(int64_t i)
   : t(Type::Int)
   , ownsArray(0)
   , length(0)
   , i(i)
 {}
+template<>
 inline udVariant::udVariant(uint64_t i)
   : t(Type::Int)
   , ownsArray(0)
   , length(0)
   , i(i)
 {}
+template<>
 inline udVariant::udVariant(float f)
   : t(Type::Float)
   , ownsArray(0)
   , length(0)
   , f(f)
 {}
+template<>
 inline udVariant::udVariant(double f)
   : t(Type::Float)
   , ownsArray(0)
   , length(0)
   , f(f)
 {}
+template<>
 inline udVariant::udVariant(udComponentRef &_c)
   : t(Type::Component)
   , ownsArray(0)
   , length(0)
   , c(_c.ptr())
 {}
+template<>
 inline udVariant::udVariant(udString s)
   : t(Type::String)
   , ownsArray(0)
   , length(s.length)
   , s(s.ptr)
 {}
-inline udVariant::udVariant(udSlice<udVariant> a)
-  : t(Type::Array)
+template<>
+inline udVariant::udVariant(const char* pStr)
+  : t(Type::String)
   , ownsArray(0)
+  , length(pStr ? strlen(pStr): 0)
+  , s(pStr)
+{}
+inline udVariant::udVariant(udSlice<udVariant> a, bool ownsMemory)
+  : t(Type::Array)
+  , ownsArray(ownsMemory ? 1 : 0)
   , length(a.length)
   , a(a.ptr)
 {}
-inline udVariant::udVariant(udSlice<udKeyValuePair> aa)
+inline udVariant::udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory)
   : t(Type::AssocArray)
-  , ownsArray(0)
+  , ownsArray(ownsMemory ? 1 : 0)
   , length(aa.length)
   , aa(aa.ptr)
 {}
@@ -230,7 +252,7 @@ inline udVariant::Type udVariant::type() const
 template<typename T>
 struct udVariant_Cast
 {
-  inline static T as(const udVariant &v);
+  inline static T as(const udVariant &v) { T r; udFromVariant(v, &r); return r; }
 };
 
 template<typename T>

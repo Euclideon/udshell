@@ -30,23 +30,12 @@ public:
   udVariant(udVariant &&rval);
   udVariant(const udVariant &rval);
 
-  udVariant(nullptr_t);
-  udVariant(bool b);
-  udVariant(int8_t i);
-  udVariant(uint8_t i);
-  udVariant(int16_t i);
-  udVariant(uint16_t i);
-  udVariant(int32_t i);
-  udVariant(uint32_t i);
-  udVariant(int64_t i);
-  udVariant(uint64_t i);
-  udVariant(float f);
-  udVariant(double f);
-  udVariant(udComponentRef &c);
-  udVariant(udString s);
-  udVariant(udSlice<udVariant> a);
-  udVariant(udSlice<udKeyValuePair> aa);
+  template<typename T>
+  udVariant(T v) : udVariant(udToVariant(v)) {}
 
+
+  udVariant(udSlice<udVariant> a, bool ownsMemory = false);
+  udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory = false);
   // math types
   template<typename U>
   udVariant(const udVector2<U> &v);

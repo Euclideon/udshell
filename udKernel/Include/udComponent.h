@@ -53,6 +53,8 @@ protected:
   virtual udResult ReceiveMessage(udString message, udString sender, const udVariant &data);
 
 private:
+  void Init(udInitParams initParams);
+
   udComponent(const udComponent &) = delete;    // Still not sold on this
   void operator=(const udComponent &) = delete;
 };

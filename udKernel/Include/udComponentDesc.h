@@ -117,6 +117,7 @@ enum class udPropertyType : uint32_t
   Component,
   Enum,
   Flags,
+  Struct,
 };
 
 enum udPropertyFlags : uint32_t

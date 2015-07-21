@@ -75,6 +75,17 @@ const udComponentDesc udComponent::descriptor =
 };
 
 
+void udComponent::Init(udInitParams initParams)
+{
+  for (auto &kv : initParams)
+  {
+    const udPropertyDesc *pDesc = FindProperty(kv.key.asString());
+    if (pDesc && pDesc->setter)
+      pDesc->setter.set(this, kv.value);
+  }
+}
+
+
 bool udComponent::IsType(udString type) const
 {
   const udComponentDesc *pDesc = pType;
@@ -108,6 +119,8 @@ void udComponent::SetProperty(udString property, const udVariant &value)
   if (!pDesc)
     return; // TODO: make noise
   if (!pDesc->setter)
+    return; // TODO: make noise
+  if (pDesc->flags & udPF_Immutable)
     return; // TODO: make noise
   pDesc->setter.set(this, value);
 }
