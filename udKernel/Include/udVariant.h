@@ -29,7 +29,6 @@ public:
   udVariant();
   udVariant(udVariant &&rval);
   udVariant(const udVariant &rval);
-  udVariant(udVariant &rval);
 
   udVariant(bool);
   udVariant(int64_t);

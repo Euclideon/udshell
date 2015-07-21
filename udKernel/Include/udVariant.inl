@@ -42,10 +42,6 @@ inline udVariant::udVariant(const udVariant &val)
     }
   }
 }
-inline udVariant::udVariant(udVariant &rval)
-  : udVariant((const udVariant&)rval)
-{}
-
 
 inline udVariant::udVariant(bool b)
   : t(Type::Bool)
@@ -101,12 +97,12 @@ struct udVariant_Construct
   }
 };
 template<typename T>
-udVariant::udVariant(T &v)
-  : udVariant(udVariant_Construct<T>::construct(v))
+udVariant::udVariant(const T &v)
+  : udVariant(udVariant_Construct<typename std::remove_const<T>::type>::construct(v))
 {}
 template<typename T>
-udVariant::udVariant(const T &v)
-  : udVariant(udVariant_Construct<T>::construct(v))
+udVariant::udVariant(T &v)
+  : udVariant((const T&)v)
 {}
 
 // specialisations of udVariant_Construct for all the basic types
