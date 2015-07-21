@@ -627,7 +627,10 @@ public:
 		SetMementoFrom(right);
 		return *this;
 	}
-	inline bool operator <(const DelegateMemento &right) {
+  inline bool operator ==(const DelegateMemento &right) {
+    return m_pthis == right.m_pthis && m_pFunction == right.m_pFunction;
+  }
+  inline bool operator <(const DelegateMemento &right) {
 		return IsLess(right);
 	}
 	inline bool operator >(const DelegateMemento &right) {
@@ -1662,6 +1665,7 @@ public:
 
   // Mimic the base class constructors.
   FastDelegate() : BaseType() { }
+  FastDelegate(BaseType d) : BaseType(d) { }
 
   template < class X, class Y >
   FastDelegate(Y * pthis,
@@ -1699,6 +1703,7 @@ public:
 
   // Mimic the base class constructors.
   FastDelegate() : BaseType() { }
+  FastDelegate(BaseType d) : BaseType(d) { }
 
   template < class X, class Y >
   FastDelegate(Y * pthis,
@@ -1736,6 +1741,7 @@ public:
 
   // Mimic the base class constructors.
   FastDelegate() : BaseType() { }
+  FastDelegate(BaseType d) : BaseType(d) { }
 
   template < class X, class Y >
   FastDelegate(Y * pthis,
@@ -1773,6 +1779,7 @@ public:
 
   // Mimic the base class constructors.
   FastDelegate() : BaseType() { }
+  FastDelegate(BaseType d) : BaseType(d) { }
 
   template < class X, class Y >
   FastDelegate(Y * pthis,
@@ -1810,6 +1817,7 @@ public:
 
   // Mimic the base class constructors.
   FastDelegate() : BaseType() { }
+  FastDelegate(BaseType d) : BaseType(d) { }
 
   template < class X, class Y >
   FastDelegate(Y * pthis,
@@ -1847,6 +1855,7 @@ public:
 
   // Mimic the base class constructors.
   FastDelegate() : BaseType() { }
+  FastDelegate(BaseType d) : BaseType(d) { }
 
   template < class X, class Y >
   FastDelegate(Y * pthis,
@@ -1884,6 +1893,7 @@ public:
 
   // Mimic the base class constructors.
   FastDelegate() : BaseType() { }
+  FastDelegate(BaseType d) : BaseType(d) { }
 
   template < class X, class Y >
   FastDelegate(Y * pthis,
@@ -1921,6 +1931,7 @@ public:
 
   // Mimic the base class constructors.
   FastDelegate() : BaseType() { }
+  FastDelegate(BaseType d) : BaseType(d) { }
 
   template < class X, class Y >
   FastDelegate(Y * pthis,
@@ -1958,6 +1969,7 @@ public:
 
   // Mimic the base class constructors.
   FastDelegate() : BaseType() { }
+  FastDelegate(BaseType d) : BaseType(d) { }
 
   template < class X, class Y >
   FastDelegate(Y * pthis,

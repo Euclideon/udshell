@@ -4,6 +4,7 @@
 
 #include "udComponentDesc.h"
 #include "udHashMap.h"
+#include "udEvent.h"
 
 #include <stdio.h>
 
@@ -52,6 +53,10 @@ protected:
 
   virtual udResult ReceiveMessage(udString message, udString sender, const udVariant &data);
 
+  template<typename... Args>
+  friend class udEvent;
+  udSubscriber subscriber;
+
 private:
   void Init(udInitParams initParams);
 
@@ -73,6 +78,22 @@ inline udSharedPtr<T> component_cast(udComponentRef pComponent)
     pDesc = pDesc->pSuperDesc;
   }
   return udSharedPtr<T>();
+}
+
+
+// HACK: this here because forward referencing! >_<
+
+template<typename... Args>
+template <typename X>
+void udEvent<Args...>::Subscribe(udComponent *pC, void(X::*func)(Args...))
+{
+  pC->subscriber.Subscribe(*this, Delegate((X*)pC, func));
+}
+template<typename... Args>
+template <typename X>
+void udEvent<Args...>::Unsubscribe(udComponent *pC, void(X::*func)(Args...))
+{
+  pC->subscriber.Unsubscribe(*this, Delegate((X*)pC, func));
 }
 
 #endif // UDCOMPONENT_H
