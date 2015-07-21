@@ -30,21 +30,16 @@ public:
   udVariant(udVariant &&rval);
   udVariant(const udVariant &rval);
 
-  template<typename T>
-  udVariant(T v) : udVariant(udToVariant(v)) {}
-
-
+  udVariant(bool);
+  udVariant(int64_t);
+  udVariant(double);
+  udVariant(udComponent *);
+  udVariant(udString);
   udVariant(udSlice<udVariant> a, bool ownsMemory = false);
   udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory = false);
-  // math types
-  template<typename U>
-  udVariant(const udVector2<U> &v);
-  template<typename U>
-  udVariant(const udVector3<U> &v);
-  template<typename U>
-  udVariant(const udVector4<U> &v);
-  template<typename U>
-  udVariant(const udMatrix4x4<U> &m);
+
+  template<typename T>
+  udVariant(const T &v);
 
   ~udVariant();
 
@@ -74,6 +69,9 @@ public:
 
   udVariant operator[](size_t i) const;
   udVariant operator[](udString key) const;
+
+  udVariant* allocArray(size_t len);
+  udKeyValuePair* allocAssocArray(size_t len);
 
   void luaPush(LuaState &l) const;
   static udVariant luaGet(LuaState &l, int idx = -1);

@@ -43,6 +43,8 @@ struct udString : public udSlice<const char>
   template<typename C>
   udString(udSlice<C> rh);
   udString(const char *pString);
+  template<size_t Len>
+  udString(const char str[Len]);
 
   // assignment
   udString& operator =(udSlice<const char> rh);

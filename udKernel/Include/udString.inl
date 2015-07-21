@@ -45,6 +45,11 @@ inline udString::udString(const char *pString)
   : udSlice<const char>(pString, pString ? strlen(pString) : 0)
 {}
 
+template<size_t Len>
+inline udString::udString(const char str[Len])
+  : udSlice<const char>(str, N)
+{}
+
 inline udString& udString::operator =(udSlice<const char> rh)
 {
   length = rh.length;

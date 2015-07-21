@@ -1,126 +1,13 @@
 
+#include <type_traits>
+
+// constructors...
 inline udVariant::udVariant()
   : t(Type::Null)
   , ownsArray(0)
   , length(0)
 {}
 
-template<>
-inline udVariant::udVariant(nullptr_t)
-  : t(Type::Null)
-  , ownsArray(0)
-  , length(0)
-{}
-template<>
-inline udVariant::udVariant(bool b)
-  : t(Type::Bool)
-  , ownsArray(0)
-  , length(0)
-  , b(b)
-{}
-template<>
-inline udVariant::udVariant(int8_t i)
-  : t(Type::Int)
-  , ownsArray(0)
-  , length(0)
-  , i(i)
-{}
-template<>
-inline udVariant::udVariant(uint8_t i)
-  : t(Type::Int)
-  , ownsArray(0)
-  , length(0)
-  , i(i)
-{}
-template<>
-inline udVariant::udVariant(int16_t i)
-  : t(Type::Int)
-  , ownsArray(0)
-  , length(0)
-  , i(i)
-{}
-template<>
-inline udVariant::udVariant(uint16_t i)
-  : t(Type::Int)
-  , ownsArray(0)
-  , length(0)
-  , i(i)
-{}
-template<>
-inline udVariant::udVariant(int32_t i)
-  : t(Type::Int)
-  , ownsArray(0)
-  , length(0)
-  , i(i)
-{}
-template<>
-inline udVariant::udVariant(uint32_t i)
-  : t(Type::Int)
-  , ownsArray(0)
-  , length(0)
-  , i(i)
-{}
-template<>
-inline udVariant::udVariant(int64_t i)
-  : t(Type::Int)
-  , ownsArray(0)
-  , length(0)
-  , i(i)
-{}
-template<>
-inline udVariant::udVariant(uint64_t i)
-  : t(Type::Int)
-  , ownsArray(0)
-  , length(0)
-  , i(i)
-{}
-template<>
-inline udVariant::udVariant(float f)
-  : t(Type::Float)
-  , ownsArray(0)
-  , length(0)
-  , f(f)
-{}
-template<>
-inline udVariant::udVariant(double f)
-  : t(Type::Float)
-  , ownsArray(0)
-  , length(0)
-  , f(f)
-{}
-template<>
-inline udVariant::udVariant(udComponentRef &_c)
-  : t(Type::Component)
-  , ownsArray(0)
-  , length(0)
-  , c(_c.ptr())
-{}
-template<>
-inline udVariant::udVariant(udString s)
-  : t(Type::String)
-  , ownsArray(0)
-  , length(s.length)
-  , s(s.ptr)
-{}
-template<>
-inline udVariant::udVariant(const char* pStr)
-  : t(Type::String)
-  , ownsArray(0)
-  , length(pStr ? strlen(pStr): 0)
-  , s(pStr)
-{}
-inline udVariant::udVariant(udSlice<udVariant> a, bool ownsMemory)
-  : t(Type::Array)
-  , ownsArray(ownsMemory ? 1 : 0)
-  , length(a.length)
-  , a(a.ptr)
-{}
-inline udVariant::udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory)
-  : t(Type::AssocArray)
-  , ownsArray(ownsMemory ? 1 : 0)
-  , length(aa.length)
-  , aa(aa.ptr)
-{}
 inline udVariant::udVariant(udVariant &&rval)
   : t(rval.t)
   , ownsArray(rval.ownsArray)
@@ -138,16 +25,16 @@ inline udVariant::udVariant(const udVariant &val)
 {
   if (ownsArray)
   {
-    if(t == Type::Array)
+    if (t == Type::Array)
     {
       a = (udVariant*)udAlloc(sizeof(udVariant)*length);
-      for(size_t i = 0; i<length; ++i)
+      for (size_t i = 0; i<length; ++i)
         new((void*)&a[i]) udVariant(val.a[i]);
     }
-    else if(t == Type::AssocArray)
+    else if (t == Type::AssocArray)
     {
       aa = (udKeyValuePair*)udAlloc(sizeof(udKeyValuePair)*length);
-      for(size_t i = 0; i<length; ++i)
+      for (size_t i = 0; i<length; ++i)
       {
         new((void*)&aa[i].key) udVariant(val.aa[i].key);
         new((void*)&aa[i].value) udVariant(val.aa[i].value);
@@ -156,52 +43,144 @@ inline udVariant::udVariant(const udVariant &val)
   }
 }
 
+inline udVariant::udVariant(bool b)
+  : t(Type::Bool)
+  , ownsArray(0)
+  , length(0)
+  , b(b)
+{}
+inline udVariant::udVariant(int64_t i)
+  : t(Type::Int)
+  , ownsArray(0)
+  , length(0)
+  , i(i)
+{}
+inline udVariant::udVariant(double f)
+  : t(Type::Float)
+  , ownsArray(0)
+  , length(0)
+  , f(f)
+{}
+inline udVariant::udVariant(udComponent *c)
+  : t(Type::Component)
+  , ownsArray(0)
+  , length(0)
+  , c(c)
+{}
+inline udVariant::udVariant(udString s)
+  : t(Type::String)
+  , ownsArray(0)
+  , length(s.length)
+  , s(s.ptr)
+{}
 
-// math types
-template<typename U>
-inline udVariant::udVariant(const udVector2<U> &v)
+inline udVariant::udVariant(udSlice<udVariant> a, bool ownsMemory)
   : t(Type::Array)
-  , ownsArray(1)
-  , length(2)
-{
-  a = (udVariant*)udAlloc(sizeof(udVariant)*length);
-  new(&a[0]) udVariant(v.x);
-  new(&a[1]) udVariant(v.y);
-}
-template<typename U>
-inline udVariant::udVariant(const udVector3<U> &v)
-  : t(Type::Array)
-  , ownsArray(1)
-  , length(3)
-{
-  a = (udVariant*)udAlloc(sizeof(udVariant)*length);
-  new(&a[0]) udVariant(v.x);
-  new(&a[1]) udVariant(v.y);
-  new(&a[2]) udVariant(v.z);
-}
-template<typename U>
-inline udVariant::udVariant(const udVector4<U> &v)
-  : t(Type::Array)
-  , ownsArray(1)
-  , length(4)
-{
-  a = (udVariant*)udAlloc(sizeof(udVariant)*length);
-  new(&a[0]) udVariant(v.x);
-  new(&a[1]) udVariant(v.y);
-  new(&a[2]) udVariant(v.z);
-  new(&a[3]) udVariant(v.w);
-}
-template<typename U>
-inline udVariant::udVariant(const udMatrix4x4<U> &m)
-  : t(Type::Array)
-  , ownsArray(1)
-  , length(16)
-{
-  a = (udVariant*)udAlloc(sizeof(udVariant)*length);
-  for (size_t i = 0; i<16; ++i)
-    new(&a[i]) udVariant(m.a[i]);
-}
+  , ownsArray(ownsMemory ? 1 : 0)
+  , length(a.length)
+  , a(a.ptr)
+{}
+inline udVariant::udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory)
+  : t(Type::AssocArray)
+  , ownsArray(ownsMemory ? 1 : 0)
+  , length(aa.length)
+  , aa(aa.ptr)
+{}
 
+
+// horrible hack to facilitate partial specialisations (support all of the types!)
+template<typename T>
+struct udVariant_Construct
+{
+  inline static udVariant construct(const T &v)
+  {
+    return udVariant(udToVariant(v));
+  }
+};
+template<typename T>
+udVariant::udVariant(const T &v)
+  : udVariant(udVariant_Construct<T>::construct(v))
+{}
+
+// specialisations of udVariant_Construct for all the basic types
+template<> struct udVariant_Construct <nullptr_t  > { inline static udVariant construct(nullptr_t)       { return udVariant(); } };
+template<> struct udVariant_Construct <float      > { inline static udVariant construct(float f)         { return udVariant((double)f); } };
+template<> struct udVariant_Construct <int8_t     > { inline static udVariant construct(int8_t i)        { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <uint8_t    > { inline static udVariant construct(uint8_t i)       { return udVariant((int64_t)(uint64_t)i); } };
+template<> struct udVariant_Construct <int16_t    > { inline static udVariant construct(int16_t i)       { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <uint16_t   > { inline static udVariant construct(uint16_t i)      { return udVariant((int64_t)(uint64_t)i); } };
+template<> struct udVariant_Construct <int32_t    > { inline static udVariant construct(int32_t i)       { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <uint32_t   > { inline static udVariant construct(uint32_t i)      { return udVariant((int64_t)(uint64_t)i); } };
+template<> struct udVariant_Construct <uint64_t   > { inline static udVariant construct(uint64_t i)      { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <const char*> { inline static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
+template<size_t N>
+struct udVariant_Construct <const char[N]>          { inline static udVariant construct(const char s[N]) { return udVariant(udString(s, N)); } };
+
+// partial for udSharedPtr, which further specialises for udComponentRef (and derived types)
+template<typename T>
+struct udVariant_Construct<udSharedPtr<T>>
+{
+  template<typename C, typename std::enable_if<!std::is_base_of<udComponent, C>::value>::type* = nullptr> // O_O
+  inline static udVariant constructPtr(udSharedPtr<C> p)           { return udToVariant(*p); } // udSharedPtr's that arent' components
+  inline static udVariant constructPtr(udSharedPtr<udComponent> c) { return udVariant(c.ptr()); } // udComponents go this way
+
+  inline static udVariant construct(udSharedPtr<T> c) { return constructPtr(c); } // shim to satisfy C++
+};
+
+// vectors and matrices (require partial specialisation)
+template<typename F>
+struct udVariant_Construct <udVector2<F>>
+{
+  inline static udVariant construct(const udVector2<F> &v)
+  {
+    udVariant r;
+    udVariant *a = r.allocArray(2);
+    new(&a[0]) udVariant(v.x);
+    new(&a[1]) udVariant(v.y);
+    return r;
+  }
+};
+template<typename F>
+struct udVariant_Construct <udVector3<F>>
+{
+  inline static udVariant construct(const udVector3<F> &v)
+  {
+    udVariant r;
+    udVariant *a = r.allocArray(3);
+    new(&a[0]) udVariant(v.x);
+    new(&a[1]) udVariant(v.y);
+    new(&a[3]) udVariant(v.z);
+    return r;
+  }
+};
+template<typename F>
+struct udVariant_Construct <udVector4<F>>
+{
+  inline static udVariant construct(const udVector4<F> &v)
+  {
+    udVariant r;
+    udVariant *a = r.allocArray(4);
+    new(&a[0]) udVariant(v.x);
+    new(&a[1]) udVariant(v.y);
+    new(&a[3]) udVariant(v.z);
+    new(&a[4]) udVariant(v.w);
+    return r;
+  }
+};
+template<typename F>
+struct udVariant_Construct <udMatrix4x4<F>>
+{
+  inline static udVariant construct(const udMatrix4x4<F> &m)
+  {
+    udVariant r;
+    udVariant *a = r.allocArray(16);
+    for (size_t i = 0; i<16; ++i)
+      new(&a[i]) udVariant(m.a[i]);
+    return r;
+  }
+};
+
+// destructor
 inline udVariant::~udVariant()
 {
   if (ownsArray && t >= Type::Array)
@@ -288,6 +267,7 @@ template<> struct udVariant_Cast < udString > { inline static udString as(const 
 
 // way to make casts for other component types?
 template<> struct udVariant_Cast < udComponentRef > { inline static udComponentRef as(const udVariant &v) { return v.asComponent(); } };
+// TODO: C++11 magic to make this shit work for all kinda fo components
 
 
 // udMath types

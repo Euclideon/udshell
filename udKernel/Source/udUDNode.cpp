@@ -107,7 +107,6 @@ const udComponentDesc udUDNode::descriptor =
   "Is a udModel Node", // description
 
   [](){ return udR_Success; },             // pInit
-  [](){ return udR_Success; },             // pInitRender
   udUDNode::Create, // pCreateInstance
 
   udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // properties

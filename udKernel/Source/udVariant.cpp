@@ -200,6 +200,26 @@ udVariant udVariant::operator[](udString key) const
   return udVariant(nullptr);
 }
 
+udVariant* udVariant::allocArray(size_t len)
+{
+  this->~udVariant();
+  t = Type::Array;
+  length = len;
+  ownsArray = true;
+  a = udAllocType(udVariant, len, udAF_None);
+  return a;
+}
+
+udKeyValuePair* udVariant::allocAssocArray(size_t len)
+{
+  this->~udVariant();
+  t = Type::AssocArray;
+  length = len;
+  ownsArray = true;
+  aa = udAllocType(udKeyValuePair, len, udAF_None);
+  return aa;
+}
+
 void udVariant::luaPush(LuaState &l) const
 {
   switch (t)
