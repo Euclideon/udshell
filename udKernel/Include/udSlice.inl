@@ -400,27 +400,27 @@ template <typename U> udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(c
 template <typename T, size_t Count>
 void udFixedSlice<T, Count>::remove(size_t i)
 {
-  --length;
-  for (; i < length; ++i)
-    ptr[i] = ptr[i+1];
-  ptr[i].~T();
+  --this->length;
+  for (; i < this->length; ++i)
+    this->ptr[i] = this->ptr[i+1];
+  this->ptr[i].~T();
 }
 template <typename T, size_t Count>
 void udFixedSlice<T, Count>::remove(const T& item)
 {
-  removeSwapLast(offsetOf(item));
+  removeSwapLast(this->offsetOf(item));
 }
 template <typename T, size_t Count>
 void udFixedSlice<T, Count>::removeSwapLast(size_t i)
 {
-  if (i < length - 1)
-    ptr[i] = ptr[length-1];
-  ptr[--length].~T();
+  if (i < this->length - 1)
+    this->ptr[i] = this->ptr[this->length-1];
+  this->ptr[--this->length].~T();
 }
 template <typename T, size_t Count>
 void udFixedSlice<T, Count>::removeSwapLast(const T& item)
 {
-  removeSwapLast(offsetOf(item));
+  removeSwapLast(this->offsetOf(item));
 }
 
 template <typename T, size_t Count>

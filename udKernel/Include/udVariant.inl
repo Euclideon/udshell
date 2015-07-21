@@ -42,6 +42,10 @@ inline udVariant::udVariant(const udVariant &val)
     }
   }
 }
+inline udVariant::udVariant(udVariant &rval)
+  : udVariant((const udVariant&)rval)
+{}
+
 
 inline udVariant::udVariant(bool b)
   : t(Type::Bool)
@@ -73,7 +77,6 @@ inline udVariant::udVariant(udString s)
   , length(s.length)
   , s(s.ptr)
 {}
-
 inline udVariant::udVariant(udSlice<udVariant> a, bool ownsMemory)
   : t(Type::Array)
   , ownsArray(ownsMemory ? 1 : 0)
@@ -98,6 +101,10 @@ struct udVariant_Construct
   }
 };
 template<typename T>
+udVariant::udVariant(T &v)
+  : udVariant(udVariant_Construct<T>::construct(v))
+{}
+template<typename T>
 udVariant::udVariant(const T &v)
   : udVariant(udVariant_Construct<T>::construct(v))
 {}
@@ -112,16 +119,16 @@ template<> struct udVariant_Construct <uint16_t   > { inline static udVariant co
 template<> struct udVariant_Construct <int32_t    > { inline static udVariant construct(int32_t i)       { return udVariant((int64_t)i); } };
 template<> struct udVariant_Construct <uint32_t   > { inline static udVariant construct(uint32_t i)      { return udVariant((int64_t)(uint64_t)i); } };
 template<> struct udVariant_Construct <uint64_t   > { inline static udVariant construct(uint64_t i)      { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <const char*> { inline static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
+template<> struct udVariant_Construct <char*> { inline static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
 template<size_t N>
-struct udVariant_Construct <const char[N]>          { inline static udVariant construct(const char s[N]) { return udVariant(udString(s, N)); } };
+struct udVariant_Construct <char[N]>          { inline static udVariant construct(const char s[N]) { return udVariant(udString(s, N)); } };
 
 // partial for udSharedPtr, which further specialises for udComponentRef (and derived types)
 template<typename T>
 struct udVariant_Construct<udSharedPtr<T>>
 {
   template<typename C, typename std::enable_if<!std::is_base_of<udComponent, C>::value>::type* = nullptr> // O_O
-  inline static udVariant constructPtr(udSharedPtr<C> p)           { return udToVariant(*p); } // udSharedPtr's that arent' components
+  inline static udVariant constructPtr(udSharedPtr<C> p)           { return udToVariant(*p); } // udSharedPtr's that aren't components
   inline static udVariant constructPtr(udSharedPtr<udComponent> c) { return udVariant(c.ptr()); } // udComponents go this way
 
   inline static udVariant construct(udSharedPtr<T> c) { return constructPtr(c); } // shim to satisfy C++

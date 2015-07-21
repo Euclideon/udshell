@@ -29,6 +29,7 @@ public:
   udVariant();
   udVariant(udVariant &&rval);
   udVariant(const udVariant &rval);
+  udVariant(udVariant &rval);
 
   udVariant(bool);
   udVariant(int64_t);
@@ -38,8 +39,8 @@ public:
   udVariant(udSlice<udVariant> a, bool ownsMemory = false);
   udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory = false);
 
-  template<typename T>
-  udVariant(const T &v);
+  template<typename T> udVariant(const T &v);
+  template<typename T> udVariant(T &v);
 
   ~udVariant();
 
