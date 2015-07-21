@@ -74,8 +74,8 @@ struct udSlice
   udSlice<T> stripFront(size_t n) const;
   udSlice<T> stripBack(size_t n) const;
 
-  ptrdiff_t offsetOf(T c) const;
-  ptrdiff_t offsetOfLast(T c) const;
+  ptrdiff_t offsetOf(const T &c) const;
+  ptrdiff_t offsetOfLast(const T &c) const;
 
   bool canFind(T c) const;
 
@@ -107,6 +107,7 @@ struct udFixedSlice : public udSlice <T>
 
   // constructors
   udFixedSlice<T, Count>();
+  udFixedSlice<T, Count>(const udFixedSlice<T, Count> &val);
   udFixedSlice<T, Count>(udFixedSlice<T, Count> &&rval);
   template <typename U> udFixedSlice<T, Count>(U *ptr, size_t length);
   template <typename U> udFixedSlice<T, Count>(udSlice<U> slice);
@@ -120,9 +121,13 @@ struct udFixedSlice : public udSlice <T>
 
   // manipulation
   void clear();
-  template<typename... Things> udFixedSlice<T, Count>& concat(const Things&... things);
-
+  template <typename... Things> udFixedSlice<T, Count>& concat(const Things&... things);
   template <typename U> udFixedSlice<T, Count>& pushBack(const U &item);
+
+  void remove(size_t i);
+  void remove(const T& item);
+  void removeSwapLast(size_t i);
+  void removeSwapLast(const T& item);
 
   udSlice<T> getBuffer() const;
 
