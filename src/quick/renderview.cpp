@@ -4,6 +4,7 @@
 
 #include <QtQuick/QQuickWindow>
 #include <QtGui/QOpenGLFramebufferObject>
+#include <QSGSimpleTextureNode>
 
 
 extern udKernel *s_pKernel;
@@ -80,4 +81,18 @@ void RenderView::componentComplete()
   // TODO: Accepted mouse buttons should be item specific
   setFocus(true);
   setAcceptedMouseButtons(Qt::LeftButton);
+}
+
+QSGNode *RenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData)
+{
+  // MAD HAX: QML flips our framebuffer texture along the y-axis - better fix in 5.6: https://bugreports.qt.io/browse/QTBUG-41073
+  if (!node)
+  {
+    node = QQuickFramebufferObject::updatePaintNode(node, nodeData);
+    QSGSimpleTextureNode *n = static_cast<QSGSimpleTextureNode *>(node);
+    if (n)
+      n->setTextureCoordinatesTransform(QSGSimpleTextureNode::MirrorVertically);
+    return node;
+  }
+  return QQuickFramebufferObject::updatePaintNode(node, nodeData);
 }

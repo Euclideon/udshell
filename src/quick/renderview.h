@@ -20,6 +20,8 @@ private:
   friend class FboRenderer;
 
   void componentComplete();
+
+  QSGNode *updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData);
 };
 
 
