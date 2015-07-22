@@ -101,6 +101,7 @@ void udDebugFont_Init()
 //-------------------------------------------------------------------
 void udDebugFont_Deinit()
 {
+  udVertex_DestroyVertexBuffer(&pRomanSimplex->pGeoBuffer);
   udDelete(pRomanSimplex);
   udVertex_DestroyVertexDeclaration(&pVertexFormat);
 }
