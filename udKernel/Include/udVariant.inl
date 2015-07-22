@@ -106,82 +106,67 @@ udVariant::udVariant(T &v)
 {}
 
 // specialisations of udVariant_Construct for all the basic types
-template<> struct udVariant_Construct <nullptr_t  > { inline static udVariant construct(nullptr_t)       { return udVariant(); } };
-template<> struct udVariant_Construct <float      > { inline static udVariant construct(float f)         { return udVariant((double)f); } };
-template<> struct udVariant_Construct <int8_t     > { inline static udVariant construct(int8_t i)        { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <uint8_t    > { inline static udVariant construct(uint8_t i)       { return udVariant((int64_t)(uint64_t)i); } };
-template<> struct udVariant_Construct <int16_t    > { inline static udVariant construct(int16_t i)       { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <uint16_t   > { inline static udVariant construct(uint16_t i)      { return udVariant((int64_t)(uint64_t)i); } };
-template<> struct udVariant_Construct <int32_t    > { inline static udVariant construct(int32_t i)       { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <uint32_t   > { inline static udVariant construct(uint32_t i)      { return udVariant((int64_t)(uint64_t)i); } };
-template<> struct udVariant_Construct <uint64_t   > { inline static udVariant construct(uint64_t i)      { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <char*> { inline static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
+template<> struct udVariant_Construct <nullptr_t> { inline static udVariant construct(nullptr_t)       { return udVariant(); } };
+template<> struct udVariant_Construct <float>     { inline static udVariant construct(float f)         { return udVariant((double)f); } };
+template<> struct udVariant_Construct <int8_t>    { inline static udVariant construct(int8_t i)        { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <uint8_t>   { inline static udVariant construct(uint8_t i)       { return udVariant((int64_t)(uint64_t)i); } };
+template<> struct udVariant_Construct <int16_t>   { inline static udVariant construct(int16_t i)       { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <uint16_t>  { inline static udVariant construct(uint16_t i)      { return udVariant((int64_t)(uint64_t)i); } };
+template<> struct udVariant_Construct <int32_t>   { inline static udVariant construct(int32_t i)       { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <uint32_t>  { inline static udVariant construct(uint32_t i)      { return udVariant((int64_t)(uint64_t)i); } };
+template<> struct udVariant_Construct <uint64_t>  { inline static udVariant construct(uint64_t i)      { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <char*>     { inline static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
 template<size_t N>
-struct udVariant_Construct <char[N]>          { inline static udVariant construct(const char s[N]) { return udVariant(udString(s, N)); } };
+struct udVariant_Construct <char[N]>              { inline static udVariant construct(const char s[N]) { return udVariant(udString(s, N)); } };
 
-// partial for udSharedPtr, which further specialises for udComponentRef (and derived types)
-template<typename T>
-struct udVariant_Construct<udSharedPtr<T>>
+// for components
+inline udVariant udToVariant(const udComponentRef c)
 {
-  template<typename C, typename std::enable_if<!std::is_base_of<udComponent, C>::value>::type* = nullptr> // O_O
-  inline static udVariant constructPtr(udSharedPtr<C> p)           { return udToVariant(*p); } // udSharedPtr's that aren't components
-  inline static udVariant constructPtr(udSharedPtr<udComponent> c) { return udVariant(c.ptr()); } // udComponents go this way
-
-  inline static udVariant construct(udSharedPtr<T> c) { return constructPtr(c); } // shim to satisfy C++
-};
+  return udVariant(c.ptr());
+}
 
 // vectors and matrices (require partial specialisation)
+#include "udMath.h"
 template<typename F>
-struct udVariant_Construct <udVector2<F>>
+inline udVariant udToVariant(const udVector2<F> &v)
 {
-  inline static udVariant construct(const udVector2<F> &v)
-  {
-    udVariant r;
-    udVariant *a = r.allocArray(2);
-    new(&a[0]) udVariant(v.x);
-    new(&a[1]) udVariant(v.y);
-    return r;
-  }
-};
+  udVariant r;
+  udVariant *a = r.allocArray(2);
+  new(&a[0]) udVariant(v.x);
+  new(&a[1]) udVariant(v.y);
+  return r;
+}
 template<typename F>
-struct udVariant_Construct <udVector3<F>>
+inline udVariant udToVariant(const udVector3<F> &v)
 {
-  inline static udVariant construct(const udVector3<F> &v)
-  {
-    udVariant r;
-    udVariant *a = r.allocArray(3);
-    new(&a[0]) udVariant(v.x);
-    new(&a[1]) udVariant(v.y);
-    new(&a[3]) udVariant(v.z);
-    return r;
-  }
-};
+  udVariant r;
+  udVariant *a = r.allocArray(3);
+  new(&a[0]) udVariant(v.x);
+  new(&a[1]) udVariant(v.y);
+  new(&a[2]) udVariant(v.z);
+  return r;
+}
 template<typename F>
-struct udVariant_Construct <udVector4<F>>
+inline udVariant udToVariant(const udVector4<F> &v)
 {
-  inline static udVariant construct(const udVector4<F> &v)
-  {
-    udVariant r;
-    udVariant *a = r.allocArray(4);
-    new(&a[0]) udVariant(v.x);
-    new(&a[1]) udVariant(v.y);
-    new(&a[3]) udVariant(v.z);
-    new(&a[4]) udVariant(v.w);
-    return r;
-  }
-};
+  udVariant r;
+  udVariant *a = r.allocArray(4);
+  new(&a[0]) udVariant(v.x);
+  new(&a[1]) udVariant(v.y);
+  new(&a[2]) udVariant(v.z);
+  new(&a[3]) udVariant(v.w);
+  return r;
+}
 template<typename F>
-struct udVariant_Construct <udMatrix4x4<F>>
+inline udVariant udToVariant(const udMatrix4x4<F> &m)
 {
-  inline static udVariant construct(const udMatrix4x4<F> &m)
-  {
-    udVariant r;
-    udVariant *a = r.allocArray(16);
-    for (size_t i = 0; i<16; ++i)
-      new(&a[i]) udVariant(m.a[i]);
-    return r;
-  }
-};
+  udVariant r;
+  udVariant *a = r.allocArray(16);
+  for (size_t i = 0; i<16; ++i)
+    new(&a[i]) udVariant(m.a[i]);
+  return r;
+}
+
 
 // destructor
 inline udVariant::~udVariant()
@@ -268,81 +253,103 @@ template<> struct udVariant_Cast < int64_t  > { inline static int64_t  as(const 
 template<> struct udVariant_Cast < uint64_t > { inline static uint64_t as(const udVariant &v) { return (uint64_t)v.asInt(); } };
 template<> struct udVariant_Cast < udString > { inline static udString as(const udVariant &v) { return v.asString(); } };
 
-// way to make casts for other component types?
-template<> struct udVariant_Cast < udComponentRef > { inline static udComponentRef as(const udVariant &v) { return v.asComponent(); } };
-// TODO: C++11 magic to make this shit work for all kinda fo components
-
+// udSharedPtr<udComponent> (and derived types)
+template<typename T, typename std::enable_if<std::is_base_of<udComponent, T>::value>::type* = nullptr> // O_O
+inline void udFromVariant(const udVariant &v, udSharedPtr<T> *pR)
+{
+  *pR = component_cast<T>(v.asComponent());
+}
 
 // udMath types
 template<typename U>
-struct udVariant_Cast < udVector2<U> > {
-  static udVector2<U> as(const udVariant &v)
+inline void udFromVariant(const udVariant &v, udVector2<U> *pR)
+{
+  *pR = udVector2<U>::zero();
+  if (udVariant::Type::Array)
   {
-    udVector2<U> r = udVector2<U>::zero();
-    // TODO: support Type::Array
-    if (udVariant::Type::AssocArray)
+    auto a = v.asArray();
+    if (a.length >= 2)
     {
-      auto aa = v.asAssocArraySeries();
-      if (aa.length >= 2)
-      {
-        for (size_t i = 0; i < 2; ++i)
-          ((U*)&r)[i] = aa[i].value.as<U>();
-      }
+      for (size_t i = 0; i < 2; ++i)
+        ((U*)pR)[i] = (U)a[i].asFloat();
     }
-    return r;
   }
-};
+  else if (udVariant::Type::AssocArray)
+  {
+    auto aa = v.asAssocArraySeries();
+    if (aa.length >= 2)
+    {
+      for (size_t i = 0; i < 2; ++i)
+        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+    }
+  }
+}
 template<typename U>
-struct udVariant_Cast < udVector3<U> > {
-  static udVector3<U> as(const udVariant &v)
+inline void udFromVariant(const udVariant &v, udVector3<U> *pR)
+{
+  *pR = udVector3<U>::zero();
+  if (udVariant::Type::Array)
   {
-    udVector3<U> r = udVector3<U>::zero();
-    // TODO: support Type::Array
-    if (udVariant::Type::AssocArray)
+    auto a = v.asArray();
+    if (a.length >= 3)
     {
-      auto aa = v.asAssocArraySeries();
-      if (aa.length >= 3)
-      {
-        for (size_t i = 0; i < 3; ++i)
-          ((U*)&r)[i] = aa[i].value.as<U>();
-      }
+      for (size_t i = 0; i < 3; ++i)
+        ((U*)pR)[i] = (U)a[i].asFloat();
     }
-    return r;
   }
-};
+  else if (udVariant::Type::AssocArray)
+  {
+    auto aa = v.asAssocArraySeries();
+    if (aa.length >= 3)
+    {
+      for (size_t i = 0; i < 3; ++i)
+        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+    }
+  }
+}
 template<typename U>
-struct udVariant_Cast < udVector4<U> > {
-  static udVector4<U> as(const udVariant &v)
+inline void udFromVariant(const udVariant &v, udVector4<U> *pR)
+{
+  *pR = udVector4<U>::zero();
+  if (udVariant::Type::Array)
   {
-    udVector4<U> r = udVector4<U>::zero();
-    // TODO: support Type::Array
-    if (udVariant::Type::AssocArray)
+    auto a = v.asArray();
+    if (a.length >= 4)
     {
-      auto aa = v.asAssocArraySeries();
-      if (aa.length >= 4)
-      {
-        for (size_t i = 0; i < 4; ++i)
-          ((U*)&r)[i] = aa[i].value.as<U>();
-      }
+      for (size_t i = 0; i < 4; ++i)
+        ((U*)pR)[i] = (U)a[i].asFloat();
     }
-    return r;
   }
-};
+  else if (udVariant::Type::AssocArray)
+  {
+    auto aa = v.asAssocArraySeries();
+    if (aa.length >= 4)
+    {
+      for (size_t i = 0; i < 4; ++i)
+        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+    }
+  }
+}
 template<typename U>
-struct udVariant_Cast < udMatrix4x4<U> > {
-  static udMatrix4x4<U> as(const udVariant &v)
+inline void udFromVariant(const udVariant &v, udMatrix4x4<U> *pR)
+{
+  *pR = udMatrix4x4<U>::identity();
+  if (udVariant::Type::Array)
   {
-    udMatrix4x4<U> r = udMatrix4x4<U>::identity();
-    // TODO: support Type::Array
-    if (udVariant::Type::AssocArray)
+    auto a = v.asArray();
+    if (a.length >= 16)
     {
-      auto aa = v.asAssocArraySeries();
-      if (aa.length >= 16)
-      {
-        for (size_t i = 0; i < 16; ++i)
-          ((U*)&r)[i] = aa[i].value.as<U>();
-      }
+      for (size_t i = 0; i < 16; ++i)
+        ((U*)pR)[i] = (U)a[i].asFloat();
     }
-    return r;
   }
-};
+  else if (udVariant::Type::AssocArray)
+  {
+    auto aa = v.asAssocArraySeries();
+    if (aa.length >= 16)
+    {
+      for (size_t i = 0; i < 16; ++i)
+        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+    }
+  }
+}

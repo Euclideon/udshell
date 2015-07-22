@@ -4,7 +4,6 @@
 
 #include "udString.h"
 #include "udSharedPtr.h"
-#include "udMath.h"
 
 struct udKeyValuePair;
 class udComponent;
