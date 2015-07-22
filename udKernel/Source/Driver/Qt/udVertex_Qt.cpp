@@ -87,7 +87,7 @@ void udVertex_SetVertexBufferData(udVertexBuffer *pVB, void *pVertexData, size_t
 
   pVB->pVB->bind();
   pVB->pVB->setUsagePattern(QOpenGLBuffer::StaticDraw);
-  pVB->pVB->allocate(pVertexData, bufferLen);
+  pVB->pVB->allocate(pVertexData, static_cast<int>(bufferLen));
 }
 
 

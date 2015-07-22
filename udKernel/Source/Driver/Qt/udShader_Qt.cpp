@@ -115,7 +115,9 @@ void udShader_SetProgramData(int param, const udFloat4 &value)
 // ***************************************************************************************
 void udShader_SetProgramData(int param, const udFloat4x4 &value)
 {
-  UDASSERT(false, "TODO");
+  if (param < 0)
+    return;
+  s_QtGLContext.pFunc->glUniformMatrix4fv(param, 1, 0, (GLfloat*)&value);
 }
 
 // ***************************************************************************************
