@@ -229,17 +229,7 @@ inline udFixedString<Size> udFixedString<Size>::format(const char *pFormat, ...)
 #endif
 
   udFixedString<Size> r;
-  r.length = len;
-  if (len < Size)
-  {
-    r.numAllocated = 0;
-    r.ptr = (char*)r.buffer;
-  }
-  else
-  {
-    r.numAllocated = udFixedSlice<char, Size>::numToAlloc(len + 1);
-    r.ptr = (char*)udAlloc(sizeof(char) * r.numAllocated);
-  }
+  r.reserve(len + 1);
 
 #if defined(_MSC_VER)
   r.length = vsnprintf_s(r.ptr, len, len, pFormat, args);

@@ -276,7 +276,6 @@ void udSlice<T>::copyTo(udSlice<U> dest) const
 // udFixedSlice
 template <typename T, size_t Count>
 inline udFixedSlice<T, Count>::udFixedSlice()
-  : numAllocated(0)
 {}
 
 template <typename T, size_t Count>
@@ -286,88 +285,95 @@ inline udFixedSlice<T, Count>::udFixedSlice(const udFixedSlice<T, Count> &val)
 
 template <typename T, size_t Count>
 inline udFixedSlice<T, Count>::udFixedSlice(udFixedSlice<T, Count> &&rval)
-  : numAllocated(0)
 {
-  numAllocated = rval.numAllocated;
   this->length = rval.length;
-  if (numAllocated)
+  if (rval.hasAllocation())
   {
     // we can copy large buffers efficiently!
-    this->ptr = pAllocation = rval.pAllocation;
+    this->ptr = rval.ptr;
+    rval.ptr = nullptr;
+    rval.length = 0;
   }
   else
   {
+    // copy items into the small array buffer
     this->ptr = (T*)buffer;
     for (int i = 0; i < this->length; ++i)
-      new((void*)&(this->ptr[i])) T(rval.ptr[i]);
+      new((void*)&this->ptr[i]) T(std::move(rval.ptr[i]));
   }
 }
 
 template <typename T, size_t Count>
 template <typename U>
 inline udFixedSlice<T, Count>::udFixedSlice(U *ptr, size_t length)
-  : numAllocated(0)
+  : udSlice<T>()
 {
-  this->operator=(udSlice<U>(ptr, length));
+  reserve(length);
+  this->length = length;
+  for (size_t i = 0; i < length; ++i)
+    new((void*)&this->ptr[i]) T(ptr[i]);
 }
 
 template <typename T, size_t Count>
 template <typename U>
 inline udFixedSlice<T, Count>::udFixedSlice(udSlice<U> slice)
-  : numAllocated(0)
+  : udFixedSlice<T, Count>(slice.ptr, slice.length)
 {
-  this->operator=(slice);
 }
 
 template <typename T, size_t Count>
 inline udFixedSlice<T, Count>::~udFixedSlice()
 {
-  if (numAllocated)
-    udFree(pAllocation);
+  for (size_t i = 0; i < length; ++i)
+    this->ptr[i].~T();
+  if (hasAllocation())
+  {
+    Header *pHeader = getHeader();
+    udFree(pHeader);
+  }
 }
 
 template <typename T, size_t Count>
 void udFixedSlice<T, Count>::reserve(size_t count)
 {
-  if (count <= Count && numAllocated == 0)
+  bool hasAlloc = hasAllocation();
+  if (!hasAlloc && count <= Count)
     this->ptr = (T*)buffer;
-  if ((count > Count || numAllocated) && count > numAllocated)
+  else if (count > Count)
   {
-    T* pNew = (T*)udAlloc(sizeof(T) * count);
-    for (size_t i = 0; i < this->length; ++i)
-      new((void*)&(pNew[i])) T(this->ptr[i]);
-    if (numAllocated)
-      udFree(pAllocation);
-    numAllocated = count;
-    pAllocation = this->ptr = pNew;
+    bool needsExtend = hasAlloc && getHeader()->numAllocated < count;
+    if (!hasAlloc || needsExtend)
+    {
+      Header *pH = (Header*)udAlloc(sizeof(Header) + sizeof(T)*count);
+      pH->numAllocated = count;
+      T *pNew = (T*)&pH[1];
+      for (size_t i = 0; i < this->length; ++i)
+        new((void*)&(pNew[i])) T(this->ptr[i]);
+      if (hasAlloc)
+      {
+        pH = getHeader();
+        udFree(pH);
+      }
+      this->ptr = pNew;
+    }
   }
 }
 
 template <typename T, size_t Count>
 udSlice<T> udFixedSlice<T, Count>::getBuffer() const
 {
-  if (numAllocated == 0)
-    return udSlice<T>((T*)buffer, Count);
-  else
-    return udSlice<T>(pAllocation, numAllocated);
+  if (hasAllocation())
+    return udSlice<T>(this->ptr, getHeader()->numAllocated);
+  return udSlice<T>((T*)buffer, Count);
 }
 
 template <typename T, size_t Count>
 inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::operator =(udFixedSlice<T, Count> &&rval)
 {
-  this->~udFixedSlice();
-  numAllocated = rval.numAllocated;
-  this->length = rval.length;
-  if (numAllocated)
+  if (this != &rval)
   {
-    // we can copy large buffers efficiently!
-    this->ptr = pAllocation = rval.pAllocation;
-  }
-  else
-  {
-    this->ptr = (T*)buffer;
-    for (int i = 0; i < this->length; ++i)
-      new((void*)&(this->ptr[i])) T(rval.ptr[i]);
+    this->~udFixedSlice();
+    new(this) udFixedSlice<T, Count>(std::move(rval));
   }
   return *this;
 }
@@ -376,10 +382,11 @@ template <typename T, size_t Count>
 template <typename U>
 inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::operator =(udSlice<U> rh)
 {
-  reserve(rh.length);
-  this->length = rh.length;
-  for (size_t i = 0; i < this->length; ++i)
-    new((void*)&(this->ptr[i])) T(rh.ptr[i]);
+  if (this != &rval)
+  {
+    this->~udFixedSlice();
+    new(this) udFixedSlice<T, Count>(rh.ptr, rh.length);
+  }
   return *this;
 }
 
@@ -442,8 +449,7 @@ inline udRCSlice<T>::udRCSlice(udRCSlice<T> &&rval)
   : udSlice<T>(rval)
   , rc(rval.rc)
 {
-  if (rc)
-    ++rc->refCount;
+  rval.rc = nullptr;
 }
 
 template <typename T>
@@ -496,11 +502,11 @@ inline udRCSlice<T>& udRCSlice<T>::operator =(const udRCSlice<T> &rh)
 template <typename T>
 inline udRCSlice<T>& udRCSlice<T>::operator =(udRCSlice<T> &&rval)
 {
-  this->~udRCSlice();
-  this->ptr = rval.ptr;
-  this->length = rval.length;
-  rc = rval.rc;
-  ++rc->refCount;
+  if (this != &rval)
+  {
+    this->~udRCSlice();
+    new(this) udRCSlice<T>(std::move(rval));
+  }
   return *this;
 }
 

@@ -92,18 +92,15 @@ struct udSlice
   void copyTo(udSlice<U> dest) const;
 };
 
-
 // udFixedSlice introduces static-sized and/or stack-based ownership. this is useful anywhere that fixed-length arrays are appropriate
 // udFixedSlice will fail-over to an allocated buffer if the contents exceed the fixed size
-template <typename T, size_t Count = 64 - sizeof(size_t)*3>
-struct udFixedSlice : public udSlice <T>
+template <typename T, size_t Count = 0>
+struct udFixedSlice : public udSlice<T>
 {
-  size_t numAllocated;
-  union
-  {
-    char buffer[sizeof(T) * Count];
-    T *pAllocation;
-  };
+#if defined(_MSC_VER)
+# pragma warning(disable: 4200) // silence warning for zero length arrays
+#endif
+  char buffer[sizeof(T) * Count];
 
   // constructors
   udFixedSlice<T, Count>();
@@ -132,7 +129,17 @@ struct udFixedSlice : public udSlice <T>
   udSlice<T> getBuffer() const;
 
 protected:
+  struct Header
+  {
+    union
+    {
+      char header[64];
+      size_t numAllocated;
+    };
+  };
   static size_t numToAlloc(size_t i);
+  bool hasAllocation() { return this->ptr != (T*)this->buffer && this->ptr != nullptr; }
+  Header* getHeader() { return ((Header*)this->ptr) - 1; }
 };
 
 

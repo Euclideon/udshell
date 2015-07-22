@@ -192,21 +192,27 @@ inline udVariant::~udVariant()
 
 inline udVariant& udVariant::operator=(udVariant &&rval)
 {
-  this->~udVariant();
+  if (this != &rval)
+  {
+    this->~udVariant();
 
-  t = rval.t;
-  ownsArray = rval.ownsArray;
-  length = rval.length;
-  p = rval.p;
+    t = rval.t;
+    ownsArray = rval.ownsArray;
+    length = rval.length;
+    p = rval.p;
 
-  rval.ownsArray = false;
+    rval.ownsArray = false;
+  }
   return *this;
 }
 
 inline udVariant& udVariant::operator=(const udVariant &rval)
 {
-  this->~udVariant();
-  new(this) udVariant(rval);
+  if (this != &rval)
+  {
+    this->~udVariant();
+    new(this) udVariant(rval);
+  }
   return *this;
 }
 
