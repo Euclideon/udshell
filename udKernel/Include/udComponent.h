@@ -81,8 +81,16 @@ inline udSharedPtr<T> component_cast(udComponentRef pComponent)
 }
 
 
-// HACK: this here because forward referencing! >_<
+// HACK: this is here because forward referencing!
+// udSharedPtr<udComponent> (and derived types)
+template<typename T, typename std::enable_if<std::is_base_of<udComponent, T>::value>::type* = nullptr> // O_O
+inline void udFromVariant(const udVariant &v, udSharedPtr<T> *pR)
+{
+  *pR = component_cast<T>(v.asComponent());
+}
 
+
+// HACK: this here because forward referencing! >_<
 template<typename... Args>
 template <typename X>
 void udEvent<Args...>::Subscribe(udComponent *pC, void(X::*func)(Args...))

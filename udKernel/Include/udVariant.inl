@@ -253,13 +253,6 @@ template<> struct udVariant_Cast < int64_t  > { inline static int64_t  as(const 
 template<> struct udVariant_Cast < uint64_t > { inline static uint64_t as(const udVariant &v) { return (uint64_t)v.asInt(); } };
 template<> struct udVariant_Cast < udString > { inline static udString as(const udVariant &v) { return v.asString(); } };
 
-// udSharedPtr<udComponent> (and derived types)
-template<typename T, typename std::enable_if<std::is_base_of<udComponent, T>::value>::type* = nullptr> // O_O
-inline void udFromVariant(const udVariant &v, udSharedPtr<T> *pR)
-{
-  *pR = component_cast<T>(v.asComponent());
-}
-
 // udMath types
 template<typename U>
 inline void udFromVariant(const udVariant &v, udVector2<U> *pR)
