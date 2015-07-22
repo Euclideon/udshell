@@ -1,39 +1,56 @@
 #include "renderview.h"
 #include "udKernel.h"
+#include "udView.h"
 
 #include <QtQuick/QQuickWindow>
 #include <QtGui/QOpenGLFramebufferObject>
 
+
+extern udKernel *s_pKernel;
+
 class FboRenderer : public QQuickFramebufferObject::Renderer
 {
 public:
-  FboRenderer(const QQuickFramebufferObject *item) : m_item(item)
+  FboRenderer(const QQuickFramebufferObject *item) : m_item(item), dirty(true)
   {
-    udDebugPrintf("\nFboRenderer::FboRenderer()\n");
+    udDebugPrintf("FboRenderer::FboRenderer()\n");
   }
 
   void render()
   {
-    udDebugPrintf("\nFboRenderer::render()\n");
+    udDebugPrintf("FboRenderer::render()\n");
+    UDASSERT(s_pKernel->GetFocusView(), "No focus view");
+
+    if (dirty)
+    {
+      udDebugPrintf("DIRTY!\n");
+      s_pKernel->GetFocusView()->Resize(framebufferObject()->width(), framebufferObject()->height());
+      dirty = false;
+    }
+
+    s_pKernel->GetFocusView()->Render();
     m_item->window()->resetOpenGLState();
   }
 
   QOpenGLFramebufferObject *createFramebufferObject(const QSize &size)
   {
-    udDebugPrintf("\nFboRenderer::createFramebufferObject()\n");
+    udDebugPrintf("FboRenderer::createFramebufferObject()\n");
     // TODO: Set up appropriate format
     QOpenGLFramebufferObjectFormat format;
-    format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-    format.setSamples(4);
+    //format.setInternalTextureFormat(GL_RGBA8);
+    //format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+    //format.setSamples(4);
+    dirty = true;
     return new QOpenGLFramebufferObject(size, format);
   }
 
   void synchronize(QQuickFramebufferObject * item)
   {
-    udDebugPrintf("\nFboRenderer::synchronize()\n");
+    udDebugPrintf("FboRenderer::synchronize()\n");
   }
 
   const QQuickFramebufferObject *m_item;
+  bool dirty;
 };
 
 
