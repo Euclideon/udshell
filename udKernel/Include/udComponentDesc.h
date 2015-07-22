@@ -139,6 +139,7 @@ struct udTypeDesc
   udTypeDesc(udPropertyType type, uint32_t arrayLength = 0, const udSlice<const udEnumKVP> kvp = nullptr)
     : type(type), arrayLength(arrayLength), kvp(kvp)
   {}
+  udTypeDesc& operator=(const udTypeDesc&) = delete;
 
   udPropertyType type;
   uint32_t arrayLength;
@@ -147,6 +148,8 @@ struct udTypeDesc
 
 struct udPropertyDesc
 {
+  udPropertyDesc() = delete;
+
   udString id;
   udString displayName;
   udString description;
@@ -161,6 +164,8 @@ struct udPropertyDesc
 
 struct udMethodDesc
 {
+  udMethodDesc() = delete;
+
   udString id;
   udString displayName;
   udString description;
@@ -181,6 +186,9 @@ typedef udComponent *(CreateInstanceCallback)(const udComponentDesc *pType, udKe
 
 struct udComponentDesc
 {
+  udComponentDesc() = delete;
+  udComponentDesc& operator=(const udComponentDesc&) = delete;
+
   const udComponentDesc *pSuperDesc;
 
   int udVersion;
