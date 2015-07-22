@@ -5,6 +5,9 @@
 #include "udVertex.h"
 #include "udShader.h"
 
+// TODO: remove when resource cleanup is implemented
+#include "udDriver.h"
+
 
 // shaders for blitting
 const char s_vertexShader[] =
@@ -129,6 +132,16 @@ void udRenderableView::RenderUD()
     uint32_t depthPitch = renderWidth*sizeof(float);
     pColorBuffer = udAllocFlags(colorPitch * renderHeight, udAF_Zero);
     pDepthBuffer = udAllocFlags(depthPitch * renderHeight, udAF_Zero);
+
+    // TODO: qt driver specific hack to see something
+#if UDRENDER_DRIVER == UDDRIVER_QT
+    int pixelCount = renderWidth*renderHeight;
+    for (int i = 0; i < pixelCount; ++i)
+    {
+      ((uint32_t*)pColorBuffer)[i] = 0x802020FF;
+      ((uint32_t*)pDepthBuffer)[i] = 0x3F800000;
+    }
+#endif
   }
 }
 
@@ -159,7 +172,11 @@ void udRenderableView::RenderGPU() const
 
   udGPU_RenderVertices(s_shader, s_pQuadVB, udPT_TriangleFan, 4);
 
-  // TODO: if Qt, destroy textures immediately
-  //...
-  // pColorTexture = nullptr;
+  // TODO: we need to have some sort of resource cleanup list so this can happen when we're ready/automatically
+#if UDRENDER_DRIVER == UDDRIVER_QT
+  udTexture_DestroyTexture(&pColorTexture);
+  udTexture_DestroyTexture(&pDepthTexture);
+  pColorTexture = nullptr;
+  pDepthTexture = nullptr;
+#endif
 }
