@@ -5,12 +5,19 @@
 Window::Window(QWindow *parent)
   : QQuickView(parent)
 {
+  udDebugPrintf("\nWindow::Window()\n");
   // register new qml types
   qmlRegisterType<RenderView>("udShell", 0, 1, "RenderView");
 
   // modify our surface format to support opengl debug logging
   QSurfaceFormat format = QSurfaceFormat::defaultFormat();
   format.setOption(QSurfaceFormat::DebugContext);
+  //format.setMajorVersion(2);
+  //format.setMinorVersion(0);
+
+  //qDebug() << "WINDOW VERSION " << format.majorVersion();
+  //qDebug() << "WINDOW VERSION " << format.minorVersion();
+
   //format.setMajorVersion(4);
   //format.setMinorVersion(3);
   //format.setProfile(QSurfaceFormat::CoreProfile);
