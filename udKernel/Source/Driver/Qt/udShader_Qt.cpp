@@ -89,19 +89,25 @@ void udShader_SetCurrent(udShaderProgram *pProgram)
 // ***************************************************************************************
 void udShader_SetProgramData(int param, bool value)
 {
-  UDASSERT(false, "TODO");
+  if (param < 0)
+    return;
+  s_QtGLContext.pFunc->glUniform1i(param, value ? 1 : 0);
 }
 
 // ***************************************************************************************
 void udShader_SetProgramData(int param, int value)
 {
-  UDASSERT(false, "TODO");
+  if (param < 0)
+    return;
+  s_QtGLContext.pFunc->glUniform1i(param, value);
 }
 
 // ***************************************************************************************
 void udShader_SetProgramData(int param, float value)
 {
-  UDASSERT(false, "TODO");
+  if (param < 0)
+    return;
+  s_QtGLContext.pFunc->glUniform1f(param, value);
 }
 
 // ***************************************************************************************
@@ -135,25 +141,33 @@ void udShader_SetProgramData(int textureUnit, int param, struct udTexture *pText
 // ***************************************************************************************
 void udShader_SetProgramData(int param, const int *pValues, size_t count)
 {
-  UDASSERT(false, "TODO");
+  if (param < 0)
+    return;
+  s_QtGLContext.pFunc->glUniform1iv(param, (GLsizei)count, pValues);
 }
 
 // ***************************************************************************************
 void udShader_SetProgramData(int param, const float *pValues, size_t count)
 {
-  UDASSERT(false, "TODO");
+  if (param < 0)
+    return;
+  s_QtGLContext.pFunc->glUniform1fv(param, (GLsizei)count, pValues);
 }
 
 // ***************************************************************************************
 void udShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
 {
-  UDASSERT(false, "TODO");
+  if (param < 0)
+    return;
+  s_QtGLContext.pFunc->glUniform4fv(param, (GLsizei)count, (GLfloat*)pValues);
 }
 
 // ***************************************************************************************
 void udShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
 {
-  UDASSERT(false, "TODO");
+  if (param < 0)
+    return;
+  s_QtGLContext.pFunc->glUniformMatrix4fv(param, (GLsizei)count, 0, (GLfloat*)pValues);
 }
 
 #endif // UDRENDER_DRIVER == UDDRIVER_QT

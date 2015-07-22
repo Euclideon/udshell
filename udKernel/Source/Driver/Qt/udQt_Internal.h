@@ -32,7 +32,6 @@ struct udTexture
   size_t elements;
   int levels;
   QOpenGLTexture *pTexture;
-  //GLuint texture;
 };
 
 struct udVertexElementData

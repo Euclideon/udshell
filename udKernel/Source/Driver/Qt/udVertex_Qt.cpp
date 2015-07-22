@@ -76,7 +76,10 @@ epilogue:
 // ***************************************************************************************
 void udVertex_DestroyVertexBuffer(udVertexBuffer **ppVB)
 {
-  UDASSERT(false, "TODO");
+  (*ppVB)->pVB->release();
+  (*ppVB)->pVB->destroy();
+  udFree(*ppVB);
+  *ppVB = nullptr;
 }
 
 // ***************************************************************************************
