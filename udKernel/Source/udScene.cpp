@@ -52,17 +52,16 @@ udResult udScene::Update(double timeDelta)
   return rootNode->Update(timeDelta);
 }
 
-udSharedPtr<const udRenderScene> udScene::GetRenderScene()
+udRenderSceneRef udScene::GetRenderScene()
 {
   if (!bDirty)
     return spCache;
 
-  udRenderScene *pScene = new udRenderScene;
+  spCache = udRenderSceneRef::create();
 
   // build scene
-  rootNode->Render(pScene, rootNode->GetMatrix());
+  rootNode->Render(spCache, rootNode->GetMatrix());
 
-  spCache = udSharedPtr<const udRenderScene>(pScene);
   bDirty = false;
 
   return spCache;

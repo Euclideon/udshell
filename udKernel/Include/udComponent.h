@@ -69,7 +69,7 @@ template<typename T>
 inline udSharedPtr<T> component_cast(udComponentRef pComponent)
 {
   if (!pComponent)
-    return udSharedPtr<T>();
+    return nullptr;
   const udComponentDesc *pDesc = pComponent->pType;
   while (pDesc)
   {
@@ -77,7 +77,7 @@ inline udSharedPtr<T> component_cast(udComponentRef pComponent)
       return static_pointer_cast<T>(pComponent);
     pDesc = pDesc->pSuperDesc;
   }
-  return udSharedPtr<T>();
+  return nullptr;
 }
 
 

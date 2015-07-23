@@ -23,12 +23,10 @@ using std::nullptr_t;
 
 
 #define PROTOTYPE_COMPONENT(Name) \
-  class Name; \
-  typedef udSharedPtr<Name> Name##Ref;
+  SHARED_CLASS(Name)
 
 
 class udKernel;
-class udComponent;
 struct udComponentDesc;
 
 PROTOTYPE_COMPONENT(udComponent);

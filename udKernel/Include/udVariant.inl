@@ -3,7 +3,7 @@
 
 // constructors...
 inline udVariant::udVariant()
-  : t(Type::Null)
+  : t((size_t)Type::Null)
   , ownsArray(0)
   , length(0)
 {}
@@ -14,7 +14,7 @@ inline udVariant::udVariant(udVariant &&rval)
   , length(rval.length)
   , p(rval.p)
 {
-  rval.ownsArray = false;
+  rval.t = (size_t)Type::Null;
 }
 
 inline udVariant::udVariant(const udVariant &val)
@@ -25,13 +25,13 @@ inline udVariant::udVariant(const udVariant &val)
 {
   if (ownsArray)
   {
-    if (t == Type::Array)
+    if (is(Type::Array))
     {
       a = (udVariant*)udAlloc(sizeof(udVariant)*length);
       for (size_t i = 0; i<length; ++i)
         new((void*)&a[i]) udVariant(val.a[i]);
     }
-    else if (t == Type::AssocArray)
+    else if (is(Type::AssocArray))
     {
       aa = (udKeyValuePair*)udAlloc(sizeof(udKeyValuePair)*length);
       for (size_t i = 0; i<length; ++i)
@@ -44,43 +44,57 @@ inline udVariant::udVariant(const udVariant &val)
 }
 
 inline udVariant::udVariant(bool b)
-  : t(Type::Bool)
+  : t((size_t)Type::Bool)
   , ownsArray(0)
   , length(0)
   , b(b)
 {}
 inline udVariant::udVariant(int64_t i)
-  : t(Type::Int)
+  : t((size_t)Type::Int)
   , ownsArray(0)
   , length(0)
   , i(i)
 {}
 inline udVariant::udVariant(double f)
-  : t(Type::Float)
+  : t((size_t)Type::Float)
   , ownsArray(0)
   , length(0)
   , f(f)
 {}
 inline udVariant::udVariant(udComponent *c)
-  : t(Type::Component)
+  : t((size_t)Type::Component)
   , ownsArray(0)
   , length(0)
   , c(c)
 {}
+inline udVariant::udVariant(const Delegate &d)
+  : t((size_t)Type::Delegate)
+  , ownsArray(0)
+  , length(0)
+{
+  new(&p) Delegate(d);
+}
+inline udVariant::udVariant(Delegate &&d)
+  : t((size_t)Type::Delegate)
+  , ownsArray(0)
+  , length(0)
+{
+  new(&p) Delegate(std::move(d));
+}
 inline udVariant::udVariant(udString s)
-  : t(Type::String)
+  : t((size_t)Type::String)
   , ownsArray(0)
   , length(s.length)
   , s(s.ptr)
 {}
 inline udVariant::udVariant(udSlice<udVariant> a, bool ownsMemory)
-  : t(Type::Array)
+  : t((size_t)Type::Array)
   , ownsArray(ownsMemory ? 1 : 0)
   , length(a.length)
   , a(a.ptr)
 {}
 inline udVariant::udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory)
-  : t(Type::AssocArray)
+  : t((size_t)Type::AssocArray)
   , ownsArray(ownsMemory ? 1 : 0)
   , length(aa.length)
   , aa(aa.ptr)
@@ -167,18 +181,84 @@ inline udVariant udToVariant(const udMatrix4x4<F> &m)
   return r;
 }
 
+// functions
+template<typename R, typename... Args>
+class udVarDelegate : public udDelegateMemento
+{
+protected:
+  template<typename T>
+  friend class udSharedPtr;
+
+  // !! HERE BE DRAGONS !!
+  template<size_t ...> struct seq { };
+  template<int N, size_t ...S> struct gens : gens<N-1, N-1, S...> { };
+  template<size_t ...S> struct gens<0, S...> { typedef seq<S...> type; };
+  template<size_t ...S>
+  UDFORCE_INLINE static udVariant callFunc(udSlice<udVariant> args, const udDelegate<R(Args...)> &d, seq<S...>)
+  {
+    return udVariant(d(args[S].as<Args>()...));
+  }
+  // !!!!!!!!!!!!!!!!!!!!!
+
+  udVariant to(udSlice<udVariant> args) const
+  {
+    return callFunc(args, udDelegate<R(Args...)>(target), typename gens<sizeof...(Args)>::type());
+  }
+
+  R from(Args... args) const
+  {
+    udVariant::Delegate d(target);
+
+    udVariant vargs[] = { udVariant(args)... };
+    udSlice<udVariant> sargs(vargs, sizeof...(args));
+
+    size_t i = 0;
+    return d(sargs).as<R>();
+  }
+
+  // *to* udVariant::Delegate constructor
+  udVarDelegate(const udDelegate<R(Args...)> &d)
+    : target(d.GetMemento())
+  {
+    FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &udVarDelegate::to);
+    m = shim.GetMemento();
+  }
+
+  // *from* udVariant::Delegate constructor
+  udVarDelegate(const udVariant::Delegate &d)
+    : target(d.GetMemento())
+  {
+    FastDelegate<R(Args...)> shim(this, &udVarDelegate::from);
+    m = shim.GetMemento();
+  }
+
+  const udDelegateMementoRef target;
+};
+
+template<typename R, typename... Args>
+inline udVariant udToVariant(const udDelegate<R(Args...)> &d)
+{
+  typedef udSharedPtr<udVarDelegate<R, Args...>> VarDelegateRef;
+
+  return udVariant::Delegate(VarDelegateRef::create(d));
+}
+
 
 // destructor
 inline udVariant::~udVariant()
 {
-  if (ownsArray && t >= Type::Array)
+  if (is(Type::Delegate))
   {
-    if (t == Type::Array)
+    ((Delegate*)&p)->~Delegate();
+  }
+  else if (ownsArray && t >= (size_t)Type::Array)
+  {
+    if (is(Type::Array))
     {
       for (size_t i = 0; i < length; ++i)
         a[i].~udVariant();
     }
-    else if (t == Type::AssocArray)
+    else if (is(Type::AssocArray))
     {
       for (size_t i = 0; i < length; ++i)
       {
@@ -218,7 +298,12 @@ inline udVariant& udVariant::operator=(const udVariant &rval)
 
 inline udVariant::Type udVariant::type() const
 {
-  return Type(t);
+  return (Type)t;
+}
+
+inline bool udVariant::is(Type type) const
+{
+  return (Type)t == type;
 }
 
 // HAX: this is a horrible hax to satisfy the C++ compiler!
@@ -264,7 +349,7 @@ template<typename U>
 inline void udFromVariant(const udVariant &v, udVector2<U> *pR)
 {
   *pR = udVector2<U>::zero();
-  if (udVariant::Type::Array)
+  if (v.is(udVariant::Type::Array))
   {
     auto a = v.asArray();
     if (a.length >= 2)
@@ -273,7 +358,7 @@ inline void udFromVariant(const udVariant &v, udVector2<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
-  else if (udVariant::Type::AssocArray)
+  else if (v.is(udVariant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
     if (aa.length >= 2)
@@ -287,7 +372,7 @@ template<typename U>
 inline void udFromVariant(const udVariant &v, udVector3<U> *pR)
 {
   *pR = udVector3<U>::zero();
-  if (udVariant::Type::Array)
+  if (v.is(udVariant::Type::Array))
   {
     auto a = v.asArray();
     if (a.length >= 3)
@@ -296,7 +381,7 @@ inline void udFromVariant(const udVariant &v, udVector3<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
-  else if (udVariant::Type::AssocArray)
+  else if (v.is(udVariant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
     if (aa.length >= 3)
@@ -310,7 +395,7 @@ template<typename U>
 inline void udFromVariant(const udVariant &v, udVector4<U> *pR)
 {
   *pR = udVector4<U>::zero();
-  if (udVariant::Type::Array)
+  if (v.is(udVariant::Type::Array))
   {
     auto a = v.asArray();
     if (a.length >= 4)
@@ -319,7 +404,7 @@ inline void udFromVariant(const udVariant &v, udVector4<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
-  else if (udVariant::Type::AssocArray)
+  else if (v.is(udVariant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
     if (aa.length >= 4)
@@ -333,7 +418,7 @@ template<typename U>
 inline void udFromVariant(const udVariant &v, udMatrix4x4<U> *pR)
 {
   *pR = udMatrix4x4<U>::identity();
-  if (udVariant::Type::Array)
+  if (v.is(udVariant::Type::Array))
   {
     auto a = v.asArray();
     if (a.length >= 16)
@@ -342,7 +427,7 @@ inline void udFromVariant(const udVariant &v, udMatrix4x4<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
-  else if (udVariant::Type::AssocArray)
+  else if (v.is(udVariant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
     if (aa.length >= 16)
@@ -351,4 +436,12 @@ inline void udFromVariant(const udVariant &v, udMatrix4x4<U> *pR)
         ((U*)pR)[i] = (U)aa[i].value.asFloat();
     }
   }
+}
+
+template<typename R, typename... Args>
+inline void udFromVariant(const udVariant &v, udDelegate<R(Args...)> *pD)
+{
+  typedef udSharedPtr<udVarDelegate<R, Args...>> VarDelegateRef;
+
+  *pD = udDelegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
 }

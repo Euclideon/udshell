@@ -51,8 +51,8 @@ public:
   void Exec(udString code);
 
   // other functions
-  udViewRef GetFocusView() const { return pFocusView; }
-  udViewRef SetFocusView(udViewRef pView);
+  udViewRef GetFocusView() const { return spFocusView; }
+  udViewRef SetFocusView(udViewRef spView);
 
   udResult RunMainLoop();
   udResult Terminate();
@@ -87,7 +87,7 @@ protected:
 
   udRenderEngine *pRenderEngine = nullptr;
 
-  udViewRef pFocusView;
+  udViewRef spFocusView = nullptr;
 
   static udKernel *CreateInstanceInternal(udInitParams commandLine);
   udResult InitInstanceInternal();
@@ -105,10 +105,10 @@ protected:
 template<typename T>
 udSharedPtr<T> udKernel::CreateComponent(udInitParams initParams)
 {
-  udComponentRef c;
+  udComponentRef c = nullptr;
   udResult r = CreateComponent(T::descriptor.id, initParams, &c);
   if (r != udR_Success)
-    return udSharedPtr<T>();
+    return nullptr;
   return static_pointer_cast<T>(c);
 }
 

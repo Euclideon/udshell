@@ -52,12 +52,12 @@ udResult udKernel::DestroyInstanceInternal()
   return udR_Success;
 }
 
-udViewRef udKernel::SetFocusView(udViewRef pView)
+udViewRef udKernel::SetFocusView(udViewRef spView)
 {
-  udViewRef pOld = pFocusView;
-  pFocusView = pView;
-  pFocusView->Resize(s_displayWidth, s_displayHeight);
-  return pOld;
+  udViewRef spOld = spFocusView;
+  spFocusView = spView;
+  spFocusView->Resize(s_displayWidth, s_displayHeight);
+  return spOld;
 }
 
 
@@ -142,7 +142,7 @@ udResult udKernel::RunMainLoop()
               case SDL_WINDOWEVENT_RESIZED:
                 s_displayWidth = event.window.data1;
                 s_displayHeight = event.window.data2;
-                pFocusView->Resize(s_displayWidth, s_displayHeight);
+                spFocusView->Resize(s_displayWidth, s_displayHeight);
                 glViewport(0, 0, s_displayWidth, s_displayHeight);
                 break;
             }
@@ -155,7 +155,7 @@ udResult udKernel::RunMainLoop()
     // TODO: need to translate input polling into messages...
     udInput_Update();
 
-    pFocusView->Render();
+    spFocusView->Render();
     SDL_GL_SwapWindow(s_window);
   }
   return udR_Success;

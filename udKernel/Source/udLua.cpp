@@ -84,7 +84,7 @@ static int CreateComponent(lua_State *L)
       init = args.asAssocArray();
   }
 
-  udComponentRef c;
+  udComponentRef c = nullptr;
   udResult r = l.kernel()->CreateComponent(type, init, &c);
   if (r == udR_Failure_)
     l.pushNil();

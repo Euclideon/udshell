@@ -93,13 +93,13 @@ udRenderableView::~udRenderableView()
 
 void udRenderableView::RenderUD()
 {
-  if (scene->ud.length)
+  if (spScene->ud.length)
   {
-    size_t size = sizeof(udRenderModel*)*scene->ud.length;
+    size_t size = sizeof(udRenderModel*)*spScene->ud.length;
     udRenderModel **ppRenderModels = (udRenderModel**)alloca(size);
 
-    for (size_t i = 0; i < scene->ud.length; ++i)
-      ppRenderModels[i] = &scene->ud[i].renderModel;
+    for (size_t i = 0; i < spScene->ud.length; ++i)
+      ppRenderModels[i] = &spScene->ud[i].renderModel;
 
     // allocate view
     udRender_CreateView(&pRenderView, pRenderEngine, renderWidth, renderHeight);
@@ -116,7 +116,7 @@ void udRenderableView::RenderUD()
     udRender_SetTarget(pRenderView, udRTT_Depth32, pDepthBuffer, depthPitch, 0x3F800000);
 
     // render UD
-    udRender_Render(pRenderView, ppRenderModels, (int)scene->ud.length, &options);
+    udRender_Render(pRenderView, ppRenderModels, (int)spScene->ud.length, &options);
   }
   else
   {

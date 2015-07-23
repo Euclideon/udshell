@@ -141,7 +141,7 @@ int udUDNode::Load(udString name, bool useStreamer)
 {
   source = "";
   udResult result;
-  spModel = udSharedudModel::Create(name,useStreamer);
+  spModel = udSharedUDModel::Create(name, useStreamer);
   if (!spModel)
   {
     result = udR_Failure_;
@@ -156,7 +156,7 @@ epilogue:
 }
 
 
-udResult udUDNode::Render(udRenderScene *pScene, const udDouble4x4 &mat)
+udResult udUDNode::Render(udRenderSceneRef &spScene, const udDouble4x4 &mat)
 {
   udUDJob job;
   memset(&job, 0, sizeof(job));
@@ -175,7 +175,7 @@ udResult udUDNode::Render(udRenderScene *pScene, const udDouble4x4 &mat)
     job.renderModel.pClip = &job.clipArea;
   }
 
-  pScene->ud.pushBack(job);
+  spScene->ud.pushBack(job);
   return udR_Success;
 }
 

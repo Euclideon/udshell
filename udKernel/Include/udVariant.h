@@ -1,25 +1,27 @@
 #pragma once
-#ifndef UDVARIANT_H
+#if !defined(UDVARIANT_H)
 #define UDVARIANT_H
 
 #include "udString.h"
-#include "udSharedPtr.h"
+#include "udDelegate.h"
 
+SHARED_CLASS(udComponent);
 struct udKeyValuePair;
-class udComponent;
-typedef udSharedPtr<udComponent> udComponentRef;
 class LuaState;
 
 struct udVariant
 {
 public:
-  enum Type : size_t
+  typedef udDelegate<udVariant(udSlice<udVariant>)> Delegate;
+
+  enum class Type
   {
     Null,
     Bool,
     Int,
     Float,
     Component,
+    Delegate,
     String,
     Array,
     AssocArray
@@ -33,6 +35,8 @@ public:
   udVariant(int64_t);
   udVariant(double);
   udVariant(udComponent *);
+  udVariant(const Delegate &d);
+  udVariant(Delegate &&d);
   udVariant(udString);
   udVariant(udSlice<udVariant> a, bool ownsMemory = false);
   udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory = false);
@@ -48,6 +52,7 @@ public:
 
   // actual methods
   Type type() const;
+  bool is(Type type) const;
 
   udRCString stringify() const;
 
@@ -58,6 +63,7 @@ public:
   int64_t asInt() const;
   double asFloat() const;
   udComponentRef asComponent() const;
+  Delegate asDelegate() const;
   udString asString() const;
   udSlice<udVariant> asArray() const;
   udSlice<udKeyValuePair> asAssocArray() const;
@@ -76,9 +82,9 @@ public:
   static udVariant luaGet(LuaState &l, int idx = -1);
 
 private:
-  size_t t : 3;
+  size_t t : 4;
   size_t ownsArray : 1;
-  size_t length : (sizeof(size_t)*8)-4;
+  size_t length : (sizeof(size_t)*8)-5;
   union
   {
     bool b;

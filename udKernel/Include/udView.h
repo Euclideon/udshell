@@ -7,7 +7,7 @@
 #include "udRender.h"
 #include "udMath.h"
 
-struct udRenderableView;
+SHARED_CLASS(udRenderableView);
 
 PROTOTYPE_COMPONENT(udScene);
 PROTOTYPE_COMPONENT(udCamera);
@@ -23,7 +23,7 @@ public:
 
   udResult Render(); // TODO: REMOVE ME
 
-  udSharedPtr<const udRenderableView> GetRenderableView();
+  udRenderableViewRef GetRenderableView();
 
   void SetScene(udSceneRef spScene);
   void SetCamera(udCameraRef spCamera);
@@ -42,10 +42,10 @@ public:
   void RegisterPostRenderCallback(void(*pCallback)(udViewRef pView, udSceneRef pScene)) { pPostRenderCallback = pCallback; }
 
 protected:
-  udSceneRef spScene;
-  udCameraRef spCamera;
+  udSceneRef spScene = nullptr;
+  udCameraRef spCamera = nullptr;
 
-  udSharedPtr<const udRenderableView> spCache;
+  udRenderableViewRef spCache = nullptr;
   bool bDirty = true;
 
   int displayWidth = 0, displayHeight = 0;

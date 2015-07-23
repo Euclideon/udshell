@@ -2,8 +2,7 @@
 #if !defined(_UDEVENT_H)
 #define _UDEVENT_H
 
-#include "3rdparty/FastDelegate.h"
-#include "udSharedPtr.h"
+#include "udDelegate.h"
 #include "udSlice.h"
 
 using fastdelegate::FastDelegate;
@@ -29,10 +28,17 @@ protected:
     Subscription(DelegateMemento m, udSubscriber *pSubscriber = nullptr)
       : m(m), pSubscriber(pSubscriber) {}
 
+    udDelegateMementoRef spM = nullptr;
     DelegateMemento m;
     udSubscriber *pSubscriber;
   };
   udFixedSlice<Subscription, 3> subscribers;
+
+  void t()
+  {
+    udDelegate<void(int)> d(subscribers[0].spM);
+    d(10);
+  }
 };
 
 template<typename... Args>

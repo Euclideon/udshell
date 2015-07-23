@@ -5,7 +5,7 @@
 
 udRCString udVariant::stringify() const
 {
-  switch (t)
+  switch ((Type)t)
   {
   case Type::Null:
     return "nil";
@@ -21,7 +21,7 @@ udRCString udVariant::stringify() const
 
 bool udVariant::asBool() const
 {
-  switch (t)
+  switch ((Type)t)
   {
   case Type::Null:
     return false;
@@ -47,7 +47,7 @@ bool udVariant::asBool() const
 }
 int64_t udVariant::asInt() const
 {
-  switch (t)
+  switch ((Type)t)
   {
   case Type::Null:
     return 0;
@@ -66,7 +66,7 @@ int64_t udVariant::asInt() const
 }
 double udVariant::asFloat() const
 {
-  switch (t)
+  switch ((Type)t)
   {
   case Type::Null:
     return 0.0;
@@ -85,20 +85,31 @@ double udVariant::asFloat() const
 }
 udComponentRef udVariant::asComponent() const
 {
-  switch (t)
+  switch ((Type)t)
   {
   case Type::Component:
     return udComponentRef(c);
   default:
     UDASSERT(type() == Type::Component, "Wrong type!");
-    return udComponentRef();
+    return nullptr;
+  }
+}
+udVariant::Delegate udVariant::asDelegate() const
+{
+  switch ((Type)t)
+  {
+    case Type::Delegate:
+      return (Delegate&)p;
+    default:
+      UDASSERT(type() == Type::Delegate, "Wrong type!");
+      return Delegate();
   }
 }
 udString udVariant::asString() const
 {
   // TODO: it would be nice to be able to string-ify other types
   // ...but we don't have any output buffer
-  switch (t)
+  switch ((Type)t)
   {
   case Type::Null:
     return udString();
@@ -113,7 +124,7 @@ udString udVariant::asString() const
 }
 udSlice<udVariant> udVariant::asArray() const
 {
-  switch (t)
+  switch ((Type)t)
   {
   case Type::Null:
     return udSlice<udVariant>();
@@ -126,7 +137,7 @@ udSlice<udVariant> udVariant::asArray() const
 }
 udSlice<udKeyValuePair> udVariant::asAssocArray() const
 {
-  switch (t)
+  switch ((Type)t)
   {
   case Type::Null:
     return udSlice<udKeyValuePair>();
@@ -139,7 +150,7 @@ udSlice<udKeyValuePair> udVariant::asAssocArray() const
 }
 udSlice<udKeyValuePair> udVariant::asAssocArraySeries() const
 {
-  switch (t)
+  switch ((Type)t)
   {
   case Type::Null:
     return udSlice<udKeyValuePair>();
@@ -153,30 +164,30 @@ udSlice<udKeyValuePair> udVariant::asAssocArraySeries() const
 
 size_t udVariant::arrayLen() const
 {
-  if (t == Type::Array)
+  if (is(Type::Array))
     return length;
-  if (t == Type::AssocArray)
+  if (is(Type::AssocArray))
     return assocArraySeriesLen();
   return 0;
 }
 size_t udVariant::assocArraySeriesLen() const
 {
-  if (t != Type::AssocArray)
+  if (!is(Type::AssocArray))
     return 0;
   size_t i = 0;
-  while (i < length && aa[i].key.t == Type::Int && aa[i].key.i == i + 1)
+  while (i < length && aa[i].key.is(Type::Int) && aa[i].key.i == i + 1)
     ++i;
   return i;
 }
 
 udVariant udVariant::operator[](size_t i) const
 {
-  if (t == Type::Array)
+  if (is(Type::Array))
   {
     UDASSERT(i < length, "Index out of range!");
     return a[i];
   }
-  if (t == Type::AssocArray)
+  if (is(Type::AssocArray))
   {
     UDASSERT(i < assocArraySeriesLen(), "Index out of range!");
     return aa[i].value;
@@ -185,13 +196,13 @@ udVariant udVariant::operator[](size_t i) const
 }
 udVariant udVariant::operator[](udString key) const
 {
-  if (t == Type::AssocArray)
+  if (is(Type::AssocArray))
   {
     size_t i = assocArraySeriesLen();
     for (; i<length; ++i)
     {
       udVariant &k = aa[i].key;
-      if (k.t != Type::String)
+      if (!k.is(Type::String))
         continue;
       if (udString(k.s, k.length).eq(key))
         return aa[i].value;
@@ -203,7 +214,7 @@ udVariant udVariant::operator[](udString key) const
 udVariant* udVariant::allocArray(size_t len)
 {
   this->~udVariant();
-  t = Type::Array;
+  t = (size_t)Type::Array;
   length = len;
   ownsArray = true;
   a = udAllocType(udVariant, len, udAF_None);
@@ -213,7 +224,7 @@ udVariant* udVariant::allocArray(size_t len)
 udKeyValuePair* udVariant::allocAssocArray(size_t len)
 {
   this->~udVariant();
-  t = Type::AssocArray;
+  t = (size_t)Type::AssocArray;
   length = len;
   ownsArray = true;
   aa = udAllocType(udKeyValuePair, len, udAF_None);
@@ -222,7 +233,7 @@ udKeyValuePair* udVariant::allocAssocArray(size_t len)
 
 void udVariant::luaPush(LuaState &l) const
 {
-  switch (t)
+  switch ((Type)t)
   {
     case Type::Null:
       l.pushNil();
@@ -239,13 +250,16 @@ void udVariant::luaPush(LuaState &l) const
     case Type::Component:
       l.pushComponent(udComponentRef(c));
       break;
+    case Type::Delegate:
+      UDASSERT(false, "TODO!!");
+      break;
     case Type::String:
       l.pushString(udString(s, length));
       break;
     case Type::Array:
     {
       lua_State *L = l.state();
-      lua_createtable(L, length, 0);
+      lua_createtable(L, (int)length, 0);
       for (size_t i = 0; i<length; ++i)
       {
         l.push(a[i]);
@@ -287,7 +301,11 @@ udVariant udVariant::luaGet(LuaState &l, int idx)
     case LuaType::String:
       return udVariant(l.toString(idx));
     case LuaType::Function:
+    {
+      UDASSERT(false, "TODO!!");
+      // create udDelegate from Lua function, pin the lua function (to the registry?)
       return udVariant();
+    }
     case LuaType::UserData:
     {
       // find out if is component...
@@ -310,11 +328,11 @@ udVariant udVariant::luaGet(LuaState &l, int idx)
         l.pop();
       }
 
+      // alloc for table
+      udVariant v;
+      udKeyValuePair *pAA = v.allocAssocArray(numElements);
+
       // populate the table
-      udKeyValuePair *pAA = (udKeyValuePair*)udAlloc(sizeof(udKeyValuePair)*numElements);
-      // TODO: check pAA i not nullptr!
-      udVariant v(udSlice<udKeyValuePair>(pAA, numElements));
-      v.ownsArray = true;
       l.pushNil();  // first key
       int i = 0;
       while (lua_next(L, pos) != 0)

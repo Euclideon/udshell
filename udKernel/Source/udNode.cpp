@@ -53,10 +53,10 @@ const udComponentDesc udNode::descriptor =
   udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
-udResult udNode::Render(udRenderScene *pScene, const udDouble4x4 &mat)
+udResult udNode::Render(udRenderSceneRef &spScene, const udDouble4x4 &mat)
 {
   for (udNodeRef &n : children)
-    n->Render(pScene, mat * n->matrix);
+    n->Render(spScene, mat * n->matrix);
   return udR_Success;
 }
 
@@ -68,13 +68,13 @@ void udNode::AddChild(udNodeRef c)
 void udNode::RemoveChild(udNodeRef c)
 {
   children.remove(c);
-  c->parent.reset();
+  c->pParent = nullptr;
 }
 
 void udNode::Detach()
 {
-  if (parent)
-    parent->RemoveChild(udNodeRef(this));
+  if (pParent)
+    pParent->RemoveChild(udNodeRef(this));
 }
 
 void udNode::CalculateWorldMatrix(udDouble4x4 *pMatrix) const

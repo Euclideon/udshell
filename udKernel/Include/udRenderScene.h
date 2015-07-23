@@ -15,7 +15,7 @@ struct udUDJob
   udDouble4x4 matrix;
   udRenderClipArea clipArea;
 
-  udSharedPtr<udSharedudModel> spModel;
+  udSharedUDModelRef spModel = nullptr;
   udRenderModel renderModel;
 };
 
@@ -31,16 +31,18 @@ struct udGeomJob
   // * render states
 };
 
-struct udRenderScene
+class udRenderScene : public udRefCounted
 {
-  udFixedSlice<udUDJob, 3> ud;
+public:
+  udFixedSlice<udUDJob, 4> ud;
   udFixedSlice<udGeomJob> geom;
 };
+typedef udSharedPtr<udRenderScene> udRenderSceneRef;
 
-struct udRenderableView
+
+class udRenderableView : public udRefCounted
 {
-  ~udRenderableView();
-
+public:
   void RenderUD();
   void RenderGPU() const;
 
@@ -54,9 +56,9 @@ struct udRenderableView
   int displayWidth, displayHeight;
   int renderWidth, renderHeight;
 
-  udSharedPtr<const udRenderScene> scene;
+  udRenderSceneRef spScene = nullptr;
 
-  udViewRef spView;
+  udViewRef spView = nullptr;
 
   udRenderEngine *pRenderEngine = nullptr;
   udRenderView *pRenderView = nullptr;
@@ -70,7 +72,11 @@ struct udRenderableView
 
 //  udSemaphore *pRenderSemaphore = nullptr;
 //  udSemaphore *pPresentSemaphore = nullptr;
+
+protected:
+  ~udRenderableView();
 };
+typedef udSharedPtr<udRenderableView> udRenderableViewRef;
 
 
 #endif // UDRENDERSCENE_H

@@ -94,32 +94,31 @@ udResult udView::Render()
   return r;
 }
 
-udSharedPtr<const udRenderableView> udView::GetRenderableView()
+udRenderableViewRef udView::GetRenderableView()
 {
   if (!bDirty)
     return spCache;
 
-  udRenderableView *pView = new udRenderableView;
+  spCache = udRenderableViewRef::create();
 
-  pView->spView = udViewRef(this);
+  spCache->spView = udViewRef(this);
 
-  pView->view = spCamera->GetViewMatrix();
-  spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight, &pView->projection);
+  spCache->view = spCamera->GetViewMatrix();
+  spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight, &spCache->projection);
 
-  pView->scene = spScene->GetRenderScene();
-  pView->options = options;
+  spCache->spScene = spScene->GetRenderScene();
+  spCache->options = options;
 
-  pView->pRenderEngine = pKernel->GetRenderEngine();
+  spCache->pRenderEngine = pKernel->GetRenderEngine();
 
-  pView->displayWidth = displayWidth;
-  pView->displayHeight = displayHeight;
-  pView->renderWidth = renderWidth;
-  pView->renderHeight = renderHeight;
+  spCache->displayWidth = displayWidth;
+  spCache->displayHeight = displayHeight;
+  spCache->renderWidth = renderWidth;
+  spCache->renderHeight = renderHeight;
 
   // TODO: move UD to async render on another thread
-  pView->RenderUD();
+  spCache->RenderUD();
 
-  spCache = udSharedPtr<const udRenderableView>(pView);
   bDirty = false;
   return spCache;
 }

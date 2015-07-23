@@ -11,7 +11,6 @@
 
 #include "udLua.h"
 
-
 udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
   udResult result;
@@ -221,11 +220,11 @@ udResult udKernel::DestroyComponent(udComponentRef *pInstance)
 udComponentRef udKernel::FindComponent(udString uid)
 {
   if (uid.empty() || uid[0] == '$' || uid[0] == '#')
-    return udComponentRef();
+    return nullptr;
   if (uid[0] == '@')
     uid.popFront();
   udComponentRef *pComponent = instanceRegistry.Get(uid.toStringz());
-  return pComponent ? *pComponent : udComponentRef();
+  return pComponent ? *pComponent : nullptr;
 }
 
 udResult udKernel::InitComponents()

@@ -1,18 +1,43 @@
 #pragma once
 #if !defined(_SHAREDPTR_H)
 
+#define SHARED_CLASS(Name) \
+  class Name; \
+  typedef udSharedPtr<Name> Name##Ref;
+
+#define SHARED_STRUCT(Name) \
+  struct Name; \
+  typedef udSharedPtr<Name> Name##Ref;
+
 class udRefCounted;
 
 template<class T>
 class udSharedPtr
 {
 public:
-  udSharedPtr() {}
+  // create a new instance of T
+  template<typename... Args>
+  static udSharedPtr<T> create(Args... args)
+  {
+    return udSharedPtr<T>(new T(args...));
+  }
 
-  explicit udSharedPtr(T *p) : pInstance(p) { acquire(); }
+  // constructors
   udSharedPtr(const udSharedPtr<T> &ptr) : pInstance(ptr.pInstance) { acquire(); }
   template <class U> // the U allows us to accept const
   udSharedPtr(const udSharedPtr<U> &ptr) : pInstance(ptr.pInstance) { acquire(); }
+  udSharedPtr(udSharedPtr<T> &&ptr)
+    : pInstance(ptr.pInstance)
+  {
+    if(this != &ptr)
+      ptr.pInstance = nullptr;
+  }
+
+//  udSharedPtr() {}        // <- should we allow default construction, or enforce nullptr?
+  udSharedPtr(nullptr_t) {}
+
+  explicit udSharedPtr(T *p) : pInstance(p) { acquire(); }
+
   inline ~udSharedPtr() { release(); }
 
   udSharedPtr& operator=(const udSharedPtr<T> &ptr)
@@ -36,6 +61,11 @@ public:
     }
     return *this;
   }
+  udSharedPtr& operator=(nullptr_t)
+  {
+    release();
+    return *this;
+  }
 
   inline void reset()
   {
@@ -52,9 +82,9 @@ public:
   }
   inline size_t count() const;
 
-  inline T& operator*() const { return *pInstance; }
-  inline T* operator->() const { return pInstance; }
-  inline T* ptr() const { return pInstance; }
+  inline T& operator*() const { return *(T*)pInstance; }
+  inline T* operator->() const { return (T*)pInstance; }
+  inline T* ptr() const { return (T*)pInstance; }
 
 private:
   template<class U> friend class udSharedPtr;
@@ -62,7 +92,7 @@ private:
   inline void acquire();
   inline void release();
 
-  T *pInstance = nullptr;
+  udRefCounted *pInstance = nullptr;
 };
 
 class udRefCounted
@@ -180,7 +210,7 @@ template<class T, class U> inline bool operator>(const udUniquePtr<T> &l, const 
 template<class T>
 inline size_t udSharedPtr<T>::count() const
 {
-  return pInstance ? ((udRefCounted*)pInstance)->rc : 0;
+  return pInstance ? pInstance->rc : 0;
 }
 
 template<class T>
@@ -188,8 +218,7 @@ inline void udSharedPtr<T>::acquire()
 {
   if (pInstance)
   {
-    udRefCounted *pRC = (udRefCounted*)pInstance;
-    ++pRC->rc;
+    ++pInstance->rc;
   }
 }
 
@@ -198,9 +227,8 @@ inline void udSharedPtr<T>::release()
 {
   if (pInstance)
   {
-    udRefCounted *pRC = (udRefCounted*)pInstance;
-    if (--pRC->rc == 0)
-      delete pRC;
+    if (--pInstance->rc == 0)
+      delete pInstance;
     pInstance = nullptr;
   }
 }

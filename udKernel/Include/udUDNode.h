@@ -25,7 +25,7 @@ class udUDNode : public udNode
 public:
   UD_COMPONENT(udUDNode);
 
-  udResult Render(udRenderScene *pScene, const udDouble4x4 &mat) override;
+  udResult Render(udRenderSceneRef &spScene, const udDouble4x4 &mat) override;
 
   uint32_t GetStartingRoot() const { return startingRoot; }
   void SetStartingRoot(uint32_t root) { startingRoot = root; }
@@ -52,7 +52,7 @@ public:
 
 protected:
   udUDNode(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
-    : udNode(pType, pKernel, uid, initParams) { spModel = udSharedPtr<udSharedudModel>(nullptr); clipArea.minX = clipArea.minY = clipArea.maxX = clipArea.maxY = 0; }
+    : udNode(pType, pKernel, uid, initParams) { clipArea.minX = clipArea.minY = clipArea.maxX = clipArea.maxY = 0; }
   virtual ~udUDNode() {}
 
   static udComponent *Create(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
@@ -68,7 +68,7 @@ protected:
   bool clipAreaSet = false;
 
   udString source;
-  udSharedPtr<udSharedudModel> spModel;
+  udSharedUDModelRef spModel = nullptr;
   udDouble4x4 udMat;
 };
 

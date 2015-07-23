@@ -6,7 +6,7 @@
 #include "udInput.h"
 #include "udMath.h"
 
-struct udRenderScene;
+SHARED_CLASS(udRenderScene);
 
 class udNode;
 PROTOTYPE_COMPONENT(udNode);
@@ -18,7 +18,7 @@ public:
 
   virtual udResult InputEvent(const udInputEvent &ev) { return udR_Success; }
   virtual udResult Update(double timeStep) { return udR_Success; }
-  virtual udResult Render(udRenderScene *pScene, const udDouble4x4 &mat);
+  virtual udResult Render(udRenderSceneRef &spScene, const udDouble4x4 &mat);
 
   virtual void SetMatrix(const udDouble4x4 &mat) { matrix = mat; }
   const udDouble4x4& GetMatrix() const { return matrix; }
@@ -26,7 +26,7 @@ public:
   virtual void SetPosition(const udDouble3 &pos) { matrix.axis.t = udDouble4::create(pos, matrix.axis.t.w); }
   const udDouble3& GetPosition() const { return matrix.axis.t.toVector3(); }
 
-  udNodeRef Parent() const { return parent; }
+  udNodeRef Parent() const { return udNodeRef(pParent); }
   const udSlice<udNodeRef> Children() const { return children; }
 
   void AddChild(udNodeRef c);
@@ -41,7 +41,7 @@ protected:
     : udComponent(pType, pKernel, uid, initParams) {}
   virtual ~udNode() {}
 
-  udNodeRef parent;
+  udNode *pParent = nullptr;
   udFixedSlice<udNodeRef, 3> children;
 
   udDouble4x4 matrix = udDouble4x4::identity();

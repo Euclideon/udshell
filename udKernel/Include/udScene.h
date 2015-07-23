@@ -6,7 +6,7 @@
 #include "udNode.h"
 #include "udRender.h"
 
-struct udRenderScene;
+SHARED_CLASS(udRenderScene);
 
 PROTOTYPE_COMPONENT(udView);
 PROTOTYPE_COMPONENT(udScene);
@@ -22,7 +22,7 @@ public:
 
   udNodeRef GetRootNode() const { return rootNode; }
 
-  udSharedPtr<const udRenderScene> GetRenderScene();
+  udRenderSceneRef GetRenderScene();
 
   udEvent<> Dirty;
 
@@ -35,9 +35,9 @@ public:
 protected:
   double timeStep = 0.0;
 
-  udNodeRef rootNode;
+  udNodeRef rootNode = nullptr;
 
-  udSharedPtr<const udRenderScene> spCache;
+  udRenderSceneRef spCache = nullptr;
   bool bDirty = true; // becomes dirty when scene changes
 
   udRenderOptions options;

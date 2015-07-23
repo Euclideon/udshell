@@ -3,21 +3,29 @@
 #define UDMODEL_H
 
 #include "udPlatform.h"
-#include "udSharedPtr.h"
 #include "udOctree.h"
+
+#include "udSharedPtr.h"
 #include "udString.h"
 
-class udSharedudModel : public udRefCounted
+SHARED_CLASS(udSharedUDModel);
+
+class udSharedUDModel : public udRefCounted
 {
 public:
-  static udSharedPtr<udSharedudModel> Create(udString name, bool useStreamer);
-  udOctree *GetOctreePtr() { return pOctree; }
+  static udSharedUDModelRef Create(udString name, bool useStreamer);
+
+  udOctree *GetOctreePtr() const { return pOctree; }
 
 protected:
-  virtual ~udSharedudModel();
+  template<typename T>
+  friend class udSharedPtr;
+
+  virtual ~udSharedUDModel();
 
 private:
-  udSharedudModel() {}
+  udSharedUDModel() {}
+
   udOctree *pOctree;
 };
 
