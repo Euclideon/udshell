@@ -44,7 +44,7 @@ public:
 
   udString GetSource() const; // This will become a udComponetSource
 
-  double GetUDScale() const { UDASSERT(udMat.a[0] == udMat.a[5] == udMat.a[10], "NonUniform Scale"); return udMat.a[0]; }
+  double GetUDScale() const { UDASSERT(udMat.a[0] == udMat.a[5] && udMat.a[0] == udMat.a[10], "NonUniform Scale"); return udMat.a[0]; }
 
   udBoundingVolume GetBoundingVolume() const;
 

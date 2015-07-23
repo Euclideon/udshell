@@ -184,7 +184,7 @@ udBoundingVolume udUDNode::GetBoundingVolume() const
 {
   udBoundingVolume vol;
 
-  UDASSERT(udMat.a[0] == udMat.a[5] == udMat.a[10], "NonUniform Scale");
+  UDASSERT(udMat.a[0] == udMat.a[5] && udMat.a[0] == udMat.a[10], "NonUniform Scale");
 
   udDouble3 min = -(udMat.axis.t.toVector3());
   udDouble3 max = min + udDouble3::create(udMat.a[0]);
