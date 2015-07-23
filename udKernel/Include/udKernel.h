@@ -96,6 +96,7 @@ protected:
 
   udResult InitComponents();
   udResult InitRender();
+  udResult DeinitRender();
 
   udResult ReceiveMessage(udString sender, udString message, const udVariant &data);
 

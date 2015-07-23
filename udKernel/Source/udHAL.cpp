@@ -31,7 +31,7 @@ udResult udHAL_InitRender()
   return udR_Success;
 }
 
-udResult udHAL_Deinit()
+udResult udHAL_DeinitRender()
 {
   if (bRenderInitialised)
   {
@@ -40,11 +40,18 @@ udResult udHAL_Deinit()
 
     void udGPU_Deinit();
     udGPU_Deinit();
+    bRenderInitialised = false;
   }
+  return udR_Success;
+}
+
+udResult udHAL_Deinit()
+{
   if (bInitialised)
   {
     void udInput_Deinit();
     udInput_Deinit();
+    bInitialised = false;
   }
   return udR_Success;
 }

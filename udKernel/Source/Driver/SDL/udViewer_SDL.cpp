@@ -48,6 +48,7 @@ udResult udKernel::DestroyInstanceInternal()
   SDL_GL_DeleteContext(s_context);
   SDL_Quit();
 
+  DeinitRender();
   delete this;
   return udR_Success;
 }

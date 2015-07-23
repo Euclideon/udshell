@@ -252,6 +252,13 @@ udResult udKernel::InitRender()
   return udR_Success;
 }
 
+udResult udKernel::DeinitRender()
+{
+  udHAL_DeinitRender();
+
+  return udR_Success;
+}
+
 void udKernel::Exec(udString code)
 {
   pLua->exec(code);
