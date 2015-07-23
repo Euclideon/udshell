@@ -324,7 +324,7 @@ inline udFixedSlice<T, Count>::udFixedSlice(udSlice<U> slice)
 template <typename T, size_t Count>
 inline udFixedSlice<T, Count>::~udFixedSlice()
 {
-  for (size_t i = 0; i < length; ++i)
+  for (size_t i = 0; i < this->length; ++i)
     this->ptr[i].~T();
   if (hasAllocation())
   {
@@ -382,11 +382,8 @@ template <typename T, size_t Count>
 template <typename U>
 inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::operator =(udSlice<U> rh)
 {
-  if (this != &rval)
-  {
-    this->~udFixedSlice();
-    new(this) udFixedSlice<T, Count>(rh.ptr, rh.length);
-  }
+  this->~udFixedSlice();
+  new(this) udFixedSlice<T, Count>(rh.ptr, rh.length);
   return *this;
 }
 
