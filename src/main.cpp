@@ -133,6 +133,10 @@ int main(int argc, char *argv[])
   qInstallMessageHandler(DbgMessageHandler);
   //QLoggingCategory::setFilterRules("qt.*=true");
 
+  // TEMP: this is just for testing - force qt to use the threaded renderer on windows
+  // 5.5 uses this by default
+  qputenv("QSG_RENDER_LOOP", "threaded");
+
   // create a kernel
   udResult r = udKernel::Create(&s_pKernel, udParseCommandLine(argc, argv), 8);
   if (r == udR_Failure_)
@@ -155,12 +159,13 @@ int main(int argc, char *argv[])
   //LoadModel();
 
   // create the main window
-  Window w;
-  w.setResizeMode(QQuickView::SizeRootObjectToView);
-  w.setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
-  w.resize(800, 600);
-  w.show();
-  w.raise();
+  // TODO: make it more obvious that kernel is taking ownership of our window??
+  Window *w = new Window;
+  w->setResizeMode(QQuickView::SizeRootObjectToView);
+  w->setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
+  w->resize(800, 600);
+  w->show();
+  w->raise();
 
   return s_pKernel->RunMainLoop();
 }

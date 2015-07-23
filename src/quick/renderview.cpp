@@ -9,6 +9,7 @@
 
 extern udKernel *s_pKernel;
 
+
 class FboRenderer : public QQuickFramebufferObject::Renderer
 {
 public:
