@@ -7,11 +7,16 @@
 #include "udSlice.h"
 #include "udMath.h"
 #include "udView.h"
+#include "udRender.h"
+#include "udModel.h"
 
 struct udUDJob
 {
   udDouble4x4 matrix;
-  udOctree *pOctree;
+  udRenderClipArea clipArea;
+
+  udSharedPtr<udSharedudModel> spModel;
+  udRenderModel renderModel;
 };
 
 struct udGeomJob

@@ -7,6 +7,13 @@
 #include "udMath.h"
 #include "udRender.h"
 #include "udNode.h"
+#include "udModel.h"
+
+struct udBoundingVolume
+{
+  udDouble3 min;
+  udDouble3 max;
+};
 
 class udUDNode;
 PROTOTYPE_COMPONENT(udUDNode);
@@ -18,11 +25,13 @@ class udUDNode : public udNode
 public:
   UD_COMPONENT(udUDNode);
 
+  udResult Render(udRenderScene *pScene, const udDouble4x4 &mat) override;
+
   uint32_t GetStartingRoot() const { return startingRoot; }
   void SetStartingRoot(uint32_t root) { startingRoot = root; }
 
   const udRenderClipArea& GetRenderClipArea() const { return clipArea; }
-  void SetRenderClipArea(const udRenderClipArea& area) { clipArea = area; }
+  void SetRenderClipArea(const udRenderClipArea& area) { clipAreaSet = true; clipArea = area; }
 
   udRender_VoxelShaderFunc *GetVoxelShader() const { return pVoxelShader;  }
   void SetVoxelShader(udRender_VoxelShaderFunc *pFunc) { pVoxelShader = pFunc;  }
@@ -35,11 +44,15 @@ public:
 
   udString GetSource() const; // This will become a udComponetSource
 
+  double GetUDScale() const { UDASSERT(udMat.a[0] == udMat.a[5] == udMat.a[10], "NonUniform Scale"); return udMat.a[0]; }
+
+  udBoundingVolume GetBoundingVolume() const;
+
   int Load(udString name, bool useStreamer); // TODO : Check return value to use error code
 
 protected:
   udUDNode(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
-    : udNode(pType, pKernel, uid, initParams) {}
+    : udNode(pType, pKernel, uid, initParams) { spModel = udSharedPtr<udSharedudModel>(nullptr); clipArea.minX = clipArea.minY = clipArea.maxX = clipArea.maxY = 0; }
   virtual ~udUDNode() {}
 
   static udComponent *Create(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
@@ -47,14 +60,16 @@ protected:
     return udNew(udUDNode, pType, pKernel, uid, initParams);
   }
 
-  udRender_VoxelShaderFunc *pVoxelShader;
-  udRender_PixelShaderFunc *pPixelShader;
+  udRender_VoxelShaderFunc *pVoxelShader = nullptr;
+  udRender_PixelShaderFunc *pPixelShader = nullptr;
   udRenderClipArea clipArea;
-  uint32_t startingRoot;
-  udRenderFlags renderFlags;
+  uint32_t startingRoot = 0;
+  udRenderFlags renderFlags = udRF_None;
+  bool clipAreaSet = false;
 
   udString source;
-  udOctree *pOctree;
+  udSharedPtr<udSharedudModel> spModel;
+  udDouble4x4 udMat;
 };
 
 
@@ -83,5 +98,36 @@ inline void udFromVariant(const udVariant &variant, udRenderClipArea *pArea)
   pArea->maxX = variant["maxx"].as<uint32_t>();
   pArea->maxY = variant["maxy"].as<uint32_t>();
 }
+
+
+inline udVariant udToVariant(const udBoundingVolume &volume)
+{
+  udKeyValuePair *pPairs = udAllocType(udKeyValuePair, 6, udAF_None);
+  if (pPairs)
+  {
+    udSlice<udKeyValuePair> slice(pPairs, 6);
+
+    new (&slice[0]) udKeyValuePair("minx", volume.min.x);
+    new (&slice[1]) udKeyValuePair("miny", volume.min.y);
+    new (&slice[0]) udKeyValuePair("minz", volume.min.z);
+    new (&slice[2]) udKeyValuePair("maxx", volume.max.x);
+    new (&slice[3]) udKeyValuePair("maxy", volume.max.y);
+    new (&slice[3]) udKeyValuePair("maxz", volume.max.z);
+    return udVariant(slice, true);
+  }
+
+  return udVariant();
+}
+
+inline void udFromVariant(const udVariant &variant, udBoundingVolume *pVolume)
+{
+  pVolume->min.x = variant["minx"].as<double>();
+  pVolume->min.y = variant["miny"].as<double>();
+  pVolume->min.z = variant["minz"].as<double>();
+  pVolume->max.x = variant["maxx"].as<double>();
+  pVolume->max.y = variant["maxy"].as<double>();
+  pVolume->max.z = variant["maxz"].as<double>();
+}
+
 
 #endif // UDPCNODE_H

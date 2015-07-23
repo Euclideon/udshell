@@ -20,8 +20,6 @@ public:
   virtual udResult Update(double timeStep) { return udR_Success; }
   virtual udResult Render(udRenderScene *pScene, const udDouble4x4 &mat);
 
-  virtual udResult Render(const udDouble4x4 &mat) { return udR_Success; }
-
   virtual void SetMatrix(const udDouble4x4 &mat) { matrix = mat; }
   const udDouble4x4& GetMatrix() const { return matrix; }
 

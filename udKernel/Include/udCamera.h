@@ -16,7 +16,6 @@ public:
 
   virtual udResult InputEvent(const udInputEvent &ev) { return udR_Success; }
   virtual udResult Update(double timeStep) { return udR_Success; }
-  virtual udResult Render(const udDouble4x4 &mat) { return udR_Success; } // TODO: render a basic camera image
 
   udDouble4x4 GetCameraMatrix() const { udDouble4x4 m; CalculateWorldMatrix(&m); return m; }
   udDouble4x4 GetViewMatrix() const { return GetCameraMatrix().inverse(); }

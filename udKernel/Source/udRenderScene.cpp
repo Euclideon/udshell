@@ -95,19 +95,11 @@ void udRenderableView::RenderUD()
 {
   if (scene->ud.length)
   {
-    size_t size = sizeof(udRenderModel)*scene->ud.length + sizeof(udRenderModel*)*scene->ud.length;
+    size_t size = sizeof(udRenderModel*)*scene->ud.length;
     udRenderModel **ppRenderModels = (udRenderModel**)alloca(size);
-    udRenderModel *pRenderModels = (udRenderModel *)&ppRenderModels[scene->ud.length];
-    memset(pRenderModels, 0, sizeof(udRenderModel)*scene->ud.length);
 
-    // construct the awkward list of ud models
     for (size_t i = 0; i < scene->ud.length; ++i)
-    {
-      ppRenderModels[i] = pRenderModels + i;
-
-      pRenderModels[i].pOctree = scene->ud[i].pOctree;
-      pRenderModels[i].pWorldMatrixD = scene->ud[i].matrix.a;
-    }
+      ppRenderModels[i] = &scene->ud[i].renderModel;
 
     // allocate view
     udRender_CreateView(&pRenderView, pRenderEngine, renderWidth, renderHeight);

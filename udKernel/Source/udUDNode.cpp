@@ -1,5 +1,6 @@
 #include "udUDNode.h"
 #include "udOctree.h"
+#include "udRenderScene.h"
 
 static const udSlice<const udEnumKVP> renderFlags =
 {
@@ -21,7 +22,7 @@ static const udSlice<const udEnumKVP> renderFlags =
 static const udPropertyDesc props[] =
 {
   {
-    "StartingRoot", // id
+    "startingroot", // id
     "Starting Root", // displayName
     "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", // description
     &udUDNode::GetStartingRoot,
@@ -30,7 +31,7 @@ static const udPropertyDesc props[] =
   },
 
   {
-    "RenderClipArea", // id
+    "rendercliparea", // id
     "Render Clip Area", // displayName
     "Clipping Area of the Screen", // description
     &udUDNode::GetRenderClipArea,
@@ -39,7 +40,7 @@ static const udPropertyDesc props[] =
   },
 
   {
-    "RenderFlags", // id
+    "renderflags", // id
     "Render Flags", // displayName
     "UD Rendering Flags", // description
     &udUDNode::GetRenderFlags,
@@ -47,13 +48,31 @@ static const udPropertyDesc props[] =
     udTypeDesc(udPropertyType::Flags, 0, renderFlags)
   },
   {
-    "DataSource", // id
+    "datasource", // id
     "udModel Data Source", // displayName
     "Data Source for UD Model", // description
     &udUDNode::GetSource,
     nullptr,
-    udTypeDesc(udPropertyType::Flags, 0, renderFlags)
-  }
+    udTypeDesc(udPropertyType::String)
+  },
+
+  {
+    "udscale", // id
+    "UD Scale", // displayName
+    "Internal Scale of the Model", // description
+    &udUDNode::GetUDScale,
+    nullptr,
+    udTypeDesc(udPropertyType::Float)
+  },
+
+  {
+    "getboundingvolume", // id
+    "Get Bounding Volume", // displayName
+    "Get the Bouning Volume", // description
+    &udUDNode::GetBoundingVolume,
+    nullptr,
+    udTypeDesc(udPropertyType::Struct)
+  },
 
 
 #if 0
@@ -90,7 +109,11 @@ static const udMethodDesc methods[] =
     "Load",
     "Load the UD Model",
     udMethod(&udUDNode::Load),
-    udTypeDesc(udPropertyType::Integer) // result
+    udTypeDesc(udPropertyType::Integer), // result
+    {
+      udTypeDesc(udPropertyType::String),
+      udTypeDesc(udPropertyType::Boolean)
+    }
   }
 };
 
@@ -114,14 +137,66 @@ const udComponentDesc udUDNode::descriptor =
 };
 
 
-
 int udUDNode::Load(udString name, bool useStreamer)
 {
+  source = "";
   udResult result;
-  UD_ERROR_CHECK(udOctree_Create(&pOctree, name.toStringz(), useStreamer, 0));
+  spModel = udSharedudModel::Create(name,useStreamer);
+  if (!spModel)
+  {
+    result = udR_Failure_;
+    UD_ERROR_HANDLE();
+  }
 
+  source = name;
+  UD_ERROR_CHECK(udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a));
 
 epilogue:
-
   return (int)result;
+}
+
+
+udResult udUDNode::Render(udRenderScene *pScene, const udDouble4x4 &mat)
+{
+  udUDJob job;
+  memset(&job, 0, sizeof(job));
+
+  job.matrix = udMul(mat, udMat);
+  job.renderModel.pOctree = spModel->GetOctreePtr();
+  job.renderModel.pWorldMatrixD = job.matrix.a;
+  job.renderModel.pVoxelShader = pVoxelShader;
+  job.renderModel.pPixelShader = pPixelShader;
+  job.renderModel.flags = renderFlags;
+  job.renderModel.startingRoot = startingRoot;
+
+  if (clipAreaSet)
+  {
+    job.clipArea = clipArea;
+    job.renderModel.pClip = &job.clipArea;
+  }
+
+  pScene->ud.pushBack(job);
+  return udR_Success;
+}
+
+
+udBoundingVolume udUDNode::GetBoundingVolume() const
+{
+  udBoundingVolume vol;
+
+  UDASSERT(udMat.a[0] == udMat.a[5] == udMat.a[10], "NonUniform Scale");
+
+  udDouble3 min = -(udMat.axis.t.toVector3());
+  udDouble3 max = min + udDouble3::create(udMat.a[0]);
+
+  // Theoretically there could be rotation so redoing min max
+  vol.min.x = udMin(min.x, max.x);
+  vol.min.y = udMin(min.y, max.y);
+  vol.min.z = udMin(min.z, max.z);
+
+  vol.max.x = udMax(min.x, max.x);
+  vol.max.y = udMax(min.y, max.y);
+  vol.max.z = udMax(min.z, max.z);
+
+  return vol;
 }
