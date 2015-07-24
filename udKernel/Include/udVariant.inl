@@ -23,7 +23,11 @@ inline udVariant::udVariant(const udVariant &val)
   , length(val.length)
   , p(val.p)
 {
-  if (ownsArray)
+  if (is(Type::Delegate))
+  {
+    new((void*)&p) Delegate((Delegate&)val.p);
+  }
+  else if (ownsArray)
   {
     if (is(Type::Array))
     {
@@ -131,7 +135,7 @@ template<> struct udVariant_Construct <uint32_t>  { inline static udVariant cons
 template<> struct udVariant_Construct <uint64_t>  { inline static udVariant construct(uint64_t i)      { return udVariant((int64_t)i); } };
 template<> struct udVariant_Construct <char*>     { inline static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
 template<size_t N>
-struct udVariant_Construct <char[N]>              { inline static udVariant construct(const char s[N]) { return udVariant(udString(s, N)); } };
+struct udVariant_Construct <char[N]>              { inline static udVariant construct(const char s[N]) { return udVariant(udString(s, N-1)); } };
 
 // for components
 inline udVariant udToVariant(const udComponentRef c)

@@ -251,7 +251,7 @@ void udVariant::luaPush(LuaState &l) const
       l.pushComponent(udComponentRef(c));
       break;
     case Type::Delegate:
-      UDASSERT(false, "TODO!!");
+      l.pushDelegate((Delegate&)p);
       break;
     case Type::String:
       l.pushString(udString(s, length));
@@ -301,11 +301,7 @@ udVariant udVariant::luaGet(LuaState &l, int idx)
     case LuaType::String:
       return udVariant(l.toString(idx));
     case LuaType::Function:
-    {
-      UDASSERT(false, "TODO!!");
-      // create udDelegate from Lua function, pin the lua function (to the registry?)
-      return udVariant();
-    }
+      return l.toDelegate(idx);
     case LuaType::UserData:
     {
       // find out if is component...

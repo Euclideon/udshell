@@ -57,6 +57,7 @@ public:
   void pushLightUserData(void *val);
 
   void pushComponent(udComponentRef c);
+  void pushDelegate(const udVariant::Delegate &d);
 
   void push(const udVariant &v);
 
@@ -78,6 +79,7 @@ public:
   void* toUserData(int idx = -1);
 
   udComponentRef toComponent(int idx = -1);
+  udVariant::Delegate toDelegate(int idx = -1);
 
   udVariant get(int idx = -1);
 
@@ -97,7 +99,6 @@ private:
   void pushDescriptor(const udComponentDesc &desc);
   void pushGetters(const udComponentDesc &desc);
   void pushSetters(const udComponentDesc &desc);
-
   static int componentCleaner(lua_State* L);
   static int componentToString(lua_State* L);
   static int componentCompare(lua_State* L);
@@ -106,6 +107,10 @@ private:
   static int getter(lua_State *L);
   static int setter(lua_State *L);
   static int method(lua_State *L);
+
+  void pushDelegateMetatable();
+  static int delegateCleaner(lua_State* L);
+  static int callDelegate(lua_State *L);
 };
 
 

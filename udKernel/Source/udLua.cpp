@@ -213,16 +213,17 @@ void LuaState::set(udVariant v, udVariant key, LuaLocation loc)
   switch (loc)
   {
     case LuaLocation::Global:
-      idx = LUA_RIDX_GLOBALS; break;
+      lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+      idx = -1; break;
     case LuaLocation::Top:
-      idx = -3; break;
+      idx = -1; break;
     default:
       UDASSERT(false, "Invalid location");
       return;
   }
   push(key);
   push(v);
-  lua_settable(L, idx);
+  lua_settable(L, idx - 2);
 }
 
 void LuaState::setNil(udVariant key, LuaLocation loc)
@@ -231,16 +232,17 @@ void LuaState::setNil(udVariant key, LuaLocation loc)
   switch (loc)
   {
     case LuaLocation::Global:
-      idx = LUA_RIDX_GLOBALS; break;
+      lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+      idx = -1; break;
     case LuaLocation::Top:
-      idx = -3; break;
+      idx = -1; break;
     default:
       UDASSERT(false, "Invalid location");
       return;
   }
   push(key);
   pushNil();
-  lua_settable(L, idx);
+  lua_settable(L, idx - 2);
 }
 
 void LuaState::setComponent(udComponentRef c, udVariant key, LuaLocation loc)
@@ -250,16 +252,16 @@ void LuaState::setComponent(udComponentRef c, udVariant key, LuaLocation loc)
   {
     case LuaLocation::Global:
       lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
-      idx = -3; break;
+      idx = -1; break;
     case LuaLocation::Top:
-      idx = -3; break;
+      idx = -1; break;
     default:
       UDASSERT(false, "Invalid location");
       return;
   }
   push(key);
   pushComponent(c);
-  lua_settable(L, idx);
+  lua_settable(L, idx - 2);
 }
 
 
@@ -438,6 +440,8 @@ static void verifyComponentType(lua_State* L, int idx)
 
   luaL_error(L, `attempt to get instance %s as type "%s"`, cname, T.stringof.ptr);
 */
+
+  lua_pop(L, 1);
 }
 udComponentRef LuaState::toComponent(int idx)
 {
@@ -538,6 +542,7 @@ int LuaState::componentNewIndex(lua_State* L)
   return 0;
 }
 
+// lua callbacks
 int LuaState::getter(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
@@ -566,13 +571,146 @@ int LuaState::method(lua_State *L)
 
   udComponentRef c = l.toComponent(1);
 
-  int numArgs = l.top() - 2;
+  int numArgs = l.top() - 1;
   udVariant *pArgs = numArgs > 0 ? (udVariant*)alloca(sizeof(udVariant)*numArgs) : nullptr;
 
   for (int i = 0; i < numArgs; ++i)
     new(&pArgs[i]) udVariant(udVariant::luaGet(l, 2 + i));
 
   udVariant v(pM->method.call(c.ptr(), udSlice<udVariant>(pArgs, numArgs)));
+
+  for (int i = 0; i < numArgs; ++i)
+    pArgs[i].~udVariant();
+
+  v.luaPush(l);
+  return 1;
+}
+
+
+// *** bind delegates to Lua ***
+int LuaState::delegateCleaner(lua_State* L)
+{
+  typedef udVariant::Delegate D;
+  D *pDelegate = (D*)lua_touserdata(L, 1);
+  pDelegate->~D();
+  return 0;
+}
+
+void LuaState::pushDelegateMetatable()
+{
+  if (luaL_newmetatable(L, "udVariant::Delegate") == 0)
+    return;
+
+  // record the type
+  pushString("udVariant::Delegate");
+  lua_setfield(L, -2, "__type");
+
+  // push a destructor
+  lua_pushcfunction(L, &delegateCleaner);
+  lua_setfield(L, -2, "__gc");
+
+  // create a '__metatable' entry to protect the metatable against modification
+  pushString("__metatable");
+  lua_pushvalue(L, -2);
+  lua_rawset(L, -3);
+}
+
+void LuaState::pushDelegate(const udVariant::Delegate &d)
+{
+  // TODO: detect if d is a lua function delegate
+  //       if it is, push the lua function directly...
+
+  new(lua_newuserdata(L, sizeof(udVariant::Delegate))) udVariant::Delegate(d);
+  pushDelegateMetatable();
+  lua_setmetatable(L, -2);
+  lua_pushcclosure(L, &callDelegate, 1);
+}
+
+class udLuaDelegate : public udDelegateMemento
+{
+protected:
+  template<typename T>
+  friend class udSharedPtr;
+
+  udVariant call(udSlice<udVariant> args) const
+  {
+    // there may already be elements on the stack
+    int top = lua_gettop(L);
+
+    // get the function to call
+    lua_pushlightuserdata(L, (void*)this);
+    lua_gettable(L, LUA_REGISTRYINDEX);
+
+    // push each arg
+    for (auto &a: args)
+      a.luaPush((LuaState&)L);
+
+    // call the function
+    lua_call(L, (int)args.length, LUA_MULTRET);
+
+    // get number of return values
+    int numRet = lua_gettop(L) - top;
+
+    udVariant v;
+    if (numRet)
+    {
+      // get the first returned valuye (abandon any further return values)
+      v = udVariant::luaGet((LuaState&)L, top + 1);
+
+      // put the stack back how we got it
+      lua_pop(L, numRet);
+    }
+    return v;
+  }
+
+  udLuaDelegate(lua_State *L, int idx)
+  {
+    this->L = L;
+
+    // we'll use the delegate pointer as a registry index
+    lua_pushlightuserdata(L, this);
+    lua_pushvalue(L, idx > 0 ? idx : idx-1);
+    lua_settable(L, LUA_REGISTRYINDEX);
+
+    // set the memento to the lua call shim
+    FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &udLuaDelegate::call);
+    m = shim.GetMemento();
+  }
+
+  ~udLuaDelegate()
+  {
+    lua_pushlightuserdata(L, this);
+    lua_pushnil(L);
+    lua_settable(L, LUA_REGISTRYINDEX);
+  }
+
+  lua_State *L;
+};
+
+udVariant::Delegate LuaState::toDelegate(int idx)
+{
+  typedef udSharedPtr<udLuaDelegate> LuaDelegateRef;
+
+  // TODO: detect if the function is a cclosure
+  //       if it is, return the udDelegate directly
+
+  if (lua_isfunction(L, idx))
+    return udVariant::Delegate(LuaDelegateRef::create(L, idx));
+  return udVariant::Delegate();
+}
+
+int LuaState::callDelegate(lua_State *L)
+{
+  LuaState &l = (LuaState&)L;
+  udVariant::Delegate &d = *(udVariant::Delegate*)l.toUserData(lua_upvalueindex(1));
+
+  int numArgs = l.top();
+  udVariant *pArgs = numArgs > 0 ? (udVariant*)alloca(sizeof(udVariant)*numArgs) : nullptr;
+
+  for (int i = 0; i < numArgs; ++i)
+    new(&pArgs[i]) udVariant(udVariant::luaGet(l, 1 + i));
+
+  udVariant v(d(udSlice<udVariant>(pArgs, numArgs)));
 
   for (int i = 0; i < numArgs; ++i)
     pArgs[i].~udVariant();
