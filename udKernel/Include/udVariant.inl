@@ -212,7 +212,6 @@ protected:
     udVariant vargs[] = { udVariant(args)... };
     udSlice<udVariant> sargs(vargs, sizeof...(args));
 
-    size_t i = 0;
     return d(sargs).as<R>();
   }
 

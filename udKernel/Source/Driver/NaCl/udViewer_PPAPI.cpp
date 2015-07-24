@@ -102,8 +102,8 @@ udResult udKernel::DestroyInstanceInternal()
 // ---------------------------------------------------------------------------------------
 udViewRef udKernel::SetFocusView(udViewRef spView)
 {
-  udViewRef spOld = pFocusView;
-  pFocusView = spView;
+  udViewRef spOld = spFocusView;
+  spFocusView = spView;
   return spOld;
 }
 

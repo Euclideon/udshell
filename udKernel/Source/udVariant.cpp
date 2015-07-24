@@ -330,7 +330,7 @@ udVariant udVariant::luaGet(LuaState &l, int idx)
 
       // alloc for table
       udVariant v;
-      udKeyValuePair *pAA = v.allocAssocArray(numElements);
+      v.allocAssocArray(numElements);
 
       // populate the table
       l.pushNil();  // first key
