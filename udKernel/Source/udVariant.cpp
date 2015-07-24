@@ -330,15 +330,15 @@ udVariant udVariant::luaGet(LuaState &l, int idx)
 
       // alloc for table
       udVariant v;
-      v.allocAssocArray(numElements);
+      udKeyValuePair *pAA = v.allocAssocArray(numElements);
 
       // populate the table
       l.pushNil();  // first key
       int i = 0;
       while (lua_next(L, pos) != 0)
       {
-        new(&v.aa[i].key) udVariant(l.get(-2));
-        new(&v.aa[i].value) udVariant(l.get(-1));
+        new(&pAA[i].key) udVariant(l.get(-2));
+        new(&pAA[i].value) udVariant(l.get(-1));
         l.pop();
         ++i;
       }

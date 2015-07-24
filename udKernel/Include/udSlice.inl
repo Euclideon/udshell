@@ -298,7 +298,7 @@ inline udFixedSlice<T, Count>::udFixedSlice(udFixedSlice<T, Count> &&rval)
   {
     // copy items into the small array buffer
     this->ptr = (T*)buffer;
-    for (int i = 0; i < this->length; ++i)
+    for (size_t i = 0; i < this->length; ++i)
       new((void*)&this->ptr[i]) T(std::move(rval.ptr[i]));
   }
 }

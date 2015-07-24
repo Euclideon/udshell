@@ -81,6 +81,13 @@ inline udVariant udMethod::call(udComponent *pThis, udSlice<udVariant> args) con
 }
 
 template<typename Ret, typename... Args>
+template<size_t ...S>
+UDFORCE_INLINE udVariant udMethod::Partial<Ret, Args...>::callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, seq<S...>)
+{
+  return udVariant(d(args[S].as<Args>()...));
+}
+
+template<typename Ret, typename... Args>
 inline udVariant udMethod::Partial<Ret, Args ...>::shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value)
 {
   auto m = pSetter->m;
@@ -89,13 +96,18 @@ inline udVariant udMethod::Partial<Ret, Args ...>::shimFunc(const udMethod * con
   FastDelegate<Ret(Args...)> d;
   d.SetMemento(m);
 
-  size_t i = 0;
-  return udVariant(d(value[i++].as<Args>()...));
+  return udVariant(callFuncHack(value, d, typename gens<sizeof...(Args)>::type()));
 }
 
 template<typename... Args>
 struct udMethod::Partial<void, Args...>
 {
+  template<size_t ...S>
+  UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, FastDelegate<void(Args...)> d, seq<S...>)
+  {
+    d(args[S].as<Args>()...);
+  }
+
   inline static udVariant shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value)
   {
     auto m = pSetter->m;
@@ -104,8 +116,7 @@ struct udMethod::Partial<void, Args...>
     FastDelegate<void(Args...)> d;
     d.SetMemento(m);
 
-    size_t i = 0;
-    d(value[i++].as<Args>()...);
+    callFuncHack(value, d, typename gens<sizeof...(Args)>::type());
     return udVariant();
   }
 };

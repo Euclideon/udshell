@@ -96,11 +96,21 @@ private:
   DelegateMemento m;
   Shim *shim;
 
+  // !!! HERE BE DRAGONS !!!
+  // nasty recursive templates to generate an integer sequence (used to index the dynamic args array)
+  template<size_t ...> struct seq { };
+  template<int N, size_t ...S> struct gens : gens<N-1, N-1, S...> { };
+  template<size_t ...S> struct gens<0, S...> { typedef seq<S...> type; };
   template<typename Ret, typename... Args>
-  struct Partial
+  struct Partial // this allows us to perform partial specialisation for Ret == void
   {
+    // this is a nasty hack to get ...S (integer sequence) as a parameter pack
+    template<size_t ...S>
+    static udVariant callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, seq<S...>);
+
     static udVariant shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value);
   };
+  // !!!!!!!!!!!!!!!!!!!!!!!
 };
 
 
