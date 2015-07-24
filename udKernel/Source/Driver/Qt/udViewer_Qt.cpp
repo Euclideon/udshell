@@ -54,6 +54,7 @@ public:
   udResult RunMainLoop();
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
+  bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
 
   void PostEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
 
@@ -76,6 +77,7 @@ private:
   QGuiApplication *pApplication;
   QQuickWindow *pMainWindow;
   Qt::HANDLE mainThreadId;
+  Qt::HANDLE renderThreadId;
 };
 
 
@@ -85,6 +87,7 @@ udQtKernel::udQtKernel(udInitParams commandLine)
   , pApplication(nullptr)
   , pMainWindow(nullptr)
   , mainThreadId(QThread::currentThreadId())
+  , renderThreadId(nullptr)
 {
   udDebugPrintf("udQtKernel::udQtKernel()\n");
 
@@ -223,6 +226,10 @@ void udQtKernel::InitRender()
   // we only want this called on the first render cycle
   QObject::disconnect(pMainWindow, &QQuickWindow::beforeRendering, this, &udQtKernel::InitRender);
 
+  // TODO: need a better place to set this since this is called *after* our scenegraph has been created
+  // ALSO does this thread ever get recreated? does this id remain valid thru the program?
+  renderThreadId = QThread::currentThreadId();
+
   if (udKernel::InitRender() != udR_Success)
   {
     // TODO: gracefully handle error with InitRender ?
@@ -235,7 +242,6 @@ void udQtKernel::InitRender()
 // RENDER THREAD
 void udQtKernel::CleanupRender()
 {
-  // TODO
   udDebugPrintf("CleanupRender\n");
   if (udKernel::DeinitRender() != udR_Success)
   {
@@ -335,9 +341,10 @@ void udKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   udDebugPrintf("udKernel::DispatchToMainThreadAndWait()\n");
 
-  // TODO: check that we're not on the render thread - that's a deadlock waiting to happen
-
   udQtKernel *pKernel = static_cast<udQtKernel*>(this);
+
+  // TODO: handle this gracefully? can we detect if the main thread is blocked??
+  UDASSERT(!pKernel->OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
 
   // if we're on the main thread just execute the callback now
   if (pKernel->OnMainThread())
