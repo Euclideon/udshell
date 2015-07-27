@@ -104,6 +104,72 @@ inline udVariant::udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory)
   , aa(aa.ptr)
 {}
 
+// destructor
+inline udVariant::~udVariant()
+{
+  if (is(Type::Delegate))
+  {
+    ((Delegate*)&p)->~Delegate();
+  }
+  else if (ownsArray && t >= (size_t)Type::Array)
+  {
+    if (is(Type::Array))
+    {
+      for (size_t i = 0; i < length; ++i)
+        a[i].~udVariant();
+    }
+    else if (is(Type::AssocArray))
+    {
+      for (size_t i = 0; i < length; ++i)
+      {
+        aa[i].key.~udVariant();
+        aa[i].value.~udVariant();
+      }
+    }
+    udFree(a);
+  }
+}
+
+inline udVariant& udVariant::operator=(udVariant &&rval)
+{
+  if (this != &rval)
+  {
+    this->~udVariant();
+
+    t = rval.t;
+    ownsArray = rval.ownsArray;
+    length = rval.length;
+    p = rval.p;
+
+    rval.ownsArray = false;
+  }
+  return *this;
+}
+
+inline udVariant& udVariant::operator=(const udVariant &rval)
+{
+  if (this != &rval)
+  {
+    this->~udVariant();
+    new(this) udVariant(rval);
+  }
+  return *this;
+}
+
+inline udVariant::Type udVariant::type() const
+{
+  return (Type)t;
+}
+
+inline bool udVariant::is(Type type) const
+{
+  return (Type)t == type;
+}
+
+
+// *************************************
+// ** template construction machinery **
+// *************************************
 
 // horrible hack to facilitate partial specialisations (support all of the types!)
 template<typename T>
@@ -185,35 +251,42 @@ inline udVariant udToVariant(const udMatrix4x4<F> &m)
   return r;
 }
 
-// functions
+
+// functions (this is quite complex)
+
+// these horrid templates generate an integer sequence
+template<size_t ...> struct Sequence { };
+template<int N, size_t ...S> struct GenSequence : GenSequence<N-1, N-1, S...> { };
+template<size_t ...S> struct GenSequence<0, S...> { typedef Sequence<S...> type; };
+
+template<typename Signature>
+class udVarDelegate;
+
 template<typename R, typename... Args>
-class udVarDelegate : public udDelegateMemento
+class udVarDelegate<R(Args...)> : public udDelegateMemento
 {
 protected:
   template<typename T>
   friend class udSharedPtr;
 
-  // !! HERE BE DRAGONS !!
-  template<size_t ...> struct seq { };
-  template<int N, size_t ...S> struct gens : gens<N-1, N-1, S...> { };
-  template<size_t ...S> struct gens<0, S...> { typedef seq<S...> type; };
   template<size_t ...S>
-  UDFORCE_INLINE static udVariant callFunc(udSlice<udVariant> args, const udDelegate<R(Args...)> &d, seq<S...>)
+  UDFORCE_INLINE static udVariant callFuncHack(udSlice<udVariant> args, const udDelegate<R(Args...)> &d, Sequence<S...>)
   {
     return udVariant(d(args[S].as<Args>()...));
   }
-  // !!!!!!!!!!!!!!!!!!!!!
 
   udVariant to(udSlice<udVariant> args) const
   {
-    return callFunc(args, udDelegate<R(Args...)>(target), typename gens<sizeof...(Args)>::type());
+    // we need a call shim which can give an integer sequence as S... (Bjarne!!!)
+    return callFuncHack(args, udDelegate<R(Args...)>(target), typename GenSequence<sizeof...(Args)>::type());
   }
 
   R from(Args... args) const
   {
     udVariant::Delegate d(target);
 
-    udVariant vargs[] = { udVariant(args)... };
+    // HAX: added 1 to support the case of zero args
+    udVariant vargs[sizeof...(args)+1] = { udVariant(args)... };
     udSlice<udVariant> sargs(vargs, sizeof...(args));
 
     return d(sargs).as<R>();
@@ -221,6 +294,57 @@ protected:
 
   // *to* udVariant::Delegate constructor
   udVarDelegate(const udDelegate<R(Args...)> &d)
+    : target(d.GetMemento())
+  {
+    FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &udVarDelegate::Partial<R, Args...>::to);
+    m = shim.GetMemento();
+  }
+
+  // *from* udVariant::Delegate constructor
+  udVarDelegate(const udVariant::Delegate &d)
+    : target(d.GetMemento())
+  {
+    FastDelegate<R(Args...)> shim(this, &udVarDelegate::Partial<R, Args...>::from);
+    m = shim.GetMemento();
+  }
+
+  const udDelegateMementoRef target;
+};
+
+// specialise for 'void' return type
+template<typename... Args>
+class udVarDelegate<void(Args...)> : public udDelegateMemento
+{
+protected:
+  template<typename T>
+  friend class udSharedPtr;
+
+  template<size_t ...S>
+  UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, const udDelegate<void(Args...)> &d, Sequence<S...>)
+  {
+    d(args[S].as<Args>()...);
+  }
+
+  udVariant to(udSlice<udVariant> args) const
+  {
+    // we need a call shim which can give an integer sequence as S... (Bjarne!!!)
+    callFuncHack(args, udDelegate<void(Args...)>(target), typename GenSequence<sizeof...(Args)>::type());
+    return udVariant();
+  }
+
+  void from(Args... args) const
+  {
+    udVariant::Delegate d(target);
+
+    // HAX: added 1 to support the case of zero args
+    udVariant vargs[sizeof...(args)+1] = { udVariant(args)... };
+    udSlice<udVariant> sargs(vargs, sizeof...(args));
+
+    d(sargs);
+  }
+
+  // *to* udVariant::Delegate constructor
+  udVarDelegate(const udDelegate<void(Args...)> &d)
     : target(d.GetMemento())
   {
     FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &udVarDelegate::to);
@@ -231,7 +355,7 @@ protected:
   udVarDelegate(const udVariant::Delegate &d)
     : target(d.GetMemento())
   {
-    FastDelegate<R(Args...)> shim(this, &udVarDelegate::from);
+    FastDelegate<void(Args...)> shim(this, &udVarDelegate::from);
     m = shim.GetMemento();
   }
 
@@ -241,73 +365,15 @@ protected:
 template<typename R, typename... Args>
 inline udVariant udToVariant(const udDelegate<R(Args...)> &d)
 {
-  typedef udSharedPtr<udVarDelegate<R, Args...>> VarDelegateRef;
+  typedef udSharedPtr<udVarDelegate<R(Args...)> VarDelegateRef;
 
   return udVariant::Delegate(VarDelegateRef::create(d));
 }
 
 
-// destructor
-inline udVariant::~udVariant()
-{
-  if (is(Type::Delegate))
-  {
-    ((Delegate*)&p)->~Delegate();
-  }
-  else if (ownsArray && t >= (size_t)Type::Array)
-  {
-    if (is(Type::Array))
-    {
-      for (size_t i = 0; i < length; ++i)
-        a[i].~udVariant();
-    }
-    else if (is(Type::AssocArray))
-    {
-      for (size_t i = 0; i < length; ++i)
-      {
-        aa[i].key.~udVariant();
-        aa[i].value.~udVariant();
-      }
-    }
-    udFree(a);
-  }
-}
-
-inline udVariant& udVariant::operator=(udVariant &&rval)
-{
-  if (this != &rval)
-  {
-    this->~udVariant();
-
-    t = rval.t;
-    ownsArray = rval.ownsArray;
-    length = rval.length;
-    p = rval.p;
-
-    rval.ownsArray = false;
-  }
-  return *this;
-}
-
-inline udVariant& udVariant::operator=(const udVariant &rval)
-{
-  if (this != &rval)
-  {
-    this->~udVariant();
-    new(this) udVariant(rval);
-  }
-  return *this;
-}
-
-inline udVariant::Type udVariant::type() const
-{
-  return (Type)t;
-}
-
-inline bool udVariant::is(Type type) const
-{
-  return (Type)t == type;
-}
+// ********************************
+// ** template casting machinery **
+// ********************************
 
 // HAX: this is a horrible hax to satisfy the C++ compiler!
 template<typename T>
@@ -444,7 +510,7 @@ inline void udFromVariant(const udVariant &v, udMatrix4x4<U> *pR)
 template<typename R, typename... Args>
 inline void udFromVariant(const udVariant &v, udDelegate<R(Args...)> *pD)
 {
-  typedef udSharedPtr<udVarDelegate<R, Args...>> VarDelegateRef;
+  typedef udSharedPtr<udVarDelegate<R(Args...)>> VarDelegateRef;
 
   *pD = udDelegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
 }

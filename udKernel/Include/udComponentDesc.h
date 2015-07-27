@@ -6,10 +6,9 @@
 #include "udString.h"
 #include "udSharedPtr.h"
 #include "udVariant.h"
+#include "udEvent.h"
 
-#include "3rdparty\FastDelegate.h"
 using namespace fastdelegate;
-
 
 // TODO: remove this!
 #if UDPLATFORM_WINDOWS
@@ -96,21 +95,56 @@ private:
   DelegateMemento m;
   Shim *shim;
 
-  // !!! HERE BE DRAGONS !!!
-  // nasty recursive templates to generate an integer sequence (used to index the dynamic args array)
-  template<size_t ...> struct seq { };
-  template<int N, size_t ...S> struct gens : gens<N-1, N-1, S...> { };
-  template<size_t ...S> struct gens<0, S...> { typedef seq<S...> type; };
   template<typename Ret, typename... Args>
   struct Partial // this allows us to perform partial specialisation for Ret == void
   {
     // this is a nasty hack to get ...S (integer sequence) as a parameter pack
     template<size_t ...S>
-    static udVariant callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, seq<S...>);
+    static udVariant callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>);
 
     static udVariant shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value);
   };
-  // !!!!!!!!!!!!!!!!!!!!!!!
+};
+
+// event glue
+struct udVarEvent
+{
+  udVarEvent(nullptr_t);
+  template<typename X, typename... Args>
+  udVarEvent(udEvent<Args...> X::*ev)
+  {
+    pSubscribe = &doSubscribe<X, Args...>;
+    pEvent = (void* udVarEvent::*)ev;
+  }
+
+  operator bool() const { return pEvent != nullptr; }
+
+  UDFORCE_INLINE void subscribe(const udComponentRef &c, const udVariant::Delegate &d)
+  {
+    pSubscribe(this, c, d);
+  }
+
+private:
+  typedef void (SubscribeFunc)(const udVarEvent*, const udComponentRef&, const udVariant::Delegate&);
+
+  void* udVarEvent::*pEvent;
+  SubscribeFunc *pSubscribe = nullptr;
+
+  template<typename X, typename... Args>
+  static void doSubscribe(const udVarEvent *pEv, const udComponentRef &c, const udVariant::Delegate &d)
+  {
+    // cast the pointer-to-member back to it's real type
+    udEvent<Args...> X::*ev = (udEvent<Args...> X::*)pEv->pEvent;
+
+    // TODO: validate that 'X' is actually a component?
+    X *pComponent = (X*)c.ptr();
+
+    // deref the pointer-to-member to get the event we want to subscribe to
+    udEvent<Args...> &e = pComponent->*ev;
+
+    udVariant v(d);
+    e.Subscribe(v.as<udDelegate<void(Args...)>>());
+  }
 };
 
 
@@ -184,6 +218,19 @@ struct udMethodDesc
   const udSlice<const udTypeDesc> args;
 };
 
+struct udEventDesc
+{
+  udEventDesc() = delete;
+
+  udString id;
+  udString displayName;
+  udString description;
+
+  udVarEvent ev;
+
+  const udSlice<const udTypeDesc> args;
+};
+
 
 // component description
 enum { UDSHELL_APIVERSION = 100 };
@@ -214,6 +261,7 @@ struct udComponentDesc
 
   const udSlice<const udPropertyDesc> properties;
   const udSlice<const udMethodDesc> methods;
+  const udSlice<const udEventDesc> events;
 };
 
 

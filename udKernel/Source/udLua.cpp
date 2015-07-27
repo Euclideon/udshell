@@ -315,6 +315,10 @@ void LuaState::pushGetters(const udComponentDesc &desc)
   lua_newtable(L); // upvalue(1) == getters table
   lua_newtable(L); // upvalue(2) == members/methods table
 
+  // add type and descriptor as members
+  pushDescriptor(desc);
+  lua_setfield(L, -2, "descriptor");
+
   // populate getters
   for (auto &p : desc.properties)
   {
@@ -326,19 +330,19 @@ void LuaState::pushGetters(const udComponentDesc &desc)
     }
   }
 
-  // add type and descriptor as members
-  pushDescriptor(desc);
-  lua_setfield(L, -2, "descriptor");
-
   // populate methods
   for (auto &m : desc.methods)
   {
-    if (m.method) // TODO: we should possibly push a function that reports an "unreadable" error
-    {
-      lua_pushlightuserdata(L, (void*)&m);
-      lua_pushcclosure(L, &method, 1);
-      lua_setfield(L, -2, m.id.ptr);
-    }
+    lua_pushlightuserdata(L, (void*)&m);
+    lua_pushcclosure(L, &method, 1);
+    lua_setfield(L, -2, m.id.ptr);
+  }
+
+  // populate events
+  for (auto &e : desc.events)
+  {
+    lua_pushlightuserdata(L, (void*)&e);
+    lua_setfield(L, -2, e.id.ptr);
   }
 
   // upvalue(3) is super.__index
@@ -488,7 +492,19 @@ int LuaState::componentIndex(lua_State* L)
   // check the members/method table
   lua_getfield(L, lua_upvalueindex(2), field);
   if (!lua_isnil(L, -1))
+  {
+    if (lua_islightuserdata(L, -1))
+    {
+      // events are light user data...
+      udEventDesc *pDesc = (udEventDesc*)lua_touserdata(L, -1);
+      lua_pop(L, 1);
+
+      // push an event object
+      LuaState &l = (LuaState&)L;
+      l.pushEvent(l.toComponent(1), *pDesc);
+    }
     return 1;
+  }
   lua_pop(L, 1);
 
   // call super.__index
@@ -717,4 +733,81 @@ int LuaState::callDelegate(lua_State *L)
 
   v.luaPush(l);
   return 1;
+}
+
+
+// *** bind events to Lua ***
+void LuaState::pushEventMetatable()
+{
+  if (luaL_newmetatable(L, "udLuaEvent") == 0)
+    return;
+
+  // record the type
+  pushString("udLuaEvent");
+  lua_setfield(L, -2, "__type");
+
+  // push a destructor
+  lua_pushcfunction(L, &eventCleaner);
+  lua_setfield(L, -2, "__gc");
+
+  // populate __index with members
+  pushString("__index");
+  pushEventMembers();
+  lua_rawset(L, -3);
+
+  // create a '__metatable' entry to protect the metatable against modification
+  pushString("__metatable");
+  lua_pushvalue(L, -2);
+  lua_rawset(L, -3);
+}
+
+void LuaState::pushEventMembers()
+{
+  lua_createtable(L, 0, 2);
+
+  lua_pushcfunction(L, &subscribe);
+  lua_setfield(L, -2, "subscribe");
+}
+
+class udLuaEvent
+{
+public:
+  udLuaEvent(const udComponentRef &c, udEventDesc &desc)
+    : c(c), desc(desc)
+  {}
+
+  void subscribe(const udVariant::Delegate &d)
+  {
+    desc.ev.subscribe(c, d);
+  }
+
+private:
+  udComponentRef c;
+  udEventDesc &desc;
+};
+
+void LuaState::pushEvent(const udComponentRef &c, udEventDesc &desc)
+{
+  new(lua_newuserdata(L, sizeof(udLuaEvent))) udLuaEvent(c, desc);
+  pushEventMetatable();
+  lua_setmetatable(L, -2);
+}
+
+int LuaState::eventCleaner(lua_State* L)
+{
+  udLuaEvent *pEv = (udLuaEvent*)lua_touserdata(L, 1);
+  pEv->~udLuaEvent();
+  return 0;
+}
+
+int LuaState::subscribe(lua_State* L)
+{
+  LuaState &l = (LuaState&)L;
+
+  udLuaEvent *pEv = (udLuaEvent*)lua_touserdata(L, 1);
+  udVariant::Delegate d = l.toDelegate(2);
+
+  pEv->subscribe(d);
+
+  return 0;
 }

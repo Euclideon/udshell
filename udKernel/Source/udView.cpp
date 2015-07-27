@@ -17,6 +17,15 @@ static const udPropertyDesc props[] =
     udTypeDesc(udPropertyType::Component) // type
   }
 };
+static const udEventDesc events[] =
+{
+  {
+    "dirty", // id
+    "Dirty", // displayName
+    "View dirty event", // description
+    &udView::Dirty
+  }
+};
 const udComponentDesc udView::descriptor =
 {
   &udComponent::descriptor, // pSuperDesc
@@ -31,7 +40,9 @@ const udComponentDesc udView::descriptor =
   [](){ return udR_Success; },  // pInit
   udView::Create,               // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // properties
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  nullptr,
+  udSlice<const udEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 udResult udView::InputEvent(const udInputEvent &ev)

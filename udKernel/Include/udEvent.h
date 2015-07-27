@@ -20,32 +20,25 @@ public:
 protected:
   friend class udSubscriber;
 
-  void AddSubscription(DelegateMemento m, udSubscriber *pSubscriber = nullptr);
-  void RemoveSubscription(DelegateMemento m, udSubscriber *pSubscriber = nullptr);
+  void AddSubscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber = nullptr);
+  void RemoveSubscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber = nullptr);
 
   struct Subscription
   {
-    Subscription(DelegateMemento m, udSubscriber *pSubscriber = nullptr)
-      : m(m), pSubscriber(pSubscriber) {}
+    Subscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber = nullptr)
+      : spM(spM), pSubscriber(pSubscriber) {}
 
-    udDelegateMementoRef spM = nullptr;
-    DelegateMemento m;
+    udDelegateMementoRef spM;
     udSubscriber *pSubscriber;
   };
   udFixedSlice<Subscription, 3> subscribers;
-
-  void t()
-  {
-    udDelegate<void(int)> d(subscribers[0].spM);
-    d(10);
-  }
 };
 
 template<typename... Args>
 class udEvent : public udBaseEvent
 {
 public:
-  typedef FastDelegate<void(Args...)> Delegate;
+  typedef udDelegate<void(Args...)> Delegate;
 
   // subscribe
   void Subscribe(Delegate callback)
@@ -60,10 +53,7 @@ public:
   template <typename X>
   void Subscribe(udComponent *pC, void(X::*func)(Args...));
   template <typename X>
-  void Subscribe(udComponentRef c, void(X::*func)(Args...))
-  {
-    Subscribe(c.ptr(), func);
-  }
+  void Subscribe(udComponentRef c, void(X::*func)(Args...)) { Subscribe(c.ptr(), func); }
 
   // unsubscribe
   void Unsubscribe(Delegate callback)
@@ -89,7 +79,7 @@ public:
     for (auto s : subscribers)
     {
       Delegate d;
-      d.SetMemento(s.m);
+      d.SetMemento(s.spM);
       d(args...);
     }
   }
@@ -114,17 +104,17 @@ public:
   void Unsubscribe(udEvent<Args...> &ev, typename udEvent<Args...>::Delegate d);
 
 protected:
-  void RemoveSubscription(DelegateMemento m, udBaseEvent *pEvent);
+  void RemoveSubscription(const udDelegateMementoRef &spM, udBaseEvent *pEvent);
 
 private:
   friend class udBaseEvent;
 
   struct Subscription
   {
-    Subscription(DelegateMemento m, udBaseEvent *pEvent)
-      : m(m), pEvent(pEvent) {}
+    Subscription(const udDelegateMementoRef &spM, udBaseEvent *pEvent)
+      : spM(spM), pEvent(pEvent) {}
 
-    DelegateMemento m;
+    udDelegateMementoRef spM;
     udBaseEvent *pEvent;
   };
 

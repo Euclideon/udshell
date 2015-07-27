@@ -111,6 +111,12 @@ private:
   void pushDelegateMetatable();
   static int delegateCleaner(lua_State* L);
   static int callDelegate(lua_State *L);
+
+  void pushEventMetatable();
+  void pushEventMembers();
+  void pushEvent(const udComponentRef &c, udEventDesc &desc);
+  static int eventCleaner(lua_State* L);
+  static int subscribe(lua_State* L);
 };
 
 

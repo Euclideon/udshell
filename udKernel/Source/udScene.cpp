@@ -16,6 +16,15 @@ static const udPropertyDesc props[] =
     udTypeDesc(udPropertyType::Integer) // type
   }
 };
+static const udEventDesc events[] =
+{
+  {
+    "dirty", // id
+    "Dirty", // displayName
+    "Scene dirty event", // description
+    &udScene::Dirty
+  }
+};
 const udComponentDesc udScene::descriptor =
 {
   &udComponent::descriptor, // pSuperDesc
@@ -30,7 +39,9 @@ const udComponentDesc udScene::descriptor =
   [](){ return udR_Success; },             // pInit
   udScene::Create, // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  nullptr,
+  udSlice<const udEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 

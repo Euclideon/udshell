@@ -82,7 +82,7 @@ inline udVariant udMethod::call(udComponent *pThis, udSlice<udVariant> args) con
 
 template<typename Ret, typename... Args>
 template<size_t ...S>
-UDFORCE_INLINE udVariant udMethod::Partial<Ret, Args...>::callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, seq<S...>)
+UDFORCE_INLINE udVariant udMethod::Partial<Ret, Args...>::callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>)
 {
   return udVariant(d(args[S].as<Args>()...));
 }
@@ -96,14 +96,14 @@ inline udVariant udMethod::Partial<Ret, Args ...>::shimFunc(const udMethod * con
   FastDelegate<Ret(Args...)> d;
   d.SetMemento(m);
 
-  return udVariant(callFuncHack(value, d, typename gens<sizeof...(Args)>::type()));
+  return udVariant(callFuncHack(value, d, typename GenSequence<sizeof...(Args)>::type()));
 }
 
 template<typename... Args>
 struct udMethod::Partial<void, Args...>
 {
   template<size_t ...S>
-  UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, FastDelegate<void(Args...)> d, seq<S...>)
+  UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, FastDelegate<void(Args...)> d, Sequence<S...>)
   {
     d(args[S].as<Args>()...);
   }
@@ -116,7 +116,7 @@ struct udMethod::Partial<void, Args...>
     FastDelegate<void(Args...)> d;
     d.SetMemento(m);
 
-    callFuncHack(value, d, typename gens<sizeof...(Args)>::type());
+    callFuncHack(value, d, typename GenSequence<sizeof...(Args)>::type());
     return udVariant();
   }
 };
