@@ -5,8 +5,10 @@
 #include "udCamera.h"
 
 #include "udRenderScene.h"
+namespace udKernel
+{
 
-static const udPropertyDesc props[] =
+static const PropertyDesc props[] =
 {
   {
     "camera", // id
@@ -14,38 +16,38 @@ static const udPropertyDesc props[] =
     "Camera for viewport", // description
     nullptr, // getter
     nullptr, // setter
-    udTypeDesc(udPropertyType::Component) // type
+    TypeDesc(PropertyType::Component) // type
   }
 };
-static const udEventDesc events[] =
+static const EventDesc events[] =
 {
   {
     "dirty", // id
     "Dirty", // displayName
     "View dirty event", // description
-    &udView::Dirty
+    &View::Dirty
   }
 };
-const udComponentDesc udView::descriptor =
+const ComponentDesc View::descriptor =
 {
-  &udComponent::descriptor, // pSuperDesc
+  &Component::descriptor, // pSuperDesc
 
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "view",      // id
-  "udView",    // displayName
+  "View",    // displayName
   "Is a view", // description
 
   [](){ return udR_Success; },  // pInit
-  udView::Create,               // pCreateInstance
+  View::Create,               // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr,
-  udSlice<const udEventDesc>(events, UDARRAYSIZE(events)) // events
+  udSlice<const EventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
-udResult udView::InputEvent(const udInputEvent &ev)
+udResult View::InputEvent(const udInputEvent &ev)
 {
   // if view wants to handle anything personally
   //...
@@ -65,7 +67,7 @@ udResult udView::InputEvent(const udInputEvent &ev)
   return udR_EventNotHandled;
 }
 
-udResult udView::Resize(int width, int height)
+udResult View::Resize(int width, int height)
 {
   int oldRenderWidth = renderWidth;
   int oldRenderHeight = renderHeight;
@@ -85,34 +87,34 @@ udResult udView::Resize(int width, int height)
     bDirty = true;
 
   if (pResizeCallback)
-    pResizeCallback(udViewRef(this), width, height);
+    pResizeCallback(ViewRef(this), width, height);
 
   return udR_Success;
 }
 
-udResult udView::Render()
+udResult View::Render()
 {
   if (pPreRenderCallback)
-    pPreRenderCallback(udViewRef(this), spScene);
+    pPreRenderCallback(ViewRef(this), spScene);
 
   udResult r = udR_Success;
 
   GetRenderableView()->RenderGPU();
 
   if (pPostRenderCallback)
-    pPostRenderCallback(udViewRef(this), spScene);
+    pPostRenderCallback(ViewRef(this), spScene);
 
   return r;
 }
 
-udRenderableViewRef udView::GetRenderableView()
+RenderableViewRef View::GetRenderableView()
 {
   if (!bDirty)
     return spCache;
 
-  spCache = udRenderableViewRef::create();
+  spCache = RenderableViewRef::create();
 
-  spCache->spView = udViewRef(this);
+  spCache->spView = ViewRef(this);
 
   spCache->view = spCamera->GetViewMatrix();
   spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight, &spCache->projection);
@@ -134,26 +136,26 @@ udRenderableViewRef udView::GetRenderableView()
   return spCache;
 }
 
-void udView::SetScene(udSceneRef spNewScene)
+void View::SetScene(SceneRef spNewScene)
 {
   if (spScene == spNewScene)
     return;
 
   if (spScene)
-    spScene->Dirty.Unsubscribe(this, &udView::OnDirty);
+    spScene->Dirty.Unsubscribe(this, &View::OnDirty);
 
   spScene = spNewScene;
 
   if (spScene)
-    spScene->Dirty.Subscribe(this, &udView::OnDirty);
+    spScene->Dirty.Subscribe(this, &View::OnDirty);
 }
 
-void udView::SetCamera(udCameraRef spCamera)
+void View::SetCamera(CameraRef spCamera)
 {
   this->spCamera = spCamera;
 }
 
-void udView::GetDimensions(int *pWidth, int *pHeight) const
+void View::GetDimensions(int *pWidth, int *pHeight) const
 {
   if (pWidth)
     *pWidth = displayWidth;
@@ -161,7 +163,7 @@ void udView::GetDimensions(int *pWidth, int *pHeight) const
     *pHeight = displayHeight;
 }
 
-void udView::GetRenderDimensions(int *pWidth, int *pHeight) const
+void View::GetRenderDimensions(int *pWidth, int *pHeight) const
 {
   if (pWidth)
     *pWidth = renderWidth;
@@ -169,8 +171,10 @@ void udView::GetRenderDimensions(int *pWidth, int *pHeight) const
     *pHeight = renderHeight;
 }
 
-void udView::OnDirty()
+void View::OnDirty()
 {
   bDirty = true;
   Dirty.Signal();
 }
+
+} // namespace udKernel

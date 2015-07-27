@@ -5,12 +5,12 @@
 #include "udKernel.h"
 
 
-udKernel *udKernel::createInstanceInternal(int argc, char** argv)
+Kernel *Kernel::createInstanceInternal(int argc, char** argv)
 {
-  return new udKernel;
+  return new Kernel;
 }
 
-udResult udKernel::destroyInstanceInternal()
+udResult Kernel::destroyInstanceInternal()
 {
   delete this;
   return udR_Success;
@@ -19,7 +19,7 @@ udResult udKernel::destroyInstanceInternal()
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udResult udKernel_RunMainLoop(udKernel *pKernel)
+udResult udKernel_RunMainLoop(Kernel *pKernel)
 {
   return udR_Success;
 }

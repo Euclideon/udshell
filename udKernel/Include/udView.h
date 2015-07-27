@@ -7,28 +7,31 @@
 #include "udRender.h"
 #include "udMath.h"
 
-SHARED_CLASS(udRenderableView);
+namespace udKernel
+{
 
-PROTOTYPE_COMPONENT(udScene);
-PROTOTYPE_COMPONENT(udCamera);
-PROTOTYPE_COMPONENT(udView);
+SHARED_CLASS(RenderableView);
 
-class udView : public udComponent
+PROTOTYPE_COMPONENT(Scene);
+PROTOTYPE_COMPONENT(Camera);
+PROTOTYPE_COMPONENT(View);
+
+class View : public Component
 {
 public:
-  UD_COMPONENT(udView);
+  UD_COMPONENT(View);
 
   virtual udResult InputEvent(const udInputEvent &ev);
   virtual udResult Resize(int width, int height);
 
   udResult Render(); // TODO: REMOVE ME
 
-  udRenderableViewRef GetRenderableView();
+  RenderableViewRef GetRenderableView();
 
-  void SetScene(udSceneRef spScene);
-  void SetCamera(udCameraRef spCamera);
-  udSceneRef GetScene() const { return spScene; }
-  udCameraRef GetCamera() const { return spCamera; }
+  void SetScene(SceneRef spScene);
+  void SetCamera(CameraRef spCamera);
+  SceneRef GetScene() const { return spScene; }
+  CameraRef GetCamera() const { return spCamera; }
 
   void GetDimensions(int *pWidth, int *pHeight) const;
   void GetRenderDimensions(int *pWidth, int *pHeight) const;
@@ -37,21 +40,21 @@ public:
   void SetRenderOptions(const udRenderOptions &options) { this->options = options; }
   const udRenderOptions& GetRenderOptions() const { return options; }
 
-  udEvent<> Dirty;
+  Event<> Dirty;
 
   // TODO: remove these!
-  void RegisterResizeCallback(void (*pCallback)(udViewRef pView, int w, int h)) { pResizeCallback = pCallback; }
-  void RegisterPreRenderCallback(void(*pCallback)(udViewRef pView, udSceneRef pScene)) { pPreRenderCallback = pCallback; }
-  void RegisterPostRenderCallback(void(*pCallback)(udViewRef pView, udSceneRef pScene)) { pPostRenderCallback = pCallback; }
+  void RegisterResizeCallback(void (*pCallback)(ViewRef pView, int w, int h)) { pResizeCallback = pCallback; }
+  void RegisterPreRenderCallback(void(*pCallback)(ViewRef pView, SceneRef pScene)) { pPreRenderCallback = pCallback; }
+  void RegisterPostRenderCallback(void(*pCallback)(ViewRef pView, SceneRef pScene)) { pPostRenderCallback = pCallback; }
 
   // TODO: Hack Remove me
   void ForceDirty() { OnDirty(); }
 
 protected:
-  udSceneRef spScene = nullptr;
-  udCameraRef spCamera = nullptr;
+  SceneRef spScene = nullptr;
+  CameraRef spCamera = nullptr;
 
-  udRenderableViewRef spCache = nullptr;
+  RenderableViewRef spCache = nullptr;
   bool bDirty = true;
 
   int displayWidth = 0, displayHeight = 0;
@@ -61,19 +64,19 @@ protected:
   udRenderOptions options;
 
   // TODO: remove these!
-  void(*pResizeCallback)(udViewRef, int, int) = nullptr;
-  void(*pPreRenderCallback)(udViewRef, udSceneRef) = nullptr;
-  void(*pPostRenderCallback)(udViewRef, udSceneRef) = nullptr;
+  void(*pResizeCallback)(ViewRef, int, int) = nullptr;
+  void(*pPreRenderCallback)(ViewRef, SceneRef) = nullptr;
+  void(*pPostRenderCallback)(ViewRef, SceneRef) = nullptr;
 
-  udView(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
-    : udComponent(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
+  View(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+    : Component(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
 
-  static udComponent *Create(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
+  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
   {
-    return udNew(udView, pType, pKernel, uid, initParams);
+    return udNew(View, pType, pKernel, uid, initParams);
   }
 
   void OnDirty();
 };
-
+} // namespace udKernel
 #endif // UDVIEW_H

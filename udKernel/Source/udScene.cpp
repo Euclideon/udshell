@@ -4,48 +4,50 @@
 #include "udKernel.h"
 #include "udRenderScene.h"
 
+namespace udKernel
+{
 
-static const udPropertyDesc props[] =
+static const PropertyDesc props[] =
 {
   {
     "rootnode", // id
     "RootNode", // displayName
     "Scene root node", // description
-    &udScene::GetRootNode, // getter
+    &Scene::GetRootNode, // getter
     nullptr, // setter
-    udTypeDesc(udPropertyType::Integer) // type
+    TypeDesc(PropertyType::Integer) // type
   }
 };
-static const udEventDesc events[] =
+static const EventDesc events[] =
 {
   {
     "dirty", // id
     "Dirty", // displayName
     "Scene dirty event", // description
-    &udScene::Dirty
+    &Scene::Dirty
   }
 };
-const udComponentDesc udScene::descriptor =
+const ComponentDesc Scene::descriptor =
 {
-  &udComponent::descriptor, // pSuperDesc
+  &Component::descriptor, // pSuperDesc
 
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "scene",      // id
-  "udScene",    // displayName
+  "Scene",    // displayName
   "Is a scene", // description
 
   [](){ return udR_Success; },             // pInit
-  udScene::Create, // pCreateInstance
+  Scene::Create, // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
   nullptr,
-  udSlice<const udEventDesc>(events, UDARRAYSIZE(events)) // events
+  udSlice<const EventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 
-udResult udScene::InputEvent(const udInputEvent &ev)
+udResult Scene::InputEvent(const udInputEvent &ev)
 {
   // do anything here?
   //...
@@ -54,7 +56,7 @@ udResult udScene::InputEvent(const udInputEvent &ev)
   return rootNode->InputEvent(ev);
 }
 
-udResult udScene::Update(double timeDelta)
+udResult Scene::Update(double timeDelta)
 {
   // do anything here?
   //...
@@ -63,12 +65,12 @@ udResult udScene::Update(double timeDelta)
   return rootNode->Update(timeDelta);
 }
 
-udRenderSceneRef udScene::GetRenderScene()
+RenderSceneRef Scene::GetRenderScene()
 {
   if (!bDirty)
     return spCache;
 
-  spCache = udRenderSceneRef::create();
+  spCache = RenderSceneRef::create();
 
   // build scene
   rootNode->Render(spCache, rootNode->GetMatrix());
@@ -78,7 +80,7 @@ udRenderSceneRef udScene::GetRenderScene()
   return spCache;
 }
 
-udResult udScene::SetRenderModels(struct udRenderModel models[], size_t numModels)
+udResult Scene::SetRenderModels(struct udRenderModel models[], size_t numModels)
 {
   for (size_t i = 0; i < numModels; ++i)
     renderModels[i] = models[i];
@@ -87,17 +89,18 @@ udResult udScene::SetRenderModels(struct udRenderModel models[], size_t numModel
   return udR_Success;
 }
 
-udScene::udScene(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams) :
-  udComponent(pType, pKernel, uid, initParams)
+Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams) :
+  Component(pType, pKernel, uid, initParams)
 {
   timeStep = 1.0 / 30.0;
-  rootNode = pKernel->CreateComponent<udNode>();
+  rootNode = pKernel->CreateComponent<Node>();
 
   memset(&renderModels, 0, sizeof(renderModels));
   numRenderModels = 0;
 }
 
-udScene::~udScene()
+Scene::~Scene()
 {
 
 }
+}  // namespace udKernel

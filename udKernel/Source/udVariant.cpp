@@ -3,7 +3,10 @@
 #include "udComponent.h"
 #include "udLua.h"
 
-udRCString udVariant::stringify() const
+namespace udKernel
+{
+
+udRCString Variant::stringify() const
 {
   switch ((Type)t)
   {
@@ -19,7 +22,7 @@ udRCString udVariant::stringify() const
   return nullptr;
 }
 
-bool udVariant::asBool() const
+bool Variant::asBool() const
 {
   switch ((Type)t)
   {
@@ -45,7 +48,7 @@ bool udVariant::asBool() const
     return false;
   }
 }
-int64_t udVariant::asInt() const
+int64_t Variant::asInt() const
 {
   switch ((Type)t)
   {
@@ -64,7 +67,7 @@ int64_t udVariant::asInt() const
     return 0;
   }
 }
-double udVariant::asFloat() const
+double Variant::asFloat() const
 {
   switch ((Type)t)
   {
@@ -83,18 +86,18 @@ double udVariant::asFloat() const
     return 0.0;
   }
 }
-udComponentRef udVariant::asComponent() const
+ComponentRef Variant::asComponent() const
 {
   switch ((Type)t)
   {
   case Type::Component:
-    return udComponentRef(c);
+    return ComponentRef(c);
   default:
     UDASSERT(type() == Type::Component, "Wrong type!");
     return nullptr;
   }
 }
-udVariant::Delegate udVariant::asDelegate() const
+Variant::Delegate Variant::asDelegate() const
 {
   switch ((Type)t)
   {
@@ -105,7 +108,7 @@ udVariant::Delegate udVariant::asDelegate() const
       return Delegate();
   }
 }
-udString udVariant::asString() const
+udString Variant::asString() const
 {
   // TODO: it would be nice to be able to string-ify other types
   // ...but we don't have any output buffer
@@ -122,47 +125,47 @@ udString udVariant::asString() const
     return udString();
   }
 }
-udSlice<udVariant> udVariant::asArray() const
+udSlice<Variant> Variant::asArray() const
 {
   switch ((Type)t)
   {
   case Type::Null:
-    return udSlice<udVariant>();
+    return udSlice<Variant>();
   case Type::Array:
-    return udSlice<udVariant>(a, length);
+    return udSlice<Variant>(a, length);
   default:
     UDASSERT(type() == Type::Array, "Wrong type!");
-    return udSlice<udVariant>();
+    return udSlice<Variant>();
   }
 }
-udSlice<udKeyValuePair> udVariant::asAssocArray() const
+udSlice<KeyValuePair> Variant::asAssocArray() const
 {
   switch ((Type)t)
   {
   case Type::Null:
-    return udSlice<udKeyValuePair>();
+    return udSlice<KeyValuePair>();
   case Type::AssocArray:
-    return udSlice<udKeyValuePair>(aa, length);
+    return udSlice<KeyValuePair>(aa, length);
   default:
     UDASSERT(type() == Type::AssocArray, "Wrong type!");
-    return udSlice<udKeyValuePair>();
+    return udSlice<KeyValuePair>();
   }
 }
-udSlice<udKeyValuePair> udVariant::asAssocArraySeries() const
+udSlice<KeyValuePair> Variant::asAssocArraySeries() const
 {
   switch ((Type)t)
   {
   case Type::Null:
-    return udSlice<udKeyValuePair>();
+    return udSlice<KeyValuePair>();
   case Type::AssocArray:
-    return udSlice<udKeyValuePair>(aa, assocArraySeriesLen());
+    return udSlice<KeyValuePair>(aa, assocArraySeriesLen());
   default:
     UDASSERT(type() == Type::AssocArray, "Wrong type!");
-    return udSlice<udKeyValuePair>();
+    return udSlice<KeyValuePair>();
   }
 }
 
-size_t udVariant::arrayLen() const
+size_t Variant::arrayLen() const
 {
   if (is(Type::Array))
     return length;
@@ -170,7 +173,7 @@ size_t udVariant::arrayLen() const
     return assocArraySeriesLen();
   return 0;
 }
-size_t udVariant::assocArraySeriesLen() const
+size_t Variant::assocArraySeriesLen() const
 {
   if (!is(Type::AssocArray))
     return 0;
@@ -180,7 +183,7 @@ size_t udVariant::assocArraySeriesLen() const
   return i;
 }
 
-udVariant udVariant::operator[](size_t i) const
+Variant Variant::operator[](size_t i) const
 {
   if (is(Type::Array))
   {
@@ -192,46 +195,46 @@ udVariant udVariant::operator[](size_t i) const
     UDASSERT(i < assocArraySeriesLen(), "Index out of range!");
     return aa[i].value;
   }
-  return udVariant(nullptr);
+  return Variant(nullptr);
 }
-udVariant udVariant::operator[](udString key) const
+Variant Variant::operator[](udString key) const
 {
   if (is(Type::AssocArray))
   {
     size_t i = assocArraySeriesLen();
     for (; i<length; ++i)
     {
-      udVariant &k = aa[i].key;
+      Variant &k = aa[i].key;
       if (!k.is(Type::String))
         continue;
       if (udString(k.s, k.length).eq(key))
         return aa[i].value;
     }
   }
-  return udVariant(nullptr);
+  return Variant(nullptr);
 }
 
-udVariant* udVariant::allocArray(size_t len)
+Variant* Variant::allocArray(size_t len)
 {
-  this->~udVariant();
+  this->~Variant();
   t = (size_t)Type::Array;
   length = len;
   ownsArray = true;
-  a = udAllocType(udVariant, len, udAF_None);
+  a = udAllocType(Variant, len, udAF_None);
   return a;
 }
 
-udKeyValuePair* udVariant::allocAssocArray(size_t len)
+KeyValuePair* Variant::allocAssocArray(size_t len)
 {
-  this->~udVariant();
+  this->~Variant();
   t = (size_t)Type::AssocArray;
   length = len;
   ownsArray = true;
-  aa = udAllocType(udKeyValuePair, len, udAF_None);
+  aa = udAllocType(KeyValuePair, len, udAF_None);
   return aa;
 }
 
-void udVariant::luaPush(LuaState &l) const
+void Variant::luaPush(LuaState &l) const
 {
   switch ((Type)t)
   {
@@ -248,7 +251,7 @@ void udVariant::luaPush(LuaState &l) const
       l.pushFloat(f);
       break;
     case Type::Component:
-      l.pushComponent(udComponentRef(c));
+      l.pushComponent(ComponentRef(c));
       break;
     case Type::Delegate:
       l.pushDelegate((Delegate&)p);
@@ -282,31 +285,31 @@ void udVariant::luaPush(LuaState &l) const
   }
 }
 
-udVariant udVariant::luaGet(LuaState &l, int idx)
+Variant Variant::luaGet(LuaState &l, int idx)
 {
   LuaType t = l.getType(idx);
   switch (t)
   {
     case LuaType::Nil:
-      return udVariant();
+      return Variant();
     case LuaType::Boolean:
-      return udVariant(l.toBool(idx));
+      return Variant(l.toBool(idx));
     case LuaType::LightUserData:
-      return udVariant();
+      return Variant();
     case LuaType::Number:
       if (l.isInteger(-1))
-        return udVariant(l.toInt(idx));
+        return Variant(l.toInt(idx));
       else
-        return udVariant(l.toFloat(idx));
+        return Variant(l.toFloat(idx));
     case LuaType::String:
-      return udVariant(l.toString(idx));
+      return Variant(l.toString(idx));
     case LuaType::Function:
       return l.toDelegate(idx);
     case LuaType::UserData:
     {
       // find out if is component...
       UDASSERT(false, "TODO!");
-      return udVariant();
+      return Variant();
     }
     case LuaType::Table:
     {
@@ -325,16 +328,16 @@ udVariant udVariant::luaGet(LuaState &l, int idx)
       }
 
       // alloc for table
-      udVariant v;
-      udKeyValuePair *pAA = v.allocAssocArray(numElements);
+      Variant v;
+      KeyValuePair *pAA = v.allocAssocArray(numElements);
 
       // populate the table
       l.pushNil();  // first key
       int i = 0;
       while (lua_next(L, pos) != 0)
       {
-        new(&pAA[i].key) udVariant(l.get(-2));
-        new(&pAA[i].value) udVariant(l.get(-1));
+        new(&pAA[i].key) Variant(l.get(-2));
+        new(&pAA[i].value) Variant(l.get(-1));
         l.pop();
         ++i;
       }
@@ -342,6 +345,8 @@ udVariant udVariant::luaGet(LuaState &l, int idx)
     }
     default:
       // TODO: make a noise of some sort...?
-      return udVariant();
+      return Variant();
   }
 }
+
+} // namespace udKernel

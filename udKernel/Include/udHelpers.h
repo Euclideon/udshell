@@ -4,8 +4,11 @@
 
 #include "udVariant.h"
 
-udRCSlice<udKeyValuePair> udParseCommandLine(const char *pCommandLine);
-udRCSlice<udKeyValuePair> udParseCommandLine(int argc, char *argv[]);
-udRCSlice<udKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
+namespace udKernel
+{
+  udRCSlice<KeyValuePair> udParseCommandLine(const char *pCommandLine);
+  udRCSlice<KeyValuePair> udParseCommandLine(int argc, char *argv[]);
+  udRCSlice<KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
+} // namespace udKernel
 
 #endif // UDHELPERS_H

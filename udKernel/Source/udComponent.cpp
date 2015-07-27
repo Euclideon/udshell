@@ -8,44 +8,45 @@
 #pragma warning(disable: 4996)
 #endif // UDPLATFORM_WINDOWS
 
+namespace udKernel
+{
 
-
-static const udPropertyDesc props[] =
+static const PropertyDesc props[] =
 {
   {
     "uid", // id
     "UID", // displayName
     "Component UID", // description
-    &udComponent::GetUid, // getter
+    &Component::GetUid, // getter
     nullptr, // setter
-    udTypeDesc(udPropertyType::String) // type
+    TypeDesc(PropertyType::String) // type
   },
   {
     "type", // id
     "Type", // displayName
     "Component Type", // description
-    &udComponent::GetType, // getter
+    &Component::GetType, // getter
     nullptr, // setter
-    udTypeDesc(udPropertyType::String) // type
+    TypeDesc(PropertyType::String) // type
   },
   {
     "displayname", // id
     "Display Name", // displayName
     "Component Display Name", // description
-    &udComponent::GetDisplayName, // getter
+    &Component::GetDisplayName, // getter
     nullptr, // setter
-    udTypeDesc(udPropertyType::String) // type
+    TypeDesc(PropertyType::String) // type
   },
   {
     "description", // id
     "Description", // displayName
     "Component Description", // description
-    &udComponent::GetDescription, // getter
+    &Component::GetDescription, // getter
     nullptr, // setter
-    udTypeDesc(udPropertyType::String) // type
+    TypeDesc(PropertyType::String) // type
   }
 };
-const udComponentDesc udComponent::descriptor =
+const ComponentDesc Component::descriptor =
 {
   nullptr, // pSuperDesc
 
@@ -53,30 +54,30 @@ const udComponentDesc udComponent::descriptor =
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "component", // id
-  "udComponent", // displayName
+  "Component", // displayName
   "Is a component", // description
 
   nullptr, // pInit
   nullptr, // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 
-void udComponent::Init(udInitParams initParams)
+void Component::Init(InitParams initParams)
 {
   for (auto &kv : initParams)
   {
-    const udPropertyDesc *pDesc = FindProperty(kv.key.asString());
+    const PropertyDesc *pDesc = FindProperty(kv.key.asString());
     if (pDesc && pDesc->setter)
       pDesc->setter.set(this, kv.value);
   }
 }
 
 
-bool udComponent::IsType(udString type) const
+bool Component::IsType(udString type) const
 {
-  const udComponentDesc *pDesc = pType;
+  const ComponentDesc *pDesc = pType;
   while (pDesc)
   {
     if (pType->id.eq(type))
@@ -86,9 +87,9 @@ bool udComponent::IsType(udString type) const
   return false;
 }
 
-const udPropertyDesc *udComponent::FindProperty(udString name) const
+const PropertyDesc *Component::FindProperty(udString name) const
 {
-  const udComponentDesc *pDesc = pType;
+  const ComponentDesc *pDesc = pType;
   while (pDesc)
   {
     for (auto &prop : pDesc->properties)
@@ -101,9 +102,9 @@ const udPropertyDesc *udComponent::FindProperty(udString name) const
   return nullptr;
 }
 
-void udComponent::SetProperty(udString property, const udVariant &value)
+void Component::SetProperty(udString property, const Variant &value)
 {
-  const udPropertyDesc *pDesc = FindProperty(property);
+  const PropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
     return; // TODO: make noise
   if (!pDesc->setter)
@@ -113,22 +114,22 @@ void udComponent::SetProperty(udString property, const udVariant &value)
   pDesc->setter.set(this, value);
 }
 
-udVariant udComponent::GetProperty(udString property) const
+Variant Component::GetProperty(udString property) const
 {
-  const udPropertyDesc *pDesc = FindProperty(property);
+  const PropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
-    return udVariant(); // TODO: make noise
+    return Variant(); // TODO: make noise
   if (!pDesc->getter)
-    return udVariant(); // TODO: make noise
+    return Variant(); // TODO: make noise
   return pDesc->getter.get(this);
 }
 
 
-udResult udComponent::ReceiveMessage(udString message, udString sender, const udVariant &data)
+udResult Component::ReceiveMessage(udString message, udString sender, const Variant &data)
 {
   if (message.eqi("set"))
   {
-    udSlice<udVariant> arr = data.asArray();
+    udSlice<Variant> arr = data.asArray();
     SetProperty(arr[0].asString(), arr[1]);
   }
   else if (message.eqi("get"))
@@ -145,7 +146,8 @@ udResult udComponent::ReceiveMessage(udString message, udString sender, const ud
   return udR_Success;
 }
 
-udResult udComponent::SendMessage(udString target, udString message, const udVariant &data)
+udResult Component::SendMessage(udString target, udString message, const Variant &data)
 {
   return pKernel->SendMessage(target, uid, message, data);
 }
+} // namespace udKernel

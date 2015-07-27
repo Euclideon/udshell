@@ -9,41 +9,44 @@
 #include "3rdparty\FastDelegate.h"
 using namespace fastdelegate;
 
+struct udRenderEngine;
+
+namespace udKernel
+{
 class LuaState;
 
-struct udRenderEngine;
 class udBlockStreamer;
-PROTOTYPE_COMPONENT(udView);
+PROTOTYPE_COMPONENT(View);
 
 // TODO: udMessageHandler returns void, should we return some error state??
-typedef FastDelegate3<udString , udString , const udVariant &, void> udMessageHandler;
+typedef FastDelegate3<udString , udString , const Variant &, void> udMessageHandler;
 
-class udKernel
+class Kernel
 {
-  friend class udComponent;
+  friend class Component;
 public:
-  static udResult Create(udKernel **ppInstance, udInitParams commandLine, int renderThreadCount = 0);
+  static udResult Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount = 0);
   udResult Destroy();
 
-  udResult SendMessage(udString target, udString sender, udString message, const udVariant &data);
+  udResult SendMessage(udString target, udString sender, udString message, const Variant &data);
 
   void RegisterMessageHandler(udRCString name, udMessageHandler messageHandler);
 
   // synchronisation
-  typedef FastDelegate1<udKernel*, void> MainThreadCallback;
+  typedef FastDelegate1<Kernel*, void> MainThreadCallback;
   void DispatchToMainThread(MainThreadCallback callback);
   void DispatchToMainThreadAndWait(MainThreadCallback callback);
 
   // component registry
-  udResult RegisterComponentType(const udComponentDesc *pDesc);
+  udResult RegisterComponentType(const ComponentDesc *pDesc);
 
-  udResult CreateComponent(udString typeId, udInitParams initParams, udComponentRef *pNewInstance);
-  udResult DestroyComponent(udComponentRef *pInstance);
+  udResult CreateComponent(udString typeId, InitParams initParams, ComponentRef *pNewInstance);
+  udResult DestroyComponent(ComponentRef *pInstance);
 
   template<typename T>
-  udSharedPtr<T> CreateComponent(udInitParams initParams = nullptr);
+  SharedPtr<T> CreateComponent(InitParams initParams = nullptr);
 
-  udComponentRef FindComponent(udString uid);
+  ComponentRef FindComponent(udString uid);
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
 
@@ -51,8 +54,8 @@ public:
   void Exec(udString code);
 
   // other functions
-  udViewRef GetFocusView() const { return spFocusView; }
-  udViewRef SetFocusView(udViewRef spView);
+  ViewRef GetFocusView() const { return spFocusView; }
+  ViewRef SetFocusView(ViewRef spView);
 
   udResult RunMainLoop();
   udResult Terminate();
@@ -60,7 +63,7 @@ public:
 protected:
   struct ComponentType
   {
-    const udComponentDesc *pDesc;
+    const ComponentDesc *pDesc;
     size_t createCount;
   };
   struct MessageHandler
@@ -79,7 +82,7 @@ protected:
   udRCString uid;
 
   udHashMap<ComponentType> componentRegistry;
-  udHashMap<udComponentRef> instanceRegistry;
+  udHashMap<ComponentRef> instanceRegistry;
   udHashMap<ForeignInstance> foreignInstanceRegistry;
   udHashMap<MessageHandler> messageHandlers;
 
@@ -87,9 +90,9 @@ protected:
 
   udRenderEngine *pRenderEngine = nullptr;
 
-  udViewRef spFocusView = nullptr;
+  ViewRef spFocusView = nullptr;
 
-  static udKernel *CreateInstanceInternal(udInitParams commandLine);
+  static Kernel *CreateInstanceInternal(InitParams commandLine);
   udResult InitInstanceInternal();
   udResult InitRenderInternal();
   udResult DestroyInstanceInternal();
@@ -98,19 +101,20 @@ protected:
   udResult InitRender();
   udResult DeinitRender();
 
-  udResult ReceiveMessage(udString sender, udString message, const udVariant &data);
+  udResult ReceiveMessage(udString sender, udString message, const Variant &data);
 
   int SendMessage(LuaState L);
 };
 
 template<typename T>
-udSharedPtr<T> udKernel::CreateComponent(udInitParams initParams)
+SharedPtr<T> Kernel::CreateComponent(InitParams initParams)
 {
-  udComponentRef c = nullptr;
+  ComponentRef c = nullptr;
   udResult r = CreateComponent(T::descriptor.id, initParams, &c);
   if (r != udR_Success)
     return nullptr;
   return static_pointer_cast<T>(c);
 }
 
+} //namespace udKernel
 #endif // UDKERNEL_H

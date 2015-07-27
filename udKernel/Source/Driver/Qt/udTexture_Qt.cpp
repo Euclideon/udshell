@@ -90,7 +90,7 @@ void udTexture_SetImageData(udTexture *pTex, int element, int level, void *pImag
 
   QOpenGLTexture *pQtTexture = pTex->pTexture;
 
-  // TODO: remove these checks once we are confident in udKernel and the Qt driver
+  // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pQtTexture, "QOpenGLTexture object has not been created");
   UDASSERT(pQtTexture->isCreated(), "GL Texture has not been created");
   UDASSERT(!pQtTexture->isStorageAllocated(), "Texture storage has already been allocated");

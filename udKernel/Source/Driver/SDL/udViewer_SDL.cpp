@@ -16,12 +16,13 @@ bool s_done = false;
 static int s_displayWidth, s_displayHeight;
 static int s_sdlEvent = -1;
 
-udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
+using namespace udKernel;
+Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
-  return new udKernel;
+  return new Kernel;
 }
 
-udResult udKernel::InitInstanceInternal()
+udResult Kernel::InitInstanceInternal()
 {
   s_displayWidth = 1280;
   s_displayHeight = 720;
@@ -37,12 +38,12 @@ udResult udKernel::InitInstanceInternal()
   return InitRenderInternal();
 }
 
-udResult udKernel::InitRenderInternal()
+udResult Kernel::InitRenderInternal()
 {
   return InitRender();
 }
 
-udResult udKernel::DestroyInstanceInternal()
+udResult Kernel::DestroyInstanceInternal()
 {
   // this
   SDL_GL_DeleteContext(s_context);
@@ -53,9 +54,9 @@ udResult udKernel::DestroyInstanceInternal()
   return udR_Success;
 }
 
-udViewRef udKernel::SetFocusView(udViewRef spView)
+ViewRef Kernel::SetFocusView(ViewRef spView)
 {
-  udViewRef spOld = spFocusView;
+  ViewRef spOld = spFocusView;
   spFocusView = spView;
   spFocusView->Resize(s_displayWidth, s_displayHeight);
   return spOld;
@@ -64,13 +65,13 @@ udViewRef udKernel::SetFocusView(udViewRef spView)
 
 struct DelegateWithSemaphore
 {
-  DelegateMemento m;
+  FastDelegateMemento m;
   udSemaphore *pSem;
 };
 
-void udKernel::DispatchToMainThread(MainThreadCallback callback)
+void Kernel::DispatchToMainThread(MainThreadCallback callback)
 {
-  DelegateMemento m = callback.GetMemento();
+  FastDelegateMemento m = callback.GetMemento();
   void **ppPtrs = (void**)&m;
 
   SDL_Event e;
@@ -81,7 +82,7 @@ void udKernel::DispatchToMainThread(MainThreadCallback callback)
   e.user.data2 = ppPtrs[1];
   SDL_PushEvent(&e);
 }
-void udKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   DelegateWithSemaphore dispatch;
   dispatch.m = callback.GetMemento();
@@ -98,7 +99,7 @@ void udKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   udDestroySemaphore(&dispatch.pSem);
 }
 
-udResult udKernel::RunMainLoop()
+udResult Kernel::RunMainLoop()
 {
   while (!s_done)
   {
@@ -109,7 +110,7 @@ udResult udKernel::RunMainLoop()
       {
         if (event.user.code == 0)
         {
-          DelegateMemento m;
+          FastDelegateMemento m;
           void **ppPtrs = (void**)&m;
           ppPtrs[0] = event.user.data1;
           ppPtrs[1] = event.user.data2;
@@ -162,7 +163,7 @@ udResult udKernel::RunMainLoop()
   return udR_Success;
 }
 
-udResult udKernel::Terminate()
+udResult Kernel::Terminate()
 {
   s_done = true;
   return udR_Success;

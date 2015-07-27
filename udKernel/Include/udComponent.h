@@ -14,31 +14,33 @@
 
 
 #define UD_COMPONENT(Name) \
-  static const udComponentDesc descriptor; \
-  typedef udSharedPtr<Name> Ref;
+  static const ComponentDesc descriptor; \
+  typedef SharedPtr<Name> Ref;
 
+namespace udKernel
+{
 
-class udComponent : public udRefCounted
+class Component : public RefCounted
 {
 public:
-  friend class udKernel;
-  UD_COMPONENT(udComponent);
+  friend class Kernel;
+  UD_COMPONENT(Component);
 
-  const udComponentDesc* const pType;
-  class udKernel* const pKernel;
+  const ComponentDesc* const pType;
+  class Kernel* const pKernel;
   const udRCString uid;
 
   bool IsType(udString type) const;
   template<typename T>
   bool IsType() const { return IsType(T::descriptor.id); }
 
-  const udPropertyDesc *FindProperty(udString name) const;
+  const PropertyDesc *FindProperty(udString name) const;
 
-  void SetProperty(udString property, const udVariant &value);
-  udVariant GetProperty(udString property) const;
+  void SetProperty(udString property, const Variant &value);
+  Variant GetProperty(udString property) const;
 
-  udResult SendMessage(udString target, udString message, const udVariant &data);
-  udResult SendMessage(udComponent *pComponent, udString message, const udVariant &data) { return SendMessage(pComponent->uid, message, data); }
+  udResult SendMessage(udString target, udString message, const Variant &data);
+  udResult SendMessage(Component *pComponent, udString message, const Variant &data) { return SendMessage(pComponent->uid, message, data); }
 
   // properties
   udString GetUid() const { return uid; }
@@ -47,30 +49,30 @@ public:
   udString GetDescription() const { return pType->description; }
 
 protected:
-  udComponent(const udComponentDesc *_pType, udKernel *_pKernel, udRCString _uid, udInitParams initParams)
+  Component(const ComponentDesc *_pType, Kernel *_pKernel, udRCString _uid, InitParams initParams)
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
-  virtual ~udComponent() {}
+  virtual ~Component() {}
 
-  virtual udResult ReceiveMessage(udString message, udString sender, const udVariant &data);
+  virtual udResult ReceiveMessage(udString message, udString sender, const Variant &data);
 
   template<typename... Args>
-  friend class udEvent;
-  udSubscriber subscriber;
+  friend class Event;
+  Subscriber subscriber;
 
 private:
-  void Init(udInitParams initParams);
+  void Init(InitParams initParams);
 
-  udComponent(const udComponent &) = delete;    // Still not sold on this
-  void operator=(const udComponent &) = delete;
+  Component(const Component &) = delete;    // Still not sold on this
+  void operator=(const Component &) = delete;
 };
 
 
 template<typename T>
-inline udSharedPtr<T> component_cast(udComponentRef pComponent)
+inline SharedPtr<T> component_cast(ComponentRef pComponent)
 {
   if (!pComponent)
     return nullptr;
-  const udComponentDesc *pDesc = pComponent->pType;
+  const ComponentDesc *pDesc = pComponent->pType;
   while (pDesc)
   {
     if (pDesc->id.eq(T::descriptor.id))
@@ -82,9 +84,9 @@ inline udSharedPtr<T> component_cast(udComponentRef pComponent)
 
 
 // HACK: this is here because forward referencing!
-// udSharedPtr<udComponent> (and derived types)
-template<typename T, typename std::enable_if<std::is_base_of<udComponent, T>::value>::type* = nullptr> // O_O
-inline void udFromVariant(const udVariant &v, udSharedPtr<T> *pR)
+// SharedPtr<Component> (and derived types)
+template<typename T, typename std::enable_if<std::is_base_of<Component, T>::value>::type* = nullptr> // O_O
+inline void udFromVariant(const Variant &v, SharedPtr<T> *pR)
 {
   *pR = component_cast<T>(v.asComponent());
 }
@@ -93,15 +95,17 @@ inline void udFromVariant(const udVariant &v, udSharedPtr<T> *pR)
 // HACK: this here because forward referencing! >_<
 template<typename... Args>
 template <typename X>
-void udEvent<Args...>::Subscribe(udComponent *pC, void(X::*func)(Args...))
+void Event<Args...>::Subscribe(Component *pC, void(X::*func)(Args...))
 {
   pC->subscriber.Subscribe(*this, Delegate((X*)pC, func));
 }
 template<typename... Args>
 template <typename X>
-void udEvent<Args...>::Unsubscribe(udComponent *pC, void(X::*func)(Args...))
+void Event<Args...>::Unsubscribe(Component *pC, void(X::*func)(Args...))
 {
   pC->subscriber.Unsubscribe(*this, Delegate((X*)pC, func));
 }
+
+} // namespace udKernel
 
 #endif // UDCOMPONENT_H

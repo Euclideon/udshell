@@ -1,87 +1,89 @@
 #include "udNode.h"
 
+namespace udKernel
+{
 
-static const udPropertyDesc props[] =
+static const PropertyDesc props[] =
 {
   {
     "matrix", // id
     "Matrix", // displayName
     "Local matrix", // description
-    &udNode::GetMatrix, // getter
-    &udNode::SetMatrix, // setter
-    udTypeDesc(udPropertyType::Float, 16) // type
+    &Node::GetMatrix, // getter
+    &Node::SetMatrix, // setter
+    TypeDesc(PropertyType::Float, 16) // type
   },
   {
     "position", // id
     "Position", // displayName
     "Local position", // description
-    &udNode::GetPosition, // getter
-    &udNode::SetPosition, // setter
-    udTypeDesc(udPropertyType::Float, 3) // type
+    &Node::GetPosition, // getter
+    &Node::SetPosition, // setter
+    TypeDesc(PropertyType::Float, 3) // type
   },
   {
     "parent", // id
     "Parent", // displayName
     "Parent node", // description
-    &udNode::GetPosition, // getter
-    &udNode::SetPosition, // setter
-    udTypeDesc(udPropertyType::Component) // type
+    &Node::GetPosition, // getter
+    &Node::SetPosition, // setter
+    TypeDesc(PropertyType::Component) // type
   },
   {
     "children", // id
     "Children", // displayName
     "Child nodes", // description
-    &udNode::GetPosition, // getter
-    &udNode::SetPosition, // setter
-    udTypeDesc(udPropertyType::Component, ~0U) // type
+    &Node::GetPosition, // getter
+    &Node::SetPosition, // setter
+    TypeDesc(PropertyType::Component, ~0U) // type
   },
 };
-const udComponentDesc udNode::descriptor =
+const ComponentDesc Node::descriptor =
 {
-  &udComponent::descriptor, // pSuperDesc
+  &Component::descriptor, // pSuperDesc
 
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "node",      // id
-  "udNode",    // displayName
+  "Node",    // displayName
   "Is a scene node", // description
 
   [](){ return udR_Success; },             // pInit
-  udNode::Create, // pCreateInstance
+  Node::Create, // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
-udResult udNode::Render(udRenderSceneRef &spScene, const udDouble4x4 &mat)
+udResult Node::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
 {
-  for (udNodeRef &n : children)
+  for (NodeRef &n : children)
     n->Render(spScene, mat * n->matrix);
   return udR_Success;
 }
 
-void udNode::AddChild(udNodeRef c)
+void Node::AddChild(NodeRef c)
 {
   children.concat(c);
 }
 
-void udNode::RemoveChild(udNodeRef c)
+void Node::RemoveChild(NodeRef c)
 {
   children.remove(c);
   c->pParent = nullptr;
 }
 
-void udNode::Detach()
+void Node::Detach()
 {
   if (pParent)
-    pParent->RemoveChild(udNodeRef(this));
+    pParent->RemoveChild(NodeRef(this));
 }
 
-void udNode::CalculateWorldMatrix(udDouble4x4 *pMatrix) const
+void Node::CalculateWorldMatrix(udDouble4x4 *pMatrix) const
 {
   if (pMatrix)
   {
-    udNodeRef spParent = Parent();
+    NodeRef spParent = Parent();
     if (spParent)
     {
       udDouble4x4 parentMatrix;
@@ -93,3 +95,5 @@ void udNode::CalculateWorldMatrix(udDouble4x4 *pMatrix) const
       *pMatrix = matrix;
   }
 }
+
+} // namespace udKernel

@@ -1,14 +1,15 @@
-
+namespace udKernel
+{
 inline lua_State *LuaState::state()
 {
   return L;
 }
 
-inline udKernel *LuaState::kernel()
+inline Kernel *LuaState::kernel()
 {
   void *pUD;
   lua_getallocf(L, &pUD);
-  return (udKernel*)pUD;
+  return (Kernel*)pUD;
 }
 
 inline int LuaState::top()
@@ -140,7 +141,8 @@ inline void LuaState::pushLightUserData(void *val)
   else
     lua_pushlightuserdata(L, val);
 }
-inline void LuaState::push(const udVariant &v)
+inline void LuaState::push(const Variant &v)
 {
   v.luaPush(*this);
 }
+} // namespace udKernel

@@ -8,21 +8,23 @@
 using fastdelegate::FastDelegate;
 typedef fastdelegate::DelegateMemento FastDelegateMemento;
 
+namespace udKernel
+{
 
-class udDelegateMemento : public udRefCounted
+class DelegateMemento : public RefCounted
 {
 protected:
   template<typename Signature>
   friend class udDelegate;
   template<typename T>
-  friend class udSharedPtr;
+  friend class SharedPtr;
 
-  udDelegateMemento() {}
-  udDelegateMemento(FastDelegateMemento m) : m(m) {}
+  DelegateMemento() {}
+  DelegateMemento(FastDelegateMemento m) : m(m) {}
 
   FastDelegateMemento m;
 };
-typedef udSharedPtr<udDelegateMemento> udDelegateMementoRef;
+typedef SharedPtr<DelegateMemento> DelegateMementoRef;
 
 
 // facilitate using the function template syntax
@@ -43,9 +45,9 @@ public:
   }
   udDelegate(const udDelegate<R(Args...)> &d)   : m(d.m) {}
 
-  udDelegate(udSharedPtr<udDelegateMemento> m)  : m(m) {}
+  udDelegate(SharedPtr<DelegateMemento> m)  : m(m) {}
 
-  udDelegate(FastDelegate<R(Args...)> d)        : m(udDelegateMementoRef::create(d.GetMemento())) {}
+  udDelegate(FastDelegate<R(Args...)> d)        : m(DelegateMementoRef::create(d.GetMemento())) {}
   template <class X, class Y>
   udDelegate(Y *i, R(X::*f)(Args...))           : udDelegate(Delegate(i, f)) {}
   template <class X, class Y>
@@ -59,15 +61,15 @@ public:
     return d(args...);
   }
 
-  void SetMemento(udDelegateMementoRef m) { this->m = m; }
-  udDelegateMementoRef GetMemento() const { return m; }
+  void SetMemento(DelegateMementoRef m) { this->m = m; }
+  DelegateMementoRef GetMemento() const { return m; }
 
 protected:
   typedef FastDelegate<R(Args...)> Delegate;
 
-  udDelegateMementoRef m = nullptr;
+  DelegateMementoRef m = nullptr;
 };
-
+}
 
 #include "udDelegate.inl"
 

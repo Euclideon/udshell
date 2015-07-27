@@ -1,10 +1,13 @@
 
 #include "udHelpers.h"
 
-udRCSlice<udKeyValuePair> udParseCommandLine(const char *pCommandLine)
+namespace udKernel
 {
-  udFixedSlice<udKeyValuePair, 64> output;
-  output.concat(udKeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
+
+udRCSlice<KeyValuePair> udParseCommandLine(const char *pCommandLine)
+{
+  udFixedSlice<KeyValuePair, 64> output;
+  output.concat(KeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
@@ -22,32 +25,34 @@ udRCSlice<udKeyValuePair> udParseCommandLine(const char *pCommandLine)
       ++i;
     }
     if (i > start)
-      output.pushBack(udKeyValuePair(nullptr, udString(pCommandLine + start, i - start)));
+      output.pushBack(KeyValuePair(nullptr, udString(pCommandLine + start, i - start)));
   }
 
-  return udRCSlice<udKeyValuePair>(output);
+  return udRCSlice<KeyValuePair>(output);
 }
 
-udRCSlice<udKeyValuePair> udParseCommandLine(int argc, char *argv[])
+udRCSlice<KeyValuePair> udParseCommandLine(int argc, char *argv[])
 {
-  udFixedSlice<udKeyValuePair, 64> output;
+  udFixedSlice<KeyValuePair, 64> output;
   output.reserve(argc);
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
   for (int i = 0; i < argc; ++i)
-    output.pushBack(udKeyValuePair(nullptr, udString(argv[i])));
+    output.pushBack(KeyValuePair(nullptr, udString(argv[i])));
 
-  return udRCSlice<udKeyValuePair>(output.slice(0, argc));
+  return udRCSlice<KeyValuePair>(output.slice(0, argc));
 }
 
-udRCSlice<udKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
+udRCSlice<KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
 {
-  udFixedSlice<udKeyValuePair, 64> output;
+  udFixedSlice<KeyValuePair, 64> output;
   output.reserve(argc);
 
   for (uint32_t i = 0; i < argc; ++i)
-    output.pushBack(udKeyValuePair(udString(argn[i]), udString(argv[i])));
+    output.pushBack(KeyValuePair(udString(argn[i]), udString(argv[i])));
 
-  return udRCSlice<udKeyValuePair>(output.slice(0, argc));
+  return udRCSlice<KeyValuePair>(output.slice(0, argc));
 }
+
+} // namespace udKernel

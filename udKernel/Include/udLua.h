@@ -5,6 +5,8 @@
 
 #include "lua.hpp"
 
+namespace udKernel
+{
 
 enum class LuaType : int
 {
@@ -32,11 +34,11 @@ enum class LuaLocation : int
 class LuaState
 {
 public:
-  LuaState(udKernel *pKernel);
+  LuaState(Kernel *pKernel);
   ~LuaState();
 
   lua_State *state();
-  udKernel *kernel();
+  Kernel *kernel();
 
   void exec(udString code);
 
@@ -56,10 +58,10 @@ public:
   void pushString(udString val);
   void pushLightUserData(void *val);
 
-  void pushComponent(udComponentRef c);
-  void pushDelegate(const udVariant::Delegate &d);
+  void pushComponent(ComponentRef c);
+  void pushDelegate(const Variant::Delegate &d);
 
-  void push(const udVariant &v);
+  void push(const Variant &v);
 
   // pop***
   void pop(int count = 1);
@@ -78,16 +80,16 @@ public:
   lua_CFunction toFunction(int idx = -1);
   void* toUserData(int idx = -1);
 
-  udComponentRef toComponent(int idx = -1);
-  udVariant::Delegate toDelegate(int idx = -1);
+  ComponentRef toComponent(int idx = -1);
+  Variant::Delegate toDelegate(int idx = -1);
 
-  udVariant get(int idx = -1);
+  Variant get(int idx = -1);
 
   // set
-  void setNil(udVariant key, LuaLocation loc = LuaLocation::Global);
-  void setComponent(udComponentRef c, udVariant key, LuaLocation loc = LuaLocation::Global);
+  void setNil(Variant key, LuaLocation loc = LuaLocation::Global);
+  void setComponent(ComponentRef c, Variant key, LuaLocation loc = LuaLocation::Global);
 
-  void set(udVariant v, udVariant key, LuaLocation loc = LuaLocation::Global);
+  void set(Variant v, Variant key, LuaLocation loc = LuaLocation::Global);
 
 private:
   lua_State *L;
@@ -95,10 +97,10 @@ private:
   static int udLuaPanic(lua_State *L);
   static void* udLuaAlloc(void *, void *ptr, size_t, size_t nsize);
 
-  void pushComponentMetatable(const udComponentDesc &desc);
-  void pushDescriptor(const udComponentDesc &desc);
-  void pushGetters(const udComponentDesc &desc);
-  void pushSetters(const udComponentDesc &desc);
+  void pushComponentMetatable(const ComponentDesc &desc);
+  void pushDescriptor(const ComponentDesc &desc);
+  void pushGetters(const ComponentDesc &desc);
+  void pushSetters(const ComponentDesc &desc);
   static int componentCleaner(lua_State* L);
   static int componentToString(lua_State* L);
   static int componentCompare(lua_State* L);
@@ -114,7 +116,7 @@ private:
 
   void pushEventMetatable();
   void pushEventMembers();
-  void pushEvent(const udComponentRef &c, udEventDesc &desc);
+  void pushEvent(const ComponentRef &c, EventDesc &desc);
   static int eventCleaner(lua_State* L);
   static int subscribe(lua_State* L);
 };
@@ -168,6 +170,9 @@ public:
   }
 };
 
+} // namespace udKernel
+
 #include "udLua.inl"
 
 #endif
+

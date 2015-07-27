@@ -7,8 +7,13 @@
 #include "udMath.h"
 #include "udComponent.h"
 
+namespace udKernel
+{
+class View;
+class Scene;
+}
 
-udResult udViewer_RunMainLoop(class udView *pView, class udScene *pScene);
+udResult udViewer_RunMainLoop(udKernel::View *pView, udKernel::Scene *pScene);
 udResult udViewer_Quit();
 
 #endif // UDVIEWER_H

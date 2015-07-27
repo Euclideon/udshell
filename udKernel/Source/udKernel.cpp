@@ -12,10 +12,12 @@
 
 #include "udLua.h"
 
-udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int renderThreadCount)
+namespace udKernel
+{
+udResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount)
 {
   udResult result;
-  udKernel *pKernel = CreateInstanceInternal(commandLine);
+  Kernel *pKernel = CreateInstanceInternal(commandLine);
   const int streamerBuffer = 550*1048576; // TODO : make this an optional command string input
 
   UD_ERROR_NULL(pKernel, udR_Failure_);
@@ -33,13 +35,13 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
   }
 
   // register all the builtin component types
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udComponent::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udView::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udScene::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udNode::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udUDNode::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udCamera::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udSimpleCamera::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&Component::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&View::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&Scene::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&Node::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&UDNode::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&Camera::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&SimpleCamera::descriptor));
   //...
 
   // init the HAL
@@ -62,7 +64,7 @@ epilogue:
   return result;
 }
 
-udResult udKernel::Destroy()
+udResult Kernel::Destroy()
 {
   udResult result;
 
@@ -86,7 +88,7 @@ epilogue:
   return result;
 }
 
-udResult udKernel::SendMessage(udString target, udString sender, udString message, const udVariant &data)
+udResult Kernel::SendMessage(udString target, udString sender, udString message, const Variant &data)
 {
   if (target.empty())
     return udR_Failure_; // TODO: no target!!
@@ -95,7 +97,7 @@ udResult udKernel::SendMessage(udString target, udString sender, udString messag
   if (targetType == '@')
   {
     // component message
-    udComponentRef *pComponent = instanceRegistry.Get(target.hash());
+    ComponentRef *pComponent = instanceRegistry.Get(target.hash());
     if (pComponent)
     {
       return (*pComponent)->ReceiveMessage(message, sender, data);
@@ -138,13 +140,13 @@ udResult udKernel::SendMessage(udString target, udString sender, udString messag
   return udR_Failure_; // TODO: error, invalid target!
 }
 
-udResult udKernel::ReceiveMessage(udString sender, udString message, const udVariant &data)
+udResult Kernel::ReceiveMessage(udString sender, udString message, const Variant &data)
 {
 
   return udR_Success;
 }
 
-void udKernel::RegisterMessageHandler(udRCString name, udMessageHandler messageHandler)
+void Kernel::RegisterMessageHandler(udRCString name, udMessageHandler messageHandler)
 {
   MessageHandler handler;
   handler.name = name;
@@ -152,7 +154,7 @@ void udKernel::RegisterMessageHandler(udRCString name, udMessageHandler messageH
   messageHandlers.Add(name.hash(), handler);
 }
 
-udResult udKernel::RegisterComponentType(const udComponentDesc *pDesc)
+udResult Kernel::RegisterComponentType(const ComponentDesc *pDesc)
 {
   if (pDesc->id.canFind('@') || pDesc->id.canFind('$') || pDesc->id.canFind('#'))
   {
@@ -165,7 +167,7 @@ udResult udKernel::RegisterComponentType(const udComponentDesc *pDesc)
   return udR_Success;
 }
 
-udResult udKernel::CreateComponent(udString typeId, udInitParams initParams, udComponentRef *pNewInstance)
+udResult Kernel::CreateComponent(udString typeId, InitParams initParams, ComponentRef *pNewInstance)
 {
   ComponentType *pType = componentRegistry.Get(typeId.hash());
   if (!pType)
@@ -173,12 +175,12 @@ udResult udKernel::CreateComponent(udString typeId, udInitParams initParams, udC
 
   try
   {
-    const udComponentDesc *pDesc = pType->pDesc;
+    const ComponentDesc *pDesc = pType->pDesc;
 
     // TODO: should we have a better uid generator than this?
     udFixedString64 uid = udFixedString64::format("%s%d", pDesc->id.ptr, pType->createCount++);
 
-    udComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
+    ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
     spComponent->Init(initParams);
 
     if (!spComponent)
@@ -204,7 +206,7 @@ udResult udKernel::CreateComponent(udString typeId, udInitParams initParams, udC
   }
 }
 
-udResult udKernel::DestroyComponent(udComponentRef *pInstance)
+udResult Kernel::DestroyComponent(ComponentRef *pInstance)
 {
   pLua->setNil(udString((*pInstance)->uid));
 
@@ -219,17 +221,17 @@ udResult udKernel::DestroyComponent(udComponentRef *pInstance)
   return udR_Success;
 }
 
-udComponentRef udKernel::FindComponent(udString uid)
+ComponentRef Kernel::FindComponent(udString uid)
 {
   if (uid.empty() || uid[0] == '$' || uid[0] == '#')
     return nullptr;
   if (uid[0] == '@')
     uid.popFront();
-  udComponentRef *pComponent = instanceRegistry.Get(uid.toStringz());
+  ComponentRef *pComponent = instanceRegistry.Get(uid.toStringz());
   return pComponent ? *pComponent : nullptr;
 }
 
-udResult udKernel::InitComponents()
+udResult Kernel::InitComponents()
 {
   udResult r = udR_Success;
   for (auto i : componentRegistry)
@@ -244,24 +246,28 @@ udResult udKernel::InitComponents()
   return r;
 }
 
-udResult udKernel::InitRender()
+void udRenderScene_InitRender();
+
+udResult Kernel::InitRender()
 {
   udHAL_InitRender();
 
-  void udRenderScene_InitRender();
   udRenderScene_InitRender();
 
   return udR_Success;
 }
 
-udResult udKernel::DeinitRender()
+udResult Kernel::DeinitRender()
 {
   udHAL_DeinitRender();
 
   return udR_Success;
 }
 
-void udKernel::Exec(udString code)
+void Kernel::Exec(udString code)
 {
   pLua->exec(code);
 }
+
+} // namespace udKernel
+

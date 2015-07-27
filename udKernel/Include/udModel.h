@@ -8,25 +8,30 @@
 #include "udSharedPtr.h"
 #include "udString.h"
 
-SHARED_CLASS(udSharedUDModel);
+namespace udKernel
+{
 
-class udSharedUDModel : public udRefCounted
+SHARED_CLASS(SharedUDModel);
+
+class SharedUDModel : public RefCounted
 {
 public:
-  static udSharedUDModelRef Create(udString name, bool useStreamer);
+  static SharedUDModelRef Create(udString name, bool useStreamer);
 
   udOctree *GetOctreePtr() const { return pOctree; }
 
 protected:
   template<typename T>
-  friend class udSharedPtr;
+  friend class SharedPtr;
 
-  virtual ~udSharedUDModel();
+  virtual ~SharedUDModel();
 
 private:
-  udSharedUDModel() {}
+  SharedUDModel() {}
 
   udOctree *pOctree;
 };
+
+} // namespace udKernel
 
 #endif // UDMODEL_H

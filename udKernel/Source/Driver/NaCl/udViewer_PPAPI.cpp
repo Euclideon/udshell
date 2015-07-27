@@ -39,7 +39,7 @@ public:
 
 udPepperModule *udPepperModule::gpModule = nullptr;
 
-class udNewPepperInstance : public pp::Instance, public udKernel
+class udNewPepperInstance : public pp::Instance, public Kernel
 {
 public:
   explicit udNewPepperInstance(PP_Instance instance);
@@ -66,20 +66,20 @@ public:
 
   static void DebugPrintfCallback(const char *pString);
   static UDTHREADLOCAL udNewPepperInstance *pThreadLocalInstance;
-  void SendToJsCallback(udString senderUID, udString message, const udVariant &data);
+  void SendToJsCallback(udString senderUID, udString message, const Variant &data);
 };
 
 UDTHREADLOCAL udNewPepperInstance* udNewPepperInstance::pThreadLocalInstance = NULL; // This can't be nullptr it creates a compile error.
 
 
 // ---------------------------------------------------------------------------------------
-udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
   return udNewPepperInstance::pThreadLocalInstance;
 }
 
 // ---------------------------------------------------------------------------------------
-void udNewPepperInstance::SendToJsCallback(udString sender, udString message, const udVariant &data)
+void udNewPepperInstance::SendToJsCallback(udString sender, udString message, const Variant &data)
 {
   // TODO: Need to wrangle this to include the sender
   udRCString s = data.stringify();
@@ -87,27 +87,27 @@ void udNewPepperInstance::SendToJsCallback(udString sender, udString message, co
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udKernel::InitInstanceInternal()
+udResult Kernel::InitInstanceInternal()
 {
   RegisterMessageHandler("js", MakeDelegate((udNewPepperInstance*)this, &udNewPepperInstance::SendToJsCallback));
   return udR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udKernel::DestroyInstanceInternal()
+udResult Kernel::DestroyInstanceInternal()
 {
   return udR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-udViewRef udKernel::SetFocusView(udViewRef spView)
+ViewRef Kernel::SetFocusView(ViewRef spView)
 {
-  udViewRef spOld = spFocusView;
+  ViewRef spOld = spFocusView;
   spFocusView = spView;
   return spOld;
 }
 
-udResult udKernel::RunMainLoop()
+udResult Kernel::RunMainLoop()
 {
 //  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
 //
@@ -120,7 +120,7 @@ udResult udKernel::RunMainLoop()
   return udR_Success;
 }
 
-udResult udKernel::Terminate()
+udResult Kernel::Terminate()
 {
 //  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
 //
@@ -213,7 +213,7 @@ void udNewPepperInstance::DidChangeView(const pp::View& view)
     udUnused(result); // Correctly handle this
     glViewport(0, 0, width, height);
 
-    udViewRef spView = GetFocusView();
+    ViewRef spView = GetFocusView();
     if (spView )
       spView->Resize(width, height);
   }
@@ -255,7 +255,7 @@ void udNewPepperInstance::PostMessageToJS(const char *pPrefix, const char* pForm
 // ---------------------------------------------------------------------------------------
 void udNewPepperInstance::RenderFrame(int32_t)
 {
-  udViewRef spView = GetFocusView();
+  ViewRef spView = GetFocusView();
 
   if (spView)
     spView->Render();
@@ -272,7 +272,7 @@ static inline int32_t MapPPKeyToUDKey(int32_t )
 // ---------------------------------------------------------------------------------------
 bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
 {
-  udViewRef spView = GetFocusView();
+  ViewRef spView = GetFocusView();
   if (!spView)
     return false;
 

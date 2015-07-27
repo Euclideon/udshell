@@ -2,7 +2,10 @@
 #include "udOctree.h"
 #include "udRenderScene.h"
 
-static const udSlice<const udEnumKVP> renderFlags =
+namespace udKernel
+{
+
+static const udSlice<const EnumKVP> renderFlags =
 {
   { "udRenderFlags::None",             udRF_None },
   { "udRenderFlags::NoOrtho",          udRF_NoOrtho },
@@ -19,59 +22,59 @@ static const udSlice<const udEnumKVP> renderFlags =
   { "udRenderFlags::Transparent",      udRF_Transparent }
 };
 
-static const udPropertyDesc props[] =
+static const PropertyDesc props[] =
 {
   {
     "startingroot", // id
     "Starting Root", // displayName
     "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", // description
-    &udUDNode::GetStartingRoot,
-    &udUDNode::SetStartingRoot,
-    udTypeDesc(udPropertyType::Integer)
+    &UDNode::GetStartingRoot,
+    &UDNode::SetStartingRoot,
+    TypeDesc(PropertyType::Integer)
   },
 
   {
     "rendercliparea", // id
     "Render Clip Area", // displayName
     "Clipping Area of the Screen", // description
-    &udUDNode::GetRenderClipArea,
-    &udUDNode::SetRenderClipArea,
-    udTypeDesc(udPropertyType::Struct)
+    &UDNode::GetRenderClipArea,
+    &UDNode::SetRenderClipArea,
+    TypeDesc(PropertyType::Struct)
   },
 
   {
     "renderflags", // id
     "Render Flags", // displayName
     "UD Rendering Flags", // description
-    &udUDNode::GetRenderFlags,
-    &udUDNode::SetRenderFlags,
-    udTypeDesc(udPropertyType::Flags, 0, renderFlags)
+    &UDNode::GetRenderFlags,
+    &UDNode::SetRenderFlags,
+    TypeDesc(PropertyType::Flags, 0, renderFlags)
   },
   {
     "datasource", // id
     "udModel Data Source", // displayName
     "Data Source for UD Model", // description
-    &udUDNode::GetSource,
+    &UDNode::GetSource,
     nullptr,
-    udTypeDesc(udPropertyType::String)
+    TypeDesc(PropertyType::String)
   },
 
   {
     "udscale", // id
     "UD Scale", // displayName
     "Internal Scale of the Model", // description
-    &udUDNode::GetUDScale,
+    &UDNode::GetUDScale,
     nullptr,
-    udTypeDesc(udPropertyType::Float)
+    TypeDesc(PropertyType::Float)
   },
 
   {
     "getboundingvolume", // id
     "Get Bounding Volume", // displayName
     "Get the Bouning Volume", // description
-    &udUDNode::GetBoundingVolume,
+    &UDNode::GetBoundingVolume,
     nullptr,
-    udTypeDesc(udPropertyType::Struct)
+    TypeDesc(PropertyType::Struct)
   },
 
 
@@ -80,70 +83,70 @@ static const udPropertyDesc props[] =
     "VoxelShader", // id
     "Voxel Shader", // displayName
     "Optional callback to handle it's own internal call to GetNodeColor()", // description
-    udPropertyType::Function, // type
+    PropertyType::Function, // type
     0, // arrayLength
     0, // flags
     udPropertyDisplayType::Default, // displayType
-    nullptr, //udGetter(&udUDNode::GetVoxelShader),
-    udSetter(&udUDNode::SetVoxelShader)
+    nullptr, //Getter(&UDNode::GetVoxelShader),
+    Setter(&UDNode::SetVoxelShader)
   },
   {
     "PixelShader", // id
     "Pixel Shader", // displayName
     "Optional callback to handle writing pixels and depth", // description
-    udPropertyType::Function, // type
+    PropertyType::Function, // type
     0, // arrayLength
     0, // flags
     udPropertyDisplayType::Default, // displayType
-    nullptr, //udGetter(&udUDNode::GetVoxelShader),
-    udSetter(&udUDNode::SetVoxelShader)
+    nullptr, //Getter(&UDNode::GetVoxelShader),
+    Setter(&UDNode::SetVoxelShader)
 }
 
 #endif
 };
 
-static const udMethodDesc methods[] =
+static const MethodDesc methods[] =
 {
   {
     "load",
     "Load",
     "Load the UD Model",
-    udMethod(&udUDNode::Load),
-    udTypeDesc(udPropertyType::Integer), // result
+    Method(&UDNode::Load),
+    TypeDesc(PropertyType::Integer), // result
     {
-      udTypeDesc(udPropertyType::String),
-      udTypeDesc(udPropertyType::Boolean)
+      TypeDesc(PropertyType::String),
+      TypeDesc(PropertyType::Boolean)
     }
   }
 };
 
 
-const udComponentDesc udUDNode::descriptor =
+const ComponentDesc UDNode::descriptor =
 {
-  &udNode::descriptor, // pSuperDesc
+  &Node::descriptor, // pSuperDesc
 
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "udnode",    // id
-  "udNode",  // displayName
+  "Node",  // displayName
   "Is a udModel Node", // description
 
   [](){ return udR_Success; },             // pInit
-  udUDNode::Create, // pCreateInstance
+  UDNode::Create, // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  udSlice<const udMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  udSlice<const MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 
-int udUDNode::Load(udString name, bool useStreamer)
+int UDNode::Load(udString name, bool useStreamer)
 {
   udResult result = udR_Failure_;
 
   if (source.empty())
   {
-    spModel = udSharedUDModel::Create(name, useStreamer);
+    spModel = SharedUDModel::Create(name, useStreamer);
     if (!spModel)
     {
       result = udR_Failure_; // TODO : Put better error code
@@ -159,9 +162,9 @@ epilogue:
 }
 
 
-udResult udUDNode::Render(udRenderSceneRef &spScene, const udDouble4x4 &mat)
+udResult UDNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
 {
-  udUDJob &job = spScene->ud.pushBack();
+  UDJob &job = spScene->ud.pushBack();
   memset(&job, 0, sizeof(job));
 
   job.matrix = udMul(mat, udMat);
@@ -182,9 +185,9 @@ udResult udUDNode::Render(udRenderSceneRef &spScene, const udDouble4x4 &mat)
 }
 
 
-udBoundingVolume udUDNode::GetBoundingVolume() const
+BoundingVolume UDNode::GetBoundingVolume() const
 {
-  udBoundingVolume vol;
+  BoundingVolume vol;
 
   UDASSERT(udMat.a[0] == udMat.a[5] && udMat.a[0] == udMat.a[10], "NonUniform Scale");
 
@@ -202,3 +205,5 @@ udBoundingVolume udUDNode::GetBoundingVolume() const
 
   return vol;
 }
+
+} // namespace udKernel

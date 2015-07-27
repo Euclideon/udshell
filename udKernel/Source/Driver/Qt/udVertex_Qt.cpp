@@ -85,7 +85,7 @@ void udVertex_DestroyVertexBuffer(udVertexBuffer **ppVB)
 // ***************************************************************************************
 void udVertex_SetVertexBufferData(udVertexBuffer *pVB, void *pVertexData, size_t bufferLen)
 {
-  // TODO: remove these checks once we are confident in udKernel and the Qt driver
+  // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pVB->pVB != nullptr, "Qt Vertex buffer doesn't exist");
 
   pVB->pVB->bind();

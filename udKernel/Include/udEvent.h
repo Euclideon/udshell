@@ -6,36 +6,37 @@
 #include "udSlice.h"
 
 using fastdelegate::FastDelegate;
-using fastdelegate::DelegateMemento;
 
-class udComponent;
-typedef udSharedPtr<udComponent> udComponentRef;
-class udSubscriber;
+namespace udKernel
+{
+class Component;
+typedef SharedPtr<Component> ComponentRef;
+class Subscriber;
 
-class udBaseEvent
+class BaseEvent
 {
 public:
-  ~udBaseEvent();
+  ~BaseEvent();
 
 protected:
-  friend class udSubscriber;
+  friend class Subscriber;
 
-  void AddSubscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber = nullptr);
-  void RemoveSubscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber = nullptr);
+  void AddSubscription(const DelegateMementoRef &spM, Subscriber *pSubscriber = nullptr);
+  void RemoveSubscription(const DelegateMementoRef &spM, Subscriber *pSubscriber = nullptr);
 
   struct Subscription
   {
-    Subscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber = nullptr)
+    Subscription(const DelegateMementoRef &spM, Subscriber *pSubscriber = nullptr)
       : spM(spM), pSubscriber(pSubscriber) {}
 
-    udDelegateMementoRef spM;
-    udSubscriber *pSubscriber;
+    DelegateMementoRef spM;
+    Subscriber *pSubscriber;
   };
   udFixedSlice<Subscription, 3> subscribers;
 };
 
 template<typename... Args>
-class udEvent : public udBaseEvent
+class Event : public BaseEvent
 {
 public:
   typedef udDelegate<void(Args...)> Delegate;
@@ -45,30 +46,30 @@ public:
   {
     AddSubscription(callback.GetMemento());
   }
-  void Subscribe(const udEvent<Args...> &ev)
+  void Subscribe(const Event<Args...> &ev)
   {
     Subscribe(ev.GetDelegate());
   }
 
   template <typename X>
-  void Subscribe(udComponent *pC, void(X::*func)(Args...));
+  void Subscribe(Component *pC, void(X::*func)(Args...));
   template <typename X>
-  void Subscribe(udComponentRef c, void(X::*func)(Args...)) { Subscribe(c.ptr(), func); }
+  void Subscribe(ComponentRef c, void(X::*func)(Args...)) { Subscribe(c.ptr(), func); }
 
   // unsubscribe
   void Unsubscribe(Delegate callback)
   {
     RemoveSubscription(callback.GetMemento());
   }
-  void Unsubscribe(const udEvent<Args...> &ev)
+  void Unsubscribe(const Event<Args...> &ev)
   {
     Unsubscribe(ev.GetDelegate());
   }
 
   template <typename X>
-  void Unsubscribe(udComponent *pC, void(X::*func)(Args...));
+  void Unsubscribe(Component *pC, void(X::*func)(Args...));
   template <typename X>
-  void Unsubscribe(udComponentRef c, void(X::*func)(Args...))
+  void Unsubscribe(ComponentRef c, void(X::*func)(Args...))
   {
     Unsubscribe(c.ptr(), func);
   }
@@ -92,35 +93,36 @@ public:
 };
 
 
-class udSubscriber
+class Subscriber
 {
 public:
-  ~udSubscriber();
+  ~Subscriber();
 
   template<typename... Args>
-  void Subscribe(udEvent<Args...> &ev, typename udEvent<Args...>::Delegate d);
+  void Subscribe(Event<Args...> &ev, typename Event<Args...>::Delegate d);
 
   template<typename... Args>
-  void Unsubscribe(udEvent<Args...> &ev, typename udEvent<Args...>::Delegate d);
+  void Unsubscribe(Event<Args...> &ev, typename Event<Args...>::Delegate d);
 
 protected:
-  void RemoveSubscription(const udDelegateMementoRef &spM, udBaseEvent *pEvent);
+  void RemoveSubscription(const DelegateMementoRef &spM, BaseEvent *pEvent);
 
 private:
-  friend class udBaseEvent;
+  friend class BaseEvent;
 
   struct Subscription
   {
-    Subscription(const udDelegateMementoRef &spM, udBaseEvent *pEvent)
+    Subscription(const DelegateMementoRef &spM, BaseEvent *pEvent)
       : spM(spM), pEvent(pEvent) {}
 
-    udDelegateMementoRef spM;
-    udBaseEvent *pEvent;
+    DelegateMementoRef spM;
+    BaseEvent *pEvent;
   };
 
   udFixedSlice<Subscription, 3> events;
 };
 
+} // namespace udKernel
 
 #include "udEvent.inl"
 

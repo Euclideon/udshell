@@ -5,14 +5,17 @@
 #include "udString.h"
 #include "udDelegate.h"
 
-SHARED_CLASS(udComponent);
-struct udKeyValuePair;
+namespace udKernel
+{
+
+SHARED_CLASS(Component);
+struct KeyValuePair;
 class LuaState;
 
-struct udVariant
+struct Variant
 {
 public:
-  typedef udDelegate<udVariant(udSlice<udVariant>)> Delegate;
+  typedef udDelegate<Variant(udSlice<Variant>)> Delegate;
 
   enum class Type
   {
@@ -27,28 +30,28 @@ public:
     AssocArray
   };
 
-  udVariant();
-  udVariant(udVariant &&rval);
-  udVariant(const udVariant &rval);
+  Variant();
+  Variant(Variant &&rval);
+  Variant(const Variant &rval);
 
-  udVariant(bool);
-  udVariant(int64_t);
-  udVariant(double);
-  udVariant(udComponent *);
-  udVariant(const Delegate &d);
-  udVariant(Delegate &&d);
-  udVariant(udString);
-  udVariant(udSlice<udVariant> a, bool ownsMemory = false);
-  udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory = false);
+  Variant(bool);
+  Variant(int64_t);
+  Variant(double);
+  Variant(Component *);
+  Variant(const Delegate &d);
+  Variant(Delegate &&d);
+  Variant(udString);
+  Variant(udSlice<Variant> a, bool ownsMemory = false);
+  Variant(udSlice<KeyValuePair> aa, bool ownsMemory = false);
 
-  template<typename T> udVariant(const T &v);
-  template<typename T> udVariant(T &v);
+  template<typename T> Variant(const T &v);
+  template<typename T> Variant(T &v);
 
-  ~udVariant();
+  ~Variant();
 
   // assignment operators
-  udVariant& operator=(udVariant &&rval);
-  udVariant& operator=(const udVariant &rval);
+  Variant& operator=(Variant &&rval);
+  Variant& operator=(const Variant &rval);
 
   // actual methods
   Type type() const;
@@ -62,24 +65,24 @@ public:
   bool asBool() const;
   int64_t asInt() const;
   double asFloat() const;
-  udComponentRef asComponent() const;
+  ComponentRef asComponent() const;
   Delegate asDelegate() const;
   udString asString() const;
-  udSlice<udVariant> asArray() const;
-  udSlice<udKeyValuePair> asAssocArray() const;
-  udSlice<udKeyValuePair> asAssocArraySeries() const;
+  udSlice<Variant> asArray() const;
+  udSlice<KeyValuePair> asAssocArray() const;
+  udSlice<KeyValuePair> asAssocArraySeries() const;
 
   size_t arrayLen() const;
   size_t assocArraySeriesLen() const;
 
-  udVariant operator[](size_t i) const;
-  udVariant operator[](udString key) const;
+  Variant operator[](size_t i) const;
+  Variant operator[](udString key) const;
 
-  udVariant* allocArray(size_t len);
-  udKeyValuePair* allocAssocArray(size_t len);
+  Variant* allocArray(size_t len);
+  KeyValuePair* allocAssocArray(size_t len);
 
   void luaPush(LuaState &l) const;
-  static udVariant luaGet(LuaState &l, int idx = -1);
+  static Variant luaGet(LuaState &l, int idx = -1);
 
 private:
   size_t t : 4;
@@ -90,30 +93,32 @@ private:
     bool b;
     int64_t i;
     double f;
-    udComponent *c;
+    Component *c;
     const char *s;
-    udVariant *a;
-    udKeyValuePair *aa;
+    Variant *a;
+    KeyValuePair *aa;
     void *p;
   };
 };
 
-struct udKeyValuePair
+struct KeyValuePair
 {
-  udKeyValuePair() {}
-  udKeyValuePair(udKeyValuePair &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
-  udKeyValuePair(const udKeyValuePair &val) : key(val.key), value(val.value) {}
+  KeyValuePair() {}
+  KeyValuePair(KeyValuePair &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
+  KeyValuePair(const KeyValuePair &val) : key(val.key), value(val.value) {}
 
-  udKeyValuePair(const udVariant &key, const udVariant &value) : key(key), value(value) {}
-  udKeyValuePair(const udVariant &key, udVariant &&value) : key(key), value(std::move(value)) {}
-  udKeyValuePair(udVariant &&key, const udVariant &value) : key(std::move(key)), value(value) {}
-  udKeyValuePair(udVariant &&key, udVariant &&value) : key(std::move(key)), value(std::move(value)) {}
+  KeyValuePair(const Variant &key, const Variant &value) : key(key), value(value) {}
+  KeyValuePair(const Variant &key, Variant &&value) : key(key), value(std::move(value)) {}
+  KeyValuePair(Variant &&key, const Variant &value) : key(std::move(key)), value(value) {}
+  KeyValuePair(Variant &&key, Variant &&value) : key(std::move(key)), value(std::move(value)) {}
 
-  udVariant key;
-  udVariant value;
+  Variant key;
+  Variant value;
 };
 
-typedef udSlice<udKeyValuePair> udInitParams;
+typedef udSlice<KeyValuePair> InitParams;
+
+} // namespace udKernel
 
 
 #include "udVariant.inl"

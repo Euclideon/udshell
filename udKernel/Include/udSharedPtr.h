@@ -3,44 +3,47 @@
 
 #define SHARED_CLASS(Name) \
   class Name; \
-  typedef udSharedPtr<Name> Name##Ref;
+  typedef SharedPtr<Name> Name##Ref;
 
 #define SHARED_STRUCT(Name) \
   struct Name; \
-  typedef udSharedPtr<Name> Name##Ref;
+  typedef SharedPtr<Name> Name##Ref;
 
-class udRefCounted;
+namespace udKernel
+{
+
+class RefCounted;
 
 template<class T>
-class udSharedPtr
+class SharedPtr
 {
 public:
   // create a new instance of T
   template<typename... Args>
-  static udSharedPtr<T> create(Args... args)
+  static SharedPtr<T> create(Args... args)
   {
-    return udSharedPtr<T>(new T(args...));
+    return SharedPtr<T>(new T(args...));
   }
 
   // constructors
-  udSharedPtr(const udSharedPtr<T> &ptr) : pInstance(ptr.pInstance) { acquire(); }
+  SharedPtr(const SharedPtr<T> &ptr) : pInstance(ptr.pInstance) { acquire(); }
   template <class U> // the U allows us to accept const
-  udSharedPtr(const udSharedPtr<U> &ptr) : pInstance(ptr.pInstance) { acquire(); }
-  udSharedPtr(udSharedPtr<T> &&ptr)
+  SharedPtr(const SharedPtr<U> &ptr) : pInstance(ptr.pInstance) { acquire(); }
+  SharedPtr(SharedPtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
     if(this != &ptr)
       ptr.pInstance = nullptr;
   }
 
-//  udSharedPtr() {}        // <- should we allow default construction, or enforce nullptr?
-  udSharedPtr(nullptr_t) {}
+//  SharedPtr() {}        // <- should we allow default construction, or enforce nullptr?
+  SharedPtr(nullptr_t) {}
 
-  explicit udSharedPtr(T *p) : pInstance(p) { acquire(); }
+  explicit SharedPtr(T *p) : pInstance(p) { acquire(); }
 
-  inline ~udSharedPtr() { release(); }
+  inline ~SharedPtr() { release(); }
 
-  udSharedPtr& operator=(const udSharedPtr<T> &ptr)
+  SharedPtr& operator=(const SharedPtr<T> &ptr)
   {
     if (pInstance != ptr.pInstance)
     {
@@ -51,7 +54,7 @@ public:
     return *this;
   }
   template <class U> // the U allows us to accept const
-  udSharedPtr& operator=(const udSharedPtr<U> &ptr)
+  SharedPtr& operator=(const SharedPtr<U> &ptr)
   {
     if (pInstance != ptr.pInstance)
     {
@@ -61,7 +64,7 @@ public:
     }
     return *this;
   }
-  udSharedPtr& operator=(nullptr_t)
+  SharedPtr& operator=(nullptr_t)
   {
     release();
     return *this;
@@ -87,20 +90,20 @@ public:
   inline T* ptr() const { return (T*)pInstance; }
 
 private:
-  template<class U> friend class udSharedPtr;
+  template<class U> friend class SharedPtr;
 
   inline void acquire();
   inline void release();
 
-  udRefCounted *pInstance = nullptr;
+  RefCounted *pInstance = nullptr;
 };
 
-class udRefCounted
+class RefCounted
 {
   mutable size_t rc = 0;
 
 protected:
-  virtual ~udRefCounted() = 0;
+  virtual ~RefCounted() = 0;
 public:
   size_t RefCount() { return rc; }
   size_t IncRef() { return ++rc; }
@@ -112,38 +115,38 @@ public:
   }
 
   template<typename T>
-  friend class udSharedPtr;
+  friend class SharedPtr;
 };
-inline udRefCounted::~udRefCounted() {}
+inline RefCounted::~RefCounted() {}
 
 
 template<class T>
-class udUniquePtr
+class UniquePtr
 {
 public:
-  udUniquePtr() {}
-  explicit udUniquePtr(T *p) : pInstance(p) {}
+  UniquePtr() {}
+  explicit UniquePtr(T *p) : pInstance(p) {}
   template <class U>
-  udUniquePtr(const udUniquePtr<U> &ptr)
+  UniquePtr(const UniquePtr<U> &ptr)
     : pInstance(static_cast<T*>(ptr.pInstance))
   {
-    const_cast<udUniquePtr<U>&>(ptr).pInstance = nullptr;
+    const_cast<UniquePtr<U>&>(ptr).pInstance = nullptr;
   }
-  udUniquePtr(const udUniquePtr &ptr)
+  UniquePtr(const UniquePtr &ptr)
     : pInstance(ptr.pInstance)
   {
-    const_cast<udUniquePtr&>(ptr).pInstance = nullptr;
+    const_cast<UniquePtr&>(ptr).pInstance = nullptr;
   }
-  inline ~udUniquePtr()
+  inline ~UniquePtr()
   {
     destroy();
   }
 
-  udUniquePtr &operator=(const udUniquePtr &ptr)
+  UniquePtr &operator=(const UniquePtr &ptr)
   {
     destroy();
     pInstance = ptr.pInstance;
-    const_cast<udUniquePtr&>(ptr).pInstance = nullptr;
+    const_cast<UniquePtr&>(ptr).pInstance = nullptr;
     return *this;
   }
 
@@ -166,7 +169,7 @@ public:
   inline T* ptr() const { return pInstance; }
 
 private:
-  template<typename U> friend class udUniquePtr;
+  template<typename U> friend class UniquePtr;
 
   inline void destroy()
   {
@@ -184,37 +187,37 @@ private:
 
 // cast functions
 template<class T, class U>
-udSharedPtr<T> static_pointer_cast(const udSharedPtr<U> &ptr)
+SharedPtr<T> static_pointer_cast(const SharedPtr<U> &ptr)
 {
-  return udSharedPtr<T>((T*)ptr.ptr());
+  return SharedPtr<T>((T*)ptr.ptr());
 }
 
 
 // comparaison operators
-template<class T, class U> inline bool operator==(const udSharedPtr<T> &l, const udSharedPtr<U> &r) { return l.ptr() == r.ptr(); }
-template<class T, class U> inline bool operator!=(const udSharedPtr<T> &l, const udSharedPtr<U> &r) { return l.ptr() != r.ptr(); }
-template<class T, class U> inline bool operator<=(const udSharedPtr<T> &l, const udSharedPtr<U> &r) { return l.ptr() <= r.ptr(); }
-template<class T, class U> inline bool operator<(const udSharedPtr<T> &l, const udSharedPtr<U> &r) { return l.ptr() < r.ptr(); }
-template<class T, class U> inline bool operator>=(const udSharedPtr<T> &l, const udSharedPtr<U> &r) { return l.ptr() >= r.ptr(); }
-template<class T, class U> inline bool operator>(const udSharedPtr<T> &l, const udSharedPtr<U> &r) { return l.ptr() > r.ptr(); }
+template<class T, class U> inline bool operator==(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() == r.ptr(); }
+template<class T, class U> inline bool operator!=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() != r.ptr(); }
+template<class T, class U> inline bool operator<=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() <= r.ptr(); }
+template<class T, class U> inline bool operator<(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() < r.ptr(); }
+template<class T, class U> inline bool operator>=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() >= r.ptr(); }
+template<class T, class U> inline bool operator>(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() > r.ptr(); }
 
-template<class T, class U> inline bool operator==(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() == r.ptr(); }
-template<class T, class U> inline bool operator!=(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() != r.ptr(); }
-template<class T, class U> inline bool operator<=(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() <= r.ptr(); }
-template<class T, class U> inline bool operator<(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() < r.ptr(); }
-template<class T, class U> inline bool operator>=(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() >= r.ptr(); }
-template<class T, class U> inline bool operator>(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() > r.ptr(); }
+template<class T, class U> inline bool operator==(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() == r.ptr(); }
+template<class T, class U> inline bool operator!=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() != r.ptr(); }
+template<class T, class U> inline bool operator<=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() <= r.ptr(); }
+template<class T, class U> inline bool operator<(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() < r.ptr(); }
+template<class T, class U> inline bool operator>=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() >= r.ptr(); }
+template<class T, class U> inline bool operator>(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() > r.ptr(); }
 
 
 
 template<class T>
-inline size_t udSharedPtr<T>::count() const
+inline size_t SharedPtr<T>::count() const
 {
   return pInstance ? pInstance->rc : 0;
 }
 
 template<class T>
-inline void udSharedPtr<T>::acquire()
+inline void SharedPtr<T>::acquire()
 {
   if (pInstance)
   {
@@ -223,7 +226,7 @@ inline void udSharedPtr<T>::acquire()
 }
 
 template<class T>
-inline void udSharedPtr<T>::release()
+inline void SharedPtr<T>::release()
 {
   if (pInstance)
   {
@@ -232,5 +235,6 @@ inline void udSharedPtr<T>::release()
     pInstance = nullptr;
   }
 }
+} // namespace udKernel
 
 #endif // _SHAREDPTR_H

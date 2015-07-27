@@ -69,7 +69,7 @@ epilogue:
 // ***************************************************************************************
 int udShader_FindShaderParameter(udShaderProgram *pProgram, const char *pName)
 {
-  // TODO: remove these checks once we are confident in udKernel and the Qt driver
+  // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pProgram->pProgram, "QOpenGLShaderProgram object not created");
   return pProgram->pProgram->uniformLocation(pName);
 }

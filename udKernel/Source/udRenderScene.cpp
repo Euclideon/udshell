@@ -8,6 +8,8 @@
 // TODO: remove when resource cleanup is implemented
 #include "udDriver.h"
 
+namespace udKernel
+{
 
 // shaders for blitting
 const char s_vertexShader[] =
@@ -74,12 +76,12 @@ void udRenderScene_InitRender()
   s_shader = udShader_CreateShaderProgram(pVS, pPS);
 }
 
-udRenderableView::udRenderableView()
+RenderableView::RenderableView()
 {
   memset(&options, 0, sizeof(options));
 };
 
-udRenderableView::~udRenderableView()
+RenderableView::~RenderableView()
 {
   if (pRenderView)
     udRender_DestroyView(&pRenderView);
@@ -95,7 +97,7 @@ udRenderableView::~udRenderableView()
     udTexture_DestroyTexture(&pDepthTexture);
 }
 
-void udRenderableView::RenderUD()
+void RenderableView::RenderUD()
 {
   if (spScene->ud.length)
   {
@@ -132,7 +134,7 @@ void udRenderableView::RenderUD()
   }
 }
 
-void udRenderableView::RenderGPU() const
+void RenderableView::RenderGPU() const
 {
   if (!pColorTexture)
   {
@@ -167,3 +169,5 @@ void udRenderableView::RenderGPU() const
   pDepthTexture = nullptr;
 #endif
 }
+
+} // namespace udKernel

@@ -8,7 +8,6 @@
 #include "udVariant.h"
 #include "udEvent.h"
 
-using namespace fastdelegate;
 
 // TODO: remove this!
 #if UDPLATFORM_WINDOWS
@@ -25,74 +24,77 @@ using std::nullptr_t;
   SHARED_CLASS(Name)
 
 
-class udKernel;
-struct udComponentDesc;
+namespace udKernel
+{
 
-PROTOTYPE_COMPONENT(udComponent);
+class Kernel;
+struct ComponentDesc;
+
+PROTOTYPE_COMPONENT(Component);
 
 
 // getter glue
-struct udGetter
+struct Getter
 {
 public:
-  udGetter(nullptr_t);
+  Getter(nullptr_t);
   template <typename X, typename Type>
-  udGetter(Type(X::*func)() const);
+  Getter(Type(X::*func)() const);
 
   operator bool() const { return shim != nullptr; }
 
-  udVariant get(const udComponent *pThis) const;
+  Variant get(const Component *pThis) const;
 
 protected:
-  typedef udVariant(Shim)(const udGetter* const, const udComponent*);
+  typedef Variant(Shim)(const Getter* const, const Component*);
 
-  DelegateMemento m;
+  FastDelegateMemento m;
   Shim *shim;
 
   template<typename T>
-  static udVariant shimFunc(const udGetter * const pGetter, const udComponent *pThis);
+  static Variant shimFunc(const Getter * const pGetter, const Component *pThis);
 };
 
 // setter glue
-struct udSetter
+struct Setter
 {
 public:
-  udSetter(nullptr_t);
+  Setter(nullptr_t);
   template <typename X, typename Type>
-  udSetter(void(X::*func)(Type));
+  Setter(void(X::*func)(Type));
 
   operator bool() const { return shim != nullptr; }
 
-  void set(udComponent *pThis, const udVariant &value) const;
+  void set(Component *pThis, const Variant &value) const;
 
 private:
-  typedef void(Shim)(const udSetter* const, udComponent*, const udVariant&);
+  typedef void(Shim)(const Setter* const, Component*, const Variant&);
 
-  DelegateMemento m;
+  FastDelegateMemento m;
   Shim *shim;
 
   template<typename T>
-  static void shimFunc(const udSetter * const pSetter, udComponent *pThis, const udVariant &value);
+  static void shimFunc(const Setter * const pSetter, Component *pThis, const Variant &value);
 };
 
 // method glue
-struct udMethod
+struct Method
 {
 public:
-  udMethod(nullptr_t);
+  Method(nullptr_t);
   template <typename X, typename Ret, typename... Args>
-  udMethod(Ret(X::*func)(Args...));
+  Method(Ret(X::*func)(Args...));
   template <typename X, typename Ret, typename... Args>
-  udMethod(Ret(X::*func)(Args...) const);
+  Method(Ret(X::*func)(Args...) const);
 
   operator bool() const { return shim != nullptr; }
 
-  udVariant call(udComponent *pThis, udSlice<udVariant> args) const;
+  Variant call(Component *pThis, udSlice<Variant> args) const;
 
 private:
-  typedef udVariant(Shim)(const udMethod* const, udComponent*, udSlice<udVariant>);
+  typedef Variant(Shim)(const Method* const, Component*, udSlice<Variant>);
 
-  DelegateMemento m;
+  FastDelegateMemento m;
   Shim *shim;
 
   template<typename Ret, typename... Args>
@@ -100,56 +102,56 @@ private:
   {
     // this is a nasty hack to get ...S (integer sequence) as a parameter pack
     template<size_t ...S>
-    static udVariant callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>);
+    static Variant callFuncHack(udSlice<Variant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>);
 
-    static udVariant shimFunc(const udMethod * const pSetter, udComponent *pThis, udSlice<udVariant> value);
+    static Variant shimFunc(const Method * const pSetter, Component *pThis, udSlice<Variant> value);
   };
 };
 
 // event glue
-struct udVarEvent
+struct VarEvent
 {
-  udVarEvent(nullptr_t);
+  VarEvent(nullptr_t);
   template<typename X, typename... Args>
-  udVarEvent(udEvent<Args...> X::*ev)
+  VarEvent(Event<Args...> X::*ev)
   {
     pSubscribe = &doSubscribe<X, Args...>;
-    pEvent = (void* udVarEvent::*)ev;
+    pEvent = (void* VarEvent::*)ev;
   }
 
   operator bool() const { return pEvent != nullptr; }
 
-  UDFORCE_INLINE void subscribe(const udComponentRef &c, const udVariant::Delegate &d)
+  UDFORCE_INLINE void subscribe(const ComponentRef &c, const Variant::Delegate &d)
   {
     pSubscribe(this, c, d);
   }
 
 private:
-  typedef void (SubscribeFunc)(const udVarEvent*, const udComponentRef&, const udVariant::Delegate&);
+  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const Variant::Delegate&);
 
-  void* udVarEvent::*pEvent;
+  void* VarEvent::*pEvent;
   SubscribeFunc *pSubscribe = nullptr;
 
   template<typename X, typename... Args>
-  static void doSubscribe(const udVarEvent *pEv, const udComponentRef &c, const udVariant::Delegate &d)
+  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const Variant::Delegate &d)
   {
     // cast the pointer-to-member back to it's real type
-    udEvent<Args...> X::*ev = (udEvent<Args...> X::*)pEv->pEvent;
+    Event<Args...> X::*ev = (Event<Args...> X::*)pEv->pEvent;
 
     // TODO: validate that 'X' is actually a component?
     X *pComponent = (X*)c.ptr();
 
     // deref the pointer-to-member to get the event we want to subscribe to
-    udEvent<Args...> &e = pComponent->*ev;
+    Event<Args...> &e = pComponent->*ev;
 
-    udVariant v(d);
+    Variant v(d);
     e.Subscribe(v.as<udDelegate<void(Args...)>>());
   }
 };
 
 
 // property description
-enum class udPropertyType : uint32_t
+enum class PropertyType : uint32_t
 {
   Void,
   Boolean,
@@ -162,73 +164,73 @@ enum class udPropertyType : uint32_t
   Struct,
 };
 
-enum udPropertyFlags : uint32_t
+enum PropertyFlags : uint32_t
 {
   udPF_Immutable = 1<<0 // must be initialised during construction
 };
 
-struct udEnumKVP
+struct EnumKVP
 {
-  udEnumKVP(udString key, int64_t v) : key(key), value(v) {}
+  EnumKVP(udString key, int64_t v) : key(key), value(v) {}
 
   udString key;
   int64_t value;
 };
-#define EnumKVP(e) udEnumKVP( #e, (int64_t)e )
+#define EnumKVP(e) EnumKVP( #e, (int64_t)e )
 
-struct udTypeDesc
+struct TypeDesc
 {
-  udTypeDesc(udPropertyType type, uint32_t arrayLength = 0, const udSlice<const udEnumKVP> kvp = nullptr)
+  TypeDesc(PropertyType type, uint32_t arrayLength = 0, const udSlice<const EnumKVP> kvp = nullptr)
     : type(type), arrayLength(arrayLength), kvp(kvp)
   {}
-  udTypeDesc& operator=(const udTypeDesc&) = delete;
+  TypeDesc& operator=(const TypeDesc&) = delete;
 
-  udPropertyType type;
+  PropertyType type;
   uint32_t arrayLength;
-  const udSlice<const udEnumKVP> kvp;
+  const udSlice<const EnumKVP> kvp;
 };
 
-struct udPropertyDesc
+struct PropertyDesc
 {
-  udPropertyDesc() = delete;
+  PropertyDesc() = delete;
 
   udString id;
   udString displayName;
   udString description;
 
-  udGetter getter;
-  udSetter setter;
+  Getter getter;
+  Setter setter;
 
-  udTypeDesc type;
+  TypeDesc type;
   udString displayType;
   uint32_t flags;
 };
 
-struct udMethodDesc
+struct MethodDesc
 {
-  udMethodDesc() = delete;
+  MethodDesc() = delete;
 
   udString id;
   udString displayName;
   udString description;
 
-  udMethod method;
+  Method method;
 
-  udTypeDesc result;
-  const udSlice<const udTypeDesc> args;
+  TypeDesc result;
+  const udSlice<const TypeDesc> args;
 };
 
-struct udEventDesc
+struct EventDesc
 {
-  udEventDesc() = delete;
+  EventDesc() = delete;
 
   udString id;
   udString displayName;
   udString description;
 
-  udVarEvent ev;
+  VarEvent ev;
 
-  const udSlice<const udTypeDesc> args;
+  const udSlice<const TypeDesc> args;
 };
 
 
@@ -237,14 +239,14 @@ enum { UDSHELL_APIVERSION = 100 };
 enum { UDSHELL_PLUGINVERSION = UDSHELL_APIVERSION };
 
 typedef udResult(InitComponent)();
-typedef udComponent *(CreateInstanceCallback)(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams);
+typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
 
-struct udComponentDesc
+struct ComponentDesc
 {
-  udComponentDesc() = delete;
-  udComponentDesc& operator=(const udComponentDesc&) = delete;
+  ComponentDesc() = delete;
+  ComponentDesc& operator=(const ComponentDesc&) = delete;
 
-  const udComponentDesc *pSuperDesc;
+  const ComponentDesc *pSuperDesc;
 
   int udVersion;
   int pluginVersion;
@@ -259,10 +261,12 @@ struct udComponentDesc
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
 
-  const udSlice<const udPropertyDesc> properties;
-  const udSlice<const udMethodDesc> methods;
-  const udSlice<const udEventDesc> events;
+  const udSlice<const PropertyDesc> properties;
+  const udSlice<const MethodDesc> methods;
+  const udSlice<const EventDesc> events;
 };
+
+} // namespace udKernel
 
 
 #include "udComponentDesc.inl"

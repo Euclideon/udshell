@@ -10,16 +10,21 @@
 #include "udRender.h"
 #include "udModel.h"
 
-struct udUDJob
+
+struct udTexture;
+namespace udKernel
+{
+
+struct UDJob
 {
   udDouble4x4 matrix;
   udRenderClipArea clipArea;
 
-  udSharedUDModelRef spModel = nullptr;
+  SharedUDModelRef spModel = nullptr;
   udRenderModel renderModel;
 };
 
-struct udGeomJob
+struct GeomJob
 {
   udDouble4x4 matrix;
 
@@ -31,19 +36,19 @@ struct udGeomJob
   // * render states
 };
 
-class udRenderScene : public udRefCounted
+class RenderScene : public RefCounted
 {
 public:
-  udFixedSlice<udUDJob, 4> ud;
-  udFixedSlice<udGeomJob> geom;
+  udFixedSlice<UDJob, 4> ud;
+  udFixedSlice<GeomJob> geom;
 };
-typedef udSharedPtr<udRenderScene> udRenderSceneRef;
+typedef SharedPtr<RenderScene> RenderSceneRef;
 
 
-class udRenderableView : public udRefCounted
+class RenderableView : public RefCounted
 {
 public:
-  udRenderableView();
+  RenderableView();
   void RenderUD();
   void RenderGPU() const;
 
@@ -57,9 +62,9 @@ public:
   int displayWidth, displayHeight;
   int renderWidth, renderHeight;
 
-  udRenderSceneRef spScene = nullptr;
+  RenderSceneRef spScene = nullptr;
 
-  udViewRef spView = nullptr;
+  ViewRef spView = nullptr;
 
   udRenderEngine *pRenderEngine = nullptr;
   udRenderView *pRenderView = nullptr;
@@ -68,16 +73,17 @@ public:
   void *pColorBuffer = nullptr;
   void *pDepthBuffer = nullptr;
 
-  mutable struct udTexture *pColorTexture = nullptr;
-  mutable struct udTexture *pDepthTexture = nullptr;
+  mutable udTexture *pColorTexture = nullptr;
+  mutable udTexture *pDepthTexture = nullptr;
 
 //  udSemaphore *pRenderSemaphore = nullptr;
 //  udSemaphore *pPresentSemaphore = nullptr;
 
 protected:
-  ~udRenderableView();
+  ~RenderableView();
 };
-typedef udSharedPtr<udRenderableView> udRenderableViewRef;
+typedef SharedPtr<RenderableView> RenderableViewRef;
 
+} // namespace udKernel
 
 #endif // UDRENDERSCENE_H

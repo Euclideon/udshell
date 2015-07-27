@@ -6,19 +6,22 @@
 #include "udInput.h"
 #include "udMath.h"
 
-SHARED_CLASS(udRenderScene);
+namespace udKernel
+{
 
-class udNode;
-PROTOTYPE_COMPONENT(udNode);
+SHARED_CLASS(RenderScene);
 
-class udNode : public udComponent
+class Node;
+PROTOTYPE_COMPONENT(Node);
+
+class Node : public Component
 {
 public:
-  UD_COMPONENT(udNode);
+  UD_COMPONENT(Node);
 
   virtual udResult InputEvent(const udInputEvent &ev) { return udR_Success; }
   virtual udResult Update(double timeStep) { return udR_Success; }
-  virtual udResult Render(udRenderSceneRef &spScene, const udDouble4x4 &mat);
+  virtual udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat);
 
   virtual void SetMatrix(const udDouble4x4 &mat) { matrix = mat; }
   const udDouble4x4& GetMatrix() const { return matrix; }
@@ -26,32 +29,32 @@ public:
   virtual void SetPosition(const udDouble3 &pos) { matrix.axis.t = udDouble4::create(pos, matrix.axis.t.w); }
   const udDouble3& GetPosition() const { return matrix.axis.t.toVector3(); }
 
-  udNodeRef Parent() const { return udNodeRef(pParent); }
-  const udSlice<udNodeRef> Children() const { return children; }
+  NodeRef Parent() const { return NodeRef(pParent); }
+  const udSlice<NodeRef> Children() const { return children; }
 
-  void AddChild(udNodeRef c);
-  void RemoveChild(udNodeRef c);
+  void AddChild(NodeRef c);
+  void RemoveChild(NodeRef c);
 
   void Detach();
 
   void CalculateWorldMatrix(udDouble4x4 *pMatrix) const;
 
 protected:
-  udNode(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
-    : udComponent(pType, pKernel, uid, initParams) {}
-  virtual ~udNode() {}
+  Node(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+    : Component(pType, pKernel, uid, initParams) {}
+  virtual ~Node() {}
 
-  udNode *pParent = nullptr;
-  udFixedSlice<udNodeRef, 3> children;
+  Node *pParent = nullptr;
+  udFixedSlice<NodeRef, 3> children;
 
   udDouble4x4 matrix = udDouble4x4::identity();
 
   // TODO: enable/visible/etc flags
 
-  static udComponent *Create(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
+  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
   {
-    return udNew(udNode, pType, pKernel, uid, initParams);
+    return udNew(Node, pType, pKernel, uid, initParams);
   }
 };
-
+} // namespace udKernel
 #endif // UDNODE_H

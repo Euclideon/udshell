@@ -42,10 +42,10 @@ public:
 };
 
 
-class udQtKernel : public udKernel, public QObject
+class udQtKernel : public Kernel, public QObject
 {
 public:
-  udQtKernel::udQtKernel(udInitParams commandLine);
+  udQtKernel::udQtKernel(InitParams commandLine);
   virtual ~udQtKernel() {}
 
   udResult Init();
@@ -82,7 +82,7 @@ private:
 
 
 // ---------------------------------------------------------------------------------------
-udQtKernel::udQtKernel(udInitParams commandLine)
+udQtKernel::udQtKernel(InitParams commandLine)
   : QObject(0)
   , pApplication(nullptr)
   , pMainWindow(nullptr)
@@ -91,8 +91,8 @@ udQtKernel::udQtKernel(udInitParams commandLine)
 {
   udDebugPrintf("udQtKernel::udQtKernel()\n");
 
-  // convert udInitParams back into a string list for Qt
-  // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the udKernel
+  // convert InitParams back into a string list for Qt
+  // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
   // NOTE: the state of our argv may be changed by Qt as it removes args that it recognises
   udFixedSlice<char *> args;
   args.reserve(commandLine.length);
@@ -108,7 +108,7 @@ udResult udQtKernel::Init()
 {
   udDebugPrintf("udQtKernel::Init()\n");
 
-  // TODO: remove these checks once we are confident in udKernel and the Qt driver
+  // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(argc >= 1, "argc must contain at least 1");
   UDASSERT(argv.length == argc, "argv length should match argc");
 
@@ -135,7 +135,7 @@ udResult udQtKernel::RegisterWindows()
 {
   udDebugPrintf("udQtKernel::RegisterWindows()\n");
 
-  // TODO: remove these checks once we are confident in udKernel and the Qt driver
+  // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
   udResult result = udR_Success;
@@ -164,7 +164,7 @@ udResult udQtKernel::RunMainLoop()
 {
   udDebugPrintf("udQtKernel::RunMainLoop()\n");
 
-  // TODO: remove these checks once we are confident in udKernel and the Qt driver
+  // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
   // run the Qt event loop - this may never return
@@ -174,7 +174,7 @@ udResult udQtKernel::RunMainLoop()
 // ---------------------------------------------------------------------------------------
 void udQtKernel::PostEvent(QEvent *pEvent, int priority)
 {
-  // TODO: remove these checks once we are confident in udKernel and the Qt driver
+  // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
   pApplication->postEvent(this, pEvent, priority);
@@ -219,7 +219,7 @@ void udQtKernel::InitRender()
 {
   udDebugPrintf("udQtKernel::InitRender()\n");
 
-  // TODO: remove these checks once we are confident in udKernel and the Qt driver
+  // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
   UDASSERT(pMainWindow != nullptr, "Main Window doesn't exist");
 
@@ -230,7 +230,7 @@ void udQtKernel::InitRender()
   // ALSO does this thread ever get recreated? does this id remain valid thru the program?
   renderThreadId = QThread::currentThreadId();
 
-  if (udKernel::InitRender() != udR_Success)
+  if (Kernel::InitRender() != udR_Success)
   {
     // TODO: gracefully handle error with InitRender ?
     udDebugPrintf("Error initialising renderer\n");
@@ -243,7 +243,7 @@ void udQtKernel::InitRender()
 void udQtKernel::CleanupRender()
 {
   udDebugPrintf("CleanupRender\n");
-  if (udKernel::DeinitRender() != udR_Success)
+  if (Kernel::DeinitRender() != udR_Success)
   {
     // TODO: gracefully handle error with DeinitRender ?
     udDebugPrintf("Error cleaning up renderer\n");
@@ -254,51 +254,51 @@ void udQtKernel::CleanupRender()
 void udQtKernel::Destroy()
 {
   udDebugPrintf("udQtKernel::Destroy()\n");
-  udKernel::Destroy();
+  Kernel::Destroy();
 }
 
 
 // ---------------------------------------------------------------------------------------
-udKernel *udKernel::CreateInstanceInternal(udInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
-  udDebugPrintf("udKernel::CreateInstanceInternal()\n");
+  udDebugPrintf("Kernel::CreateInstanceInternal()\n");
   return new udQtKernel(commandLine);
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udKernel::InitInstanceInternal()
+udResult Kernel::InitInstanceInternal()
 {
-  udDebugPrintf("udKernel::InitInstanceInternal()\n");
+  udDebugPrintf("Kernel::InitInstanceInternal()\n");
   return static_cast<udQtKernel*>(this)->Init();
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udKernel::InitRenderInternal()
+udResult Kernel::InitRenderInternal()
 {
-  UDASSERT(false, "udKernel::InitRenderInternal() is expected to be unused by the Qt driver");
+  UDASSERT(false, "Kernel::InitRenderInternal() is expected to be unused by the Qt driver");
   return udR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udKernel::DestroyInstanceInternal()
+udResult Kernel::DestroyInstanceInternal()
 {
-  udDebugPrintf("udKernel::DestroyInstanceInternal()\n");
+  udDebugPrintf("Kernel::DestroyInstanceInternal()\n");
   return static_cast<udQtKernel*>(this)->Shutdown();
 }
 
 // ---------------------------------------------------------------------------------------
-udViewRef udKernel::SetFocusView(udViewRef spView)
+ViewRef Kernel::SetFocusView(ViewRef spView)
 {
-  udDebugPrintf("udKernel::SetFocusView()\n");
-  udViewRef spOld = spFocusView;
+  udDebugPrintf("Kernel::SetFocusView()\n");
+  ViewRef spOld = spFocusView;
   spFocusView = spView;
   return spOld;
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udKernel::RunMainLoop()
+udResult Kernel::RunMainLoop()
 {
-  udDebugPrintf("udKernel::RunMainLoop()\n");
+  udDebugPrintf("Kernel::RunMainLoop()\n");
 
   udResult result;
   udQtKernel *pKernel = static_cast<udQtKernel*>(this);
@@ -308,23 +308,23 @@ udResult udKernel::RunMainLoop()
 
 epilogue:
   if (result != udR_Success)
-    udDebugPrintf("Error encountered in udKernel::RunMainLoop()\n");
+    udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
 
   return result;
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udKernel::Terminate()
+udResult Kernel::Terminate()
 {
-  udDebugPrintf("udKernel::Terminate()\n");
+  udDebugPrintf("Kernel::Terminate()\n");
 
   return udR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-void udKernel::DispatchToMainThread(MainThreadCallback callback)
+void Kernel::DispatchToMainThread(MainThreadCallback callback)
 {
-  udDebugPrintf("udKernel::DispatchToMainThread()\n");
+  udDebugPrintf("Kernel::DispatchToMainThread()\n");
 
   udQtKernel *pKernel = static_cast<udQtKernel*>(this);
 
@@ -337,9 +337,9 @@ void udKernel::DispatchToMainThread(MainThreadCallback callback)
 }
 
 // ---------------------------------------------------------------------------------------
-void udKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 {
-  udDebugPrintf("udKernel::DispatchToMainThreadAndWait()\n");
+  udDebugPrintf("Kernel::DispatchToMainThreadAndWait()\n");
 
   udQtKernel *pKernel = static_cast<udQtKernel*>(this);
 

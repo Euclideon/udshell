@@ -4,113 +4,114 @@
 #include "udInput.h"
 #include "udKernel.h"
 
-
-static const udPropertyDesc props[] =
+namespace udKernel
+{
+static const PropertyDesc props[] =
 {
   {
     "cameramatrix", // id
     "Position", // displayName
     "Position of camera", // description
-    &udCamera::GetCameraMatrix,
+    &Camera::GetCameraMatrix,
     nullptr,
-    udTypeDesc(udPropertyType::Float, 16)
+    TypeDesc(PropertyType::Float, 16)
   },
   {
     "viewmatrix", // id
     "Position", // displayName
     "Position of camera", // description
-    &udCamera::GetViewMatrix,
+    &Camera::GetViewMatrix,
     nullptr,
-    udTypeDesc(udPropertyType::Float, 16)
+    TypeDesc(PropertyType::Float, 16)
   }
 };
-static const udMethodDesc methods[] =
+static const MethodDesc methods[] =
 {
   {
     "setdepthplanes",
     "SetDepthPlanes",
     "Set the near and far depth planes:\n  setdepthplanes(near, far)",
-    udMethod(&udCamera::SetDepthPlanes),
-    udTypeDesc(udPropertyType::Void), // result
+    Method(&Camera::SetDepthPlanes),
+    TypeDesc(PropertyType::Void), // result
     { // args
-      udTypeDesc(udPropertyType::Float),
-      udTypeDesc(udPropertyType::Float)
+      TypeDesc(PropertyType::Float),
+      TypeDesc(PropertyType::Float)
     }
   }
 };
-const udComponentDesc udCamera::descriptor =
+const ComponentDesc Camera::descriptor =
 {
-  &udNode::descriptor, // pSuperDesc
+  &Node::descriptor, // pSuperDesc
 
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "camera",      // id
-  "udCamera",    // displayName
+  "Camera",    // displayName
   "Is a camera", // description
 
   [](){ return udR_Success; },  // pInit
-  udCamera::Create,             // pCreateInstance
+  Camera::Create,             // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<const udMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  udSlice<const MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 
-static const udPropertyDesc simpleCameraProps[] =
+static const PropertyDesc simpleCameraProps[] =
 {
   {
     "matrix", // id
     "Matrix", // displayName
     "Local matrix", // description
-    &udSimpleCamera::GetMatrix, // getter
-    &udSimpleCamera::SetMatrix, // setter
-    udTypeDesc(udPropertyType::Float, 16) // type
+    &SimpleCamera::GetMatrix, // getter
+    &SimpleCamera::SetMatrix, // setter
+    TypeDesc(PropertyType::Float, 16) // type
   },
   {
     "position", // id
     "Position", // displayName
     "Local position", // description
-    &udSimpleCamera::GetPosition, // getter
-    &udSimpleCamera::SetPosition, // setter
-    udTypeDesc(udPropertyType::Float, 3) // type
+    &SimpleCamera::GetPosition, // getter
+    &SimpleCamera::SetPosition, // setter
+    TypeDesc(PropertyType::Float, 3) // type
   },
   {
     "orientation", // id
     "Orientation", // displayName
     "Camera orientation (YPR)", // description
     nullptr, // getter
-    &udSimpleCamera::SetOrientation, // setter
-    udTypeDesc(udPropertyType::Float, 3) // type
+    &SimpleCamera::SetOrientation, // setter
+    TypeDesc(PropertyType::Float, 3) // type
   },
   {
     "speed", // id
     "Speed", // displayName
     "Camera speed", // description
     nullptr, // getter
-    &udSimpleCamera::SetSpeed, // setter
-    udTypeDesc(udPropertyType::Float) // type
+    &SimpleCamera::SetSpeed, // setter
+    TypeDesc(PropertyType::Float) // type
   }
 };
-const udComponentDesc udSimpleCamera::descriptor =
+const ComponentDesc SimpleCamera::descriptor =
 {
-  &udCamera::descriptor, // pSuperDesc
+  &Camera::descriptor, // pSuperDesc
 
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "simplecamera",       // id
-  "udSimpleCamera",     // displayName
+  "SimpleCamera",     // displayName
   "Is a simple camera", // description
 
   [](){ return udR_Success; },  // pInit
-  udSimpleCamera::Create,       // pCreateInstance
+  SimpleCamera::Create,       // pCreateInstance
 
-  udSlice<const udPropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
+  udSlice<const PropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
 };
 
 
-void udCamera::GetProjectionMatrix(double aspectRatio, udDouble4x4 *pMatrix) const
+void Camera::GetProjectionMatrix(double aspectRatio, udDouble4x4 *pMatrix) const
 {
   if (!bOrtho)
     *pMatrix = udDouble4x4::perspective(fovY, aspectRatio, zNear, zFar);
@@ -120,7 +121,7 @@ void udCamera::GetProjectionMatrix(double aspectRatio, udDouble4x4 *pMatrix) con
 
 
 
-udResult udSimpleCamera::InputEvent(const udInputEvent &ev)
+udResult SimpleCamera::InputEvent(const udInputEvent &ev)
 {
   // TODO: rejig of code from below...
 
@@ -129,7 +130,7 @@ udResult udSimpleCamera::InputEvent(const udInputEvent &ev)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udResult udSimpleCamera::Update(double timeDelta)
+udResult SimpleCamera::Update(double timeDelta)
 {
   // update the camera
   double s;
@@ -237,8 +238,8 @@ udResult udSimpleCamera::Update(double timeDelta)
 }
 
 // ***************************************************************************************
-udComponent *udSimpleCamera::CreateInstance(udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
+Component *SimpleCamera::CreateInstance(ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
 {
-  return udNew(udSimpleCamera, pType, pKernel, uid, initParams);
+  return udNew(SimpleCamera, pType, pKernel, uid, initParams);
 }
-
+} // namespace udKernel

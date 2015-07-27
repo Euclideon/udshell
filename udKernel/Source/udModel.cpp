@@ -1,24 +1,29 @@
 #include "udModel.h"
 
-udSharedUDModelRef udSharedUDModel::Create(udString name, bool useStreamer)
+namespace udKernel
+{
+
+SharedUDModelRef SharedUDModel::Create(udString name, bool useStreamer)
 {
   udResult result;
-  udSharedUDModelRef spModel(nullptr);
+  SharedUDModelRef spModel(nullptr);
 
-  udSharedUDModel *pSharedModel = udNew(udSharedUDModel);
+  SharedUDModel *pSharedModel = udNew(SharedUDModel);
   UD_ERROR_NULL(pSharedModel, udR_MemoryAllocationFailure);
 
   UD_ERROR_CHECK(udOctree_Create(&pSharedModel->pOctree, name.toStringz(), useStreamer, 0));
 
-  spModel = udSharedUDModelRef(pSharedModel);
+  spModel = SharedUDModelRef(pSharedModel);
 
 epilogue:
 
   return spModel;
 }
 
-udSharedUDModel::~udSharedUDModel()
+SharedUDModel::~SharedUDModel()
 {
   if (pOctree)
     pOctree->pDestroy(pOctree);
 }
+} // namespace udKernel
+
