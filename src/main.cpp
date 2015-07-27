@@ -6,7 +6,7 @@
 #include "udScene.h"
 #include "udCamera.h"
 #include "udDebugFont.h"
-
+#include "udUDNode.h"
 #include "quick/window.h"
 
 udKernel *s_pKernel;
@@ -73,20 +73,12 @@ void update(udViewRef pView, udSceneRef pScene)
   pCamera->SetDepthPlanes(0.0001f, 7500.f);
   //pCamera->Update();
 
-  udRenderModel renderModel = { 0 };
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
 
-  if (pMainModel)
-  {
-    renderModel.pOctree = pMainModel;
-    renderModel.pClip = nullptr;
-    renderModel.flags = udRF_PointCubes;
-    renderModel.pWorldMatrixD = (const double *)&s_mat;
-  }
-
-  pScene->SetRenderOptions(options);
-  pScene->SetRenderModels(&renderModel, 1);
+  pView->SetRenderOptions(options);
+  pView->ForceDirty();
+  pScene->ForceDirty();
 }
 
 void display(udViewRef pView, udSceneRef pScene)
@@ -145,6 +137,17 @@ int main(int argc, char *argv[])
   auto pView = s_pKernel->CreateComponent<udView>();
   auto pScene = s_pKernel->CreateComponent<udScene>();
   auto pCamera = s_pKernel->CreateComponent<udSimpleCamera>();
+  auto pUDNode = s_pKernel->CreateComponent<udUDNode>();
+
+  if (pUDNode)
+  {
+    // TODO: enable streamer once we have a tick running to update the streamer
+    pUDNode->Load("res\\DirCube.upc", false);
+    if (!pUDNode->GetSource().empty())
+    {
+      pScene->GetRootNode()->AddChild(pUDNode);
+    }
+  }
 
   pView->RegisterPreRenderCallback(update);
   pView->RegisterPostRenderCallback(display);

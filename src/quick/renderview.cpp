@@ -32,6 +32,9 @@ public:
 
     s_pKernel->GetFocusView()->Render();
     m_item->window()->resetOpenGLState();
+
+    // TODO: Remove this once we have proper dirty state being set
+    update();
   }
 
   QOpenGLFramebufferObject *createFramebufferObject(const QSize &size)
