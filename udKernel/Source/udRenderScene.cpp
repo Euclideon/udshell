@@ -129,15 +129,6 @@ void udRenderableView::RenderUD()
     pColorBuffer = udAllocFlags(colorPitch * renderHeight, udAF_Zero);
     pDepthBuffer = udAllocFlags(depthPitch * renderHeight, udAF_Zero);
 
-    // TODO: qt driver specific hack to see something
-#if UDRENDER_DRIVER == UDDRIVER_QT
-    int pixelCount = renderWidth*renderHeight;
-    for (int i = 0; i < pixelCount; ++i)
-    {
-      ((uint32_t*)pColorBuffer)[i] = 0x802020FF;
-      ((uint32_t*)pDepthBuffer)[i] = 0x3F800000;
-    }
-#endif
   }
 }
 

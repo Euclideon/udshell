@@ -55,10 +55,13 @@
 #if defined(__clang__) || defined(__GNUC__)
 #include <string.h>
 #define attributeUnused __attribute__ ((unused))
-#else // defined(__clang__)
+#define unusedParam(x) __attribute__((__unused__))x
+#else // defined(__clang__) || defined(__GNUC__)
 #include <memory.h>
 #define attributeUnused
-#endif // defined(__clang__)
+#define unusedParam(x)
+#endif // defined(__clang__) || defined(__GNUC__)
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //						Configuration options
@@ -769,7 +772,7 @@ public:
 // support static_cast between void * and function pointers.
 
 	template< class DerivedClass >
-	inline void CopyFrom (DerivedClass *pParent, const DelegateMemento &right) {
+	inline void CopyFrom (DerivedClass * unusedParam(pParent), const DelegateMemento &right) {
 		SetMementoFrom(right);
 	}
 	// For static functions, the 'static_function_invoker' class in the parent
