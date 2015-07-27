@@ -20,7 +20,6 @@ public:
 
   void render()
   {
-    udDebugPrintf("FboRenderer::render()\n");
     UDASSERT(s_pKernel->GetFocusView(), "No focus view");
 
     if (dirty)

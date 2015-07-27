@@ -33,37 +33,6 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
 }
 
-static udFilename s_filename("d:\\GIS_Example.uds");
-static udOctree *pMainModel = 0;
-static uint32_t streamingTime = 0;
-udDouble4x4 s_mat = udDouble4x4::identity();
-
-void LoadModel()
-{
-  udOctree_Destroy(&pMainModel);
-
-  udDebugPrintf("Loading %s\n", s_filename.GetFilenameWithExt());
-  streamingTime = udGetTimeMs();
-
-  if (udOctree_Create(&pMainModel, s_filename, nullptr, 0) != udR_Success)
-  {
-    udDebugPrintf("Failed to load model\n");
-  }
-  else
-  {
-    udDebugPrintf("Loaded model: %s\n", s_filename.GetFilenameWithExt());
-    int metadataCount;
-    udOctree_GetMetadataCount(pMainModel, &metadataCount);
-    udDebugPrintf("%d metadata entries\n", metadataCount);
-    for (int i = 0; i < metadataCount; ++i)
-    {
-      const char *pName;
-      const char *pValue;
-      udOctree_GetMetadataByIndex(pMainModel, i, &pName, &pValue);
-      udDebugPrintf("  '%s' = '%s'\n", pName, pValue);
-    }
-  }
-}
 
 void update(ViewRef pView, SceneRef pScene)
 {
@@ -84,28 +53,6 @@ void update(ViewRef pView, SceneRef pScene)
 
 void display(ViewRef pView, SceneRef pScene)
 {
-  udDebugPrintf("main - display()\n");
-
-  int displayWidth, displayHeight;
-  pView->GetDimensions(&displayWidth, &displayHeight);
-
-  int renderWidth, renderHeight;
-  pView->GetRenderDimensions(&renderWidth, &renderHeight);
-
-  //udRenderView *pRenderView = pView->GetRenderableView()->GetRenderView();
-  //udCameraRef pCamera = pView->GetCamera();
-
-  udStreamerStatus streamerStatus = { 0 };
-  //s_pKernel->GetStreamer()->Update(&streamerStatus);
-
-  udOctree_Update(&streamerStatus);
-
-  if (!streamerStatus.active && streamingTime)
-  {
-    udDebugPrintf("%s streamed in %1.2f seconds (from load to inactive)\n", s_filename.GetFilenameWithExt(), (udGetTimeMs() - streamingTime) / 1000.f);
-    streamingTime = 0;
-  }
-
   udDebugFont_BeginRender();
 
   udDebugConsole_SetCursorPos(10.f, 20.f);
@@ -159,8 +106,6 @@ int main(int argc, char *argv[])
   pView->SetScene(pScene);
   pView->SetCamera(pCamera);
   s_pKernel->SetFocusView(pView);
-
-  //LoadModel();
 
   // create the main window
   // TODO: make it more obvious that kernel is taking ownership of our window??
