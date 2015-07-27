@@ -34,12 +34,18 @@ public:
   void GetRenderDimensions(int *pWidth, int *pHeight) const;
   float GetAspectRatio() const { return (float)displayWidth / (float)displayHeight; }
 
+  void SetRenderOptions(const udRenderOptions &options) { this->options = options; }
+  const udRenderOptions& GetRenderOptions() const { return options; }
+
   udEvent<> Dirty;
 
   // TODO: remove these!
   void RegisterResizeCallback(void (*pCallback)(udViewRef pView, int w, int h)) { pResizeCallback = pCallback; }
   void RegisterPreRenderCallback(void(*pCallback)(udViewRef pView, udSceneRef pScene)) { pPreRenderCallback = pCallback; }
   void RegisterPostRenderCallback(void(*pCallback)(udViewRef pView, udSceneRef pScene)) { pPostRenderCallback = pCallback; }
+
+  // TODO: Hack Remove me
+  void ForceDirty() { OnDirty(); }
 
 protected:
   udSceneRef spScene = nullptr;
@@ -60,7 +66,7 @@ protected:
   void(*pPostRenderCallback)(udViewRef, udSceneRef) = nullptr;
 
   udView(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
-    : udComponent(pType, pKernel, uid, initParams) {}
+    : udComponent(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
 
   static udComponent *Create(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)
   {

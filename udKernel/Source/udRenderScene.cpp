@@ -74,6 +74,10 @@ void udRenderScene_InitRender()
   s_shader = udShader_CreateShaderProgram(pVS, pPS);
 }
 
+udRenderableView::udRenderableView()
+{
+  memset(&options, 0, sizeof(options));
+};
 
 udRenderableView::~udRenderableView()
 {

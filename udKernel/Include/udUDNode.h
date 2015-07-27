@@ -42,13 +42,15 @@ public:
   uint32_t GetRenderFlags() const { return renderFlags; }
   void SetRenderFlags(uint32_t flags) { renderFlags = (udRenderFlags)flags; }
 
-  udString GetSource() const; // This will become a udComponetSource
+  udString GetSource() const { return source;  }
 
   double GetUDScale() const { UDASSERT(udMat.a[0] == udMat.a[5] && udMat.a[0] == udMat.a[10], "NonUniform Scale"); return udMat.a[0]; }
 
   udBoundingVolume GetBoundingVolume() const;
 
   int Load(udString name, bool useStreamer); // TODO : Check return value to use error code
+
+  udSharedUDModelRef GetSharedUDModel() const { return  spModel;  } // TODO: Remove this once its no longer required by udglViewer
 
 protected:
   udUDNode(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams)

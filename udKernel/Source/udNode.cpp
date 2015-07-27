@@ -79,5 +79,17 @@ void udNode::Detach()
 
 void udNode::CalculateWorldMatrix(udDouble4x4 *pMatrix) const
 {
-  // TODO: multiply local matrix by parent matrices
+  if (pMatrix)
+  {
+    udNodeRef spParent = Parent();
+    if (spParent)
+    {
+      udDouble4x4 parentMatrix;
+      spParent->CalculateWorldMatrix(&parentMatrix);
+
+      *pMatrix = udMul(parentMatrix, matrix);
+    }
+    else
+      *pMatrix = matrix;
+  }
 }

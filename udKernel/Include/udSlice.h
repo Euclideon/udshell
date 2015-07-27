@@ -120,6 +120,7 @@ struct udFixedSlice : public udSlice<T>
   void clear();
   template <typename... Things> udFixedSlice<T, Count>& concat(const Things&... things);
   template <typename U> udFixedSlice<T, Count>& pushBack(const U &item);
+  T& pushBack();
 
   void remove(size_t i);
   void remove(const T& item);

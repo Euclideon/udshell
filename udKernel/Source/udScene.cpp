@@ -76,20 +76,12 @@ udResult udScene::SetRenderModels(struct udRenderModel models[], size_t numModel
   return udR_Success;
 }
 
-udResult udScene::SetRenderOptions(const struct udRenderOptions &options)
-{
-  this->options = options;
-
-  return udR_Success;
-}
-
 udScene::udScene(const udComponentDesc *pType, udKernel *pKernel, udRCString uid, udInitParams initParams) :
   udComponent(pType, pKernel, uid, initParams)
 {
   timeStep = 1.0 / 30.0;
   rootNode = pKernel->CreateComponent<udNode>();
 
-  memset(&options, 0, sizeof(options));
   memset(&renderModels, 0, sizeof(renderModels));
   numRenderModels = 0;
 }

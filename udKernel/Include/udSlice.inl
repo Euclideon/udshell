@@ -402,6 +402,14 @@ template <typename U> udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(c
 }
 
 template <typename T, size_t Count>
+inline T& udFixedSlice<T, Count>::pushBack()
+{
+  reserve(this->length + 1);
+  new((void*)&(this->ptr[this->length])) T();
+  return this->ptr[this->length++];
+}
+
+template <typename T, size_t Count>
 void udFixedSlice<T, Count>::remove(size_t i)
 {
   --this->length;

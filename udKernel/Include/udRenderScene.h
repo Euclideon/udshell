@@ -43,6 +43,7 @@ typedef udSharedPtr<udRenderScene> udRenderSceneRef;
 class udRenderableView : public udRefCounted
 {
 public:
+  udRenderableView();
   void RenderUD();
   void RenderGPU() const;
 

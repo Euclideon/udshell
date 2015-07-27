@@ -125,8 +125,8 @@ const udComponentDesc udUDNode::descriptor =
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
-  "pcNode",      // id
-  "udUDNode",    // displayName
+  "udnode",    // id
+  "udNode",  // displayName
   "Is a udModel Node", // description
 
   [](){ return udR_Success; },             // pInit
@@ -139,17 +139,20 @@ const udComponentDesc udUDNode::descriptor =
 
 int udUDNode::Load(udString name, bool useStreamer)
 {
-  source = "";
-  udResult result;
-  spModel = udSharedUDModel::Create(name, useStreamer);
-  if (!spModel)
-  {
-    result = udR_Failure_;
-    UD_ERROR_HANDLE();
-  }
+  udResult result = udR_Failure_;
 
-  source = name;
-  UD_ERROR_CHECK(udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a));
+  if (source.empty())
+  {
+    spModel = udSharedUDModel::Create(name, useStreamer);
+    if (!spModel)
+    {
+      result = udR_Failure_; // TODO : Put better error code
+      UD_ERROR_HANDLE();
+    }
+
+    UD_ERROR_CHECK(udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a));
+    source = name;
+  }
 
 epilogue:
   return (int)result;
@@ -158,7 +161,7 @@ epilogue:
 
 udResult udUDNode::Render(udRenderSceneRef &spScene, const udDouble4x4 &mat)
 {
-  udUDJob job;
+  udUDJob &job = spScene->ud.pushBack();
   memset(&job, 0, sizeof(job));
 
   job.matrix = udMul(mat, udMat);
@@ -175,7 +178,6 @@ udResult udUDNode::Render(udRenderSceneRef &spScene, const udDouble4x4 &mat)
     job.renderModel.pClip = &job.clipArea;
   }
 
-  spScene->ud.pushBack(job);
   return udR_Success;
 }
 

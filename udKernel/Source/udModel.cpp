@@ -16,3 +16,9 @@ epilogue:
 
   return spModel;
 }
+
+udSharedUDModel::~udSharedUDModel()
+{
+  if (pOctree)
+    pOctree->pDestroy(pOctree);
+}

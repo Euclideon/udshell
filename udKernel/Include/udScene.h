@@ -28,9 +28,9 @@ public:
 
   // TODO: HACK: fix this api!
   udResult SetRenderModels(struct udRenderModel models[], size_t numModels);
-  udResult SetRenderOptions(const struct udRenderOptions &options);
   const udRenderModel* GetRenderModels(size_t *pNumModels) const { if (pNumModels) { *pNumModels = numRenderModels; } return renderModels; }
-  const udRenderOptions& GetRenderOptions() const { return options; }
+
+  void ForceDirty() { bDirty = true; }
 
 protected:
   double timeStep = 0.0;
@@ -40,7 +40,6 @@ protected:
   udRenderSceneRef spCache = nullptr;
   bool bDirty = true; // becomes dirty when scene changes
 
-  udRenderOptions options;
   udRenderModel renderModels[16];
   size_t numRenderModels = 0;
 

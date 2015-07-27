@@ -31,7 +31,7 @@ const udComponentDesc udView::descriptor =
   [](){ return udR_Success; },  // pInit
   udView::Create,               // pCreateInstance
 
-  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  udSlice<const udPropertyDesc>(props, UDARRAYSIZE(props)) // properties
 };
 
 udResult udView::InputEvent(const udInputEvent &ev)

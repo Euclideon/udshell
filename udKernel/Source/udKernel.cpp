@@ -8,6 +8,7 @@
 #include "udView.h"
 #include "udCamera.h"
 #include "udNode.h"
+#include "udUDNode.h"
 
 #include "udLua.h"
 
@@ -36,6 +37,7 @@ udResult udKernel::Create(udKernel **ppInstance, udInitParams commandLine, int r
   UD_ERROR_CHECK(pKernel->RegisterComponentType(&udView::descriptor));
   UD_ERROR_CHECK(pKernel->RegisterComponentType(&udScene::descriptor));
   UD_ERROR_CHECK(pKernel->RegisterComponentType(&udNode::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&udUDNode::descriptor));
   UD_ERROR_CHECK(pKernel->RegisterComponentType(&udCamera::descriptor));
   UD_ERROR_CHECK(pKernel->RegisterComponentType(&udSimpleCamera::descriptor));
   //...
@@ -207,7 +209,7 @@ udResult udKernel::DestroyComponent(udComponentRef *pInstance)
   pLua->setNil(udString((*pInstance)->uid));
 
   // TODO: remove from component registry
-//  instanceRegistry.Destroy(...);
+  //instanceRegistry.Destroy((*pInstance)->uid.toStringz());
 
   // TODO: inform partners that I destroyed a component
   //...

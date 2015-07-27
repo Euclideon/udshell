@@ -498,6 +498,10 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // return nil (already on stack)
+  lua_getglobal(L, "print");
+  udFixedString64 errorMsg = udFixedString64::format("Error \"%s\" not found", field);
+  lua_pushstring(L, errorMsg.toStringz());
+  lua_call(L, 1, 0);
   return 1;
 }
 int LuaState::componentNewIndex(lua_State* L)
@@ -519,9 +523,18 @@ int LuaState::componentNewIndex(lua_State* L)
   if (!lua_isnil(L, -1))
   {
     lua_pushvalue(L, 1);
+    lua_pushvalue(L, 2);
     lua_pushvalue(L, 3);
-    lua_call(L, 2, LUA_MULTRET);
+    lua_call(L, 3, LUA_MULTRET);
+    return 0;
   }
+
+  // return nil (already on stack)
+  lua_getglobal(L, "print");
+  udFixedString64 errorMsg = udFixedString64::format("Error \"%s\" not found", field);
+  lua_pushstring(L, errorMsg.toStringz());
+  lua_call(L, 1, 0);
+
   return 0;
 }
 
