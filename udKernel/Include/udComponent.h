@@ -14,7 +14,7 @@
 
 
 #define UD_COMPONENT(Name) \
-  static const ComponentDesc descriptor; \
+  static ComponentDesc descriptor; \
   typedef SharedPtr<Name> Ref;
 
 namespace udKernel
@@ -28,6 +28,7 @@ public:
 
   const ComponentDesc* const pType;
   class Kernel* const pKernel;
+
   const udRCString uid;
 
   bool IsType(udString type) const;
@@ -38,6 +39,8 @@ public:
 
   void SetProperty(udString property, const Variant &value);
   Variant GetProperty(udString property) const;
+
+  void SignalPropertyChanged(const PropertyDesc *pProp) { pPropertyChange[pProp->index].Signal(); }
 
   udResult SendMessage(udString target, udString message, const Variant &data);
   udResult SendMessage(Component *pComponent, udString message, const Variant &data) { return SendMessage(pComponent->uid, message, data); }
@@ -51,13 +54,25 @@ public:
 protected:
   Component(const ComponentDesc *_pType, Kernel *_pKernel, udRCString _uid, InitParams initParams)
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
-  virtual ~Component() {}
+  virtual ~Component();
 
   virtual udResult ReceiveMessage(udString message, udString sender, const Variant &data);
+
+  size_t Component::NumProperties() const
+  {
+    return pType->pPropertyTree->Size();
+  }
+  ptrdiff_t Component::PropertyIndex(udString property) const
+  {
+    ComponentDesc::PropertyNode *pN = pType->pPropertyTree->Get(property);
+    return pN ? pN->index : -1;
+  }
 
   template<typename... Args>
   friend class Event;
   Subscriber subscriber;
+
+  Event<> *pPropertyChange = nullptr;
 
 private:
   void Init(InitParams initParams);

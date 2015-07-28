@@ -52,7 +52,7 @@ class SimpleCamera : public Camera
 public:
   UD_COMPONENT(SimpleCamera);
 
-  static Component *CreateInstance(ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
+  static Component *CreateInstance(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
 
   virtual void SetMatrix(const udDouble4x4 &matrix) { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); Camera::SetMatrix(matrix); }
   virtual void SetPosition(const udDouble3 &pos) { this->pos = pos; Camera::SetPosition(pos); }

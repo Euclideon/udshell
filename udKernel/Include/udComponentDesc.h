@@ -7,6 +7,7 @@
 #include "udSharedPtr.h"
 #include "udVariant.h"
 #include "udEvent.h"
+#include "udMap.h"
 
 
 // TODO: remove this!
@@ -205,6 +206,8 @@ struct PropertyDesc
   TypeDesc type;
   udString displayType;
   uint32_t flags;
+
+  uint32_t index;
 };
 
 struct MethodDesc
@@ -220,6 +223,8 @@ struct MethodDesc
 
   TypeDesc result;
   const udSlice<const TypeDesc> args;
+
+  uint32_t index;
 };
 
 struct EventDesc
@@ -234,6 +239,8 @@ struct EventDesc
   VarEvent ev;
 
   const udSlice<const TypeDesc> args;
+
+  uint32_t index;
 };
 
 
@@ -249,7 +256,7 @@ struct ComponentDesc
   ComponentDesc() = delete;
   ComponentDesc& operator=(const ComponentDesc&) = delete;
 
-  const ComponentDesc *pSuperDesc;
+  ComponentDesc *pSuperDesc;
 
   int udVersion;
   int pluginVersion;
@@ -260,13 +267,38 @@ struct ComponentDesc
 
   // icon image...
 
-//  this
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
 
-  const udSlice<const PropertyDesc> properties;
-  const udSlice<const MethodDesc> methods;
-  const udSlice<const EventDesc> events;
+  const udSlice<PropertyDesc> properties;
+  const udSlice<MethodDesc> methods;
+  const udSlice<EventDesc> events;
+
+  // property binary search tree
+  template<typename T>
+  struct SearchTree
+  {
+    SearchTree(const T *pItem)
+      : id(pItem->id), pItem(pItem), index(pItem->index) {}
+    udString id;
+    const T *pItem;
+    size_t index;
+    SearchTree *pLeft = nullptr;
+    SearchTree *pRight = nullptr;
+  };
+  typedef SearchTree<PropertyDesc> PropertyNode;
+  typedef SearchTree<MethodDesc> MethodNode;
+  typedef SearchTree<EventDesc> EventNode;
+
+  udMap<PropertyNode> *pPropertyTree;
+  udMap<MethodNode> *pMethodTree;
+  udMap<EventNode> *pEventTree;
+
+  void BuildSearchTree();
+
+  size_t NumProperties() const { return pPropertyTree ? pPropertyTree->Size() : 0; }
+  size_t NumMethods() const { return pMethodTree ? pMethodTree->Size() : 0; }
+  size_t NumEvents() const { return pEventTree ? pEventTree->Size() : 0; }
 };
 
 } // namespace udKernel

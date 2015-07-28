@@ -22,7 +22,7 @@ static const udSlice<const EnumKVP> renderFlags =
   { "udRenderFlags::Transparent",      udRF_Transparent }
 };
 
-static const PropertyDesc props[] =
+static PropertyDesc props[] =
 {
   {
     "startingroot", // id
@@ -105,7 +105,7 @@ static const PropertyDesc props[] =
 #endif
 };
 
-static const MethodDesc methods[] =
+static MethodDesc methods[] =
 {
   {
     "load",
@@ -121,7 +121,7 @@ static const MethodDesc methods[] =
 };
 
 
-const ComponentDesc UDNode::descriptor =
+ComponentDesc UDNode::descriptor =
 {
   &Node::descriptor, // pSuperDesc
 
@@ -135,8 +135,8 @@ const ComponentDesc UDNode::descriptor =
   [](){ return udR_Success; },             // pInit
   UDNode::Create, // pCreateInstance
 
-  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  udSlice<const MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  udSlice<MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 

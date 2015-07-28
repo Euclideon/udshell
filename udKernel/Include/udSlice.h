@@ -53,6 +53,7 @@ struct udSlice
   bool operator !=(udSlice<const T> rh) const;
 
   template <typename U> bool eq(udSlice<U> rh) const;
+  template <typename U> ptrdiff_t cmp(udSlice<U> rh) const;
 
   template <typename U> bool beginsWith(udSlice<U> rh) const;
   template <typename U> bool endsWith(udSlice<U> rh) const;

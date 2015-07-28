@@ -8,7 +8,7 @@
 namespace udKernel
 {
 
-static const PropertyDesc props[] =
+static PropertyDesc props[] =
 {
   {
     "camera", // id
@@ -19,7 +19,7 @@ static const PropertyDesc props[] =
     TypeDesc(PropertyType::Component) // type
   }
 };
-static const EventDesc events[] =
+static EventDesc events[] =
 {
   {
     "dirty", // id
@@ -28,7 +28,7 @@ static const EventDesc events[] =
     &View::Dirty
   }
 };
-const ComponentDesc View::descriptor =
+ComponentDesc View::descriptor =
 {
   &Component::descriptor, // pSuperDesc
 
@@ -42,9 +42,9 @@ const ComponentDesc View::descriptor =
   [](){ return udR_Success; },  // pInit
   View::Create,               // pCreateInstance
 
-  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr,
-  udSlice<const EventDesc>(events, UDARRAYSIZE(events)) // events
+  udSlice<EventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 udResult View::InputEvent(const udInputEvent &ev)

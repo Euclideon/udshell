@@ -7,7 +7,7 @@
 namespace udKernel
 {
 
-static const PropertyDesc props[] =
+static PropertyDesc props[] =
 {
   {
     "rootnode", // id
@@ -18,7 +18,7 @@ static const PropertyDesc props[] =
     TypeDesc(PropertyType::Integer) // type
   }
 };
-static const EventDesc events[] =
+static EventDesc events[] =
 {
   {
     "dirty", // id
@@ -27,7 +27,7 @@ static const EventDesc events[] =
     &Scene::Dirty
   }
 };
-const ComponentDesc Scene::descriptor =
+ComponentDesc Scene::descriptor =
 {
   &Component::descriptor, // pSuperDesc
 
@@ -41,9 +41,9 @@ const ComponentDesc Scene::descriptor =
   [](){ return udR_Success; },             // pInit
   Scene::Create, // pCreateInstance
 
-  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
   nullptr,
-  udSlice<const EventDesc>(events, UDARRAYSIZE(events)) // events
+  udSlice<EventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 

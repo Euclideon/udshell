@@ -1,5 +1,6 @@
 #pragma once
 #if !defined(_SHAREDPTR_H)
+#define _SHAREDPTR_H
 
 #define SHARED_CLASS(Name) \
   class Name; \

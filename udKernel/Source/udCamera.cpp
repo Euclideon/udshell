@@ -6,7 +6,7 @@
 
 namespace udKernel
 {
-static const PropertyDesc props[] =
+static PropertyDesc props[] =
 {
   {
     "cameramatrix", // id
@@ -25,7 +25,7 @@ static const PropertyDesc props[] =
     TypeDesc(PropertyType::Float, 16)
   }
 };
-static const MethodDesc methods[] =
+static MethodDesc methods[] =
 {
   {
     "setdepthplanes",
@@ -39,7 +39,7 @@ static const MethodDesc methods[] =
     }
   }
 };
-const ComponentDesc Camera::descriptor =
+ComponentDesc Camera::descriptor =
 {
   &Node::descriptor, // pSuperDesc
 
@@ -53,12 +53,12 @@ const ComponentDesc Camera::descriptor =
   [](){ return udR_Success; },  // pInit
   Camera::Create,             // pCreateInstance
 
-  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<const MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  udSlice<MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 
-static const PropertyDesc simpleCameraProps[] =
+static PropertyDesc simpleCameraProps[] =
 {
   {
     "matrix", // id
@@ -93,7 +93,7 @@ static const PropertyDesc simpleCameraProps[] =
     TypeDesc(PropertyType::Float) // type
   }
 };
-const ComponentDesc SimpleCamera::descriptor =
+ComponentDesc SimpleCamera::descriptor =
 {
   &Camera::descriptor, // pSuperDesc
 
@@ -107,7 +107,7 @@ const ComponentDesc SimpleCamera::descriptor =
   [](){ return udR_Success; },  // pInit
   SimpleCamera::Create,       // pCreateInstance
 
-  udSlice<const PropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
+  udSlice<PropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
 };
 
 
@@ -238,7 +238,7 @@ udResult SimpleCamera::Update(double timeDelta)
 }
 
 // ***************************************************************************************
-Component *SimpleCamera::CreateInstance(ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
 {
   return udNew(SimpleCamera, pType, pKernel, uid, initParams);
 }

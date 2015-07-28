@@ -32,7 +32,7 @@ protected:
     DelegateMementoRef spM;
     Subscriber *pSubscriber;
   };
-  udFixedSlice<Subscription, 3> subscribers;
+  udFixedSlice<Subscription, 4> subscribers;
 };
 
 template<typename... Args>
@@ -119,7 +119,7 @@ private:
     BaseEvent *pEvent;
   };
 
-  udFixedSlice<Subscription, 3> events;
+  udFixedSlice<Subscription, 4> events;
 };
 
 } // namespace udKernel

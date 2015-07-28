@@ -154,7 +154,7 @@ void Kernel::RegisterMessageHandler(udRCString name, udMessageHandler messageHan
   messageHandlers.Add(name.hash(), handler);
 }
 
-udResult Kernel::RegisterComponentType(const ComponentDesc *pDesc)
+udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
 {
   if (pDesc->id.canFind('@') || pDesc->id.canFind('$') || pDesc->id.canFind('#'))
   {
@@ -162,6 +162,10 @@ udResult Kernel::RegisterComponentType(const ComponentDesc *pDesc)
     return udR_Failure_;
   }
 
+  // build search trees
+  pDesc->BuildSearchTree();
+
+  // add to registry
   ComponentType t = { pDesc, 0 };
   componentRegistry.Add(pDesc->id.hash(), t);
   return udR_Success;

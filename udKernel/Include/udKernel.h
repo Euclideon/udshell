@@ -38,7 +38,7 @@ public:
   void DispatchToMainThreadAndWait(MainThreadCallback callback);
 
   // component registry
-  udResult RegisterComponentType(const ComponentDesc *pDesc);
+  udResult RegisterComponentType(ComponentDesc *pDesc);
 
   udResult CreateComponent(udString typeId, InitParams initParams, ComponentRef *pNewInstance);
   udResult DestroyComponent(ComponentRef *pInstance);

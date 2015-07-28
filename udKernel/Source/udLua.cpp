@@ -578,8 +578,9 @@ int LuaState::setter(lua_State *L)
   const PropertyDesc *pProp = (const PropertyDesc*)l.toUserData(lua_upvalueindex(1));
 
   ComponentRef c = l.toComponent(1);
-
   pProp->setter.set(c.ptr(), l.get(2));
+
+  c->SignalPropertyChanged(pProp);
   return 0;
 }
 int LuaState::method(lua_State *L)

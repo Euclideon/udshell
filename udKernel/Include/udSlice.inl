@@ -81,6 +81,20 @@ inline bool udSlice<T>::eq(udSlice<U> rh) const
 
 template<typename T>
 template<typename U>
+inline ptrdiff_t udSlice<T>::cmp(udSlice<U> rh) const
+{
+  size_t len = length < rh.length ? length : rh.length;
+  for (size_t i = 0; i < len; ++i)
+  {
+    if (ptr[i] == rh.ptr[i])
+      continue;
+    return ptr[i] < rh.ptr[i] ? -1 : 1;
+  }
+  return length - rh.length;
+}
+
+template<typename T>
+template<typename U>
 inline bool udSlice<T>::beginsWith(udSlice<U> rh) const
 {
   if (length < rh.length)

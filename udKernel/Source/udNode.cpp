@@ -3,7 +3,7 @@
 namespace udKernel
 {
 
-static const PropertyDesc props[] =
+static PropertyDesc props[] =
 {
   {
     "matrix", // id
@@ -38,7 +38,7 @@ static const PropertyDesc props[] =
     TypeDesc(PropertyType::Component, ~0U) // type
   },
 };
-const ComponentDesc Node::descriptor =
+ComponentDesc Node::descriptor =
 {
   &Component::descriptor, // pSuperDesc
 
@@ -52,7 +52,7 @@ const ComponentDesc Node::descriptor =
   [](){ return udR_Success; },             // pInit
   Node::Create, // pCreateInstance
 
-  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 udResult Node::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)

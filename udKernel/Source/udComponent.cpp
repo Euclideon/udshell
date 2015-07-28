@@ -11,7 +11,7 @@
 namespace udKernel
 {
 
-static const PropertyDesc props[] =
+static PropertyDesc props[] =
 {
   {
     "uid", // id
@@ -46,7 +46,7 @@ static const PropertyDesc props[] =
     TypeDesc(PropertyType::String) // type
   }
 };
-const ComponentDesc Component::descriptor =
+ComponentDesc Component::descriptor =
 {
   nullptr, // pSuperDesc
 
@@ -60,7 +60,7 @@ const ComponentDesc Component::descriptor =
   nullptr, // pInit
   nullptr, // pCreateInstance
 
-  udSlice<const PropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 
@@ -72,6 +72,20 @@ void Component::Init(InitParams initParams)
     if (pDesc && pDesc->setter)
       pDesc->setter.set(this, kv.value);
   }
+
+  // allocate property change events
+  size_t numProps = NumProperties();
+  pPropertyChange = udAllocType(Event<>, numProps, udAF_None);
+  for (size_t i = 0; i<numProps; ++i)
+    new(&pPropertyChange[i]) Event<>();
+}
+
+Component::~Component()
+{
+  size_t numProps = NumProperties();
+  for (size_t i = 0; i<numProps; ++i)
+    pPropertyChange[i].~Event<>();
+  udFree(pPropertyChange);
 }
 
 
@@ -112,6 +126,7 @@ void Component::SetProperty(udString property, const Variant &value)
   if (pDesc->flags & udPF_Immutable)
     return; // TODO: make noise
   pDesc->setter.set(this, value);
+  pPropertyChange[pDesc->index].Signal();
 }
 
 Variant Component::GetProperty(udString property) const
@@ -142,7 +157,6 @@ udResult Component::ReceiveMessage(udString message, udString sender, const Vari
 //      SendMessage(sender, "val", buffer);
     }
   }
-
   return udR_Success;
 }
 
