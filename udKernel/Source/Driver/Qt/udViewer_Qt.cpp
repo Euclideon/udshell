@@ -8,14 +8,15 @@
 #include <QSemaphore>
 
 #include "udKernel.h"
+
 using namespace udKernel;
 
 // custom kernel event
-class udQtKernelEvent : public QEvent
+class QtKernelEvent : public QEvent
 {
 public:
-  udQtKernelEvent(const FastDelegateMemento &mem) : QEvent(type()), m(mem) {}
-  virtual ~udQtKernelEvent() {}
+  QtKernelEvent(const FastDelegateMemento &mem) : QEvent(type()), m(mem) {}
+  virtual ~QtKernelEvent() {}
 
   static QEvent::Type type()
   {
@@ -29,24 +30,24 @@ public:
 private:
   static QEvent::Type eventType;
 };
-QEvent::Type udQtKernelEvent::eventType = QEvent::None;
+QEvent::Type QtKernelEvent::eventType = QEvent::None;
 
 // custom kernel event with semaphore
-class udQtKernelSyncEvent : public udQtKernelEvent
+class QtKernelSyncEvent : public QtKernelEvent
 {
 public:
-  udQtKernelSyncEvent(const FastDelegateMemento &mem, QSemaphore *pS) : udQtKernelEvent(mem), pSem(pS) {}
-  virtual ~udQtKernelSyncEvent() { if(pSem) pSem->release(); }
+  QtKernelSyncEvent(const FastDelegateMemento &mem, QSemaphore *pS) : QtKernelEvent(mem), pSem(pS) {}
+  virtual ~QtKernelSyncEvent() { if (pSem) pSem->release(); }
 
   QSemaphore *pSem;
 };
 
 
-class udQtKernel : public Kernel, public QObject
+class QtKernel : public Kernel, public QObject
 {
 public:
-  udQtKernel::udQtKernel(InitParams commandLine);
-  virtual ~udQtKernel() {}
+  QtKernel::QtKernel(InitParams commandLine);
+  virtual ~QtKernel() {}
 
   udResult Init();
   udResult Shutdown();
@@ -76,13 +77,15 @@ private:
 
   QGuiApplication *pApplication;
   QQuickWindow *pMainWindow;
+  QQmlEngine *pQmlEngine;
+
   Qt::HANDLE mainThreadId;
   Qt::HANDLE renderThreadId;
 };
 
 
 // ---------------------------------------------------------------------------------------
-udQtKernel::udQtKernel(InitParams commandLine)
+QtKernel::QtKernel(InitParams commandLine)
   : QObject(0)
   , pApplication(nullptr)
   , pMainWindow(nullptr)
@@ -104,7 +107,7 @@ udQtKernel::udQtKernel(InitParams commandLine)
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udQtKernel::Init()
+udResult QtKernel::Init()
 {
   udDebugPrintf("udQtKernel::Init()\n");
 
@@ -116,13 +119,19 @@ udResult udQtKernel::Init()
   pApplication = new QGuiApplication(argc, argv.ptr);
 
   // make sure we cleanup the kernel when we're about to quit
-  QObject::connect(pApplication, &QCoreApplication::aboutToQuit, this, &udQtKernel::Destroy);
+  QObject::connect(pApplication, &QCoreApplication::aboutToQuit, this, &QtKernel::Destroy);
+
+  // TODO: create qml engine
+  // TODO: create qquickwindow
+  // TODO: create app qml context
+  // TODO: create dummy empty window
+  // TODO: hook up window signals
 
   return udR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udQtKernel::Shutdown()
+udResult QtKernel::Shutdown()
 {
   udDebugPrintf("udQtKernel::Shutdown()\n");
   delete pMainWindow;
@@ -131,7 +140,7 @@ udResult udQtKernel::Shutdown()
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udQtKernel::RegisterWindows()
+udResult QtKernel::RegisterWindows()
 {
   udDebugPrintf("udQtKernel::RegisterWindows()\n");
 
@@ -160,7 +169,7 @@ epilogue:
 }
 
 // ---------------------------------------------------------------------------------------
-udResult udQtKernel::RunMainLoop()
+udResult QtKernel::RunMainLoop()
 {
   udDebugPrintf("udQtKernel::RunMainLoop()\n");
 
@@ -172,7 +181,7 @@ udResult udQtKernel::RunMainLoop()
 }
 
 // ---------------------------------------------------------------------------------------
-void udQtKernel::PostEvent(QEvent *pEvent, int priority)
+void QtKernel::PostEvent(QEvent *pEvent, int priority)
 {
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
@@ -181,7 +190,7 @@ void udQtKernel::PostEvent(QEvent *pEvent, int priority)
 }
 
 // ---------------------------------------------------------------------------------------
-void udQtKernel::RegisterWindow(QQuickWindow *pWin)
+void QtKernel::RegisterWindow(QQuickWindow *pWin)
 {
   udDebugPrintf("udQtKernel::RegisterWindow()\n");
 
@@ -192,19 +201,19 @@ void udQtKernel::RegisterWindow(QQuickWindow *pWin)
 
   // hook into render thread events
   // TODO: we should probably break this out to allow for context destruction/construction
-  QObject::connect(pMainWindow, &QQuickWindow::beforeRendering, this, &udQtKernel::InitRender, Qt::DirectConnection);
+  QObject::connect(pMainWindow, &QQuickWindow::beforeRendering, this, &QtKernel::InitRender, Qt::DirectConnection);
   //QObject::connect(pMainWindow, &QQuickWindow::sceneGraphInitialized, this, &udQtKernel::OnSceneGraphInitialized, Qt::DirectConnection);
   //QObject::connect(pMainWindow, &QQuickWindow::openglContextCreated, this, &udQtKernel::OnOpenglContextCreated, Qt::DirectConnection);
-  QObject::connect(pMainWindow, &QQuickWindow::sceneGraphInvalidated, this, &udQtKernel::CleanupRender, Qt::DirectConnection);
+  QObject::connect(pMainWindow, &QQuickWindow::sceneGraphInvalidated, this, &QtKernel::CleanupRender, Qt::DirectConnection);
 }
 
 // ---------------------------------------------------------------------------------------
-void udQtKernel::customEvent(QEvent *pEvent)
+void QtKernel::customEvent(QEvent *pEvent)
 {
-  if (pEvent->type() == udQtKernelEvent::type())
+  if (pEvent->type() == QtKernelEvent::type())
   {
     MainThreadCallback d;
-    d.SetMemento(static_cast<udQtKernelEvent*>(pEvent)->m);
+    d.SetMemento(static_cast<QtKernelEvent*>(pEvent)->m);
     d(this);
   }
   else
@@ -215,7 +224,7 @@ void udQtKernel::customEvent(QEvent *pEvent)
 
 // ---------------------------------------------------------------------------------------
 // RENDER THREAD
-void udQtKernel::InitRender()
+void QtKernel::InitRender()
 {
   udDebugPrintf("udQtKernel::InitRender()\n");
 
@@ -224,7 +233,7 @@ void udQtKernel::InitRender()
   UDASSERT(pMainWindow != nullptr, "Main Window doesn't exist");
 
   // we only want this called on the first render cycle
-  QObject::disconnect(pMainWindow, &QQuickWindow::beforeRendering, this, &udQtKernel::InitRender);
+  QObject::disconnect(pMainWindow, &QQuickWindow::beforeRendering, this, &QtKernel::InitRender);
 
   // TODO: need a better place to set this since this is called *after* our scenegraph has been created
   // ALSO does this thread ever get recreated? does this id remain valid thru the program?
@@ -240,7 +249,7 @@ void udQtKernel::InitRender()
 
 // ---------------------------------------------------------------------------------------
 // RENDER THREAD
-void udQtKernel::CleanupRender()
+void QtKernel::CleanupRender()
 {
   udDebugPrintf("CleanupRender\n");
   if (Kernel::DeinitRender() != udR_Success)
@@ -251,7 +260,7 @@ void udQtKernel::CleanupRender()
 }
 
 // ---------------------------------------------------------------------------------------
-void udQtKernel::Destroy()
+void QtKernel::Destroy()
 {
   udDebugPrintf("udQtKernel::Destroy()\n");
   Kernel::Destroy();
@@ -262,14 +271,14 @@ void udQtKernel::Destroy()
 Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
   udDebugPrintf("Kernel::CreateInstanceInternal()\n");
-  return new udQtKernel(commandLine);
+  return new QtKernel(commandLine);
 }
 
 // ---------------------------------------------------------------------------------------
 udResult Kernel::InitInstanceInternal()
 {
   udDebugPrintf("Kernel::InitInstanceInternal()\n");
-  return static_cast<udQtKernel*>(this)->Init();
+  return static_cast<QtKernel*>(this)->Init();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -283,7 +292,7 @@ udResult Kernel::InitRenderInternal()
 udResult Kernel::DestroyInstanceInternal()
 {
   udDebugPrintf("Kernel::DestroyInstanceInternal()\n");
-  return static_cast<udQtKernel*>(this)->Shutdown();
+  return static_cast<QtKernel*>(this)->Shutdown();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -296,12 +305,18 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 }
 
 // ---------------------------------------------------------------------------------------
+//void Kernel::FormatMainWindow(UIComponentRef spUiComponent)
+//{
+  // TODO:
+//}
+
+// ---------------------------------------------------------------------------------------
 udResult Kernel::RunMainLoop()
 {
   udDebugPrintf("Kernel::RunMainLoop()\n");
 
   udResult result;
-  udQtKernel *pKernel = static_cast<udQtKernel*>(this);
+  QtKernel *pKernel = static_cast<QtKernel*>(this);
 
   UD_ERROR_CHECK(pKernel->RegisterWindows());
   UD_ERROR_CHECK(pKernel->RunMainLoop());
@@ -326,14 +341,14 @@ void Kernel::DispatchToMainThread(MainThreadCallback callback)
 {
   udDebugPrintf("Kernel::DispatchToMainThread()\n");
 
-  udQtKernel *pKernel = static_cast<udQtKernel*>(this);
+  QtKernel *pKernel = static_cast<QtKernel*>(this);
 
   // if we're on the main thread just execute the callback now
   if (pKernel->OnMainThread())
     callback(this);
   // otherwise jam it into the event queue
   else
-    pKernel->PostEvent(new udQtKernelEvent(callback.GetMemento()), Qt::NormalEventPriority);
+    pKernel->PostEvent(new QtKernelEvent(callback.GetMemento()), Qt::NormalEventPriority);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -341,7 +356,7 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   udDebugPrintf("Kernel::DispatchToMainThreadAndWait()\n");
 
-  udQtKernel *pKernel = static_cast<udQtKernel*>(this);
+  QtKernel *pKernel = static_cast<QtKernel*>(this);
 
   // TODO: handle this gracefully? can we detect if the main thread is blocked??
   UDASSERT(!pKernel->OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
@@ -355,7 +370,7 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   else
   {
     QSemaphore sem;
-    pKernel->PostEvent(new udQtKernelSyncEvent(callback.GetMemento(), &sem), Qt::NormalEventPriority);
+    pKernel->PostEvent(new QtKernelSyncEvent(callback.GetMemento(), &sem), Qt::NormalEventPriority);
     sem.acquire();
   }
 }

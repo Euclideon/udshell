@@ -9,6 +9,7 @@
 #include "udCamera.h"
 #include "udNode.h"
 #include "udUDNode.h"
+#include "udUIComponent.h"
 
 #include "udLua.h"
 
@@ -42,6 +43,8 @@ udResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   UD_ERROR_CHECK(pKernel->RegisterComponentType(&UDNode::descriptor));
   UD_ERROR_CHECK(pKernel->RegisterComponentType(&Camera::descriptor));
   UD_ERROR_CHECK(pKernel->RegisterComponentType(&SimpleCamera::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponentType(&UIComponent::descriptor));
+
   //...
 
   // init the HAL

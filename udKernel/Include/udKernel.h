@@ -16,7 +16,10 @@ namespace udKernel
 class LuaState;
 
 class udBlockStreamer;
+
 PROTOTYPE_COMPONENT(View);
+PROTOTYPE_COMPONENT(UIComponent);
+
 
 // TODO: udMessageHandler returns void, should we return some error state??
 typedef FastDelegate3<udString , udString , const Variant &, void> udMessageHandler;
@@ -56,6 +59,8 @@ public:
   // other functions
   ViewRef GetFocusView() const { return spFocusView; }
   ViewRef SetFocusView(ViewRef spView);
+  // TODO
+  //void FormatMainWindow(UIComponentRef spUIComponent);
 
   udResult RunMainLoop();
   udResult Terminate();
