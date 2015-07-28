@@ -7,7 +7,7 @@
 #include <QSGSimpleTextureNode>
 
 
-extern udKernel *s_pKernel;
+extern udKernel::Kernel *s_pKernel;
 
 
 class FboRenderer : public QQuickFramebufferObject::Renderer

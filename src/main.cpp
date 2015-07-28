@@ -9,7 +9,8 @@
 #include "udUDNode.h"
 #include "quick/window.h"
 
-udKernel *s_pKernel;
+using namespace udKernel;
+Kernel*s_pKernel;
 
 
 // ---------------------------------------------------------------------------------------
@@ -64,11 +65,11 @@ void LoadModel()
   }
 }
 
-void update(udViewRef pView, udSceneRef pScene)
+void update(ViewRef pView, SceneRef pScene)
 {
   udDebugPrintf("main - update()\n");
 
-  udCameraRef pCamera = pView->GetCamera();
+  CameraRef pCamera = pView->GetCamera();
   pCamera->SetPerspective(UD_PIf / 3.f);
   pCamera->SetDepthPlanes(0.0001f, 7500.f);
   //pCamera->Update();
@@ -81,7 +82,7 @@ void update(udViewRef pView, udSceneRef pScene)
   pScene->ForceDirty();
 }
 
-void display(udViewRef pView, udSceneRef pScene)
+void display(ViewRef pView, SceneRef pScene)
 {
   udDebugPrintf("main - display()\n");
 
@@ -130,14 +131,14 @@ int main(int argc, char *argv[])
   qputenv("QSG_RENDER_LOOP", "threaded");
 
   // create a kernel
-  udResult r = udKernel::Create(&s_pKernel, udParseCommandLine(argc, argv), 8);
+  udResult r = Kernel::Create(&s_pKernel, udParseCommandLine(argc, argv), 8);
   if (r == udR_Failure_)
     return 1;
 
-  auto pView = s_pKernel->CreateComponent<udView>();
-  auto pScene = s_pKernel->CreateComponent<udScene>();
-  auto pCamera = s_pKernel->CreateComponent<udSimpleCamera>();
-  auto pUDNode = s_pKernel->CreateComponent<udUDNode>();
+  auto pView = s_pKernel->CreateComponent<View>();
+  auto pScene = s_pKernel->CreateComponent<Scene>();
+  auto pCamera = s_pKernel->CreateComponent<SimpleCamera>();
+  auto pUDNode = s_pKernel->CreateComponent<UDNode>();
 
   if (pUDNode)
   {
