@@ -3,7 +3,7 @@
 namespace udKernel
 {
 
-const ComponentDesc UIComponent::descriptor =
+ComponentDesc UIComponent::descriptor =
 {
   &Component::descriptor, // pSuperDesc
 
