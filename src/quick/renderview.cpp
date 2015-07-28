@@ -2,10 +2,14 @@
 #include "udKernel.h"
 #include "udView.h"
 
+// Warning from QSGGeometry
+#if UDPLATFORM_WINDOWS
+#pragma warning(disable: 4512)
+#endif
+
 #include <QtQuick/QQuickWindow>
 #include <QtGui/QOpenGLFramebufferObject>
 #include <QSGSimpleTextureNode>
-
 
 extern udKernel::Kernel *s_pKernel;
 
