@@ -8,13 +8,13 @@
 #include <QSemaphore>
 
 #include "udKernel.h"
-
+using namespace udKernel;
 
 // custom kernel event
 class udQtKernelEvent : public QEvent
 {
 public:
-  udQtKernelEvent(const DelegateMemento &mem) : QEvent(type()), m(mem) {}
+  udQtKernelEvent(const FastDelegateMemento &mem) : QEvent(type()), m(mem) {}
   virtual ~udQtKernelEvent() {}
 
   static QEvent::Type type()
@@ -24,7 +24,7 @@ public:
     return eventType;
   }
 
-  DelegateMemento m;
+  FastDelegateMemento m;
 
 private:
   static QEvent::Type eventType;
@@ -35,7 +35,7 @@ QEvent::Type udQtKernelEvent::eventType = QEvent::None;
 class udQtKernelSyncEvent : public udQtKernelEvent
 {
 public:
-  udQtKernelSyncEvent(const DelegateMemento &mem, QSemaphore *pS) : udQtKernelEvent(mem), pSem(pS) {}
+  udQtKernelSyncEvent(const FastDelegateMemento &mem, QSemaphore *pS) : udQtKernelEvent(mem), pSem(pS) {}
   virtual ~udQtKernelSyncEvent() { if(pSem) pSem->release(); }
 
   QSemaphore *pSem;

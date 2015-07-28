@@ -193,6 +193,7 @@ struct TypeDesc
 struct PropertyDesc
 {
   PropertyDesc() = delete;
+  void operator=(const PropertyDesc&) = delete;
 
   udString id;
   udString displayName;
@@ -209,6 +210,7 @@ struct PropertyDesc
 struct MethodDesc
 {
   MethodDesc() = delete;
+  void operator=(const MethodDesc&) = delete;
 
   udString id;
   udString displayName;
@@ -223,6 +225,7 @@ struct MethodDesc
 struct EventDesc
 {
   EventDesc() = delete;
+  void operator=(const EventDesc&) = delete;
 
   udString id;
   udString displayName;
