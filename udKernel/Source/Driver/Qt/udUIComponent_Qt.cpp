@@ -1,6 +1,6 @@
 #include "udDriver.h"
 
-#if UDINPUT_DRIVER == UDDRIVER_QT
+#if UDUI_DRIVER == UDDRIVER_QT
 
 #include "udUIComponent.h"
 

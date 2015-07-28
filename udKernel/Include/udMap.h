@@ -2,52 +2,11 @@
 #if !defined(_UDMAP_H)
 #define _UDMAP_H
 
-template<typename T>
-class udFreeList
-{
-public:
-  udFreeList(size_t listSize)
-    : numAllocated(0)
-  {
-    pList = pFreeList = udAllocType(T, listSize, udAF_None);
-    for (size_t i = 0; i<listSize; ++i)
-      (T*&)pList[i] = i < listSize-1 ? &pList[i+1] : nullptr;
-  }
-  ~udFreeList()
-  {
-    // TODO: free allocated items...
-
-    udFree(pList);
-  }
-
-  template<typename... Args>
-  T* Alloc(Args... args)
-  {
-    T *pNew = pFreeList;
-    if (!pNew)
-      return nullptr;
-
-    pFreeList = *(T**)pFreeList;
-    ++numAllocated;
-
-    return new(pNew) T(args...);
-  }
-
-  void Free(T *pItem)
-  {
-    pItem->~T();
-    *(T**)pItem = pFreeList;
-    pFreeList = pItem;
-  }
-
-  size_t Size() const { return numAllocated; }
-
-private:
-  T *pList, *pFreeList;
-  size_t numAllocated;
-};
+#include "udFreeList.h"
 
 #include <functional>
+
+
 template<typename T>
 class udMap
 {
