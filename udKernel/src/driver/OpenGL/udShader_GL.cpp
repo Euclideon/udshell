@@ -1,10 +1,10 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDRENDER_DRIVER == UDDRIVER_OPENGL
 
-#include "udShader.h"
-#include "udTexture.h"
-#include "udVertex.h"
+#include "hal/shader.h"
+#include "hal/texture.h"
+#include "hal/vertex.h"
 
 #include "udOpenGL_Internal.h"
 

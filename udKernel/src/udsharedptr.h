@@ -10,7 +10,7 @@
   struct Name; \
   typedef SharedPtr<Name> Name##Ref;
 
-namespace udKernel
+namespace ud
 {
 
 class RefCounted;

@@ -1,8 +1,8 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDINPUT_DRIVER == UDDRIVER_NULL
 
-#include "udKernel.h"
+#include "kernel.h"
 
 
 Kernel *Kernel::createInstanceInternal(int argc, char** argv)

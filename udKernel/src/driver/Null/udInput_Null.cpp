@@ -1,4 +1,4 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDINPUT_DRIVER == UDDRIVER_NULL
 

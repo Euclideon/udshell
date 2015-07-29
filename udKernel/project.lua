@@ -3,10 +3,10 @@ project "udKernel"
 	language "C++"
 	flags { "StaticRuntime", "OmitDefaultLibrary" }
 
-	files { "Source/**", "Include/**" }
+	files { "src/**" }
 	files { "project.lua" }
 
-	includedirs { "Include" }
+	includedirs { "src" }
 	includedirs { "../udPlatform/Include" }
 	includedirs { "../udPointCloud/Include" }
 	includedirs { "../3rdParty/lua/" .. luaPath .. "/src"}

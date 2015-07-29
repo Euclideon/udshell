@@ -2,16 +2,17 @@
 #ifndef UDPCNODE_H
 #define UDPCNODE_H
 
-#include "udComponent.h"
-#include "udInput.h"
 #include "udMath.h"
 #include "udRender.h"
-#include "udNode.h"
-#include "udModel.h"
+
+#include "../component.h"
+#include "node.h"
+#include "resources/udmodel.h"
+#include "hal/input.h"
 
 struct udOctree;
 
-namespace udKernel
+namespace ud
 {
 
 struct BoundingVolume
@@ -135,6 +136,6 @@ inline void udFromVariant(const Variant &variant, BoundingVolume *pVolume)
   pVolume->max.z = variant["maxz"].as<double>();
 }
 
-} // namespace udKernel
+} // namespace ud
 
 #endif // UDPCNODE_H

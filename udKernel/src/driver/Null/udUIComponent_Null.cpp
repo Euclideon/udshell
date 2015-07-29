@@ -1,10 +1,10 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDUI_DRIVER == UDDRIVER_NULL
 
-#include "udUIComponent.h"
+#include "components/uicomponent.h"
 
-namespace udKernel
+namespace ud
 {
 
 Component *UIComponent::Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
@@ -12,6 +12,6 @@ Component *UIComponent::Create(const ComponentDesc *pType, Kernel *pKernel, udRC
   return nullptr;
 }
 
-} // namespace udKernel
+} // namespace ud
 
 #endif

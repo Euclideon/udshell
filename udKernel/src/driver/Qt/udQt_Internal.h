@@ -2,9 +2,9 @@
 #ifndef UDQT_INTERNAL_H
 #define UDQT_INTERNAL_H
 
-#include "udDriver.h"
-#include "udTexture.h"
-#include "udVertex.h"
+#include "hal/driver.h"
+#include "hal/texture.h"
+#include "hal/vertex.h"
 
 #include <QOpenGLFunctions_2_0>
 #include <QOpenGLDebugLogger>

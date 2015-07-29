@@ -1,5 +1,6 @@
 #include "udPlatform.h"
-#include "udHal.h"
+
+#include "hal.h"
 
 static bool bInitialised = false;
 static bool bRenderInitialised = false;

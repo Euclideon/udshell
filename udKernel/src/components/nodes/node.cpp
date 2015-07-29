@@ -1,6 +1,6 @@
-#include "udNode.h"
+#include "node.h"
 
-namespace udKernel
+namespace ud
 {
 
 static PropertyDesc props[] =
@@ -96,4 +96,4 @@ void Node::CalculateWorldMatrix(udDouble4x4 *pMatrix) const
   }
 }
 
-} // namespace udKernel
+} // namespace ud

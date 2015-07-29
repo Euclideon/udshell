@@ -2,16 +2,16 @@
 #ifndef UDKERNEL_H
 #define UDKERNEL_H
 
-#include "udComponent.h"
-#include "udView.h"
-#include "udHelpers.h"
+#include "components/component.h"
+#include "components/view.h"
+#include "helpers.h"
 
-#include "3rdparty\FastDelegate.h"
+#include "3rdparty/FastDelegate.h"
 using namespace fastdelegate;
 
 struct udRenderEngine;
 
-namespace udKernel
+namespace ud
 {
 class LuaState;
 
@@ -121,5 +121,5 @@ SharedPtr<T> Kernel::CreateComponent(InitParams initParams)
   return static_pointer_cast<T>(c);
 }
 
-} //namespace udKernel
+} //namespace ud
 #endif // UDKERNEL_H

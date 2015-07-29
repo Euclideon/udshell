@@ -1,6 +1,6 @@
-#include "udComponentDesc.h"
+#include "componentdesc.h"
 
-namespace udKernel
+namespace ud
 {
 
 void ComponentDesc::BuildSearchTree()
@@ -61,4 +61,4 @@ void ComponentDesc::BuildSearchTree()
   }
 }
 
-} // namespace udKernel
+} // namespace ud

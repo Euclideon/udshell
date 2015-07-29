@@ -2,7 +2,7 @@
 #if !defined(UD_GLUT)
 #define UD_GLUT
 
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDWINDOW_DRIVER == UDDRIVER_GLUT
 

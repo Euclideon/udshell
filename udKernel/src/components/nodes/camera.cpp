@@ -1,10 +1,10 @@
 #include "udPlatform.h"
-#include "udViewer_Internal.h"
-#include "udCamera.h"
-#include "udInput.h"
-#include "udKernel.h"
 
-namespace udKernel
+#include "camera.h"
+#include "kernel.h"
+#include "hal/input.h"
+
+namespace ud
 {
 static PropertyDesc props[] =
 {
@@ -242,4 +242,4 @@ Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKer
 {
   return udNew(SimpleCamera, pType, pKernel, uid, initParams);
 }
-} // namespace udKernel
+} // namespace ud

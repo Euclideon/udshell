@@ -2,7 +2,7 @@
 #if !defined(UD_OPENGL)
 #define UD_OPENGL
 
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if defined(USE_GLEW)
 # include "GL/glew.h"
@@ -33,8 +33,8 @@
 # define udCheckGLError()
 #endif
 
-#include "udTexture.h"
-#include "udVertex.h"
+#include "hal/texture.h"
+#include "hal/vertex.h"
 
 struct udTexture
 {

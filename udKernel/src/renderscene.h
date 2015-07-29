@@ -3,16 +3,16 @@
 #define UDRENDERSCENE_H
 
 #include "udRender.h"
-#include "udSharedPtr.h"
-#include "udSlice.h"
 #include "udMath.h"
-#include "udView.h"
-#include "udRender.h"
-#include "udModel.h"
+
+#include "udsharedptr.h"
+#include "udslice.h"
+#include "components/view.h"
+#include "resources/udmodel.h"
 
 
 struct udTexture;
-namespace udKernel
+namespace ud
 {
 
 struct UDJob
@@ -84,6 +84,6 @@ protected:
 };
 typedef SharedPtr<RenderableView> RenderableViewRef;
 
-} // namespace udKernel
+} // namespace ud
 
 #endif // UDRENDERSCENE_H

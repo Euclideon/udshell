@@ -1,14 +1,13 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDINPUT_DRIVER == UDDRIVER_SDL
 
+#include "kernel.h"
+#include "components/view.h"
+#include "viewer_internal.h"
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-
-#include "udKernel.h"
-#include "udView.h"
-
-#include "../../udViewer_Internal.h"
 
 SDL_Window* s_window = nullptr;
 SDL_GLContext s_context = nullptr;
@@ -16,7 +15,7 @@ bool s_done = false;
 static int s_displayWidth, s_displayHeight;
 static int s_sdlEvent = -1;
 
-using namespace udKernel;
+using namespace ud;
 Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
   return new Kernel;

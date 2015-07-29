@@ -1,8 +1,8 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDRENDER_DRIVER == UDDRIVER_OPENGL
 
-#include "udVertex.h"
+#include "hal/vertex.h"
 
 #include "udOpenGL_Internal.h"
 

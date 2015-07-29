@@ -2,9 +2,9 @@
 #ifndef UDUICOMPONENT_H
 #define UDUICOMPONENT_H
 
-#include "udComponent.h"
+#include "component.h"
 
-namespace udKernel
+namespace ud
 {
 PROTOTYPE_COMPONENT(UIComponent);
 
@@ -22,6 +22,6 @@ protected:
 };
 
 
-} // namespace udKernel
+} // namespace ud
 
 #endif // UDUICOMPONENT_H

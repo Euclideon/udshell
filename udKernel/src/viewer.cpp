@@ -1,15 +1,16 @@
 #include "udPlatform.h"
 #include "udPlatformUtil.h"
 #include "udRender.h"
-#include "udGPU.h"
-#include "udTexture.h"
-#include "udVertex.h"
-#include "udShader.h"
-#include "udInput.h"
-#include "udViewer_Internal.h"
 #include "udMath.h"
 
-#include "udCamera.h"
+#include "hal/render.h"
+#include "hal/texture.h"
+#include "hal/vertex.h"
+#include "hal/shader.h"
+#include "hal/input.h"
+#include "viewer_internal.h"
+
+#include "components/nodes/camera.h"
 
 
 void udDebugFont_Init();

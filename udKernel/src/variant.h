@@ -2,10 +2,10 @@
 #if !defined(UDVARIANT_H)
 #define UDVARIANT_H
 
-#include "udString.h"
-#include "udDelegate.h"
+#include "udstring.h"
+#include "delegate.h"
 
-namespace udKernel
+namespace ud
 {
 
 SHARED_CLASS(Component);
@@ -118,9 +118,9 @@ struct KeyValuePair
 
 typedef udSlice<KeyValuePair> InitParams;
 
-} // namespace udKernel
+} // namespace ud
 
 
-#include "udVariant.inl"
+#include "variant.inl"
 
 #endif // UDVARIANT_H

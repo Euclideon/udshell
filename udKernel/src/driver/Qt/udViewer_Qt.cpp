@@ -1,4 +1,4 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDINPUT_DRIVER == UDDRIVER_QT
 
@@ -7,9 +7,9 @@
 #include <QThread>
 #include <QSemaphore>
 
-#include "udKernel.h"
+#include "kernel.h"
 
-using namespace udKernel;
+using namespace ud;
 
 // custom kernel event
 class QtKernelEvent : public QEvent

@@ -3,10 +3,11 @@
 #include "udPlatform.h"
 #include "udPlatformUtil.h"
 #include "udMath.h"
-#include "udDebugFont.h"
-#include "udShader.h"
-#include "udVertex.h"
-#include "udGPU.h"
+
+#include "debugfont.h"
+#include "shader.h"
+#include "vertex.h"
+#include "render.h"
 
 #include <stdarg.h>
 #include <malloc.h>

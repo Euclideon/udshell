@@ -1,7 +1,7 @@
 
-#include "udHelpers.h"
+#include "helpers.h"
 
-namespace udKernel
+namespace ud
 {
 
 udRCSlice<KeyValuePair> udParseCommandLine(const char *pCommandLine)
@@ -55,4 +55,4 @@ udRCSlice<KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], co
   return udRCSlice<KeyValuePair>(output.slice(0, argc));
 }
 
-} // namespace udKernel
+} // namespace ud

@@ -1,10 +1,10 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDUI_DRIVER == UDDRIVER_QT
 
-#include "udUIComponent.h"
+#include "components/uicomponent.h"
 
-namespace udKernel
+namespace ud
 {
 
 class QmlComponent : public UIComponent
@@ -33,6 +33,6 @@ Component *UIComponent::Create(const ComponentDesc *pType, Kernel *pKernel, udRC
   return udNew(QmlComponent, pType, pKernel, uid, initParams);
 }
 
-} // namespace udKernel
+} // namespace ud
 
 #endif

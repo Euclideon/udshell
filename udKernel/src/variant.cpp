@@ -1,9 +1,9 @@
 
-#include "udVariant.h"
-#include "udComponent.h"
-#include "udLua.h"
+#include "variant.h"
+#include "components/component.h"
+#include "udlua.h"
 
-namespace udKernel
+namespace ud
 {
 
 udRCString Variant::stringify() const
@@ -349,4 +349,4 @@ Variant Variant::luaGet(LuaState &l, int idx)
   }
 }
 
-} // namespace udKernel
+} // namespace ud

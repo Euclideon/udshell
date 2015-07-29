@@ -1,11 +1,11 @@
 #pragma once
 #if !defined(_LUA_H)
 
-#include "udComponent.h"
+#include "components/component.h"
 
 #include "lua.hpp"
 
-namespace udKernel
+namespace ud
 {
 
 enum class LuaType : int
@@ -170,9 +170,9 @@ public:
   }
 };
 
-} // namespace udKernel
+} // namespace ud
 
-#include "udLua.inl"
+#include "udlua.inl"
 
 #endif
 

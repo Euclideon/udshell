@@ -2,12 +2,13 @@
 #ifndef UDVIEW_H
 #define UDVIEW_H
 
-#include "udComponent.h"
-#include "udInput.h"
 #include "udRender.h"
 #include "udMath.h"
 
-namespace udKernel
+#include "component.h"
+#include "hal/input.h"
+
+namespace ud
 {
 
 SHARED_CLASS(RenderableView);
@@ -78,5 +79,5 @@ protected:
 
   void OnDirty();
 };
-} // namespace udKernel
+} // namespace ud
 #endif // UDVIEW_H

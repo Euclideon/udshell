@@ -2,11 +2,12 @@
 #ifndef UDNODE_H
 #define UDNODE_H
 
-#include "udComponent.h"
-#include "udInput.h"
 #include "udMath.h"
 
-namespace udKernel
+#include "components/component.h"
+#include "hal/input.h"
+
+namespace ud
 {
 
 SHARED_CLASS(RenderScene);
@@ -56,5 +57,5 @@ protected:
     return udNew(Node, pType, pKernel, uid, initParams);
   }
 };
-} // namespace udKernel
+} // namespace ud
 #endif // UDNODE_H

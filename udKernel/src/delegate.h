@@ -3,12 +3,12 @@
 #define _UDDELEGATE_H
 
 #include "3rdparty/FastDelegate.h"
-#include "udSharedPtr.h"
+#include "udsharedptr.h"
 
 using fastdelegate::FastDelegate;
 typedef fastdelegate::DelegateMemento FastDelegateMemento;
 
-namespace udKernel
+namespace ud
 {
 
 class DelegateMemento : public RefCounted
@@ -70,7 +70,5 @@ protected:
   DelegateMementoRef m = nullptr;
 };
 }
-
-#include "udDelegate.inl"
 
 #endif // _UDDELEGATE_H

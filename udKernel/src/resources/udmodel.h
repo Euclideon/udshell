@@ -5,10 +5,10 @@
 #include "udPlatform.h"
 #include "udOctree.h"
 
-#include "udSharedPtr.h"
-#include "udString.h"
+#include "udsharedptr.h"
+#include "udstring.h"
 
-namespace udKernel
+namespace ud
 {
 
 SHARED_CLASS(SharedUDModel);
@@ -32,6 +32,6 @@ private:
   udOctree *pOctree;
 };
 
-} // namespace udKernel
+} // namespace ud
 
 #endif // UDMODEL_H

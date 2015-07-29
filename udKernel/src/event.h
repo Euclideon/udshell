@@ -2,12 +2,12 @@
 #if !defined(_UDEVENT_H)
 #define _UDEVENT_H
 
-#include "udDelegate.h"
-#include "udSlice.h"
+#include "delegate.h"
+#include "udslice.h"
 
 using fastdelegate::FastDelegate;
 
-namespace udKernel
+namespace ud
 {
 class Component;
 typedef SharedPtr<Component> ComponentRef;
@@ -122,8 +122,8 @@ private:
   udFixedSlice<Subscription, 4> events;
 };
 
-} // namespace udKernel
+} // namespace ud
 
-#include "udEvent.inl"
+#include "event.inl"
 
 #endif // _UDEVENT_H

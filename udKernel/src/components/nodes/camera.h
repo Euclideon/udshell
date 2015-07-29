@@ -2,10 +2,10 @@
 #ifndef UDCAMERA_H
 #define UDCAMERA_H
 
-#include "udComponent.h"
-#include "udNode.h"
+#include "../component.h"
+#include "node.h"
 
-namespace udKernel
+namespace ud
 {
 PROTOTYPE_COMPONENT(Camera);
 PROTOTYPE_COMPONENT(SimpleCamera);
@@ -85,5 +85,5 @@ protected:
   }
 };
 
-} // namespace udKernel
+} // namespace ud
 #endif

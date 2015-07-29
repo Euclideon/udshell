@@ -2,11 +2,12 @@
 #ifndef UDSCENE_H
 #define UDSCENE_H
 
-#include "udComponent.h"
-#include "udNode.h"
 #include "udRender.h"
 
-namespace udKernel
+#include "component.h"
+#include "nodes/node.h"
+
+namespace ud
 {
 
 SHARED_CLASS(RenderScene);

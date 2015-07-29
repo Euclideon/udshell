@@ -1,10 +1,10 @@
 
-#include "udScene.h"
-#include "udView.h"
-#include "udKernel.h"
-#include "udRenderScene.h"
+#include "scene.h"
+#include "view.h"
+#include "kernel.h"
+#include "renderscene.h"
 
-namespace udKernel
+namespace ud
 {
 
 static PropertyDesc props[] =
@@ -103,4 +103,4 @@ Scene::~Scene()
 {
 
 }
-}  // namespace udKernel
+}  // namespace ud

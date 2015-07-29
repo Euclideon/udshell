@@ -1,5 +1,5 @@
 
-namespace udKernel
+namespace ud
 {
 using fastdelegate::FastDelegate0;
 using fastdelegate::FastDelegate1;
@@ -125,4 +125,4 @@ struct Method::Partial<void, Args...>
     return Variant();
   }
 };
-}  // namespace udKernel
+}  // namespace ud

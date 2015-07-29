@@ -1,10 +1,10 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDRENDER_DRIVER == UDDRIVER_QT
 
-#include "udGPU.h"
-#include "udShader.h"
-#include "udVertex.h"
+#include "hal/render.h"
+#include "hal/shader.h"
+#include "hal/vertex.h"
 
 #include "udQt_Internal.h"
 

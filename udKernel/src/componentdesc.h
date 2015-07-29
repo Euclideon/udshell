@@ -3,11 +3,12 @@
 #define UDCOMPONENTDESC_H
 
 #include "udPlatform.h"
-#include "udString.h"
-#include "udSharedPtr.h"
-#include "udVariant.h"
-#include "udEvent.h"
-#include "udMap.h"
+
+#include "udstring.h"
+#include "udsharedptr.h"
+#include "variant.h"
+#include "event.h"
+#include "udmap.h"
 
 
 // TODO: remove this!
@@ -25,7 +26,7 @@ using std::nullptr_t;
   SHARED_CLASS(Name)
 
 
-namespace udKernel
+namespace ud
 {
 
 class Kernel;
@@ -301,9 +302,9 @@ struct ComponentDesc
   size_t NumEvents() const { return pEventTree ? pEventTree->Size() : 0; }
 };
 
-} // namespace udKernel
+} // namespace ud
 
 
-#include "udComponentDesc.inl"
+#include "componentdesc.inl"
 
 #endif // UDCOMPONENTDESC_H

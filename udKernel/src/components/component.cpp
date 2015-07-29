@@ -1,14 +1,14 @@
 
 #include "udPlatform.h"
 #include "udPlatformUtil.h"
-#include "udKernel.h"
+#include "kernel.h"
 
 // TODO: shut up about sprintf! **REMOVE ME**
 #if UDPLATFORM_WINDOWS
 #pragma warning(disable: 4996)
 #endif // UDPLATFORM_WINDOWS
 
-namespace udKernel
+namespace ud
 {
 
 static PropertyDesc props[] =
@@ -164,4 +164,4 @@ udResult Component::SendMessage(udString target, udString message, const Variant
 {
   return pKernel->SendMessage(target, uid, message, data);
 }
-} // namespace udKernel
+} // namespace ud

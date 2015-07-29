@@ -1,19 +1,18 @@
 #include "udPlatform.h"
-#include "udKernel.h"
+#include "kernel.h"
 #include "udRender.h"
 #include "udBlockStreamer.h"
 
-#include "udHAL.h"
-#include "udScene.h"
-#include "udView.h"
-#include "udCamera.h"
-#include "udNode.h"
-#include "udUDNode.h"
-#include "udUIComponent.h"
+#include "hal/hal.h"
+#include "components/scene.h"
+#include "components/view.h"
+#include "components/uicomponent.h"
+#include "components/nodes/node.h"
+#include "components/nodes/camera.h"
+#include "components/nodes/udnode.h"
+#include "udlua.h"
 
-#include "udLua.h"
-
-namespace udKernel
+namespace ud
 {
 udResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount)
 {
@@ -276,5 +275,5 @@ void Kernel::Exec(udString code)
   pLua->exec(code);
 }
 
-} // namespace udKernel
+} // namespace ud
 

@@ -1,9 +1,9 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDRENDER_DRIVER == UDDRIVER_NULL
 
-#include "udShader.h"
-#include "udTexture.h"
+#include "hal/shader.h"
+#include "hal/texture.h"
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015

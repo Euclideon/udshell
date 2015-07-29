@@ -1,10 +1,11 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDINPUT_DRIVER == UDDRIVER_PPAPI
 
 #include <stdarg.h>
 #include "udPlatformUtil.h"
 #include "udFile.h"
+#include "udBlockStreamer.h"
 
 #include "ppapi/cpp/instance.h"
 #include "ppapi/cpp/graphics_3d.h"
@@ -17,14 +18,13 @@
 #include "ppapi/lib/gl/gles2/gl2ext_ppapi.h"
 #include "ppapi/utility/completion_callback_factory.h"
 
-#include "../../udViewer_Internal.h"
 #include "../OpenGL/udOpenGL_Internal.h"
 
-#include "udCamera.h"
-#include "udView.h"
-#include "udScene.h"
-#include "udKernel.h"
-#include "udBlockStreamer.h"
+#include "kernel.h"
+#include "components/view.h"
+#include "components/scene.h"
+#include "components/nodes/camera.h"
+#include "viewer_internal.h"
 
 // Pepper module
 class udPepperModule : public pp::Module

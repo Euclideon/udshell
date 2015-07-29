@@ -1,8 +1,8 @@
-#include "udUDNode.h"
+#include "udnode.h"
 #include "udOctree.h"
-#include "udRenderScene.h"
+#include "renderscene.h"
 
-namespace udKernel
+namespace ud
 {
 
 static const udSlice<const EnumKVP> renderFlags =
@@ -206,4 +206,4 @@ BoundingVolume UDNode::GetBoundingVolume() const
   return vol;
 }
 
-} // namespace udKernel
+} // namespace ud

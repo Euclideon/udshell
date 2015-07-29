@@ -1,11 +1,11 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDINPUT_DRIVER == UDDRIVER_GLUT
 
 #include "udGLUT_Internal.h"
-#include "../../udInput_Internal.h"
-
 #include "udPlatformUtil.h"
+
+#include "hal/input_internal.h"
 
 
 static unsigned char fkeysToUDKey[] =

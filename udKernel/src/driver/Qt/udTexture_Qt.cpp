@@ -1,8 +1,9 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDRENDER_DRIVER == UDDRIVER_QT
 
-#include "udTexture.h"
+#include "hal/texture.h"
+
 #include "udQt_Internal.h"
 
 #include <QOpenGLTexture>

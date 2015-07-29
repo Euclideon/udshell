@@ -1,14 +1,14 @@
-#include "udRenderScene.h"
+#include "renderscene.h"
 
-#include "udGPU.h"
-#include "udTexture.h"
-#include "udVertex.h"
-#include "udShader.h"
+#include "hal/render.h"
+#include "hal/texture.h"
+#include "hal/vertex.h"
+#include "hal/shader.h"
 
 // TODO: remove when resource cleanup is implemented
-#include "udDriver.h"
+#include "hal/driver.h"
 
-namespace udKernel
+namespace ud
 {
 
 // shaders for blitting
@@ -170,4 +170,4 @@ void RenderableView::RenderGPU() const
 #endif
 }
 
-} // namespace udKernel
+} // namespace ud

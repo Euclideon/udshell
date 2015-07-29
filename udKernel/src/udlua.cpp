@@ -1,10 +1,10 @@
 
-#include "udLua.h"
-#include "udKernel.h"
+#include "udlua.h"
+#include "kernel.h"
 
-
-namespace udKernel
+namespace ud
 {
+
 static const char s_udatatypename[] = "userdata";
 const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
   "no value",
@@ -814,4 +814,5 @@ int LuaState::subscribe(lua_State* L)
 
   return 0;
 }
-} // namespace udKernel
+
+} // namespace ud

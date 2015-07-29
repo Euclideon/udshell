@@ -2,9 +2,10 @@
 #ifndef UDCOMPONENT_H
 #define UDCOMPONENT_H
 
-#include "udComponentDesc.h"
+#include "componentdesc.h"
+#include "event.h"
+
 #include "udHashMap.h"
-#include "udEvent.h"
 
 #include <stdio.h>
 
@@ -17,7 +18,7 @@
   static ComponentDesc descriptor; \
   typedef SharedPtr<Name> Ref;
 
-namespace udKernel
+namespace ud
 {
 
 class Component : public RefCounted
@@ -121,6 +122,6 @@ void Event<Args...>::Unsubscribe(Component *pC, void(X::*func)(Args...))
   pC->subscriber.Unsubscribe(*this, Delegate((X*)pC, func));
 }
 
-} // namespace udKernel
+} // namespace ud
 
 #endif // UDCOMPONENT_H

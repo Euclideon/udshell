@@ -1,6 +1,6 @@
-#include "udUIComponent.h"
+#include "uicomponent.h"
 
-namespace udKernel
+namespace ud
 {
 
 ComponentDesc UIComponent::descriptor =
@@ -18,4 +18,4 @@ ComponentDesc UIComponent::descriptor =
   UIComponent::Create        // pCreateInstance
 };
 
-} // namespace udKernel
+} // namespace ud

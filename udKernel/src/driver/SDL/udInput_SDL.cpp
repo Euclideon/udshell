@@ -1,8 +1,8 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDINPUT_DRIVER == UDDRIVER_SDL
 
-#include "../../udInput_Internal.h"
+#include "hal/input_internal.h"
 
 #include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_mouse.h>

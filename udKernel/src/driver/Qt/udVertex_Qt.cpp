@@ -1,8 +1,9 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDRENDER_DRIVER == UDDRIVER_QT
 
-#include "udVertex.h"
+#include "hal/vertex.h"
+
 #include "udQt_Internal.h"
 
 #include <QOpenGLBuffer>

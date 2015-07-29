@@ -1,8 +1,8 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDINPUT_DRIVER == UDDRIVER_PPAPI
 
-#include "../../udInput_Internal.h"
+#include "hal/input_internal.h"
 
 
 // --------------------------------------------------------

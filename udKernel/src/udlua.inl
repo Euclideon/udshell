@@ -1,5 +1,6 @@
-namespace udKernel
+namespace ud
 {
+
 inline lua_State *LuaState::state()
 {
   return L;
@@ -145,4 +146,5 @@ inline void LuaState::push(const Variant &v)
 {
   v.luaPush(*this);
 }
-} // namespace udKernel
+
+} // namespace ud

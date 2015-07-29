@@ -1,4 +1,4 @@
-namespace udKernel
+namespace ud
 {
 
 inline BaseEvent::~BaseEvent()
@@ -65,4 +65,4 @@ inline void Subscriber::RemoveSubscription(const DelegateMementoRef &spM, BaseEv
     }
   }
 }
-} // namespace udKernel
+} // namespace ud

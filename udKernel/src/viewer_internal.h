@@ -2,7 +2,7 @@
 #ifndef UDVIEWER_INTERNAL_H
 #define UDVIEWER_INTERNAL_H
 
-#include "udViewer.h"
+#include "viewer.h"
 #include "udRender.h"
 
 

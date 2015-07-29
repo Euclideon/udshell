@@ -1,8 +1,8 @@
-#include "udDriver.h"
+#include "hal/driver.h"
 
 #if UDRENDER_DRIVER == UDDRIVER_NULL
 
-#include "udVertex.h"
+#include "hal/vertex.h"
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015

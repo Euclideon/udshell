@@ -3,7 +3,7 @@
 
 #include "udMath.h"
 
-namespace udKernel
+namespace ud
 {
 
 // constructors...
@@ -518,4 +518,4 @@ inline void udFromVariant(const Variant &v, udDelegate<R(Args...)> *pD)
 
   *pD = udDelegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
 }
-} // namespace udKernel
+} // namespace ud

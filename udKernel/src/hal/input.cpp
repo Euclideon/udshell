@@ -1,4 +1,4 @@
-#include "udInput_Internal.h"
+#include "input_internal.h"
 
 const int gMaxDevices[udID_Max] =
 {

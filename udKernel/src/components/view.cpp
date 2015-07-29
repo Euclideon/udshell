@@ -1,11 +1,11 @@
 
-#include "udView.h"
-#include "udKernel.h"
-#include "udScene.h"
-#include "udCamera.h"
+#include "view.h"
+#include "kernel.h"
+#include "scene.h"
+#include "nodes/camera.h"
+#include "renderscene.h"
 
-#include "udRenderScene.h"
-namespace udKernel
+namespace ud
 {
 
 static PropertyDesc props[] =
@@ -177,4 +177,4 @@ void View::OnDirty()
   Dirty.Signal();
 }
 
-} // namespace udKernel
+} // namespace ud

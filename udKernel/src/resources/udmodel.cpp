@@ -1,6 +1,6 @@
-#include "udModel.h"
+#include "udmodel.h"
 
-namespace udKernel
+namespace ud
 {
 
 SharedUDModelRef SharedUDModel::Create(udString name, bool useStreamer)
@@ -25,5 +25,5 @@ SharedUDModel::~SharedUDModel()
   if (pOctree)
     pOctree->pDestroy(pOctree);
 }
-} // namespace udKernel
+} // namespace ud
 
