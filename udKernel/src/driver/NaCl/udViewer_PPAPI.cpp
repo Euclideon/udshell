@@ -24,7 +24,6 @@
 #include "components/view.h"
 #include "components/scene.h"
 #include "components/nodes/camera.h"
-#include "viewer_internal.h"
 
 // Pepper module
 class udPepperModule : public pp::Module
@@ -66,7 +65,7 @@ public:
 
   static void DebugPrintfCallback(const char *pString);
   static UDTHREADLOCAL udNewPepperInstance *pThreadLocalInstance;
-  void SendToJsCallback(udString senderUID, udString message, const Variant &data);
+  void SendToJsCallback(udString senderUID, udString message, const udVariant &data);
 };
 
 UDTHREADLOCAL udNewPepperInstance* udNewPepperInstance::pThreadLocalInstance = NULL; // This can't be nullptr it creates a compile error.
@@ -79,7 +78,7 @@ Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 }
 
 // ---------------------------------------------------------------------------------------
-void udNewPepperInstance::SendToJsCallback(udString sender, udString message, const Variant &data)
+void udNewPepperInstance::SendToJsCallback(udString sender, udString message, const udVariant &data)
 {
   // TODO: Need to wrangle this to include the sender
   udRCString s = data.stringify();

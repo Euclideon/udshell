@@ -4,7 +4,6 @@
 
 #include "kernel.h"
 #include "components/view.h"
-#include "viewer_internal.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>

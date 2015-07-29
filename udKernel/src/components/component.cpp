@@ -75,16 +75,16 @@ void Component::Init(InitParams initParams)
 
   // allocate property change events
   size_t numProps = NumProperties();
-  pPropertyChange = udAllocType(Event<>, numProps, udAF_None);
+  pPropertyChange = udAllocType(udEvent<>, numProps, udAF_None);
   for (size_t i = 0; i<numProps; ++i)
-    new(&pPropertyChange[i]) Event<>();
+    new(&pPropertyChange[i]) udEvent<>();
 }
 
 Component::~Component()
 {
   size_t numProps = NumProperties();
   for (size_t i = 0; i<numProps; ++i)
-    pPropertyChange[i].~Event<>();
+    pPropertyChange[i].~udEvent<>();
   udFree(pPropertyChange);
 }
 
@@ -116,7 +116,7 @@ const PropertyDesc *Component::FindProperty(udString name) const
   return nullptr;
 }
 
-void Component::SetProperty(udString property, const Variant &value)
+void Component::SetProperty(udString property, const udVariant &value)
 {
   const PropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
@@ -129,22 +129,22 @@ void Component::SetProperty(udString property, const Variant &value)
   pPropertyChange[pDesc->index].Signal();
 }
 
-Variant Component::GetProperty(udString property) const
+udVariant Component::GetProperty(udString property) const
 {
   const PropertyDesc *pDesc = FindProperty(property);
   if (!pDesc)
-    return Variant(); // TODO: make noise
+    return udVariant(); // TODO: make noise
   if (!pDesc->getter)
-    return Variant(); // TODO: make noise
+    return udVariant(); // TODO: make noise
   return pDesc->getter.get(this);
 }
 
 
-udResult Component::ReceiveMessage(udString message, udString sender, const Variant &data)
+udResult Component::ReceiveMessage(udString message, udString sender, const udVariant &data)
 {
   if (message.eqi("set"))
   {
-    udSlice<Variant> arr = data.asArray();
+    udSlice<udVariant> arr = data.asArray();
     SetProperty(arr[0].asString(), arr[1]);
   }
   else if (message.eqi("get"))
@@ -160,7 +160,7 @@ udResult Component::ReceiveMessage(udString message, udString sender, const Vari
   return udR_Success;
 }
 
-udResult Component::SendMessage(udString target, udString message, const Variant &data)
+udResult Component::SendMessage(udString target, udString message, const udVariant &data)
 {
   return pKernel->SendMessage(target, uid, message, data);
 }

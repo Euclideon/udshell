@@ -79,26 +79,28 @@ protected:
   udDouble4x4 udMat;
 };
 
+} // namespace ud
 
-inline Variant ToVariant(const udRenderClipArea& area)
+
+inline udVariant udToVariant(const udRenderClipArea& area)
 {
-  KeyValuePair *pPairs = udAllocType(KeyValuePair, 4, udAF_None);
+  udKeyValuePair *pPairs = udAllocType(udKeyValuePair, 4, udAF_None);
   if (pPairs)
   {
-    udSlice<KeyValuePair> slice(pPairs, 4);
+    udSlice<udKeyValuePair> slice(pPairs, 4);
 
-    new (&slice[0]) KeyValuePair("minx", area.minX);
-    new (&slice[1]) KeyValuePair("miny", area.minY);
-    new (&slice[2]) KeyValuePair("maxx", area.maxX);
-    new (&slice[3]) KeyValuePair("maxy", area.maxX);
+    new (&slice[0]) udKeyValuePair("minx", area.minX);
+    new (&slice[1]) udKeyValuePair("miny", area.minY);
+    new (&slice[2]) udKeyValuePair("maxx", area.maxX);
+    new (&slice[3]) udKeyValuePair("maxy", area.maxX);
 
-    return Variant(slice, true);
+    return udVariant(slice, true);
   }
 
-  return Variant();
+  return udVariant();
 }
 
-inline void udFromVariant(const Variant &variant, udRenderClipArea *pArea)
+inline void udFromVariant(const udVariant &variant, udRenderClipArea *pArea)
 {
   pArea->minX = variant["minx"].as<uint32_t>();
   pArea->minY = variant["miny"].as<uint32_t>();
@@ -107,26 +109,26 @@ inline void udFromVariant(const Variant &variant, udRenderClipArea *pArea)
 }
 
 
-inline Variant ToVariant(const BoundingVolume &volume)
+inline udVariant udToVariant(const ud::BoundingVolume &volume)
 {
-  KeyValuePair *pPairs = udAllocType(KeyValuePair, 6, udAF_None);
+  udKeyValuePair *pPairs = udAllocType(udKeyValuePair, 6, udAF_None);
   if (pPairs)
   {
-    udSlice<KeyValuePair> slice(pPairs, 6);
+    udSlice<udKeyValuePair> slice(pPairs, 6);
 
-    new (&slice[0]) KeyValuePair("minx", volume.min.x);
-    new (&slice[1]) KeyValuePair("miny", volume.min.y);
-    new (&slice[0]) KeyValuePair("minz", volume.min.z);
-    new (&slice[2]) KeyValuePair("maxx", volume.max.x);
-    new (&slice[3]) KeyValuePair("maxy", volume.max.y);
-    new (&slice[3]) KeyValuePair("maxz", volume.max.z);
-    return Variant(slice, true);
+    new (&slice[0]) udKeyValuePair("minx", volume.min.x);
+    new (&slice[1]) udKeyValuePair("miny", volume.min.y);
+    new (&slice[0]) udKeyValuePair("minz", volume.min.z);
+    new (&slice[2]) udKeyValuePair("maxx", volume.max.x);
+    new (&slice[3]) udKeyValuePair("maxy", volume.max.y);
+    new (&slice[3]) udKeyValuePair("maxz", volume.max.z);
+    return udVariant(slice, true);
   }
 
-  return Variant();
+  return udVariant();
 }
 
-inline void udFromVariant(const Variant &variant, BoundingVolume *pVolume)
+inline void udFromVariant(const udVariant &variant, ud::BoundingVolume *pVolume)
 {
   pVolume->min.x = variant["minx"].as<double>();
   pVolume->min.y = variant["miny"].as<double>();
@@ -135,7 +137,5 @@ inline void udFromVariant(const Variant &variant, BoundingVolume *pVolume)
   pVolume->max.y = variant["maxy"].as<double>();
   pVolume->max.z = variant["maxz"].as<double>();
 }
-
-} // namespace ud
 
 #endif // UDPCNODE_H

@@ -5,15 +5,15 @@
 #include "udPlatform.h"
 #include "udOctree.h"
 
-#include "udsharedptr.h"
-#include "udstring.h"
+#include "util/udsharedptr.h"
+#include "util/udstring.h"
 
 namespace ud
 {
 
 SHARED_CLASS(SharedUDModel);
 
-class SharedUDModel : public RefCounted
+class SharedUDModel : public udRefCounted
 {
 public:
   static SharedUDModelRef Create(udString name, bool useStreamer);
@@ -22,7 +22,7 @@ public:
 
 protected:
   template<typename T>
-  friend class SharedPtr;
+  friend class udSharedPtr;
 
   virtual ~SharedUDModel();
 

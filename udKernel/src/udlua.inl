@@ -142,7 +142,7 @@ inline void LuaState::pushLightUserData(void *val)
   else
     lua_pushlightuserdata(L, val);
 }
-inline void LuaState::push(const Variant &v)
+inline void LuaState::push(const udVariant &v)
 {
   v.luaPush(*this);
 }

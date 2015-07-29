@@ -22,7 +22,7 @@ PROTOTYPE_COMPONENT(UIComponent);
 
 
 // TODO: udMessageHandler returns void, should we return some error state??
-typedef FastDelegate3<udString , udString , const Variant &, void> udMessageHandler;
+typedef FastDelegate3<udString , udString , const udVariant &, void> udMessageHandler;
 
 class Kernel
 {
@@ -31,7 +31,7 @@ public:
   static udResult Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount = 0);
   udResult Destroy();
 
-  udResult SendMessage(udString target, udString sender, udString message, const Variant &data);
+  udResult SendMessage(udString target, udString sender, udString message, const udVariant &data);
 
   void RegisterMessageHandler(udRCString name, udMessageHandler messageHandler);
 
@@ -47,7 +47,7 @@ public:
   udResult DestroyComponent(ComponentRef *pInstance);
 
   template<typename T>
-  SharedPtr<T> CreateComponent(InitParams initParams = nullptr);
+  udSharedPtr<T> CreateComponent(InitParams initParams = nullptr);
 
   ComponentRef FindComponent(udString uid);
 
@@ -106,13 +106,13 @@ protected:
   udResult InitRender();
   udResult DeinitRender();
 
-  udResult ReceiveMessage(udString sender, udString message, const Variant &data);
+  udResult ReceiveMessage(udString sender, udString message, const udVariant &data);
 
   int SendMessage(LuaState L);
 };
 
 template<typename T>
-SharedPtr<T> Kernel::CreateComponent(InitParams initParams)
+udSharedPtr<T> Kernel::CreateComponent(InitParams initParams)
 {
   ComponentRef c = nullptr;
   udResult r = CreateComponent(T::descriptor.id, initParams, &c);

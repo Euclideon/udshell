@@ -59,9 +59,9 @@ public:
   void pushLightUserData(void *val);
 
   void pushComponent(ComponentRef c);
-  void pushDelegate(const Variant::Delegate &d);
+  void pushDelegate(const udVariant::Delegate &d);
 
-  void push(const Variant &v);
+  void push(const udVariant &v);
 
   // pop***
   void pop(int count = 1);
@@ -81,15 +81,15 @@ public:
   void* toUserData(int idx = -1);
 
   ComponentRef toComponent(int idx = -1);
-  Variant::Delegate toDelegate(int idx = -1);
+  udVariant::Delegate toDelegate(int idx = -1);
 
-  Variant get(int idx = -1);
+  udVariant get(int idx = -1);
 
   // set
-  void setNil(Variant key, LuaLocation loc = LuaLocation::Global);
-  void setComponent(ComponentRef c, Variant key, LuaLocation loc = LuaLocation::Global);
+  void setNil(udVariant key, LuaLocation loc = LuaLocation::Global);
+  void setComponent(ComponentRef c, udVariant key, LuaLocation loc = LuaLocation::Global);
 
-  void set(Variant v, Variant key, LuaLocation loc = LuaLocation::Global);
+  void set(udVariant v, udVariant key, LuaLocation loc = LuaLocation::Global);
 
 private:
   lua_State *L;

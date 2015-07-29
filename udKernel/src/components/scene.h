@@ -28,7 +28,7 @@ public:
 
   RenderSceneRef GetRenderScene();
 
-  Event<> Dirty;
+  udEvent<> Dirty;
 
   // TODO: HACK: fix this api!
   udResult SetRenderModels(struct udRenderModel models[], size_t numModels);

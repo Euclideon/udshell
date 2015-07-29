@@ -1,6 +1,7 @@
 
 namespace ud
 {
+
 using fastdelegate::FastDelegate0;
 using fastdelegate::FastDelegate1;
 
@@ -16,13 +17,13 @@ inline Getter::Getter(Type(X::*func)() const)
   shim = &shimFunc<Type>;
 }
 
-inline Variant Getter::get(const Component *pThis) const
+inline udVariant Getter::get(const ud::Component *pThis) const
 {
   return shim(this, pThis);
 }
 
 template<typename T>
-inline Variant Getter::shimFunc(const Getter * const pGetter, const Component *pThis)
+inline udVariant Getter::shimFunc(const Getter * const pGetter, const ud::Component *pThis)
 {
   auto m = pGetter->m;
   m.SetThis((void*)pThis);
@@ -30,7 +31,7 @@ inline Variant Getter::shimFunc(const Getter * const pGetter, const Component *p
   FastDelegate0<T> d;
   d.SetMemento(m);
 
-  return Variant(d());
+  return udVariant(d());
 }
 
 // setter stuff
@@ -45,13 +46,13 @@ inline Setter::Setter(void(X::*func)(Type))
   shim = &shimFunc<Type>;
 }
 
-inline void Setter::set(Component *pThis, const Variant &value) const
+inline void Setter::set(ud::Component *pThis, const udVariant &value) const
 {
   shim(this, pThis, value);
 }
 
 template<typename T>
-inline void Setter::shimFunc(const Setter * const pSetter, Component *pThis, const Variant &value)
+inline void Setter::shimFunc(const Setter * const pSetter, ud::Component *pThis, const udVariant &value)
 {
   auto m = pSetter->m;
   m.SetThis((void*)pThis);
@@ -80,20 +81,20 @@ inline Method::Method(Ret(X::*func)(Args...) const)
   shim = &Partial<Ret, Args...>::shimFunc;
 }
 
-inline Variant Method::call(Component *pThis, udSlice<Variant> args) const
+inline udVariant Method::call(ud::Component *pThis, udSlice<udVariant> args) const
 {
   return shim(this, pThis, args);
 }
 
 template<typename Ret, typename... Args>
 template<size_t ...S>
-UDFORCE_INLINE Variant Method::Partial<Ret, Args...>::callFuncHack(udSlice<Variant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>)
+UDFORCE_INLINE udVariant Method::Partial<Ret, Args...>::callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>)
 {
-  return Variant(d(args[S].as<Args>()...));
+  return udVariant(d(args[S].as<Args>()...));
 }
 
 template<typename Ret, typename... Args>
-inline Variant Method::Partial<Ret, Args ...>::shimFunc(const Method * const pSetter, Component *pThis, udSlice<Variant> value)
+inline udVariant Method::Partial<Ret, Args ...>::shimFunc(const Method * const pSetter, Component *pThis, udSlice<udVariant> value)
 {
   auto m = pSetter->m;
   m.SetThis((void*)pThis);
@@ -101,19 +102,19 @@ inline Variant Method::Partial<Ret, Args ...>::shimFunc(const Method * const pSe
   FastDelegate<Ret(Args...)> d;
   d.SetMemento(m);
 
-  return Variant(callFuncHack(value, d, typename GenSequence<sizeof...(Args)>::type()));
+  return udVariant(callFuncHack(value, d, typename GenSequence<sizeof...(Args)>::type()));
 }
 
 template<typename... Args>
 struct Method::Partial<void, Args...>
 {
   template<size_t ...S>
-  UDFORCE_INLINE static void callFuncHack(udSlice<Variant> args, FastDelegate<void(Args...)> d, Sequence<S...>)
+  UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, FastDelegate<void(Args...)> d, Sequence<S...>)
   {
     d(args[S].as<Args>()...);
   }
 
-  inline static Variant shimFunc(const Method * const pSetter, Component *pThis, udSlice<Variant> value)
+  inline static udVariant shimFunc(const Method * const pSetter, Component *pThis, udSlice<udVariant> value)
   {
     auto m = pSetter->m;
     m.SetThis((void*)pThis);
@@ -122,7 +123,8 @@ struct Method::Partial<void, Args...>
     d.SetMemento(m);
 
     callFuncHack(value, d, typename GenSequence<sizeof...(Args)>::type());
-    return Variant();
+    return udVariant();
   }
 };
+
 }  // namespace ud

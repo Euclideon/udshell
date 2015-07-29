@@ -5,8 +5,8 @@
 #include "udRender.h"
 #include "udMath.h"
 
-#include "udsharedptr.h"
-#include "udslice.h"
+#include "util/udsharedptr.h"
+#include "util/udslice.h"
 #include "components/view.h"
 #include "resources/udmodel.h"
 
@@ -36,16 +36,16 @@ struct GeomJob
   // * render states
 };
 
-class RenderScene : public RefCounted
+class RenderScene : public udRefCounted
 {
 public:
   udFixedSlice<UDJob, 4> ud;
   udFixedSlice<GeomJob> geom;
 };
-typedef SharedPtr<RenderScene> RenderSceneRef;
+typedef udSharedPtr<RenderScene> RenderSceneRef;
 
 
-class RenderableView : public RefCounted
+class RenderableView : public udRefCounted
 {
 public:
   RenderableView();
@@ -82,7 +82,7 @@ public:
 protected:
   ~RenderableView();
 };
-typedef SharedPtr<RenderableView> RenderableViewRef;
+typedef udSharedPtr<RenderableView> RenderableViewRef;
 
 } // namespace ud
 

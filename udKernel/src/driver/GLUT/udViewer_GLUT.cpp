@@ -4,8 +4,6 @@
 
 #include "udGLUT_Internal.h"
 
-#include "viewer_internal.h"
-
 void udGPU_Init();
 
 

@@ -4,11 +4,11 @@
 
 #include "udPlatform.h"
 
-#include "udstring.h"
-#include "udsharedptr.h"
-#include "variant.h"
-#include "event.h"
-#include "udmap.h"
+#include "util/udstring.h"
+#include "util/udsharedptr.h"
+#include "util/udvariant.h"
+#include "util/udevent.h"
+#include "util/udmap.h"
 
 
 // TODO: remove this!
@@ -45,16 +45,16 @@ public:
 
   operator bool() const { return shim != nullptr; }
 
-  Variant get(const Component *pThis) const;
+  udVariant get(const ud::Component *pThis) const;
 
 protected:
-  typedef Variant(Shim)(const Getter* const, const Component*);
+  typedef udVariant(Shim)(const Getter* const, const ud::Component*);
 
   FastDelegateMemento m;
   Shim *shim;
 
   template<typename T>
-  static Variant shimFunc(const Getter * const pGetter, const Component *pThis);
+  static udVariant shimFunc(const Getter * const pGetter, const ud::Component *pThis);
 };
 
 // setter glue
@@ -67,16 +67,16 @@ public:
 
   operator bool() const { return shim != nullptr; }
 
-  void set(Component *pThis, const Variant &value) const;
+  void set(ud::Component *pThis, const udVariant &value) const;
 
 private:
-  typedef void(Shim)(const Setter* const, Component*, const Variant&);
+  typedef void(Shim)(const Setter* const, ud::Component*, const udVariant&);
 
   FastDelegateMemento m;
   Shim *shim;
 
   template<typename T>
-  static void shimFunc(const Setter * const pSetter, Component *pThis, const Variant &value);
+  static void shimFunc(const Setter * const pSetter, ud::Component *pThis, const udVariant &value);
 };
 
 // method glue
@@ -91,10 +91,10 @@ public:
 
   operator bool() const { return shim != nullptr; }
 
-  Variant call(Component *pThis, udSlice<Variant> args) const;
+  udVariant call(ud::Component *pThis, udSlice<udVariant> args) const;
 
 private:
-  typedef Variant(Shim)(const Method* const, Component*, udSlice<Variant>);
+  typedef udVariant(Shim)(const Method* const, ud::Component*, udSlice<udVariant>);
 
   FastDelegateMemento m;
   Shim *shim;
@@ -104,9 +104,9 @@ private:
   {
     // this is a nasty hack to get ...S (integer sequence) as a parameter pack
     template<size_t ...S>
-    static Variant callFuncHack(udSlice<Variant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>);
+    static udVariant callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>);
 
-    static Variant shimFunc(const Method * const pSetter, Component *pThis, udSlice<Variant> value);
+    static udVariant shimFunc(const Method * const pSetter, ud::Component *pThis, udSlice<udVariant> value);
   };
 };
 
@@ -115,7 +115,7 @@ struct VarEvent
 {
   VarEvent(nullptr_t);
   template<typename X, typename... Args>
-  VarEvent(Event<Args...> X::*ev)
+  VarEvent(udEvent<Args...> X::*ev)
   {
     pSubscribe = &doSubscribe<X, Args...>;
     pEvent = (void* VarEvent::*)ev;
@@ -123,30 +123,30 @@ struct VarEvent
 
   operator bool() const { return pEvent != nullptr; }
 
-  UDFORCE_INLINE void subscribe(const ComponentRef &c, const Variant::Delegate &d)
+  UDFORCE_INLINE void subscribe(const ud::ComponentRef &c, const udVariant::Delegate &d)
   {
     pSubscribe(this, c, d);
   }
 
 private:
-  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const Variant::Delegate&);
+  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const udVariant::Delegate&);
 
   void* VarEvent::*pEvent;
   SubscribeFunc *pSubscribe = nullptr;
 
   template<typename X, typename... Args>
-  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const Variant::Delegate &d)
+  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const udVariant::Delegate &d)
   {
     // cast the pointer-to-member back to it's real type
-    Event<Args...> X::*ev = (Event<Args...> X::*)pEv->pEvent;
+    udEvent<Args...> X::*ev = (udEvent<Args...> X::*)pEv->pEvent;
 
     // TODO: validate that 'X' is actually a component?
     X *pComponent = (X*)c.ptr();
 
     // deref the pointer-to-member to get the event we want to subscribe to
-    Event<Args...> &e = pComponent->*ev;
+    udEvent<Args...> &e = pComponent->*ev;
 
-    Variant v(d);
+    udVariant v(d);
     e.Subscribe(v.as<udDelegate<void(Args...)>>());
   }
 };
