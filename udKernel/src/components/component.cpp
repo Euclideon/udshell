@@ -74,18 +74,17 @@ void Component::Init(InitParams initParams)
   }
 
   // allocate property change events
-  size_t numProps = NumProperties();
-  pPropertyChange = udAllocType(udEvent<>, numProps, udAF_None);
-  for (size_t i = 0; i<numProps; ++i)
-    new(&pPropertyChange[i]) udEvent<>();
+  propertyChange.length = NumProperties();
+  propertyChange.ptr = udAllocType(udEvent<>, propertyChange.length, udAF_None);
+  for (size_t i = 0; i<propertyChange.length; ++i)
+    new(&propertyChange.ptr[i]) udEvent<>();
 }
 
 Component::~Component()
 {
-  size_t numProps = NumProperties();
-  for (size_t i = 0; i<numProps; ++i)
-    pPropertyChange[i].~udEvent<>();
-  udFree(pPropertyChange);
+  for (size_t i = 0; i<propertyChange.length; ++i)
+    propertyChange.ptr[i].~udEvent<>();
+  udFree(propertyChange.ptr);
 }
 
 
@@ -126,7 +125,7 @@ void Component::SetProperty(udString property, const udVariant &value)
   if (pDesc->flags & udPF_Immutable)
     return; // TODO: make noise
   pDesc->setter.set(this, value);
-  pPropertyChange[pDesc->index].Signal();
+  propertyChange[pDesc->index].Signal();
 }
 
 udVariant Component::GetProperty(udString property) const

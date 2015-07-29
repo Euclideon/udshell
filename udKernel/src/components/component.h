@@ -41,7 +41,7 @@ public:
   void SetProperty(udString property, const udVariant &value);
   udVariant GetProperty(udString property) const;
 
-  void SignalPropertyChanged(const PropertyDesc *pProp) { pPropertyChange[pProp->index].Signal(); }
+  void SignalPropertyChanged(const PropertyDesc *pProp) { propertyChange[pProp->index].Signal(); }
 
   udResult SendMessage(udString target, udString message, const udVariant &data);
   udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { return SendMessage(pComponent->uid, message, data); }
@@ -74,7 +74,7 @@ protected:
 
   udSubscriber subscriber;
 
-  udEvent<> *pPropertyChange = nullptr;
+  udSlice<udEvent<>> propertyChange;
 
 private:
   void Init(InitParams initParams);
