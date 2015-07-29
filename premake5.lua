@@ -15,10 +15,6 @@ solution "udShell"
 
 	defines { "UD_USE_QT" }
 
---	if os.get() == "windows" then
---		dofile "ud/3rdParty/GL/glew/project.lua"
---	end
-
 	dofile "ud/3rdParty/lua/project.lua"
 	dofile "ud/udPlatform/project.lua"
 	dofile "ud/udPointCloud/project.lua"
@@ -38,15 +34,11 @@ solution "udShell"
 		includedirs { "ud/udPointCloud/Include" }
 		includedirs { "ud/udKernel/src" }
 		includedirs { "ud/3rdParty" }
---		includedirs { "ud/3rdParty/GL/glew/include" }
 
---		links { "GLEW" }
 		links { "udPlatform" }
 		links { "udPointCloud" }
 		links { "udKernel" }
 		links { luaPath }
-
---		defines { "GLEW_STATIC" }
 
 		qt.enable()
 --		qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
