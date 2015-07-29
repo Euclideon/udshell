@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDINPUT_DRIVER == UDDRIVER_GLUT
+#if UDWINDOW_DRIVER == UDDRIVER_GLUT
 
 #include "udGLUT_Internal.h"
 

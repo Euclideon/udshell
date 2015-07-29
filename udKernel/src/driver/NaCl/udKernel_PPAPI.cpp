@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDINPUT_DRIVER == UDDRIVER_PPAPI
+#if UDWINDOW_DRIVER == UDDRIVER_PPAPI
 
 #include <stdarg.h>
 #include "udPlatformUtil.h"

@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDINPUT_DRIVER == UDDRIVER_QT
+#if UDWINDOW_DRIVER == UDDRIVER_QT
 
 #include <QGuiApplication>
 #include <QQuickWindow>

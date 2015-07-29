@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDINPUT_DRIVER == UDDRIVER_SDL
+#if UDWINDOW_DRIVER == UDDRIVER_SDL
 
 #include "kernel.h"
 #include "components/view.h"
