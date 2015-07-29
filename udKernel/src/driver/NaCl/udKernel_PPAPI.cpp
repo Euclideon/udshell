@@ -25,6 +25,8 @@
 #include "components/scene.h"
 #include "components/nodes/camera.h"
 
+using namespace ud;
+
 // Pepper module
 class udPepperModule : public pp::Module
 {

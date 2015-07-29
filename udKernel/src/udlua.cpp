@@ -649,7 +649,7 @@ class LuaDelegate : public udDelegateMemento
 {
 protected:
   template<typename T>
-  friend class udSharedPtr;
+  friend class ::udSharedPtr;
 
   udVariant call(udSlice<udVariant> args) const
   {

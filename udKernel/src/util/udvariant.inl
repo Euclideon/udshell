@@ -314,7 +314,7 @@ protected:
   VarDelegate(const udDelegate<R(Args...)> &d)
     : target(d.GetMemento())
   {
-    FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &VarDelegate::Partial<R, Args...>::to);
+    FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &VarDelegate::to);
     m = shim.GetMemento();
   }
 
@@ -322,7 +322,7 @@ protected:
   VarDelegate(const udVariant::Delegate &d)
     : target(d.GetMemento())
   {
-    FastDelegate<R(Args...)> shim(this, &VarDelegate::Partial<R, Args...>::from);
+    FastDelegate<R(Args...)> shim(this, &VarDelegate::from);
     m = shim.GetMemento();
   }
 
@@ -383,7 +383,7 @@ protected:
 template<typename R, typename... Args>
 inline udVariant udToVariant(const udDelegate<R(Args...)> &d)
 {
-  typedef udSharedPtr<VarDelegate<R(Args...)> VarDelegateRef;
+  typedef udSharedPtr<VarDelegate<R(Args...)>> VarDelegateRef;
 
   return udVariant::Delegate(VarDelegateRef::create(d));
 }

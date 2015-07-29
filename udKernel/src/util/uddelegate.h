@@ -51,6 +51,27 @@ public:
   udDelegate(Y *i, R(X::*f)(Args...) const)     : udDelegate(Delegate(i, f)) {}
   udDelegate(R(*f)(Args...))                    : udDelegate(Delegate(f)) {}
 
+  udDelegate& operator=(const udDelegate &d)
+  {
+    if (this != &d)
+    {
+      this->~udDelegate();
+      new (this) udDelegate(d);
+    }
+    return *this;
+  }
+
+  udDelegate& operator=(udDelegate &&rval)
+  {
+    if (this != &rval)
+    {
+      (void*&)m = (void*&)rval.m;
+      (void*&)rval.m = nullptr;
+    }
+    return *this;
+  }
+
+
   UDFORCE_INLINE R operator()(Args... args) const
   {
     Delegate d;

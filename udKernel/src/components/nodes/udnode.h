@@ -79,6 +79,35 @@ protected:
   udDouble4x4 udMat;
 };
 
+inline udVariant udToVariant(const BoundingVolume &volume)
+{
+  udKeyValuePair *pPairs = udAllocType(udKeyValuePair, 6, udAF_None);
+  if (pPairs)
+  {
+    udSlice<udKeyValuePair> slice(pPairs, 6);
+
+    new (&slice[0]) udKeyValuePair("minx", volume.min.x);
+    new (&slice[1]) udKeyValuePair("miny", volume.min.y);
+    new (&slice[0]) udKeyValuePair("minz", volume.min.z);
+    new (&slice[2]) udKeyValuePair("maxx", volume.max.x);
+    new (&slice[3]) udKeyValuePair("maxy", volume.max.y);
+    new (&slice[3]) udKeyValuePair("maxz", volume.max.z);
+    return udVariant(slice, true);
+  }
+
+  return udVariant();
+}
+
+inline void udFromVariant(const udVariant &variant, BoundingVolume *pVolume)
+{
+  pVolume->min.x = variant["minx"].as<double>();
+  pVolume->min.y = variant["miny"].as<double>();
+  pVolume->min.z = variant["minz"].as<double>();
+  pVolume->max.x = variant["maxx"].as<double>();
+  pVolume->max.y = variant["maxy"].as<double>();
+  pVolume->max.z = variant["maxz"].as<double>();
+}
+
 } // namespace ud
 
 
@@ -106,36 +135,6 @@ inline void udFromVariant(const udVariant &variant, udRenderClipArea *pArea)
   pArea->minY = variant["miny"].as<uint32_t>();
   pArea->maxX = variant["maxx"].as<uint32_t>();
   pArea->maxY = variant["maxy"].as<uint32_t>();
-}
-
-
-inline udVariant udToVariant(const ud::BoundingVolume &volume)
-{
-  udKeyValuePair *pPairs = udAllocType(udKeyValuePair, 6, udAF_None);
-  if (pPairs)
-  {
-    udSlice<udKeyValuePair> slice(pPairs, 6);
-
-    new (&slice[0]) udKeyValuePair("minx", volume.min.x);
-    new (&slice[1]) udKeyValuePair("miny", volume.min.y);
-    new (&slice[0]) udKeyValuePair("minz", volume.min.z);
-    new (&slice[2]) udKeyValuePair("maxx", volume.max.x);
-    new (&slice[3]) udKeyValuePair("maxy", volume.max.y);
-    new (&slice[3]) udKeyValuePair("maxz", volume.max.z);
-    return udVariant(slice, true);
-  }
-
-  return udVariant();
-}
-
-inline void udFromVariant(const udVariant &variant, ud::BoundingVolume *pVolume)
-{
-  pVolume->min.x = variant["minx"].as<double>();
-  pVolume->min.y = variant["miny"].as<double>();
-  pVolume->min.z = variant["minz"].as<double>();
-  pVolume->max.x = variant["maxx"].as<double>();
-  pVolume->max.y = variant["maxy"].as<double>();
-  pVolume->max.z = variant["maxz"].as<double>();
 }
 
 #endif // UDPCNODE_H

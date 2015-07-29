@@ -59,18 +59,18 @@ protected:
 
   virtual udResult ReceiveMessage(udString message, udString sender, const udVariant &data);
 
-  size_t Component::NumProperties() const
+  size_t NumProperties() const
   {
     return pType->pPropertyTree->Size();
   }
-  ptrdiff_t Component::PropertyIndex(udString property) const
+  ptrdiff_t PropertyIndex(udString property) const
   {
     ComponentDesc::PropertyNode *pN = pType->pPropertyTree->Get(property);
     return pN ? pN->index : -1;
   }
 
   template<typename... Args>
-  friend class udEvent;
+  friend class ::udEvent;
 
   udSubscriber subscriber;
 
@@ -107,7 +107,7 @@ inline udSharedPtr<T> component_cast(ComponentRef pComponent)
 template<typename T, typename std::enable_if<std::is_base_of<ud::Component, T>::value>::type* = nullptr> // O_O
 inline void udFromVariant(const udVariant &v, udSharedPtr<T> *pR)
 {
-  *pR = component_cast<T>(v.asComponent());
+  *pR = ud::component_cast<T>(v.asComponent());
 }
 
 
