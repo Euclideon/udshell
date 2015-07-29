@@ -1,16 +1,17 @@
 #include <QLoggingCategory>
 
-#include "udKernel.h"
-#include "udView.h"
-#include "udRenderScene.h"
-#include "udScene.h"
-#include "udCamera.h"
-#include "udDebugFont.h"
-#include "udUDNode.h"
+#include "kernel.h"
+#include "renderscene.h"
+#include "components/view.h"
+#include "components/scene.h"
+#include "components/nodes/camera.h"
+#include "components/nodes/udnode.h"
+#include "hal/debugfont.h"
 #include "quick/window.h"
 
-using namespace udKernel;
-Kernel*s_pKernel;
+using namespace ud;
+
+Kernel *s_pKernel;
 
 
 // ---------------------------------------------------------------------------------------

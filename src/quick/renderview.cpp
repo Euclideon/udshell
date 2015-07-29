@@ -1,17 +1,17 @@
-#include "renderview.h"
-#include "udKernel.h"
-#include "udView.h"
-
 // Warning from QSGGeometry
-#if UDPLATFORM_WINDOWS
-#pragma warning(disable: 4512)
+#if _MSC_VER
+# pragma warning(disable: 4512)
 #endif
 
 #include <QtQuick/QQuickWindow>
 #include <QtGui/QOpenGLFramebufferObject>
 #include <QSGSimpleTextureNode>
 
-extern udKernel::Kernel *s_pKernel;
+#include "kernel.h"
+#include "renderview.h"
+#include "components/view.h"
+
+extern ud::Kernel *s_pKernel;
 
 
 class FboRenderer : public QQuickFramebufferObject::Renderer

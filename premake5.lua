@@ -36,7 +36,7 @@ solution "udShell"
 
 		includedirs { "ud/udPlatform/Include" }
 		includedirs { "ud/udPointCloud/Include" }
-		includedirs { "ud/udKernel/Include" }
+		includedirs { "ud/udKernel/src" }
 		includedirs { "ud/3rdParty" }
 --		includedirs { "ud/3rdParty/GL/glew/include" }
 
