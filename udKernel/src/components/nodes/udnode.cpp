@@ -146,7 +146,7 @@ int UDNode::Load(udString name, bool useStreamer)
 
   if (source.empty())
   {
-    spModel = SharedUDModel::Create(name, useStreamer);
+    spModel = UDModel::Create(name, useStreamer);
     if (!spModel)
     {
       result = udR_Failure_; // TODO : Put better error code

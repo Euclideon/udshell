@@ -71,6 +71,12 @@ inline udVariant::udVariant(ud::Component *c)
   , length(0)
   , c(c)
 {}
+inline udVariant::udVariant(ud::Resource *r)
+  : t((size_t)Type::Resource)
+  , ownsArray(0)
+  , length(0)
+  , r(r)
+{}
 inline udVariant::udVariant(const Delegate &d)
   : t((size_t)Type::Delegate)
   , ownsArray(0)
@@ -202,6 +208,17 @@ template<> struct udVariant_Construct <uint64_t>  { inline static udVariant cons
 template<> struct udVariant_Construct <char*>     { inline static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
 template<size_t N>
 struct udVariant_Construct <char[N]>              { inline static udVariant construct(const char s[N]) { return udVariant(udString(s, N-1)); } };
+
+// for arrays
+template<typename T>
+inline udVariant udToVariant(const udSlice<T> arr)
+{
+  udVariant r;
+  udVariant *a = r.allocArray(arr.length);
+  for (size_t i = 0; i<arr.length; ++i)
+    new(&a[i]) udVariant(arr[i]);
+  return r;
+}
 
 // for components
 inline udVariant udToVariant(const ud::ComponentRef c)

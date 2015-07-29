@@ -161,6 +161,7 @@ enum class PropertyType : uint32_t
   Float,
   String,
   Component,
+  Resource,
   Enum,
   Flags,
   Struct,

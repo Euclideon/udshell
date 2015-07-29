@@ -55,7 +55,7 @@ public:
 
   int Load(udString name, bool useStreamer); // TODO : Check return value to use error code
 
-  SharedUDModelRef GetSharedUDModel() const { return  spModel;  } // TODO: Remove this once its no longer required by udglViewer
+  UDModelRef GetSharedUDModel() const { return  spModel;  } // TODO: Remove this once its no longer required by udglViewer
 
 protected:
   UDNode(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
@@ -75,7 +75,7 @@ protected:
   bool clipAreaSet = false;
 
   udString source;
-  SharedUDModelRef spModel = nullptr;
+  UDModelRef spModel = nullptr;
   udDouble4x4 udMat;
 };
 

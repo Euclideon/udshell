@@ -20,7 +20,7 @@ struct UDJob
   udDouble4x4 matrix;
   udRenderClipArea clipArea;
 
-  SharedUDModelRef spModel = nullptr;
+  UDModelRef spModel = nullptr;
   udRenderModel renderModel;
 };
 

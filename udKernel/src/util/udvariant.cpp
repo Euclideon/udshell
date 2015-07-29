@@ -1,6 +1,7 @@
 
 #include "util/udvariant.h"
 #include "components/component.h"
+#include "resources/resource.h"
 #include "udlua.h"
 
 udRCString udVariant::stringify() const
@@ -92,6 +93,17 @@ ud::ComponentRef udVariant::asComponent() const
   default:
     UDASSERT(type() == Type::Component, "Wrong type!");
     return nullptr;
+  }
+}
+ud::ResourceRef udVariant::asResource() const
+{
+  switch ((Type)t)
+  {
+    case Type::Resource:
+      return ud::ResourceRef(r);
+    default:
+      UDASSERT(type() == Type::Resource, "Wrong type!");
+      return nullptr;
   }
 }
 udVariant::Delegate udVariant::asDelegate() const
@@ -249,6 +261,10 @@ void udVariant::luaPush(ud::LuaState &l) const
       break;
     case Type::Component:
       l.pushComponent(ud::ComponentRef(c));
+      break;
+    case Type::Resource:
+      UDASSERT(false, "TODO!");
+//      l.pushResource(ud::ResourceRef(c));
       break;
     case Type::Delegate:
       l.pushDelegate((Delegate&)p);

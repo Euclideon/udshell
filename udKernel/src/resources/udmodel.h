@@ -1,22 +1,23 @@
 #pragma once
-#ifndef UDMODEL_H // Changes this name once we have a new prefix!
-#define UDMODEL_H
+#ifndef _UD_UDMODEL_H
+#define _UD_UDMODEL_H
 
 #include "udPlatform.h"
 #include "udOctree.h"
 
+#include "resources/resource.h"
 #include "util/udsharedptr.h"
 #include "util/udstring.h"
 
 namespace ud
 {
 
-SHARED_CLASS(SharedUDModel);
+SHARED_CLASS(UDModel);
 
-class SharedUDModel : public udRefCounted
+class UDModel : public Resource
 {
 public:
-  static SharedUDModelRef Create(udString name, bool useStreamer);
+  static UDModelRef Create(udString name, bool useStreamer);
 
   udOctree *GetOctreePtr() const { return pOctree; }
 
@@ -24,14 +25,13 @@ protected:
   template<typename T>
   friend class udSharedPtr;
 
-  virtual ~SharedUDModel();
-
 private:
-  SharedUDModel() {}
+  UDModel() : Resource(ResourceType::UD) {};
+  virtual ~UDModel();
 
   udOctree *pOctree;
 };
 
 } // namespace ud
 
-#endif // UDMODEL_H
+#endif // _UD_UDMODEL_H

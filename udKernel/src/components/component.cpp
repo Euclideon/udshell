@@ -1,6 +1,7 @@
 
 #include "udPlatform.h"
 #include "udPlatformUtil.h"
+
 #include "kernel.h"
 
 // TODO: shut up about sprintf! **REMOVE ME**

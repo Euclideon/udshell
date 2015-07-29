@@ -8,6 +8,7 @@
 namespace ud
 {
   SHARED_CLASS(Component);
+  SHARED_CLASS(Resource);
   class LuaState;
 };
 
@@ -25,6 +26,7 @@ public:
     Int,
     Float,
     Component,
+    Resource,
     Delegate,
     String,
     Array,
@@ -39,6 +41,7 @@ public:
   udVariant(int64_t);
   udVariant(double);
   udVariant(ud::Component *);
+  udVariant(ud::Resource *);
   udVariant(const Delegate &d);
   udVariant(Delegate &&d);
   udVariant(udString);
@@ -67,6 +70,7 @@ public:
   int64_t asInt() const;
   double asFloat() const;
   ud::ComponentRef asComponent() const;
+  ud::ResourceRef asResource() const;
   Delegate asDelegate() const;
   udString asString() const;
   udSlice<udVariant> asArray() const;
@@ -95,6 +99,7 @@ private:
     int64_t i;
     double f;
     ud::Component *c;
+    ud::Resource *r;
     const char *s;
     udVariant *a;
     udKeyValuePair *aa;
