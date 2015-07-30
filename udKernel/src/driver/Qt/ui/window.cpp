@@ -14,7 +14,7 @@ Window::Window(QWindow *parent)
   udDebugPrintf("Window::Window()\n");
 
   // register our internal qml types
-  qmlRegisterType<RenderView>("udShell", 0, 1, "RenderView");
+  qmlRegisterType<RenderView>("udKernel", 0, 1, "RenderView");
 
   // modify our surface format to support opengl debug logging
   // TODO: set gl version based on property settings?
