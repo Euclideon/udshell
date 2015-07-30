@@ -6,7 +6,6 @@
 #include "hal/hal.h"
 #include "components/scene.h"
 #include "components/view.h"
-#include "components/uicomponent.h"
 #include "components/nodes/node.h"
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
@@ -187,10 +186,10 @@ udResult Kernel::CreateComponent(udString typeId, InitParams initParams, Compone
     udFixedString64 uid = udFixedString64::format("%s%d", pDesc->id.ptr, pType->createCount++);
 
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
-    spComponent->Init(initParams);
-
     if (!spComponent)
       return udR_MemoryAllocationFailure;
+
+    spComponent->Init(initParams);
 
     instanceRegistry.Add(spComponent->uid.hash(), spComponent);
 
