@@ -13,12 +13,12 @@
 #include "../udQtKernel_Internal.h"
 #include "qtuicomponent.h"
 
-namespace ud
+namespace qt
 {
 
 // ---------------------------------------------------------------------------------------
-QtUIComponent::QtUIComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
-  : UIComponent(pType, pKernel, uid, initParams)
+UIComponent::UIComponent(const ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, InitParams initParams)
+  : ud::UIComponent(pType, pKernel, uid, initParams)
 {
   // create the qml component for the associated script
   // TODO: remove hardcoded script
@@ -43,11 +43,11 @@ QtUIComponent::QtUIComponent(const ComponentDesc *pType, Kernel *pKernel, udRCSt
 }
 
 // ---------------------------------------------------------------------------------------
-QtUIComponent::~QtUIComponent()
+UIComponent::~UIComponent()
 {
   delete pQtQuickItem;
 }
 
-} // namespace ud
+} // namespace qt
 
 #endif

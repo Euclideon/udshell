@@ -1,42 +1,36 @@
 #pragma once
-#ifndef UDQTUICOMPONENT_INTERNAL_H
-#define UDQTUICOMPONENT_INTERNAL_H
+#ifndef QTUICOMPONENT_INTERNAL_H
+#define QTUICOMPONENT_INTERNAL_H
 
 #include <QQuickItem>
 
 #include "components/uicomponent.h"
 
-namespace ud
+namespace qt
 {
 
-class Kernel;
+class ud::Kernel;
 
-PROTOTYPE_COMPONENT(QtUIComponent);
+PROTOTYPE_COMPONENT(UIComponent);
 
-class QtUIComponent : public UIComponent
+class UIComponent : public ud::UIComponent
 {
 public:
-  //UD_COMPONENT(udUiComponent);
+  //UD_COMPONENT(UIComponent);
 
   QQuickItem *QuickItem() { return pQtQuickItem; }
 
-  //virtual void SetSource(udString source) {}
-
-  // qml properties
-  // qquickitem?
-  // qqmlcomponent
-
 protected:
-  QtUIComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
-  virtual ~QtUIComponent();
+  UIComponent(const ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, InitParams initParams);
+  virtual ~UIComponent();
 
-  // HACK: expose QtUIComponent::Create to UIComponent::descriptor
-  friend class UIComponent;
+  // HACK: allow ud::UIComponent::Create() to create a qt::UIComponent
+  friend class ud::UIComponent;
 
 private:
   QQuickItem *pQtQuickItem;
 };
 
-} // namespace ud
+} // namespace qt
 
-#endif  // UDQTUICOMPONENT_INTERNAL_H
+#endif  // QTUICOMPONENT_INTERNAL_H

@@ -5,16 +5,16 @@
 #include <QSemaphore>
 
 #include "udQtKernel_Internal.h"
-#include "ui/qtuicomponent.h"
 
-using namespace ud;
+namespace qt
+{
 
 // custom kernel event
-class QtKernelEvent : public QEvent
+class KernelEvent : public QEvent
 {
 public:
-  QtKernelEvent(const FastDelegateMemento &mem) : QEvent(type()), m(mem) {}
-  virtual ~QtKernelEvent() {}
+  KernelEvent(const FastDelegateMemento &mem) : QEvent(type()), m(mem) {}
+  virtual ~KernelEvent() {}
 
   static QEvent::Type type()
   {
@@ -29,14 +29,14 @@ private:
   static QEvent::Type eventType;
 };
 
-QEvent::Type QtKernelEvent::eventType = QEvent::None;
+QEvent::Type KernelEvent::eventType = QEvent::None;
 
 // custom kernel event with semaphore
-class QtKernelSyncEvent : public QtKernelEvent
+class KernelSyncEvent : public KernelEvent
 {
 public:
-  QtKernelSyncEvent(const FastDelegateMemento &mem, QSemaphore *pS) : QtKernelEvent(mem), pSem(pS) {}
-  virtual ~QtKernelSyncEvent() { if (pSem) pSem->release(); }
+  KernelSyncEvent(const FastDelegateMemento &mem, QSemaphore *pS) : KernelEvent(mem), pSem(pS) {}
+  virtual ~KernelSyncEvent() { if (pSem) pSem->release(); }
 
   QSemaphore *pSem;
 };
@@ -108,12 +108,11 @@ udResult QtKernel::Shutdown()
 udResult QtKernel::FormatMainWindow(UIComponentRef spUIComponent)
 {
   udDebugPrintf("QtKernel::FormatMainWindow()\n");
-  QtUIComponentRef spQtUI = component_cast<QtUIComponent>(spUIComponent);
 
   // NOTE: we are reparenting the "visual parent" of the ui component, this means ui component is still
   // responsible for cleaning up its qobject
   // TODO: should we take complete ownership of the ui component??
-  spQtUI->QuickItem()->setParentItem(pMainWindow->contentItem());
+  spUIComponent->QuickItem()->setParentItem(pMainWindow->contentItem());
 
   // TODO: store this info as properties?
   pMainWindow->resize(800, 600);
@@ -121,8 +120,8 @@ udResult QtKernel::FormatMainWindow(UIComponentRef spUIComponent)
   pMainWindow->raise();
 
   // TODO: wire this up to a resize event
-  spQtUI->QuickItem()->setWidth(800);
-  spQtUI->QuickItem()->setHeight(600);
+  spUIComponent->QuickItem()->setWidth(800);
+  spUIComponent->QuickItem()->setHeight(600);
 
   return udR_Success;
 }
@@ -153,10 +152,10 @@ void QtKernel::PostEvent(QEvent *pEvent, int priority)
 void QtKernel::customEvent(QEvent *pEvent)
 {
   udDebugPrintf("QtKernel::customEvent()\n");
-  if (pEvent->type() == QtKernelEvent::type())
+  if (pEvent->type() == KernelEvent::type())
   {
     MainThreadCallback d;
-    d.SetMemento(static_cast<QtKernelEvent*>(pEvent)->m);
+    d.SetMemento(static_cast<KernelEvent*>(pEvent)->m);
     d(this);
   }
   else
@@ -182,7 +181,7 @@ void QtKernel::InitRender()
   // ALSO does this thread ever get recreated? does this id remain valid thru the program?
   renderThreadId = QThread::currentThreadId();
 
-  if (Kernel::InitRender() != udR_Success)
+  if (ud::Kernel::InitRender() != udR_Success)
   {
     // TODO: gracefully handle error with InitRender ?
     udDebugPrintf("Error initialising renderer\n");
@@ -195,7 +194,7 @@ void QtKernel::InitRender()
 void QtKernel::CleanupRender()
 {
   udDebugPrintf("QtKernel::CleanupRender\n");
-  if (Kernel::DeinitRender() != udR_Success)
+  if (ud::Kernel::DeinitRender() != udR_Success)
   {
     // TODO: gracefully handle error with DeinitRender ?
     udDebugPrintf("Error cleaning up renderer\n");
@@ -206,23 +205,29 @@ void QtKernel::CleanupRender()
 void QtKernel::Destroy()
 {
   udDebugPrintf("QtKernel::Destroy()\n");
-  Kernel::Destroy();
+  ud::Kernel::Destroy();
 }
 
+} // namespace qt
+
+
 /** Kernel ***********************************************/
+
+namespace ud
+{
 
 // ---------------------------------------------------------------------------------------
 Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
   udDebugPrintf("Kernel::CreateInstanceInternal()\n");
-  return new QtKernel(commandLine);
+  return new qt::QtKernel(commandLine);
 }
 
 // ---------------------------------------------------------------------------------------
 udResult Kernel::InitInstanceInternal()
 {
   udDebugPrintf("Kernel::InitInstanceInternal()\n");
-  return static_cast<QtKernel*>(this)->Init();
+  return static_cast<qt::QtKernel*>(this)->Init();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -236,7 +241,7 @@ udResult Kernel::InitRenderInternal()
 udResult Kernel::DestroyInstanceInternal()
 {
   udDebugPrintf("Kernel::DestroyInstanceInternal()\n");
-  return static_cast<QtKernel*>(this)->Shutdown();
+  return static_cast<qt::QtKernel*>(this)->Shutdown();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -252,14 +257,14 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 udResult Kernel::FormatMainWindow(UIComponentRef spUIComponent)
 {
   udDebugPrintf("Kernel::FormatMainWindow()\n");
-  return static_cast<QtKernel*>(this)->FormatMainWindow(spUIComponent);
+  return static_cast<qt::QtKernel*>(this)->FormatMainWindow(spUIComponent);
 }
 
 // ---------------------------------------------------------------------------------------
 udResult Kernel::RunMainLoop()
 {
   udDebugPrintf("Kernel::RunMainLoop()\n");
-  return static_cast<QtKernel*>(this)->RunMainLoop();
+  return static_cast<qt::QtKernel*>(this)->RunMainLoop();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -275,14 +280,14 @@ void Kernel::DispatchToMainThread(MainThreadCallback callback)
 {
   udDebugPrintf("Kernel::DispatchToMainThread()\n");
 
-  QtKernel *pKernel = static_cast<QtKernel*>(this);
+  qt::QtKernel *pKernel = static_cast<qt::QtKernel*>(this);
 
   // if we're on the main thread just execute the callback now
   if (pKernel->OnMainThread())
     callback(this);
   // otherwise jam it into the event queue
   else
-    pKernel->PostEvent(new QtKernelEvent(callback.GetMemento()), Qt::NormalEventPriority);
+    pKernel->PostEvent(new qt::KernelEvent(callback.GetMemento()), Qt::NormalEventPriority);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -290,7 +295,7 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   udDebugPrintf("Kernel::DispatchToMainThreadAndWait()\n");
 
-  QtKernel *pKernel = static_cast<QtKernel*>(this);
+  qt::QtKernel *pKernel = static_cast<qt::QtKernel*>(this);
 
   // TODO: handle this gracefully? can we detect if the main thread is blocked??
   UDASSERT(!pKernel->OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
@@ -304,9 +309,11 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   else
   {
     QSemaphore sem;
-    pKernel->PostEvent(new QtKernelSyncEvent(callback.GetMemento(), &sem), Qt::NormalEventPriority);
+    pKernel->PostEvent(new qt::KernelSyncEvent(callback.GetMemento(), &sem), Qt::NormalEventPriority);
     sem.acquire();
   }
 }
+
+} // namespace ud
 
 #endif

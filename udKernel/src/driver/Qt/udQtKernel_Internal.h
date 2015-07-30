@@ -9,11 +9,12 @@
 #include <QEvent>
 
 #include "kernel.h"
+#include "ui/qtuicomponent.h"
 
-namespace ud
+namespace qt
 {
 
-class QtKernel : public Kernel, public QObject
+class QtKernel : public ud::Kernel, public QObject
 {
 public:
   QtKernel::QtKernel(InitParams commandLine);
@@ -51,6 +52,6 @@ private:
   Qt::HANDLE renderThreadId;
 };
 
-} // namespace ud
+} // namespace qt
 
 #endif  // UDQTKERNEL_INTERNAL_H

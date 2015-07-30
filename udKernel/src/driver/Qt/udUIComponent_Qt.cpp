@@ -10,7 +10,7 @@ namespace ud
 // ---------------------------------------------------------------------------------------
 Component *UIComponent::Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
 {
-  return udNew(QtUIComponent, pType, pKernel, uid, initParams);
+  return udNew(qt::UIComponent, pType, pKernel, uid, initParams);
 }
 
 } // namespace ud
