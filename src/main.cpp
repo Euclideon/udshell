@@ -7,7 +7,6 @@
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
 #include "hal/debugfont.h"
-#include "quick/renderview.h"
 
 using namespace ud;
 
@@ -109,7 +108,6 @@ int main(int argc, char *argv[])
   pView->SetCamera(pCamera);
   s_pKernel->SetFocusView(pView);
 
-  qmlRegisterType<RenderView>("udShell", 0, 1, "RenderView");
   udKeyValuePair params[] = { {"file", "qrc:/qml/main.qml"} };
   auto spMainWindow = s_pKernel->CreateComponent<UIComponent>(InitParams(params, 1));
   if (!spMainWindow)
