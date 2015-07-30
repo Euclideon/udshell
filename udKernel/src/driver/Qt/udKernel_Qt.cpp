@@ -5,6 +5,7 @@
 #include <QSemaphore>
 
 #include "udQtKernel_Internal.h"
+#include "ui/window.h"
 
 namespace qt
 {
@@ -86,7 +87,7 @@ udResult QtKernel::Init()
 
   // TODO: expose kernel innards to the qml context?
 
-  pMainWindow = new QQuickWindow();
+  pMainWindow = new Window();
 
   QObject::connect(pMainWindow, &QQuickWindow::beforeRendering, this, &QtKernel::InitRender, Qt::DirectConnection);
   QObject::connect(pMainWindow, &QQuickWindow::sceneGraphInvalidated, this, &QtKernel::CleanupRender, Qt::DirectConnection);

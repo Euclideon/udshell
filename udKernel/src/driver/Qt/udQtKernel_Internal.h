@@ -3,7 +3,6 @@
 #define UDQTKERNEL_INTERNAL_H
 
 #include <QGuiApplication>
-#include <QQuickWindow>
 #include <QQmlEngine>
 #include <QThread>
 #include <QEvent>
@@ -13,6 +12,8 @@
 
 namespace qt
 {
+
+class Window;
 
 class QtKernel : public ud::Kernel, public QObject
 {
@@ -45,8 +46,9 @@ private:
   udRCSlice<char *> argv;
 
   QGuiApplication *pApplication;
-  QQuickWindow *pMainWindow;
   QQmlEngine *pQmlEngine;
+
+  Window *pMainWindow;
 
   Qt::HANDLE mainThreadId;
   Qt::HANDLE renderThreadId;

@@ -50,4 +50,4 @@ UIComponent::~UIComponent()
 
 } // namespace qt
 
-#endif
+#endif  // UDUI_DRIVER == UDDRIVER_QT
