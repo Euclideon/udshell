@@ -14,3 +14,5 @@ project(luaPath)
 
   -- include common stuff
   dofile "../../common-proj.lua"
+
+  warnings "Off"
