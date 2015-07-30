@@ -145,13 +145,19 @@ int UDNode::Load(udString name, bool useStreamer)
   if (source.empty())
   {
     spModel = pKernel->CreateComponent<UDModel>();
-    spModel->Load(name, useStreamer);
+    if (spModel)
+    {
+      result = spModel->Load(name, useStreamer);
 
-    UD_ERROR_CHECK(udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a));
-    source = name;
+      if (result == udR_Success)
+      {
+        result = udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a);
+        if (result == udR_Success)
+          source = name;
+      }
+    }
   }
 
-epilogue:
   return (int)result;
 }
 

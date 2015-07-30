@@ -55,7 +55,7 @@ public:
 
   int Load(udString name, bool useStreamer); // TODO : Check return value to use error code
 
-  UDModelRef GetSharedUDModel() const { return  spModel;  } // TODO: Remove this once its no longer required by udglViewer
+  UDModelRef GetUDModel() const { return  spModel;  } // TODO: Remove this once its no longer required by udglViewer
 
 protected:
   UDNode(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)

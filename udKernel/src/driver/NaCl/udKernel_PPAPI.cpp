@@ -74,7 +74,7 @@ UDTHREADLOCAL udNewPepperInstance* udNewPepperInstance::pThreadLocalInstance = N
 
 
 // ---------------------------------------------------------------------------------------
-Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 {
   return udNewPepperInstance::pThreadLocalInstance;
 }

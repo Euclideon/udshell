@@ -19,7 +19,7 @@ class UDModel : public Resource
 public:
   UD_COMPONENT(UDModel);
 
-  void Load(udString name, bool useStreamer);
+  udResult Load(udString name, bool useStreamer);
 
   udOctree *GetOctreePtr() const { return pOctree; }
 
