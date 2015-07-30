@@ -5,7 +5,7 @@
 #include <QSemaphore>
 
 #include "udQtKernel_Internal.h"
-#include "udQtUIComponent_Internal.h"
+#include "ui/qtuicomponent.h"
 
 using namespace ud;
 
