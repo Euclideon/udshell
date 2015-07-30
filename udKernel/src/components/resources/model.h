@@ -2,7 +2,7 @@
 #ifndef _UD_MODEL_H
 #define _UD_MODEL_H
 
-#include "resources/resource.h"
+#include "components/resources/resource.h"
 #include "util/udsharedptr.h"
 #include "util/udstring.h"
 
@@ -14,13 +14,11 @@ SHARED_CLASS(Model);
 class Model : public Resource
 {
 public:
+  UD_COMPONENT(Model);
 
 protected:
-  template<typename T>
-  friend class udSharedPtr;
-
-private:
-  Model() : Resource(ResourceType::Model) {};
+  Model(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+    : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Model();
 };
 

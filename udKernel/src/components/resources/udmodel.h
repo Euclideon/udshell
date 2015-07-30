@@ -24,10 +24,6 @@ public:
   udOctree *GetOctreePtr() const { return pOctree; }
 
 protected:
-  template<typename T>
-  friend class udSharedPtr;
-
-private:
   UDModel(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~UDModel();

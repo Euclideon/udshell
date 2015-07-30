@@ -1,5 +1,5 @@
 #pragma once
-#if !defined(_UD_RESOURCE_H)
+#ifndef _UD_RESOURCE_H
 #define _UD_RESOURCE_H
 
 #include "components/component.h"

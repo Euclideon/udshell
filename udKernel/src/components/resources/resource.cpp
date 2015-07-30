@@ -12,7 +12,7 @@ ComponentDesc Resource::descriptor =
 
   "resource", // id
   "Resource", // displayName
-  "Is a resource", // description
+  "Base resource", // description
 };
 
 } // namespace ud

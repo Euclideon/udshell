@@ -41,8 +41,6 @@ public:
   void SetProperty(udString property, const udVariant &value);
   udVariant GetProperty(udString property) const;
 
-  void SignalPropertyChanged(const PropertyDesc *pProp) { propertyChange[pProp->index].Signal(); }
-
   udResult SendMessage(udString target, udString message, const udVariant &data);
   udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { return SendMessage(pComponent->uid, message, data); }
 
@@ -69,14 +67,17 @@ protected:
     return pN ? pN->index : -1;
   }
 
-  template<typename... Args>
-  friend class ::udEvent;
+  void SignalPropertyChanged(const PropertyDesc *pProp) { propertyChange[pProp->index].Signal(); }
 
   udSubscriber subscriber;
 
   udSlice<udEvent<>> propertyChange;
 
 private:
+  template<typename... Args>
+  friend class ::udEvent;
+  friend class LuaState;
+
   void Init(InitParams initParams);
 
   Component(const Component &) = delete;    // Still not sold on this

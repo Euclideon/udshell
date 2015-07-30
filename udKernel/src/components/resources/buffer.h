@@ -2,7 +2,7 @@
 #ifndef _UD_BUFFER_H
 #define _UD_BUFFER_H
 
-#include "resources/resource.h"
+#include "components/resources/resource.h"
 #include "util/udsharedptr.h"
 #include "util/udstring.h"
 
@@ -14,20 +14,22 @@ SHARED_CLASS(Buffer);
 class Buffer : public Resource
 {
 public:
+  UD_COMPONENT(Buffer);
 
-protected:
-  template<typename T>
-  friend class udSharedPtr;
-
-  void *GetBuffer() const;
+  void Allocate(size_t size) const;
   size_t GetBufferSize() const;
 
-  void SetBuffer(void *pBuffer, size_t size);
+  void* Map(size_t *pSize = nullptr);
+  void UnMap();
 
-private:
-  Buffer() : Resource(ResourceType::Buffer) {};
+  void SetBuffer(const void *pBuffer, size_t size);
+
+protected:
+  Buffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+    : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Buffer();
 
+  udSlice<char> buffer;
 };
 
 } // namespace ud
