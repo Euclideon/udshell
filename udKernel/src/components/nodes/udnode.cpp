@@ -144,7 +144,7 @@ int UDNode::Load(udString name, bool useStreamer)
 
   if (source.empty())
   {
-    UDModelRef spModel = pKernel->CreateComponent<UDModel>();
+    spModel = pKernel->CreateComponent<UDModel>();
     spModel->Load(name, useStreamer);
 
     UD_ERROR_CHECK(udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a));
