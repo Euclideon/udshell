@@ -17,6 +17,8 @@ protected:
   UIComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
     : Component(pType, pKernel, uid, initParams) {}
   virtual ~UIComponent() {}
+
+  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
 };
 
 

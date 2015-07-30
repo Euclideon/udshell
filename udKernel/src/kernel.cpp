@@ -194,7 +194,8 @@ Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, udR
 template<typename CT>
 udResult Kernel::RegisterComponent()
 {
-  CT::descriptor.pCreateInstance = &NewComponent<CT>;
+  if (!CT::descriptor.pCreateInstance)
+    CT::descriptor.pCreateInstance = &NewComponent<CT>;
   return RegisterComponentType(&CT::descriptor);
 }
 
