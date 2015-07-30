@@ -38,9 +38,6 @@ ComponentDesc Scene::descriptor =
   "Scene",    // displayName
   "Is a scene", // description
 
-  [](){ return udR_Success; },             // pInit
-  Scene::Create, // pCreateInstance
-
   udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
   nullptr,
   udSlice<EventDesc>(events, UDARRAYSIZE(events)) // events

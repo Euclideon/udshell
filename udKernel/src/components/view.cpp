@@ -39,9 +39,6 @@ ComponentDesc View::descriptor =
   "View",    // displayName
   "Is a view", // description
 
-  [](){ return udR_Success; },  // pInit
-  View::Create,               // pCreateInstance
-
   udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr,
   udSlice<EventDesc>(events, UDARRAYSIZE(events)) // events

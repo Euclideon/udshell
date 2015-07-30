@@ -62,11 +62,6 @@ protected:
     : Node(pType, pKernel, uid, initParams) { clipArea.minX = clipArea.minY = clipArea.maxX = clipArea.maxY = 0; }
   virtual ~UDNode() {}
 
-  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
-  {
-    return udNew(UDNode, pType, pKernel, uid, initParams);
-  }
-
   udRender_VoxelShaderFunc *pVoxelShader = nullptr;
   udRender_PixelShaderFunc *pPixelShader = nullptr;
   udRenderClipArea clipArea;

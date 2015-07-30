@@ -2,7 +2,7 @@
 #if !defined(_UD_RESOURCE_H)
 #define _UD_RESOURCE_H
 
-#include "util/udvariant.h"
+#include "components/component.h"
 
 namespace ud
 {
@@ -11,28 +11,31 @@ SHARED_CLASS(DataSource);
 
 enum class ResourceType : int
 {
+  Buffer,
   Array,
   SparseArray,
   UD,
   Shader,
   Text,
+  Model,
 };
 
-class Resource : public udRefCounted
+class Resource : public Component
 {
 public:
+  UD_COMPONENT(Resource);
+
   int Type() const { return (int)type; }
 
   virtual udVariant GetMetadata(udString key) const { return udVariant(); }
 
 protected:
-  Resource(ResourceType type, DataSourceRef dataSource = nullptr)
-    : type(type), source(dataSource) {}
-  Resource() = delete;
+  Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+    : Component(pType, pKernel, uid, initParams) {}
 
   ResourceType type;
 
-  DataSourceRef source;
+  DataSourceRef source = nullptr;
 };
 SHARED_CLASS(Resource);
 

@@ -50,9 +50,6 @@ ComponentDesc Camera::descriptor =
   "Camera",    // displayName
   "Is a camera", // description
 
-  [](){ return udR_Success; },  // pInit
-  Camera::Create,             // pCreateInstance
-
   udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
   udSlice<MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
@@ -103,9 +100,6 @@ ComponentDesc SimpleCamera::descriptor =
   "simplecamera",       // id
   "SimpleCamera",     // displayName
   "Is a simple camera", // description
-
-  [](){ return udR_Success; },  // pInit
-  SimpleCamera::Create,       // pCreateInstance
 
   udSlice<PropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
 };

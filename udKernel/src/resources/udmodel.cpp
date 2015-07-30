@@ -3,21 +3,21 @@
 namespace ud
 {
 
-UDModelRef UDModel::Create(udString name, bool useStreamer)
+ComponentDesc UDModel::descriptor =
 {
-  udResult result;
-  UDModelRef spModel(nullptr);
+  &Resource::descriptor, // pSuperDesc
 
-  UDModel *pSharedModel = udNew(UDModel);
-  UD_ERROR_NULL(pSharedModel, udR_MemoryAllocationFailure);
+  UDSHELL_APIVERSION, // udVersion
+  UDSHELL_PLUGINVERSION, // pluginVersion
 
-  UD_ERROR_CHECK(udOctree_Create(&pSharedModel->pOctree, name.toStringz(), useStreamer, 0));
+  "udmodel", // id
+  "UD Model", // displayName
+  "UD model resource", // description
+};
 
-  spModel = UDModelRef(pSharedModel);
-
-epilogue:
-
-  return spModel;
+void UDModel::Load(udString name, bool useStreamer)
+{
+  udOctree_Create(&pOctree, name.toStringz(), useStreamer, 0);
 }
 
 UDModel::~UDModel()
@@ -27,4 +27,3 @@ UDModel::~UDModel()
 }
 
 } // namespace ud
-

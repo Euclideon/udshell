@@ -6,9 +6,12 @@
 #include "hal/hal.h"
 #include "components/scene.h"
 #include "components/view.h"
+#include "components/datasource.h"
 #include "components/nodes/node.h"
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
+#include "resources/resource.h"
+#include "resources/udmodel.h"
 #include "udlua.h"
 
 namespace ud
@@ -34,14 +37,25 @@ udResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   }
 
   // register all the builtin component types
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&Component::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&View::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&Scene::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&Node::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&UDNode::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&Camera::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&SimpleCamera::descriptor));
-  UD_ERROR_CHECK(pKernel->RegisterComponentType(&UIComponent::descriptor));
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Component>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<View>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Scene>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<DataSource>());
+
+  // nodes
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Node>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Camera>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<SimpleCamera>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<UDNode>());
+
+  // resources
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Resource>());
+//  UD_ERROR_CHECK(pKernel->RegisterComponent<Buffer>());
+//  UD_ERROR_CHECK(pKernel->RegisterComponent<Array>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<UDModel>());
+//  UD_ERROR_CHECK(pKernel->RegisterComponent<Shader>());
+//  UD_ERROR_CHECK(pKernel->RegisterComponent<Model>());
 
   //...
 
@@ -170,6 +184,18 @@ udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
   ComponentType t = { pDesc, 0 };
   componentRegistry.Add(pDesc->id.hash(), t);
   return udR_Success;
+}
+
+template<typename CT>
+Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+{
+  return udNew(CT, pType, pKernel, uid, initParams);
+}
+template<typename CT>
+udResult Kernel::RegisterComponent()
+{
+  CT::descriptor.pCreateInstance = &NewComponent<CT>;
+  return RegisterComponentType(&CT::descriptor);
 }
 
 udResult Kernel::CreateComponent(udString typeId, InitParams initParams, ComponentRef *pNewInstance)

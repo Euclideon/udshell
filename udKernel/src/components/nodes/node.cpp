@@ -49,9 +49,6 @@ ComponentDesc Node::descriptor =
   "Node",    // displayName
   "Is a scene node", // description
 
-  [](){ return udR_Success; },             // pInit
-  Node::Create, // pCreateInstance
-
   udSlice<PropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 

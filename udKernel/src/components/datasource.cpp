@@ -47,7 +47,7 @@ static MethodDesc methods[] =
 };
 ComponentDesc DataSource::descriptor =
 {
-  nullptr, // pSuperDesc
+  &Component::descriptor, // pSuperDesc
 
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
@@ -56,11 +56,8 @@ ComponentDesc DataSource::descriptor =
   "Data Source", // displayName
   "Provides data", // description
 
-  nullptr, // pInit
-  nullptr, // pCreateInstance
-
   udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
   udSlice<MethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
 };
 
-}
+} // namespace ud

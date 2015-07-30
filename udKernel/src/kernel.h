@@ -43,6 +43,8 @@ public:
 
   // component registry
   udResult RegisterComponentType(ComponentDesc *pDesc);
+  template<typename ComponentType>
+  udResult RegisterComponent();
 
   udResult CreateComponent(udString typeId, InitParams initParams, ComponentRef *pNewInstance);
   udResult DestroyComponent(ComponentRef *pInstance);
@@ -109,6 +111,9 @@ protected:
   udResult ReceiveMessage(udString sender, udString message, const udVariant &data);
 
   int SendMessage(LuaState L);
+
+  template<typename CT>
+  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
 };
 
 template<typename T>

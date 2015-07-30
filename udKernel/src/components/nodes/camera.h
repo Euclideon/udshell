@@ -39,11 +39,6 @@ protected:
   Camera(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
     : Node(pType, pKernel, uid, initParams) {}
   virtual ~Camera() {}
-
-  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
-  {
-    return udNew(Camera, pType, pKernel, uid, initParams);
-  }
 };
 
 
@@ -78,11 +73,6 @@ protected:
   SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
     : Camera(pType, pKernel, uid, initParams) {}
   virtual ~SimpleCamera() {}
-
-  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
-  {
-    return udNew(SimpleCamera, pType, pKernel, uid, initParams);
-  }
 };
 
 } // namespace ud

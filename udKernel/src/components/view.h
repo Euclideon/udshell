@@ -72,11 +72,6 @@ protected:
   View(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
     : Component(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
 
-  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
-  {
-    return udNew(View, pType, pKernel, uid, initParams);
-  }
-
   void OnDirty();
 };
 } // namespace ud

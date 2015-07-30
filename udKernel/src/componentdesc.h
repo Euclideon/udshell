@@ -269,14 +269,17 @@ struct ComponentDesc
 
   // icon image...
 
-  InitComponent *pInit;
-  CreateInstanceCallback *pCreateInstance;
+  // TODO: add flags ('Abstract' (can't create) flag)
 
   const udSlice<PropertyDesc> properties;
   const udSlice<MethodDesc> methods;
   const udSlice<EventDesc> events;
 
+  InitComponent *pInit;
+  CreateInstanceCallback *pCreateInstance;
+
   // property binary search tree
+  // TODO: make this an RB tree...
   template<typename T>
   struct SearchTree
   {

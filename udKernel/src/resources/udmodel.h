@@ -17,7 +17,9 @@ SHARED_CLASS(UDModel);
 class UDModel : public Resource
 {
 public:
-  static UDModelRef Create(udString name, bool useStreamer);
+  UD_COMPONENT(UDModel);
+
+  void Load(udString name, bool useStreamer);
 
   udOctree *GetOctreePtr() const { return pOctree; }
 
@@ -26,7 +28,8 @@ protected:
   friend class udSharedPtr;
 
 private:
-  UDModel() : Resource(ResourceType::UD) {};
+  UDModel(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+    : Resource(pType, pKernel, uid, initParams) {}
   virtual ~UDModel();
 
   udOctree *pOctree;

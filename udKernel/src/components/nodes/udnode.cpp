@@ -1,6 +1,7 @@
 #include "udnode.h"
 #include "udOctree.h"
 #include "renderscene.h"
+#include "kernel.h"
 
 namespace ud
 {
@@ -132,9 +133,6 @@ ComponentDesc UDNode::descriptor =
   "Node",  // displayName
   "Is a udModel Node", // description
 
-  [](){ return udR_Success; },             // pInit
-  UDNode::Create, // pCreateInstance
-
   udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // properties
   udSlice<MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
@@ -146,12 +144,8 @@ int UDNode::Load(udString name, bool useStreamer)
 
   if (source.empty())
   {
-    spModel = UDModel::Create(name, useStreamer);
-    if (!spModel)
-    {
-      result = udR_Failure_; // TODO : Put better error code
-      UD_ERROR_HANDLE();
-    }
+    UDModelRef spModel = pKernel->CreateComponent<UDModel>();
+    spModel->Load(name, useStreamer);
 
     UD_ERROR_CHECK(udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a));
     source = name;

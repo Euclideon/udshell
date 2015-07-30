@@ -58,9 +58,6 @@ ComponentDesc Component::descriptor =
   "Component", // displayName
   "Is a component", // description
 
-  nullptr, // pInit
-  nullptr, // pCreateInstance
-
   udSlice<PropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 

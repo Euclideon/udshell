@@ -15,6 +15,7 @@
 
 
 #define UD_COMPONENT(Name) \
+  friend class Kernel; \
   static ComponentDesc descriptor; \
   typedef udSharedPtr<Name> Ref;
 
@@ -24,7 +25,6 @@ namespace ud
 class Component : public udRefCounted
 {
 public:
-  friend class Kernel;
   UD_COMPONENT(Component);
 
   const ComponentDesc* const pType;

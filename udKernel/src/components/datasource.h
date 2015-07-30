@@ -11,7 +11,6 @@ namespace ud
 class DataSource : Component
 {
 public:
-  friend class Kernel;
   UD_COMPONENT(Component);
 
   enum class Flags : size_t

@@ -49,12 +49,8 @@ protected:
 
   Scene(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
   virtual ~Scene();
-
-  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
-  {
-    return udNew(Scene, pType, pKernel, uid, initParams);
-  }
 };
+
 };
 
 #endif // UDSCENE_H

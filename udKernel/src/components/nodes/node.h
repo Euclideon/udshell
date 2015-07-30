@@ -51,11 +51,6 @@ protected:
   udDouble4x4 matrix = udDouble4x4::identity();
 
   // TODO: enable/visible/etc flags
-
-  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
-  {
-    return udNew(Node, pType, pKernel, uid, initParams);
-  }
 };
 } // namespace ud
 #endif // UDNODE_H

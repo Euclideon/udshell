@@ -7,11 +7,6 @@
 namespace ud
 {
 
-Component *UIComponent::Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
-{
-  return nullptr;
-}
-
 } // namespace ud
 
 #endif
