@@ -2,12 +2,10 @@
 
 #if UDWINDOW_DRIVER == UDDRIVER_QT
 
-#include <QGuiApplication>
-#include <QQuickWindow>
-#include <QThread>
 #include <QSemaphore>
 
-#include "kernel.h"
+#include "udQtKernel_Internal.h"
+#include "udQtUIComponent_Internal.h"
 
 using namespace ud;
 
@@ -30,6 +28,7 @@ public:
 private:
   static QEvent::Type eventType;
 };
+
 QEvent::Type QtKernelEvent::eventType = QEvent::None;
 
 // custom kernel event with semaphore
@@ -43,56 +42,18 @@ public:
 };
 
 
-class QtKernel : public Kernel, public QObject
-{
-public:
-  QtKernel::QtKernel(InitParams commandLine);
-  virtual ~QtKernel() {}
-
-  udResult Init();
-  udResult Shutdown();
-  udResult RegisterWindows();
-  udResult RunMainLoop();
-
-  bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
-  bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
-
-  void PostEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
-
-private slots:
-  void InitRender();
-  void CleanupRender();
-  void OnSceneGraphInitialized();
-  void OnOpenglContextCreated(QOpenGLContext * context);
-  void Destroy();
-
-private:
-  void RegisterWindow(QQuickWindow *pWin);
-
-  void customEvent(QEvent *pEvent);
-
-  // Members
-  int argc;
-  udRCSlice<char *> argv;
-
-  QGuiApplication *pApplication;
-  QQuickWindow *pMainWindow;
-  QQmlEngine *pQmlEngine;
-
-  Qt::HANDLE mainThreadId;
-  Qt::HANDLE renderThreadId;
-};
-
+/** QtKernel *********************************************/
 
 // ---------------------------------------------------------------------------------------
 QtKernel::QtKernel(InitParams commandLine)
   : QObject(0)
   , pApplication(nullptr)
   , pMainWindow(nullptr)
+  , pQmlEngine(nullptr)
   , mainThreadId(QThread::currentThreadId())
   , renderThreadId(nullptr)
 {
-  udDebugPrintf("udQtKernel::udQtKernel()\n");
+  udDebugPrintf("QtKernel::udQtKernel()\n");
 
   // convert InitParams back into a string list for Qt
   // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
@@ -109,7 +70,7 @@ QtKernel::QtKernel(InitParams commandLine)
 // ---------------------------------------------------------------------------------------
 udResult QtKernel::Init()
 {
-  udDebugPrintf("udQtKernel::Init()\n");
+  udDebugPrintf("QtKernel::Init()\n");
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(argc >= 1, "argc must contain at least 1");
@@ -121,11 +82,14 @@ udResult QtKernel::Init()
   // make sure we cleanup the kernel when we're about to quit
   QObject::connect(pApplication, &QCoreApplication::aboutToQuit, this, &QtKernel::Destroy);
 
-  // TODO: create qml engine
-  // TODO: create qquickwindow
-  // TODO: create app qml context
-  // TODO: create dummy empty window
-  // TODO: hook up window signals
+  pQmlEngine = new QQmlEngine(this);
+
+  // TODO: expose kernel innards to the qml context?
+
+  pMainWindow = new QQuickWindow();
+
+  QObject::connect(pMainWindow, &QQuickWindow::beforeRendering, this, &QtKernel::InitRender, Qt::DirectConnection);
+  QObject::connect(pMainWindow, &QQuickWindow::sceneGraphInvalidated, this, &QtKernel::CleanupRender, Qt::DirectConnection);
 
   return udR_Success;
 }
@@ -133,45 +97,40 @@ udResult QtKernel::Init()
 // ---------------------------------------------------------------------------------------
 udResult QtKernel::Shutdown()
 {
-  udDebugPrintf("udQtKernel::Shutdown()\n");
+  udDebugPrintf("QtKernel::Shutdown()\n");
   delete pMainWindow;
+  delete pQmlEngine;
   delete this;
   return udR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-udResult QtKernel::RegisterWindows()
+udResult QtKernel::FormatMainWindow(UIComponentRef spUIComponent)
 {
-  udDebugPrintf("udQtKernel::RegisterWindows()\n");
+  udDebugPrintf("QtKernel::FormatMainWindow()\n");
+  QtUIComponentRef spQtUI = component_cast<QtUIComponent>(spUIComponent);
 
-  // TODO: remove these checks once we are confident in Kernel and the Qt driver
-  UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
+  // NOTE: we are reparenting the "visual parent" of the ui component, this means ui component is still
+  // responsible for cleaning up its qobject
+  // TODO: should we take complete ownership of the ui component??
+  spQtUI->QuickItem()->setParentItem(pMainWindow->contentItem());
 
-  udResult result = udR_Success;
-  QWindowList appWindows = pApplication->allWindows();
-  QQuickWindow *pWindow = nullptr;
+  // TODO: store this info as properties?
+  pMainWindow->resize(800, 600);
+  pMainWindow->show();
+  pMainWindow->raise();
 
-  UD_ERROR_IF(appWindows.size() == 0, udR_Failure_);
+  // TODO: wire this up to a resize event
+  spQtUI->QuickItem()->setWidth(800);
+  spQtUI->QuickItem()->setHeight(600);
 
-  // TODO: allow for multiple windows?
-  pWindow = qobject_cast<QQuickWindow *>(pApplication->allWindows().at(0));
-
-  // TODO: support widget based qt apps?
-  UD_ERROR_NULL(pWindow, udR_Failure_);
-
-  RegisterWindow(pWindow);
-
-epilogue:
-  if (result != udR_Success)
-    udDebugPrintf("App must create a QQuickWindow before calling RunMainLoop()\n");
-
-  return result;
+  return udR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
 udResult QtKernel::RunMainLoop()
 {
-  udDebugPrintf("udQtKernel::RunMainLoop()\n");
+  udDebugPrintf("QtKernel::RunMainLoop()\n");
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
@@ -183,6 +142,7 @@ udResult QtKernel::RunMainLoop()
 // ---------------------------------------------------------------------------------------
 void QtKernel::PostEvent(QEvent *pEvent, int priority)
 {
+  udDebugPrintf("QtKernel::PostEvent()\n");
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
@@ -190,26 +150,9 @@ void QtKernel::PostEvent(QEvent *pEvent, int priority)
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::RegisterWindow(QQuickWindow *pWin)
-{
-  udDebugPrintf("udQtKernel::RegisterWindow()\n");
-
-  // TODO: allow for multiple windows or destroy old window?
-  UDASSERT(pMainWindow == nullptr, "We're trying to register a window and one already exists");
-  UDASSERT(pWin != nullptr, "Trying to register a null window");
-  pMainWindow = pWin;
-
-  // hook into render thread events
-  // TODO: we should probably break this out to allow for context destruction/construction
-  QObject::connect(pMainWindow, &QQuickWindow::beforeRendering, this, &QtKernel::InitRender, Qt::DirectConnection);
-  //QObject::connect(pMainWindow, &QQuickWindow::sceneGraphInitialized, this, &udQtKernel::OnSceneGraphInitialized, Qt::DirectConnection);
-  //QObject::connect(pMainWindow, &QQuickWindow::openglContextCreated, this, &udQtKernel::OnOpenglContextCreated, Qt::DirectConnection);
-  QObject::connect(pMainWindow, &QQuickWindow::sceneGraphInvalidated, this, &QtKernel::CleanupRender, Qt::DirectConnection);
-}
-
-// ---------------------------------------------------------------------------------------
 void QtKernel::customEvent(QEvent *pEvent)
 {
+  udDebugPrintf("QtKernel::customEvent()\n");
   if (pEvent->type() == QtKernelEvent::type())
   {
     MainThreadCallback d;
@@ -226,7 +169,7 @@ void QtKernel::customEvent(QEvent *pEvent)
 // RENDER THREAD
 void QtKernel::InitRender()
 {
-  udDebugPrintf("udQtKernel::InitRender()\n");
+  udDebugPrintf("QtKernel::InitRender()\n");
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
@@ -251,7 +194,7 @@ void QtKernel::InitRender()
 // RENDER THREAD
 void QtKernel::CleanupRender()
 {
-  udDebugPrintf("CleanupRender\n");
+  udDebugPrintf("QtKernel::CleanupRender\n");
   if (Kernel::DeinitRender() != udR_Success)
   {
     // TODO: gracefully handle error with DeinitRender ?
@@ -262,10 +205,11 @@ void QtKernel::CleanupRender()
 // ---------------------------------------------------------------------------------------
 void QtKernel::Destroy()
 {
-  udDebugPrintf("udQtKernel::Destroy()\n");
+  udDebugPrintf("QtKernel::Destroy()\n");
   Kernel::Destroy();
 }
 
+/** Kernel ***********************************************/
 
 // ---------------------------------------------------------------------------------------
 Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
@@ -305,27 +249,17 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 }
 
 // ---------------------------------------------------------------------------------------
-//void Kernel::FormatMainWindow(UIComponentRef spUiComponent)
-//{
-  // TODO:
-//}
+udResult Kernel::FormatMainWindow(UIComponentRef spUIComponent)
+{
+  udDebugPrintf("Kernel::FormatMainWindow()\n");
+  return static_cast<QtKernel*>(this)->FormatMainWindow(spUIComponent);
+}
 
 // ---------------------------------------------------------------------------------------
 udResult Kernel::RunMainLoop()
 {
   udDebugPrintf("Kernel::RunMainLoop()\n");
-
-  udResult result;
-  QtKernel *pKernel = static_cast<QtKernel*>(this);
-
-  UD_ERROR_CHECK(pKernel->RegisterWindows());
-  UD_ERROR_CHECK(pKernel->RunMainLoop());
-
-epilogue:
-  if (result != udR_Success)
-    udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
-
-  return result;
+  return static_cast<QtKernel*>(this)->RunMainLoop();
 }
 
 // ---------------------------------------------------------------------------------------

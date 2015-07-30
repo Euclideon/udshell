@@ -108,6 +108,12 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
   return spOld;
 }
 
+// ---------------------------------------------------------------------------------------
+udResult Kernel::FormatMainWindow(UIComponentRef spUIComponent)
+{
+  return udR_Success;
+}
+
 udResult Kernel::RunMainLoop()
 {
 //  udNaClInstance *pInternal = (udNaClInstance*)pInstance;

@@ -5,7 +5,7 @@
 #include "hal/shader.h"
 #include "hal/vertex.h"
 
-#include "udQt_Internal.h"
+#include "udQtRender_Internal.h"
 
 #include <QOpenGLShaderProgram>
 #include <QOpenGLShader>

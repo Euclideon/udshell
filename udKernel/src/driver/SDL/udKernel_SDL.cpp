@@ -60,6 +60,11 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
   return spOld;
 }
 
+udResult Kernel::FormatMainWindow(UIComponentRef spUIComponent)
+{
+  return udR_Success;
+}
+
 
 struct DelegateWithSemaphore
 {

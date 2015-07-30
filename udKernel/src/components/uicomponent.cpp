@@ -15,7 +15,11 @@ ComponentDesc UIComponent::descriptor =
   "Is a ui component", // description
 
   [](){ return udR_Success; },  // pInit
-  UIComponent::Create        // pCreateInstance
+  UIComponent::Create,          // pCreateInstance
+
+  nullptr,  // properties
+  nullptr,  // methods
+  nullptr   // events
 };
 
 } // namespace ud

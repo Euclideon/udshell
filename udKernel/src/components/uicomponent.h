@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UDUICOMPONENT_H
-#define UDUICOMPONENT_H
+#ifndef UICOMPONENT_H
+#define UICOMPONENT_H
 
 #include "component.h"
 
@@ -24,4 +24,4 @@ protected:
 
 } // namespace ud
 
-#endif // UDUICOMPONENT_H
+#endif // UICOMPONENT_H

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UDQT_INTERNAL_H
-#define UDQT_INTERNAL_H
+#ifndef UDQTRENDER_INTERNAL_H
+#define UDQTRENDER_INTERNAL_H
 
 #include "hal/driver.h"
 #include "hal/texture.h"
@@ -64,4 +64,4 @@ struct udShaderProgram
   QOpenGLShaderProgram *pProgram;
 };
 
-#endif  // UDQT_INTERNAL_H
+#endif  // UDQTRENDER_INTERNAL_H

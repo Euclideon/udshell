@@ -4,6 +4,7 @@
 
 #include "components/component.h"
 #include "components/view.h"
+#include "components/uicomponent.h"
 #include "helpers.h"
 
 #include "3rdparty/FastDelegate.h"
@@ -59,8 +60,7 @@ public:
   // other functions
   ViewRef GetFocusView() const { return spFocusView; }
   ViewRef SetFocusView(ViewRef spView);
-  // TODO
-  //void FormatMainWindow(UIComponentRef spUIComponent);
+  udResult FormatMainWindow(UIComponentRef spUIComponent);
 
   udResult RunMainLoop();
   udResult Terminate();
