@@ -7,7 +7,7 @@
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
 #include "hal/debugfont.h"
-#include "quick/window.h"
+#include "quick/renderview.h"
 
 using namespace ud;
 
@@ -37,8 +37,6 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
 
 void update(ViewRef pView, SceneRef pScene)
 {
-  udDebugPrintf("main - update()\n");
-
   CameraRef pCamera = pView->GetCamera();
   pCamera->SetPerspective(UD_PIf / 3.f);
   pCamera->SetDepthPlanes(0.0001f, 7500.f);
@@ -81,7 +79,10 @@ int main(int argc, char *argv[])
   // create a kernel
   udResult r = Kernel::Create(&s_pKernel, udParseCommandLine(argc, argv), 8);
   if (r == udR_Failure_)
+  {
+    udDebugPrintf("Error creating Kernel\n");
     return 1;
+  }
 
   auto pView = s_pKernel->CreateComponent<View>();
   auto pScene = s_pKernel->CreateComponent<Scene>();
@@ -108,14 +109,19 @@ int main(int argc, char *argv[])
   pView->SetCamera(pCamera);
   s_pKernel->SetFocusView(pView);
 
-  // create the main window
-  // TODO: make it more obvious that kernel is taking ownership of our window??
-  Window *w = new Window;
-  w->setResizeMode(QQuickView::SizeRootObjectToView);
-  w->setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
-  w->resize(800, 600);
-  w->show();
-  w->raise();
+  qmlRegisterType<RenderView>("udShell", 0, 1, "RenderView");
+  udKeyValuePair params[] = { {"file", "qrc:/qml/main.qml"} };
+  auto spMainWindow = s_pKernel->CreateComponent<UIComponent>(InitParams(params, 1));
+  if (!spMainWindow)
+  {
+    udDebugPrintf("Error creating MainWindow UI Component\n");
+    return 1;
+  }
+  s_pKernel->FormatMainWindow(spMainWindow);
 
-  return s_pKernel->RunMainLoop();
+  if (s_pKernel->RunMainLoop() != udR_Success)
+  {
+    // TODO: improve error handling/reporting
+    udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
+  }
 }
