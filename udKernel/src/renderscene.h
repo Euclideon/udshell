@@ -8,7 +8,7 @@
 #include "util/udsharedptr.h"
 #include "util/udslice.h"
 #include "components/view.h"
-#include "resources/udmodel.h"
+#include "components/resources/udmodel.h"
 
 
 struct udTexture;

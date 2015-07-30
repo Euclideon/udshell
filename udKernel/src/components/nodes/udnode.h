@@ -7,7 +7,7 @@
 
 #include "../component.h"
 #include "node.h"
-#include "resources/udmodel.h"
+#include "components/resources/udmodel.h"
 #include "hal/input.h"
 
 struct udOctree;

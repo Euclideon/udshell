@@ -5,7 +5,7 @@
 #include "udPlatform.h"
 #include "udOctree.h"
 
-#include "resources/resource.h"
+#include "components/resources/resource.h"
 #include "util/udsharedptr.h"
 #include "util/udstring.h"
 

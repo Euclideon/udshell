@@ -10,8 +10,8 @@
 #include "components/nodes/node.h"
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
-#include "resources/resource.h"
-#include "resources/udmodel.h"
+#include "components/resources/resource.h"
+#include "components/resources/udmodel.h"
 #include "udlua.h"
 
 namespace ud

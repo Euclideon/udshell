@@ -1,7 +1,7 @@
 
 #include "util/udvariant.h"
 #include "components/component.h"
-#include "resources/resource.h"
+#include "components/resources/resource.h"
 #include "udlua.h"
 
 udRCString udVariant::stringify() const
