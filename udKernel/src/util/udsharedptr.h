@@ -34,7 +34,7 @@ public:
       ptr.pInstance = nullptr;
   }
 
-//  udSharedPtr() {}        // <- should we allow default construction, or enforce nullptr?
+  udSharedPtr() {}
   udSharedPtr(nullptr_t) {}
 
   explicit udSharedPtr(T *p) : pInstance(p) { acquire(); }

@@ -71,12 +71,6 @@ inline udVariant::udVariant(ud::Component *c)
   , length(0)
   , c(c)
 {}
-inline udVariant::udVariant(ud::Resource *r)
-  : t((size_t)Type::Resource)
-  , ownsArray(0)
-  , length(0)
-  , r(r)
-{}
 inline udVariant::udVariant(const Delegate &d)
   : t((size_t)Type::Delegate)
   , ownsArray(0)

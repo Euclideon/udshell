@@ -60,4 +60,38 @@ ComponentDesc DataSource::descriptor =
   udSlice<MethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
 };
 
+DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+  : Component(pType, pKernel, uid, initParams)
+{
+  ComponentRef spSource, spData;
+
+  for (auto &p : initParams)
+  {
+    udString key = p.key.as<udString>();
+    if (key.eqi("data"))
+    {
+      if (p.value.type() == udVariant::Type::Component)
+      {
+        // binary buffer? (pre-formatted image)
+        // array buffer? (raw image)
+      }
+    }
+    else if (key.eqi("source"))
+    {
+      if (p.value.type() == udVariant::Type::String)
+      {
+        // path or url?
+
+        // open a stream...
+      }
+      else if (p.value.type() == udVariant::Type::Component)
+      {
+        // binary buffer? (formatted image)   (source is read-only)
+      }
+    }
+  }
+
+  Create(spSource, spData);
+}
+
 } // namespace ud

@@ -16,20 +16,27 @@ class Buffer : public Resource
 public:
   UD_COMPONENT(Buffer);
 
-  void Allocate(size_t size) const;
+  void Allocate(size_t size);
+  void Free();
+
   size_t GetBufferSize() const;
 
   void* Map(size_t *pSize = nullptr);
+  const void* MapForRead(size_t *pSize = nullptr);
   void UnMap();
 
   void SetBuffer(const void *pBuffer, size_t size);
 
+  udEvent<> changed;
+
 protected:
   Buffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
-  virtual ~Buffer();
+  virtual ~Buffer() { Free(); }
 
-  udSlice<char> buffer;
+  udSlice<char> buffer = nullptr;
+  int mapDepth = 0;
+  bool readMap;
 };
 
 } // namespace ud

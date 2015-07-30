@@ -8,7 +8,7 @@
 namespace ud
 {
 
-class DataSource : Component
+class DataSource : public Component
 {
 public:
   UD_COMPONENT(Component);
@@ -21,13 +21,15 @@ public:
     DeferredLoad = 1<<3,
   };
 
+  virtual udSlice<const udString> GetFileExtensions() const { return nullptr; }
+
   udResult Flush();
 
   size_t GetNumResources() const { return resources.length; }
   udSlice<ResourceRef> GetResources() const { return resources; }
 
   ResourceRef GetResource(size_t resourceIndex) const { return resources[resourceIndex]; }
-  int GetResourceType(size_t resourceIndex) const { return resources[resourceIndex]->Type(); }
+  udString GetResourceType(size_t resourceIndex) const { return resources[resourceIndex]->Type(); }
 
   template<typename ResType = Resource>
   ResourceRef Get(size_t resourceIndex) const
@@ -36,8 +38,9 @@ public:
   }
 
 protected:
-  DataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
-    : Component(pType, pKernel, uid, initParams) {}
+  DataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
+
+  virtual void Create(ComponentRef spSource, ComponentRef spData) {}
 
   udFixedSlice<ResourceRef, 1> resources;
   Flags flags;

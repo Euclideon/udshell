@@ -95,17 +95,6 @@ ud::ComponentRef udVariant::asComponent() const
     return nullptr;
   }
 }
-ud::ResourceRef udVariant::asResource() const
-{
-  switch ((Type)t)
-  {
-    case Type::Resource:
-      return ud::ResourceRef(r);
-    default:
-      UDASSERT(type() == Type::Resource, "Wrong type!");
-      return nullptr;
-  }
-}
 udVariant::Delegate udVariant::asDelegate() const
 {
   switch ((Type)t)
@@ -261,10 +250,6 @@ void udVariant::luaPush(ud::LuaState &l) const
       break;
     case Type::Component:
       l.pushComponent(ud::ComponentRef(c));
-      break;
-    case Type::Resource:
-      UDASSERT(false, "TODO!");
-//      l.pushResource(ud::ResourceRef(c));
       break;
     case Type::Delegate:
       l.pushDelegate((Delegate&)p);
