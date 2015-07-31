@@ -76,7 +76,7 @@ inline void udFromVariant(const udVariant &variant, QString *pString)
   // NOTE: assumes pString is already empty
   udString s = variant.asString();
   if (!s.empty())
-    pString->append(QString::fromUtf8(s.ptr, s.length));
+    pString->append(QString::fromUtf8(s.ptr, static_cast<int>(s.length)));
 }
 
 #endif  // UDQTKERNEL_INTERNAL_H
