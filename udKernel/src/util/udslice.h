@@ -83,6 +83,9 @@ struct udSlice
   udSlice<T> find(T c) const;
   udSlice<T> findBack(T c) const;
 
+  typedef bool(*Predicate)(const T &e);
+  T* search(Predicate) const;
+
   template<bool skipEmptyTokens = false>
   udSlice<T> popToken(udSlice<T> delimiters);
 

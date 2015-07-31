@@ -220,6 +220,17 @@ inline udSlice<T> udSlice<T>::findBack(T c) const
 }
 
 template<typename T>
+T* udSlice<T>::search(Predicate pred) const
+{
+  for (auto &e : *this)
+  {
+    if (pred(e))
+      return &e;
+  }
+  return nullptr;
+}
+
+template<typename T>
 template<bool skipEmptyTokens>
 inline udSlice<T> udSlice<T>::popToken(udSlice<T> delimiters)
 {
