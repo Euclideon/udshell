@@ -85,9 +85,9 @@ inline udVariant::udVariant(Delegate &&d)
 {
   new(&p) Delegate(std::move(d));
 }
-inline udVariant::udVariant(udString s)
+inline udVariant::udVariant(udString s, bool ownsMemory)
   : t((size_t)Type::String)
-  , ownsArray(0)
+  , ownsArray(ownsMemory ? 1 : 0)
   , length(s.length)
   , s(s.ptr)
 {}
@@ -111,7 +111,7 @@ inline udVariant::~udVariant()
   {
     ((Delegate*)&p)->~Delegate();
   }
-  else if (ownsArray && t >= (size_t)Type::Array)
+  else if (ownsArray && t >= (size_t)Type::String)
   {
     if (is(Type::Array))
     {

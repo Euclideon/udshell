@@ -42,7 +42,7 @@ public:
   udVariant(ud::Component *);
   udVariant(const Delegate &d);
   udVariant(Delegate &&d);
-  udVariant(udString);
+  udVariant(udString, bool ownsMemory = false);
   udVariant(udSlice<udVariant> a, bool ownsMemory = false);
   udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory = false);
 
