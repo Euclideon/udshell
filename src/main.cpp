@@ -108,8 +108,8 @@ int main(int argc, char *argv[])
   pView->SetCamera(pCamera);
   s_pKernel->SetFocusView(pView);
 
-  udKeyValuePair params[] = { {"file", "qrc:/qml/main.qml"} };
-  auto spMainWindow = s_pKernel->CreateComponent<UIComponent>(InitParams(params, 1));
+  udSlice<const udKeyValuePair> params = { {"file", "qrc:/qml/main.qml"} };
+  auto spMainWindow = s_pKernel->CreateComponent<UIComponent>(params);
   if (!spMainWindow)
   {
     udDebugPrintf("Error creating MainWindow UI Component\n");
