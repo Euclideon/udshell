@@ -61,6 +61,8 @@ void display(ViewRef pView, SceneRef pScene)
 // ---------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+  udMemoryDebugTrackingInit();
+
   // unit test
   udResult udSlice_Test();
   udSlice_Test();
@@ -121,5 +123,11 @@ int main(int argc, char *argv[])
   {
     // TODO: improve error handling/reporting
     udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
+    return 1;
   }
+
+  udMemoryOutputLeaks();
+  udMemoryDebugTrackingDeinit();
+
+  return 0;
 }
