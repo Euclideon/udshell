@@ -15,7 +15,7 @@ static int s_displayWidth, s_displayHeight;
 static int s_sdlEvent = -1;
 
 using namespace ud;
-Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 {
   return new Kernel;
 }

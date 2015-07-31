@@ -18,7 +18,7 @@ class Window;
 class QtKernel : public ud::Kernel, public QObject
 {
 public:
-  QtKernel::QtKernel(InitParams commandLine);
+  QtKernel::QtKernel(udInitParams commandLine);
   virtual ~QtKernel() {}
 
   udResult Init();

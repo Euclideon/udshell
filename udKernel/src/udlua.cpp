@@ -77,13 +77,13 @@ static int CreateComponent(lua_State *L)
   udString type = l.toString(1);
 
   // get the init params
-  InitParams init;
+  udInitParams init;
   udVariant args;
   if (numArgs >= 2)
   {
     new(&args) udVariant(udVariant::luaGet(l, 2));
     if (args.type() == udVariant::Type::AssocArray)
-      init = args.asAssocArray();
+      new(&init) udInitParams(args.asAssocArray());
   }
 
   ComponentRef c = nullptr;

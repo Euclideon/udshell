@@ -21,7 +21,7 @@ public:
   void SetBuffer(udString text) { Buffer::SetBuffer(text.ptr, text.length); }
 
 protected:
-  Text(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+  Text(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Buffer(pType, pKernel, uid, initParams) {}
   virtual ~Text();
 };

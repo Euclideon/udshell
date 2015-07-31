@@ -62,7 +62,7 @@ ComponentDesc Component::descriptor =
 };
 
 
-void Component::Init(InitParams initParams)
+void Component::Init(udInitParams initParams)
 {
   for (auto &kv : initParams)
   {

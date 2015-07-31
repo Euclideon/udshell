@@ -69,7 +69,7 @@ protected:
   void(*pPreRenderCallback)(ViewRef, SceneRef) = nullptr;
   void(*pPostRenderCallback)(ViewRef, SceneRef) = nullptr;
 
-  View(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+  View(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Component(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
 
   void OnDirty();

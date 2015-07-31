@@ -38,7 +38,7 @@ public:
   }
 
 protected:
-  DataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
+  DataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
 
   virtual void Create(ComponentRef spSource, ComponentRef spData) {}
 

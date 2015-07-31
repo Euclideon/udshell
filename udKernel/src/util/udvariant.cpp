@@ -4,6 +4,10 @@
 #include "components/resources/resource.h"
 #include "udlua.h"
 
+
+const udVariant udInitParams::varNull;
+
+
 udRCString udVariant::stringify() const
 {
   switch ((Type)t)

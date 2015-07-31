@@ -46,7 +46,7 @@ public:
 /** QtKernel *********************************************/
 
 // ---------------------------------------------------------------------------------------
-QtKernel::QtKernel(InitParams commandLine)
+QtKernel::QtKernel(udInitParams commandLine)
   : QObject(0)
   , pApplication(nullptr)
   , pMainWindow(nullptr)
@@ -60,10 +60,10 @@ QtKernel::QtKernel(InitParams commandLine)
   // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
   // NOTE: the state of our argv may be changed by Qt as it removes args that it recognises
   udFixedSlice<char *> args;
-  args.reserve(commandLine.length);
-  argc = static_cast<int>(commandLine.length);
+  args.reserve(commandLine.params.length);
+  argc = static_cast<int>(commandLine.params.length);
   for (int i = 0; i < argc; i++)
-    args.pushBack(const_cast<char*>(commandLine.ptr[i].value.asString().ptr));
+    args.pushBack(const_cast<char*>(commandLine[i].value.asString().ptr));
 
   argv = args.slice(0, argc);
 }
@@ -218,7 +218,7 @@ namespace ud
 {
 
 // ---------------------------------------------------------------------------------------
-Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 {
   udDebugPrintf("Kernel::CreateInstanceInternal()\n");
   return new qt::QtKernel(commandLine);

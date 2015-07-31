@@ -29,7 +29,7 @@ class Kernel
 {
   friend class Component;
 public:
-  static udResult Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount = 0);
+  static udResult Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount = 0);
   udResult Destroy();
 
   udResult SendMessage(udString target, udString sender, udString message, const udVariant &data);
@@ -46,11 +46,11 @@ public:
   template<typename ComponentType>
   udResult RegisterComponent();
 
-  udResult CreateComponent(udString typeId, InitParams initParams, ComponentRef *pNewInstance);
+  udResult CreateComponent(udString typeId, udInitParams initParams, ComponentRef *pNewInstance);
   udResult DestroyComponent(ComponentRef *pInstance);
 
   template<typename T>
-  udSharedPtr<T> CreateComponent(InitParams initParams = nullptr);
+  udSharedPtr<T> CreateComponent(udInitParams initParams = nullptr);
 
   ComponentRef FindComponent(udString uid);
 
@@ -99,7 +99,7 @@ protected:
 
   ViewRef spFocusView = nullptr;
 
-  static Kernel *CreateInstanceInternal(InitParams commandLine);
+  static Kernel *CreateInstanceInternal(udInitParams commandLine);
   udResult InitInstanceInternal();
   udResult InitRenderInternal();
   udResult DestroyInstanceInternal();
@@ -113,11 +113,11 @@ protected:
   int SendMessage(LuaState L);
 
   template<typename CT>
-  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams);
+  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
 };
 
 template<typename T>
-udSharedPtr<T> Kernel::CreateComponent(InitParams initParams)
+udSharedPtr<T> Kernel::CreateComponent(udInitParams initParams)
 {
   ComponentRef c = nullptr;
   udResult r = CreateComponent(T::descriptor.id, initParams, &c);

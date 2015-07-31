@@ -19,7 +19,7 @@ public:
   virtual udVariant GetMetadata(udString key) const { return udVariant(); }
 
 protected:
-  Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+  Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Component(pType, pKernel, uid, initParams) {}
 
   udString type;

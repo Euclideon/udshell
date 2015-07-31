@@ -16,7 +16,7 @@
 
 namespace ud
 {
-udResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount)
+udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
   udResult result;
   Kernel *pKernel = CreateInstanceInternal(commandLine);
@@ -187,7 +187,7 @@ udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
 }
 
 template<typename CT>
-Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
 {
   return udNew(CT, pType, pKernel, uid, initParams);
 }
@@ -199,7 +199,7 @@ udResult Kernel::RegisterComponent()
   return RegisterComponentType(&CT::descriptor);
 }
 
-udResult Kernel::CreateComponent(udString typeId, InitParams initParams, ComponentRef *pNewInstance)
+udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, ComponentRef *pNewInstance)
 {
   ComponentType *pType = componentRegistry.Get(typeId.hash());
   if (!pType)

@@ -21,7 +21,7 @@ public:
   QQuickItem *QuickItem() { return pQtQuickItem; }
 
 protected:
-  UIComponent(const ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, InitParams initParams);
+  UIComponent(const ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams);
   virtual ~UIComponent();
 
   // HACK: allow ud::UIComponent::Create() to create a qt::UIComponent

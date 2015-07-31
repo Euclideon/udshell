@@ -118,7 +118,42 @@ struct udKeyValuePair
   udVariant value;
 };
 
-typedef udSlice<udKeyValuePair> InitParams;
+class udInitParams
+{
+public:
+  udInitParams() {}
+  udInitParams(nullptr_t) {}
+  udInitParams(const udInitParams& rh) : params(rh.params) {}
+  udInitParams(udSlice<const udKeyValuePair> kvp) : params(kvp) {}
+
+  udSlice<const udKeyValuePair> params;
+
+  const udKeyValuePair& operator[](size_t index) const
+  {
+    return params[index];
+  }
+  const udVariant& operator[](udString key) const
+  {
+    for (auto &p : params)
+    {
+      if (p.key.is(udVariant::Type::String) && p.key.asString().eq(key))
+        return p.value;
+    }
+    return varNull;
+  }
+
+  udIterator<const udKeyValuePair> begin() const
+  {
+    return params.begin();
+  }
+  udIterator<const udKeyValuePair> end() const
+  {
+    return params.end();
+  }
+
+private:
+  static const udVariant varNull;
+};
 
 
 #include "util/udvariant.inl"

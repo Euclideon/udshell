@@ -17,7 +17,7 @@ namespace qt
 {
 
 // ---------------------------------------------------------------------------------------
-UIComponent::UIComponent(const ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, InitParams initParams)
+UIComponent::UIComponent(const ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams)
   : ud::UIComponent(pType, pKernel, uid, initParams)
 {
   // create the qml component for the associated script

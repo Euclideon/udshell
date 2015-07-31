@@ -24,7 +24,7 @@ public:
   udOctree *GetOctreePtr() const { return pOctree; }
 
 protected:
-  UDModel(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+  UDModel(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~UDModel();
 

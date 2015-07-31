@@ -41,7 +41,7 @@ public:
   void CalculateWorldMatrix(udDouble4x4 *pMatrix) const;
 
 protected:
-  Node(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+  Node(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Component(pType, pKernel, uid, initParams) {}
   virtual ~Node() {}
 

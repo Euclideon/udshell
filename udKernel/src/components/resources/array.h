@@ -52,7 +52,7 @@ public:
   }
 
 protected:
-  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Buffer(pType, pKernel, uid, initParams) {}
   virtual ~ArrayBuffer();
 

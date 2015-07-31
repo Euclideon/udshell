@@ -58,7 +58,7 @@ public:
   UDModelRef GetSharedUDModel() const { return  spModel;  } // TODO: Remove this once its no longer required by udglViewer
 
 protected:
-  UDNode(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+  UDNode(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Node(pType, pKernel, uid, initParams) { clipArea.minX = clipArea.minY = clipArea.maxX = clipArea.maxY = 0; }
   virtual ~UDNode() {}
 

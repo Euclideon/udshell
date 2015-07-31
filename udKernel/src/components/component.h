@@ -51,7 +51,7 @@ public:
   udString GetDescription() const { return pType->description; }
 
 protected:
-  Component(const ComponentDesc *_pType, Kernel *_pKernel, udRCString _uid, InitParams initParams)
+  Component(const ComponentDesc *_pType, Kernel *_pKernel, udRCString _uid, udInitParams initParams)
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
   virtual ~Component();
 
@@ -78,7 +78,7 @@ private:
   friend class ::udEvent;
   friend class LuaState;
 
-  void Init(InitParams initParams);
+  void Init(udInitParams initParams);
 
   Component(const Component &) = delete;    // Still not sold on this
   void operator=(const Component &) = delete;

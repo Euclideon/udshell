@@ -8,7 +8,7 @@ namespace ud
 {
 
 // ---------------------------------------------------------------------------------------
-Component *UIComponent::Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+Component *UIComponent::Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
 {
   return udNew(qt::UIComponent, pType, pKernel, uid, initParams);
 }

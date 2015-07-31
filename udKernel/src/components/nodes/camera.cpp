@@ -232,7 +232,7 @@ udResult SimpleCamera::Update(double timeDelta)
 }
 
 // ***************************************************************************************
-Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
 {
   return udNew(SimpleCamera, pType, pKernel, uid, initParams);
 }

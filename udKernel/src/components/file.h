@@ -12,11 +12,16 @@ class File : public Stream
 public:
   UD_COMPONENT(File);
 
-  size_t Read(void *pData, size_t bytes) override;
-  size_t Write(void *pData, size_t bytes) override;
+  virtual int64_t Length() const { return 0; }
+
+  virtual size_t Read(void *pData, size_t bytes) { return 0; }
+  virtual size_t Write(void *pData, size_t bytes) { return 0; }
+
+  virtual int64_t GetPos() { return 0; }
+  virtual int64_t Seek(SeekOrigin rel, int64_t offset) { return 0; }
 
 protected:
-  File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, InitParams initParams)
+  File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Stream(pType, pKernel, uid, initParams)
   {
   }
