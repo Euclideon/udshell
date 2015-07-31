@@ -20,10 +20,17 @@ namespace qt
 UIComponent::UIComponent(const ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams)
   : ud::UIComponent(pType, pKernel, uid, initParams)
 {
+  QString filename = initParams["file"].as<QString>();
+  if (filename.isNull())
+  {
+    udDebugPrintf("Error: attempted to create ui component without qml file set\n");
+    throw udR_Failure_;
+  }
+
   // create the qml component for the associated script
   // TODO: remove hardcoded script
   QtKernel *pQtKernel = static_cast<QtKernel*>(pKernel);
-  QQmlComponent component(pQtKernel->QmlEngine(), QUrl(QStringLiteral("qrc:/qml/main.qml")));
+  QQmlComponent component(pQtKernel->QmlEngine(), QUrl(filename));
   QObject *pObject = component.create();
 
   if (!pObject)
