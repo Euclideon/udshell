@@ -45,6 +45,7 @@ public:
     size_t elements = shape[0];
     for (size_t i = 1; i<dimensions; ++i)
       elements *= shape[i];
+    return elements;
   }
   udSlice<const size_t> GetShape() const
   {
@@ -54,7 +55,7 @@ public:
 protected:
   ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Buffer(pType, pKernel, uid, initParams) {}
-  virtual ~ArrayBuffer();
+  virtual ~ArrayBuffer() {}
 
   void Allocate(size_t size) = delete;
 

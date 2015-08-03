@@ -19,7 +19,7 @@ public:
 protected:
   Shader(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
-  virtual ~Shader();
+  virtual ~Shader() {}
 
 };
 

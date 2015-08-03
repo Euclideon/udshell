@@ -21,16 +21,15 @@ const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
 
 
 static udString s_luaInit(
-  "function tprint (tbl, indent)                              \n"
+  "function tprint (val, indent, fmt)                         \n"
   "  if not indent then indent = 0 end                        \n"
-  "  for k, v in pairs(tbl) do                                \n"
-  "    formatting = string.rep(\"  \", indent) .. k .. \": \" \n"
-  "    if type(v) == \"table\" then                           \n"
-  "      print(formatting)                                    \n"
-  "      tprint(v, indent+1)                                  \n"
-  "    else                                                   \n"
-  "      print(formatting .. tostring(v))                     \n"
+  "  if type(val) == 'table' then                             \n"
+  "    for k, v in pairs(val) do                              \n"
+  "      formatting = string.rep('  ', indent) .. k .. ': '   \n"
+  "      tprint(v, indent+1, formatting)                      \n"
   "    end                                                    \n"
+  "  else                                                     \n"
+  "    print((fmt or '') .. tostring(val))                    \n"
   "  end                                                      \n"
   "end                                                        \n"
 );

@@ -23,7 +23,7 @@ public:
 protected:
   Text(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Buffer(pType, pKernel, uid, initParams) {}
-  virtual ~Text();
+  virtual ~Text() {}
 };
 
 } // namespace ud

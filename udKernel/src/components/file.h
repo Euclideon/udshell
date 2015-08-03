@@ -4,6 +4,8 @@
 
 #include "stream.h"
 
+struct udFile;
+
 namespace ud
 {
 
@@ -12,19 +14,16 @@ class File : public Stream
 public:
   UD_COMPONENT(File);
 
-  virtual int64_t Length() const { return 0; }
+  size_t Read(void *pData, size_t bytes) override;
+  size_t Write(const void *pData, size_t bytes) override;
 
-  virtual size_t Read(void *pData, size_t bytes) { return 0; }
-  virtual size_t Write(void *pData, size_t bytes) { return 0; }
-
-  virtual int64_t GetPos() { return 0; }
-  virtual int64_t Seek(SeekOrigin rel, int64_t offset) { return 0; }
+  int64_t Seek(SeekOrigin rel, int64_t offset) override;
 
 protected:
-  File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
-    : Stream(pType, pKernel, uid, initParams)
-  {
-  }
+  File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  ~File();
+
+  udFile *pFile;
 };
 
 }

@@ -6,16 +6,24 @@
 #include "hal/hal.h"
 #include "components/scene.h"
 #include "components/view.h"
+#include "components/stream.h"
+#include "components/file.h"
 #include "components/datasource.h"
 #include "components/nodes/node.h"
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
 #include "components/resources/resource.h"
+#include "components/resources/buffer.h"
+#include "components/resources/array.h"
+#include "components/resources/text.h"
+#include "components/resources/shader.h"
+#include "components/resources/model.h"
 #include "components/resources/udmodel.h"
 #include "udlua.h"
 
 namespace ud
 {
+
 udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
   udResult result;
@@ -42,6 +50,8 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Scene>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<DataSource>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Stream>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<File>());
 
   // nodes
   UD_ERROR_CHECK(pKernel->RegisterComponent<Node>());
@@ -51,11 +61,15 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
 
   // resources
   UD_ERROR_CHECK(pKernel->RegisterComponent<Resource>());
-//  UD_ERROR_CHECK(pKernel->RegisterComponent<Buffer>());
-//  UD_ERROR_CHECK(pKernel->RegisterComponent<Array>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Buffer>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<ArrayBuffer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UDModel>());
-//  UD_ERROR_CHECK(pKernel->RegisterComponent<Shader>());
-//  UD_ERROR_CHECK(pKernel->RegisterComponent<Model>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Shader>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Model>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Text>());
+
+  // data sources
+//  UD_ERROR_CHECK(pKernel->RegisterComponent<TGASource>());
 
   //...
 
