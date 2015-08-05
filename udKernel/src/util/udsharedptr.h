@@ -46,6 +46,16 @@ public:
 
   inline ~udSharedPtr() { release(); }
 
+  udSharedPtr& operator=(udSharedPtr<T> &&ptr)
+  {
+    if (pInstance != ptr.pInstance)
+    {
+      release();
+      pInstance = ptr.pInstance;
+      ptr.pInstance = nullptr;
+    }
+    return *this;
+  }
   udSharedPtr& operator=(const udSharedPtr<T> &ptr)
   {
     if (pInstance != ptr.pInstance)
