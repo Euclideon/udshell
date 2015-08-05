@@ -6,6 +6,7 @@
 
 namespace ud
 {
+
 PROTOTYPE_COMPONENT(UIComponent);
 
 class UIComponent : public Component
@@ -20,7 +21,6 @@ protected:
 
   static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
 };
-
 
 } // namespace ud
 

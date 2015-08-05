@@ -9,6 +9,8 @@ struct udFile;
 namespace ud
 {
 
+PROTOTYPE_COMPONENT(File);
+
 class File : public Stream
 {
 public:

@@ -8,6 +8,8 @@
 namespace ud
 {
 
+PROTOTYPE_COMPONENT(Stream);
+
 enum class SeekOrigin
 {
   Begin,

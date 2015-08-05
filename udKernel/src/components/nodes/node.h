@@ -12,7 +12,6 @@ namespace ud
 
 SHARED_CLASS(RenderScene);
 
-class Node;
 PROTOTYPE_COMPONENT(Node);
 
 class Node : public Component
@@ -52,5 +51,6 @@ protected:
 
   // TODO: enable/visible/etc flags
 };
+
 } // namespace ud
 #endif // UDNODE_H
