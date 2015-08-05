@@ -611,7 +611,7 @@ inline size_t count(size_t len) // terminator
   return len;
 }
 template<typename T, typename... Args>
-inline size_t count(size_t len, const T &a, const Args&... args) // T
+inline size_t count(size_t len, const T &, const Args&... args) // T
 {
   return count(len + 1, args...);
 }

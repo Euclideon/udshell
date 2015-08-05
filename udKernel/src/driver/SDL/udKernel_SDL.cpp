@@ -12,7 +12,7 @@ SDL_Window* s_window = nullptr;
 SDL_GLContext s_context = nullptr;
 bool s_done = false;
 static int s_displayWidth, s_displayHeight;
-static int s_sdlEvent = -1;
+static Uint32 s_sdlEvent = (Uint32)-1;
 
 using namespace ud;
 Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)

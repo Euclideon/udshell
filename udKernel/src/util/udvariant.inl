@@ -321,6 +321,9 @@ protected:
   }
 
   const udDelegateMementoRef target;
+
+private:
+  VarDelegate<R(Args...)>& operator=(const VarDelegate<R(Args...)> &rh) = delete;
 };
 
 // specialise for 'void' return type
