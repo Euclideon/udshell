@@ -31,7 +31,7 @@ protected:
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~UDModel();
 
-  udOctree *pOctree;
+  udOctree *pOctree = nullptr;
 };
 
 
