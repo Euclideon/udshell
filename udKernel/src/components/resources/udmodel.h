@@ -9,7 +9,6 @@
 #include "util/udsharedptr.h"
 #include "util/udstring.h"
 #include "udRender.h"
-#include "udlua.h"
 #include "kernel.h"
 
 namespace ud
