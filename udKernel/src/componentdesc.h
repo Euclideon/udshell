@@ -8,7 +8,7 @@
 #include "util/udsharedptr.h"
 #include "util/udvariant.h"
 #include "util/udevent.h"
-#include "util/udmap.h"
+#include "util/udavltree.h"
 
 
 // TODO: remove this!
@@ -16,14 +16,18 @@
 #pragma warning(disable: 4100)
 #endif // UDPLATFORM_WINDOWS
 
-#if !defined(_MSC_VER)
-#include <cstddef>
-using std::nullptr_t;
-#endif //!defined(_MSC_VER)
-
 
 #define PROTOTYPE_COMPONENT(Name) \
   SHARED_CLASS(Name)
+
+
+template<>
+struct udAVLCompare<udString> {
+  static inline ptrdiff_t compare(udString a, udString b)
+  {
+    return a.cmp(b);
+  }
+};
 
 
 namespace ud
@@ -160,6 +164,7 @@ enum class PropertyType : uint32_t
   Integer,
   Float,
   String,
+  Variant,
   Component,
   Resource,
   Enum,
@@ -219,7 +224,6 @@ struct MethodDesc
   void operator=(const MethodDesc&) = delete;
 
   udString id;
-  udString displayName;
   udString description;
 
   Method method;
@@ -279,32 +283,16 @@ struct ComponentDesc
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
 
-  // property binary search tree
-  // TODO: make this an RB tree...
-  template<typename T>
-  struct SearchTree
-  {
-    SearchTree(const T *pItem)
-      : id(pItem->id), pItem(pItem), index(pItem->index) {}
-    udString id;
-    const T *pItem;
-    size_t index;
-    SearchTree *pLeft = nullptr;
-    SearchTree *pRight = nullptr;
-  };
-  typedef SearchTree<PropertyDesc> PropertyNode;
-  typedef SearchTree<MethodDesc> MethodNode;
-  typedef SearchTree<EventDesc> EventNode;
 
-  udMap<PropertyNode> *pPropertyTree;
-  udMap<MethodNode> *pMethodTree;
-  udMap<EventNode> *pEventTree;
+  udAVLTree<udString, PropertyDesc*> propertyTree;
+  udAVLTree<udString, MethodDesc*> methodTree;
+  udAVLTree<udString, EventDesc*> eventTree;
 
   void BuildSearchTree();
 
-  size_t NumProperties() const { return pPropertyTree ? pPropertyTree->Size() : 0; }
-  size_t NumMethods() const { return pMethodTree ? pMethodTree->Size() : 0; }
-  size_t NumEvents() const { return pEventTree ? pEventTree->Size() : 0; }
+  size_t NumProperties() const { return propertyTree.Size(); }
+  size_t NumMethods() const { return methodTree.Size(); }
+  size_t NumEvents() const { return eventTree.Size(); }
 };
 
 } // namespace ud

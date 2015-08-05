@@ -109,7 +109,6 @@ static MethodDesc methods[] =
 {
   {
     "load",
-    "Load",
     "Load the UD Model",
     Method(&UDNode::Load),
     TypeDesc(PropertyType::Integer), // result

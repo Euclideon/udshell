@@ -29,7 +29,6 @@ static MethodDesc methods[] =
 {
   {
     "setdepthplanes",
-    "SetDepthPlanes",
     "Set the near and far depth planes:\n  setdepthplanes(near, far)",
     Method(&Camera::SetDepthPlanes),
     TypeDesc(PropertyType::Void), // result

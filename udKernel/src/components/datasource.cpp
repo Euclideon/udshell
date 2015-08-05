@@ -12,36 +12,45 @@ static PropertyDesc props[] =
     &DataSource::GetNumResources, // getter
     nullptr, // setter
     TypeDesc(PropertyType::Integer) // type
-  },
-  {
-    "resources", // id
-    "Resources", // displayName
-    "List of resources", // description
-    &DataSource::GetResources, // getter
-    nullptr, // setter
-    TypeDesc(PropertyType::Resource, ~0), // type
   }
 };
 static MethodDesc methods[] =
 {
   {
-    "getresource", // id
-    "Get Resource", // displayName
-    "Get a resource by index", // description
-    &DataSource::GetResource, // method
+    "getresourcename", // id
+    "Get a resource name by index", // description
+    &DataSource::GetResourceName, // method
     TypeDesc(PropertyType::Resource), // type
     {
       TypeDesc(PropertyType::Integer), // arg0
     }
   },
   {
-    "getresourcetype", // id
-    "Get Resource Type", // displayName
-    "Get the type of a resource", // description
-    &DataSource::GetResourceType, // method
+    "getresource", // id
+    "Get a resource by name or index", // description
+    &DataSource::GetResourceByVariant, // method
+    TypeDesc(PropertyType::Resource), // type
+    {
+      TypeDesc(PropertyType::Variant), // arg0
+    }
+  },
+  {
+    "setresource", // id
+    "Set a resource by name", // description
+    &DataSource::SetResource, // method
+    TypeDesc(PropertyType::Void), // type
+    {
+      TypeDesc(PropertyType::String), // arg0
+      TypeDesc(PropertyType::Resource), // arg1
+    }
+  },
+  {
+    "countresource", // id
+    "Count resources with a name prefix", // description
+    &DataSource::CountResources, // method
     TypeDesc(PropertyType::Integer), // type
     {
-      TypeDesc(PropertyType::Integer), // arg0
+      TypeDesc(PropertyType::String), // arg0
     }
   }
 };
@@ -63,29 +72,28 @@ ComponentDesc DataSource::descriptor =
 DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  ComponentRef spSource, spData;
-
   const udVariant &source = initParams["source"];
-  const udVariant &data = initParams["data"];
 
-  if (data.is(udVariant::Type::Component))
-  {
-    // binary buffer? (pre-formatted image)
-    // array buffer? (raw image)
-  }
+//  const udVariant &flags = initParams["flags"];
+//  size_t f = flags.as<size_t>();
 
+  StreamRef spSource;
   if (source.is(udVariant::Type::String))
   {
     // path or url?
+//    pKernel->CreateComponent<File>({ "path", source.toString() });
 
-    // open a stream...
+    // open a file stream...
   }
   else if (source.is(udVariant::Type::Component))
   {
+    // already a stream...
+
     // binary buffer? (formatted image)   (source is read-only)
+    //   wrap stream around buffer
   }
 
-  Create(spSource, spData);
+  Create(spSource);
 }
 
 } // namespace ud

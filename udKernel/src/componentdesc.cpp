@@ -5,16 +5,16 @@ namespace ud
 
 void ComponentDesc::BuildSearchTree()
 {
-  if (pPropertyTree) // all components have properties
+  if (propertyTree.Size() > 0) // all components have properties
     return;
 
   if (pSuperDesc)
     pSuperDesc->BuildSearchTree();
 
   // count and assign indices
-  size_t numProps = pSuperDesc && pSuperDesc->pPropertyTree ? pSuperDesc->pPropertyTree->Size() : 0;
-  size_t numMethods = pSuperDesc && pSuperDesc->pMethodTree ? pSuperDesc->pMethodTree->Size() : 0;
-  size_t numEvents = pSuperDesc && pSuperDesc->pEventTree ? pSuperDesc->pEventTree->Size() : 0;
+  size_t numProps = pSuperDesc ? pSuperDesc->propertyTree.Size() : 0;
+  size_t numMethods = pSuperDesc ? pSuperDesc->methodTree.Size() : 0;
+  size_t numEvents = pSuperDesc ? pSuperDesc->eventTree.Size() : 0;
 
   for (size_t i = 0; i<properties.length; ++i)
     properties[i].index = (uint32_t)(numProps + i);
@@ -27,36 +27,25 @@ void ComponentDesc::BuildSearchTree()
   numMethods += methods.length;
   numEvents += events.length;
 
-  // allocate the search trees
-  if (numProps)
-  {
-    pPropertyTree = udNew(udMap<PropertyNode>, numProps, [](const PropertyNode &a, const PropertyNode &b) {
-      return a.id.cmp(b.id);
-    });
-  }
-  if (numMethods)
-  {
-    pMethodTree = udNew(udMap<MethodNode>, numMethods, [](const MethodNode &a, const MethodNode &b) {
-      return a.id.cmp(b.id);
-    });
-  }
-  if (numEvents)
-  {
-    pEventTree = udNew(udMap<EventNode>, numEvents, [](const EventNode &a, const EventNode &b) {
-      return a.id.cmp(b.id);
-    });
-  }
-
   // build the search trees
   ComponentDesc *pDesc = this;
   while (pDesc)
   {
-    for (size_t i = 0; i<pDesc->properties.length; ++i)
-      pPropertyTree->Insert(PropertyNode(&pDesc->properties[i]));
-    for (size_t i = 0; i<pDesc->methods.length; ++i)
-      pMethodTree->Insert(MethodNode(&pDesc->methods[i]));
-    for (size_t i = 0; i<pDesc->events.length; ++i)
-      pEventTree->Insert(EventNode(&pDesc->events[i]));
+    for (auto &p : pDesc->properties)
+    {
+      if (!propertyTree.Get(p.id))
+        propertyTree.Insert(p.id, &p);
+    }
+    for (auto &m : pDesc->methods)
+    {
+      if (!methodTree.Get(m.id))
+        methodTree.Insert(m.id, &m);
+    }
+    for (auto &e : pDesc->events)
+    {
+      if (!eventTree.Get(e.id))
+        eventTree.Insert(e.id, &e);
+    }
     pDesc = pDesc->pSuperDesc;
   }
 }

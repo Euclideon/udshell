@@ -161,4 +161,5 @@ udResult Component::SendMessage(udString target, udString message, const udVaria
 {
   return pKernel->SendMessage(target, uid, message, data);
 }
+
 } // namespace ud

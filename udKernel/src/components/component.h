@@ -59,12 +59,12 @@ protected:
 
   size_t NumProperties() const
   {
-    return pType->pPropertyTree->Size();
+    return pType->propertyTree.Size();
   }
   ptrdiff_t PropertyIndex(udString property) const
   {
-    ComponentDesc::PropertyNode *pN = pType->pPropertyTree->Get(property);
-    return pN ? pN->index : -1;
+    PropertyDesc *const *ppProp = pType->propertyTree.Get(property);
+    return ppProp ? (*ppProp)->index : -1;
   }
 
   void SignalPropertyChanged(const PropertyDesc *pProp) { propertyChange[pProp->index].Signal(); }

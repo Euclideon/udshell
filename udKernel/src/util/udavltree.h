@@ -1,0 +1,342 @@
+
+
+template<typename K>
+struct udAVLCompare
+{
+  static inline ptrdiff_t compare(K a, K b)
+  {
+    if (a < b)
+      return -1;
+    if (a > b)
+      return 1;
+    return 0;
+  }
+};
+
+template<typename K, typename V>
+class udAVLTree
+{
+public:
+
+  size_t Size() const { return size; }
+
+  void Insert(const K &key, V &&rval)
+  {
+    Node* node = (Node*)udAlloc(sizeof(Node));
+    new(&node->k) K(key);
+    new(&node->v) V(std::move(rval));
+    node->left = nullptr;
+    node->right = nullptr;
+    node->height = 1;  // new Node is initially added at leaf
+    root = insert(root, node);
+  }
+  void Insert(const K &key, const V &v)
+  {
+    Node* node = (Node*)udAlloc(sizeof(Node));
+    new(&node->k) K(key);
+    new(&node->v) V(v);
+    node->left = nullptr;
+    node->right = nullptr;
+    node->height = 1;  // new Node is initially added at leaf
+    root = insert(root, node);
+  }
+  template<typename... Args>
+  void Insert(const K &key, Args... args)
+  {
+    Node* node = (Node*)udAlloc(sizeof(Node));
+    new(&node->k) K(key);
+    new(&node->v) V(args...);
+    node->left = nullptr;
+    node->right = nullptr;
+    node->height = 1;  // new Node is initially added at leaf
+    root = insert(root, node);
+  }
+
+  void Remove(const K &key)
+  {
+    root = deleteNode(root, key);
+  }
+
+  const V* Get(const K &key) const
+  {
+    const Node *n = find(root, key);
+    return n ? &n->v : nullptr;
+  }
+  V* Get(const K &key)
+  {
+    Node *n = const_cast<Node*>(find(root, key));
+    return n ? &n->v : nullptr;
+  }
+
+  V& operator[](const K &key) const
+  {
+    V *v = Get(key);
+    UDASSERT(v, "Invalid index");
+    return *v;
+  }
+
+private:
+  struct Node
+  {
+    V v;
+    K k;
+    Node *left, *right;
+    int height;
+
+    Node() = delete;
+  };
+
+  size_t size = 0;
+  Node *root = nullptr;
+
+  static int height(const Node *n)
+  {
+    return n ? n->height : 0;
+  }
+  static int maxHeight(const Node *n)
+  {
+    if (!n)
+      return 0;
+    if (n->left)
+    {
+      if (n->right)
+        return max(n->left->height, n->right->height);
+      else
+        return n->left->height;
+    }
+    if (n->right)
+      return n->right->height;
+    return 0;
+  }
+  static int getBalance(Node *n)
+  {
+    return n ? height(n->left) - height(n->right) : 0;
+  }
+
+  static Node *rightRotate(Node *y)
+  {
+    Node *x = y->left;
+    Node *T2 = x->right;
+
+    // Perform rotation
+    x->right = y;
+    y->left = T2;
+
+    // Update heights
+    y->height = maxHeight(y) + 1;
+    x->height = maxHeight(x) + 1;
+
+    // Return new root
+    return x;
+  }
+  static Node *leftRotate(Node *x)
+  {
+    Node *y = x->right;
+    Node *T2 = y->left;
+
+    // Perform rotation
+    y->left = x;
+    x->right = T2;
+
+    //  Update heights
+    x->height = maxHeight(x) + 1;
+    y->height = maxHeight(y) + 1;
+
+    // Return new root
+    return y;
+  }
+
+  static const Node* find(const Node *n, const K &key)
+  {
+    if (!n)
+      return nullptr;
+    ptrdiff_t c = udAVLCompare<K>::compare(key, n->k);
+    if (c < 0)
+      return find(n->left, key);
+    if (c > 0)
+      return find(n->right, key);
+    return n;
+  }
+
+  Node* insert(Node *n, Node *newnode)
+  {
+    // 1.  Perform the normal BST rotation
+    if (n == nullptr)
+    {
+      ++size;
+      return newnode;
+    }
+
+    ptrdiff_t c = udAVLCompare<K>::compare(newnode->k, n->k);
+    if (c < 0)
+      n->left = insert(n->left, newnode);
+    else if (c > 0)
+      n->right = insert(n->right, newnode);
+    else
+    {
+      newnode->left = n->left;
+      newnode->right = n->right;
+      newnode->height = n->height;
+
+      n->k.~K();
+      n->v.~V();
+      udFree(n);
+
+      return newnode;
+    }
+
+    // 2. Update height of this ancestor Node
+    n->height = maxHeight(n) + 1;
+
+    // 3. Get the balance factor of this ancestor Node to check whether
+    //    this Node became unbalanced
+    int balance = getBalance(n);
+
+    // If this Node becomes unbalanced, then there are 4 cases
+
+    if (balance > 1)
+    {
+      ptrdiff_t lc = udAVLCompare<K>::compare(newnode->k, n->left->k);
+      // Left Left Case
+      if (lc < 0)
+        return rightRotate(n);
+
+      // Left Right Case
+      if (lc > 0)
+      {
+        n->left = leftRotate(n->left);
+        return rightRotate(n);
+      }
+    }
+
+    if (balance < -1)
+    {
+      ptrdiff_t rc = udAVLCompare<K>::compare(newnode->k, n->right->k);
+
+      // Right Right Case
+      if (rc > 0)
+        return leftRotate(n);
+
+      // Right Left Case
+      if (rc < 0)
+      {
+        n->right = rightRotate(n->right);
+        return leftRotate(n);
+      }
+    }
+
+    // return the (unchanged) Node pointer
+    return n;
+  }
+
+  static Node* minValueNode(Node *n)
+  {
+    Node *current = n;
+
+    // loop down to find the leftmost leaf
+    while (current->left != nullptr)
+      current = current->left;
+
+    return current;
+  }
+
+  Node* deleteNode(Node *root, const K &key)
+  {
+    // STEP 1: PERFORM STANDARD BST DELETE
+
+    if (root == nullptr)
+      return root;
+
+    ptrdiff_t c = udAVLCompare<K>::compare(key, root->k);
+
+    // If the key to be deleted is smaller than the root's key,
+    // then it lies in left subtree
+    if (c < 0)
+      root->left = deleteNode(root->left, n);
+
+    // If the key to be deleted is greater than the root's key,
+    // then it lies in right subtree
+    else if (c > 0)
+      root->right = deleteNode(root->right, n);
+
+    // if key is same as root's key, then this is the Node
+    // to be deleted
+    else
+    {
+      // Node with only one child or no child
+      if ((root->left == nullptr) || (root->right == nullptr))
+      {
+        Node *temp = root->left ? root->left : root->right;
+
+        // No child case
+        if (temp == nullptr)
+        {
+          temp = root;
+          root = nullptr;
+        }
+        else // One child case
+        {
+          // TODO: FIX THIS!!
+          // this is copying the child node into the parent node becase there is no parent pointer
+          // DO: add parent pointer, then fix up the parent's child pointer to the child, and do away with this pointless copy!
+          *root = *temp; // Copy the contents of the non-empty child
+        }
+
+        temp->k.~K();
+        temp->v.~V();
+        udFree(temp);
+
+        --size;
+      }
+      else
+      {
+        // Node with two children: Get the inorder successor (smallest
+        // in the right subtree)
+        struct Node *temp = minValueNode(root->right);
+
+        // Copy the inorder successor's data to this Node
+        root->key = temp->key;
+
+        // Delete the inorder successor
+        root->right = deleteNode(root->right, temp->key);
+      }
+    }
+
+    // If the tree had only one Node then return
+    if (root == nullptr)
+      return root;
+
+    // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
+    root->height = max(height(root->left), height(root->right)) + 1;
+
+    // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
+    //  this Node became unbalanced)
+    int balance = getBalance(root);
+
+    // If this Node becomes unbalanced, then there are 4 cases
+
+    // Left Left Case
+    if (balance > 1 && getBalance(root->left) >= 0)
+      return rightRotate(root);
+
+    // Left Right Case
+    if (balance > 1 && getBalance(root->left) < 0)
+    {
+      root->left = leftRotate(root->left);
+      return rightRotate(root);
+    }
+
+    // Right Right Case
+    if (balance < -1 && getBalance(root->right) <= 0)
+      return leftRotate(root);
+
+    // Right Left Case
+    if (balance < -1 && getBalance(root->right) > 0)
+    {
+      root->right = rightRotate(root->right);
+      return leftRotate(root);
+    }
+
+    return root;
+  }
+};
