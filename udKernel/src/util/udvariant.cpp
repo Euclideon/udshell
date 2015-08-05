@@ -105,6 +105,8 @@ udVariant::Delegate udVariant::asDelegate() const
   {
     case Type::Delegate:
       return (Delegate&)p;
+    case Type::Null:
+      return Delegate();
     default:
       UDASSERT(type() == Type::Delegate, "Wrong type!");
       return Delegate();

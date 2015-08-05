@@ -2,6 +2,8 @@
 #include "udOctree.h"
 #include "renderscene.h"
 #include "kernel.h"
+#include "udRender.h"
+#include "util/uddelegate.h"
 
 namespace ud
 {
@@ -70,27 +72,24 @@ static PropertyDesc props[] =
   },
 
   {
-    "getboundingvolume", // id
-    "Get Bounding Volume", // displayName
-    "Get the Bouning Volume", // description
+    "boundingvolume", // id
+    "Bounding Volume", // displayName
+    "The Bouning Volume", // description
     &UDNode::GetBoundingVolume,
     nullptr,
     TypeDesc(PropertyType::Struct)
   },
 
 
-#if 0
   {
-    "VoxelShader", // id
+    "voxelshader", // id
     "Voxel Shader", // displayName
     "Optional callback to handle it's own internal call to GetNodeColor()", // description
-    PropertyType::Function, // type
-    0, // arrayLength
-    0, // flags
-    udPropertyDisplayType::Default, // displayType
-    nullptr, //Getter(&UDNode::GetVoxelShader),
-    Setter(&UDNode::SetVoxelShader)
+    &UDNode::GetSimpleVoxelDelegate,
+    &UDNode::SetSimpleVoxelDelegate,
+    PropertyType::Delegate, // type
   },
+#if 0
   {
     "PixelShader", // id
     "Pixel Shader", // displayName
@@ -167,18 +166,27 @@ udResult UDNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
   UDJob &job = spScene->ud.pushBack();
   memset(&job, 0, sizeof(job));
 
-  job.matrix = udMul(mat, udMat);
+  job.renderModel.matrix = udMul(mat, udMat);
   job.renderModel.pOctree = spModel->GetOctreePtr();
-  job.renderModel.pWorldMatrixD = job.matrix.a;
+  job.renderModel.pWorldMatrixD = job.renderModel.matrix.a;
   job.renderModel.pVoxelShader = pVoxelShader;
   job.renderModel.pPixelShader = pPixelShader;
   job.renderModel.flags = renderFlags;
   job.renderModel.startingRoot = startingRoot;
 
+  if (pVoxelShader)
+    job.renderModel.pVoxelShader = pVoxelShader;
+  else if (simpleVoxelDel.GetMemento())
+  {
+    job.renderModel.pVoxelShader = NodeRenderModel::VoxelShaderFunc;
+    job.renderModel.simpleVoxelDel = simpleVoxelDel;
+  }
+
+
   if (clipAreaSet)
   {
-    job.clipArea = clipArea;
-    job.renderModel.pClip = &job.clipArea;
+    job.renderModel.clipArea = clipArea;
+    job.renderModel.pClip = &job.renderModel.clipArea;
   }
 
   return udR_Success;

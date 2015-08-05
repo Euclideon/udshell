@@ -39,7 +39,10 @@ public:
   void SetRenderClipArea(const udRenderClipArea& area) { clipAreaSet = true; clipArea = area; }
 
   udRender_VoxelShaderFunc *GetVoxelShader() const { return pVoxelShader;  }
-  void SetVoxelShader(udRender_VoxelShaderFunc *pFunc) { pVoxelShader = pFunc;  }
+  void SetVoxelShader(udRender_VoxelShaderFunc *pFunc) { simpleVoxelDel = udDelegate<NodeRenderModel::SimpleVoxelDlgt>();  pVoxelShader = pFunc;  }
+
+  udDelegate<NodeRenderModel::SimpleVoxelDlgt> GetSimpleVoxelDelegate() const { return simpleVoxelDel; }
+  void SetSimpleVoxelDelegate(udDelegate<NodeRenderModel::SimpleVoxelDlgt> del);// { pVoxelShader = nullptr; simpleVoxelDel = del; }
 
   udRender_PixelShaderFunc *GetPixelShader() const { return pPixelShader;  }
   void SetPixelShader(udRender_PixelShaderFunc *pFunc)  { pPixelShader = pFunc; }
@@ -63,7 +66,10 @@ protected:
   virtual ~UDNode() {}
 
   udRender_VoxelShaderFunc *pVoxelShader = nullptr;
+  udDelegate<NodeRenderModel::SimpleVoxelDlgt> simpleVoxelDel;
+
   udRender_PixelShaderFunc *pPixelShader = nullptr;
+
   udRenderClipArea clipArea;
   uint32_t startingRoot = 0;
   udRenderFlags renderFlags = udRF_None;
@@ -73,6 +79,16 @@ protected:
   UDModelRef spModel = nullptr;
   udDouble4x4 udMat;
 };
+
+
+inline void UDNode::SetSimpleVoxelDelegate(udDelegate<NodeRenderModel::SimpleVoxelDlgt> del)
+{
+  pVoxelShader = nullptr;
+  if (del.GetMemento())
+    simpleVoxelDel = del;
+  else
+    simpleVoxelDel = udDelegate<NodeRenderModel::SimpleVoxelDlgt>();
+}
 
 inline udVariant udToVariant(const BoundingVolume &volume)
 {

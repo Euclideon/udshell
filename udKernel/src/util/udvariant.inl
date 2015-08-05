@@ -524,5 +524,8 @@ inline void udFromVariant(const udVariant &v, udDelegate<R(Args...)> *pD)
 {
   typedef udSharedPtr<VarDelegate<R(Args...)>> VarDelegateRef;
 
-  *pD = udDelegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
+  if (v.asDelegate())
+    *pD = udDelegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
+  else
+    *pD = nullptr;
 }

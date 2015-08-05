@@ -164,6 +164,7 @@ enum class PropertyType : uint32_t
   Resource,
   Enum,
   Flags,
+  Delegate,
   Struct,
 };
 

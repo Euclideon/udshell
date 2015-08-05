@@ -17,11 +17,8 @@ namespace ud
 
 struct UDJob
 {
-  udDouble4x4 matrix;
-  udRenderClipArea clipArea;
-
   UDModelRef spModel = nullptr;
-  udRenderModel renderModel;
+  NodeRenderModel renderModel;
 };
 
 struct GeomJob

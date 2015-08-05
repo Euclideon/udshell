@@ -33,6 +33,7 @@ class udDelegate<R(Args...)>
 {
 public:
   udDelegate() {}
+  udDelegate(nullptr_t) {}
   udDelegate(udDelegate<R(Args...)> &&rval)
   {
     // blind-copy the pointer
@@ -50,6 +51,8 @@ public:
   template <class X, class Y>
   udDelegate(Y *i, R(X::*f)(Args...) const)     : udDelegate(Delegate(i, f)) {}
   udDelegate(R(*f)(Args...))                    : udDelegate(Delegate(f)) {}
+
+  operator bool () { return m ? !m->m.empty() : false; }
 
   udDelegate& operator=(const udDelegate &d)
   {
