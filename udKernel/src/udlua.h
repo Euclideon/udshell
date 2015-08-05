@@ -8,6 +8,31 @@
 namespace ud
 {
 
+enum class ConsoleColor
+{
+  Default = -1,
+
+  Black = 0,
+  DarkBlue,
+  DarkGreen,
+  DarkCyan,
+  DarkRed,
+  DarkMagenta,
+  DarkYellow,
+  LightGrey,
+  DarkGrey,
+  Blue,
+  Green,
+  Cyan,
+  Red,
+  Magenta,
+  Yellow,
+  White
+};
+
+void SetConsoleColor(ConsoleColor fg = ConsoleColor::Default, ConsoleColor bg = ConsoleColor::Default);
+
+
 enum class LuaType : int
 {
   None = LUA_TNONE,
@@ -41,6 +66,7 @@ public:
   Kernel *kernel();
 
   void exec(udString code);
+  void print(udString str);
 
   int top();
 
@@ -109,6 +135,7 @@ private:
   static int getter(lua_State *L);
   static int setter(lua_State *L);
   static int method(lua_State *L);
+  static int help(lua_State* L);
 
   void pushDelegateMetatable();
   static int delegateCleaner(lua_State* L);

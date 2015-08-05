@@ -5,6 +5,8 @@
 namespace ud
 {
 
+#include "init.inc"
+
 static const char s_udatatypename[] = "userdata";
 const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
   "no value",
@@ -20,19 +22,33 @@ const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
 };
 
 
-static udString s_luaInit(
-  "function tprint (val, indent, fmt)                         \n"
-  "  if not indent then indent = 0 end                        \n"
-  "  if type(val) == 'table' then                             \n"
-  "    for k, v in pairs(val) do                              \n"
-  "      formatting = string.rep('  ', indent) .. k .. ': '   \n"
-  "      tprint(v, indent+1, formatting)                      \n"
-  "    end                                                    \n"
-  "  else                                                     \n"
-  "    print((fmt or '') .. tostring(val))                    \n"
-  "  end                                                      \n"
-  "end                                                        \n"
-);
+#if UDPLATFORM_WINDOWS
+void SetConsoleColor(ConsoleColor fg, ConsoleColor bg)
+{
+  if (fg == ConsoleColor::Default)
+    fg = ConsoleColor::LightGrey;
+  if (bg == ConsoleColor::Default)
+    bg = ConsoleColor::Black;
+  HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute(hConsole, (uint8_t)fg | ((uint8_t)bg << 4));
+}
+#else
+void SetConsoleColor(ConsoleColor fg, ConsoleColor bg)
+{
+  static const char *fg_codes[] = {
+    "\x1b[39m", // default
+    "\x1b[30m", "\x1b[34m", "\x1b[32m", "\x1b[36m", "\x1b[31m", "\x1b[35m", "\x1b[33m", "\x1b[37m", // colors
+    "\x1b[30;1m", "\x1b[34;1m", "\x1b[32;1m", "\x1b[36;1m", "\x1b[31;1m", "\x1b[35;1m", "\x1b[33;1m", "\x1b[37;1m", // 'bold'
+  };
+  static const char *gb_codes[] = {
+    "\x1b[49m", // default
+    "\x1b[40m", "\x1b[44m", "\x1b[42m", "\x1b[46m", "\x1b[41m", "\x1b[45m", "\x1b[43m", "\x1b[47m", // colors
+    "\x1b[40;1m", "\x1b[44;1m", "\x1b[42;1m", "\x1b[46;1m", "\x1b[41;1m", "\x1b[45;1m", "\x1b[43;1m", "\x1b[47;1m", // 'bold'
+  };
+  printf(fg_codes[(int)fg + 1]);
+  printf(fg_codes[(int)fg + 1]);
+}
+#endif
 
 
 static int SendMessage(lua_State *L)
@@ -150,7 +166,7 @@ LuaState::LuaState(Kernel *pKernel)
 
   luaL_openlibs(L);
 
-  exec(s_luaInit);
+  exec(init_lua);
 
   // TODO: register things
 
@@ -201,6 +217,13 @@ void LuaState::exec(udString code)
     udDebugPrintf("%s", pS);
     lua_pop(L, 1);
   }
+}
+
+void LuaState::print(udString str)
+{
+  lua_getglobal(L, "print");
+  lua_pushlstring(L, str.ptr, str.length);
+  lua_call(L, 1, 0);
 }
 
 udVariant LuaState::get(int idx)
@@ -319,6 +342,10 @@ void LuaState::pushGetters(const ComponentDesc &desc)
   // add type and descriptor as members
   pushDescriptor(desc);
   lua_setfield(L, -2, "descriptor");
+
+  // help function
+  lua_pushcfunction(L, &help);
+  lua_setfield(L, -2, "help");
 
   // populate getters
   for (auto &p : desc.properties)
@@ -519,10 +546,9 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // return nil (already on stack)
-  lua_getglobal(L, "print");
-  udFixedString64 errorMsg = udFixedString64::format("Error \"%s\" not found", field);
-  lua_pushstring(L, errorMsg.toStringz());
-  lua_call(L, 1, 0);
+  udFixedString64 errorMsg = udFixedString64::format("Error: '%s' not found", field);
+  LuaState &l = (LuaState&)L;
+  l.print(errorMsg);
   return 1;
 }
 int LuaState::componentNewIndex(lua_State* L)
@@ -602,6 +628,56 @@ int LuaState::method(lua_State *L)
 
   v.luaPush(l);
   return 1;
+}
+
+int LuaState::help(lua_State* L)
+{
+  LuaState &l = (LuaState&)L;
+
+  int numArgs = l.top();
+  if (numArgs < 1)
+    return 0;
+
+  ComponentRef c = l.toComponent(1);
+  const ComponentDesc *pDesc = c->pType;
+
+  udFixedString256 buffer;
+  if (numArgs > 1)
+  {
+    // help for member
+    udString s = l.toString(2);
+
+    // find member...
+  }
+  else
+  {
+    // general help
+    SetConsoleColor(ConsoleColor::Cyan);
+    l.print(pDesc->id);
+
+    SetConsoleColor();
+    l.print(pDesc->description);
+    l.print("\nProperties:\n");
+
+    SetConsoleColor(ConsoleColor::Green);
+    // list properties
+
+    SetConsoleColor();
+    l.print("\nMethods:\n");
+
+    SetConsoleColor(ConsoleColor::Magenta);
+    // list methods
+
+    SetConsoleColor();
+    l.print("\nEvents:\n");
+
+    SetConsoleColor(ConsoleColor::Yellow);
+    // list events
+
+    SetConsoleColor();
+  }
+
+  return 0;
 }
 
 
@@ -786,6 +862,8 @@ public:
 private:
   ComponentRef c;
   EventDesc &desc;
+
+  LuaEvent& operator=(const LuaEvent &) = delete;
 };
 
 void LuaState::pushEvent(const ComponentRef &c, EventDesc &desc)
