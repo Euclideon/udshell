@@ -2,6 +2,11 @@
 #if !defined(_SHAREDPTR_H)
 #define _SHAREDPTR_H
 
+#if defined(_MSC_VER)
+// TODO: REMOVE THIS!!!
+#pragma warning(disable: 4714)
+#endif
+
 #define SHARED_CLASS(Name) \
   class Name; \
   typedef udSharedPtr<Name> Name##Ref;
@@ -83,9 +88,9 @@ public:
   }
   inline size_t count() const;
 
-  inline T& operator*() const { return *(T*)pInstance; }
-  inline T* operator->() const { return (T*)pInstance; }
-  inline T* ptr() const { return (T*)pInstance; }
+  UDFORCE_INLINE T& operator*() const { return *(T*)pInstance; }
+  UDFORCE_INLINE T* operator->() const { return (T*)pInstance; }
+  UDFORCE_INLINE T* ptr() const { return (T*)pInstance; }
 
 private:
   template<class U> friend class udSharedPtr;

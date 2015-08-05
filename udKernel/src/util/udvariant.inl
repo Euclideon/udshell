@@ -4,32 +4,43 @@
 // constructors...
 inline udVariant::udVariant()
   : t((size_t)Type::Null)
-  , ownsArray(0)
+  , ownsContent(0)
   , length(0)
 {}
 
 inline udVariant::udVariant(udVariant &&rval)
   : t(rval.t)
-  , ownsArray(rval.ownsArray)
+  , ownsContent(rval.ownsContent)
   , length(rval.length)
   , p(rval.p)
 {
   rval.t = (size_t)Type::Null;
+  rval.ownsContent = 0;
 }
 
 inline udVariant::udVariant(const udVariant &val)
   : t(val.t)
-  , ownsArray(val.ownsArray)
+  , ownsContent(val.ownsContent)
   , length(val.length)
   , p(val.p)
 {
-  if (is(Type::Delegate))
+  if (ownsContent)
   {
-    new((void*)&p) Delegate((Delegate&)val.p);
-  }
-  else if (ownsArray)
-  {
-    if (is(Type::Array))
+    if (is(Type::Component))
+    {
+      new((void*)&p) ud::ComponentRef((ud::ComponentRef&)val.c);
+    }
+    else if (is(Type::Delegate))
+    {
+      new((void*)&p) Delegate((Delegate&)val.p);
+    }
+    else if (is(Type::String))
+    {
+      char *pS = (char*)udAlloc(length);
+      memcpy(pS, val.s, length);
+      s = pS;
+    }
+    else if (is(Type::Array))
     {
       a = (udVariant*)udAlloc(sizeof(udVariant)*length);
       for (size_t i = 0; i<length; ++i)
@@ -49,86 +60,68 @@ inline udVariant::udVariant(const udVariant &val)
 
 inline udVariant::udVariant(bool b)
   : t((size_t)Type::Bool)
-  , ownsArray(0)
+  , ownsContent(0)
   , length(0)
   , b(b)
 {}
 inline udVariant::udVariant(int64_t i)
   : t((size_t)Type::Int)
-  , ownsArray(0)
+  , ownsContent(0)
   , length(0)
   , i(i)
 {}
 inline udVariant::udVariant(double f)
   : t((size_t)Type::Float)
-  , ownsArray(0)
+  , ownsContent(0)
   , length(0)
   , f(f)
 {}
-inline udVariant::udVariant(ud::Component *c)
+inline udVariant::udVariant(ud::ComponentRef &&spC)
   : t((size_t)Type::Component)
-  , ownsArray(0)
+  , ownsContent(1)
   , length(0)
-  , c(c)
-{}
+{
+  new(&p) ud::ComponentRef(std::move(spC));
+}
+inline udVariant::udVariant(const ud::ComponentRef &spC)
+  : t((size_t)Type::Component)
+  , ownsContent(1)
+  , length(0)
+{
+  new(&p) ud::ComponentRef(spC);
+}
 inline udVariant::udVariant(const Delegate &d)
   : t((size_t)Type::Delegate)
-  , ownsArray(0)
+  , ownsContent(1)
   , length(0)
 {
   new(&p) Delegate(d);
 }
 inline udVariant::udVariant(Delegate &&d)
   : t((size_t)Type::Delegate)
-  , ownsArray(0)
+  , ownsContent(1)
   , length(0)
 {
   new(&p) Delegate(std::move(d));
 }
 inline udVariant::udVariant(udString s, bool ownsMemory)
   : t((size_t)Type::String)
-  , ownsArray(ownsMemory ? 1 : 0)
+  , ownsContent(ownsMemory ? 1 : 0)
   , length(s.length)
   , s(s.ptr)
 {}
 inline udVariant::udVariant(udSlice<udVariant> a, bool ownsMemory)
   : t((size_t)Type::Array)
-  , ownsArray(ownsMemory ? 1 : 0)
+  , ownsContent(ownsMemory ? 1 : 0)
   , length(a.length)
   , a(a.ptr)
 {}
 inline udVariant::udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory)
   : t((size_t)Type::AssocArray)
-  , ownsArray(ownsMemory ? 1 : 0)
+  , ownsContent(ownsMemory ? 1 : 0)
   , length(aa.length)
   , aa(aa.ptr)
 {}
-
-// destructor
-inline udVariant::~udVariant()
-{
-  if (is(Type::Delegate))
-  {
-    ((Delegate*)&p)->~Delegate();
-  }
-  else if (ownsArray && t >= (size_t)Type::String)
-  {
-    if (is(Type::Array))
-    {
-      for (size_t i = 0; i < length; ++i)
-        a[i].~udVariant();
-    }
-    else if (is(Type::AssocArray))
-    {
-      for (size_t i = 0; i < length; ++i)
-      {
-        aa[i].key.~udVariant();
-        aa[i].value.~udVariant();
-      }
-    }
-    udFree(a);
-  }
-}
 
 inline udVariant& udVariant::operator=(udVariant &&rval)
 {
@@ -137,11 +130,12 @@ inline udVariant& udVariant::operator=(udVariant &&rval)
     this->~udVariant();
 
     t = rval.t;
-    ownsArray = rval.ownsArray;
+    ownsContent = rval.ownsContent;
     length = rval.length;
     p = rval.p;
 
-    rval.ownsArray = false;
+    rval.t = (size_t)Type::Null;
+    rval.ownsContent = false;
   }
   return *this;
 }
@@ -175,11 +169,19 @@ inline bool udVariant::is(Type type) const
 template<typename T>
 struct udVariant_Construct
 {
-  inline static udVariant construct(const T &v)
+  UDFORCE_INLINE static udVariant construct(T &&rval)
+  {
+    return udVariant(udToVariant(std::move(rval)));
+  }
+  UDFORCE_INLINE static udVariant construct(const T &v)
   {
     return udVariant(udToVariant(v));
   }
 };
+template<typename T>
+udVariant::udVariant(T &&rval)
+  : udVariant(udVariant_Construct<typename std::remove_const<T>::type>::construct(std::move(rval)))
+{}
 template<typename T>
 udVariant::udVariant(const T &v)
   : udVariant(udVariant_Construct<typename std::remove_const<T>::type>::construct(v))
@@ -190,22 +192,22 @@ udVariant::udVariant(T &v)
 {}
 
 // specialisations of udVariant_Construct for all the basic types
-template<> struct udVariant_Construct <nullptr_t> { inline static udVariant construct(nullptr_t)       { return udVariant(); } };
-template<> struct udVariant_Construct <float>     { inline static udVariant construct(float f)         { return udVariant((double)f); } };
-template<> struct udVariant_Construct <int8_t>    { inline static udVariant construct(int8_t i)        { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <uint8_t>   { inline static udVariant construct(uint8_t i)       { return udVariant((int64_t)(uint64_t)i); } };
-template<> struct udVariant_Construct <int16_t>   { inline static udVariant construct(int16_t i)       { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <uint16_t>  { inline static udVariant construct(uint16_t i)      { return udVariant((int64_t)(uint64_t)i); } };
-template<> struct udVariant_Construct <int32_t>   { inline static udVariant construct(int32_t i)       { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <uint32_t>  { inline static udVariant construct(uint32_t i)      { return udVariant((int64_t)(uint64_t)i); } };
-template<> struct udVariant_Construct <uint64_t>  { inline static udVariant construct(uint64_t i)      { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <char*>     { inline static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
+template<> struct udVariant_Construct <nullptr_t> { UDFORCE_INLINE static udVariant construct(nullptr_t)       { return udVariant(); } };
+template<> struct udVariant_Construct <float>     { UDFORCE_INLINE static udVariant construct(float f)         { return udVariant((double)f); } };
+template<> struct udVariant_Construct <int8_t>    { UDFORCE_INLINE static udVariant construct(int8_t i)        { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <uint8_t>   { UDFORCE_INLINE static udVariant construct(uint8_t i)       { return udVariant((int64_t)(uint64_t)i); } };
+template<> struct udVariant_Construct <int16_t>   { UDFORCE_INLINE static udVariant construct(int16_t i)       { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <uint16_t>  { UDFORCE_INLINE static udVariant construct(uint16_t i)      { return udVariant((int64_t)(uint64_t)i); } };
+template<> struct udVariant_Construct <int32_t>   { UDFORCE_INLINE static udVariant construct(int32_t i)       { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <uint32_t>  { UDFORCE_INLINE static udVariant construct(uint32_t i)      { return udVariant((int64_t)(uint64_t)i); } };
+template<> struct udVariant_Construct <uint64_t>  { UDFORCE_INLINE static udVariant construct(uint64_t i)      { return udVariant((int64_t)i); } };
+template<> struct udVariant_Construct <char*>     { UDFORCE_INLINE static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
 template<size_t N>
-struct udVariant_Construct <char[N]>              { inline static udVariant construct(const char s[N]) { return udVariant(udString(s, N-1)); } };
+struct udVariant_Construct <char[N]>              { UDFORCE_INLINE static udVariant construct(const char s[N]) { return udVariant(udString(s, N-1)); } };
 
 // for arrays
 template<typename T>
-inline udVariant udToVariant(const udSlice<T> arr)
+UDFORCE_INLINE udVariant udToVariant(const udSlice<T> arr)
 {
   udVariant r;
   udVariant *a = r.allocArray(arr.length);
@@ -215,16 +217,20 @@ inline udVariant udToVariant(const udSlice<T> arr)
 }
 
 // for components
-inline udVariant udToVariant(const ud::ComponentRef c)
+UDFORCE_INLINE udVariant udToVariant(ud::ComponentRef &&rval)
 {
-  return udVariant(c.ptr());
+  return udVariant(std::move(rval));
+}
+UDFORCE_INLINE udVariant udToVariant(const ud::ComponentRef &c)
+{
+  return udVariant(c);
 }
 
 // vectors and matrices (require partial specialisation)
 #include "udMath.h"
 
 template<typename F>
-inline udVariant udToVariant(const udVector2<F> &v)
+UDFORCE_INLINE udVariant udToVariant(const udVector2<F> &v)
 {
   udVariant r;
   udVariant *a = r.allocArray(2);
@@ -233,7 +239,7 @@ inline udVariant udToVariant(const udVector2<F> &v)
   return r;
 }
 template<typename F>
-inline udVariant udToVariant(const udVector3<F> &v)
+UDFORCE_INLINE udVariant udToVariant(const udVector3<F> &v)
 {
   udVariant r;
   udVariant *a = r.allocArray(3);
@@ -243,7 +249,7 @@ inline udVariant udToVariant(const udVector3<F> &v)
   return r;
 }
 template<typename F>
-inline udVariant udToVariant(const udVector4<F> &v)
+UDFORCE_INLINE udVariant udToVariant(const udVector4<F> &v)
 {
   udVariant r;
   udVariant *a = r.allocArray(4);
@@ -254,7 +260,7 @@ inline udVariant udToVariant(const udVector4<F> &v)
   return r;
 }
 template<typename F>
-inline udVariant udToVariant(const udMatrix4x4<F> &m)
+UDFORCE_INLINE udVariant udToVariant(const udMatrix4x4<F> &m)
 {
   udVariant r;
   udVariant *a = r.allocArray(16);
@@ -375,6 +381,9 @@ protected:
   }
 
   const udDelegateMementoRef target;
+
+private:
+  VarDelegate<void(Args...)>& operator=(const VarDelegate<void(Args...)> &rh) = delete;
 };
 
 template<typename R, typename... Args>
@@ -427,6 +436,8 @@ template<> struct udVariant_Cast < uint32_t > { inline static uint32_t as(const 
 template<> struct udVariant_Cast < int64_t  > { inline static int64_t  as(const udVariant &v) { return (int64_t)v.asInt(); } };
 template<> struct udVariant_Cast < uint64_t > { inline static uint64_t as(const udVariant &v) { return (uint64_t)v.asInt(); } };
 template<> struct udVariant_Cast < udString > { inline static udString as(const udVariant &v) { return v.asString(); } };
+
+template<> struct udVariant_Cast < udVariant > { inline static udVariant as(const udVariant &v) { return v; } };
 
 // udMath types
 template<typename U>

@@ -7,6 +7,38 @@
 
 const udVariant udInitParams::varNull;
 
+// destructor
+inline udVariant::~udVariant()
+{
+  if (ownsContent)
+  {
+    switch ((Type)t)
+    {
+      case Type::Component:
+        ((ud::ComponentRef*)&p)->~udSharedPtr();
+        break;
+      case Type::Delegate:
+        ((Delegate*)&p)->~Delegate();
+        break;
+      case Type::String:
+        udFree(s);
+        break;
+      case Type::Array:
+        for (size_t i = 0; i < length; ++i)
+          a[i].~udVariant();
+        udFree(a);
+        break;
+      case Type::AssocArray:
+        for (size_t i = 0; i < length; ++i)
+        {
+          aa[i].key.~udVariant();
+          aa[i].value.~udVariant();
+        }
+        udFree(aa);
+        break;
+    }
+  }
+}
 
 udRCString udVariant::stringify() const
 {
@@ -92,8 +124,10 @@ ud::ComponentRef udVariant::asComponent() const
 {
   switch ((Type)t)
   {
+  case Type::Null:
+    return ud::ComponentRef();
   case Type::Component:
-    return ud::ComponentRef(c);
+    return (ud::ComponentRef&)p;
   default:
     UDASSERT(type() == Type::Component, "Wrong type!");
     return nullptr;
@@ -103,10 +137,10 @@ udVariant::Delegate udVariant::asDelegate() const
 {
   switch ((Type)t)
   {
-    case Type::Delegate:
-      return (Delegate&)p;
     case Type::Null:
       return Delegate();
+    case Type::Delegate:
+      return (Delegate&)p;
     default:
       UDASSERT(type() == Type::Delegate, "Wrong type!");
       return Delegate();
@@ -182,7 +216,7 @@ size_t udVariant::assocArraySeriesLen() const
   if (!is(Type::AssocArray))
     return 0;
   size_t i = 0;
-  while (i < length && aa[i].key.is(Type::Int) && aa[i].key.i == i + 1)
+  while (i < length && aa[i].key.is(Type::Int) && aa[i].key.i == (int64_t)i + 1)
     ++i;
   return i;
 }
@@ -223,7 +257,7 @@ udVariant* udVariant::allocArray(size_t len)
   this->~udVariant();
   t = (size_t)Type::Array;
   length = len;
-  ownsArray = true;
+  ownsContent = true;
   a = udAllocType(udVariant, len, udAF_None);
   return a;
 }
@@ -233,7 +267,7 @@ udKeyValuePair* udVariant::allocAssocArray(size_t len)
   this->~udVariant();
   t = (size_t)Type::AssocArray;
   length = len;
-  ownsArray = true;
+  ownsContent = true;
   aa = udAllocType(udKeyValuePair, len, udAF_None);
   return aa;
 }

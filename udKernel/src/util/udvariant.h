@@ -39,13 +39,15 @@ public:
   udVariant(bool);
   udVariant(int64_t);
   udVariant(double);
-  udVariant(ud::Component *);
-  udVariant(const Delegate &d);
+  udVariant(ud::ComponentRef &&spC);
+  udVariant(const ud::ComponentRef &spC);
   udVariant(Delegate &&d);
+  udVariant(const Delegate &d);
   udVariant(udString, bool ownsMemory = false);
   udVariant(udSlice<udVariant> a, bool ownsMemory = false);
   udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory = false);
 
+  template<typename T> udVariant(T &&rval);
   template<typename T> udVariant(const T &v);
   template<typename T> udVariant(T &v);
 
@@ -88,7 +90,7 @@ public:
 
 private:
   size_t t : 4;
-  size_t ownsArray : 1;
+  size_t ownsContent : 1;
   size_t length : (sizeof(size_t)*8)-5;
   union
   {
