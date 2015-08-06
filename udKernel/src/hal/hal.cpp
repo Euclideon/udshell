@@ -13,6 +13,9 @@ udResult udHAL_Init()
   void udInput_Init();
   udInput_Init();
 
+  void udImage_InitInternal();
+  udImage_InitInternal();
+
   bInitialised = true;
   return udR_Success;
 }
@@ -50,6 +53,8 @@ udResult udHAL_Deinit()
 {
   if (bInitialised)
   {
+    void udImage_DeinitInternal();
+    udImage_DeinitInternal();
     void udInput_Deinit();
     udInput_Deinit();
     bInitialised = false;
