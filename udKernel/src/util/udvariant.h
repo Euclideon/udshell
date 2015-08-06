@@ -66,6 +66,8 @@ public:
   template<typename T>
   T as() const;
 
+  ptrdiff_t compare(const udVariant &v) const;
+
   bool asBool() const;
   int64_t asInt() const;
   double asFloat() const;

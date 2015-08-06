@@ -56,6 +56,30 @@ udRCString udVariant::stringify() const
   return nullptr;
 }
 
+ptrdiff_t udVariant::compare(const udVariant &v) const
+{
+  if (t != v.t)
+    return t - v.t;
+
+  switch ((Type)t)
+  {
+    case Type::Null:
+      return 0;
+    case Type::Bool:
+      return (b ? 1 : 0) - (v.b ? 1 : 0);
+    case Type::Int:
+      return i - v.i;
+    case Type::Float:
+      return f < v.f ? -1 : (f > v.f ? 1 : 0);
+    case Type::String:
+      return udString(s, length).cmp(udString(v.s, v.length));
+    case Type::Component:
+      return c->uid.cmp(v.c->uid);
+    default:
+      return (char*)p - (char*)v.p;
+  }
+}
+
 bool udVariant::asBool() const
 {
   switch ((Type)t)

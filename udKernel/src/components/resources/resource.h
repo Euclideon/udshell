@@ -8,24 +8,22 @@ namespace ud
 {
 
 SHARED_CLASS(DataSource);
+SHARED_CLASS(Metadata);
+SHARED_CLASS(Resource);
 
 class Resource : public Component
 {
 public:
   UD_COMPONENT(Resource);
 
-  udString Type() const { return type; }
-
-  virtual udVariant GetMetadata(udString key) const { return udVariant(); }
+  MetadataRef GetMetadata() const { return metadata; }
 
 protected:
-  Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
-    : Component(pType, pKernel, uid, initParams) {}
+  Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
 
-  udString type;
   DataSourceRef source = nullptr;
+  MetadataRef metadata = nullptr;
 };
-SHARED_CLASS(Resource);
 
 }
 

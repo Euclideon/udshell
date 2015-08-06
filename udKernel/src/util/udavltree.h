@@ -5,7 +5,7 @@
 template<typename T>
 struct AVLCompare
 {
-  ptrdiff_t operator()(const T &a, const T &b)
+  UDFORCE_INLINE ptrdiff_t operator()(const T &a, const T &b)
   {
     return a < b ? -1 : (a > b ? 1 : 0);
   }

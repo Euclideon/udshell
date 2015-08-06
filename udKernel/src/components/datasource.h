@@ -85,7 +85,7 @@ protected:
   virtual void Create(StreamRef spSource) {}
 
   struct StringCompare {
-    inline ptrdiff_t operator()(udString a, udString b)
+    UDFORCE_INLINE ptrdiff_t operator()(udString a, udString b)
     {
       return a.cmp(b);
     }
