@@ -1,4 +1,6 @@
-
+#pragma once
+#if !defined(_UDAVLTREE_H)
+#define _UDAVLTREE_H
 
 template<typename K>
 struct udAVLCompare
@@ -20,14 +22,31 @@ public:
 
   size_t Size() const { return size; }
 
+  void Insert(K &&key, V &&rval)
+  {
+    Node* node = (Node*)udAlloc(sizeof(Node));
+    new(&node->k) K(std::move(key));
+    new(&node->v) V(std::move(rval));
+    node->left = node->right = nullptr;
+    node->height = 1;
+    root = insert(root, node);
+  }
   void Insert(const K &key, V &&rval)
   {
     Node* node = (Node*)udAlloc(sizeof(Node));
     new(&node->k) K(key);
     new(&node->v) V(std::move(rval));
-    node->left = nullptr;
-    node->right = nullptr;
-    node->height = 1;  // new Node is initially added at leaf
+    node->left = node->right = nullptr;
+    node->height = 1;
+    root = insert(root, node);
+  }
+  void Insert(K &&key, const V &v)
+  {
+    Node* node = (Node*)udAlloc(sizeof(Node));
+    new(&node->k) K(std::move(key));
+    new(&node->v) V(v);
+    node->left = node->right = nullptr;
+    node->height = 1;
     root = insert(root, node);
   }
   void Insert(const K &key, const V &v)
@@ -35,20 +54,8 @@ public:
     Node* node = (Node*)udAlloc(sizeof(Node));
     new(&node->k) K(key);
     new(&node->v) V(v);
-    node->left = nullptr;
-    node->right = nullptr;
-    node->height = 1;  // new Node is initially added at leaf
-    root = insert(root, node);
-  }
-  template<typename... Args>
-  void Insert(const K &key, Args... args)
-  {
-    Node* node = (Node*)udAlloc(sizeof(Node));
-    new(&node->k) K(key);
-    new(&node->v) V(args...);
-    node->left = nullptr;
-    node->right = nullptr;
-    node->height = 1;  // new Node is initially added at leaf
+    node->left = node->right = nullptr;
+    node->height = 1;
     root = insert(root, node);
   }
 
@@ -178,8 +185,7 @@ private:
       newnode->right = n->right;
       newnode->height = n->height;
 
-      n->k.~K();
-      n->v.~V();
+      n->~Node();
       udFree(n);
 
       return newnode;
@@ -282,8 +288,7 @@ private:
           *root = *temp; // Copy the contents of the non-empty child
         }
 
-        temp->k.~K();
-        temp->v.~V();
+        temp->~Node();
         udFree(temp);
 
         --size;
@@ -340,3 +345,5 @@ private:
     return root;
   }
 };
+
+#endif // _UDAVLTREE_H
