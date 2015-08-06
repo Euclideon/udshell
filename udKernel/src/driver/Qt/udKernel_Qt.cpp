@@ -56,10 +56,10 @@ QtKernel::QtKernel(udInitParams commandLine)
 {
   udDebugPrintf("QtKernel::udQtKernel()\n");
 
-  // convert InitParams back into a string list for Qt
+  // convert udInitParams back into a string list for Qt
   // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
   // NOTE: the state of our argv may be changed by Qt as it removes args that it recognises
-  udFixedSlice<char *> args;
+  udFixedSlice<char *, 1> args;
   args.reserve(commandLine.params.length);
   argc = static_cast<int>(commandLine.params.length);
   for (int i = 0; i < argc; i++)
@@ -106,7 +106,7 @@ udResult QtKernel::Shutdown()
 }
 
 // ---------------------------------------------------------------------------------------
-udResult QtKernel::FormatMainWindow(UIComponentRef spUIComponent)
+udResult QtKernel::FormatMainWindow(QtUIComponentRef spUIComponent)
 {
   udDebugPrintf("QtKernel::FormatMainWindow()\n");
 

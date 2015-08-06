@@ -15,36 +15,44 @@ namespace ud
 static PropertyDesc props[] =
 {
   {
-    "uid", // id
-    "UID", // displayName
-    "Component UID", // description
+    {
+      "uid", // id
+      "UID", // displayName
+      "Component UID", // description
+      TypeDesc(PropertyType::String) // type
+    },
     &Component::GetUid, // getter
     nullptr, // setter
-    TypeDesc(PropertyType::String) // type
   },
   {
-    "type", // id
-    "Type", // displayName
-    "Component Type", // description
+    {
+      "type", // id
+      "Type", // displayName
+      "Component Type", // description
+      TypeDesc(PropertyType::String) // type
+    },
     &Component::GetType, // getter
     nullptr, // setter
-    TypeDesc(PropertyType::String) // type
   },
   {
-    "displayname", // id
-    "Display Name", // displayName
-    "Component Display Name", // description
+    {
+      "displayname", // id
+      "Display Name", // displayName
+      "Component Display Name", // description
+      TypeDesc(PropertyType::String) // type
+    },
     &Component::GetDisplayName, // getter
     nullptr, // setter
-    TypeDesc(PropertyType::String) // type
   },
   {
-    "description", // id
-    "Description", // displayName
-    "Component Description", // description
+    {
+      "description", // id
+      "Description", // displayName
+      "Component Description", // description
+      TypeDesc(PropertyType::String) // type
+    },
     &Component::GetDescription, // getter
     nullptr, // setter
-    TypeDesc(PropertyType::String) // type
   }
 };
 ComponentDesc Component::descriptor =
@@ -66,7 +74,7 @@ void Component::Init(udInitParams initParams)
 {
   for (auto &kv : initParams)
   {
-    const PropertyDesc *pDesc = FindProperty(kv.key.asString());
+    const PropertyDesc *pDesc = FindPropertyDesc(kv.key.asString());
     if (pDesc && pDesc->setter)
       pDesc->setter.set(this, kv.value);
   }
@@ -98,14 +106,14 @@ bool Component::IsType(udString type) const
   return false;
 }
 
-const PropertyDesc *Component::FindProperty(udString name) const
+const PropertyDesc *Component::FindPropertyDesc(udString name) const
 {
   const ComponentDesc *pDesc = pType;
   while (pDesc)
   {
     for (auto &prop : pDesc->properties)
     {
-      if (prop.id.eqi(name))
+      if (prop.info.id.eqi(name))
         return &prop;
     }
     pDesc = pDesc->pSuperDesc;
@@ -113,14 +121,37 @@ const PropertyDesc *Component::FindProperty(udString name) const
   return nullptr;
 }
 
+const PropertyInfo *Component::GetPropertyInfo(int index) const
+{
+  // TODO: this is shit, traversing all properties should be constant time
+  const ComponentDesc *pDesc = pType;
+  while (pDesc)
+  {
+    for (auto &prop : pDesc->properties)
+    {
+      if (prop.index == index)
+        return &prop.info;
+    }
+    pDesc = pDesc->pSuperDesc;
+  }
+
+  return nullptr;
+}
+
+const PropertyInfo *Component::GetPropertyInfo(udString property) const
+{
+  const PropertyDesc *pDesc = FindPropertyDesc(property);
+  return pDesc ? &pDesc->info : nullptr;
+}
+
 void Component::SetProperty(udString property, const udVariant &value)
 {
-  const PropertyDesc *pDesc = FindProperty(property);
+  const PropertyDesc *pDesc = FindPropertyDesc(property);
   if (!pDesc)
     return; // TODO: make noise
   if (!pDesc->setter)
     return; // TODO: make noise
-  if (pDesc->flags & udPF_Immutable)
+  if (pDesc->info.flags & udPF_Immutable)
     return; // TODO: make noise
   pDesc->setter.set(this, value);
   propertyChange[pDesc->index].Signal();
@@ -128,7 +159,7 @@ void Component::SetProperty(udString property, const udVariant &value)
 
 udVariant Component::GetProperty(udString property) const
 {
-  const PropertyDesc *pDesc = FindProperty(property);
+  const PropertyDesc *pDesc = FindPropertyDesc(property);
   if (!pDesc)
     return udVariant(); // TODO: make noise
   if (!pDesc->getter)

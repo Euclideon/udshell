@@ -354,7 +354,7 @@ void LuaState::pushGetters(const ComponentDesc &desc)
     {
       lua_pushlightuserdata(L, (void*)&p);
       lua_pushcclosure(L, &getter, 1);
-      lua_setfield(L, -3, p.id.ptr);
+      lua_setfield(L, -3, p.info.id.ptr);
     }
   }
 
@@ -363,14 +363,14 @@ void LuaState::pushGetters(const ComponentDesc &desc)
   {
     lua_pushlightuserdata(L, (void*)&m);
     lua_pushcclosure(L, &method, 1);
-    lua_setfield(L, -2, m.id.ptr);
+    lua_setfield(L, -2, m.info.id.ptr);
   }
 
   // populate events
   for (auto &e : desc.events)
   {
     lua_pushlightuserdata(L, (void*)&e);
-    lua_setfield(L, -2, e.id.ptr);
+    lua_setfield(L, -2, e.info.id.ptr);
   }
 
   // upvalue(3) is super.__index
@@ -390,7 +390,7 @@ void LuaState::pushSetters(const ComponentDesc &desc)
     {
       lua_pushlightuserdata(L, (void*)&p);
       lua_pushcclosure(L, &setter, 1);
-      lua_setfield(L, -2, p.id.ptr);
+      lua_setfield(L, -2, p.info.id.ptr);
     }
   }
 
@@ -425,20 +425,20 @@ void LuaState::pushDescriptor(const ComponentDesc &desc)
   {
     lua_createtable(L, 0, 0);
 
-    pushString(p.id);
+    pushString(p.info.id);
     lua_setfield(L, -2, "id");
-    pushString(p.displayName);
+    pushString(p.info.displayName);
     lua_setfield(L, -2, "displayname");
-    pushString(p.description);
+    pushString(p.info.description);
     lua_setfield(L, -2, "description");
 
-    pushInt((int)p.type.type);
+    pushInt((int)p.info.type.type);
     lua_setfield(L, -2, "type");
-    pushInt(p.type.arrayLength);
+    pushInt(p.info.type.arrayLength);
     lua_setfield(L, -2, "arraylength");
-    pushInt(p.flags);
+    pushInt(p.info.flags);
     lua_setfield(L, -2, "flags");
-    pushString(p.displayType);
+    pushString(p.info.displayType);
     lua_setfield(L, -2, "displaytype");
 
     lua_seti(L, -2, i++);

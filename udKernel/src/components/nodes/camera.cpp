@@ -9,33 +9,39 @@ namespace ud
 static PropertyDesc props[] =
 {
   {
-    "cameramatrix", // id
-    "Position", // displayName
-    "Position of camera", // description
+    {
+      "cameramatrix", // id
+      "Position", // displayName
+      "Position of camera", // description
+      TypeDesc(PropertyType::Float, 16)
+    },
     &Camera::GetCameraMatrix,
-    nullptr,
-    TypeDesc(PropertyType::Float, 16)
+    nullptr
   },
   {
-    "viewmatrix", // id
-    "Position", // displayName
-    "Position of camera", // description
+    {
+      "viewmatrix", // id
+      "Position", // displayName
+      "Position of camera", // description
+      TypeDesc(PropertyType::Float, 16)
+    },
     &Camera::GetViewMatrix,
-    nullptr,
-    TypeDesc(PropertyType::Float, 16)
+    nullptr
   }
 };
 static MethodDesc methods[] =
 {
   {
-    "setdepthplanes",
-    "Set the near and far depth planes:\n  setdepthplanes(near, far)",
-    Method(&Camera::SetDepthPlanes),
-    TypeDesc(PropertyType::Void), // result
-    { // args
-      TypeDesc(PropertyType::Float),
-      TypeDesc(PropertyType::Float)
-    }
+    {
+      "setdepthplanes",
+      "Set the near and far depth planes:\n  setdepthplanes(near, far)",
+      TypeDesc(PropertyType::Void), // result
+      { // args
+        TypeDesc(PropertyType::Float),
+        TypeDesc(PropertyType::Float)
+      }
+    },
+    Method(&Camera::SetDepthPlanes) // method
   }
 };
 ComponentDesc Camera::descriptor =
@@ -57,36 +63,44 @@ ComponentDesc Camera::descriptor =
 static PropertyDesc simpleCameraProps[] =
 {
   {
-    "matrix", // id
-    "Matrix", // displayName
-    "Local matrix", // description
+    {
+      "matrix", // id
+      "Matrix", // displayName
+      "Local matrix", // description
+      TypeDesc(PropertyType::Float, 16) // type
+    },
     &SimpleCamera::GetMatrix, // getter
-    &SimpleCamera::SetMatrix, // setter
-    TypeDesc(PropertyType::Float, 16) // type
+    &SimpleCamera::SetMatrix  // setter
   },
   {
-    "position", // id
-    "Position", // displayName
-    "Local position", // description
+    {
+      "position", // id
+      "Position", // displayName
+      "Local position", // description
+      TypeDesc(PropertyType::Float, 3) // type
+    },
     &SimpleCamera::GetPosition, // getter
-    &SimpleCamera::SetPosition, // setter
-    TypeDesc(PropertyType::Float, 3) // type
+    &SimpleCamera::SetPosition  // setter
   },
   {
-    "orientation", // id
-    "Orientation", // displayName
-    "Camera orientation (YPR)", // description
+    {
+      "orientation", // id
+      "Orientation", // displayName
+      "Camera orientation (YPR)", // description
+      TypeDesc(PropertyType::Float, 3) // type
+    },
     nullptr, // getter
-    &SimpleCamera::SetOrientation, // setter
-    TypeDesc(PropertyType::Float, 3) // type
+    &SimpleCamera::SetOrientation  // setter
   },
   {
-    "speed", // id
-    "Speed", // displayName
-    "Camera speed", // description
+    {
+      "speed", // id
+      "Speed", // displayName
+      "Camera speed", // description
+      TypeDesc(PropertyType::Float) // type
+    },
     nullptr, // getter
-    &SimpleCamera::SetSpeed, // setter
-    TypeDesc(PropertyType::Float) // type
+    &SimpleCamera::SetSpeed  // setter
   }
 };
 ComponentDesc SimpleCamera::descriptor =

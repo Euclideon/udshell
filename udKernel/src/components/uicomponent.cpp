@@ -11,7 +11,7 @@ ComponentDesc UIComponent::descriptor =
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "ui",                // id
-  "udUIComponent",     // displayName
+  "UIComponent",     // displayName
   "Is a ui component", // description
 
   nullptr, // properties

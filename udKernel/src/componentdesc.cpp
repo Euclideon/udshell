@@ -33,18 +33,18 @@ void ComponentDesc::BuildSearchTree()
   {
     for (auto &p : pDesc->properties)
     {
-      if (!propertyTree.Get(p.id))
-        propertyTree.Insert(p.id, &p);
+      if (!propertyTree.Get(p.info.id))
+        propertyTree.Insert(p.info.id, &p);
     }
     for (auto &m : pDesc->methods)
     {
-      if (!methodTree.Get(m.id))
-        methodTree.Insert(m.id, &m);
+      if (!methodTree.Get(m.info.id))
+        methodTree.Insert(m.info.id, &m);
     }
     for (auto &e : pDesc->events)
     {
-      if (!eventTree.Get(e.id))
-        eventTree.Insert(e.id, &e);
+      if (!eventTree.Get(e.info.id))
+        eventTree.Insert(e.info.id, &e);
     }
     pDesc = pDesc->pSuperDesc;
   }

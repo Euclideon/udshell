@@ -28,66 +28,80 @@ static const udSlice<const EnumKVP> renderFlags =
 static PropertyDesc props[] =
 {
   {
-    "startingroot", // id
-    "Starting Root", // displayName
-    "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", // description
+    {
+      "startingroot", // id
+      "Starting Root", // displayName
+      "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", // description
+      TypeDesc(PropertyType::Integer)
+    },
     &UDNode::GetStartingRoot,
-    &UDNode::SetStartingRoot,
-    TypeDesc(PropertyType::Integer)
+    &UDNode::SetStartingRoot
   },
 
   {
-    "rendercliparea", // id
-    "Render Clip Area", // displayName
-    "Clipping Area of the Screen", // description
+    {
+      "rendercliparea", // id
+      "Render Clip Area", // displayName
+      "Clipping Area of the Screen", // description
+      TypeDesc(PropertyType::Struct)
+    },
     &UDNode::GetRenderClipArea,
-    &UDNode::SetRenderClipArea,
-    TypeDesc(PropertyType::Struct)
+    &UDNode::SetRenderClipArea
   },
 
   {
-    "renderflags", // id
-    "Render Flags", // displayName
-    "UD Rendering Flags", // description
+    {
+      "renderflags", // id
+      "Render Flags", // displayName
+      "UD Rendering Flags", // description
+      TypeDesc(PropertyType::Flags, 0, renderFlags)
+    },
     &UDNode::GetRenderFlags,
-    &UDNode::SetRenderFlags,
-    TypeDesc(PropertyType::Flags, 0, renderFlags)
+    &UDNode::SetRenderFlags
   },
   {
-    "datasource", // id
-    "udModel Data Source", // displayName
-    "Data Source for UD Model", // description
+    {
+      "datasource", // id
+      "udModel Data Source", // displayName
+      "Data Source for UD Model", // description
+      TypeDesc(PropertyType::String)
+    },
     &UDNode::GetSource,
     nullptr,
-    TypeDesc(PropertyType::String)
   },
 
   {
-    "udscale", // id
-    "UD Scale", // displayName
-    "Internal Scale of the Model", // description
+    {
+      "udscale", // id
+      "UD Scale", // displayName
+      "Internal Scale of the Model", // description
+      TypeDesc(PropertyType::Float)
+    },
     &UDNode::GetUDScale,
-    nullptr,
-    TypeDesc(PropertyType::Float)
+    nullptr
   },
 
   {
-    "boundingvolume", // id
-    "Bounding Volume", // displayName
-    "The Bouning Volume", // description
+    {
+      "boundingvolume", // id
+      "Bounding Volume", // displayName
+      "The Bouning Volume", // description
+      TypeDesc(PropertyType::Struct)
+    },
     &UDNode::GetBoundingVolume,
-    nullptr,
-    TypeDesc(PropertyType::Struct)
+    nullptr
   },
 
 
   {
-    "voxelshader", // id
-    "Voxel Shader", // displayName
-    "Optional callback to handle it's own internal call to GetNodeColor()", // description
+    {
+      "voxelshader", // id
+      "Voxel Shader", // displayName
+      "Optional callback to handle it's own internal call to GetNodeColor()", // description
+      PropertyType::Delegate, // type
+    },
     &UDNode::GetSimpleVoxelDelegate,
-    &UDNode::SetSimpleVoxelDelegate,
-    PropertyType::Delegate, // type
+    &UDNode::SetSimpleVoxelDelegate
   },
 #if 0
   {
@@ -108,14 +122,16 @@ static PropertyDesc props[] =
 static MethodDesc methods[] =
 {
   {
-    "load",
-    "Load the UD Model",
-    Method(&UDNode::Load),
-    TypeDesc(PropertyType::Integer), // result
     {
-      TypeDesc(PropertyType::String),
-      TypeDesc(PropertyType::Boolean)
-    }
+      "load",
+      "Load the UD Model",
+      TypeDesc(PropertyType::Integer), // result
+      {
+        TypeDesc(PropertyType::String),
+        TypeDesc(PropertyType::Boolean)
+      }
+    },
+    Method(&UDNode::Load) // method
   }
 };
 

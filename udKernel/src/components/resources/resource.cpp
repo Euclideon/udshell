@@ -8,12 +8,14 @@ namespace ud
 static PropertyDesc props[] =
 {
   {
-    "metadata", // id
-    "Metadata", // displayName
-    "Get the metadata object", // description
+    {
+      "metadata", // id
+      "Metadata", // displayName
+      "Get the metadata object", // description
+      TypeDesc(PropertyType::Resource)
+    },
     &Resource::GetMetadata,
-    nullptr,
-    TypeDesc(PropertyType::Resource)
+    nullptr
   }
 };
 ComponentDesc Resource::descriptor =

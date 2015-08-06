@@ -6,36 +6,44 @@ namespace ud
 static PropertyDesc props[] =
 {
   {
-    "matrix", // id
-    "Matrix", // displayName
-    "Local matrix", // description
+    {
+      "matrix", // id
+      "Matrix", // displayName
+      "Local matrix", // description
+      TypeDesc(PropertyType::Float, 16) // type
+    },
     &Node::GetMatrix, // getter
     &Node::SetMatrix, // setter
-    TypeDesc(PropertyType::Float, 16) // type
   },
   {
-    "position", // id
-    "Position", // displayName
-    "Local position", // description
+    {
+      "position", // id
+      "Position", // displayName
+      "Local position", // description
+      TypeDesc(PropertyType::Float, 3) // type
+    },
     &Node::GetPosition, // getter
     &Node::SetPosition, // setter
-    TypeDesc(PropertyType::Float, 3) // type
   },
   {
-    "parent", // id
-    "Parent", // displayName
-    "Parent node", // description
+    {
+      "parent", // id
+      "Parent", // displayName
+      "Parent node", // description
+      TypeDesc(PropertyType::Component) // type
+    },
     &Node::GetPosition, // getter
     &Node::SetPosition, // setter
-    TypeDesc(PropertyType::Component) // type
   },
   {
-    "children", // id
-    "Children", // displayName
-    "Child nodes", // description
+    {
+      "children", // id
+      "Children", // displayName
+      "Child nodes", // description
+      TypeDesc(PropertyType::Component, ~0U) // type
+    },
     &Node::GetPosition, // getter
     &Node::SetPosition, // setter
-    TypeDesc(PropertyType::Component, ~0U) // type
   },
 };
 ComponentDesc Node::descriptor =

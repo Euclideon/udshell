@@ -10,20 +10,24 @@ namespace ud
 static PropertyDesc props[] =
 {
   {
-    "rootnode", // id
-    "RootNode", // displayName
-    "Scene root node", // description
+    {
+      "rootnode", // id
+      "RootNode", // displayName
+      "Scene root node", // description
+      TypeDesc(PropertyType::Integer) // type
+    },
     &Scene::GetRootNode, // getter
-    nullptr, // setter
-    TypeDesc(PropertyType::Integer) // type
+    nullptr  // setter
   }
 };
 static EventDesc events[] =
 {
   {
-    "dirty", // id
-    "Dirty", // displayName
-    "Scene dirty event", // description
+    {
+      "dirty", // id
+      "Dirty", // displayName
+      "Scene dirty event", // description
+    },
     &Scene::Dirty
   }
 };

@@ -190,23 +190,41 @@ struct TypeDesc
   const udSlice<const EnumKVP> kvp;
 };
 
-struct PropertyDesc
+struct PropertyInfo
 {
-  PropertyDesc() = delete;
-  void operator=(const PropertyDesc&) = delete;
+  PropertyInfo() = delete;
 
   udString id;
   udString displayName;
   udString description;
 
-  Getter getter;
-  Setter setter;
-
   TypeDesc type;
   udString displayType;
   uint32_t flags;
+};
+
+struct PropertyDesc
+{
+  PropertyDesc() = delete;
+  void operator=(const PropertyDesc&) = delete;
+
+  PropertyInfo info;
+
+  Getter getter;
+  Setter setter;
 
   uint32_t index;
+};
+
+struct MethodInfo
+{
+  MethodInfo() = delete;
+
+  udString id;
+  udString description;
+
+  TypeDesc result;
+  const udSlice<const TypeDesc> args;
 };
 
 struct MethodDesc
@@ -214,15 +232,22 @@ struct MethodDesc
   MethodDesc() = delete;
   void operator=(const MethodDesc&) = delete;
 
-  udString id;
-  udString description;
+  MethodInfo info;
 
   Method method;
-
-  TypeDesc result;
-  const udSlice<const TypeDesc> args;
-
   uint32_t index;
+};
+
+struct EventInfo
+{
+  EventInfo() = delete;
+  void operator=(const EventInfo&) = delete;
+
+  udString id;
+  udString displayName;
+  udString description;
+
+  const udSlice<const TypeDesc> args;
 };
 
 struct EventDesc
@@ -230,13 +255,9 @@ struct EventDesc
   EventDesc() = delete;
   void operator=(const EventDesc&) = delete;
 
-  udString id;
-  udString displayName;
-  udString description;
+  EventInfo info;
 
   VarEvent ev;
-
-  const udSlice<const TypeDesc> args;
 
   uint32_t index;
 };

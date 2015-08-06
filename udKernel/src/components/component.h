@@ -36,15 +36,13 @@ public:
   template<typename T>
   bool IsType() const { return IsType(T::descriptor.id); }
 
-  const PropertyDesc *FindProperty(udString name) const;
-
-  void SetProperty(udString property, const udVariant &value);
-  udVariant GetProperty(udString property) const;
+  virtual void SetProperty(udString property, const udVariant &value);
+  virtual udVariant GetProperty(udString property) const;
 
   udResult SendMessage(udString target, udString message, const udVariant &data);
   udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { return SendMessage(pComponent->uid, message, data); }
 
-  // properties
+  // built-in component properties
   udString GetUid() const { return uid; }
   udString GetType() const { return pType->id; }
   udString GetDisplayName() const { return pType->displayName; }
@@ -55,17 +53,21 @@ protected:
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
   virtual ~Component();
 
+  virtual void Init(udInitParams initParams);
+
   virtual udResult ReceiveMessage(udString message, udString sender, const udVariant &data);
 
-  size_t NumProperties() const
-  {
-    return pType->propertyTree.Size();
-  }
-  ptrdiff_t PropertyIndex(udString property) const
+  // property access
+  const PropertyDesc *FindPropertyDesc(udString name) const;
+  virtual const PropertyInfo *GetPropertyInfo(int index) const;
+  virtual const PropertyInfo *GetPropertyInfo(udString property) const;
+  virtual size_t NumProperties() const { return pType->propertyTree.Size(); }
+
+  /*virtual ptrdiff_t PropertyIndex(udString property) const
   {
     PropertyDesc *const *ppProp = pType->propertyTree.Get(property);
     return ppProp ? (*ppProp)->index : -1;
-  }
+  }*/
 
   void SignalPropertyChanged(const PropertyDesc *pProp) { propertyChange[pProp->index].Signal(); }
 
@@ -77,8 +79,6 @@ private:
   template<typename... Args>
   friend class ::udEvent;
   friend class LuaState;
-
-  void Init(udInitParams initParams);
 
   Component(const Component &) = delete;    // Still not sold on this
   void operator=(const Component &) = delete;

@@ -6,52 +6,62 @@ namespace ud
 static PropertyDesc props[] =
 {
   {
-    "numrecords", // id
-    "NumRecords", // displayName
-    "Number of records in the metadata", // description
+    {
+      "numrecords", // id
+      "NumRecords", // displayName
+      "Number of records in the metadata", // description
+      TypeDesc(PropertyType::Integer)
+    },
     &Metadata::NumRecords,
-    nullptr,
-    TypeDesc(PropertyType::Integer)
+    nullptr
   }
 };
 static MethodDesc methods[] =
 {
   {
-    "insert",
-    "Insert a record",
-    Method(&Metadata::InsertMethod),
-    TypeDesc(PropertyType::Void), // result
     {
-      TypeDesc(PropertyType::Variant), // key
-      TypeDesc(PropertyType::Variant) // value
-    }
+      "insert",
+      "Insert a record",
+      TypeDesc(PropertyType::Void), // result
+      {
+        TypeDesc(PropertyType::Variant), // key
+        TypeDesc(PropertyType::Variant) // value
+      }
+    },
+    Method(&Metadata::InsertMethod),  // method
   },
   {
-    "remove",
-    "Remove a record",
-    Method(&Metadata::Remove),
-    TypeDesc(PropertyType::Void), // result
     {
-      TypeDesc(PropertyType::Variant), // key
-    }
+      "remove",
+      "Remove a record",
+      TypeDesc(PropertyType::Void), // result
+      {
+        TypeDesc(PropertyType::Variant), // key
+      }
+    },
+    Method(&Metadata::Remove),  // method
   },
   {
-    "exists",
-    "Check if a record exists",
-    Method(&Metadata::Exists),
-    TypeDesc(PropertyType::Boolean), // result
     {
-      TypeDesc(PropertyType::Variant), // key
-    }
+      "exists",
+      "Check if a record exists",
+      TypeDesc(PropertyType::Boolean), // result
+      {
+        TypeDesc(PropertyType::Variant), // key
+      }
+    },
+    Method(&Metadata::Exists) // method
   },
   {
-    "get",
-    "Get a record",
-    Method(&Metadata::Get),
-    TypeDesc(PropertyType::Variant), // result
     {
-      TypeDesc(PropertyType::Variant), // key
-    }
+      "get",
+      "Get a record",
+      TypeDesc(PropertyType::Variant), // result
+      {
+        TypeDesc(PropertyType::Variant), // key
+      }
+    },
+    Method(&Metadata::Get), // method
   }
 };
 ComponentDesc Metadata::descriptor =

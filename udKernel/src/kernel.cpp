@@ -82,7 +82,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   // init the components
   UD_ERROR_CHECK(pKernel->InitComponents());
 
-  pKernel->pLua = new LuaState(pKernel);
+  pKernel->pLua = udNew(LuaState, pKernel);
 
 epilogue:
   if (result != udR_Success)
@@ -99,6 +99,9 @@ udResult Kernel::Destroy()
 
   // unregister components, free stuff
   //...
+
+  // TODO: this crashes - fix!
+  //udDelete(pLua);
 
   messageHandlers.Deinit();
   componentRegistry.Deinit();

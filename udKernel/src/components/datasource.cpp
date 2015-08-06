@@ -6,52 +6,62 @@ namespace ud
 static PropertyDesc props[] =
 {
   {
-    "resourcecount", // id
-    "Resource Count", // displayName
-    "Number of resources the data source provides", // description
+    {
+      "resourcecount", // id
+      "Resource Count", // displayName
+      "Number of resources the data source provides", // description
+      TypeDesc(PropertyType::Integer) // type
+    },
     &DataSource::GetNumResources, // getter
-    nullptr, // setter
-    TypeDesc(PropertyType::Integer) // type
+    nullptr  // setter
   }
 };
 static MethodDesc methods[] =
 {
   {
-    "getresourcename", // id
-    "Get a resource name by index", // description
-    &DataSource::GetResourceName, // method
-    TypeDesc(PropertyType::Resource), // type
     {
-      TypeDesc(PropertyType::Integer), // arg0
-    }
+      "getresourcename", // id
+      "Get a resource name by index", // description
+      TypeDesc(PropertyType::Resource), // type
+      {
+        TypeDesc(PropertyType::Integer), // arg0
+      }
+    },
+    &DataSource::GetResourceName  // method
   },
   {
-    "getresource", // id
-    "Get a resource by name or index", // description
-    &DataSource::GetResourceByVariant, // method
-    TypeDesc(PropertyType::Resource), // type
     {
-      TypeDesc(PropertyType::Variant), // arg0
-    }
+      "getresource", // id
+      "Get a resource by name or index", // description
+      TypeDesc(PropertyType::Resource), // type
+      {
+        TypeDesc(PropertyType::Variant), // arg0
+      }
+    },
+    &DataSource::GetResourceByVariant  // method
   },
   {
-    "setresource", // id
-    "Set a resource by name", // description
-    &DataSource::SetResource, // method
-    TypeDesc(PropertyType::Void), // type
     {
-      TypeDesc(PropertyType::String), // arg0
-      TypeDesc(PropertyType::Resource), // arg1
-    }
+      "setresource", // id
+      "Set a resource by name", // description
+      TypeDesc(PropertyType::Void), // type
+      {
+        TypeDesc(PropertyType::String), // arg0
+        TypeDesc(PropertyType::Resource), // arg1
+      }
+    },
+    &DataSource::SetResource  // method
   },
   {
-    "countresource", // id
-    "Count resources with a name prefix", // description
-    &DataSource::CountResources, // method
-    TypeDesc(PropertyType::Integer), // type
     {
-      TypeDesc(PropertyType::String), // arg0
-    }
+      "countresource", // id
+      "Count resources with a name prefix", // description
+      TypeDesc(PropertyType::Integer), // type
+      {
+        TypeDesc(PropertyType::String), // arg0
+      }
+    },
+    &DataSource::CountResources  // method
   }
 };
 ComponentDesc DataSource::descriptor =

@@ -11,20 +11,24 @@ namespace ud
 static PropertyDesc props[] =
 {
   {
-    "camera", // id
-    "Camera", // displayName
-    "Camera for viewport", // description
+    {
+      "camera", // id
+      "Camera", // displayName
+      "Camera for viewport", // description
+      TypeDesc(PropertyType::Component) // type
+    },
     nullptr, // getter
     nullptr, // setter
-    TypeDesc(PropertyType::Component) // type
   }
 };
 static EventDesc events[] =
 {
   {
-    "dirty", // id
-    "Dirty", // displayName
-    "View dirty event", // description
+    {
+      "dirty", // id
+      "Dirty", // displayName
+      "View dirty event", // description
+    },
     &View::Dirty
   }
 };

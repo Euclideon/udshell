@@ -23,7 +23,7 @@ public:
 
   udResult Init();
   udResult Shutdown();
-  udResult FormatMainWindow(UIComponentRef spUIComponent);
+  udResult FormatMainWindow(QtUIComponentRef spUIComponent);
   udResult RunMainLoop();
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
@@ -56,27 +56,46 @@ private:
 
 } // namespace qt
 
-// Qt type conversion to/from variants
+// Qt type conversion to/from UD
 
-inline udVariant udToVariant(const QString &string)
+inline udString AllocUDStringFromQString(const QString &string)
 {
   QByteArray byteArray = string.toUtf8();
 
   // Need to do a deep copy and give ownership to the variant
-  size_t length = byteArray.size()+1;
+  size_t length = byteArray.size() + 1;
   char *pString = udAllocType(char, length, udAF_None);
   memcpy(pString, byteArray.data(), length);
 
-  udString udStr(pString, length);
-  return udVariant(udStr, true);
+  return udString(pString, length);
+}
+
+inline udVariant udToVariant(const QString &string)
+{
+  return udVariant(AllocUDStringFromQString(string), true);
 }
 
 inline void udFromVariant(const udVariant &variant, QString *pString)
 {
-  // NOTE: assumes pString is already empty
   udString s = variant.asString();
   if (!s.empty())
-    pString->append(QString::fromUtf8(s.ptr, static_cast<int>(s.length)));
+    *pString = QString::fromUtf8(s.ptr, static_cast<int>(s.length));
+}
+
+inline udVariant udToVariant(const QVariant &var)
+{
+  // TODO: implement qvariant to udvariant
+  udDebugPrintf("CONVERT QVariant to udVariant\n");
+  udDebugPrintf("VALUE: %s\n", var.toString().toLatin1().data());
+
+  return udVariant();
+}
+
+inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
+{
+  // TODO: implement udvariant to qvariant
+  udDebugPrintf("CONVERT udVariant to QVariant\n");
+  udDebugPrintf("VALUE: %s\n", variant.asString().toStringz());
 }
 
 #endif  // UDQTKERNEL_INTERNAL_H
