@@ -78,6 +78,10 @@ public:
     return *v;
   }
 
+  class Iterator;
+  Iterator begin() const { return Iterator(root); }
+  Iterator end() const { return Iterator(nullptr); }
+
 private:
   struct Node
   {
@@ -103,7 +107,7 @@ private:
     if (n->left)
     {
       if (n->right)
-        return max(n->left->height, n->right->height);
+        return udMax(n->left->height, n->right->height);
       else
         return n->left->height;
     }
@@ -279,7 +283,7 @@ private:
         else // One child case
         {
           // TODO: FIX THIS!!
-          // this is copying the child node into the parent node becase there is no parent pointer
+          // this is copying the child node into the parent node because there is no parent pointer
           // DO: add parent pointer, then fix up the parent's child pointer to the child, and do away with this pointless copy!
           *root = *temp; // Copy the contents of the non-empty child
         }
@@ -340,6 +344,86 @@ private:
 
     return root;
   }
+
+  class Iterator
+  {
+  public:
+    Iterator(Node *pRoot) : pRoot(pRoot), depth(0), stack(0)
+    {
+      Node *pLeftMost = pRoot;
+      while (pLeftMost && pLeftMost->left)
+      {
+        stack |= 1LL << depth;
+        ++depth;
+        pLeftMost = pLeftMost->left;
+      }
+    }
+
+    Iterator &operator++()
+    {
+      const Node *pNode = GetNode(stack, depth);
+      if (pNode->right)
+      {
+        ++depth;
+        const Node *pLeftMost = pNode->right;
+        while (pLeftMost->left)
+        {
+          stack |= 1LL << depth;
+          ++depth;
+          pLeftMost = pLeftMost->left;
+        }
+        return *this;
+      }
+
+      while (depth)
+      {
+        --depth;
+        stack &= ~(1 << depth);
+
+        const Node *pParentNode = GetNode(stack, depth);
+
+        if (pParentNode->right == pNode)
+          pNode = pParentNode;
+        else
+          return *this;
+      }
+
+      pRoot = 0;
+      data = 0;
+      return *this;
+    }
+
+    bool operator!=(Iterator rhs) { return pRoot != rhs.pRoot || data != rhs.data; }
+
+    const V& operator*() const { return GetNode(stack, depth)->v; }
+    V& operator*() { return const_cast<Node*>(GetNode(stack, depth))->v; }
+
+    const Node *GetNode(uint64_t s, uint64_t d) const
+    {
+      const Node *pNode = pRoot;
+      for (auto i = 0; i < d; ++i)
+      {
+        if (s & (1LL << i))
+          pNode = pNode->left;
+        else
+          pNode = pNode->right;
+      }
+      return pNode;
+    }
+
+  private:
+    union
+    {
+      struct
+      {
+        uint64_t depth : 8;
+        uint64_t stack : 56;
+      };
+      uint64_t data;
+    };
+    Node *pRoot;
+  };
+
 };
 
 #endif // _UDAVLTREE_H
