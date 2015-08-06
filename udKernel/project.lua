@@ -29,18 +29,18 @@ project "udKernel"
 		buildoptions { "-std=c++11" }
 	filter "files:script/**"
 		buildmessage 'text2c.sh %{file.relpath} %{cfg.objdir}/script/%{file.basename}.inc'
-		buildcommands { '%{prj.location}/udKernel/text2c.sh "%{file.relpath}" "%{cfg.objdir}/script/%{file.basename}.inc"' }
+		buildcommands { path.getabsolute('.') .. '/text2c.sh "%{file.relpath}" "%{cfg.objdir}/script/%{file.basename}.inc"' }
 		buildoutputs { '%{cfg.objdir}/script/%{file.basename}.inc' }
 	filter "files:shaders/**"
 		buildmessage 'text2c.sh %{file.relpath} %{cfg.objdir}/shaders/%{file.basename}.inc'
-		buildcommands { '%{prj.location}/udKernel/text2c.sh "%{file.relpath}" "%{cfg.objdir}/shaders/%{file.basename}.inc"' }
+		buildcommands { path.getabsolute('.') .. '/text2c.sh "%{file.relpath}" "%{cfg.objdir}/shaders/%{file.basename}.inc"' }
 		buildoutputs { '%{cfg.objdir}/shaders/%{file.basename}.inc' }
 	filter {}
 
 	-- include common stuff
 	dofile "../common-proj.lua"
 
---	exceptionhandling "Default"
+	exceptionhandling "Default"
 
 	if qt then
 		qt.enable()
