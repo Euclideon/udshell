@@ -21,15 +21,6 @@
   SHARED_CLASS(Name)
 
 
-template<>
-struct udAVLCompare<udString> {
-  static inline ptrdiff_t compare(udString a, udString b)
-  {
-    return a.cmp(b);
-  }
-};
-
-
 namespace ud
 {
 
@@ -283,10 +274,16 @@ struct ComponentDesc
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
 
+  struct StringCompare {
+    inline ptrdiff_t operator()(udString a, udString b)
+    {
+      return a.cmp(b);
+    }
+  };
 
-  udAVLTree<udString, PropertyDesc*> propertyTree;
-  udAVLTree<udString, MethodDesc*> methodTree;
-  udAVLTree<udString, EventDesc*> eventTree;
+  udAVLTree<udString, PropertyDesc*, StringCompare> propertyTree;
+  udAVLTree<udString, MethodDesc*, StringCompare> methodTree;
+  udAVLTree<udString, EventDesc*, StringCompare> eventTree;
 
   void BuildSearchTree();
 

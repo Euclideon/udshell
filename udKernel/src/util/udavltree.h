@@ -2,20 +2,16 @@
 #if !defined(_UDAVLTREE_H)
 #define _UDAVLTREE_H
 
-template<typename K>
-struct udAVLCompare
+template<typename T>
+struct AVLCompare
 {
-  static inline ptrdiff_t compare(K a, K b)
+  ptrdiff_t operator()(const T &a, const T &b)
   {
-    if (a < b)
-      return -1;
-    if (a > b)
-      return 1;
-    return 0;
+    return a < b ? -1 : (a > b ? 1 : 0);
   }
 };
 
-template<typename K, typename V>
+template<typename K, typename V, typename PredFunctor = AVLCompare<K>>
 class udAVLTree
 {
 public:
@@ -157,7 +153,7 @@ private:
   {
     if (!n)
       return nullptr;
-    ptrdiff_t c = udAVLCompare<K>::compare(key, n->k);
+    ptrdiff_t c = PredFunctor()(key, n->k);
     if (c < 0)
       return find(n->left, key);
     if (c > 0)
@@ -174,7 +170,7 @@ private:
       return newnode;
     }
 
-    ptrdiff_t c = udAVLCompare<K>::compare(newnode->k, n->k);
+    ptrdiff_t c = PredFunctor()(newnode->k, n->k);
     if (c < 0)
       n->left = insert(n->left, newnode);
     else if (c > 0)
@@ -202,7 +198,7 @@ private:
 
     if (balance > 1)
     {
-      ptrdiff_t lc = udAVLCompare<K>::compare(newnode->k, n->left->k);
+      ptrdiff_t lc = PredFunctor()(newnode->k, n->left->k);
       // Left Left Case
       if (lc < 0)
         return rightRotate(n);
@@ -217,7 +213,7 @@ private:
 
     if (balance < -1)
     {
-      ptrdiff_t rc = udAVLCompare<K>::compare(newnode->k, n->right->k);
+      ptrdiff_t rc = PredFunctor()(newnode->k, n->right->k);
 
       // Right Right Case
       if (rc > 0)
@@ -253,17 +249,17 @@ private:
     if (root == nullptr)
       return root;
 
-    ptrdiff_t c = udAVLCompare<K>::compare(key, root->k);
+    ptrdiff_t c = PredFunctor()(key, root->k);
 
     // If the key to be deleted is smaller than the root's key,
     // then it lies in left subtree
     if (c < 0)
-      root->left = deleteNode(root->left, n);
+      root->left = deleteNode(root->left, key);
 
     // If the key to be deleted is greater than the root's key,
     // then it lies in right subtree
     else if (c > 0)
-      root->right = deleteNode(root->right, n);
+      root->right = deleteNode(root->right, key);
 
     // if key is same as root's key, then this is the Node
     // to be deleted
@@ -300,10 +296,10 @@ private:
         struct Node *temp = minValueNode(root->right);
 
         // Copy the inorder successor's data to this Node
-        root->key = temp->key;
+        root->k = temp->k;
 
         // Delete the inorder successor
-        root->right = deleteNode(root->right, temp->key);
+        root->right = deleteNode(root->right, temp->k);
       }
     }
 

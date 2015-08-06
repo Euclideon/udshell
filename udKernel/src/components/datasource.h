@@ -84,7 +84,14 @@ protected:
 
   virtual void Create(StreamRef spSource) {}
 
-  udAVLTree<udString, ResourceRef> resources;
+  struct StringCompare {
+    inline ptrdiff_t operator()(udString a, udString b)
+    {
+      return a.cmp(b);
+    }
+  };
+
+  udAVLTree<udString, ResourceRef, StringCompare> resources;
   Flags flags;
 };
 
