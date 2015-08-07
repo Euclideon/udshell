@@ -22,29 +22,11 @@ template class QtComponent<ud::UIComponent>;
 
 // ---------------------------------------------------------------------------------------
 template<typename Base>
-const ud::PropertyInfo *QtComponent<Base>::GetPropertyInfo(int index) const
-{
-  udDebugPrintf("QtComponent::GetPropertyInfo %d\n", index);
-  // TODO: check bounds, else fall thru to component
-  return Component::GetPropertyInfo(index);
-}
-
-// ---------------------------------------------------------------------------------------
-template<typename Base>
 const ud::PropertyInfo *QtComponent<Base>::GetPropertyInfo(udString property) const
 {
   udDebugPrintf("QtComponent::GetPropertyInfo %s\n", property.ptr);
   // TODO: search for property, fall thru to component
   return Component::GetPropertyInfo(property);
-}
-
-// ---------------------------------------------------------------------------------------
-template<typename Base>
-size_t QtComponent<Base>::NumProperties() const
-{
-  udDebugPrintf("QtComponent::NumProperties\n");
-  // TODO: add qt property count to component count
-  return Component::NumProperties();
 }
 
 // ---------------------------------------------------------------------------------------

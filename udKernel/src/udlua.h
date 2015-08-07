@@ -125,15 +125,11 @@ private:
 
   void pushComponentMetatable(const ComponentDesc &desc);
   void pushDescriptor(const ComponentDesc &desc);
-  void pushGetters(const ComponentDesc &desc);
-  void pushSetters(const ComponentDesc &desc);
   static int componentCleaner(lua_State* L);
   static int componentToString(lua_State* L);
   static int componentCompare(lua_State* L);
   static int componentIndex(lua_State* L);
   static int componentNewIndex(lua_State* L);
-  static int getter(lua_State *L);
-  static int setter(lua_State *L);
   static int method(lua_State *L);
   static int help(lua_State* L);
 

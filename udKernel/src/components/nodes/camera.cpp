@@ -6,14 +6,13 @@
 
 namespace ud
 {
-static PropertyDesc props[] =
+static CPropertyDesc props[] =
 {
   {
     {
       "cameramatrix", // id
       "Position", // displayName
       "Position of camera", // description
-      TypeDesc(PropertyType::Float, 16)
     },
     &Camera::GetCameraMatrix,
     nullptr
@@ -23,25 +22,19 @@ static PropertyDesc props[] =
       "viewmatrix", // id
       "Position", // displayName
       "Position of camera", // description
-      TypeDesc(PropertyType::Float, 16)
     },
     &Camera::GetViewMatrix,
     nullptr
   }
 };
-static MethodDesc methods[] =
+static CMethodDesc methods[] =
 {
   {
     {
       "setdepthplanes",
       "Set the near and far depth planes:\n  setdepthplanes(near, far)",
-      TypeDesc(PropertyType::Void), // result
-      { // args
-        TypeDesc(PropertyType::Float),
-        TypeDesc(PropertyType::Float)
-      }
     },
-    Method(&Camera::SetDepthPlanes) // method
+    &Camera::SetDepthPlanes // method
   }
 };
 ComponentDesc Camera::descriptor =
@@ -55,19 +48,18 @@ ComponentDesc Camera::descriptor =
   "Camera",    // displayName
   "Is a camera", // description
 
-  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 
-static PropertyDesc simpleCameraProps[] =
+static CPropertyDesc simpleCameraProps[] =
 {
   {
     {
       "matrix", // id
       "Matrix", // displayName
       "Local matrix", // description
-      TypeDesc(PropertyType::Float, 16) // type
     },
     &SimpleCamera::GetMatrix, // getter
     &SimpleCamera::SetMatrix  // setter
@@ -77,7 +69,6 @@ static PropertyDesc simpleCameraProps[] =
       "position", // id
       "Position", // displayName
       "Local position", // description
-      TypeDesc(PropertyType::Float, 3) // type
     },
     &SimpleCamera::GetPosition, // getter
     &SimpleCamera::SetPosition  // setter
@@ -87,7 +78,6 @@ static PropertyDesc simpleCameraProps[] =
       "orientation", // id
       "Orientation", // displayName
       "Camera orientation (YPR)", // description
-      TypeDesc(PropertyType::Float, 3) // type
     },
     nullptr, // getter
     &SimpleCamera::SetOrientation  // setter
@@ -97,7 +87,6 @@ static PropertyDesc simpleCameraProps[] =
       "speed", // id
       "Speed", // displayName
       "Camera speed", // description
-      TypeDesc(PropertyType::Float) // type
     },
     nullptr, // getter
     &SimpleCamera::SetSpeed  // setter
@@ -114,7 +103,7 @@ ComponentDesc SimpleCamera::descriptor =
   "SimpleCamera",     // displayName
   "Is a simple camera", // description
 
-  udSlice<PropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
+  udSlice<CPropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
 };
 
 

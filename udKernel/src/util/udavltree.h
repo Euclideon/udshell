@@ -11,12 +11,34 @@ struct AVLCompare
   }
 };
 
+template<>
+struct AVLCompare<udString>
+{
+  UDFORCE_INLINE ptrdiff_t operator()(udString a, udString b)
+  {
+    return a.cmp(b);
+  }
+};
+
 template<typename K, typename V, typename PredFunctor = AVLCompare<K>>
 class udAVLTree
 {
 public:
+  udAVLTree() {}
+  udAVLTree(nullptr_t) {}
+  udAVLTree(udAVLTree &&rval)
+    : size(size), root(root)
+  {
+    rval.root = nullptr;
+  }
+
+  ~udAVLTree()
+  {
+    // TODO: ** CLEAN UP HERE **
+  }
 
   size_t Size() const { return size; }
+  bool Empty() const { return size == 0; }
 
   void Insert(K &&key, V &&rval)
   {

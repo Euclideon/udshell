@@ -3,65 +3,47 @@
 namespace ud
 {
 
-static PropertyDesc props[] =
+static CPropertyDesc props[] =
 {
   {
     {
       "numrecords", // id
       "NumRecords", // displayName
       "Number of records in the metadata", // description
-      TypeDesc(PropertyType::Integer)
     },
     &Metadata::NumRecords,
     nullptr
   }
 };
-static MethodDesc methods[] =
+static CMethodDesc methods[] =
 {
   {
     {
       "insert",
       "Insert a record",
-      TypeDesc(PropertyType::Void), // result
-      {
-        TypeDesc(PropertyType::Variant), // key
-        TypeDesc(PropertyType::Variant) // value
-      }
     },
-    Method(&Metadata::InsertMethod),  // method
+    &Metadata::InsertMethod,  // method
   },
   {
     {
       "remove",
       "Remove a record",
-      TypeDesc(PropertyType::Void), // result
-      {
-        TypeDesc(PropertyType::Variant), // key
-      }
     },
-    Method(&Metadata::Remove),  // method
+    &Metadata::Remove,  // method
   },
   {
     {
       "exists",
       "Check if a record exists",
-      TypeDesc(PropertyType::Boolean), // result
-      {
-        TypeDesc(PropertyType::Variant), // key
-      }
     },
-    Method(&Metadata::Exists) // method
+    &Metadata::Exists // method
   },
   {
     {
       "get",
       "Get a record",
-      TypeDesc(PropertyType::Variant), // result
-      {
-        TypeDesc(PropertyType::Variant), // key
-      }
     },
-    Method(&Metadata::Get), // method
+    &Metadata::Get, // method
   }
 };
 ComponentDesc Metadata::descriptor =
@@ -75,8 +57,8 @@ ComponentDesc Metadata::descriptor =
   "Metadata", // displayName
   "Metadata resource", // description
 
-  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  udSlice<MethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 } // namespace ud

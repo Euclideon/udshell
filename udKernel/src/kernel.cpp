@@ -195,7 +195,7 @@ udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
   }
 
   // build search trees
-  pDesc->BuildSearchTree();
+  pDesc->BuildSearchTrees();
 
   // add to registry
   ComponentType t = { pDesc, 0 };

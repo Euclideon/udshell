@@ -30,69 +30,125 @@ struct ComponentDesc;
 PROTOTYPE_COMPONENT(Component);
 
 
+// interface for getters, setters, methods, events
+
 // getter glue
-struct Getter
+class Getter
 {
 public:
-  Getter(nullptr_t);
-  template <typename X, typename Type>
-  Getter(Type(X::*func)() const);
+  Getter(nullptr_t) : shim(nullptr) {}
 
   operator bool() const { return shim != nullptr; }
 
-  udVariant get(const ud::Component *pThis) const;
+  udVariant get(const ud::Component *pThis) const
+  {
+    return shim(this, pThis);
+  }
 
 protected:
   typedef udVariant(Shim)(const Getter* const, const ud::Component*);
-
-  FastDelegateMemento m;
   Shim *shim;
+};
+
+// setter glue
+class Setter
+{
+public:
+  Setter(nullptr_t) : shim(nullptr) {}
+
+  operator bool() const { return shim != nullptr; }
+
+  void set(ud::Component *pThis, const udVariant &value) const
+  {
+    shim(this, pThis, value);
+  }
+
+protected:
+  typedef void(Shim)(const Setter* const, ud::Component*, const udVariant&);
+  Shim *shim;
+};
+
+// method glue
+class Method
+{
+public:
+  Method(nullptr_t) : shim(nullptr) {}
+
+  operator bool() const { return shim != nullptr; }
+
+  udVariant call(ud::Component *pThis, udSlice<udVariant> args) const
+  {
+    return shim(this, pThis, args);
+  }
+
+protected:
+  typedef udVariant(Shim)(const Method* const, ud::Component*, udSlice<udVariant>);
+  Shim *shim;
+};
+
+// event glue
+class VarEvent
+{
+public:
+  VarEvent(nullptr_t) : pSubscribe(nullptr) {}
+
+  operator bool() const { return pSubscribe != nullptr; }
+
+  void subscribe(const ud::ComponentRef &c, const udVariant::Delegate &d)
+  {
+    pSubscribe(this, c, d);
+  }
+
+protected:
+  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const udVariant::Delegate&);
+  SubscribeFunc *pSubscribe = nullptr;
+};
+
+
+// C/C++ implementations of the getters/setters/methods/events
+
+// getter glue
+class CGetter : public Getter
+{
+public:
+  CGetter(nullptr_t) : Getter(nullptr) {}
+  template <typename X, typename Type>
+  CGetter(Type(X::*func)() const);
+
+protected:
+  FastDelegateMemento m;
 
   template<typename T>
   static udVariant shimFunc(const Getter * const pGetter, const ud::Component *pThis);
 };
 
 // setter glue
-struct Setter
+class CSetter : public Setter
 {
 public:
-  Setter(nullptr_t);
+  CSetter(nullptr_t) : Setter(nullptr) {}
   template <typename X, typename Type>
-  Setter(void(X::*func)(Type));
+  CSetter(void(X::*func)(Type));
 
-  operator bool() const { return shim != nullptr; }
-
-  void set(ud::Component *pThis, const udVariant &value) const;
-
-private:
-  typedef void(Shim)(const Setter* const, ud::Component*, const udVariant&);
-
+protected:
   FastDelegateMemento m;
-  Shim *shim;
 
   template<typename T>
   static void shimFunc(const Setter * const pSetter, ud::Component *pThis, const udVariant &value);
 };
 
 // method glue
-struct Method
+class CMethod : public Method
 {
 public:
-  Method(nullptr_t);
+  CMethod(nullptr_t) : Method(nullptr) {}
   template <typename X, typename Ret, typename... Args>
-  Method(Ret(X::*func)(Args...));
+  CMethod(Ret(X::*func)(Args...));
   template <typename X, typename Ret, typename... Args>
-  Method(Ret(X::*func)(Args...) const);
+  CMethod(Ret(X::*func)(Args...) const);
 
-  operator bool() const { return shim != nullptr; }
-
-  udVariant call(ud::Component *pThis, udSlice<udVariant> args) const;
-
-private:
-  typedef udVariant(Shim)(const Method* const, ud::Component*, udSlice<udVariant>);
-
+protected:
   FastDelegateMemento m;
-  Shim *shim;
 
   template<typename Ret, typename... Args>
   struct Partial // this allows us to perform partial specialisation for Ret == void
@@ -106,64 +162,22 @@ private:
 };
 
 // event glue
-struct VarEvent
+class CEvent : public VarEvent
 {
-  VarEvent(nullptr_t);
+public:
+  CEvent(nullptr_t) : VarEvent(nullptr) {}
   template<typename X, typename... Args>
-  VarEvent(udEvent<Args...> X::*ev)
-  {
-    pSubscribe = &doSubscribe<X, Args...>;
-    pEvent = (void* VarEvent::*)ev;
-  }
+  CEvent(udEvent<Args...> X::*ev);
 
-  operator bool() const { return pEvent != nullptr; }
-
-  UDFORCE_INLINE void subscribe(const ud::ComponentRef &c, const udVariant::Delegate &d)
-  {
-    pSubscribe(this, c, d);
-  }
-
-private:
-  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const udVariant::Delegate&);
-
-  void* VarEvent::*pEvent;
-  SubscribeFunc *pSubscribe = nullptr;
+protected:
+  void* CEvent::*pEvent;
 
   template<typename X, typename... Args>
-  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const udVariant::Delegate &d)
-  {
-    // cast the pointer-to-member back to it's real type
-    udEvent<Args...> X::*ev = (udEvent<Args...> X::*)pEv->pEvent;
-
-    // TODO: validate that 'X' is actually a component?
-    X *pComponent = (X*)c.ptr();
-
-    // deref the pointer-to-member to get the event we want to subscribe to
-    udEvent<Args...> &e = pComponent->*ev;
-
-    udVariant v(d);
-    e.Subscribe(v.as<udDelegate<void(Args...)>>());
-  }
+  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const udVariant::Delegate &d);
 };
 
 
 // property description
-enum class PropertyType : uint32_t
-{
-  Void,
-  Boolean,
-  Integer,
-  Float,
-  String,
-  Variant,
-  Component,
-  Resource,
-  Enum,
-  Flags,
-  Delegate,
-  Struct,
-};
-
 enum PropertyFlags : uint32_t
 {
   udPF_Immutable = 1<<0 // must be initialised during construction
@@ -178,18 +192,6 @@ struct EnumKVP
 };
 #define EnumKVP(e) EnumKVP( #e, (int64_t)e )
 
-struct TypeDesc
-{
-  TypeDesc(PropertyType type, uint32_t arrayLength = 0, const udSlice<const EnumKVP> kvp = nullptr)
-    : type(type), arrayLength(arrayLength), kvp(kvp)
-  {}
-  TypeDesc& operator=(const TypeDesc&) = delete;
-
-  PropertyType type;
-  uint32_t arrayLength;
-  const udSlice<const EnumKVP> kvp;
-};
-
 struct PropertyInfo
 {
   PropertyInfo() = delete;
@@ -198,7 +200,6 @@ struct PropertyInfo
   udString displayName;
   udString description;
 
-  TypeDesc type;
   udString displayType;
   uint32_t flags;
 };
@@ -209,11 +210,8 @@ struct PropertyDesc
   void operator=(const PropertyDesc&) = delete;
 
   PropertyInfo info;
-
-  Getter getter;
-  Setter setter;
-
-  uint32_t index;
+  Getter *getter;
+  Setter *setter;
 };
 
 struct MethodInfo
@@ -222,9 +220,6 @@ struct MethodInfo
 
   udString id;
   udString description;
-
-  TypeDesc result;
-  const udSlice<const TypeDesc> args;
 };
 
 struct MethodDesc
@@ -233,9 +228,7 @@ struct MethodDesc
   void operator=(const MethodDesc&) = delete;
 
   MethodInfo info;
-
-  Method method;
-  uint32_t index;
+  Method *method;
 };
 
 struct EventInfo
@@ -246,8 +239,6 @@ struct EventInfo
   udString id;
   udString displayName;
   udString description;
-
-  const udSlice<const TypeDesc> args;
 };
 
 struct EventDesc
@@ -256,10 +247,27 @@ struct EventDesc
   void operator=(const EventDesc&) = delete;
 
   EventInfo info;
+  VarEvent *ev;
+};
 
-  VarEvent ev;
 
-  uint32_t index;
+struct CPropertyDesc
+{
+  PropertyInfo info;
+  CGetter getter;
+  CSetter setter;
+};
+
+struct CMethodDesc
+{
+  MethodInfo info;
+  CMethod method;
+};
+
+struct CEventDesc
+{
+  EventInfo info;
+  CEvent ev;
 };
 
 
@@ -288,29 +296,25 @@ struct ComponentDesc
 
   // TODO: add flags ('Abstract' (can't create) flag)
 
-  const udSlice<PropertyDesc> properties;
-  const udSlice<MethodDesc> methods;
-  const udSlice<EventDesc> events;
+  udSlice<CPropertyDesc> properties;
+  udSlice<CMethodDesc> methods;
+  udSlice<CEventDesc> events;
 
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
 
-  struct StringCompare {
-    UDFORCE_INLINE ptrdiff_t operator()(udString a, udString b)
-    {
-      return a.cmp(b);
-    }
-  };
-
-  udAVLTree<udString, PropertyDesc*, StringCompare> propertyTree;
-  udAVLTree<udString, MethodDesc*, StringCompare> methodTree;
-  udAVLTree<udString, EventDesc*, StringCompare> eventTree;
-
-  void BuildSearchTree();
+  udAVLTree<udString, PropertyDesc> propertyTree;
+  udAVLTree<udString, MethodDesc> methodTree;
+  udAVLTree<udString, EventDesc> eventTree;
 
   size_t NumProperties() const { return propertyTree.Size(); }
   size_t NumMethods() const { return methodTree.Size(); }
   size_t NumEvents() const { return eventTree.Size(); }
+
+  void BuildSearchTrees();
+  void InitProps();
+  void InitMethods();
+  void InitEvents();
 };
 
 } // namespace ud

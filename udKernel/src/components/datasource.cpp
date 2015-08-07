@@ -3,29 +3,24 @@
 namespace ud
 {
 
-static PropertyDesc props[] =
+static CPropertyDesc props[] =
 {
   {
     {
       "resourcecount", // id
       "Resource Count", // displayName
       "Number of resources the data source provides", // description
-      TypeDesc(PropertyType::Integer) // type
     },
     &DataSource::GetNumResources, // getter
     nullptr  // setter
   }
 };
-static MethodDesc methods[] =
+static CMethodDesc methods[] =
 {
   {
     {
       "getresourcename", // id
       "Get a resource name by index", // description
-      TypeDesc(PropertyType::Resource), // type
-      {
-        TypeDesc(PropertyType::Integer), // arg0
-      }
     },
     &DataSource::GetResourceName  // method
   },
@@ -33,10 +28,6 @@ static MethodDesc methods[] =
     {
       "getresource", // id
       "Get a resource by name or index", // description
-      TypeDesc(PropertyType::Resource), // type
-      {
-        TypeDesc(PropertyType::Variant), // arg0
-      }
     },
     &DataSource::GetResourceByVariant  // method
   },
@@ -44,11 +35,6 @@ static MethodDesc methods[] =
     {
       "setresource", // id
       "Set a resource by name", // description
-      TypeDesc(PropertyType::Void), // type
-      {
-        TypeDesc(PropertyType::String), // arg0
-        TypeDesc(PropertyType::Resource), // arg1
-      }
     },
     &DataSource::SetResource  // method
   },
@@ -56,10 +42,6 @@ static MethodDesc methods[] =
     {
       "countresource", // id
       "Count resources with a name prefix", // description
-      TypeDesc(PropertyType::Integer), // type
-      {
-        TypeDesc(PropertyType::String), // arg0
-      }
     },
     &DataSource::CountResources  // method
   }
@@ -75,8 +57,8 @@ ComponentDesc DataSource::descriptor =
   "Data Source", // displayName
   "Provides data", // description
 
-  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<MethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
+  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
 };
 
 DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)

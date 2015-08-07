@@ -42,6 +42,22 @@ public:
   udResult SendMessage(udString target, udString message, const udVariant &data);
   udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { return SendMessage(pComponent->uid, message, data); }
 
+  const PropertyInfo *GetPropertyInfo(udString name) const
+  {
+    const PropertyDesc *pDesc = GetPropertyDesc(name);
+    return pDesc ? &pDesc->info : nullptr;
+  }
+  const MethodInfo *GetMethodInfo(udString name) const
+  {
+    const MethodDesc *pDesc = GetMethodDesc(name);
+    return pDesc ? &pDesc->info : nullptr;
+  }
+  const EventInfo *GetEventInfo(udString name) const
+  {
+    const EventDesc *pDesc = GetEventDesc(name);
+    return pDesc ? &pDesc->info : nullptr;
+  }
+
   // built-in component properties
   udString GetUid() const { return uid; }
   udString GetType() const { return pType->id; }
@@ -58,22 +74,11 @@ protected:
   virtual udResult ReceiveMessage(udString message, udString sender, const udVariant &data);
 
   // property access
-  const PropertyDesc *FindPropertyDesc(udString name) const;
-  virtual const PropertyInfo *GetPropertyInfo(int index) const;
-  virtual const PropertyInfo *GetPropertyInfo(udString property) const;
-  virtual size_t NumProperties() const { return pType->propertyTree.Size(); }
-
-  /*virtual ptrdiff_t PropertyIndex(udString property) const
-  {
-    PropertyDesc *const *ppProp = pType->propertyTree.Get(property);
-    return ppProp ? (*ppProp)->index : -1;
-  }*/
-
-  void SignalPropertyChanged(const PropertyDesc *pProp) { propertyChange[pProp->index].Signal(); }
+  virtual const PropertyDesc *GetPropertyDesc(udString name) const;
+  virtual const MethodDesc *GetMethodDesc(udString name) const;
+  virtual const EventDesc *GetEventDesc(udString name) const;
 
   udSubscriber subscriber;
-
-  udSlice<udEvent<>> propertyChange;
 
 private:
   template<typename... Args>

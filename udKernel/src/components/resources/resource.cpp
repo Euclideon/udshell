@@ -5,14 +5,13 @@
 namespace ud
 {
 
-static PropertyDesc props[] =
+static CPropertyDesc props[] =
 {
   {
     {
       "metadata", // id
       "Metadata", // displayName
       "Get the metadata object", // description
-      TypeDesc(PropertyType::Resource)
     },
     &Resource::GetMetadata,
     nullptr
@@ -29,7 +28,7 @@ ComponentDesc Resource::descriptor =
   "Resource", // displayName
   "Base resource", // description
 
-  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
 };
 
 Resource::Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)

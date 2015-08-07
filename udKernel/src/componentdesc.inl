@@ -6,25 +6,18 @@ using fastdelegate::FastDelegate0;
 using fastdelegate::FastDelegate1;
 
 // getter stuff
-inline Getter::Getter(nullptr_t)
-  : shim(nullptr)
-{
-}
 template <class X, class Type>
-inline Getter::Getter(Type(X::*func)() const)
+inline CGetter::CGetter(Type(X::*func)() const)
+  : Getter(nullptr)
 {
   m = fastdelegate::MakeDelegate((X*)nullptr, func).GetMemento();
   shim = &shimFunc<Type>;
 }
 
-inline udVariant Getter::get(const ud::Component *pThis) const
-{
-  return shim(this, pThis);
-}
-
 template<typename T>
-inline udVariant Getter::shimFunc(const Getter * const pGetter, const ud::Component *pThis)
+inline udVariant CGetter::shimFunc(const Getter * const _pGetter, const ud::Component *pThis)
 {
+  CGetter *pGetter = (CGetter*)_pGetter;
   auto m = pGetter->m;
   m.SetThis((void*)pThis);
 
@@ -35,25 +28,19 @@ inline udVariant Getter::shimFunc(const Getter * const pGetter, const ud::Compon
 }
 
 // setter stuff
-inline Setter::Setter(nullptr_t)
-  : shim(nullptr)
-{
-}
 template <class X, class Type>
-inline Setter::Setter(void(X::*func)(Type))
+inline CSetter::CSetter(void(X::*func)(Type))
+  : Setter(nullptr)
 {
   m = fastdelegate::MakeDelegate((X*)nullptr, func).GetMemento();
   shim = &shimFunc<Type>;
 }
 
-inline void Setter::set(ud::Component *pThis, const udVariant &value) const
-{
-  shim(this, pThis, value);
-}
-
 template<typename T>
-inline void Setter::shimFunc(const Setter * const pSetter, ud::Component *pThis, const udVariant &value)
+inline void CSetter::shimFunc(const Setter * const _pSetter, ud::Component *pThis, const udVariant &value)
 {
+  CSetter *pSetter = (CSetter*)_pSetter;
+
   auto m = pSetter->m;
   m.SetThis((void*)pThis);
 
@@ -64,39 +51,34 @@ inline void Setter::shimFunc(const Setter * const pSetter, ud::Component *pThis,
 }
 
 // method stuff
-inline Method::Method(nullptr_t)
-: shim(nullptr)
-{
-}
 template <typename X, typename Ret, typename... Args>
-inline Method::Method(Ret(X::*func)(Args...))
+inline CMethod::CMethod(Ret(X::*func)(Args...))
+  : Method(nullptr)
 {
   m = fastdelegate::MakeDelegate((X*)nullptr, func).GetMemento();
   shim = &Partial<Ret, Args...>::shimFunc;
 }
 template <typename X, typename Ret, typename... Args>
-inline Method::Method(Ret(X::*func)(Args...) const)
+inline CMethod::CMethod(Ret(X::*func)(Args...) const)
+  : Method(nullptr)
 {
   m = fastdelegate::MakeDelegate((X*)nullptr, func).GetMemento();
   shim = &Partial<Ret, Args...>::shimFunc;
-}
-
-inline udVariant Method::call(ud::Component *pThis, udSlice<udVariant> args) const
-{
-  return shim(this, pThis, args);
 }
 
 template<typename Ret, typename... Args>
 template<size_t ...S>
-UDFORCE_INLINE udVariant Method::Partial<Ret, Args...>::callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>)
+UDFORCE_INLINE udVariant CMethod::Partial<Ret, Args...>::callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>)
 {
   return udVariant(d(args[S].as<typename std::remove_reference<Args>::type>()...));
 }
 
 template<typename Ret, typename... Args>
-inline udVariant Method::Partial<Ret, Args ...>::shimFunc(const Method * const pSetter, Component *pThis, udSlice<udVariant> value)
+inline udVariant CMethod::Partial<Ret, Args ...>::shimFunc(const Method * const _pMethod, Component *pThis, udSlice<udVariant> value)
 {
-  auto m = pSetter->m;
+  CMethod *pMethod = (CMethod*)_pMethod;
+
+  auto m = pMethod->m;
   m.SetThis((void*)pThis);
 
   FastDelegate<Ret(Args...)> d;
@@ -106,7 +88,7 @@ inline udVariant Method::Partial<Ret, Args ...>::shimFunc(const Method * const p
 }
 
 template<typename... Args>
-struct Method::Partial<void, Args...>
+struct CMethod::Partial<void, Args...>
 {
   template<size_t ...S>
   UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, FastDelegate<void(Args...)> d, Sequence<S...>)
@@ -114,9 +96,11 @@ struct Method::Partial<void, Args...>
     d(args[S].as<typename std::remove_reference<Args>::type>()...);
   }
 
-  inline static udVariant shimFunc(const Method * const pSetter, Component *pThis, udSlice<udVariant> value)
+  inline static udVariant shimFunc(const Method * const _pMethod, Component *pThis, udSlice<udVariant> value)
   {
-    auto m = pSetter->m;
+    CMethod *pMethod = (CMethod*)_pMethod;
+
+    auto m = pMethod->m;
     m.SetThis((void*)pThis);
 
     FastDelegate<void(Args...)> d;
@@ -126,5 +110,32 @@ struct Method::Partial<void, Args...>
     return udVariant();
   }
 };
+
+// event stuff
+template<typename X, typename... Args>
+inline CEvent::CEvent(udEvent<Args...> X::*ev)
+  : VarEvent(nullptr)
+{
+  pSubscribe = &doSubscribe<X, Args...>;
+  pEvent = (void* CEvent::*)ev;
+}
+
+template<typename X, typename... Args>
+inline void CEvent::doSubscribe(const VarEvent *_pEv, const ComponentRef &c, const udVariant::Delegate &d)
+{
+  CEvent *pEv = (CEvent*)_pEv;
+
+  // cast the pointer-to-member back to it's real type
+  udEvent<Args...> X::*ev = (udEvent<Args...> X::*)pEv->pEvent;
+
+  // TODO: validate that 'X' is actually a component?
+  X *pComponent = (X*)c.ptr();
+
+  // deref the pointer-to-member to get the event we want to subscribe to
+  udEvent<Args...> &e = pComponent->*ev;
+
+  udVariant v(d);
+  e.Subscribe(v.as<udDelegate<void(Args...)>>());
+}
 
 }  // namespace ud

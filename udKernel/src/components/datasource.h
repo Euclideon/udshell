@@ -91,7 +91,7 @@ protected:
     }
   };
 
-  udAVLTree<udString, ResourceRef, StringCompare> resources;
+  udAVLTree<udString, ResourceRef> resources;
   Flags flags;
 };
 

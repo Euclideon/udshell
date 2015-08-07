@@ -7,20 +7,19 @@
 namespace ud
 {
 
-static PropertyDesc props[] =
+static CPropertyDesc props[] =
 {
   {
     {
       "rootnode", // id
       "RootNode", // displayName
       "Scene root node", // description
-      TypeDesc(PropertyType::Integer) // type
     },
     &Scene::GetRootNode, // getter
     nullptr  // setter
   }
 };
-static EventDesc events[] =
+static CEventDesc events[] =
 {
   {
     {
@@ -42,9 +41,9 @@ ComponentDesc Scene::descriptor =
   "Scene",    // displayName
   "Is a scene", // description
 
-  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
   nullptr,
-  udSlice<EventDesc>(events, UDARRAYSIZE(events)) // events
+  udSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 

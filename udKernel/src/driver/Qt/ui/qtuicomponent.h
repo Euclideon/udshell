@@ -17,11 +17,7 @@ template<typename Base>
 class QtComponent : public Base
 {
 public:
-  virtual const ud::PropertyInfo *GetPropertyInfo(int index) const;
   virtual const ud::PropertyInfo *GetPropertyInfo(udString property) const;
-
-  virtual size_t NumProperties() const;
-  //virtual ptrdiff_t PropertyIndex(udString property) const;
 
   virtual void SetProperty(udString property, const udVariant &value);
   virtual udVariant GetProperty(udString property) const;

@@ -312,10 +312,10 @@ void LuaState::pushComponentMetatable(const ComponentDesc &desc)
 
   // push getters and setters
   pushString("__index");
-  pushGetters(desc);
+  lua_pushcfunction(L, &componentIndex);
   lua_rawset(L, -3);
   pushString("__newindex");
-  pushSetters(desc);
+  lua_pushcfunction(L, &componentNewIndex);
   lua_rawset(L, -3);
 
   // compare operator
@@ -332,72 +332,6 @@ void LuaState::pushComponentMetatable(const ComponentDesc &desc)
   pushString("__metatable");
   lua_pushvalue(L, -2);
   lua_rawset(L, -3);
-}
-
-void LuaState::pushGetters(const ComponentDesc &desc)
-{
-  lua_newtable(L); // upvalue(1) == getters table
-  lua_newtable(L); // upvalue(2) == members/methods table
-
-  // add type and descriptor as members
-  pushDescriptor(desc);
-  lua_setfield(L, -2, "descriptor");
-
-  // help function
-  lua_pushcfunction(L, &help);
-  lua_setfield(L, -2, "help");
-
-  // populate getters
-  for (auto &p : desc.properties)
-  {
-    if (p.getter) // TODO: we should possibly push a function that reports an "unreadable" error
-    {
-      lua_pushlightuserdata(L, (void*)&p);
-      lua_pushcclosure(L, &getter, 1);
-      lua_setfield(L, -3, p.info.id.ptr);
-    }
-  }
-
-  // populate methods
-  for (auto &m : desc.methods)
-  {
-    lua_pushlightuserdata(L, (void*)&m);
-    lua_pushcclosure(L, &method, 1);
-    lua_setfield(L, -2, m.info.id.ptr);
-  }
-
-  // populate events
-  for (auto &e : desc.events)
-  {
-    lua_pushlightuserdata(L, (void*)&e);
-    lua_setfield(L, -2, e.info.id.ptr);
-  }
-
-  // upvalue(3) is super.__index
-  if (luaL_getmetafield(L, -4, "__index") == LUA_TNIL)
-    lua_pushnil(L);
-
-  lua_pushcclosure(L, &componentIndex, 3);
-}
-void LuaState::pushSetters(const ComponentDesc &desc)
-{
-  lua_newtable(L);
-
-  // populate setters
-  for (auto &p : desc.properties)
-  {
-    if (p.setter) // TODO: we should possibly push a function that reports an "unwritable" error
-    {
-      lua_pushlightuserdata(L, (void*)&p);
-      lua_pushcclosure(L, &setter, 1);
-      lua_setfield(L, -2, p.info.id.ptr);
-    }
-  }
-
-  if (luaL_getmetafield(L, -3, "__newindex") == LUA_TNIL)
-    lua_pushnil(L);
-
-  lua_pushcclosure(L, &componentNewIndex, 2);
 }
 void LuaState::pushDescriptor(const ComponentDesc &desc)
 {
@@ -416,12 +350,12 @@ void LuaState::pushDescriptor(const ComponentDesc &desc)
 
   // TODO: parent descriptor should also be here...
 
-  if (desc.properties.empty())
+  if (desc.propertyTree.Empty())
     return;
 
   lua_createtable(L, 0, 0);
   size_t i = 1;
-  for (auto &p : desc.properties)
+  for (auto &p : desc.propertyTree)
   {
     lua_createtable(L, 0, 0);
 
@@ -432,10 +366,6 @@ void LuaState::pushDescriptor(const ComponentDesc &desc)
     pushString(p.info.description);
     lua_setfield(L, -2, "description");
 
-    pushInt((int)p.info.type.type);
-    lua_setfield(L, -2, "type");
-    pushInt(p.info.type.arrayLength);
-    lua_setfield(L, -2, "arraylength");
     pushInt(p.info.flags);
     lua_setfield(L, -2, "flags");
     pushString(p.info.displayType);
@@ -505,115 +435,119 @@ int LuaState::componentCompare(lua_State* L)
 
 int LuaState::componentIndex(lua_State* L)
 {
-  auto field = lua_tostring(L, 2);
+  LuaState &l = (LuaState&)L;
 
-  // check the getter table
-  lua_getfield(L, lua_upvalueindex(1), field);
-  if (!lua_isnil(L, -1))
-  {
-    lua_pushvalue(L, 1);
-    lua_call(L, 1, LUA_MULTRET);
-    return lua_gettop(L) - 2;
-  }
-  lua_pop(L, 1);
+  // get component
+  ComponentRef spC = l.toComponent(1);
 
-  // check the members/method table
-  lua_getfield(L, lua_upvalueindex(2), field);
-  if (!lua_isnil(L, -1))
+  // get field name
+  size_t len;
+  auto pField = lua_tolstring(L, 2, &len);
+  udString field(pField, len);
+
+  // check for getter
+  const PropertyDesc *pProp = spC->GetPropertyDesc(field);
+  if (pProp)
   {
-    if (lua_islightuserdata(L, -1))
+    if (pProp->getter)
     {
-      // events are light user data...
-      EventDesc *pDesc = (EventDesc*)lua_touserdata(L, -1);
-      lua_pop(L, 1);
-
-      // push an event object
-      LuaState &l = (LuaState&)L;
-      l.pushEvent(l.toComponent(1), *pDesc);
+      udVariant result(pProp->getter->get(spC.ptr()));
+      l.push(result);
+      return 1;
     }
+    else
+    {
+      // TODO: complain that property is not readable!
+      lua_pushnil(L);
+      return 1;
+    }
+  }
+
+  // check for method
+  const MethodDesc *pMethod = spC->GetMethodDesc(field);
+  if (pMethod)
+  {
+    lua_pushlightuserdata(L, (void*)pMethod->method);
+    lua_pushcclosure(L, &method, 1);
     return 1;
   }
-  lua_pop(L, 1);
 
-  // call super.__index
-  lua_pushvalue(L, lua_upvalueindex(3));
-  if (!lua_isnil(L, -1))
+  // check for events
+  const EventDesc *pEv = spC->GetEventDesc(field);
+  if (pEv)
   {
-    lua_pushvalue(L, 1);
-    lua_pushvalue(L, 2);
-    lua_call(L, 2, LUA_MULTRET);
-    return lua_gettop(L) - 2;
+    // TODO: push event object...
+    lua_pushlightuserdata(L, (void*)pEv->ev);
+    return 1;
   }
 
-  // return nil (already on stack)
+  // TODO: move these to be actual methods?
+  if (field.cmp(udString("descriptor")) == 0)
+  {
+    // TODO: return descriptor here...
+    UDASSERT(false, "TODO");
+//    pushDescriptor(*spC->pType);
+    return 0;
+  }
+  else if (field.cmp(udString("help")) == 0)
+  {
+    lua_pushcfunction(L, &help);
+    return 1;
+  }
+
+  // TODO: make better error message, this doesn't feel right
   udFixedString64 errorMsg = udFixedString64::format("Error: '%s' not found", field);
-  LuaState &l = (LuaState&)L;
   l.print(errorMsg);
+
+  // return nil
+  lua_pushnil(L);
   return 1;
 }
 int LuaState::componentNewIndex(lua_State* L)
 {
-  auto field = lua_tostring(L, 2);
+  LuaState &l = (LuaState&)L;
 
-  // call setter
-  lua_getfield(L, lua_upvalueindex(1), field);
-  if (!lua_isnil(L, -1))
-  {
-    lua_pushvalue(L, 1);
-    lua_pushvalue(L, 3);
-    lua_call(L, 2, LUA_MULTRET);
-    return 0;
-  }
+  // get component
+  ComponentRef spC = l.toComponent(1);
 
-  // call super.__newindex
-  lua_pushvalue(L, lua_upvalueindex(2));
-  if (!lua_isnil(L, -1))
+  // get field name
+  size_t len;
+  auto pField = lua_tolstring(L, 2, &len);
+  udString field(pField, len);
+
+  // check for setter
+  const PropertyDesc *pProp = spC->GetPropertyDesc(field);
+  if (pProp)
   {
-    lua_pushvalue(L, 1);
-    lua_pushvalue(L, 2);
-    lua_pushvalue(L, 3);
-    lua_call(L, 3, LUA_MULTRET);
-    return 0;
+    if (pProp->setter)
+    {
+      pProp->setter->set(spC.ptr(), l.get(3));
+      // TODO: put signal back
+//      spC->SignalPropertyChanged(pProp);
+      return 0;
+    }
+    else
+    {
+      // TODO: complain that property is not writable!
+      return 0;
+    }
   }
 
   // return nil (already on stack)
-  lua_getglobal(L, "print");
-  udFixedString64 errorMsg = udFixedString64::format("Error \"%s\" not found", field);
-  lua_pushstring(L, errorMsg.toStringz());
-  lua_call(L, 1, 0);
-
+  udFixedString64 errorMsg = udFixedString64::format("Error: '%s' not found", field);
+  l.print(errorMsg);
   return 0;
 }
 
 // lua callbacks
-int LuaState::getter(lua_State *L)
-{
-  LuaState &l = (LuaState&)L;
-  const PropertyDesc *pProp = (const PropertyDesc*)l.toUserData(lua_upvalueindex(1));
-
-  ComponentRef c = l.toComponent(1);
-  udVariant v(pProp->getter.get(c.ptr()));
-
-  ((LuaState&)L).push(v);
-  return 1;
-}
-int LuaState::setter(lua_State *L)
-{
-  LuaState &l = (LuaState&)L;
-  const PropertyDesc *pProp = (const PropertyDesc*)l.toUserData(lua_upvalueindex(1));
-
-  ComponentRef c = l.toComponent(1);
-  pProp->setter.set(c.ptr(), l.get(2));
-
-  c->SignalPropertyChanged(pProp);
-  return 0;
-}
 int LuaState::method(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
-  const MethodDesc *pM = (const MethodDesc*)l.toUserData(lua_upvalueindex(1));
+  const Method *pM = (const Method*)l.toUserData(lua_upvalueindex(1));
 
   ComponentRef c = l.toComponent(1);
+
+  // TODO: assert that c is a component!
 
   int numArgs = l.top() - 1;
   udVariant *pArgs = numArgs > 0 ? (udVariant*)alloca(sizeof(udVariant)*numArgs) : nullptr;
@@ -621,7 +555,7 @@ int LuaState::method(lua_State *L)
   for (int i = 0; i < numArgs; ++i)
     new(&pArgs[i]) udVariant(udVariant::luaGet(l, 2 + i));
 
-  udVariant v(pM->method.call(c.ptr(), udSlice<udVariant>(pArgs, numArgs)));
+  udVariant v(pM->call(c.ptr(), udSlice<udVariant>(pArgs, numArgs)));
 
   for (int i = 0; i < numArgs; ++i)
     pArgs[i].~udVariant();
@@ -666,7 +600,7 @@ int LuaState::help(lua_State* L)
       SetConsoleColor(ConsoleColor::Green);
       for (auto &p : pDesc->propertyTree)
       {
-        buf = udFixedString64::format("  %-16s - %s", p->id.toStringz(), p->description.toStringz());
+        buf = udFixedString64::format("  %-16s - %s", p.info.id.toStringz(), p.info.description.toStringz());
         l.print(buf);
       }
     }
@@ -692,7 +626,7 @@ int LuaState::help(lua_State* L)
         else
           func.concat(")");
 */
-        buf = udFixedString64::format("  %-16s - %s", m->id.toStringz(), m->description.toStringz());
+        buf = udFixedString64::format("  %-16s - %s", m.info.id.toStringz(), m.info.description.toStringz());
         l.print(buf);
       }
     }
@@ -705,7 +639,7 @@ int LuaState::help(lua_State* L)
       SetConsoleColor(ConsoleColor::Yellow);
       for (auto &e : pDesc->eventTree)
       {
-        buf = udFixedString64::format("  %-16s - %s", e->id.toStringz(), e->description.toStringz());
+        buf = udFixedString64::format("  %-16s - %s", e.info.id.toStringz(), e.info.description.toStringz());
         l.print(buf);
       }
     }
@@ -892,7 +826,7 @@ public:
 
   void subscribe(const udVariant::Delegate &d)
   {
-    desc.ev.subscribe(c, d);
+    desc.ev->subscribe(c, d);
   }
 
 private:

@@ -12,14 +12,13 @@
 namespace ud
 {
 
-static PropertyDesc props[] =
+static CPropertyDesc props[] =
 {
   {
     {
       "uid", // id
       "UID", // displayName
       "Component UID", // description
-      TypeDesc(PropertyType::String) // type
     },
     &Component::GetUid, // getter
     nullptr, // setter
@@ -29,7 +28,6 @@ static PropertyDesc props[] =
       "type", // id
       "Type", // displayName
       "Component Type", // description
-      TypeDesc(PropertyType::String) // type
     },
     &Component::GetType, // getter
     nullptr, // setter
@@ -39,7 +37,6 @@ static PropertyDesc props[] =
       "displayname", // id
       "Display Name", // displayName
       "Component Display Name", // description
-      TypeDesc(PropertyType::String) // type
     },
     &Component::GetDisplayName, // getter
     nullptr, // setter
@@ -49,7 +46,6 @@ static PropertyDesc props[] =
       "description", // id
       "Description", // displayName
       "Component Description", // description
-      TypeDesc(PropertyType::String) // type
     },
     &Component::GetDescription, // getter
     nullptr, // setter
@@ -66,7 +62,7 @@ ComponentDesc Component::descriptor =
   "Component", // displayName
   "Is a component", // description
 
-  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 
@@ -74,23 +70,24 @@ void Component::Init(udInitParams initParams)
 {
   for (auto &kv : initParams)
   {
-    const PropertyDesc *pDesc = FindPropertyDesc(kv.key.asString());
+    const PropertyDesc *pDesc = GetPropertyDesc(kv.key.asString());
     if (pDesc && pDesc->setter)
-      pDesc->setter.set(this, kv.value);
+      pDesc->setter->set(this, kv.value);
   }
 
+/*
+  // TODO: rethink this whole thing!!
+
   // allocate property change events
-  propertyChange.length = NumProperties();
+  propertyChange.length = pType->propertyTree.Size();
   propertyChange.ptr = udAllocType(udEvent<>, propertyChange.length, udAF_None);
   for (size_t i = 0; i<propertyChange.length; ++i)
     new(&propertyChange.ptr[i]) udEvent<>();
+*/
 }
 
 Component::~Component()
 {
-  for (size_t i = 0; i<propertyChange.length; ++i)
-    propertyChange.ptr[i].~udEvent<>();
-  udFree(propertyChange.ptr);
 }
 
 
@@ -106,65 +103,38 @@ bool Component::IsType(udString type) const
   return false;
 }
 
-const PropertyDesc *Component::FindPropertyDesc(udString name) const
+const PropertyDesc *Component::GetPropertyDesc(udString name) const
 {
-  const ComponentDesc *pDesc = pType;
-  while (pDesc)
-  {
-    for (auto &prop : pDesc->properties)
-    {
-      if (prop.info.id.eqi(name))
-        return &prop;
-    }
-    pDesc = pDesc->pSuperDesc;
-  }
-  return nullptr;
+  return pType->propertyTree.Get(name);
 }
-
-const PropertyInfo *Component::GetPropertyInfo(int index) const
+const MethodDesc *Component::GetMethodDesc(udString name) const
 {
-  // TODO: this is shit, traversing all properties should be constant time
-  const ComponentDesc *pDesc = pType;
-  while (pDesc)
-  {
-    for (auto &prop : pDesc->properties)
-    {
-      if (prop.index == index)
-        return &prop.info;
-    }
-    pDesc = pDesc->pSuperDesc;
-  }
-
-  return nullptr;
+  return pType->methodTree.Get(name);
 }
-
-const PropertyInfo *Component::GetPropertyInfo(udString property) const
+const EventDesc *Component::GetEventDesc(udString name) const
 {
-  const PropertyDesc *pDesc = FindPropertyDesc(property);
-  return pDesc ? &pDesc->info : nullptr;
+  return pType->eventTree.Get(name);
 }
 
 void Component::SetProperty(udString property, const udVariant &value)
 {
-  const PropertyDesc *pDesc = FindPropertyDesc(property);
+  const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
-    return; // TODO: make noise
-  if (!pDesc->setter)
-    return; // TODO: make noise
-  if (pDesc->info.flags & udPF_Immutable)
-    return; // TODO: make noise
-  pDesc->setter.set(this, value);
-  propertyChange[pDesc->index].Signal();
+    return; // TODO: make noise "no property"
+  if (!pDesc->setter || pDesc->info.flags & udPF_Immutable)
+    return; // TODO: make noise "not writable"
+  pDesc->setter->set(this, value);
+//  propertyChange[pDesc->index].Signal();
 }
 
 udVariant Component::GetProperty(udString property) const
 {
-  const PropertyDesc *pDesc = FindPropertyDesc(property);
+  const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
-    return udVariant(); // TODO: make noise
+    return udVariant(); // TODO: make noise "no property"
   if (!pDesc->getter)
-    return udVariant(); // TODO: make noise
-  return pDesc->getter.get(this);
+    return udVariant(); // TODO: make noise "not readable"
+  return pDesc->getter->get(this);
 }
 
 

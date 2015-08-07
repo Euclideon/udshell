@@ -8,20 +8,19 @@
 namespace ud
 {
 
-static PropertyDesc props[] =
+static CPropertyDesc props[] =
 {
   {
     {
       "camera", // id
       "Camera", // displayName
       "Camera for viewport", // description
-      TypeDesc(PropertyType::Component) // type
     },
     nullptr, // getter
     nullptr, // setter
   }
 };
-static EventDesc events[] =
+static CEventDesc events[] =
 {
   {
     {
@@ -43,9 +42,9 @@ ComponentDesc View::descriptor =
   "View",    // displayName
   "Is a view", // description
 
-  udSlice<PropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr,
-  udSlice<EventDesc>(events, UDARRAYSIZE(events)) // events
+  udSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 udResult View::InputEvent(const udInputEvent &ev)
