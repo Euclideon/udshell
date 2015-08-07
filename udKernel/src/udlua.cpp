@@ -657,22 +657,58 @@ int LuaState::help(lua_State* L)
 
     SetConsoleColor();
     l.print(pDesc->description);
-    l.print("\nProperties:\n");
 
-    SetConsoleColor(ConsoleColor::Green);
-    // list properties
+    udFixedString64 buf;
+    if (pDesc->propertyTree.Size() > 0)
+    {
+      l.print("\nProperties:");
 
-    SetConsoleColor();
-    l.print("\nMethods:\n");
+      SetConsoleColor(ConsoleColor::Green);
+      for (auto &p : pDesc->propertyTree)
+      {
+        buf = udFixedString64::format("  %-16s - %s", p->id.toStringz(), p->description.toStringz());
+        l.print(buf);
+      }
+    }
 
-    SetConsoleColor(ConsoleColor::Magenta);
-    // list methods
+    if (pDesc->methodTree.Size() > 0)
+    {
+      SetConsoleColor();
+      l.print("\nMethods:");
 
-    SetConsoleColor();
-    l.print("\nEvents:\n");
+      SetConsoleColor(ConsoleColor::Magenta);
+      for (auto &m : pDesc->methodTree)
+      {
+/*
+        udFixedString64 func = udFixedString64::format("%s(", m->id.toStringz());
+        for (size_t i = 0; i < m->args.length; ++i)
+        {
+          func.concat(m->args[i].name);
+          if (i<m->args.length-1)
+            func.concat(", ");
+        }
+        if (m->result.type != PropertyType::Void)
+          func.concat(") -> ", m->result.name);
+        else
+          func.concat(")");
+*/
+        buf = udFixedString64::format("  %-16s - %s", m->id.toStringz(), m->description.toStringz());
+        l.print(buf);
+      }
+    }
 
-    SetConsoleColor(ConsoleColor::Yellow);
-    // list events
+    if (pDesc->eventTree.Size() > 0)
+    {
+      SetConsoleColor();
+      l.print("\nEvents:");
+
+      SetConsoleColor(ConsoleColor::Yellow);
+      for (auto &e : pDesc->eventTree)
+      {
+        buf = udFixedString64::format("  %-16s - %s", e->id.toStringz(), e->description.toStringz());
+        l.print(buf);
+      }
+    }
 
     SetConsoleColor();
   }
