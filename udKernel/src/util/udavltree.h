@@ -361,35 +361,7 @@ private:
 
     Iterator &operator++()
     {
-      const Node *pNode = GetNode(stack, depth);
-      if (pNode->right)
-      {
-        ++depth;
-        const Node *pLeftMost = pNode->right;
-        while (pLeftMost->left)
-        {
-          stack |= 1LL << depth;
-          ++depth;
-          pLeftMost = pLeftMost->left;
-        }
-        return *this;
-      }
-
-      while (depth)
-      {
-        --depth;
-        stack &= ~(1 << depth);
-
-        const Node *pParentNode = GetNode(stack, depth);
-
-        if (pParentNode->right == pNode)
-          pNode = pParentNode;
-        else
-          return *this;
-      }
-
-      pRoot = 0;
-      data = 0;
+      IterateNext(pRoot, nullptr, 0);
       return *this;
     }
 
@@ -412,6 +384,46 @@ private:
     }
 
   private:
+
+    bool IterateNext(Node *pNode, Node *pParent, uint64_t d)
+    {
+      if (d < depth)
+      {
+        Node *pNext = (stack & (1LL << d)) ? pNode->left : pNode->right;
+        if (!IterateNext(pNext, pNode, d + 1))
+          return false;
+      }
+      else
+      {
+        if (pNode->right) // Left Most
+        {
+          ++depth;
+          const Node *pLeftMost = pNode->right;
+          while (pLeftMost->left)
+          {
+            stack |= 1LL << depth;
+            ++depth;
+            pLeftMost = pLeftMost->left;
+          }
+          return false;
+        }
+      }
+
+      if (depth == 0)
+      {
+        pRoot = 0;
+        data = 0;
+        return false;
+      }
+
+      --depth;
+      stack &= ~(1 << depth);
+      if (pParent->right == pNode)
+        return true;
+
+      return false;
+    }
+
     union
     {
       struct
