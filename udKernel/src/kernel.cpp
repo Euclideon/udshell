@@ -19,6 +19,8 @@
 #include "components/resources/shader.h"
 #include "components/resources/model.h"
 #include "components/resources/udmodel.h"
+#include "components/resources/kvpstore.h"
+#include "components/resources/metadata.h"
 #include "components/datasources/UDDataSource.h"
 #include "udlua.h"
 
@@ -68,6 +70,8 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Shader>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Model>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Text>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<KVPStore>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Metadata>());
 
   // data sources
   UD_ERROR_CHECK(pKernel->RegisterComponent<UDDataSource>());

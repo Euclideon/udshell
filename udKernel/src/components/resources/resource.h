@@ -16,10 +16,12 @@ class Resource : public Component
 public:
   UD_COMPONENT(Resource);
 
-  MetadataRef GetMetadata() const { return metadata; }
+  MetadataRef GetMetadata() const;
 
 protected:
-  Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+    : Component(pType, pKernel, uid, initParams)
+  {}
 
   DataSourceRef source = nullptr;
   MetadataRef metadata = nullptr;

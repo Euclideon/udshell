@@ -2,7 +2,7 @@
 #ifndef _UD_METADATA_H
 #define _UD_METADATA_H
 
-#include "components/resources/resource.h"
+#include "components/resources/kvpstore.h"
 #include "util/udavltree.h"
 
 namespace ud
@@ -10,49 +10,40 @@ namespace ud
 
 SHARED_CLASS(Metadata);
 
-class Metadata : public Resource
+class Metadata : public KVPStore
 {
 public:
   UD_COMPONENT(Metadata);
 
-  size_t NumRecords() const
+  size_t NumRecords() const override
   {
     return metadata.Size();
   }
 
-  void Insert(udVariant &&key, udVariant &&value)           { metadata.Insert(std::move(key), std::move(value)); }
-  void Insert(const udVariant &key, udVariant &&value)      { metadata.Insert(key, std::move(value)); }
-  void Insert(udVariant &&key, const udVariant &value)      { metadata.Insert(std::move(key), value); }
-  void Insert(const udVariant &key, const udVariant &value) { metadata.Insert(key, value); }
+  void Insert(udVariant &&key, udVariant &&value) override           { metadata.Insert(std::move(key), std::move(value)); }
+  void Insert(const udVariant &key, udVariant &&value) override      { metadata.Insert(key, std::move(value)); }
+  void Insert(udVariant &&key, const udVariant &value) override      { metadata.Insert(std::move(key), value); }
+  void Insert(const udVariant &key, const udVariant &value) override { metadata.Insert(key, value); }
 
-  void Remove(const udVariant &key)
+  void Remove(const udVariant &key) override
   {
     metadata.Remove(key);
   }
 
-  bool Exists(const udVariant &key) const
+  bool Exists(const udVariant &key) const override
   {
     return !!metadata.Get(key);
   }
 
-  udVariant Get(const udVariant &key) const
+  udVariant Get(const udVariant &key) const override
   {
     udVariant *v = const_cast<udVariant*>(metadata.Get(key));
     return v ? *v : udVariant();
   }
-
-  udVariant operator[](const udVariant &key) const
-  {
-    udVariant *v = const_cast<udVariant*>(metadata.Get(key));
-    return v ? *v : udVariant();
-  }
-
-  // TODO: THIS IS ONLY HERE BECAUSE DESCRIPTOR CAN'T GET TO PROTECTED
-  void InsertMethod(const udVariant &key, const udVariant &value) { metadata.Insert(key, value); }
 
 protected:
   Metadata(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
-    : Resource(pType, pKernel, uid, initParams) {}
+    : KVPStore(pType, pKernel, uid, initParams) {}
 
   struct VariantCompare {
     UDFORCE_INLINE ptrdiff_t operator()(const udVariant &a, const udVariant &b)

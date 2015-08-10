@@ -31,10 +31,11 @@ ComponentDesc Resource::descriptor =
   udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
 };
 
-Resource::Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
-  : Component(pType, pKernel, uid, initParams)
+MetadataRef Resource::GetMetadata() const
 {
-  metadata = pKernel->CreateComponent<Metadata>();
+  if (!metadata)
+    (MetadataRef&)metadata = pKernel->CreateComponent<Metadata>();
+  return metadata;
 }
 
 } // namespace ud
