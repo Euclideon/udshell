@@ -161,9 +161,10 @@ inline bool udVariant::is(Type type) const
 }
 
 
-// *************************************
-// ** template construction machinery **
-// *************************************
+// ***************************************************
+// ** template construction machinery for udVariant **
+// **         HERE BE RADIOACTIVE DRAGONS!!         **
+// ***************************************************
 
 // horrible hack to facilitate partial specialisations (support all of the types!)
 template<typename T>
@@ -178,20 +179,31 @@ struct udVariant_Construct
     return udVariant(udToVariant(v));
   }
 };
+
+// T& and T&& constructors
+// These pipe through to `struct udVariant_Construct<>` to facilitate a bunch of partial specialisation madness
 template<typename T>
-udVariant::udVariant(T &&rval)
+UDFORCE_INLINE udVariant::udVariant(T &&rval)
   : udVariant(udVariant_Construct<typename std::remove_const<T>::type>::construct(std::move(rval)))
 {}
 template<typename T>
-udVariant::udVariant(const T &v)
-  : udVariant(udVariant_Construct<typename std::remove_const<T>::type>::construct(v))
-{}
-template<typename T>
-udVariant::udVariant(T &v)
-  : udVariant((const T&)v)
+UDFORCE_INLINE udVariant::udVariant(T &v)
+  : udVariant(udVariant_Construct<T>::construct(v))
 {}
 
-// specialisations of udVariant_Construct for all the basic types
+
+// specialisation of non-const udVariant, which annoyingly gets hooked by the T& constructor instead of the copy constructor
+template<> struct udVariant_Construct<udVariant>  { UDFORCE_INLINE static udVariant construct(const udVariant &v) { return udVariant(v); } };
+
+// ** suite of specialisations required to wrangle every conceivable combination of 'const'
+template<typename T>
+struct udVariant_Construct<const T>               { UDFORCE_INLINE static udVariant construct(const T &v) { return udVariant((T&)v); } };
+template<typename T, size_t N>
+struct udVariant_Construct<const T[N]>            { typedef T Arr[N]; UDFORCE_INLINE static udVariant construct(const T v[N]) { return udVariant((Arr&)v); } };
+template<typename T>
+struct udVariant_Construct<const T *>             { UDFORCE_INLINE static udVariant construct(const T *v) { return udVariant((T*)v); } };
+
+// specialisations for all the basic types
 template<> struct udVariant_Construct <nullptr_t> { UDFORCE_INLINE static udVariant construct(nullptr_t)       { return udVariant(); } };
 template<> struct udVariant_Construct <float>     { UDFORCE_INLINE static udVariant construct(float f)         { return udVariant((double)f); } };
 template<> struct udVariant_Construct <int8_t>    { UDFORCE_INLINE static udVariant construct(int8_t i)        { return udVariant((int64_t)i); } };
@@ -205,9 +217,14 @@ template<> struct udVariant_Construct <char*>     { UDFORCE_INLINE static udVari
 template<size_t N>
 struct udVariant_Construct <char[N]>              { UDFORCE_INLINE static udVariant construct(const char s[N]) { return udVariant(udString(s, N-1)); } };
 
+// ******************************************************
+// ** Take a breath; you survived, now back to sanity! **
+// ******************************************************
+
+
 // for arrays
 template<typename T>
-UDFORCE_INLINE udVariant udToVariant(const udSlice<T> arr)
+inline udVariant udToVariant(const udSlice<T> arr)
 {
   udVariant r;
   udVariant *a = r.allocArray(arr.length);
@@ -230,7 +247,7 @@ UDFORCE_INLINE udVariant udToVariant(const ud::ComponentRef &c)
 #include "udMath.h"
 
 template<typename F>
-UDFORCE_INLINE udVariant udToVariant(const udVector2<F> &v)
+inline udVariant udToVariant(const udVector2<F> &v)
 {
   udVariant r;
   udVariant *a = r.allocArray(2);
@@ -239,7 +256,7 @@ UDFORCE_INLINE udVariant udToVariant(const udVector2<F> &v)
   return r;
 }
 template<typename F>
-UDFORCE_INLINE udVariant udToVariant(const udVector3<F> &v)
+inline udVariant udToVariant(const udVector3<F> &v)
 {
   udVariant r;
   udVariant *a = r.allocArray(3);
@@ -249,7 +266,7 @@ UDFORCE_INLINE udVariant udToVariant(const udVector3<F> &v)
   return r;
 }
 template<typename F>
-UDFORCE_INLINE udVariant udToVariant(const udVector4<F> &v)
+inline udVariant udToVariant(const udVector4<F> &v)
 {
   udVariant r;
   udVariant *a = r.allocArray(4);
@@ -260,7 +277,7 @@ UDFORCE_INLINE udVariant udToVariant(const udVector4<F> &v)
   return r;
 }
 template<typename F>
-UDFORCE_INLINE udVariant udToVariant(const udMatrix4x4<F> &m)
+inline udVariant udToVariant(const udMatrix4x4<F> &m)
 {
   udVariant r;
   udVariant *a = r.allocArray(16);

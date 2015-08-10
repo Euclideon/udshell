@@ -36,6 +36,8 @@ udVariant::~udVariant()
         }
         udFree(aa);
         break;
+      default:
+        break;
     }
   }
 }
