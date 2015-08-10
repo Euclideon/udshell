@@ -21,10 +21,8 @@ class UDModel : public Resource
 public:
   UD_COMPONENT(UDModel);
 
-  udResult Load(udString name, bool useStreamer);
-
   udOctree *GetOctreePtr() const { return pOctree; }
-
+  friend class UDDataSource;
 protected:
   UDModel(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
@@ -47,7 +45,7 @@ struct NodeRenderModel : public udRenderModel
     NodeRenderModel *pNodeModel = static_cast<NodeRenderModel*>(pRenderModel);
     udOctree *pOctree = pRenderModel->pOctree;
     uint32_t color = pOctree->pGetNodeColor(pOctree, nodeIndex);
-    // TODO : either wrap this in a critical section  or create Lua states for each thread
+    // TODO : either wrap this in a critical section or create Lua states for each thread
     color = pNodeModel->simpleVoxelDel(color);
     return color;
   }

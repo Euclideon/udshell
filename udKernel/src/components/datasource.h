@@ -37,19 +37,33 @@ public:
   }
   udString GetResourceName(size_t index) const
   {
-    // index map... somehow
+    size_t i = 0;
+    for (auto iter = resources.begin(); iter != resources.end(); ++iter)
+    {
+      if (i == index)
+        return iter.Key();
+      ++i;
+    }
     return nullptr;
   }
   ResourceRef GetResource(size_t index) const
   {
-    // index map... somehow
+    size_t i = 0;
+    for (auto &r: resources)
+    {
+      if (i == index)
+        return r;
+      ++i;
+    }
     return nullptr;
   }
-  ResourceRef GetResource(udString name) const
+
+  template<typename T>
+  udSharedPtr<T> GetResource(udString name) const
   {
     ResourceRef *r = const_cast<ResourceRef*>(resources.Get(name));
     if (r)
-      return *r;
+      return component_cast<T>(*r);
     return nullptr;
   }
 
@@ -74,7 +88,7 @@ public:
   ResourceRef GetResourceByVariant(udVariant index) const
   {
     if (index.is(udVariant::Type::String))
-      return GetResource(index.asString());
+      return GetResource<Resource>(index.asString());
     else
       return GetResource(index.asInt());
   }

@@ -4,6 +4,7 @@
 #include "kernel.h"
 #include "udRender.h"
 #include "util/uddelegate.h"
+#include "components/datasources/uddatasource.h"
 
 namespace ud
 {
@@ -141,19 +142,17 @@ ComponentDesc UDNode::descriptor =
 int UDNode::Load(udString name, bool useStreamer)
 {
   udResult result = udR_Failure_;
-
   if (source.empty())
   {
-    spModel = pKernel->CreateComponent<UDModel>();
-    if (spModel)
+    UDDataSourceRef udSource = pKernel->CreateComponent<UDDataSource>({ { "source", name } });
+    if (udSource)
     {
-      result = spModel->Load(name, useStreamer);
-
-      if (result == udR_Success)
+      spModel = udSource->GetResource<UDModel>(name);
+      if (spModel)
       {
-        result = udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a);
-        if (result == udR_Success)
-          source = name;
+         result = udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a);
+         if (result == udR_Success)
+           source = name;
       }
     }
   }

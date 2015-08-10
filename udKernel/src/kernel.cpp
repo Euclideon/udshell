@@ -19,6 +19,7 @@
 #include "components/resources/shader.h"
 #include "components/resources/model.h"
 #include "components/resources/udmodel.h"
+#include "components/datasources/UDDataSource.h"
 #include "udlua.h"
 
 namespace ud
@@ -69,6 +70,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Text>());
 
   // data sources
+  UD_ERROR_CHECK(pKernel->RegisterComponent<UDDataSource>());
 //  UD_ERROR_CHECK(pKernel->RegisterComponent<TGASource>());
 
   //...

@@ -37,13 +37,13 @@ public:
 
   udVariant Get(const udVariant &key) const
   {
-    const udVariant *v = metadata.Get(key);
+    udVariant *v = const_cast<udVariant*>(metadata.Get(key));
     return v ? *v : udVariant();
   }
 
   udVariant operator[](const udVariant &key) const
   {
-    const udVariant *v = metadata.Get(key);
+    udVariant *v = const_cast<udVariant*>(metadata.Get(key));
     return v ? *v : udVariant();
   }
 

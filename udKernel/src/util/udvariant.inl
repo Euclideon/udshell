@@ -290,7 +290,7 @@ protected:
   template<size_t ...S>
   UDFORCE_INLINE static udVariant callFuncHack(udSlice<udVariant> args, const udDelegate<R(Args...)> &d, Sequence<S...>)
   {
-    return udVariant(d(args[S].as<Args>()...));
+    return udVariant(d(args[S].as<typename std::remove_reference<Args>::type>()...));
   }
 
   udVariant to(udSlice<udVariant> args) const
@@ -343,7 +343,7 @@ protected:
   template<size_t ...S>
   UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, const udDelegate<void(Args...)> &d, Sequence<S...>)
   {
-    d(args[S].as<Args>()...);
+    d(args[S].as<typename std::remove_reference<Args>::type>()...);
   }
 
   udVariant to(udSlice<udVariant> args) const

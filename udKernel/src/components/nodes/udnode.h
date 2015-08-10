@@ -42,7 +42,7 @@ public:
   void SetVoxelShader(udRender_VoxelShaderFunc *pFunc) { simpleVoxelDel = udDelegate<NodeRenderModel::SimpleVoxelDlgt>();  pVoxelShader = pFunc;  }
 
   udDelegate<NodeRenderModel::SimpleVoxelDlgt> GetSimpleVoxelDelegate() const { return simpleVoxelDel; }
-  void SetSimpleVoxelDelegate(udDelegate<NodeRenderModel::SimpleVoxelDlgt> del);// { pVoxelShader = nullptr; simpleVoxelDel = del; }
+  void SetSimpleVoxelDelegate(udDelegate<NodeRenderModel::SimpleVoxelDlgt> del);
 
   udRender_PixelShaderFunc *GetPixelShader() const { return pPixelShader;  }
   void SetPixelShader(udRender_PixelShaderFunc *pFunc)  { pPixelShader = pFunc; }

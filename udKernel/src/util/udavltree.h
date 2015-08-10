@@ -334,7 +334,7 @@ private:
       return root;
 
     // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
-    root->height = max(height(root->left), height(root->right)) + 1;
+    root->height = udMax(height(root->left), height(root->right)) + 1;
 
     // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
     //  this Node became unbalanced)
@@ -367,10 +367,11 @@ private:
     return root;
   }
 
+public:
   class Iterator
   {
   public:
-    Iterator(Node *pRoot) : pRoot(pRoot), depth(0), stack(0)
+    Iterator(Node *pRoot) : depth(0), stack(0), pRoot(pRoot)
     {
       Node *pLeftMost = pRoot;
       while (pLeftMost && pLeftMost->left)
@@ -391,6 +392,8 @@ private:
 
     const V& operator*() const { return GetNode(stack, depth)->v; }
     V& operator*() { return const_cast<Node*>(GetNode(stack, depth))->v; }
+
+    const K &Key() const { return GetNode(stack, depth)->k; }
 
     const Node *GetNode(uint64_t s, uint64_t d) const
     {
@@ -457,7 +460,6 @@ private:
     };
     Node *pRoot;
   };
-
 };
 
 #endif // _UDAVLTREE_H

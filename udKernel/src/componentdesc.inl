@@ -70,7 +70,7 @@ template<typename Ret, typename... Args>
 template<size_t ...S>
 UDFORCE_INLINE udVariant CMethod::Partial<Ret, Args...>::callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>)
 {
-  return udVariant(d(args[S].as<typename std::remove_reference<Args>::type>()...));
+  return udVariant(d(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
 }
 
 template<typename Ret, typename... Args>
@@ -93,7 +93,7 @@ struct CMethod::Partial<void, Args...>
   template<size_t ...S>
   UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, FastDelegate<void(Args...)> d, Sequence<S...>)
   {
-    d(args[S].as<typename std::remove_reference<Args>::type>()...);
+    d(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
   }
 
   inline static udVariant shimFunc(const Method * const _pMethod, Component *pThis, udSlice<udVariant> value)

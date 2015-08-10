@@ -15,11 +15,6 @@ ComponentDesc UDModel::descriptor =
   "UD model resource", // description
 };
 
-udResult UDModel::Load(udString name, bool useStreamer)
-{
-  return udOctree_Create(&pOctree, name.toStringz(), useStreamer, 0);
-}
-
 UDModel::~UDModel()
 {
   if (pOctree)

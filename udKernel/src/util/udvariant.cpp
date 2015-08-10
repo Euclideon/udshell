@@ -8,7 +8,7 @@
 const udVariant udInitParams::varNull;
 
 // destructor
-inline udVariant::~udVariant()
+udVariant::~udVariant()
 {
   if (ownsContent)
   {
