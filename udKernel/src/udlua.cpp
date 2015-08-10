@@ -600,7 +600,7 @@ int LuaState::help(lua_State* L)
       SetConsoleColor(ConsoleColor::Green);
       for (auto &p : pDesc->propertyTree)
       {
-        buf = udFixedString64::format("  %-16s - %s", p.info.id.toStringz(), p.info.description.toStringz());
+        buf = udFixedString64::format("  %-16s - %s", (const char*)p.info.id.toStringz(), (const char*)p.info.description.toStringz());
         l.print(buf);
       }
     }
@@ -626,7 +626,7 @@ int LuaState::help(lua_State* L)
         else
           func.concat(")");
 */
-        buf = udFixedString64::format("  %-16s - %s", m.info.id.toStringz(), m.info.description.toStringz());
+        buf = udFixedString64::format("  %-16s - %s", (const char*)m.info.id.toStringz(), (const char*)m.info.description.toStringz());
         l.print(buf);
       }
     }
@@ -639,7 +639,7 @@ int LuaState::help(lua_State* L)
       SetConsoleColor(ConsoleColor::Yellow);
       for (auto &e : pDesc->eventTree)
       {
-        buf = udFixedString64::format("  %-16s - %s", e.info.id.toStringz(), e.info.description.toStringz());
+        buf = udFixedString64::format("  %-16s - %s", (const char*)e.info.id.toStringz(), (const char*)e.info.description.toStringz());
         l.print(buf);
       }
     }

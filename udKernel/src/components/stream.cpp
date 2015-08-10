@@ -40,7 +40,7 @@ size_t Stream::WriteBuffer(BufferRef spData)
 
 BufferRef Stream::Load()
 {
-  size_t len = Length();
+  int64_t len = Length();
   if (len < 0)
     return nullptr;
 
