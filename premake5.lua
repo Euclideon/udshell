@@ -8,7 +8,11 @@ solution "udShell"
 		configurations { "Release", "Debug", "DebugOpt" }
 	else
 		configurations { "Debug", "DebugOpt", "Release" }
-		platforms { "x64" }
+		platforms { "x64", "Clang" }
+		configuration { "Clang" }
+			toolset "msc-LLVM-vs2013"
+			architecture "x86_64"
+		configuration {}
 	end
 
 	startproject "udShell"
