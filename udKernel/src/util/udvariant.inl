@@ -199,7 +199,7 @@ template<> struct udVariant_Construct<udVariant>  { UDFORCE_INLINE static udVari
 template<typename T>
 struct udVariant_Construct<const T>               { UDFORCE_INLINE static udVariant construct(const T &v) { return udVariant((T&)v); } };
 template<typename T, size_t N>
-struct udVariant_Construct<const T[N]>            { typedef T Arr[N]; UDFORCE_INLINE static udVariant construct(const T v[N]) { return udVariant((Arr&)v); } };
+struct udVariant_Construct<const T[N]>            { UDFORCE_INLINE static udVariant construct(const T v[N]) { return udVariant_Construct<T[N]>::construct(v); } };
 template<typename T>
 struct udVariant_Construct<const T *>             { UDFORCE_INLINE static udVariant construct(const T *v) { return udVariant((T*)v); } };
 
@@ -216,6 +216,8 @@ template<> struct udVariant_Construct <uint64_t>  { UDFORCE_INLINE static udVari
 template<> struct udVariant_Construct <char*>     { UDFORCE_INLINE static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
 template<size_t N>
 struct udVariant_Construct <char[N]>              { UDFORCE_INLINE static udVariant construct(const char s[N]) { return udVariant(udString(s, N-1)); } };
+template<typename T, size_t N>
+struct udVariant_Construct <T[N]>                 { UDFORCE_INLINE static udVariant construct(const T a[N])    { return udVariant(udSlice<T>(a, N)); } };
 
 // ******************************************************
 // ** Take a breath; you survived, now back to sanity! **
