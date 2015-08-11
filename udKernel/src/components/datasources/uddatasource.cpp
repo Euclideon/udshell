@@ -1,5 +1,6 @@
-#include "components/datasources/UDDataSource.h"
-#include "components/resources/udModel.h"
+#include "components/datasources/uddatasource.h"
+#include "components/resources/udmodel.h"
+#include "components/resources/metadata.h"
 #include "udOctree.h"
 
 namespace ud
@@ -33,6 +34,24 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udRCStri
       UDModelRef model = pKernel->CreateComponent<UDModel>();
       model->pOctree = pOctree;
       resources.Insert(source.asString(), model);
+
+      // Populate meta data
+      int32_t count;
+      result =  udOctree_GetMetadataCount(pOctree, &count);
+      if (result == udR_Success)
+      {
+        for (int32_t i = 0; i < count; ++i)
+        {
+          const char *pName;
+          const char *pValue;
+          result = udOctree_GetMetadataByIndex(pOctree, i, &pName, &pValue, nullptr, nullptr);
+          if (result == udR_Success)
+          {
+            MetadataRef meta = model->GetMetadata();
+            meta->Insert(pName, pValue);
+          }
+        }
+      }
     }
   }
 }
