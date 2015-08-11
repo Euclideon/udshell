@@ -52,7 +52,8 @@ solution "udShell"
 			qtsuffix "d"
 
 		configuration { "windows" }
-			links { "ws2_32.lib", "winmm.lib" }
+			links { "ws2_32.lib", "winmm.lib", "assimp.lib" }
+			libdirs { "ud/3rdParty/assimp-3.1.1/lib64" }
 			disablewarnings { "4481", "4127" } -- silence some Qt warnings
 
 		-- include common stuff
