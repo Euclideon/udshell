@@ -11,8 +11,7 @@ namespace ud
 Component *UIComponent::Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
 {
   using namespace qt;
-  //return udNew(QtUIComponent, QtUIComponent::CreateComponentDesc(pType), pKernel, uid, initParams);
-  return udNew(QtUIComponent, pType, pKernel, uid, initParams);
+  return udNew(QtUIComponent, QtUIComponent::CreateComponentDesc(pType), pKernel, uid, initParams);
 }
 
 } // namespace ud

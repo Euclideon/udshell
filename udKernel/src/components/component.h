@@ -69,7 +69,7 @@ protected:
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
   virtual ~Component();
 
-  virtual void Init(udInitParams initParams);
+  void Init(udInitParams initParams);
 
   virtual udResult ReceiveMessage(udString message, udString sender, const udVariant &data);
 
