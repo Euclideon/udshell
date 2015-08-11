@@ -1,6 +1,7 @@
 #include "imagesource.h"
 #include "components/resources/array.h"
 #include "hal/image.h"
+#include "kernel.h"
 
 namespace ud
 {

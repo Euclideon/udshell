@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_UD_UDDataSource_H)
-#define _UD_UDDataSource_H
+#if !defined(_UD_UDSOURCE_H)
+#define _UD_UDSOURCE_H
 
 #include "components/datasource.h"
 
@@ -33,4 +33,4 @@ protected:
 
 }
 
-#endif // _UD_UDDataSource_H
+#endif // _UD_UDSOURCE_H

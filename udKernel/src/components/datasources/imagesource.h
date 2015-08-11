@@ -1,11 +1,10 @@
 #pragma once
-#if !defined(_UD_TGASOURCE_H)
-#define _UD_TGASOURCE_H
+#if !defined(_UD_IMAGESOURCE_H)
+#define _UD_IMAGESOURCE_H
 
 #include "components/datasource.h"
 #include "components/resources/array.h"
 #include "components/stream.h"
-#include "kernel.h"
 
 namespace ud
 {
@@ -32,4 +31,4 @@ protected:
 
 } // namespace ud
 
-#endif // _UD_TGASOURCE_H
+#endif // _UD_IMAGESOURCE_H
