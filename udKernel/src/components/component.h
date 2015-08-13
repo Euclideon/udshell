@@ -31,6 +31,7 @@ public:
   class Kernel* const pKernel;
 
   const udRCString uid;
+  udRCString name;
 
   bool IsType(udString type) const;
   template<typename T>
@@ -60,9 +61,12 @@ public:
 
   // built-in component properties
   udString GetUid() const { return uid; }
+  udString GetName() const { return name; }
   udString GetType() const { return pType->id; }
   udString GetDisplayName() const { return pType->displayName; }
   udString GetDescription() const { return pType->description; }
+
+  void SetName(udString name) { this->name = name; }
 
 protected:
   Component(const ComponentDesc *_pType, Kernel *_pKernel, udRCString _uid, udInitParams initParams)

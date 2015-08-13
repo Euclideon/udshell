@@ -25,6 +25,15 @@ static CPropertyDesc props[] =
   },
   {
     {
+      "name", // id
+      "Name", // displayName
+      "Component Name", // description
+    },
+    &Component::GetName, // getter
+    &Component::SetName, // setter
+  },
+  {
+    {
       "type", // id
       "Type", // displayName
       "Component Type", // description
