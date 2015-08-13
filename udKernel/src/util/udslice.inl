@@ -323,8 +323,13 @@ inline udFixedSlice<T, Count>::udFixedSlice(udFixedSlice<T, Count> &&rval)
   {
     // copy items into the small array buffer
     this->ptr = (T*)buffer;
-    for (size_t i = 0; i < this->length; ++i)
-      new((void*)&this->ptr[i]) T(std::move(rval.ptr[i]));
+    if (std::is_pod<T>::value)
+      memcpy((void*)this->ptr, rval.ptr, sizeof(T)*this->length);
+    else
+    {
+      for (size_t i = 0; i < this->length; ++i)
+        new((void*)&this->ptr[i]) T(std::move(rval.ptr[i]));
+    }
   }
 }
 
@@ -335,8 +340,13 @@ inline udFixedSlice<T, Count>::udFixedSlice(U *ptr, size_t length)
 {
   reserve(length);
   this->length = length;
-  for (size_t i = 0; i < length; ++i)
-    new((void*)&this->ptr[i]) T(ptr[i]);
+//  if (std::is_pod<T>::value) // TODO: this is only valid if T and U are the same!
+//    memcpy((void*)this->ptr, ptr, sizeof(T)*length);
+//  else
+  {
+    for (size_t i = 0; i < length; ++i)
+      new((void*)&this->ptr[i]) T(ptr[i]);
+  }
 }
 
 template <typename T, size_t Count>
@@ -372,8 +382,13 @@ void udFixedSlice<T, Count>::reserve(size_t count)
       Header *pH = (Header*)udAlloc(sizeof(Header) + sizeof(T)*count);
       pH->numAllocated = count;
       T *pNew = (T*)&pH[1];
-      for (size_t i = 0; i < this->length; ++i)
-        new((void*)&(pNew[i])) T(this->ptr[i]);
+      if (std::is_pod<T>::value)
+        memcpy((void*)pNew, this->ptr, sizeof(T)*this->length);
+      else
+      {
+        for (size_t i = 0; i < this->length; ++i)
+          new((void*)&(pNew[i])) T(this->ptr[i]);
+      }
       if (hasAlloc)
       {
         pH = getHeader();
@@ -596,8 +611,13 @@ inline void udRCSlice<T>::init(U *ptr, size_t length)
   // copy the data
   this->ptr = (T*)((char*)this->ptr + sizeof(udRC));
   this->length = length;
-  for(size_t i=0; i<length; ++i)
-    new((void*)&(this->ptr[i])) T(ptr[i]);
+//  if (std::is_pod<T>::value) // TODO: this is only valid if T and U are the same!
+//    memcpy((void*)this->ptr, ptr, sizeof(T)*length);
+//  else
+  {
+    for (size_t i = 0; i<length; ++i)
+      new((void*)&(this->ptr[i])) T(ptr[i]);
+  }
 }
 
 
