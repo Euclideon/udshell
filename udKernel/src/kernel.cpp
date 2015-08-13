@@ -17,6 +17,7 @@
 #include "components/resources/array.h"
 #include "components/resources/text.h"
 #include "components/resources/shader.h"
+#include "components/resources/material.h"
 #include "components/resources/model.h"
 #include "components/resources/udmodel.h"
 #include "components/resources/kvpstore.h"
@@ -70,6 +71,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<ArrayBuffer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UDModel>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Shader>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Material>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Model>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Text>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<KVPStore>());

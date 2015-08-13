@@ -7,6 +7,8 @@
 #include "util/udstring.h"
 #include "util/stringof.h"
 
+#include <type_traits>
+
 namespace ud
 {
 
@@ -57,7 +59,7 @@ public:
 
   // allocate from existing data
   template<typename ElementType>
-  inline void Allocate(udSlice<const ElementType> data)
+  inline void AllocateFromData(udSlice<const ElementType> data)
   {
     Allocate<ElementType>(data.length);
 

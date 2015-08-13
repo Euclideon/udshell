@@ -6,10 +6,17 @@
 #include "components/resources/array.h"
 #include "components/stream.h"
 
+// prototypes to pacify C++
+struct aiScene;
+struct aiNode;
+template<typename T> class aiMatrix4x4t;
+typedef aiMatrix4x4t<float> aiMatrix4x4;
+
 namespace ud
 {
 
 SHARED_CLASS(GeomSource);
+SHARED_CLASS(Node);
 
 class GeomSource : public DataSource
 {
@@ -51,6 +58,8 @@ protected:
   {}
 
   void Create(StreamRef spSource) override;
+
+  NodeRef ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth = 0);
 };
 
 } // namespace ud

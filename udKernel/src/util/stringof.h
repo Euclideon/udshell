@@ -3,6 +3,7 @@
 #define _STRINGOF_H
 
 #include <type_traits>
+#include <tuple>
 
 template<typename T>
 udString udStringify();
@@ -54,7 +55,7 @@ namespace internal {
     static udRCString stringify()
     {
       char buffer[16];
-      sprintf(buffer, "%d", (int)N);
+      udSprintf(buffer, sizeof(buffer), "%d", (int)N);
       return udRCString::concat(Stringify<T>::stringify(), "[", buffer, "]");
     }
   };

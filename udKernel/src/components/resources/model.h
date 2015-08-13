@@ -4,7 +4,7 @@
 
 #include "components/resources/resource.h"
 #include "components/resources/array.h"
-#include "components/resources/shader.h"
+#include "components/resources/material.h"
 #include "util/udsharedptr.h"
 #include "util/udstring.h"
 
@@ -18,16 +18,23 @@ class Model : public Resource
 public:
   UD_COMPONENT(Model);
 
-  ArrayBufferRef GetVertexBuffer() const { return vertices; }
+  ArrayBufferRef GetPositionBuffer() const { return spPositions; }
+
+  void SetMaterial(MaterialRef spMaterial) { this->spMaterial = spMaterial; }
+  void SetPositions(ArrayBufferRef spPositions) { this->spPositions = spPositions; }
+  void SetIndices(ArrayBufferRef spIndices) { this->spIndices = spIndices; }
 
 protected:
   Model(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
-  virtual ~Model() {}
 
-  ArrayBufferRef vertices;
-  ArrayBufferRef indices;
-  ShaderRef shader;
+  ArrayBufferRef spPositions = nullptr;
+  ArrayBufferRef spNormals = nullptr;
+  ArrayBufferRef spBinormalsTangents = nullptr;
+  ArrayBufferRef spUVs[8] = {};
+  ArrayBufferRef spColors[8] = {};
+  ArrayBufferRef spIndices = nullptr;
+  MaterialRef spMaterial = nullptr;
 };
 
 } // namespace ud
