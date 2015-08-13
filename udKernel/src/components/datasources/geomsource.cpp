@@ -202,7 +202,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       resName = udFixedString64::format("normals%d", numMeshes);
       resources.Insert(resName, spNormals);
 
-//      spMesh->SetNormals(spNormals);
+      spMesh->SetNormals(spNormals);
     }
 
     // binormals & tangents
@@ -228,7 +228,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       resName = udFixedString64::format("binormalstangents%d", numMeshes);
       resources.Insert(resName, spBinTan);
 
-//      spMesh->SetBinormalsAndTangents(spBinTan);
+      spMesh->SetBinormalsAndTangents(spBinTan);
     }
 
     // UVs
@@ -243,7 +243,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       resName = udFixedString64::format("uvs%d_%d", numMeshes, t);
       resources.Insert(resName, spUVs);
 
-//      spMesh->SetUVs(t, spUVs);
+      spMesh->SetUVs(t, spUVs);
     }
 
     // Colors
@@ -258,7 +258,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       resName = udFixedString64::format("colors%d_%d", numMeshes, t);
       resources.Insert(resName, spColors);
 
-//      spMesh->SetColors(t, spColors);
+      spMesh->SetColors(t, spColors);
     }
 
     // indices (faces)

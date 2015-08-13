@@ -21,7 +21,13 @@ public:
   ArrayBufferRef GetPositionBuffer() const { return spPositions; }
 
   void SetMaterial(MaterialRef spMaterial) { this->spMaterial = spMaterial; }
+
   void SetPositions(ArrayBufferRef spPositions) { this->spPositions = spPositions; }
+  void SetNormals(ArrayBufferRef spNormals) { this->spNormals = spNormals; }
+  void SetBinormalsAndTangents(ArrayBufferRef spBinormalsAndTangents) { this->spBinormalsTangents = spBinormalsAndTangents; }
+  void SetUVs(size_t uvChannel, ArrayBufferRef spUVs) { this->spUVs[uvChannel] = spUVs; }
+  void SetColors(size_t colorChannel, ArrayBufferRef spColors) { this->spColors[colorChannel] = spColors; }
+
   void SetIndices(ArrayBufferRef spIndices) { this->spIndices = spIndices; }
 
 protected:
@@ -31,8 +37,8 @@ protected:
   ArrayBufferRef spPositions = nullptr;
   ArrayBufferRef spNormals = nullptr;
   ArrayBufferRef spBinormalsTangents = nullptr;
-  ArrayBufferRef spUVs[8] = {};
-  ArrayBufferRef spColors[8] = {};
+  ArrayBufferRef spUVs[8];
+  ArrayBufferRef spColors[8];
   ArrayBufferRef spIndices = nullptr;
   MaterialRef spMaterial = nullptr;
 };
