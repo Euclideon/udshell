@@ -17,6 +17,8 @@ ComponentDesc Buffer::descriptor =
 
 void Buffer::Allocate(size_t size)
 {
+  Free();
+
   buffer.length = size;
   buffer.ptr = (char*)udAlloc(size);
 }
