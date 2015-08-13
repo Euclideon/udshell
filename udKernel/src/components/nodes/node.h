@@ -4,7 +4,7 @@
 
 #include "udMath.h"
 
-#include "components/component.h"
+#include "../resources/resource.h"
 #include "hal/input.h"
 
 namespace ud
@@ -14,7 +14,7 @@ SHARED_CLASS(RenderScene);
 
 PROTOTYPE_COMPONENT(Node);
 
-class Node : public Component
+class Node : public Resource
 {
 public:
   UD_COMPONENT(Node);
@@ -41,7 +41,7 @@ public:
 
 protected:
   Node(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
-    : Component(pType, pKernel, uid, initParams) {}
+    : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Node() {}
 
   Node *pParent = nullptr;
@@ -53,4 +53,5 @@ protected:
 };
 
 } // namespace ud
+
 #endif // UDNODE_H

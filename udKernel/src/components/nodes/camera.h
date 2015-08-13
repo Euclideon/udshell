@@ -7,9 +7,9 @@
 
 namespace ud
 {
+
 PROTOTYPE_COMPONENT(Camera);
 PROTOTYPE_COMPONENT(SimpleCamera);
-
 
 class Camera : public Node
 {
@@ -76,4 +76,5 @@ protected:
 };
 
 } // namespace ud
+
 #endif
