@@ -37,7 +37,7 @@ void ImageSource::Create(StreamRef spSource)
 
     // create image for each image element
     ArrayBufferRef spImage = pKernel->CreateComponent<ArrayBuffer>();
-    spImage->Allocate(4, { s.width, s.height });
+    spImage->Allocate("{u8[4]}", 4, { s.width, s.height });
 
     // write image to to the array buffer
     size_t size;

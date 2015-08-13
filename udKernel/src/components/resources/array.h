@@ -5,6 +5,7 @@
 #include "components/resources/buffer.h"
 #include "util/udsharedptr.h"
 #include "util/udstring.h"
+#include "util/stringof.h"
 
 namespace ud
 {
@@ -16,27 +17,62 @@ class ArrayBuffer : public Buffer
 public:
   UD_COMPONENT(ArrayBuffer);
 
-  void Allocate(size_t elementSize, size_t length)
+  // array allocation
+  inline void Allocate(udRCString elementType, size_t elementSize, size_t length)
   {
-    Buffer::Allocate(elementSize*length);
-    this->elementSize = elementSize;
-    dimensions = 1;
-    shape[0] = length;
+    Allocate(elementType, elementSize, udSlice<size_t>(&length, 1));
   }
-  void Allocate(size_t elementSize, udSlice<const size_t> shape)
+  void Allocate(udRCString elementType, size_t elementSize, udSlice<const size_t> shape)
   {
     UDASSERT(shape.length > 0, "No dimensions given!");
     UDASSERT(shape.length <= 4, "More than 4 dimensional matrices is not supported...");
-    size_t elements = shape[0];
-    for (size_t i = 1; i<shape.length; ++i)
-      elements *= shape[i];
-    Buffer::Allocate(elementSize*elements);
-    this->elementSize = elementSize;
+
     dimensions = shape.length;
+    this->elementType = elementType;
+
+    // record dimensions and count total number of elements
+    size_t elements = 1;
     for (size_t i = 0; i<shape.length; ++i)
-      this->shape[0] = shape[i];
+    {
+      this->shape[i] = shape.ptr[i];
+      elements *= shape.ptr[i];
+    }
+
+    // alloc array
+    this->elementSize = elementSize;
+    Buffer::Allocate(elementSize*elements);
   }
 
+  // strongly typed array allocation
+  template<typename ElementType>
+  inline void Allocate(size_t length)
+  {
+    Allocate<ElementType>(udSlice<size_t>(&length, 1));
+  }
+  template<typename ElementType>
+  inline void Allocate(udSlice<const size_t> shape)
+  {
+    Allocate(stringof<ElementType>(), sizeof(ElementType), shape);
+  }
+
+  // allocate from existing data
+  template<typename ElementType>
+  inline void Allocate(udSlice<const ElementType> data)
+  {
+    Allocate<ElementType>(data.length);
+
+    // initialise buffer
+    if (std::is_pod<ElementType>::value)
+      memcpy(buffer.ptr, data.ptr, sizeof(ElementType)*data.length);
+    else
+    {
+      ElementType *pBuffer = (ElementType*)buffer.ptr;
+      for (size_t i = 0; i < data.length; ++i)
+        new(pBuffer + i) ElementType(data.ptr[i]);
+    }
+  }
+
+  udRCString GetElementType() const { return elementType; }
   size_t GetElementSize() const { return elementSize; }
   size_t GetNumDimensions() const { return dimensions; }
 
@@ -52,18 +88,62 @@ public:
     return udSlice<const size_t>(shape, dimensions);
   }
 
+  // ArrayBuffer overrides the map functions
+  template<typename T = void>
+  T* Map(size_t *pNumElements = nullptr)
+  {
+    UDASSERT(stringof<T>().eq(elementType), "Incompatible type!");
+    size_t size;
+    void *pBuffer = Buffer::Map(&size);
+    if (pNumElements)
+      *pNumElements = size/sizeof(T);
+    return (T*)pBuffer;
+  }
+  template<>
+  void* Map<void>(size_t *pSize) { return Buffer::Map(pSize); }
+
+  template<typename T = void>
+  const T* MapForRead(size_t *pNumElements = nullptr)
+  {
+    UDASSERT(stringof<T>().eq(elementType), "Incompatible type!");
+    size_t size;
+    void *pBuffer = Buffer::MapForRead(&size);
+    if (pNumElements)
+      *pNumElements = size/sizeof(T);
+    return (T*)pBuffer;
+  }
+  template<>
+  const void* MapForRead<void>(size_t *pSize) { return Buffer::MapForRead(pSize); }
+
+  template<typename T>
+  void SetData(udSlice<const T> data)
+  {
+    UDASSERT(stringof<T>().eq(elementType), "Incompatible type!");
+
+    size_t numElements = GetLength();
+    UDASSERT(buffer.length == sizeof(T)*numElements, "Incorrect number of elements!");
+
+    // initialise buffer
+    if (std::is_pod<T>::value)
+      memcpy(buffer.ptr, data.ptr, sizeof(T)*data.length);
+    else
+    {
+      T *pBuffer = (T*)buffer.ptr;
+      for (size_t i = 0; i < numElements; ++i)
+        new(pBuffer + i) T(data[i]);
+    }
+  }
+
 protected:
   ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Buffer(pType, pKernel, uid, initParams) {}
-  virtual ~ArrayBuffer() {}
 
   void Allocate(size_t size) = delete;
 
+  udRCString elementType;
   size_t elementSize;
   size_t dimensions;
   size_t shape[4];
-
-  // element type description...
 };
 
 } // namespace ud
