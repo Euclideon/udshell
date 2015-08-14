@@ -16,6 +16,7 @@ struct udEnumDesc
 {
   udString name;
   udSlice<const udString> keys;
+  void (*stringify)(size_t val, udFixedString64 &s);
 };
 
 #define UD_ENUM(NAME, ...)                                                        \
@@ -65,7 +66,8 @@ struct udEnumDesc
     }                                                                             \
     static const udEnumDesc* Desc()                                               \
     {                                                                             \
-      static const udEnumDesc desc = { Name(), Keys() };                          \
+      static const udEnumDesc desc = { Name(), Keys(),                            \
+        [](size_t v, udFixedString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
   };
@@ -131,7 +133,8 @@ struct udEnumDesc
     }                                                                             \
     static const udEnumDesc* Desc()                                               \
     {                                                                             \
-      static const udEnumDesc desc = { Name(), Keys() };                          \
+      static const udEnumDesc desc = { Name(), Keys(),                            \
+        [](size_t v, udFixedString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
   };

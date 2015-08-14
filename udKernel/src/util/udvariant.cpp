@@ -323,6 +323,16 @@ void udVariant::luaPush(ud::LuaState &l) const
     case Type::Float:
       l.pushFloat(f);
       break;
+    case Type::Enum:
+    case Type::Bitfield:
+    {
+      size_t val;
+      const udEnumDesc *pDesc = asEnum(&val);
+      udFixedString64 s;
+      pDesc->stringify(val, s);
+      l.pushString(s);
+      break;
+    }
     case Type::Component:
       l.pushComponent(ud::ComponentRef(c));
       break;
