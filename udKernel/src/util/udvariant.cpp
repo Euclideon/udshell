@@ -146,6 +146,15 @@ double udVariant::asFloat() const
     return 0.0;
   }
 }
+const udEnumDesc* udVariant::asEnum(size_t *pVal) const
+{
+  if ((Type)t == Type::Enum || (Type)t == Type::Bitfield)
+  {
+    *pVal = (ptrdiff_t)(length << 5) >> 5;
+    return (const udEnumDesc*)p;
+  }
+  return nullptr;
+}
 ud::ComponentRef udVariant::asComponent() const
 {
   switch ((Type)t)

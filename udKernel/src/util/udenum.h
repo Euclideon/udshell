@@ -12,18 +12,25 @@
 struct udEnum {};
 struct udBitfield {};
 
+struct udEnumDesc
+{
+  udString name;
+  udSlice<const udString> keys;
+};
+
 #define UD_ENUM(NAME, ...)                                                        \
   struct NAME : public udEnum                                                     \
   {                                                                               \
     enum EnumKeys                                                                 \
     {                                                                             \
+      Invalid = -1,                                                               \
       __VA_ARGS__                                                                 \
     };                                                                            \
     typedef std::underlying_type<EnumKeys>::type Type;                            \
                                                                                   \
     Type v;                                                                       \
                                                                                   \
-    NAME() {}                                                                     \
+    NAME() : v(Invalid) {}                                                        \
     NAME(const NAME &e) : v(e.v) {}                                               \
     NAME(Type v) : v(v) {}                                                        \
     NAME(udString s)                                                              \
@@ -43,7 +50,7 @@ struct udBitfield {};
                                                                                   \
     udString StringOf() const                                                     \
     {                                                                             \
-      return Keys()[v];                                                           \
+      return v == -1 ? "Invalid" : Keys()[v];                                     \
     }                                                                             \
                                                                                   \
     static udString Name()                                                        \
@@ -55,6 +62,11 @@ struct udBitfield {};
     {                                                                             \
       static udSlice<const udString> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
+    }                                                                             \
+    static const udEnumDesc* Desc()                                               \
+    {                                                                             \
+      static const udEnumDesc desc = { Name(), Keys() };                          \
+      return &desc;                                                               \
     }                                                                             \
   };
 
@@ -69,7 +81,7 @@ struct udBitfield {};
                                                                                   \
     Type v;                                                                       \
                                                                                   \
-    NAME() {}                                                                     \
+    NAME() : v(0) {}                                                              \
     NAME(const NAME &e) : v(e.v) {}                                               \
     NAME(Type v) : v(v) {}                                                        \
     NAME(udString s)                                                              \
@@ -116,6 +128,11 @@ struct udBitfield {};
     {                                                                             \
       static udSlice<const udString> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
+    }                                                                             \
+    static const udEnumDesc* Desc()                                               \
+    {                                                                             \
+      static const udEnumDesc desc = { Name(), Keys() };                          \
+      return &desc;                                                               \
     }                                                                             \
   };
 

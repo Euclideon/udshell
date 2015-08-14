@@ -76,6 +76,12 @@ inline udVariant::udVariant(double f)
   , length(0)
   , f(f)
 {}
+inline udVariant::udVariant(size_t val, const udEnumDesc *pDesc, bool isBitfield)
+  : t(isBitfield ? (size_t)Type::Bitfield : (size_t)Type::Enum)
+  , ownsContent(0)
+  , length(val)
+  , p((void*)pDesc)
+{}
 inline udVariant::udVariant(ud::ComponentRef &&spC)
   : t((size_t)Type::Component)
   , ownsContent(1)
@@ -223,6 +229,16 @@ struct udVariant_Construct <T[N]>                 { UDFORCE_INLINE static udVari
 // ** Take a breath; you survived, now back to sanity! **
 // ******************************************************
 
+// enums & bitfields
+template<typename T,
+  typename std::enable_if<
+    std::is_base_of<udEnum, T>::value ||
+    std::is_base_of<udBitfield, T>::value
+  >::type* = nullptr>
+inline udVariant udToVariant(T e)
+{
+  return udVariant(e.v, e.Desc(), std::is_base_of<udBitfield, T>::value);
+}
 
 // for arrays
 template<typename T>
@@ -457,6 +473,31 @@ template<> struct udVariant_Cast < uint64_t > { inline static uint64_t as(const 
 template<> struct udVariant_Cast < udString > { inline static udString as(const udVariant &v) { return v.asString(); } };
 
 template<> struct udVariant_Cast < udVariant > { inline static udVariant as(const udVariant &v) { return v; } };
+
+// enums & bitfields
+template<typename T,
+  typename std::enable_if<
+    std::is_base_of<udEnum, T>::value ||
+    std::is_base_of<udBitfield, T>::value
+  >::type* = nullptr>
+inline void udFromVariant(const udVariant &v, T *pE)
+{
+  if (v.is(std::is_base_of<udBitfield, T>::value ? udVariant::Type::Bitfield : udVariant::Type::Enum))
+  {
+    size_t val;
+    const udEnumDesc *pDesc = v.asEnum(&val);
+    if (!pDesc->name.eq(T::Name()))
+    {
+      // TODO: complain about invalid enum type?! error or something?
+      return;
+    }
+    *pE = T((T::Type)val);
+  }
+  else if (v.is(udVariant::Type::Int))
+    *pE = T(T::Type(v.asInt()));
+  else if (v.is(udVariant::Type::String))
+    *pE = T(v.asString());
+}
 
 // udMath types
 template<typename U>

@@ -3,6 +3,7 @@
 #define UDVARIANT_H
 
 #include "util/udstring.h"
+#include "util/udenum.h"
 #include "util/uddelegate.h"
 
 namespace ud
@@ -25,6 +26,8 @@ public:
     Bool,
     Int,
     Float,
+    Enum,
+    Bitfield,
     Component,
     Delegate,
     String,
@@ -39,6 +42,7 @@ public:
   udVariant(bool);
   udVariant(int64_t);
   udVariant(double);
+  udVariant(size_t val, const udEnumDesc *pDesc, bool isBitfield);
   udVariant(ud::ComponentRef &&spC);
   udVariant(const ud::ComponentRef &spC);
   udVariant(Delegate &&d);
@@ -70,6 +74,7 @@ public:
   bool asBool() const;
   int64_t asInt() const;
   double asFloat() const;
+  const udEnumDesc* asEnum(size_t *pVal) const;
   ud::ComponentRef asComponent() const;
   Delegate asDelegate() const;
   udString asString() const;
@@ -92,7 +97,7 @@ public:
 private:
   size_t t : 4;
   size_t ownsContent : 1;
-  size_t length : (sizeof(size_t)*8)-5;
+  size_t length : (sizeof(size_t)*8)-5; // NOTE: if you change this, update the shift's in asEnum()!!!
   union
   {
     bool b;
