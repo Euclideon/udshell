@@ -41,7 +41,7 @@ public:
   virtual udVariant GetProperty(udString property) const;
 
   udResult SendMessage(udString target, udString message, const udVariant &data);
-  udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { return SendMessage(pComponent->uid, message, data); }
+  udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { udFixedString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp , message, data); }
 
   const PropertyInfo *GetPropertyInfo(udString name) const
   {

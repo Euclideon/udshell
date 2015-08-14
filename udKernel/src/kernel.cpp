@@ -25,6 +25,7 @@
 #include "components/datasources/ImageSource.h"
 #include "components/datasources/GeomSource.h"
 #include "components/datasources/UDDataSource.h"
+#include "components/timer.h"
 #include "udlua.h"
 
 namespace ud
@@ -58,6 +59,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<DataSource>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Stream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<File>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
 
   // nodes
   UD_ERROR_CHECK(pKernel->RegisterComponent<Node>());
