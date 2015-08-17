@@ -1,7 +1,7 @@
 #include "hal/driver.h"
-#include "hal/haltimer.h"
 
-#if UDINPUT_DRIVER == UDDRIVER_WIN32
+#if UDWINDOW_DRIVER == UDDRIVER_WIN32
+#include "hal/haltimer.h"
 
 struct HalTimerWin32 : public HalTimer
 {
@@ -57,4 +57,4 @@ void HalTimer_Destroy(HalTimer **ppTimer)
   }
 }
 
-#endif // UDINPUT_DRIVER == UDDRIVER_WIN32
+#endif // UDWINDOW_DRIVER == UDDRIVER_WIN32

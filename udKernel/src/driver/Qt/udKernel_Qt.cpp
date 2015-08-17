@@ -279,8 +279,6 @@ udResult Kernel::Terminate()
 // ---------------------------------------------------------------------------------------
 void Kernel::DispatchToMainThread(MainThreadCallback callback)
 {
-  udDebugPrintf("Kernel::DispatchToMainThread()\n");
-
   qt::QtKernel *pKernel = static_cast<qt::QtKernel*>(this);
 
   // if we're on the main thread just execute the callback now

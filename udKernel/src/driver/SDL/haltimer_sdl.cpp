@@ -1,8 +1,8 @@
 #include "hal/driver.h"
+
+#if UDWINDOW_DRIVER == UDDRIVER_SDL
 #include "hal/haltimer.h"
 #include "SDL2/SDL_timer.h"
-
-#if UDINPUT_DRIVER == UDDRIVER_SDL
 
 struct HalTimerSDL : public HalTimer
 {
@@ -57,4 +57,4 @@ void HalTimer_Destroy(HalTimer **ppTimer)
   }
 }
 
-#endif // UDINPUT_DRIVER == UDDRIVER_SDL
+#endif // UDWINDOW_DRIVER == UDDRIVER_SDL

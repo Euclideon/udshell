@@ -5,7 +5,6 @@
 #include "component.h"
 #include "components/stream.h"
 #include "resources/resource.h"
-#include "SDL2/SDL_timer.h"
 #include "hal/haltimer.h"
 
 namespace ud
@@ -37,6 +36,7 @@ public:
 
 private:
   Timer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  virtual ~Timer();
 
   static void TimerCallback(HalTimer *pTimer, void *pParam);
   void SetTimer(uint32_t duration, TimerType tt);

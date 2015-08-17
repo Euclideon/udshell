@@ -117,6 +117,11 @@ Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInit
 }
 
 
+Timer::~Timer()
+{
+  HalTimer_Destroy(&pTimer);
+}
+
 void Timer::SetTimer(uint32_t d, TimerType tt)
 {
   HalTimer_Destroy(&pTimer);
