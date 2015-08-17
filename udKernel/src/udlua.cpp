@@ -476,8 +476,7 @@ int LuaState::componentIndex(lua_State* L)
   const EventDesc *pEv = spC->GetEventDesc(field);
   if (pEv)
   {
-    // TODO: push event object...
-    lua_pushlightuserdata(L, (void*)pEv->ev);
+    l.pushEvent(spC, *pEv);
     return 1;
   }
 
@@ -820,7 +819,7 @@ void LuaState::pushEventMembers()
 class LuaEvent
 {
 public:
-  LuaEvent(const ComponentRef &c, EventDesc &desc)
+  LuaEvent(const ComponentRef &c, const EventDesc &desc)
     : c(c), desc(desc)
   {}
 
@@ -831,12 +830,12 @@ public:
 
 private:
   ComponentRef c;
-  EventDesc &desc;
+  const EventDesc &desc;
 
   LuaEvent& operator=(const LuaEvent &) = delete;
 };
 
-void LuaState::pushEvent(const ComponentRef &c, EventDesc &desc)
+void LuaState::pushEvent(const ComponentRef &c, const EventDesc &desc)
 {
   new(lua_newuserdata(L, sizeof(LuaEvent))) LuaEvent(c, desc);
   pushEventMetatable();

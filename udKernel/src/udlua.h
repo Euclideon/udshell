@@ -139,7 +139,7 @@ private:
 
   void pushEventMetatable();
   void pushEventMembers();
-  void pushEvent(const ComponentRef &c, EventDesc &desc);
+  void pushEvent(const ComponentRef &c, const EventDesc &desc);
   static int eventCleaner(lua_State* L);
   static int subscribe(lua_State* L);
 };
