@@ -34,7 +34,11 @@ public:
   udResult SetRenderModels(struct udRenderModel models[], size_t numModels);
   const udRenderModel* GetRenderModels(size_t *pNumModels) const { if (pNumModels) { *pNumModels = numRenderModels; } return renderModels; }
 
-  void ForceDirty() { bDirty = true; }
+  void ForceDirty()
+  {
+    bDirty = true;
+    Dirty.Signal();
+  }
 
 protected:
   double timeStep = 0.0;

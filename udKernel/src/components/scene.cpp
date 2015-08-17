@@ -19,6 +19,16 @@ static CPropertyDesc props[] =
     nullptr  // setter
   }
 };
+static CMethodDesc methods[] =
+{
+  {
+    {
+      "forcedirty", // id
+      "Force a dirty signal", // description
+    },
+    &Scene::ForceDirty, // method
+  }
+};
 static CEventDesc events[] =
 {
   {
@@ -42,7 +52,7 @@ ComponentDesc Scene::descriptor =
   "Is a scene", // description
 
   udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  nullptr,
+  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // propeties
   udSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
