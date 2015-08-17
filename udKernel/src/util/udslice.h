@@ -108,6 +108,8 @@ struct udFixedSlice : public udSlice<T>
 
   // constructors
   udFixedSlice<T, Count>();
+  udFixedSlice<T, Count>(nullptr_t);
+  udFixedSlice<T, Count>(std::initializer_list<T> list);
   udFixedSlice<T, Count>(const udFixedSlice<T, Count> &val);
   udFixedSlice<T, Count>(udFixedSlice<T, Count> &&rval);
   template <typename U> udFixedSlice<T, Count>(U *ptr, size_t length);
@@ -163,14 +165,19 @@ struct udRCSlice : public udSlice<T>
 
   // constructors
   udRCSlice<T>();
+  udRCSlice<T>(nullptr_t);
+  udRCSlice<T>(std::initializer_list<T> list);
   udRCSlice<T>(udRCSlice<T> &&rval);
   udRCSlice<T>(const udRCSlice<T> &rcslice);
   template <typename U> udRCSlice<T>(U *ptr, size_t length);
   template <typename U> udRCSlice<T>(udSlice<U> slice);
   ~udRCSlice<T>();
 
+  size_t refcount() const { return rc ? rc->refCount : 0; }
+
   // static constructors (make proper constructors?)
   template<typename... Things> static udRCSlice<T> concat(const Things&... things);
+  static udRCSlice<T> alloc(size_t elements);
 
   // assignment
   udRCSlice<T>& operator =(const udRCSlice<T> &rh);

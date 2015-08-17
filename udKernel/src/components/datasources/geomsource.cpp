@@ -223,7 +223,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
         std::get<1>(pBT[j])[1] = mesh.mTangents[j].y;
         std::get<1>(pBT[j])[2] = mesh.mTangents[j].z;
       }
-      spBinTan->UnMap();
+      spBinTan->Unmap();
 
       resName = udFixedString64::format("binormalstangents%d", numMeshes);
       resources.Insert(resName, spBinTan);
@@ -274,7 +274,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       *pIndices++ = f.mIndices[1];
       *pIndices++ = f.mIndices[2];
     }
-    spIndices->UnMap();
+    spIndices->Unmap();
 
     resName = udFixedString64::format("indices%d", numMeshes);
     resources.Insert(resName, spIndices);

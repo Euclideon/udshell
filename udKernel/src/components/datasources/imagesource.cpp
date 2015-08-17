@@ -44,7 +44,7 @@ void ImageSource::Create(StreamRef spSource)
     void *pMem = spImage->Map(&size);
     UDASSERT(size == s.width*s.height*4, "Wrong size?!");
     memcpy(pMem, s.pImage, s.width*s.height*4);
-    spImage->UnMap();
+    spImage->Unmap();
 
     // add resource
     udFixedString64 buffer = udFixedString64::format("image%d", i);

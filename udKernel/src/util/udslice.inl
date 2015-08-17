@@ -304,6 +304,15 @@ inline udFixedSlice<T, Count>::udFixedSlice()
 {}
 
 template <typename T, size_t Count>
+inline udFixedSlice<T, Count>::udFixedSlice(nullptr_t)
+{}
+
+template <typename T, size_t Count>
+inline udFixedSlice<T, Count>::udFixedSlice(std::initializer_list<T> list)
+  : udFixedSlice(list.begin(), list.size())
+{}
+
+template <typename T, size_t Count>
 inline udFixedSlice<T, Count>::udFixedSlice(const udFixedSlice<T, Count> &val)
   : udFixedSlice(val.ptr, val.length)
 {}
@@ -489,6 +498,22 @@ inline udRCSlice<T>::udRCSlice()
   : rc(nullptr)
 {}
 
+template<typename T>
+inline udRCSlice<T>::udRCSlice(nullptr_t)
+  : rc(nullptr)
+{}
+
+template<typename T>
+inline udRCSlice<T>::udRCSlice(std::initializer_list<T> list)
+  : udSlice<T>(alloc(list.begin(), list.size()))
+  , rc(nullptr)
+{
+  init(list.begin(), list.size());
+
+  // TODO: we don't need to copy static contents into an allocated buffer!
+  //       we might want to support RC slices to static data, where the RC is ignored
+}
+
 template <typename T>
 inline udRCSlice<T>::udRCSlice(udRCSlice<T> &&rval)
   : udSlice<T>(rval)
@@ -561,6 +586,12 @@ inline udRCSlice<T>& udRCSlice<T>::operator =(udSlice<U> rh)
 {
   *this = udRCSlice(rh);
   return *this;
+}
+
+template <typename T>
+udRCSlice<T> udRCSlice<T>::alloc(size_t elements)
+{
+  return udRCSlice<T>(udAllocType(T, elements, udAF_None), elements);
 }
 
 template <typename T>

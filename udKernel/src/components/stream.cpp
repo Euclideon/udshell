@@ -23,7 +23,7 @@ BufferRef Stream::ReadBuffer(size_t bytes)
 
   void *pBuffer = spBuffer->Map();
   size_t read = Read(pBuffer, bytes);
-  spBuffer->UnMap();
+  spBuffer->Unmap();
 
   UDASSERT(read == bytes, "TODO: handle the case where we read less bytes than we expect!");
 
@@ -34,7 +34,7 @@ size_t Stream::WriteBuffer(BufferRef spData)
   size_t bytes;
   const void *pBuffer = spData->MapForRead(&bytes);
   bytes = Write(pBuffer, bytes);
-  spData->UnMap();
+  spData->Unmap();
   return bytes;
 }
 
@@ -50,7 +50,7 @@ BufferRef Stream::Load()
   void *pBuffer = spBuffer->Map();
   Seek(SeekOrigin::Begin, 0);
   Read(pBuffer, len);
-  spBuffer->UnMap();
+  spBuffer->Unmap();
 
   return spBuffer;
 }
@@ -65,7 +65,7 @@ void Stream::Save(BufferRef spBuffer)
   Seek(SeekOrigin::Begin, 0);
   Write(pBuffer, len);
 
-  spBuffer->UnMap();
+  spBuffer->Unmap();
 }
 
 } // namespace ud

@@ -16,16 +16,25 @@ class Buffer : public Resource
 public:
   UD_COMPONENT(Buffer);
 
-  void Allocate(size_t size);
+  UD_ENUM(AllocMode,
+            LockExisting,
+            CopyOnWrite,
+            DiscardOnWrite
+          );
+
+  void Allocate(size_t size, AllocMode mode = AllocMode::LockExisting);
   void Free();
 
   size_t GetBufferSize() const;
 
   void* Map(size_t *pSize = nullptr);
   const void* MapForRead(size_t *pSize = nullptr);
-  void UnMap();
+  void Unmap();
 
-  void SetBuffer(const void *pBuffer, size_t size);
+  void CopyBuffer(BufferRef buffer);
+  void CopyBuffer(const void *pBuffer, size_t size);
+
+  udRCSlice<char> GetRawBuffer() { return buffer; }
 
   udEvent<> changed;
 
@@ -34,7 +43,11 @@ protected:
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Buffer() { Free(); }
 
-  udSlice<char> buffer = nullptr;
+  AllocMode lockMode = AllocMode::LockExisting;
+  size_t bufferLength = 0;
+
+  udRCSlice<char> buffer = nullptr;
+
   int mapDepth = 0;
   bool readMap;
 };

@@ -21,8 +21,8 @@ enum class MaterialProperties
   SpecularColor,
   __MaxVectorProp,
 
-  __Max = __MaxVectorProp,
-  __NumVectorProps = __MaxVectorProp - __VectorProps
+  Max = __MaxVectorProp,
+  NumVectorProps = __MaxVectorProp - __VectorProps
 };
 
 
@@ -41,7 +41,7 @@ protected:
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Material() {}
 
-  udFloat4 vecProps[MaterialProperties::__NumVectorProps];
+  udFloat4 vecProps[MaterialProperties::NumVectorProps];
 };
 
 } // namespace ud
