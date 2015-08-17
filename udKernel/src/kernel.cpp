@@ -97,6 +97,9 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
 
   pKernel->pLua = udNew(LuaState, pKernel);
 
+  pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
+  pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
+
 epilogue:
   if (result != udR_Success)
   {
@@ -116,6 +119,9 @@ udResult Kernel::Destroy()
   // TODO: this crashes - fix!
   //udDelete(pLua);
 
+  // TODO: Destroy the streamer timer
+  // pKernel->spStreamerTimer;
+
   messageHandlers.Deinit();
   componentRegistry.Deinit();
   instanceRegistry.Deinit();
@@ -131,6 +137,12 @@ udResult Kernel::Destroy()
 
 epilogue:
   return result;
+}
+
+void Kernel::StreamerUpdate()
+{
+  udStreamerStatus streamerStatus = { 0 };
+  udOctree_Update(&streamerStatus);
 }
 
 udResult Kernel::SendMessage(udString target, udString sender, udString message, const udVariant &data)

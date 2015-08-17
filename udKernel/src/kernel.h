@@ -5,6 +5,7 @@
 #include "components/component.h"
 #include "components/view.h"
 #include "components/uicomponent.h"
+#include "components/timer.h"
 #include "helpers.h"
 
 #include "3rdparty/FastDelegate.h"
@@ -98,6 +99,7 @@ protected:
   udRenderEngine *pRenderEngine = nullptr;
 
   ViewRef spFocusView = nullptr;
+  TimerRef spStreamerTimer = nullptr;
 
   static Kernel *CreateInstanceInternal(udInitParams commandLine);
   udResult InitInstanceInternal();
@@ -111,6 +113,7 @@ protected:
   udResult ReceiveMessage(udString sender, udString message, const udVariant &data);
 
   int SendMessage(LuaState L);
+  void StreamerUpdate();
 
   template<typename CT>
   static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
