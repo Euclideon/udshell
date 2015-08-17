@@ -1,5 +1,6 @@
 #pragma once
-#if !defined(_LUA_H)
+#if !defined(_UDLUA_H)
+#define _UDLUA_H
 
 #include "components/component.h"
 
@@ -197,5 +198,5 @@ public:
 
 #include "udlua.inl"
 
-#endif
+#endif // _UDLUA_H
 

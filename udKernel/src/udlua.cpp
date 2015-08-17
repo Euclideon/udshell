@@ -192,7 +192,7 @@ LuaState::~LuaState()
 
 int LuaState::udLuaPanic(lua_State *L)
 {
-  // TODO: Lua is panic!!
+  UDASSERT(false, "TODO: implement panic handler... throw exception?");
   return 0;
 }
 

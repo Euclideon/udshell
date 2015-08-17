@@ -4,10 +4,12 @@
 #include "udBlockStreamer.h"
 
 #include "hal/hal.h"
-#include "components/scene.h"
-#include "components/view.h"
 #include "components/stream.h"
 #include "components/file.h"
+#include "components/lua.h"
+#include "components/timer.h"
+#include "components/scene.h"
+#include "components/view.h"
 #include "components/datasource.h"
 #include "components/nodes/node.h"
 #include "components/nodes/camera.h"
@@ -25,7 +27,6 @@
 #include "components/datasources/ImageSource.h"
 #include "components/datasources/GeomSource.h"
 #include "components/datasources/UDDataSource.h"
-#include "components/timer.h"
 #include "udlua.h"
 
 namespace ud
@@ -53,13 +54,14 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
 
   // register all the builtin component types
   UD_ERROR_CHECK(pKernel->RegisterComponent<Component>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<View>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Scene>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<DataSource>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Stream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<File>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<View>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Scene>());
 
   // nodes
   UD_ERROR_CHECK(pKernel->RegisterComponent<Node>());
@@ -95,7 +97,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   // init the components
   UD_ERROR_CHECK(pKernel->InitComponents());
 
-  pKernel->pLua = udNew(LuaState, pKernel);
+  pKernel->spLua = pKernel->CreateComponent<Lua>();
 
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
@@ -262,7 +264,8 @@ udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, Compo
 
     instanceRegistry.Add(spComponent->uid.hash(), spComponent);
 
-    pLua->setComponent(spComponent, udString(spComponent->uid));
+    if (spLua)
+      spLua->SetGlobal(spComponent, udString(spComponent->uid));
 
     // TODO: inform partner kernels that I created a component
     //...
@@ -282,7 +285,7 @@ udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, Compo
 
 udResult Kernel::DestroyComponent(ComponentRef *pInstance)
 {
-  pLua->setNil(udString((*pInstance)->uid));
+  spLua->SetGlobal(nullptr, udString((*pInstance)->uid));
 
   // TODO: remove from component registry
   //instanceRegistry.Destroy((*pInstance)->uid.toStringz());
@@ -340,8 +343,25 @@ udResult Kernel::DeinitRender()
 
 void Kernel::Exec(udString code)
 {
-  pLua->exec(code);
+  spLua->Execute(code);
 }
 
 } // namespace ud
+
+
+// synchronised pointer destroy function (it's here because there's no udsharedptr.cpp file)
+template<class T>
+void udSynchronisedPtr<T>::destroy()
+{
+  struct S
+  {
+    void Destroy(ud::Kernel *pKernel)
+    {
+      ((udSharedPtr<T>&)this)->release();
+    }
+  };
+
+  pKernel->DispatchToMainThread(MakeDelegate((S*)this, &S::Destroy));
+  pInstance = nullptr;
+}
 

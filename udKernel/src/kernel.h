@@ -3,6 +3,7 @@
 #define UDKERNEL_H
 
 #include "components/component.h"
+#include "components/lua.h"
 #include "components/view.h"
 #include "components/uicomponent.h"
 #include "components/timer.h"
@@ -38,7 +39,7 @@ public:
   void RegisterMessageHandler(udRCString name, udMessageHandler messageHandler);
 
   // synchronisation
-  typedef FastDelegate1<Kernel*, void> MainThreadCallback;
+  typedef FastDelegate<void(Kernel*)> MainThreadCallback;
   void DispatchToMainThread(MainThreadCallback callback);
   void DispatchToMainThreadAndWait(MainThreadCallback callback);
 
@@ -58,6 +59,7 @@ public:
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
 
   // script
+  LuaRef GetLua() const { return spLua; }
   void Exec(udString code);
 
   // other functions
@@ -94,7 +96,7 @@ protected:
   udHashMap<ForeignInstance> foreignInstanceRegistry;
   udHashMap<MessageHandler> messageHandlers;
 
-  LuaState *pLua;
+  LuaRef spLua = nullptr;
 
   udRenderEngine *pRenderEngine = nullptr;
 
