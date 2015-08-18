@@ -6,6 +6,7 @@
 #include "components/scene.h"
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
+#include "components/timer.h"
 #include "hal/debugfont.h"
 
 using namespace ud;
@@ -93,12 +94,23 @@ int main(int argc, char *argv[])
   if (pUDNode)
   {
     // TODO: enable streamer once we have a tick running to update the streamer
-    pUDNode->Load("res\\DirCube.upc", false);
+//    pUDNode->Load("res\\DirCube.upc", false);
+    pUDNode->Load("res\\MCG.uds", true);
     if (!pUDNode->GetSource().empty())
     {
       pScene->GetRootNode()->AddChild(pUDNode);
     }
   }
+
+  auto spTimer0 = s_pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
+  auto spTimer1 = s_pKernel->CreateComponent<Timer>({ { "duration", 1000 }, { "timertype", "countdown" } });
+
+  auto testDelegate0 = []() -> void { udDebugPrintf("My Event 0\n"); };
+  auto testDelegate1 = []() -> void { udDebugPrintf("My Event 1\n"); };
+
+  spTimer0->Event.Subscribe(FastDelegate<void()>(testDelegate0));
+  spTimer1->Event.Subscribe(FastDelegate<void()>(testDelegate1));
+
 
   pView->RegisterPreRenderCallback(update);
   pView->RegisterPostRenderCallback(display);
