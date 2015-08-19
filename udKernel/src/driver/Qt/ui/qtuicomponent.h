@@ -1,6 +1,6 @@
 #pragma once
-#ifndef QTUICOMPONENT_INTERNAL_H
-#define QTUICOMPONENT_INTERNAL_H
+#ifndef QTUICOMPONENT_H
+#define QTUICOMPONENT_H
 
 #include <QQuickItem>
 
@@ -13,7 +13,7 @@ class ud::Kernel;
 
 PROTOTYPE_COMPONENT(QtUIComponent);
 
-// Decorate base class
+// Decorator base class
 template<typename Base>
 class QtComponent : public Base
 {
@@ -27,12 +27,9 @@ protected:
   virtual ~QtComponent();
 
   static ud::ComponentDesc *CreateComponentDesc(const ud::ComponentDesc *pType);
-
   void PopulateComponentDesc(QObject *pObject);
 
-protected:
   ud::ComponentDesc *pDesc;
-
   QObject *pQtObject;
 };
 
@@ -52,4 +49,4 @@ protected:
 
 } // namespace qt
 
-#endif  // QTUICOMPONENT_INTERNAL_H
+#endif  // QTUICOMPONENT_H
