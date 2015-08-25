@@ -99,10 +99,10 @@ inline udVariant udToVariant(const BoundingVolume &volume)
 
     new (&slice[0]) udKeyValuePair("minx", volume.min.x);
     new (&slice[1]) udKeyValuePair("miny", volume.min.y);
-    new (&slice[0]) udKeyValuePair("minz", volume.min.z);
-    new (&slice[2]) udKeyValuePair("maxx", volume.max.x);
-    new (&slice[3]) udKeyValuePair("maxy", volume.max.y);
-    new (&slice[3]) udKeyValuePair("maxz", volume.max.z);
+    new (&slice[2]) udKeyValuePair("minz", volume.min.z);
+    new (&slice[3]) udKeyValuePair("maxx", volume.max.x);
+    new (&slice[4]) udKeyValuePair("maxy", volume.max.y);
+    new (&slice[5]) udKeyValuePair("maxz", volume.max.z);
     return udVariant(slice, true);
   }
 
