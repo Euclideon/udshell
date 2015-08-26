@@ -1,0 +1,205 @@
+#if !defined(_UD_SLICE)
+#define _UD_SLICE
+
+#include "udPlatform.h"
+#include "udResult.h"
+
+#include <initializer_list>
+
+// slices are bounded arrays, unlike C's conventional unbounded pointers (typically, with separate length stored in parallel)
+// no attempt is made to create a one-size-fits-all implementation, as it is recognised that usages offer distinct advantages/disadvantages
+// slise is the basis of the suite however, and everything is based on udSlice. derived types address specifics in usage and/or ownership patterns
+
+// declare an iterator so it works with standard range pased functions (foreach!)
+template<typename T>
+class udIterator
+{
+  // TODO: this could be made safer by storing a ref to the parent slice, and keeping an offset
+  T *pI;
+
+public:
+  udIterator(T *pI) : pI(pI) {}
+  bool operator!=(udIterator<T> rh) const { return pI != rh.pI; } // compare
+  udIterator<T> operator++() { ++pI; return *this; }              // increment
+  T& operator*() const { return *pI; }                            // value
+};
+
+// udSlice does not retain ownership of it's memory, it is used for temporary ownership; working locals, function args, etc
+template<typename T>
+struct udSlice
+{
+  size_t length;
+  T *ptr;
+
+  // constructors
+  udSlice<T>();
+  udSlice<T>(nullptr_t);
+  udSlice<T>(std::initializer_list<T> list);
+  udSlice<T>(T* ptr, size_t length);
+  template <typename U> udSlice<T>(udSlice<U> rh);
+
+  // assignment
+  template <typename U> udSlice<T>& operator =(udSlice<U> rh);
+
+  // contents
+  T& operator[](size_t i) const;
+
+  udSlice<T> slice(size_t first, size_t last) const;
+
+  bool empty() const;
+
+  // comparison
+  bool operator ==(udSlice<const T> rh) const;
+  bool operator !=(udSlice<const T> rh) const;
+
+  template <typename U> bool eq(udSlice<U> rh) const;
+  template <typename U> ptrdiff_t cmp(udSlice<U> rh) const;
+
+  template <typename U> bool beginsWith(udSlice<U> rh) const;
+  template <typename U> bool endsWith(udSlice<U> rh) const;
+
+  // iterators
+  udIterator<T> begin() const;
+  udIterator<T> end() const;
+
+  // useful functions
+  T& front() const;
+  T& back() const;
+  udSlice<T> front(size_t n) const;
+  udSlice<T> back(size_t n) const;
+  T& popFront();
+  T& popBack();
+  udSlice<T> popFront(size_t n);
+  udSlice<T> popBack(size_t n);
+
+  udSlice<T> stripFront(size_t n) const;
+  udSlice<T> stripBack(size_t n) const;
+
+  ptrdiff_t offsetOf(const T *c) const;
+
+  bool canFind(const T &c) const;
+
+  udSlice<T> find(const T &c) const;
+  udSlice<T> findBack(const T &c) const;
+  ptrdiff_t findFirst(const T &c) const;
+  ptrdiff_t findLast(const T &c) const;
+
+  typedef bool(*Predicate)(const T &e);
+  T* search(Predicate) const;
+
+  template<bool skipEmptyTokens = false>
+  udSlice<T> popToken(udSlice<T> delimiters);
+
+  template<bool skipEmptyTokens = false>
+  udSlice<udSlice<T>> tokenise(udSlice<udSlice<T>> tokens, udSlice<T> delimiters);
+
+  template<typename U>
+  void copyTo(udSlice<U> dest) const;
+};
+
+// udFixedSlice introduces static-sized and/or stack-based ownership. this is useful anywhere that fixed-length arrays are appropriate
+// udFixedSlice will fail-over to an allocated buffer if the contents exceed the fixed size
+template <typename T, size_t Count = 0>
+struct udFixedSlice : public udSlice<T>
+{
+#if defined(_MSC_VER)
+# pragma warning(disable: 4200) // silence warning for zero length arrays
+#endif
+  char buffer[sizeof(T) * Count];
+
+  // constructors
+  udFixedSlice<T, Count>();
+  udFixedSlice<T, Count>(nullptr_t);
+  udFixedSlice<T, Count>(std::initializer_list<T> list);
+  udFixedSlice<T, Count>(const udFixedSlice<T, Count> &val);
+  udFixedSlice<T, Count>(udFixedSlice<T, Count> &&rval);
+  template <typename U> udFixedSlice<T, Count>(U *ptr, size_t length);
+  template <typename U> udFixedSlice<T, Count>(udSlice<U> slice);
+  ~udFixedSlice<T, Count>();
+
+  void reserve(size_t count);
+
+  // assignment
+  udFixedSlice<T, Count>& operator =(udFixedSlice<T, Count> &&rval);
+  template <typename U> udFixedSlice<T, Count>& operator =(udSlice<U> rh);
+
+  // manipulation
+  void clear();
+  template <typename... Things> udFixedSlice<T, Count>& concat(const Things&... things);
+  template <typename U> udFixedSlice<T, Count>& pushBack(const U &item);
+  template <typename U> udFixedSlice<T, Count>& pushBack(U &&item);
+  T& pushBack();
+
+  void remove(size_t i);
+  void remove(const T& item);
+  void removeSwapLast(size_t i);
+  void removeSwapLast(const T& item);
+
+  udSlice<T> getBuffer() const;
+
+protected:
+  struct Header
+  {
+    union
+    {
+      char header[64];
+      size_t numAllocated;
+    };
+  };
+  static size_t numToAlloc(size_t i);
+  bool hasAllocation() { return this->ptr != (T*)this->buffer && this->ptr != nullptr; }
+  Header* getHeader() { return ((Header*)this->ptr) - 1; }
+};
+
+
+// udRCSlice is a reference counted slice, used to retain ownership of some memory, but will not duplicate when copies are made
+// useful for long-living data that doesn't consume a fixed amount of their containing struct
+// also useful for sharing between systems, passing between threads, etc.
+// slices of udRCSlice's increment the RC, so that slices can outlive the original owner, but without performing additional allocations and copies
+template <typename T>
+struct udRCSlice : public udSlice<T>
+{
+  struct udRC
+  {
+    size_t refCount;
+    size_t allocatedCount;
+  } *rc;
+
+  // constructors
+  udRCSlice<T>();
+  udRCSlice<T>(nullptr_t);
+  udRCSlice<T>(std::initializer_list<T> list);
+  udRCSlice<T>(udRCSlice<T> &&rval);
+  udRCSlice<T>(const udRCSlice<T> &rcslice);
+  template <typename U> udRCSlice<T>(U *ptr, size_t length);
+  template <typename U> udRCSlice<T>(udSlice<U> slice);
+  ~udRCSlice<T>();
+
+  size_t refcount() const { return rc ? rc->refCount : 0; }
+
+  // static constructors (make proper constructors?)
+  template<typename... Things> static udRCSlice<T> concat(const Things&... things);
+  static udRCSlice<T> alloc(size_t elements);
+
+  // assignment
+  udRCSlice<T>& operator =(const udRCSlice<T> &rh);
+  udRCSlice<T>& operator =(udRCSlice<T> &&rval);
+  template <typename U> udRCSlice<T>& operator =(udSlice<U> rh);
+
+  // contents
+  udRCSlice<T> slice(size_t first, size_t last) const;
+
+protected:
+  udRCSlice<T>(T *ptr, size_t length, udRC *rc);
+  static size_t numToAlloc(size_t i);
+  template <typename U> static udSlice<T> alloc(U *ptr, size_t length);
+  template <typename U> void init(U *ptr, size_t length);
+};
+
+// unit tests
+udResult udSlice_Test();
+
+
+#include "udSlice.inl"
+
+#endif // _UD_SLICE

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StepFilter xmlns="http://schemas.microsoft.com/vstudio/debugger/natstepfilter/2010">
+  <Function><Name>udSlice&lt;.*&gt;::udSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>udString::udString</Name><Action>NoStepInto</Action></Function>
+
+  <Function><Name>udSharedPtr&lt;.*&gt;::operator*</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>udSharedPtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
+
+  <Function><Name>fastdelegate::detail::ClosurePtr&lt;.*&gt;::GetClosureThis</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>fastdelegate::detail::ClosurePtr&lt;.*&gt;::GetClosureMemPtr</Name><Action>NoStepInto</Action></Function>
+</StepFilter>

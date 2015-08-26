@@ -1,0 +1,41 @@
+#include "resource.h"
+#include "metadata.h"
+#include "kernel.h"
+
+namespace ud
+{
+
+static CPropertyDesc props[] =
+{
+  {
+    {
+      "metadata", // id
+      "Metadata", // displayName
+      "Get the metadata object", // description
+    },
+    &Resource::GetMetadata,
+    nullptr
+  }
+};
+ComponentDesc Resource::descriptor =
+{
+  &Component::descriptor, // pSuperDesc
+
+  UDSHELL_APIVERSION, // udVersion
+  UDSHELL_PLUGINVERSION, // pluginVersion
+
+  "resource", // id
+  "Resource", // displayName
+  "Base resource", // description
+
+  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+};
+
+MetadataRef Resource::GetMetadata() const
+{
+  if (!metadata)
+    (MetadataRef&)metadata = pKernel->CreateComponent<Metadata>();
+  return metadata;
+}
+
+} // namespace ud
