@@ -35,30 +35,6 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
 }
 
 
-void update(ViewRef pView, SceneRef pScene)
-{
-  CameraRef pCamera = pView->GetCamera();
-  pCamera->SetPerspective(UD_PIf / 3.f);
-  pCamera->SetDepthPlanes(0.0001f, 7500.f);
-  //pCamera->Update();
-
-  udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
-  options.flags = udRF_PointCubes | udRF_ClearTargets;
-
-  pView->SetRenderOptions(options);
-  pView->ForceDirty();
-  pScene->ForceDirty();
-}
-
-void display(ViewRef pView, SceneRef pScene)
-{
-  udDebugFont_BeginRender();
-
-  udDebugConsole_SetCursorPos(10.f, 20.f);
-  udDebugConsole_SetTextScale(0.4f);
-  udDebugConsole_Printf("TEST!!!!!");
-}
-
 // ---------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
@@ -112,11 +88,14 @@ int main(int argc, char *argv[])
   spTimer1->Event.Subscribe(FastDelegate<void()>(testDelegate1));
 
 
-  pView->RegisterPreRenderCallback(update);
-  pView->RegisterPostRenderCallback(display);
+  udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
+  options.flags = udRF_PointCubes | udRF_ClearTargets;
+  pView->SetRenderOptions(options);
 
   pCamera->SetSpeed(1.0);
   pCamera->InvertYAxis(true);
+  pCamera->SetPerspective(UD_PIf / 3.f);
+  pCamera->SetDepthPlanes(0.0001f, 7500.f);
 
   pView->SetScene(pScene);
   pView->SetCamera(pCamera);
