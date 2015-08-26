@@ -178,31 +178,22 @@ inline udSlice<T> udSlice<T>::stripBack(size_t n) const
 }
 
 template<typename T>
-inline ptrdiff_t udSlice<T>::offsetOf(const T &c) const
+inline ptrdiff_t udSlice<T>::offsetOf(const T *c) const
 {
   size_t offset = 0;
-  while (offset < length && ptr[offset] != c)
+  while (offset < length && &ptr[offset] != c)
     ++offset;
   return offset == length ? -1 : offset;
 }
 
 template<typename T>
-inline ptrdiff_t udSlice<T>::offsetOfLast(const T &c) const
+inline bool udSlice<T>::canFind(const T &c) const
 {
-  ptrdiff_t last = length-1;
-  while (last >= 0 && ptr[last] != c)
-    --last;
-  return last;
+  return findFirst(c) != -1;
 }
 
 template<typename T>
-inline bool udSlice<T>::canFind(T c) const
-{
-  return offsetOf(c) != -1;
-}
-
-template<typename T>
-inline udSlice<T> udSlice<T>::find(T c) const
+inline udSlice<T> udSlice<T>::find(const T &c) const
 {
   size_t offset = 0;
   while (offset < length && ptr[offset] != c)
@@ -211,12 +202,29 @@ inline udSlice<T> udSlice<T>::find(T c) const
 }
 
 template<typename T>
-inline udSlice<T> udSlice<T>::findBack(T c) const
+inline udSlice<T> udSlice<T>::findBack(const T &c) const
 {
   size_t last = length;
   while (ptr[last-1] != c && last > 0)
     --last;
   return slice(0, last);
+}
+
+template<typename T>
+inline ptrdiff_t udSlice<T>::findFirst(const T &c) const
+{
+  size_t offset = 0;
+  while (offset < length && ptr[offset] != c)
+    ++offset;
+  return offset == length ? -1 : offset;
+}
+template<typename T>
+inline ptrdiff_t udSlice<T>::findLast(const T &c) const
+{
+  ptrdiff_t last = length-1;
+  while (last >= 0 && ptr[last] != c)
+    --last;
+  return last;
 }
 
 template<typename T>
@@ -449,6 +457,13 @@ template <typename U> udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(c
   new((void*)&(this->ptr[this->length++])) T(item);
   return *this;
 }
+template <typename T, size_t Count>
+template <typename U> udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(U &&item)
+{
+  reserve(this->length + 1);
+  new((void*)&(this->ptr[this->length++])) T(std::move(item));
+  return *this;
+}
 
 template <typename T, size_t Count>
 inline T& udFixedSlice<T, Count>::pushBack()
@@ -469,7 +484,7 @@ void udFixedSlice<T, Count>::remove(size_t i)
 template <typename T, size_t Count>
 void udFixedSlice<T, Count>::remove(const T& item)
 {
-  removeSwapLast(this->offsetOf(item));
+  remove(this->offsetOf(&item));
 }
 template <typename T, size_t Count>
 void udFixedSlice<T, Count>::removeSwapLast(size_t i)
@@ -481,7 +496,7 @@ void udFixedSlice<T, Count>::removeSwapLast(size_t i)
 template <typename T, size_t Count>
 void udFixedSlice<T, Count>::removeSwapLast(const T& item)
 {
-  removeSwapLast(this->offsetOf(item));
+  removeSwapLast(this->offsetOf(&item));
 }
 
 template <typename T, size_t Count>

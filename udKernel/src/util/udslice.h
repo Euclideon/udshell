@@ -75,13 +75,14 @@ struct udSlice
   udSlice<T> stripFront(size_t n) const;
   udSlice<T> stripBack(size_t n) const;
 
-  ptrdiff_t offsetOf(const T &c) const;
-  ptrdiff_t offsetOfLast(const T &c) const;
+  ptrdiff_t offsetOf(const T *c) const;
 
-  bool canFind(T c) const;
+  bool canFind(const T &c) const;
 
-  udSlice<T> find(T c) const;
-  udSlice<T> findBack(T c) const;
+  udSlice<T> find(const T &c) const;
+  udSlice<T> findBack(const T &c) const;
+  ptrdiff_t findFirst(const T &c) const;
+  ptrdiff_t findLast(const T &c) const;
 
   typedef bool(*Predicate)(const T &e);
   T* search(Predicate) const;
@@ -126,6 +127,7 @@ struct udFixedSlice : public udSlice<T>
   void clear();
   template <typename... Things> udFixedSlice<T, Count>& concat(const Things&... things);
   template <typename U> udFixedSlice<T, Count>& pushBack(const U &item);
+  template <typename U> udFixedSlice<T, Count>& pushBack(U &&item);
   T& pushBack();
 
   void remove(size_t i);
