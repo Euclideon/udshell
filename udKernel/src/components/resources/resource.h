@@ -18,6 +18,8 @@ public:
 
   MetadataRef GetMetadata() const;
 
+  udEvent<> Changed;
+
 protected:
   Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Component(pType, pKernel, uid, initParams)

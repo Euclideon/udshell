@@ -1,6 +1,7 @@
 #include "hal/driver.h"
 
 #if UDWINDOW_DRIVER == UDDRIVER_QT
+
 #include "hal/haltimer.h"
 #include <QTimer>
 

@@ -9,18 +9,35 @@
 namespace ud
 {
 
-SHARED_CLASS(Shader);
+SHARED_CLASS(RenderShader);
+
+PROTOTYPE_COMPONENT(Shader);
+
+UD_ENUM(ShaderType,
+        VertexShader,
+        PixelShader);
 
 class Shader : public Resource
 {
 public:
   UD_COMPONENT(Shader);
 
+  udRCString GetCode() const { return code; }
+  void SetCode(udRCString code) { this->code = code; }
+
 protected:
+  friend class Material;
+  friend class RenderShader;
+
   Shader(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Shader() {}
 
+  RenderShaderRef GetRenderShader(int type);
+
+  udRCString code;
+
+  RenderShaderRef spRenderShader = nullptr;
 };
 
 } // namespace ud

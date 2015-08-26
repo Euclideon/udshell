@@ -9,20 +9,14 @@
 namespace ud
 {
 
-SHARED_CLASS(Buffer);
+PROTOTYPE_COMPONENT(Buffer);
 
 class Buffer : public Resource
 {
 public:
   UD_COMPONENT(Buffer);
 
-  UD_ENUM(AllocMode,
-            LockExisting,
-            CopyOnWrite,
-            DiscardOnWrite
-          );
-
-  void Allocate(size_t size, AllocMode mode = AllocMode::LockExisting);
+  void Allocate(size_t size);
   void Free();
 
   size_t GetBufferSize() const;
@@ -34,19 +28,12 @@ public:
   void CopyBuffer(BufferRef buffer);
   void CopyBuffer(const void *pBuffer, size_t size);
 
-  udRCSlice<char> GetRawBuffer() { return buffer; }
-
-  udEvent<> changed;
-
 protected:
   Buffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Buffer() { Free(); }
 
-  AllocMode lockMode = AllocMode::LockExisting;
-  size_t bufferLength = 0;
-
-  udRCSlice<char> buffer = nullptr;
+  udSlice<char> buffer;
 
   int mapDepth = 0;
   bool readMap;

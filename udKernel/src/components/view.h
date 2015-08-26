@@ -25,8 +25,6 @@ public:
   virtual udResult InputEvent(const udInputEvent &ev);
   virtual udResult Resize(int width, int height);
 
-  udResult Render(); // TODO: REMOVE ME
-
   RenderableViewRef GetRenderableView();
 
   void SetScene(SceneRef spScene);
@@ -42,6 +40,7 @@ public:
   const udRenderOptions& GetRenderOptions() const { return options; }
 
   udEvent<> Dirty;
+  udEvent<> FrameReady;
 
   // TODO: remove these!
   void RegisterResizeCallback(void (*pCallback)(ViewRef pView, int w, int h)) { pResizeCallback = pCallback; }
@@ -52,11 +51,12 @@ public:
   void ForceDirty() { OnDirty(); }
 
 protected:
+  friend class Renderer;
+
   SceneRef spScene = nullptr;
   CameraRef spCamera = nullptr;
 
-  RenderableViewRef spCache = nullptr;
-  bool bDirty = true;
+  RenderableViewRef spLatestFrame = nullptr;
 
   int displayWidth = 0, displayHeight = 0;
   int renderWidth = 0, renderHeight = 0;
@@ -72,7 +72,11 @@ protected:
   View(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Component(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
 
+  void SetLatestFrame(udUniquePtr<RenderableView> spFrame);
+
   void OnDirty();
 };
+
 } // namespace ud
+
 #endif // UDVIEW_H

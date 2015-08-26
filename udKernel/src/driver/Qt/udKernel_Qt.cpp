@@ -3,6 +3,7 @@
 #if UDWINDOW_DRIVER == UDDRIVER_QT
 
 #include <QSemaphore>
+#include <QOpenGLContext>
 
 #include "udQtKernel_Internal.h"
 #include "ui/window.h"
@@ -181,6 +182,18 @@ void QtKernel::InitRender()
   // TODO: need a better place to set this since this is called *after* our scenegraph has been created
   // ALSO does this thread ever get recreated? does this id remain valid thru the program?
   renderThreadId = QThread::currentThreadId();
+
+  QOpenGLContext *current = pMainWindow->openglContext();
+  current->doneCurrent();
+
+  pMainThreadContext = new QOpenGLContext();
+  pMainThreadContext->setFormat(current->format());
+  pMainThreadContext->setShareContext(current);
+  bool succeed = pMainThreadContext->create();
+  UDASSERT(succeed, "Couldn't create shared render context!");
+
+  pMainThreadContext->moveToThread(pApplication->thread());
+  current->makeCurrent(pMainWindow);
 
   if (ud::Kernel::InitRender() != udR_Success)
   {

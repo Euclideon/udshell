@@ -34,24 +34,25 @@ struct udTexture
   QOpenGLTexture *pTexture;
 };
 
-struct udVertexElementData
+struct udArrayElementData
 {
   int offset;
   int stride;
 };
 
-struct udVertexDeclaration
+struct udFormatDeclaration
 {
-  udVertexElement *pElements;
-  udVertexElementData *pElementData;
+  udArrayElement *pElements;
+  udArrayElementData *pElementData;
   int numElements;
 };
 
-struct udVertexBuffer
+struct udArrayBuffer
 {
-  udVertexDeclaration *pVertexDeclaration;
+  QOpenGLBuffer *pBuffer;
 
-  QOpenGLBuffer *pVB;
+  udArrayDataFormat *pFormat;
+  size_t numElements;
 };
 
 struct udShader

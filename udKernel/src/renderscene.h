@@ -4,14 +4,22 @@
 
 #include "udRender.h"
 #include "udMath.h"
+#include "udChunkedArray.h"
 
 #include "util/udsharedptr.h"
 #include "util/udslice.h"
 #include "components/view.h"
 #include "components/resources/udmodel.h"
-
+#include "components/resources/array.h"
+#include "components/resources/shader.h"
+#include "components/resources/model.h"
+#include "hal/vertex.h"
+#include "hal/texture.h"
+#include "hal/shader.h"
+#include "renderresource.h"
 
 struct udTexture;
+
 namespace ud
 {
 
@@ -25,19 +33,35 @@ struct GeomJob
 {
   udDouble4x4 matrix;
 
+  uint32_t numTextures, numArrays;
+  RenderTextureRef textures[8];
+  RenderArrayRef arrays[16];
+  RenderArrayRef index;
+
+  RenderShaderProgramRef spProgram;
+  RenderVertexFormatRef spVertexFormat;
+
+  Material::BlendMode blendMode;
+  Material::CullMode cullMode;
+
   // TODO: has stuff
-  // * textures
-  // * vertex data
-  // * shader
-  // * constants
-  // * render states
+  // constants
+  // render states
 };
 
 class RenderScene : public udRefCounted
 {
 public:
+  // ud thread
   udFixedSlice<UDJob, 4> ud;
-  udFixedSlice<GeomJob> geom;
+
+  // render thread
+  udFixedSlice<GeomJob, 16> geom;
+
+protected:
+  ~RenderScene()
+  {
+  }
 };
 typedef udSharedPtr<RenderScene> RenderSceneRef;
 
@@ -46,8 +70,9 @@ class RenderableView : public udRefCounted
 {
 public:
   RenderableView();
-  void RenderUD();
-  void RenderGPU() const;
+
+  void RenderUD();  // ** RUN ON THE UD THREAD!
+  void RenderGPU(); // ** RUN ON THE RENDER THREAD!
 
   // TODO: REMOVE ME!
   udRenderView *GetRenderView() const { return pRenderView; }
@@ -70,16 +95,49 @@ public:
   void *pColorBuffer = nullptr;
   void *pDepthBuffer = nullptr;
 
-  mutable udTexture *pColorTexture = nullptr;
-  mutable udTexture *pDepthTexture = nullptr;
-
-//  udSemaphore *pRenderSemaphore = nullptr;
-//  udSemaphore *pPresentSemaphore = nullptr;
+  udTexture *pColorTexture = nullptr;
+  udTexture *pDepthTexture = nullptr;
 
 protected:
-  ~RenderableView();
+  ~RenderableView() override;
 };
 typedef udSharedPtr<RenderableView> RenderableViewRef;
+
+
+// renderer interface
+class Renderer
+{
+public:
+  Renderer(Kernel *pKernel, int renderThreadCount);
+  ~Renderer();
+
+  udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
+
+  void AddUDRenderJob(udUniquePtr<RenderableView> job);
+
+protected:
+  friend class View;
+  friend class RenderShaderProgram;
+  friend class RenderVertexFormat;
+
+  static uint32_t UDThreadStart(void *data)
+  {
+    ((Renderer*)data)->UDThread();
+    return 0;
+  }
+  void UDThread();
+
+  Kernel *pKernel;
+
+  udRenderEngine *pRenderEngine = nullptr;
+
+  udMutex *pUDMutex;
+  udSemaphore *pUDSemaphore, *pUDTerminateSemaphore;
+  udFixedSlice<udUniquePtr<RenderableView>, 4> udRenderQueue;
+
+  udAVLTree<uint32_t, RenderShaderProgram*> shaderPrograms;
+  udAVLTree<uint32_t, RenderVertexFormat*> vertexFormats;
+};
 
 } // namespace ud
 

@@ -1,6 +1,7 @@
 #include "hal/driver.h"
 
 #if UDWINDOW_DRIVER == UDDRIVER_SDL
+
 #include "hal/haltimer.h"
 #include "SDL2/SDL_timer.h"
 

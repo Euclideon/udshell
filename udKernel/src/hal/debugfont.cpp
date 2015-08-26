@@ -44,14 +44,14 @@ struct udDebugFont
   int nCharacters, height;
   VectorCharacter *pCharacters;
   Hershey *pVectors;
-  udVertexBuffer *pGeoBuffer;
+  udArrayBuffer *pGeoBuffer;
 };
 
 //-------------------------------------------------------------------
 extern Hershey romanVectors[];
 extern VectorCharacter romanSimplexCharacters[96];
 static udDebugFont *pRomanSimplex;
-static udVertexDeclaration *pVertexFormat;
+static udFormatDeclaration *pVertexFormat;
 static udShader *pFontShaderV;
 static udShader *pFontShaderP;
 static udShaderProgram *pShader;
@@ -88,12 +88,13 @@ void udDebugFont_Init()
   pFontShaderP = udShader_CreateShader(s_pixelShader, sizeof(s_pixelShader), udST_PixelShader);
   pShader = udShader_CreateShaderProgram(pFontShaderV, pFontShaderP);
 
-  static udVertexElement vertDesc[] =
+  static udArrayElement vertDesc[] =
   {
 //    { udVET_Position, DcVCT_Short2, DcVCU_Position, 0, 0 }
-    { udVET_Position, 0, 2, udVDF_Float2 }
+//    { udVET_Position, 0, 2, udVDF_Float2 }
+    { "a_position", udVDF_Float2, 0 }
   };
-  pVertexFormat = udVertex_CreateVertexDeclaration(vertDesc, sizeof(vertDesc)/sizeof(vertDesc[0]));
+  pVertexFormat = udVertex_CreateFormatDeclaration(vertDesc, sizeof(vertDesc)/sizeof(vertDesc[0]));
 
   // Process the roman simplex font
   pRomanSimplex = udNew(udDebugFont, 96, romanSimplexCharacters, romanVectors);
@@ -102,9 +103,9 @@ void udDebugFont_Init()
 //-------------------------------------------------------------------
 void udDebugFont_Deinit()
 {
-  udVertex_DestroyVertexBuffer(&pRomanSimplex->pGeoBuffer);
+  udVertex_DestroyArrayBuffer(&pRomanSimplex->pGeoBuffer);
   udDelete(pRomanSimplex);
-  udVertex_DestroyVertexDeclaration(&pVertexFormat);
+  udVertex_DestroyFormatDeclaration(&pVertexFormat);
 }
 
 //*******************************************************************
@@ -181,7 +182,7 @@ float udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x,
     }
   }
 
-  udGPU_RenderRanges(pShader, pFont->pGeoBuffer, udPT_Lines, ranges, numRanges, UpdateOffset, &loopData);
+  udGPU_RenderRanges(pShader, pVertexFormat, &pFont->pGeoBuffer, udPT_Lines, ranges, numRanges, UpdateOffset, &loopData);
 
   return height;
 }
@@ -323,8 +324,9 @@ udDebugFont::udDebugFont(int _nCharacters, VectorCharacter *_pCharacters, Hershe
   }
   UDASSERT(vertexIndex == totalVertices, "Vector font processing internal error");
 
-  pGeoBuffer = udVertex_CreateVertexBuffer(pVertexFormat);
-  udVertex_SetVertexBufferData(pGeoBuffer, pBuffer, sizeof(udDebugFontVertex)*totalVertices);
+  udArrayDataFormat elements[1] = { udVDF_Float2 };
+  pGeoBuffer = udVertex_CreateVertexBuffer(elements, 1);
+  udVertex_SetArrayBufferData(pGeoBuffer, pBuffer, sizeof(udDebugFontVertex)*totalVertices);
   udFree(pBuffer);
 }
 

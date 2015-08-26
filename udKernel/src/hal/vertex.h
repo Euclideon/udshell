@@ -2,48 +2,65 @@
 #ifndef UDVERTEX_H
 #define UDVERTEX_H
 
-struct udVertexDeclaration;
-struct udVertexBuffer;
+struct udFormatDeclaration;
+struct udArrayBuffer;
 
-enum udVertexDataFormat
+enum udArrayDataFormat
 {
-  udVDF_Float4,
+  udVDF_Unknown = -1,
+
+  udVDF_Float4 = 0,
   udVDF_Float3,
   udVDF_Float2,
-  udVDF_Float1,
+  udVDF_Float,
   udVDF_UByte4N_RGBA,
   udVDF_UByte4N_BGRA,
+  udVDF_Int4,
+  udVDF_Int3,
+  udVDF_Int2,
+  udVDF_Int,
+  udVDF_UInt4,
+  udVDF_UInt3,
+  udVDF_UInt2,
+  udVDF_UInt,
+  udVDF_Short4,
+  udVDF_Short2,
+  udVDF_Short4N,
+  udVDF_Short2N,
+  udVDF_Short,
+  udVDF_UShort4,
+  udVDF_UShort2,
+  udVDF_UShort4N,
+  udVDF_UShort2N,
+  udVDF_UShort,
+  udVDF_Byte4,
+  udVDF_UByte4,
+  udVDF_Byte4N,
+  udVDF_Byte,
+  udVDF_UByte,
 
-  udVDF_Max
+  udVDF_Max,
+  udVDF_ForceInt = 0x7f
 };
 
-enum udVertexElementType
+struct udArrayElement
 {
-  udVET_Position,
-  udVET_Normal,
-  udVET_Colour,
-  udVET_TexCoord,
-
-  udVET_Max
+  char attributeName[56];
+  udArrayDataFormat format;
+//  int componentCount;
+  int stream;
 };
 
-struct udVertexElement
-{
-  udVertexElementType type;
-  int index;
-  int componentCount;
-  udVertexDataFormat format;
-};
+udFormatDeclaration *udVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount);
+void udVertex_DestroyFormatDeclaration(udFormatDeclaration **ppDeclaration);
 
-udVertexDeclaration *udVertex_CreateVertexDeclaration(const udVertexElement *pElementArray, int elementCount);
-void udVertex_DestroyVertexDeclaration(udVertexDeclaration **ppDeclaration);
+udArrayBuffer* udVertex_CreateIndexBuffer(udArrayDataFormat format);
+udArrayBuffer* udVertex_CreateVertexBuffer(udArrayDataFormat elements[], size_t numElements);
+void udVertex_DestroyArrayBuffer(udArrayBuffer **ppVB);
 
-udVertexBuffer* udVertex_CreateVertexBuffer(udVertexDeclaration *pFormat);
-void udVertex_DestroyVertexBuffer(udVertexBuffer **ppVB);
+void udVertex_SetArrayBufferData(udArrayBuffer *pVB, const void *pData, size_t bufferLen);
 
-void udVertex_SetVertexBufferData(udVertexBuffer *pVB, void *pVertexData, size_t bufferLen);
-
-//void udVertex_SetVertexBuffer(const udVertexBuffer *pVertexBuffer);
+//void udVertex_SetVertexBuffer(const udArrayBuffer *pVertexBuffer);
 //void udVertex_SetIndexBuffer(const udIndexBuffer *pIndexBuffer);
 
 #endif // UDVERTEX_H

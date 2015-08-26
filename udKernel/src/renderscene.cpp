@@ -47,18 +47,23 @@ const char s_blitShader[] =
 "  gl_FragColor = texture2D(u_texture, v_texcoord);\n"
 "}\n";
 
-static udVertexDeclaration *s_pPosUV = nullptr;
-static udVertexBuffer *s_pQuadVB = nullptr;
+static udFormatDeclaration *s_pPosUV = nullptr;
+static udArrayBuffer *s_pQuadVB = nullptr;
+static udArrayBuffer *s_pQuadIB = nullptr;
 static udShaderProgram *s_shader = nullptr;
 
 void udRenderScene_InitRender()
 {
   // crete a vertex buffer to render the quad to the screen
-  udVertexElement elements[] = {
-      { udVET_Position, 0, 2, udVDF_Float2 },
+  udArrayDataFormat format[] = { udVDF_Float2 };
+  s_pQuadVB = udVertex_CreateVertexBuffer(format, 1);
+  s_pQuadIB = udVertex_CreateIndexBuffer(udVDF_UInt);
+
+  udArrayElement elements[] = {
+//    { udVET_Position, 0, 2, udVDF_Float2 },
+    { "a_position", format[0], 0 },
   };
-  s_pPosUV = udVertex_CreateVertexDeclaration(elements, sizeof(elements)/sizeof(elements[0]));
-  s_pQuadVB = udVertex_CreateVertexBuffer(s_pPosUV);
+  s_pPosUV = udVertex_CreateFormatDeclaration(elements, sizeof(elements)/sizeof(elements[0]));
 
   struct Vertex
   {
@@ -69,7 +74,10 @@ void udRenderScene_InitRender()
       { 1, 1 },
       { 0, 1 }
   };
-  udVertex_SetVertexBufferData(s_pQuadVB, quad, sizeof(quad));
+  udVertex_SetArrayBufferData(s_pQuadVB, quad, sizeof(quad));
+
+  uint32_t indices[] = { 0, 1, 2, 3 };
+  udVertex_SetArrayBufferData(s_pQuadIB, indices, sizeof(indices));
 
   udShader *pVS = udShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), udST_VertexShader);
   udShader *pPS = udShader_CreateShader(s_blitShader, sizeof(s_blitShader), udST_PixelShader);
@@ -130,12 +138,14 @@ void RenderableView::RenderUD()
     uint32_t depthPitch = renderWidth*sizeof(float);
     pColorBuffer = udAllocFlags(colorPitch * renderHeight, udAF_Zero);
     pDepthBuffer = udAllocFlags(depthPitch * renderHeight, udAF_Zero);
-
   }
 }
 
-void RenderableView::RenderGPU() const
+void RenderableView::RenderGPU()
 {
+//  if (spView->pPreRenderCallback)
+//    spView->pPreRenderCallback(spView, spScene);
+
   if (!pColorTexture)
   {
     // copy the data into the texture
@@ -159,7 +169,7 @@ void RenderableView::RenderGPU() const
   int u_textureScale = udShader_FindShaderParameter(s_shader, "u_textureScale");
   udShader_SetProgramData(u_textureScale, udFloat4::create(0, 0, 1, 1));
 
-  udGPU_RenderVertices(s_shader, s_pQuadVB, udPT_TriangleFan, 4);
+  udGPU_RenderIndices(s_shader, s_pPosUV, &s_pQuadVB, s_pQuadIB, udPT_TriangleFan, 4);
 
   // TODO: we need to have some sort of resource cleanup list so this can happen when we're ready/automatically
 #if UDRENDER_DRIVER == UDDRIVER_QT
@@ -168,6 +178,103 @@ void RenderableView::RenderGPU() const
   pColorTexture = nullptr;
   pDepthTexture = nullptr;
 #endif
+
+/*
+  if (pPostRenderCallback)
+    pPostRenderCallback(ViewRef(this), spScene);
+*/
+}
+
+
+Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
+  : pKernel(pKernel)
+{
+  // TODO: Remove this once webview is properly integrated
+  const int streamerBuffer = 550*1048576; // TODO : make this an optional command string input
+  if (renderThreadCount != -1)
+  {
+    udRender_Create(&pRenderEngine, renderThreadCount);
+    udOctree_Init(streamerBuffer);
+  }
+
+  // create UD thread
+  pUDMutex = udCreateMutex();
+  pUDSemaphore = udCreateSemaphore(65536, 0);
+  pUDTerminateSemaphore = udCreateSemaphore(1, 0);
+  udCreateThread(UDThreadStart, this);
+}
+Renderer::~Renderer()
+{
+  // terminate UD thread
+  udIncrementSemaphore(pUDSemaphore);
+  udWaitSemaphore(pUDTerminateSemaphore);
+
+  // clean up synchronisation tools
+  udDestroyMutex(&pUDMutex);
+  udDestroySemaphore(&pUDSemaphore);
+  udDestroySemaphore(&pUDTerminateSemaphore);
+
+  // destroy render engine
+  udRender_Destroy(&pRenderEngine);
+}
+
+void Renderer::AddUDRenderJob(udUniquePtr<RenderableView> job)
+{
+  udLockMutex(pUDMutex);
+
+  for (size_t i = 0; i < udRenderQueue.length; ++i)
+  {
+    if (udRenderQueue[i]->spView == job->spView)
+    {
+      // replace queued job with latest frame
+      udRenderQueue[i] = job;
+      udReleaseMutex(pUDMutex);
+      return;
+    }
+  }
+
+  // add new job
+  udRenderQueue.concat(job);
+  udReleaseMutex(pUDMutex);
+  udIncrementSemaphore(pUDSemaphore);
+}
+
+void Renderer::UDThread()
+{
+  struct JobDone
+  {
+    JobDone(const udUniquePtr<RenderableView> &job) : job(job) {}
+
+    udUniquePtr<RenderableView> job;
+
+    void FinishJob(Kernel *pKernel)
+    {
+      ViewRef spView = job->spView;
+      spView->SetLatestFrame(job);
+      delete this;
+    }
+  };
+
+  while (1)
+  {
+    udWaitSemaphore(pUDSemaphore);
+
+    udLockMutex(pUDMutex);
+    if (udRenderQueue.length == 0)
+    {
+      udReleaseMutex(pUDMutex);
+      break;
+    }
+    udUniquePtr<RenderableView> job = udRenderQueue.popFront();
+    udReleaseMutex(pUDMutex);
+
+    job->RenderUD();
+
+    JobDone *done = new JobDone(job);
+    pKernel->DispatchToMainThread(MakeDelegate(done, &JobDone::FinishJob));
+  }
+
+  udIncrementSemaphore(pUDTerminateSemaphore);
 }
 
 } // namespace ud

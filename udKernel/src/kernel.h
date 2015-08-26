@@ -56,7 +56,7 @@ public:
 
   ComponentRef FindComponent(udString uid);
 
-  udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
+  Renderer *GetRenderer() const { return pRenderer; }
 
   // script
   LuaRef GetLua() const { return spLua; }
@@ -96,9 +96,9 @@ protected:
   udHashMap<ForeignInstance> foreignInstanceRegistry;
   udHashMap<MessageHandler> messageHandlers;
 
-  LuaRef spLua = nullptr;
+  Renderer *pRenderer = nullptr;
 
-  udRenderEngine *pRenderEngine = nullptr;
+  LuaRef spLua = nullptr;
 
   ViewRef spFocusView = nullptr;
   TimerRef spStreamerTimer = nullptr;

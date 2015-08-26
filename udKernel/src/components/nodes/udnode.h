@@ -21,9 +21,7 @@ struct BoundingVolume
   udDouble3 max;
 };
 
-class UDNode;
 PROTOTYPE_COMPONENT(UDNode);
-
 
 class UDNode : public Node
 {

@@ -19,7 +19,7 @@ udQtGLContext s_QtGLContext =
   nullptr,  // pDebugger
 };
 
-static int s_PrimTypes[] =
+static int s_primTypes[] =
 {
   GL_POINTS,
   GL_LINES,
@@ -34,76 +34,129 @@ struct udVertexDataFormatGL
   GLint components;
   GLenum type;
   GLboolean normalise;
-} s_DataFormat[] =
+} s_dataFormat[] =
 {
-  { 4, GL_FLOAT, GL_FALSE }, // udVDF_Float4,
-  { 3, GL_FLOAT, GL_FALSE }, // udVDF_Float3,
-  { 2, GL_FLOAT, GL_FALSE }, // udVDF_Float2,
-  { 1, GL_FLOAT, GL_FALSE }, // udVDF_Float1,
-  { 4, GL_UNSIGNED_BYTE, GL_TRUE },  // udVDF_UByte4N_RGBA,
-  { GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE },  // udVDF_UByte4N_BGRA,
-};
-
-char s_attribNames[][16] =
-{
-  // MAD HAX: we reserved an extra '\0' on the end of each attrib name
-  //          we'll overwrite that with the stream index temporarily...
-  "a_position\0",
-  "a_normal\0",
-  "a_colour\0",
-  "a_texcoord\0"
-};
-
-const int s_attribNameLen[] = // HAX: this length is used to overwrite the '\0' with an index at runtime
-{
-  10,
-  8,
-  8,
-  10
+  { 4, GL_FLOAT, GL_FALSE }, // udVDF_Float4
+  { 3, GL_FLOAT, GL_FALSE }, // udVDF_Float3
+  { 2, GL_FLOAT, GL_FALSE }, // udVDF_Float2
+  { 1, GL_FLOAT, GL_FALSE }, // udVDF_Float
+  { 4, GL_UNSIGNED_BYTE, GL_TRUE },       // udVDF_UByte4N_RGBA
+  { GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE }, // udVDF_UByte4N_BGRA
+  { 4, GL_INT, GL_FALSE }, // udVDF_Int4
+  { 3, GL_INT, GL_FALSE }, // udVDF_Int3
+  { 2, GL_INT, GL_FALSE }, // udVDF_Int2
+  { 1, GL_INT, GL_FALSE }, // udVDF_Int
+  { 4, GL_UNSIGNED_INT, GL_FALSE }, // udVDF_UInt4
+  { 3, GL_UNSIGNED_INT, GL_FALSE }, // udVDF_UInt3
+  { 2, GL_UNSIGNED_INT, GL_FALSE }, // udVDF_UInt2
+  { 1, GL_UNSIGNED_INT, GL_FALSE }, // udVDF_UInt
+  { 4, GL_SHORT, GL_FALSE }, // udVDF_Short4
+  { 2, GL_SHORT, GL_FALSE }, // udVDF_Short2
+  { 4, GL_SHORT, GL_TRUE },  // udVDF_Short4N
+  { 2, GL_SHORT, GL_TRUE },  // udVDF_Short2N
+  { 1, GL_SHORT, GL_FALSE }, // udVDF_Short
+  { 4, GL_UNSIGNED_SHORT, GL_FALSE }, // udVDF_UShort4
+  { 2, GL_UNSIGNED_SHORT, GL_FALSE }, // udVDF_UShort2
+  { 4, GL_UNSIGNED_SHORT, GL_TRUE },  // udVDF_UShort4N
+  { 2, GL_UNSIGNED_SHORT, GL_TRUE },  // udVDF_UShort2N
+  { 1, GL_UNSIGNED_SHORT, GL_FALSE }, // udVDF_UShort
+  { 4, GL_BYTE, GL_FALSE },           // udVDF_Byte4
+  { 4, GL_UNSIGNED_BYTE, GL_FALSE },  // udVDF_UByte4
+  { 4, GL_BYTE, GL_TRUE },            // udVDF_Byte4N
+  { 1, GL_BYTE, GL_FALSE },           // udVDF_Byte
+  { 1, GL_UNSIGNED_BYTE, GL_FALSE },  // udVDF_UByte
 };
 
 
 // ***************************************************************************************
-void udGPU_RenderVertices(udShaderProgram *pProgram, udVertexBuffer *pVB, udPrimitiveType primType, size_t vertexCount, size_t firstVertex)
+void udGPU_RenderVertices(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udPrimitiveType primType, size_t vertexCount, size_t firstVertex)
 {
   udVertexRange r;
   r.firstVertex = (uint32_t)firstVertex;
   r.vertexCount = (uint32_t)vertexCount;
-  udGPU_RenderRanges(pProgram, pVB, primType, &r, 1);
+  udGPU_RenderRanges(pProgram, pVertexDecl, pVB, primType, &r, 1);
 }
 
 // ***************************************************************************************
-void udGPU_RenderRanges(struct udShaderProgram *pProgram, struct udVertexBuffer *pVB, udPrimitiveType primType, udVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
+void udGPU_RenderIndices(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udArrayBuffer *pIB, udPrimitiveType primType, size_t indexCount, size_t firstIndex, size_t firstVertex)
 {
-  udVertexElement *pElements = pVB->pVertexDeclaration->pElements;
-  udVertexElementData *pElementData = pVB->pVertexDeclaration->pElementData;
-
-  // bind the buffer
-  pVB->pVB->bind();
+  udArrayElement *pElements = pVertexDecl->pElements;
+  udArrayElementData *pElementData = pVertexDecl->pElementData;
 
   // bind the vertex streams to the shader attributes
   int attribs[16];
-  for (int a = 0; a < pVB->pVertexDeclaration->numElements; ++a)
+  bool boundVB[16] = { false };
+  for (int a = 0; a < pVertexDecl->numElements; ++a)
   {
-    udVertexElementType type = pElements[a].type;
-
-    // MAD HAX: we lookup the attributes by name each render
-    //          this is thoroughly lame, and should be cached on shader creation
-    if (pElements[a].index == 0)
-      attribs[a] = pProgram->pProgram->attributeLocation(s_attribNames[type]);
-    if (pElements[a].index > 0 || attribs[a] == -1)
-    {
-      // MAD HAX: we reserved an extra '\0' on the end of each attrib name
-      //          we'll overwrite that with the stream index temporarily...
-      s_attribNames[type][s_attribNameLen[type]] = (char)('0' + pElements[a].index);
-      attribs[a] = pProgram->pProgram->attributeLocation(s_attribNames[type]);
-      s_attribNames[type][s_attribNameLen[type]] = 0;
-    }
-
+    attribs[a] = pProgram->pProgram->attributeLocation(pElements[a].attributeName);
     if (attribs[a] == -1)
       continue;
 
-    udVertexDataFormatGL &f = s_DataFormat[pElements[a].format];
+    if (!boundVB[pElements[a].stream])
+    {
+      // bind the buffer
+      pVB[pElements[a].stream]->pBuffer->bind();
+      boundVB[pElements[a].stream] = true;
+    }
+
+    udVertexDataFormatGL &f = s_dataFormat[pElements[a].format];
+    s_QtGLContext.pFunc->glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)(size_t)pElementData[a].offset);
+    pProgram->pProgram->enableAttributeArray(attribs[a]);
+  }
+
+  // issue the draw call
+  pIB->pBuffer->bind();
+  GLenum type;
+  switch (pIB->pFormat[0])
+  {
+    case udVDF_UInt:
+      type = GL_UNSIGNED_INT; break;
+    case udVDF_UShort:
+      type = GL_UNSIGNED_SHORT; break;
+    case udVDF_UByte:
+      type = GL_UNSIGNED_BYTE; break;
+    default:
+      UDASSERT(false, "Invalid index buffer type!");
+  }
+  s_QtGLContext.pFunc->glDrawElements(s_primTypes[primType], (GLsizei)indexCount, type, nullptr);
+  pIB->pBuffer->release();
+
+  // unbind the attributes  TODO: perhaps we can remove this...?
+  for (int a = 0; a<pVertexDecl->numElements; ++a)
+  {
+    if (attribs[a] != -1)
+      pProgram->pProgram->disableAttributeArray(attribs[a]);
+    if (boundVB[pElements[a].stream])
+    {
+      pVB[pElements[a].stream]->pBuffer->release();
+      boundVB[pElements[a].stream] = false;
+    }
+  }
+}
+
+// ***************************************************************************************
+void udGPU_RenderRanges(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udPrimitiveType primType, udVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
+{
+  udArrayElement *pElements = pVertexDecl->pElements;
+  udArrayElementData *pElementData = pVertexDecl->pElementData;
+
+  // bind the vertex streams to the shader attributes
+  int attribs[16];
+  bool boundVB[16] = { false };
+  for (int a = 0; a < pVertexDecl->numElements; ++a)
+  {
+    attribs[a] = pProgram->pProgram->attributeLocation(pElements[a].attributeName);
+    if (attribs[a] == -1)
+      continue;
+
+    if (!boundVB[pElements[a].stream])
+    {
+      // bind the buffer
+      pVB[pElements[a].stream]->pBuffer->bind();
+      boundVB[pElements[a].stream] = true;
+    }
+
+    udVertexDataFormatGL &f = s_dataFormat[pElements[a].format];
     s_QtGLContext.pFunc->glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)(size_t)pElementData[a].offset);
     pProgram->pProgram->enableAttributeArray(attribs[a]);
   }
@@ -113,17 +166,20 @@ void udGPU_RenderRanges(struct udShaderProgram *pProgram, struct udVertexBuffer 
   {
     if (pCallback)
       pCallback(i, pCallbackData);
-    s_QtGLContext.pFunc->glDrawArrays(s_PrimTypes[primType], (GLint)pRanges[i].firstVertex, (GLsizei)pRanges[i].vertexCount);
+    s_QtGLContext.pFunc->glDrawArrays(s_primTypes[primType], (GLint)pRanges[i].firstVertex, (GLsizei)pRanges[i].vertexCount);
   }
 
   // unbind the attributes  TODO: perhaps we can remove this...?
-  for (int a = 0; a<pVB->pVertexDeclaration->numElements; ++a)
+  for (int a = 0; a<pVertexDecl->numElements; ++a)
   {
     if (attribs[a] != -1)
       pProgram->pProgram->disableAttributeArray(attribs[a]);
+    if (boundVB[pElements[a].stream])
+    {
+      pVB[pElements[a].stream]->pBuffer->release();
+      boundVB[pElements[a].stream] = false;
+    }
   }
-
-  pVB->pVB->release();
 }
 
 // ---------------------------------------------------------------------------------------

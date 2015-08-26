@@ -47,6 +47,7 @@ private:
 
   QGuiApplication *pApplication;
   QQmlEngine *pQmlEngine;
+  QOpenGLContext *pMainThreadContext;
 
   Window *pMainWindow;
 

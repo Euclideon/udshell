@@ -23,7 +23,7 @@ namespace qt
 class FboRenderer : public QQuickFramebufferObject::Renderer
 {
 public:
-  FboRenderer(const QQuickFramebufferObject *item) : m_item(item), dirty(true)
+  FboRenderer(const QQuickFramebufferObject *item) : m_item(item)
   {
     udDebugPrintf("FboRenderer::FboRenderer()\n");
   }
@@ -32,18 +32,10 @@ public:
   {
     UDASSERT(s_pKernel->GetFocusView(), "No focus view");
 
-    if (dirty)
-    {
-      udDebugPrintf("DIRTY!\n");
-      s_pKernel->GetFocusView()->Resize(framebufferObject()->width(), framebufferObject()->height());
-      dirty = false;
-    }
+    if (spRenderView)
+      spRenderView->RenderGPU();
 
-    s_pKernel->GetFocusView()->Render();
     m_item->window()->resetOpenGLState();
-
-    // TODO: Remove this once we have proper dirty state being set
-    update();
   }
 
   QOpenGLFramebufferObject *createFramebufferObject(const QSize &size)
@@ -54,29 +46,51 @@ public:
     //format.setInternalTextureFormat(GL_RGBA8);
     //format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
     //format.setSamples(4);
-    dirty = true;
     return new QOpenGLFramebufferObject(size, format);
   }
 
   void synchronize(QQuickFramebufferObject * item)
   {
+    RenderView *pRenderView = (RenderView*)item;
+
     udDebugPrintf("FboRenderer::synchronize()\n");
+
+    if (pRenderView->dirty)
+    {
+      ud::ViewRef spView = s_pKernel->GetFocusView();
+      spRenderView = spView->GetRenderableView();
+
+      update();
+
+      pRenderView->dirty = false;
+    }
   }
 
   const QQuickFramebufferObject *m_item;
-  bool dirty;
+  ud::RenderableViewRef spRenderView = nullptr;
 };
 
 
 RenderView::RenderView(QQuickItem *pParent)
-  : QQuickFramebufferObject(pParent)
+  : QQuickFramebufferObject(pParent), dirty(false)
 {
   udDebugPrintf("RenderView::RenderView()\n");
+
+  // handle resize
+  QObject::connect(this, &QQuickItem::widthChanged, this, &RenderView::OnResize);
+  QObject::connect(this, &QQuickItem::heightChanged, this, &RenderView::OnResize);
+
+  // HAX HAX!
+  ud::ViewRef spView = s_pKernel->GetFocusView();
+  spView->FrameReady.Subscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
 }
 
 RenderView::~RenderView()
 {
   udDebugPrintf("RenderView::~RenderView()\n");
+
+  ud::ViewRef spView = s_pKernel->GetFocusView();
+  spView->FrameReady.Unsubscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
 }
 
 QQuickFramebufferObject::Renderer *RenderView::createRenderer() const

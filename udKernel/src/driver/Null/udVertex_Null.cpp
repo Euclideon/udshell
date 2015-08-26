@@ -6,31 +6,40 @@
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udVertexDeclaration *udVertex_CreateVertexDeclaration(const udVertexElement *pElementArray, int elementCount)
+udFormatDeclaration *udVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount)
+{
+  return nullptr;
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+void udVertex_DestroyFormatDeclaration(udFormatDeclaration **ppDeclaration)
+{
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, Aug 2015
+udArrayBuffer* udVertex_CreateIndexBuffer(udArrayDataFormat format)
+{
+  return nullptr;
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+udArrayBuffer* udVertex_CreateVertexBuffer(udArrayDataFormat elements[], size_t numElements)
+{
+  return nullptr;
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+void udVertex_DestroyArrayBuffer(udArrayBuffer **ppVB)
 {
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udVertex_DestroyVertexDeclaration(udVertexDeclaration **ppDeclaration)
-{
-}
-
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-udVertexBuffer* udVertex_CreateVertexBuffer(udVertexDeclaration *pFormat)
-{
-}
-
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-void udVertex_DestroyVertexBuffer(udVertexBuffer **ppVB)
-{
-}
-
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-void udVertex_SetVertexBufferData(udVertexBuffer *pVB, void *pVertexData, size_t bufferLen)
+void udVertex_SetArrayBufferData(udArrayBuffer *pVB, const void *pVertexData, size_t bufferLen)
 {
 }
 

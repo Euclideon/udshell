@@ -12,7 +12,9 @@
 namespace ud
 {
 
-SHARED_CLASS(ArrayBuffer);
+SHARED_CLASS(RenderResource);
+
+PROTOTYPE_COMPONENT(ArrayBuffer);
 
 class ArrayBuffer : public Buffer
 {
@@ -41,8 +43,11 @@ public:
     }
 
     // alloc array
+    bool alreadyAllocated = buffer.ptr != nullptr;
     this->elementSize = elementSize;
     Buffer::Allocate(elementSize*elements);
+    if (alreadyAllocated)
+      Changed.Signal();
   }
 
   // strongly typed array allocation
@@ -137,15 +142,37 @@ public:
   }
 
 protected:
-  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
-    : Buffer(pType, pKernel, uid, initParams) {}
+  friend class GeomNode;
 
-  void Allocate(size_t size) = delete;
+  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+    : Buffer(pType, pKernel, uid, initParams)
+  {
+    Changed.Subscribe(udDelegate<void()>(this, &ArrayBuffer::OnBufferDirty));
+  }
+  ~ArrayBuffer()
+  {
+    Changed.Unsubscribe(udDelegate<void()>(this, &ArrayBuffer::OnBufferDirty));
+  }
+
+  void OnBufferDirty()
+  {
+    spRenderData = nullptr;
+  }
+
+  enum class RenderResourceType
+  {
+    VertexArray,
+    IndexArray,
+    Texture,
+  };
+  RenderResourceRef GetRenderResource(RenderResourceType type);
 
   udRCString elementType;
   size_t elementSize;
   size_t dimensions;
   size_t shape[4];
+
+  RenderResourceRef spRenderData = nullptr;
 };
 
 } // namespace ud

@@ -131,8 +131,8 @@ ComponentDesc UDNode::descriptor =
   UDSHELL_PLUGINVERSION, // pluginVersion
 
   "udnode",    // id
-  "Node",  // displayName
-  "Is a udModel Node", // description
+  "UDNode",  // displayName
+  "Is a UD model node", // description
 
   udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
   udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods

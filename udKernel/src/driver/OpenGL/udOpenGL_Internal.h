@@ -36,6 +36,12 @@
 #include "hal/texture.h"
 #include "hal/vertex.h"
 
+enum udArrayType
+{
+  udAT_VertexArray,
+  udAT_IndexArray,
+};
+
 struct udTexture
 {
   udTextureType type;
@@ -54,30 +60,30 @@ struct udGLTextureFormat
   GLenum type;
 };
 
-
-
-struct udVertexElementData
+struct udArrayElementData
 {
   int offset;
   int stride;
 };
 
-struct udVertexDeclaration
+struct udFormatDeclaration
 {
-  udVertexElement *pElements;
-  udVertexElementData *pElementData;
+  udArrayElement *pElements;
+  udArrayElementData *pElementData;
   int numElements;
 };
 
-struct udVertexBuffer
+struct udArrayBuffer
 {
-  udVertexDeclaration *pVertexDeclaration;
+  udArrayType type;
 
-  GLuint vb;
+  GLuint buffer;
   size_t bufferLen;
   void *pMappedBuffer;
-};
 
+  udArrayDataFormat *pFormat;
+  size_t numElements;
+};
 
 struct udShader
 {

@@ -3,6 +3,7 @@
 #if UDWINDOW_DRIVER == UDDRIVER_SDL
 
 #include "kernel.h"
+#include "renderscene.h"
 #include "components/view.h"
 
 #include <SDL2/SDL.h>
@@ -160,7 +161,10 @@ udResult Kernel::RunMainLoop()
     // TODO: need to translate input polling into messages...
     udInput_Update();
 
-    spFocusView->Render();
+    // render a frame (this could move to another thread!)
+    RenderableViewRef spRenderView = spFocusView->GetRenderableView();
+    spRenderView->RenderGPU();
+
     SDL_GL_SwapWindow(s_window);
   }
   return udR_Success;

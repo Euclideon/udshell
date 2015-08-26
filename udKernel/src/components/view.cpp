@@ -84,7 +84,7 @@ udResult View::Resize(int width, int height)
 
   // dirty the viewport if the resize affected the render buffers
   if (oldRenderWidth != renderWidth || oldRenderHeight != renderHeight)
-    bDirty = true;
+    OnDirty();
 
   if (pResizeCallback)
     pResizeCallback(ViewRef(this), width, height);
@@ -92,48 +92,9 @@ udResult View::Resize(int width, int height)
   return udR_Success;
 }
 
-udResult View::Render()
-{
-  if (pPreRenderCallback)
-    pPreRenderCallback(ViewRef(this), spScene);
-
-  udResult r = udR_Success;
-
-  GetRenderableView()->RenderGPU();
-
-  if (pPostRenderCallback)
-    pPostRenderCallback(ViewRef(this), spScene);
-
-  return r;
-}
-
 RenderableViewRef View::GetRenderableView()
 {
-  if (!bDirty)
-    return spCache;
-
-  spCache = RenderableViewRef::create();
-
-  spCache->spView = ViewRef(this);
-
-  spCache->view = spCamera->GetViewMatrix();
-  spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight, &spCache->projection);
-
-  spCache->spScene = spScene->GetRenderScene();
-  spCache->options = options;
-
-  spCache->pRenderEngine = pKernel->GetRenderEngine();
-
-  spCache->displayWidth = displayWidth;
-  spCache->displayHeight = displayHeight;
-  spCache->renderWidth = renderWidth;
-  spCache->renderHeight = renderHeight;
-
-  // TODO: move UD to async render on another thread
-  spCache->RenderUD();
-
-  bDirty = false;
-  return spCache;
+  return spLatestFrame;
 }
 
 void View::SetScene(SceneRef spNewScene)
@@ -148,11 +109,15 @@ void View::SetScene(SceneRef spNewScene)
 
   if (spScene)
     spScene->Dirty.Subscribe(this, &View::OnDirty);
+
+  OnDirty();
 }
 
 void View::SetCamera(CameraRef spCamera)
 {
   this->spCamera = spCamera;
+
+  OnDirty();
 }
 
 void View::GetDimensions(int *pWidth, int *pHeight) const
@@ -171,9 +136,42 @@ void View::GetRenderDimensions(int *pWidth, int *pHeight) const
     *pHeight = renderHeight;
 }
 
+void View::SetLatestFrame(udUniquePtr<RenderableView> spFrame)
+{
+  spLatestFrame = spFrame;
+  FrameReady.Signal();
+}
+
 void View::OnDirty()
 {
-  bDirty = true;
+  if (spScene && spCamera)
+  {
+    udUniquePtr<RenderableView> spRenderView = udUniquePtr<RenderableView>(new RenderableView);
+
+    Renderer *pRenderer = pKernel->GetRenderer();
+    spRenderView->pRenderEngine = pRenderer->GetRenderEngine();
+
+    spRenderView->spView = ViewRef(this);
+
+    spRenderView->view = spCamera->GetViewMatrix();
+    spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight, &spRenderView->projection);
+
+    spRenderView->spScene = spScene->GetRenderScene();
+    spRenderView->options = options;
+
+    spRenderView->displayWidth = displayWidth;
+    spRenderView->displayHeight = displayHeight;
+    spRenderView->renderWidth = renderWidth;
+    spRenderView->renderHeight = renderHeight;
+
+    // if there are ud jobs, we'll need to send it to the UD render thread
+    if (spRenderView->spScene->ud.length > 0)
+      pRenderer->AddUDRenderJob(spRenderView);
+    else
+      SetLatestFrame(spRenderView);
+  }
+
+  // emit the dirty signal
   Dirty.Signal();
 }
 

@@ -1,6 +1,7 @@
 #include "hal/driver.h"
 
 #if UDWINDOW_DRIVER == UDDRIVER_WIN32
+
 #include "hal/haltimer.h"
 
 struct HalTimerWin32 : public HalTimer

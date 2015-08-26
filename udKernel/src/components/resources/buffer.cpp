@@ -1,4 +1,6 @@
 #include "buffer.h"
+#include "renderresource.h"
+#include "renderscene.h"
 
 namespace ud
 {
@@ -15,83 +17,55 @@ ComponentDesc Buffer::descriptor =
   "Buffer resource", // description
 };
 
-void Buffer::Allocate(size_t size, AllocMode mode)
+void Buffer::Allocate(size_t size)
 {
   Free();
 
-  bufferLength = size;
-
-  lockMode = mode;
-  switch (mode)
-  {
-    case AllocMode::LockExisting:
-      buffer = udRCSlice<char>::alloc(size);
-      break;
-  }
+  buffer.ptr = (char*)udAlloc(size);
+  buffer.length = size;
 }
 
 void Buffer::Free()
 {
-  buffer = nullptr;
+  if (buffer.ptr)
+  {
+    udFree(buffer.ptr);
+    buffer.ptr = nullptr;
+    buffer.length = 0;
+  }
 }
 
 size_t Buffer::GetBufferSize() const
 {
-  return bufferLength;
+  return buffer.length;
 }
 
 void* Buffer::Map(size_t *pSize)
 {
-  if (mapDepth > 0)
+  if (!buffer.ptr || mapDepth > 0)
+  {
+    if (pSize)
+      *pSize = 0;
     return nullptr;
-
+  }
   readMap = false;
   ++mapDepth;
-
-  switch (lockMode)
-  {
-    case AllocMode::LockExisting:
-    {
-      // TODO: verify that this is a reasonable thing to do
-      // we can't lock a buffer if someone else has a ref to it... right>?
-      if (buffer.refcount() > 1)
-      {
-        if (pSize)
-          *pSize = 0;
-        return nullptr;
-      }
-      break;
-    }
-    case AllocMode::CopyOnWrite:
-    {
-      udRCSlice<char> newBuffer = udRCSlice<char>::alloc(bufferLength);
-      if (buffer.ptr)
-        memcpy(newBuffer.ptr, buffer.ptr, bufferLength);
-      buffer = newBuffer;
-      break;
-    }
-    case AllocMode::DiscardOnWrite:
-    {
-      buffer = udRCSlice<char>::alloc(bufferLength);
-      break;
-    }
-    default:
-      UDUNREACHABLE();
-      break;
-  }
-
   if (pSize)
-    *pSize = bufferLength;
+    *pSize = buffer.length;
   return buffer.ptr;
 }
 
 const void* Buffer::MapForRead(size_t *pSize)
 {
-  if (mapDepth > 0 && !readMap)
+  if (!buffer.ptr || (mapDepth > 0 && !readMap))
+  {
+    if (pSize)
+      *pSize = 0;
     return nullptr;
+  }
   readMap = true;
   ++mapDepth;
-  if (pSize && buffer.ptr)
+  if (pSize)
     *pSize = buffer.length;
   return buffer.ptr;
 }
@@ -99,7 +73,7 @@ const void* Buffer::MapForRead(size_t *pSize)
 void Buffer::Unmap()
 {
   if (--mapDepth == 0 && !readMap)
-    changed.Signal();
+    Changed.Signal();
 }
 
 void Buffer::CopyBuffer(BufferRef buffer)
@@ -116,26 +90,17 @@ void Buffer::CopyBuffer(BufferRef buffer)
 
 void Buffer::CopyBuffer(const void *pBuffer, size_t size)
 {
-  switch (lockMode)
+  if (buffer.length < size)
   {
-    case AllocMode::LockExisting:
-      UDASSERT(buffer.ptr, "Buffer not allocated!");
-      if (size != bufferLength)
-        buffer = udRCSlice<char>::alloc(size);
-      break;
-    case AllocMode::CopyOnWrite:
-    case AllocMode::DiscardOnWrite:
-      buffer = udRCSlice<char>::alloc(size);
-      break;
-    default:
-      UDUNREACHABLE();
-      break;
+    if (buffer.ptr)
+      udFree(buffer.ptr);
+    buffer.ptr = (char*)udAlloc(size);
+    buffer.length = size;
   }
 
-  bufferLength = size;
   memcpy(buffer.ptr, pBuffer, size);
 
-  changed.Signal();
+  Changed.Signal();
 }
 
 } // namespace ud

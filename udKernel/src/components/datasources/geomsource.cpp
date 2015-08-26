@@ -97,21 +97,21 @@ void GeomSource::Create(StreamRef spSource)
     udString name = FromAIString(_name);
     MaterialRef spMat = pKernel->CreateComponent<Material>({ { "name", name } });
 
-    aiColor4D colour(1.f, 1.f, 1.f, 1.f);
-    aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, colour);
-    spMat->SetMaterialProperty(MaterialProperties::DiffuseColor, CopyAIColor(colour));
+    aiColor4D color(1.f, 1.f, 1.f, 1.f);
+    aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, color);
+    spMat->SetMaterialProperty("diffuse", CopyAIColor(color));
 
-    colour = aiColor4D(1.f, 1.f, 1.f, 1.f);
-    aiMat.Get(AI_MATKEY_COLOR_AMBIENT, colour);
-    spMat->SetMaterialProperty(MaterialProperties::AmbientColor, CopyAIColor(colour));
+    color = aiColor4D(1.f, 1.f, 1.f, 1.f);
+    aiMat.Get(AI_MATKEY_COLOR_AMBIENT, color);
+    spMat->SetMaterialProperty("ambient", CopyAIColor(color));
 
-    colour = aiColor4D(1.f, 1.f, 1.f, 1.f);
-    aiMat.Get(AI_MATKEY_COLOR_EMISSIVE, colour);
-    spMat->SetMaterialProperty(MaterialProperties::EmissiveColor, CopyAIColor(colour));
+    color = aiColor4D(1.f, 1.f, 1.f, 1.f);
+    aiMat.Get(AI_MATKEY_COLOR_EMISSIVE, color);
+    spMat->SetMaterialProperty("emissive", CopyAIColor(color));
 
-    colour = aiColor4D(1.f, 1.f, 1.f, 1.f);
-    aiMat.Get(AI_MATKEY_COLOR_SPECULAR, colour);
-    spMat->SetMaterialProperty(MaterialProperties::SpecularColor, CopyAIColor(colour));
+    color = aiColor4D(1.f, 1.f, 1.f, 1.f);
+    aiMat.Get(AI_MATKEY_COLOR_SPECULAR, color);
+    spMat->SetMaterialProperty("specular", CopyAIColor(color));
 
     // TODO: foreach texture type, get texture
     aiString texture;
@@ -188,7 +188,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     resName = udFixedString64::format("positions%d", numMeshes);
     resources.Insert(resName, spVerts);
 
-    spMesh->SetPositions(spVerts);
+    spMesh->SetVertexArray(spVerts, { "a_position" });
 
     // normals
     if (mesh.HasNormals())
@@ -202,7 +202,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       resName = udFixedString64::format("normals%d", numMeshes);
       resources.Insert(resName, spNormals);
 
-      spMesh->SetNormals(spNormals);
+      spMesh->SetVertexArray(spNormals, { "a_normal" });
     }
 
     // binormals & tangents
@@ -228,7 +228,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       resName = udFixedString64::format("binormalstangents%d", numMeshes);
       resources.Insert(resName, spBinTan);
 
-      spMesh->SetBinormalsAndTangents(spBinTan);
+      spMesh->SetVertexArray(spBinTan, { "a_binormal", "a_tangent" });
     }
 
     // UVs
@@ -243,22 +243,22 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       resName = udFixedString64::format("uvs%d_%d", numMeshes, t);
       resources.Insert(resName, spUVs);
 
-      spMesh->SetUVs(t, spUVs);
+      spMesh->SetVertexArray(spUVs, { udRCString::format("a_uv%d", t) });
     }
 
     // Colors
-    for (uint32_t t = 0; t<mesh.GetNumColorChannels(); ++t)
+    for (uint32_t c = 0; c<mesh.GetNumColorChannels(); ++c)
     {
       typedef std::tuple<float[4]> VertColor;
-      udSlice<VertColor> colors((VertColor*)mesh.mColors[t], mesh.mNumVertices);
+      udSlice<VertColor> colors((VertColor*)mesh.mColors[c], mesh.mNumVertices);
 
       ArrayBufferRef spColors = pKernel->CreateComponent<ArrayBuffer>();
       spColors->AllocateFromData<VertColor>(colors);
 
-      resName = udFixedString64::format("colors%d_%d", numMeshes, t);
+      resName = udFixedString64::format("colors%d_%d", numMeshes, c);
       resources.Insert(resName, spColors);
 
-      spMesh->SetColors(t, spColors);
+      spMesh->SetVertexArray(spColors, { udRCString::format("a_color%d", c) });
     }
 
     // indices (faces)
@@ -279,7 +279,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     resName = udFixedString64::format("indices%d", numMeshes);
     resources.Insert(resName, spIndices);
 
-    spMesh->SetIndices(spIndices);
+    spMesh->SetIndexArray(spIndices);
 
     // add mesh resource
     resName = udFixedString64::format("mesh%d", numMeshes++);

@@ -3,45 +3,94 @@
 #define _UD_MATERIAL_H
 
 #include "components/resources/resource.h"
+#include "components/resources/shader.h"
 #include "util/udsharedptr.h"
 #include "util/udstring.h"
+#include "util/udavltree.h"
 
 namespace ud
 {
 
-SHARED_CLASS(Material);
+SHARED_CLASS(ArrayBuffer);
+SHARED_CLASS(RenderShaderProgram);
 
-
-enum class MaterialProperties
-{
-  __VectorProps = 0,
-  DiffuseColor = __VectorProps,
-  AmbientColor,
-  EmissiveColor,
-  SpecularColor,
-  __MaxVectorProp,
-
-  Max = __MaxVectorProp,
-  NumVectorProps = __MaxVectorProp - __VectorProps
-};
-
+PROTOTYPE_COMPONENT(Material);
 
 class Material : public Resource
 {
 public:
   UD_COMPONENT(Material);
 
-  void SetMaterialProperty(MaterialProperties property, const udFloat4 &val)
+  UD_ENUM(BlendMode,
+          None,
+          Alpha,
+          Additive);
+
+  UD_ENUM(CullMode,
+          None,
+          CW,
+          CCW);
+
+  ShaderRef GetShader(ShaderType type) const { return shaders[(int)type]; }
+  void SetShader(ShaderType type, ShaderRef spShader)
   {
-    vecProps[(size_t)property] = val;
+    if (shaders[(int)type])
+      shaders[(int)type]->Changed.Unsubscribe(udDelegate<void()>(this, &Material::OnShaderShanged));
+    shaders[(int)type] = spShader;
+    if (spShader)
+      spShader->Changed.Subscribe(udDelegate<void()>(this, &Material::OnShaderShanged));
+    OnShaderShanged();
+  }
+
+  ShaderRef GetVertexShader() const { return GetShader(ShaderType::VertexShader); }
+  void SetVertexShader(ShaderRef spShader) { SetShader(ShaderType::VertexShader, spShader); }
+  ShaderRef GetPixelShader() const { return GetShader(ShaderType::PixelShader); }
+  void SetPixelShader(ShaderRef spShader) { SetShader(ShaderType::PixelShader, spShader); }
+
+  ArrayBufferRef GetTexture(int index) const { return textures[index]; }
+  void SetTexture(int index, ArrayBufferRef spArray) { textures[index] = spArray; }
+
+  BlendMode GetBlendMode() const { return blendMode; }
+  void SetBlendMode(BlendMode blendMode) { this->blendMode = blendMode; }
+
+  CullMode GetCullMode() const { return cullMode; }
+  void SetCullMode(CullMode cullMode) { this->cullMode = cullMode; }
+
+  void SetMaterialProperty(udRCString property, const udFloat4 &val)
+  {
+    properties.Insert(property, val);
   }
 
 protected:
+  friend class GeomNode;
+
   Material(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
-  virtual ~Material() {}
+  virtual ~Material()
+  {
+    for (ShaderRef &s : shaders)
+    {
+      if (s)
+        s->Changed.Unsubscribe(udDelegate<void()>(this, &Material::OnShaderShanged));
+    }
+  }
 
-  udFloat4 vecProps[MaterialProperties::NumVectorProps];
+  void OnShaderShanged()
+  {
+    spRenderProgram = nullptr;
+  }
+
+  RenderShaderProgramRef GetRenderProgram();
+
+  ShaderRef shaders[2];
+  ArrayBufferRef textures[8];
+
+  BlendMode blendMode;
+  CullMode cullMode;
+
+  udAVLTree<udRCString, udFloat4> properties;
+
+  RenderShaderProgramRef spRenderProgram = nullptr;
 };
 
 } // namespace ud

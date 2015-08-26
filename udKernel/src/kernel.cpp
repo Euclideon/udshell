@@ -13,6 +13,7 @@
 #include "components/datasource.h"
 #include "components/nodes/node.h"
 #include "components/nodes/camera.h"
+#include "components/nodes/geomnode.h"
 #include "components/nodes/udnode.h"
 #include "components/resources/resource.h"
 #include "components/resources/buffer.h"
@@ -27,6 +28,7 @@
 #include "components/datasources/ImageSource.h"
 #include "components/datasources/GeomSource.h"
 #include "components/datasources/UDDataSource.h"
+#include "renderscene.h"
 #include "udlua.h"
 
 namespace ud
@@ -36,7 +38,6 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
 {
   udResult result;
   Kernel *pKernel = CreateInstanceInternal(commandLine);
-  const int streamerBuffer = 550*1048576; // TODO : make this an optional command string input
 
   UD_ERROR_NULL(pKernel, udR_Failure_);
 
@@ -45,12 +46,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   pKernel->foreignInstanceRegistry.Init(256);
   pKernel->messageHandlers.Init(64);
 
-  // TODO: Remove this once webview is properly integrated
-  if (renderThreadCount != -1)
-  {
-    UD_ERROR_CHECK(udRender_Create(&pKernel->pRenderEngine, renderThreadCount));
-    UD_ERROR_CHECK(udOctree_Init(streamerBuffer));
-  }
+  pKernel->pRenderer = udNew(Renderer, pKernel, renderThreadCount);
 
   // register all the builtin component types
   UD_ERROR_CHECK(pKernel->RegisterComponent<Component>());
@@ -67,6 +63,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Node>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Camera>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<SimpleCamera>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<GeomNode>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UDNode>());
 
   // resources
@@ -131,7 +128,7 @@ udResult Kernel::Destroy()
 
   udOctree_Shutdown();
 
-  UD_ERROR_CHECK(udRender_Destroy(&pRenderEngine));
+  delete pRenderer;
 
   udHAL_Deinit();
 
