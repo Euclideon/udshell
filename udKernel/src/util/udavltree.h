@@ -19,6 +19,14 @@ struct AVLCompare<udString>
     return a.cmp(b);
   }
 };
+template<>
+struct AVLCompare<udRCString>
+{
+  UDFORCE_INLINE ptrdiff_t operator()(udString a, udString b)
+  {
+    return a.cmp(b);
+  }
+};
 
 template<typename K, typename V, typename PredFunctor = AVLCompare<K>>
 class udAVLTree
