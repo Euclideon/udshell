@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
   if (pUDNode)
   {
     // TODO: enable streamer once we have a tick running to update the streamer
-//    pUDNode->Load("res\\DirCube.upc", false);
-    pUDNode->Load("res\\MCG.uds", true);
+    pUDNode->Load("data\\DirCube.upc", false);
+//    pUDNode->Load("data\\MCG.uds", true);
     if (!pUDNode->GetSource().empty())
     {
       pScene->GetRootNode()->AddChild(pUDNode);

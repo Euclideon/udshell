@@ -12,20 +12,20 @@ project "udKernel"
 	includedirs { "src" }
 	includedirs { "%{cfg.objdir}/script" }
 	includedirs { "%{cfg.objdir}/shaders" }
-	includedirs { "../udPlatform/Include" }
-	includedirs { "../udPointCloud/Include" }
+	includedirs { "../ud/udPlatform/Include" }
+	includedirs { "../ud/udPointCloud/Include" }
 	includedirs { "../3rdParty/lua/" .. luaPath .. "/src"}
 	includedirs { "../3rdParty/assimp-3.1.1/include" }
 
 	if not qt then
---		includedirs { "../3rdParty/GL/freeglut/static/Include" }
-		includedirs { "../3rdParty/sdl2/include" }
-		includedirs { "../3rdParty/GL/glew/include" }
+--		includedirs { "../ud/3rdParty/GL/freeglut/static/Include" }
+		includedirs { "../ud/3rdParty/sdl2/include" }
+		includedirs { "../ud/3rdParty/GL/glew/include" }
 		defines { "GLEW_STATIC" }
 	end
 
 	filter "windows"
-		includedirs { "../3rdParty/sdl2/include" }
+		includedirs { "../ud/3rdParty/sdl2/include" }
 	filter "PNaCl"
 		buildoptions { "-std=c++11" }
 	filter "files:script/**"
@@ -39,7 +39,7 @@ project "udKernel"
 	filter {}
 
 	-- include common stuff
-	dofile "../common-proj.lua"
+	dofile "../ud/common-proj.lua"
 
 	exceptionhandling "Default"
 
