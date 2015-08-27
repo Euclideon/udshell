@@ -128,6 +128,7 @@ void udVertex_DestroyArrayBuffer(udArrayBuffer **ppBuffer)
 {
   (*ppBuffer)->pBuffer->release();
   (*ppBuffer)->pBuffer->destroy();
+  delete (*ppBuffer)->pBuffer;
   udFree(*ppBuffer);
   *ppBuffer = nullptr;
 }
