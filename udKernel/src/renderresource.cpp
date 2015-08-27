@@ -120,6 +120,28 @@ RenderShaderProgram::~RenderShaderProgram()
   uint32_t key = 0;
   pRenderer->shaderPrograms.Remove(key);
 }
+size_t RenderShaderProgram::numAttributes()
+{
+  return udShader_GetNumAttributes(pProgram);
+}
+udString RenderShaderProgram::getAttributeName(size_t i)
+{
+  return udShader_GetAttributeName(pProgram, i);
+}
+size_t RenderShaderProgram::numUniforms()
+{
+  return udShader_GetNumUniforms(pProgram);
+}
+udString RenderShaderProgram::getUniformName(size_t i)
+{
+  return udShader_GetUniformName(pProgram, i);
+}
+void RenderShaderProgram::setUniform(int i, const udFloat4 &v)
+{
+  udShader_SetCurrent(pProgram);
+  udShader_SetProgramData(i, v);
+}
+
 
 RenderVertexFormat::RenderVertexFormat(Renderer *pRenderer, const udArrayElement *pElements, size_t numElements)
   : RenderResource(pRenderer)

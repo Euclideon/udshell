@@ -106,8 +106,6 @@ public:
       *pNumElements = size/sizeof(T);
     return (T*)pBuffer;
   }
-  template<>
-  void* Map<void>(size_t *pSize) { return Buffer::Map(pSize); }
 
   template<typename T = void>
   const T* MapForRead(size_t *pNumElements = nullptr)
@@ -119,8 +117,6 @@ public:
       *pNumElements = size/sizeof(T);
     return (T*)pBuffer;
   }
-  template<>
-  const void* MapForRead<void>(size_t *pSize) { return Buffer::MapForRead(pSize); }
 
   template<typename T>
   void SetData(udSlice<const T> data)
@@ -174,6 +170,13 @@ protected:
 
   RenderResourceRef spRenderData = nullptr;
 };
+
+template<>
+inline void* ArrayBuffer::Map<void>(size_t *pSize) { return Buffer::Map(pSize); }
+
+template<>
+inline const void* ArrayBuffer::MapForRead<void>(size_t *pSize) { return Buffer::MapForRead(pSize); }
+
 
 } // namespace ud
 

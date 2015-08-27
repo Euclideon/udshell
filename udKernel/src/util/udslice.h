@@ -36,10 +36,10 @@ struct udSlice
   udSlice<T>(nullptr_t);
   udSlice<T>(std::initializer_list<T> list);
   udSlice<T>(T* ptr, size_t length);
-  template <typename U> udSlice<T>(udSlice<U> rh);
+  template<typename U> udSlice<T>(udSlice<U> rh);
 
   // assignment
-  template <typename U> udSlice<T>& operator =(udSlice<U> rh);
+  template<typename U> udSlice<T>& operator =(udSlice<U> rh);
 
   // contents
   T& operator[](size_t i) const;
@@ -52,11 +52,11 @@ struct udSlice
   bool operator ==(udSlice<const T> rh) const;
   bool operator !=(udSlice<const T> rh) const;
 
-  template <typename U> bool eq(udSlice<U> rh) const;
-  template <typename U> ptrdiff_t cmp(udSlice<U> rh) const;
+  template<typename U> bool eq(udSlice<U> rh) const;
+  template<typename U> ptrdiff_t cmp(udSlice<U> rh) const;
 
-  template <typename U> bool beginsWith(udSlice<U> rh) const;
-  template <typename U> bool endsWith(udSlice<U> rh) const;
+  template<typename U> bool beginsWith(udSlice<U> rh) const;
+  template<typename U> bool endsWith(udSlice<U> rh) const;
 
   // iterators
   udIterator<T> begin() const;

@@ -89,6 +89,14 @@ public:
   virtual ~RenderShaderProgram();
 
   udShaderProgram *pProgram;
+
+  size_t numAttributes();
+  udString getAttributeName(size_t i);
+
+  size_t numUniforms();
+  udString getUniformName(size_t i);
+
+  void setUniform(int i, const udFloat4 &v4);
 };
 SHARED_CLASS(RenderShaderProgram);
 

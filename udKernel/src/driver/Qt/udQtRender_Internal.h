@@ -63,6 +63,16 @@ struct udShader
 struct udShaderProgram
 {
   QOpenGLShaderProgram *pProgram;
+
+  struct Param
+  {
+    char *pName;
+    size_t type;
+  };
+  size_t numAttributes;
+  Param *pAttributes;
+  size_t numUniforms;
+  Param *pUniforms;
 };
 
 #endif  // UDQTRENDER_INTERNAL_H

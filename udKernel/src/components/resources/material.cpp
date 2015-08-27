@@ -92,6 +92,49 @@ ComponentDesc Material::descriptor =
   udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
 };
 
+void Material::SetShader(ShaderType type, ShaderRef spShader)
+{
+  if (shaders[(int)type] == spShader)
+    return;
+  if (shaders[(int)type])
+    shaders[(int)type]->Changed.Unsubscribe(udDelegate<void()>(this, &Material::OnShaderChanged));
+  shaders[(int)type] = spShader;
+  if (spShader)
+    spShader->Changed.Subscribe(udDelegate<void()>(this, &Material::OnShaderChanged));
+  OnShaderChanged();
+}
+
+void Material::SetMaterialProperty(udRCString property, const udFloat4 &val)
+{
+  properties.Insert(property, val);
+}
+
+void Material::OnShaderChanged()
+{
+  // remove shader properties from component
+  // TODO...
+
+  spRenderProgram = nullptr;
+
+  // recreate the shader and populate properties
+  GetRenderProgram();
+}
+
+void Material::SetRenderstate()
+{
+  if (!spRenderProgram)
+    return;
+
+  size_t numUniforms = spRenderProgram->numUniforms();
+  for (size_t i = 0; i < numUniforms; ++i)
+  {
+    udString name = spRenderProgram->getUniformName(i);
+    const udFloat4 *pVal = properties.Get(name);
+    if (pVal)
+      spRenderProgram->setUniform((int)i, *pVal);
+  }
+}
+
 RenderShaderProgramRef Material::GetRenderProgram()
 {
   if (!spRenderProgram)
@@ -110,6 +153,9 @@ RenderShaderProgramRef Material::GetRenderProgram()
       }
       else
         spRenderProgram = RenderShaderProgramRef(pProgram);
+
+      // populate the material with properties from the shader...
+      // TODO...
     }
   }
   return spRenderProgram;

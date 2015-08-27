@@ -20,6 +20,14 @@ udShader* udShader_CreateShader(const char *pSource, size_t length, udShaderType
 
 udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader *pPixelShader);
 
+size_t udShader_GetNumAttributes(udShaderProgram *pProgram);
+const char *udShader_GetAttributeName(udShaderProgram *pProgram, size_t i);
+size_t udShader_GetAttributeType(udShaderProgram *pProgram, size_t i);
+
+size_t udShader_GetNumUniforms(udShaderProgram *pProgram);
+const char *udShader_GetUniformName(udShaderProgram *pProgram, size_t i);
+size_t udShader_GetUniformType(udShaderProgram *pProgram, size_t i);
+
 int udShader_FindShaderParameter(udShaderProgram *pProgram, const char *pName);
 
 void udShader_SetCurrent(udShaderProgram *pProgram);

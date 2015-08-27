@@ -32,15 +32,7 @@ public:
           CCW);
 
   ShaderRef GetShader(ShaderType type) const { return shaders[(int)type]; }
-  void SetShader(ShaderType type, ShaderRef spShader)
-  {
-    if (shaders[(int)type])
-      shaders[(int)type]->Changed.Unsubscribe(udDelegate<void()>(this, &Material::OnShaderShanged));
-    shaders[(int)type] = spShader;
-    if (spShader)
-      spShader->Changed.Subscribe(udDelegate<void()>(this, &Material::OnShaderShanged));
-    OnShaderShanged();
-  }
+  void SetShader(ShaderType type, ShaderRef spShader);
 
   ShaderRef GetVertexShader() const { return GetShader(ShaderType::VertexShader); }
   void SetVertexShader(ShaderRef spShader) { SetShader(ShaderType::VertexShader, spShader); }
@@ -56,10 +48,7 @@ public:
   CullMode GetCullMode() const { return cullMode; }
   void SetCullMode(CullMode cullMode) { this->cullMode = cullMode; }
 
-  void SetMaterialProperty(udRCString property, const udFloat4 &val)
-  {
-    properties.Insert(property, val);
-  }
+  void SetMaterialProperty(udRCString property, const udFloat4 &val);
 
 protected:
   friend class GeomNode;
@@ -71,22 +60,20 @@ protected:
     for (ShaderRef &s : shaders)
     {
       if (s)
-        s->Changed.Unsubscribe(udDelegate<void()>(this, &Material::OnShaderShanged));
+        s->Changed.Unsubscribe(udDelegate<void()>(this, &Material::OnShaderChanged));
     }
   }
 
-  void OnShaderShanged()
-  {
-    spRenderProgram = nullptr;
-  }
+  void OnShaderChanged();
+  void SetRenderstate();
 
   RenderShaderProgramRef GetRenderProgram();
 
   ShaderRef shaders[2];
   ArrayBufferRef textures[8];
 
-  BlendMode blendMode;
-  CullMode cullMode;
+  BlendMode blendMode = BlendMode::None;
+  CullMode cullMode = CullMode::None;
 
   udAVLTree<udRCString, udFloat4> properties;
 
