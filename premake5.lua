@@ -22,7 +22,7 @@ solution "udShell"
 	dofile "ud/udPlatform/project.lua"
 	dofile "ud/udPointCloud/project.lua"
 
-	dofile "ud/3rdParty/lua/project.lua"
+	dofile "3rdParty/lua/project.lua"
 
 	dofile "udKernel/project.lua"
 
