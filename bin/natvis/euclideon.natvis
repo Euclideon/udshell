@@ -22,30 +22,52 @@
         </ArrayItems>
     </Expand>
 </Type>
+<Type Name="udFixedSlice&lt;*&gt;">
+    <Expand>
+        <Item Name="length">length</Item>
+        <Item Name="ptr">ptr,[length]</Item>
+        <ArrayItems>
+            <Size>length</Size>
+            <ValuePointer>ptr</ValuePointer>
+        </ArrayItems>
+    </Expand>
+</Type>
+<Type Name="udRCSlice&lt;*&gt;">
+    <Expand>
+        <Item Name="length">length</Item>
+        <Item Name="ptr">ptr,[length]</Item>
+        <Item Name="refcount">rc->refCount</Item>
+        <ArrayItems>
+            <Size>length</Size>
+            <ValuePointer>ptr</ValuePointer>
+        </ArrayItems>
+    </Expand>
+</Type>
 
 <Type Name="udVariant">
     <DisplayString Condition="t == 0">Nil</DisplayString>
     <DisplayString Condition="t == 1">{b}</DisplayString>
     <DisplayString Condition="t == 2">{i}</DisplayString>
     <DisplayString Condition="t == 3">{f}</DisplayString>
-    <DisplayString Condition="t == 4">{c}</DisplayString>
-    <DisplayString Condition="t == 5">{p}</DisplayString>
-    <DisplayString Condition="t == 6">{s,[length]s8}</DisplayString>
-    <DisplayString Condition="t == 7">{a,[length]}</DisplayString>
-    <DisplayString Condition="t == 8">{aa,[length]}</DisplayString>
+    <DisplayString Condition="t == 4">{length}</DisplayString>
+    <DisplayString Condition="t == 5">{length}</DisplayString>
+    <DisplayString Condition="t == 6">{c}</DisplayString>
+    <DisplayString Condition="t == 7">{p}</DisplayString>
+    <DisplayString Condition="t == 8">{s,[length]s8}</DisplayString>
+    <DisplayString Condition="t == 9">{a,[length]}</DisplayString>
+    <DisplayString Condition="t == 10">{aa,[length]}</DisplayString>
 
-    <StringView Condition="t == 6">s,[length]s8</StringView>
+    <StringView Condition="t == 8">s,[length]s8</StringView>
 
     <Expand>
-        <ArrayItems Condition="t == 7">
+        <Item Name="length" Condition="t == 9">length</Item>
+        <ArrayItems Condition="t == 9">
             <Size>length</Size>
             <ValuePointer>a</ValuePointer>
         </ArrayItems>
-        <ArrayItems Condition="t == 7">
-            <Size>length</Size>
-            <ValuePointer>a</ValuePointer>
-        </ArrayItems>
-        <ArrayItems Condition="t == 8">
+
+        <Item Name="length" Condition="t == 10">length</Item>
+        <ArrayItems Condition="t == 10">
             <Size>length</Size>
             <ValuePointer>aa</ValuePointer>
         </ArrayItems>
@@ -53,7 +75,7 @@
 </Type>
 
 <Type Name="udKeyValuePair">
-	<DisplayString>{key} = {value}</DisplayString>
+    <DisplayString>{key} = {value}</DisplayString>
 </Type>
 
 </AutoVisualizer>
