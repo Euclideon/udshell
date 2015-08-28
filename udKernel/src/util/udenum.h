@@ -101,10 +101,9 @@ struct udEnumDesc
                                                                                   \
     operator Type() const { return v; }                                           \
                                                                                   \
-    NAME operator |(NAME rh) const { NAME r; r.v = v | rh.v; return r; }          \
-    NAME operator &(NAME rh) const { NAME r; r.v = v & rh.v; return r; }          \
-    NAME operator ^(NAME rh) const { NAME r; r.v = v ^ rh.v; return r; }          \
-    NAME operator ~() const        { NAME r; r.v = ~v; return r; }                \
+    NAME& operator |=(NAME rh) { v = v | rh.v; return *this; }                    \
+    NAME& operator &=(NAME rh) { v = v & rh.v; return *this; }                    \
+    NAME& operator ^=(NAME rh) { v = v ^ rh.v; return *this; }                    \
                                                                                   \
     udFixedString64 StringOf()                                                    \
     {                                                                             \
