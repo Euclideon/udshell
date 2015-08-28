@@ -70,7 +70,11 @@ struct udEnumDesc
         [](size_t v, udFixedString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
-  };
+  };                                                                              \
+  inline NAME udGetValAsEnum(NAME::EnumKeys e)                                    \
+  {                                                                               \
+    return NAME(e);                                                               \
+  }
 
 #define UD_BITFIELD(NAME, ...)                                                    \
   struct NAME : public udBitfield                                                 \
@@ -136,6 +140,11 @@ struct udEnumDesc
         [](size_t v, udFixedString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
-  };
+  };                                                                              \
+  inline NAME udGetValAsEnum(NAME::EnumKeys e)                                    \
+  {                                                                               \
+    return NAME(e);                                                               \
+  }
+
 
 #endif // _UDENUM_H

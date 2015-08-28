@@ -229,6 +229,13 @@ struct udVariant_Construct <T[N]>                 { UDFORCE_INLINE static udVari
 // ** Take a breath; you survived, now back to sanity! **
 // ******************************************************
 
+// enum & bitfield keys
+template<typename T, typename std::enable_if<std::is_enum<T>::value>::type* = nullptr>
+inline udVariant udToVariant(T e)
+{
+  return udToVariant(udGetValAsEnum(e));
+}
+
 // enums & bitfields
 template<typename T,
   typename std::enable_if<

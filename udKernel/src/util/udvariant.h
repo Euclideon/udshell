@@ -133,7 +133,7 @@ public:
   udInitParams(nullptr_t) {}
   udInitParams(const udInitParams& rh) : params(rh.params) {}
   udInitParams(udSlice<const udKeyValuePair> kvp) : params(kvp) {}
-  udInitParams(std::initializer_list<udKeyValuePair> list) : udInitParams(udSlice<const udKeyValuePair>(list.begin(), list.size())) {}
+  udInitParams(std::initializer_list<const udKeyValuePair> list) : udInitParams(udSlice<const udKeyValuePair>(list.begin(), list.size())) {}
 
   udSlice<const udKeyValuePair> params;
 
