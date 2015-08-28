@@ -3,6 +3,7 @@
 #include "udPlatformUtil.h"
 
 #include "kernel.h"
+#include "components/logger.h"
 
 // TODO: shut up about sprintf! **REMOVE ME**
 #if UDPLATFORM_WINDOWS
@@ -171,5 +172,13 @@ udResult Component::SendMessage(udString target, udString message, const udVaria
 {
   return pKernel->SendMessage(target, uid, message, data);
 }
+
+void Component::LogError(int level, const udString text) const { pKernel->LogError(level, text, uid); }
+void Component::LogWarning(int level, const udString text) const { pKernel->LogWarning(level, text, uid); }
+void Component::LogDebug(int level, const udString text) const { pKernel->LogDebug(level, text, uid); }
+void Component::LogInfo(int level, const udString text) const { pKernel->LogInfo(level, text, uid); }
+void Component::LogScript(int level, const udString text) const { pKernel->LogScript(level, text, uid); }
+void Component::LogTrace(int level, const udString text) const { pKernel->LogTrace(level, text, uid); }
+void Component::Log(int level, const udString text) const { pKernel->Log(level, text, uid); }
 
 } // namespace ud

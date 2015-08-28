@@ -52,7 +52,7 @@ ComponentDesc Scene::descriptor =
   "Is a scene", // description
 
   udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // propeties
+  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
   udSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 

@@ -22,7 +22,7 @@ class udBlockStreamer;
 
 PROTOTYPE_COMPONENT(View);
 PROTOTYPE_COMPONENT(UIComponent);
-
+PROTOTYPE_COMPONENT(Logger);
 
 // TODO: udMessageHandler returns void, should we return some error state??
 typedef FastDelegate3<udString , udString , const udVariant &, void> udMessageHandler;
@@ -65,6 +65,17 @@ public:
   // other functions
   ViewRef GetFocusView() const { return spFocusView; }
   ViewRef SetFocusView(ViewRef spView);
+
+  LoggerRef GetLogger() const { return spLogger; }
+  LoggerRef SetLogger(LoggerRef spLogger);
+  void LogError(int level, const udString text, const udString componentUID = nullptr);
+  void LogWarning(int level, const udString text, const udString componentUID = nullptr);
+  void LogDebug(int level, const udString text, const udString componentUID = nullptr);
+  void LogInfo(int level, const udString text, const udString componentUID = nullptr);
+  void LogScript(int level, const udString text, const udString componentUID = nullptr);
+  void LogTrace(int level, const udString text, const udString componentUID = nullptr);
+  void Log(int level, const udString text, const udString componentUID = nullptr);
+
   udResult FormatMainWindow(UIComponentRef spUIComponent);
 
   udResult RunMainLoop();
@@ -100,6 +111,7 @@ protected:
 
   LuaRef spLua = nullptr;
 
+  LoggerRef spLogger = nullptr;
   ViewRef spFocusView = nullptr;
   TimerRef spStreamerTimer = nullptr;
 

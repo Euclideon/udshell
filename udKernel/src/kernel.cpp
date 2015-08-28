@@ -6,7 +6,9 @@
 #include "hal/hal.h"
 #include "components/stream.h"
 #include "components/file.h"
+#include "components/console.h"
 #include "components/lua.h"
+#include "components/logger.h"
 #include "components/timer.h"
 #include "components/scene.h"
 #include "components/view.h"
@@ -53,6 +55,8 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<DataSource>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Stream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<File>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Console>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
@@ -95,6 +99,8 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->InitComponents());
 
   pKernel->spLua = pKernel->CreateComponent<Lua>();
+
+  pKernel->spLogger = pKernel->CreateComponent<Logger>();
 
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
@@ -343,8 +349,17 @@ void Kernel::Exec(udString code)
   spLua->Execute(code);
 }
 
-} // namespace ud
+// Helper functions for the kernel's logger
+void Kernel::LogError(int level, const udString text, const udString componentUID) { spLogger->Log(level, text, LogCategories::Error, componentUID); }
+void Kernel::LogWarning(int level, const udString text, const udString componentUID) { spLogger->Log(level, text, LogCategories::Warning, componentUID); }
+void Kernel::LogDebug(int level, const udString text, const udString componentUID) { spLogger->Log(level, text, LogCategories::Debug, componentUID); }
+void Kernel::LogInfo(int level, const udString text, const udString componentUID) { spLogger->Log(level, text, LogCategories::Info, componentUID); }
+void Kernel::LogScript(int level, const udString text, const udString componentUID) { spLogger->Log(level, text, LogCategories::Script, componentUID); }
+void Kernel::LogTrace(int level, const udString text, const udString componentUID) { spLogger->Log(level, text, LogCategories::Trace, componentUID); }
+// Short name for LogDebug function
+void Kernel::Log(int level, const udString text, const udString componentUID) { spLogger->Log(level, text, LogCategories::Debug, componentUID); }
 
+} // namespace ud
 
 // synchronised pointer destroy function (it's here because there's no udsharedptr.cpp file)
 template<class T>
