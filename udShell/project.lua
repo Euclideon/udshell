@@ -6,7 +6,7 @@ project "udShell"
 	files { "src/**.cpp", "src/**.h" }
 	files { "res/**.qrc", "res/**.qml" }
 --		files { "**.pro", "**.pri" }
-	files { "premake5.lua" }
+	files { "../premake5.lua", "project.lua" }
 
 	includedirs { "../ud/udPlatform/Include" }
 	includedirs { "../ud/udPointCloud/Include" }
