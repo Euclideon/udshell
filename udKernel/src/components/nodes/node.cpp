@@ -63,6 +63,26 @@ udResult Node::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
   return udR_Success;
 }
 
+bool Node::InputEvent(const udInputEvent &ev)
+{
+  for (auto &c : children)
+  {
+    if (c->InputEvent(ev))
+      return true;
+  }
+  return false;
+}
+
+bool Node::Update(double timeStep)
+{
+  for (auto &c : children)
+  {
+    if (c->Update(timeStep))
+      return true;
+  }
+  return false;
+}
+
 void Node::AddChild(NodeRef c)
 {
   children.concat(c);

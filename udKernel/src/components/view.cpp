@@ -47,24 +47,18 @@ ComponentDesc View::descriptor =
   udSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
-udResult View::InputEvent(const udInputEvent &ev)
+bool View::InputEvent(const udInputEvent &ev)
 {
+  bool handled = false;
+
   // if view wants to handle anything personally
   //...
+
   if (spScene)
-  {
-      // pass to scene
-    udResult r = spScene->InputEvent(ev);
-    if (r == udR_EventNotHandled)
-    {
-      // pass to camera
-      r = spCamera->InputEvent(ev);
-    }
-
-    return r;
-  }
-
-  return udR_EventNotHandled;
+    handled = spScene->InputEvent(ev);
+  if (!handled && spCamera)
+    handled = spCamera->ViewportInputEvent(ev);
+  return handled;
 }
 
 udResult View::Resize(int width, int height)
@@ -153,7 +147,7 @@ void View::OnDirty()
 
     spRenderView->spView = ViewRef(this);
 
-    spRenderView->view = spCamera->GetViewMatrix();
+    spRenderView->camera = spCamera->GetCameraMatrix();
     spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight, &spRenderView->projection);
 
     spRenderView->spScene = spScene->GetRenderScene();

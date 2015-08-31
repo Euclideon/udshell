@@ -6,6 +6,7 @@
 
 namespace ud
 {
+
 static CPropertyDesc props[] =
 {
   {
@@ -107,6 +108,8 @@ ComponentDesc SimpleCamera::descriptor =
 };
 
 
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
 void Camera::GetProjectionMatrix(double aspectRatio, udDouble4x4 *pMatrix) const
 {
   if (!bOrtho)
@@ -115,18 +118,51 @@ void Camera::GetProjectionMatrix(double aspectRatio, udDouble4x4 *pMatrix) const
     *pMatrix = udDouble4x4::ortho(-orthoHeight*aspectRatio*0.5, orthoHeight*aspectRatio*0.5, -orthoHeight*0.5, orthoHeight*0.5, zNear, zFar);
 }
 
-
-
-udResult SimpleCamera::InputEvent(const udInputEvent &ev)
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+bool SimpleCamera::ViewportInputEvent(const udInputEvent &ev)
 {
-  // TODO: rejig of code from below...
+  if (ev.deviceType == udID_Keyboard)
+  {
+    if (ev.eventType == udInputEvent::EventType::Key)
+    {
+      switch (ev.key.key)
+      {
+        case udKC_W:
+        case udKC_Up:
+          keyState[(int)Keys::Up] += ev.key.state ? 1 : -1; break;
+        case udKC_S:
+        case udKC_Down:
+          keyState[(int)Keys::Down] += ev.key.state ? 1 : -1; break;
+        case udKC_A:
+        case udKC_Left:
+          keyState[(int)Keys::Left] += ev.key.state ? 1 : -1; break;
+        case udKC_D:
+        case udKC_Right:
+          keyState[(int)Keys::Right] += ev.key.state ? 1 : -1; break;
+        case udKC_R:
+        case udKC_PageUp:
+          keyState[(int)Keys::Elevate] += ev.key.state ? 1 : -1; break;
+        case udKC_F:
+        case udKC_PageDown:
+          keyState[(int)Keys::Descend] += ev.key.state ? 1 : -1; break;
+        case udKC_LShift:
+        case udKC_RShift:
+          keyState[(int)Keys::Boost] += ev.key.state ? 1 : -1; break;
+      }
+    }
+  }
+  else if (ev.deviceType == udID_Mouse)
+  {
 
-  return udR_Success;
+  }
+
+  return false;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udResult SimpleCamera::Update(double timeDelta)
+bool SimpleCamera::Update(double timeDelta)
 {
   // update the camera
   double s;
@@ -156,18 +192,12 @@ udResult SimpleCamera::Update(double timeDelta)
   if(fabs(s = udInput_State(udID_Gamepad, udGC_AxisLX)) > 0.2f)
     tx += s;
 
-  ty += udInput_State(udID_Keyboard, udKC_W)
-        -udInput_State(udID_Keyboard, udKC_S)
-        +udInput_State(udID_Keyboard, udKC_Up)
-        -udInput_State(udID_Keyboard, udKC_Down);
-  tx += udInput_State(udID_Keyboard, udKC_D)
-        -udInput_State(udID_Keyboard, udKC_A)
-        +udInput_State(udID_Keyboard, udKC_Right)
-        -udInput_State(udID_Keyboard, udKC_Left);
-  tz += udInput_State(udID_Keyboard, udKC_R)
-        +udInput_State(udID_Keyboard, udKC_Home)
-        -udInput_State(udID_Keyboard, udKC_F)
-        -udInput_State(udID_Keyboard, udKC_End)
+  ty += keyState[(int)Keys::Up]
+        -keyState[(int)Keys::Down];
+  tx += keyState[(int)Keys::Right]
+        -keyState[(int)Keys::Left];
+  tz += keyState[(int)Keys::Elevate]
+        -keyState[(int)Keys::Descend]
         +udInput_State(udID_Gamepad, udGC_ButtonDUp)
         -udInput_State(udID_Gamepad, udGC_ButtonDDown)
         +udInput_State(udID_Gamepad, udGC_ButtonRT)
@@ -191,7 +221,7 @@ udResult SimpleCamera::Update(double timeDelta)
   this->speed = udClamp(this->speed * speed, 0.001, 999.0);
 
   float multiplier = 1.f;
-  if(udInput_State(udID_Keyboard, udKC_LShift) || udInput_State(udID_Keyboard, udKC_RShift) || udInput_State(udID_Gamepad, udGC_ButtonRB))
+  if (keyState[(int)Keys::Boost] || udInput_State(udID_Gamepad, udGC_ButtonRB))
     multiplier *= 3.f;
   if(udInput_State(udID_Gamepad, udGC_ButtonLB))
     multiplier *= 0.333f;
@@ -218,7 +248,6 @@ udResult SimpleCamera::Update(double timeDelta)
   while (ypr.x >= UD_2PI)
     ypr.x -= UD_2PI;
 
-
   udDouble4x4 cam = GetCameraMatrix();
 
   udDouble3 forward = cam.axis.y.toVector3();
@@ -230,12 +259,21 @@ udResult SimpleCamera::Update(double timeDelta)
   pos += xAxis*tx*speed;
   pos.z += tz*speed;
 
-  return udR_Success;
+  matrix = udDouble4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos);
+
+  if (ty || tx || tz || pitch || yaw)
+  {
+    udDebugPrintf("%g, %g", pos.x, pos.y);
+    return true;
+  }
+  return false;
 }
 
 // ***************************************************************************************
+// Author: Manu Evans, May 2015
 Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
 {
   return udNew(SimpleCamera, pType, pKernel, uid, initParams);
 }
+
 } // namespace ud

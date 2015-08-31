@@ -23,10 +23,10 @@ static CMethodDesc methods[] =
 {
   {
     {
-      "forcedirty", // id
+      "makedirty", // id
       "Force a dirty signal", // description
     },
-    &Scene::ForceDirty, // method
+    &Scene::MakeDirty, // method
   }
 };
 static CEventDesc events[] =
@@ -57,7 +57,7 @@ ComponentDesc Scene::descriptor =
 };
 
 
-udResult Scene::InputEvent(const udInputEvent &ev)
+bool Scene::InputEvent(const udInputEvent &ev)
 {
   // do anything here?
   //...
@@ -66,13 +66,14 @@ udResult Scene::InputEvent(const udInputEvent &ev)
   return rootNode->InputEvent(ev);
 }
 
-udResult Scene::Update(double timeDelta)
+void Scene::Update(double timeDelta)
 {
   // do anything here?
   //...
 
   // update the hierarchy...
-  return rootNode->Update(timeDelta);
+  if (rootNode->Update(timeDelta))
+    MakeDirty();
 }
 
 RenderSceneRef Scene::GetRenderScene()

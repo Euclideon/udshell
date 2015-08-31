@@ -22,7 +22,7 @@ class View : public Component
 public:
   UD_COMPONENT(View);
 
-  virtual udResult InputEvent(const udInputEvent &ev);
+  virtual bool InputEvent(const udInputEvent &ev);
   virtual udResult Resize(int width, int height);
 
   RenderableViewRef GetRenderableView();

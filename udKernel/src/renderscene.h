@@ -78,7 +78,7 @@ public:
   udRenderView *GetRenderView() const { return pRenderView; }
   void *GetColorBuffer() const { return pColorBuffer; }
 
-  udDouble4x4 view;
+  udDouble4x4 camera;
   udDouble4x4 projection;
 
   int displayWidth, displayHeight;

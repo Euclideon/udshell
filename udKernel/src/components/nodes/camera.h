@@ -16,9 +16,6 @@ class Camera : public Node
 public:
   UD_COMPONENT(Camera);
 
-  virtual udResult InputEvent(const udInputEvent &ev) { return udR_Success; }
-  virtual udResult Update(double timeStep) { return udR_Success; }
-
   udDouble4x4 GetCameraMatrix() const { udDouble4x4 m; CalculateWorldMatrix(&m); return m; }
   udDouble4x4 GetViewMatrix() const { return GetCameraMatrix().inverse(); }
 
@@ -29,16 +26,20 @@ public:
   void SetDepthPlanes(double zNear, double zFar) { this->zNear = zNear; this->zFar = zFar; }
 
 protected:
+  friend class View;
+
   bool bOrtho = false;
   double fovY = UD_DEG2RAD(60);
   double orthoHeight = 1.0;
   double zNear = 0.1;
   double zFar = 1000.0;
 
-protected:
   Camera(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Node(pType, pKernel, uid, initParams) {}
-  virtual ~Camera() {}
+
+  bool InputEvent(const udInputEvent &ev) override { return false; }
+  virtual bool ViewportInputEvent(const udInputEvent &ev) { return false; }
+  bool Update(double timeStep) override { return udR_Success; }
 };
 
 
@@ -67,12 +68,20 @@ protected:
 
   bool bHelicopter = false;
 
-  virtual udResult InputEvent(const udInputEvent &ev); // Why is this protected?
-  virtual udResult Update(double timeStep);
+  enum class Keys
+  {
+    Up, Down, Left, Right, Elevate, Descend, Boost, Max
+  };
+  char keyState[(int)Keys::Max];
 
   SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
-    : Camera(pType, pKernel, uid, initParams) {}
-  virtual ~SimpleCamera() {}
+    : Camera(pType, pKernel, uid, initParams)
+  {
+    memset(keyState, 0, sizeof(keyState));
+  }
+
+  bool ViewportInputEvent(const udInputEvent &ev) override;
+  bool Update(double timeStep) override;
 };
 
 } // namespace ud

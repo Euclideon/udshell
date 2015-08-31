@@ -16,8 +16,6 @@ class GeomNode : public Node
 public:
   UD_COMPONENT(GeomNode);
 
-  udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;
-
   ModelRef GetModel() const { return spModel; }
   void SetModel(ModelRef spModel) { this->spModel = spModel; }
 
@@ -25,6 +23,8 @@ protected:
   GeomNode(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Node(pType, pKernel, uid, initParams) {}
   virtual ~GeomNode() {}
+
+  udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;
 
   ModelRef spModel = nullptr;
 };
