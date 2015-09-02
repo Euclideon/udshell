@@ -130,25 +130,32 @@ bool SimpleCamera::ViewportInputEvent(const udInputEvent &ev)
       {
         case udKC_W:
         case udKC_Up:
-          keyState[(int)Keys::Up] += ev.key.state ? 1 : -1; break;
+          keyState[(int)Keys::Up] += ev.key.state ? 1 : -1;
+          return true;
         case udKC_S:
         case udKC_Down:
-          keyState[(int)Keys::Down] += ev.key.state ? 1 : -1; break;
+          keyState[(int)Keys::Down] += ev.key.state ? 1 : -1;
+          return true;
         case udKC_A:
         case udKC_Left:
-          keyState[(int)Keys::Left] += ev.key.state ? 1 : -1; break;
+          keyState[(int)Keys::Left] += ev.key.state ? 1 : -1;
+          return true;
         case udKC_D:
         case udKC_Right:
-          keyState[(int)Keys::Right] += ev.key.state ? 1 : -1; break;
+          keyState[(int)Keys::Right] += ev.key.state ? 1 : -1;
+          return true;
         case udKC_R:
         case udKC_PageUp:
-          keyState[(int)Keys::Elevate] += ev.key.state ? 1 : -1; break;
+          keyState[(int)Keys::Elevate] += ev.key.state ? 1 : -1;
+          return true;
         case udKC_F:
         case udKC_PageDown:
-          keyState[(int)Keys::Descend] += ev.key.state ? 1 : -1; break;
+          keyState[(int)Keys::Descend] += ev.key.state ? 1 : -1;
+          return true;
         case udKC_LShift:
         case udKC_RShift:
-          keyState[(int)Keys::Boost] += ev.key.state ? 1 : -1; break;
+          keyState[(int)Keys::Boost] += ev.key.state ? 1 : -1;
+          return true;
       }
     }
   }
@@ -262,10 +269,7 @@ bool SimpleCamera::Update(double timeDelta)
   matrix = udDouble4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos);
 
   if (ty || tx || tz || pitch || yaw)
-  {
-    udDebugPrintf("%g, %g", pos.x, pos.y);
     return true;
-  }
   return false;
 }
 
