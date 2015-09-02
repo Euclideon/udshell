@@ -2,10 +2,10 @@
 <StepFilter xmlns="http://schemas.microsoft.com/vstudio/debugger/natstepfilter/2010">
   <Function><Name>udSlice&lt;.*&gt;::udSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
   <Function><Name>udFixedSlice&lt;.*&gt;::udFixedSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udRCSlice&lt;.*&gt;::udRCSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>udSharedSlice&lt;.*&gt;::udSharedSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
   <Function><Name>udString::udString</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udFixedString&lt;.*&gt;::udFixedString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udRCString::udRCString</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>udMutableString&lt;.*&gt;::udMutableString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>udSharedString::udSharedString</Name><Action>NoStepInto</Action></Function>
 
   <Function><Name>udVariant::udVariant</Name><Action>NoStepInto</Action></Function>
   <Function><Name>udKeyValuePair::udKeyValuePair</Name><Action>NoStepInto</Action></Function>

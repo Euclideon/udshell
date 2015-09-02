@@ -29,7 +29,7 @@ public:
   void CopyBuffer(const void *pBuffer, size_t size);
 
 protected:
-  Buffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  Buffer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Buffer() { Free(); }
 

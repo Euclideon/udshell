@@ -74,7 +74,7 @@ ComponentDesc Lua::descriptor =
   nullptr // events
 };
 
-Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   pLua = udNew(LuaState, pKernel);

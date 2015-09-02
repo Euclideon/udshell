@@ -74,8 +74,8 @@ private:
     int indexOfOpenBracket = methodSig.indexOf('(');
     if (indexOfOpenBracket != -1)
     {
-      udFixedString128 signalHandlerName =
-        udFixedString128::format("SignalHandler%s", methodSig.right(methodSig.size() - indexOfOpenBracket).data());
+      udMutableString128 signalHandlerName;
+      signalHandlerName.sprintf("SignalHandler%s", methodSig.right(methodSig.size() - indexOfOpenBracket).data());
       udDebugPrintf("Checking for signal handler: '%s'\n", signalHandlerName.toStringz());
       methodIndex = metaObject()->indexOfMethod(signalHandlerName.toStringz());
     }

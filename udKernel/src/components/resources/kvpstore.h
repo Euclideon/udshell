@@ -36,7 +36,7 @@ public:
   void InsertMethod(const udVariant &key, const udVariant &value) { Insert(key, value); }
 
 protected:
-  KVPStore(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  KVPStore(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 };
 

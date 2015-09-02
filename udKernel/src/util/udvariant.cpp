@@ -42,7 +42,7 @@ udVariant::~udVariant()
   }
 }
 
-udRCString udVariant::stringify() const
+udSharedString udVariant::stringify() const
 {
   switch ((Type)t)
   {
@@ -97,9 +97,9 @@ bool udVariant::asBool() const
   case Type::String:
   {
     udString str(s, length);
-    if (str.eqi("true"))
+    if (str.eqIC("true"))
       return true;
-    else if (str.eqi("false"))
+    else if (str.eqIC("false"))
       return false;
     return !str.empty();
   }
@@ -328,7 +328,7 @@ void udVariant::luaPush(ud::LuaState &l) const
     {
       size_t val;
       const udEnumDesc *pDesc = asEnum(&val);
-      udFixedString64 s;
+      udMutableString64 s;
       pDesc->stringify(val, s);
       l.pushString(s);
       break;

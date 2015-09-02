@@ -23,7 +23,7 @@ ComponentDesc File::descriptor =
   "File object", // description
 };
 
-File::File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+File::File(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   const udVariant &path = initParams["path"];

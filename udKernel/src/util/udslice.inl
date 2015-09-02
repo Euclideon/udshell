@@ -1,4 +1,10 @@
 
+struct udRC
+{
+  size_t refCount;
+  size_t allocatedCount;
+};
+
 // udSlice
 template<typename T>
 inline udSlice<T>::udSlice()
@@ -36,17 +42,20 @@ inline udSlice<T>& udSlice<T>::operator =(udSlice<U> rh)
 }
 
 template<typename T>
-inline T& udSlice<T>::operator[](size_t i) const
+inline T& udSlice<T>::operator[](ptrdiff_t i) const
 {
-  UDASSERT(i < length, "Index out of range!");
-  return ptr[i];
+  size_t offset = (size_t)(i < 0 ? i + length : i);
+  UDASSERT(offset < length, "Index out of range!");
+  return ptr[offset];
 }
 
 template<typename T>
-inline udSlice<T> udSlice<T>::slice(size_t first, size_t last) const
+inline udSlice<T> udSlice<T>::slice(ptrdiff_t first, ptrdiff_t last) const
 {
-  UDASSERT(last <= length && first <= last, "Index out of range!");
-  return udSlice<T>(ptr + first, last - first);
+  size_t start = (size_t)(first < 0 ? first + length : first);
+  size_t end = (size_t)(last < 0 ? last + length : last);
+  UDASSERT(end <= length && start <= end, "Index out of range!");
+  return udSlice<T>(ptr + start, end - start);
 }
 
 template<typename T>
@@ -111,12 +120,12 @@ inline bool udSlice<T>::endsWith(udSlice<U> rh) const
 }
 
 template<typename T>
-udIterator<T> udSlice<T>::begin() const
+inline udIterator<T> udSlice<T>::begin() const
 {
   return udIterator<T>(&ptr[0]);
 }
 template<typename T>
-udIterator<T> udSlice<T>::end() const
+inline udIterator<T> udSlice<T>::end() const
 {
   return udIterator<T>(&ptr[length]);
 }
@@ -132,16 +141,6 @@ inline T& udSlice<T>::back() const
   return ptr[length-1];
 }
 template<typename T>
-inline udSlice<T> udSlice<T>::front(size_t n) const
-{
-  return slice(0, n);
-}
-template<typename T>
-inline udSlice<T> udSlice<T>::back(size_t n) const
-{
-  return slice(length-n, length);
-}
-template<typename T>
 inline T& udSlice<T>::popFront()
 {
   *this = slice(1, length);
@@ -153,32 +152,151 @@ inline T& udSlice<T>::popBack()
   *this = slice(0, length - 1);
   return ptr[length];
 }
+
 template<typename T>
-inline udSlice<T> udSlice<T>::popFront(size_t n)
+inline udSlice<T> udSlice<T>::get(ptrdiff_t n) const
 {
-  *this = slice(n, length);
-  return udSlice<T>(ptr - n, n);
+  if (n < 0)
+    return slice(n, length);
+  else
+    return slice(0, n);
 }
 template<typename T>
-inline udSlice<T> udSlice<T>::popBack(size_t n)
+inline udSlice<T> udSlice<T>::pop(ptrdiff_t n)
 {
-  *this = slice(0, length - n);
-  return udSlice<T>(ptr + length, n);
+  if (n < 0)
+  {
+    *this = slice(0, n);
+    return udSlice<T>(ptr - n, -n);
+  }
+  else
+  {
+    *this = slice(n, length);
+    return udSlice<T>(ptr - n, n);
+  }
+}
+template<typename T>
+inline udSlice<T> udSlice<T>::strip(ptrdiff_t n) const
+{
+  if (n < 0)
+    return slice(0, n);
+  else
+    return slice(n, length);
 }
 
 template<typename T>
-inline udSlice<T> udSlice<T>::stripFront(size_t n) const
+inline bool udSlice<T>::exists(const T &c, size_t *pIndex) const
 {
-  return slice(n, length);
-}
-template<typename T>
-inline udSlice<T> udSlice<T>::stripBack(size_t n) const
-{
-  return slice(0, length-n);
+  size_t i = findFirst(c) != -1;
+  if (pIndex)
+    *pIndex = i;
+  return i == length;
 }
 
 template<typename T>
-inline ptrdiff_t udSlice<T>::offsetOf(const T *c) const
+inline size_t udSlice<T>::findFirst(const T &c) const
+{
+  size_t offset = 0;
+  while (offset < length && ptr[offset] != c)
+    ++offset;
+  return offset;
+}
+template<typename T>
+inline size_t udSlice<T>::findLast(const T &c) const
+{
+  ptrdiff_t last = length-1;
+  while (last >= 0 && ptr[last] != c)
+    --last;
+  return last < 0 ? length : last;
+}
+template<typename T>
+template<typename U>
+inline size_t udSlice<T>::findFirst(udSlice<U> s) const
+{
+  if (s.empty())
+    return 0;
+  ptrdiff_t len = length-s.length;
+  for (ptrdiff_t i = 0; i < len; ++i)
+  {
+    size_t j = 0;
+    for (; j < s.length; ++j)
+    {
+      if (ptr[i + j] != s.ptr[j])
+        break;
+    }
+    if (j == s.length)
+      return i;
+  }
+  return length;
+}
+template<typename T>
+template<typename U>
+inline size_t udSlice<T>::findLast(udSlice<U> s) const
+{
+  if (s.empty())
+    return length;
+  for (ptrdiff_t i = length-s.length; i >= 0; --i)
+  {
+    size_t j = 0;
+    for (; j < s.length; ++j)
+    {
+      if (ptr[i + j] != s.ptr[j])
+        break;
+    }
+    if (j == s.length)
+      return i;
+  }
+  return length;
+}
+
+template<typename T>
+inline udSlice<T> udSlice<T>::getLeftAtFirst(const T &c, bool bInclusive) const
+{
+  return slice(0, findFirst(c) + (bInclusive ? 1 : 0));
+}
+template<typename T>
+inline udSlice<T> udSlice<T>::getLeftAtLast(const T &c, bool bInclusive) const
+{
+  return slice(0, findLast(c) + (bInclusive ? 1 : 0));
+}
+template<typename T>
+inline udSlice<T> udSlice<T>::getRightAtFirst(const T &c, bool bInclusive) const
+{
+  return slice(findFirst(c) + (bInclusive ? 0 : 1), length);
+}
+template<typename T>
+inline udSlice<T> udSlice<T>::getRightAtLast(const T &c, bool bInclusive) const
+{
+  return slice(findLast(c) + (bInclusive ? 0 : 1), length);
+}
+
+template<typename T>
+template<typename U>
+inline udSlice<T> udSlice<T>::getLeftAtFirst(udSlice<U> s, bool bInclusive) const
+{
+  return slice(0, findFirst(s) + (bInclusive ? s.length : 0));
+}
+template<typename T>
+template<typename U>
+inline udSlice<T> udSlice<T>::getLeftAtLast(udSlice<U> s, bool bInclusive) const
+{
+  return slice(0, findLast(s) + (bInclusive ? s.length : 0));
+}
+template<typename T>
+template<typename U>
+inline udSlice<T> udSlice<T>::getRightAtFirst(udSlice<U> s, bool bInclusive) const
+{
+  return slice(findFirst(s) + (bInclusive ? 0 : s.length), length);
+}
+template<typename T>
+template<typename U>
+inline udSlice<T> udSlice<T>::getRightAtLast(udSlice<U> s, bool bInclusive) const
+{
+  return slice(findLast(s) + (bInclusive ? 0 : s.length), length);
+}
+
+template<typename T>
+inline ptrdiff_t udSlice<T>::indexOfElement(const T *c) const
 {
   size_t offset = 0;
   while (offset < length && &ptr[offset] != c)
@@ -187,48 +305,7 @@ inline ptrdiff_t udSlice<T>::offsetOf(const T *c) const
 }
 
 template<typename T>
-inline bool udSlice<T>::canFind(const T &c) const
-{
-  return findFirst(c) != -1;
-}
-
-template<typename T>
-inline udSlice<T> udSlice<T>::find(const T &c) const
-{
-  size_t offset = 0;
-  while (offset < length && ptr[offset] != c)
-    ++offset;
-  return slice(offset, length);
-}
-
-template<typename T>
-inline udSlice<T> udSlice<T>::findBack(const T &c) const
-{
-  size_t last = length;
-  while (ptr[last-1] != c && last > 0)
-    --last;
-  return slice(0, last);
-}
-
-template<typename T>
-inline ptrdiff_t udSlice<T>::findFirst(const T &c) const
-{
-  size_t offset = 0;
-  while (offset < length && ptr[offset] != c)
-    ++offset;
-  return offset == length ? -1 : offset;
-}
-template<typename T>
-inline ptrdiff_t udSlice<T>::findLast(const T &c) const
-{
-  ptrdiff_t last = length-1;
-  while (last >= 0 && ptr[last] != c)
-    --last;
-  return last;
-}
-
-template<typename T>
-T* udSlice<T>::search(Predicate pred) const
+inline T* udSlice<T>::search(Predicate pred) const
 {
   for (auto &e : *this)
   {
@@ -245,13 +322,13 @@ inline udSlice<T> udSlice<T>::popToken(udSlice<T> delimiters)
   size_t offset = 0;
   if (skipEmptyTokens)
   {
-    while (offset < length && delimiters.canFind(ptr[offset]))
+    while (offset < length && delimiters.exists(ptr[offset]))
       ++offset;
     if (offset == length)
       return udSlice<T>();
   }
   size_t end = offset;
-  while (end < length && !delimiters.canFind(ptr[end]))
+  while (end < length && !delimiters.exists(ptr[end]))
     ++end;
   udSlice<T> token = slice(offset, end);
   if (end < length)
@@ -263,7 +340,7 @@ inline udSlice<T> udSlice<T>::popToken(udSlice<T> delimiters)
 
 template<typename T>
 template<bool skipEmptyTokens>
-udSlice<udSlice<T>> udSlice<T>::tokenise(udSlice<udSlice<T>> tokens, udSlice<T> delimiters)
+inline udSlice<udSlice<T>> udSlice<T>::tokenise(udSlice<udSlice<T>> tokens, udSlice<T> delimiters)
 {
   size_t numTokens = 0;
   size_t offset = 0;
@@ -298,7 +375,7 @@ udSlice<udSlice<T>> udSlice<T>::tokenise(udSlice<udSlice<T>> tokens, udSlice<T> 
 
 template<typename T>
 template<typename U>
-void udSlice<T>::copyTo(udSlice<U> dest) const
+inline void udSlice<T>::copyTo(udSlice<U> dest) const
 {
   UDASSERT(length >= dest.length, "Not enough elements!");
   for (size_t i = 0; i<dest.length; ++i)
@@ -339,7 +416,7 @@ inline udFixedSlice<T, Count>::udFixedSlice(udFixedSlice<T, Count> &&rval)
   else
   {
     // copy items into the small array buffer
-    this->ptr = (T*)buffer;
+    this->ptr = (T*)buffer.ptr();
     if (std::is_pod<T>::value)
       memcpy((void*)this->ptr, rval.ptr, sizeof(T)*this->length);
     else
@@ -386,11 +463,11 @@ inline udFixedSlice<T, Count>::~udFixedSlice()
 }
 
 template <typename T, size_t Count>
-void udFixedSlice<T, Count>::reserve(size_t count)
+inline void udFixedSlice<T, Count>::reserve(size_t count)
 {
   bool hasAlloc = hasAllocation();
   if (!hasAlloc && count <= Count)
-    this->ptr = (T*)buffer;
+    this->ptr = buffer.ptr();
   else if (count > Count)
   {
     bool needsExtend = hasAlloc && getHeader()->numAllocated < count;
@@ -417,11 +494,11 @@ void udFixedSlice<T, Count>::reserve(size_t count)
 }
 
 template <typename T, size_t Count>
-udSlice<T> udFixedSlice<T, Count>::getBuffer() const
+inline udSlice<T> udFixedSlice<T, Count>::getBuffer() const
 {
   if (hasAllocation())
     return udSlice<T>(this->ptr, getHeader()->numAllocated);
-  return udSlice<T>((T*)buffer, Count);
+  return udSlice<T>(buffer.ptr(), Count);
 }
 
 template <typename T, size_t Count>
@@ -451,14 +528,16 @@ inline void udFixedSlice<T, Count>::clear()
 }
 
 template <typename T, size_t Count>
-template <typename U> udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(const U &item)
+template <typename U>
+inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(const U &item)
 {
   reserve(this->length + 1);
   new((void*)&(this->ptr[this->length++])) T(item);
   return *this;
 }
 template <typename T, size_t Count>
-template <typename U> udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(U &&item)
+template <typename U>
+inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(U &&item)
 {
   reserve(this->length + 1);
   new((void*)&(this->ptr[this->length++])) T(std::move(item));
@@ -482,21 +561,21 @@ void udFixedSlice<T, Count>::remove(size_t i)
   this->ptr[i].~T();
 }
 template <typename T, size_t Count>
-void udFixedSlice<T, Count>::remove(const T& item)
+inline void udFixedSlice<T, Count>::remove(const T *pItem)
 {
-  remove(this->offsetOf(&item));
+  remove(this->indexOfElement(pItem));
 }
 template <typename T, size_t Count>
-void udFixedSlice<T, Count>::removeSwapLast(size_t i)
+inline void udFixedSlice<T, Count>::removeSwapLast(size_t i)
 {
   if (i < this->length - 1)
     this->ptr[i] = this->ptr[this->length-1];
   this->ptr[--this->length].~T();
 }
 template <typename T, size_t Count>
-void udFixedSlice<T, Count>::removeSwapLast(const T& item)
+inline void udFixedSlice<T, Count>::removeSwapLast(const T *pItem)
 {
-  removeSwapLast(this->offsetOf(&item));
+  removeSwapLast(this->indexOfElement(pItem));
 }
 
 template <typename T, size_t Count>
@@ -507,19 +586,19 @@ inline size_t udFixedSlice<T, Count>::numToAlloc(size_t i)
 }
 
 
-// udRCSlice
+// udSharedSlice
 template <typename T>
-inline udRCSlice<T>::udRCSlice()
+inline udSharedSlice<T>::udSharedSlice()
   : rc(nullptr)
 {}
 
 template<typename T>
-inline udRCSlice<T>::udRCSlice(nullptr_t)
+inline udSharedSlice<T>::udSharedSlice(nullptr_t)
   : rc(nullptr)
 {}
 
 template<typename T>
-inline udRCSlice<T>::udRCSlice(std::initializer_list<T> list)
+inline udSharedSlice<T>::udSharedSlice(std::initializer_list<T> list)
   : udSlice<T>(alloc(list.begin(), list.size()))
   , rc(nullptr)
 {
@@ -530,7 +609,7 @@ inline udRCSlice<T>::udRCSlice(std::initializer_list<T> list)
 }
 
 template <typename T>
-inline udRCSlice<T>::udRCSlice(udRCSlice<T> &&rval)
+inline udSharedSlice<T>::udSharedSlice(udSharedSlice<T> &&rval)
   : udSlice<T>(rval)
   , rc(rval.rc)
 {
@@ -538,7 +617,7 @@ inline udRCSlice<T>::udRCSlice(udRCSlice<T> &&rval)
 }
 
 template <typename T>
-inline udRCSlice<T>::udRCSlice(const udRCSlice<T> &rcslice)
+inline udSharedSlice<T>::udSharedSlice(const udSharedSlice<T> &rcslice)
   : udSlice<T>(rcslice)
   , rc(rcslice.rc)
 {
@@ -548,7 +627,7 @@ inline udRCSlice<T>::udRCSlice(const udRCSlice<T> &rcslice)
 
 template <typename T>
 template <typename U>
-inline udRCSlice<T>::udRCSlice(U *ptr, size_t length)
+inline udSharedSlice<T>::udSharedSlice(U *ptr, size_t length)
   : udSlice<T>(alloc(ptr, length))
   , rc(nullptr)
 {
@@ -557,7 +636,7 @@ inline udRCSlice<T>::udRCSlice(U *ptr, size_t length)
 
 template <typename T>
 template <typename U>
-inline udRCSlice<T>::udRCSlice(udSlice<U> slice)
+inline udSharedSlice<T>::udSharedSlice(udSlice<U> slice)
   : udSlice<T>(alloc(slice.ptr, slice.length))
   , rc(nullptr)
 {
@@ -565,18 +644,18 @@ inline udRCSlice<T>::udRCSlice(udSlice<U> slice)
 }
 
 template <typename T>
-inline udRCSlice<T>::~udRCSlice()
+inline udSharedSlice<T>::~udSharedSlice()
 {
   if (rc && --rc->refCount == 0)
     udFree(rc);
 }
 
 template <typename T>
-inline udRCSlice<T>& udRCSlice<T>::operator =(const udRCSlice<T> &rh)
+inline udSharedSlice<T>& udSharedSlice<T>::operator =(const udSharedSlice<T> &rh)
 {
   if(rc != rh.rc)
   {
-    this->~udRCSlice();
+    this->~udSharedSlice();
     rc = rh.rc;
     ++rc->refCount;
   }
@@ -585,39 +664,39 @@ inline udRCSlice<T>& udRCSlice<T>::operator =(const udRCSlice<T> &rh)
 }
 
 template <typename T>
-inline udRCSlice<T>& udRCSlice<T>::operator =(udRCSlice<T> &&rval)
+inline udSharedSlice<T>& udSharedSlice<T>::operator =(udSharedSlice<T> &&rval)
 {
   if (this != &rval)
   {
-    this->~udRCSlice();
-    new(this) udRCSlice<T>(std::move(rval));
+    this->~udSharedSlice();
+    new(this) udSharedSlice<T>(std::move(rval));
   }
   return *this;
 }
 
 template <typename T>
 template <typename U>
-inline udRCSlice<T>& udRCSlice<T>::operator =(udSlice<U> rh)
+inline udSharedSlice<T>& udSharedSlice<T>::operator =(udSlice<U> rh)
 {
-  *this = udRCSlice(rh);
+  *this = udSharedSlice(rh);
   return *this;
 }
 
 template <typename T>
-udRCSlice<T> udRCSlice<T>::alloc(size_t elements)
+inline udSharedSlice<T> udSharedSlice<T>::alloc(size_t elements)
 {
-  return udRCSlice<T>(udAllocType(T, elements, udAF_None), elements);
+  return udSharedSlice<T>(udAllocType(T, elements, udAF_None), elements);
 }
 
 template <typename T>
-inline udRCSlice<T> udRCSlice<T>::slice(size_t first, size_t last) const
+inline udSharedSlice<T> udSharedSlice<T>::slice(size_t first, size_t last) const
 {
   UDASSERT(last <= this->length && first <= last, "Index out of range!");
-  return udRCSlice(this->ptr + first, last - first, rc);
+  return udSharedSlice(this->ptr + first, last - first, rc);
 }
 
 template <typename T>
-inline udRCSlice<T>::udRCSlice(T *ptr, size_t length, udRC *rc)
+inline udSharedSlice<T>::udSharedSlice(T *ptr, size_t length, udRC *rc)
   : udSlice<T>(ptr, length)
   , rc(rc)
 {
@@ -626,7 +705,7 @@ inline udRCSlice<T>::udRCSlice(T *ptr, size_t length, udRC *rc)
 }
 
 template <typename T>
-inline size_t udRCSlice<T>::numToAlloc(size_t i)
+inline size_t udSharedSlice<T>::numToAlloc(size_t i)
 {
   // TODO: i'm sure we can imagine a better heuristic...
   return i > 16 ? i : 16;
@@ -634,7 +713,7 @@ inline size_t udRCSlice<T>::numToAlloc(size_t i)
 
 template <typename T>
 template <typename U>
-inline udSlice<T> udRCSlice<T>::alloc(U *ptr, size_t length)
+inline udSlice<T> udSharedSlice<T>::alloc(U *ptr, size_t length)
 {
   if(!ptr || !length)
     return udSlice<T>();
@@ -644,7 +723,7 @@ inline udSlice<T> udRCSlice<T>::alloc(U *ptr, size_t length)
 
 template <typename T>
 template <typename U>
-inline void udRCSlice<T>::init(U *ptr, size_t length)
+inline void udSharedSlice<T>::init(U *ptr, size_t length)
 {
   if(!ptr || !length)
     return;
@@ -705,7 +784,7 @@ inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::concat(const Things&... t
 
 template<typename T>
 template<typename... Things>
-inline udRCSlice<T> udRCSlice<T>::concat(const Things&... things)
+inline udSharedSlice<T> udSharedSlice<T>::concat(const Things&... things)
 {
   size_t len = count(0, things...);
   udRC *pRC = (udRC*)udAlloc(sizeof(udRC) + sizeof(T)*len);
@@ -713,5 +792,5 @@ inline udRCSlice<T> udRCSlice<T>::concat(const Things&... things)
   pRC->allocatedCount = len;
   T *ptr = (T*)(pRC + 1);
   append<T>(ptr, things...);
-  return udRCSlice(ptr, len, pRC);
+  return udSharedSlice(ptr, len, pRC);
 }

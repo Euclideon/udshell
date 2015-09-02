@@ -94,7 +94,7 @@ public:
   }
 
 protected:
-  DataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  DataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 
   virtual void Create(StreamRef spSource) {}
 

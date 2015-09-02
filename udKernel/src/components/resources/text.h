@@ -21,7 +21,7 @@ public:
   void CopyBuffer(udString text) { Buffer::CopyBuffer(text.ptr, text.length); }
 
 protected:
-  Text(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  Text(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Buffer(pType, pKernel, uid, initParams) {}
   virtual ~Text() {}
 };

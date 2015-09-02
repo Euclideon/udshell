@@ -22,20 +22,20 @@ class Shader : public Resource
 public:
   UD_COMPONENT(Shader);
 
-  udRCString GetCode() const { return code; }
-  void SetCode(udRCString code) { this->code = code; }
+  udSharedString GetCode() const { return code; }
+  void SetCode(udSharedString code) { this->code = code; }
 
 protected:
   friend class Material;
   friend class RenderShader;
 
-  Shader(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  Shader(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Shader() {}
 
   RenderShaderRef GetRenderShader(int type);
 
-  udRCString code;
+  udSharedString code;
 
   RenderShaderRef spRenderShader = nullptr;
 };

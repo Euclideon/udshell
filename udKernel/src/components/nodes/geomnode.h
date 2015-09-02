@@ -20,7 +20,7 @@ public:
   void SetModel(ModelRef spModel) { this->spModel = spModel; }
 
 protected:
-  GeomNode(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  GeomNode(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Node(pType, pKernel, uid, initParams) {}
   virtual ~GeomNode() {}
 

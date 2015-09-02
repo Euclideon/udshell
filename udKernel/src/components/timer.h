@@ -35,7 +35,7 @@ public:
   void MessageCallback(Kernel *pKernel);
 
 private:
-  Timer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  Timer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
   virtual ~Timer();
 
   static void TimerCallback(HalTimer *pTimer, void *pParam);

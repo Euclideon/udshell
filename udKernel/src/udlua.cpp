@@ -420,7 +420,7 @@ int LuaState::componentCleaner(lua_State* L)
 int LuaState::componentToString(lua_State* L)
 {
   ComponentRef *pComponent = (ComponentRef*)lua_touserdata(L, 1);
-  udFixedString64 s;
+  udMutableString64 s;
   s.concat("@", (*pComponent)->GetUid());
   lua_pushlstring(L, s.ptr, s.length);
   return 1;
@@ -495,7 +495,7 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // TODO: make better error message, this doesn't feel right
-  udFixedString64 errorMsg = udFixedString64::format("Error: '%s' not found", field);
+  udMutableString64 errorMsg; errorMsg.sprintf("Error: '%s' not found", field);
   l.print(errorMsg);
 
   // return nil
@@ -533,7 +533,7 @@ int LuaState::componentNewIndex(lua_State* L)
   }
 
   // return nil (already on stack)
-  udFixedString64 errorMsg = udFixedString64::format("Error: '%s' not found", field);
+  udMutableString64 errorMsg; errorMsg.sprintf("Error: '%s' not found", field);
   l.print(errorMsg);
   return 0;
 }
@@ -574,7 +574,7 @@ int LuaState::help(lua_State* L)
   ComponentRef c = l.toComponent(1);
   const ComponentDesc *pDesc = c->pType;
 
-  udFixedString256 buffer;
+  udMutableString256 buffer;
   if (numArgs > 1)
   {
     // help for member
@@ -591,7 +591,7 @@ int LuaState::help(lua_State* L)
     SetConsoleColor();
     l.print(pDesc->description);
 
-    udFixedString64 buf;
+    udMutableString64 buf;
     if (pDesc->propertyTree.Size() > 0)
     {
       l.print("\nProperties:");
@@ -599,7 +599,7 @@ int LuaState::help(lua_State* L)
       SetConsoleColor(ConsoleColor::Green);
       for (auto &p : pDesc->propertyTree)
       {
-        buf = udFixedString64::format("  %-16s - %s", (const char*)p.info.id.toStringz(), (const char*)p.info.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)p.info.id.toStringz(), (const char*)p.info.description.toStringz());
         l.print(buf);
       }
     }
@@ -613,7 +613,7 @@ int LuaState::help(lua_State* L)
       for (auto &m : pDesc->methodTree)
       {
 /*
-        udFixedString64 func = udFixedString64::format("%s(", m->id.toStringz());
+        udMutableString64 func = udMutableString64::format("%s(", m->id.toStringz());
         for (size_t i = 0; i < m->args.length; ++i)
         {
           func.concat(m->args[i].name);
@@ -625,7 +625,7 @@ int LuaState::help(lua_State* L)
         else
           func.concat(")");
 */
-        buf = udFixedString64::format("  %-16s - %s", (const char*)m.info.id.toStringz(), (const char*)m.info.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)m.info.id.toStringz(), (const char*)m.info.description.toStringz());
         l.print(buf);
       }
     }
@@ -638,7 +638,7 @@ int LuaState::help(lua_State* L)
       SetConsoleColor(ConsoleColor::Yellow);
       for (auto &e : pDesc->eventTree)
       {
-        buf = udFixedString64::format("  %-16s - %s", (const char*)e.info.id.toStringz(), (const char*)e.info.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)e.info.id.toStringz(), (const char*)e.info.description.toStringz());
         l.print(buf);
       }
     }

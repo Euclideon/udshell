@@ -1,7 +1,7 @@
 
 #include "helpers.h"
 
-udRCSlice<const udKeyValuePair> udParseCommandLine(const char *pCommandLine)
+udSharedSlice<const udKeyValuePair> udParseCommandLine(const char *pCommandLine)
 {
   udFixedSlice<const udKeyValuePair, 64> output;
   output.concat(udKeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
@@ -25,10 +25,10 @@ udRCSlice<const udKeyValuePair> udParseCommandLine(const char *pCommandLine)
       output.pushBack(udKeyValuePair(nullptr, udString(pCommandLine + start, i - start)));
   }
 
-  return udRCSlice<const udKeyValuePair>(output);
+  return udSharedSlice<const udKeyValuePair>(output);
 }
 
-udRCSlice<const udKeyValuePair> udParseCommandLine(int argc, char *argv[])
+udSharedSlice<const udKeyValuePair> udParseCommandLine(int argc, char *argv[])
 {
   udFixedSlice<const udKeyValuePair, 64> output;
   output.reserve(argc);
@@ -38,10 +38,10 @@ udRCSlice<const udKeyValuePair> udParseCommandLine(int argc, char *argv[])
   for (int i = 0; i < argc; ++i)
     output.pushBack(udKeyValuePair(nullptr, udString(argv[i])));
 
-  return udRCSlice<const udKeyValuePair>(output.slice(0, argc));
+  return udSharedSlice<const udKeyValuePair>(output.slice(0, argc));
 }
 
-udRCSlice<const udKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
+udSharedSlice<const udKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
 {
   udFixedSlice<const udKeyValuePair, 64> output;
   output.reserve(argc);
@@ -49,5 +49,5 @@ udRCSlice<const udKeyValuePair> udParseCommandLine(uint32_t argc, const char* ar
   for (uint32_t i = 0; i < argc; ++i)
     output.pushBack(udKeyValuePair(udString(argn[i]), udString(argv[i])));
 
-  return udRCSlice<const udKeyValuePair>(output.slice(0, argc));
+  return udSharedSlice<const udKeyValuePair>(output.slice(0, argc));
 }

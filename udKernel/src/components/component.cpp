@@ -150,12 +150,12 @@ udVariant Component::GetProperty(udString property) const
 
 udResult Component::ReceiveMessage(udString message, udString sender, const udVariant &data)
 {
-  if (message.eqi("set"))
+  if (message.eqIC("set"))
   {
     udSlice<udVariant> arr = data.asArray();
     SetProperty(arr[0].asString(), arr[1]);
   }
-  else if (message.eqi("get"))
+  else if (message.eqIC("get"))
   {
     if (!sender.empty())
     {

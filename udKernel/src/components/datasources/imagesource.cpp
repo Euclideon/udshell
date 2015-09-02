@@ -47,7 +47,7 @@ void ImageSource::Create(StreamRef spSource)
     spImage->Unmap();
 
     // add resource
-    udFixedString64 buffer = udFixedString64::format("image%d", i);
+    udMutableString64 buffer; buffer.sprintf("image%d", i);
     resources.Insert(buffer, spImage);
   }
 }

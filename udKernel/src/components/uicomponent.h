@@ -15,11 +15,11 @@ public:
   UD_COMPONENT(UIComponent);
 
 protected:
-  UIComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  UIComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Component(pType, pKernel, uid, initParams) {}
   virtual ~UIComponent() {}
 
-  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 };
 
 } // namespace ud

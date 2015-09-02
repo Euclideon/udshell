@@ -20,7 +20,7 @@ struct AVLCompare<udString>
   }
 };
 template<>
-struct AVLCompare<udRCString>
+struct AVLCompare<udSharedString>
 {
   UDFORCE_INLINE ptrdiff_t operator()(udString a, udString b)
   {

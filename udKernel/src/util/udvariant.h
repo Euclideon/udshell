@@ -64,7 +64,7 @@ public:
   Type type() const;
   bool is(Type type) const;
 
-  udRCString stringify() const;
+  udSharedString stringify() const;
 
   template<typename T>
   T as() const;

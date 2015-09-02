@@ -57,7 +57,7 @@ public:
   UDModelRef GetUDModel() const { return  spModel;  } // TODO: Remove this once its no longer required by udglViewer
 
 protected:
-  UDNode(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  UDNode(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Node(pType, pKernel, uid, initParams) { clipArea.minX = clipArea.minY = clipArea.maxX = clipArea.maxY = 0; }
 
   udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;

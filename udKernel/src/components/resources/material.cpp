@@ -104,7 +104,7 @@ void Material::SetShader(ShaderType type, ShaderRef spShader)
   OnShaderChanged();
 }
 
-void Material::SetMaterialProperty(udRCString property, const udFloat4 &val)
+void Material::SetMaterialProperty(udSharedString property, const udFloat4 &val)
 {
   properties.Insert(property, val);
 }
