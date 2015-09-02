@@ -14,8 +14,9 @@ class MemStream : public Stream
 public:
   UD_COMPONENT(MemStream);
 
-  size_t Read(void *pData, size_t bytes) override;
-  size_t Write(const void *pData, size_t bytes) override;
+  udSlice<void> Read(udSlice<void> buffer) override;
+  size_t Write(udSlice<const void> data) override;
+
   int64_t Seek(SeekOrigin rel, int64_t offset) override;
 
   BufferRef GetBuffer() const;
@@ -28,7 +29,7 @@ protected:
   static const size_t DefaultBufferSize = 102400;
 
   BufferRef spBuffer;
-  void *pBufArray;
+  udSlice<void> buffer;
   OpenFlags oFlags;
 };
 

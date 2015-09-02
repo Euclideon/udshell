@@ -70,9 +70,8 @@ RenderArray::RenderArray(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, Arra
     pArray = udVertex_CreateIndexBuffer(elements[0]);
   }
 
-  size_t size;
-  const void *pData = spArrayBuffer->MapForRead(&size);
-  udVertex_SetArrayBufferData(pArray, pData, size);
+  udSlice<const void> data = spArrayBuffer->MapForRead();
+  udVertex_SetArrayBufferData(pArray, data.ptr, data.length);
   spArrayBuffer->Unmap();
 }
 RenderArray::~RenderArray()

@@ -22,12 +22,12 @@ public:
   bool Resize(size_t size) { return _Resize(size, true); }
   size_t GetBufferSize() const;
 
-  void* Map(size_t *pSize = nullptr);
-  const void* MapForRead(size_t *pSize = nullptr);
+  udSlice<void> Map();
+  udSlice<const void> MapForRead();
   void Unmap();
 
   bool CopyBuffer(BufferRef buffer);
-  bool CopyBuffer(const void *pBuffer, size_t size);
+  bool CopyBuffer(udSlice<const void> buffer);
 
 protected:
   Buffer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
@@ -36,7 +36,7 @@ protected:
 
   bool _Resize(size_t size, bool copy);
 
-  udSlice<char> buffer;
+  udSlice<void> buffer;
 
   size_t logicalSize = 0;
   int mapDepth = 0;

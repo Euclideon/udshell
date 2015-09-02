@@ -97,25 +97,21 @@ public:
 
   // ArrayBuffer overrides the map functions
   template<typename T = void>
-  T* Map(size_t *pNumElements = nullptr)
+  udSlice<T> Map()
   {
     UDASSERT(stringof<T>().eq(elementType), "Incompatible type!");
-    size_t size;
-    void *pBuffer = Buffer::Map(&size);
-    if (pNumElements)
-      *pNumElements = size/sizeof(T);
-    return (T*)pBuffer;
+    udSlice<void> buffer = Buffer::Map();
+    return udSlice<T>((T*)buffer.ptr, buffer.length/sizeof(T));
   }
 
   template<typename T = void>
-  const T* MapForRead(size_t *pNumElements = nullptr)
+  udSlice<const T> MapForRead()
   {
     UDASSERT(stringof<T>().eq(elementType), "Incompatible type!");
-    size_t size;
-    const void *pBuffer = Buffer::MapForRead(&size);
+    udSlice<void> buffer = Buffer::MapForRead();
     if (pNumElements)
-      *pNumElements = size/sizeof(T);
-    return (const T*)pBuffer;
+      *pNumElements = buffer.length/sizeof(T);
+    return udSlice<const T>((const T*)buffer.ptr, buffer.length/sizeof(T));
   }
 
   template<typename T>
@@ -172,10 +168,10 @@ protected:
 };
 
 template<>
-inline void* ArrayBuffer::Map<void>(size_t *pSize) { return Buffer::Map(pSize); }
+inline udSlice<void> ArrayBuffer::Map<void>() { return Buffer::Map(); }
 
 template<>
-inline const void* ArrayBuffer::MapForRead<void>(size_t *pSize) { return Buffer::MapForRead(pSize); }
+inline udSlice<const void> ArrayBuffer::MapForRead<void>() { return Buffer::MapForRead(); }
 
 
 } // namespace ud

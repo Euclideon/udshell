@@ -32,8 +32,9 @@ void ImageSource::Create(StreamRef spSource)
   void *pBuffer = udAlloc((size_t)len);
 
   // read file from source
-  IF_UDASSERT(size_t read =) spSource->Read(pBuffer, (size_t)len);
-  UDASSERT((int64_t)read == len, "!");
+  udSlice<void> buf(pBuffer, (size_t)len);
+  buf = spSource->Read(buf);
+  UDASSERT((int64_t)buf.length == len, "!");
 
   // load the image
   udImage *pImage = udImage_ReadImage(pBuffer, (size_t)len, nullptr);
@@ -47,16 +48,18 @@ void ImageSource::Create(StreamRef spSource)
     spImage->Allocate("{u8[4]}", 4, { s.width, s.height });
 
     // write image to to the array buffer
-    size_t size;
-    void *pMem = spImage->Map(&size);
-    UDASSERT(size == s.width*s.height*4, "Wrong size?!");
-    memcpy(pMem, s.pImage, s.width*s.height*4);
+    udSlice<void> mem = spImage->Map();
+    UDASSERT(mem.length == s.width*s.height*4, "Wrong size?!");
+//    mem.copyTo(udSlice<void>(s.pImage, s.width*s.height*4)); // TODO: use copyTo()...
+    memcpy(mem.ptr, s.pImage, s.width*s.height*4);
     spImage->Unmap();
 
     // add resource
     udMutableString64 buffer; buffer.concat("image", i);
     resources.Insert(buffer, spImage);
   }
+
+  udFree(pBuffer);
 }
 
 udResult ImageSource::RegisterExtensions(Kernel *pKernel)

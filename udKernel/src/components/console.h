@@ -20,8 +20,8 @@ class Console : public Stream
 public:
   UD_COMPONENT(Console);
 
-  size_t Read(void *pData, size_t bytes) override;
-  size_t Write(const void *pData, size_t bytes) override;
+  udSlice<void> Read(udSlice<void> buffer) override;
+  size_t Write(udSlice<const void> data) override;
   int Flush() override;
 
 protected:

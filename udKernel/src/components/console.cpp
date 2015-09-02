@@ -41,30 +41,24 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
     pOut = stdout;
 }
 
-size_t Console::Read(void *pData, size_t bytes)
+udSlice<void> Console::Read(udSlice<void> buffer)
 {
-  size_t read;
-
-  read = fread(pData, 1, bytes, pIn);
-
-  return read;
+  size_t read = fread(buffer.ptr, 1, buffer.length, pIn);
+  return buffer.slice(0, read);
 }
 
-size_t Console::Write(const void *pData, size_t bytes)
+size_t Console::Write(udSlice<const void> data)
 {
-  size_t written;
-
   if (bDbgOutput)
   {
 #if UDPLATFORM_WINDOWS
-    OutputDebugString((LPCSTR)pData);
+    udString s((const char*)data.ptr, data.length);
+    OutputDebugString((LPCSTR)s.toStringz());
 #endif
-    written = bytes;
+    return data.length;
   }
   else
-    written = fwrite(pData, 1, bytes, pOut);
-
-  return written;
+    return fwrite(data.ptr, 1, data.length, pOut);
 }
 
 int Console::Flush()

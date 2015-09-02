@@ -85,60 +85,61 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
   size_t len = 0;
   if (oFlags & OpenFlags::Write)
   {
-    pBufArray = spBuffer->Map(&len);
-    if (!pBufArray)
+    buffer = spBuffer->Map();
+    if (!buffer)
       LogError("Can't reserve Buffer for writing.");
   }
   else if (oFlags & OpenFlags::Read)
   {
-    pBufArray = const_cast<void *>(spBuffer->MapForRead(&len));
-    if (!pBufArray)
+    auto map = spBuffer->MapForRead();
+    buffer = udSlice<void>(const_cast<void*>(map.ptr), map.length);
+    if (!buffer)
       LogError("Can't reserve Buffer for reading.");
   }
   length = len;
 
-  if (!pBufArray)
+  if (!buffer)
   {
     spBuffer = nullptr;
     return; // TODO Error handling
   }
 }
 
-size_t MemStream::Read(void *pData, size_t bytes)
+udSlice<void> MemStream::Read(udSlice<void> buffer)
 {
   if (!spBuffer)
     return 0;
 
+  size_t bytes = buffer.length;
   if (pos + bytes > (size_t)length)
     bytes = size_t(length - pos);
 
-  memcpy(pData, (char *)pBufArray + pos, bytes);
+  memcpy(buffer.ptr, (const char*)buffer.ptr + pos, bytes);
   pos += bytes;
 
-  return bytes;
+  return udSlice<void>(buffer.ptr, bytes);
 }
 
-size_t MemStream::Write(const void *pData, size_t bytes)
+size_t MemStream::Write(udSlice<const void> data)
 {
   if (!(oFlags & OpenFlags::Write) || !spBuffer)
     return 0;
 
-  if (pos + bytes > (size_t)length)
+  if (pos + data.length > (size_t)length)
   {
     spBuffer->Unmap();
-    spBuffer->Resize(size_t(pos + bytes));
+    spBuffer->Resize(size_t(pos + data.length));
 
-    size_t len = 0;
-    pBufArray = spBuffer->Map(&len);
-    length = len;
+    buffer = spBuffer->Map();
+    length = buffer.length;
   }
 
-  memcpy((char *)pBufArray + pos, pData, bytes);
-  pos += bytes;
+  memcpy((char*)buffer.ptr + pos, data.ptr, data.length);
+  pos += data.length;
 
   spBuffer->Changed.Signal();
 
-  return bytes;
+  return data.length;
 }
 
 int64_t MemStream::Seek(SeekOrigin rel, int64_t offset)

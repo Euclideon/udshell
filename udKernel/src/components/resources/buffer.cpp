@@ -81,34 +81,22 @@ size_t Buffer::GetBufferSize() const
   return logicalSize;
 }
 
-void* Buffer::Map(size_t *pSize)
+udSlice<void> Buffer::Map()
 {
   if (!buffer.ptr || mapDepth > 0)
-  {
-    if (pSize)
-      *pSize = 0;
     return nullptr;
-  }
   readMap = false;
   ++mapDepth;
-  if (pSize)
-    *pSize = logicalSize;
-  return buffer.ptr;
+  return udSlice<void>(buffer.ptr, logicalSize);
 }
 
-const void* Buffer::MapForRead(size_t *pSize)
+udSlice<const void> Buffer::MapForRead()
 {
   if (!buffer.ptr || (mapDepth > 0 && !readMap))
-  {
-    if (pSize)
-      *pSize = 0;
     return nullptr;
-  }
   readMap = true;
   ++mapDepth;
-  if (pSize)
-    *pSize = logicalSize;
-  return buffer.ptr;
+  return udSlice<void>(buffer.ptr, logicalSize);
 }
 
 void Buffer::Unmap()
@@ -122,27 +110,26 @@ bool Buffer::CopyBuffer(BufferRef buffer)
   if (mapDepth > 0)
     return false; // TODO Error handling
 
-  size_t size;
-  const void *pBuffer = buffer->MapForRead(&size);
-  UDASSERT(pBuffer != nullptr, "Unable to map buffer!");
-  if (pBuffer)
+  udSlice<const void> buf = buffer->MapForRead();
+  UDASSERT(buf != nullptr, "Unable to map buffer!");
+  if (buf != nullptr)
   {
-    CopyBuffer(pBuffer, size);
+    CopyBuffer(buf);
     buffer->Unmap();
   }
 
   return true; // TODO Error handling
 }
 
-bool Buffer::CopyBuffer(const void *pBuffer, size_t size)
+bool Buffer::CopyBuffer(udSlice<const void> _buffer)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
 
-  if (logicalSize < size)
-    _Resize(size, false);
+  if (logicalSize < _buffer.length)
+    _Resize(_buffer.length, false);
 
-  memcpy(buffer.ptr, pBuffer, size);
+  memcpy(buffer.ptr, _buffer.ptr, _buffer.length);
 
   Changed.Signal();
   return true; // TODO Error handling
