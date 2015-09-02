@@ -28,6 +28,9 @@ public:
   virtual size_t Read(void *pData, size_t bytes) { return 0; }
   virtual size_t Write(const void *pData, size_t bytes) { return 0; }
 
+  virtual size_t WriteLn(udString str);
+  virtual udString ReadLn(udSlice<char> buf);
+
   virtual int Flush() { return 0; }
 
   BufferRef ReadBuffer(size_t bytes);

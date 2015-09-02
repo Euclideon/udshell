@@ -67,28 +67,6 @@ size_t Console::Write(const void *pData, size_t bytes)
   return written;
 }
 
-size_t Console::WriteLn(udString str)
-{
-  size_t written;
-
-  written = fwrite(str.ptr, 1, str.length, pOut);
-  written += fwrite("\n", 1, 1, pOut);
-
-  return written;
-}
-
-udString Console::ReadLn(udSlice<char> buf)
-{
-  size_t read;
-
-  fgets(buf.ptr, (int)buf.length, pOut);
-
-  read = strlen(buf.ptr) - 1;
-  buf[read] = '\0';
-
-  return buf.ptr;
-}
-
 int Console::Flush()
 {
   if (pOut)

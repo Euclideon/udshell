@@ -131,9 +131,9 @@ int Logger::Log(int level, udString text, LogCategories category, udString compo
       if (s.format & LogFormatSpecs::Category)
         out.concat(category.StringOf(), ": ");
 
-      out.concat(text, "\n");
+      out.concat(text);
 
-      s.spStream->Write(out.toStringz(), out.length);
+      s.spStream->WriteLn(out);
       s.spStream->Flush();
     }
   }
