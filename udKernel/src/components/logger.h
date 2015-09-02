@@ -49,17 +49,19 @@ public:
 
   int Log(int level, udString text, LogCategories category = LogCategories::Debug, udString componentUID = nullptr);
 
-  void Enable();
-  void Disable();
+  bool GetEnabled() const { return bEnabled; }
+  void SetEnabled(bool bEnable) { this->bEnabled = bEnable; }
 
   void AddStream(StreamRef spStream, LogCategories categories = LogDefaults::Categories, int level = LogDefaults::Level, LogFormatSpecs format = LogDefaults::Format);
   int RemoveStream(StreamRef spStream);
-  int SetLevel(StreamRef spStream, int level);
+
   int GetLevel(StreamRef spStream) const;
-  int SetCategories(StreamRef spStream, LogCategories categories);
-  LogCategories GetCategories(StreamRef spStream) const;
+  int SetLevel(StreamRef spStream, int level);
+
   int AddCategory(StreamRef spStream, LogCategories category);
   int RemoveCategory(StreamRef spStream, LogCategories category);
+  LogCategories GetCategories(StreamRef spStream) const;
+  int SetCategories(StreamRef spStream, LogCategories categories);
 
 protected:
   Logger(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
