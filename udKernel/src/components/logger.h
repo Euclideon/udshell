@@ -26,8 +26,8 @@ UD_BITFIELD(LogFormatSpecs,
 );
 
 UD_ENUM(LogDefaults,
-  Level = 3,
-  Categories = LogCategories::Error,
+  Level = 5,
+  Categories = (LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace),
   Format = (LogFormatSpecs::Timestamp | LogFormatSpecs::Category | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)
 );
 
