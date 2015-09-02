@@ -26,18 +26,19 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, ud
 
   if (out == ConsoleOutputs::StdDbg)
   {
-    if (UD_DEBUG && UDPLATFORM_WINDOWS && IsDebuggerPresent())
+    pOut = stderr;
+#if UD_DEBUG && UDPLATFORM_WINDOWS
+    if (IsDebuggerPresent())
     {
       pOut = nullptr;
       bDbgOutput = true;
     }
-    else
-      pOut = stderr;
+#endif
   }
-  else if (out == ConsoleOutputs::StdOut)
-    pOut = stdout;
-  else
+  else if (out == ConsoleOutputs::StdErr)
     pOut = stderr;
+  else
+    pOut = stdout;
 }
 
 size_t Console::Read(void *pData, size_t bytes)
@@ -55,7 +56,9 @@ size_t Console::Write(const void *pData, size_t bytes)
 
   if (bDbgOutput)
   {
+#if UDPLATFORM_WINDOWS
     OutputDebugString((LPCSTR)pData);
+#endif
     written = bytes;
   }
   else
@@ -64,23 +67,26 @@ size_t Console::Write(const void *pData, size_t bytes)
   return written;
 }
 
-size_t Console::WriteLn(const char *pData)
+size_t Console::WriteLn(udString str)
 {
-  fputs(pData, pOut);
+  size_t written;
 
-  return strlen(pData);
+  written = fwrite(str.ptr, 1, str.length, pOut);
+  written += fwrite("\n", 1, 1, pOut);
+
+  return written;
 }
 
-size_t Console::ReadLn(char *pData, size_t bytes)
+udString Console::ReadLn(udSlice<char> buf)
 {
   size_t read;
 
-  fgets(pData, (int)bytes, pOut);
+  fgets(buf.ptr, (int)buf.length, pOut);
 
-  read = strlen(pData) - 1;
-  pData[read] = '\0';
+  read = strlen(buf.ptr) - 1;
+  buf[read] = '\0';
 
-  return read;
+  return buf.ptr;
 }
 
 int Console::Flush()

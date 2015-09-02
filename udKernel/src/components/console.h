@@ -24,8 +24,8 @@ public:
   size_t Write(const void *pData, size_t bytes) override;
   int Flush() override;
 
-  size_t ReadLn(char *pData, size_t bytes);
-  size_t WriteLn(const char *pData);
+  size_t WriteLn(udString str);
+  udString ReadLn(udSlice<char> buf);
 
 protected:
   Console(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);

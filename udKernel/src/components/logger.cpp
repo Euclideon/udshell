@@ -90,10 +90,10 @@ Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
   return nullptr;
 }
 
-int Logger::Log(int level, const udString text, LogCategories category, const udString componentUID)
+int Logger::Log(int level, udString text, LogCategories category, udString componentUID)
 {
   udFixedString<1024> out;
-  char timeStr[1024];
+  char timeStr[64];
 
   for (auto &s : streamList)
   {
@@ -106,7 +106,7 @@ int Logger::Log(int level, const udString text, LogCategories category, const ud
           time_t ti = time(nullptr);
           struct tm _tm;
           localtime_s(&_tm, &ti);
-          strftime(timeStr, 1024, "[%d/%m/%d %H:%M:%S]", &_tm);
+          strftime(timeStr, 64, "[%d/%m/%d %H:%M:%S]", &_tm);
           out.concat(timeStr);
       }
       if (s.format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID))
@@ -151,12 +151,9 @@ void Logger::Disable()
   bEnabled = false;
 }
 
-int Logger::AddStream(StreamRef spStream, LogCategories categories, int level, LogFormatSpecs format)
+void Logger::AddStream(StreamRef spStream, LogCategories categories, int level, LogFormatSpecs format)
 {
-  spStream->Seek(Stream::SeekOrigin::End, 0);
   streamList.pushBack(LogStream(spStream, categories, level, format));
-
-  return 0;
 }
 
 int Logger::RemoveStream(StreamRef spStream)
@@ -168,6 +165,7 @@ int Logger::RemoveStream(StreamRef spStream)
     return 0;
   }
 
+  // TODO Fix error checking
   return -1;
 }
 
@@ -179,6 +177,7 @@ int Logger::SetLevel(StreamRef spStream, int level)
     return 0;
   }
 
+  // TODO Fix error checking
   return -1;
 }
 
@@ -187,6 +186,7 @@ int Logger::GetLevel(StreamRef spStream) const
   if (LogStream *pLogStream = FindLogStream(spStream))
     return pLogStream->level;
 
+  // TODO Fix error checking
   return -1;
 }
 
@@ -198,6 +198,7 @@ int Logger::SetCategories(StreamRef spStream, LogCategories categories)
     return 0;
   }
 
+  // TODO Fix error checking
   return -1;
 }
 
@@ -206,6 +207,7 @@ LogCategories Logger::GetCategories(StreamRef spStream) const
   if (LogStream *pLogStream = FindLogStream(spStream))
     return pLogStream->categories;
 
+  // TODO Fix error checking
   return -1;
 }
 
@@ -217,6 +219,7 @@ int Logger::AddCategory(StreamRef spStream, LogCategories category)
     return 0;
   }
 
+  // TODO Fix error checking
   return -1;
 }
 
@@ -228,6 +231,7 @@ int Logger::RemoveCategory(StreamRef spStream, LogCategories category)
     return 0;
   }
 
+  // TODO Fix error checking
   return -1;
 }
 

@@ -30,7 +30,7 @@ protected:
   File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
   ~File();
 
-  char *GetfopenFlags(FileOpenFlags flags) const;
+  udString GetfopenFlags(FileOpenFlags flags) const;
   int GetPosixOpenFlags(FileOpenFlags flags) const;
 
   FILE *pFile;

@@ -7,19 +7,18 @@
 
 namespace ud
 {
-
 PROTOTYPE_COMPONENT(Stream);
+
+UD_ENUM(SeekOrigin,
+  Begin,
+  CurrentPos,
+  End
+);
 
 class Stream : public Component
 {
 public:
   UD_COMPONENT(Stream);
-
-  UD_ENUM(SeekOrigin,
-    Begin,
-    CurrentPos,
-    End
-  );
 
   int64_t Length() const { return length; }
 

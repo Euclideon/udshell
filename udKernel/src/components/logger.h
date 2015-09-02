@@ -47,12 +47,12 @@ public:
     LogFormatSpecs format;
   };
 
-  int Log(int level, const udString text, LogCategories category = LogCategories::Debug, const udString componentUID = nullptr);
+  int Log(int level, udString text, LogCategories category = LogCategories::Debug, udString componentUID = nullptr);
 
   void Enable();
   void Disable();
 
-  int AddStream(StreamRef spStream, LogCategories categories = LogDefaults::Categories, int level = LogDefaults::Level, LogFormatSpecs format = LogDefaults::Format);
+  void AddStream(StreamRef spStream, LogCategories categories = LogDefaults::Categories, int level = LogDefaults::Level, LogFormatSpecs format = LogDefaults::Format);
   int RemoveStream(StreamRef spStream);
   int SetLevel(StreamRef spStream, int level);
   int GetLevel(StreamRef spStream) const;

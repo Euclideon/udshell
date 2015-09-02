@@ -1,6 +1,6 @@
 #include "components/file.h"
 
-#ifdef UDPLATFORM_WINDOWS
+#if UDPLATFORM_WINDOWS
 #include <io.h>
 #include <share.h>
 #endif
@@ -34,14 +34,14 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitPa
   const udVariant &flags = initParams["flags"];
   FileOpenFlags of = flags.as<FileOpenFlags>();
 
-  char *fFlags = GetfopenFlags(of);
-  if (!fFlags)
+  udString fFlags = GetfopenFlags(of);
+  if (fFlags.empty())
     throw udR_InvalidParameter_;
 
   int posixFlags = GetPosixOpenFlags(of);
 
   int fd;
-#ifdef UDPLATFORM_WINDOWS
+#if UDPLATFORM_WINDOWS
   _sopen_s(&fd, path.asString().toStringz(), posixFlags, SH_DENYNO, S_IREAD | S_IWRITE);
 #else
   fd = _open(path.asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
@@ -49,15 +49,16 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitPa
 
   if (fd == -1)
     throw udR_File_OpenFailure;
-  if (nullptr == (pFile = _fdopen(fd, fFlags)))
+  if (nullptr == (pFile = _fdopen(fd, fFlags.toStringz())))
   {
     _close(fd);
     throw udR_File_OpenFailure;
   }
 
+  long pos = ftell(pFile);
   fseek(pFile, 0L, SEEK_END);
   length = ftell(pFile);
-  fseek(pFile, 0L, SEEK_SET);
+  fseek(pFile, pos, SEEK_SET);
 }
 
 int File::GetPosixOpenFlags(FileOpenFlags flags) const
@@ -90,9 +91,9 @@ int File::GetPosixOpenFlags(FileOpenFlags flags) const
   return posixFlags;
 }
 
-char *File::GetfopenFlags(FileOpenFlags flags) const
+udString File::GetfopenFlags(FileOpenFlags flags) const
 {
-  char *pMode;
+  udString pMode;
 
   if ((flags & FileOpenFlags::Append) && (flags & FileOpenFlags::Read))
   {
@@ -149,6 +150,7 @@ size_t File::Write(const void *pData, size_t bytes)
   fseek(pFile, (long)pos, SEEK_SET);
   written = fwrite(pData, 1, bytes, pFile);
   pos = ftell(pFile);
+  length = udMax(pos, length);
 
   return written;
 }
@@ -178,6 +180,7 @@ int File::Flush()
   if(fflush(pFile))
     return -1;
 
+  // TODO Fix error handling
   return 0;
 }
 
