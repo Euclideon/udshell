@@ -78,16 +78,6 @@ int main(int argc, char *argv[])
     }
   }
 
-  auto spTimer0 = s_pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
-  auto spTimer1 = s_pKernel->CreateComponent<Timer>({ { "duration", 1000 }, { "timertype", "countdown" } });
-
-  auto testDelegate0 = []() -> void { udDebugPrintf("My Event 0\n"); };
-  auto testDelegate1 = []() -> void { udDebugPrintf("My Event 1\n"); };
-
-  spTimer0->Event.Subscribe(FastDelegate<void()>(testDelegate0));
-  spTimer1->Event.Subscribe(FastDelegate<void()>(testDelegate1));
-
-
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
   pView->SetRenderOptions(options);
