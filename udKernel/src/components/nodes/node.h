@@ -19,10 +19,6 @@ class Node : public Resource
 public:
   UD_COMPONENT(Node);
 
-  virtual udResult InputEvent(const udInputEvent &ev) { return udR_Success; }
-  virtual udResult Update(double timeStep) { return udR_Success; }
-  virtual udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat);
-
   virtual void SetMatrix(const udDouble4x4 &mat) { matrix = mat; }
   const udDouble4x4& GetMatrix() const { return matrix; }
 
@@ -40,9 +36,14 @@ public:
   void CalculateWorldMatrix(udDouble4x4 *pMatrix) const;
 
 protected:
+  friend class Scene;
+
   Node(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
-  virtual ~Node() {}
+
+  virtual bool InputEvent(const udInputEvent &ev);
+  virtual bool Update(double timeStep);
+  virtual udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat);
 
   Node *pParent = nullptr;
   udFixedSlice<NodeRef, 3> children;

@@ -28,8 +28,6 @@ class UDNode : public Node
 public:
   UD_COMPONENT(UDNode);
 
-  udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;
-
   uint32_t GetStartingRoot() const { return startingRoot; }
   void SetStartingRoot(uint32_t root) { startingRoot = root; }
 
@@ -61,7 +59,8 @@ public:
 protected:
   UDNode(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
     : Node(pType, pKernel, uid, initParams) { clipArea.minX = clipArea.minY = clipArea.maxX = clipArea.maxY = 0; }
-  virtual ~UDNode() {}
+
+  udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;
 
   udRender_VoxelShaderFunc *pVoxelShader = nullptr;
   udDelegate<NodeRenderModel::SimpleVoxelDlgt> simpleVoxelDel;

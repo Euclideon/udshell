@@ -81,7 +81,7 @@ enum udGamepadControl
   udGC_Max
 };
 
-enum udKeyCodes
+enum udKeyCode
 {
   udKC_Unknown = 0,
 
@@ -221,16 +221,15 @@ struct udInputEvent
   {
     Move,
     Key,
-    Text
   };
 
   struct MoveEvent
   {
-    int32_t xDelta;
-    int32_t yDelta;
+    float xDelta;
+    float yDelta;
 
-    int32_t xAbsolute;
-    int32_t yAbsolute;
+    float xAbsolute;
+    float yAbsolute;
   };
 
   struct KeyEvent
@@ -239,25 +238,20 @@ struct udInputEvent
     int state;
   };
 
-  struct TextEvent
-  {
-  };
-
   EventType eventType;
 
   union
   {
     MoveEvent move;
     KeyEvent key;
-    TextEvent text;
   };
 };
 
 
-inline udKeyCodes udInput_AsciiToKeyCode(unsigned char c)
+inline udKeyCode udInput_AsciiToKeyCode(unsigned char c)
 {
   extern unsigned char udAsciiToUDKey[128];
-  return (udKeyCodes)udAsciiToUDKey[c];
+  return (udKeyCode)udAsciiToUDKey[c];
 }
 
 

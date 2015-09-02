@@ -21,8 +21,8 @@ class Scene : public Component
 public:
   UD_COMPONENT(Scene);
 
-  virtual udResult InputEvent(const udInputEvent &ev);
-  virtual udResult Update(double timeDelta);
+  virtual bool InputEvent(const udInputEvent &ev);
+  virtual void Update(double timeDelta);
 
   NodeRef GetRootNode() const { return rootNode; }
 
@@ -34,7 +34,7 @@ public:
   udResult SetRenderModels(struct udRenderModel models[], size_t numModels);
   const udRenderModel* GetRenderModels(size_t *pNumModels) const { if (pNumModels) { *pNumModels = numRenderModels; } return renderModels; }
 
-  void ForceDirty()
+  void MakeDirty()
   {
     bDirty = true;
     Dirty.Signal();

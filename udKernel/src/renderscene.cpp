@@ -119,7 +119,7 @@ void RenderableView::RenderUD()
     udRender_CreateView(&pRenderView, pRenderEngine, renderWidth, renderHeight);
 
     udRender_SetMatrixF64(pRenderView, udRMT_Projection, projection.a);
-    udRender_SetMatrixF64(pRenderView, udRMT_Camera, view.a);
+    udRender_SetMatrixF64(pRenderView, udRMT_Camera, camera.a);
 
     // allocate render buffers
     uint32_t colorPitch = renderWidth*sizeof(uint32_t);

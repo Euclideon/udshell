@@ -25,6 +25,7 @@ public:
   Renderer *createRenderer() const;
 
 private:
+  ud::ViewRef spView;
   bool dirty;
 
   // TODO: Avoid this crap
@@ -33,6 +34,15 @@ private:
   void componentComplete();
 
   QSGNode *updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData);
+
+  void keyPressEvent(QKeyEvent * event) override;
+  void keyReleaseEvent(QKeyEvent * event) override;
+  void mouseDoubleClickEvent(QMouseEvent *) override;
+  void mouseMoveEvent(QMouseEvent *) override;
+  void mousePressEvent(QMouseEvent *) override;
+  void mouseReleaseEvent(QMouseEvent *) override;
+  void touchEvent(QTouchEvent *) override;
+//  void inputMethodEvent(QInputMethodEvent *) override;
 
 private slots:
   void OnResize()
@@ -44,6 +54,7 @@ private slots:
   void OnFrameReady()
   {
     dirty = true;
+    update();
   }
 };
 

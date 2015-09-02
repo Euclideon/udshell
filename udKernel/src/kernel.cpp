@@ -99,6 +99,9 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
 
+  pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
+  pKernel->spUpdateTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
+
 epilogue:
   if (result != udR_Success)
   {
@@ -136,6 +139,26 @@ udResult Kernel::Destroy()
 
 epilogue:
   return result;
+}
+
+void Kernel::Update()
+{
+  static uint64_t last = udPerfCounterStart();
+  uint64_t now = udPerfCounterStart();
+  double sec = (double)udPerfCounterMilliseconds(last, now) / 1000.0;
+  last = now;
+
+  // TODO: this shouldn't require a focus view! get the scene from the project...
+
+  SceneRef spScene = spFocusView->GetScene();
+  if (spScene)
+    spScene->Update(sec);
+  CameraRef spCamera = spFocusView->GetCamera();
+  if (spCamera)
+  {
+    if (spCamera->Update(sec))
+      spFocusView->ForceDirty();
+  }
 }
 
 void Kernel::StreamerUpdate()

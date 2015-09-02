@@ -102,6 +102,7 @@ protected:
 
   ViewRef spFocusView = nullptr;
   TimerRef spStreamerTimer = nullptr;
+  TimerRef spUpdateTimer = nullptr;
 
   static Kernel *CreateInstanceInternal(udInitParams commandLine);
   udResult InitInstanceInternal();
@@ -115,6 +116,8 @@ protected:
   udResult ReceiveMessage(udString sender, udString message, const udVariant &data);
 
   int SendMessage(LuaState L);
+
+  void Update();
   void StreamerUpdate();
 
   template<typename CT>
