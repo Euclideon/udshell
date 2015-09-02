@@ -72,7 +72,7 @@ ComponentDesc Logger::descriptor =
   nullptr, // events
 };
 
-Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   bEnabled = true;
@@ -91,13 +91,11 @@ Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
 
 int Logger::Log(int level, udString text, LogCategories category, udString componentUID)
 {
-  udFixedString<1024> out;
+  udMutableString<1024> out;
   char timeStr[64];
 
   for (auto &s : streamList)
   {
-    out = "";
-
     if ((s.categories & category) && s.level >= level)
     {
       if (s.format & LogFormatSpecs::Timestamp)
@@ -106,31 +104,31 @@ int Logger::Log(int level, udString text, LogCategories category, udString compo
           struct tm _tm;
           localtime_s(&_tm, &ti);
           strftime(timeStr, 64, "[%d/%m/%d %H:%M:%S]", &_tm);
-          out.concat(timeStr);
+          out.append(timeStr);
       }
       if (s.format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID))
       {
-        out.concat("(");
+        out.append("(");
 
         if (s.format & LogFormatSpecs::Level)
         {
-          out = udFixedString<1024>::format("%s%d", out.toStringz(), level);
+          out.append(level);
           if (s.format & LogFormatSpecs::ComponentUID && componentUID != nullptr)
-            out.concat(", ");
+            out.append(", ");
         }
         if (s.format & LogFormatSpecs::ComponentUID)
-          out.concat(componentUID);
+          out.append(componentUID);
 
-        out.concat(")");
+        out.append(")");
       }
 
       if (s.format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID))
-        out.concat(" ");
+        out.append(" ");
 
       if (s.format & LogFormatSpecs::Category)
-        out.concat(category.StringOf(), ": ");
+        out.append(category.StringOf(), ": ");
 
-      out.concat(text);
+      out.append(text);
 
       s.spStream->WriteLn(out);
       s.spStream->Flush();
@@ -149,7 +147,7 @@ int Logger::RemoveStream(StreamRef spStream)
 {
   if (LogStream *pLogStream = FindLogStream(spStream))
   {
-    streamList.removeSwapLast(*pLogStream);
+    streamList.removeSwapLast(pLogStream);
 
     return 0;
   }

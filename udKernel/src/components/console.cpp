@@ -15,7 +15,7 @@ ComponentDesc Console::descriptor =
   "Standard in/out console", // description
 };
 
-Console::Console(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+Console::Console(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   bDbgOutput = false;

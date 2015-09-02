@@ -25,7 +25,7 @@ public:
   int Flush() override;
 
 protected:
-  Console(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  Console(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 
   FILE *pIn, *pOut;
   bool bDbgOutput;
