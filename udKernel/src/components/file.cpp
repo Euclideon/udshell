@@ -34,8 +34,8 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitPa
   const udVariant &flags = initParams["flags"];
   FileOpenFlags of = flags.as<FileOpenFlags>();
 
-  udString fFlags = GetfopenFlags(of);
-  if (fFlags.empty())
+  char *fFlags = GetfopenFlags(of);
+  if (!fFlags)
     throw udR_InvalidParameter_;
 
   int posixFlags = GetPosixOpenFlags(of);
@@ -49,7 +49,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitPa
 
   if (fd == -1)
     throw udR_File_OpenFailure;
-  if (nullptr == (pFile = _fdopen(fd, fFlags.toStringz())))
+  if (nullptr == (pFile = _fdopen(fd, fFlags)))
   {
     _close(fd);
     throw udR_File_OpenFailure;
@@ -91,9 +91,9 @@ int File::GetPosixOpenFlags(FileOpenFlags flags) const
   return posixFlags;
 }
 
-udString File::GetfopenFlags(FileOpenFlags flags) const
+char *File::GetfopenFlags(FileOpenFlags flags) const
 {
-  udString pMode;
+  char *pMode;
 
   if ((flags & FileOpenFlags::Append) && (flags & FileOpenFlags::Read))
   {
