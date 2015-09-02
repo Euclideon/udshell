@@ -495,7 +495,7 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // TODO: make better error message, this doesn't feel right
-  udMutableString64 errorMsg; errorMsg.sprintf("Error: '%s' not found", field);
+  udMutableString64 errorMsg; errorMsg.format("Error: '{0}' not found", field);
   l.print(errorMsg);
 
   // return nil
@@ -533,7 +533,7 @@ int LuaState::componentNewIndex(lua_State* L)
   }
 
   // return nil (already on stack)
-  udMutableString64 errorMsg; errorMsg.sprintf("Error: '%s' not found", field);
+  udMutableString64 errorMsg; errorMsg.format("Error: '{0}' not found", field);
   l.print(errorMsg);
   return 0;
 }
