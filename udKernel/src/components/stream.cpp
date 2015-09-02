@@ -68,4 +68,21 @@ void Stream::Save(BufferRef spBuffer)
   spBuffer->Unmap();
 }
 
+size_t Stream::WriteLn(udString str)
+{
+  size_t written;
+
+  written = Write(str.ptr, str.length);
+  written += Write("\n", 1);
+
+  return written;
+}
+
+udString Stream::ReadLn(udSlice<char> buf)
+{
+  UDASSERT(false, "TODO");
+
+  return nullptr;
+}
+
 } // namespace ud

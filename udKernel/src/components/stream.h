@@ -7,15 +7,13 @@
 
 namespace ud
 {
-
 PROTOTYPE_COMPONENT(Stream);
 
-enum class SeekOrigin
-{
+UD_ENUM(SeekOrigin,
   Begin,
   CurrentPos,
   End
-};
+);
 
 class Stream : public Component
 {
@@ -30,6 +28,11 @@ public:
   virtual size_t Read(void *pData, size_t bytes) { return 0; }
   virtual size_t Write(const void *pData, size_t bytes) { return 0; }
 
+  virtual size_t WriteLn(udString str);
+  virtual udString ReadLn(udSlice<char> buf);
+
+  virtual int Flush() { return 0; }
+
   BufferRef ReadBuffer(size_t bytes);
   size_t WriteBuffer(BufferRef spData);
 
@@ -41,7 +44,7 @@ public:
 
 protected:
   Stream(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
-    : Component(pType, pKernel, uid, initParams)
+    : Component(pType, pKernel, uid, initParams), pos(0)
   {}
 
   int64_t length, pos;
