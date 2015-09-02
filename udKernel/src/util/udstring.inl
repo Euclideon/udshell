@@ -212,7 +212,7 @@ inline udFixedString<Size>& udFixedString<Size>::operator =(udSlice<U> rh)
 template<size_t Size>
 inline udFixedString<Size>& udFixedString<Size>::operator =(const char *pString)
 {
-  udFixedSlice<char, Size>::operator=(pString, pString ? strlen(pString) : 0);
+  udFixedSlice<char, Size>::operator=(udString(pString, pString ? strlen(pString) : 0));
   return *this;
 }
 

@@ -61,7 +61,7 @@ struct udEnumDesc
     }                                                                             \
     static udSlice<const udString> Keys()                                         \
     {                                                                             \
-      static udSlice<const udString> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
+      static udFixedSlice<const udString, 16> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
     }                                                                             \
     static const udEnumDesc* Desc()                                               \
@@ -131,7 +131,7 @@ struct udEnumDesc
     }                                                                             \
     static udSlice<const udString> Keys()                                         \
     {                                                                             \
-      static udSlice<const udString> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
+      static udFixedSlice<const udString, 16> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
     }                                                                             \
     static const udEnumDesc* Desc()                                               \
