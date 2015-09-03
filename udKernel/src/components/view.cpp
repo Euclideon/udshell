@@ -16,8 +16,8 @@ static CPropertyDesc props[] =
       "Camera", // displayName
       "Camera for viewport", // description
     },
-    nullptr, // getter
-    nullptr, // setter
+    &View::GetCamera, // getter
+    &View::SetCamera, // setter
   }
 };
 static CEventDesc events[] =
