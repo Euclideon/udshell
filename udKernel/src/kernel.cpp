@@ -7,6 +7,7 @@
 #include "components/stream.h"
 #include "components/file.h"
 #include "components/console.h"
+#include "components/memstream.h"
 #include "components/lua.h"
 #include "components/logger.h"
 #include "components/timer.h"
@@ -57,6 +58,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Stream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<File>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Console>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<MemStream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());

@@ -9,6 +9,11 @@ namespace ud
 {
 PROTOTYPE_COMPONENT(Stream);
 
+UD_BITFIELD(OpenFlags,
+  Read,
+  Write
+);
+
 UD_ENUM(SeekOrigin,
   Begin,
   CurrentPos,
