@@ -22,7 +22,7 @@ void Buffer::Allocate(size_t size)
   Free();
 
   buffer.ptr = (char*)udAlloc(size);
-  buffer.length = size;
+  buffer.length = logicalSize = size;
 }
 
 void Buffer::Free()
@@ -35,9 +35,38 @@ void Buffer::Free()
   }
 }
 
+void Buffer::Resize(size_t size) { _Resize(size, true); }
+void Buffer::_Resize(size_t size, bool copy)
+{
+  if (!buffer.ptr)
+  {
+    Allocate(size);
+    return;
+  }
+
+  size_t physSize = buffer.length;
+  while (size > physSize)
+    physSize *= 2;
+
+  if (physSize > buffer.length)
+  {
+    char *newBuf = (char*)udAlloc(physSize);
+    if (buffer.ptr)
+    {
+      if (copy)
+        memcpy(newBuf, buffer.ptr, logicalSize);
+      udFree(buffer.ptr);
+    }
+    buffer.ptr = newBuf;
+    buffer.length = physSize;
+  }
+
+  logicalSize = size;
+}
+
 size_t Buffer::GetBufferSize() const
 {
-  return buffer.length;
+  return logicalSize;
 }
 
 void* Buffer::Map(size_t *pSize)
@@ -51,7 +80,7 @@ void* Buffer::Map(size_t *pSize)
   readMap = false;
   ++mapDepth;
   if (pSize)
-    *pSize = buffer.length;
+    *pSize = logicalSize;
   return buffer.ptr;
 }
 
@@ -66,7 +95,7 @@ const void* Buffer::MapForRead(size_t *pSize)
   readMap = true;
   ++mapDepth;
   if (pSize)
-    *pSize = buffer.length;
+    *pSize = logicalSize;
   return buffer.ptr;
 }
 
@@ -90,13 +119,8 @@ void Buffer::CopyBuffer(BufferRef buffer)
 
 void Buffer::CopyBuffer(const void *pBuffer, size_t size)
 {
-  if (buffer.length < size)
-  {
-    if (buffer.ptr)
-      udFree(buffer.ptr);
-    buffer.ptr = (char*)udAlloc(size);
-    buffer.length = size;
-  }
+  if (logicalSize < size)
+    _Resize(size, false);
 
   memcpy(buffer.ptr, pBuffer, size);
 

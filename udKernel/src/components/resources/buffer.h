@@ -19,6 +19,7 @@ public:
   void Allocate(size_t size);
   void Free();
 
+  void Resize(size_t size);
   size_t GetBufferSize() const;
 
   void* Map(size_t *pSize = nullptr);
@@ -33,8 +34,11 @@ protected:
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Buffer() { Free(); }
 
+  void _Resize(size_t size, bool copy);
+
   udSlice<char> buffer;
 
+  size_t logicalSize = 0;
   int mapDepth = 0;
   bool readMap;
 };
