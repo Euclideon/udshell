@@ -17,27 +17,68 @@ ComponentDesc Buffer::descriptor =
   "Buffer resource", // description
 };
 
-void Buffer::Allocate(size_t size)
+bool Buffer::Allocate(size_t size)
 {
+  if (mapDepth > 0)
+    return false; // TODO Error handling
+
   Free();
 
   buffer.ptr = (char*)udAlloc(size);
-  buffer.length = size;
+  buffer.length = logicalSize = size;
+
+  return true;
 }
 
-void Buffer::Free()
+bool Buffer::Free()
 {
-  if (buffer.ptr)
+  if (buffer.ptr && mapDepth == 0)
   {
     udFree(buffer.ptr);
     buffer.ptr = nullptr;
     buffer.length = 0;
   }
+  else
+    return false; // TODO Error handling
+
+  return true;
+}
+
+bool Buffer::_Resize(size_t size, bool copy)
+{
+  if (mapDepth > 0)
+    return false; // TODO Error handling
+
+  if (!buffer.ptr)
+  {
+    Allocate(size);
+    return true; // TODO Error handling
+  }
+
+  size_t physSize = buffer.length;
+  while (size > physSize)
+    physSize *= 2;
+
+  if (physSize > buffer.length)
+  {
+    char *newBuf = (char*)udAlloc(physSize);
+    if (buffer.ptr)
+    {
+      if (copy)
+        memcpy(newBuf, buffer.ptr, logicalSize);
+      udFree(buffer.ptr);
+    }
+    buffer.ptr = newBuf;
+    buffer.length = physSize;
+  }
+
+  logicalSize = size;
+  return true; // TODO Error handling
 }
 
 size_t Buffer::GetBufferSize() const
 {
-  return buffer.length;
+  return logicalSize;
 }
 
 void* Buffer::Map(size_t *pSize)
@@ -51,7 +92,7 @@ void* Buffer::Map(size_t *pSize)
   readMap = false;
   ++mapDepth;
   if (pSize)
-    *pSize = buffer.length;
+    *pSize = logicalSize;
   return buffer.ptr;
 }
 
@@ -66,7 +107,7 @@ const void* Buffer::MapForRead(size_t *pSize)
   readMap = true;
   ++mapDepth;
   if (pSize)
-    *pSize = buffer.length;
+    *pSize = logicalSize;
   return buffer.ptr;
 }
 
@@ -76,8 +117,11 @@ void Buffer::Unmap()
     Changed.Signal();
 }
 
-void Buffer::CopyBuffer(BufferRef buffer)
+bool Buffer::CopyBuffer(BufferRef buffer)
 {
+  if (mapDepth > 0)
+    return false; // TODO Error handling
+
   size_t size;
   const void *pBuffer = buffer->MapForRead(&size);
   UDASSERT(pBuffer != nullptr, "Unable to map buffer!");
@@ -86,21 +130,22 @@ void Buffer::CopyBuffer(BufferRef buffer)
     CopyBuffer(pBuffer, size);
     buffer->Unmap();
   }
+
+  return true; // TODO Error handling
 }
 
-void Buffer::CopyBuffer(const void *pBuffer, size_t size)
+bool Buffer::CopyBuffer(const void *pBuffer, size_t size)
 {
-  if (buffer.length < size)
-  {
-    if (buffer.ptr)
-      udFree(buffer.ptr);
-    buffer.ptr = (char*)udAlloc(size);
-    buffer.length = size;
-  }
+  if (mapDepth > 0)
+    return false; // TODO Error handling
+
+  if (logicalSize < size)
+    _Resize(size, false);
 
   memcpy(buffer.ptr, pBuffer, size);
 
   Changed.Signal();
+  return true; // TODO Error handling
 }
 
 } // namespace ud
