@@ -22,7 +22,7 @@ public:
   const QObject *QtObject() const { return pQtObject; }
 
 protected:
-  QtComponent(ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams)
+  QtComponent(ud::ComponentDesc *pType, ud::Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Base(pType, pKernel, uid, initParams), pDesc(pType), pQtObject(nullptr) {}
   virtual ~QtComponent();
 
@@ -40,7 +40,7 @@ public:
   QQuickItem *QuickItem() { return static_cast<QQuickItem*>(pQtObject); }
 
 protected:
-  QtUIComponent(ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams);
+  QtUIComponent(ud::ComponentDesc *pType, ud::Kernel *pKernel, udSharedString uid, udInitParams initParams);
   virtual ~QtUIComponent();
 
   // HACK: allow ud::UIComponent::Create() to create a QtUIComponent

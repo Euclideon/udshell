@@ -53,7 +53,7 @@ public:
   }
 
 protected:
-  GeomSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  GeomSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {}
 

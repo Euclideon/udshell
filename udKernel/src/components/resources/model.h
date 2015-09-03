@@ -24,13 +24,13 @@ public:
   MaterialRef GetMaterial() const { return spMaterial; }
   void SetMaterial(MaterialRef spMaterial) { this->spMaterial = spMaterial; }
 
-  void SetVertexArray(ArrayBufferRef spVertices, udSlice<const udRCString> attributeNames);
+  void SetVertexArray(ArrayBufferRef spVertices, udSlice<const udSharedString> attributeNames);
   void SetIndexArray(ArrayBufferRef spIndices) { this->spIndices = spIndices; }
 
 protected:
   friend class GeomNode;
 
-  Model(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  Model(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
   void OnArrayChanged()
@@ -43,7 +43,7 @@ protected:
   struct VertexArray
   {
     ArrayBufferRef spArray;
-    udFixedSlice<udRCString, 1> attributes;
+    udFixedSlice<udSharedString, 1> attributes;
   };
 
   udFixedSlice<VertexArray, 2> vertexArrays;

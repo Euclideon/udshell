@@ -69,7 +69,7 @@ protected:
   void(*pPreRenderCallback)(ViewRef, SceneRef) = nullptr;
   void(*pPostRenderCallback)(ViewRef, SceneRef) = nullptr;
 
-  View(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  View(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Component(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
 
   void SetLatestFrame(udUniquePtr<RenderableView> spFrame);

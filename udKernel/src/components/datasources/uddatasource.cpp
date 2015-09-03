@@ -18,7 +18,7 @@ ComponentDesc UDDataSource::descriptor =
   "Provides UD Data", // description
 };
 
-UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : DataSource(pType, pKernel, uid, initParams)
 {
   const udVariant &source = initParams["source"];

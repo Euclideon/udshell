@@ -83,7 +83,7 @@ Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 void udNewPepperInstance::SendToJsCallback(udString sender, udString message, const udVariant &data)
 {
   // TODO: Need to wrangle this to include the sender
-  udRCString s = data.stringify();
+  udSharedString s = data.stringify();
   PostMessageToJS(message.toStringz(), ":%s", (const char*)s.toStringz());
 }
 

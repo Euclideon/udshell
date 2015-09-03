@@ -43,7 +43,7 @@ public:
   // TODO: remove support for sync operations?
 
 protected:
-  Stream(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  Stream(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Component(pType, pKernel, uid, initParams), pos(0)
   {}
 

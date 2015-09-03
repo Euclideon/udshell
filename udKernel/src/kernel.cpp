@@ -236,7 +236,7 @@ udResult Kernel::ReceiveMessage(udString sender, udString message, const udVaria
   return udR_Success;
 }
 
-void Kernel::RegisterMessageHandler(udRCString name, udMessageHandler messageHandler)
+void Kernel::RegisterMessageHandler(udSharedString name, udMessageHandler messageHandler)
 {
   MessageHandler handler;
   handler.name = name;
@@ -246,7 +246,7 @@ void Kernel::RegisterMessageHandler(udRCString name, udMessageHandler messageHan
 
 udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
 {
-  if (pDesc->id.canFind('@') || pDesc->id.canFind('$') || pDesc->id.canFind('#'))
+  if (pDesc->id.exists('@') || pDesc->id.exists('$') || pDesc->id.exists('#'))
   {
     UDASSERT(false, "Invalid component id");
     return udR_Failure_;
@@ -262,7 +262,7 @@ udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
 }
 
 template<typename CT>
-Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
 {
   return udNew(CT, pType, pKernel, uid, initParams);
 }
@@ -285,7 +285,7 @@ udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, Compo
     const ComponentDesc *pDesc = pType->pDesc;
 
     // TODO: should we have a better uid generator than this?
-    udFixedString64 uid = udFixedString64::format("%s%d", pDesc->id.ptr, pType->createCount++);
+    udMutableString64 uid; uid.concat(pDesc->id, pType->createCount++);
 
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
     if (!spComponent)

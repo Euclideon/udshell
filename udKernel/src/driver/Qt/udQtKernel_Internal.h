@@ -43,7 +43,7 @@ private:
 
   // Members
   int argc;
-  udRCSlice<char *> argv;
+  udSharedSlice<char *> argv;
 
   QGuiApplication *pApplication;
   QQmlEngine *pQmlEngine;

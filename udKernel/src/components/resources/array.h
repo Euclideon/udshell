@@ -22,11 +22,11 @@ public:
   UD_COMPONENT(ArrayBuffer);
 
   // array allocation
-  inline void Allocate(udRCString elementType, size_t elementSize, size_t length)
+  inline void Allocate(udSharedString elementType, size_t elementSize, size_t length)
   {
     Allocate(elementType, elementSize, udSlice<size_t>(&length, 1));
   }
-  void Allocate(udRCString elementType, size_t elementSize, udSlice<const size_t> shape)
+  void Allocate(udSharedString elementType, size_t elementSize, udSlice<const size_t> shape)
   {
     UDASSERT(shape.length > 0, "No dimensions given!");
     UDASSERT(shape.length <= 4, "More than 4 dimensional matrices is not supported...");
@@ -79,7 +79,7 @@ public:
     }
   }
 
-  udRCString GetElementType() const { return elementType; }
+  udSharedString GetElementType() const { return elementType; }
   size_t GetElementSize() const { return elementSize; }
   size_t GetNumDimensions() const { return dimensions; }
 
@@ -140,7 +140,7 @@ public:
 protected:
   friend class GeomNode;
 
-  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Buffer(pType, pKernel, uid, initParams)
   {
     Changed.Subscribe(udDelegate<void()>(this, &ArrayBuffer::OnBufferDirty));
@@ -163,7 +163,7 @@ protected:
   };
   RenderResourceRef GetRenderResource(RenderResourceType type);
 
-  udRCString elementType;
+  udSharedString elementType;
   size_t elementSize;
   size_t dimensions;
   size_t shape[4];

@@ -87,7 +87,7 @@ ComponentDesc Timer::descriptor =
 };
 
 
-Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : Component(pType, pKernel, uid, initParams), pTimer(nullptr)
 {
   const udVariant intervalVar = initParams["duration"];
@@ -103,9 +103,9 @@ Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInit
   if (typeVar.is(udVariant::Type::String))
   {
     udString typeStr = typeVar.as<udString>();
-    if (typeStr.eqi("Interval"))
+    if (typeStr.eqIC("Interval"))
       timerType = TimerType::Interval;
-    else if (typeStr.eqi("CountDown"))
+    else if (typeStr.eqIC("CountDown"))
       timerType = TimerType::CountDown;
     else
       throw udR_InvalidParameter_;

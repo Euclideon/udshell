@@ -294,7 +294,7 @@ void QtComponent<Base>::PopulateComponentDesc(QObject *pObject)
 
 
 // ---------------------------------------------------------------------------------------
-QtUIComponent::QtUIComponent(ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams)
+QtUIComponent::QtUIComponent(ud::ComponentDesc *pType, ud::Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : QtComponent(pType, pKernel, uid, initParams)
 {
   QString filename = initParams["file"].as<QString>();

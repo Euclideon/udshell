@@ -36,7 +36,7 @@ public:
 
   udResult SendMessage(udString target, udString sender, udString message, const udVariant &data);
 
-  void RegisterMessageHandler(udRCString name, udMessageHandler messageHandler);
+  void RegisterMessageHandler(udSharedString name, udMessageHandler messageHandler);
 
   // synchronisation
   typedef FastDelegate<void(Kernel*)> MainThreadCallback;
@@ -89,18 +89,18 @@ protected:
   };
   struct MessageHandler
   {
-    udRCString name;
+    udSharedString name;
     udMessageHandler callback;
   };
 
   struct ForeignInstance
   {
-    udRCString localUID;
-    udRCString remoteUID;
-    udRCString kernelUID;
+    udSharedString localUID;
+    udSharedString remoteUID;
+    udSharedString kernelUID;
   };
 
-  udRCString uid;
+  udSharedString uid;
 
   udHashMap<ComponentType> componentRegistry;
   udHashMap<ComponentRef> instanceRegistry;
@@ -133,7 +133,7 @@ protected:
   void StreamerUpdate();
 
   template<typename CT>
-  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 };
 
 template<typename T>

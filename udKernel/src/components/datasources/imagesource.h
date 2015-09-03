@@ -22,7 +22,7 @@ public:
   }
 
 protected:
-  ImageSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  ImageSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {}
 

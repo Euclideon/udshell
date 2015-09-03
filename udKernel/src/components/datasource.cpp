@@ -61,7 +61,7 @@ ComponentDesc DataSource::descriptor =
   udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
 };
 
-DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   const udVariant &source = initParams["source"];

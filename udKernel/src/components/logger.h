@@ -64,7 +64,7 @@ public:
   int SetCategories(StreamRef spStream, LogCategories categories);
 
 protected:
-  Logger(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  Logger(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 
   LogStream *FindLogStream(StreamRef spStream) const;
 

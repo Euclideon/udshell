@@ -21,7 +21,7 @@ public:
   udEvent<> Changed;
 
 protected:
-  Resource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  Resource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Component(pType, pKernel, uid, initParams)
   {}
 

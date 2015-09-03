@@ -30,8 +30,8 @@ public:
   const ComponentDesc* const pType;
   class Kernel* const pKernel;
 
-  const udRCString uid;
-  udRCString name;
+  const udSharedString uid;
+  udSharedString name;
 
   bool IsType(udString type) const;
   template<typename T>
@@ -41,7 +41,7 @@ public:
   virtual udVariant GetProperty(udString property) const;
 
   udResult SendMessage(udString target, udString message, const udVariant &data);
-  udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { udFixedString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp , message, data); }
+  udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { udMutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp , message, data); }
 
   const PropertyInfo *GetPropertyInfo(udString name) const
   {
@@ -77,7 +77,7 @@ public:
   void SetName(udString name) { this->name = name; }
 
 protected:
-  Component(const ComponentDesc *_pType, Kernel *_pKernel, udRCString _uid, udInitParams initParams)
+  Component(const ComponentDesc *_pType, Kernel *_pKernel, udSharedString _uid, udInitParams initParams)
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
   virtual ~Component();
 

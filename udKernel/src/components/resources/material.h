@@ -48,12 +48,12 @@ public:
   CullMode GetCullMode() const { return cullMode; }
   void SetCullMode(CullMode cullMode) { this->cullMode = cullMode; }
 
-  void SetMaterialProperty(udRCString property, const udFloat4 &val);
+  void SetMaterialProperty(udSharedString property, const udFloat4 &val);
 
 protected:
   friend class GeomNode;
 
-  Material(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  Material(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Material()
   {
@@ -75,7 +75,7 @@ protected:
   BlendMode blendMode = BlendMode::None;
   CullMode cullMode = CullMode::None;
 
-  udAVLTree<udRCString, udFloat4> properties;
+  udAVLTree<udSharedString, udFloat4> properties;
 
   RenderShaderProgramRef spRenderProgram = nullptr;
 };

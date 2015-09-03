@@ -38,7 +38,7 @@ public:
 protected:
   friend class Scene;
 
-  Node(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+  Node(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
   virtual bool InputEvent(const udInputEvent &ev);

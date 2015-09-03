@@ -6,6 +6,8 @@
 
 #include <initializer_list>
 
+struct udRC;
+
 // slices are bounded arrays, unlike C's conventional unbounded pointers (typically, with separate length stored in parallel)
 // no attempt is made to create a one-size-fits-all implementation, as it is recognised that usages offer distinct advantages/disadvantages
 // slise is the basis of the suite however, and everything is based on udSlice. derived types address specifics in usage and/or ownership patterns
@@ -42,9 +44,9 @@ struct udSlice
   template<typename U> udSlice<T>& operator =(udSlice<U> rh);
 
   // contents
-  T& operator[](size_t i) const;
+  T& operator[](ptrdiff_t i) const;
 
-  udSlice<T> slice(size_t first, size_t last) const;
+  udSlice<T> slice(ptrdiff_t first, ptrdiff_t last) const;
 
   bool empty() const;
 
@@ -65,24 +67,29 @@ struct udSlice
   // useful functions
   T& front() const;
   T& back() const;
-  udSlice<T> front(size_t n) const;
-  udSlice<T> back(size_t n) const;
   T& popFront();
   T& popBack();
-  udSlice<T> popFront(size_t n);
-  udSlice<T> popBack(size_t n);
+  udSlice<T> get(ptrdiff_t n) const;
+  udSlice<T> pop(ptrdiff_t n);
+  udSlice<T> strip(ptrdiff_t n) const;
 
-  udSlice<T> stripFront(size_t n) const;
-  udSlice<T> stripBack(size_t n) const;
+  bool exists(const T &c, size_t *pIndex = nullptr) const;
+  size_t findFirst(const T &c) const;
+  size_t findLast(const T &c) const;
+  template<typename U> size_t findFirst(udSlice<U> s) const;
+  template<typename U> size_t findLast(udSlice<U> s) const;
 
-  ptrdiff_t offsetOf(const T *c) const;
+  udSlice<T> getLeftAtFirst(const T &c, bool bInclusive = false) const;
+  udSlice<T> getLeftAtLast(const T &c, bool bInclusive = false) const;
+  udSlice<T> getRightAtFirst(const T &c, bool bInclusive = true) const;
+  udSlice<T> getRightAtLast(const T &c, bool bInclusive = true) const;
 
-  bool canFind(const T &c) const;
+  template<typename U> udSlice<T> getLeftAtFirst(udSlice<U> s, bool bInclusive = false) const;
+  template<typename U> udSlice<T> getLeftAtLast(udSlice<U> s, bool bInclusive = false) const;
+  template<typename U> udSlice<T> getRightAtFirst(udSlice<U> s, bool bInclusive = true) const;
+  template<typename U> udSlice<T> getRightAtLast(udSlice<U> s, bool bInclusive = true) const;
 
-  udSlice<T> find(const T &c) const;
-  udSlice<T> findBack(const T &c) const;
-  ptrdiff_t findFirst(const T &c) const;
-  ptrdiff_t findLast(const T &c) const;
+  ptrdiff_t indexOfElement(const T *c) const;
 
   typedef bool(*Predicate)(const T &e);
   T* search(Predicate) const;
@@ -102,11 +109,6 @@ struct udSlice
 template <typename T, size_t Count = 0>
 struct udFixedSlice : public udSlice<T>
 {
-#if defined(_MSC_VER)
-# pragma warning(disable: 4200) // silence warning for zero length arrays
-#endif
-  char buffer[sizeof(T) * Count];
-
   // constructors
   udFixedSlice<T, Count>();
   udFixedSlice<T, Count>(nullptr_t);
@@ -126,18 +128,33 @@ struct udFixedSlice : public udSlice<T>
   // manipulation
   void clear();
   template <typename... Things> udFixedSlice<T, Count>& concat(const Things&... things);
+
+  T& pushBack();
   template <typename U> udFixedSlice<T, Count>& pushBack(const U &item);
   template <typename U> udFixedSlice<T, Count>& pushBack(U &&item);
-  T& pushBack();
 
   void remove(size_t i);
-  void remove(const T& item);
+  void remove(const T *pItem);
   void removeSwapLast(size_t i);
-  void removeSwapLast(const T& item);
+  void removeSwapLast(const T *pItem);
 
   udSlice<T> getBuffer() const;
 
 protected:
+  template<size_t Len>
+  struct Buffer
+  {
+    char buffer[sizeof(T) * Len];
+    bool hasAllocation(T *p) const { return p != (T*)buffer && p != nullptr; }
+    T* ptr() const { return (T*)buffer; }
+  };
+  template<> struct Buffer<0>
+  {
+    bool hasAllocation(T *p) const { return p != nullptr; }
+    T* ptr() const { return nullptr; }
+  };
+  Buffer<Count> buffer;
+
   struct Header
   {
     union
@@ -147,50 +164,46 @@ protected:
     };
   };
   static size_t numToAlloc(size_t i);
-  bool hasAllocation() { return this->ptr != (T*)this->buffer && this->ptr != nullptr; }
+  bool hasAllocation() { return buffer.hasAllocation(this->ptr); }
   Header* getHeader() { return ((Header*)this->ptr) - 1; }
 };
 
 
-// udRCSlice is a reference counted slice, used to retain ownership of some memory, but will not duplicate when copies are made
+// udSharedSlice is a reference counted slice, used to retain ownership of some memory, but will not duplicate when copies are made
 // useful for long-living data that doesn't consume a fixed amount of their containing struct
 // also useful for sharing between systems, passing between threads, etc.
-// slices of udRCSlice's increment the RC, so that slices can outlive the original owner, but without performing additional allocations and copies
+// slices of udSharedSlice's increment the RC, so that slices can outlive the original owner, but without performing additional allocations and copies
 template <typename T>
-struct udRCSlice : public udSlice<T>
+struct udSharedSlice : public udSlice<T>
 {
-  struct udRC
-  {
-    size_t refCount;
-    size_t allocatedCount;
-  } *rc;
+  udRC *rc;
 
   // constructors
-  udRCSlice<T>();
-  udRCSlice<T>(nullptr_t);
-  udRCSlice<T>(std::initializer_list<T> list);
-  udRCSlice<T>(udRCSlice<T> &&rval);
-  udRCSlice<T>(const udRCSlice<T> &rcslice);
-  template <typename U> udRCSlice<T>(U *ptr, size_t length);
-  template <typename U> udRCSlice<T>(udSlice<U> slice);
-  ~udRCSlice<T>();
+  udSharedSlice<T>();
+  udSharedSlice<T>(nullptr_t);
+  udSharedSlice<T>(std::initializer_list<T> list);
+  udSharedSlice<T>(udSharedSlice<T> &&rval);
+  udSharedSlice<T>(const udSharedSlice<T> &rcslice);
+  template <typename U> udSharedSlice<T>(U *ptr, size_t length);
+  template <typename U> udSharedSlice<T>(udSlice<U> slice);
+  ~udSharedSlice<T>();
 
   size_t refcount() const { return rc ? rc->refCount : 0; }
 
   // static constructors (make proper constructors?)
-  template<typename... Things> static udRCSlice<T> concat(const Things&... things);
-  static udRCSlice<T> alloc(size_t elements);
+  template<typename... Things> static udSharedSlice<T> concat(const Things&... things);
+  static udSharedSlice<T> alloc(size_t elements);
 
   // assignment
-  udRCSlice<T>& operator =(const udRCSlice<T> &rh);
-  udRCSlice<T>& operator =(udRCSlice<T> &&rval);
-  template <typename U> udRCSlice<T>& operator =(udSlice<U> rh);
+  udSharedSlice<T>& operator =(const udSharedSlice<T> &rh);
+  udSharedSlice<T>& operator =(udSharedSlice<T> &&rval);
+  template <typename U> udSharedSlice<T>& operator =(udSlice<U> rh);
 
   // contents
-  udRCSlice<T> slice(size_t first, size_t last) const;
+  udSharedSlice<T> slice(size_t first, size_t last) const;
 
 protected:
-  udRCSlice<T>(T *ptr, size_t length, udRC *rc);
+  udSharedSlice<T>(T *ptr, size_t length, udRC *rc);
   static size_t numToAlloc(size_t i);
   template <typename U> static udSlice<T> alloc(U *ptr, size_t length);
   template <typename U> void init(U *ptr, size_t length);

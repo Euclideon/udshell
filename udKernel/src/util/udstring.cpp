@@ -27,7 +27,7 @@ const char s_charDetails[256] =
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
 
-udRCString udRCString::format(const char *pFormat, ...)
+udSharedString udSharedString::sprintf(const char *pFormat, ...)
 {
   va_list args;
   va_start(args, pFormat);
@@ -35,7 +35,7 @@ udRCString udRCString::format(const char *pFormat, ...)
   size_t len = vsprintf(nullptr, pFormat, args) + 1;
   len = numToAlloc(len);
 
-  udRCString r;
+  udSharedString r;
   r.rc = (udRC*)udAlloc(sizeof(udRC) + len);
   r.rc->refCount = 1;
   r.rc->allocatedCount = len;
@@ -54,6 +54,10 @@ udRCString udRCString::format(const char *pFormat, ...)
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s)
 {
   // TODO: what formats are interesting for strings?
+
+  if (!buffer.ptr)
+    return s.length;
+
   if (buffer.length < s.length)
     return buffer.length - s.length;
   for (size_t i = 0; i < s.length; ++i)
@@ -64,6 +68,10 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s)
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, const char *s)
 {
   // TODO: what formats are interesting for strings?
+
+  if (!buffer.ptr)
+    return strlen(s);
+
   size_t i = 0;
   for (; s[i]; ++i)
   {
@@ -78,16 +86,22 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, bool b)
 {
   if (b == true)
   {
-    if (buffer.length < 4)
-      return buffer.length - 4;
-    udString("true", 4).copyTo(buffer);
+    if (buffer.ptr)
+    {
+      if (buffer.length < 4)
+        return buffer.length - 4;
+      udString("true", 4).copyTo(buffer);
+    }
     return 4;
   }
   else
   {
-    if (buffer.length < 5)
-      return buffer.length - 5;
-    udString("false", 5).copyTo(buffer);
+    if (buffer.ptr)
+    {
+      if (buffer.length < 5)
+        return buffer.length - 5;
+      udString("false", 5).copyTo(buffer);
+    }
     return 5;
   }
 }
@@ -105,7 +119,10 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i)
     start = len = 1;
     do
     {
-      buffer.ptr[len++] = '0' - i%10;
+      if (buffer.ptr)
+        buffer.ptr[len++] = '0' - i%10;
+      else
+        ++len;
     } while ((i /= 10) != 0);
   }
   else
@@ -113,17 +130,23 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i)
     start = len = 0;
     do
     {
-      buffer.ptr[len++] = '0' + i%10;
+      if (buffer.ptr)
+        buffer.ptr[len++] = '0' + i%10;
+      else
+        ++len;
     } while ((i /= 10) != 0);
   }
 
-  // number is written little endian, so we need to reverse it
-  size_t end = len-1;
-  while (start < end)
+  if (buffer.ptr)
   {
-    char t = buffer.ptr[end];
-    buffer.ptr[end--] = buffer.ptr[start];
-    buffer.ptr[start++] = t;
+    // number is written little endian, so we need to reverse it
+    size_t end = len-1;
+    while (start < end)
+    {
+      char t = buffer.ptr[end];
+      buffer.ptr[end--] = buffer.ptr[start];
+      buffer.ptr[start++] = t;
+    }
   }
   return len;
 }
@@ -136,17 +159,23 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, uint64_t i)
   size_t len = 0;
   do
   {
-    buffer.ptr[len++] = '0' + i % 10;
+    if (buffer.ptr)
+      buffer.ptr[len++] = '0' + i % 10;
+    else
+      ++len;
   } while ((i /= 10) != 0);
 
-  // number is written little endian, so we need to reverse it
-  size_t start = 0;
-  size_t end = len - 1;
-  while (start < end)
+  if (buffer.ptr)
   {
-    char t = buffer.ptr[end];
-    buffer.ptr[end--] = buffer.ptr[start];
-    buffer.ptr[start++] = t;
+    // number is written little endian, so we need to reverse it
+    size_t start = 0;
+    size_t end = len - 1;
+    while (start < end)
+    {
+      char t = buffer.ptr[end];
+      buffer.ptr[end--] = buffer.ptr[start];
+      buffer.ptr[start++] = t;
+    }
   }
   return len;
 }
@@ -157,104 +186,143 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, double i)
   return 0;
 }
 
-template<> ptrdiff_t udRCString::VarArg::stringifyProxy<uint8_t>(udSlice<char> buffer, udString format, const void *pData)
+namespace ud_internal
 {
-  return udStringify(buffer, format, (uint64_t)*(uint8_t*)pData);
-}
-template<> ptrdiff_t udRCString::VarArg::stringifyProxy<int8_t>(udSlice<char> buffer, udString format, const void *pData)
-{
-  return udStringify(buffer, format, (int64_t)*(int8_t*)pData);
-}
-template<> inline ptrdiff_t udRCString::VarArg::stringifyProxy<uint16_t>(udSlice<char> buffer, udString format, const void *pData)
-{
-  return udStringify(buffer, format, (uint64_t)*(uint16_t*)pData);
-}
-template<> ptrdiff_t udRCString::VarArg::stringifyProxy<int16_t>(udSlice<char> buffer, udString format, const void *pData)
-{
-  return udStringify(buffer, format, (int64_t)*(int16_t*)pData);
-}
-template<> ptrdiff_t udRCString::VarArg::stringifyProxy<uint32_t>(udSlice<char> buffer, udString format, const void *pData)
-{
-  return udStringify(buffer, format, (uint64_t)*(uint32_t*)pData);
-}
-template<> ptrdiff_t udRCString::VarArg::stringifyProxy<int32_t>(udSlice<char> buffer, udString format, const void *pData)
-{
-  return udStringify(buffer, format, (int64_t)*(int32_t*)pData);
-}
-template<> ptrdiff_t udRCString::VarArg::stringifyProxy<float>(udSlice<char> buffer, udString format, const void *pData)
-{
-  return udStringify(buffer, format, (double)*(float*)pData);
-}
-
-udRCString udRCString::formatInternal(const char *pFormat, udSlice<VarArg> args)
-{
-  size_t allocated = 2048;
-  size_t offset = 0;
-  char *pBuffer = (char*)alloca(allocated);
-
-  const char *pC = pFormat;
-  while (*pC)
+  size_t getLength(udSlice<VarArg> args)
   {
-    if (*pC == '\\' && pC[1] != 0)
-    {
-      // print escaped characters directly
-      ++pC;
-    }
-    else if (*pC == '{')
-    {
-      ++pC;
-
-      // get the arg index
-      if (!isNumeric(*pC))
-        goto bail_out; // TODO: error bad format string!
-      size_t arg = 0;
-      while (isNumeric(*pC))
-        arg = arg*10 + (*pC++ - '0');
-      if (arg >= args.length)
-        goto bail_out; // TODO: error, invalid arg index!
-
-      // get the format string (if present)
-      udString format;
-      if (*pC == ',')
-      {
-        format.ptr = pC + 1;
-        do { pC++; } while (*pC && *pC != '}');
-        format.length = pC - format.ptr;
-      }
-
-      // expect terminating '}'
-      if (*pC++ != '}')
-        goto bail_out; // TODO: error bad format string!
-
-      // append the arg
-      VarArg &p = args[arg];
-      ptrdiff_t len;
-      do
-      {
-        len = p.pProxy(udSlice<char>(pBuffer + offset, allocated - offset), format, p.pArg);
-        if (len < 0)
-        {
-          // TODO: realloc (at least 'len')
-          continue;
-        }
-      } while (0);
-      offset += len;
-      continue;
-    }
-    if (offset < allocated)
-      pBuffer[offset++] = *pC++;
-    else
-    {
-      // TODO: realloc
-    }
+    size_t len = 0;
+    for (auto &a : args)
+      len += a.pProxy(nullptr, nullptr, a.pArg);
+    return len;
   }
+  udSlice<char> concatenate(udSlice<char> buffer, udSlice<VarArg> args)
+  {
+    size_t len = 0;
+    for (auto &a : args)
+      len += a.pProxy(buffer.slice(len, buffer.length), nullptr, a.pArg);
+    return buffer.slice(0, len);
+  }
+  udSlice<char> format(udString format, udSlice<char> buffer, udSlice<VarArg> args)
+  {
+    size_t offset = 0;
+    char *pBuffer = buffer.ptr;
 
-  return udString(pBuffer, offset);
+    const char *pC = format.ptr;
+    const char *pEnd = format.ptr + format.length;
+    while (pC < pEnd)
+    {
+      if (*pC == '\\' && pC[1] != 0)
+      {
+        // print escaped characters directly
+        ++pC;
+        if (pC == pEnd)
+          break;
+        if (pBuffer)
+          pBuffer[offset] = *pC;
+        ++offset;
+        ++pC;
+      }
+      else if (*pC == '{')
+      {
+        ++pC;
+        while (isWhitespace(*pC) && pC < pEnd)
+          ++pC;
+        if (pC == pEnd)
+          return nullptr;
 
-bail_out:
-  if (allocated > 2048)
-    udFree(pBuffer);
-  return nullptr;
+        // get the arg index
+        if (!isNumeric(*pC))
+        {
+          UDASSERT(false, "Invalid format string!");
+          return nullptr;
+        }
+        size_t arg = 0;
+        while (isNumeric(*pC) && pC < pEnd)
+          arg = arg*10 + (*pC++ - '0');
+        if (arg >= args.length)
+        {
+          UDASSERT(false, "Format string references invalid parameter!");
+          return nullptr;
+        }
+        while (isWhitespace(*pC) && pC < pEnd)
+          ++pC;
+        if (pC == pEnd)
+          return nullptr;
+
+        // get the format string (if present)
+        udString format;
+        if (*pC == ',')
+        {
+          ++pC;
+          while (isWhitespace(*pC) && pC < pEnd)
+            ++pC;
+          if (pC == pEnd)
+            return nullptr;
+          format.ptr = pC;
+          while (*pC != '}' && !isWhitespace(*pC) && pC < pEnd)
+            pC++;
+          format.length = pC - format.ptr;
+        }
+        while (isWhitespace(*pC) && pC < pEnd)
+          ++pC;
+        if (pC == pEnd)
+          return nullptr;
+
+        // expect terminating '}'
+        if (*pC++ != '}')
+        {
+          UDASSERT(false, "Invalid format string!");
+          return nullptr;
+        }
+
+        // append the arg
+        VarArg &p = args[arg];
+        ptrdiff_t len;
+        udSlice<char> buf(pBuffer ? pBuffer + offset : nullptr, pBuffer ? buffer.length - offset : 0);
+        len = p.pProxy(buf, format, p.pArg);
+        offset += len;
+      }
+      else
+      {
+        if (pBuffer)
+          pBuffer[offset] = *pC;
+        ++offset;
+        ++pC;
+      }
+    }
+    return udSlice<char>(pBuffer, offset);
+  }
+}
+
+udSharedString udSharedString::concatInternal(udSlice<ud_internal::VarArg> args)
+{
+  size_t len = ud_internal::getLength(args);
+
+  // allocate a new udSharedString
+  udRC *pRC = (udRC*)udAlloc(sizeof(udRC) + sizeof(char)*(len+1));
+  pRC->refCount = 0;
+  pRC->allocatedCount = len;
+  char *ptr = (char*)(pRC + 1);
+
+  ud_internal::concatenate(udSlice<char>(ptr, len), args);
+  ptr[len] = 0;
+
+  return udSharedString(ptr, len, pRC);
+}
+udSharedString udSharedString::formatInternal(udString format, udSlice<ud_internal::VarArg> args)
+{
+  size_t len = ud_internal::format(format, nullptr, args).length;
+
+  // allocate a new udSharedString
+  udRC *pRC = (udRC*)udAlloc(sizeof(udRC) + sizeof(char)*(len+1));
+  pRC->refCount = 0;
+  pRC->allocatedCount = len;
+  char *ptr = (char*)(pRC + 1);
+
+  ud_internal::format(format, udSlice<char>(ptr, len), args);
+  ptr[len] = 0;
+
+  return udSharedString(ptr, len, pRC);
 }
 
 int64_t udString::parseInt(bool bDetectBase, int base) const
@@ -265,13 +333,13 @@ int64_t udString::parseInt(bool bDetectBase, int base) const
 
   int number = 0;
 
-  if (base == 16 || (bDetectBase && (s.eqi("0x") || s.eq("$"))))
+  if (base == 16 || (bDetectBase && (s.eqIC("0x") || s.eq("$"))))
   {
     // hex number
-    if (s.eqi("0x"))
-      s.popFront(2);
+    if (s.eqIC("0x"))
+      s.pop(2);
     else if (s.eq("$"))
-      s.popFront();
+      s.pop(1);
 
     while (s.length > 0)
     {
@@ -282,10 +350,10 @@ int64_t udString::parseInt(bool bDetectBase, int base) const
       number += isNumeric(digit) ? digit - '0' : (digit|0x20) - 'a' + 10;
     }
   }
-  else if (base == 2 || (bDetectBase && s.eqi("b")))
+  else if (base == 2 || (bDetectBase && s.eqIC("b")))
   {
-    if (s.eqi("b"))
-      s.popFront();
+    if (s.eqIC("b"))
+      s.pop(1);
 
     while (s.length > 0 && (s.ptr[0] == '0' || s.ptr[0] == '1'))
     {
@@ -300,7 +368,7 @@ int64_t udString::parseInt(bool bDetectBase, int base) const
     if (s.ptr[0] == '-' || s.ptr[0] == '+')
     {
       neg = s.ptr[0] == '-';
-      s.popFront();
+      s.pop(1);
     }
 
     while (s.length > 0)
@@ -356,31 +424,6 @@ double udString::parseFloat() const
   return (double)number * frac;
 }
 
-udRCString udRCString::concat(udString *pStrings, size_t numStrings)
-{
-  // calculate total length
-  size_t len = 0;
-  for (size_t i = 0; i < numStrings; ++i)
-    len += pStrings[i].length;
-
-  // allocate a new udRCString
-  udRC *pRC = (udRC*)udAlloc(sizeof(udRC) + sizeof(char)*len);
-  pRC->refCount = 0;
-  pRC->allocatedCount = len;
-  char *ptr = (char*)(pRC + 1);
-
-  // concatenate the strings
-  char *pC = ptr;
-  for (size_t i = 0; i < numStrings; ++i)
-  {
-    for (size_t j = 0; j < pStrings[i].length; ++j)
-      *pC++ = pStrings[i].ptr[j];
-  }
-
-  return udRCString(ptr, len, pRC);
-}
-
-
 udResult udSlice_Test()
 {
   // usSlice<> tests
@@ -413,9 +456,9 @@ udResult udSlice_Test()
   udSlice<int> s_slice = s_i.slice(1, 3); // slices of udFixedSlice are not owned; they die when the parent allocation dies
 
 
-  // udRCSlice<> tests
-  udRCSlice<int> rc_i1(i1);       // rc_i1 is an allocated, ref-counted copy of the slice i1
-  udRCSlice<const int> rc_ci1(s1);// rc_ci1 initialised from different (compatible) types (ie, short -> int, float -> double)
+  // udSharedSlice<> tests
+  udSharedSlice<int> rc_i1(i1);       // rc_i1 is an allocated, ref-counted copy of the slice i1
+  udSharedSlice<const int> rc_ci1(s1);// rc_ci1 initialised from different (compatible) types (ie, short -> int, float -> double)
 
   // TODO: assign mutable RCSlice to const RCSlice without copy, should only bump RC
 
@@ -425,9 +468,9 @@ udResult udSlice_Test()
 
   rc_i1 = rc_slice;               // assignment between RC slices of the same array elide rc fiddling; only updates the offset/length
 
-  i1 == rc_i2;                    // comparison of udSlice and udRCSlice; compares ptr && length as usual
+  i1 == rc_i2;                    // comparison of udSlice and udSharedSlice; compares ptr && length as usual
 
-  rc_i1.eq(i1);                   // element comparison between udSlice and udRCSlice
+  rc_i1.eq(i1);                   // element comparison between udSlice and udSharedSlice
 
   for (auto i : i1)
   {
@@ -454,10 +497,10 @@ udResult udString_Test()
   udString s2(buffer, 3);       // initialise to sub-string; ie, "wor"
 
   s1.eq(s2);                    // strcmp() == 0
-  s1.eqi(s2);                   // case insensitive; stricmp() == 0
+  s1.eqIC(s2);                   // case insensitive; stricmp() == 0
   s1.eq("hello");               // compare with c-string
 
-  udRCSlice<wchar_t> wcs(s1);   // init w_char string from c-string! yay unicode! (except we probably also want to decode utf-8...)
+  udSharedSlice<wchar_t> wcs(s1);   // init w_char string from c-string! yay unicode! (except we probably also want to decode utf-8...)
 
   wcs.eq(s1);                   // compare wide-char and ascii strings
 
@@ -466,11 +509,11 @@ udResult udString_Test()
   s2.toStringz(buffer, sizeof(buffer)); // write udString to c-string
 
 
-  // udFixedString
-  udFixedString<64> s_s1(s1);
+  // udMutableString
+  udMutableString<64> s_s1(s1);
   udString s_slice = s_s1.slice(1, 4); // slices of udFixedSlice are not owned; they die when the parent allocation dies
 
-  s_s1.eqi("HELLO");            // string comparison against string literals
+  s_s1.eqIC("HELLO");            // string comparison against string literals
 
   receivesString(s_s1);         // pass to functions
 
@@ -480,30 +523,38 @@ udResult udString_Test()
   s_s1.concat(s1, "!!", udString("world"));
 
 
-  // udRCString
-  udRCString rcs1(s1);          // RC string initialised from some slice
-  udRCString rcs2("string");    // also from literal
-  udRCString rcs3(buffer, 4);   // also from c-string (and optionally a slice thereof)
+  // udSharedString
+  udSharedString rcs1(s1);          // RC string initialised from some slice
+  udSharedString rcs2("string");    // also from literal
+  udSharedString rcs3(buffer, 4);   // also from c-string (and optionally a slice thereof)
 
   receivesString(rcs1);         // pass to functions
 
-  udFixedString<64> ss2 = rcs2; // stack string takes copy of a udRCString
-  udRCString rcs4 = ss2;        // rc strings take copy of stack strings too
+  udMutableString<64> ss2 = rcs2; // stack string takes copy of a udSharedString
+  udSharedString rcs4 = ss2;        // rc strings take copy of stack strings too
 
-  rcs1 == s1;                   // compare udRCString and udString pointers
+  rcs1 == s1;                   // compare udSharedString and udString pointers
 
-  rcs1.eqi(s1);                 // string comparison works too between udRCString and udString
+  rcs1.eqIC(s1);                 // string comparison works too between udSharedString and udString
 
-//  udRCString::format("Format: %s", "hello");  // create from format string
+//  udSharedString::format("Format: %s", "hello");  // create from format string
 
 //  char temp[256];
-//  fopen(rcs1.toStringz(temp, sizeof(temp)), "ro"); // write udRCString to c-string, for passing to OS functions or C api's
+//  fopen(rcs1.toStringz(temp, sizeof(temp)), "ro"); // write udSharedString to c-string, for passing to OS functions or C api's
                                                    // unlike c_str(), user supplies buffer (saves allocations)
 
-  udRCString r2 = udRCString::concat(s1, "!!", rcs1, udString("world"), s_s1);
-//  udRCString::format("x{1}_{2}", "10", "200");
+  udSharedString r2 = udSharedString::concat(s1, "!!", rcs1, udString("world"), s_s1);
+//  udSharedString::format("x{1}_{2}", "10", "200");
 
   receivesCString(r2.toStringz());
+
+  const char *pName = "manu";
+  udSharedString cc = udSharedString::concat("hello ", pName, 10);
+  udSharedString fmt = udSharedString::format("{ 1 }, {2}, { 0 , hello }", "hello ", pName, 10);
+
+  udMutableString<0> ms; ms.concat("hello ", pName, 10);
+  ms.append("poop!");
+  ms.format("{1}, {2}, {0,hello}", "hello ", pName, 10);
 
   return udR_Success;
 }

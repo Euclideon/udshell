@@ -33,7 +33,7 @@ RenderVertexFormatRef Model::GetRenderVertexFormat(RenderShaderProgramRef spShad
   return spRenderVertexFormat;
 }
 
-void Model::SetVertexArray(ArrayBufferRef spVertices, udSlice<const udRCString> attributeNames)
+void Model::SetVertexArray(ArrayBufferRef spVertices, udSlice<const udSharedString> attributeNames)
 {
 //  udString type = spVertices->GetType();
   // TODO: assert that type has the same number of elements as `attributeNames.length`.

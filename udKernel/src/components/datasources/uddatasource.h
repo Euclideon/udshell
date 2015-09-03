@@ -28,7 +28,7 @@ public:
   }
 
 protected:
-  UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 };
 
 }

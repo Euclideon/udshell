@@ -5,10 +5,10 @@
 <Type Name="udString">
     <DisplayString>{ptr,[length]s8}</DisplayString>
 </Type>
-<Type Name="udFixedString&lt;*&gt;">
+<Type Name="udMutableString&lt;*&gt;">
     <DisplayString>{ptr,[length]s8}</DisplayString>
 </Type>
-<Type Name="udRCString">
+<Type Name="udSharedString">
     <DisplayString>{ptr,[length]s8}</DisplayString>
 </Type>
 
@@ -32,7 +32,7 @@
         </ArrayItems>
     </Expand>
 </Type>
-<Type Name="udRCSlice&lt;*&gt;">
+<Type Name="udSharedSlice&lt;*&gt;">
     <Expand>
         <Item Name="length">length</Item>
         <Item Name="ptr">ptr,[length]</Item>

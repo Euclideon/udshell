@@ -122,7 +122,7 @@ void GeomSource::Create(StreamRef spSource)
     //...
 
     // add resource
-    udFixedString64 buffer = udFixedString64::format("material%d", i);
+    udMutableString64 buffer; buffer.concat("material", i);
     resources.Insert(buffer, spMat);
   }
 
@@ -170,7 +170,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     ModelRef spMesh = pKernel->CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
 
     // get material
-    udFixedString64 resName = udFixedString64::format("material%d", mesh.mMaterialIndex);
+    udMutableString64 resName; resName.concat("material", mesh.mMaterialIndex);
     ResourceRef *pspMat = resources.Get(resName);
     if (pspMat)
     {
@@ -185,7 +185,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     ArrayBufferRef spVerts = pKernel->CreateComponent<ArrayBuffer>();
     spVerts->AllocateFromData<VertPos>(verts);
 
-    resName = udFixedString64::format("positions%d", numMeshes);
+    resName.concat("positions", numMeshes);
     resources.Insert(resName, spVerts);
 
     spMesh->SetVertexArray(spVerts, { "a_position" });
@@ -199,7 +199,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       ArrayBufferRef spNormals = pKernel->CreateComponent<ArrayBuffer>();
       spNormals->AllocateFromData<VertNorm>(normals);
 
-      resName = udFixedString64::format("normals%d", numMeshes);
+      resName.concat("normals", numMeshes);
       resources.Insert(resName, spNormals);
 
       spMesh->SetVertexArray(spNormals, { "a_normal" });
@@ -225,7 +225,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       }
       spBinTan->Unmap();
 
-      resName = udFixedString64::format("binormalstangents%d", numMeshes);
+      resName.concat("binormalstangents", numMeshes);
       resources.Insert(resName, spBinTan);
 
       spMesh->SetVertexArray(spBinTan, { "a_binormal", "a_tangent" });
@@ -240,10 +240,10 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       ArrayBufferRef spUVs = pKernel->CreateComponent<ArrayBuffer>();
       spUVs->AllocateFromData<VertUV>(uvs);
 
-      resName = udFixedString64::format("uvs%d_%d", numMeshes, t);
+      resName.concat("uvs", numMeshes, "_", t);
       resources.Insert(resName, spUVs);
 
-      spMesh->SetVertexArray(spUVs, { udRCString::format("a_uv%d", t) });
+      spMesh->SetVertexArray(spUVs, { udSharedString::concat("a_uv", t) });
     }
 
     // Colors
@@ -255,10 +255,10 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       ArrayBufferRef spColors = pKernel->CreateComponent<ArrayBuffer>();
       spColors->AllocateFromData<VertColor>(colors);
 
-      resName = udFixedString64::format("colors%d_%d", numMeshes, c);
+      resName.concat("colors", numMeshes, "_", c);
       resources.Insert(resName, spColors);
 
-      spMesh->SetVertexArray(spColors, { udRCString::format("a_color%d", c) });
+      spMesh->SetVertexArray(spColors, { udSharedString::concat("a_color", c) });
     }
 
     // indices (faces)
@@ -276,13 +276,13 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     }
     spIndices->Unmap();
 
-    resName = udFixedString64::format("indices%d", numMeshes);
+    resName.concat("indices", numMeshes);
     resources.Insert(resName, spIndices);
 
     spMesh->SetIndexArray(spIndices);
 
     // add mesh resource
-    resName = udFixedString64::format("mesh%d", numMeshes++);
+    resName.concat("mesh", numMeshes++);
     resources.Insert(resName, spMesh);
   }
 

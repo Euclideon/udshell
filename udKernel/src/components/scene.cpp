@@ -100,7 +100,7 @@ udResult Scene::SetRenderModels(struct udRenderModel models[], size_t numModels)
   return udR_Success;
 }
 
-Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams) :
+Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams) :
   Component(pType, pKernel, uid, initParams)
 {
   timeStep = 1.0 / 30.0;

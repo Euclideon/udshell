@@ -27,7 +27,7 @@ public:
   int Flush() override;
 
 protected:
-  File(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  File(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
   ~File();
 
   char *GetfopenFlags(FileOpenFlags flags) const;
