@@ -17,31 +17,42 @@ ComponentDesc Buffer::descriptor =
   "Buffer resource", // description
 };
 
-void Buffer::Allocate(size_t size)
+bool Buffer::Allocate(size_t size)
 {
+  if (mapDepth > 0)
+    return false; // TODO Error handling
+
   Free();
 
   buffer.ptr = (char*)udAlloc(size);
   buffer.length = logicalSize = size;
+
+  return true;
 }
 
-void Buffer::Free()
+bool Buffer::Free()
 {
-  if (buffer.ptr)
+  if (buffer.ptr && mapDepth == 0)
   {
     udFree(buffer.ptr);
     buffer.ptr = nullptr;
     buffer.length = 0;
   }
+  else
+    return false; // TODO Error handling
+
+  return true;
 }
 
-void Buffer::Resize(size_t size) { _Resize(size, true); }
-void Buffer::_Resize(size_t size, bool copy)
+bool Buffer::_Resize(size_t size, bool copy)
 {
+  if (mapDepth > 0)
+    return false; // TODO Error handling
+
   if (!buffer.ptr)
   {
     Allocate(size);
-    return;
+    return true; // TODO Error handling
   }
 
   size_t physSize = buffer.length;
@@ -62,6 +73,7 @@ void Buffer::_Resize(size_t size, bool copy)
   }
 
   logicalSize = size;
+  return true; // TODO Error handling
 }
 
 size_t Buffer::GetBufferSize() const
@@ -105,8 +117,11 @@ void Buffer::Unmap()
     Changed.Signal();
 }
 
-void Buffer::CopyBuffer(BufferRef buffer)
+bool Buffer::CopyBuffer(BufferRef buffer)
 {
+  if (mapDepth > 0)
+    return false; // TODO Error handling
+
   size_t size;
   const void *pBuffer = buffer->MapForRead(&size);
   UDASSERT(pBuffer != nullptr, "Unable to map buffer!");
@@ -115,16 +130,22 @@ void Buffer::CopyBuffer(BufferRef buffer)
     CopyBuffer(pBuffer, size);
     buffer->Unmap();
   }
+
+  return true; // TODO Error handling
 }
 
-void Buffer::CopyBuffer(const void *pBuffer, size_t size)
+bool Buffer::CopyBuffer(const void *pBuffer, size_t size)
 {
+  if (mapDepth > 0)
+    return false; // TODO Error handling
+
   if (logicalSize < size)
     _Resize(size, false);
 
   memcpy(buffer.ptr, pBuffer, size);
 
   Changed.Signal();
+  return true; // TODO Error handling
 }
 
 } // namespace ud

@@ -16,25 +16,25 @@ class Buffer : public Resource
 public:
   UD_COMPONENT(Buffer);
 
-  void Allocate(size_t size);
-  void Free();
+  bool Allocate(size_t size);
+  bool Free();
 
-  void Resize(size_t size);
+  bool Resize(size_t size) { return _Resize(size, true); }
   size_t GetBufferSize() const;
 
   void* Map(size_t *pSize = nullptr);
   const void* MapForRead(size_t *pSize = nullptr);
   void Unmap();
 
-  void CopyBuffer(BufferRef buffer);
-  void CopyBuffer(const void *pBuffer, size_t size);
+  bool CopyBuffer(BufferRef buffer);
+  bool CopyBuffer(const void *pBuffer, size_t size);
 
 protected:
   Buffer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Buffer() { Free(); }
 
-  void _Resize(size_t size, bool copy);
+  bool _Resize(size_t size, bool copy);
 
   udSlice<char> buffer;
 
