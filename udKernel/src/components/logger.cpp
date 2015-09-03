@@ -4,46 +4,45 @@
 
 namespace ud
 {
+static CPropertyDesc props[] =
+{
+  {
+    {
+      "enabled", // id
+      "Enabled", // displayName
+      "Is Enabled", // description
+    },
+    &Logger::GetEnabled, // getter
+    &Logger::SetEnabled, // setter
+  }
+};
+
 static CMethodDesc methods[] =
 {
   {
     {
-      "enable", // id
-      "Enable output from the logger", // description
-    },
-    &Logger::Enable, // method
-  },
-  {
-    {
-      "disable", // id
-      "Disable all output from the logger", // description
-    },
-    &Logger::Disable, // method
-  },
-  {
-    {
-      "set_level", // id
+      "setlevel", // id
       "Set severity level for this log stream", // description
     },
     &Logger::SetLevel, // method
   },
   {
     {
-      "set_categories", // id
+      "setcategories", // id
       "Set logging categories to output to this stream", // description
     },
     &Logger::SetCategories, // method
   },
   {
     {
-      "add_stream", // id
+      "addstream", // id
       "Add an output stream to the logger", // description
     },
     &Logger::AddStream, // method
   },
   {
     {
-      "remove_stream", // id
+      "removestream", // id
       "Remove an output stream from the logger", // description
     },
     &Logger::RemoveStream, // method
@@ -68,7 +67,7 @@ ComponentDesc Logger::descriptor =
   "Logger", // displayName
   "Logger", // description
 
-  nullptr, // properties
+  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
   udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
   nullptr, // events
 };
@@ -139,16 +138,6 @@ int Logger::Log(int level, udString text, LogCategories category, udString compo
   }
 
   return 0;
-}
-
-void Logger::Enable()
-{
-  bEnabled = true;
-}
-
-void Logger::Disable()
-{
-  bEnabled = false;
 }
 
 void Logger::AddStream(StreamRef spStream, LogCategories categories, int level, LogFormatSpecs format)
