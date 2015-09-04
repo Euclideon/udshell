@@ -18,10 +18,6 @@
 namespace qt
 {
 
-// Instantiate QtComponent types
-template class QtComponent<ud::UIComponent>;
-
-
 // Qt shims
 struct QtGetter : public ud::Getter
 {
@@ -332,6 +328,10 @@ QtUIComponent::QtUIComponent(ud::ComponentDesc *pType, ud::Kernel *pKernel, udSh
 QtUIComponent::~QtUIComponent()
 {
 }
+
+
+// Instantiate QtComponent types
+template class QtComponent<ud::UIComponent>;
 
 } // namespace qt
 
