@@ -1,7 +1,7 @@
 #if !defined(_UD_STRING)
 #define _UD_STRING
 
-#include "udSlice.h"
+#include "udslice.h"
 
 
 extern const char s_charDetails[256];
@@ -45,8 +45,8 @@ struct udString : public udSlice<const char>
   template<typename C>
   udString(udSlice<C> rh);
   udString(const char *pString);
-  template<size_t Len>
-  udString(const char str[Len]);
+  template<size_t N>
+  udString(const char str[N]);
 
   // assignment
   udString& operator =(udSlice<const char> rh);
@@ -262,7 +262,7 @@ private:
 // unit tests
 udResult udString_Test();
 
-#include "udString.inl"
+#include "udstring.inl"
 
 #endif
 

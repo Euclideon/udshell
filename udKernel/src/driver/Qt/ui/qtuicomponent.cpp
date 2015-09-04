@@ -174,7 +174,7 @@ protected:
   QtSignalToDelegate *sigToDel;
 
   template<typename QtComponentT>
-  static void doSubscribe(const VarEvent *pEv, const ud::ComponentRef &c, const udVariant::Delegate &d)
+  static void doSubscribe(const VarEvent *pEv, const ud::ComponentRef &c, const udVariant::VarDelegate &d)
   {
     QtVarEvent *pEvent = (QtVarEvent*)pEv;
     QtComponentT *pQtComp = (QtComponentT *)c.ptr();

@@ -21,6 +21,7 @@ project "udShell"
 --		qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
 	qtmodules { "core", "qml", "quick", "gui" }
 	qtprefix "Qt5"
+	pic "on"
 	configuration { "Debug or DebugOpt" }
 		qtsuffix "d"
 
@@ -29,9 +30,10 @@ project "udShell"
 		libdirs { "../3rdParty/assimp-3.1.1/lib64" }
 		disablewarnings { "4481", "4127" } -- silence some Qt warnings
 
+	configuration { }
+
 	-- include common stuff
 	dofile "../ud/common-proj.lua"
-	configuration { }
 
 	exceptionhandling "Default"
 

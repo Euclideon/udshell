@@ -86,7 +86,7 @@ public:
   void pushLightUserData(void *val);
 
   void pushComponent(ComponentRef c);
-  void pushDelegate(const udVariant::Delegate &d);
+  void pushDelegate(const udVariant::VarDelegate &d);
 
   void push(const udVariant &v);
 
@@ -108,7 +108,7 @@ public:
   void* toUserData(int idx = -1);
 
   ComponentRef toComponent(int idx = -1);
-  udVariant::Delegate toDelegate(int idx = -1);
+  udVariant::VarDelegate toDelegate(int idx = -1);
 
   udVariant get(int idx = -1);
 

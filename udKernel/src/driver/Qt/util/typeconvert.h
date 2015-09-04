@@ -53,7 +53,7 @@ inline udVariant udToVariant(const QVariant &var)
     case QMetaType::ULongLong:
     case QMetaType::QChar:
     case QMetaType::UInt:
-      return udVariant(var.toLongLong());
+      return udVariant((int64_t)var.toLongLong());
 
     // udVariant::Type::String
     // TODO: optimise - reduce unnecessary copies

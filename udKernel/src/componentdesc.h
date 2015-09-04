@@ -94,13 +94,13 @@ public:
 
   operator bool() const { return pSubscribe != nullptr; }
 
-  void subscribe(const ud::ComponentRef &c, const udVariant::Delegate &d)
+  void subscribe(const ud::ComponentRef &c, const udVariant::VarDelegate &d)
   {
     pSubscribe(this, c, d);
   }
 
 protected:
-  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const udVariant::Delegate&);
+  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const udVariant::VarDelegate&);
   SubscribeFunc *pSubscribe = nullptr;
 };
 
@@ -173,7 +173,7 @@ protected:
   void* CEvent::*pEvent;
 
   template<typename X, typename... Args>
-  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const udVariant::Delegate &d);
+  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const udVariant::VarDelegate &d);
 };
 
 
@@ -195,6 +195,8 @@ struct EnumKVP
 struct PropertyInfo
 {
   PropertyInfo() = delete;
+  PropertyInfo(udString id, udString displayName, udString description, udString displayType = nullptr, uint32_t flags = 0)
+    : id(id), displayName(displayName), description(description), displayType(displayType), flags(flags) {}
 
   udString id;
   udString displayName;
@@ -207,6 +209,8 @@ struct PropertyInfo
 struct PropertyDesc
 {
   PropertyDesc() = delete;
+  PropertyDesc(const PropertyInfo &info, Getter *getter, Setter *setter)
+    : info(info), getter(getter), setter(setter) {}
   void operator=(const PropertyDesc&) = delete;
 
   PropertyInfo info;
@@ -217,6 +221,8 @@ struct PropertyDesc
 struct MethodInfo
 {
   MethodInfo() = delete;
+  MethodInfo(udString id, udString description)
+    : id(id), description(description) {}
 
   udString id;
   udString description;
@@ -225,6 +231,8 @@ struct MethodInfo
 struct MethodDesc
 {
   MethodDesc() = delete;
+  MethodDesc(const MethodInfo &info, Method *method)
+    : info(info), method(method) {}
   void operator=(const MethodDesc&) = delete;
 
   MethodInfo info;
@@ -234,6 +242,8 @@ struct MethodDesc
 struct EventInfo
 {
   EventInfo() = delete;
+  EventInfo(udString id, udString displayName, udString description)
+    : id(id), displayName(displayName), description(description) {}
   void operator=(const EventInfo&) = delete;
 
   udString id;
@@ -244,6 +254,8 @@ struct EventInfo
 struct EventDesc
 {
   EventDesc() = delete;
+  EventDesc(EventInfo info, VarEvent *ev)
+    : info(info), ev(ev) {}
   void operator=(const EventDesc&) = delete;
 
   EventInfo info;
@@ -281,6 +293,12 @@ typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *
 struct ComponentDesc
 {
   ComponentDesc() = delete;
+  ComponentDesc(ComponentDesc *pSuperDesc, int udVersion, int pluginVersion, udString id, udString displayName, udString description,
+    udSlice<CPropertyDesc> properties = nullptr, udSlice<CMethodDesc> methods = nullptr, udSlice<CEventDesc> events = nullptr,
+    InitComponent *pInit = nullptr, CreateInstanceCallback *pCreateInstance = nullptr)
+    : pSuperDesc(pSuperDesc), udVersion(udVersion), pluginVersion(pluginVersion), id(id), displayName(displayName), description(description)
+    , properties(properties), methods(methods), events(events), pInit(pInit), pCreateInstance(pCreateInstance) {}
+  
   ComponentDesc& operator=(const ComponentDesc&) = delete;
 
   ComponentDesc *pSuperDesc;

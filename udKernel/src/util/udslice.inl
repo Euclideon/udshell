@@ -1,9 +1,5 @@
-
-struct udRC
-{
-  size_t refCount;
-  size_t allocatedCount;
-};
+#include <type_traits>
+#include <utility>
 
 // udSlice
 template<typename T>

@@ -6,7 +6,12 @@
 
 #include <initializer_list>
 
-struct udRC;
+struct udRC
+{
+  size_t refCount;
+  size_t allocatedCount;
+};
+
 
 // slices are bounded arrays, unlike C's conventional unbounded pointers (typically, with separate length stored in parallel)
 // no attempt is made to create a one-size-fits-all implementation, as it is recognised that usages offer distinct advantages/disadvantages
@@ -141,14 +146,14 @@ struct udFixedSlice : public udSlice<T>
   udSlice<T> getBuffer() const;
 
 protected:
-  template<size_t Len>
+  template<size_t Len, bool = true>
   struct Buffer
   {
     char buffer[sizeof(T) * Len];
     bool hasAllocation(T *p) const { return p != (T*)buffer && p != nullptr; }
     T* ptr() const { return (T*)buffer; }
   };
-  template<> struct Buffer<0>
+  template<bool dummy> struct Buffer<0, dummy> // SORRY! >_< C++ still sucks! We must partial-specialise here because reasons.
   {
     bool hasAllocation(T *p) const { return p != nullptr; }
     T* ptr() const { return nullptr; }
@@ -213,6 +218,6 @@ protected:
 udResult udSlice_Test();
 
 
-#include "udSlice.inl"
+#include "udslice.inl"
 
 #endif // _UD_SLICE

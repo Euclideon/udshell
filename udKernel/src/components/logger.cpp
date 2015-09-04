@@ -101,9 +101,14 @@ int Logger::Log(int level, udString text, LogCategories category, udString compo
       if (s.format & LogFormatSpecs::Timestamp)
       {
           time_t ti = time(nullptr);
+#if UDPLATFORM_WINDOWS
           struct tm _tm;
           localtime_s(&_tm, &ti);
           strftime(timeStr, 64, "[%d/%m/%d %H:%M:%S]", &_tm);
+#else
+          tm *_tm = localtime(&ti);
+          strftime(timeStr, 64, "[%d/%m/%d %H:%M:%S]", _tm);
+#endif
           out.append(timeStr);
       }
       if (s.format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID))

@@ -27,9 +27,9 @@
 #include "components/resources/udmodel.h"
 #include "components/resources/kvpstore.h"
 #include "components/resources/metadata.h"
-#include "components/datasources/ImageSource.h"
-#include "components/datasources/GeomSource.h"
-#include "components/datasources/UDDataSource.h"
+#include "components/datasources/imagesource.h"
+#include "components/datasources/geomsource.h"
+#include "components/datasources/uddatasource.h"
 #include "renderscene.h"
 #include "udlua.h"
 

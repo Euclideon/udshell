@@ -38,7 +38,7 @@ static udArrayDataFormat GetElementType(udString type)
     { "s8[4]", udVDF_Byte4N },
     { "u8[4]", udVDF_UByte4N_RGBA },
   };
-  for (size_t i = 0; i<ARRAYSIZE(s_typeMap); ++i)
+  for (size_t i = 0; i<UDARRAYSIZE(s_typeMap); ++i)
   {
     if (type.eq(s_typeMap[i].pName))
       return s_typeMap[i].format;

@@ -48,6 +48,7 @@ project "udKernel"
 --		qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
 		qtmodules { "core", "qml", "quick", "gui" }
 		qtprefix "Qt5"
+		pic "on"
 		configuration { "Debug or DebugOpt" }
 			qtsuffix "d"
 	end

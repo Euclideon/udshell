@@ -175,7 +175,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     if (pspMat)
     {
       spMesh->SetMaterial(component_cast<Material>(*pspMat));
-      udDebugPrintf("%*s  Material: %d (%s)", depth, " ", mesh.mMaterialIndex, (*pspMat)->GetName().toStringz());
+      udDebugPrintf("%*s  Material: %d (%s)", depth, " ", mesh.mMaterialIndex, (const char*)(*pspMat)->GetName().toStringz());
     }
 
     // positions

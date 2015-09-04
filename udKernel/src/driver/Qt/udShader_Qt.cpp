@@ -32,7 +32,7 @@ udShader* udShader_CreateShader(const char *pSource, size_t length, udShaderType
   QOpenGLShader *pQtShader = new QOpenGLShader(s_shaderType[type]);
   if (!pQtShader->compileSourceCode(QByteArray(pSource, static_cast<int>(length))))
   {
-    udDebugPrintf("Shader failed to compile: %s\n", pQtShader->log().toLatin1());
+    udDebugPrintf("Shader failed to compile: %s\n", pQtShader->log().toLatin1().data());
     delete pQtShader;
     return 0;
   }
@@ -119,7 +119,7 @@ udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader 
 epilogue:
   if (!result)
   {
-    udDebugPrintf("Error creating shader program: %s\n", pQtProgram->log().toLatin1());
+    udDebugPrintf("Error creating shader program: %s\n", pQtProgram->log().toLatin1().data());
     delete pQtProgram;
   }
 

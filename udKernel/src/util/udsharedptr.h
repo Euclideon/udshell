@@ -2,6 +2,8 @@
 #if !defined(_SHAREDPTR_H)
 #define _SHAREDPTR_H
 
+#include <type_traits>
+
 #if defined(_MSC_VER)
 // TODO: REMOVE THIS!!!
 #pragma warning(disable: 4714)
@@ -193,7 +195,7 @@ public:
 private:
   template<typename U> friend class udSharedPtr;
   template<typename U> friend class udUniquePtr;
-  template<typename T, bool isref> friend struct Destroy;
+  template<typename U, bool isref> friend struct Destroy;
 
   mutable T *pInstance = nullptr;
 };
