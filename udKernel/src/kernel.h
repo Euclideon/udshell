@@ -68,13 +68,13 @@ public:
 
   LoggerRef GetLogger() const { return spLogger; }
   LoggerRef SetLogger(LoggerRef spLogger);
-  void LogError(int level, const udString text, const udString componentUID = nullptr);
+  void LogError(const udString text, const udString componentUID = nullptr);
   void LogWarning(int level, const udString text, const udString componentUID = nullptr);
   void LogDebug(int level, const udString text, const udString componentUID = nullptr);
   void LogInfo(int level, const udString text, const udString componentUID = nullptr);
-  void LogScript(int level, const udString text, const udString componentUID = nullptr);
-  void LogTrace(int level, const udString text, const udString componentUID = nullptr);
-  void Log(int level, const udString text, const udString componentUID = nullptr);
+  void LogScript(const udString text, const udString componentUID = nullptr);
+  void LogTrace(const udString text, const udString componentUID = nullptr);
+  void Log(const udString text, const udString componentUID = nullptr);
 
   udResult FormatMainWindow(UIComponentRef spUIComponent);
 

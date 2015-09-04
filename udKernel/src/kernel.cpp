@@ -378,14 +378,14 @@ void Kernel::Exec(udString code)
 }
 
 // Helper functions for the kernel's logger
-void Kernel::LogError(int level, udString text, udString componentUID) { spLogger->Log(level, text, LogCategories::Error, componentUID); }
+void Kernel::LogError(udString text, udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Error, componentUID); }
 void Kernel::LogWarning(int level, udString text, udString componentUID) { spLogger->Log(level, text, LogCategories::Warning, componentUID); }
 void Kernel::LogDebug(int level, udString text, udString componentUID) { spLogger->Log(level, text, LogCategories::Debug, componentUID); }
 void Kernel::LogInfo(int level, udString text, udString componentUID) { spLogger->Log(level, text, LogCategories::Info, componentUID); }
-void Kernel::LogScript(int level, udString text, udString componentUID) { spLogger->Log(level, text, LogCategories::Script, componentUID); }
-void Kernel::LogTrace(int level, udString text, udString componentUID) { spLogger->Log(level, text, LogCategories::Trace, componentUID); }
-// Short name for LogDebug function
-void Kernel::Log(int level, udString text, const udString componentUID) { spLogger->Log(level, text, LogCategories::Debug, componentUID); }
+void Kernel::LogScript(udString text, udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Script, componentUID); }
+void Kernel::LogTrace(udString text, udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, componentUID); }
+// Calls LogDebug() with level 2
+void Kernel::Log(udString text, const udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, componentUID); }
 
 } // namespace ud
 

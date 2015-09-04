@@ -66,13 +66,13 @@ public:
   udString GetDisplayName() const { return pType->displayName; }
   udString GetDescription() const { return pType->description; }
 
-  void LogError(int level, udString text) const;
+  void LogError(udString text) const;
   void LogWarning(int level, udString text) const;
   void LogDebug(int level, udString text) const;
   void LogInfo(int level, udString text) const;
-  void LogScript(int level, udString text) const;
-  void LogTrace(int level, udString text) const;
-  void Log(int level, udString text) const;
+  void LogScript(udString text) const;
+  void LogTrace(udString text) const;
+  void Log(udString text) const; // Calls LogDebug() with level 2
 
   void SetName(udString name) { this->name = name; }
 
