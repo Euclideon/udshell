@@ -30,6 +30,9 @@ project "udShell"
 		libdirs { "../3rdParty/assimp-3.1.1/lib64" }
 		disablewarnings { "4481", "4127" } -- silence some Qt warnings
 
+	configuration { "linux" }
+		links { "assimp" }
+
 	configuration { }
 
 	-- include common stuff
