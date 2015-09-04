@@ -112,10 +112,10 @@ public:
   {
     UDASSERT(stringof<T>().eq(elementType), "Incompatible type!");
     size_t size;
-    void *pBuffer = Buffer::MapForRead(&size);
+    const void *pBuffer = Buffer::MapForRead(&size);
     if (pNumElements)
       *pNumElements = size/sizeof(T);
-    return (T*)pBuffer;
+    return (const T*)pBuffer;
   }
 
   template<typename T>
