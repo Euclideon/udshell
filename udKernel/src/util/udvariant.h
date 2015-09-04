@@ -52,7 +52,13 @@ public:
   udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory = false);
 
   template<typename T> udVariant(T &&rval);
+#if defined(_MSC_VER)
+  // MSVC(2013?) seems to have a compiler bug which incorrectly invokes the move constructor with lvalues!?! O_O
+  // this code seems to relax the confusion for MSVC, but it's technically wrong, and doesn't build on the other compilers...
+  template<typename T> udVariant(T &v);
+#else
   template<typename T> udVariant(const T &v);
+#endif
 
   ~udVariant();
 
