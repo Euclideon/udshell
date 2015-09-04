@@ -26,7 +26,8 @@ UD_BITFIELD(LogFormatSpecs,
 );
 
 UD_ENUM(LogDefaults,
-  Level = 5,
+  LogLevel = 2,
+  StreamLevel = 2,
   Categories = (LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace),
   Format = (LogFormatSpecs::Timestamp | LogFormatSpecs::Category | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)
 );
@@ -52,7 +53,7 @@ public:
   bool GetEnabled() const { return bEnabled; }
   void SetEnabled(bool bEnable) { this->bEnabled = bEnable; }
 
-  void AddStream(StreamRef spStream, LogCategories categories = LogDefaults::Categories, int level = LogDefaults::Level, LogFormatSpecs format = LogDefaults::Format);
+  void AddStream(StreamRef spStream, LogCategories categories = LogDefaults::Categories, int level = LogDefaults::StreamLevel, LogFormatSpecs format = LogDefaults::Format);
   int RemoveStream(StreamRef spStream);
 
   int GetLevel(StreamRef spStream) const;
