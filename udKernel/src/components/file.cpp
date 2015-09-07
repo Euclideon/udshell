@@ -6,7 +6,7 @@
 #endif
 
 #include <fcntl.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 
 namespace ud
 {
@@ -43,10 +43,6 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udIn
   int fd;
 #if UDPLATFORM_WINDOWS
   _sopen_s(&fd, path.asString().toStringz(), posixFlags, SH_DENYNO, S_IREAD | S_IWRITE);
-#else
-  fd = _open(path.asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
-#endif
-
   if (fd == -1)
     throw udR_File_OpenFailure;
   if (nullptr == (pFile = _fdopen(fd, fFlags)))
@@ -54,6 +50,16 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udIn
     _close(fd);
     throw udR_File_OpenFailure;
   }
+#else
+  fd = open(path.asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
+  if (fd == -1)
+    throw udR_File_OpenFailure;
+  if (nullptr == (pFile = fdopen(fd, fFlags)))
+  {
+    close(fd);
+    throw udR_File_OpenFailure;
+  }
+#endif
 
   long pos = ftell(pFile);
   fseek(pFile, 0L, SEEK_END);

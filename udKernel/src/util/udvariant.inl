@@ -32,7 +32,7 @@ inline udVariant::udVariant(const udVariant &val)
     }
     else if (is(Type::Delegate))
     {
-      new((void*)&p) Delegate((Delegate&)val.p);
+      new((void*)&p) VarDelegate((VarDelegate&)val.p);
     }
     else if (is(Type::String))
     {
@@ -44,15 +44,15 @@ inline udVariant::udVariant(const udVariant &val)
     {
       a = (udVariant*)udAlloc(sizeof(udVariant)*length);
       for (size_t i = 0; i<length; ++i)
-        new((void*)&a[i]) udVariant(val.a[i]);
+        new((void*)&a[i]) udVariant((const udVariant&)val.a[i]);
     }
     else if (is(Type::AssocArray))
     {
       aa = (udKeyValuePair*)udAlloc(sizeof(udKeyValuePair)*length);
       for (size_t i = 0; i<length; ++i)
       {
-        new((void*)&aa[i].key) udVariant(val.aa[i].key);
-        new((void*)&aa[i].value) udVariant(val.aa[i].value);
+        new((void*)&aa[i].key) udVariant((const udVariant&)val.aa[i].key);
+        new((void*)&aa[i].value) udVariant((const udVariant&)val.aa[i].value);
       }
     }
   }
@@ -96,19 +96,19 @@ inline udVariant::udVariant(const ud::ComponentRef &spC)
 {
   new(&p) ud::ComponentRef(spC);
 }
-inline udVariant::udVariant(const Delegate &d)
+inline udVariant::udVariant(const VarDelegate &d)
   : t((size_t)Type::Delegate)
   , ownsContent(1)
   , length(0)
 {
-  new(&p) Delegate(d);
+  new(&p) VarDelegate(d);
 }
-inline udVariant::udVariant(Delegate &&d)
+inline udVariant::udVariant(VarDelegate &&d)
   : t((size_t)Type::Delegate)
   , ownsContent(1)
   , length(0)
 {
-  new(&p) Delegate(std::move(d));
+  new(&p) VarDelegate(std::move(d));
 }
 inline udVariant::udVariant(udString s, bool ownsMemory)
   : t((size_t)Type::String)
@@ -178,11 +178,11 @@ struct udVariant_Construct
 {
   UDFORCE_INLINE static udVariant construct(T &&rval)
   {
-    return udVariant(udToVariant(std::move(rval)));
+    return udToVariant(std::move(rval));
   }
   UDFORCE_INLINE static udVariant construct(const T &v)
   {
-    return udVariant(udToVariant(v));
+    return udToVariant(v);
   }
 };
 
@@ -190,13 +190,19 @@ struct udVariant_Construct
 // These pipe through to `struct udVariant_Construct<>` to facilitate a bunch of partial specialisation madness
 template<typename T>
 UDFORCE_INLINE udVariant::udVariant(T &&rval)
-  : udVariant(udVariant_Construct<typename std::remove_const<T>::type>::construct(std::move(rval)))
+  : udVariant(udVariant_Construct<typename std::remove_reference<T>::type>::construct(std::move(rval)))
 {}
+#if defined(_MSC_VER)
 template<typename T>
 UDFORCE_INLINE udVariant::udVariant(T &v)
   : udVariant(udVariant_Construct<T>::construct(v))
 {}
-
+#else
+template<typename T>
+UDFORCE_INLINE udVariant::udVariant(const T &v)
+  : udVariant(udVariant_Construct<T>::construct(v))
+{}
+#endif
 
 // specialisation of non-const udVariant, which annoyingly gets hooked by the T& constructor instead of the copy constructor
 template<> struct udVariant_Construct<udVariant>  { UDFORCE_INLINE static udVariant construct(const udVariant &v) { return udVariant(v); } };
@@ -343,7 +349,7 @@ protected:
 
   R from(Args... args) const
   {
-    udVariant::Delegate d(target);
+    udVariant::VarDelegate d(target);
 
     // HAX: added 1 to support the case of zero args
     udVariant vargs[sizeof...(args)+1] = { udVariant(args)... };
@@ -361,7 +367,7 @@ protected:
   }
 
   // *from* udVariant::Delegate constructor
-  VarDelegate(const udVariant::Delegate &d)
+  VarDelegate(const udVariant::VarDelegate &d)
     : target(d.GetMemento())
   {
     FastDelegate<R(Args...)> shim(this, &VarDelegate::from);
@@ -397,7 +403,7 @@ protected:
 
   void from(Args... args) const
   {
-    udVariant::Delegate d(target);
+    udVariant::VarDelegate d(target);
 
     // HAX: added 1 to support the case of zero args
     udVariant vargs[sizeof...(args)+1] = { udVariant(args)... };
@@ -415,7 +421,7 @@ protected:
   }
 
   // *from* udVariant::Delegate constructor
-  VarDelegate(const udVariant::Delegate &d)
+  VarDelegate(const udVariant::VarDelegate &d)
     : target(d.GetMemento())
   {
     FastDelegate<void(Args...)> shim(this, &VarDelegate::from);
@@ -433,7 +439,7 @@ inline udVariant udToVariant(const udDelegate<R(Args...)> &d)
 {
   typedef udSharedPtr<VarDelegate<R(Args...)>> VarDelegateRef;
 
-  return udVariant::Delegate(VarDelegateRef::create(d));
+  return udVariant::VarDelegate(VarDelegateRef::create(d));
 }
 
 
@@ -498,10 +504,10 @@ inline void udFromVariant(const udVariant &v, T *pE)
       // TODO: complain about invalid enum type?! error or something?
       return;
     }
-    *pE = T((T::Type)val);
+    *pE = T((typename T::Type)val);
   }
   else if (v.is(udVariant::Type::Int))
-    *pE = T(T::Type(v.asInt()));
+    *pE = T((typename T::Type)v.asInt());
   else if (v.is(udVariant::Type::String))
     *pE = T(v.asString());
 }

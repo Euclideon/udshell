@@ -46,8 +46,8 @@ inline udString::udString(const char *pString)
   : udSlice<const char>(pString, pString ? strlen(pString) : 0)
 {}
 
-template<size_t Len>
-inline udString::udString(const char str[Len])
+template<size_t N>
+inline udString::udString(const char str[N])
   : udSlice<const char>(str, N)
 {}
 
@@ -300,12 +300,12 @@ inline udMutableString<Size>& udMutableString<Size>::sprintf(const char *pFormat
   size_t len = vsprintf(nullptr, pFormat, args) + 1;
 #endif
 
-  reserve(len + 1);
+  this->reserve(len + 1);
 
 #if defined(_MSC_VER)
-  length = vsnprintf_s(ptr, len, len, pFormat, args);
+  this->length = vsnprintf_s(this->ptr, len, len, pFormat, args);
 #else
-  length = vsnprintf(ptr, len, pFormat, args);
+  this->length = vsnprintf(this->ptr, len, pFormat, args);
 #endif
 
   va_end(args);
@@ -316,19 +316,19 @@ inline udMutableString<Size>& udMutableString<Size>::sprintf(const char *pFormat
 template<size_t Size>
 inline udMutableString<Size>& udMutableString<Size>::toUpper()
 {
-  for (size_t i = 0; i < length; ++i)
+  for (size_t i = 0; i < this->length; ++i)
   {
-    if (isAlpha(ptr[i]))
-      ptr[i] == toUpper(ptr[i]);
+    if (isAlpha(this->ptr[i]))
+      this->ptr[i] == toUpper(this->ptr[i]);
   }
 }
 template<size_t Size>
 inline udMutableString<Size>& udMutableString<Size>::toLower()
 {
-  for (size_t i = 0; i < length; ++i)
+  for (size_t i = 0; i < this->length; ++i)
   {
-    if (isAlpha(ptr[i]))
-      ptr[i] == toLower(ptr[i]);
+    if (isAlpha(this->ptr[i]))
+      this->ptr[i] == toLower(this->ptr[i]);
   }
 }
 
@@ -537,7 +537,7 @@ template<typename... Args>
 inline udMutableString<Size>& udMutableString<Size>::concat(const Args&... args)
 {
   using namespace ud_internal;
-  clear();
+  this->clear();
   VarArg proxies[] = { VarArg(args)... };
   appendInternal(udSlice<VarArg>(proxies, UDARRAYSIZE(proxies)));
   return *this;
@@ -566,20 +566,20 @@ inline void udMutableString<Size>::appendInternal(udSlice<ud_internal::VarArg> a
 {
   using namespace ud_internal;
   size_t len = getLength(args);
-  reserve(length + len + 1);
-  concatenate(udSlice<char>(ptr + length, len), args);
-  length += len;
-  ptr[length] = 0;
+  this->reserve(this->length + len + 1);
+  concatenate(udSlice<char>(this->ptr + this->length, len), args);
+  this->length += len;
+  this->ptr[this->length] = 0;
 }
 template<size_t Size>
 inline void udMutableString<Size>::formatInternal(udString format, udSlice<ud_internal::VarArg> args)
 {
   using namespace ud_internal;
   size_t len = ud_internal::format(format, nullptr, args).length;
-  reserve(len + 1);
-  ud_internal::format(format, udSlice<char>(ptr, len), args);
-  length = len;
-  ptr[len] = 0;
+  this->reserve(len + 1);
+  ud_internal::format(format, udSlice<char>(this->ptr, len), args);
+  this->length = len;
+  this->ptr[len] = 0;
 }
 
 

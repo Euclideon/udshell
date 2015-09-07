@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "udString.h"
+#include "udstring.h"
 
 #if defined(_MSC_VER)
 // _CRT_SECURE_NO_WARNINGS warning (vsprintf_s)

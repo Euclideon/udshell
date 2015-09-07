@@ -3,10 +3,14 @@
 #define SIGNALTODELEGATE_H
 
 // suppress warnings from qvariant
-#pragma warning(push,3)
+#if defined(_MSC_VER)
+# pragma warning(push,3)
+#endif
 #include <QObject>
 #include <QMetaMethod>
-#pragma warning(pop)
+#if defined(_MSC_VER)
+# pragma warning(pop)
+#endif
 
 #include "typeconvert.h"
 #include "util/foreach.h"
@@ -52,7 +56,7 @@ class QtSignalToDelegate : public QObject
   Q_OBJECT
 
 public:
-  QtSignalToDelegate(const QObject *pSourceObj, const QMetaMethod &m, const udVariant::Delegate &d) : v(d)
+  QtSignalToDelegate(const QObject *pSourceObj, const QMetaMethod &m, const udVariant::VarDelegate &d) : v(d)
   {
     QMetaMethod sigHandler = lookupSignalHandler(m);
     if (sigHandler.isValid())
@@ -76,7 +80,7 @@ private:
     {
       udMutableString128 signalHandlerName;
       signalHandlerName.concat("SignalHandler", methodSig.right(methodSig.size() - indexOfOpenBracket).data());
-      udDebugPrintf("Checking for signal handler: '%s'\n", signalHandlerName.toStringz());
+      udDebugPrintf("Checking for signal handler: '%s'\n", (const char*)signalHandlerName.toStringz());
       methodIndex = metaObject()->indexOfMethod(signalHandlerName.toStringz());
     }
 

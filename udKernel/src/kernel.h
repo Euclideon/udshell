@@ -16,9 +16,10 @@ struct udRenderEngine;
 
 namespace ud
 {
-class LuaState;
 
+class LuaState;
 class udBlockStreamer;
+class Renderer;
 
 PROTOTYPE_COMPONENT(View);
 PROTOTYPE_COMPONENT(UIComponent);

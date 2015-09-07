@@ -18,7 +18,7 @@ udVariant::~udVariant()
         ((ud::ComponentRef*)&p)->~udSharedPtr();
         break;
       case Type::Delegate:
-        ((Delegate*)&p)->~Delegate();
+        ((VarDelegate*)&p)->~VarDelegate();
         break;
       case Type::String:
         udFree(s);
@@ -168,17 +168,17 @@ ud::ComponentRef udVariant::asComponent() const
     return nullptr;
   }
 }
-udVariant::Delegate udVariant::asDelegate() const
+udVariant::VarDelegate udVariant::asDelegate() const
 {
   switch ((Type)t)
   {
     case Type::Null:
-      return Delegate();
+      return VarDelegate();
     case Type::Delegate:
-      return (Delegate&)p;
+      return (VarDelegate&)p;
     default:
       UDASSERT(type() == Type::Delegate, "Wrong type!");
-      return Delegate();
+      return VarDelegate();
   }
 }
 udString udVariant::asString() const
@@ -337,7 +337,7 @@ void udVariant::luaPush(ud::LuaState &l) const
       l.pushComponent(ud::ComponentRef(c));
       break;
     case Type::Delegate:
-      l.pushDelegate((Delegate&)p);
+      l.pushDelegate((VarDelegate&)p);
       break;
     case Type::String:
       l.pushString(udString(s, length));
@@ -381,7 +381,7 @@ udVariant udVariant::luaGet(ud::LuaState &l, int idx)
       return udVariant();
     case ud::LuaType::Number:
       if (l.isInteger(-1))
-        return udVariant(l.toInt(idx));
+        return udVariant((int64_t)l.toInt(idx));
       else
         return udVariant(l.toFloat(idx));
     case ud::LuaType::String:

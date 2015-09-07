@@ -18,10 +18,6 @@
 namespace qt
 {
 
-// Instantiate QtComponent types
-template class QtComponent<ud::UIComponent>;
-
-
 // Qt shims
 struct QtGetter : public ud::Getter
 {
@@ -174,7 +170,7 @@ protected:
   QtSignalToDelegate *sigToDel;
 
   template<typename QtComponentT>
-  static void doSubscribe(const VarEvent *pEv, const ud::ComponentRef &c, const udVariant::Delegate &d)
+  static void doSubscribe(const VarEvent *pEv, const ud::ComponentRef &c, const udVariant::VarDelegate &d)
   {
     QtVarEvent *pEvent = (QtVarEvent*)pEv;
     QtComponentT *pQtComp = (QtComponentT *)c.ptr();
@@ -332,6 +328,10 @@ QtUIComponent::QtUIComponent(ud::ComponentDesc *pType, ud::Kernel *pKernel, udSh
 QtUIComponent::~QtUIComponent()
 {
 }
+
+
+// Instantiate QtComponent types
+template class QtComponent<ud::UIComponent>;
 
 } // namespace qt
 

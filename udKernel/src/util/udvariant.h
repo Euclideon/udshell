@@ -18,7 +18,7 @@ struct udKeyValuePair;
 struct udVariant
 {
 public:
-  typedef udDelegate<udVariant(udSlice<udVariant>)> Delegate;
+  typedef udDelegate<udVariant(udSlice<udVariant>)> VarDelegate;
 
   enum class Type
   {
@@ -45,14 +45,20 @@ public:
   udVariant(size_t val, const udEnumDesc *pDesc, bool isBitfield);
   udVariant(ud::ComponentRef &&spC);
   udVariant(const ud::ComponentRef &spC);
-  udVariant(Delegate &&d);
-  udVariant(const Delegate &d);
+  udVariant(VarDelegate &&d);
+  udVariant(const VarDelegate &d);
   udVariant(udString, bool ownsMemory = false);
   udVariant(udSlice<udVariant> a, bool ownsMemory = false);
   udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory = false);
 
   template<typename T> udVariant(T &&rval);
+#if defined(_MSC_VER)
+  // MSVC(2013?) seems to have a compiler bug which incorrectly invokes the move constructor with lvalues!?! O_O
+  // this code seems to relax the confusion for MSVC, but it's technically wrong, and doesn't build on the other compilers...
   template<typename T> udVariant(T &v);
+#else
+  template<typename T> udVariant(const T &v);
+#endif
 
   ~udVariant();
 
@@ -76,7 +82,7 @@ public:
   double asFloat() const;
   const udEnumDesc* asEnum(size_t *pVal) const;
   ud::ComponentRef asComponent() const;
-  Delegate asDelegate() const;
+  VarDelegate asDelegate() const;
   udString asString() const;
   udSlice<udVariant> asArray() const;
   udSlice<udKeyValuePair> asAssocArray() const;

@@ -56,6 +56,7 @@
 #include <string.h>
 #define attributeUnused __attribute__ ((unused))
 #define unusedParam(x) __attribute__((__unused__))x
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #else // defined(__clang__) || defined(__GNUC__)
 #include <memory.h>
 #define attributeUnused

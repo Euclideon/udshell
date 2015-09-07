@@ -6,10 +6,13 @@
 
 #include "components/uicomponent.h"
 
+namespace ud
+{
+  class Kernel;
+}
+
 namespace qt
 {
-
-class ud::Kernel;
 
 PROTOTYPE_COMPONENT(QtUIComponent);
 

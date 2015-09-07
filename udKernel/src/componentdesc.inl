@@ -121,7 +121,7 @@ inline CEvent::CEvent(udEvent<Args...> X::*ev)
 }
 
 template<typename X, typename... Args>
-inline void CEvent::doSubscribe(const VarEvent *_pEv, const ComponentRef &c, const udVariant::Delegate &d)
+inline void CEvent::doSubscribe(const VarEvent *_pEv, const ComponentRef &c, const udVariant::VarDelegate &d)
 {
   CEvent *pEv = (CEvent*)_pEv;
 

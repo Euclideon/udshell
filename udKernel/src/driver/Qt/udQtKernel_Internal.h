@@ -4,6 +4,7 @@
 
 #include <QGuiApplication>
 #include <QQmlEngine>
+#include <QOpenGLContext>
 #include <QThread>
 #include <QEvent>
 
@@ -18,7 +19,7 @@ class Window;
 class QtKernel : public ud::Kernel, public QObject
 {
 public:
-  QtKernel::QtKernel(udInitParams commandLine);
+  QtKernel(udInitParams commandLine);
   virtual ~QtKernel() {}
 
   udResult Init();

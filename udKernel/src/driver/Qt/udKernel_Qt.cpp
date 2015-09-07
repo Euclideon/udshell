@@ -3,7 +3,6 @@
 #if UDWINDOW_DRIVER == UDDRIVER_QT
 
 #include <QSemaphore>
-#include <QOpenGLContext>
 
 #include "udQtKernel_Internal.h"
 #include "ui/window.h"
