@@ -115,15 +115,50 @@ bool Component::IsType(udString type) const
 
 const PropertyDesc *Component::GetPropertyDesc(udString name) const
 {
-  return pType->propertyTree.Get(name);
+  const PropertyDesc *pDesc = instanceProperties.Get(name);
+  if (!pDesc)
+    pDesc = pType->propertyTree.Get(name);
+  return pDesc;
 }
 const MethodDesc *Component::GetMethodDesc(udString name) const
 {
-  return pType->methodTree.Get(name);
+  const MethodDesc *pDesc = instanceMethods.Get(name);
+  if (!pDesc)
+    pDesc = pType->methodTree.Get(name);
+  return pDesc;
 }
 const EventDesc *Component::GetEventDesc(udString name) const
 {
-  return pType->eventTree.Get(name);
+  const EventDesc *pDesc = instanceEvents.Get(name);
+  if (!pDesc)
+    pDesc = pType->eventTree.Get(name);
+  return pDesc;
+}
+
+void Component::AddDynamicProperty(const PropertyDesc &property)
+{
+  instanceProperties.Insert(property.info.id, property);
+}
+void Component::AddDynamicMethod(const MethodDesc &method)
+{
+  instanceMethods.Insert(method.info.id, method);
+}
+void Component::AddDynamicEvent(const EventDesc &event)
+{
+  instanceEvents.Insert(event.info.id, event);
+}
+
+void Component::RemoveDynamicProperty(udString name)
+{
+  instanceProperties.Remove(name);
+}
+void Component::RemoveDynamicMethod(udString name)
+{
+  instanceMethods.Remove(name);
+}
+void Component::RemoveDynamicEvent(udString name)
+{
+  instanceEvents.Remove(name);
 }
 
 void Component::SetProperty(udString property, const udVariant &value)

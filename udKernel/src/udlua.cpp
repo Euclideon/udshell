@@ -592,11 +592,16 @@ int LuaState::help(lua_State* L)
     l.print(pDesc->description);
 
     udMutableString64 buf;
-    if (pDesc->propertyTree.Size() > 0)
+    if (c->NumProperties() > 0)
     {
       l.print("\nProperties:");
 
       SetConsoleColor(ConsoleColor::Green);
+      for (auto &p : c->instanceProperties)
+      {
+        buf.sprintf("  %-16s - %s", (const char*)p.info.id.toStringz(), (const char*)p.info.description.toStringz());
+        l.print(buf);
+      }
       for (auto &p : pDesc->propertyTree)
       {
         buf.sprintf("  %-16s - %s", (const char*)p.info.id.toStringz(), (const char*)p.info.description.toStringz());
@@ -604,12 +609,30 @@ int LuaState::help(lua_State* L)
       }
     }
 
-    if (pDesc->methodTree.Size() > 0)
+    if (c->NumMethods() > 0)
     {
       SetConsoleColor();
       l.print("\nMethods:");
 
       SetConsoleColor(ConsoleColor::Magenta);
+      for (auto &m : c->instanceMethods)
+      {
+/*
+        udMutableString64 func = udMutableString64::format("%s(", m->id.toStringz());
+        for (size_t i = 0; i < m->args.length; ++i)
+        {
+          func.concat(m->args[i].name);
+          if (i<m->args.length-1)
+            func.concat(", ");
+        }
+        if (m->result.type != PropertyType::Void)
+          func.concat(") -> ", m->result.name);
+        else
+          func.concat(")");
+*/
+        buf.sprintf("  %-16s - %s", (const char*)m.info.id.toStringz(), (const char*)m.info.description.toStringz());
+        l.print(buf);
+      }
       for (auto &m : pDesc->methodTree)
       {
 /*
@@ -630,12 +653,17 @@ int LuaState::help(lua_State* L)
       }
     }
 
-    if (pDesc->eventTree.Size() > 0)
+    if (c->NumEvents() > 0)
     {
       SetConsoleColor();
       l.print("\nEvents:");
 
       SetConsoleColor(ConsoleColor::Yellow);
+      for (auto &e : c->instanceEvents)
+      {
+        buf.sprintf("  %-16s - %s", (const char*)e.info.id.toStringz(), (const char*)e.info.description.toStringz());
+        l.print(buf);
+      }
       for (auto &e : pDesc->eventTree)
       {
         buf.sprintf("  %-16s - %s", (const char*)e.info.id.toStringz(), (const char*)e.info.description.toStringz());
