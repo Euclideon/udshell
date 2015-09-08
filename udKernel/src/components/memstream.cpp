@@ -43,7 +43,12 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, udSharedString
     throw udR_InvalidParameter_;
 
   const udVariant &buf = initParams["buffer"];
-  if (!buf.is(udVariant::Type::Null))
+  if (buf.is(udVariant::Type::Null))
+  {
+      inBuffer = pKernel->CreateComponent<Buffer>();
+      inBuffer->Allocate(DefaultBufferSize);
+  }
+  else
   {
     inBuffer = buf.as<BufferRef>();
     if (!inBuffer)
@@ -115,15 +120,8 @@ size_t MemStream::Read(void *pData, size_t bytes)
 
 size_t MemStream::Write(const void *pData, size_t bytes)
 {
-  if (!(oFlags & OpenFlags::Write))
+  if (!(oFlags & OpenFlags::Write) || !spBuffer)
     return 0;
-
-  if (!spBuffer)
-  {
-    BufferRef buf = pKernel->CreateComponent<Buffer>();
-    buf->Allocate(DefaultBufferSize);
-    SetBuffer(buf);
-  }
 
   if (pos + bytes > (size_t)length)
   {
@@ -137,6 +135,8 @@ size_t MemStream::Write(const void *pData, size_t bytes)
 
   memcpy((char *)pBufArray + pos, pData, bytes);
   pos += bytes;
+
+  spBuffer->Changed.Signal();
 
   return bytes;
 }
