@@ -96,20 +96,21 @@ int Logger::Log(int level, udString text, LogCategories category, udString compo
 
   for (auto &s : streamList)
   {
+    out = nullptr;
+
     if ((s.categories & category) && s.level >= level)
     {
       if (s.format & LogFormatSpecs::Timestamp)
       {
-          time_t ti = time(nullptr);
+        time_t ti = time(nullptr);
 #if UDPLATFORM_WINDOWS
-          struct tm _tm;
-          localtime_s(&_tm, &ti);
-          strftime(timeStr, 64, "[%d/%m/%d %H:%M:%S]", &_tm);
+        tm _tm, *pTm = &_tm;
+        localtime_s(&_tm, &ti);
 #else
-          tm *_tm = localtime(&ti);
-          strftime(timeStr, 64, "[%d/%m/%d %H:%M:%S]", _tm);
+        tm *pTm = localtime(&ti);
 #endif
-          out.append(timeStr);
+        strftime(timeStr, sizeof(timeStr), "[%d/%m/%d %H:%M:%S]", pTm);
+        out.append((const char*)timeStr);
       }
       if (s.format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID))
       {
