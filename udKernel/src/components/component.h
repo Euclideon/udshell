@@ -37,8 +37,16 @@ public:
   template<typename T>
   bool IsType() const { return IsType(T::descriptor.id); }
 
-  virtual void SetProperty(udString property, const udVariant &value);
   virtual udVariant GetProperty(udString property) const;
+  virtual void SetProperty(udString property, const udVariant &value);
+
+  udVariant CallMethod(udString method, udSlice<udVariant> args);
+  template<typename ...Args>
+  udVariant CallMethod(udString method, Args... args)
+  {
+    udVariant varargs[sizeof...(Args)] = { args... };
+    return CallMethod(method, udSlice<udVariant>(varargs, sizeof...(Args)));
+  }
 
   udResult SendMessage(udString target, udString message, const udVariant &data);
   udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { udMutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp , message, data); }
