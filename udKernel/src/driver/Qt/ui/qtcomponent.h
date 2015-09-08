@@ -26,9 +26,6 @@ public:
 
   QQuickItem *QuickItem() { return static_cast<QQuickItem*>(pQtObject); }
 
-protected:
-
-  static ud::ComponentDesc *CreateComponentDesc(const ud::ComponentDesc *pType);
   void PopulateComponentDesc(QObject *pObject);
 
   ud::Component *pComponent;

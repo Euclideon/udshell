@@ -7,26 +7,24 @@
 #include "qtcomponent.h"
 #include "components/ui.h"
 
+namespace ud {
+  class Kernel;
+}
+
 namespace qt
 {
 
-class ud::Kernel;
-
 PROTOTYPE_COMPONENT(QtWindow);
 
-class QtWindow : public QtComponent < ud::Window >
+class QtWindow : public QtComponent
 {
 public:
-  QQuickWindow *QuickWindow() { return static_cast<QQuickWindow*>(pQtObject); }
-
-protected:
-  QtWindow(ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams);
+  QtWindow(ud::Component *pComponent, udString qml);
   virtual ~QtWindow();
 
-  void Refresh();
+  QQuickWindow *QuickWindow() { return static_cast<QQuickWindow*>(pQtObject); }
 
-  // HACK: allow ud::Window::Create() to create a QtWindow
-  friend class ud::Window;
+  void Refresh();
 };
 
 } // namespace qt

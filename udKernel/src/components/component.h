@@ -13,6 +13,10 @@
 # undef SendMessage
 #endif
 
+namespace qt {
+  class QtComponent;
+}
+
 
 #define UD_COMPONENT(Name) \
   friend class Kernel; \
@@ -123,6 +127,7 @@ private:
   template<typename... Args>
   friend class ::udEvent;
   friend class LuaState;
+  friend qt::QtComponent;
 
   Component(const Component &) = delete;    // Still not sold on this
   void operator=(const Component &) = delete;

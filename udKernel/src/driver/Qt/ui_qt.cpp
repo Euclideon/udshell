@@ -2,7 +2,6 @@
 
 #if UDUI_DRIVER == UDDRIVER_QT
 
-#include "ui/uicomponent.h"
 #include "ui/window.h"
 
 namespace ud
@@ -13,6 +12,10 @@ udResult UIComponent::CreateInternal(udString filename)
   try
   {
     pInternal = new qt::QtComponent(this, filename);
+
+    // We expect a QQuickItem object
+    // TODO: better error handling?
+    UDASSERT(qobject_cast<QQuickItem*>(pInternal->pQtObject) != nullptr, "Qt UIComponent must create a QQuickItem");
   }
   catch (...)
   {
@@ -27,18 +30,39 @@ void UIComponent::DestroyInternal()
   pInternal = nullptr;
 }
 
-// ---------------------------------------------------------------------------------------
-Component *Viewport::Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+
+udResult Viewport::CreateInternal()
 {
-  using namespace qt;
-  return udNew(QtViewport, QtViewport::CreateComponentDesc(pType), pKernel, uid, initParams);
+  return udR_Success;
 }
 
-// ---------------------------------------------------------------------------------------
-Component *Window::Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+void Viewport::DestroyInternal()
 {
-  using namespace qt;
-  return udNew(QtWindow, QtWindow::CreateComponentDesc(pType), pKernel, uid, initParams);
+}
+
+
+udResult Window::CreateInternal(udString filename)
+{
+  try
+  {
+    pInternal = new qt::QtWindow(this, filename);
+  }
+  catch (...)
+  {
+    return udR_Failure_;
+  }
+  return udR_Success;
+}
+
+void Window::DestroyInternal()
+{
+  delete pInternal;
+  pInternal = nullptr;
+}
+
+void Window::Refresh()
+{
+  pInternal->Refresh();
 }
 
 } // namespace ud

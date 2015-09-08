@@ -34,7 +34,7 @@ public:
   QQuickItem *QuickItem() { return static_cast<QQuickItem*>(pQtObject); }
 
 protected:
-  QtViewport(ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams);
+  QtViewport(ud::ComponentDesc *pType, ud::Kernel *pKernel, udSharedString uid, udInitParams initParams);
   virtual ~QtViewport();
 
   // HACK: allow ud::Viewport::Create() to create a QtViewport

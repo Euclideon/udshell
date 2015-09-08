@@ -59,7 +59,7 @@ QtUIComponent::~QtUIComponent()
 }
 
 // ---------------------------------------------------------------------------------------
-QtViewport::QtViewport(ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams)
+QtViewport::QtViewport(ud::ComponentDesc *pType, ud::Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : QtComponent(pType, pKernel, uid, initParams)
 {
   QString filename = initParams["file"].as<QString>();

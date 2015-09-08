@@ -10,6 +10,7 @@
 
 #include <QQmlComponent>
 
+#include "../udQtKernel_Internal.h"
 #include "../util/signaltodelegate.h"
 #include "qtcomponent.h"
 #include "components/ui.h"
@@ -202,10 +203,6 @@ QtComponent::QtComponent(ud::Component *pComponent, udString qml)
       udDebugPrintf("QML ERROR: %s\n", error.toString().toLatin1().data());
     throw udR_Failure_;
   }
-
-  // We expect a QQuickItem object
-  // TODO: better error handling?
-  UDASSERT(qobject_cast<QQuickItem*>(pQtObject) != nullptr, "QtUIComponents must create a QQuickItem");
 
   // Decorate the descriptor with meta object information
   PopulateComponentDesc(pQtObject);

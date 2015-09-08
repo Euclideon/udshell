@@ -7,6 +7,7 @@
 #if UDUI_DRIVER == UDDRIVER_QT
 namespace qt {
   class QtComponent;
+  class QtWindow;
   class QtKernel;
 }
 #endif
@@ -45,10 +46,11 @@ public:
   UD_COMPONENT(Viewport);
 
 protected:
-  Viewport(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  Viewport(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
   virtual ~Viewport();
 
-  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  udResult CreateInternal();
+  void DestroyInternal();
 };
 
 class Window : public Component
@@ -60,15 +62,21 @@ public:
   UIComponentRef GetUI() const { return spTopLevelUI; }
 
 protected:
-  Window(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
-    : Component(pType, pKernel, uid, initParams) {}
-  virtual ~Window() {}
+  Window(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  virtual ~Window();
 
-  virtual void Refresh() { UDASSERT(false, "OVERRIDE THIS METHOD"); }
+  udResult CreateInternal(udString filename);
+  void DestroyInternal();
 
-  static Component *Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams);
+  void Refresh();
 
   UIComponentRef spTopLevelUI = nullptr;
+
+#if UDUI_DRIVER == UDDRIVER_QT
+  qt::QtWindow *pInternal = nullptr;
+#else
+  void *pInternal = nullptr;
+#endif
 };
 
 } // namespace ud

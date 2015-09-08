@@ -15,13 +15,6 @@ ComponentDesc UIComponent::descriptor =
   "ui",                // id
   "UI",                // displayName
   "Is a UI component", // description
-
-  nullptr, // properties
-  nullptr, // methods
-  nullptr, // events
-
-  nullptr, // pInit
-  nullptr, // pCreate
 };
 
 // VIEWPORT //////////////////////
@@ -36,13 +29,6 @@ ComponentDesc Viewport::descriptor =
   "viewport",             // id
   "Viewport",             // displayName
   "Is a viewport",        // description
-
-  nullptr,                // properties
-  nullptr,                // methods
-  nullptr,                // events
-
-  nullptr,                // pInit
-  Viewport::Create,       // pCreate
 };
 
 // WINDOW //////////////////////
@@ -70,13 +56,6 @@ ComponentDesc Window::descriptor =
   "window",               // id
   "Window",               // displayName
   "Is a window",          // description
-
-  nullptr,                // properties
-  nullptr,                // methods
-  nullptr,                // events
-
-  nullptr,                // pInit
-  Window::Create,         // pCreate
 };
 
 UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
@@ -99,15 +78,38 @@ UIComponent::~UIComponent()
 
 
 // ---------------------------------------------------------------------------------------
-Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
-
+  if (CreateInternal() != udR_Success)
+    throw udR_Failure_;
 }
 
 // ---------------------------------------------------------------------------------------
 Viewport::~Viewport()
 {
+  DestroyInternal();
+}
+
+
+// ---------------------------------------------------------------------------------------
+Window::Window(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  : Component(pType, pKernel, uid, initParams)
+{
+  udString filename = initParams["file"].as<udString>();
+  if (filename.empty())
+  {
+    LogError("Attempted to create ui component without source file");
+    throw udR_Failure_;
+  }
+  if (CreateInternal(filename) != udR_Success)
+    throw udR_Failure_;
+}
+
+// ---------------------------------------------------------------------------------------
+Window::~Window()
+{
+  DestroyInternal();
 }
 
 // ---------------------------------------------------------------------------------------

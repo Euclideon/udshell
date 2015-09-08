@@ -43,7 +43,6 @@ void udRenderScene_InitRender(Kernel*);
 udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
   udResult result;
-  StreamRef spDebugFile, spConsole;
   Kernel *pKernel = CreateInstanceInternal(commandLine);
 
   UD_ERROR_NULL(pKernel, udR_Failure_);
@@ -126,8 +125,8 @@ void Kernel::DoInit(Kernel *pKernel)
   udRenderScene_InitRender(pKernel);
 
   pKernel->spLogger = pKernel->CreateComponent<Logger>();
-  spDebugFile = pKernel->CreateComponent<File>({ { "path", "udKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create } });
-  spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
+  StreamRef spDebugFile = pKernel->CreateComponent<File>({ { "path", "udKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create } });
+  StreamRef spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
   pKernel->spLogger->AddStream(spDebugFile, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
   pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script, 5, LogDefaults::Format);
 

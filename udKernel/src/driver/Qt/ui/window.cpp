@@ -19,38 +19,12 @@ namespace qt
 {
 
 // ---------------------------------------------------------------------------------------
-QtWindow::QtWindow(ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams)
-  : QtComponent(pType, pKernel, uid, initParams)
+QtWindow::QtWindow(ud::Component *pComponent, udString qml)
+  : QtComponent(pComponent, qml)
 {
-  QString filename = initParams["file"].as<QString>();
-  if (filename.isNull())
-  {
-    udDebugPrintf("Error: attempted to create ui component without qml file set\n");
-    udFree(pDesc);
-    throw udR_Failure_;
-  }
-
-  // create the qml component for the associated script
-  QtKernel *pQtKernel = static_cast<QtKernel*>(pKernel);
-  QQmlComponent component(pQtKernel->QmlEngine(), QUrl(filename));
-  pQtObject = component.create();
-
-  if (!pQtObject)
-  {
-    // TODO: better error information/handling
-    udDebugPrintf("Error creating QtWindow\n");
-    foreach(const QQmlError &error, component.errors())
-      udDebugPrintf("QML ERROR: %s\n", error.toString().toLatin1().data());
-    udFree(pDesc);
-    throw udR_Failure_;
-  }
-
   // We expect a QQuickWindow object
   // TODO: better error handling?
   UDASSERT(qobject_cast<QQuickWindow*>(pQtObject) != nullptr, "QtWindow must create a QQuickWindow");
-
-  // Decorate the descriptor with meta object information
-  PopulateComponentDesc(pQtObject);
 }
 
 // ---------------------------------------------------------------------------------------

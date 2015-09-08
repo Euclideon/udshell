@@ -12,7 +12,7 @@ Component *UIComponent::Create(const ComponentDesc *pType, Kernel *pKernel, udSh
   return nullptr;
 }
 
-Component *Window::Create(const ComponentDesc *pType, Kernel *pKernel, udRCString uid, udInitParams initParams)
+Component *Window::Create(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
 {
   return nullptr;
 }

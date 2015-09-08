@@ -25,11 +25,11 @@ PROTOTYPE_COMPONENT(View);
 PROTOTYPE_COMPONENT(UIComponent);
 PROTOTYPE_COMPONENT(Logger);
 
-// TODO: udMessageHandler returns void, should we return some error state??
 class Kernel
 {
   friend class Component;
 public:
+  // TODO: MessageHandler returns void, should we return some error state??
   typedef FastDelegate<void(udString sender, udString message, const udVariant &data)> MessageHandler;
 
   static udResult Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount = 0);
