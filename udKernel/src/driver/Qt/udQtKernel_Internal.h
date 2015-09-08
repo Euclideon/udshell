@@ -5,11 +5,12 @@
 #include <QGuiApplication>
 #include <QQmlEngine>
 #include <QOpenGLContext>
+#include <QSurfaceFormat>
 #include <QThread>
 #include <QEvent>
 
 #include "kernel.h"
-#include "ui/qtuicomponent.h"
+#include "ui/window.h"
 
 namespace qt
 {
@@ -24,7 +25,7 @@ public:
 
   udResult Init();
   udResult Shutdown();
-  udResult FormatMainWindow(QtUIComponentRef spUIComponent);
+  udResult SetTopLevelUI(QtWindowRef spWindow);
   udResult RunMainLoop();
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
@@ -35,11 +36,12 @@ public:
   QQmlEngine *QmlEngine() { return pQmlEngine; }
 
 private slots:
-  void InitRender();
-  void CleanupRender();
+  void OnGLContextCreated(QOpenGLContext *pContext);
+  void OnFirstRender();
   void Destroy();
 
 private:
+  void DoInit(ud::Kernel *);
   void customEvent(QEvent *pEvent);
 
   // Members
@@ -50,7 +52,8 @@ private:
   QQmlEngine *pQmlEngine;
   QOpenGLContext *pMainThreadContext;
 
-  Window *pMainWindow;
+  QSurfaceFormat mainSurfaceFormat;
+  QQuickWindow *pTopLevelWindow;
 
   Qt::HANDLE mainThreadId;
   Qt::HANDLE renderThreadId;

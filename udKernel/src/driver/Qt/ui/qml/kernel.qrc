@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/kernel">
+    <file>qmldir</file>
+    <file>splashscreen.qml</file>
+  </qresource>
+</RCC>

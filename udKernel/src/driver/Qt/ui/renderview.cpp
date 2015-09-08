@@ -86,6 +86,8 @@ RenderView::RenderView(QQuickItem *pParent)
 //  spView = s_pKernel->CreateComponent<ud::View>();
   spView = s_pKernel->GetFocusView();
   spView->FrameReady.Subscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
+
+  s_pKernel->SetFocusView(spView);
 }
 
 RenderView::~RenderView()

@@ -3,9 +3,14 @@
 #if UDWINDOW_DRIVER == UDDRIVER_QT
 
 #include <QSemaphore>
+#include <QQuickWindow>
 
 #include "udQtKernel_Internal.h"
 #include "ui/window.h"
+#include "ui/renderview.h"
+
+// Init the kernel's qrc file resources - this has to happen from the global namespace
+inline void InitResources() { Q_INIT_RESOURCE(kernel); }
 
 namespace qt
 {
@@ -49,8 +54,10 @@ public:
 QtKernel::QtKernel(udInitParams commandLine)
   : QObject(0)
   , pApplication(nullptr)
-  , pMainWindow(nullptr)
   , pQmlEngine(nullptr)
+  , pMainThreadContext(nullptr)
+  , mainSurfaceFormat(QSurfaceFormat::defaultFormat())
+  , pTopLevelWindow(nullptr)
   , mainThreadId(QThread::currentThreadId())
   , renderThreadId(nullptr)
 {
@@ -85,12 +92,36 @@ udResult QtKernel::Init()
 
   pQmlEngine = new QQmlEngine(this);
 
+  // register our internal qml types
+  qmlRegisterType<RenderView>("udKernel", 0, 1, "RenderView");
+
   // TODO: expose kernel innards to the qml context?
 
-  pMainWindow = new Window();
+  // Load in the qrc file
+  InitResources();
 
-  QObject::connect(pMainWindow, &QQuickWindow::beforeRendering, this, &QtKernel::InitRender, Qt::DirectConnection);
-  QObject::connect(pMainWindow, &QQuickWindow::sceneGraphInvalidated, this, &QtKernel::CleanupRender, Qt::DirectConnection);
+  // modify our surface format to support opengl debug logging
+  // TODO: set gl version based on property settings?
+  // TODO: control setting a debug context based on command line switches?
+  mainSurfaceFormat.setOption(QSurfaceFormat::DebugContext);
+  QSurfaceFormat::setDefaultFormat(mainSurfaceFormat);
+
+  // create the splash screen
+  QQmlComponent component(pQmlEngine, QUrl("qrc:/kernel/splashscreen.qml"));
+  QObject *object = component.create();
+  pTopLevelWindow = qobject_cast<QQuickWindow*>(object);
+  if (!pTopLevelWindow)
+  {
+    // TODO: better error information/handling
+    udDebugPrintf("Error creating Splash Screen\n");
+    foreach(const QQmlError &error, component.errors())
+      udDebugPrintf("QML ERROR: %s\n", error.toString().toLatin1().data());
+    return udR_Failure_;
+  }
+
+  // defer the heavier init stuff and app specific init to after Qt hits the event loop
+  // we'll hook into the splash screen to do this
+  QObject::connect(pTopLevelWindow, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender, Qt::DirectConnection);
 
   return udR_Success;
 }
@@ -99,30 +130,52 @@ udResult QtKernel::Init()
 udResult QtKernel::Shutdown()
 {
   udDebugPrintf("QtKernel::Shutdown()\n");
-  delete pMainWindow;
+
+  delete pTopLevelWindow;
+
+  if (ud::Kernel::DeinitRender() != udR_Success)
+  {
+    // TODO: gracefully handle error with DeinitRender ?
+    udDebugPrintf("Error cleaning up renderer\n");
+  }
+
   delete pQmlEngine;
   delete this;
   return udR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-udResult QtKernel::FormatMainWindow(QtUIComponentRef spUIComponent)
+udResult QtKernel::SetTopLevelUI(QtWindowRef spWindow)
 {
-  udDebugPrintf("QtKernel::FormatMainWindow()\n");
+  udDebugPrintf("QtKernel::SetTopLevelUI()\n");
 
-  // NOTE: we are reparenting the "visual parent" of the ui component, this means ui component is still
-  // responsible for cleaning up its qobject
-  // TODO: should we take complete ownership of the ui component??
-  spUIComponent->QuickItem()->setParentItem(pMainWindow->contentItem());
+  QQuickWindow *pPrevWindow = pTopLevelWindow;
+  pTopLevelWindow = spWindow->QuickWindow();
 
-  // TODO: store this info as properties?
-  pMainWindow->resize(800, 600);
-  pMainWindow->show();
-  pMainWindow->raise();
+  if (pPrevWindow)
+  {
+    // unhook the current top level window
+    //QObject::disconnect(pPrevWindow, &QQuickWindow::sceneGraphInitialized, this, &QtKernel::OnSceneGraphInitialized);
+    QObject::disconnect(pTopLevelWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated);
+    pPrevWindow->hide();
+    delete pPrevWindow;
+  }
 
-  // TODO: wire this up to a resize event
-  spUIComponent->QuickItem()->setWidth(800);
-  spUIComponent->QuickItem()->setHeight(600);
+  pMainThreadContext->doneCurrent();
+
+  // hook up the new one
+  //QObject::connect(pTopLevelWindow, &QQuickWindow::sceneGraphInitialized, this, &QtKernel::OnSceneGraphInitialized, Qt::DirectConnection);
+  QObject::connect(pTopLevelWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated, Qt::DirectConnection);
+
+  pTopLevelWindow->show();
+  pTopLevelWindow->raise();
+
+  if (!pMainThreadContext->makeCurrent(pTopLevelWindow))
+  {
+    // TODO: error
+    udDebugPrintf("Error making main gl context current\n");
+    return udR_Failure_;
+  }
 
   return udR_Success;
 }
@@ -150,6 +203,77 @@ void QtKernel::PostEvent(QEvent *pEvent, int priority)
 }
 
 // ---------------------------------------------------------------------------------------
+void QtKernel::OnGLContextCreated(QOpenGLContext *pContext)
+{
+  udDebugPrintf("QtKernel::CreateOpenGLContext()\n");
+
+  UDASSERT(pMainThreadContext != nullptr, "Expected GL context");
+
+  // we need to share our context with Qt and recreate
+  pContext->setShareContext(pMainThreadContext);
+  bool succeed = pContext->create();
+
+  // TODO: error handle
+  UDASSERT(succeed, "Couldn't create shared render context!");
+}
+
+// ---------------------------------------------------------------------------------------
+// RENDER THREAD
+void QtKernel::OnFirstRender()
+{
+  udDebugPrintf("QtKernel::OnFirstRender()\n");
+
+  // we only want this called on the first render cycle
+  QObject::disconnect(pTopLevelWindow, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender);
+
+  // TODO: hook up render thread id stuff again
+  //renderThreadId = QThread::currentThreadId();
+
+  // dispatch init call
+  DispatchToMainThread(MakeDelegate(this, &QtKernel::DoInit));
+}
+
+// ---------------------------------------------------------------------------------------
+void QtKernel::Destroy()
+{
+  udDebugPrintf("QtKernel::Destroy()\n");
+  ud::Kernel::Destroy();
+}
+
+// ---------------------------------------------------------------------------------------
+void QtKernel::DoInit(ud::Kernel *)
+{
+  udDebugPrintf("QtKernel::DoInit()\n");
+
+  UDASSERT(pTopLevelWindow != nullptr, "No active window set");
+  UDASSERT(pMainThreadContext == nullptr, "Main Thread context already exists");
+
+  // create main opengl context
+  pMainThreadContext = new QOpenGLContext();
+  pMainThreadContext->setFormat(mainSurfaceFormat);
+  bool succeed = pMainThreadContext->create();
+  UDASSERT(succeed, "Couldn't create render context!");
+
+  if (!pMainThreadContext->makeCurrent(pTopLevelWindow))
+  {
+    // TODO: handle error
+    udDebugPrintf("Error making main gl context current\n");
+    pApplication->quit();
+  }
+
+  // init the HAL's render system
+  if (ud::Kernel::InitRender() != udR_Success)
+  {
+    // TODO: gracefully handle error with InitRender ?
+    udDebugPrintf("Error initialising renderer\n");
+    pApplication->quit();
+  }
+
+  // app specific init
+  ud::Kernel::DoInit(this);
+}
+
+// ---------------------------------------------------------------------------------------
 void QtKernel::customEvent(QEvent *pEvent)
 {
   udDebugPrintf("QtKernel::customEvent()\n");
@@ -163,62 +287,6 @@ void QtKernel::customEvent(QEvent *pEvent)
   {
     udDebugPrintf("Unknown event received in Kernel\n");
   }
-}
-
-// ---------------------------------------------------------------------------------------
-// RENDER THREAD
-void QtKernel::InitRender()
-{
-  udDebugPrintf("QtKernel::InitRender()\n");
-
-  // TODO: remove these checks once we are confident in Kernel and the Qt driver
-  UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
-  UDASSERT(pMainWindow != nullptr, "Main Window doesn't exist");
-
-  // we only want this called on the first render cycle
-  QObject::disconnect(pMainWindow, &QQuickWindow::beforeRendering, this, &QtKernel::InitRender);
-
-  // TODO: need a better place to set this since this is called *after* our scenegraph has been created
-  // ALSO does this thread ever get recreated? does this id remain valid thru the program?
-  renderThreadId = QThread::currentThreadId();
-
-  QOpenGLContext *current = pMainWindow->openglContext();
-  current->doneCurrent();
-
-  pMainThreadContext = new QOpenGLContext();
-  pMainThreadContext->setFormat(current->format());
-  pMainThreadContext->setShareContext(current);
-  bool succeed = pMainThreadContext->create();
-  UDASSERT(succeed, "Couldn't create shared render context!");
-
-  pMainThreadContext->moveToThread(pApplication->thread());
-  current->makeCurrent(pMainWindow);
-
-  if (ud::Kernel::InitRender() != udR_Success)
-  {
-    // TODO: gracefully handle error with InitRender ?
-    udDebugPrintf("Error initialising renderer\n");
-    pApplication->quit();
-  }
-}
-
-// ---------------------------------------------------------------------------------------
-// RENDER THREAD
-void QtKernel::CleanupRender()
-{
-  udDebugPrintf("QtKernel::CleanupRender\n");
-  if (ud::Kernel::DeinitRender() != udR_Success)
-  {
-    // TODO: gracefully handle error with DeinitRender ?
-    udDebugPrintf("Error cleaning up renderer\n");
-  }
-}
-
-// ---------------------------------------------------------------------------------------
-void QtKernel::Destroy()
-{
-  udDebugPrintf("QtKernel::Destroy()\n");
-  ud::Kernel::Destroy();
 }
 
 } // namespace qt
@@ -244,13 +312,6 @@ udResult Kernel::InitInstanceInternal()
 }
 
 // ---------------------------------------------------------------------------------------
-udResult Kernel::InitRenderInternal()
-{
-  UDASSERT(false, "Kernel::InitRenderInternal() is expected to be unused by the Qt driver");
-  return udR_Success;
-}
-
-// ---------------------------------------------------------------------------------------
 udResult Kernel::DestroyInstanceInternal()
 {
   udDebugPrintf("Kernel::DestroyInstanceInternal()\n");
@@ -267,10 +328,10 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 }
 
 // ---------------------------------------------------------------------------------------
-udResult Kernel::FormatMainWindow(UIComponentRef spUIComponent)
+udResult Kernel::SetTopLevelUI(WindowRef spWindow)
 {
-  udDebugPrintf("Kernel::FormatMainWindow()\n");
-  return static_cast<qt::QtKernel*>(this)->FormatMainWindow(spUIComponent);
+  udDebugPrintf("Kernel::SetTopLevelUI()\n");
+  return static_cast<qt::QtKernel*>(this)->SetTopLevelUI(spWindow);
 }
 
 // ---------------------------------------------------------------------------------------

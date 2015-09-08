@@ -109,7 +109,7 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 }
 
 // ---------------------------------------------------------------------------------------
-udResult Kernel::FormatMainWindow(UIComponentRef spUIComponent)
+udResult Kernel::SetTopLevelUI(WindowRef spWindow)
 {
   return udR_Success;
 }

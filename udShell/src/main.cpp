@@ -34,33 +34,9 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
 }
 
-
-// ---------------------------------------------------------------------------------------
-int main(int argc, char *argv[])
+void Init(udString sender, udString message, const udVariant &data)
 {
-  udMemoryDebugTrackingInit();
-
-  // unit test
-  udResult udSlice_Test();
-  udSlice_Test();
-  udResult udString_Test();
-  udString_Test();
-
-  // install our qt message handler
-  qInstallMessageHandler(DbgMessageHandler);
-  //QLoggingCategory::setFilterRules("qt.*=true");
-
-  // TEMP: this is just for testing - force qt to use the threaded renderer on windows
-  // 5.5 uses this by default
-  qputenv("QSG_RENDER_LOOP", "threaded");
-
-  // create a kernel
-  udResult r = Kernel::Create(&s_pKernel, udParseCommandLine(argc, argv), 8);
-  if (r == udR_Failure_)
-  {
-    udDebugPrintf("Error creating Kernel\n");
-    return 1;
-  }
+  // TODO: load a project file...
 
   auto pView = s_pKernel->CreateComponent<View>();
   auto pScene = s_pKernel->CreateComponent<Scene>();
@@ -89,16 +65,51 @@ int main(int argc, char *argv[])
 
   pView->SetScene(pScene);
   pView->SetCamera(pCamera);
-  s_pKernel->SetFocusView(pView);
+  //s_pKernel->SetFocusView(pView);
 
-  udSlice<const udKeyValuePair> params = { {"file", "qrc:/qml/main.qml"} };
-  auto spMainWindow = s_pKernel->CreateComponent<UIComponent>(params);
+  //UIComponentRef spMainWindow = s_pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/main.qml" } });
+  WindowRef spMainWindow = s_pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/main.qml" } });
   if (!spMainWindow)
   {
     udDebugPrintf("Error creating MainWindow UI Component\n");
+    return;
+  }
+
+  // TODO: viewport can either create a view or set a view - passed a view via initparam
+  // TODO: on refresh reload qml stuff
+  // TODO: plug in main window component - viewport
+
+  s_pKernel->SetTopLevelUI(spMainWindow);
+}
+
+// ---------------------------------------------------------------------------------------
+int main(int argc, char *argv[])
+{
+  udMemoryDebugTrackingInit();
+
+  // unit test
+  udResult udSlice_Test();
+  udSlice_Test();
+  udResult udString_Test();
+  udString_Test();
+
+  // install our qt message handler
+  qInstallMessageHandler(DbgMessageHandler);
+  //QLoggingCategory::setFilterRules("qt.*=true");
+
+  // TEMP: this is just for testing - force qt to use the threaded renderer on windows
+  // 5.5 uses this by default
+  qputenv("QSG_RENDER_LOOP", "threaded");
+
+  // create a kernel
+  udResult r = Kernel::Create(&s_pKernel, udParseCommandLine(argc, argv), 8);
+  if (r == udR_Failure_)
+  {
+    udDebugPrintf("Error creating Kernel\n");
     return 1;
   }
-  s_pKernel->FormatMainWindow(spMainWindow);
+
+  s_pKernel->RegisterMessageHandler("init", &Init);
 
   if (s_pKernel->RunMainLoop() != udR_Success)
   {

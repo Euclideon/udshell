@@ -52,7 +52,13 @@ static udArrayBuffer *s_pQuadVB = nullptr;
 static udArrayBuffer *s_pQuadIB = nullptr;
 static udShaderProgram *s_shader = nullptr;
 
-void udRenderScene_InitRender()
+#include "kernel.h"
+
+void udRenderScene_Init(Kernel *pKernel)
+{
+}
+
+void udRenderScene_InitRender(Kernel*)
 {
   // crete a vertex buffer to render the quad to the screen
   udArrayDataFormat format[] = { udVDF_Float2 };

@@ -5,7 +5,7 @@
 #include "components/component.h"
 #include "components/lua.h"
 #include "components/view.h"
-#include "components/uicomponent.h"
+#include "components/ui.h"
 #include "components/timer.h"
 #include "helpers.h"
 
@@ -26,18 +26,18 @@ PROTOTYPE_COMPONENT(UIComponent);
 PROTOTYPE_COMPONENT(Logger);
 
 // TODO: udMessageHandler returns void, should we return some error state??
-typedef FastDelegate3<udString , udString , const udVariant &, void> udMessageHandler;
-
 class Kernel
 {
   friend class Component;
 public:
+  typedef FastDelegate<void(udString sender, udString message, const udVariant &data)> MessageHandler;
+
   static udResult Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount = 0);
   udResult Destroy();
 
   udResult SendMessage(udString target, udString sender, udString message, const udVariant &data);
 
-  void RegisterMessageHandler(udSharedString name, udMessageHandler messageHandler);
+  void RegisterMessageHandler(udSharedString name, MessageHandler messageHandler);
 
   // synchronisation
   typedef FastDelegate<void(Kernel*)> MainThreadCallback;
@@ -64,6 +64,8 @@ public:
   void Exec(udString code);
 
   // other functions
+  udResult SetTopLevelUI(WindowRef spWindow);
+
   ViewRef GetFocusView() const { return spFocusView; }
   ViewRef SetFocusView(ViewRef spView);
 
@@ -77,8 +79,6 @@ public:
   void LogTrace(const udString text, const udString componentUID = nullptr);
   void Log(const udString text, const udString componentUID = nullptr);
 
-  udResult FormatMainWindow(UIComponentRef spUIComponent);
-
   udResult RunMainLoop();
   udResult Terminate();
 
@@ -88,10 +88,10 @@ protected:
     const ComponentDesc *pDesc;
     size_t createCount;
   };
-  struct MessageHandler
+  struct MessageCallback
   {
     udSharedString name;
-    udMessageHandler callback;
+    MessageHandler callback;
   };
 
   struct ForeignInstance
@@ -106,7 +106,7 @@ protected:
   udHashMap<ComponentType> componentRegistry;
   udHashMap<ComponentRef> instanceRegistry;
   udHashMap<ForeignInstance> foreignInstanceRegistry;
-  udHashMap<MessageHandler> messageHandlers;
+  udHashMap<MessageCallback> messageHandlers;
 
   Renderer *pRenderer = nullptr;
 
@@ -117,9 +117,10 @@ protected:
   TimerRef spStreamerTimer = nullptr;
   TimerRef spUpdateTimer = nullptr;
 
+  void DoInit(Kernel *pKernel);
+
   static Kernel *CreateInstanceInternal(udInitParams commandLine);
   udResult InitInstanceInternal();
-  udResult InitRenderInternal();
   udResult DestroyInstanceInternal();
 
   udResult InitComponents();

@@ -34,11 +34,6 @@ udResult Kernel::InitInstanceInternal()
 
   SDL_GL_CreateContext(s_window);
 
-  return InitRenderInternal();
-}
-
-udResult Kernel::InitRenderInternal()
-{
   return InitRender();
 }
 
@@ -61,7 +56,7 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
   return spOld;
 }
 
-udResult Kernel::FormatMainWindow(UIComponentRef spUIComponent)
+udResult Kernel::SetTopLevelUI(UIComponentRef spWindow)
 {
   return udR_Success;
 }

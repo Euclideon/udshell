@@ -2,32 +2,66 @@
 
 #if UDUI_DRIVER == UDDRIVER_QT
 
+// the qt implementation of the udui_driver requires a qt kernel currently
+// error if we try otherwise
+#if UDWINDOW_DRIVER != UDDRIVER_QT
+#error UDUI_DRIVER Requires (UDWINDOW_DRIVER == UDDRIVER_QT)
+#endif
+
+#include <QQmlComponent>
+#include <QLocale>
+
 #include "window.h"
-#include "renderview.h"
+#include "../udQtKernel_Internal.h"
+#include "../util/typeconvert.h"
 
 namespace qt
 {
 
-Window::Window(QWindow *parent)
-  : QQuickWindow(parent)
+// ---------------------------------------------------------------------------------------
+QtWindow::QtWindow(ud::ComponentDesc *pType, ud::Kernel *pKernel, udRCString uid, udInitParams initParams)
+  : QtComponent(pType, pKernel, uid, initParams)
 {
-  udDebugPrintf("Window::Window()\n");
+  QString filename = initParams["file"].as<QString>();
+  if (filename.isNull())
+  {
+    udDebugPrintf("Error: attempted to create ui component without qml file set\n");
+    udFree(pDesc);
+    throw udR_Failure_;
+  }
 
-  // register our internal qml types
-  qmlRegisterType<RenderView>("udKernel", 0, 1, "RenderView");
+  // create the qml component for the associated script
+  QtKernel *pQtKernel = static_cast<QtKernel*>(pKernel);
+  QQmlComponent component(pQtKernel->QmlEngine(), QUrl(filename));
+  pQtObject = component.create();
 
-  // modify our surface format to support opengl debug logging
-  // TODO: set gl version based on property settings?
-  QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-  format.setOption(QSurfaceFormat::DebugContext);
-  setFormat(format);
+  if (!pQtObject)
+  {
+    // TODO: better error information/handling
+    udDebugPrintf("Error creating QtWindow\n");
+    foreach(const QQmlError &error, component.errors())
+      udDebugPrintf("QML ERROR: %s\n", error.toString().toLatin1().data());
+    udFree(pDesc);
+    throw udR_Failure_;
+  }
 
-  // TODO - Use a shared context for udShell?
+  // We expect a QQuickWindow object
+  // TODO: better error handling?
+  UDASSERT(qobject_cast<QQuickWindow*>(pQtObject) != nullptr, "QtWindow must create a QQuickWindow");
+
+  // Decorate the descriptor with meta object information
+  PopulateComponentDesc(pQtObject);
 }
 
-Window::~Window()
+// ---------------------------------------------------------------------------------------
+QtWindow::~QtWindow()
 {
-  udDebugPrintf("Window::~Window()\n");
+}
+
+// ---------------------------------------------------------------------------------------
+void QtWindow::Refresh()
+{
+
 }
 
 } // namespace qt

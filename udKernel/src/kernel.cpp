@@ -36,6 +36,9 @@
 
 namespace ud
 {
+void udRenderScene_Init(Kernel*);
+void udRenderScene_InitRender(Kernel*);
+
 
 udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
@@ -63,6 +66,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Window>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<View>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Scene>());
 
@@ -98,10 +102,28 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   // platform init
   UD_ERROR_CHECK(pKernel->InitInstanceInternal());
 
+epilogue:
+  if (result != udR_Success)
+  {
+    // TODO: clean up code
+  }
+  *ppInstance = pKernel;
+  return result;
+}
+
+void Kernel::DoInit(Kernel *pKernel)
+{
   // init the components
-  UD_ERROR_CHECK(pKernel->InitComponents());
+  if (pKernel->InitComponents() != udR_Success)
+  {
+    UDASSERT(false, "Oh no! Can't boot!");
+    return;
+  }
 
   pKernel->spLua = pKernel->CreateComponent<Lua>();
+
+  udRenderScene_Init(pKernel);
+  udRenderScene_InitRender(pKernel);
 
   pKernel->spLogger = pKernel->CreateComponent<Logger>();
   spDebugFile = pKernel->CreateComponent<File>({ { "path", "udKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create } });
@@ -115,14 +137,10 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
   pKernel->spUpdateTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
 
-epilogue:
-  if (result != udR_Success)
-  {
-    // TODO: clean up code
-  }
-  *ppInstance = pKernel;
-  return result;
+  // call application init
+  SendMessage("$init", "#", "init", nullptr);
 }
+
 
 udResult Kernel::Destroy()
 {
@@ -219,7 +237,7 @@ udResult Kernel::SendMessage(udString target, udString sender, udString message,
   else if (targetType == '$')
   {
     // registered message
-    MessageHandler *pHandler = messageHandlers.Get(target.hash());
+    MessageCallback *pHandler = messageHandlers.Get(target.hash());
     if (pHandler)
     {
       pHandler->callback(sender, message, data);
@@ -238,9 +256,9 @@ udResult Kernel::ReceiveMessage(udString sender, udString message, const udVaria
   return udR_Success;
 }
 
-void Kernel::RegisterMessageHandler(udSharedString name, udMessageHandler messageHandler)
+void Kernel::RegisterMessageHandler(udSharedString name, MessageHandler messageHandler)
 {
-  MessageHandler handler;
+  MessageCallback handler;
   handler.name = name;
   handler.callback = messageHandler;
   messageHandlers.Add(name.hash(), handler);
@@ -356,13 +374,9 @@ udResult Kernel::InitComponents()
   return r;
 }
 
-void udRenderScene_InitRender();
-
 udResult Kernel::InitRender()
 {
   udHAL_InitRender();
-
-  udRenderScene_InitRender();
 
   return udR_Success;
 }

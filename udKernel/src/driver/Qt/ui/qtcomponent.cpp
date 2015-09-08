@@ -10,9 +10,9 @@
 
 #include <QQmlComponent>
 
-#include "../udQtKernel_Internal.h"
 #include "../util/signaltodelegate.h"
-#include "qtuicomponent.h"
+#include "qtcomponent.h"
+#include "components/ui.h"
 
 
 namespace qt
@@ -182,47 +182,41 @@ protected:
 };
 
 
-// ---------------------------------------------------------------------------------------
-template<typename Base>
-QtComponent<Base>::~QtComponent()
+
+
+QtComponent::QtComponent(ud::Component *pComponent, udString qml)
+  : pComponent(pComponent)
 {
-  udFree(pDesc);
-  delete pQtObject;
+  // create the qml component for the associated script
+  QtKernel *pQtKernel = static_cast<QtKernel*>(pComponent->pKernel);
+
+  QString filename = QString::fromUtf8(qml.ptr, static_cast<int>(qml.length));
+  QQmlComponent component(pQtKernel->QmlEngine(), QUrl(filename));
+  pQtObject = component.create();
+
+  if (!pQtObject)
+  {
+    // TODO: better error information/handling
+    udDebugPrintf("Error creating QtUIComponent\n");
+    foreach(const QQmlError &error, component.errors())
+      udDebugPrintf("QML ERROR: %s\n", error.toString().toLatin1().data());
+    throw udR_Failure_;
+  }
+
+  // We expect a QQuickItem object
+  // TODO: better error handling?
+  UDASSERT(qobject_cast<QQuickItem*>(pQtObject) != nullptr, "QtUIComponents must create a QQuickItem");
+
+  // Decorate the descriptor with meta object information
+  PopulateComponentDesc(pQtObject);
 }
 
-// ---------------------------------------------------------------------------------------
-template<typename Base>
-ud::ComponentDesc *QtComponent<Base>::CreateComponentDesc(const ud::ComponentDesc *pType)
+QtComponent::~QtComponent()
 {
-  ud::ComponentDesc *pCompDesc = udAllocType(ud::ComponentDesc, 1, udAF_Zero);
-
-  // TODO: override this in specialised derived class - "is a qt ui component"
-  static char displayName[] = "Qt Component";
-  static char description[] = "Is a Qt component";
-
-  // TODO: make an internal component lookup table if we end up needing multiple components for the one qml file
-
-  pCompDesc->pSuperDesc = const_cast<ud::ComponentDesc*>(pType);
-  pCompDesc->udVersion = ud::UDSHELL_APIVERSION;
-  pCompDesc->pluginVersion = ud::UDSHELL_PLUGINVERSION;
-
-  // TODO: should we use unique qt id's here?
-  pCompDesc->id = pType->id;
-  pCompDesc->displayName = displayName;
-  pCompDesc->description = description;
-
-  return pCompDesc;
 }
 
-// ---------------------------------------------------------------------------------------
-template<typename Base>
-void QtComponent<Base>::PopulateComponentDesc(QObject *pObject)
+void QtComponent::PopulateComponentDesc(QObject *pObject)
 {
-  UDASSERT(pDesc, "ComponentDesc is null");
-
-  // Build the descriptor search tree
-  pDesc->BuildSearchTrees();
-
   // TODO: add built-in properties, methods and events
 
   const QMetaObject *pMetaObject = pObject->metaObject();
@@ -245,14 +239,14 @@ void QtComponent<Base>::PopulateComponentDesc(QObject *pObject)
     // TODO: store list to free getter/setter?
     ud::PropertyDesc desc = { info, udNew(QtGetter, propertyName, this), udNew(QtSetter, propertyName, this) };
 
-    pDesc->propertyTree.Insert(propertyName, desc);
+    pComponent->AddDynamicProperty(desc);
   }
 
   // TODO: Inject the dynamic properties?
   // TODO: hook up to new property signal
   //foreach(const QByteArray &propName, pObject->dynamicPropertyNames())
   //{
-    //qDebug() << "DYNAMIC PROPERTY " << propName;
+  //qDebug() << "DYNAMIC PROPERTY " << propName;
   //}
 
   // TODO: Inject the methods
@@ -270,7 +264,7 @@ void QtComponent<Base>::PopulateComponentDesc(QObject *pObject)
       ud::MethodInfo info = { methodName, methodDescStr };
       ud::MethodDesc desc = { info, udNew(QtMethod, method, this) };
 
-      pDesc->methodTree.Insert(methodName, desc);
+      pComponent->AddDynamicMethod(desc);
     }
     else if (method.methodType() == QMetaMethod::Signal)
     {
@@ -283,55 +277,10 @@ void QtComponent<Base>::PopulateComponentDesc(QObject *pObject)
       ud::EventInfo info = { eventName, eventName, eventDescStr };
       ud::EventDesc desc = { info, udNew(QtVarEvent, method, this) };
 
-      pDesc->eventTree.Insert(eventName, desc);
+      pComponent->AddDynamicEvent(desc);
     }
   }
 }
-
-
-// ---------------------------------------------------------------------------------------
-QtUIComponent::QtUIComponent(ud::ComponentDesc *pType, ud::Kernel *pKernel, udSharedString uid, udInitParams initParams)
-  : QtComponent(pType, pKernel, uid, initParams)
-{
-  QString filename = initParams["file"].as<QString>();
-  if (filename.isNull())
-  {
-    udDebugPrintf("Error: attempted to create ui component without qml file set\n");
-    udFree(pDesc);
-    throw udR_Failure_;
-  }
-
-  // create the qml component for the associated script
-  QtKernel *pQtKernel = static_cast<QtKernel*>(pKernel);
-  QQmlComponent component(pQtKernel->QmlEngine(), QUrl(filename));
-  pQtObject = component.create();
-
-  if (!pQtObject)
-  {
-    // TODO: better error information/handling
-    udDebugPrintf("Error creating QtUIComponent\n");
-    foreach(const QQmlError &error, component.errors())
-      udDebugPrintf("QML ERROR: %s\n", error.toString().toLatin1().data());
-    udFree(pDesc);
-    throw udR_Failure_;
-  }
-
-  // We expect a QQuickItem object
-  // TODO: better error handling?
-  UDASSERT(qobject_cast<QQuickItem*>(pQtObject) != nullptr, "QtUIComponents must create a QQuickItem");
-
-  // Decorate the descriptor with meta object information
-  PopulateComponentDesc(pQtObject);
-}
-
-// ---------------------------------------------------------------------------------------
-QtUIComponent::~QtUIComponent()
-{
-}
-
-
-// Instantiate QtComponent types
-template class QtComponent<ud::UIComponent>;
 
 } // namespace qt
 
