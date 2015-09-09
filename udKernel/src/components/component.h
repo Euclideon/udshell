@@ -13,10 +13,6 @@
 # undef SendMessage
 #endif
 
-namespace qt {
-  class QtComponent;
-}
-
 
 #define UD_COMPONENT(Name) \
   friend class Kernel; \
@@ -88,6 +84,14 @@ public:
 
   void SetName(udString name) { this->name = name; }
 
+
+  void AddDynamicProperty(const PropertyDesc &property);
+  void AddDynamicMethod(const MethodDesc &method);
+  void AddDynamicEvent(const EventDesc &event);
+  void RemoveDynamicProperty(udString name);
+  void RemoveDynamicMethod(udString name);
+  void RemoveDynamicEvent(udString name);
+
 protected:
   Component(const ComponentDesc *_pType, Kernel *_pKernel, udSharedString _uid, udInitParams initParams)
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
@@ -108,13 +112,6 @@ protected:
   const MethodDesc *GetMethodDesc(udString name) const;
   const EventDesc *GetEventDesc(udString name) const;
 
-  void AddDynamicProperty(const PropertyDesc &property);
-  void AddDynamicMethod(const MethodDesc &method);
-  void AddDynamicEvent(const EventDesc &event);
-  void RemoveDynamicProperty(udString name);
-  void RemoveDynamicMethod(udString name);
-  void RemoveDynamicEvent(udString name);
-
   // TODO: these substantially inflate the size of base Component and are almost always nullptr
   // ...should we move them to a separate allocation?
   udAVLTree<udString, PropertyDesc> instanceProperties;
@@ -127,7 +124,6 @@ private:
   template<typename... Args>
   friend class ::udEvent;
   friend class LuaState;
-  friend qt::QtComponent;
 
   Component(const Component &) = delete;    // Still not sold on this
   void operator=(const Component &) = delete;

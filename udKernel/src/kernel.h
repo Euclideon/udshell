@@ -5,7 +5,6 @@
 #include "components/component.h"
 #include "components/lua.h"
 #include "components/view.h"
-#include "components/ui.h"
 #include "components/timer.h"
 #include "helpers.h"
 
@@ -21,9 +20,10 @@ class LuaState;
 class udBlockStreamer;
 class Renderer;
 
-PROTOTYPE_COMPONENT(View);
-PROTOTYPE_COMPONENT(UIComponent);
-PROTOTYPE_COMPONENT(Logger);
+SHARED_CLASS(View);
+SHARED_CLASS(UIComponent);
+SHARED_CLASS(Window);
+SHARED_CLASS(Logger);
 
 class Kernel
 {
@@ -149,4 +149,5 @@ udSharedPtr<T> Kernel::CreateComponent(udInitParams initParams)
 }
 
 } //namespace ud
+
 #endif // UDKERNEL_H

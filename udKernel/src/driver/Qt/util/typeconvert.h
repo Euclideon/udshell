@@ -36,8 +36,15 @@ inline void udFromVariant(const udVariant &variant, QString *pString)
 
 inline udVariant udToVariant(const QVariant &var)
 {
+  if (var.isNull())
+    return udVariant();
+
   switch (static_cast<QMetaType::Type>(var.type()))
   {
+    // udVariant::Type::Null
+    case QMetaType::Void:
+      return udVariant();
+
     // udVariant::Type::Bool
     case QMetaType::Bool:
       return udVariant(var.toBool());
@@ -47,27 +54,34 @@ inline udVariant udToVariant(const QVariant &var)
     case QMetaType::Double:
       return udVariant(var.toDouble());
 
-    // udVariant::Type::Int:
+    // udVariant::Type::Int
+    case QMetaType::Char:
+    case QMetaType::UChar:
+    case QMetaType::Short:
+    case QMetaType::UShort:
     case QMetaType::Int:
+    case QMetaType::UInt:
+    case QMetaType::Long:
+    case QMetaType::ULong:
     case QMetaType::LongLong:
     case QMetaType::ULongLong:
-    case QMetaType::QChar:
-    case QMetaType::UInt:
       return udVariant((int64_t)var.toLongLong());
 
     // udVariant::Type::String
     // TODO: optimise - reduce unnecessary copies
     case QMetaType::QByteArray:
     case QMetaType::QString:
+    case QMetaType::QChar:
       return udVariant(AllocUDStringFromQString(var.toString()), true);
 
     // TODO: serialize other types?
 
     // udVariant::Type::Array
+
     // udVariant::Type::AssocArray
-    // udVariant::Type::Null
+
     default:
-      udDebugPrintf("udToVariant: Unsupported type '%s'\n", var.typeName());
+      udDebugPrintf("udToVariant: Unsupported type '%s' (support me!)\n", var.typeName());
       return udVariant();
   };
 }
@@ -78,7 +92,10 @@ inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
 
   switch (variant.type())
   {
-    //case udVariant::Type::Null:
+    case udVariant::Type::Null:
+      // *pVariant is already null right?
+      break;
+
     case udVariant::Type::Bool:
       pVariant->setValue(variant.asBool());
       break;
@@ -92,14 +109,18 @@ inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
       break;
 
     //case udVariant::Type::Component:
+
     //case udVariant::Type::Delegate:
+
     // TODO: optimise?
     case udVariant::Type::String:
       pVariant->setValue(variant.as<QString>());
       break;
 
     //case udVariant::Type::Array:
+
     //case udVariant::Type::AssocArray:
+
     default:
       udDebugPrintf("udToVariant: Unsupported type '%d'\n", variant.type());
   };

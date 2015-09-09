@@ -10,7 +10,8 @@
 #include <QEvent>
 
 #include "kernel.h"
-#include "ui/window.h"
+
+class QQuickWindow;
 
 namespace qt
 {
@@ -25,7 +26,7 @@ public:
 
   udResult Init();
   udResult Shutdown();
-  udResult SetTopLevelUI(QtWindowRef spWindow);
+  udResult SetTopLevelUI(ud::WindowRef spWindow);
   udResult RunMainLoop();
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }

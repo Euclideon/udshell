@@ -2,6 +2,7 @@
 
 #include "kernel.h"
 #include "renderscene.h"
+#include "components/window.h"
 #include "components/view.h"
 #include "components/scene.h"
 #include "components/nodes/camera.h"
@@ -65,9 +66,7 @@ void Init(udString sender, udString message, const udVariant &data)
 
   pView->SetScene(pScene);
   pView->SetCamera(pCamera);
-  //s_pKernel->SetFocusView(pView);
 
-  //UIComponentRef spMainWindow = s_pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/main.qml" } });
   WindowRef spMainWindow = s_pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/main.qml" } });
   if (!spMainWindow)
   {

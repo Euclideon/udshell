@@ -6,8 +6,9 @@
 #include <QQuickWindow>
 
 #include "udQtKernel_Internal.h"
-#include "ui/window.h"
 #include "ui/renderview.h"
+
+#include "components/window.h"
 
 // Init the kernel's qrc file resources - this has to happen from the global namespace
 inline void InitResources() { Q_INIT_RESOURCE(kernel); }
@@ -61,8 +62,6 @@ QtKernel::QtKernel(udInitParams commandLine)
   , mainThreadId(QThread::currentThreadId())
   , renderThreadId(nullptr)
 {
-  udDebugPrintf("QtKernel::udQtKernel()\n");
-
   // convert udInitParams back into a string list for Qt
   // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
   // NOTE: the state of our argv may be changed by Qt as it removes args that it recognises
@@ -78,7 +77,7 @@ QtKernel::QtKernel(udInitParams commandLine)
 // ---------------------------------------------------------------------------------------
 udResult QtKernel::Init()
 {
-  udDebugPrintf("QtKernel::Init()\n");
+  LogTrace("QtKernel::Init()");
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(argc >= 1, "argc must contain at least 1");
@@ -129,7 +128,7 @@ udResult QtKernel::Init()
 // ---------------------------------------------------------------------------------------
 udResult QtKernel::Shutdown()
 {
-  udDebugPrintf("QtKernel::Shutdown()\n");
+  LogTrace("QtKernel::Shutdown()");
 
   delete pTopLevelWindow;
 
@@ -145,12 +144,12 @@ udResult QtKernel::Shutdown()
 }
 
 // ---------------------------------------------------------------------------------------
-udResult QtKernel::SetTopLevelUI(QtWindowRef spWindow)
+udResult QtKernel::SetTopLevelUI(ud::WindowRef spWindow)
 {
-  udDebugPrintf("QtKernel::SetTopLevelUI()\n");
+  LogTrace("QtKernel::SetTopLevelUI()");
 
   QQuickWindow *pPrevWindow = pTopLevelWindow;
-  pTopLevelWindow = spWindow->QuickWindow();
+  pTopLevelWindow = (QQuickWindow*)spWindow->GetInternalData();
 
   if (pPrevWindow)
   {
@@ -183,7 +182,7 @@ udResult QtKernel::SetTopLevelUI(QtWindowRef spWindow)
 // ---------------------------------------------------------------------------------------
 udResult QtKernel::RunMainLoop()
 {
-  udDebugPrintf("QtKernel::RunMainLoop()\n");
+  LogTrace("QtKernel::RunMainLoop()");
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
@@ -195,7 +194,7 @@ udResult QtKernel::RunMainLoop()
 // ---------------------------------------------------------------------------------------
 void QtKernel::PostEvent(QEvent *pEvent, int priority)
 {
-  udDebugPrintf("QtKernel::PostEvent()\n");
+  LogTrace("QtKernel::PostEvent()");
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
@@ -205,7 +204,7 @@ void QtKernel::PostEvent(QEvent *pEvent, int priority)
 // ---------------------------------------------------------------------------------------
 void QtKernel::OnGLContextCreated(QOpenGLContext *pContext)
 {
-  udDebugPrintf("QtKernel::CreateOpenGLContext()\n");
+  LogTrace("QtKernel::CreateOpenGLContext()");
 
   UDASSERT(pMainThreadContext != nullptr, "Expected GL context");
 
@@ -221,7 +220,7 @@ void QtKernel::OnGLContextCreated(QOpenGLContext *pContext)
 // RENDER THREAD
 void QtKernel::OnFirstRender()
 {
-  udDebugPrintf("QtKernel::OnFirstRender()\n");
+  LogTrace("QtKernel::OnFirstRender()");
 
   // we only want this called on the first render cycle
   QObject::disconnect(pTopLevelWindow, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender);
@@ -236,14 +235,14 @@ void QtKernel::OnFirstRender()
 // ---------------------------------------------------------------------------------------
 void QtKernel::Destroy()
 {
-  udDebugPrintf("QtKernel::Destroy()\n");
+  LogTrace("QtKernel::Destroy()");
   ud::Kernel::Destroy();
 }
 
 // ---------------------------------------------------------------------------------------
 void QtKernel::DoInit(ud::Kernel *)
 {
-  udDebugPrintf("QtKernel::DoInit()\n");
+  LogTrace("QtKernel::DoInit()");
 
   UDASSERT(pTopLevelWindow != nullptr, "No active window set");
   UDASSERT(pMainThreadContext == nullptr, "Main Thread context already exists");
@@ -276,7 +275,7 @@ void QtKernel::DoInit(ud::Kernel *)
 // ---------------------------------------------------------------------------------------
 void QtKernel::customEvent(QEvent *pEvent)
 {
-  udDebugPrintf("QtKernel::customEvent()\n");
+  LogTrace("QtKernel::customEvent()");
   if (pEvent->type() == KernelEvent::type())
   {
     MainThreadCallback d;
@@ -307,21 +306,20 @@ Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 // ---------------------------------------------------------------------------------------
 udResult Kernel::InitInstanceInternal()
 {
-  udDebugPrintf("Kernel::InitInstanceInternal()\n");
   return static_cast<qt::QtKernel*>(this)->Init();
 }
 
 // ---------------------------------------------------------------------------------------
 udResult Kernel::DestroyInstanceInternal()
 {
-  udDebugPrintf("Kernel::DestroyInstanceInternal()\n");
+  LogTrace("Kernel::DestroyInstanceInternal()");
   return static_cast<qt::QtKernel*>(this)->Shutdown();
 }
 
 // ---------------------------------------------------------------------------------------
 ViewRef Kernel::SetFocusView(ViewRef spView)
 {
-  udDebugPrintf("Kernel::SetFocusView()\n");
+  LogTrace("Kernel::SetFocusView()");
   ViewRef spOld = spFocusView;
   spFocusView = spView;
   return spOld;
@@ -330,21 +328,21 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 // ---------------------------------------------------------------------------------------
 udResult Kernel::SetTopLevelUI(WindowRef spWindow)
 {
-  udDebugPrintf("Kernel::SetTopLevelUI()\n");
+  LogTrace("Kernel::SetTopLevelUI()");
   return static_cast<qt::QtKernel*>(this)->SetTopLevelUI(spWindow);
 }
 
 // ---------------------------------------------------------------------------------------
 udResult Kernel::RunMainLoop()
 {
-  udDebugPrintf("Kernel::RunMainLoop()\n");
+  LogTrace("Kernel::RunMainLoop()");
   return static_cast<qt::QtKernel*>(this)->RunMainLoop();
 }
 
 // ---------------------------------------------------------------------------------------
 udResult Kernel::Terminate()
 {
-  udDebugPrintf("Kernel::Terminate()\n");
+  LogTrace("Kernel::Terminate()");
 
   return udR_Success;
 }
@@ -365,7 +363,7 @@ void Kernel::DispatchToMainThread(MainThreadCallback callback)
 // ---------------------------------------------------------------------------------------
 void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 {
-  udDebugPrintf("Kernel::DispatchToMainThreadAndWait()\n");
+  LogTrace("Kernel::DispatchToMainThreadAndWait()");
 
   qt::QtKernel *pKernel = static_cast<qt::QtKernel*>(this);
 

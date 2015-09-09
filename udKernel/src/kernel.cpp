@@ -13,6 +13,9 @@
 #include "components/timer.h"
 #include "components/scene.h"
 #include "components/view.h"
+#include "components/ui.h"
+#include "components/viewport.h"
+#include "components/window.h"
 #include "components/datasource.h"
 #include "components/nodes/node.h"
 #include "components/nodes/camera.h"
@@ -43,6 +46,7 @@ void udRenderScene_InitRender(Kernel*);
 udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
   udResult result;
+  StreamRef spDebugFile, spConsole;
   Kernel *pKernel = CreateInstanceInternal(commandLine);
 
   UD_ERROR_NULL(pKernel, udR_Failure_);
@@ -65,6 +69,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Viewport>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Window>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<View>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Scene>());
@@ -93,10 +98,17 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<GeomSource>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UDDataSource>());
 
-  //...
-
   // init the HAL
   UD_ERROR_CHECK(udHAL_Init());
+
+  // create internal stuff
+  pKernel->spLua = pKernel->CreateComponent<Lua>();
+
+  pKernel->spLogger = pKernel->CreateComponent<Logger>();
+  spDebugFile = pKernel->CreateComponent<File>({ { "path", "udKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create } });
+  spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
+  pKernel->spLogger->AddStream(spDebugFile, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
+  pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script, 5, LogDefaults::Format);
 
   // platform init
   UD_ERROR_CHECK(pKernel->InitInstanceInternal());
@@ -119,16 +131,8 @@ void Kernel::DoInit(Kernel *pKernel)
     return;
   }
 
-  pKernel->spLua = pKernel->CreateComponent<Lua>();
-
   udRenderScene_Init(pKernel);
   udRenderScene_InitRender(pKernel);
-
-  pKernel->spLogger = pKernel->CreateComponent<Logger>();
-  StreamRef spDebugFile = pKernel->CreateComponent<File>({ { "path", "udKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create } });
-  StreamRef spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
-  pKernel->spLogger->AddStream(spDebugFile, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
-  pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script, 5, LogDefaults::Format);
 
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));

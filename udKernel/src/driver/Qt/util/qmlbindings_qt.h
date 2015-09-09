@@ -1,89 +1,77 @@
-#include "hal/driver.h"
+#pragma once
+#ifndef QTCOMPONENT_H
+#define QTCOMPONENT_H
 
-#if UDUI_DRIVER == UDDRIVER_QT
-
-// the qt implementation of the udui_driver requires a qt kernel currently
-// error if we try otherwise
-#if UDWINDOW_DRIVER != UDDRIVER_QT
-#error UDUI_DRIVER Requires (UDWINDOW_DRIVER == UDDRIVER_QT)
-#endif
-
+#include <QObject>
 #include <QQmlComponent>
 
 #include "../udQtKernel_Internal.h"
-#include "../util/signaltodelegate.h"
-#include "qtcomponent.h"
-#include "components/ui.h"
+#include "signaltodelegate.h"
+#include "typeconvert.h"
 
+#include "components/component.h"
 
 namespace qt
 {
 
 // Qt shims
+template<typename ComponentType>
 struct QtGetter : public ud::Getter
 {
 public:
-  QtGetter(nullptr_t) : ud::Getter(nullptr) {}
-  template<typename QtComponentT>
-  QtGetter(udString id, QtComponentT *arg) : ud::Getter(nullptr), propertyId(id)
+  QtGetter(udString id) : ud::Getter(nullptr), propertyId(id)
   {
-    shim = &shimFunc<QtComponentT>;
+    shim = &shimFunc;
   }
 
 protected:
   udString propertyId;
 
-  template<typename QtComponentT>
   static udVariant shimFunc(const ud::Getter * const _pGetter, const ud::Component *pThis)
   {
     QtGetter *pGetter = (QtGetter*)_pGetter;
-    const QtComponentT *pQtComp = (const QtComponentT *)pThis;
-    return udVariant(pQtComp->QtObject()->property(pGetter->propertyId.ptr));
+    const QObject *pQObject = (const QObject*)((const ComponentType*)pThis)->GetInternalData();
+    return udVariant(pQObject->property(pGetter->propertyId.ptr));
   }
 };
 
 
+template<typename ComponentType>
 struct QtSetter : public ud::Setter
 {
 public:
-  QtSetter(nullptr_t) : ud::Setter(nullptr) {}
-  template<typename QtComponentT>
-  QtSetter(udString id, QtComponentT *arg) : ud::Setter(nullptr), propertyId(id)
+  QtSetter(udString id) : ud::Setter(nullptr), propertyId(id)
   {
-    shim = &shimFunc<QtComponentT>;
+    shim = &shimFunc;
   }
 
 protected:
   udString propertyId;
 
-  template<typename QtComponentT>
   static void shimFunc(const ud::Setter * const _pSetter, ud::Component *pThis, const udVariant &value)
   {
     QtSetter *pSetter = (QtSetter*)_pSetter;
-    QtComponentT *pQtComp = (QtComponentT *)pThis;
-    pQtComp->QtObject()->setProperty(pSetter->propertyId.ptr, value.as<QVariant>());
+    QObject *pQObject = (QObject*)((ComponentType*)pThis)->GetInternalData();
+    pQObject->setProperty(pSetter->propertyId.ptr, value.as<QVariant>());
   }
 };
 
-
+template<typename ComponentType>
 struct QtMethod : public ud::Method
 {
 public:
-  QtMethod(nullptr_t) : ud::Method(nullptr) {}
-  template<typename QtComponentT>
-  QtMethod(const QMetaMethod &_method, QtComponentT *arg) : ud::Method(nullptr), method(_method)
+  QtMethod(const QMetaMethod &_method) : ud::Method(nullptr), method(_method)
   {
-    shim = &shimFunc<QtComponentT>;
+    shim = &shimFunc;
   }
 
 protected:
   QMetaMethod method;
 
-  template<typename QtComponentT>
   static udVariant shimFunc(const Method * const _pMethod, ud::Component *pThis, udSlice<udVariant> value)
   {
     QtMethod *pMethod = (QtMethod*)_pMethod;
-    QtComponentT *pQtComp = (QtComponentT *)pThis;
+    QObject *pQObject = (QObject*)((ComponentType*)pThis)->GetInternalData();
 
     // TODO: do better runtime handling of this rather than assert since this can come from the user - check against Q_METAMETHOD_INVOKE_MAX_ARGS
     // TODO: error output??
@@ -95,56 +83,56 @@ protected:
     switch (value.length)
     {
       case 0:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal));
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal));
         break;
       case 1:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()));
         break;
       case 2:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()));
         break;
       case 3:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()));
         break;
       case 4:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
           Q_ARG(QVariant, value[3].as<QVariant>()));
         break;
       case 5:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
           Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()));
         break;
       case 6:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
           Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()));
         break;
       case 7:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
           Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()),
           Q_ARG(QVariant, value[6].as<QVariant>()));
         break;
       case 8:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
           Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()),
           Q_ARG(QVariant, value[6].as<QVariant>()), Q_ARG(QVariant, value[7].as<QVariant>()));
         break;
       case 9:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
           Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()),
           Q_ARG(QVariant, value[6].as<QVariant>()), Q_ARG(QVariant, value[7].as<QVariant>()), Q_ARG(QVariant, value[8].as<QVariant>()));
         break;
       case 10:
       default:
-        pMethod->method.invoke(pQtComp->QtObject(), Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
           Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
           Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()),
           Q_ARG(QVariant, value[6].as<QVariant>()), Q_ARG(QVariant, value[7].as<QVariant>()), Q_ARG(QVariant, value[8].as<QVariant>()),
@@ -155,64 +143,33 @@ protected:
   }
 };
 
-
+template<typename ComponentType>
 struct QtVarEvent : public ud::VarEvent
 {
 public:
-  QtVarEvent(nullptr_t) : ud::VarEvent(nullptr) {}
-  template<typename QtComponentT>
-  QtVarEvent(const QMetaMethod &m, QtComponentT *arg) : ud::VarEvent(nullptr), method(m), sigToDel(nullptr)
+  QtVarEvent(const QMetaMethod &m) : ud::VarEvent(nullptr), method(m), sigToDel(nullptr)
   {
-    pSubscribe = &doSubscribe<QtComponentT>;
+    pSubscribe = &doSubscribe;
   }
 
 protected:
   QMetaMethod method;
   QtSignalToDelegate *sigToDel;
 
-  template<typename QtComponentT>
   static void doSubscribe(const VarEvent *pEv, const ud::ComponentRef &c, const udVariant::VarDelegate &d)
   {
     QtVarEvent *pEvent = (QtVarEvent*)pEv;
-    QtComponentT *pQtComp = (QtComponentT *)c.ptr();
+    ComponentType *pC = (ComponentType*)c.ptr();
 
     // TODO: hook up disconnect path
     // TODO: store list of signal to delegates
-    pEvent->sigToDel = new QtSignalToDelegate(pQtComp->QtObject(), pEvent->method, d);
+    pEvent->sigToDel = new QtSignalToDelegate((QObject*)pC->GetInternalData(), pEvent->method, d);
   }
 };
 
 
-
-
-QtComponent::QtComponent(ud::Component *pComponent, udString qml)
-  : pComponent(pComponent)
-{
-  // create the qml component for the associated script
-  QtKernel *pQtKernel = static_cast<QtKernel*>(pComponent->pKernel);
-
-  QString filename = QString::fromUtf8(qml.ptr, static_cast<int>(qml.length));
-  QQmlComponent component(pQtKernel->QmlEngine(), QUrl(filename));
-  pQtObject = component.create();
-
-  if (!pQtObject)
-  {
-    // TODO: better error information/handling
-    udDebugPrintf("Error creating QtUIComponent\n");
-    foreach(const QQmlError &error, component.errors())
-      udDebugPrintf("QML ERROR: %s\n", error.toString().toLatin1().data());
-    throw udR_Failure_;
-  }
-
-  // Decorate the descriptor with meta object information
-  PopulateComponentDesc(pQtObject);
-}
-
-QtComponent::~QtComponent()
-{
-}
-
-void QtComponent::PopulateComponentDesc(QObject *pObject)
+template<typename ComponentType>
+inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
 {
   // TODO: add built-in properties, methods and events
 
@@ -234,7 +191,7 @@ void QtComponent::PopulateComponentDesc(QObject *pObject)
     // TODO: have non lookup qmlproperty version and lookup version for the dynamic properties
     // TODO: list of qmlproperty - shared between getter and setter
     // TODO: store list to free getter/setter?
-    ud::PropertyDesc desc = { info, udNew(QtGetter, propertyName, this), udNew(QtSetter, propertyName, this) };
+    ud::PropertyDesc desc = { info, udNew(QtGetter<ComponentType>, propertyName), udNew(QtSetter<ComponentType>, propertyName) };
 
     pComponent->AddDynamicProperty(desc);
   }
@@ -259,7 +216,7 @@ void QtComponent::PopulateComponentDesc(QObject *pObject)
       // TODO: keep free list of methods
       udString methodName = AllocUDStringFromQString(method.name());
       ud::MethodInfo info = { methodName, methodDescStr };
-      ud::MethodDesc desc = { info, udNew(QtMethod, method, this) };
+      ud::MethodDesc desc = { info, udNew(QtMethod<ComponentType>, method) };
 
       pComponent->AddDynamicMethod(desc);
     }
@@ -272,7 +229,7 @@ void QtComponent::PopulateComponentDesc(QObject *pObject)
       // TODO: keep free list of events
       udString eventName = AllocUDStringFromQString(method.name());
       ud::EventInfo info = { eventName, eventName, eventDescStr };
-      ud::EventDesc desc = { info, udNew(QtVarEvent, method, this) };
+      ud::EventDesc desc = { info, udNew(QtVarEvent<ComponentType>, method) };
 
       pComponent->AddDynamicEvent(desc);
     }
@@ -281,4 +238,4 @@ void QtComponent::PopulateComponentDesc(QObject *pObject)
 
 } // namespace qt
 
-#endif  // UDUI_DRIVER == UDDRIVER_QT
+#endif  // QTCOMPONENT_H
