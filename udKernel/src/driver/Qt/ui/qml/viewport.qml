@@ -4,10 +4,9 @@ import udKernel 0.1
 
 Item {
   id: main
-  width: 100
-  height: 100
+  anchors.fill: parent
 
-  RenderView {
+  UDRenderView {
     id: viewport
     anchors.fill: parent
     anchors.margins: 10

@@ -76,9 +76,9 @@ udResult Viewport::CreateInternal(udInitParams initParams)
   // check that we have a RenderView
   QQuickItem *pRootItem = (QQuickItem*)pInternal;
   QList<qt::RenderView *> renderViews = pRootItem->findChildren<qt::RenderView *>();
-  if (renderViews.isEmpty())
+  if (renderViews.size() != 1)
   {
-    LogWarning(2, "Viewport component does not contain a RenderView QML item");
+    LogWarning(1, "Viewport component must contain 1 RenderView QML item");
     return udR_Failure_;
   }
 
@@ -90,12 +90,7 @@ udResult Viewport::CreateInternal(udInitParams initParams)
     spView = pKernel->CreateComponent<View>();
   }
 
-  // TODO: is this the behavior we want?
-  if (renderViews.size() > 1)
-    LogWarning(2, "Viewport component contains multiple RenderView QML items, note that these will all be set to the same view");
-
-  foreach(qt::RenderView *pRenderView, renderViews)
-    pRenderView->AttachView(spView);
+  renderViews.first()->AttachView(spView);
 
   return udR_Success;
 }
@@ -177,10 +172,6 @@ void Window::SetTopLevelUI(UIComponentRef spUIComponent)
   spTopLevelUI = spUIComponent;
   QQuickWindow *pQtWindow = (QQuickWindow*)pInternal;
   reinterpret_cast<QQuickItem*>(spUIComponent->GetInternalData())->setParentItem(pQtWindow->contentItem());
-
-  // TODO: size this to parent
-  reinterpret_cast<QQuickItem*>(spUIComponent->GetInternalData())->setWidth(640);
-  reinterpret_cast<QQuickItem*>(spUIComponent->GetInternalData())->setHeight(480);
 }
 
 } // namespace ud

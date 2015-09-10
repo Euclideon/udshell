@@ -88,8 +88,6 @@ void Init(udString sender, udString message, const udVariant &data)
   }
 
   spMainWindow->SetTopLevelUI(spViewport);
-
-  // TODO: viewport can either create a view or set a view - passed a view via initparam
 }
 
 // ---------------------------------------------------------------------------------------

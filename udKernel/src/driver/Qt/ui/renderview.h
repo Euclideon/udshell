@@ -49,7 +49,6 @@ private:
 private slots:
   void OnResize()
   {
-    udDebugPrintf("HEIGHT %d", (int)height());
     if (spView)
       spView->Resize(width(), height());
   }

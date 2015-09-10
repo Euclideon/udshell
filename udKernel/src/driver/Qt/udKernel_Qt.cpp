@@ -3,10 +3,11 @@
 #if UDWINDOW_DRIVER == UDDRIVER_QT
 
 #include <QSemaphore>
-#include <QQuickWindow>
 
 #include "udQtKernel_Internal.h"
+
 #include "ui/renderview.h"
+#include "ui/window_qt.h"
 
 // Init the kernel's qrc file resources - this has to happen from the global namespace
 inline void InitResources() { Q_INIT_RESOURCE(kernel); }
@@ -91,7 +92,8 @@ udResult QtKernel::Init()
   pQmlEngine = new QQmlEngine(this);
 
   // register our internal qml types
-  qmlRegisterType<RenderView>("udKernel", 0, 1, "RenderView");
+  qmlRegisterType<RenderView>("udKernel", 0, 1, "UDRenderView");
+  qmlRegisterType<QtWindow>("udKernel", 0, 1, "UDWindow");
 
   // TODO: expose kernel innards to the qml context?
 

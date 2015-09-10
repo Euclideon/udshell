@@ -54,7 +54,6 @@ public:
     if (pRenderView->dirty)
     {
       spRenderView = pRenderView->spView->GetRenderableView();
-      //update();
       pRenderView->dirty = false;
     }
   }
