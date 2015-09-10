@@ -29,14 +29,14 @@ void ImageSource::Create(StreamRef spSource)
 {
   // allocate for file
   int64_t len = spSource->Length();
-  void *pBuffer = udAlloc(len);
+  void *pBuffer = udAlloc((size_t)len);
 
   // read file from source
-  size_t read = spSource->Read(pBuffer, len);
+  IF_UDASSERT(size_t read =) spSource->Read(pBuffer, (size_t)len);
   UDASSERT((int64_t)read == len, "!");
 
   // load the image
-  udImage *pImage = udImage_ReadImage(pBuffer, len, nullptr);
+  udImage *pImage = udImage_ReadImage(pBuffer, (size_t)len, nullptr);
 
   for (size_t i = 0; i<pImage->elements; ++i)
   {

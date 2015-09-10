@@ -20,7 +20,7 @@ static QOpenGLShader::ShaderTypeBit s_shaderType[udST_Max] =
 
 
 // ***************************************************************************************
-udShader* udShader_CreateShaderFromFile(const char *pFilename, udShaderType type)
+udShader* udShader_CreateShaderFromFile(const char *udUnusedParam(pFilename), udShaderType udUnusedParam(type))
 {
   UDASSERT(false, "TODO");
   return 0;

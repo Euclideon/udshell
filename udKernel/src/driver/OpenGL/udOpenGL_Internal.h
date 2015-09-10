@@ -93,6 +93,18 @@ struct udShader
 struct udShaderProgram
 {
   GLuint program;
+
+  struct Param
+  {
+    char *pName;
+    size_t type;
+  };
+
+  size_t numAttributes;
+  Param *pAttributes;
+
+  size_t numUniforms;
+  Param *pUniforms;
 };
 
 #endif // UD_OPENGL

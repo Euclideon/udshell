@@ -15,10 +15,10 @@ InputState gInputState[2];
 int gCurrentInputState = 0;
 
 static unsigned int mouseLock = 0;
+#if 0
 static unsigned int mouseLocked = 0;
-
 static int ignoreMouseEvents = 0;
-
+#endif // 0
 
 // ********************************************************
 // Author: Manu Evans, March 2015

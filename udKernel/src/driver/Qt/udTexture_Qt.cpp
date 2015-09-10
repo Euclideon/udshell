@@ -85,7 +85,7 @@ void udTexture_DestroyTexture(udTexture **ppTex)
 }
 
 // ***************************************************************************************
-void udTexture_SetImageData(udTexture *pTex, int element, int level, void *pImage)
+void udTexture_SetImageData(udTexture *pTex, int udUnusedParam(element), int level, void *pImage)
 {
   // TODO: should we use the function pointer instead? maybe api check?
 

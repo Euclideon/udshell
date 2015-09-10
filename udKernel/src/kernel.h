@@ -130,7 +130,7 @@ protected:
   TimerRef spStreamerTimer = nullptr;
   TimerRef spUpdateTimer = nullptr;
 
-  void DoInit(Kernel *pKernel);
+  udResult DoInit(Kernel *pKernel);
 
   static Kernel *CreateInstanceInternal(udInitParams commandLine);
   udResult InitInstanceInternal();

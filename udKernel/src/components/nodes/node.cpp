@@ -90,7 +90,7 @@ void Node::AddChild(NodeRef c)
 
 void Node::RemoveChild(NodeRef c)
 {
-  children.remove(c);
+  children.removeFirst(c);
   c->pParent = nullptr;
 }
 

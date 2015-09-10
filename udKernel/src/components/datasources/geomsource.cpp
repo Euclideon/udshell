@@ -84,10 +84,10 @@ void GeomSource::Create(StreamRef spSource)
 
   // allocate for file
   int64_t len = spSource->Length();
-  void *pBuffer = udAlloc(len);
+  void *pBuffer = udAlloc((size_t)len);
 
   // read file from source
-  size_t read = spSource->Read(pBuffer, len);
+  size_t read = spSource->Read(pBuffer, (size_t)len);
   UDASSERT((int64_t)read == len, "!");
 
   Assimp::Importer importer;

@@ -70,7 +70,7 @@ ptrdiff_t udVariant::compare(const udVariant &v) const
     case Type::Bool:
       return (b ? 1 : 0) - (v.b ? 1 : 0);
     case Type::Int:
-      return i - v.i;
+      return ptrdiff_t(i - v.i);
     case Type::Float:
       return f < v.f ? -1 : (f > v.f ? 1 : 0);
     case Type::String:
@@ -380,7 +380,7 @@ udVariant udVariant::luaGet(ud::LuaState &l, int idx)
     case ud::LuaType::LightUserData:
       return udVariant();
     case ud::LuaType::Number:
-      if (l.isInteger(-1))
+      if (l.isInteger(idx))
         return udVariant((int64_t)l.toInt(idx));
       else
         return udVariant(l.toFloat(idx));

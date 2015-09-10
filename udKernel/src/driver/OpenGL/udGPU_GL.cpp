@@ -70,7 +70,7 @@ void udGPU_RenderVertices(udShaderProgram *pProgram, udFormatDeclaration *pVerte
 
 // ***************************************************************************************
 // Author: Manu Evans, Aug 2015
-void udGPU_RenderIndices(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udArrayBuffer *pIB, udPrimitiveType primType, size_t indexCount, size_t firstIndex, size_t firstVertex)
+void udGPU_RenderIndices(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udArrayBuffer *pIB, udPrimitiveType primType, size_t indexCount, size_t udUnusedParam(firstIndex), size_t udUnusedParam(firstVertex))
 {
   udArrayElement *pElements = pVertexDecl->pElements;
   udArrayElementData *pElementData = pVertexDecl->pElementData;
@@ -108,7 +108,9 @@ void udGPU_RenderIndices(udShaderProgram *pProgram, udFormatDeclaration *pVertex
     case udVDF_UByte:
       type = GL_UNSIGNED_BYTE; break;
     default:
+      type = GL_UNSIGNED_SHORT;
       UDASSERT(false, "Invalid index buffer type!");
+      break;
   }
   glDrawElements(s_primTypes[primType], (GLsizei)indexCount, type, nullptr);
 

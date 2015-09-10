@@ -54,23 +54,43 @@ static udShaderProgram *s_shader = nullptr;
 
 #include "kernel.h"
 
-void udRenderScene_Init(Kernel *pKernel)
+udResult udRenderScene_Init(Kernel*)
 {
+  return udR_Success;
 }
 
-void udRenderScene_InitRender(Kernel*)
+udResult udRenderScene_Deinit(Kernel*)
 {
-  // crete a vertex buffer to render the quad to the screen
+  return udR_Success;
+}
+
+udResult udRenderScene_InitRender(Kernel*)
+{
+  // create a vertex buffer to render the quad to the screen
   udArrayDataFormat format[] = { udVDF_Float2 };
   s_pQuadVB = udVertex_CreateVertexBuffer(format, 1);
+  if (!s_pQuadVB)
+    return udR_Failure_;
+
   s_pQuadIB = udVertex_CreateIndexBuffer(udVDF_UInt);
+  if (!s_pQuadIB)
+  {
+    udVertex_DestroyArrayBuffer(&s_pQuadVB);
+    return udR_Failure_;
+  }
 
   udArrayElement elements[] = {
 //    { udVET_Position, 0, 2, udVDF_Float2 },
     { "a_position", format[0], 0 },
   };
-  s_pPosUV = udVertex_CreateFormatDeclaration(elements, sizeof(elements)/sizeof(elements[0]));
 
+  s_pPosUV = udVertex_CreateFormatDeclaration(elements, sizeof(elements)/sizeof(elements[0]));
+  if (!s_pPosUV)
+  {
+    udVertex_DestroyArrayBuffer(&s_pQuadIB);
+    udVertex_DestroyArrayBuffer(&s_pQuadVB);
+    return udR_Failure_;
+  }
   struct Vertex
   {
     float x, y;
@@ -80,14 +100,57 @@ void udRenderScene_InitRender(Kernel*)
       { 1, 1 },
       { 0, 1 }
   };
+
   udVertex_SetArrayBufferData(s_pQuadVB, quad, sizeof(quad));
 
   uint32_t indices[] = { 0, 1, 2, 3 };
   udVertex_SetArrayBufferData(s_pQuadIB, indices, sizeof(indices));
 
   udShader *pVS = udShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), udST_VertexShader);
+  if (!pVS)
+  {
+    udVertex_DestroyFormatDeclaration(&s_pPosUV);
+    udVertex_DestroyArrayBuffer(&s_pQuadIB);
+    udVertex_DestroyArrayBuffer(&s_pQuadVB);
+    return udR_Failure_;
+  }
+
   udShader *pPS = udShader_CreateShader(s_blitShader, sizeof(s_blitShader), udST_PixelShader);
+  if (!pPS)
+  {
+    // TODO: Add in calls to udShader_Destroy when implemented.
+    //udShader_Destroy(&pVS)
+    udVertex_DestroyFormatDeclaration(&s_pPosUV);
+    udVertex_DestroyArrayBuffer(&s_pQuadIB);
+    udVertex_DestroyArrayBuffer(&s_pQuadVB);
+    return udR_Failure_;
+  }
+
   s_shader = udShader_CreateShaderProgram(pVS, pPS);
+  if (!s_shader)
+  {
+    // TODO: Add in calls to udShader_Destroy when implemented.
+    //udShader_Destroy(&pPS)
+    //udShader_Destroy(&pVS)
+    udVertex_DestroyFormatDeclaration(&s_pPosUV);
+    udVertex_DestroyArrayBuffer(&s_pQuadIB);
+    udVertex_DestroyArrayBuffer(&s_pQuadVB);
+    return udR_Failure_;
+  }
+
+  return udR_Success;
+}
+
+udResult udRenderScene_DeinitRender(Kernel*)
+{
+  // TODO: Add in calls to udShader_Destroy when implemented.
+  //udShader_DestroyShaderProgram(s_shader);
+  //udShader_Destroy(&pPS);
+  //udShader_Destroy(&pVS);
+  udVertex_DestroyFormatDeclaration(&s_pPosUV);
+  udVertex_DestroyArrayBuffer(&s_pQuadIB);
+  udVertex_DestroyArrayBuffer(&s_pQuadVB);
+  return udR_Success;
 }
 
 RenderableView::RenderableView()
@@ -191,7 +254,6 @@ void RenderableView::RenderGPU()
 */
 }
 
-
 Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   : pKernel(pKernel)
 {
@@ -209,6 +271,7 @@ Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   pUDTerminateSemaphore = udCreateSemaphore(1, 0);
   udCreateThread(UDThreadStart, this);
 }
+
 Renderer::~Renderer()
 {
   // terminate UD thread
@@ -263,7 +326,9 @@ void Renderer::UDThread()
 
   while (1)
   {
-    udWaitSemaphore(pUDSemaphore);
+    int result = udWaitSemaphore(pUDSemaphore);
+    if (result == -1)
+      return;
 
     udLockMutex(pUDMutex);
     if (udRenderQueue.length == 0)
