@@ -9,6 +9,39 @@ namespace ud
 PROTOTYPE_COMPONENT(Logger);
 SHARED_CLASS(Stream);
 
+/**
+* --- LogCategories ---
+*
+* Error: Emit when the condition should never be encountered at runtime.
+*
+* Warning: Emit when program state looks questionable, but not proofably an error.
+* Levels:
+*   0 - Warning will be always be displayed. For cases that are very likely errors.
+*   1 - Critical Warning. Application will probably not run correctly.
+*   2 - Non-Critical Warning. Application will run, but may perform incorrectly.
+*   3 - Low-confidence warning, likely correct program behaviour.
+*   4 - High-frequency non-critical warnings. For warnings that appear in loops.
+*
+* Debug: Emit strictly for debug purposes, they are not of interest to users who are not debugging.
+* Levels:
+*   0 - Messages will be always be displayed.
+*   1 - High-importance message.
+*   2 - Normal-importance message.
+*   3 - Typically unwanted message.
+*   4 - Spammy high-frequency message.
+*
+* Info: Emit to the general output stream, may be viewed by end-users.
+* Levels:
+*   0 - Messages will be always be displayed.
+*   1 - High-importance message.
+*   2 - Normal-importance message.
+*   3 - Typically unwanted message.
+*   4 - Spammy high-frequency message.
+*
+* Script: Messages are associated with script execution; directed to script output areas.
+*
+* Trace: Used to follow the program flow. It is not unusual to place LogTrace() calls at the top of functions.
+*/
 UD_BITFIELD(LogCategories,
   Error,
   Warning,
