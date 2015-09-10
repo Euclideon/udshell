@@ -147,6 +147,17 @@ udVariant Component::GetProperty(udString property) const
   return pDesc->getter->get(this);
 }
 
+udVariant Component::CallMethod(udString method, udSlice<udVariant> args)
+{
+  const MethodDesc *pDesc = GetMethodDesc(method);
+  if (!pDesc)
+  {
+    LogWarning(1, "Method not found!");
+    return udVariant();
+  }
+  return pDesc->method->call(this, args);
+}
+
 
 udResult Component::ReceiveMessage(udString message, udString sender, const udVariant &data)
 {
