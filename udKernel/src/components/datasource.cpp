@@ -65,7 +65,7 @@ ComponentDesc DataSource::descriptor =
   udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
 };
 
-StreamRef DataSource::OpenStream(const udVariant source)
+StreamRef DataSource::OpenStream(const udVariant &source)
 {
   ComponentRef spComp = nullptr;
   StreamRef spSource = nullptr;
@@ -76,7 +76,7 @@ StreamRef DataSource::OpenStream(const udVariant source)
   if (source.is(udVariant::Type::String))
   {
     // path or url?
-    spSource = pKernel->CreateComponent<File>({ { "path", source.asString() }, { "flags", FileOpenFlags::Read } });
+    spSource = pKernel->CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
     if (!spSource)
     {
       LogWarning(5, "\"src\" file path not found: {0}", source.asString());

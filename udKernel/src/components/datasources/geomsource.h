@@ -36,7 +36,8 @@ protected:
   GeomSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
-    Create(OpenStream(initParams["src"]));
+    StreamRef ref = OpenStream(initParams["src"]);
+    Create(ref);
   }
 
   void Create(StreamRef spSource);

@@ -21,6 +21,7 @@
 #include "components/nodes/camera.h"
 #include "components/nodes/geomnode.h"
 #include "components/nodes/udnode.h"
+#include "components/resourcemanager.h"
 #include "components/resources/resource.h"
 #include "components/resources/buffer.h"
 #include "components/resources/array.h"
@@ -66,6 +67,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Console>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<MemStream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<ResourceManager>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
@@ -114,6 +116,9 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
   if (spConsole)
      pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script, 5, LogDefaults::Format);
+
+  // Resource Manager
+  pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
 
   // platform init
   UD_ERROR_CHECK(pKernel->InitInstanceInternal());

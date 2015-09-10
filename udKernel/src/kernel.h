@@ -24,6 +24,7 @@ SHARED_CLASS(View);
 SHARED_CLASS(UIComponent);
 SHARED_CLASS(Window);
 SHARED_CLASS(Logger);
+SHARED_CLASS(ResourceManager);
 
 class Kernel
 {
@@ -74,8 +75,8 @@ public:
   ViewRef GetFocusView() const { return spFocusView; }
   ViewRef SetFocusView(ViewRef spView);
 
+  // logger functions
   LoggerRef GetLogger() const { return spLogger; }
-  LoggerRef SetLogger(LoggerRef spLogger);
   void LogError(const udString text, const udString componentUID = nullptr);
   void LogWarning(int level, const udString text, const udString componentUID = nullptr);
   void LogDebug(int level, const udString text, const udString componentUID = nullptr);
@@ -83,6 +84,9 @@ public:
   void LogScript(const udString text, const udString componentUID = nullptr);
   void LogTrace(const udString text, const udString componentUID = nullptr);
   void Log(const udString text, const udString componentUID = nullptr);
+
+  // Functions for resource management
+  ResourceManagerRef GetResourceManager() const { return spResourceManager; }
 
   udResult RegisterExtensions(const ComponentDesc *pDesc, const udSlice<const udString> exts);
   DataSourceRef CreateDataSourceFromExtension(udString ext, udInitParams initParams);
@@ -121,6 +125,7 @@ protected:
   LuaRef spLua = nullptr;
 
   LoggerRef spLogger = nullptr;
+  ResourceManagerRef spResourceManager = nullptr;
   ViewRef spFocusView = nullptr;
   TimerRef spStreamerTimer = nullptr;
   TimerRef spUpdateTimer = nullptr;
@@ -145,14 +150,7 @@ protected:
   template<typename CT>
   static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 
-  struct ExtensionsCompare
-  {
-    UDFORCE_INLINE ptrdiff_t operator()(const udString &a, const udString &b)
-    {
-      return a.cmp(b);
-    }
-  };
-  udAVLTree<udString, const ComponentDesc *, ExtensionsCompare> extensionsRegistry;
+  udAVLTree<udString, const ComponentDesc *> extensionsRegistry;
 };
 
 template<typename T>

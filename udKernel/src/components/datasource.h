@@ -96,7 +96,7 @@ public:
 protected:
   DataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 
-  StreamRef OpenStream(const udVariant source);
+  StreamRef OpenStream(const udVariant &source);
 
   struct StringCompare {
     UDFORCE_INLINE ptrdiff_t operator()(udString a, udString b)
