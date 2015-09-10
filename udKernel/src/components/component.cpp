@@ -135,6 +135,11 @@ const EventDesc *Component::GetEventDesc(udString name) const
   return pDesc;
 }
 
+const StaticFuncDesc *Component::GetStaticFuncDesc(udString name) const
+{
+  return pType->staticFuncTree.Get(name);
+}
+
 void Component::AddDynamicProperty(const PropertyDesc &property)
 {
   instanceProperties.Insert(property.info.id, property);

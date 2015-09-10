@@ -56,7 +56,7 @@ public:
     const PropertyDesc *pDesc = GetPropertyDesc(name);
     return pDesc ? &pDesc->info : nullptr;
   }
-  const MethodInfo *GetMethodInfo(udString name) const
+  const FunctionInfo *GetMethodInfo(udString name) const
   {
     const MethodDesc *pDesc = GetMethodDesc(name);
     return pDesc ? &pDesc->info : nullptr;
@@ -64,6 +64,11 @@ public:
   const EventInfo *GetEventInfo(udString name) const
   {
     const EventDesc *pDesc = GetEventDesc(name);
+    return pDesc ? &pDesc->info : nullptr;
+  }
+  const FunctionInfo *GetStaticFuncInfo(udString name) const
+  {
+    const StaticFuncDesc *pDesc = GetStaticFuncDesc(name);
     return pDesc ? &pDesc->info : nullptr;
   }
 
@@ -107,10 +112,12 @@ protected:
   size_t NumProperties() const { return instanceProperties.Size() + pType->propertyTree.Size(); }
   size_t NumMethods() const { return instanceMethods.Size() + pType->methodTree.Size(); }
   size_t NumEvents() const { return instanceEvents.Size() + pType->eventTree.Size(); }
+  size_t NumStaticFuncs() const { return pType->staticFuncTree.Size(); }
 
   const PropertyDesc *GetPropertyDesc(udString name) const;
   const MethodDesc *GetMethodDesc(udString name) const;
   const EventDesc *GetEventDesc(udString name) const;
+  const StaticFuncDesc *GetStaticFuncDesc(udString name) const;
 
   // TODO: these substantially inflate the size of base Component and are almost always nullptr
   // ...should we move them to a separate allocation?

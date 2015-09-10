@@ -215,7 +215,7 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
       // TODO: keep list of strings
       // TODO: keep free list of methods
       udString methodName = AllocUDStringFromQString(method.name());
-      ud::MethodInfo info = { methodName, methodDescStr };
+      ud::FunctionInfo info = { methodName, methodDescStr };
       ud::MethodDesc desc = { info, udNew(QtMethod<ComponentType>, method) };
 
       pComponent->AddDynamicMethod(desc);

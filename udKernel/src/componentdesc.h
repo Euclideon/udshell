@@ -86,6 +86,24 @@ protected:
   Shim *shim;
 };
 
+// static funcion glue
+class StaticFunc
+{
+public:
+  StaticFunc(nullptr_t) : shim(nullptr) {}
+
+  operator bool() const { return shim != nullptr; }
+
+  udVariant call(udSlice<udVariant> args) const
+  {
+    return shim(this, args);
+  }
+
+protected:
+  typedef udVariant(Shim)(const StaticFunc* const, udSlice<udVariant>);
+  Shim *shim;
+};
+
 // event glue
 class VarEvent
 {
@@ -161,6 +179,28 @@ protected:
   };
 };
 
+// static function glue
+class CStaticFunc : public StaticFunc
+{
+public:
+  CStaticFunc(nullptr_t) : StaticFunc(nullptr) {}
+  template <typename Ret, typename... Args>
+  CStaticFunc(Ret(*func)(Args...));
+
+protected:
+  void *f; // function pointer
+
+  template<typename Ret, typename... Args>
+  struct Partial // this allows us to perform partial specialisation for Ret == void
+  {
+    // this is a nasty hack to get ...S (integer sequence) as a parameter pack
+    template<size_t ...S>
+    static udVariant callFuncHack(udSlice<udVariant> args, Ret(*f)(Args...), Sequence<S...>);
+
+    static udVariant shimFunc(const StaticFunc * const pSetter, udSlice<udVariant> value);
+  };
+};
+
 // event glue
 class CEvent : public VarEvent
 {
@@ -221,12 +261,12 @@ struct PropertyDesc
   Setter *setter;
 };
 
-struct MethodInfo
+struct FunctionInfo
 {
-  MethodInfo() = delete;
-  MethodInfo(udString id, udString description)
+  FunctionInfo() = delete;
+  FunctionInfo(udString id, udString description)
     : id(id), description(description) {}
-  MethodInfo(const MethodInfo &rh)
+  FunctionInfo(const FunctionInfo &rh)
     : id(rh.id), description(rh.description) {}
 
   udString id;
@@ -236,13 +276,24 @@ struct MethodInfo
 struct MethodDesc
 {
   MethodDesc() = delete;
-  MethodDesc(const MethodInfo &info, Method *method)
+  MethodDesc(const FunctionInfo &info, Method *method)
     : info(info), method(method) {}
   MethodDesc(const MethodDesc &rh)
     : info(rh.info), method(rh.method) {}
 
-  MethodInfo info;
+  FunctionInfo info;
   Method *method;
+};
+
+struct StaticFuncDesc
+{
+  StaticFuncDesc() = delete;
+  StaticFuncDesc(const FunctionInfo &info, StaticFunc *staticFunc)
+    : info(info), staticFunc(staticFunc) {}
+  void operator=(const StaticFuncDesc&) = delete;
+
+  FunctionInfo info;
+  StaticFunc *staticFunc;
 };
 
 struct EventInfo
@@ -280,7 +331,7 @@ struct CPropertyDesc
 
 struct CMethodDesc
 {
-  MethodInfo info;
+  FunctionInfo info;
   CMethod method;
 };
 
@@ -290,6 +341,11 @@ struct CEventDesc
   CEvent ev;
 };
 
+struct CStaticFuncDesc
+{
+  FunctionInfo info;
+  CStaticFunc staticFunc;
+};
 
 // component description
 enum { UDSHELL_APIVERSION = 100 };
@@ -302,10 +358,10 @@ struct ComponentDesc
 {
   ComponentDesc() = delete;
   ComponentDesc(ComponentDesc *pSuperDesc, int udVersion, int pluginVersion, udString id, udString displayName, udString description,
-    udSlice<CPropertyDesc> properties = nullptr, udSlice<CMethodDesc> methods = nullptr, udSlice<CEventDesc> events = nullptr,
+    udSlice<CPropertyDesc> properties = nullptr, udSlice<CMethodDesc> methods = nullptr, udSlice<CEventDesc> events = nullptr, udSlice<CStaticFuncDesc> staticFuncs = nullptr,
     InitComponent *pInit = nullptr, CreateInstanceCallback *pCreateInstance = nullptr)
     : pSuperDesc(pSuperDesc), udVersion(udVersion), pluginVersion(pluginVersion), id(id), displayName(displayName), description(description)
-    , properties(properties), methods(methods), events(events), pInit(pInit), pCreateInstance(pCreateInstance) {}
+    , properties(properties), methods(methods), events(events), staticFuncs(staticFuncs), pInit(pInit), pCreateInstance(pCreateInstance) {}
 
   ComponentDesc& operator=(const ComponentDesc&) = delete;
 
@@ -325,6 +381,7 @@ struct ComponentDesc
   udSlice<CPropertyDesc> properties;
   udSlice<CMethodDesc> methods;
   udSlice<CEventDesc> events;
+  udSlice<CStaticFuncDesc> staticFuncs;
 
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
@@ -332,11 +389,14 @@ struct ComponentDesc
   udAVLTree<udString, PropertyDesc> propertyTree;
   udAVLTree<udString, MethodDesc> methodTree;
   udAVLTree<udString, EventDesc> eventTree;
+  udAVLTree<udString, StaticFuncDesc> staticFuncTree;
+
 
   void BuildSearchTrees();
   void InitProps();
   void InitMethods();
   void InitEvents();
+  void InitStaticFuncs();
 };
 
 } // namespace ud
