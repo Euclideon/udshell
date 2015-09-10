@@ -498,6 +498,7 @@ namespace ud_internal
     ProxyFunc *pProxy;
     const void *pArg;
 
+    VarArg() {}
     template<typename T>
     VarArg(const T& arg)
       : pProxy(&StringifyProxy<T>::stringify)
@@ -538,8 +539,8 @@ inline udMutableString<Size>& udMutableString<Size>::concat(const Args&... args)
 {
   using namespace ud_internal;
   this->clear();
-  VarArg proxies[] = { VarArg(args)... };
-  appendInternal(udSlice<VarArg>(proxies, UDARRAYSIZE(proxies)));
+  VarArg proxies[sizeof...(Args)+1] = { VarArg(args)... };
+  appendInternal(udSlice<VarArg>(proxies, sizeof...(Args)));
   return *this;
 }
 template<size_t Size>
@@ -547,8 +548,8 @@ template<typename... Args>
 inline udMutableString<Size>& udMutableString<Size>::append(const Args&... args)
 {
   using namespace ud_internal;
-  VarArg proxies[] = { VarArg(args)... };
-  appendInternal(udSlice<VarArg>(proxies, UDARRAYSIZE(proxies)));
+  VarArg proxies[sizeof...(Args)+1] = { VarArg(args)... };
+  appendInternal(udSlice<VarArg>(proxies, sizeof...(Args)));
   return *this;
 }
 template<size_t Size>
@@ -556,8 +557,8 @@ template<typename... Args>
 inline udMutableString<Size>& udMutableString<Size>::format(udString format, const Args&... args)
 {
   using namespace ud_internal;
-  VarArg proxies[] = { VarArg(args)... };
-  formatInternal(format, udSlice<VarArg>(proxies, UDARRAYSIZE(proxies)));
+  VarArg proxies[sizeof...(Args)+1] = { VarArg(args)... };
+  formatInternal(format, udSlice<VarArg>(proxies, sizeof...(Args)));
   return *this;
 }
 
@@ -567,7 +568,7 @@ inline void udMutableString<Size>::appendInternal(udSlice<ud_internal::VarArg> a
   using namespace ud_internal;
   size_t len = getLength(args);
   this->reserve(this->length + len + 1);
-  concatenate(udSlice<char>(this->ptr + this->length, len), args);
+  ud_internal::concatenate(udSlice<char>(this->ptr + this->length, len), args);
   this->length += len;
   this->ptr[this->length] = 0;
 }
@@ -589,13 +590,13 @@ template<typename... Args>
 inline udSharedString udSharedString::concat(const Args&... args)
 {
   using namespace ud_internal;
-  VarArg proxies[] = { VarArg(args)... };
-  return concatInternal(udSlice<VarArg>(proxies, UDARRAYSIZE(proxies)));
+  VarArg proxies[sizeof...(Args)+1] = { VarArg(args)... };
+  return concatInternal(udSlice<VarArg>(proxies, sizeof...(Args)));
 }
 template<typename... Args>
 inline udSharedString udSharedString::format(udString format, const Args&... args)
 {
   using namespace ud_internal;
-  VarArg proxies[] = { VarArg(args)... };
-  return formatInternal(format, udSlice<VarArg>(proxies, UDARRAYSIZE(proxies)));
+  VarArg proxies[sizeof...(Args)+1] = { VarArg(args)... };
+  return formatInternal(format, udSlice<VarArg>(proxies, sizeof...(Args)));
 }

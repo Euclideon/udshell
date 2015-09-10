@@ -41,7 +41,7 @@ public:
   virtual udVariant GetProperty(udString property) const;
 
   udResult SendMessage(udString target, udString message, const udVariant &data);
-  udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { udMutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp , message, data); }
+  udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { udMutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp, message, data); }
 
   const PropertyInfo *GetPropertyInfo(udString name) const
   {
@@ -66,13 +66,13 @@ public:
   udString GetDisplayName() const { return pType->displayName; }
   udString GetDescription() const { return pType->description; }
 
-  void LogError(udString text) const;
-  void LogWarning(int level, udString text) const;
-  void LogDebug(int level, udString text) const;
-  void LogInfo(int level, udString text) const;
-  void LogScript(udString text) const;
-  void LogTrace(udString text) const;
-  void Log(udString text) const; // Calls LogDebug() with level 2
+  template<typename ...Args> void LogError(udString text, Args... args) const;
+  template<typename ...Args> void LogWarning(int level, udString text, Args... args) const;
+  template<typename ...Args> void LogDebug(int level, udString text, Args... args) const;
+  template<typename ...Args> void LogInfo(int level, udString text, Args... args) const;
+  template<typename ...Args> void LogScript(udString text, Args... args) const;
+  template<typename ...Args> void LogTrace(udString text, Args... args) const;
+  template<typename ...Args> void Log(udString text, Args... args) const; // Calls LogDebug() with level 2
 
   void SetName(udString name) { this->name = name; }
 
@@ -84,6 +84,8 @@ protected:
   void Init(udInitParams initParams);
 
   virtual udResult ReceiveMessage(udString message, udString sender, const udVariant &data);
+
+  void LogInternal(int level, udString text, int category, udString componentUID) const;
 
   // property access
   virtual const PropertyDesc *GetPropertyDesc(udString name) const;
@@ -100,6 +102,90 @@ private:
   Component(const Component &) = delete;    // Still not sold on this
   void operator=(const Component &) = delete;
 };
+
+} // namespace ud
+
+#include "components/logger.h"
+namespace ud
+{
+
+template<typename ...Args>
+inline void Component::LogError(udString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(LogDefaults::LogLevel, text, LogCategories::Error, uid);
+  else
+  {
+    udMutableString128 tmp; tmp.format(text, args...);
+    LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Error, uid);
+  }
+}
+template<typename ...Args>
+inline void Component::LogWarning(int level, udString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(level, text, LogCategories::Warning, uid);
+  else
+  {
+    udMutableString128 tmp; tmp.format(text, args...);
+    LogInternal(level, tmp, LogCategories::Warning, uid);
+  }
+}
+template<typename ...Args>
+inline void Component::LogDebug(int level, udString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(level, text, LogCategories::Debug, uid);
+  else
+  {
+    udMutableString128 tmp; tmp.format(text, args...);
+    LogInternal(level, tmp, LogCategories::Debug, uid);
+  }
+}
+template<typename ...Args>
+inline void Component::LogInfo(int level, udString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(level, text, LogCategories::Info, uid);
+  else
+  {
+    udMutableString128 tmp; tmp.format(text, args...);
+    LogInternal(level, tmp, LogCategories::Info, uid);
+  }
+}
+template<typename ...Args>
+inline void Component::LogScript(udString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(LogDefaults::LogLevel, text, LogCategories::Script, uid);
+  else
+  {
+    udMutableString128 tmp; tmp.format(text, args...);
+    LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Script, uid);
+  }
+}
+template<typename ...Args>
+inline void Component::LogTrace(udString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(LogDefaults::LogLevel, text, LogCategories::Trace, uid);
+  else
+  {
+    udMutableString128 tmp; tmp.format(text, args...);
+    LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Trace, uid);
+  }
+}
+template<typename ...Args>
+inline void Component::Log(udString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(LogDefaults::LogLevel, text, LogCategories::Debug, uid);
+  else
+  {
+    udMutableString128 tmp; tmp.format(text, args...);
+    LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Debug, uid);
+  }
+}
 
 
 template<typename T>
