@@ -8,8 +8,6 @@
 #include "udQtKernel_Internal.h"
 #include "ui/renderview.h"
 
-#include "components/window.h"
-
 // Init the kernel's qrc file resources - this has to happen from the global namespace
 inline void InitResources() { Q_INIT_RESOURCE(kernel); }
 
@@ -78,6 +76,7 @@ QtKernel::QtKernel(udInitParams commandLine)
 udResult QtKernel::Init()
 {
   LogTrace("QtKernel::Init()");
+  LogInfo(2, "Initialising udShell...");
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(argc >= 1, "argc must contain at least 1");
@@ -112,9 +111,9 @@ udResult QtKernel::Init()
   if (!pTopLevelWindow)
   {
     // TODO: better error information/handling
-    udDebugPrintf("Error creating Splash Screen\n");
+    LogError("Error creating Splash Screen");
     foreach(const QQmlError &error, component.errors())
-      udDebugPrintf("QML ERROR: %s\n", error.toString().toLatin1().data());
+      LogError(udSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
     return udR_Failure_;
   }
 
@@ -135,47 +134,11 @@ udResult QtKernel::Shutdown()
   if (ud::Kernel::DeinitRender() != udR_Success)
   {
     // TODO: gracefully handle error with DeinitRender ?
-    udDebugPrintf("Error cleaning up renderer\n");
+    LogError("Error cleaning up renderer");
   }
 
   delete pQmlEngine;
   delete this;
-  return udR_Success;
-}
-
-// ---------------------------------------------------------------------------------------
-udResult QtKernel::SetTopLevelUI(ud::WindowRef spWindow)
-{
-  LogTrace("QtKernel::SetTopLevelUI()");
-
-  QQuickWindow *pPrevWindow = pTopLevelWindow;
-  pTopLevelWindow = (QQuickWindow*)spWindow->GetInternalData();
-
-  if (pPrevWindow)
-  {
-    // unhook the current top level window
-    //QObject::disconnect(pPrevWindow, &QQuickWindow::sceneGraphInitialized, this, &QtKernel::OnSceneGraphInitialized);
-    QObject::disconnect(pTopLevelWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated);
-    pPrevWindow->hide();
-    delete pPrevWindow;
-  }
-
-  pMainThreadContext->doneCurrent();
-
-  // hook up the new one
-  //QObject::connect(pTopLevelWindow, &QQuickWindow::sceneGraphInitialized, this, &QtKernel::OnSceneGraphInitialized, Qt::DirectConnection);
-  QObject::connect(pTopLevelWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated, Qt::DirectConnection);
-
-  pTopLevelWindow->show();
-  pTopLevelWindow->raise();
-
-  if (!pMainThreadContext->makeCurrent(pTopLevelWindow))
-  {
-    // TODO: error
-    udDebugPrintf("Error making main gl context current\n");
-    return udR_Failure_;
-  }
-
   return udR_Success;
 }
 
@@ -195,6 +158,7 @@ udResult QtKernel::RunMainLoop()
 void QtKernel::PostEvent(QEvent *pEvent, int priority)
 {
   LogTrace("QtKernel::PostEvent()");
+
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
@@ -202,9 +166,44 @@ void QtKernel::PostEvent(QEvent *pEvent, int priority)
 }
 
 // ---------------------------------------------------------------------------------------
+udResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
+{
+  LogTrace("QtKernel::RegisterWindow()");
+
+  // TODO: support adding multiple windows
+
+  if (pTopLevelWindow)
+  {
+    // unhook the current top level window
+    QObject::disconnect(pTopLevelWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated);
+    pTopLevelWindow->hide();
+    delete pTopLevelWindow;
+  }
+
+  pMainThreadContext->doneCurrent();
+
+  pTopLevelWindow = pWindow;
+
+  // Hook up window signals
+  QObject::connect(pTopLevelWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated, Qt::DirectConnection);
+
+  pTopLevelWindow->show();
+  pTopLevelWindow->raise();
+
+  if (!pMainThreadContext->makeCurrent(pTopLevelWindow))
+  {
+    // TODO: error handle
+    LogError("Error making main gl context current");
+    return udR_Failure_;
+  }
+
+  return udR_Success;
+}
+
+// ---------------------------------------------------------------------------------------
 void QtKernel::OnGLContextCreated(QOpenGLContext *pContext)
 {
-  LogTrace("QtKernel::CreateOpenGLContext()");
+  LogTrace("QtKernel::OnGLContextCreated()");
 
   UDASSERT(pMainThreadContext != nullptr, "Expected GL context");
 
@@ -256,7 +255,7 @@ void QtKernel::DoInit(ud::Kernel *)
   if (!pMainThreadContext->makeCurrent(pTopLevelWindow))
   {
     // TODO: handle error
-    udDebugPrintf("Error making main gl context current\n");
+    LogError("Error making main GL Context current");
     pApplication->quit();
   }
 
@@ -264,7 +263,7 @@ void QtKernel::DoInit(ud::Kernel *)
   if (ud::Kernel::InitRender() != udR_Success)
   {
     // TODO: gracefully handle error with InitRender ?
-    udDebugPrintf("Error initialising renderer\n");
+    LogError("Error initialising renderer");
     pApplication->quit();
   }
 
@@ -276,6 +275,7 @@ void QtKernel::DoInit(ud::Kernel *)
 void QtKernel::customEvent(QEvent *pEvent)
 {
   LogTrace("QtKernel::customEvent()");
+
   if (pEvent->type() == KernelEvent::type())
   {
     MainThreadCallback d;
@@ -284,7 +284,7 @@ void QtKernel::customEvent(QEvent *pEvent)
   }
   else
   {
-    udDebugPrintf("Unknown event received in Kernel\n");
+    LogWarning(2, udSharedString::concat("Unknown event received in Kernel: TYPE ", (int)pEvent->type()));
   }
 }
 
@@ -299,7 +299,6 @@ namespace ud
 // ---------------------------------------------------------------------------------------
 Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 {
-  udDebugPrintf("Kernel::CreateInstanceInternal()\n");
   return new qt::QtKernel(commandLine);
 }
 
@@ -312,7 +311,6 @@ udResult Kernel::InitInstanceInternal()
 // ---------------------------------------------------------------------------------------
 udResult Kernel::DestroyInstanceInternal()
 {
-  LogTrace("Kernel::DestroyInstanceInternal()");
   return static_cast<qt::QtKernel*>(this)->Shutdown();
 }
 
@@ -326,24 +324,15 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 }
 
 // ---------------------------------------------------------------------------------------
-udResult Kernel::SetTopLevelUI(WindowRef spWindow)
-{
-  LogTrace("Kernel::SetTopLevelUI()");
-  return static_cast<qt::QtKernel*>(this)->SetTopLevelUI(spWindow);
-}
-
-// ---------------------------------------------------------------------------------------
 udResult Kernel::RunMainLoop()
 {
-  LogTrace("Kernel::RunMainLoop()");
   return static_cast<qt::QtKernel*>(this)->RunMainLoop();
 }
 
 // ---------------------------------------------------------------------------------------
 udResult Kernel::Terminate()
 {
-  LogTrace("Kernel::Terminate()");
-
+  // TODO: wire this up? Is this obsolete?
   return udR_Success;
 }
 

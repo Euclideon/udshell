@@ -56,12 +56,6 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
   return spOld;
 }
 
-udResult Kernel::SetTopLevelUI(UIComponentRef spWindow)
-{
-  return udR_Success;
-}
-
-
 struct DelegateWithSemaphore
 {
   FastDelegateMemento m;

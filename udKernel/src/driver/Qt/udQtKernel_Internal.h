@@ -16,8 +16,6 @@ class QQuickWindow;
 namespace qt
 {
 
-class Window;
-
 class QtKernel : public ud::Kernel, public QObject
 {
 public:
@@ -26,7 +24,6 @@ public:
 
   udResult Init();
   udResult Shutdown();
-  udResult SetTopLevelUI(ud::WindowRef spWindow);
   udResult RunMainLoop();
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
@@ -35,6 +32,8 @@ public:
   void PostEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
 
   QQmlEngine *QmlEngine() { return pQmlEngine; }
+
+  udResult RegisterWindow(QQuickWindow *pWindow);
 
 private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);

@@ -25,15 +25,10 @@ namespace qt
 class FboRenderer : public QQuickFramebufferObject::Renderer
 {
 public:
-  FboRenderer(const QQuickFramebufferObject *item) : m_item(item)
-  {
-    udDebugPrintf("FboRenderer::FboRenderer()\n");
-  }
+  FboRenderer(const QQuickFramebufferObject *item) : m_item(item) { }
 
   void render()
   {
-    UDASSERT(spRenderView, "No view");
-
     if (spRenderView)
       spRenderView->RenderGPU();
 
@@ -42,7 +37,6 @@ public:
 
   QOpenGLFramebufferObject *createFramebufferObject(const QSize &size)
   {
-    udDebugPrintf("FboRenderer::createFramebufferObject()\n");
     // TODO: Set up appropriate format
     QOpenGLFramebufferObjectFormat format;
     //format.setInternalTextureFormat(GL_RGBA8);
@@ -59,11 +53,8 @@ public:
 
     if (pRenderView->dirty)
     {
-      ud::ViewRef spView = s_pKernel->GetFocusView();
-      spRenderView = spView->GetRenderableView();
-
-      update();
-
+      spRenderView = pRenderView->spView->GetRenderableView();
+      //update();
       pRenderView->dirty = false;
     }
   }
@@ -74,33 +65,40 @@ public:
 
 
 RenderView::RenderView(QQuickItem *pParent)
-  : QQuickFramebufferObject(pParent), dirty(false)
+  : QQuickFramebufferObject(pParent)
+  , spView(nullptr)
+  , dirty(false)
 {
-  udDebugPrintf("RenderView::RenderView()\n");
+  s_pKernel->LogTrace("Create RenderView Quick Item");
 
   // handle resize
   QObject::connect(this, &QQuickItem::widthChanged, this, &RenderView::OnResize);
   QObject::connect(this, &QQuickItem::heightChanged, this, &RenderView::OnResize);
-
-  // HAX HAX!
-//  spView = s_pKernel->CreateComponent<ud::View>();
-  spView = s_pKernel->GetFocusView();
-  spView->FrameReady.Subscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
-
-  s_pKernel->SetFocusView(spView);
 }
 
 RenderView::~RenderView()
 {
-  udDebugPrintf("RenderView::~RenderView()\n");
+  s_pKernel->LogTrace("Destroy RenderView Quick Item");
 
-  spView->FrameReady.Unsubscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
+  if (spView)
+    spView->FrameReady.Unsubscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
 }
 
 QQuickFramebufferObject::Renderer *RenderView::createRenderer() const
 {
-  udDebugPrintf("RenderView::createRenderer()\n");
+  s_pKernel->LogTrace("Create RenderView Renderer");
   return new FboRenderer(this);
+}
+
+void RenderView::AttachView(ud::ViewRef _spView)
+{
+  udDebugPrintf("RenderView::AttachView()\n");
+
+  spView = _spView;
+  spView->FrameReady.Subscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
+
+  // TEMP HAX:
+  s_pKernel->SetFocusView(spView);
 }
 
 void RenderView::componentComplete()
@@ -139,7 +137,7 @@ void RenderView::keyPressEvent(QKeyEvent *pEv)
   ev.eventType = udInputEvent::Key;
   ev.key.key = kc;
   ev.key.state = 1;
-  if(spView->InputEvent(ev))
+  if (spView && spView->InputEvent(ev))
     pEv->accept();
 }
 void RenderView::keyReleaseEvent(QKeyEvent *pEv)
@@ -153,7 +151,7 @@ void RenderView::keyReleaseEvent(QKeyEvent *pEv)
   ev.eventType = udInputEvent::Key;
   ev.key.key = kc;
   ev.key.state = 0;
-  if (spView->InputEvent(ev))
+  if (spView && spView->InputEvent(ev))
     pEv->accept();
 }
 void RenderView::mouseDoubleClickEvent(QMouseEvent *pEv)
@@ -185,7 +183,7 @@ void RenderView::mouseMoveEvent(QMouseEvent *pEv)
   ev.move.yDelta = (float)(lastY - y); // TODO: MASSIVE HAX!!! FIX ME!!
   ev.move.xAbsolute = (float)x;
   ev.move.yAbsolute = (float)y;
-  if (spView->InputEvent(ev))
+  if (spView && spView->InputEvent(ev))
     pEv->accept();
 
   lastX = x; // TODO: MASSIVE HAX!!! FIX ME!!
@@ -199,7 +197,7 @@ void RenderView::mousePressEvent(QMouseEvent *pEv)
   ev.eventType = udInputEvent::Key;
   ev.key.key = pEv->button();
   ev.key.state = 1;
-  if (spView->InputEvent(ev))
+  if (spView && spView->InputEvent(ev))
     pEv->accept();
 }
 void RenderView::mouseReleaseEvent(QMouseEvent *pEv)
@@ -210,7 +208,7 @@ void RenderView::mouseReleaseEvent(QMouseEvent *pEv)
   ev.eventType = udInputEvent::Key;
   ev.key.key = pEv->button();
   ev.key.state = 0;
-  if (spView->InputEvent(ev))
+  if (spView && spView->InputEvent(ev))
     pEv->accept();
 }
 void RenderView::touchEvent(QTouchEvent *pEv)

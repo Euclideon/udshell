@@ -108,12 +108,6 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
   return spOld;
 }
 
-// ---------------------------------------------------------------------------------------
-udResult Kernel::SetTopLevelUI(WindowRef spWindow)
-{
-  return udR_Success;
-}
-
 udResult Kernel::RunMainLoop()
 {
 //  udNaClInstance *pInternal = (udNaClInstance*)pInstance;

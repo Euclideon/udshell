@@ -12,8 +12,8 @@ static CPropertyDesc windowProps[] =
       "UI", // displayName
       "Top level UI for the window", // description
     },
-    &Window::GetUI, // getter
-    &Window::SetUI, // setter
+    &Window::GetTopLevelUI, // getter
+    &Window::SetTopLevelUI, // setter
   }
 };
 
@@ -27,6 +27,10 @@ ComponentDesc Window::descriptor =
   "window",               // id
   "Window",               // displayName
   "Is a window",          // description
+
+  udSlice<CPropertyDesc>(windowProps, UDARRAYSIZE(windowProps)), // properties
+  nullptr,
+  nullptr
 };
 
 
@@ -42,13 +46,6 @@ Window::Window(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, 
 Window::~Window()
 {
   DestroyInternal();
-}
-
-// ---------------------------------------------------------------------------------------
-void Window::SetUI(UIComponentRef spUIComponent)
-{
-  spTopLevelUI = spUIComponent;
-  // ... DO SOMETHING...
 }
 
 } // namespace ud

@@ -2,5 +2,6 @@
   <qresource prefix="/kernel">
     <file>qmldir</file>
     <file>splashscreen.qml</file>
+    <file>viewport.qml</file>
   </qresource>
 </RCC>

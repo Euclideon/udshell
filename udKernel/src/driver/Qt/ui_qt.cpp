@@ -12,13 +12,14 @@
 #include "components/viewport.h"
 #include "components/window.h"
 
+#include "ui/renderview.h"
+
 namespace ud
 {
 
 udResult UIComponent::CreateInternal(udInitParams initParams)
 {
-  // create the qml component for the associated script
-  qt::QtKernel *pQtKernel = static_cast<qt::QtKernel*>(pKernel);
+  LogTrace("UIComponent::CreateInternal()");
 
   udString file = initParams["file"].as<udString>();
   if (file.empty())
@@ -27,8 +28,9 @@ udResult UIComponent::CreateInternal(udInitParams initParams)
     throw udR_Failure_;
   }
 
+  // create the qml component for the associated script
   QString filename = QString::fromUtf8(file.ptr, static_cast<int>(file.length));
-  QQmlComponent component(pQtKernel->QmlEngine(), QUrl(filename));
+  QQmlComponent component(static_cast<qt::QtKernel*>(pKernel)->QmlEngine(), QUrl(filename));
 
   QObject *pQtObject = component.create();
   if (!pQtObject)
@@ -36,7 +38,7 @@ udResult UIComponent::CreateInternal(udInitParams initParams)
     // TODO: better error information/handling
     LogError("Error creating QtComponent");
     foreach(const QQmlError &error, component.errors())
-      LogError(udSharedString::sprintf("QML ERROR: %s", error.toString().toLatin1().data()));
+      LogError(udSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
     throw udR_Failure_;
   }
 
@@ -55,27 +57,61 @@ udResult UIComponent::CreateInternal(udInitParams initParams)
   return udR_Success;
 }
 
+// ---------------------------------------------------------------------------------------
 void UIComponent::DestroyInternal()
 {
+  LogTrace("UIComponent::DestroyInternal()");
+
   QQuickItem *pQtObject = (QQuickItem*)pInternal;
   delete pQtObject;
   pInternal = nullptr;
 }
 
 
+// ---------------------------------------------------------------------------------------
 udResult Viewport::CreateInternal(udInitParams initParams)
 {
+  LogTrace("Viewport::CreateInternal()");
+
+  // check that we have a RenderView
+  QQuickItem *pRootItem = (QQuickItem*)pInternal;
+  QList<qt::RenderView *> renderViews = pRootItem->findChildren<qt::RenderView *>();
+  if (renderViews.isEmpty())
+  {
+    LogWarning(2, "Viewport component does not contain a RenderView QML item");
+    return udR_Failure_;
+  }
+
+  // check if we passed in a view, otherwise create a default one
+  ViewRef spView = initParams["view"].as<ViewRef>();
+  if (!spView)
+  {
+    LogDebug(2, "Creating internal view");
+    spView = pKernel->CreateComponent<View>();
+  }
+
+  // TODO: is this the behavior we want?
+  if (renderViews.size() > 1)
+    LogWarning(2, "Viewport component contains multiple RenderView QML items, note that these will all be set to the same view");
+
+  foreach(qt::RenderView *pRenderView, renderViews)
+    pRenderView->AttachView(spView);
+
   return udR_Success;
 }
 
+// ---------------------------------------------------------------------------------------
 void Viewport::DestroyInternal()
 {
+  LogTrace("Viewport::DestroyInternal()");
 }
 
 
+// ---------------------------------------------------------------------------------------
 udResult Window::CreateInternal(udInitParams initParams)
 {
-  // create the qml component for the associated script
+  LogTrace("Window::CreateInternal()");
+
   qt::QtKernel *pQtKernel = static_cast<qt::QtKernel*>(pKernel);
 
   udString file = initParams["file"].as<udString>();
@@ -85,6 +121,7 @@ udResult Window::CreateInternal(udInitParams initParams)
     throw udR_Failure_;
   }
 
+  // create the qml component for the associated script
   QString filename = QString::fromUtf8(file.ptr, static_cast<int>(file.length));
   QQmlComponent component(pQtKernel->QmlEngine(), QUrl(filename));
 
@@ -94,12 +131,13 @@ udResult Window::CreateInternal(udInitParams initParams)
     // TODO: better error information/handling
     LogError("Error creating QtComponent");
     foreach(const QQmlError &error, component.errors())
-      LogError(udSharedString::sprintf("QML ERROR: %s", error.toString().toLatin1().data()));
+      LogError(udSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
     throw udR_Failure_;
   }
 
   // We expect a QQuickWindow object
-  if (qobject_cast<QQuickWindow*>(pQtObject) == nullptr)
+  QQuickWindow *pQtWindow = qobject_cast<QQuickWindow*>(pQtObject);
+  if (pQtWindow == nullptr)
   {
     LogError("Window must create a QQuickWindow");
     throw udR_Failure_;
@@ -110,14 +148,39 @@ udResult Window::CreateInternal(udInitParams initParams)
 
   pInternal = pQtObject;
 
+  // register the window with the kernel
+  if (pQtKernel->RegisterWindow(pQtWindow) != udR_Success)
+  {
+    // TODO: error handling
+    LogError("Unable to register window");
+    throw udR_Failure_;
+  }
+
   return udR_Success;
 }
 
+// ---------------------------------------------------------------------------------------
 void Window::DestroyInternal()
 {
-  QQuickWindow *pQtObject = (QQuickWindow*)pInternal;
-  delete pQtObject;
+  LogTrace("Window::DestroyInternal()");
+
+  QQuickWindow *pQtWindow = (QQuickWindow*)pInternal;
+  delete pQtWindow;
   pInternal = nullptr;
+}
+
+// ---------------------------------------------------------------------------------------
+void Window::SetTopLevelUI(UIComponentRef spUIComponent)
+{
+  LogTrace("Window::SetTopLevelUI()");
+
+  spTopLevelUI = spUIComponent;
+  QQuickWindow *pQtWindow = (QQuickWindow*)pInternal;
+  reinterpret_cast<QQuickItem*>(spUIComponent->GetInternalData())->setParentItem(pQtWindow->contentItem());
+
+  // TODO: size this to parent
+  reinterpret_cast<QQuickItem*>(spUIComponent->GetInternalData())->setWidth(640);
+  reinterpret_cast<QQuickItem*>(spUIComponent->GetInternalData())->setHeight(480);
 }
 
 } // namespace ud

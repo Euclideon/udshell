@@ -16,8 +16,8 @@ class Window : public Component
 public:
   UD_COMPONENT(Window);
 
-  void SetUI(UIComponentRef spUIComponent);
-  UIComponentRef GetUI() const { return spTopLevelUI; }
+  void SetTopLevelUI(UIComponentRef spUIComponent);
+  UIComponentRef GetTopLevelUI() const { return spTopLevelUI; }
 
   void *GetInternalData() { return pInternal; }
   const void *GetInternalData() const { return pInternal; }

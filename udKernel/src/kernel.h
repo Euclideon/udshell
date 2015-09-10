@@ -64,8 +64,6 @@ public:
   void Exec(udString code);
 
   // other functions
-  udResult SetTopLevelUI(WindowRef spWindow);
-
   ViewRef GetFocusView() const { return spFocusView; }
   ViewRef SetFocusView(ViewRef spView);
 
