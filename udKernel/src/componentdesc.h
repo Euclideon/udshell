@@ -197,6 +197,8 @@ struct PropertyInfo
   PropertyInfo() = delete;
   PropertyInfo(udString id, udString displayName, udString description, udString displayType = nullptr, uint32_t flags = 0)
     : id(id), displayName(displayName), description(description), displayType(displayType), flags(flags) {}
+  PropertyInfo(const PropertyInfo &rh)
+    : id(rh.id), displayName(rh.displayName), description(rh.description), displayType(rh.displayType), flags(rh.flags) {}
 
   udString id;
   udString displayName;
@@ -211,7 +213,8 @@ struct PropertyDesc
   PropertyDesc() = delete;
   PropertyDesc(const PropertyInfo &info, Getter *getter, Setter *setter)
     : info(info), getter(getter), setter(setter) {}
-  void operator=(const PropertyDesc&) = delete;
+  PropertyDesc(const PropertyDesc &rh)
+    : info(rh.info), getter(rh.getter), setter(rh.setter) {}
 
   PropertyInfo info;
   Getter *getter;
@@ -223,6 +226,8 @@ struct MethodInfo
   MethodInfo() = delete;
   MethodInfo(udString id, udString description)
     : id(id), description(description) {}
+  MethodInfo(const MethodInfo &rh)
+    : id(rh.id), description(rh.description) {}
 
   udString id;
   udString description;
@@ -233,7 +238,8 @@ struct MethodDesc
   MethodDesc() = delete;
   MethodDesc(const MethodInfo &info, Method *method)
     : info(info), method(method) {}
-  void operator=(const MethodDesc&) = delete;
+  MethodDesc(const MethodDesc &rh)
+    : info(rh.info), method(rh.method) {}
 
   MethodInfo info;
   Method *method;
@@ -244,7 +250,8 @@ struct EventInfo
   EventInfo() = delete;
   EventInfo(udString id, udString displayName, udString description)
     : id(id), displayName(displayName), description(description) {}
-  void operator=(const EventInfo&) = delete;
+  EventInfo(const EventInfo &rh)
+    : id(rh.id), displayName(rh.displayName), description(rh.description) {}
 
   udString id;
   udString displayName;
@@ -256,7 +263,8 @@ struct EventDesc
   EventDesc() = delete;
   EventDesc(EventInfo info, VarEvent *ev)
     : info(info), ev(ev) {}
-  void operator=(const EventDesc&) = delete;
+  EventDesc(const EventDesc &rh)
+    : info(rh.info), ev(rh.ev) {}
 
   EventInfo info;
   VarEvent *ev;
@@ -298,7 +306,7 @@ struct ComponentDesc
     InitComponent *pInit = nullptr, CreateInstanceCallback *pCreateInstance = nullptr)
     : pSuperDesc(pSuperDesc), udVersion(udVersion), pluginVersion(pluginVersion), id(id), displayName(displayName), description(description)
     , properties(properties), methods(methods), events(events), pInit(pInit), pCreateInstance(pCreateInstance) {}
-  
+
   ComponentDesc& operator=(const ComponentDesc&) = delete;
 
   ComponentDesc *pSuperDesc;
@@ -324,10 +332,6 @@ struct ComponentDesc
   udAVLTree<udString, PropertyDesc> propertyTree;
   udAVLTree<udString, MethodDesc> methodTree;
   udAVLTree<udString, EventDesc> eventTree;
-
-  size_t NumProperties() const { return propertyTree.Size(); }
-  size_t NumMethods() const { return methodTree.Size(); }
-  size_t NumEvents() const { return eventTree.Size(); }
 
   void BuildSearchTrees();
   void InitProps();

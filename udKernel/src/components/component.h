@@ -96,9 +96,26 @@ protected:
   void LogInternal(int level, udString text, int category, udString componentUID) const;
 
   // property access
-  virtual const PropertyDesc *GetPropertyDesc(udString name) const;
-  virtual const MethodDesc *GetMethodDesc(udString name) const;
-  virtual const EventDesc *GetEventDesc(udString name) const;
+  size_t NumProperties() const { return instanceProperties.Size() + pType->propertyTree.Size(); }
+  size_t NumMethods() const { return instanceMethods.Size() + pType->methodTree.Size(); }
+  size_t NumEvents() const { return instanceEvents.Size() + pType->eventTree.Size(); }
+
+  const PropertyDesc *GetPropertyDesc(udString name) const;
+  const MethodDesc *GetMethodDesc(udString name) const;
+  const EventDesc *GetEventDesc(udString name) const;
+
+  void AddDynamicProperty(const PropertyDesc &property);
+  void AddDynamicMethod(const MethodDesc &method);
+  void AddDynamicEvent(const EventDesc &event);
+  void RemoveDynamicProperty(udString name);
+  void RemoveDynamicMethod(udString name);
+  void RemoveDynamicEvent(udString name);
+
+  // TODO: these substantially inflate the size of base Component and are almost always nullptr
+  // ...should we move them to a separate allocation?
+  udAVLTree<udString, PropertyDesc> instanceProperties;
+  udAVLTree<udString, MethodDesc> instanceMethods;
+  udAVLTree<udString, EventDesc> instanceEvents;
 
   udSubscriber subscriber;
 
