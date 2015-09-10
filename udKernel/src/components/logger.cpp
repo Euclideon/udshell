@@ -1,5 +1,5 @@
-#include "components/logger.h"
 #include "components/stream.h"
+
 #include <time.h>
 
 namespace ud
