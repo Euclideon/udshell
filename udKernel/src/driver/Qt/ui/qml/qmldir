@@ -1,0 +1,3 @@
+module udKernel
+SplashScreen 0.1 splashscreen.qml
+Viewport 0.1 viewport.qml

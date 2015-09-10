@@ -13,6 +13,9 @@
 #include "components/timer.h"
 #include "components/scene.h"
 #include "components/view.h"
+#include "components/ui.h"
+#include "components/viewport.h"
+#include "components/window.h"
 #include "components/datasource.h"
 #include "components/nodes/node.h"
 #include "components/nodes/camera.h"
@@ -36,6 +39,9 @@
 
 namespace ud
 {
+void udRenderScene_Init(Kernel*);
+void udRenderScene_InitRender(Kernel*);
+
 
 udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
@@ -63,6 +69,8 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Viewport>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Window>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<View>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Scene>());
 
@@ -90,17 +98,10 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<GeomSource>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UDDataSource>());
 
-  //...
-
   // init the HAL
   UD_ERROR_CHECK(udHAL_Init());
 
-  // platform init
-  UD_ERROR_CHECK(pKernel->InitInstanceInternal());
-
-  // init the components
-  UD_ERROR_CHECK(pKernel->InitComponents());
-
+  // create internal stuff
   pKernel->spLua = pKernel->CreateComponent<Lua>();
 
   pKernel->spLogger = pKernel->CreateComponent<Logger>();
@@ -109,11 +110,8 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   pKernel->spLogger->AddStream(spDebugFile, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
   pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script, 5, LogDefaults::Format);
 
-  pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
-  pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
-
-  pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
-  pKernel->spUpdateTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
+  // platform init
+  UD_ERROR_CHECK(pKernel->InitInstanceInternal());
 
 epilogue:
   if (result != udR_Success)
@@ -123,6 +121,29 @@ epilogue:
   *ppInstance = pKernel;
   return result;
 }
+
+void Kernel::DoInit(Kernel *pKernel)
+{
+  // init the components
+  if (pKernel->InitComponents() != udR_Success)
+  {
+    UDASSERT(false, "Oh no! Can't boot!");
+    return;
+  }
+
+  udRenderScene_Init(pKernel);
+  udRenderScene_InitRender(pKernel);
+
+  pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
+  pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
+
+  pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
+  pKernel->spUpdateTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
+
+  // call application init
+  SendMessage("$init", "#", "init", nullptr);
+}
+
 
 udResult Kernel::Destroy()
 {
@@ -219,7 +240,7 @@ udResult Kernel::SendMessage(udString target, udString sender, udString message,
   else if (targetType == '$')
   {
     // registered message
-    MessageHandler *pHandler = messageHandlers.Get(target.hash());
+    MessageCallback *pHandler = messageHandlers.Get(target.hash());
     if (pHandler)
     {
       pHandler->callback(sender, message, data);
@@ -238,9 +259,9 @@ udResult Kernel::ReceiveMessage(udString sender, udString message, const udVaria
   return udR_Success;
 }
 
-void Kernel::RegisterMessageHandler(udSharedString name, udMessageHandler messageHandler)
+void Kernel::RegisterMessageHandler(udSharedString name, MessageHandler messageHandler)
 {
-  MessageHandler handler;
+  MessageCallback handler;
   handler.name = name;
   handler.callback = messageHandler;
   messageHandlers.Add(name.hash(), handler);
@@ -356,13 +377,9 @@ udResult Kernel::InitComponents()
   return r;
 }
 
-void udRenderScene_InitRender();
-
 udResult Kernel::InitRender()
 {
   udHAL_InitRender();
-
-  udRenderScene_InitRender();
 
   return udR_Success;
 }

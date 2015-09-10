@@ -34,11 +34,6 @@ udResult Kernel::InitInstanceInternal()
 
   SDL_GL_CreateContext(s_window);
 
-  return InitRenderInternal();
-}
-
-udResult Kernel::InitRenderInternal()
-{
   return InitRender();
 }
 
@@ -60,12 +55,6 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
   spFocusView->Resize(s_displayWidth, s_displayHeight);
   return spOld;
 }
-
-udResult Kernel::FormatMainWindow(UIComponentRef spUIComponent)
-{
-  return udR_Success;
-}
-
 
 struct DelegateWithSemaphore
 {

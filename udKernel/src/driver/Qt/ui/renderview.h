@@ -24,6 +24,8 @@ public:
 
   Renderer *createRenderer() const;
 
+  void AttachView(ud::ViewRef spView);
+
 private:
   ud::ViewRef spView;
   bool dirty;
@@ -47,8 +49,8 @@ private:
 private slots:
   void OnResize()
   {
-    ud::ViewRef spView = s_pKernel->GetFocusView();
-    spView->Resize(width(), height());
+    if (spView)
+      spView->Resize(width(), height());
   }
 
   void OnFrameReady()

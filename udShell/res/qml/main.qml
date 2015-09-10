@@ -3,13 +3,18 @@ import QtQuick.Controls 1.3
 import udKernel 0.1
 
 Item {
-  id: desktopwindow
-  width: 640
-  height: 480
+  id: main
+  //title: "udShell"
+  //width: 640
+  //height: 480
 
-  RenderView {
-    id: viewport
+  //RenderView {
+//    id: viewport
+    //anchors.fill: parent
+    //anchors.margins: 10
+  //}
+  Rectangle {
+    color: "red"
     anchors.fill: parent
-    anchors.margins: 10
   }
 }
