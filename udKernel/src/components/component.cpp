@@ -130,9 +130,15 @@ void Component::SetProperty(udString property, const udVariant &value)
 {
   const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
-    return; // TODO: make noise "no property"
+  {
+    LogWarning(2, "No property '{0}' for component '{1}'", property, name.empty() ? uid : name);
+    return;
+  }
   if (!pDesc->setter || pDesc->info.flags & udPF_Immutable)
-    return; // TODO: make noise "not writable"
+  {
+    LogWarning(2, "Property '{0}' for component '{1}' is read-only", property, name.empty() ? uid : name);
+    return;
+  }
   pDesc->setter->set(this, value);
 //  propertyChange[pDesc->index].Signal();
 }
@@ -141,9 +147,15 @@ udVariant Component::GetProperty(udString property) const
 {
   const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
-    return udVariant(); // TODO: make noise "no property"
+  {
+    LogWarning(2, "No property '{0}' for component '{1}'", property, name.empty() ? uid : name);
+    return udVariant();
+  }
   if (!pDesc->getter)
-    return udVariant(); // TODO: make noise "not readable"
+  {
+    LogWarning(2, "Property '{0}' for component '{1}' is write-only", property, name.empty() ? uid : name);
+    return udVariant();
+  }
   return pDesc->getter->get(this);
 }
 
@@ -184,12 +196,9 @@ udResult Component::SendMessage(udString target, udString message, const udVaria
   return pKernel->SendMessage(target, uid, message, data);
 }
 
-void Component::LogError(udString text) const { pKernel->LogError(text, uid); }
-void Component::LogWarning(int level, udString text) const { pKernel->LogWarning(level, text, uid); }
-void Component::LogDebug(int level, udString text) const { pKernel->LogDebug(level, text, uid); }
-void Component::LogInfo(int level, udString text) const { pKernel->LogInfo(level, text, uid); }
-void Component::LogScript(udString text) const { pKernel->LogScript(text, uid); }
-void Component::LogTrace(udString text) const { pKernel->LogTrace(text, uid); }
-void Component::Log(udString text) const { pKernel->Log(text, uid); }
+void Component::LogInternal(int level, udString text, int category, udString componentUID) const
+{
+  pKernel->GetLogger()->Log(level, text, (LogCategories)category, componentUID);
+}
 
 } // namespace ud
