@@ -113,7 +113,10 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
 
   spDebugFile = pKernel->CreateComponent<File>({ { "path", "udKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create } });
   if (spDebugFile)
-     pKernel->spLogger->AddStream(spDebugFile, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
+  {
+    pKernel->spLogger->AddStream(spDebugFile, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
+    spDebugFile->WriteLn("\n*** Logging started ***");
+  }
 
   spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
   if (spConsole)
