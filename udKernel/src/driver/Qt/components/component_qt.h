@@ -20,6 +20,8 @@ public:
   QtComponent(ud::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) {}
   QtComponent(const QtComponent &val) : QObject(nullptr), spComponent(val.spComponent) {}
 
+  ud::ComponentRef GetComponent() const { return spComponent; }
+
   // methods to inspet internals
   //..
 

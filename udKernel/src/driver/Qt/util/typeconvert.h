@@ -76,6 +76,20 @@ inline udVariant udToVariant(const QVariant &var)
     case QMetaType::QChar:
       return udVariant(AllocUDStringFromQString(var.toString()), true);
 
+    case QMetaType::QObjectStar:
+    {
+      QObject *pQObj = var.value<QObject*>();
+
+      qt::QtComponent *pQC = qobject_cast<qt::QtComponent*>(pQObj);
+      if (pQC)
+        return udVariant(pQC->GetComponent());
+
+      udDebugPrintf("udToVariant: Unsupported QObject conversion '%s'", pQObj->metaObject()->className());
+
+      // TODO: create generic QtComponent which thinly wraps a QObject
+      return udVariant();
+    }
+
     // TODO: serialize other types?
 
     // udVariant::Type::Array
