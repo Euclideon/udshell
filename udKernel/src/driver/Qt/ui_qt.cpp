@@ -171,7 +171,15 @@ void Window::SetTopLevelUI(UIComponentRef spUIComponent)
 
   spTopLevelUI = spUIComponent;
   QQuickWindow *pQtWindow = (QQuickWindow*)pInternal;
-  reinterpret_cast<QQuickItem*>(spUIComponent->GetInternalData())->setParentItem(pQtWindow->contentItem());
+
+  // if there's an existing top level ui, then detach
+  foreach(QQuickItem *pChild, pQtWindow->contentItem()->childItems())
+    pChild->setParentItem(nullptr);
+
+  // set the new one
+  QQuickItem *pQtItem = reinterpret_cast<QQuickItem*>(spUIComponent->GetInternalData());
+  if (pQtItem)
+    pQtItem->setParentItem(pQtWindow->contentItem());
 }
 
 } // namespace ud

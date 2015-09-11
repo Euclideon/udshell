@@ -5,7 +5,7 @@ namespace ud
 
 ComponentDesc Viewport::descriptor =
 {
-  &Component::descriptor, // pSuperDesc
+  &UIComponent::descriptor, // pSuperDesc
 
   UDSHELL_APIVERSION,     // udVersion
   UDSHELL_PLUGINVERSION,  // pluginVersion
