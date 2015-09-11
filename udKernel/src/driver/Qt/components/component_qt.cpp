@@ -9,7 +9,7 @@
 namespace qt
 {
 
-QVariant QtComponent::Get(QString name) const
+QVariant QUDComponent::Get(QString name) const
 {
   QByteArray byteArray = name.toUtf8();
   udString prop(byteArray.data(), byteArray.size());
@@ -18,14 +18,14 @@ QVariant QtComponent::Get(QString name) const
   udFromVariant(spComponent->GetProperty(prop), &res);
   return res;
 }
-void QtComponent::Set(QString name, QVariant val)
+void QUDComponent::Set(QString name, QVariant val)
 {
   QByteArray byteArray = name.toUtf8();
   udString prop(byteArray.data(), byteArray.size());
   spComponent->SetProperty(prop, udToVariant(val));
 }
 
-QVariant QtComponent::Call(QString name, QVariantList args) const
+QVariant QUDComponent::Call(QString name, QVariantList args) const
 {
   QByteArray byteArray = name.toUtf8();
   udString method(byteArray.data(), byteArray.size());
@@ -39,7 +39,7 @@ QVariant QtComponent::Call(QString name, QVariantList args) const
   return res;
 }
 
-void QtComponent::Subscribe(QString eventName, QJSValue func) const
+void QUDComponent::Subscribe(QString eventName, QJSValue func) const
 {
   UDASSERT(func.isCallable(), "!");
 

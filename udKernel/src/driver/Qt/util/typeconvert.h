@@ -80,13 +80,14 @@ inline udVariant udToVariant(const QVariant &var)
     {
       QObject *pQObj = var.value<QObject*>();
 
-      qt::QtComponent *pQC = qobject_cast<qt::QtComponent*>(pQObj);
+      qt::QUDComponent *pQC = qobject_cast<qt::QUDComponent*>(pQObj);
       if (pQC)
         return udVariant(pQC->GetComponent());
 
       udDebugPrintf("udToVariant: Unsupported QObject conversion '%s'", pQObj->metaObject()->className());
 
       // TODO: create generic QtComponent which thinly wraps a QObject
+//      pKernel->CreateComponent<QtComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
       return udVariant();
     }
 
@@ -125,7 +126,7 @@ inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
       break;
 
     case udVariant::Type::Component:
-      pVariant->setValue(qt::QtComponent(variant.asComponent()));
+      pVariant->setValue(qt::QUDComponent(variant.asComponent()));
       break;
 
     //case udVariant::Type::Delegate:

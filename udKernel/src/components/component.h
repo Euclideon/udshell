@@ -15,8 +15,8 @@
 
 
 #define UD_COMPONENT(Name) \
-  friend class Kernel; \
-  static ComponentDesc descriptor; \
+  friend class ud::Kernel; \
+  static ud::ComponentDesc descriptor; \
   typedef udSharedPtr<Name> Ref;
 
 namespace ud

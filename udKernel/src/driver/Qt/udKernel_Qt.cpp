@@ -8,6 +8,7 @@
 
 #include "ui/renderview.h"
 #include "ui/window_qt.h"
+#include "components/qtcomponent_qt.h"
 
 // Init the kernel's qrc file resources - this has to happen from the global namespace
 inline void InitResources() { Q_INIT_RESOURCE(kernel); }
@@ -78,6 +79,8 @@ udResult QtKernel::Init()
 {
   LogTrace("QtKernel::Init()");
   LogInfo(2, "Initialising udShell...");
+
+  RegisterComponent<QtComponent>();
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(argc >= 1, "argc must contain at least 1");

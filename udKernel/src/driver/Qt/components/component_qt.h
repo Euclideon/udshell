@@ -11,14 +11,14 @@
 namespace qt
 {
 
-class QtComponent : public QObject
+class QUDComponent : public QObject
 {
   Q_OBJECT
 
 public:
-  QtComponent() : QObject(nullptr) {}
-  QtComponent(ud::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) {}
-  QtComponent(const QtComponent &val) : QObject(nullptr), spComponent(val.spComponent) {}
+  QUDComponent() : QObject(nullptr) {}
+  QUDComponent(ud::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) {}
+  QUDComponent(const QUDComponent &val) : QObject(nullptr), spComponent(val.spComponent) {}
 
   ud::ComponentRef GetComponent() const { return spComponent; }
 
@@ -37,6 +37,6 @@ private:
 
 } // namespace qt
 
-Q_DECLARE_METATYPE(qt::QtComponent);
+Q_DECLARE_METATYPE(qt::QUDComponent);
 
 #endif // UD_COMPONENT_QT_H
