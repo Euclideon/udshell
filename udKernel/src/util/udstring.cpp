@@ -69,6 +69,9 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, const char *s)
 {
   // TODO: what formats are interesting for strings?
 
+  if (!s)
+    return 0;
+
   if (!buffer.ptr)
     return strlen(s);
 

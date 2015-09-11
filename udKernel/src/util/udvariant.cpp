@@ -390,8 +390,21 @@ udVariant udVariant::luaGet(ud::LuaState &l, int idx)
       return l.toDelegate(idx);
     case ud::LuaType::UserData:
     {
-      // find out if is component...
-      UDASSERT(false, "TODO!");
+      lua_State *L = l.state();
+      if (lua_getmetatable(L, idx) == 0)
+        luaL_error(L, "attempt to get 'userdata: %p' as a Component", lua_topointer(L, idx));
+
+      lua_getfield(L, -1, "__udtype"); // must be a Component
+      const char *type = lua_tostring(L, -1);
+      lua_pop(L, 1);
+
+      udVariant v;
+      if (!strcmp(type, "component"))
+        return udVariant(l.toComponent(idx));
+      else if (!strcmp(type, "delegate"))
+        return udVariant(l.toDelegate(idx));
+//      else if (!strcmp(type, "event"))
+//        return udVariant(l.toEvent(idx));
       return udVariant();
     }
     case ud::LuaType::Table:
@@ -401,7 +414,8 @@ udVariant udVariant::luaGet(ud::LuaState &l, int idx)
       int pos = idx < 0 ? idx-1 : idx;
 
       // work out how many items are in the table
-      // HACK: we are doing a brute-force count! this should be replaced with better stuff
+      // HACK: we are doing a brute-force count!
+      // TODO: this should be replaced with better stuff
       size_t numElements = 0;
       l.pushNil();  // first key
       while (lua_next(L, pos) != 0)

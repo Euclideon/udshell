@@ -6,6 +6,8 @@
 #include <QVariant>
 #include <QMetaType>
 
+#include "../components/component_qt.h"
+
 #include "util/udvariant.h"
 
 // Qt type conversion to/from UD
@@ -108,7 +110,9 @@ inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
       pVariant->setValue(variant.asFloat());
       break;
 
-    //case udVariant::Type::Component:
+    case udVariant::Type::Component:
+      pVariant->setValue(qt::QtComponent(variant.asComponent()));
+      break;
 
     //case udVariant::Type::Delegate:
 

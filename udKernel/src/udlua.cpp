@@ -295,6 +295,10 @@ void LuaState::pushComponentMetatable(const ComponentDesc &desc)
   if (luaL_newmetatable(L, desc.id.ptr) == 0)
     return;
 
+  // record the logical type
+  pushString("component");
+  lua_setfield(L, -2, "__udtype");
+
   // record the type
   pushString(desc.id);
   lua_setfield(L, -2, "__type");
@@ -396,13 +400,12 @@ static void verifyComponentType(lua_State* L, int idx)
 /*
   // TODO: this should actually check that types are supported!
   lua_getfield(L, -1, "__type"); // must be a Component
-  auto type = lua_tostring(L, -1);
+  const char *type = lua_tostring(L, -1);
 
   // find type in the descriptor hierarchy
 
   luaL_error(L, `attempt to get instance %s as type "%s"`, cname, T.stringof.ptr);
 */
-
   lua_pop(L, 1);
 }
 ComponentRef LuaState::toComponent(int idx)
@@ -692,6 +695,10 @@ void LuaState::pushDelegateMetatable()
   if (luaL_newmetatable(L, "udVariant::VarDelegate") == 0)
     return;
 
+  // record the logical type
+  pushString("delegate");
+  lua_setfield(L, -2, "__udtype");
+
   // record the type
   pushString("udVariant::VarDelegate");
   lua_setfield(L, -2, "__type");
@@ -816,6 +823,10 @@ void LuaState::pushEventMetatable()
 {
   if (luaL_newmetatable(L, "udLuaEvent") == 0)
     return;
+
+  // record the logical type
+  pushString("event");
+  lua_setfield(L, -2, "__udtype");
 
   // record the type
   pushString("udLuaEvent");
