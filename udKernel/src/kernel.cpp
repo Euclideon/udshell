@@ -398,7 +398,7 @@ udResult Kernel::InitComponents()
   {
     if (i.pDesc->pInit)
     {
-      r = i.pDesc->pInit();
+      r = i.pDesc->pInit(this);
       if (r != udR_Success)
         break;
     }
@@ -434,6 +434,30 @@ void Kernel::LogScript(udString text, udString componentUID) { spLogger->Log(Log
 void Kernel::LogTrace(udString text, udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, componentUID); }
 // Calls LogDebug() with level 2
 void Kernel::Log(udString text, const udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, componentUID); }
+
+udResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const udSlice<const udString> exts)
+{
+  for (const udString &e : exts)
+  {
+    extensionsRegistry.Insert(e, pDesc);
+  }
+
+  return udR_Success;
+}
+
+DataSourceRef Kernel::CreateDataSourceFromExtension(udString ext, udInitParams initParams)
+{
+  const ComponentDesc **pDesc = extensionsRegistry.Get(ext);
+  if (!pDesc)
+    return nullptr;
+
+  ComponentRef spNewDataSource = nullptr;
+  udResult r = CreateComponent((*pDesc)->id, initParams, &spNewDataSource);
+  if (r != udR_Success)
+    return nullptr;
+
+  return shared_pointer_cast<DataSource>(spNewDataSource);
+}
 
 } // namespace ud
 

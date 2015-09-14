@@ -84,6 +84,9 @@ public:
   void LogTrace(const udString text, const udString componentUID = nullptr);
   void Log(const udString text, const udString componentUID = nullptr);
 
+  udResult RegisterExtensions(const ComponentDesc *pDesc, const udSlice<const udString> exts);
+  DataSourceRef CreateDataSourceFromExtension(udString ext, udInitParams initParams);
+
   udResult RunMainLoop();
   udResult Terminate();
 
@@ -141,6 +144,15 @@ protected:
 
   template<typename CT>
   static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+
+  struct ExtensionsCompare
+  {
+    UDFORCE_INLINE ptrdiff_t operator()(const udString &a, const udString &b)
+    {
+      return a.cmp(b);
+    }
+  };
+  udAVLTree<udString, const ComponentDesc *, ExtensionsCompare> extensionsRegistry;
 };
 
 template<typename T>

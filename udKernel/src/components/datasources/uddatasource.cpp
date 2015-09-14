@@ -2,9 +2,11 @@
 #include "components/resources/udmodel.h"
 #include "components/resources/metadata.h"
 #include "udOctree.h"
+#include "kernel.h"
 
 namespace ud
 {
+const udFixedSlice<const udString> UDDataSource::extensions = { ".uds", ".ssf", ".upc", ".udi", ".oct3" };
 
 ComponentDesc UDDataSource::descriptor =
 {
@@ -16,6 +18,12 @@ ComponentDesc UDDataSource::descriptor =
   "UDDataSource", // id
   "UDData Source", // displayName
   "Provides UD Data", // description
+
+  nullptr,            // properties
+  nullptr,            // methods
+  nullptr,            // events
+  nullptr,            // static functions
+  &RegisterExtensions // init
 };
 
 UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
@@ -54,6 +62,11 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udShared
       }
     }
   }
+}
+
+udResult UDDataSource::RegisterExtensions(Kernel *pKernel)
+{
+  return pKernel->RegisterExtensions(&descriptor, extensions);
 }
 
 } // namespace ud

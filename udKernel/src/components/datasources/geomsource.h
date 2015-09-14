@@ -25,34 +25,14 @@ public:
 
   udSlice<const udString> GetFileExtensions() const override
   {
-    return {
-      // mesh formats
-      ".fbx", // Autodesk FBX
-      ".dae", // Collada
-      ".blend", // Blender 3D
-      ".3ds", // 3DS Max 3DS
-      ".ase", // 3DS Max ASE
-      ".obj", // Wavefront Object
-      ".ifc", // Industry Foundation Classes(IFC/Step)
-      ".xgl", ".zgl", // XGL
-      ".ply", // Stanford Polygon Library
-      ".dxf", // AutoCAD DXF (*limited)
-      ".lwo", // LightWave
-      ".lws", // LightWave Scene
-      ".lxo", // Modo
-      ".stl", // Stereolithography
-      ".x", // DirectX X
-      ".ac", // AC3D
-      ".ms3d", // Milkshape 3D
-      ".cob", ".scn", //TrueSpace (*limited)
-
-      // mocap formats
-      ".bvh", // Biovision BVH
-      ".csm", // CharacterStudio Motion (*limited)
-    };
+    return extensions;
   }
 
 protected:
+  static const udFixedSlice<const udString> extensions;
+
+  static udResult RegisterExtensions(Kernel *pKernel);
+
   GeomSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {}
