@@ -35,9 +35,11 @@ protected:
 
   GeomSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)
-  {}
+  {
+    Create(OpenStream(initParams["src"]));
+  }
 
-  void Create(StreamRef spSource) override;
+  void Create(StreamRef spSource);
 
   NodeRef ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth = 0);
 };

@@ -29,7 +29,7 @@ ComponentDesc UDDataSource::descriptor =
 UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : DataSource(pType, pKernel, uid, initParams)
 {
-  const udVariant &source = initParams["source"];
+  const udVariant &source = initParams["src"];
 
   if (source.is(udVariant::Type::String))
   {

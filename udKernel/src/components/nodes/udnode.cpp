@@ -144,7 +144,7 @@ int UDNode::Load(udString name, bool useStreamer)
   udResult result = udR_Failure_;
   if (source.empty())
   {
-    UDDataSourceRef udSource = pKernel->CreateComponent<UDDataSource>({ { "source", name }, {"useStreamer", useStreamer } });
+    UDDataSourceRef udSource = pKernel->CreateComponent<UDDataSource>({ { "src", name }, {"useStreamer", useStreamer } });
     if (udSource)
     {
       spModel = udSource->GetResource<UDModel>(name);
