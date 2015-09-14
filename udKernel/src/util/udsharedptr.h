@@ -302,7 +302,7 @@ inline udRefCounted::~udRefCounted() {}
 
 // cast functions
 template<class T, class U>
-inline udSharedPtr<T> static_pointer_cast(const udSharedPtr<U> &ptr)
+inline udSharedPtr<T> shared_pointer_cast(const udSharedPtr<U> &ptr)
 {
   return udSharedPtr<T>((T*)ptr.ptr());
 }

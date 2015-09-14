@@ -143,7 +143,7 @@ udSharedPtr<T> Kernel::CreateComponent(udInitParams initParams)
   udResult r = CreateComponent(T::descriptor.id, initParams, &c);
   if (r != udR_Success)
     return nullptr;
-  return static_pointer_cast<T>(c);
+  return shared_pointer_cast<T>(c);
 }
 
 } //namespace ud

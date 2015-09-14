@@ -81,7 +81,7 @@ public:
   template<typename ResType = Resource>
   ResourceRef Get(size_t resourceIndex) const
   {
-    return static_pointer_cast<ResType>(GetResource(ResType::Name(), resourceIndex));
+    return shared_pointer_cast<ResType>(GetResource(ResType::Name(), resourceIndex));
   }
 
   // HACK: this should be private!!
