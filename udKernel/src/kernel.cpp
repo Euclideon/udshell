@@ -22,6 +22,7 @@
 #include "components/nodes/geomnode.h"
 #include "components/nodes/udnode.h"
 #include "components/resourcemanager.h"
+#include "components/project.h"
 #include "components/resources/resource.h"
 #include "components/resources/buffer.h"
 #include "components/resources/array.h"
@@ -68,6 +69,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<MemStream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<ResourceManager>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Project>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
