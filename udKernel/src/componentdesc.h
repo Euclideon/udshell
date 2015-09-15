@@ -391,6 +391,7 @@ struct ComponentDesc
   udAVLTree<udString, EventDesc> eventTree;
   udAVLTree<udString, StaticFuncDesc> staticFuncTree;
 
+  StaticFunc *ComponentDesc::GetStaticFunc(udString id) const;
 
   void BuildSearchTrees();
   void InitProps();

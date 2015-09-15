@@ -73,4 +73,21 @@ void ComponentDesc::BuildSearchTrees()
   InitStaticFuncs();
 }
 
+StaticFunc *ComponentDesc::GetStaticFunc(udString id) const
+{
+  const StaticFuncDesc *pFuncDesc;
+  const ComponentDesc *pCompDesc = this;
+
+  while(pCompDesc)
+  {
+    pFuncDesc = pCompDesc->staticFuncTree.Get(id);
+    if (pFuncDesc)
+      return pFuncDesc->staticFunc;
+
+    pCompDesc = pCompDesc->pSuperDesc;
+  }
+
+  return nullptr;
+}
+
 } // namespace ud
