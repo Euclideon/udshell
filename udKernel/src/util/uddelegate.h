@@ -52,7 +52,7 @@ public:
   udDelegate(Y *i, R(X::*f)(Args...) const)     : udDelegate(Delegate(i, f)) {}
   udDelegate(R(*f)(Args...))                    : udDelegate(Delegate(f)) {}
 
-  operator bool () { return m ? !m->m.empty() : false; }
+  explicit operator bool () { return m ? !m->m.empty() : false; }
 
   udDelegate& operator=(const udDelegate &d)
   {

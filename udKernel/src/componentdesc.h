@@ -38,7 +38,7 @@ class Getter
 public:
   Getter(nullptr_t) : shim(nullptr) {}
 
-  operator bool() const { return shim != nullptr; }
+  explicit operator bool() const { return shim != nullptr; }
 
   udVariant get(const ud::Component *pThis) const
   {
@@ -56,7 +56,7 @@ class Setter
 public:
   Setter(nullptr_t) : shim(nullptr) {}
 
-  operator bool() const { return shim != nullptr; }
+  explicit operator bool() const { return shim != nullptr; }
 
   void set(ud::Component *pThis, const udVariant &value) const
   {
@@ -74,7 +74,7 @@ class Method
 public:
   Method(nullptr_t) : shim(nullptr) {}
 
-  operator bool() const { return shim != nullptr; }
+  explicit operator bool() const { return shim != nullptr; }
 
   udVariant call(ud::Component *pThis, udSlice<udVariant> args) const
   {
@@ -92,7 +92,7 @@ class StaticFunc
 public:
   StaticFunc(nullptr_t) : shim(nullptr) {}
 
-  operator bool() const { return shim != nullptr; }
+  explicit operator bool() const { return shim != nullptr; }
 
   udVariant call(udSlice<udVariant> args) const
   {
@@ -110,7 +110,7 @@ class VarEvent
 public:
   VarEvent(nullptr_t) : pSubscribe(nullptr) {}
 
-  operator bool() const { return pSubscribe != nullptr; }
+  explicit operator bool() const { return pSubscribe != nullptr; }
 
   void subscribe(const ud::ComponentRef &c, const udVariant::VarDelegate &d)
   {

@@ -68,7 +68,7 @@ public:
       QObject::disconnect(connection);
   }
 
-  operator bool() { return connection; }
+  explicit operator bool() { return connection; }
 
 private:
   QMetaMethod lookupSignalHandler(const QMetaMethod &m)
