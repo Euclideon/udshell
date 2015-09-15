@@ -3,7 +3,7 @@ luaPath = "lua-5.3.1"
 
 project(luaPath)
   kind "StaticLib"
-  language "C++"
+  language "C"
   flags { "StaticRuntime", "OmitDefaultLibrary" }
 
   files { luaPath .. "/src/**" }

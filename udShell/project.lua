@@ -22,7 +22,7 @@ project "udShell"
 	qtmodules { "core", "qml", "quick", "gui" }
 	qtprefix "Qt5"
 	pic "on"
-	configuration { "Debug or DebugOpt" }
+	configuration { "windows", "Debug or DebugOpt" }
 		qtsuffix "d"
 
 	configuration { "windows" }
