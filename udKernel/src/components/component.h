@@ -223,7 +223,7 @@ inline udSharedPtr<T> component_cast(ComponentRef pComponent)
   while (pDesc)
   {
     if (pDesc->id.eq(T::descriptor.id))
-      return static_pointer_cast<T>(pComponent);
+      return shared_pointer_cast<T>(pComponent);
     pDesc = pDesc->pSuperDesc;
   }
   return nullptr;
