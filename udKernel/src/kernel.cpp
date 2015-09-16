@@ -104,11 +104,16 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   // create internal stuff
   pKernel->spLua = pKernel->CreateComponent<Lua>();
 
+  // create logger and default streams
   pKernel->spLogger = pKernel->CreateComponent<Logger>();
+
   spDebugFile = pKernel->CreateComponent<File>({ { "path", "udKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create } });
+  if (spDebugFile)
+     pKernel->spLogger->AddStream(spDebugFile, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
+
   spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
-  pKernel->spLogger->AddStream(spDebugFile, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
-  pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script, 5, LogDefaults::Format);
+  if (spConsole)
+     pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script, 5, LogDefaults::Format);
 
   // platform init
   UD_ERROR_CHECK(pKernel->InitInstanceInternal());
