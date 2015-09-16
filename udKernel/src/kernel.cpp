@@ -206,6 +206,30 @@ void Kernel::StreamerUpdate()
   udOctree_Update(&streamerStatus);
 }
 
+udFixedSlice<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase)
+{
+  udFixedSlice<const ComponentDesc *> derivedDescs;
+
+  for (ComponentType &ct : componentRegistry)
+  {
+    const ComponentDesc *pDesc = ct.pDesc;
+    if(!bIncludeBase)
+      pDesc = pDesc->pSuperDesc;
+
+    while (pDesc)
+    {
+      if (pDesc == pBase)
+      {
+        derivedDescs.concat(ct.pDesc);
+        break;
+      }
+      pDesc = pDesc->pSuperDesc;
+    }
+  }
+
+  return derivedDescs;
+}
+
 udResult Kernel::SendMessage(udString target, udString sender, udString message, const udVariant &data)
 {
   if (target.empty())

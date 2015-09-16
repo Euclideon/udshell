@@ -49,6 +49,13 @@ public:
   template<typename ComponentType>
   udResult RegisterComponent();
 
+  template<typename CT>
+  udFixedSlice<const ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase)
+  {
+    return GetDerivedComponentDescs(&CT::descriptor, bIncludeBase);
+  }
+  udFixedSlice<const ComponentDesc *> GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase);
+
   udResult CreateComponent(udString typeId, udInitParams initParams, ComponentRef *pNewInstance);
   udResult DestroyComponent(ComponentRef *pInstance);
 
