@@ -7,8 +7,10 @@
 #include <QMetaType>
 
 #include "../components/component_qt.h"
+#include "../components/qtcomponent_qt.h"
 
 #include "util/udvariant.h"
+
 
 // Qt type conversion to/from UD
 
@@ -28,7 +30,6 @@ inline udVariant udToVariant(const QString &string)
 {
   return udVariant(AllocUDStringFromQString(string), true);
 }
-
 inline void udFromVariant(const udVariant &variant, QString *pString)
 {
   udString s = variant.asString();
@@ -38,7 +39,7 @@ inline void udFromVariant(const udVariant &variant, QString *pString)
 
 inline udVariant udToVariant(const QVariant &var)
 {
-  if (var.isNull())
+  if (!var.isValid() || var.isNull())
     return udVariant();
 
   switch (static_cast<QMetaType::Type>(var.type()))
@@ -80,13 +81,14 @@ inline udVariant udToVariant(const QVariant &var)
     {
       QObject *pQObj = var.value<QObject*>();
 
-      qt::QtComponent *pQC = qobject_cast<qt::QtComponent*>(pQObj);
+      qt::QtUDComponent *pQC = qobject_cast<qt::QtUDComponent*>(pQObj);
       if (pQC)
         return udVariant(pQC->GetComponent());
 
       udDebugPrintf("udToVariant: Unsupported QObject conversion '%s'", pQObj->metaObject()->className());
 
       // TODO: create generic QtComponent which thinly wraps a QObject
+//      pKernel->CreateComponent<QtComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
       return udVariant();
     }
 
@@ -101,7 +103,6 @@ inline udVariant udToVariant(const QVariant &var)
       return udVariant();
   };
 }
-
 inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
 {
   UDASSERT(pVariant->isNull(), "pVariant is not null");
@@ -125,7 +126,7 @@ inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
       break;
 
     case udVariant::Type::Component:
-      pVariant->setValue(qt::QtComponent(variant.asComponent()));
+      pVariant->setValue(qt::QtUDComponent(variant.asComponent()));
       break;
 
     //case udVariant::Type::Delegate:
@@ -140,7 +141,7 @@ inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
     //case udVariant::Type::AssocArray:
 
     default:
-      udDebugPrintf("udToVariant: Unsupported type '%d'\n", variant.type());
+      udDebugPrintf("udFromVariant: Unsupported type '%d'\n", variant.type());
   };
 }
 

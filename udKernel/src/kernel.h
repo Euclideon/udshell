@@ -153,6 +153,19 @@ udSharedPtr<T> Kernel::CreateComponent(udInitParams initParams)
   return shared_pointer_cast<T>(c);
 }
 
+template<typename CT>
+Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+{
+  return udNew(CT, pType, pKernel, uid, initParams);
+}
+template<typename CT>
+udResult Kernel::RegisterComponent()
+{
+  if (!CT::descriptor.pCreateInstance)
+    CT::descriptor.pCreateInstance = &NewComponent<CT>;
+  return RegisterComponentType(&CT::descriptor);
+}
+
 } //namespace ud
 
 #endif // UDKERNEL_H

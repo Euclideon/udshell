@@ -77,67 +77,42 @@ protected:
     // TODO: error output??
     UDASSERT(value.length <= 10, "Attempting to call method shim with more than 10 arguments");
 
-    // TODO: Do something less ugly - list of QGenericArguments?
     // TODO: check value length against function arg length minus default args amount - need to parse the signature to get the default arg list?
-    QVariant retVal;
-    switch (value.length)
+
+    char qargs[sizeof(QtUDComponent)*10];
+    QtUDComponent *pQObjStack = (QtUDComponent*)qargs;
+
+    QVariant vargs[10];
+    QGenericArgument args[10];
+    for (int i = 0; i<10; ++i)
     {
-      case 0:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal));
-        break;
-      case 1:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()));
-        break;
-      case 2:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()));
-        break;
-      case 3:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()));
-        break;
-      case 4:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
-          Q_ARG(QVariant, value[3].as<QVariant>()));
-        break;
-      case 5:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
-          Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()));
-        break;
-      case 6:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
-          Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()));
-        break;
-      case 7:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
-          Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()),
-          Q_ARG(QVariant, value[6].as<QVariant>()));
-        break;
-      case 8:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
-          Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()),
-          Q_ARG(QVariant, value[6].as<QVariant>()), Q_ARG(QVariant, value[7].as<QVariant>()));
-        break;
-      case 9:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
-          Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()),
-          Q_ARG(QVariant, value[6].as<QVariant>()), Q_ARG(QVariant, value[7].as<QVariant>()), Q_ARG(QVariant, value[8].as<QVariant>()));
-        break;
-      case 10:
-      default:
-        pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-          Q_ARG(QVariant, value[0].as<QVariant>()), Q_ARG(QVariant, value[1].as<QVariant>()), Q_ARG(QVariant, value[2].as<QVariant>()),
-          Q_ARG(QVariant, value[3].as<QVariant>()), Q_ARG(QVariant, value[4].as<QVariant>()), Q_ARG(QVariant, value[5].as<QVariant>()),
-          Q_ARG(QVariant, value[6].as<QVariant>()), Q_ARG(QVariant, value[7].as<QVariant>()), Q_ARG(QVariant, value[8].as<QVariant>()),
-          Q_ARG(QVariant, value[9].as<QVariant>()));
+      if (i < value.length)
+      {
+        if (value[i].is(udVariant::Type::Component))
+        {
+          ud::ComponentRef spComponent = value[i].asComponent();
+          if (spComponent->IsType("qtcomponent"))
+            vargs[i] = QVariant::fromValue(static_pointer_cast<QtComponent>(spComponent)->GetQObject());
+          else
+          {
+            new(pQObjStack) QtUDComponent(spComponent);
+            vargs[i] = QVariant::fromValue(pQObjStack++);
+          }
+        }
+        else
+          vargs[i] = value[i].as<QVariant>();
+        args[i] = Q_ARG(QVariant, vargs[i]);
+      }
+      else
+        args[i] = ::QGenericArgument();
     }
+
+    QVariant retVal;
+    pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+            args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+
+    while (pQObjStack > (qt::QtUDComponent*)qargs)
+      (--pQObjStack)->~QtUDComponent();
 
     return udVariant(retVal);
   }
