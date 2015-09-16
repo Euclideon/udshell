@@ -186,23 +186,11 @@ struct udVariant_Construct
   }
 };
 
-// T& and T&& constructors
 // These pipe through to `struct udVariant_Construct<>` to facilitate a bunch of partial specialisation madness
-#if defined(_MSC_VER)
 template<typename T>
 UDFORCE_INLINE udVariant::udVariant(T &&rval)
-  : udVariant(udVariant_Construct<typename std::remove_reference<T>::type>::construct(std::move(rval)))
+  : udVariant(udVariant_Construct<typename std::remove_reference<T>::type>::construct(std::forward<T>(rval)))
 {}
-template<typename T>
-UDFORCE_INLINE udVariant::udVariant(T &v)
-  : udVariant(udVariant_Construct<T>::construct(v))
-{}
-#else
-template<typename T>
-UDFORCE_INLINE udVariant::udVariant(const T &v)
-  : udVariant(udVariant_Construct<T>::construct(v))
-{}
-#endif
 
 // specialisation of non-const udVariant, which annoyingly gets hooked by the T& constructor instead of the copy constructor
 template<> struct udVariant_Construct<udVariant>  { UDFORCE_INLINE static udVariant construct(const udVariant &v) { return udVariant(v); } };
