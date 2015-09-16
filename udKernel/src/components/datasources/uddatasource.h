@@ -24,10 +24,14 @@ public:
 
   udSlice<const udString> GetFileExtensions() const override
   {
-    return {".uds", ".ssf", ".upc", ".udi", ".oct3" };
+    return extensions;
   }
 
 protected:
+  static const udFixedSlice<const udString> extensions;
+
+  static udResult RegisterExtensions(Kernel *pKernel);
+
   UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 };
 

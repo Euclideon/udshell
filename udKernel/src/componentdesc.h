@@ -351,7 +351,7 @@ struct CStaticFuncDesc
 enum { UDSHELL_APIVERSION = 100 };
 enum { UDSHELL_PLUGINVERSION = UDSHELL_APIVERSION };
 
-typedef udResult(InitComponent)();
+typedef udResult(InitComponent)(Kernel*);
 typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
 
 struct ComponentDesc

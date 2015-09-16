@@ -18,15 +18,22 @@ public:
 
   udSlice<const udString> GetFileExtensions() const override
   {
-    return{ ".bmp", ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".tga", ".dds", ".webp" };
+    return extensions;
   }
 
 protected:
+  static const udFixedSlice<const udString> extensions;
+
+  static udResult RegisterExtensions(Kernel *pKernel);
+
   ImageSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)
-  {}
+  {
+    StreamRef ref = OpenStream(initParams["src"]);
+    Create(ref);
+  }
 
-  void Create(StreamRef spSource) override;
+  void Create(StreamRef spSource);
 };
 
 } // namespace ud

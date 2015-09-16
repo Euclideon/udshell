@@ -21,6 +21,7 @@
 #include "components/nodes/camera.h"
 #include "components/nodes/geomnode.h"
 #include "components/nodes/udnode.h"
+#include "components/resourcemanager.h"
 #include "components/resources/resource.h"
 #include "components/resources/buffer.h"
 #include "components/resources/array.h"
@@ -66,6 +67,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Console>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<MemStream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<ResourceManager>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
@@ -114,6 +116,9 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
   if (spConsole)
      pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script, 5, LogDefaults::Format);
+
+  // Resource Manager
+  pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
 
   // platform init
   UD_ERROR_CHECK(pKernel->InitInstanceInternal());
@@ -385,7 +390,7 @@ udResult Kernel::InitComponents()
   {
     if (i.pDesc->pInit)
     {
-      r = i.pDesc->pInit();
+      r = i.pDesc->pInit(this);
       if (r != udR_Success)
         break;
     }
@@ -421,6 +426,30 @@ void Kernel::LogScript(udString text, udString componentUID) { spLogger->Log(Log
 void Kernel::LogTrace(udString text, udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, componentUID); }
 // Calls LogDebug() with level 2
 void Kernel::Log(udString text, const udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, componentUID); }
+
+udResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const udSlice<const udString> exts)
+{
+  for (const udString &e : exts)
+  {
+    extensionsRegistry.Insert(e, pDesc);
+  }
+
+  return udR_Success;
+}
+
+DataSourceRef Kernel::CreateDataSourceFromExtension(udString ext, udInitParams initParams)
+{
+  const ComponentDesc **pDesc = extensionsRegistry.Get(ext);
+  if (!pDesc)
+    return nullptr;
+
+  ComponentRef spNewDataSource = nullptr;
+  udResult r = CreateComponent((*pDesc)->id, initParams, &spNewDataSource);
+  if (r != udR_Success)
+    return nullptr;
+
+  return shared_pointer_cast<DataSource>(spNewDataSource);
+}
 
 } // namespace ud
 

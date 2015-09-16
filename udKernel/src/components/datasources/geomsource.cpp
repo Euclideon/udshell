@@ -15,6 +15,31 @@
 
 namespace ud
 {
+const udFixedSlice<const udString> GeomSource::extensions = {
+  // mesh formats
+  ".fbx", // Autodesk FBX
+  ".dae", // Collada
+  ".blend", // Blender 3D
+  ".3ds", // 3DS Max 3DS
+  ".ase", // 3DS Max ASE
+  ".obj", // Wavefront Object
+  ".ifc", // Industry Foundation Classes(IFC/Step)
+  ".xgl", ".zgl", // XGL
+  ".ply", // Stanford Polygon Library
+  ".dxf", // AutoCAD DXF (*limited)
+  ".lwo", // LightWave
+  ".lws", // LightWave Scene
+  ".lxo", // Modo
+  ".stl", // Stereolithography
+  ".x", // DirectX X
+  ".ac", // AC3D
+  ".ms3d", // Milkshape 3D
+  ".cob", ".scn", //TrueSpace (*limited)
+
+  // mocap formats
+  ".bvh", // Biovision BVH
+  ".csm", // CharacterStudio Motion (*limited)
+};
 
 ComponentDesc GeomSource::descriptor =
 {
@@ -26,6 +51,12 @@ ComponentDesc GeomSource::descriptor =
   "geomsource", // id
   "Geometry Source", // displayName
   "Provides polygon geometry", // description
+
+  nullptr,            // properties
+  nullptr,            // methods
+  nullptr,            // events
+  nullptr,            // static functions
+  &RegisterExtensions // init
 };
 
 static inline udString FromAIString(aiString name)
@@ -295,6 +326,11 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   }
 
   return spNode;
+}
+
+udResult GeomSource::RegisterExtensions(Kernel *pKernel)
+{
+  return pKernel->RegisterExtensions(&descriptor, extensions);
 }
 
 } // namespace ud

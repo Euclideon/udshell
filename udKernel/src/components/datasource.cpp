@@ -1,4 +1,8 @@
 #include "components/datasource.h"
+#include "components/file.h"
+#include "components/memstream.h"
+#include "components/stream.h"
+#include "kernel.h"
 
 namespace ud
 {
@@ -61,31 +65,50 @@ ComponentDesc DataSource::descriptor =
   udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
 };
 
-DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
-  : Component(pType, pKernel, uid, initParams)
+StreamRef DataSource::OpenStream(const udVariant &source)
 {
-  const udVariant &source = initParams["source"];
+  ComponentRef spComp = nullptr;
+  StreamRef spSource = nullptr;
 
-//  const udVariant &flags = initParams["flags"];
-//  size_t f = flags.as<size_t>();
+  //  const udVariant &flags = initParams["flags"];
+  //  size_t f = flags.as<size_t>();
 
-  StreamRef spSource;
   if (source.is(udVariant::Type::String))
   {
     // path or url?
-//    pKernel->CreateComponent<File>({ "path", source.toString() });
-
-    // open a file stream...
+    spSource = pKernel->CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
+    if (!spSource)
+    {
+      LogWarning(5, "\"src\" file path not found: {0}", source.asString());
+      throw udR_File_OpenFailure;
+    }
   }
-  else if (source.is(udVariant::Type::Component))
+  else if ((spComp = source.as<ComponentRef>()))
   {
-    // already a stream...
-
-    // binary buffer? (formatted image)   (source is read-only)
-    //   wrap stream around buffer
+    if (spComp->IsType<Stream>())
+    {
+      spSource = shared_pointer_cast<Stream>(spComp);
+    }
+    else if (spComp->IsType<Buffer>())
+    {
+      BufferRef spBuffer = shared_pointer_cast<Buffer>(spComp);
+      spSource = pKernel->CreateComponent<MemStream>({ { "buffer", spBuffer }, { "flags", FileOpenFlags::Read } });
+    }
   }
 
-  Create(spSource);
+  if (!spSource)
+  {
+    LogError("Unknown type for \"src\" init paramater");
+    throw udR_InvalidParameter_;
+  }
+
+  return spSource;
+}
+
+DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  : Component(pType, pKernel, uid, initParams)
+{
+
 }
 
 } // namespace ud

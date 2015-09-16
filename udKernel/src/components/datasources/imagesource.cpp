@@ -5,6 +5,7 @@
 
 namespace ud
 {
+const udFixedSlice<const udString> ImageSource::extensions = { ".bmp", ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".tga", ".dds", ".webp" };
 
 ComponentDesc ImageSource::descriptor =
 {
@@ -16,6 +17,12 @@ ComponentDesc ImageSource::descriptor =
   "imagesource", // id
   "Image Source", // displayName
   "Provides images", // description
+
+  nullptr,            // properties
+  nullptr,            // methods
+  nullptr,            // events
+  nullptr,            // static functions
+  &RegisterExtensions // init
 };
 
 void ImageSource::Create(StreamRef spSource)
@@ -50,6 +57,11 @@ void ImageSource::Create(StreamRef spSource)
     udMutableString64 buffer; buffer.concat("image", i);
     resources.Insert(buffer, spImage);
   }
+}
+
+udResult ImageSource::RegisterExtensions(Kernel *pKernel)
+{
+  return pKernel->RegisterExtensions(&descriptor, extensions);
 }
 
 } // namespace ud
