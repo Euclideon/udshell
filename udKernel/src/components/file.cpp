@@ -69,7 +69,11 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udIn
 
 int File::GetPosixOpenFlags(FileOpenFlags flags) const
 {
+#if UDPLATFORM_WINDOWS
   int posixFlags = O_BINARY;
+#else
+  int posixFlags = 0;
+#endif
 
   if ((flags & FileOpenFlags::Read) && (flags & FileOpenFlags::Write))
   {
