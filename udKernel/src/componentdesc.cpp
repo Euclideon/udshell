@@ -31,6 +31,20 @@ void ComponentDesc::InitMethods()
   }
 }
 
+void ComponentDesc::InitStaticFuncs()
+{
+  ComponentDesc *desc = this;
+  while (desc)
+  {
+    for (auto &m : desc->staticFuncs)
+    {
+      if (!staticFuncTree.Get(m.info.id))
+        staticFuncTree.Insert(m.info.id, { m.info, &m.staticFunc });
+    }
+    desc = desc->pSuperDesc;
+  }
+}
+
 void ComponentDesc::InitEvents()
 {
   ComponentDesc *desc = this;
@@ -56,6 +70,24 @@ void ComponentDesc::BuildSearchTrees()
   InitProps();
   InitMethods();
   InitEvents();
+  InitStaticFuncs();
+}
+
+StaticFunc *ComponentDesc::GetStaticFunc(udString id) const
+{
+  const StaticFuncDesc *pFuncDesc;
+  const ComponentDesc *pCompDesc = this;
+
+  while(pCompDesc)
+  {
+    pFuncDesc = pCompDesc->staticFuncTree.Get(id);
+    if (pFuncDesc)
+      return pFuncDesc->staticFunc;
+
+    pCompDesc = pCompDesc->pSuperDesc;
+  }
+
+  return nullptr;
 }
 
 } // namespace ud

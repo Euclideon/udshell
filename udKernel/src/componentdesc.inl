@@ -111,6 +111,52 @@ struct CMethod::Partial<void, Args...>
   }
 };
 
+// static function stuff
+template <typename Ret, typename... Args>
+inline CStaticFunc::CStaticFunc(Ret(*func)(Args...))
+  : StaticFunc(nullptr)
+{
+  f = func;
+  shim = &Partial<Ret, Args...>::shimFunc;
+}
+
+template<typename Ret, typename... Args>
+template<size_t ...S>
+UDFORCE_INLINE udVariant CStaticFunc::Partial<Ret, Args...>::callFuncHack(udSlice<udVariant> args, Ret (*f)(Args...), Sequence<S...>)
+{
+  return udVariant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+}
+
+template<typename Ret, typename... Args>
+inline udVariant CStaticFunc::Partial<Ret, Args ...>::shimFunc(const StaticFunc * const _pStaticFunc, udSlice<udVariant> value)
+{
+  CStaticFunc *pStaticFunc = (CStaticFunc*)_pStaticFunc;
+
+  auto f = (Ret(*)(Args ...)) pStaticFunc->f;
+
+  return udVariant(callFuncHack(value, f, typename GenSequence<sizeof...(Args)>::type()));
+}
+
+template<typename... Args>
+struct CStaticFunc::Partial < void, Args... >
+{
+  template<size_t ...S>
+  UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, void (*f)(Args...), Sequence<S...>)
+  {
+    f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
+  }
+
+  inline static udVariant shimFunc(const StaticFunc * const _staticFunc, udSlice<udVariant> value)
+  {
+    CStaticFunc *pStaticFunc = (CStaticFunc*)_pStaticFunc;
+
+    auto f = (void(*)(Args ...)) pStaticFunc->f;
+
+    callFuncHack(value, f, typename GenSequence<sizeof...(Args)>::type());
+    return udVariant();
+  }
+};
+
 // event stuff
 template<typename X, typename... Args>
 inline CEvent::CEvent(udEvent<Args...> X::*ev)
