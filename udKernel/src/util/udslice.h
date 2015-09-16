@@ -135,7 +135,6 @@ struct udFixedSlice : public udSlice<T>
   template <typename... Things> udFixedSlice<T, Count>& concat(const Things&... things);
 
   T& pushBack();
-  template <typename U> udFixedSlice<T, Count>& pushBack(const U &item);
   template <typename U> udFixedSlice<T, Count>& pushBack(U &&item);
 
   void remove(size_t i);

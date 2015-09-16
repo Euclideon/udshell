@@ -525,18 +525,10 @@ inline void udFixedSlice<T, Count>::clear()
 
 template <typename T, size_t Count>
 template <typename U>
-inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(const U &item)
-{
-  reserve(this->length + 1);
-  new((void*)&(this->ptr[this->length++])) T(item);
-  return *this;
-}
-template <typename T, size_t Count>
-template <typename U>
 inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(U &&item)
 {
   reserve(this->length + 1);
-  new((void*)&(this->ptr[this->length++])) T(std::move(item));
+  new((void*)&(this->ptr[this->length++])) T(std::forward<U>(item));
   return *this;
 }
 
