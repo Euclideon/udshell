@@ -5,16 +5,12 @@
 #include <QString>
 #include <QVariant>
 #include <QMetaType>
-#include <QQuickItem>
-#include <QQuickWindow>
 
 #include "../components/component_qt.h"
 #include "../components/qtcomponent_qt.h"
 
 #include "util/udvariant.h"
 
-#include "components/window.h"
-#include "components/ui.h"
 
 // Qt type conversion to/from UD
 
@@ -41,60 +37,9 @@ inline void udFromVariant(const udVariant &variant, QString *pString)
     *pString = QString::fromUtf8(s.ptr, static_cast<int>(s.length));
 }
 
-inline udVariant udToVariant(const QGenericArgument &var)
-{
-  // TODO: ??
-}
-inline void udFromVariant(const udVariant &variant, QGenericArgument *pArg)
-{
-  switch (variant.type())
-  {
-    case udVariant::Type::Null:
-      *pArg = Q_ARG(nullptr_t, nullptr);
-      break;
-
-    case udVariant::Type::Bool:
-      *pArg = Q_ARG(bool, variant.asBool());
-      break;
-
-    case udVariant::Type::Int:
-      *pArg = Q_ARG(int64_t, variant.asInt());
-      break;
-
-    case udVariant::Type::Float:
-      *pArg = Q_ARG(double, variant.asFloat());
-      break;
-
-    case udVariant::Type::Component:
-    {
-      ud::ComponentRef spComponent = variant.asComponent();
-
-      if (spComponent->IsType("qtcomponent"))
-        *pArg = Q_ARG(QObject*, static_pointer_cast<qt::QtComponent>(spComponent)->GetQObject());
-      else
-        *pArg = Q_ARG(qt::QUDComponent, qt::QUDComponent(spComponent));
-      break;
-    }
-
-      //case udVariant::Type::Delegate:
-
-      // TODO: optimise?
-    case udVariant::Type::String:
-      *pArg = Q_ARG(QString, variant.as<QString>());
-      break;
-
-      //case udVariant::Type::Array:
-
-      //case udVariant::Type::AssocArray:
-
-    default:
-      udDebugPrintf("udToVariant: Unsupported type '%d'\n", variant.type());
-  };
-}
-
 inline udVariant udToVariant(const QVariant &var)
 {
-  if (var.isNull())
+  if (!var.isValid() || var.isNull())
     return udVariant();
 
   switch (static_cast<QMetaType::Type>(var.type()))
@@ -136,7 +81,7 @@ inline udVariant udToVariant(const QVariant &var)
     {
       QObject *pQObj = var.value<QObject*>();
 
-      qt::QUDComponent *pQC = qobject_cast<qt::QUDComponent*>(pQObj);
+      qt::QtUDComponent *pQC = qobject_cast<qt::QtUDComponent*>(pQObj);
       if (pQC)
         return udVariant(pQC->GetComponent());
 
@@ -181,7 +126,7 @@ inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
       break;
 
     case udVariant::Type::Component:
-      pVariant->setValue(qt::QUDComponent(variant.asComponent()));
+      pVariant->setValue(qt::QtUDComponent(variant.asComponent()));
       break;
 
     //case udVariant::Type::Delegate:
@@ -196,7 +141,7 @@ inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
     //case udVariant::Type::AssocArray:
 
     default:
-      udDebugPrintf("udToVariant: Unsupported type '%d'\n", variant.type());
+      udDebugPrintf("udFromVariant: Unsupported type '%d'\n", variant.type());
   };
 }
 

@@ -6,18 +6,6 @@ Item {
   id: main
   anchors.fill: parent
 
-  function mtest(wow) { console.log("nowai!! " + wow); return 10; }
-
-  function test(c)
-  {
-    console.log(c.__Get("uid"));
-
-    c.__Set("name", "bob");
-    res = c.__Call("mtest", "Wheee!");
-
-    console.log(res);
-  }
-
   UDRenderView {
     id: viewport
     anchors.fill: parent

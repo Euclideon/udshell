@@ -77,21 +77,42 @@ protected:
     // TODO: error output??
     UDASSERT(value.length <= 10, "Attempting to call method shim with more than 10 arguments");
 
-    // TODO: Do something less ugly - list of QGenericArguments?
     // TODO: check value length against function arg length minus default args amount - need to parse the signature to get the default arg list?
 
+    char qargs[sizeof(QtUDComponent)*10];
+    QtUDComponent *pQObjStack = (QtUDComponent*)qargs;
+
+    QVariant vargs[10];
     QGenericArgument args[10];
     for (int i = 0; i<10; ++i)
     {
       if (i < value.length)
-        args[i] = value[i].as<QGenericArgument>();
+      {
+        if (value[i].is(udVariant::Type::Component))
+        {
+          ud::ComponentRef spComponent = value[i].asComponent();
+          if (spComponent->IsType("qtcomponent"))
+            vargs[i] = QVariant::fromValue(static_pointer_cast<QtComponent>(spComponent)->GetQObject());
+          else
+          {
+            new(pQObjStack) QtUDComponent(spComponent);
+            vargs[i] = QVariant::fromValue(pQObjStack++);
+          }
+        }
+        else
+          vargs[i] = value[i].as<QVariant>();
+        args[i] = Q_ARG(QVariant, vargs[i]);
+      }
       else
         args[i] = ::QGenericArgument();
     }
 
     QVariant retVal;
     pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-       args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+            args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+
+    while (pQObjStack > (qt::QtUDComponent*)qargs)
+      (--pQObjStack)->~QtUDComponent();
 
     return udVariant(retVal);
   }
