@@ -92,7 +92,7 @@ protected:
         {
           ud::ComponentRef spComponent = value[i].asComponent();
           if (spComponent->IsType("qtcomponent"))
-            vargs[i] = QVariant::fromValue(static_pointer_cast<QtComponent>(spComponent)->GetQObject());
+            vargs[i] = QVariant::fromValue(shared_pointer_cast<QtComponent>(spComponent)->GetQObject());
           else
           {
             new(pQObjStack) QtUDComponent(spComponent);
