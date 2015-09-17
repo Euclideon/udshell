@@ -248,6 +248,9 @@ inline void udFromVariant(const udVariant &v, udSharedPtr<T> *pR)
 }
 
 
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, ud::ComponentRef spComponent);
+
+
 // HACK: this here because forward referencing! >_<
 template<typename... Args>
 template <typename X>

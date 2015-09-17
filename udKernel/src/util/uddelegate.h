@@ -91,4 +91,11 @@ protected:
   udDelegateMementoRef m = nullptr;
 };
 
+template<typename R, typename... Args>
+inline ptrdiff_t udStringify(udSlice<char> /*buffer*/, udString /*format*/, udDelegate<R(Args...)> /*d*/)
+{
+  UDASSERT(false, "TODO! Write me!");
+  return 0;
+}
+
 #endif // _UDDELEGATE_H
