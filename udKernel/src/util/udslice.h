@@ -54,6 +54,7 @@ struct udSlice
   udSlice<T> slice(ptrdiff_t first, ptrdiff_t last) const;
 
   bool empty() const;
+  explicit operator bool() const { return length != 0; }
 
   // comparison
   bool operator ==(udSlice<const T> rh) const;
