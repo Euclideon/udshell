@@ -2,7 +2,7 @@
 #include "components/file.h"
 #include "components/resourcemanager.h"
 #include "kernel.h"
-#include "3rdparty/rapidxml-1.13/rapidxml.hpp"
+#include "rapidxml.hpp"
 
 namespace ud
 {
@@ -67,7 +67,9 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
       {
         params.concat(udKeyValuePair(attr->name(), attr->value()));
       }
-      spResourceManager->LoadResourcesFromFile(udInitParams(params));
+      udInitParams resourceParams = udInitParams(params);
+
+      spResourceManager->LoadResourcesFromFile({ {"src", resourceParams["src"]} });
     }
   }
   catch (parse_error e)
