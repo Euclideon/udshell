@@ -59,17 +59,15 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
     doc.parse<0>(pBuffer);
 
     xml_node<> *nProject = doc.first_node("project");
-    xml_node<> *nResources = nProject->first_node("resources");
-    for (xml_node<> *nResource = nResources->first_node("resource"); nResource; nResource = nResource->next_sibling("resource"))
+    xml_node<> *nDataSources = nProject->first_node("datasources");
+    for (xml_node<> *nDataSource = nDataSources->first_node("datasource"); nDataSource; nDataSource = nDataSource->next_sibling("datasource"))
     {
-      udFixedSlice<const udKeyValuePair, 256> params;
-      for (xml_attribute<> *attr = nResource->first_attribute(); attr; attr = attr->next_attribute())
+      udFixedSlice<const udKeyValuePair, 256> dsParams;
+      for (xml_attribute<> *attr = nDataSource->first_attribute(); attr; attr = attr->next_attribute())
       {
-        params.concat(udKeyValuePair(attr->name(), attr->value()));
+        dsParams.concat(udKeyValuePair(attr->name(), attr->value()));
       }
-      udInitParams resourceParams = udInitParams(params);
-
-      spResourceManager->LoadResourcesFromFile({ {"src", resourceParams["src"]} });
+      spResourceManager->LoadResourcesFromFile(udInitParams(dsParams));
     }
   }
   catch (parse_error e)
