@@ -445,3 +445,33 @@ udVariant udVariant::luaGet(ud::LuaState &l, int idx)
       return udVariant();
   }
 }
+
+ptrdiff_t udStringifyVariant(udSlice<char> buffer, udString format, const udVariant &v)
+{
+  switch (v.type())
+  {
+    case udVariant::Type::Null:
+      return udStringifyTemplate(buffer, format, nullptr);
+    case udVariant::Type::Bool:
+      return udStringifyTemplate(buffer, format, v.asBool());
+    case udVariant::Type::Int:
+      return udStringifyTemplate(buffer, format, v.asInt());
+    case udVariant::Type::Float:
+      return udStringifyTemplate(buffer, format, v.asFloat());
+    case udVariant::Type::Enum:
+      UDASSERT(false, "TODO! Please write me!");
+      return 0;
+    case udVariant::Type::String:
+      return udStringifyTemplate(buffer, format, v.asString());
+    case udVariant::Type::Component:
+      return udStringifyTemplate(buffer, format, v.asComponent());
+    case udVariant::Type::Delegate:
+      return udStringifyTemplate(buffer, format, v.asDelegate());
+    case udVariant::Type::Array:
+      return udStringifyTemplate(buffer, format, v.asArray());
+    case udVariant::Type::AssocArray:
+      UDASSERT(false, "TODO! Please write me!");
+      return 0;
+  }
+  return 0;
+}
