@@ -41,9 +41,11 @@
 
 namespace ud
 {
-void udRenderScene_Init(Kernel*);
-void udRenderScene_InitRender(Kernel*);
+udResult udRenderScene_Init(Kernel*);
+udResult udRenderScene_InitRender(Kernel*);
 
+udResult udRenderScene_Deinit(Kernel*);
+udResult udRenderScene_DeinitRender(Kernel*); // Not sure if both Deinit's are necessary
 
 udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount)
 {
@@ -134,32 +136,46 @@ epilogue:
   return result;
 }
 
-void Kernel::DoInit(Kernel *pKernel)
+udResult Kernel::DoInit(Kernel *pKernel)
 {
   // init the components
   if (pKernel->InitComponents() != udR_Success)
   {
     UDASSERT(false, "Oh no! Can't boot!");
-    return;
+    return udR_Failure_;
   }
 
-  udRenderScene_Init(pKernel);
-  udRenderScene_InitRender(pKernel);
+  udResult result = udRenderScene_Init(pKernel);
+  if (result != udR_Success)
+    return result;
+
+  result = udRenderScene_InitRender(pKernel);
+
+  if (result != udR_Success)
+    return result;
+
 
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
+  if (!pKernel->spStreamerTimer)
+    return udR_Failure_;
+
   pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
 
   pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
+  if (!pKernel->spUpdateTimer)
+    return udR_Failure_;
+
   pKernel->spUpdateTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
 
   // call application init
-  SendMessage("$init", "#", "init", nullptr);
+  return SendMessage("$init", "#", "init", nullptr);
 }
-
 
 udResult Kernel::Destroy()
 {
-  udResult result;
+  udResult result = udR_Success;
+  udResult renderSceneRenderResult = udRenderScene_DeinitRender(this);
+  udResult renderSceneResult = udRenderScene_Deinit(this);
 
   // unregister components, free stuff
   //...
@@ -184,6 +200,12 @@ udResult Kernel::Destroy()
   UD_ERROR_CHECK(DestroyInstanceInternal());
 
 epilogue:
+
+  if (renderSceneRenderResult != udR_Success)
+    result = renderSceneRenderResult;
+  else if (renderSceneResult != udR_Success)
+    result = renderSceneResult;
+
   return result;
 }
 
@@ -211,6 +233,15 @@ void Kernel::StreamerUpdate()
 {
   udStreamerStatus streamerStatus = { 0 };
   udOctree_Update(&streamerStatus);
+
+  // TODO: Find a cleaner way of doing this.  We have to keep rendering while the streamer is active.
+  // We need more than just a global active , we need an active per view.
+  if (streamerStatus.active)
+  {
+    SceneRef spScene = spFocusView->GetScene();
+    if (spScene)
+      spScene->MakeDirty();
+  }
 }
 
 udFixedSlice<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase)

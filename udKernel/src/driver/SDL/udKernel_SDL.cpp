@@ -5,6 +5,7 @@
 #include "kernel.h"
 #include "renderscene.h"
 #include "components/view.h"
+#include "driver/SDL/udSDLKernel_Internal.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -16,9 +17,10 @@ static int s_displayWidth, s_displayHeight;
 static Uint32 s_sdlEvent = (Uint32)-1;
 
 using namespace ud;
+
 Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 {
-  return new Kernel;
+  return new SDLKernel;
 }
 
 udResult Kernel::InitInstanceInternal()
@@ -26,15 +28,42 @@ udResult Kernel::InitInstanceInternal()
   s_displayWidth = 1280;
   s_displayHeight = 720;
 
-  SDL_Init(SDL_INIT_VIDEO);
+  int sdlInit = SDL_Init(SDL_INIT_VIDEO);
+  if (sdlInit < 0)
+    return udR_Failure_;
 
   s_sdlEvent = SDL_RegisterEvents(1);
+  if (s_sdlEvent < 0)
+  {
+    SDL_Quit();
+    return udR_Failure_;
+  }
 
   s_window = SDL_CreateWindow("udPointCloud Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_displayWidth, s_displayHeight, SDL_WINDOW_OPENGL);
+  if (!s_window)
+  {
+    SDL_Quit();
+    return udR_Failure_;
+  }
 
-  SDL_GL_CreateContext(s_window);
+  s_context = SDL_GL_CreateContext(s_window);
+  if (!s_context)
+  {
+    SDL_DestroyWindow(s_window);
+    SDL_Quit();
+    return udR_Failure_;
+  }
 
-  return InitRender();
+  udResult result = InitRender();
+  if (result != udR_Success)
+  {
+    SDL_GL_DeleteContext(s_context);
+    SDL_DestroyWindow(s_window);
+    SDL_Quit();
+    return result;
+  }
+
+  return udR_Success;
 }
 
 udResult Kernel::DestroyInstanceInternal()
@@ -97,7 +126,7 @@ udResult Kernel::RunMainLoop()
   while (!s_done)
   {
     SDL_Event event;
-    if (SDL_PollEvent(&event))
+    while (SDL_PollEvent(&event))
     {
       if (event.type == s_sdlEvent)
       {
@@ -152,7 +181,8 @@ udResult Kernel::RunMainLoop()
 
     // render a frame (this could move to another thread!)
     RenderableViewRef spRenderView = spFocusView->GetRenderableView();
-    spRenderView->RenderGPU();
+    if (spRenderView)
+      spRenderView->RenderGPU();
 
     SDL_GL_SwapWindow(s_window);
   }

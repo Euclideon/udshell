@@ -2,6 +2,10 @@
 
 #if UDWINDOW_DRIVER == UDDRIVER_QT
 
+#if defined(_MSC_VER)
+#pragma warning(disable:4512) // assignment operator could not be generated
+#endif // defined(_MSC_VER)
+
 #include <QSemaphore>
 
 #include "udQtKernel_Internal.h"
@@ -214,7 +218,7 @@ void QtKernel::OnGLContextCreated(QOpenGLContext *pContext)
 
   // we need to share our context with Qt and recreate
   pContext->setShareContext(pMainThreadContext);
-  bool succeed = pContext->create();
+  IF_UDASSERT(bool succeed =) pContext->create();
 
   // TODO: error handle
   UDASSERT(succeed, "Couldn't create shared render context!");
@@ -254,7 +258,7 @@ void QtKernel::DoInit(ud::Kernel *)
   // create main opengl context
   pMainThreadContext = new QOpenGLContext();
   pMainThreadContext->setFormat(mainSurfaceFormat);
-  bool succeed = pMainThreadContext->create();
+  IF_UDASSERT(bool succeed = )pMainThreadContext->create();
   UDASSERT(succeed, "Couldn't create render context!");
 
   if (!pMainThreadContext->makeCurrent(pTopLevelWindow))

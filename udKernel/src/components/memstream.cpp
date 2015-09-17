@@ -110,7 +110,7 @@ size_t MemStream::Read(void *pData, size_t bytes)
     return 0;
 
   if (pos + bytes > (size_t)length)
-    bytes = length - pos;
+    bytes = size_t(length - pos);
 
   memcpy(pData, (char *)pBufArray + pos, bytes);
   pos += bytes;
@@ -126,7 +126,7 @@ size_t MemStream::Write(const void *pData, size_t bytes)
   if (pos + bytes > (size_t)length)
   {
     spBuffer->Unmap();
-    spBuffer->Resize(pos + bytes);
+    spBuffer->Resize(size_t(pos + bytes));
 
     size_t len = 0;
     pBufArray = spBuffer->Map(&len);

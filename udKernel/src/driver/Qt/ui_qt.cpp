@@ -2,6 +2,10 @@
 
 #if UDUI_DRIVER == UDDRIVER_QT
 
+#if defined(_MSC_VER)
+#pragma warning(disable:4512) // assignment operator could not be generated
+#endif // defined(_MSC_VER)
+
 #include <QQuickItem>
 #include <QQuickWindow>
 

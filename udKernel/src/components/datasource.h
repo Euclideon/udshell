@@ -90,7 +90,7 @@ public:
     if (index.is(udVariant::Type::String))
       return GetResource<Resource>(index.asString());
     else
-      return GetResource(index.asInt());
+      return GetResource((size_t)index.asInt());
   }
 
 protected:

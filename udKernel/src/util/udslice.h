@@ -139,8 +139,11 @@ struct udFixedSlice : public udSlice<T>
 
   void remove(size_t i);
   void remove(const T *pItem);
+  void removeFirst(const T &item) { remove(this->findFirst(item)); }
+
   void removeSwapLast(size_t i);
   void removeSwapLast(const T *pItem);
+  void removeFirstSwapLast(const T &item) { removeSwapLast(this->findFirst(item)); }
 
   udSlice<T> getBuffer() const;
 

@@ -22,7 +22,7 @@ BufferRef Stream::ReadBuffer(size_t bytes)
   spBuffer->Allocate(bytes);
 
   void *pBuffer = spBuffer->Map();
-  size_t read = Read(pBuffer, bytes);
+  IF_UDASSERT(size_t read =) Read(pBuffer, bytes);
   spBuffer->Unmap();
 
   UDASSERT(read == bytes, "TODO: handle the case where we read less bytes than we expect!");
@@ -45,11 +45,11 @@ BufferRef Stream::Load()
     return nullptr;
 
   BufferRef spBuffer = pKernel->CreateComponent<Buffer>();
-  spBuffer->Allocate(len);
+  spBuffer->Allocate((size_t)len);
 
   void *pBuffer = spBuffer->Map();
   Seek(SeekOrigin::Begin, 0);
-  Read(pBuffer, len);
+  Read(pBuffer, (size_t)len);
   spBuffer->Unmap();
 
   return spBuffer;
