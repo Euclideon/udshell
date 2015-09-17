@@ -315,6 +315,10 @@ template<class T, class U> inline bool operator<=(const udSharedPtr<T> &l, const
 template<class T, class U> inline bool operator<(const udSharedPtr<T> &l, const udSharedPtr<U> &r) { return l.ptr() < r.ptr(); }
 template<class T, class U> inline bool operator>=(const udSharedPtr<T> &l, const udSharedPtr<U> &r) { return l.ptr() >= r.ptr(); }
 template<class T, class U> inline bool operator>(const udSharedPtr<T> &l, const udSharedPtr<U> &r) { return l.ptr() > r.ptr(); }
+template<class T, class U> inline bool operator==(const udSharedPtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
+template<class T, class U> inline bool operator!=(const udSharedPtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
+template<class T, class U> inline bool operator==(nullptr_t, const udSharedPtr<U> &r) { return nullptr == r.ptr(); }
+template<class T, class U> inline bool operator!=(nullptr_t, const udSharedPtr<U> &r) { return nullptr != r.ptr(); }
 
 template<class T, class U> inline bool operator==(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() == r.ptr(); }
 template<class T, class U> inline bool operator!=(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() != r.ptr(); }
@@ -322,6 +326,10 @@ template<class T, class U> inline bool operator<=(const udUniquePtr<T> &l, const
 template<class T, class U> inline bool operator<(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() < r.ptr(); }
 template<class T, class U> inline bool operator>=(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() >= r.ptr(); }
 template<class T, class U> inline bool operator>(const udUniquePtr<T> &l, const udUniquePtr<U> &r) { return l.ptr() > r.ptr(); }
+template<class T, class U> inline bool operator==(const udUniquePtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
+template<class T, class U> inline bool operator!=(const udUniquePtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
+template<class T, class U> inline bool operator==(nullptr_t, const udUniquePtr<U> &r) { return nullptr == r.ptr(); }
+template<class T, class U> inline bool operator!=(nullptr_t, const udUniquePtr<U> &r) { return nullptr != r.ptr(); }
 
 
 // udSharedPtr constructors and assignments
