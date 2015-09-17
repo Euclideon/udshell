@@ -103,7 +103,7 @@ protected:
   LogStream *FindLogStream(StreamRef spStream) const;
 
   udFixedSlice<LogStream, 1> streamList;
-  bool bEnabled;
+  bool bEnabled = true, bLogging = false;
 };
 
 } //namespace ud

@@ -74,9 +74,7 @@ ComponentDesc Logger::descriptor =
 
 Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
-{
-  bEnabled = true;
-}
+{}
 
 Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
 {
@@ -93,6 +91,10 @@ int Logger::Log(int level, udString text, LogCategories category, udString compo
 {
   udMutableString<1024> out;
   char timeStr[64];
+
+  if (bLogging)
+    return -1; // TODO Handle errors
+  bLogging = true;
 
   for (auto &s : streamList)
   {
@@ -141,6 +143,7 @@ int Logger::Log(int level, udString text, LogCategories category, udString compo
     }
   }
 
+  bLogging = false;
   return 0;
 }
 
