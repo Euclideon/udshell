@@ -104,7 +104,7 @@ public:
 
   UDFORCE_INLINE bool unique() const { return count() == 1; }
 
-  UDFORCE_INLINE operator bool() const { return count() > 0; }
+  UDFORCE_INLINE explicit operator bool() const { return count() > 0; }
 
   UDFORCE_INLINE T& operator*() const { return *(T*)pInstance; }
   UDFORCE_INLINE T* operator->() const { return (T*)pInstance; }
@@ -185,7 +185,7 @@ public:
   }
 
   // reference counter operations :
-  UDFORCE_INLINE operator bool() const { return pInstance != nullptr; }
+  UDFORCE_INLINE explicit operator bool() const { return pInstance != nullptr; }
 
   // underlying pointer operations :
   UDFORCE_INLINE T& operator*() const { return *pInstance; }
@@ -258,7 +258,7 @@ public:
   }
 
   // reference counter operations :
-  inline operator bool() const { return pInstance != nullptr; }
+  inline explicit operator bool() const { return pInstance != nullptr; }
 
   // underlying pointer operations :
   inline T& operator*() const { return *pInstance; }
