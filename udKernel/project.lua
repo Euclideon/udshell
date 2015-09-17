@@ -16,7 +16,8 @@ project "udKernel"
 	includedirs { "../ud/udPointCloud/Include" }
 	includedirs { "../3rdParty/lua/" .. luaPath .. "/src"}
 	includedirs { "../3rdParty/assimp-3.1.1/include" }
-
+	includedirs { "../3rdParty/rapidxml-1.13" }
+	
 	if not qt then
 --		includedirs { "../ud/3rdParty/GL/freeglut/static/Include" }
 		includedirs { "../ud/3rdParty/sdl2/include" }
