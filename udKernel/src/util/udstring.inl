@@ -479,6 +479,7 @@ inline udSharedString::udSharedString(const char *ptr, size_t length, udRC *rc)
 // varargs functions....
 //
 
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, nullptr_t);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, const char *s);
 template<size_t N>
@@ -487,6 +488,41 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, bool b);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, uint64_t i);
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, double i);
+template<typename T>
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, udSlice<T> arr)
+{
+  ptrdiff_t len = 2; // for the "[" .. "]"
+  len += arr.length > 1 ? (arr.length-1)*2 : 0; // bytes for the ", " separator sequences
+
+  if (!buffer.ptr)
+  {
+    for (auto &v : arr)
+      len += udStringifyTemplate(nullptr, format, v);
+  }
+  else
+  {
+    if (buffer.length < (size_t)len)
+      return -len;
+
+    buffer[0] = '['; buffer.popFront();
+    for (size_t i = 0; i < arr.length; ++i)
+    {
+      if (i > 0)
+      {
+        buffer[0] = ','; buffer[1] = ' ';
+        buffer.pop(2);
+      }
+      ptrdiff_t l = udStringifyTemplate(buffer, format, arr[i]);
+      if (l < 0)
+        return l - len;
+      buffer.pop(l);
+      len += l;
+    }
+    buffer[0] = ']';
+  }
+  return len;
+}
+
 
 // stringify helper
 namespace ud_internal
@@ -524,10 +560,19 @@ namespace ud_internal
   template<> struct VarArg::StringifyProxy<float>    { inline static ptrdiff_t stringify(udSlice<char> buffer, udString format, const void *pData) { return udStringify(buffer, format, (double)*(float*)pData); } };
   template<size_t N>
   struct VarArg::StringifyProxy<const char[N]>       { inline static ptrdiff_t stringify(udSlice<char> buffer, udString format, const void *pData) { return udStringify(buffer, format, udString((const char*)pData, N-1)); } };
+  template<size_t N>
+  struct VarArg::StringifyProxy<udMutableString<N>>  { inline static ptrdiff_t stringify(udSlice<char> buffer, udString format, const void *pData) { return udStringify(buffer, format, *(udString*)pData); } };
+  template<> struct VarArg::StringifyProxy<udSharedString>  { inline static ptrdiff_t stringify(udSlice<char> buffer, udString format, const void *pData) { return udStringify(buffer, format, *(udString*)pData); } };
 
   size_t getLength(udSlice<VarArg> args);
   udSlice<char> concatenate(udSlice<char> buffer, udSlice<VarArg> args);
   udSlice<char> format(udString format, udSlice<char> buffer, udSlice<VarArg> args);
+}
+
+template<typename T>
+inline ptrdiff_t udStringifyTemplate(udSlice<char> buffer, udString format, const T &val)
+{
+  return ud_internal::VarArg::StringifyProxy<T>::stringify(buffer, format, (void*)&val);
 }
 
 

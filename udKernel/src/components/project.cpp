@@ -33,10 +33,10 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
   if (src.is(udVariant::Type::String))
   {
     // path or url?
-    spSrc = pKernel->CreateComponent<File>({ { "path", src.asString() }, { "flags", FileOpenFlags::Read } });
+    spSrc = pKernel->CreateComponent<File>({ { "path", src }, { "flags", FileOpenFlags::Read } });
     if (!spSrc)
     {
-      LogWarning(5, "\"src\" file path not found: {0}", src.asString());
+      LogWarning(5, "\"src\" file path not found: {0}", src);
       throw udR_File_OpenFailure;
     }
   }

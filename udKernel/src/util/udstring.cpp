@@ -51,6 +51,13 @@ udSharedString udSharedString::sprintf(const char *pFormat, ...)
   return r;
 }
 
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, nullptr_t)
+{
+  if (buffer.ptr)
+    udString("null", 4).copyTo(buffer);
+  return 4;
+}
+
 ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s)
 {
   // TODO: what formats are interesting for strings?
@@ -491,6 +498,8 @@ void receivesCString(const char*)
 {
 }
 
+#include "udvariant.h"
+
 udResult udString_Test()
 {
   // udString
@@ -557,7 +566,9 @@ udResult udString_Test()
 
   udMutableString<0> ms; ms.concat("hello ", pName, 10);
   ms.append("poop!");
-  ms.format("{1}, {2}, {0,hello}", "hello ", pName, 10);
+
+  int arr[] = { 1, 2, 30 };
+  ms.format("{1}, {2}, {0,hello} {3}, {4}", "hello ", pName, 10, udSlice<int>(arr, 3), udVariant(true));
 
   return udR_Success;
 }
