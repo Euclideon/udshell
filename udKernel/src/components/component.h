@@ -248,7 +248,7 @@ inline void udFromVariant(const udVariant &v, udSharedPtr<T> *pR)
 }
 
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, ud::ComponentRef spComponent);
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, ud::ComponentRef spComponent, const udVarArg *pArgs);
 
 
 // HACK: this here because forward referencing! >_<

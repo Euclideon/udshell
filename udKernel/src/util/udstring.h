@@ -28,7 +28,7 @@ struct udString
 #else
 
 class udCString;
-namespace ud_internal { struct VarArg; }
+struct udVarArg;
 
 
 // udString is a layer above udSlice<>, defined for 'const char' (utf-8) and adds string-specific methods
@@ -166,8 +166,8 @@ struct udMutableString : public udFixedSlice<char, Size>
   uint32_t hash(uint32_t hash = 0) const                                                { return ((udString*)this)->hash(hash); }
 
 private:
-  void appendInternal(udSlice<ud_internal::VarArg> args);
-  void formatInternal(udString format, udSlice<ud_internal::VarArg> args);
+  void appendInternal(udSlice<udVarArg> args);
+  void formatInternal(udString format, udSlice<udVarArg> args);
 };
 
 // we'll typedef these such that the desired size compensates for the other internal members
@@ -255,9 +255,33 @@ struct udSharedString : public udSharedSlice<const char>
 private:
   udSharedString(const char *ptr, size_t length, udRC *rc);
 
-  static udSharedString concatInternal(udSlice<ud_internal::VarArg> args);
-  static udSharedString formatInternal(udString format, udSlice<ud_internal::VarArg> args);
+  static udSharedString concatInternal(udSlice<udVarArg> args);
+  static udSharedString formatInternal(udString format, udSlice<udVarArg> args);
 };
+
+
+// vararg for stringification
+struct udVarArg
+{
+  udVarArg() {}
+  template<typename T>
+  udVarArg(const T& arg);
+
+  bool HasIntify() const { return pIntProxy != nullptr; }
+
+  ptrdiff_t GetString(udSlice<char> buffer, udString format = nullptr, const udVarArg *pArgs = nullptr) const { return pStringProxy(buffer, format, pArg, pArgs); }
+  ptrdiff_t GetStringLength(udString format = nullptr, const udVarArg *pArgs = nullptr) const { return pStringProxy(nullptr, format, pArg, pArgs); }
+  int64_t GetInt() const { return pIntProxy ? pIntProxy(pArg) : 0; }
+
+private:
+  typedef ptrdiff_t(StringifyFunc)(udSlice<char>, udString, const void*, const udVarArg*);
+  typedef int64_t(IntConvFunc)(const void*);
+
+  const void *pArg;
+  StringifyFunc *pStringProxy;
+  IntConvFunc *pIntProxy;
+};
+
 
 // unit tests
 udResult udString_Test();

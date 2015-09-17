@@ -51,48 +51,72 @@ udSharedString udSharedString::sprintf(const char *pFormat, ...)
   return r;
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, nullptr_t)
+ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), nullptr_t, const udVarArg *udUnusedParam(pArgs))
 {
   if (buffer.ptr)
     udString("null", 4).copyTo(buffer);
   return 4;
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s)
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s, const udVarArg *pArgs)
 {
-  // TODO: what formats are interesting for strings?
-
-  if (!buffer.ptr)
-    return s.length;
-
-  if (buffer.length < s.length)
-    return buffer.length - s.length;
-  for (size_t i = 0; i < s.length; ++i)
-    buffer.ptr[i] = s.ptr[i];
-  return s.length;
-}
-
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, const char *s)
-{
-  // TODO: what formats are interesting for strings?
-
-  if (!s)
-    return 0;
-
-  if (!buffer.ptr)
-    return strlen(s);
-
-  size_t i = 0;
-  for (; s[i]; ++i)
+  // parse format string
+  bool rightJustify = false;
+  int64_t minimumLen = 0;
+  while (format)
   {
-    if (i == buffer.length)
-      return -1;
-    buffer.ptr[i] = s[i];
+    if (format[0] == '-')
+    {
+      rightJustify = true;
+      format.pop(1);
+    }
+    else if (format[0] == '*')
+    {
+      int64_t i = format.slice(1, format.length).parseInt();
+      UDASSERT(pArgs[i].HasIntify(), "Argument can not be interpreted as an integer!");
+      minimumLen = pArgs[i].GetInt();
+      UDASSERT(minimumLen >= 0, "Invalid string length!");
+      break;
+    }
+    else
+    {
+      // TODO: error here? invalid format string?
+      format.pop(1);
+    }
   }
-  return i;
+
+  // calculate string length
+  bool needPadding = (size_t)minimumLen > s.length;
+  size_t length = needPadding ? (size_t)minimumLen : s.length;
+
+  // if we're only counting
+  if (!buffer.ptr)
+    return length;
+
+  // if the buffer is too small
+  if (buffer.length < length)
+    return buffer.length - length;
+
+  char *pBuffer = buffer.ptr;
+
+  // do left padding
+  if (rightJustify && needPadding)
+  {
+    memset(pBuffer, ' ', length - s.length);
+    pBuffer += length - s.length;
+  }
+
+  // copy string
+  memcpy(pBuffer, s.ptr, s.length);
+
+  // do right padding
+  if (!rightJustify && needPadding)
+    memset(pBuffer + s.length, ' ', length - s.length);
+
+  return length;
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, bool b)
+ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), bool b, const udVarArg *udUnusedParam(pArgs))
 {
   if (b == true)
   {
@@ -116,7 +140,7 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, bool b)
   }
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i)
+ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), int64_t i, const udVarArg *udUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for ints?
 
@@ -161,7 +185,7 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, int64_t i)
   return len;
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, uint64_t i)
+ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), uint64_t i, const udVarArg *udUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for ints?
 
@@ -189,7 +213,7 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, uint64_t i)
   }
   return len;
 }
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, double i)
+ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), double f, const udVarArg *udUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for floats?
   UDASSERT(false, "No fun!");
@@ -198,22 +222,24 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, double i)
 
 namespace ud_internal
 {
-  size_t getLength(udSlice<VarArg> args)
+  size_t getLength(udSlice<udVarArg> args)
   {
     size_t len = 0;
     for (auto &a : args)
-      len += a.pProxy(nullptr, nullptr, a.pArg);
+      len += a.GetStringLength();
     return len;
   }
-  udSlice<char> concatenate(udSlice<char> buffer, udSlice<VarArg> args)
+  udSlice<char> concatenate(udSlice<char> buffer, udSlice<udVarArg> args)
   {
     size_t len = 0;
     for (auto &a : args)
-      len += a.pProxy(buffer.slice(len, buffer.length), nullptr, a.pArg);
+      len += a.GetString(buffer.slice(len, buffer.length));
     return buffer.slice(0, len);
   }
-  udSlice<char> format(udString format, udSlice<char> buffer, udSlice<VarArg> args)
+  udSlice<char> format(udString format, udSlice<char> buffer, udSlice<udVarArg> args)
   {
+    udMutableString64 indirectFormat;
+
     size_t offset = 0;
     char *pBuffer = buffer.ptr;
 
@@ -285,12 +311,23 @@ namespace ud_internal
           return nullptr;
         }
 
+        // check for universal format strings
+        if (format)
+        {
+          // indrect formatting allows to take the format string from another parameter
+          if (format[0] == '@')
+          {
+            int64_t i = format.slice(1, format.length).parseInt(false);
+            UDASSERT(i >= 0 && (size_t)i < args.length, "Invalid indirect format index!");
+            ptrdiff_t formatLen = args[i].GetStringLength();
+            indirectFormat.reserve((size_t)formatLen);
+            args[i].GetString(indirectFormat.getBuffer());
+            format = udString(indirectFormat.ptr, formatLen);
+          }
+        }
+
         // append the arg
-        VarArg &p = args[arg];
-        ptrdiff_t len;
-        udSlice<char> buf(pBuffer ? pBuffer + offset : nullptr, pBuffer ? buffer.length - offset : 0);
-        len = p.pProxy(buf, format, p.pArg);
-        offset += len;
+        offset += args[arg].GetString(udSlice<char>(pBuffer ? pBuffer + offset : nullptr, pBuffer ? buffer.length - offset : 0), format, args.ptr);
       }
       else
       {
@@ -304,7 +341,7 @@ namespace ud_internal
   }
 }
 
-udSharedString udSharedString::concatInternal(udSlice<ud_internal::VarArg> args)
+udSharedString udSharedString::concatInternal(udSlice<udVarArg> args)
 {
   size_t len = ud_internal::getLength(args);
 
@@ -319,7 +356,7 @@ udSharedString udSharedString::concatInternal(udSlice<ud_internal::VarArg> args)
 
   return udSharedString(ptr, len, pRC);
 }
-udSharedString udSharedString::formatInternal(udString format, udSlice<ud_internal::VarArg> args)
+udSharedString udSharedString::formatInternal(udString format, udSlice<udVarArg> args)
 {
   size_t len = ud_internal::format(format, nullptr, args).length;
 
@@ -568,7 +605,7 @@ udResult udString_Test()
   ms.append("poop!");
 
   int arr[] = { 1, 2, 30 };
-  ms.format("{1}, {2}, {0,hello} {3}, {4}", "hello ", pName, 10, udSlice<int>(arr, 3), udVariant(true));
+  ms.format("{1}, {2}, {0,@5} {3}, {4}", "hello ", pName, 10, udSlice<int>(arr, 3), udVariant(true), "*6", 10);
 
   return udR_Success;
 }

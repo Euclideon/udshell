@@ -243,7 +243,7 @@ void Component::LogInternal(int level, udString text, int category, udString com
 
 } // namespace ud
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, ud::ComponentRef spComponent)
+ptrdiff_t udStringify(udSlice<char> buffer, udString format, ud::ComponentRef spComponent, const udVarArg *pArgs)
 {
   ptrdiff_t len = spComponent->uid.length + 1;
   if (!buffer.ptr)
@@ -253,5 +253,5 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, ud::ComponentRef sp
 
   // HACK: this could be a lot nicer!
   udMutableString<64> uid; uid.concat("@", spComponent->uid);
-  return udStringifyTemplate(buffer, format, uid);
+  return udStringifyTemplate(buffer, format, uid, pArgs);
 }
