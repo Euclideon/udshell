@@ -92,6 +92,7 @@ udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader 
     pProgram->pAttributes = (udShaderProgram::Param*)&pProgram[1];
     pProgram->pUniforms = (udShaderProgram::Param*)&pProgram->pAttributes[numAttributes];
     char *pStrings = (char*)&pProgram->pUniforms[numUniforms];
+    char *pEnd = (char*)&pProgram[1] + extraBytes;
 
     for (GLint i = 0; i < numAttributes; ++i)
     {
@@ -99,7 +100,7 @@ udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader 
       GLint size;
       GLenum type;
       pProgram->pAttributes[i].pName = pStrings;
-      funcs.glGetActiveAttrib(program, i, 128, &length, &size, &type, pProgram->pAttributes[i].pName);
+      funcs.glGetActiveAttrib(program, i, pEnd - pStrings, &length, &size, &type, pProgram->pAttributes[i].pName);
       pProgram->pAttributes[i].type = type;
       pStrings += length + 1;
     }
@@ -110,7 +111,7 @@ udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader 
       GLint size;
       GLenum type;
       pProgram->pUniforms[i].pName = pStrings;
-      funcs.glGetActiveUniform(program, i, 128, &length, &size, &type, pProgram->pUniforms[i].pName);
+      funcs.glGetActiveUniform(program, i, pEnd - pStrings, &length, &size, &type, pProgram->pUniforms[i].pName);
       pProgram->pUniforms[i].type = type;
       pStrings += length + 1;
     }
