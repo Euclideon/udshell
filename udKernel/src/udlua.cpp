@@ -248,6 +248,14 @@ void LuaState::set(udVariant v, udVariant key, LuaLocation loc)
   push(key);
   push(v);
   lua_settable(L, idx - 2);
+  switch (loc)
+  {
+    case LuaLocation::Global:
+      lua_pop(L, 1);
+      break;
+    default:
+      break;
+  }
 }
 
 void LuaState::setNil(udVariant key, LuaLocation loc)
@@ -267,6 +275,14 @@ void LuaState::setNil(udVariant key, LuaLocation loc)
   push(key);
   pushNil();
   lua_settable(L, idx - 2);
+  switch (loc)
+  {
+    case LuaLocation::Global:
+      lua_pop(L, 1);
+      break;
+    default:
+      break;
+  }
 }
 
 void LuaState::setComponent(ComponentRef c, udVariant key, LuaLocation loc)
@@ -286,6 +302,14 @@ void LuaState::setComponent(ComponentRef c, udVariant key, LuaLocation loc)
   push(key);
   pushComponent(c);
   lua_settable(L, idx - 2);
+  switch (loc)
+  {
+    case LuaLocation::Global:
+      lua_pop(L, 1);
+      break;
+    default:
+      break;
+  }
 }
 
 
