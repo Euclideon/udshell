@@ -533,6 +533,26 @@ inline udFixedSlice<T, Count>& udFixedSlice<T, Count>::pushBack(U &&item)
 }
 
 template <typename T, size_t Count>
+T& udFixedSlice<T, Count>::front() const
+{
+  return this->ptr[0];
+}
+template <typename T, size_t Count>
+T udFixedSlice<T, Count>::popFront()
+{
+  // TODO: this should be removed and uses replaced with a udQueue type.
+  T copy(std::move(ptr[0]));
+  for (int i = 1; i < length; ++i)
+  {
+    ptr[i-1].~T();
+    new(&ptr[i-1]) T(std::move(ptr[1]));
+  }
+  --length;
+  ptr[length].~T();
+  return copy;
+}
+
+template <typename T, size_t Count>
 inline T& udFixedSlice<T, Count>::pushBack()
 {
   reserve(this->length + 1);

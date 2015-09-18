@@ -135,6 +135,9 @@ struct udFixedSlice : public udSlice<T>
   void clear();
   template <typename... Things> udFixedSlice<T, Count>& concat(const Things&... things);
 
+  T& front() const;
+  T popFront();
+
   T& pushBack();
   template <typename U> udFixedSlice<T, Count>& pushBack(U &&item);
 
