@@ -92,9 +92,6 @@ public:
 
   int GetLevel(StreamRef spStream) const;
   int SetLevel(StreamRef spStream, int level);
-
-  int AddCategory(StreamRef spStream, LogCategories category);
-  int RemoveCategory(StreamRef spStream, LogCategories category);
   LogCategories GetCategories(StreamRef spStream) const;
   int SetCategories(StreamRef spStream, LogCategories categories);
 

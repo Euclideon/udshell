@@ -21,6 +21,42 @@ static CMethodDesc methods[] =
 {
   {
     {
+      "removefilters", // id
+      "Remove all logging filters", // description
+    },
+    &Logger::RemoveFilters, // method
+  },
+  {
+    {
+      "getfilterlevel", // id
+      "Get filter level for the specified category", // description
+    },
+    &Logger::GetFilterLevel, // method
+  },
+  {
+    {
+      "setfilterlevel", // id
+      "Filter logging for a category to the specified level", // description
+    },
+    &Logger::SetFilterLevel, // method
+  },
+  // TODO udVariant doesn't support udSlice<const udString>. fix this with wrappers?
+  /*{ T
+    {
+      "getfiltercomponents", // id
+      "Get filtered components uids", // description
+    },
+    &Logger::GetFilterComponents, // method
+  },
+  {
+    {
+      "setfiltercomponents", // id
+      "Filter logging to the specified component UIDs", // description
+    },
+    &Logger::SetFilterComponents, // method
+  },*/
+  {
+    {
       "setlevel", // id
       "Set severity level for this log stream", // description
     },
@@ -228,30 +264,6 @@ LogCategories Logger::GetCategories(StreamRef spStream) const
 {
   if (LogStream *pLogStream = FindLogStream(spStream))
     return pLogStream->categories;
-
-  // TODO Fix error checking
-  return -1;
-}
-
-int Logger::AddCategory(StreamRef spStream, LogCategories category)
-{
-  if (LogStream *pLogStream = FindLogStream(spStream))
-  {
-    pLogStream->categories &= category;
-    return 0;
-  }
-
-  // TODO Fix error checking
-  return -1;
-}
-
-int Logger::RemoveCategory(StreamRef spStream, LogCategories category)
-{
-  if (LogStream *pLogStream = FindLogStream(spStream))
-  {
-    pLogStream->categories &= ~category;
-    return 0;
-  }
 
   // TODO Fix error checking
   return -1;
