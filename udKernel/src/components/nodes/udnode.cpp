@@ -147,7 +147,7 @@ int UDNode::Load(udString name, bool useStreamer)
     UDDataSourceRef udSource = pKernel->CreateComponent<UDDataSource>({ { "src", name }, {"useStreamer", useStreamer } });
     if (udSource)
     {
-      spModel = udSource->GetResource<UDModel>(name);
+      spModel = udSource->GetResourceAs<UDModel>(name);
       if (spModel)
       {
          result = udOctree_GetLocalMatrixF64(spModel->GetOctreePtr(), udMat.a);
