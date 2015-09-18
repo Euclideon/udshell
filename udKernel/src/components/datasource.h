@@ -46,6 +46,7 @@ public:
     }
     return nullptr;
   }
+
   ResourceRef GetResource(size_t index) const
   {
     size_t i = 0;
@@ -57,14 +58,23 @@ public:
     }
     return nullptr;
   }
-
-  template<typename T>
-  udSharedPtr<T> GetResource(udString name) const
+  ResourceRef GetResource(udString name) const
   {
     ResourceRef *r = const_cast<ResourceRef*>(resources.Get(name));
     if (r)
-      return component_cast<T>(*r);
+      return *r;
     return nullptr;
+  }
+
+  template<typename T>
+  udSharedPtr<T> GetResourceAs(size_t index) const
+  {
+    return component_cast<T>(GetResource(index));
+  }
+  template<typename T>
+  udSharedPtr<T> GetResourceAs(udString name) const
+  {
+    return component_cast<T>(GetResource(name));
   }
 
   void SetResource(udString name, const ResourceRef &spResource)
@@ -88,7 +98,7 @@ public:
   ResourceRef GetResourceByVariant(udVariant index) const
   {
     if (index.is(udVariant::Type::String))
-      return GetResource<Resource>(index.asString());
+      return GetResource(index.asString());
     else
       return GetResource((size_t)index.asInt());
   }
