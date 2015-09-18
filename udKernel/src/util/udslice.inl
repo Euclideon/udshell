@@ -545,10 +545,9 @@ T udFixedSlice<T, Count>::popFront()
   for (int i = 1; i < length; ++i)
   {
     ptr[i-1].~T();
-    new(&ptr[i-1]) T(std::move(ptr[1]));
+    new((void*)&ptr[i-1]) T(std::move(ptr[i]));
   }
-  --length;
-  ptr[length].~T();
+  ptr[--length].~T();
   return copy;
 }
 
