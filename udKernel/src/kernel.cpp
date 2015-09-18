@@ -117,7 +117,9 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
 
   spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
   if (spConsole)
-     pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script, 5, LogDefaults::Format);
+     pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
+
+  pKernel->spLogger->SetFilterLevel(LogCategories::Trace, 0);
 
   // Resource Manager
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();

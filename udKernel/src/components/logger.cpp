@@ -74,7 +74,9 @@ ComponentDesc Logger::descriptor =
 
 Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
-{}
+{
+  RemoveFilters();
+}
 
 Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
 {
@@ -87,13 +89,38 @@ Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
   return nullptr;
 }
 
-int Logger::Log(int level, udString text, LogCategories category, udString componentUID)
+void Logger::Log(int level, udString text, LogCategories category, udString componentUID)
 {
   udMutableString<1024> out;
   char timeStr[64];
 
+  // Check category level filter
+  int catIndex;
+  LogCategories tempCat = category;
+  for (catIndex = 0; !(tempCat & 1); catIndex++)
+    tempCat = tempCat >> 1;
+
+  if (levelsFilter[catIndex] != -1 && levelsFilter[catIndex] < level)
+    return;
+
+  // Check component ids filter
+  if (componentUID != nullptr && !componentsFilter.empty())
+  {
+    bool componentFound = false;
+    for (udString comp : componentsFilter)
+    {
+      if (!comp.cmp(componentUID))
+      {
+        componentFound = true;
+        break;
+      }
+    }
+    if (!componentFound)
+      return;
+  }
+
   if (bLogging)
-    return -1; // TODO Handle errors
+    return;
   bLogging = true;
 
   for (auto &s : streamList)
@@ -144,7 +171,6 @@ int Logger::Log(int level, udString text, LogCategories category, udString compo
   }
 
   bLogging = false;
-  return 0;
 }
 
 void Logger::AddStream(StreamRef spStream, LogCategories categories, int level, LogFormatSpecs format)
@@ -229,6 +255,42 @@ int Logger::RemoveCategory(StreamRef spStream, LogCategories category)
 
   // TODO Fix error checking
   return -1;
+}
+
+int Logger::GetFilterLevel(LogCategories category) const
+{
+  int catIndex;
+  for (catIndex = 0; !(category & 1); catIndex++)
+    category = category >> 1;
+
+  return levelsFilter[catIndex];
+}
+
+udSlice<udSharedString> Logger::GetFilterComponents() const
+{
+  return componentsFilter;
+}
+
+void Logger::SetFilterLevel(LogCategories categories, int level)
+{
+  for (int i = 0; categories; i++)
+  {
+    if (categories & 1)
+      levelsFilter[i] = level;
+
+    categories = categories >> 1;
+  }
+}
+
+void Logger::SetFilterComponents(udSlice<const udString> comps)
+{
+  componentsFilter = comps;
+}
+
+void Logger::RemoveFilters()
+{
+  memset(levelsFilter, -1, sizeof(levelsFilter));
+  componentsFilter = nullptr;
 }
 
 } // namespace ud
