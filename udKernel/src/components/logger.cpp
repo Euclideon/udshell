@@ -21,6 +21,42 @@ static CMethodDesc methods[] =
 {
   {
     {
+      "removefilters", // id
+      "Remove all logging filters", // description
+    },
+    &Logger::RemoveFilters, // method
+  },
+  {
+    {
+      "getfilterlevel", // id
+      "Get filter level for the specified category", // description
+    },
+    &Logger::GetFilterLevel, // method
+  },
+  {
+    {
+      "setfilterlevel", // id
+      "Filter logging for a category to the specified level", // description
+    },
+    &Logger::SetFilterLevel, // method
+  },
+  // TODO udVariant doesn't support udSlice<const udString>. fix this with wrappers?
+  /*{ T
+    {
+      "getfiltercomponents", // id
+      "Get filtered components uids", // description
+    },
+    &Logger::GetFilterComponents, // method
+  },
+  {
+    {
+      "setfiltercomponents", // id
+      "Filter logging to the specified component UIDs", // description
+    },
+    &Logger::SetFilterComponents, // method
+  },*/
+  {
+    {
       "setlevel", // id
       "Set severity level for this log stream", // description
     },
@@ -75,7 +111,7 @@ ComponentDesc Logger::descriptor =
 Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  bEnabled = true;
+  RemoveFilters();
 }
 
 Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
@@ -89,10 +125,39 @@ Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
   return nullptr;
 }
 
-int Logger::Log(int level, udString text, LogCategories category, udString componentUID)
+void Logger::Log(int level, udString text, LogCategories category, udString componentUID)
 {
   udMutableString<1024> out;
   char timeStr[64];
+
+  // Check category level filter
+  int catIndex;
+  LogCategories tempCat = category;
+  for (catIndex = 0; !(tempCat & 1); catIndex++)
+    tempCat = tempCat >> 1;
+
+  if (levelsFilter[catIndex] != -1 && levelsFilter[catIndex] < level)
+    return;
+
+  // Check component ids filter
+  if (componentUID != nullptr && !componentsFilter.empty())
+  {
+    bool componentFound = false;
+    for (udString comp : componentsFilter)
+    {
+      if (!comp.cmp(componentUID))
+      {
+        componentFound = true;
+        break;
+      }
+    }
+    if (!componentFound)
+      return;
+  }
+
+  if (bLogging)
+    return;
+  bLogging = true;
 
   for (auto &s : streamList)
   {
@@ -141,7 +206,7 @@ int Logger::Log(int level, udString text, LogCategories category, udString compo
     }
   }
 
-  return 0;
+  bLogging = false;
 }
 
 void Logger::AddStream(StreamRef spStream, LogCategories categories, int level, LogFormatSpecs format)
@@ -204,28 +269,40 @@ LogCategories Logger::GetCategories(StreamRef spStream) const
   return -1;
 }
 
-int Logger::AddCategory(StreamRef spStream, LogCategories category)
+int Logger::GetFilterLevel(LogCategories category) const
 {
-  if (LogStream *pLogStream = FindLogStream(spStream))
-  {
-    pLogStream->categories &= category;
-    return 0;
-  }
+  int catIndex;
+  for (catIndex = 0; !(category & 1); catIndex++)
+    category = category >> 1;
 
-  // TODO Fix error checking
-  return -1;
+  return levelsFilter[catIndex];
 }
 
-int Logger::RemoveCategory(StreamRef spStream, LogCategories category)
+udSlice<udSharedString> Logger::GetFilterComponents() const
 {
-  if (LogStream *pLogStream = FindLogStream(spStream))
-  {
-    pLogStream->categories &= ~category;
-    return 0;
-  }
+  return componentsFilter;
+}
 
-  // TODO Fix error checking
-  return -1;
+void Logger::SetFilterLevel(LogCategories categories, int level)
+{
+  for (int i = 0; categories; i++)
+  {
+    if (categories & 1)
+      levelsFilter[i] = level;
+
+    categories = categories >> 1;
+  }
+}
+
+void Logger::SetFilterComponents(udSlice<const udString> comps)
+{
+  componentsFilter = comps;
+}
+
+void Logger::RemoveFilters()
+{
+  memset(levelsFilter, -1, sizeof(levelsFilter));
+  componentsFilter = nullptr;
 }
 
 } // namespace ud
