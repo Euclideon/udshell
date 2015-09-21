@@ -1,10 +1,15 @@
 
 #include <type_traits>
 
-ptrdiff_t udStringifyVariant(udSlice<char> buffer, udString format, const udVariant &var);
+ptrdiff_t udStringifyVariant(udSlice<char> buffer, udString format, const udVariant &var, const udVarArg*);
+
 namespace ud_internal
 {
-  template<> struct VarArg::StringifyProxy<udVariant>{ inline static ptrdiff_t stringify(udSlice<char> buffer, udString format, const void *pData) { return udStringifyVariant(buffer, format, *(udVariant*)pData); } };
+  template<> struct StringifyProxy<udVariant>
+  {
+    inline static ptrdiff_t stringify(udSlice<char> buffer, udString format, const void *pData, const udVarArg *pArgs) { return udStringifyVariant(buffer, format, *(udVariant*)pData, pArgs); }
+    inline static int64_t intify(const void *pData) { return ((udVariant*)pData)->asInt(); }
+  };
 }
 
 // constructors...

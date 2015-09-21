@@ -175,8 +175,8 @@ protected:
     };
   };
   static size_t numToAlloc(size_t i);
-  bool hasAllocation() { return buffer.hasAllocation(this->ptr); }
-  Header* getHeader() { return ((Header*)this->ptr) - 1; }
+  bool hasAllocation() const { return buffer.hasAllocation(this->ptr); }
+  Header* getHeader() const { return ((Header*)this->ptr) - 1; }
 };
 
 

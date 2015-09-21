@@ -92,7 +92,7 @@ protected:
 };
 
 template<typename R, typename... Args>
-inline ptrdiff_t udStringify(udSlice<char> /*buffer*/, udString /*format*/, udDelegate<R(Args...)> /*d*/)
+inline ptrdiff_t udStringify(udSlice<char> udUnusedParam(buffer), udString udUnusedParam(format), udDelegate<R(Args...)> udUnusedParam(d), const udVarArg *udUnusedParam(pArgs))
 {
   UDASSERT(false, "TODO! Write me!");
   return 0;

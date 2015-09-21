@@ -59,7 +59,7 @@ ComponentDesc GeomSource::descriptor =
   &RegisterExtensions // init
 };
 
-static inline udString FromAIString(aiString name)
+static inline udString FromAIString(const aiString &name)
 {
   return udString(name.C_Str(), name.length);
 }
@@ -123,7 +123,7 @@ void GeomSource::Create(StreamRef spSource)
 
     aiString _name;
     aiMat.Get(AI_MATKEY_NAME, _name);
-    udDebugPrintf("Material %d: %s", i, _name.C_Str());
+    LogDebug(4, "Material {0}: \"{1}\"", i, FromAIString(_name));
 
     udString name = FromAIString(_name);
     MaterialRef spMat = pKernel->CreateComponent<Material>({ { "name", name } });
@@ -147,7 +147,7 @@ void GeomSource::Create(StreamRef spSource)
     // TODO: foreach texture type, get texture
     aiString texture;
     aiMat.Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), texture);
-    udDebugPrintf("  Texture: %s", texture.C_Str());
+    LogDebug(4, "  Texture: {0}", FromAIString(texture));
 
     // TODO: try and load texture...
     //...
@@ -172,15 +172,15 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   aiNode &node = *pNode;
   const aiMatrix4x4 &parent = *pParent;
 
-  udDebugPrintf("%*sNode: %s", depth, " ", node.mName.C_Str());
+  LogDebug(4, "{1,*0}Node: {2}", depth, "", FromAIString(node.mName));
 
   aiMatrix4x4 &local = node.mTransformation;
   aiMatrix4x4 world = parent * local;
 
-  udDebugPrintf("%*s  Local Position: %.2f,%.2f,%.2f", depth, " ", local.a4, local.b4, local.c4);
-  udDebugPrintf("%*s  Local Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, " ", local.a1, local.b1, local.c1, local.a2, local.b2, local.c2, local.a3, local.b3, local.c3);
-  udDebugPrintf("%*s  World Position: %.2f,%.2f,%.2f", depth, " ", world.a4, world.b4, world.c4);
-  udDebugPrintf("%*s  World Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, " ", world.a1, world.b1, world.c1, world.a2, world.b2, world.c2, world.a3, world.b3, world.c3);
+  LogDebug(4, "{1,*0}  Local Position: %.2f,%.2f,%.2f", depth, "", local.a4, local.b4, local.c4);
+  LogDebug(4, "{1,*0}  Local Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", local.a1, local.b1, local.c1, local.a2, local.b2, local.c2, local.a3, local.b3, local.c3);
+  LogDebug(4, "{1,*0}  World Position: %.2f,%.2f,%.2f", depth, "", world.a4, world.b4, world.c4);
+  LogDebug(4, "{1,*0}  World Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", world.a1, world.b1, world.c1, world.a2, world.b2, world.c2, world.a3, world.b3, world.c3);
 
   // create bone from node
   NodeRef spNode = pKernel->CreateComponent<Node>({{ "name", FromAIString(node.mName) }});
@@ -195,7 +195,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   {
     aiMesh &mesh = *pScene->mMeshes[node.mMeshes[i]];
 
-    udDebugPrintf("%*sMesh %d: %d (%s)", depth, " ", i, node.mMeshes[i], mesh.mName.C_Str());
+    LogDebug(4, "{1,*0}Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], FromAIString(mesh.mName));
 
     // create a model
     ModelRef spMesh = pKernel->CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
@@ -206,7 +206,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     if (pspMat)
     {
       spMesh->SetMaterial(component_cast<Material>(*pspMat));
-      udDebugPrintf("%*s  Material: %d (%s)", depth, " ", mesh.mMaterialIndex, (const char*)(*pspMat)->GetName().toStringz());
+      LogDebug(4, "{1,*0}  Material: {2} ({3})", depth, "", mesh.mMaterialIndex, (*pspMat)->GetName());
     }
 
     // positions

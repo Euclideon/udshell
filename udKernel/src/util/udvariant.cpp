@@ -446,29 +446,29 @@ udVariant udVariant::luaGet(ud::LuaState &l, int idx)
   }
 }
 
-ptrdiff_t udStringifyVariant(udSlice<char> buffer, udString format, const udVariant &v)
+ptrdiff_t udStringifyVariant(udSlice<char> buffer, udString format, const udVariant &v, const udVarArg *pArgs)
 {
   switch (v.type())
   {
     case udVariant::Type::Null:
-      return udStringifyTemplate(buffer, format, nullptr);
+      return udStringifyTemplate(buffer, format, nullptr, pArgs);
     case udVariant::Type::Bool:
-      return udStringifyTemplate(buffer, format, v.asBool());
+      return udStringifyTemplate(buffer, format, v.asBool(), pArgs);
     case udVariant::Type::Int:
-      return udStringifyTemplate(buffer, format, v.asInt());
+      return udStringifyTemplate(buffer, format, v.asInt(), pArgs);
     case udVariant::Type::Float:
-      return udStringifyTemplate(buffer, format, v.asFloat());
+      return udStringifyTemplate(buffer, format, v.asFloat(), pArgs);
     case udVariant::Type::Enum:
       UDASSERT(false, "TODO! Please write me!");
       return 0;
     case udVariant::Type::String:
-      return udStringifyTemplate(buffer, format, v.asString());
+      return udStringifyTemplate(buffer, format, v.asString(), pArgs);
     case udVariant::Type::Component:
-      return udStringifyTemplate(buffer, format, v.asComponent());
+      return udStringifyTemplate(buffer, format, v.asComponent(), pArgs);
     case udVariant::Type::Delegate:
-      return udStringifyTemplate(buffer, format, v.asDelegate());
+      return udStringifyTemplate(buffer, format, v.asDelegate(), pArgs);
     case udVariant::Type::Array:
-      return udStringifyTemplate(buffer, format, v.asArray());
+      return udStringifyTemplate(buffer, format, v.asArray(), pArgs);
     case udVariant::Type::AssocArray:
       UDASSERT(false, "TODO! Please write me!");
       return 0;
