@@ -4,31 +4,45 @@
 
 #include "kernel.h"
 
-
-Kernel *Kernel::createInstanceInternal(int argc, char** argv)
+namespace ud
 {
-  return new Kernel;
-}
 
-udResult Kernel::destroyInstanceInternal()
+class NullKernel : public Kernel
 {
-  delete this;
-  return udR_Success;
-}
+public:
+  NullKernel() {}
+  udResult InitInternal() { return udR_Success; }
+};
 
-
-// ---------------------------------------------------------------------------------------
-// Author: Manu Evans, May 2015
-udResult udKernel_RunMainLoop(Kernel *pKernel)
+Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 {
-  return udR_Success;
+  return new NullKernel;
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udResult udKernel_Quit()
+udResult Kernel::RunMainLoop()
 {
   return udR_Success;
+}
+
+// ---------------------------------------------------------------------------------------
+// Author: Manu Evans, May 2015
+udResult Kernel::Terminate()
+{
+  return udR_Success;
+}
+
+void Kernel::DispatchToMainThread(MainThreadCallback callback)
+{
+
+}
+
+void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+{
+
+}
+
 }
 
 #endif

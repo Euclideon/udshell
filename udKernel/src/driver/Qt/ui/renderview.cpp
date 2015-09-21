@@ -11,9 +11,9 @@
 #include <QtGui/QOpenGLFramebufferObject>
 #include <QSGSimpleTextureNode>
 
-#include "kernel.h"
 #include "renderview.h"
-#include "components/view.h"
+#include "kernel.h"
+#include "renderscene.h"
 
 udKeyCode qtKeyToUDKey(Qt::Key qk);
 
@@ -48,8 +48,6 @@ public:
   void synchronize(QQuickFramebufferObject * item)
   {
     RenderView *pRenderView = (RenderView*)item;
-
-    udDebugPrintf("FboRenderer::synchronize()\n");
 
     if (pRenderView->dirty)
     {
@@ -91,7 +89,7 @@ QQuickFramebufferObject::Renderer *RenderView::createRenderer() const
 
 void RenderView::AttachView(ud::ViewRef _spView)
 {
-  udDebugPrintf("RenderView::AttachView()\n");
+  s_pKernel->LogTrace("RenderView::AttachView()");
 
   spView = _spView;
   spView->FrameReady.Subscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
@@ -102,7 +100,7 @@ void RenderView::AttachView(ud::ViewRef _spView)
 
 void RenderView::componentComplete()
 {
-  udDebugPrintf("RenderView::componentComplete()\n");
+  s_pKernel->LogTrace("RenderView::componentComplete()");
   QQuickFramebufferObject::componentComplete();
 
   // TODO: Focus should be set based on mouse click from main window - possibly handle in QML
@@ -139,6 +137,7 @@ void RenderView::keyPressEvent(QKeyEvent *pEv)
   if (spView && spView->InputEvent(ev))
     pEv->accept();
 }
+
 void RenderView::keyReleaseEvent(QKeyEvent *pEv)
 {
   udKeyCode kc = qtKeyToUDKey((Qt::Key)pEv->key());
@@ -153,6 +152,7 @@ void RenderView::keyReleaseEvent(QKeyEvent *pEv)
   if (spView && spView->InputEvent(ev))
     pEv->accept();
 }
+
 void RenderView::mouseDoubleClickEvent(QMouseEvent *pEv)
 {
   bool handled = false;
@@ -160,6 +160,7 @@ void RenderView::mouseDoubleClickEvent(QMouseEvent *pEv)
   if (handled)
     pEv->accept();
 }
+
 void RenderView::mouseMoveEvent(QMouseEvent *pEv)
 {
   auto pos = pEv->localPos();
@@ -188,6 +189,7 @@ void RenderView::mouseMoveEvent(QMouseEvent *pEv)
   lastX = x; // TODO: MASSIVE HAX!!! FIX ME!!
   lastY = y;
 }
+
 void RenderView::mousePressEvent(QMouseEvent *pEv)
 {
   udInputEvent ev;
@@ -199,6 +201,7 @@ void RenderView::mousePressEvent(QMouseEvent *pEv)
   if (spView && spView->InputEvent(ev))
     pEv->accept();
 }
+
 void RenderView::mouseReleaseEvent(QMouseEvent *pEv)
 {
   udInputEvent ev;
@@ -210,6 +213,7 @@ void RenderView::mouseReleaseEvent(QMouseEvent *pEv)
   if (spView && spView->InputEvent(ev))
     pEv->accept();
 }
+
 void RenderView::touchEvent(QTouchEvent *pEv)
 {
   bool handled = false;

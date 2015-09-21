@@ -7,7 +7,6 @@
 #include <QMetaType>
 
 #include "../components/component_qt.h"
-#include "../components/qtcomponent_qt.h"
 
 #include "util/udvariant.h"
 

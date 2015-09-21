@@ -2,10 +2,11 @@
 #ifndef UD_QTCOMPONENT_QT_H
 #define UD_QTCOMPONENT_QT_H
 
-#include <qobject.h>
+#include <QObject>
 
 #include "components/component.h"
-#include "kernel.h"
+
+class ud::Kernel;
 
 namespace qt
 {

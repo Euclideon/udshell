@@ -46,6 +46,8 @@ public:
   explicit udNewPepperInstance(PP_Instance instance);
   virtual ~udNewPepperInstance();
 
+  udResult InitInternal() override;
+
   // Pepper overrides
   virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
   virtual void DidChangeView(const pp::View& view);
@@ -88,15 +90,9 @@ void udNewPepperInstance::SendToJsCallback(udString sender, udString message, co
 }
 
 // ---------------------------------------------------------------------------------------
-udResult Kernel::InitInstanceInternal()
+udResult udNewPepperInstance::InitInternal()
 {
   RegisterMessageHandler("js", MakeDelegate((udNewPepperInstance*)this, &udNewPepperInstance::SendToJsCallback));
-  return udR_Success;
-}
-
-// ---------------------------------------------------------------------------------------
-udResult Kernel::DestroyInstanceInternal()
-{
   return udR_Success;
 }
 

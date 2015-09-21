@@ -18,12 +18,22 @@ static Uint32 s_sdlEvent = (Uint32)-1;
 
 using namespace ud;
 
+class SDLKernel : public Kernel
+{
+public:
+  SDLKernel() {}
+
+  udResult InitInternal() override;
+  udResult Destroy() override;
+  udResult RunMainLoop() override;
+};
+
 Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 {
   return new SDLKernel;
 }
 
-udResult Kernel::InitInstanceInternal()
+udResult SDLKernel::InitInternal()
 {
   s_displayWidth = 1280;
   s_displayHeight = 720;
@@ -66,14 +76,13 @@ udResult Kernel::InitInstanceInternal()
   return udR_Success;
 }
 
-udResult Kernel::DestroyInstanceInternal()
+udResult SDLKernel::Destroy()
 {
   // this
   SDL_GL_DeleteContext(s_context);
   SDL_Quit();
 
   DeinitRender();
-  delete this;
   return udR_Success;
 }
 
@@ -121,7 +130,7 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   udDestroySemaphore(&dispatch.pSem);
 }
 
-udResult Kernel::RunMainLoop()
+udResult SDLKernel::RunMainLoop()
 {
   while (!s_done)
   {

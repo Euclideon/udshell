@@ -3,11 +3,8 @@
 
 #include <QtQuick/QQuickFramebufferObject>
 
-#include "kernel.h"
-#include "renderscene.h"
 #include "components/view.h"
 
-extern ud::Kernel *s_pKernel;
 
 namespace qt
 {
@@ -49,8 +46,11 @@ private:
 private slots:
   void OnResize()
   {
-    if (spView)
-      spView->Resize(width(), height());
+    int w = (int)width();
+    int h = (int)height();
+
+    if (spView && w > 0 && h > 0)
+      spView->Resize(w, h);
   }
 
   void OnFrameReady()

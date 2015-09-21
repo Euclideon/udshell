@@ -2,8 +2,6 @@
 
 #if UDUI_DRIVER == UDDRIVER_QT
 
-#include "../util/typeconvert.h"
-
 #include "qtcomponent_qt.h"
 
 namespace qt

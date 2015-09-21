@@ -125,7 +125,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
 
   // platform init
-  UD_ERROR_CHECK(pKernel->InitInstanceInternal());
+  UD_ERROR_CHECK(pKernel->InitInternal());
 
 epilogue:
   if (result != udR_Success)
@@ -180,9 +180,6 @@ udResult Kernel::Destroy()
   // unregister components, free stuff
   //...
 
-  // TODO: this crashes - fix!
-  //udDelete(pLua);
-
   // TODO: Destroy the streamer timer
   // pKernel->spStreamerTimer;
 
@@ -193,13 +190,12 @@ udResult Kernel::Destroy()
 
   udOctree_Shutdown();
 
-  delete pRenderer;
+  // TODO: fix!
+  //delete pRenderer;
 
   udHAL_Deinit();
 
-  UD_ERROR_CHECK(DestroyInstanceInternal());
-
-epilogue:
+  delete this;
 
   if (renderSceneRenderResult != udR_Success)
     result = renderSceneRenderResult;

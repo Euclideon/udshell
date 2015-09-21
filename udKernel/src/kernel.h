@@ -34,7 +34,7 @@ public:
   typedef FastDelegate<void(udString sender, udString message, const udVariant &data)> MessageHandler;
 
   static udResult Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount = 0);
-  udResult Destroy();
+  virtual udResult Destroy();
 
   udResult SendMessage(udString target, udString sender, udString message, const udVariant &data);
 
@@ -91,7 +91,7 @@ public:
   udResult RegisterExtensions(const ComponentDesc *pDesc, const udSlice<const udString> exts);
   DataSourceRef CreateDataSourceFromExtension(udString ext, udInitParams initParams);
 
-  udResult RunMainLoop();
+  virtual udResult RunMainLoop() { return udR_Success; }
   udResult Terminate();
 
 protected:
@@ -130,11 +130,12 @@ protected:
   TimerRef spStreamerTimer = nullptr;
   TimerRef spUpdateTimer = nullptr;
 
+  virtual ~Kernel() {}
+
   udResult DoInit(Kernel *pKernel);
 
   static Kernel *CreateInstanceInternal(udInitParams commandLine);
-  udResult InitInstanceInternal();
-  udResult DestroyInstanceInternal();
+  virtual udResult InitInternal() = 0;
 
   udResult InitComponents();
   udResult InitRender();

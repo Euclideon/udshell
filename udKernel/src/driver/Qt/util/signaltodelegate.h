@@ -2,7 +2,7 @@
 #ifndef SIGNALTODELEGATE_H
 #define SIGNALTODELEGATE_H
 
-// suppress warnings from qvariant
+// suppress warnings from qt
 #if defined(_MSC_VER)
 # pragma warning(push,3)
 #endif
@@ -13,7 +13,6 @@
 #endif
 
 #include "typeconvert.h"
-#include "util/foreach.h"
 
 namespace qt
 {
