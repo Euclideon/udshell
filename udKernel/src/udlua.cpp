@@ -168,6 +168,10 @@ LuaState::LuaState(Kernel *pKernel)
 
   exec(init_lua);
 
+  pushString("_COMPONENTS");
+  lua_createtable(L, 0, 0);
+  lua_settable(L, LUA_REGISTRYINDEX);
+
   // TODO: register things
 
   lua_register(L, "SendMessage", (lua_CFunction)SendMessage);
@@ -231,13 +235,17 @@ udVariant LuaState::get(int idx)
   return udVariant::luaGet(*this, idx);
 }
 
-void LuaState::set(udVariant v, udVariant key, LuaLocation loc)
+void LuaState::set(udVariant key, udVariant v, LuaLocation loc)
 {
   int idx;
   switch (loc)
   {
     case LuaLocation::Global:
       lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+      idx = -1; break;
+    case LuaLocation::Components:
+      pushString("_COMPONENTS");
+      lua_gettable(L, LUA_REGISTRYINDEX);
       idx = -1; break;
     case LuaLocation::Top:
       idx = -1; break;
@@ -251,6 +259,7 @@ void LuaState::set(udVariant v, udVariant key, LuaLocation loc)
   switch (loc)
   {
     case LuaLocation::Global:
+    case LuaLocation::Components:
       lua_pop(L, 1);
       break;
     default:
@@ -266,6 +275,10 @@ void LuaState::setNil(udVariant key, LuaLocation loc)
     case LuaLocation::Global:
       lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
       idx = -1; break;
+    case LuaLocation::Components:
+      pushString("_COMPONENTS");
+      lua_gettable(L, LUA_REGISTRYINDEX);
+      idx = -1; break;
     case LuaLocation::Top:
       idx = -1; break;
     default:
@@ -278,6 +291,7 @@ void LuaState::setNil(udVariant key, LuaLocation loc)
   switch (loc)
   {
     case LuaLocation::Global:
+    case LuaLocation::Components:
       lua_pop(L, 1);
       break;
     default:
@@ -285,13 +299,17 @@ void LuaState::setNil(udVariant key, LuaLocation loc)
   }
 }
 
-void LuaState::setComponent(ComponentRef c, udVariant key, LuaLocation loc)
+void LuaState::setComponent(udVariant key, ComponentRef c, LuaLocation loc)
 {
   int idx;
   switch (loc)
   {
     case LuaLocation::Global:
       lua_geti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+      idx = -1; break;
+    case LuaLocation::Components:
+      pushString("_COMPONENTS");
+      lua_gettable(L, LUA_REGISTRYINDEX);
       idx = -1; break;
     case LuaLocation::Top:
       idx = -1; break;
@@ -305,6 +323,7 @@ void LuaState::setComponent(ComponentRef c, udVariant key, LuaLocation loc)
   switch (loc)
   {
     case LuaLocation::Global:
+    case LuaLocation::Components:
       lua_pop(L, 1);
       break;
     default:
@@ -316,7 +335,8 @@ void LuaState::setComponent(ComponentRef c, udVariant key, LuaLocation loc)
 // *** bind components to Lua ***
 void LuaState::pushComponentMetatable(const ComponentDesc &desc)
 {
-  if (luaL_newmetatable(L, desc.id.ptr) == 0)
+  udMutableString64 t; t.append("ud::", desc.id, "\0");
+  if (luaL_newmetatable(L, t.ptr) == 0)
     return;
 
   // record the logical type
@@ -404,7 +424,7 @@ void LuaState::pushDescriptor(const ComponentDesc &desc)
   lua_setfield(L, -2, "properties");
 }
 
-void LuaState::pushComponent(ComponentRef c)
+void LuaState::pushComponent(const ComponentRef &c)
 {
   if (!c)
   {

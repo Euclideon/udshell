@@ -1,5 +1,6 @@
 #include "geomsource.h"
 #include "components/nodes/node.h"
+#include "components/nodes/geomnode.h"
 #include "components/resources/array.h"
 #include "components/resources/metadata.h"
 #include "components/resources/model.h"
@@ -116,6 +117,24 @@ void GeomSource::Create(StreamRef spSource)
   if (!pScene)
     return; // TODO: some sort of error?
 
+  // marse materials
+  ParseMaterials(pScene);
+
+  // marse meshes
+  ParseMeshes(pScene);
+
+  // parse the scene
+  if (pScene->mRootNode)
+  {
+    aiMatrix4x4 world;
+    size_t numMeshes = 0;
+    NodeRef spRoot = ParseNode(pScene, pScene->mRootNode, &world, numMeshes);
+    resources.Insert("scene0", spRoot);
+  }
+}
+
+void GeomSource::ParseMaterials(const aiScene *pScene)
+{
   // copy all the materials
   for (uint32_t i = 0; i<pScene->mNumMaterials; ++i)
   {
@@ -144,26 +163,146 @@ void GeomSource::Create(StreamRef spSource)
     aiMat.Get(AI_MATKEY_COLOR_SPECULAR, color);
     spMat->SetMaterialProperty("specular", CopyAIColor(color));
 
-    // TODO: foreach texture type, get texture
+    // TODO: foreach texture type...
     aiString texture;
     aiMat.Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), texture);
-    LogDebug(4, "  Texture: {0}", FromAIString(texture));
+    if (texture.length > 0)
+    {
+      LogDebug(4, "  Texture: {0}", FromAIString(texture));
 
-    // TODO: try and load texture...
-    //...
+      // TODO: try and load texture...
+      //...
+    }
 
     // add resource
-    udMutableString64 buffer; buffer.concat("material", i);
-    resources.Insert(buffer, spMat);
+    resources.Insert(udSharedString::concat("material", i), spMat);
   }
+}
 
-  // parse the scene
-  if (pScene->mRootNode)
+void GeomSource::ParseMeshes(const aiScene *pScene)
+{
+  // copy all the meshes
+  for (uint32_t i = 0; i<pScene->mNumMeshes; ++i)
   {
-    aiMatrix4x4 world;
-    size_t numMeshes = 0;
-    NodeRef spRoot = ParseNode(pScene, pScene->mRootNode, &world, numMeshes);
-    resources.Insert("scene0", spRoot);
+    aiMesh &mesh = *pScene->mMeshes[i];
+
+    LogDebug(4, "Mesh {0}: {1}", i, FromAIString(mesh.mName));
+
+    // create a model
+    ModelRef spMesh = pKernel->CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
+
+    // get material
+    ResourceRef *pspMat = resources.Get(udSharedString::concat("material", mesh.mMaterialIndex));
+    if (pspMat)
+    {
+      spMesh->SetMaterial(component_cast<Material>(*pspMat));
+      LogDebug(4, "  Material: {0} ({1})", mesh.mMaterialIndex, (*pspMat)->GetName());
+    }
+    else
+    {
+      // unknown material!
+      LogWarning(2, "  Material: Unknown material!");
+    }
+
+    // positions
+    typedef std::tuple<float[3]> VertPos;
+    udSlice<VertPos> verts((VertPos*)mesh.mVertices, mesh.mNumVertices);
+
+    ArrayBufferRef spVerts = pKernel->CreateComponent<ArrayBuffer>();
+    spVerts->AllocateFromData<VertPos>(verts);
+
+    resources.Insert(udSharedString::concat("positions", i), spVerts);
+
+    spMesh->SetVertexArray(spVerts, { "a_position" });
+
+    // normals
+    if (mesh.HasNormals())
+    {
+      typedef std::tuple<float[3]> VertNorm;
+      udSlice<VertNorm> normals((VertNorm*)mesh.mNormals, mesh.mNumVertices);
+
+      ArrayBufferRef spNormals = pKernel->CreateComponent<ArrayBuffer>();
+      spNormals->AllocateFromData<VertNorm>(normals);
+
+      resources.Insert(udSharedString::concat("normals", i), spNormals);
+
+      spMesh->SetVertexArray(spNormals, { "a_normal" });
+    }
+
+    // binormals & tangents
+    if (mesh.HasTangentsAndBitangents())
+    {
+      typedef std::tuple<float[3], float[3]> VertBinTan;
+
+      ArrayBufferRef spBinTan = pKernel->CreateComponent<ArrayBuffer>();
+      spBinTan->Allocate<VertBinTan>(mesh.mNumVertices);
+
+      VertBinTan *pBT = spBinTan->Map<VertBinTan>();
+      for (uint32_t j = 0; j<mesh.mNumVertices; ++j)
+      {
+        std::get<0>(pBT[j])[0] = mesh.mBitangents[j].x;
+        std::get<0>(pBT[j])[1] = mesh.mBitangents[j].y;
+        std::get<0>(pBT[j])[2] = mesh.mBitangents[j].z;
+        std::get<1>(pBT[j])[0] = mesh.mTangents[j].x;
+        std::get<1>(pBT[j])[1] = mesh.mTangents[j].y;
+        std::get<1>(pBT[j])[2] = mesh.mTangents[j].z;
+      }
+      spBinTan->Unmap();
+
+      resources.Insert(udSharedString::concat("binormalstangents", i), spBinTan);
+
+      spMesh->SetVertexArray(spBinTan, { "a_binormal", "a_tangent" });
+    }
+
+    // UVs
+    for (uint32_t t = 0; t<mesh.GetNumUVChannels(); ++t)
+    {
+      typedef std::tuple<float[3]> VertUV;
+      udSlice<VertUV> uvs((VertUV*)mesh.mTextureCoords[t], mesh.mNumVertices);
+
+      ArrayBufferRef spUVs = pKernel->CreateComponent<ArrayBuffer>();
+      spUVs->AllocateFromData<VertUV>(uvs);
+
+      resources.Insert(udSharedString::concat("uvs", i, "_", t), spUVs);
+
+      spMesh->SetVertexArray(spUVs, { udSharedString::concat("a_uv", t) });
+    }
+
+    // Colors
+    for (uint32_t c = 0; c<mesh.GetNumColorChannels(); ++c)
+    {
+      typedef std::tuple<float[4]> VertColor;
+      udSlice<VertColor> colors((VertColor*)mesh.mColors[c], mesh.mNumVertices);
+
+      ArrayBufferRef spColors = pKernel->CreateComponent<ArrayBuffer>();
+      spColors->AllocateFromData<VertColor>(colors);
+
+      resources.Insert(udSharedString::concat("colors", i, "_", c), spColors);
+
+      spMesh->SetVertexArray(spColors, { udSharedString::concat("a_color", c) });
+    }
+
+    // indices (faces)
+    ArrayBufferRef spIndices = pKernel->CreateComponent<ArrayBuffer>();
+    spIndices->Allocate<uint32_t>(mesh.mNumFaces * 3);
+
+    uint32_t *pIndices = spIndices->Map<uint32_t>();
+    for (uint32_t j = 0; j<mesh.mNumFaces; ++j)
+    {
+      aiFace &f = mesh.mFaces[j];
+      UDASSERT(f.mNumIndices == 3, "Prim is not a triangle!");
+      *pIndices++ = f.mIndices[0];
+      *pIndices++ = f.mIndices[1];
+      *pIndices++ = f.mIndices[2];
+    }
+    spIndices->Unmap();
+
+    resources.Insert(udSharedString::concat("indices", i), spIndices);
+
+    spMesh->SetIndexArray(spIndices);
+
+    // add mesh resource
+    resources.Insert(udSharedString::concat("mesh", i), spMesh);
   }
 }
 
@@ -193,128 +332,23 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   // parse node mesh
   for (uint32_t i = 0; i<node.mNumMeshes; ++i)
   {
-    aiMesh &mesh = *pScene->mMeshes[node.mMeshes[i]];
-
-    LogDebug(4, "{1,*0}Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], FromAIString(mesh.mName));
-
-    // create a model
-    ModelRef spMesh = pKernel->CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
-
-    // get material
-    udMutableString64 resName; resName.concat("material", mesh.mMaterialIndex);
-    ResourceRef *pspMat = resources.Get(resName);
-    if (pspMat)
+    ResourceRef *pspMesh = resources.Get(udSharedString::concat("mesh", node.mMeshes[i]));
+    if (pspMesh)
     {
-      spMesh->SetMaterial(component_cast<Material>(*pspMat));
-      LogDebug(4, "{1,*0}  Material: {2} ({3})", depth, "", mesh.mMaterialIndex, (*pspMat)->GetName());
+      // create geom node
+      GeomNodeRef spGeomNode = pKernel->CreateComponent<GeomNode>();
+      spGeomNode->SetModel(shared_pointer_cast<Model>(*pspMesh));
+
+      // add geom node to world node (we could collapse this if there is only one mesh...)
+      spNode->AddChild(spGeomNode);
+
+      LogDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], (*pspMesh)->name);
     }
-
-    // positions
-    typedef std::tuple<float[3]> VertPos;
-    udSlice<VertPos> verts((VertPos*)mesh.mVertices, mesh.mNumVertices);
-
-    ArrayBufferRef spVerts = pKernel->CreateComponent<ArrayBuffer>();
-    spVerts->AllocateFromData<VertPos>(verts);
-
-    resName.concat("positions", numMeshes);
-    resources.Insert(resName, spVerts);
-
-    spMesh->SetVertexArray(spVerts, { "a_position" });
-
-    // normals
-    if (mesh.HasNormals())
+    else
     {
-      typedef std::tuple<float[3]> VertNorm;
-      udSlice<VertNorm> normals((VertNorm*)mesh.mNormals, mesh.mNumVertices);
-
-      ArrayBufferRef spNormals = pKernel->CreateComponent<ArrayBuffer>();
-      spNormals->AllocateFromData<VertNorm>(normals);
-
-      resName.concat("normals", numMeshes);
-      resources.Insert(resName, spNormals);
-
-      spMesh->SetVertexArray(spNormals, { "a_normal" });
+      // unknown mesh!
+      LogWarning(2, "{1,*0}  Mesh {2}: {3} Unknown mesh!!", depth, "", i, node.mMeshes[i]);
     }
-
-    // binormals & tangents
-    if (mesh.HasTangentsAndBitangents())
-    {
-      typedef std::tuple<float[3], float[3]> VertBinTan;
-
-      ArrayBufferRef spBinTan = pKernel->CreateComponent<ArrayBuffer>();
-      spBinTan->Allocate<VertBinTan>(mesh.mNumVertices);
-
-      VertBinTan *pBT = spBinTan->Map<VertBinTan>();
-      for (uint32_t j = 0; j<mesh.mNumVertices; ++j)
-      {
-        std::get<0>(pBT[j])[0] = mesh.mBitangents[j].x;
-        std::get<0>(pBT[j])[1] = mesh.mBitangents[j].y;
-        std::get<0>(pBT[j])[2] = mesh.mBitangents[j].z;
-        std::get<1>(pBT[j])[0] = mesh.mTangents[j].x;
-        std::get<1>(pBT[j])[1] = mesh.mTangents[j].y;
-        std::get<1>(pBT[j])[2] = mesh.mTangents[j].z;
-      }
-      spBinTan->Unmap();
-
-      resName.concat("binormalstangents", numMeshes);
-      resources.Insert(resName, spBinTan);
-
-      spMesh->SetVertexArray(spBinTan, { "a_binormal", "a_tangent" });
-    }
-
-    // UVs
-    for (uint32_t t = 0; t<mesh.GetNumUVChannels(); ++t)
-    {
-      typedef std::tuple<float[3]> VertUV;
-      udSlice<VertUV> uvs((VertUV*)mesh.mTextureCoords[t], mesh.mNumVertices);
-
-      ArrayBufferRef spUVs = pKernel->CreateComponent<ArrayBuffer>();
-      spUVs->AllocateFromData<VertUV>(uvs);
-
-      resName.concat("uvs", numMeshes, "_", t);
-      resources.Insert(resName, spUVs);
-
-      spMesh->SetVertexArray(spUVs, { udSharedString::concat("a_uv", t) });
-    }
-
-    // Colors
-    for (uint32_t c = 0; c<mesh.GetNumColorChannels(); ++c)
-    {
-      typedef std::tuple<float[4]> VertColor;
-      udSlice<VertColor> colors((VertColor*)mesh.mColors[c], mesh.mNumVertices);
-
-      ArrayBufferRef spColors = pKernel->CreateComponent<ArrayBuffer>();
-      spColors->AllocateFromData<VertColor>(colors);
-
-      resName.concat("colors", numMeshes, "_", c);
-      resources.Insert(resName, spColors);
-
-      spMesh->SetVertexArray(spColors, { udSharedString::concat("a_color", c) });
-    }
-
-    // indices (faces)
-    ArrayBufferRef spIndices = pKernel->CreateComponent<ArrayBuffer>();
-    spIndices->Allocate<uint32_t>(mesh.mNumFaces * 3);
-
-    uint32_t *pIndices = spIndices->Map<uint32_t>();
-    for (uint32_t j = 0; j<mesh.mNumFaces; ++j)
-    {
-      aiFace &f = mesh.mFaces[j];
-      UDASSERT(f.mNumIndices == 3, "Prim is not a triangle!");
-      *pIndices++ = f.mIndices[0];
-      *pIndices++ = f.mIndices[1];
-      *pIndices++ = f.mIndices[2];
-    }
-    spIndices->Unmap();
-
-    resName.concat("indices", numMeshes);
-    resources.Insert(resName, spIndices);
-
-    spMesh->SetIndexArray(spIndices);
-
-    // add mesh resource
-    resName.concat("mesh", numMeshes++);
-    resources.Insert(resName, spMesh);
   }
 
   // recurse children

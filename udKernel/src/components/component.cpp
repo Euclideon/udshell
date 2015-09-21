@@ -98,6 +98,8 @@ void Component::Init(udInitParams initParams)
 
 Component::~Component()
 {
+  LogDebug(4, "Destroy component: {0} ({1})", uid, name);
+  pKernel->DestroyComponent(this);
 }
 
 

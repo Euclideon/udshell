@@ -115,7 +115,7 @@ protected:
     }
   };
 
-  udAVLTree<udString, ResourceRef> resources;
+  udAVLTree<udSharedString, ResourceRef> resources;
   Flags flags;
 };
 

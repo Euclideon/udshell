@@ -14,7 +14,7 @@ ComponentDesc GeomNode::descriptor =
   UDSHELL_APIVERSION, // udVersion
   UDSHELL_PLUGINVERSION, // pluginVersion
 
-  "gromnode",    // id
+  "geomnode",    // id
   "GeomNode",  // displayName
   "Is a geometry node", // description
 

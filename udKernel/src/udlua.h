@@ -53,7 +53,8 @@ enum class LuaType : int
 enum class LuaLocation : int
 {
   Global = 0,
-  Top = 1
+  Components,
+  Top
 };
 
 
@@ -85,7 +86,7 @@ public:
   void pushString(udString val);
   void pushLightUserData(void *val);
 
-  void pushComponent(ComponentRef c);
+  void pushComponent(const ComponentRef &c);
   void pushDelegate(const udVariant::VarDelegate &d);
 
   void push(const udVariant &v);
@@ -114,9 +115,9 @@ public:
 
   // set
   void setNil(udVariant key, LuaLocation loc = LuaLocation::Global);
-  void setComponent(ComponentRef c, udVariant key, LuaLocation loc = LuaLocation::Global);
+  void setComponent(udVariant key, ComponentRef c, LuaLocation loc = LuaLocation::Global);
 
-  void set(udVariant v, udVariant key, LuaLocation loc = LuaLocation::Global);
+  void set(udVariant key, udVariant v, LuaLocation loc = LuaLocation::Global);
 
 private:
   lua_State *L;
