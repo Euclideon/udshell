@@ -20,11 +20,10 @@ class QtKernel : public ud::Kernel, public QObject
 {
 public:
   QtKernel(udInitParams commandLine);
-  virtual ~QtKernel() {}
+  virtual ~QtKernel();
 
-  udResult Init();
-  udResult Shutdown();
-  udResult RunMainLoop();
+  udResult InitInternal() override;
+  udResult RunMainLoop() override;
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
   bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
@@ -38,7 +37,7 @@ public:
 private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);
   void OnFirstRender();
-  void Destroy();
+  void OnAppQuit();
 
 private:
   void DoInit(ud::Kernel *);

@@ -2,9 +2,8 @@
 #ifndef UD_COMPONENT_QT_H
 #define UD_COMPONENT_QT_H
 
-#include <qobject.h>
-#include <qvariant.h>
-#include <qjsvalue.h>
+#include <QVariant>
+#include <QJSValue>
 
 #include "components/component.h"
 

@@ -1,15 +1,13 @@
 #pragma once
-#ifndef QTCOMPONENT_H
-#define QTCOMPONENT_H
+#ifndef QMLBINDINGS_QT_H
+#define QMLBINDINGS_QT_H
 
-#include <QObject>
 #include <QQmlComponent>
 
-#include "../udQtKernel_Internal.h"
 #include "signaltodelegate.h"
 #include "typeconvert.h"
 
-#include "components/component.h"
+#include "../components/qtcomponent_qt.h"
 
 namespace qt
 {
@@ -213,4 +211,4 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
 
 } // namespace qt
 
-#endif  // QTCOMPONENT_H
+#endif  // QMLBINDINGS_QT_H

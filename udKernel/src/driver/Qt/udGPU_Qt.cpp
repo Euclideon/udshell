@@ -193,8 +193,6 @@ void onGLMessageLogged(QOpenGLDebugMessage message)
 // ***************************************************************************************
 void udGPU_Init()
 {
-  udDebugPrintf("udGPU_INIT()\n");
-
   // TODO: gracefully handle this case, maybe try to create a context or postpone init?
   UDASSERT(QOpenGLContext::currentContext(), "QOpenGLContext::currentContext() should not be null when we call udGPU_Init");
 
@@ -228,8 +226,6 @@ void udGPU_Init()
 // ***************************************************************************************
 void udGPU_Deinit()
 {
-  udDebugPrintf("udGPU_DEINIT()\n");
-
   // TODO: cleanup all current gl objects?
 
 //#if UD_DEBUG

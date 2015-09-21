@@ -8,6 +8,7 @@
 // Author: Manu Evans, May 2015
 udTexture* udTexture_CreateTexture(udTextureType type, size_t width, size_t height, int levels, udImageFormat format)
 {
+  return nullptr;
 }
 
 // ***************************************************************************************

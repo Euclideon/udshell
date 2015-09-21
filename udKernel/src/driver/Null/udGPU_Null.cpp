@@ -11,9 +11,15 @@ void udGPU_RenderVertices(udShaderProgram *pProgram, udFormatDeclaration *pVerte
 {
 }
 
+void udGPU_RenderIndices(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udArrayBuffer *pIB, udPrimitiveType primType, size_t indexCount,
+  size_t udUnusedParam(firstIndex), size_t udUnusedParam(firstVertex))
+{
+}
+
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udGPU_RenderRanges(struct udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udPrimitiveType primType, udVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
+void udGPU_RenderRanges(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udPrimitiveType primType,
+  udVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
 {
 }
 

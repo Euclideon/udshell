@@ -9,24 +9,70 @@
 // Author: Manu Evans, May 2015
 udShader* udShader_CreateShaderFromFile(const char *pFilename, udShaderType type)
 {
+  return nullptr;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 udShader* udShader_CreateShader(const char *pSource, size_t length, udShaderType type)
 {
+  return nullptr;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader *pPixelShader)
 {
+  return nullptr;
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+size_t udShader_GetNumAttributes(udShaderProgram *pProgram)
+{
+  return 0;
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+const char *udShader_GetAttributeName(udShaderProgram *pProgram, size_t i)
+{
+  return "";
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+size_t udShader_GetAttributeType(udShaderProgram *pProgram, size_t i)
+{
+  return 0;
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+size_t udShader_GetNumUniforms(udShaderProgram *pProgram)
+{
+  return 0;
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+const char *udShader_GetUniformName(udShaderProgram *pProgram, size_t i)
+{
+  return "";
+}
+
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+size_t udShader_GetUniformType(udShaderProgram *pProgram, size_t i)
+{
+  return 0;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 int udShader_FindShaderParameter(udShaderProgram *pProgram, const char *pName)
 {
+  return -1;
 }
 
 // ***************************************************************************************

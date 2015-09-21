@@ -79,22 +79,42 @@ QtKernel::QtKernel(udInitParams commandLine)
 }
 
 // ---------------------------------------------------------------------------------------
-udResult QtKernel::Init()
+QtKernel::~QtKernel()
 {
-  LogTrace("QtKernel::Init()");
-  LogInfo(2, "Initialising udShell...");
+  if (DeinitRender() != udR_Success)
+  {
+    // TODO: gracefully handle error with DeinitRender ?
+    LogError("Error cleaning up renderer");
+  }
 
-  RegisterComponent<QtComponent>();
+  delete pTopLevelWindow;
+  delete pMainThreadContext;
+  delete pQmlEngine;
 
+  pApplication->deleteLater();
+}
+
+// ---------------------------------------------------------------------------------------
+udResult QtKernel::InitInternal()
+{
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   UDASSERT(argc >= 1, "argc must contain at least 1");
   UDASSERT(argv.length == argc, "argv length should match argc");
+
+  LogTrace("QtKernel::InitInternal()");
+  LogInfo(2, "Initialising udShell...");
+
+  if (RegisterComponent<QtComponent>() != udR_Success)
+  {
+    LogError("Unable to register QtComponent");
+    return udR_Failure_;
+  }
 
   // create our qapplication
   pApplication = new QGuiApplication(argc, argv.ptr);
 
   // make sure we cleanup the kernel when we're about to quit
-  QObject::connect(pApplication, &QCoreApplication::aboutToQuit, this, &QtKernel::Destroy);
+  QObject::connect(pApplication, &QCoreApplication::aboutToQuit, this, &QtKernel::OnAppQuit);
 
   pQmlEngine = new QQmlEngine(this);
 
@@ -130,24 +150,6 @@ udResult QtKernel::Init()
   // we'll hook into the splash screen to do this
   QObject::connect(pTopLevelWindow, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender, Qt::DirectConnection);
 
-  return udR_Success;
-}
-
-// ---------------------------------------------------------------------------------------
-udResult QtKernel::Shutdown()
-{
-  LogTrace("QtKernel::Shutdown()");
-
-  delete pTopLevelWindow;
-
-  if (ud::Kernel::DeinitRender() != udR_Success)
-  {
-    // TODO: gracefully handle error with DeinitRender ?
-    LogError("Error cleaning up renderer");
-  }
-
-  delete pQmlEngine;
-  delete this;
   return udR_Success;
 }
 
@@ -231,20 +233,21 @@ void QtKernel::OnFirstRender()
   LogTrace("QtKernel::OnFirstRender()");
 
   // we only want this called on the first render cycle
+  // this will be after the qt scenegraph and render thread has been created for the first window (splash screen)
   QObject::disconnect(pTopLevelWindow, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender);
 
   // TODO: hook up render thread id stuff again
   //renderThreadId = QThread::currentThreadId();
 
-  // dispatch init call
+  // dispatch init call to create our render context and resources on the main thread
   DispatchToMainThread(MakeDelegate(this, &QtKernel::DoInit));
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::Destroy()
+void QtKernel::OnAppQuit()
 {
-  LogTrace("QtKernel::Destroy()");
-  ud::Kernel::Destroy();
+  LogTrace("QtKernel::OnAppQuit()");
+  Destroy();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -312,30 +315,12 @@ Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
 }
 
 // ---------------------------------------------------------------------------------------
-udResult Kernel::InitInstanceInternal()
-{
-  return static_cast<qt::QtKernel*>(this)->Init();
-}
-
-// ---------------------------------------------------------------------------------------
-udResult Kernel::DestroyInstanceInternal()
-{
-  return static_cast<qt::QtKernel*>(this)->Shutdown();
-}
-
-// ---------------------------------------------------------------------------------------
 ViewRef Kernel::SetFocusView(ViewRef spView)
 {
   LogTrace("Kernel::SetFocusView()");
   ViewRef spOld = spFocusView;
   spFocusView = spView;
   return spOld;
-}
-
-// ---------------------------------------------------------------------------------------
-udResult Kernel::RunMainLoop()
-{
-  return static_cast<qt::QtKernel*>(this)->RunMainLoop();
 }
 
 // ---------------------------------------------------------------------------------------

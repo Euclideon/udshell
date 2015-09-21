@@ -73,14 +73,14 @@ void Init(udString sender, udString message, const udVariant &data)
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);
 
-  WindowRef spMainWindow = s_pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
+  auto spMainWindow = s_pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
   if (!spMainWindow)
   {
     s_pKernel->LogError("Error creating MainWindow UI Component\n");
     return;
   }
 
-  ViewportRef spViewport = s_pKernel->CreateComponent<Viewport>({ { "file", "qrc:/kernel/viewport.qml" }, { "view", spView } });
+  auto spViewport = s_pKernel->CreateComponent<Viewport>({ { "file", "qrc:/kernel/viewport.qml" }, { "view", spView } });
   if (!spViewport)
   {
     s_pKernel->LogError("Error creating Main Viewport Component\n");
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
   s_pKernel->RegisterMessageHandler("init", &Init);
 
-  if (s_pKernel->RunMainLoop() == udR_Success)
+  if (s_pKernel->RunMainLoop() != udR_Success)
   {
     // TODO: improve error handling/reporting
     udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
