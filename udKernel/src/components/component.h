@@ -44,7 +44,7 @@ public:
   template<typename ...Args>
   udVariant CallMethod(udString method, Args... args)
   {
-    udVariant varargs[sizeof...(Args)] = { args... };
+    udVariant varargs[sizeof...(Args) + 1] = { args... };
     return CallMethod(method, udSlice<udVariant>(varargs, sizeof...(Args)));
   }
 
