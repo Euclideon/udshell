@@ -3,6 +3,10 @@
 
 #include <QQuickWindow>
 #include <QQuickItem>
+#include "kernel.h"
+#include "components/shortcutmanager.h"
+
+extern ud::Kernel *s_pKernel;
 
 namespace qt
 {
@@ -21,6 +25,19 @@ protected:
     QQuickWindow::resizeEvent(pEv);
     QQuickItem *pRoot = contentItem();
     pRoot->setSize(pEv->size());
+  }
+
+  void keyPressEvent(QKeyEvent *pEv)
+  {
+    if (!pEv->isAutoRepeat())
+    {
+      QKeySequence seq(pEv->key() + pEv->modifiers());
+      bool ret = s_pKernel->GetShortcutManager()->HandleShortcutEvent(seq.toString().toUtf8().data());
+      if (ret)
+        return;
+    }
+
+    QQuickWindow::keyPressEvent(pEv);
   }
 };
 
