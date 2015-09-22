@@ -11,6 +11,7 @@
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
 #include "driver/SDL/udSDLKernel_Internal.h"
+#include "eperror.h"
 
 static void ProcessCmdline(int argc, char *argv[]);
 
@@ -50,24 +51,22 @@ static struct
 // Author: David Ely, September 2015
 static void ViewerInit(udString sender, udString message, const udVariant &data)
 {
-  using namespace ud;
+  udResult result = udR_Success;
+  EPERROR(result);
 
+  using namespace ud;
   //TODO: Error handling for the whole function, perhaps send message with error?
   mData.spView = mData.pKernel->CreateComponent<View>();
-  if (!mData.spView)
-    return;
+  EPERROR_NULL(mData.spView, udR_Failure_, { mData.spView = nullptr; });
 
   mData.spScene = mData.pKernel->CreateComponent<Scene>();
-  if (!mData.spScene)
-    return;
+  EPERROR_NULL(mData.spScene, udR_Failure_, { mData.spScene = nullptr; });
 
   mData.spSimpleCamera = mData.pKernel->CreateComponent<SimpleCamera>();
-  if (!mData.spSimpleCamera)
-    return;
+  EPERROR_NULL(mData.spSimpleCamera, udR_Failure_, { mData.spSimpleCamera = nullptr; });
 
   mData.spUDNode = mData.pKernel->CreateComponent<UDNode>();
-  if (!mData.spUDNode)
-    return;
+  EPERROR_NULL(mData.spUDNode, udR_Failure_, { mData.spUDNode = nullptr; });
 
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None, nullptr, nullptr, nullptr };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
