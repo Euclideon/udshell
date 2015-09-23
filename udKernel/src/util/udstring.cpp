@@ -607,6 +607,11 @@ udResult udString_Test()
   int arr[] = { 1, 2, 30 };
   ms.format("{1}, {2}, {0,@5} {3}, {4}", "hello ", pName, 10, udSlice<int>(arr, 3), udVariant(true), "*6", 10);
 
+  udSlice<const void> poo;
+//  poo.slice(1, 3);
+//  poo[2];
+//  poo.alloc(10);
+
   return udR_Success;
 }
 

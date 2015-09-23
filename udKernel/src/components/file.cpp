@@ -142,26 +142,20 @@ File::~File()
   fclose(pFile);
 }
 
-size_t File::Read(void *pData, size_t bytes)
+udSlice<void> File::Read(udSlice<void> buffer)
 {
-  size_t read;
-
   fseek(pFile, (long)pos, SEEK_SET);
-  read = fread(pData, 1, bytes, pFile);
+  size_t read = fread(buffer.ptr, 1, buffer.length, pFile);
   pos = ftell(pFile);
-
-  return read;
+  return buffer.slice(0, read);
 }
 
-size_t File::Write(const void *pData, size_t bytes)
+size_t File::Write(udSlice<const void> data)
 {
-  size_t written;
-
   fseek(pFile, (long)pos, SEEK_SET);
-  written = fwrite(pData, 1, bytes, pFile);
+  size_t written = fwrite(data.ptr, 1, data.length, pFile);
   pos = ftell(pFile);
   length = udMax(pos, length);
-
   return written;
 }
 

@@ -88,8 +88,9 @@ void GeomSource::Create(StreamRef spSource)
   void *pBuffer = udAlloc((size_t)len);
 
   // read file from source
-  size_t read = spSource->Read(pBuffer, (size_t)len);
-  UDASSERT((int64_t)read == len, "!");
+  udSlice<void> buf(pBuffer, (size_t)len);
+  buf = spSource->Read(buf);
+  UDASSERT((int64_t)buf.length == len, "!");
 
   Assimp::Importer importer;
 
@@ -113,7 +114,7 @@ void GeomSource::Create(StreamRef spSource)
   // set the post-transform cache size...
 //  importer.SetPropertyInteger(AI_CONFIG_PP_ICL_PTCACHE_SIZE, postTransformCacheSize?);
 
-  const aiScene *pScene = importer.ReadFileFromMemory(pBuffer, read, options, pExtension);
+  const aiScene *pScene = importer.ReadFileFromMemory(buf.ptr, buf.length, options, pExtension);
   if (!pScene)
     return; // TODO: some sort of error?
 
@@ -177,6 +178,8 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
     // add resource
     resources.Insert(udSharedString::concat("material", i), spMat);
   }
+
+  udFree(pBuffer);
 }
 
 void GeomSource::ParseMeshes(const aiScene *pScene)
@@ -237,15 +240,15 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       ArrayBufferRef spBinTan = pKernel->CreateComponent<ArrayBuffer>();
       spBinTan->Allocate<VertBinTan>(mesh.mNumVertices);
 
-      VertBinTan *pBT = spBinTan->Map<VertBinTan>();
+      udSlice<VertBinTan> bt = spBinTan->Map<VertBinTan>();
       for (uint32_t j = 0; j<mesh.mNumVertices; ++j)
       {
-        std::get<0>(pBT[j])[0] = mesh.mBitangents[j].x;
-        std::get<0>(pBT[j])[1] = mesh.mBitangents[j].y;
-        std::get<0>(pBT[j])[2] = mesh.mBitangents[j].z;
-        std::get<1>(pBT[j])[0] = mesh.mTangents[j].x;
-        std::get<1>(pBT[j])[1] = mesh.mTangents[j].y;
-        std::get<1>(pBT[j])[2] = mesh.mTangents[j].z;
+        std::get<0>(bt.ptr[j])[0] = mesh.mBitangents[j].x;
+        std::get<0>(bt.ptr[j])[1] = mesh.mBitangents[j].y;
+        std::get<0>(bt.ptr[j])[2] = mesh.mBitangents[j].z;
+        std::get<1>(bt.ptr[j])[0] = mesh.mTangents[j].x;
+        std::get<1>(bt.ptr[j])[1] = mesh.mTangents[j].y;
+        std::get<1>(bt.ptr[j])[2] = mesh.mTangents[j].z;
       }
       spBinTan->Unmap();
 
@@ -286,7 +289,8 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     ArrayBufferRef spIndices = pKernel->CreateComponent<ArrayBuffer>();
     spIndices->Allocate<uint32_t>(mesh.mNumFaces * 3);
 
-    uint32_t *pIndices = spIndices->Map<uint32_t>();
+    udSlice<uint32_t> indices = spIndices->Map<uint32_t>();
+    uint32_t *pIndices = indices.ptr;
     for (uint32_t j = 0; j<mesh.mNumFaces; ++j)
     {
       aiFace &f = mesh.mFaces[j];
@@ -295,6 +299,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       *pIndices++ = f.mIndices[1];
       *pIndices++ = f.mIndices[2];
     }
+    UDASSERT(pIndices - indices.ptr == (ptrdiff_t)indices.length, "Wrong number of indices?!");
     spIndices->Unmap();
 
     resources.Insert(udSharedString::concat("indices", i), spIndices);

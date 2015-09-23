@@ -35,13 +35,20 @@ public:
 template<typename T>
 struct udSlice
 {
+private:
+  template<typename ET> struct ElementType { typedef ET Ty; };
+  template<> struct ElementType<void> { typedef uint8_t Ty; };
+  template<> struct ElementType<const void> { typedef const uint8_t Ty; };
+public:
+  typedef typename ElementType<T>::Ty ET;
+
   size_t length;
   T *ptr;
 
   // constructors
   udSlice<T>();
   udSlice<T>(nullptr_t);
-  udSlice<T>(std::initializer_list<T> list);
+  udSlice<T>(std::initializer_list<ET> list);
   udSlice<T>(T* ptr, size_t length);
   template<typename U> udSlice<T>(udSlice<U> rh);
 
@@ -49,7 +56,7 @@ struct udSlice
   template<typename U> udSlice<T>& operator =(udSlice<U> rh);
 
   // contents
-  T& operator[](ptrdiff_t i) const;
+  ET& operator[](ptrdiff_t i) const;
 
   udSlice<T> slice(ptrdiff_t first, ptrdiff_t last) const;
 
@@ -71,24 +78,24 @@ struct udSlice
   udIterator<T> end() const;
 
   // useful functions
-  T& front() const;
-  T& back() const;
-  T& popFront();
-  T& popBack();
+  ET& front() const;
+  ET& back() const;
+  ET& popFront();
+  ET& popBack();
   udSlice<T> get(ptrdiff_t n) const;
   udSlice<T> pop(ptrdiff_t n);
   udSlice<T> strip(ptrdiff_t n) const;
 
-  bool exists(const T &c, size_t *pIndex = nullptr) const;
-  size_t findFirst(const T &c) const;
-  size_t findLast(const T &c) const;
+  bool exists(const ET &c, size_t *pIndex = nullptr) const;
+  size_t findFirst(const ET &c) const;
+  size_t findLast(const ET &c) const;
   template<typename U> size_t findFirst(udSlice<U> s) const;
   template<typename U> size_t findLast(udSlice<U> s) const;
 
-  udSlice<T> getLeftAtFirst(const T &c, bool bInclusive = false) const;
-  udSlice<T> getLeftAtLast(const T &c, bool bInclusive = false) const;
-  udSlice<T> getRightAtFirst(const T &c, bool bInclusive = true) const;
-  udSlice<T> getRightAtLast(const T &c, bool bInclusive = true) const;
+  udSlice<T> getLeftAtFirst(const ET &c, bool bInclusive = false) const;
+  udSlice<T> getLeftAtLast(const ET &c, bool bInclusive = false) const;
+  udSlice<T> getRightAtFirst(const ET &c, bool bInclusive = true) const;
+  udSlice<T> getRightAtLast(const ET &c, bool bInclusive = true) const;
 
   template<typename U> udSlice<T> getLeftAtFirst(udSlice<U> s, bool bInclusive = false) const;
   template<typename U> udSlice<T> getLeftAtLast(udSlice<U> s, bool bInclusive = false) const;
@@ -97,7 +104,7 @@ struct udSlice
 
   ptrdiff_t indexOfElement(const T *c) const;
 
-  typedef bool(*Predicate)(const T &e);
+  typedef bool(*Predicate)(const ET &e);
   T* search(Predicate) const;
 
   template<bool skipEmptyTokens = false>
@@ -192,7 +199,7 @@ struct udSharedSlice : public udSlice<T>
   // constructors
   udSharedSlice<T>();
   udSharedSlice<T>(nullptr_t);
-  udSharedSlice<T>(std::initializer_list<T> list);
+  udSharedSlice<T>(std::initializer_list<ET> list);
   udSharedSlice<T>(udSharedSlice<T> &&rval);
   udSharedSlice<T>(const udSharedSlice<T> &rcslice);
   template <typename U> udSharedSlice<T>(U *ptr, size_t length);

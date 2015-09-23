@@ -30,11 +30,11 @@ public:
   int64_t GetPos() const { return pos; }
   virtual int64_t Seek(SeekOrigin rel, int64_t offset) { return 0; }
 
-  virtual size_t Read(void *pData, size_t bytes) { return 0; }
-  virtual size_t Write(const void *pData, size_t bytes) { return 0; }
+  virtual udSlice<void> Read(udSlice<void> buffer) { return 0; }
+  virtual size_t Write(udSlice<const void> data) { return 0; }
 
-  virtual size_t WriteLn(udString str);
   virtual udString ReadLn(udSlice<char> buf);
+  virtual size_t WriteLn(udString str);
 
   virtual int Flush() { return 0; }
 

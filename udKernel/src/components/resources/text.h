@@ -18,7 +18,7 @@ public:
   udVariant ParseXml() const;
   udVariant ParseJson() const;
 
-  void CopyBuffer(udString text) { Buffer::CopyBuffer(text.ptr, text.length); }
+  void CopyBuffer(udString text) { Buffer::CopyBuffer(text); }
 
 protected:
   Text(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)

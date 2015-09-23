@@ -21,8 +21,8 @@ class File : public Stream
 public:
   UD_COMPONENT(File);
 
-  size_t Read(void *pData, size_t bytes) override;
-  size_t Write(const void *pData, size_t bytes) override;
+  udSlice<void> Read(udSlice<void> buffer) override;
+  size_t Write(udSlice<const void> data) override;
   int64_t Seek(SeekOrigin rel, int64_t offset) override;
   int Flush() override;
 

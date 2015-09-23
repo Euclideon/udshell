@@ -21,19 +21,18 @@ BufferRef Stream::ReadBuffer(size_t bytes)
   BufferRef spBuffer = pKernel->CreateComponent<Buffer>();
   spBuffer->Allocate(bytes);
 
-  void *pBuffer = spBuffer->Map();
-  IF_UDASSERT(size_t read =) Read(pBuffer, bytes);
+  udSlice<void> buffer = spBuffer->Map();
+  IF_UDASSERT(udSlice<void> read =) Read(buffer);
   spBuffer->Unmap();
 
-  UDASSERT(read == bytes, "TODO: handle the case where we read less bytes than we expect!");
+  UDASSERT(read.length == bytes, "TODO: handle the case where we read less bytes than we expect!");
 
   return spBuffer;
 }
 size_t Stream::WriteBuffer(BufferRef spData)
 {
-  size_t bytes;
-  const void *pBuffer = spData->MapForRead(&bytes);
-  bytes = Write(pBuffer, bytes);
+  udSlice<const void> buffer = spData->MapForRead();
+  size_t bytes = Write(buffer);
   spData->Unmap();
   return bytes;
 }
@@ -47,9 +46,9 @@ BufferRef Stream::Load()
   BufferRef spBuffer = pKernel->CreateComponent<Buffer>();
   spBuffer->Allocate((size_t)len);
 
-  void *pBuffer = spBuffer->Map();
+  udSlice<void> buffer = spBuffer->Map();
   Seek(SeekOrigin::Begin, 0);
-  Read(pBuffer, (size_t)len);
+  Read(buffer);
   spBuffer->Unmap();
 
   return spBuffer;
@@ -59,11 +58,10 @@ void Stream::Save(BufferRef spBuffer)
 {
   // TODO: check and bail if stream is not writable...
 
-  size_t len;
-  const void *pBuffer = spBuffer->MapForRead(&len);
+  udSlice<const void> buffer = spBuffer->MapForRead();
 
   Seek(SeekOrigin::Begin, 0);
-  Write(pBuffer, len);
+  Write(buffer);
 
   spBuffer->Unmap();
 }
@@ -72,8 +70,8 @@ size_t Stream::WriteLn(udString str)
 {
   size_t written;
 
-  written = Write(str.ptr, str.length);
-  written += Write("\n", 1);
+  written = Write(str);
+  written += Write(udString("\n", 1));
 
   return written;
 }

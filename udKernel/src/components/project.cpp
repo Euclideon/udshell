@@ -48,7 +48,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
 
   int64_t len = spSrc->Length();
   char *pBuffer = (char *)udAlloc(len + 1);
-  spSrc->Read(pBuffer, len);
+  spSrc->Read(udSlice<void>(pBuffer, len));
   pBuffer[len] = '\0';
 
   using namespace rapidxml;
