@@ -210,6 +210,22 @@ udVariant Component::CallMethod(udString method, udSlice<udVariant> args)
   return pDesc->method->call(this, args);
 }
 
+void Component::Subscribe(udString eventName, const udVariant::VarDelegate &d)
+{
+  const EventDesc *pDesc = GetEventDesc(eventName);
+  if (!pDesc)
+  {
+    LogWarning(2, "No event '{0}' for component '{1}'", eventName, name.empty() ? uid : name);
+    return;
+  }
+  pDesc->ev->subscribe(ComponentRef(this), d);
+}
+
+void Component::Unsubscribe()
+{
+  // TODO
+}
+
 
 udResult Component::ReceiveMessage(udString message, udString sender, const udVariant &data)
 {

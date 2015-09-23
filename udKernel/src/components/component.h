@@ -48,6 +48,9 @@ public:
     return CallMethod(method, udSlice<udVariant>(varargs, sizeof...(Args)));
   }
 
+  void Subscribe(udString eventName, const udVariant::VarDelegate &d);
+  void Unsubscribe();
+
   udResult SendMessage(udString target, udString message, const udVariant &data);
   udResult SendMessage(Component *pComponent, udString message, const udVariant &data) { udMutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp, message, data); }
 
