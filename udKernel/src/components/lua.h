@@ -23,7 +23,7 @@ public:
   void SetErrorStream(StreamRef stream);
 
   udVariant GetGlobal(udVariant key) const;
-  void SetGlobal(udVariant value, udVariant key);
+  void SetGlobal(udVariant key, udVariant value);
 
   void Execute(udString code);
   void Print(udString str) const;

@@ -58,7 +58,6 @@ public:
   udFixedSlice<const ComponentDesc *> GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase);
 
   udResult CreateComponent(udString typeId, udInitParams initParams, ComponentRef *pNewInstance);
-  udResult DestroyComponent(ComponentRef *pInstance);
 
   template<typename T>
   udSharedPtr<T> CreateComponent(udInitParams initParams = nullptr);
@@ -116,7 +115,7 @@ protected:
   udSharedString uid;
 
   udHashMap<ComponentType> componentRegistry;
-  udHashMap<ComponentRef> instanceRegistry;
+  udHashMap<Component*> instanceRegistry;
   udHashMap<ForeignInstance> foreignInstanceRegistry;
   udHashMap<MessageCallback> messageHandlers;
 
@@ -140,6 +139,8 @@ protected:
   udResult InitComponents();
   udResult InitRender();
   udResult DeinitRender();
+
+  udResult DestroyComponent(Component *pInstance);
 
   udResult ReceiveMessage(udString sender, udString message, const udVariant &data);
 
@@ -167,6 +168,8 @@ udSharedPtr<T> Kernel::CreateComponent(udInitParams initParams)
 template<typename CT>
 Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
 {
+  udMutableString128 t; t.format("New: {0} - {1}", pType->id, uid);
+  pKernel->LogDebug(4, t);
   return udNew(CT, pType, pKernel, uid, initParams);
 }
 template<typename CT>

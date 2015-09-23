@@ -275,10 +275,11 @@ udResult Kernel::SendMessage(udString target, udString sender, udString message,
   if (targetType == '@')
   {
     // component message
-    ComponentRef *pComponent = instanceRegistry.Get(target.hash());
-    if (pComponent)
+    Component **ppComponent = instanceRegistry.Get(target.hash());
+    if (ppComponent)
     {
-      return (*pComponent)->ReceiveMessage(message, sender, data);
+      ComponentRef spComponent(*ppComponent);
+      return spComponent->ReceiveMessage(message, sender, data);
     }
     else
     {
@@ -368,10 +369,10 @@ udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, Compo
 
     spComponent->Init(initParams);
 
-    instanceRegistry.Add(spComponent->uid.hash(), spComponent);
+    instanceRegistry.Add(spComponent->uid.hash(), spComponent.ptr());
 
     if (spLua)
-      spLua->SetGlobal(spComponent, udString(spComponent->uid));
+      spLua->SetGlobal(udString(spComponent->uid), spComponent);
 
     // TODO: inform partner kernels that I created a component
     //...
@@ -381,26 +382,26 @@ udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, Compo
   }
   catch (udResult r)
   {
+    LogDebug(3, "Create component failed!");
     return r;
   }
   catch (...)
   {
+    LogDebug(3, "Create component failed!");
     return udR_Failure_;
   }
 }
 
-udResult Kernel::DestroyComponent(ComponentRef *pInstance)
+udResult Kernel::DestroyComponent(Component *pInstance)
 {
-  spLua->SetGlobal(nullptr, udString((*pInstance)->uid));
+  spLua->SetGlobal(udString(pInstance->uid), nullptr);
 
   // TODO: remove from component registry
-  //instanceRegistry.Destroy((*pInstance)->uid.toStringz());
+  instanceRegistry.Destroy(pInstance->uid.toStringz());
 
   // TODO: inform partners that I destroyed a component
   //...
 
-  pInstance->reset();
-  pInstance = nullptr;
   return udR_Success;
 }
 
@@ -410,8 +411,8 @@ ComponentRef Kernel::FindComponent(udString uid)
     return nullptr;
   if (uid[0] == '@')
     uid.popFront();
-  ComponentRef *pComponent = instanceRegistry.Get(uid.toStringz());
-  return pComponent ? *pComponent : nullptr;
+  Component **ppComponent = instanceRegistry.Get(uid.toStringz());
+  return ppComponent ? ComponentRef(*ppComponent) : nullptr;
 }
 
 udResult Kernel::InitComponents()
@@ -449,14 +450,14 @@ void Kernel::Exec(udString code)
 }
 
 // Helper functions for the kernel's logger
-void Kernel::LogError(udString text, udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Error, componentUID); }
-void Kernel::LogWarning(int level, udString text, udString componentUID) { spLogger->Log(level, text, LogCategories::Warning, componentUID); }
-void Kernel::LogDebug(int level, udString text, udString componentUID) { spLogger->Log(level, text, LogCategories::Debug, componentUID); }
-void Kernel::LogInfo(int level, udString text, udString componentUID) { spLogger->Log(level, text, LogCategories::Info, componentUID); }
-void Kernel::LogScript(udString text, udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Script, componentUID); }
-void Kernel::LogTrace(udString text, udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, componentUID); }
+void Kernel::LogError(udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Error, componentUID); }
+void Kernel::LogWarning(int level, udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Warning, componentUID); }
+void Kernel::LogDebug(int level, udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Debug, componentUID); }
+void Kernel::LogInfo(int level, udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Info, componentUID); }
+void Kernel::LogScript(udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Script, componentUID); }
+void Kernel::LogTrace(udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, componentUID); }
 // Calls LogDebug() with level 2
-void Kernel::Log(udString text, const udString componentUID) { spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, componentUID); }
+void Kernel::Log(udString text, const udString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, componentUID); }
 
 udResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const udSlice<const udString> exts)
 {

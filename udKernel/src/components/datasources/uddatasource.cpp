@@ -12,11 +12,11 @@ ComponentDesc UDDataSource::descriptor =
 {
   &DataSource::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  UDSHELL_APIVERSION,      // udVersion
+  UDSHELL_PLUGINVERSION,   // pluginVersion
 
-  "UDDataSource", // id
-  "UDData Source", // displayName
+  "uddataSource",     // id
+  "UDDataSource",    // displayName
   "Provides UD Data", // description
 
   nullptr,            // properties

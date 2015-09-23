@@ -104,9 +104,9 @@ udVariant Lua::GetGlobal(udVariant key) const
   UDASSERT(false, "TODO: look up 'key' from global table");
   return pLua->get(-1);
 }
-void Lua::SetGlobal(udVariant value, udVariant key)
+void Lua::SetGlobal(udVariant key, udVariant value)
 {
-  pLua->set(value, key, LuaLocation::Global);
+  pLua->set(key, value, LuaLocation::Global);
 }
 
 void Lua::Execute(udString code)

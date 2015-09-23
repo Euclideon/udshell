@@ -42,6 +42,9 @@ protected:
 
   void Create(StreamRef spSource);
 
+  void ParseMaterials(const aiScene *pScene);
+  void ParseMeshes(const aiScene *pScene);
+
   NodeRef ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth = 0);
 };
 
