@@ -10,7 +10,6 @@
 #include "components/scene.h"
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
-#include "driver/SDL/udSDLKernel_Internal.h"
 #include "eperror.h"
 
 static void ProcessCmdline(int argc, char *argv[]);
@@ -24,7 +23,7 @@ static struct
   uint32_t rendererThreadCount;
   uint32_t streamerMemoryLimit;
 
-  ud::SDLKernel *pKernel;
+  ud::Kernel *pKernel;
 
   ud::ViewRef spView;
   ud::SceneRef spScene;
@@ -121,16 +120,11 @@ int main(int argc, char* argv[])
   mData.rendererThreadCount = udGetHardwareThreadCount() - 1;
   ProcessCmdline(argc, argv);
 
-  Kernel *pKernel;
-  udResult result = ud::Kernel::Create(&pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
+  udResult result = ud::Kernel::Create(&mData.pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
   if (result != udR_Success)
     return -1;
 
-  mData.pKernel = static_cast<SDLKernel*>(pKernel);
-
   mData.pKernel->RegisterMessageHandler("init", &ViewerInit);
-
-  mData.pKernel->DoInit(mData.pKernel);
 
   if (mData.pKernel->RunMainLoop() != udR_Success)
   {
