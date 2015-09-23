@@ -5,7 +5,6 @@
 #include "kernel.h"
 #include "renderscene.h"
 #include "components/view.h"
-#include "driver/SDL/udSDLKernel_Internal.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -132,6 +131,8 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 
 udResult SDLKernel::RunMainLoop()
 {
+  DoInit(this);
+
   while (!s_done)
   {
     SDL_Event event;
