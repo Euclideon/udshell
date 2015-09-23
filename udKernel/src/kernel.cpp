@@ -22,6 +22,7 @@
 #include "components/nodes/geomnode.h"
 #include "components/nodes/udnode.h"
 #include "components/resourcemanager.h"
+#include "components/shortcutmanager.h"
 #include "components/project.h"
 #include "components/resources/resource.h"
 #include "components/resources/buffer.h"
@@ -71,6 +72,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<MemStream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<ResourceManager>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<ShortcutManager>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Project>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
@@ -126,8 +128,11 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
 
   pKernel->spLogger->SetFilterLevel(LogCategories::Trace, 0);
 
-  // Resource Manager
+  // resource manager
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
+
+  // shortcut manager
+  pKernel->spShortcutManager = pKernel->CreateComponent<ShortcutManager>();
 
   // platform init
   UD_ERROR_CHECK(pKernel->InitInternal());

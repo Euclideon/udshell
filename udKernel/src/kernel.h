@@ -25,6 +25,7 @@ SHARED_CLASS(UIComponent);
 SHARED_CLASS(Window);
 SHARED_CLASS(Logger);
 SHARED_CLASS(ResourceManager);
+SHARED_CLASS(ShortcutManager);
 
 class Kernel
 {
@@ -70,10 +71,6 @@ public:
   LuaRef GetLua() const { return spLua; }
   void Exec(udString code);
 
-  // other functions
-  ViewRef GetFocusView() const { return spFocusView; }
-  ViewRef SetFocusView(ViewRef spView);
-
   // logger functions
   LoggerRef GetLogger() const { return spLogger; }
   void LogError(const udString text, const udString componentUID = nullptr);
@@ -89,6 +86,11 @@ public:
 
   udResult RegisterExtensions(const ComponentDesc *pDesc, const udSlice<const udString> exts);
   DataSourceRef CreateDataSourceFromExtension(udString ext, udInitParams initParams);
+
+  // other functions
+  ViewRef GetFocusView() const { return spFocusView; }
+  ViewRef SetFocusView(ViewRef spView);
+  ShortcutManagerRef GetShortcutManager() const { return spShortcutManager; }
 
   virtual udResult RunMainLoop() { return udR_Success; }
   udResult Terminate();
@@ -125,6 +127,7 @@ protected:
 
   LoggerRef spLogger = nullptr;
   ResourceManagerRef spResourceManager = nullptr;
+  ShortcutManagerRef spShortcutManager = nullptr;
   ViewRef spFocusView = nullptr;
   TimerRef spStreamerTimer = nullptr;
   TimerRef spUpdateTimer = nullptr;
