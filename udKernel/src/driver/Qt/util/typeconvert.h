@@ -29,6 +29,7 @@ inline udVariant udToVariant(const QString &string)
 {
   return udVariant(AllocUDStringFromQString(string), true);
 }
+
 inline void udFromVariant(const udVariant &variant, QString *pString)
 {
   udString s = variant.asString();
@@ -102,6 +103,7 @@ inline udVariant udToVariant(const QVariant &var)
       return udVariant();
   };
 }
+
 inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
 {
   UDASSERT(pVariant->isNull(), "pVariant is not null");
@@ -137,6 +139,50 @@ inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
 
     //case udVariant::Type::Array:
 
+    //case udVariant::Type::AssocArray:
+
+    default:
+      udDebugPrintf("udFromVariant: Unsupported type '%d'\n", variant.type());
+  };
+}
+
+inline udVariant udToVariant(const QJSValue &jsValue)
+{
+  return udToVariant(jsValue.toVariant());
+}
+
+inline void udFromVariant(const udVariant &variant, QJSValue *pJSValue)
+{
+  switch (variant.type())
+  {
+    case udVariant::Type::Null:
+      *pJSValue = QJSValue(QJSValue::NullValue);
+      break;
+
+    case udVariant::Type::Bool:
+      *pJSValue = QJSValue(variant.asBool());
+      break;
+
+    case udVariant::Type::Int:
+    {
+      int64_t i = variant.asInt();
+      if (i >= 0)
+        *pJSValue = QJSValue((uint32_t)i);
+      else
+        *pJSValue = QJSValue((int)i);
+      break;
+    }
+
+    case udVariant::Type::Float:
+      *pJSValue = QJSValue(variant.asFloat());
+      break;
+
+    //case udVariant::Type::Component:
+
+    case udVariant::Type::String:
+      *pJSValue = QJSValue(variant.asString().toStringz());
+
+    //case udVariant::Type::Array:
     //case udVariant::Type::AssocArray:
 
     default:

@@ -70,28 +70,7 @@ public:
   explicit operator bool() { return connection; }
 
 private:
-  QMetaMethod lookupSignalHandler(const QMetaMethod &m)
-  {
-    int methodIndex = -1;
-    QByteArray methodSig = m.methodSignature();
-    int indexOfOpenBracket = methodSig.indexOf('(');
-    if (indexOfOpenBracket != -1)
-    {
-      udMutableString128 signalHandlerName;
-      signalHandlerName.concat("SignalHandler", methodSig.right(methodSig.size() - indexOfOpenBracket).data());
-      udDebugPrintf("Checking for signal handler: '%s'\n", (const char*)signalHandlerName.toStringz());
-      methodIndex = metaObject()->indexOfMethod(signalHandlerName.toStringz());
-    }
-
-    // TODO: remove this before release, maybe allow fallback on most closest match and error log/warn?
-    if (methodIndex == -1)
-    {
-      UDASSERT(false, "Attempted to connect to unsupported signal: '%s' ", m.methodSignature().data());
-      return QMetaMethod();
-    }
-
-    return metaObject()->method(methodIndex);
-  }
+  QMetaMethod lookupSignalHandler(const QMetaMethod &m);
 
 private slots:
   QT_SIGNAL_HANDLER_0();

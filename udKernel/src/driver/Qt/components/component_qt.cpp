@@ -139,11 +139,52 @@ QVariant QtUDComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   return res;
 }
 
+// Shim class
+class JSValueDelegate : public udDelegateMemento
+{
+protected:
+  template<typename T>
+  friend class ::udSharedPtr;
+
+  udVariant call(udSlice<udVariant> args)
+  {
+    QJSValueList jsArgs;
+    jsArgs.reserve(static_cast<int>(args.length));
+
+    for (auto &arg : args)
+      jsArgs.append(arg.as<QJSValue>());
+
+    QJSValue ret = jsVal.call(jsArgs);
+    return udToVariant(ret);
+  }
+
+  JSValueDelegate(const QJSValue &jsValue) : jsVal(jsValue)
+  {
+    // set the memento to our call shim
+    FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &JSValueDelegate::call);
+    m = shim.GetMemento();
+  }
+
+  ~JSValueDelegate() {}
+
+  QJSValue jsVal;
+};
+
+
 void QtUDComponent::Subscribe(QString eventName, QJSValue func) const
 {
-  UDASSERT(func.isCallable(), "!");
+  typedef udSharedPtr<JSValueDelegate> JSValueDelegateRef;
 
-  UDASSERT(false, "TODO");
+  if (!func.isCallable())
+  {
+    spComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString().data());
+    return;
+  }
+
+  QByteArray byteArray = eventName.toUtf8();
+  udString event(byteArray.data(), byteArray.size());
+
+  spComponent->Subscribe(event, udVariant::VarDelegate(JSValueDelegateRef::create(func)));
 }
 
 } // namespace qt
