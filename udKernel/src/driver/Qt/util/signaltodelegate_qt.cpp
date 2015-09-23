@@ -2,10 +2,8 @@
 
 #if UDUI_DRIVER == UDDRIVER_QT
 
+#include "../udQtKernel_Internal.h"
 #include "signaltodelegate.h"
-#include "kernel.h"
-
-extern ud::Kernel *s_pKernel;
 
 namespace qt
 {
@@ -19,7 +17,7 @@ QMetaMethod QtSignalToDelegate::lookupSignalHandler(const QMetaMethod &m)
   {
     udMutableString128 signalHandlerName;
     signalHandlerName.concat("SignalHandler", methodSig.right(methodSig.size() - indexOfOpenBracket).data());
-    s_pKernel->LogDebug(3, udSharedString::concat("Checking for signal handler: ", signalHandlerName.toStringz()));
+    QtApplication::Kernel()->LogDebug(3, udSharedString::concat("Checking for signal handler: ", signalHandlerName.toStringz()));
     methodIndex = metaObject()->indexOfMethod(signalHandlerName.toStringz());
   }
 

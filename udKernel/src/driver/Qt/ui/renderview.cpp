@@ -11,13 +11,11 @@
 #include <QtGui/QOpenGLFramebufferObject>
 #include <QSGSimpleTextureNode>
 
+#include "../udQtKernel_Internal.h"
 #include "renderview.h"
-#include "kernel.h"
 #include "renderscene.h"
 
 udKeyCode qtKeyToUDKey(Qt::Key qk);
-
-extern ud::Kernel *s_pKernel;
 
 namespace qt
 {
@@ -66,7 +64,7 @@ RenderView::RenderView(QQuickItem *pParent)
   , spView(nullptr)
   , dirty(false)
 {
-  s_pKernel->LogTrace("Create RenderView Quick Item");
+  QtApplication::Kernel()->LogTrace("Create RenderView Quick Item");
 
   // handle resize
   QObject::connect(this, &QQuickItem::widthChanged, this, &RenderView::OnResize);
@@ -75,7 +73,7 @@ RenderView::RenderView(QQuickItem *pParent)
 
 RenderView::~RenderView()
 {
-  s_pKernel->LogTrace("Destroy RenderView Quick Item");
+  QtApplication::Kernel()->LogTrace("Destroy RenderView Quick Item");
 
   if (spView)
     spView->FrameReady.Unsubscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
@@ -83,24 +81,24 @@ RenderView::~RenderView()
 
 QQuickFramebufferObject::Renderer *RenderView::createRenderer() const
 {
-  s_pKernel->LogTrace("Create RenderView Renderer");
+  QtApplication::Kernel()->LogTrace("Create RenderView Renderer");
   return new FboRenderer(this);
 }
 
 void RenderView::AttachView(ud::ViewRef _spView)
 {
-  s_pKernel->LogTrace("RenderView::AttachView()");
+  QtApplication::Kernel()->LogTrace("RenderView::AttachView()");
 
   spView = _spView;
   spView->FrameReady.Subscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
 
   // TEMP HAX:
-  s_pKernel->SetFocusView(spView);
+  QtApplication::Kernel()->SetFocusView(spView);
 }
 
 void RenderView::componentComplete()
 {
-  s_pKernel->LogTrace("RenderView::componentComplete()");
+  QtApplication::Kernel()->LogTrace("RenderView::componentComplete()");
   QQuickFramebufferObject::componentComplete();
 
   // TODO: Focus should be set based on mouse click from main window - possibly handle in QML
