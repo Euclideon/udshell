@@ -4,7 +4,7 @@
 
 #include "hal/vertex.h"
 
-#include "udQtRender_Internal.h"
+#include "eprender_qt.h"
 
 #include <QOpenGLBuffer>
 

@@ -6,8 +6,8 @@
 #include "udOctree.h"
 
 #include "components/resources/resource.h"
-#include "util/udsharedptr.h"
-#include "util/udstring.h"
+#include "ep/epsharedptr.h"
+#include "ep/epstring.h"
 #include "udRender.h"
 #include "kernel.h"
 

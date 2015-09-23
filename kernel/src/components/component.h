@@ -3,7 +3,7 @@
 #define UDCOMPONENT_H
 
 #include "componentdesc.h"
-#include "util/udevent.h"
+#include "ep/epevent.h"
 
 #include "udHashMap.h"
 

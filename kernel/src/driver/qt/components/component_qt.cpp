@@ -2,7 +2,7 @@
 
 #if UDUI_DRIVER == UDDRIVER_QT
 
-#include "../util/typeconvert.h"
+#include "../util/typeconvert_qt.h"
 
 #include "component_qt.h"
 

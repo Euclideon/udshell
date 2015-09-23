@@ -5,8 +5,8 @@
 #include "components/resources/resource.h"
 #include "components/resources/array.h"
 #include "components/resources/material.h"
-#include "util/udsharedptr.h"
-#include "util/udstring.h"
+#include "ep/epsharedptr.h"
+#include "ep/epstring.h"
 
 namespace ud
 {

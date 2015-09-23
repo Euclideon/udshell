@@ -1,8 +1,8 @@
 
-#include "util/udvariant.h"
+#include "ep/epvariant.h"
 #include "components/component.h"
 #include "components/resources/resource.h"
-#include "udlua.h"
+#include "eplua.h"
 
 
 const udVariant udInitParams::varNull;

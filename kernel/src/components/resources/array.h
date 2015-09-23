@@ -3,9 +3,9 @@
 #define _UD_ARRAYBUFFER_H
 
 #include "components/resources/buffer.h"
-#include "util/udsharedptr.h"
-#include "util/udstring.h"
-#include "util/stringof.h"
+#include "ep/epsharedptr.h"
+#include "ep/epstring.h"
+#include "ep/epstringof.h"
 
 #include <type_traits>
 

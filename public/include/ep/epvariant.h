@@ -2,9 +2,9 @@
 #if !defined(UDVARIANT_H)
 #define UDVARIANT_H
 
-#include "util/udstring.h"
-#include "util/udenum.h"
-#include "util/uddelegate.h"
+#include "ep/epstring.h"
+#include "ep/epenum.h"
+#include "ep/epdelegate.h"
 
 namespace ud
 {
@@ -164,6 +164,6 @@ private:
 };
 
 
-#include "util/udvariant.inl"
+#include "ep/epvariant.inl"
 
 #endif // UDVARIANT_H

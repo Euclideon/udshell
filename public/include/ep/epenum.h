@@ -2,8 +2,8 @@
 #if !defined(_UDENUM_H)
 #define _UDENUM_H
 
-#include "udstring.h"
-#include "util/foreach.h"
+#include "ep/epstring.h"
+#include "ep/epforeach.h"
 #include <type_traits>
 
 #define STRINGIFY(a, i) #a,

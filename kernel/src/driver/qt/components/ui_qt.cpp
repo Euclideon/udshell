@@ -9,14 +9,14 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 
-#include "udQtKernel_Internal.h"
-#include "util/qmlbindings_qt.h"
+#include "../epkernel_qt.h"
+#include "../util/qmlbindings_qt.h"
 
 #include "components/ui.h"
 #include "components/viewport.h"
 #include "components/window.h"
 
-#include "ui/renderview.h"
+#include "../ui/renderview_qt.h"
 
 namespace ud
 {

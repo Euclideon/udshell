@@ -3,7 +3,7 @@
 #include "renderscene.h"
 #include "kernel.h"
 #include "udRender.h"
-#include "util/uddelegate.h"
+#include "ep/epdelegate.h"
 #include "components/datasources/uddatasource.h"
 
 namespace ud

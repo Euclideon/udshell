@@ -1,4 +1,4 @@
-project "udKernel"
+project "epkernel"
 	kind "StaticLib"
 	language "C++"
 	flags { "StaticRuntime", "OmitDefaultLibrary" }
@@ -10,14 +10,13 @@ project "udKernel"
 	files { "text2c.sh" }
 
 	includedirs { "src" }
-	includedirs { "%{cfg.objdir}/script" }
-	includedirs { "%{cfg.objdir}/shaders" }
+	includedirs { "../public/include" }
 	includedirs { "../ud/udPlatform/Include" }
 	includedirs { "../ud/udPointCloud/Include" }
-	includedirs { "../3rdParty/lua/" .. luaPath .. "/src"}
-	includedirs { "../3rdParty/assimp-3.1.1/include" }
-	includedirs { "../3rdParty/rapidxml-1.13" }
-	
+	includedirs { "../3rdparty/lua/" .. luaPath .. "/src"}
+	includedirs { "../3rdparty/assimp-3.1.1/include" }
+	includedirs { "../3rdparty/rapidxml-1.13" }
+
 	if not qt then
 --		includedirs { "../ud/3rdParty/GL/freeglut/static/Include" }
 		includedirs { "../ud/3rdParty/sdl2/include" }
@@ -29,6 +28,19 @@ project "udKernel"
 		includedirs { "../ud/3rdParty/sdl2/include" }
 	filter "PNaCl"
 		buildoptions { "-std=c++11" }
+
+	-- include common stuff
+	dofile "../ud/common-proj.lua"
+
+	exceptionhandling "Default"
+
+	-- common-proj.lua set objdir and targetdir, we'll reset them correctly for udShell
+	objdir "../int/%{cfg.buildcfg}_%{cfg.platform}"
+	targetdir "../public/lib/%{cfg.buildcfg}_%{cfg.platform}"
+
+	includedirs { "%{cfg.objdir}/script" }
+	includedirs { "%{cfg.objdir}/shaders" }
+
 	filter "files:script/**"
 		buildmessage 'text2c.sh %{file.relpath} %{cfg.objdir}/script/%{file.basename}.inc'
 		buildcommands { path.getabsolute('.') .. '/text2c.sh "%{file.relpath}" "%{cfg.objdir}/script/%{file.basename}.inc"' }
@@ -38,11 +50,6 @@ project "udKernel"
 		buildcommands { path.getabsolute('.') .. '/text2c.sh "%{file.relpath}" "%{cfg.objdir}/shaders/%{file.basename}.inc"' }
 		buildoutputs { '%{cfg.objdir}/shaders/%{file.basename}.inc' }
 	filter {}
-
-	-- include common stuff
-	dofile "../ud/common-proj.lua"
-
-	exceptionhandling "Default"
 
 	if qt then
 		qt.enable()

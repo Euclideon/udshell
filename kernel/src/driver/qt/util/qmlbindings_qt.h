@@ -4,8 +4,8 @@
 
 #include <QQmlComponent>
 
-#include "signaltodelegate.h"
-#include "typeconvert.h"
+#include "signaltodelegate_qt.h"
+#include "typeconvert_qt.h"
 
 #include "../components/qtcomponent_qt.h"
 

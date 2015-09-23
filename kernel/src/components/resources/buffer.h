@@ -3,8 +3,8 @@
 #define _UD_BUFFER_H
 
 #include "components/resources/resource.h"
-#include "util/udsharedptr.h"
-#include "util/udstring.h"
+#include "ep/epsharedptr.h"
+#include "ep/epstring.h"
 
 namespace ud
 {

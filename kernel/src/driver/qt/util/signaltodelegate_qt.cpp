@@ -2,8 +2,8 @@
 
 #if UDUI_DRIVER == UDDRIVER_QT
 
-#include "../udQtKernel_Internal.h"
-#include "signaltodelegate.h"
+#include "../epkernel_qt.h"
+#include "signaltodelegate_qt.h"
 
 namespace qt
 {

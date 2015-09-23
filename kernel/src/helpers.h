@@ -2,7 +2,7 @@
 #ifndef UDHELPERS_H
 #define UDHELPERS_H
 
-#include "util/udvariant.h"
+#include "ep/epvariant.h"
 
 udSharedSlice<const udKeyValuePair> udParseCommandLine(const char *pCommandLine);
 udSharedSlice<const udKeyValuePair> udParseCommandLine(int argc, char *argv[]);

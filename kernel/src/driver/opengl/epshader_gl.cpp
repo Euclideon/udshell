@@ -6,7 +6,7 @@
 #include "hal/texture.h"
 #include "hal/vertex.h"
 
-#include "udOpenGL_Internal.h"
+#include "ep_opengl.h"
 
 
 static GLenum s_shaderType[udST_Max] =

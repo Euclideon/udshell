@@ -3,7 +3,7 @@
 #define _UD_TEXT_H
 
 #include "components/resources/buffer.h"
-#include "util/udstring.h"
+#include "ep/epstring.h"
 
 namespace ud
 {

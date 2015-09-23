@@ -231,6 +231,6 @@ protected:
 udResult udSlice_Test();
 
 
-#include "udslice.inl"
+#include "ep/epslice.inl"
 
 #endif // _UD_SLICE

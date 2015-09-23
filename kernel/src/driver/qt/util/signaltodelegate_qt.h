@@ -12,7 +12,7 @@
 # pragma warning(pop)
 #endif
 
-#include "typeconvert.h"
+#include "typeconvert_qt.h"
 
 namespace qt
 {

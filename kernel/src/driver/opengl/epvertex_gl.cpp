@@ -4,7 +4,7 @@
 
 #include "hal/vertex.h"
 
-#include "udOpenGL_Internal.h"
+#include "ep_opengl.h"
 
 
 const int s_VertexDataStride[udVDF_Max] =

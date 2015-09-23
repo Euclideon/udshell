@@ -4,7 +4,7 @@
 #include "udOctree.h"
 
 // kernel includes
-#include "util/udstring.h"
+#include "ep/epstring.h"
 #include "kernel.h"
 #include "components/view.h"
 #include "components/scene.h"

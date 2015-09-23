@@ -1,7 +1,7 @@
 require "qt"
 qt = premake.extensions.qt
 
-solution "udShell"
+solution "epshell"
 
 	-- This hack just makes the VS project and also the makefile output their configurations in the idiomatic order
 	if _ACTION == "gmake" then
@@ -17,15 +17,15 @@ solution "udShell"
 		end
 	end
 
-	startproject "udShell"
+	startproject "epshell"
 
-	defines { "UD_USE_QT" }
+	defines { "EP_USE_QT" }
 
 	dofile "ud/udPlatform/project.lua"
 	dofile "ud/udPointCloud/project.lua"
 
-	dofile "3rdParty/lua/project.lua"
+	dofile "3rdparty/lua/project.lua"
 
-	dofile "udKernel/project.lua"
+	dofile "kernel/project.lua"
 
-	dofile "udShell/project.lua"
+	dofile "shell/project.lua"

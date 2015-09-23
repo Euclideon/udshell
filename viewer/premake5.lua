@@ -1,4 +1,4 @@
-solution "udviewer"
+solution "epviewer"
 
 	-- This hack just makes the VS project and also the makefile output their configurations in the idiomatic order
 	if _ACTION == "gmake" then
@@ -12,7 +12,7 @@ solution "udviewer"
 		configuration {}
 	end
 
-	startproject "udviewer"
+	startproject "epviewer"
 
 	dofile "../ud/3rdParty/GL/glew/project.lua"
 	-- common-proj.lua set objdir and targetdir, we'll reset them correctly for udviewer
@@ -29,12 +29,12 @@ solution "udviewer"
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
-	dofile "../3rdParty/lua/project.lua"
+	dofile "../3rdparty/lua/project.lua"
   -- common-proj.lua set objdir and targetdir, we'll reset them correctly for udviewer
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
-	dofile "../udKernel/project.lua"
+	dofile "../kernel/project.lua"
   -- common-proj.lua set objdir and targetdir, we'll reset them correctly for udviewer
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"

@@ -1,7 +1,7 @@
 #if !defined(_UD_STRING)
 #define _UD_STRING
 
-#include "udslice.h"
+#include "ep/epslice.h"
 
 
 extern const char s_charDetails[256];
@@ -286,7 +286,7 @@ private:
 // unit tests
 udResult udString_Test();
 
-#include "udstring.inl"
+#include "ep/epstring.inl"
 
 #endif
 

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UDQTRENDER_INTERNAL_H
-#define UDQTRENDER_INTERNAL_H
+#ifndef eprender_qt_H
+#define eprender_qt_H
 
 #include "hal/driver.h"
 #include "hal/texture.h"
@@ -75,4 +75,4 @@ struct udShaderProgram
   Param *pUniforms;
 };
 
-#endif  // UDQTRENDER_INTERNAL_H
+#endif  // eprender_qt_H

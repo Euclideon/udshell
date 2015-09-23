@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UDQTKERNEL_INTERNAL_H
-#define UDQTKERNEL_INTERNAL_H
+#ifndef epkernel_qt_H
+#define epkernel_qt_H
 
 #include <QGuiApplication>
 #include <QQmlEngine>
@@ -83,4 +83,4 @@ private:
 
 } // namespace qt
 
-#endif  // UDQTKERNEL_INTERNAL_H
+#endif  // epkernel_qt_H

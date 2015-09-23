@@ -11,8 +11,8 @@
 #include <QtGui/QOpenGLFramebufferObject>
 #include <QSGSimpleTextureNode>
 
-#include "../udQtKernel_Internal.h"
-#include "renderview.h"
+#include "../epkernel_qt.h"
+#include "renderview_qt.h"
 #include "renderscene.h"
 
 udKeyCode qtKeyToUDKey(Qt::Key qk);

@@ -3,7 +3,7 @@
 #define UD_SHORTCUT_MANAGER_H
 
 #include "component.h"
-#include "util/uddelegate.h"
+#include "ep/epdelegate.h"
 
 namespace ud
 {

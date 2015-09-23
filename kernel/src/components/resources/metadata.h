@@ -3,7 +3,7 @@
 #define _UD_METADATA_H
 
 #include "components/resources/kvpstore.h"
-#include "util/udavltree.h"
+#include "ep/epavltree.h"
 
 namespace ud
 {

@@ -4,7 +4,7 @@
 
 #include "hal/texture.h"
 
-#include "udQtRender_Internal.h"
+#include "eprender_qt.h"
 
 #include <QOpenGLTexture>
 

@@ -1,4 +1,4 @@
-project "udShell"
+project "epshell"
 	kind "WindowedApp"
 	language "C++"
 	flags { "StaticRuntime" }
@@ -8,13 +8,14 @@ project "udShell"
 --		files { "**.pro", "**.pri" }
 	files { "../premake5.lua", "project.lua" }
 
+	includedirs { "../public/include" }
+	includedirs { "../kernel/src" }
 	includedirs { "../ud/udPlatform/Include" }
 	includedirs { "../ud/udPointCloud/Include" }
-	includedirs { "../udKernel/src" }
 
 	links { "udPlatform" }
 	links { "udPointCloud" }
-	links { "udKernel" }
+	links { "epkernel" }
 	links { luaPath }
 
 	qt.enable()
@@ -27,7 +28,7 @@ project "udShell"
 
 	configuration { "windows" }
 		links { "ws2_32.lib", "winmm.lib", "assimp.lib" }
-		libdirs { "../3rdParty/assimp-3.1.1/lib64" }
+		libdirs { "../3rdparty/assimp-3.1.1/lib64" }
 		disablewarnings { "4481", "4127" } -- silence some Qt warnings
 
 	configuration { "linux" }
@@ -42,4 +43,4 @@ project "udShell"
 
 	-- common-proj.lua set objdir and targetdir, we'll reset them correctly for udShell
 	objdir "../int/%{cfg.buildcfg}_%{cfg.platform}"
-	targetdir "../bin/%{cfg.buildcfg}_%{cfg.platform}"
+	targetdir "../public/bin/%{cfg.buildcfg}_%{cfg.platform}"

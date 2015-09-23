@@ -197,7 +197,6 @@ public:
 
 } // namespace ud
 
-#include "udlua.inl"
+#include "eplua.inl"
 
 #endif // _UDLUA_H
-

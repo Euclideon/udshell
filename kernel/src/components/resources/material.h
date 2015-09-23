@@ -4,9 +4,9 @@
 
 #include "components/resources/resource.h"
 #include "components/resources/shader.h"
-#include "util/udsharedptr.h"
-#include "util/udstring.h"
-#include "util/udavltree.h"
+#include "ep/epsharedptr.h"
+#include "ep/epstring.h"
+#include "ep/epavltree.h"
 
 namespace ud
 {

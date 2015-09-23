@@ -2,8 +2,8 @@
 #if !defined(_UDEVENT_H)
 #define _UDEVENT_H
 
-#include "util/uddelegate.h"
-#include "util/udslice.h"
+#include "ep/epdelegate.h"
+#include "ep/epslice.h"
 
 using fastdelegate::FastDelegate;
 

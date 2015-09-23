@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "udstring.h"
+#include "ep/epstring.h"
 
 #if defined(_MSC_VER)
 // _CRT_SECURE_NO_WARNINGS warning (vsprintf_s)
@@ -535,7 +535,7 @@ void receivesCString(const char*)
 {
 }
 
-#include "udvariant.h"
+#include "ep/epvariant.h"
 
 udResult udString_Test()
 {

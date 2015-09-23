@@ -4,7 +4,7 @@
 
 #include "hal/texture.h"
 
-#include "udOpenGL_Internal.h"
+#include "ep_opengl.h"
 
 
 GLenum s_textureType[udTT_Max] =

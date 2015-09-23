@@ -6,7 +6,7 @@
 #include "hal/shader.h"
 #include "hal/vertex.h"
 
-#include "udOpenGL_Internal.h"
+#include "ep_opengl.h"
 
 
 static int s_primTypes[] =

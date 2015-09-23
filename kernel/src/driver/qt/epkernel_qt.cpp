@@ -8,9 +8,9 @@
 
 #include <QSemaphore>
 
-#include "udQtKernel_Internal.h"
+#include "epkernel_qt.h"
 
-#include "ui/renderview.h"
+#include "ui/renderview_qt.h"
 #include "ui/window_qt.h"
 #include "components/qtcomponent_qt.h"
 

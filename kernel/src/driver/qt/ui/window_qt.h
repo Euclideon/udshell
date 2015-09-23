@@ -3,7 +3,7 @@
 
 #include <QQuickWindow>
 #include <QQuickItem>
-#include "../udQtKernel_Internal.h"
+#include "../epkernel_qt.h"
 #include "components/shortcutmanager.h"
 
 namespace qt

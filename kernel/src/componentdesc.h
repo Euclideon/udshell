@@ -4,11 +4,11 @@
 
 #include "udPlatform.h"
 
-#include "util/udstring.h"
-#include "util/udsharedptr.h"
-#include "util/udvariant.h"
-#include "util/udevent.h"
-#include "util/udavltree.h"
+#include "ep/epstring.h"
+#include "ep/epsharedptr.h"
+#include "ep/epvariant.h"
+#include "ep/epevent.h"
+#include "ep/epavltree.h"
 
 
 // TODO: remove this!

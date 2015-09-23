@@ -2,8 +2,8 @@
 #if !defined(_UDDELEGATE_H)
 #define _UDDELEGATE_H
 
-#include "3rdparty/FastDelegate.h"
-#include "udsharedptr.h"
+#include "ep/epfastdelegate.h"
+#include "ep/epsharedptr.h"
 
 using fastdelegate::FastDelegate;
 typedef fastdelegate::DelegateMemento FastDelegateMemento;

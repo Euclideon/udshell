@@ -8,7 +8,7 @@
 
 #include "../components/component_qt.h"
 
-#include "util/udvariant.h"
+#include "ep/epvariant.h"
 
 
 // Qt type conversion to/from UD

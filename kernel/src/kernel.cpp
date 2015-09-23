@@ -38,7 +38,7 @@
 #include "components/datasources/geomsource.h"
 #include "components/datasources/uddatasource.h"
 #include "renderscene.h"
-#include "udlua.h"
+#include "eplua.h"
 
 namespace ud
 {

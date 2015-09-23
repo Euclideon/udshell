@@ -8,7 +8,7 @@
 #include "components/timer.h"
 #include "helpers.h"
 
-#include "3rdparty/FastDelegate.h"
+#include "ep/epfastdelegate.h"
 using namespace fastdelegate;
 
 struct udRenderEngine;
