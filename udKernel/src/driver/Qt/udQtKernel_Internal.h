@@ -16,8 +16,31 @@ class QQuickWindow;
 namespace qt
 {
 
-class QtKernel : public ud::Kernel, public QObject
+class QtApplication : public QGuiApplication
 {
+  Q_OBJECT
+
+public:
+  QtApplication(ud::Kernel *pKern, int &argc, char ** argv) : QGuiApplication(argc, argv), pKernel(pKern) {}
+
+  static void SetKernel(ud::Kernel *pKernel) {
+    UDASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
+    static_cast<QtApplication*>(QtApplication::instance())->pKernel = pKernel;
+  }
+  static ud::Kernel *Kernel() {
+    UDASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
+    return static_cast<QtApplication*>(QtApplication::instance())->pKernel;
+  }
+
+protected:
+  ud::Kernel *pKernel = nullptr;
+};
+
+
+class QtKernel : public QObject, public ud::Kernel
+{
+  Q_OBJECT
+
 public:
   QtKernel(udInitParams commandLine);
   virtual ~QtKernel();
@@ -47,7 +70,7 @@ private:
   int argc;
   udSharedSlice<char *> argv;
 
-  QGuiApplication *pApplication;
+  QtApplication *pApplication;
   QQmlEngine *pQmlEngine;
   QOpenGLContext *pMainThreadContext;
 

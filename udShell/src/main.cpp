@@ -14,25 +14,24 @@
 
 using namespace ud;
 
-Kernel *s_pKernel = nullptr;
-
+static Kernel *pKernel = nullptr;
 
 // ---------------------------------------------------------------------------------------
 void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-  if (s_pKernel)
+  if (pKernel)
   {
     // TODO: replace this with something more robust - maybe a full logging system and status console
     switch (type) {
       case QtDebugMsg:
-        s_pKernel->LogDebug(2, udSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
+        pKernel->LogDebug(2, udSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
         break;
       case QtWarningMsg:
-        s_pKernel->LogWarning(2, udSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
+        pKernel->LogWarning(2, udSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
         break;
       case QtCriticalMsg:
       case QtFatalMsg:
-        s_pKernel->LogError(udSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
+        pKernel->LogError(udSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
     }
   }
   else
@@ -45,10 +44,10 @@ void Init(udString sender, udString message, const udVariant &data)
 {
   // TODO: load a project file...
 
-  auto spView = s_pKernel->CreateComponent<View>();
-  auto spScene = s_pKernel->CreateComponent<Scene>();
-  auto spCamera = s_pKernel->CreateComponent<SimpleCamera>();
-  auto spUDNode = s_pKernel->CreateComponent<UDNode>();
+  auto spView = pKernel->CreateComponent<View>();
+  auto spScene = pKernel->CreateComponent<Scene>();
+  auto spCamera = pKernel->CreateComponent<SimpleCamera>();
+  auto spUDNode = pKernel->CreateComponent<UDNode>();
 
   if (spUDNode)
   {
@@ -73,17 +72,17 @@ void Init(udString sender, udString message, const udVariant &data)
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);
 
-  auto spMainWindow = s_pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
+  auto spMainWindow = pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
   if (!spMainWindow)
   {
-    s_pKernel->LogError("Error creating MainWindow UI Component\n");
+    pKernel->LogError("Error creating MainWindow UI Component\n");
     return;
   }
 
-  auto spViewport = s_pKernel->CreateComponent<Viewport>({ { "file", "qrc:/kernel/viewport.qml" }, { "view", spView } });
+  auto spViewport = pKernel->CreateComponent<Viewport>({ { "file", "qrc:/kernel/viewport.qml" }, { "view", spView } });
   if (!spViewport)
   {
-    s_pKernel->LogError("Error creating Main Viewport Component\n");
+    pKernel->LogError("Error creating Main Viewport Component\n");
     return;
   }
 
@@ -110,7 +109,7 @@ int main(int argc, char *argv[])
   qputenv("QSG_RENDER_LOOP", "threaded");
 
   // create a kernel
-  udResult r = Kernel::Create(&s_pKernel, udParseCommandLine(argc, argv), 8);
+  udResult r = Kernel::Create(&pKernel, udParseCommandLine(argc, argv), 8);
   if (r == udR_Failure_)
   {
     // TODO: improve error handling/reporting
@@ -118,9 +117,9 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  s_pKernel->RegisterMessageHandler("init", &Init);
+  pKernel->RegisterMessageHandler("init", &Init);
 
-  if (s_pKernel->RunMainLoop() != udR_Success)
+  if (pKernel->RunMainLoop() != udR_Success)
   {
     // TODO: improve error handling/reporting
     udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");

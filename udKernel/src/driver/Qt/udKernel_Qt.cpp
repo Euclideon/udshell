@@ -111,7 +111,7 @@ udResult QtKernel::InitInternal()
   }
 
   // create our qapplication
-  pApplication = new QGuiApplication(argc, argv.ptr);
+  pApplication = new QtApplication(this, argc, argv.ptr);
 
   // make sure we cleanup the kernel when we're about to quit
   QObject::connect(pApplication, &QCoreApplication::aboutToQuit, this, &QtKernel::OnAppQuit);
