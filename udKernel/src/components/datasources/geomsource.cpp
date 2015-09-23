@@ -132,6 +132,8 @@ void GeomSource::Create(StreamRef spSource)
     NodeRef spRoot = ParseNode(pScene, pScene->mRootNode, &world, numMeshes);
     resources.Insert("scene0", spRoot);
   }
+
+  udFree(pBuffer);
 }
 
 void GeomSource::ParseMaterials(const aiScene *pScene)
@@ -178,8 +180,6 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
     // add resource
     resources.Insert(udSharedString::concat("material", i), spMat);
   }
-
-  udFree(pBuffer);
 }
 
 void GeomSource::ParseMeshes(const aiScene *pScene)
