@@ -3,6 +3,10 @@
 #if UDPLATFORM_WINDOWS
 #include <io.h>
 #include <share.h>
+#define close _close
+#define read _read
+#define write _write
+#define lseek _lseeki64
 #endif
 
 #include <fcntl.h>
@@ -34,45 +38,30 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udIn
   const udVariant &flags = initParams["flags"];
   FileOpenFlags of = flags.as<FileOpenFlags>();
 
-  const char *fFlags = GetfopenFlags(of);
-  if (!fFlags)
-    throw udR_InvalidParameter_;
-
   int posixFlags = GetPosixOpenFlags(of);
 
-  int fd;
 #if UDPLATFORM_WINDOWS
   _sopen_s(&fd, path.asString().toStringz(), posixFlags, SH_DENYNO, S_IREAD | S_IWRITE);
-  if (fd == -1)
-    throw udR_File_OpenFailure;
-  if (nullptr == (pFile = _fdopen(fd, fFlags)))
-  {
-    _close(fd);
-    throw udR_File_OpenFailure;
-  }
 #else
   fd = open(path.asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
+#endif
   if (fd == -1)
     throw udR_File_OpenFailure;
-  if (nullptr == (pFile = fdopen(fd, fFlags)))
-  {
-    close(fd);
-    throw udR_File_OpenFailure;
-  }
-#endif
 
-  long pos = ftell(pFile);
-  fseek(pFile, 0L, SEEK_END);
-  length = ftell(pFile);
-  fseek(pFile, pos, SEEK_SET);
+  uint64_t curr = lseek(fd, 0L, SEEK_CUR);
+  length = lseek(fd, 0L, SEEK_END);
+  lseek(fd, curr, SEEK_SET);
 }
 
 int File::GetPosixOpenFlags(FileOpenFlags flags) const
 {
-#if UDPLATFORM_WINDOWS
-  int posixFlags = O_BINARY;
-#else
   int posixFlags = 0;
+
+#if UDPLATFORM_WINDOWS
+  if (!(flags & FileOpenFlags::Text))
+  {
+    posixFlags |= O_BINARY;
+  }
 #endif
 
   if ((flags & FileOpenFlags::Read) && (flags & FileOpenFlags::Write))
@@ -101,62 +90,35 @@ int File::GetPosixOpenFlags(FileOpenFlags flags) const
   return posixFlags;
 }
 
-const char *File::GetfopenFlags(FileOpenFlags flags) const
-{
-  const char *pMode;
-
-  if ((flags & FileOpenFlags::Append) && (flags & FileOpenFlags::Read))
-  {
-    pMode = "a+";
-  }
-  else if ((flags & FileOpenFlags::Append))
-  {
-    pMode = "a";
-  }
-  else if ((flags & FileOpenFlags::Read) && (flags & FileOpenFlags::Write) && (flags & FileOpenFlags::Create))
-  {
-    pMode = "w+b";  // Read/write, any existing file destroyed
-  }
-  else if ((flags & FileOpenFlags::Read) && (flags & FileOpenFlags::Write))
-  {
-    pMode = "r+b"; // Read/write, but file must already exist
-  }
-  else if (flags & FileOpenFlags::Read)
-  {
-    pMode = "rb"; // Read, file must already exist
-  }
-  else if ((flags & FileOpenFlags::Write) || (flags & FileOpenFlags::Create))
-  {
-    pMode = "wb"; // Write, any existing file destroyed (Create flag treated as Write in this case)
-  }
-  else
-  {
-    pMode = nullptr;
-  }
-
-  return pMode;
-}
-
 File::~File()
 {
-  fclose(pFile);
+  close(fd);
 }
 
 udSlice<void> File::Read(udSlice<void> buffer)
 {
-  fseek(pFile, (long)pos, SEEK_SET);
-  size_t read = fread(buffer.ptr, 1, buffer.length, pFile);
-  pos = ftell(pFile);
-  return buffer.slice(0, read);
+  int nRead;
+
+  lseek(fd, pos, SEEK_SET);
+  nRead = read(fd, buffer.ptr, (unsigned int)buffer.length);
+  pos = lseek(fd, 0L, SEEK_CUR);
+
+  if (nRead == -1)
+    return nullptr;
+
+  return buffer.slice(0, nRead);
 }
 
 size_t File::Write(udSlice<const void> data)
 {
-  fseek(pFile, (long)pos, SEEK_SET);
-  size_t written = fwrite(data.ptr, 1, data.length, pFile);
-  pos = ftell(pFile);
+  lseek(fd, pos, SEEK_SET);
+  int written = write(fd, data.ptr, (unsigned int)data.length);
+  pos = lseek(fd, 0L, SEEK_CUR);
   length = udMax(pos, length);
-  return written;
+  if (written == -1)
+    return 0;
+
+  return (size_t)written;
 }
 
 int64_t File::Seek(SeekOrigin rel, int64_t offset)
@@ -177,15 +139,6 @@ int64_t File::Seek(SeekOrigin rel, int64_t offset)
       break;
   }
   return pos;
-}
-
-int File::Flush()
-{
-  if(fflush(pFile))
-    return -1;
-
-  // TODO Fix error handling
-  return 0;
 }
 
 } // namespace ud

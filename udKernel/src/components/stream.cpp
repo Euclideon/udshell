@@ -70,8 +70,10 @@ size_t Stream::WriteLn(udString str)
 {
   size_t written;
 
-  written = Write(str);
-  written += Write(udString("\n", 1));
+  udMutableString<256> temp;
+  temp = str;
+  temp.append("\n");
+  written = Write(temp);
 
   return written;
 }
