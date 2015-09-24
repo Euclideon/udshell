@@ -135,7 +135,7 @@ struct epMutableString : public epArray<char, Size>
   template<typename... Args> epMutableString& append(const Args&... args);
 
   template<typename... Args> epMutableString& format(epString format, const Args&... args);
-  epMutableString& sprintf(const char *pFormat, ...)  EPPRINTF_FUNC(1, 2);
+  epMutableString& sprintf(const char *pFormat, ...)  EPPRINTF_FUNC(2, 3);
 
   epMutableString& toUpper();
   epMutableString& toLower();

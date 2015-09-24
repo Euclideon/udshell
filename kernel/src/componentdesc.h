@@ -391,7 +391,7 @@ struct ComponentDesc
   epAVLTree<epString, EventDesc> eventTree;
   epAVLTree<epString, StaticFuncDesc> staticFuncTree;
 
-  StaticFunc *ComponentDesc::GetStaticFunc(epString id) const;
+  StaticFunc *GetStaticFunc(epString id) const;
 
   void BuildSearchTrees();
   void InitProps();

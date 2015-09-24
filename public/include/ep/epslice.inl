@@ -605,7 +605,7 @@ inline epSharedSlice<T>::epSharedSlice(nullptr_t)
 {}
 
 template<typename T>
-inline epSharedSlice<T>::epSharedSlice(std::initializer_list<ET> list)
+inline epSharedSlice<T>::epSharedSlice(std::initializer_list<typename epSharedSlice<T>::ET> list)
   : epSlice<T>(alloc(list.begin(), list.size()))
   , rc(nullptr)
 {
@@ -725,7 +725,7 @@ inline epSlice<T> epSharedSlice<T>::alloc(U *ptr, size_t length)
   if(!ptr || !length)
     return epSlice<T>();
   size_t alloc = numToAlloc(length);
-  return epSlice<T>((T*)udAlloc(sizeof(epRC) + alloc*sizeof(ET)), alloc);
+  return epSlice<T>((T*)udAlloc(sizeof(epRC) + alloc*sizeof(typename epSharedSlice<T>::ET)), alloc);
 }
 
 template <typename T>

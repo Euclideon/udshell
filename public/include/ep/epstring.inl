@@ -562,7 +562,7 @@ template<typename T>
 epVarArg::epVarArg(const T& arg)
 : pArg(&arg)
 , pStringProxy(ud_internal::StringifyProxy<T>::stringify)
-, pIntProxy(ud_internal::StringifyProxy<T>::intify)
+, pIntProxy((IntConvFunc*)ud_internal::StringifyProxy<T>::intify)
 {}
 
 

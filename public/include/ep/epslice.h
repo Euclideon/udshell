@@ -5,6 +5,13 @@
 
 #include <initializer_list>
 
+namespace ep_internal {
+  template<typename T> struct ElementType { typedef T Ty; };
+  template<> struct ElementType<void> { typedef uint8_t Ty; };
+  template<> struct ElementType<const void> { typedef const uint8_t Ty; };
+}
+
+
 struct epRC
 {
   size_t refCount;
@@ -35,11 +42,8 @@ template<typename T>
 struct epSlice
 {
 private:
-  template<typename ET> struct ElementType { typedef ET Ty; };
-  template<> struct ElementType<void> { typedef uint8_t Ty; };
-  template<> struct ElementType<const void> { typedef const uint8_t Ty; };
 public:
-  typedef typename ElementType<T>::Ty ET;
+  typedef typename ep_internal::ElementType<T>::Ty ET;
 
   size_t length;
   T *ptr;
@@ -198,7 +202,7 @@ struct epSharedSlice : public epSlice<T>
   // constructors
   epSharedSlice<T>();
   epSharedSlice<T>(nullptr_t);
-  epSharedSlice<T>(std::initializer_list<ET> list);
+  epSharedSlice<T>(std::initializer_list<typename epSharedSlice<T>::ET> list);
   epSharedSlice<T>(epSharedSlice<T> &&rval);
   epSharedSlice<T>(const epSharedSlice<T> &rcslice);
   template <typename U> epSharedSlice<T>(U *ptr, size_t length);
