@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDRENDER_DRIVER == UDDRIVER_QT
+#if EPRENDER_DRIVER == EPDRIVER_QT
 
 #include "hal/shader.h"
 #include "hal/vertex.h"
@@ -12,7 +12,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLFunctions>
 
-static QOpenGLShader::ShaderTypeBit s_shaderType[udST_Max] =
+static QOpenGLShader::ShaderTypeBit s_shaderType[epST_Max] =
 {
   QOpenGLShader::Vertex,
   QOpenGLShader::Fragment
@@ -20,14 +20,14 @@ static QOpenGLShader::ShaderTypeBit s_shaderType[udST_Max] =
 
 
 // ***************************************************************************************
-udShader* udShader_CreateShaderFromFile(const char *udUnusedParam(pFilename), udShaderType udUnusedParam(type))
+epShader* epShader_CreateShaderFromFile(const char *epUnusedParam(pFilename), epShaderType epUnusedParam(type))
 {
-  UDASSERT(false, "TODO");
+  EPASSERT(false, "TODO");
   return 0;
 }
 
 // ***************************************************************************************
-udShader* udShader_CreateShader(const char *pSource, size_t length, udShaderType type)
+epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType type)
 {
   QOpenGLShader *pQtShader = new QOpenGLShader(s_shaderType[type]);
   if (!pQtShader->compileSourceCode(QByteArray(pSource, static_cast<int>(length))))
@@ -37,16 +37,16 @@ udShader* udShader_CreateShader(const char *pSource, size_t length, udShaderType
     return 0;
   }
 
-  udShader *pShader = udAllocType(udShader, 1, udAF_None);
+  epShader *pShader = udAllocType(epShader, 1, udAF_None);
   pShader->pShader = pQtShader;
   return pShader;
 }
 
 // ***************************************************************************************
-udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader *pPixelShader)
+epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader *pPixelShader)
 {
   bool result = true;
-  udShaderProgram *pProgram = nullptr;
+  epShaderProgram *pProgram = nullptr;
 
   QOpenGLShaderProgram *pQtProgram = new QOpenGLShaderProgram();
   UD_ERROR_IF(!pQtProgram->addShader(pVertexShader->pShader), false);
@@ -83,14 +83,14 @@ udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader 
       extraBytes += length + 1;
     }
 
-    extraBytes += sizeof(udShaderProgram::Param) * (numAttributes + numUniforms);
+    extraBytes += sizeof(epShaderProgram::Param) * (numAttributes + numUniforms);
 
-    pProgram = (udShaderProgram*)udAlloc(sizeof(udShaderProgram) + extraBytes);
+    pProgram = (epShaderProgram*)udAlloc(sizeof(epShaderProgram) + extraBytes);
     pProgram->pProgram = pQtProgram;
     pProgram->numAttributes = numAttributes;
     pProgram->numUniforms = numUniforms;
-    pProgram->pAttributes = (udShaderProgram::Param*)&pProgram[1];
-    pProgram->pUniforms = (udShaderProgram::Param*)&pProgram->pAttributes[numAttributes];
+    pProgram->pAttributes = (epShaderProgram::Param*)&pProgram[1];
+    pProgram->pUniforms = (epShaderProgram::Param*)&pProgram->pAttributes[numAttributes];
     char *pStrings = (char*)&pProgram->pUniforms[numUniforms];
     char *pEnd = (char*)&pProgram[1] + extraBytes;
 
@@ -128,51 +128,51 @@ epilogue:
 }
 
 // ***************************************************************************************
-size_t udShader_GetNumAttributes(udShaderProgram *pProgram)
+size_t epShader_GetNumAttributes(epShaderProgram *pProgram)
 {
   return pProgram->numAttributes;
 }
 
 // ***************************************************************************************
-const char *udShader_GetAttributeName(udShaderProgram *pProgram, size_t i)
+const char *epShader_GetAttributeName(epShaderProgram *pProgram, size_t i)
 {
   return pProgram->pAttributes[i].pName;
 }
 
 // ***************************************************************************************
-size_t udShader_GetAttributeType(udShaderProgram *pProgram, size_t i)
+size_t epShader_GetAttributeType(epShaderProgram *pProgram, size_t i)
 {
   return pProgram->pAttributes[i].type;
 }
 
 // ***************************************************************************************
-size_t udShader_GetNumUniforms(udShaderProgram *pProgram)
+size_t epShader_GetNumUniforms(epShaderProgram *pProgram)
 {
   return pProgram->numUniforms;
 }
 
 // ***************************************************************************************
-const char *udShader_GetUniformName(udShaderProgram *pProgram, size_t i)
+const char *epShader_GetUniformName(epShaderProgram *pProgram, size_t i)
 {
   return pProgram->pUniforms[i].pName;
 }
 
 // ***************************************************************************************
-size_t udShader_GetUniformType(udShaderProgram *pProgram, size_t i)
+size_t epShader_GetUniformType(epShaderProgram *pProgram, size_t i)
 {
   return pProgram->pUniforms[i].type;
 }
 
 // ***************************************************************************************
-int udShader_FindShaderParameter(udShaderProgram *pProgram, const char *pName)
+int epShader_FindShaderParameter(epShaderProgram *pProgram, const char *pName)
 {
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
-  UDASSERT(pProgram->pProgram, "QOpenGLShaderProgram object not created");
+  EPASSERT(pProgram->pProgram, "QOpenGLShaderProgram object not created");
   return pProgram->pProgram->uniformLocation(pName);
 }
 
 // ***************************************************************************************
-void udShader_SetCurrent(udShaderProgram *pProgram)
+void epShader_SetCurrent(epShaderProgram *pProgram)
 {
   if (pProgram)
   {
@@ -184,7 +184,7 @@ void udShader_SetCurrent(udShaderProgram *pProgram)
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int param, bool value)
+void epShader_SetProgramData(int param, bool value)
 {
   if (param < 0)
     return;
@@ -192,7 +192,7 @@ void udShader_SetProgramData(int param, bool value)
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int param, int value)
+void epShader_SetProgramData(int param, int value)
 {
   if (param < 0)
     return;
@@ -200,7 +200,7 @@ void udShader_SetProgramData(int param, int value)
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int param, float value)
+void epShader_SetProgramData(int param, float value)
 {
   if (param < 0)
     return;
@@ -208,7 +208,7 @@ void udShader_SetProgramData(int param, float value)
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int param, const udFloat4 &value)
+void epShader_SetProgramData(int param, const udFloat4 &value)
 {
   if (param < 0)
     return;
@@ -216,7 +216,7 @@ void udShader_SetProgramData(int param, const udFloat4 &value)
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int param, const udFloat4x4 &value)
+void epShader_SetProgramData(int param, const udFloat4x4 &value)
 {
   if (param < 0)
     return;
@@ -224,7 +224,7 @@ void udShader_SetProgramData(int param, const udFloat4x4 &value)
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int textureUnit, int param, struct udTexture *pTexture)
+void epShader_SetProgramData(int textureUnit, int param, struct epTexture *pTexture)
 {
   if (param < 0)
     return;
@@ -236,7 +236,7 @@ void udShader_SetProgramData(int textureUnit, int param, struct udTexture *pText
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int param, const int *pValues, size_t count)
+void epShader_SetProgramData(int param, const int *pValues, size_t count)
 {
   if (param < 0)
     return;
@@ -244,7 +244,7 @@ void udShader_SetProgramData(int param, const int *pValues, size_t count)
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int param, const float *pValues, size_t count)
+void epShader_SetProgramData(int param, const float *pValues, size_t count)
 {
   if (param < 0)
     return;
@@ -252,7 +252,7 @@ void udShader_SetProgramData(int param, const float *pValues, size_t count)
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
+void epShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
 {
   if (param < 0)
     return;
@@ -260,11 +260,11 @@ void udShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
 }
 
 // ***************************************************************************************
-void udShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
+void epShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
 {
   if (param < 0)
     return;
   s_QtGLContext.pFunc->glUniformMatrix4fv(param, (GLsizei)count, 0, (GLfloat*)pValues);
 }
 
-#endif // UDRENDER_DRIVER == UDDRIVER_QT
+#endif // EPRENDER_DRIVER == EPDRIVER_QT

@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_UD_CONSOLE_H)
-#define _UD_CONSOLE_H
+#if !defined(_EP_CONSOLE_H)
+#define _EP_CONSOLE_H
 
 #include "stream.h"
 
@@ -10,7 +10,7 @@ UD_ENUM(ConsoleOutputs,
   StdDbg
 );
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(Console);
@@ -18,14 +18,14 @@ PROTOTYPE_COMPONENT(Console);
 class Console : public Stream
 {
 public:
-  UD_COMPONENT(Console);
+  EP_COMPONENT(Console);
 
-  udSlice<void> Read(udSlice<void> buffer) override;
-  size_t Write(udSlice<const void> data) override;
+  epSlice<void> Read(epSlice<void> buffer) override;
+  size_t Write(epSlice<const void> data) override;
   int Flush() override;
 
 protected:
-  Console(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  Console(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
   FILE *pIn, *pOut;
   bool bDbgOutput;
@@ -33,4 +33,4 @@ protected:
 
 }
 
-#endif // _UD_CONSOLE_H
+#endif // _EP_CONSOLE_H

@@ -21,28 +21,28 @@ class QtApplication : public QGuiApplication
   Q_OBJECT
 
 public:
-  QtApplication(ud::Kernel *pKern, int &argc, char ** argv) : QGuiApplication(argc, argv), pKernel(pKern) {}
+  QtApplication(ep::Kernel *pKern, int &argc, char ** argv) : QGuiApplication(argc, argv), pKernel(pKern) {}
 
-  static void SetKernel(ud::Kernel *pKernel) {
-    UDASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
+  static void SetKernel(ep::Kernel *pKernel) {
+    EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
     static_cast<QtApplication*>(QtApplication::instance())->pKernel = pKernel;
   }
-  static ud::Kernel *Kernel() {
-    UDASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
+  static ep::Kernel *Kernel() {
+    EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
     return static_cast<QtApplication*>(QtApplication::instance())->pKernel;
   }
 
 protected:
-  ud::Kernel *pKernel = nullptr;
+  ep::Kernel *pKernel = nullptr;
 };
 
 
-class QtKernel : public QObject, public ud::Kernel
+class QtKernel : public QObject, public ep::Kernel
 {
   Q_OBJECT
 
 public:
-  QtKernel(udInitParams commandLine);
+  QtKernel(epInitParams commandLine);
   virtual ~QtKernel();
 
   udResult InitInternal() override;
@@ -63,12 +63,12 @@ private slots:
   void OnAppQuit();
 
 private:
-  void DoInit(ud::Kernel *);
+  void DoInit(ep::Kernel *);
   void customEvent(QEvent *pEvent);
 
   // Members
   int argc;
-  udSharedSlice<char *> argv;
+  epSharedSlice<char *> argv;
 
   QtApplication *pApplication;
   QQmlEngine *pQmlEngine;

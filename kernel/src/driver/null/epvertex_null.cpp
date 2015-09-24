@@ -1,46 +1,46 @@
 #include "hal/driver.h"
 
-#if UDRENDER_DRIVER == UDDRIVER_NULL
+#if EPRENDER_DRIVER == EPDRIVER_NULL
 
 #include "hal/vertex.h"
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udFormatDeclaration *udVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount)
+epFormatDeclaration *epVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount)
 {
   return nullptr;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udVertex_DestroyFormatDeclaration(udFormatDeclaration **ppDeclaration)
+void epVertex_DestroyFormatDeclaration(epFormatDeclaration **ppDeclaration)
 {
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, Aug 2015
-udArrayBuffer* udVertex_CreateIndexBuffer(udArrayDataFormat format)
+epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format)
 {
   return nullptr;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udArrayBuffer* udVertex_CreateVertexBuffer(udArrayDataFormat elements[], size_t numElements)
+epArrayBuffer* epVertex_CreateVertexBuffer(epArrayDataFormat elements[], size_t numElements)
 {
   return nullptr;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udVertex_DestroyArrayBuffer(udArrayBuffer **ppVB)
+void epVertex_DestroyArrayBuffer(epArrayBuffer **ppVB)
 {
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udVertex_SetArrayBufferData(udArrayBuffer *pVB, const void *pVertexData, size_t bufferLen)
+void epVertex_SetArrayBufferData(epArrayBuffer *pVB, const void *pVertexData, size_t bufferLen)
 {
 }
 
-#endif // UDRENDER_DRIVER == UDDRIVER_OPENGL
+#endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

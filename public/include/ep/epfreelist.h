@@ -1,19 +1,19 @@
 #pragma once
-#if !defined(_UDFREELIST_H)
-#define _UDFREELIST_H
+#if !defined(_EPFREELIST_H)
+#define _EPFREELIST_H
 
 template<typename T>
-class udFreeList
+class epFreeList
 {
 public:
-  udFreeList(size_t listSize)
+  epFreeList(size_t listSize)
     : numAllocated(0)
   {
     pList = pFreeList = udAllocType(T, listSize, udAF_None);
     for (size_t i = 0; i<listSize; ++i)
       (T*&)pList[i] = i < listSize-1 ? &pList[i+1] : nullptr;
   }
-  ~udFreeList()
+  ~epFreeList()
   {
     // TODO: free allocated items...
 
@@ -47,4 +47,4 @@ private:
   size_t numAllocated;
 };
 
-#endif // _UDFREELIST_H
+#endif // _EPFREELIST_H

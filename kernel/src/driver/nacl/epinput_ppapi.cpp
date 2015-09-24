@@ -1,27 +1,27 @@
 #include "hal/driver.h"
 
-#if UDINPUT_DRIVER == UDDRIVER_PPAPI
+#if EPINPUT_DRIVER == EPDRIVER_PPAPI
 
 #include "hal/input_internal.h"
 
 
 // --------------------------------------------------------
 // Author: Manu Evans, March 2015
-void udInput_InitInternal()
+void epInput_InitInternal()
 {
 
 }
 
 // --------------------------------------------------------
 // Author: Manu Evans, March 2015
-void udInput_UpdateInternal()
+void epInput_UpdateInternal()
 {
   InputState &input = gInputState[gCurrentInputState];
   InputState &prev = gInputState[1 - gCurrentInputState];
 
   // Temp hack to stop warnings
-  udUnused(input);
-  udUnused(prev);
+  epUnused(input);
+  epUnused(prev);
 
   // poll keyboard
   //...

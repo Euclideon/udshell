@@ -1,26 +1,26 @@
 #include "hal/driver.h"
 
-#if UDRENDER_DRIVER == UDDRIVER_NULL
+#if EPRENDER_DRIVER == EPDRIVER_NULL
 
 #include "hal/texture.h"
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udTexture* udTexture_CreateTexture(udTextureType type, size_t width, size_t height, int levels, udImageFormat format)
+epTexture* epTexture_CreateTexture(epTextureType type, size_t width, size_t height, int levels, epImageFormat format)
 {
   return nullptr;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udTexture_DestroyTexture(udTexture **ppTex)
+void epTexture_DestroyTexture(epTexture **ppTex)
 {
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udTexture_SetImageData(udTexture *pTex, int element, int level, void *pImage)
+void epTexture_SetImageData(epTexture *pTex, int element, int level, void *pImage)
 {
 }
 
-#endif // UDRENDER_DRIVER == UDDRIVER_OPENGL
+#endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

@@ -5,17 +5,17 @@
 #include "eplua.h"
 
 
-const udVariant udInitParams::varNull;
+const epVariant epInitParams::varNull;
 
 // destructor
-udVariant::~udVariant()
+epVariant::~epVariant()
 {
   if (ownsContent)
   {
     switch ((Type)t)
     {
       case Type::Component:
-        ((ud::ComponentRef*)&p)->~udSharedPtr();
+        ((ep::ComponentRef*)&p)->~epSharedPtr();
         break;
       case Type::Delegate:
         ((VarDelegate*)&p)->~VarDelegate();
@@ -25,14 +25,14 @@ udVariant::~udVariant()
         break;
       case Type::Array:
         for (size_t i = 0; i < length; ++i)
-          a[i].~udVariant();
+          a[i].~epVariant();
         udFree(a);
         break;
       case Type::AssocArray:
         for (size_t i = 0; i < length; ++i)
         {
-          aa[i].key.~udVariant();
-          aa[i].value.~udVariant();
+          aa[i].key.~epVariant();
+          aa[i].value.~epVariant();
         }
         udFree(aa);
         break;
@@ -42,7 +42,7 @@ udVariant::~udVariant()
   }
 }
 
-udSharedString udVariant::stringify() const
+epSharedString epVariant::stringify() const
 {
   switch ((Type)t)
   {
@@ -58,7 +58,7 @@ udSharedString udVariant::stringify() const
   return nullptr;
 }
 
-ptrdiff_t udVariant::compare(const udVariant &v) const
+ptrdiff_t epVariant::compare(const epVariant &v) const
 {
   if (t != v.t)
     return t - v.t;
@@ -74,7 +74,7 @@ ptrdiff_t udVariant::compare(const udVariant &v) const
     case Type::Float:
       return f < v.f ? -1 : (f > v.f ? 1 : 0);
     case Type::String:
-      return udString(s, length).cmp(udString(v.s, v.length));
+      return epString(s, length).cmp(epString(v.s, v.length));
     case Type::Component:
       return c->uid.cmp(v.c->uid);
     default:
@@ -82,7 +82,7 @@ ptrdiff_t udVariant::compare(const udVariant &v) const
   }
 }
 
-bool udVariant::asBool() const
+bool epVariant::asBool() const
 {
   switch ((Type)t)
   {
@@ -96,7 +96,7 @@ bool udVariant::asBool() const
     return f != 0;
   case Type::String:
   {
-    udString str(s, length);
+    epString str(s, length);
     if (str.eqIC("true"))
       return true;
     else if (str.eqIC("false"))
@@ -104,11 +104,11 @@ bool udVariant::asBool() const
     return !str.empty();
   }
   default:
-    UDASSERT(type() == Type::Bool, "Wrong type!");
+    EPASSERT(type() == Type::Bool, "Wrong type!");
     return false;
   }
 }
-int64_t udVariant::asInt() const
+int64_t epVariant::asInt() const
 {
   switch ((Type)t)
   {
@@ -121,13 +121,13 @@ int64_t udVariant::asInt() const
   case Type::Float:
     return (int64_t)f;
   case Type::String:
-    return udString(s, length).parseInt();
+    return epString(s, length).parseInt();
   default:
-    UDASSERT(type() == Type::Int, "Wrong type!");
+    EPASSERT(type() == Type::Int, "Wrong type!");
     return 0;
   }
 }
-double udVariant::asFloat() const
+double epVariant::asFloat() const
 {
   switch ((Type)t)
   {
@@ -140,35 +140,35 @@ double udVariant::asFloat() const
   case Type::Float:
     return f;
   case Type::String:
-    return udString(s, length).parseFloat();
+    return epString(s, length).parseFloat();
   default:
-    UDASSERT(type() == Type::Float, "Wrong type!");
+    EPASSERT(type() == Type::Float, "Wrong type!");
     return 0.0;
   }
 }
-const udEnumDesc* udVariant::asEnum(size_t *pVal) const
+const epEnumDesc* epVariant::asEnum(size_t *pVal) const
 {
   if ((Type)t == Type::Enum || (Type)t == Type::Bitfield)
   {
     *pVal = (ptrdiff_t)(length << 5) >> 5;
-    return (const udEnumDesc*)p;
+    return (const epEnumDesc*)p;
   }
   return nullptr;
 }
-ud::ComponentRef udVariant::asComponent() const
+ep::ComponentRef epVariant::asComponent() const
 {
   switch ((Type)t)
   {
   case Type::Null:
-    return ud::ComponentRef();
+    return ep::ComponentRef();
   case Type::Component:
-    return (ud::ComponentRef&)p;
+    return (ep::ComponentRef&)p;
   default:
-    UDASSERT(type() == Type::Component, "Wrong type!");
+    EPASSERT(type() == Type::Component, "Wrong type!");
     return nullptr;
   }
 }
-udVariant::VarDelegate udVariant::asDelegate() const
+epVariant::VarDelegate epVariant::asDelegate() const
 {
   switch ((Type)t)
   {
@@ -177,68 +177,68 @@ udVariant::VarDelegate udVariant::asDelegate() const
     case Type::Delegate:
       return (VarDelegate&)p;
     default:
-      UDASSERT(type() == Type::Delegate, "Wrong type!");
+      EPASSERT(type() == Type::Delegate, "Wrong type!");
       return VarDelegate();
   }
 }
-udString udVariant::asString() const
+epString epVariant::asString() const
 {
   // TODO: it would be nice to be able to string-ify other types
   // ...but we don't have any output buffer
   switch ((Type)t)
   {
   case Type::Null:
-    return udString();
+    return epString();
   case Type::String:
-    return udString(s, length);
+    return epString(s, length);
   case Type::Component:
     return c->GetUid();
   default:
-    UDASSERT(type() == Type::String, "Wrong type!");
-    return udString();
+    EPASSERT(type() == Type::String, "Wrong type!");
+    return epString();
   }
 }
-udSlice<udVariant> udVariant::asArray() const
+epSlice<epVariant> epVariant::asArray() const
 {
   switch ((Type)t)
   {
   case Type::Null:
-    return udSlice<udVariant>();
+    return epSlice<epVariant>();
   case Type::Array:
-    return udSlice<udVariant>(a, length);
+    return epSlice<epVariant>(a, length);
   default:
-    UDASSERT(type() == Type::Array, "Wrong type!");
-    return udSlice<udVariant>();
+    EPASSERT(type() == Type::Array, "Wrong type!");
+    return epSlice<epVariant>();
   }
 }
-udSlice<udKeyValuePair> udVariant::asAssocArray() const
+epSlice<epKeyValuePair> epVariant::asAssocArray() const
 {
   switch ((Type)t)
   {
   case Type::Null:
-    return udSlice<udKeyValuePair>();
+    return epSlice<epKeyValuePair>();
   case Type::AssocArray:
-    return udSlice<udKeyValuePair>(aa, length);
+    return epSlice<epKeyValuePair>(aa, length);
   default:
-    UDASSERT(type() == Type::AssocArray, "Wrong type!");
-    return udSlice<udKeyValuePair>();
+    EPASSERT(type() == Type::AssocArray, "Wrong type!");
+    return epSlice<epKeyValuePair>();
   }
 }
-udSlice<udKeyValuePair> udVariant::asAssocArraySeries() const
+epSlice<epKeyValuePair> epVariant::asAssocArraySeries() const
 {
   switch ((Type)t)
   {
   case Type::Null:
-    return udSlice<udKeyValuePair>();
+    return epSlice<epKeyValuePair>();
   case Type::AssocArray:
-    return udSlice<udKeyValuePair>(aa, assocArraySeriesLen());
+    return epSlice<epKeyValuePair>(aa, assocArraySeriesLen());
   default:
-    UDASSERT(type() == Type::AssocArray, "Wrong type!");
-    return udSlice<udKeyValuePair>();
+    EPASSERT(type() == Type::AssocArray, "Wrong type!");
+    return epSlice<epKeyValuePair>();
   }
 }
 
-size_t udVariant::arrayLen() const
+size_t epVariant::arrayLen() const
 {
   if (is(Type::Array))
     return length;
@@ -246,7 +246,7 @@ size_t udVariant::arrayLen() const
     return assocArraySeriesLen();
   return 0;
 }
-size_t udVariant::assocArraySeriesLen() const
+size_t epVariant::assocArraySeriesLen() const
 {
   if (!is(Type::AssocArray))
     return 0;
@@ -256,58 +256,58 @@ size_t udVariant::assocArraySeriesLen() const
   return i;
 }
 
-udVariant udVariant::operator[](size_t i) const
+epVariant epVariant::operator[](size_t i) const
 {
   if (is(Type::Array))
   {
-    UDASSERT(i < length, "Index out of range!");
+    EPASSERT(i < length, "Index out of range!");
     return a[i];
   }
   if (is(Type::AssocArray))
   {
-    UDASSERT(i < assocArraySeriesLen(), "Index out of range!");
+    EPASSERT(i < assocArraySeriesLen(), "Index out of range!");
     return aa[i].value;
   }
-  return udVariant(nullptr);
+  return epVariant(nullptr);
 }
-udVariant udVariant::operator[](udString key) const
+epVariant epVariant::operator[](epString key) const
 {
   if (is(Type::AssocArray))
   {
     size_t i = assocArraySeriesLen();
     for (; i<length; ++i)
     {
-      udVariant &k = aa[i].key;
+      epVariant &k = aa[i].key;
       if (!k.is(Type::String))
         continue;
-      if (udString(k.s, k.length).eq(key))
+      if (epString(k.s, k.length).eq(key))
         return aa[i].value;
     }
   }
-  return udVariant(nullptr);
+  return epVariant(nullptr);
 }
 
-udVariant* udVariant::allocArray(size_t len)
+epVariant* epVariant::allocArray(size_t len)
 {
-  this->~udVariant();
+  this->~epVariant();
   t = (size_t)Type::Array;
   length = len;
   ownsContent = true;
-  a = udAllocType(udVariant, len, udAF_None);
+  a = udAllocType(epVariant, len, udAF_None);
   return a;
 }
 
-udKeyValuePair* udVariant::allocAssocArray(size_t len)
+epKeyValuePair* epVariant::allocAssocArray(size_t len)
 {
-  this->~udVariant();
+  this->~epVariant();
   t = (size_t)Type::AssocArray;
   length = len;
   ownsContent = true;
-  aa = udAllocType(udKeyValuePair, len, udAF_None);
+  aa = udAllocType(epKeyValuePair, len, udAF_None);
   return aa;
 }
 
-void udVariant::luaPush(ud::LuaState &l) const
+void epVariant::luaPush(ep::LuaState &l) const
 {
   switch ((Type)t)
   {
@@ -327,20 +327,20 @@ void udVariant::luaPush(ud::LuaState &l) const
     case Type::Bitfield:
     {
       size_t val;
-      const udEnumDesc *pDesc = asEnum(&val);
-      udMutableString64 s;
+      const epEnumDesc *pDesc = asEnum(&val);
+      epMutableString64 s;
       pDesc->stringify(val, s);
       l.pushString(s);
       break;
     }
     case Type::Component:
-      l.pushComponent(ud::ComponentRef(c));
+      l.pushComponent(ep::ComponentRef(c));
       break;
     case Type::Delegate:
       l.pushDelegate((VarDelegate&)p);
       break;
     case Type::String:
-      l.pushString(udString(s, length));
+      l.pushString(epString(s, length));
       break;
     case Type::Array:
     {
@@ -368,27 +368,27 @@ void udVariant::luaPush(ud::LuaState &l) const
   }
 }
 
-udVariant udVariant::luaGet(ud::LuaState &l, int idx)
+epVariant epVariant::luaGet(ep::LuaState &l, int idx)
 {
-  ud::LuaType t = l.getType(idx);
+  ep::LuaType t = l.getType(idx);
   switch (t)
   {
-    case ud::LuaType::Nil:
-      return udVariant();
-    case ud::LuaType::Boolean:
-      return udVariant(l.toBool(idx));
-    case ud::LuaType::LightUserData:
-      return udVariant();
-    case ud::LuaType::Number:
+    case ep::LuaType::Nil:
+      return epVariant();
+    case ep::LuaType::Boolean:
+      return epVariant(l.toBool(idx));
+    case ep::LuaType::LightUserData:
+      return epVariant();
+    case ep::LuaType::Number:
       if (l.isInteger(idx))
-        return udVariant((int64_t)l.toInt(idx));
+        return epVariant((int64_t)l.toInt(idx));
       else
-        return udVariant(l.toFloat(idx));
-    case ud::LuaType::String:
-      return udVariant(l.toString(idx));
-    case ud::LuaType::Function:
+        return epVariant(l.toFloat(idx));
+    case ep::LuaType::String:
+      return epVariant(l.toString(idx));
+    case ep::LuaType::Function:
       return l.toDelegate(idx);
-    case ud::LuaType::UserData:
+    case ep::LuaType::UserData:
     {
       lua_State *L = l.state();
       if (lua_getmetatable(L, idx) == 0)
@@ -398,16 +398,16 @@ udVariant udVariant::luaGet(ud::LuaState &l, int idx)
       const char *type = lua_tostring(L, -1);
       lua_pop(L, 1);
 
-      udVariant v;
+      epVariant v;
       if (!strcmp(type, "component"))
-        return udVariant(l.toComponent(idx));
+        return epVariant(l.toComponent(idx));
       else if (!strcmp(type, "delegate"))
-        return udVariant(l.toDelegate(idx));
+        return epVariant(l.toDelegate(idx));
 //      else if (!strcmp(type, "event"))
-//        return udVariant(l.toEvent(idx));
-      return udVariant();
+//        return epVariant(l.toEvent(idx));
+      return epVariant();
     }
-    case ud::LuaType::Table:
+    case ep::LuaType::Table:
     {
       lua_State *L = l.state();
 
@@ -425,16 +425,16 @@ udVariant udVariant::luaGet(ud::LuaState &l, int idx)
       }
 
       // alloc for table
-      udVariant v;
-      udKeyValuePair *pAA = v.allocAssocArray(numElements);
+      epVariant v;
+      epKeyValuePair *pAA = v.allocAssocArray(numElements);
 
       // populate the table
       l.pushNil();  // first key
       int i = 0;
       while (lua_next(L, pos) != 0)
       {
-        new(&pAA[i].key) udVariant(l.get(-2));
-        new(&pAA[i].value) udVariant(l.get(-1));
+        new(&pAA[i].key) epVariant(l.get(-2));
+        new(&pAA[i].value) epVariant(l.get(-1));
         l.pop();
         ++i;
       }
@@ -442,35 +442,35 @@ udVariant udVariant::luaGet(ud::LuaState &l, int idx)
     }
     default:
       // TODO: make a noise of some sort...?
-      return udVariant();
+      return epVariant();
   }
 }
 
-ptrdiff_t udStringifyVariant(udSlice<char> buffer, udString format, const udVariant &v, const udVarArg *pArgs)
+ptrdiff_t epStringifyVariant(epSlice<char> buffer, epString format, const epVariant &v, const epVarArg *pArgs)
 {
   switch (v.type())
   {
-    case udVariant::Type::Null:
-      return udStringifyTemplate(buffer, format, nullptr, pArgs);
-    case udVariant::Type::Bool:
-      return udStringifyTemplate(buffer, format, v.asBool(), pArgs);
-    case udVariant::Type::Int:
-      return udStringifyTemplate(buffer, format, v.asInt(), pArgs);
-    case udVariant::Type::Float:
-      return udStringifyTemplate(buffer, format, v.asFloat(), pArgs);
-    case udVariant::Type::Enum:
-      UDASSERT(false, "TODO! Please write me!");
+    case epVariant::Type::Null:
+      return epStringifyTemplate(buffer, format, nullptr, pArgs);
+    case epVariant::Type::Bool:
+      return epStringifyTemplate(buffer, format, v.asBool(), pArgs);
+    case epVariant::Type::Int:
+      return epStringifyTemplate(buffer, format, v.asInt(), pArgs);
+    case epVariant::Type::Float:
+      return epStringifyTemplate(buffer, format, v.asFloat(), pArgs);
+    case epVariant::Type::Enum:
+      EPASSERT(false, "TODO! Please write me!");
       return 0;
-    case udVariant::Type::String:
-      return udStringifyTemplate(buffer, format, v.asString(), pArgs);
-    case udVariant::Type::Component:
-      return udStringifyTemplate(buffer, format, v.asComponent(), pArgs);
-    case udVariant::Type::Delegate:
-      return udStringifyTemplate(buffer, format, v.asDelegate(), pArgs);
-    case udVariant::Type::Array:
-      return udStringifyTemplate(buffer, format, v.asArray(), pArgs);
-    case udVariant::Type::AssocArray:
-      UDASSERT(false, "TODO! Please write me!");
+    case epVariant::Type::String:
+      return epStringifyTemplate(buffer, format, v.asString(), pArgs);
+    case epVariant::Type::Component:
+      return epStringifyTemplate(buffer, format, v.asComponent(), pArgs);
+    case epVariant::Type::Delegate:
+      return epStringifyTemplate(buffer, format, v.asDelegate(), pArgs);
+    case epVariant::Type::Array:
+      return epStringifyTemplate(buffer, format, v.asArray(), pArgs);
+    case epVariant::Type::AssocArray:
+      EPASSERT(false, "TODO! Please write me!");
       return 0;
   }
   return 0;

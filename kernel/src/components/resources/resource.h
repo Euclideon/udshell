@@ -1,10 +1,10 @@
 #pragma once
-#ifndef _UD_RESOURCE_H
-#define _UD_RESOURCE_H
+#ifndef _EP_RESOURCE_H
+#define _EP_RESOURCE_H
 
 #include "components/component.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(DataSource);
@@ -14,14 +14,14 @@ SHARED_CLASS(Resource);
 class Resource : public Component
 {
 public:
-  UD_COMPONENT(Resource);
+  EP_COMPONENT(Resource);
 
   MetadataRef GetMetadata() const;
 
-  udEvent<> Changed;
+  epEvent<> Changed;
 
 protected:
-  Resource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  Resource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Component(pType, pKernel, uid, initParams)
   {}
 
@@ -31,4 +31,4 @@ protected:
 
 }
 
-#endif // _UD_RESOURCE_H
+#endif // _EP_RESOURCE_H

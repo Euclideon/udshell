@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDWINDOW_DRIVER == UDDRIVER_QT
+#if EPWINDOW_DRIVER == EPDRIVER_QT
 
 #if defined(_MSC_VER)
 #pragma warning(disable:4512) // assignment operator could not be generated
@@ -56,7 +56,7 @@ public:
 /** QtKernel *********************************************/
 
 // ---------------------------------------------------------------------------------------
-QtKernel::QtKernel(udInitParams commandLine)
+QtKernel::QtKernel(epInitParams commandLine)
   : QObject(0)
   , pApplication(nullptr)
   , pQmlEngine(nullptr)
@@ -66,10 +66,10 @@ QtKernel::QtKernel(udInitParams commandLine)
   , mainThreadId(QThread::currentThreadId())
   , renderThreadId(nullptr)
 {
-  // convert udInitParams back into a string list for Qt
+  // convert epInitParams back into a string list for Qt
   // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
   // NOTE: the state of our argv may be changed by Qt as it removes args that it recognises
-  udFixedSlice<char *, 1> args;
+  epArray<char *, 1> args;
   args.reserve(commandLine.params.length);
   argc = static_cast<int>(commandLine.params.length);
   for (int i = 0; i < argc; i++)
@@ -98,8 +98,8 @@ QtKernel::~QtKernel()
 udResult QtKernel::InitInternal()
 {
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
-  UDASSERT(argc >= 1, "argc must contain at least 1");
-  UDASSERT(argv.length == argc, "argv length should match argc");
+  EPASSERT(argc >= 1, "argc must contain at least 1");
+  EPASSERT(argv.length == argc, "argv length should match argc");
 
   LogTrace("QtKernel::InitInternal()");
   LogInfo(2, "Initialising udShell...");
@@ -142,7 +142,7 @@ udResult QtKernel::InitInternal()
     // TODO: better error information/handling
     LogError("Error creating Splash Screen");
     foreach(const QQmlError &error, component.errors())
-      LogError(udSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
+      LogError(epSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
     return udR_Failure_;
   }
 
@@ -159,7 +159,7 @@ udResult QtKernel::RunMainLoop()
   LogTrace("QtKernel::RunMainLoop()");
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
-  UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
+  EPASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
   // run the Qt event loop - this may never return
   return (pApplication->exec() == 0) ? udR_Success : udR_Failure_;
@@ -171,7 +171,7 @@ void QtKernel::PostEvent(QEvent *pEvent, int priority)
   LogTrace("QtKernel::PostEvent()");
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
-  UDASSERT(pApplication != nullptr, "QApplication doesn't exist");
+  EPASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
   pApplication->postEvent(this, pEvent, priority);
 }
@@ -216,14 +216,14 @@ void QtKernel::OnGLContextCreated(QOpenGLContext *pContext)
 {
   LogTrace("QtKernel::OnGLContextCreated()");
 
-  UDASSERT(pMainThreadContext != nullptr, "Expected GL context");
+  EPASSERT(pMainThreadContext != nullptr, "Expected GL context");
 
   // we need to share our context with Qt and recreate
   pContext->setShareContext(pMainThreadContext);
   IF_UDASSERT(bool succeed =) pContext->create();
 
   // TODO: error handle
-  UDASSERT(succeed, "Couldn't create shared render context!");
+  EPASSERT(succeed, "Couldn't create shared render context!");
 }
 
 // ---------------------------------------------------------------------------------------
@@ -251,18 +251,18 @@ void QtKernel::OnAppQuit()
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::DoInit(ud::Kernel *)
+void QtKernel::DoInit(ep::Kernel *)
 {
   LogTrace("QtKernel::DoInit()");
 
-  UDASSERT(pTopLevelWindow != nullptr, "No active window set");
-  UDASSERT(pMainThreadContext == nullptr, "Main Thread context already exists");
+  EPASSERT(pTopLevelWindow != nullptr, "No active window set");
+  EPASSERT(pMainThreadContext == nullptr, "Main Thread context already exists");
 
   // create main opengl context
   pMainThreadContext = new QOpenGLContext();
   pMainThreadContext->setFormat(mainSurfaceFormat);
   IF_UDASSERT(bool succeed = )pMainThreadContext->create();
-  UDASSERT(succeed, "Couldn't create render context!");
+  EPASSERT(succeed, "Couldn't create render context!");
 
   if (!pMainThreadContext->makeCurrent(pTopLevelWindow))
   {
@@ -272,7 +272,7 @@ void QtKernel::DoInit(ud::Kernel *)
   }
 
   // init the HAL's render system
-  if (ud::Kernel::InitRender() != udR_Success)
+  if (ep::Kernel::InitRender() != udR_Success)
   {
     // TODO: gracefully handle error with InitRender ?
     LogError("Error initialising renderer");
@@ -280,7 +280,7 @@ void QtKernel::DoInit(ud::Kernel *)
   }
 
   // app specific init
-  ud::Kernel::DoInit(this);
+  ep::Kernel::DoInit(this);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -296,7 +296,7 @@ void QtKernel::customEvent(QEvent *pEvent)
   }
   else
   {
-    LogWarning(2, udSharedString::concat("Unknown event received in Kernel: TYPE ", (int)pEvent->type()));
+    LogWarning(2, epSharedString::concat("Unknown event received in Kernel: TYPE ", (int)pEvent->type()));
   }
 }
 
@@ -305,11 +305,11 @@ void QtKernel::customEvent(QEvent *pEvent)
 
 /** Kernel ***********************************************/
 
-namespace ud
+namespace ep
 {
 
 // ---------------------------------------------------------------------------------------
-Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
 {
   return new qt::QtKernel(commandLine);
 }
@@ -351,7 +351,7 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   qt::QtKernel *pKernel = static_cast<qt::QtKernel*>(this);
 
   // TODO: handle this gracefully? can we detect if the main thread is blocked??
-  UDASSERT(!pKernel->OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
+  EPASSERT(!pKernel->OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
 
   // if we're on the main thread just execute the callback now
   if (pKernel->OnMainThread())
@@ -367,6 +367,6 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   }
 }
 
-} // namespace ud
+} // namespace ep
 
 #endif

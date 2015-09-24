@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDWINDOW_DRIVER == UDDRIVER_PPAPI
+#if EPWINDOW_DRIVER == EPDRIVER_PPAPI
 
 #include <stdarg.h>
 #include "udPlatformUtil.h"
@@ -25,7 +25,7 @@
 #include "components/scene.h"
 #include "components/nodes/camera.h"
 
-using namespace ud;
+using namespace ep;
 
 // Pepper module
 class udPepperModule : public pp::Module
@@ -69,23 +69,23 @@ public:
 
   static void DebugPrintfCallback(const char *pString);
   static UDTHREADLOCAL udNewPepperInstance *pThreadLocalInstance;
-  void SendToJsCallback(udString senderUID, udString message, const udVariant &data);
+  void SendToJsCallback(epString senderUID, epString message, const epVariant &data);
 };
 
 UDTHREADLOCAL udNewPepperInstance* udNewPepperInstance::pThreadLocalInstance = NULL; // This can't be nullptr it creates a compile error.
 
 
 // ---------------------------------------------------------------------------------------
-Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
 {
   return udNewPepperInstance::pThreadLocalInstance;
 }
 
 // ---------------------------------------------------------------------------------------
-void udNewPepperInstance::SendToJsCallback(udString sender, udString message, const udVariant &data)
+void udNewPepperInstance::SendToJsCallback(epString sender, epString message, const epVariant &data)
 {
   // TODO: Need to wrangle this to include the sender
-  udSharedString s = data.stringify();
+  epSharedString s = data.stringify();
   PostMessageToJS(message.toStringz(), ":%s", (const char*)s.toStringz());
 }
 
@@ -207,7 +207,7 @@ void udNewPepperInstance::DidChangeView(const pp::View& view)
   if (!glContext.is_null())
   {
     int32_t result = glContext.ResizeBuffers(width, height);
-    udUnused(result); // Correctly handle this
+    epUnused(result); // Correctly handle this
     glViewport(0, 0, width, height);
 
     ViewRef spView = GetFocusView();
@@ -273,16 +273,16 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
   if (!spView)
     return false;
 
-  udInputEvent inputEvent;
+  epInputEvent inputEvent;
   switch (pepperEvent.GetType())
   {
     case PP_INPUTEVENT_TYPE_MOUSEDOWN:
     case PP_INPUTEVENT_TYPE_MOUSEUP:
     {
       pp::MouseInputEvent mouse_event(pepperEvent);
-      inputEvent.deviceType = udID_Mouse;
+      inputEvent.deviceType = epID_Mouse;
       inputEvent.deviceId = 0;
-      inputEvent.eventType = udInputEvent::Key;
+      inputEvent.eventType = epInputEvent::Key;
 
       PP_InputEvent_MouseButton button = mouse_event.GetButton();
       int32_t key = -1;
@@ -311,9 +311,9 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
     case PP_INPUTEVENT_TYPE_MOUSEMOVE:
     {
       pp::MouseInputEvent mouse_event(pepperEvent);
-      inputEvent.deviceType = udID_Mouse;
+      inputEvent.deviceType = epID_Mouse;
       inputEvent.deviceId = 0;
-      inputEvent.eventType = udInputEvent::Move;
+      inputEvent.eventType = epInputEvent::Move;
 
       pp::Point delta = mouse_event.GetMovement();
       pp::Point absolute = mouse_event.GetPosition();
@@ -329,10 +329,10 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
     case PP_INPUTEVENT_TYPE_CHAR:
     {
       pp::KeyboardInputEvent keyEvent(pepperEvent);
-      inputEvent.deviceType = udID_Keyboard;
+      inputEvent.deviceType = epID_Keyboard;
       inputEvent.deviceId = 0;
-      inputEvent.eventType = udInputEvent::Text;
-      // TODO : Once udInput::TextEvent is fleshed out finish this.
+      inputEvent.eventType = epInputEvent::Text;
+      // TODO : Once epInput::TextEvent is fleshed out finish this.
     }
     break;
 
@@ -341,9 +341,9 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
     {
       pp::KeyboardInputEvent keyEvent(pepperEvent);
 
-      inputEvent.deviceType = udID_Keyboard;
+      inputEvent.deviceType = epID_Keyboard;
       inputEvent.deviceId = 0;
-      inputEvent.eventType = udInputEvent::Key;
+      inputEvent.eventType = epInputEvent::Key;
 
       inputEvent.key.key = MapPPKeyToUDKey(keyEvent.GetKeyCode());
       inputEvent.key.state = pepperEvent.GetType() == PP_INPUTEVENT_TYPE_KEYDOWN ? 1 : 0;
@@ -371,10 +371,10 @@ void udNewPepperInstance::HandleMessage(const pp::Var& message)
   if (message.is_string())
   {
     std::string str = message.AsString();
-    udString data(str.c_str(), str.size());
+    epString data(str.c_str(), str.size());
 
     // TODO: js needs to be adapted to include the destination (ie, $webview)
-    udString msg = data.popToken(":");
+    epString msg = data.popToken(":");
     SendMessage("$webview", "$js", msg, data);
   }
 }
@@ -395,7 +395,7 @@ public:
 
   virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
   virtual void DidChangeView(const pp::View& view); // this needs to route to an external view
-  virtual bool HandleInputEvent(const pp::InputEvent& pepperEvent); // route to udInput
+  virtual bool HandleInputEvent(const pp::InputEvent& pepperEvent); // route to epInput
   virtual void HandleMessage(const pp::Var& message);
 
   void InitRenderer();
@@ -441,7 +441,7 @@ void udViewerDriver_Init(udViewerInstance *pInstance)
 
   udFile_RegisterNaclHTTP(pInternal->pPepperInstance);
 
-  udGPU_Init();
+  epGPU_Init();
 
 //  udViewer_ResizeFrame(width, height);
 }

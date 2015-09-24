@@ -4,7 +4,7 @@
 #include "kernel.h"
 #include "components/resources/model.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc GeomNode::descriptor =
@@ -18,8 +18,8 @@ ComponentDesc GeomNode::descriptor =
   "GeomNode",  // displayName
   "Is a geometry node", // description
 
-//  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-//  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+//  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+//  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 udResult GeomNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
@@ -52,4 +52,4 @@ udResult GeomNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
   return udR_Success;
 }
 
-} // namespace ud
+} // namespace ep

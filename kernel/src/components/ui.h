@@ -4,7 +4,7 @@
 
 #include "component.h"
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(UIComponent);
@@ -12,21 +12,21 @@ PROTOTYPE_COMPONENT(UIComponent);
 class UIComponent : public Component
 {
 public:
-  UD_COMPONENT(UIComponent);
+  EP_COMPONENT(UIComponent);
 
   void *GetInternalData() { return pInternal; }
   const void *GetInternalData() const { return pInternal; }
 
 protected:
-  UIComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  UIComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   virtual ~UIComponent();
 
-  udResult CreateInternal(udInitParams initParams);
+  udResult CreateInternal(epInitParams initParams);
   void DestroyInternal();
 
   void *pInternal = nullptr;
 };
 
-} // namespace ud
+} // namespace ep
 
 #endif // UI_H

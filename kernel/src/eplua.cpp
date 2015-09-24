@@ -2,7 +2,7 @@
 #include "eplua.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 #include "init.inc"
@@ -22,7 +22,7 @@ const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
 };
 
 
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
 void SetConsoleColor(ConsoleColor fg, ConsoleColor bg)
 {
   if (fg == ConsoleColor::Default)
@@ -62,14 +62,14 @@ static int SendMessage(lua_State *L)
     return 0;
   }
 
-  udString target = l.toString(1);
-  udString sender = l.toString(2);
-  udString message = l.toString(3);
+  epString target = l.toString(1);
+  epString sender = l.toString(2);
+  epString message = l.toString(3);
 
   // get args (is present)
-  udVariant args;
+  epVariant args;
   if (numArgs >= 4)
-    new(&args) udVariant(udVariant::luaGet(l, 4));
+    new(&args) epVariant(epVariant::luaGet(l, 4));
 
   /*udResult r = */l.kernel()->SendMessage(target, sender, message, args);
 
@@ -89,16 +89,16 @@ static int CreateComponent(lua_State *L)
   }
 
   // get the type
-  udString type = l.toString(1);
+  epString type = l.toString(1);
 
   // get the init params
-  udInitParams init;
-  udVariant args;
+  epInitParams init;
+  epVariant args;
   if (numArgs >= 2)
   {
-    new(&args) udVariant(udVariant::luaGet(l, 2));
-    if (args.type() == udVariant::Type::AssocArray)
-      new(&init) udInitParams(args.asAssocArray());
+    new(&args) epVariant(epVariant::luaGet(l, 2));
+    if (args.type() == epVariant::Type::AssocArray)
+      new(&init) epInitParams(args.asAssocArray());
   }
 
   ComponentRef c = nullptr;
@@ -121,7 +121,7 @@ static int FindComponent(lua_State *L)
     return 0;
   }
 
-  udString component = l.toString(1);
+  epString component = l.toString(1);
 
   ComponentRef c = l.kernel()->FindComponent(component);
 
@@ -129,13 +129,13 @@ static int FindComponent(lua_State *L)
   return 1;
 }
 
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
 // HAX! debug tools for windows
 #pragma warning(disable: 4996)
 struct Dispatch
 {
   char buffer[2048];
-  udString s;
+  epString s;
 
   void Exec(Kernel *pKernel)
   {
@@ -178,7 +178,7 @@ LuaState::LuaState(Kernel *pKernel)
   lua_register(L, "CreateComponent", (lua_CFunction)CreateComponent);
   lua_register(L, "FindComponent", (lua_CFunction)FindComponent);
 
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
   // HAX! debug tool for windows...
   AllocConsole();
   freopen("CONIN$", "r", stdin);
@@ -196,7 +196,7 @@ LuaState::~LuaState()
 
 int LuaState::udLuaPanic(lua_State *L)
 {
-  UDASSERT(false, "TODO: implement panic handler... throw exception?");
+  EPASSERT(false, "TODO: implement panic handler... throw exception?");
   return 0;
 }
 
@@ -210,7 +210,7 @@ void* LuaState::udLuaAlloc(void *, void *ptr, size_t, size_t nsize)
     return udRealloc(ptr, nsize);
 }
 
-void LuaState::exec(udString code)
+void LuaState::exec(epString code)
 {
   int fail = luaL_loadbufferx(L, code.ptr, code.length, "command", nullptr);
   if (!fail)
@@ -223,19 +223,19 @@ void LuaState::exec(udString code)
   }
 }
 
-void LuaState::print(udString str)
+void LuaState::print(epString str)
 {
   lua_getglobal(L, "print");
   lua_pushlstring(L, str.ptr, str.length);
   lua_call(L, 1, 0);
 }
 
-udVariant LuaState::get(int idx)
+epVariant LuaState::get(int idx)
 {
-  return udVariant::luaGet(*this, idx);
+  return epVariant::luaGet(*this, idx);
 }
 
-void LuaState::set(udVariant key, udVariant v, LuaLocation loc)
+void LuaState::set(epVariant key, epVariant v, LuaLocation loc)
 {
   int idx;
   switch (loc)
@@ -250,7 +250,7 @@ void LuaState::set(udVariant key, udVariant v, LuaLocation loc)
     case LuaLocation::Top:
       idx = -1; break;
     default:
-      UDASSERT(false, "Invalid location");
+      EPASSERT(false, "Invalid location");
       return;
   }
   push(key);
@@ -267,7 +267,7 @@ void LuaState::set(udVariant key, udVariant v, LuaLocation loc)
   }
 }
 
-void LuaState::setNil(udVariant key, LuaLocation loc)
+void LuaState::setNil(epVariant key, LuaLocation loc)
 {
   int idx;
   switch (loc)
@@ -282,7 +282,7 @@ void LuaState::setNil(udVariant key, LuaLocation loc)
     case LuaLocation::Top:
       idx = -1; break;
     default:
-      UDASSERT(false, "Invalid location");
+      EPASSERT(false, "Invalid location");
       return;
   }
   push(key);
@@ -299,7 +299,7 @@ void LuaState::setNil(udVariant key, LuaLocation loc)
   }
 }
 
-void LuaState::setComponent(udVariant key, ComponentRef c, LuaLocation loc)
+void LuaState::setComponent(epVariant key, ComponentRef c, LuaLocation loc)
 {
   int idx;
   switch (loc)
@@ -314,7 +314,7 @@ void LuaState::setComponent(udVariant key, ComponentRef c, LuaLocation loc)
     case LuaLocation::Top:
       idx = -1; break;
     default:
-      UDASSERT(false, "Invalid location");
+      EPASSERT(false, "Invalid location");
       return;
   }
   push(key);
@@ -335,7 +335,7 @@ void LuaState::setComponent(udVariant key, ComponentRef c, LuaLocation loc)
 // *** bind components to Lua ***
 void LuaState::pushComponentMetatable(const ComponentDesc &desc)
 {
-  udMutableString64 t; t.append("ud::", desc.id, "\0");
+  epMutableString64 t; t.append("ep::", desc.id, "\0");
   if (luaL_newmetatable(L, t.ptr) == 0)
     return;
 
@@ -467,7 +467,7 @@ int LuaState::componentCleaner(lua_State* L)
 int LuaState::componentToString(lua_State* L)
 {
   ComponentRef *pComponent = (ComponentRef*)lua_touserdata(L, 1);
-  udMutableString64 s;
+  epMutableString64 s;
   s.concat("@", (*pComponent)->GetUid());
   lua_pushlstring(L, s.ptr, s.length);
   return 1;
@@ -490,7 +490,7 @@ int LuaState::componentIndex(lua_State* L)
   // get field name
   size_t len;
   auto pField = lua_tolstring(L, 2, &len);
-  udString field(pField, len);
+  epString field(pField, len);
 
   // check for getter
   const PropertyDesc *pProp = spC->GetPropertyDesc(field);
@@ -498,7 +498,7 @@ int LuaState::componentIndex(lua_State* L)
   {
     if (pProp->getter)
     {
-      udVariant result(pProp->getter->get(spC.ptr()));
+      epVariant result(pProp->getter->get(spC.ptr()));
       l.push(result);
       return 1;
     }
@@ -528,21 +528,21 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // TODO: move these to be actual methods?
-  if (field.cmp(udString("descriptor")) == 0)
+  if (field.cmp(epString("descriptor")) == 0)
   {
     // TODO: return descriptor here...
-    UDASSERT(false, "TODO");
+    EPASSERT(false, "TODO");
 //    pushDescriptor(*spC->pType);
     return 0;
   }
-  else if (field.cmp(udString("help")) == 0)
+  else if (field.cmp(epString("help")) == 0)
   {
     lua_pushcfunction(L, &help);
     return 1;
   }
 
   // TODO: make better error message, this doesn't feel right
-  udMutableString64 errorMsg; errorMsg.format("Error: '{0}' not found", field);
+  epMutableString64 errorMsg; errorMsg.format("Error: '{0}' not found", field);
   l.print(errorMsg);
 
   // return nil
@@ -559,7 +559,7 @@ int LuaState::componentNewIndex(lua_State* L)
   // get field name
   size_t len;
   auto pField = lua_tolstring(L, 2, &len);
-  udString field(pField, len);
+  epString field(pField, len);
 
   // check for setter
   const PropertyDesc *pProp = spC->GetPropertyDesc(field);
@@ -580,7 +580,7 @@ int LuaState::componentNewIndex(lua_State* L)
   }
 
   // return nil (already on stack)
-  udMutableString64 errorMsg; errorMsg.format("Error: '{0}' not found", field);
+  epMutableString64 errorMsg; errorMsg.format("Error: '{0}' not found", field);
   l.print(errorMsg);
   return 0;
 }
@@ -596,15 +596,15 @@ int LuaState::method(lua_State *L)
   // TODO: assert that c is a component!
 
   int numArgs = l.top() - 1;
-  udVariant *pArgs = numArgs > 0 ? (udVariant*)alloca(sizeof(udVariant)*numArgs) : nullptr;
+  epVariant *pArgs = numArgs > 0 ? (epVariant*)alloca(sizeof(epVariant)*numArgs) : nullptr;
 
   for (int i = 0; i < numArgs; ++i)
-    new(&pArgs[i]) udVariant(udVariant::luaGet(l, 2 + i));
+    new(&pArgs[i]) epVariant(epVariant::luaGet(l, 2 + i));
 
-  udVariant v(pM->call(c.ptr(), udSlice<udVariant>(pArgs, numArgs)));
+  epVariant v(pM->call(c.ptr(), epSlice<epVariant>(pArgs, numArgs)));
 
   for (int i = 0; i < numArgs; ++i)
-    pArgs[i].~udVariant();
+    pArgs[i].~epVariant();
 
   v.luaPush(l);
   return 1;
@@ -621,11 +621,11 @@ int LuaState::help(lua_State* L)
   ComponentRef c = l.toComponent(1);
   const ComponentDesc *pDesc = c->pType;
 
-  udMutableString256 buffer;
+  epMutableString256 buffer;
   if (numArgs > 1)
   {
     // help for member
-    udString s = l.toString(2);
+    epString s = l.toString(2);
 
     // find member...
   }
@@ -638,7 +638,7 @@ int LuaState::help(lua_State* L)
     SetConsoleColor();
     l.print(pDesc->description);
 
-    udMutableString64 buf;
+    epMutableString64 buf;
     if (c->NumProperties() > 0)
     {
       l.print("\nProperties:");
@@ -665,7 +665,7 @@ int LuaState::help(lua_State* L)
       for (auto &m : c->instanceMethods)
       {
 /*
-        udMutableString64 func = udMutableString64::format("%s(", m->id.toStringz());
+        epMutableString64 func = epMutableString64::format("%s(", m->id.toStringz());
         for (size_t i = 0; i < m->args.length; ++i)
         {
           func.concat(m->args[i].name);
@@ -683,7 +683,7 @@ int LuaState::help(lua_State* L)
       for (auto &m : pDesc->methodTree)
       {
 /*
-        udMutableString64 func = udMutableString64::format("%s(", m->id.toStringz());
+        epMutableString64 func = epMutableString64::format("%s(", m->id.toStringz());
         for (size_t i = 0; i < m->args.length; ++i)
         {
           func.concat(m->args[i].name);
@@ -728,7 +728,7 @@ int LuaState::help(lua_State* L)
 // *** bind delegates to Lua ***
 int LuaState::delegateCleaner(lua_State* L)
 {
-  typedef udVariant::VarDelegate D;
+  typedef epVariant::VarDelegate D;
   D *pDelegate = (D*)lua_touserdata(L, 1);
   pDelegate->~D();
   return 0;
@@ -736,7 +736,7 @@ int LuaState::delegateCleaner(lua_State* L)
 
 void LuaState::pushDelegateMetatable()
 {
-  if (luaL_newmetatable(L, "udVariant::VarDelegate") == 0)
+  if (luaL_newmetatable(L, "epVariant::VarDelegate") == 0)
     return;
 
   // record the logical type
@@ -744,7 +744,7 @@ void LuaState::pushDelegateMetatable()
   lua_setfield(L, -2, "__udtype");
 
   // record the type
-  pushString("udVariant::VarDelegate");
+  pushString("epVariant::VarDelegate");
   lua_setfield(L, -2, "__type");
 
   // push a destructor
@@ -757,24 +757,24 @@ void LuaState::pushDelegateMetatable()
   lua_rawset(L, -3);
 }
 
-void LuaState::pushDelegate(const udVariant::VarDelegate &d)
+void LuaState::pushDelegate(const epVariant::VarDelegate &d)
 {
   // TODO: detect if d is a lua function delegate
   //       if it is, push the lua function directly...
 
-  new(lua_newuserdata(L, sizeof(udVariant::VarDelegate))) udVariant::VarDelegate(d);
+  new(lua_newuserdata(L, sizeof(epVariant::VarDelegate))) epVariant::VarDelegate(d);
   pushDelegateMetatable();
   lua_setmetatable(L, -2);
   lua_pushcclosure(L, &callDelegate, 1);
 }
 
-class LuaDelegate : public udDelegateMemento
+class LuaDelegate : public epDelegateMemento
 {
 protected:
   template<typename T>
-  friend class ::udSharedPtr;
+  friend class ::epSharedPtr;
 
-  udVariant call(udSlice<udVariant> args) const
+  epVariant call(epSlice<epVariant> args) const
   {
     // there may already be elements on the stack
     int top = lua_gettop(L);
@@ -793,11 +793,11 @@ protected:
     // get number of return values
     int numRet = lua_gettop(L) - top;
 
-    udVariant v;
+    epVariant v;
     if (numRet)
     {
       // get the first returned valuye (abandon any further return values)
-      v = udVariant::luaGet((LuaState&)L, top + 1);
+      v = epVariant::luaGet((LuaState&)L, top + 1);
 
       // put the stack back how we got it
       lua_pop(L, numRet);
@@ -815,7 +815,7 @@ protected:
     lua_settable(L, LUA_REGISTRYINDEX);
 
     // set the memento to the lua call shim
-    FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &LuaDelegate::call);
+    FastDelegate<epVariant(epSlice<epVariant>)> shim(this, &LuaDelegate::call);
     m = shim.GetMemento();
   }
 
@@ -829,33 +829,33 @@ protected:
   lua_State *L;
 };
 
-udVariant::VarDelegate LuaState::toDelegate(int idx)
+epVariant::VarDelegate LuaState::toDelegate(int idx)
 {
-  typedef udSharedPtr<LuaDelegate> LuaDelegateRef;
+  typedef epSharedPtr<LuaDelegate> LuaDelegateRef;
 
   // TODO: detect if the function is a cclosure
-  //       if it is, return the udDelegate directly
+  //       if it is, return the epDelegate directly
 
   if (lua_isfunction(L, idx))
-    return udVariant::VarDelegate(LuaDelegateRef::create(L, idx));
-  return udVariant::VarDelegate();
+    return epVariant::VarDelegate(LuaDelegateRef::create(L, idx));
+  return epVariant::VarDelegate();
 }
 
 int LuaState::callDelegate(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
-  udVariant::VarDelegate &d = *(udVariant::VarDelegate*)l.toUserData(lua_upvalueindex(1));
+  epVariant::VarDelegate &d = *(epVariant::VarDelegate*)l.toUserData(lua_upvalueindex(1));
 
   int numArgs = l.top();
-  udVariant *pArgs = numArgs > 0 ? (udVariant*)alloca(sizeof(udVariant)*numArgs) : nullptr;
+  epVariant *pArgs = numArgs > 0 ? (epVariant*)alloca(sizeof(epVariant)*numArgs) : nullptr;
 
   for (int i = 0; i < numArgs; ++i)
-    new(&pArgs[i]) udVariant(udVariant::luaGet(l, 1 + i));
+    new(&pArgs[i]) epVariant(epVariant::luaGet(l, 1 + i));
 
-  udVariant v(d(udSlice<udVariant>(pArgs, numArgs)));
+  epVariant v(d(epSlice<epVariant>(pArgs, numArgs)));
 
   for (int i = 0; i < numArgs; ++i)
-    pArgs[i].~udVariant();
+    pArgs[i].~epVariant();
 
   v.luaPush(l);
   return 1;
@@ -906,7 +906,7 @@ public:
     : c(c), desc(desc)
   {}
 
-  void subscribe(const udVariant::VarDelegate &d)
+  void subscribe(const epVariant::VarDelegate &d)
   {
     desc.ev->subscribe(c, d);
   }
@@ -937,11 +937,11 @@ int LuaState::subscribe(lua_State* L)
   LuaState &l = (LuaState&)L;
 
   LuaEvent *pEv = (LuaEvent*)lua_touserdata(L, 1);
-  udVariant::VarDelegate d = l.toDelegate(2);
+  epVariant::VarDelegate d = l.toDelegate(2);
 
   pEv->subscribe(d);
 
   return 0;
 }
 
-} // namespace ud
+} // namespace ep

@@ -1,8 +1,8 @@
 #pragma once
-#ifndef UDCOMPONENTDESC_H
-#define UDCOMPONENTDESC_H
+#ifndef EPCOMPONENTDESC_H
+#define EPCOMPONENTDESC_H
 
-#include "udPlatform.h"
+#include "ep/epplatform.h"
 
 #include "ep/epstring.h"
 #include "ep/epsharedptr.h"
@@ -12,16 +12,16 @@
 
 
 // TODO: remove this!
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
 #pragma warning(disable: 4100)
-#endif // UDPLATFORM_WINDOWS
+#endif // defined(EP_WINDOWS)
 
 
 #define PROTOTYPE_COMPONENT(Name) \
   SHARED_CLASS(Name)
 
 
-namespace ud
+namespace ep
 {
 
 class Kernel;
@@ -40,13 +40,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  udVariant get(const ud::Component *pThis) const
+  epVariant get(const ep::Component *pThis) const
   {
     return shim(this, pThis);
   }
 
 protected:
-  typedef udVariant(Shim)(const Getter* const, const ud::Component*);
+  typedef epVariant(Shim)(const Getter* const, const ep::Component*);
   Shim *shim;
 };
 
@@ -58,13 +58,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  void set(ud::Component *pThis, const udVariant &value) const
+  void set(ep::Component *pThis, const epVariant &value) const
   {
     shim(this, pThis, value);
   }
 
 protected:
-  typedef void(Shim)(const Setter* const, ud::Component*, const udVariant&);
+  typedef void(Shim)(const Setter* const, ep::Component*, const epVariant&);
   Shim *shim;
 };
 
@@ -76,13 +76,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  udVariant call(ud::Component *pThis, udSlice<udVariant> args) const
+  epVariant call(ep::Component *pThis, epSlice<epVariant> args) const
   {
     return shim(this, pThis, args);
   }
 
 protected:
-  typedef udVariant(Shim)(const Method* const, ud::Component*, udSlice<udVariant>);
+  typedef epVariant(Shim)(const Method* const, ep::Component*, epSlice<epVariant>);
   Shim *shim;
 };
 
@@ -94,13 +94,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  udVariant call(udSlice<udVariant> args) const
+  epVariant call(epSlice<epVariant> args) const
   {
     return shim(this, args);
   }
 
 protected:
-  typedef udVariant(Shim)(const StaticFunc* const, udSlice<udVariant>);
+  typedef epVariant(Shim)(const StaticFunc* const, epSlice<epVariant>);
   Shim *shim;
 };
 
@@ -112,13 +112,13 @@ public:
 
   explicit operator bool() const { return pSubscribe != nullptr; }
 
-  void subscribe(const ud::ComponentRef &c, const udVariant::VarDelegate &d)
+  void subscribe(const ep::ComponentRef &c, const epVariant::VarDelegate &d)
   {
     pSubscribe(this, c, d);
   }
 
 protected:
-  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const udVariant::VarDelegate&);
+  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const epVariant::VarDelegate&);
   SubscribeFunc *pSubscribe = nullptr;
 };
 
@@ -137,7 +137,7 @@ protected:
   FastDelegateMemento m;
 
   template<typename T>
-  static udVariant shimFunc(const Getter * const pGetter, const ud::Component *pThis);
+  static epVariant shimFunc(const Getter * const pGetter, const ep::Component *pThis);
 };
 
 // setter glue
@@ -152,7 +152,7 @@ protected:
   FastDelegateMemento m;
 
   template<typename T>
-  static void shimFunc(const Setter * const pSetter, ud::Component *pThis, const udVariant &value);
+  static void shimFunc(const Setter * const pSetter, ep::Component *pThis, const epVariant &value);
 };
 
 // method glue
@@ -173,9 +173,9 @@ protected:
   {
     // this is a nasty hack to get ...S (integer sequence) as a parameter pack
     template<size_t ...S>
-    static udVariant callFuncHack(udSlice<udVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>);
+    static epVariant callFuncHack(epSlice<epVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>);
 
-    static udVariant shimFunc(const Method * const pSetter, ud::Component *pThis, udSlice<udVariant> value);
+    static epVariant shimFunc(const Method * const pSetter, ep::Component *pThis, epSlice<epVariant> value);
   };
 };
 
@@ -195,9 +195,9 @@ protected:
   {
     // this is a nasty hack to get ...S (integer sequence) as a parameter pack
     template<size_t ...S>
-    static udVariant callFuncHack(udSlice<udVariant> args, Ret(*f)(Args...), Sequence<S...>);
+    static epVariant callFuncHack(epSlice<epVariant> args, Ret(*f)(Args...), Sequence<S...>);
 
-    static udVariant shimFunc(const StaticFunc * const pSetter, udSlice<udVariant> value);
+    static epVariant shimFunc(const StaticFunc * const pSetter, epSlice<epVariant> value);
   };
 };
 
@@ -207,13 +207,13 @@ class CEvent : public VarEvent
 public:
   CEvent(nullptr_t) : VarEvent(nullptr) {}
   template<typename X, typename... Args>
-  CEvent(udEvent<Args...> X::*ev);
+  CEvent(epEvent<Args...> X::*ev);
 
 protected:
   void* CEvent::*pEvent;
 
   template<typename X, typename... Args>
-  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const udVariant::VarDelegate &d);
+  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const epVariant::VarDelegate &d);
 };
 
 
@@ -225,9 +225,9 @@ enum PropertyFlags : uint32_t
 
 struct EnumKVP
 {
-  EnumKVP(udString key, int64_t v) : key(key), value(v) {}
+  EnumKVP(epString key, int64_t v) : key(key), value(v) {}
 
-  udString key;
+  epString key;
   int64_t value;
 };
 #define EnumKVP(e) EnumKVP( #e, (int64_t)e )
@@ -235,16 +235,16 @@ struct EnumKVP
 struct PropertyInfo
 {
   PropertyInfo() = delete;
-  PropertyInfo(udString id, udString displayName, udString description, udString displayType = nullptr, uint32_t flags = 0)
+  PropertyInfo(epString id, epString displayName, epString description, epString displayType = nullptr, uint32_t flags = 0)
     : id(id), displayName(displayName), description(description), displayType(displayType), flags(flags) {}
   PropertyInfo(const PropertyInfo &rh)
     : id(rh.id), displayName(rh.displayName), description(rh.description), displayType(rh.displayType), flags(rh.flags) {}
 
-  udString id;
-  udString displayName;
-  udString description;
+  epString id;
+  epString displayName;
+  epString description;
 
-  udString displayType;
+  epString displayType;
   uint32_t flags;
 };
 
@@ -264,13 +264,13 @@ struct PropertyDesc
 struct FunctionInfo
 {
   FunctionInfo() = delete;
-  FunctionInfo(udString id, udString description)
+  FunctionInfo(epString id, epString description)
     : id(id), description(description) {}
   FunctionInfo(const FunctionInfo &rh)
     : id(rh.id), description(rh.description) {}
 
-  udString id;
-  udString description;
+  epString id;
+  epString description;
 };
 
 struct MethodDesc
@@ -299,14 +299,14 @@ struct StaticFuncDesc
 struct EventInfo
 {
   EventInfo() = delete;
-  EventInfo(udString id, udString displayName, udString description)
+  EventInfo(epString id, epString displayName, epString description)
     : id(id), displayName(displayName), description(description) {}
   EventInfo(const EventInfo &rh)
     : id(rh.id), displayName(rh.displayName), description(rh.description) {}
 
-  udString id;
-  udString displayName;
-  udString description;
+  epString id;
+  epString displayName;
+  epString description;
 };
 
 struct EventDesc
@@ -352,13 +352,13 @@ enum { UDSHELL_APIVERSION = 100 };
 enum { UDSHELL_PLUGINVERSION = UDSHELL_APIVERSION };
 
 typedef udResult(InitComponent)(Kernel*);
-typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
 struct ComponentDesc
 {
   ComponentDesc() = delete;
-  ComponentDesc(ComponentDesc *pSuperDesc, int udVersion, int pluginVersion, udString id, udString displayName, udString description,
-    udSlice<CPropertyDesc> properties = nullptr, udSlice<CMethodDesc> methods = nullptr, udSlice<CEventDesc> events = nullptr, udSlice<CStaticFuncDesc> staticFuncs = nullptr,
+  ComponentDesc(ComponentDesc *pSuperDesc, int udVersion, int pluginVersion, epString id, epString displayName, epString description,
+    epSlice<CPropertyDesc> properties = nullptr, epSlice<CMethodDesc> methods = nullptr, epSlice<CEventDesc> events = nullptr, epSlice<CStaticFuncDesc> staticFuncs = nullptr,
     InitComponent *pInit = nullptr, CreateInstanceCallback *pCreateInstance = nullptr)
     : pSuperDesc(pSuperDesc), udVersion(udVersion), pluginVersion(pluginVersion), id(id), displayName(displayName), description(description)
     , properties(properties), methods(methods), events(events), staticFuncs(staticFuncs), pInit(pInit), pCreateInstance(pCreateInstance) {}
@@ -370,28 +370,28 @@ struct ComponentDesc
   int udVersion;
   int pluginVersion;
 
-  udString id;          // an id for this component
-  udString displayName; // display name
-  udString description; // description
+  epString id;          // an id for this component
+  epString displayName; // display name
+  epString description; // description
 
   // icon image...
 
   // TODO: add flags ('Abstract' (can't create) flag)
 
-  udSlice<CPropertyDesc> properties;
-  udSlice<CMethodDesc> methods;
-  udSlice<CEventDesc> events;
-  udSlice<CStaticFuncDesc> staticFuncs;
+  epSlice<CPropertyDesc> properties;
+  epSlice<CMethodDesc> methods;
+  epSlice<CEventDesc> events;
+  epSlice<CStaticFuncDesc> staticFuncs;
 
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
 
-  udAVLTree<udString, PropertyDesc> propertyTree;
-  udAVLTree<udString, MethodDesc> methodTree;
-  udAVLTree<udString, EventDesc> eventTree;
-  udAVLTree<udString, StaticFuncDesc> staticFuncTree;
+  epAVLTree<epString, PropertyDesc> propertyTree;
+  epAVLTree<epString, MethodDesc> methodTree;
+  epAVLTree<epString, EventDesc> eventTree;
+  epAVLTree<epString, StaticFuncDesc> staticFuncTree;
 
-  StaticFunc *ComponentDesc::GetStaticFunc(udString id) const;
+  StaticFunc *ComponentDesc::GetStaticFunc(epString id) const;
 
   void BuildSearchTrees();
   void InitProps();
@@ -400,9 +400,9 @@ struct ComponentDesc
   void InitStaticFuncs();
 };
 
-} // namespace ud
+} // namespace ep
 
 
 #include "componentdesc.inl"
 
-#endif // UDCOMPONENTDESC_H
+#endif // EPCOMPONENTDESC_H

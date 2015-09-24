@@ -1,7 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "udPlatform.h"
-#include "udPlatformUtil.h"
+#include "ep/epplatform.h"
 #include "udMath.h"
 
 #include "debugfont.h"
@@ -10,10 +9,11 @@
 #include "render.h"
 
 #include <stdarg.h>
+#include <stdio.h>
 #include <malloc.h>
 
 //-------------------------------------------------------------------
-struct udDebugFontVertex
+struct epDebugFontVertex
 {
   float x,y;
 };
@@ -37,24 +37,24 @@ struct VectorCharacter
 };
 
 //-------------------------------------------------------------------
-struct udDebugFont
+struct epDebugFont
 {
-  udDebugFont(int nCharacters, VectorCharacter *pCharacters, Hershey *pVectors);
+  epDebugFont(int nCharacters, VectorCharacter *pCharacters, Hershey *pVectors);
 
   int nCharacters, height;
   VectorCharacter *pCharacters;
   Hershey *pVectors;
-  udArrayBuffer *pGeoBuffer;
+  epArrayBuffer *pGeoBuffer;
 };
 
 //-------------------------------------------------------------------
 extern Hershey romanVectors[];
 extern VectorCharacter romanSimplexCharacters[96];
-static udDebugFont *pRomanSimplex;
-static udFormatDeclaration *pVertexFormat;
-static udShader *pFontShaderV;
-static udShader *pFontShaderP;
-static udShaderProgram *pShader;
+static epDebugFont *pRomanSimplex;
+static epFormatDeclaration *pVertexFormat;
+static epShader *pFontShaderV;
+static epShader *pFontShaderP;
+static epShaderProgram *pShader;
 
 float s_consoleX, s_consoleY, s_consoleSize;
 udFloat4 s_consoleColor = udFloat4::one();
@@ -82,48 +82,48 @@ const char s_pixelShader[] =
 "}\n";
 
 //-------------------------------------------------------------------
-void udDebugFont_Init()
+void epDebugFont_Init()
 {
-  pFontShaderV = udShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), udST_VertexShader);
-  pFontShaderP = udShader_CreateShader(s_pixelShader, sizeof(s_pixelShader), udST_PixelShader);
-  pShader = udShader_CreateShaderProgram(pFontShaderV, pFontShaderP);
+  pFontShaderV = epShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), epST_VertexShader);
+  pFontShaderP = epShader_CreateShader(s_pixelShader, sizeof(s_pixelShader), epST_PixelShader);
+  pShader = epShader_CreateShaderProgram(pFontShaderV, pFontShaderP);
 
   static udArrayElement vertDesc[] =
   {
 //    { udVET_Position, DcVCT_Short2, DcVCU_Position, 0, 0 }
-//    { udVET_Position, 0, 2, udVDF_Float2 }
-    { "a_position", udVDF_Float2, 0 }
+//    { udVET_Position, 0, 2, epVDF_Float2 }
+    { "a_position", epVDF_Float2, 0 }
   };
-  pVertexFormat = udVertex_CreateFormatDeclaration(vertDesc, sizeof(vertDesc)/sizeof(vertDesc[0]));
+  pVertexFormat = epVertex_CreateFormatDeclaration(vertDesc, sizeof(vertDesc)/sizeof(vertDesc[0]));
 
   // Process the roman simplex font
-  pRomanSimplex = udNew(udDebugFont, 96, romanSimplexCharacters, romanVectors);
+  pRomanSimplex = udNew(epDebugFont, 96, romanSimplexCharacters, romanVectors);
 }
 
 //-------------------------------------------------------------------
-void udDebugFont_Deinit()
+void epDebugFont_Deinit()
 {
-  udVertex_DestroyArrayBuffer(&pRomanSimplex->pGeoBuffer);
+  epVertex_DestroyArrayBuffer(&pRomanSimplex->pGeoBuffer);
   udDelete(pRomanSimplex);
-  udVertex_DestroyFormatDeclaration(&pVertexFormat);
+  epVertex_DestroyFormatDeclaration(&pVertexFormat);
 }
 
 //*******************************************************************
-void udDebugFont_BeginRender(const udFloat4x4 *pWVP)
+void epDebugFont_BeginRender(const udFloat4x4 *pWVP)
 {
-  int wvp = udShader_FindShaderParameter(pShader, "u_wvp");
-  s_colorConstant = udShader_FindShaderParameter(pShader, "u_color");
+  int wvp = epShader_FindShaderParameter(pShader, "u_wvp");
+  s_colorConstant = epShader_FindShaderParameter(pShader, "u_color");
 
-  udShader_SetCurrent(pShader);
+  epShader_SetCurrent(pShader);
 
   if(!pWVP)
   {
     udFloat4x4 wvpMat = udFloat4x4::orthoForScreeen(1280, 720, 0, 1);
-    udShader_SetProgramData(wvp, wvpMat);
+    epShader_SetProgramData(wvp, wvpMat);
   }
   else
   {
-    udShader_SetProgramData(wvp, *pWVP);
+    epShader_SetProgramData(wvp, *pWVP);
   }
 }
 
@@ -135,25 +135,25 @@ struct CharOffset
 void UpdateOffset(size_t i, void *pUserData)
 {
   CharOffset *pOffset = (CharOffset*)pUserData;
-  udShader_SetProgramData(pOffset->constantSlot, pOffset->pOffsets[i]);
+  epShader_SetProgramData(pOffset->constantSlot, pOffset->pOffsets[i]);
 }
 
 //*******************************************************************
-float udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x, float y, float scale, const udFloat4 &color)
+float epDebugFont_RenderString(epDebugFont *pFont, const char *pString, float x, float y, float scale, const udFloat4 &color)
 {
   if (!pFont)
     pFont = pRomanSimplex;
 
-  size_t len = udStrlen(pString);
+  size_t len = strlen(pString);
   udFloat4 *offsets = (udFloat4*)alloca(sizeof(udFloat4) * len);
-  udVertexRange *ranges = (udVertexRange*)alloca(sizeof(udVertexRange) * len);
+  epVertexRange *ranges = (epVertexRange*)alloca(sizeof(epVertexRange) * len);
   size_t numRanges = 0;
 
   CharOffset loopData;
   loopData.pOffsets = offsets;
-  loopData.constantSlot = udShader_FindShaderParameter(pShader, "u_posScale");
+  loopData.constantSlot = epShader_FindShaderParameter(pShader, "u_posScale");
 
-  udShader_SetProgramData(s_colorConstant, color);
+  epShader_SetProgramData(s_colorConstant, color);
 
   udFloat4 offset = { x, y, scale, scale };
   float h = (float)pFont->height * scale;
@@ -182,19 +182,19 @@ float udDebugFont_RenderString(udDebugFont *pFont, const char *pString, float x,
     }
   }
 
-  udGPU_RenderRanges(pShader, pVertexFormat, &pFont->pGeoBuffer, udPT_Lines, ranges, numRanges, UpdateOffset, &loopData);
+  epGPU_RenderRanges(pShader, pVertexFormat, &pFont->pGeoBuffer, epPT_Lines, ranges, numRanges, UpdateOffset, &loopData);
 
   return height;
 }
 
 //*******************************************************************
-void udDebugFont_EndRender()
+void epDebugFont_EndRender()
 {
   //...?
 }
 
 //*******************************************************************
-int udDebugFont_GetHeight(udDebugFont *pFont)
+int epDebugFont_GetHeight(epDebugFont *pFont)
 {
   if (!pFont)
     pFont = pRomanSimplex;
@@ -202,53 +202,53 @@ int udDebugFont_GetHeight(udDebugFont *pFont)
 }
 
 //*******************************************************************
-void udDebugConsole_SetCursorPos(float x, float y)
+void epDebugConsole_SetCursorPos(float x, float y)
 {
   s_consoleX = x;
   s_consoleY = y;
 }
 
 //*******************************************************************
-void udDebugConsole_SetTextScale(float scale)
+void epDebugConsole_SetTextScale(float scale)
 {
   s_consoleSize = scale;
 }
 
 //*******************************************************************
-void udDebugConsole_SetTextColor(const udFloat4 &color)
+void epDebugConsole_SetTextColor(const udFloat4 &color)
 {
   s_consoleColor = color;
 }
 
 //*******************************************************************
-void udDebugConsole_Print(const char *pString)
+void epDebugConsole_Print(const char *pString)
 {
-  s_consoleY += udDebugFont_RenderString(NULL, pString, s_consoleX, s_consoleY, s_consoleSize, s_consoleColor);
+  s_consoleY += epDebugFont_RenderString(NULL, pString, s_consoleX, s_consoleY, s_consoleSize, s_consoleColor);
 }
 
 //*******************************************************************
-void udDebugConsole_Printf(const char *pFormat, ...)
+void epDebugConsole_Printf(const char *pFormat, ...)
 {
   va_list args;
   va_start(args, pFormat);
   size_t len;
-#if UDPLATFORM_NACL
+#if defined(EP_NACL)
   len = vsprintf(nullptr, pFormat, args);
 #else
   len = vsnprintf(nullptr, 0, pFormat, args);
 #endif
   char *pBuffer = (char*)alloca(len+1);
-#if UDPLATFORM_NACL
+#if defined(EP_NACL)
   len = vsprintf(pBuffer, pFormat, args);
 #else
   len = vsnprintf(pBuffer, len+1, pFormat, args);
 #endif
-  udDebugConsole_Print(pBuffer);
+  epDebugConsole_Print(pBuffer);
   va_end(args);
 }
 
 //-------------------------------------------------------------------
-udDebugFont::udDebugFont(int _nCharacters, VectorCharacter *_pCharacters, Hershey *_pVectors)
+epDebugFont::epDebugFont(int _nCharacters, VectorCharacter *_pCharacters, Hershey *_pVectors)
 {
   nCharacters = _nCharacters;
   pCharacters = _pCharacters;
@@ -289,14 +289,14 @@ udDebugFont::udDebugFont(int _nCharacters, VectorCharacter *_pCharacters, Hershe
   }
 
   // Create a geo buffer big enough for all the primitives
-  udDebugFontVertex *pBuffer = udAllocType(udDebugFontVertex, totalVertices, udAF_None);
+  epDebugFontVertex *pBuffer = udAllocType(epDebugFontVertex, totalVertices, udAF_None);
 
   int vertexIndex = 0;
   int minY = 32767, maxY = -32767;
   for (int i = 0; i < nCharacters; ++i)
   {
     short xOffset = -short(pVectors[pCharacters[i].vectorArrayIndex].pPairs[0] - 'R');
-    UDASSERT(vertexIndex == pCharacters[i].vertexIndex, "Vector font processing internal error");
+    EPASSERT(vertexIndex == pCharacters[i].vertexIndex, "Vector font processing internal error");
     const char *p = pVectors[pCharacters[i].vectorArrayIndex].pPairs + 2;
     for (short k = 1; k < pVectors[pCharacters[i].vectorArrayIndex].pairCount - 1; ++k, p += 2)
     {
@@ -320,13 +320,13 @@ udDebugFont::udDebugFont(int _nCharacters, VectorCharacter *_pCharacters, Hershe
       ++vertexIndex;
     }
     height = maxY - minY + 1;
-    UDASSERT(vertexIndex - pCharacters[i].vertexIndex == pCharacters[i].primitiveCount*2, "Vector font processing internal error");
+    EPASSERT(vertexIndex - pCharacters[i].vertexIndex == pCharacters[i].primitiveCount*2, "Vector font processing internal error");
   }
-  UDASSERT(vertexIndex == totalVertices, "Vector font processing internal error");
+  EPASSERT(vertexIndex == totalVertices, "Vector font processing internal error");
 
-  udArrayDataFormat elements[1] = { udVDF_Float2 };
-  pGeoBuffer = udVertex_CreateVertexBuffer(elements, 1);
-  udVertex_SetArrayBufferData(pGeoBuffer, pBuffer, sizeof(udDebugFontVertex)*totalVertices);
+  epArrayDataFormat elements[1] = { epVDF_Float2 };
+  pGeoBuffer = epVertex_CreateVertexBuffer(elements, 1);
+  epVertex_SetArrayBufferData(pGeoBuffer, pBuffer, sizeof(epDebugFontVertex)*totalVertices);
   udFree(pBuffer);
 }
 

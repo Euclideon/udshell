@@ -1,12 +1,12 @@
 #pragma once
-#ifndef _UD_BUFFER_H
-#define _UD_BUFFER_H
+#ifndef _EP_BUFFER_H
+#define _EP_BUFFER_H
 
 #include "components/resources/resource.h"
 #include "ep/epsharedptr.h"
 #include "ep/epstring.h"
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(Buffer);
@@ -14,7 +14,7 @@ PROTOTYPE_COMPONENT(Buffer);
 class Buffer : public Resource
 {
 public:
-  UD_COMPONENT(Buffer);
+  EP_COMPONENT(Buffer);
 
   bool Allocate(size_t size);
   bool Free();
@@ -22,27 +22,27 @@ public:
   bool Resize(size_t size) { return _Resize(size, true); }
   size_t GetBufferSize() const;
 
-  udSlice<void> Map();
-  udSlice<const void> MapForRead();
+  epSlice<void> Map();
+  epSlice<const void> MapForRead();
   void Unmap();
 
   bool CopyBuffer(BufferRef buffer);
-  bool CopyBuffer(udSlice<const void> buffer);
+  bool CopyBuffer(epSlice<const void> buffer);
 
 protected:
-  Buffer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  Buffer(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Buffer() { Free(); }
 
   bool _Resize(size_t size, bool copy);
 
-  udSlice<void> buffer;
+  epSlice<void> buffer;
 
   size_t logicalSize = 0;
   int mapDepth = 0;
   bool readMap;
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // _UD_BUFFER_H
+#endif // _EP_BUFFER_H

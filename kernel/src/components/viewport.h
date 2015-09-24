@@ -4,7 +4,7 @@
 
 #include "ui.h"
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(Viewport);
@@ -12,16 +12,16 @@ PROTOTYPE_COMPONENT(Viewport);
 class Viewport : public UIComponent
 {
 public:
-  UD_COMPONENT(Viewport);
+  EP_COMPONENT(Viewport);
 
 protected:
-  Viewport(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  Viewport(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   virtual ~Viewport();
 
-  udResult CreateInternal(udInitParams initParams);
+  udResult CreateInternal(epInitParams initParams);
   void DestroyInternal();
 };
 
-} // namespace ud
+} // namespace ep
 
 #endif // UD_VIEWPORT_H

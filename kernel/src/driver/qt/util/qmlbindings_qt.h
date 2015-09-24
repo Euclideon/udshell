@@ -14,39 +14,39 @@ namespace qt
 
 // Qt shims
 template<typename ComponentType>
-struct QtGetter : public ud::Getter
+struct QtGetter : public ep::Getter
 {
 public:
-  QtGetter(udString id) : ud::Getter(nullptr), propertyId(id)
+  QtGetter(epString id) : ep::Getter(nullptr), propertyId(id)
   {
     shim = &shimFunc;
   }
 
 protected:
-  udString propertyId;
+  epString propertyId;
 
-  static udVariant shimFunc(const ud::Getter * const _pGetter, const ud::Component *pThis)
+  static epVariant shimFunc(const ep::Getter * const _pGetter, const ep::Component *pThis)
   {
     QtGetter *pGetter = (QtGetter*)_pGetter;
     const QObject *pQObject = (const QObject*)((const ComponentType*)pThis)->GetInternalData();
-    return udVariant(pQObject->property(pGetter->propertyId.ptr));
+    return epVariant(pQObject->property(pGetter->propertyId.ptr));
   }
 };
 
 
 template<typename ComponentType>
-struct QtSetter : public ud::Setter
+struct QtSetter : public ep::Setter
 {
 public:
-  QtSetter(udString id) : ud::Setter(nullptr), propertyId(id)
+  QtSetter(epString id) : ep::Setter(nullptr), propertyId(id)
   {
     shim = &shimFunc;
   }
 
 protected:
-  udString propertyId;
+  epString propertyId;
 
-  static void shimFunc(const ud::Setter * const _pSetter, ud::Component *pThis, const udVariant &value)
+  static void shimFunc(const ep::Setter * const _pSetter, ep::Component *pThis, const epVariant &value)
   {
     QtSetter *pSetter = (QtSetter*)_pSetter;
     QObject *pQObject = (QObject*)((ComponentType*)pThis)->GetInternalData();
@@ -55,10 +55,10 @@ protected:
 };
 
 template<typename ComponentType>
-struct QtMethod : public ud::Method
+struct QtMethod : public ep::Method
 {
 public:
-  QtMethod(const QMetaMethod &_method) : ud::Method(nullptr), method(_method)
+  QtMethod(const QMetaMethod &_method) : ep::Method(nullptr), method(_method)
   {
     shim = &shimFunc;
   }
@@ -66,19 +66,19 @@ public:
 protected:
   QMetaMethod method;
 
-  static udVariant shimFunc(const Method * const _pMethod, ud::Component *pThis, udSlice<udVariant> value)
+  static epVariant shimFunc(const Method * const _pMethod, ep::Component *pThis, epSlice<epVariant> value)
   {
     QtMethod *pMethod = (QtMethod*)_pMethod;
     QObject *pQObject = (QObject*)((ComponentType*)pThis)->GetInternalData();
 
     // TODO: do better runtime handling of this rather than assert since this can come from the user - check against Q_METAMETHOD_INVOKE_MAX_ARGS
     // TODO: error output??
-    UDASSERT(value.length <= 10, "Attempting to call method shim with more than 10 arguments");
+    EPASSERT(value.length <= 10, "Attempting to call method shim with more than 10 arguments");
 
     // TODO: check value length against function arg length minus default args amount - need to parse the signature to get the default arg list?
 
-    char qargs[sizeof(QtUDComponent)*10];
-    QtUDComponent *pQObjStack = (QtUDComponent*)qargs;
+    char qargs[sizeof(QtEPComponent)*10];
+    QtEPComponent *pQObjStack = (QtEPComponent*)qargs;
 
     QVariant vargs[10];
     QGenericArgument args[10];
@@ -86,14 +86,14 @@ protected:
     {
       if (i < value.length)
       {
-        if (value[i].is(udVariant::Type::Component))
+        if (value[i].is(epVariant::Type::Component))
         {
-          ud::ComponentRef spComponent = value[i].asComponent();
+          ep::ComponentRef spComponent = value[i].asComponent();
           if (spComponent->IsType("qtcomponent"))
             vargs[i] = QVariant::fromValue(shared_pointer_cast<QtComponent>(spComponent)->GetQObject());
           else
           {
-            new(pQObjStack) QtUDComponent(spComponent);
+            new(pQObjStack) QtEPComponent(spComponent);
             vargs[i] = QVariant::fromValue(pQObjStack++);
           }
         }
@@ -109,18 +109,18 @@ protected:
     pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
             args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
 
-    while (pQObjStack > (qt::QtUDComponent*)qargs)
-      (--pQObjStack)->~QtUDComponent();
+    while (pQObjStack > (qt::QtEPComponent*)qargs)
+      (--pQObjStack)->~QtEPComponent();
 
-    return udVariant(retVal);
+    return epVariant(retVal);
   }
 };
 
 template<typename ComponentType>
-struct QtVarEvent : public ud::VarEvent
+struct QtVarEvent : public ep::VarEvent
 {
 public:
-  QtVarEvent(const QMetaMethod &m) : ud::VarEvent(nullptr), method(m), sigToDel(nullptr)
+  QtVarEvent(const QMetaMethod &m) : ep::VarEvent(nullptr), method(m), sigToDel(nullptr)
   {
     pSubscribe = &doSubscribe;
   }
@@ -129,7 +129,7 @@ protected:
   QMetaMethod method;
   QtSignalToDelegate *sigToDel;
 
-  static void doSubscribe(const VarEvent *pEv, const ud::ComponentRef &c, const udVariant::VarDelegate &d)
+  static void doSubscribe(const VarEvent *pEv, const ep::ComponentRef &c, const epVariant::VarDelegate &d)
   {
     QtVarEvent *pEvent = (QtVarEvent*)pEv;
     ComponentType *pC = (ComponentType*)c.ptr();
@@ -158,13 +158,13 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
 
     // TODO: keep a list of string names that we manage so we can free
     // TODO: type & flags
-    udString propertyName = AllocUDStringFromQString(property.name());
-    ud::PropertyInfo info = { propertyName, propertyName, propertyDescStr };
+    epString propertyName = AllocUDStringFromQString(property.name());
+    ep::PropertyInfo info = { propertyName, propertyName, propertyDescStr };
 
     // TODO: have non lookup qmlproperty version and lookup version for the dynamic properties
     // TODO: list of qmlproperty - shared between getter and setter
     // TODO: store list to free getter/setter?
-    ud::PropertyDesc desc = { info, udNew(QtGetter<ComponentType>, propertyName), udNew(QtSetter<ComponentType>, propertyName) };
+    ep::PropertyDesc desc = { info, udNew(QtGetter<ComponentType>, propertyName), udNew(QtSetter<ComponentType>, propertyName) };
 
     pComponent->AddDynamicProperty(desc);
   }
@@ -187,9 +187,9 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
 
       // TODO: keep list of strings
       // TODO: keep free list of methods
-      udString methodName = AllocUDStringFromQString(method.name());
-      ud::FunctionInfo info = { methodName, methodDescStr };
-      ud::MethodDesc desc = { info, udNew(QtMethod<ComponentType>, method) };
+      epString methodName = AllocUDStringFromQString(method.name());
+      ep::FunctionInfo info = { methodName, methodDescStr };
+      ep::MethodDesc desc = { info, udNew(QtMethod<ComponentType>, method) };
 
       pComponent->AddDynamicMethod(desc);
     }
@@ -200,9 +200,9 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
 
       // TODO: keep list of strings
       // TODO: keep free list of events
-      udString eventName = AllocUDStringFromQString(method.name());
-      ud::EventInfo info = { eventName, eventName, eventDescStr };
-      ud::EventDesc desc = { info, udNew(QtVarEvent<ComponentType>, method) };
+      epString eventName = AllocUDStringFromQString(method.name());
+      ep::EventInfo info = { eventName, eventName, eventDescStr };
+      ep::EventDesc desc = { info, udNew(QtVarEvent<ComponentType>, method) };
 
       pComponent->AddDynamicEvent(desc);
     }

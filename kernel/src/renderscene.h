@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UDRENDERSCENE_H
-#define UDRENDERSCENE_H
+#ifndef EPRENDERSCENE_H
+#define EPRENDERSCENE_H
 
 #include "udRender.h"
 #include "udMath.h"
@@ -18,9 +18,9 @@
 #include "hal/shader.h"
 #include "renderresource.h"
 
-struct udTexture;
+struct epTexture;
 
-namespace ud
+namespace ep
 {
 
 struct UDJob
@@ -49,24 +49,24 @@ struct GeomJob
   // render states
 };
 
-class RenderScene : public udRefCounted
+class RenderScene : public epRefCounted
 {
 public:
   // ud thread
-  udFixedSlice<UDJob, 4> ud;
+  epArray<UDJob, 4> ud;
 
   // render thread
-  udFixedSlice<GeomJob, 16> geom;
+  epArray<GeomJob, 16> geom;
 
 protected:
   ~RenderScene()
   {
   }
 };
-typedef udSharedPtr<RenderScene> RenderSceneRef;
+typedef epSharedPtr<RenderScene> RenderSceneRef;
 
 
-class RenderableView : public udRefCounted
+class RenderableView : public epRefCounted
 {
 public:
   RenderableView();
@@ -95,13 +95,13 @@ public:
   void *pColorBuffer = nullptr;
   void *pDepthBuffer = nullptr;
 
-  udTexture *pColorTexture = nullptr;
-  udTexture *pDepthTexture = nullptr;
+  epTexture *pColorTexture = nullptr;
+  epTexture *pDepthTexture = nullptr;
 
 protected:
   ~RenderableView() override;
 };
-typedef udSharedPtr<RenderableView> RenderableViewRef;
+typedef epSharedPtr<RenderableView> RenderableViewRef;
 
 
 // renderer interface
@@ -113,7 +113,7 @@ public:
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
 
-  void AddUDRenderJob(udUniquePtr<RenderableView> job);
+  void AddUDRenderJob(epUniquePtr<RenderableView> job);
 
 protected:
   friend class View;
@@ -133,12 +133,12 @@ protected:
 
   udMutex *pUDMutex;
   udSemaphore *pUDSemaphore, *pUDTerminateSemaphore;
-  udFixedSlice<udUniquePtr<RenderableView>, 4> udRenderQueue;
+  epArray<epUniquePtr<RenderableView>, 4> udRenderQueue;
 
-  udAVLTree<uint32_t, RenderShaderProgram*> shaderPrograms;
-  udAVLTree<uint32_t, RenderVertexFormat*> vertexFormats;
+  epAVLTree<uint32_t, RenderShaderProgram*> shaderPrograms;
+  epAVLTree<uint32_t, RenderVertexFormat*> vertexFormats;
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // UDRENDERSCENE_H
+#endif // EPRENDERSCENE_H

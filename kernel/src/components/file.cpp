@@ -1,6 +1,6 @@
 #include "components/file.h"
 
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
 #include <io.h>
 #include <share.h>
 #define close _close
@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc File::descriptor =
@@ -27,20 +27,20 @@ ComponentDesc File::descriptor =
   "File object", // description
 };
 
-File::File(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+File::File(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
-  const udVariant &path = initParams["path"];
+  const epVariant &path = initParams["path"];
 
-  if (!path.is(udVariant::Type::String))
+  if (!path.is(epVariant::Type::String))
 	  throw udR_InvalidParameter_;
 
-  const udVariant &flags = initParams["flags"];
+  const epVariant &flags = initParams["flags"];
   FileOpenFlags of = flags.as<FileOpenFlags>();
 
   int posixFlags = GetPosixOpenFlags(of);
 
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
   _sopen_s(&fd, path.asString().toStringz(), posixFlags, SH_DENYNO, S_IREAD | S_IWRITE);
 #else
   fd = open(path.asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
@@ -57,7 +57,7 @@ int File::GetPosixOpenFlags(FileOpenFlags flags) const
 {
   int posixFlags = 0;
 
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
   if (!(flags & FileOpenFlags::Text))
   {
     posixFlags |= O_BINARY;
@@ -95,7 +95,7 @@ File::~File()
   close(fd);
 }
 
-udSlice<void> File::Read(udSlice<void> buffer)
+epSlice<void> File::Read(epSlice<void> buffer)
 {
   int nRead;
 
@@ -109,7 +109,7 @@ udSlice<void> File::Read(udSlice<void> buffer)
   return buffer.slice(0, nRead);
 }
 
-size_t File::Write(udSlice<const void> data)
+size_t File::Write(epSlice<const void> data)
 {
   lseek(fd, pos, SEEK_SET);
   int written = write(fd, data.ptr, (unsigned int)data.length);
@@ -141,4 +141,4 @@ int64_t File::Seek(SeekOrigin rel, int64_t offset)
   return pos;
 }
 
-} // namespace ud
+} // namespace ep

@@ -1,12 +1,12 @@
 #pragma once
-#ifndef _UD_SHADER_H
-#define _UD_SHADER_H
+#ifndef _EP_SHADER_H
+#define _EP_SHADER_H
 
 #include "components/resources/resource.h"
 #include "ep/epsharedptr.h"
 #include "ep/epstring.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(RenderShader);
@@ -20,26 +20,26 @@ UD_ENUM(ShaderType,
 class Shader : public Resource
 {
 public:
-  UD_COMPONENT(Shader);
+  EP_COMPONENT(Shader);
 
-  udSharedString GetCode() const { return code; }
-  void SetCode(udSharedString code) { this->code = code; }
+  epSharedString GetCode() const { return code; }
+  void SetCode(epSharedString code) { this->code = code; }
 
 protected:
   friend class Material;
   friend class RenderShader;
 
-  Shader(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  Shader(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Shader() {}
 
   RenderShaderRef GetRenderShader(int type);
 
-  udSharedString code;
+  epSharedString code;
 
   RenderShaderRef spRenderShader = nullptr;
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // _UD_SHADER_H
+#endif // _EP_SHADER_H

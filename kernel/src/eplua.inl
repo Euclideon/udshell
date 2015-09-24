@@ -1,4 +1,4 @@
-namespace ud
+namespace ep
 {
 
 inline lua_State *LuaState::state()
@@ -57,11 +57,11 @@ inline lua_Integer LuaState::toInt(int idx)
   // TODO: check isnum
   return i;
 }
-inline udString LuaState::toString(int idx)
+inline epString LuaState::toString(int idx)
 {
   size_t len;
   const char *pS = lua_tolstring(L, idx, &len);
-  return udString(pS, len);
+  return epString(pS, len);
 }
 inline lua_CFunction LuaState::toFunction(int idx)
 {
@@ -95,9 +95,9 @@ inline lua_Integer LuaState::popInt()
   lua_pop(L, 1);
   return r;
 }
-inline udString LuaState::popString()
+inline epString LuaState::popString()
 {
-  udString r = toString(-1);
+  epString r = toString(-1);
   lua_pop(L, 1);
   return r;
 }
@@ -131,7 +131,7 @@ inline void LuaState::pushInt(lua_Integer val)
 {
   lua_pushinteger(L, val);
 }
-inline void LuaState::pushString(udString val)
+inline void LuaState::pushString(epString val)
 {
   lua_pushlstring(L, val.ptr, val.length);
 }
@@ -142,9 +142,9 @@ inline void LuaState::pushLightUserData(void *val)
   else
     lua_pushlightuserdata(L, val);
 }
-inline void LuaState::push(const udVariant &v)
+inline void LuaState::push(const epVariant &v)
 {
   v.luaPush(*this);
 }
 
-} // namespace ud
+} // namespace ep

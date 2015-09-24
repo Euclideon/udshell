@@ -4,95 +4,95 @@
 #include "hal/vertex.h"
 #include "hal/shader.h"
 
-namespace ud
+namespace ep
 {
 
-static udArrayDataFormat GetElementType(udString type)
+static epArrayDataFormat GetElementType(epString type)
 {
   static const struct TypeMap
   {
     const char *pName;
-    udArrayDataFormat format;
+    epArrayDataFormat format;
   } s_typeMap[] = {
-    { "f32[4]", udVDF_Float4 },
-    { "f32[3]", udVDF_Float3 },
-    { "f32[2]", udVDF_Float2 },
-    { "f32[1]", udVDF_Float },
-    { "f32", udVDF_Float },
-    { "s32[4]", udVDF_Int4 },
-    { "s32[3]", udVDF_Int3 },
-    { "s32[2]", udVDF_Int2 },
-    { "s32[1]", udVDF_Int },
-    { "s32", udVDF_Int },
-    { "u32[4]", udVDF_UInt4 },
-    { "u32[3]", udVDF_UInt3 },
-    { "u32[2]", udVDF_UInt2 },
-    { "u32[1]", udVDF_UInt },
-    { "u32", udVDF_UInt },
-    { "s16[4]", udVDF_Short4 },
-    { "s16[2]", udVDF_Short2 },
-    { "s16", udVDF_Short },
-    { "u16[4]", udVDF_UShort4 },
-    { "u16[2]", udVDF_UShort2 },
-    { "u16", udVDF_UShort },
-    { "s8[4]", udVDF_Byte4N },
-    { "u8[4]", udVDF_UByte4N_RGBA },
+    { "f32[4]", epVDF_Float4 },
+    { "f32[3]", epVDF_Float3 },
+    { "f32[2]", epVDF_Float2 },
+    { "f32[1]", epVDF_Float },
+    { "f32", epVDF_Float },
+    { "s32[4]", epVDF_Int4 },
+    { "s32[3]", epVDF_Int3 },
+    { "s32[2]", epVDF_Int2 },
+    { "s32[1]", epVDF_Int },
+    { "s32", epVDF_Int },
+    { "u32[4]", epVDF_UInt4 },
+    { "u32[3]", epVDF_UInt3 },
+    { "u32[2]", epVDF_UInt2 },
+    { "u32[1]", epVDF_UInt },
+    { "u32", epVDF_UInt },
+    { "s16[4]", epVDF_Short4 },
+    { "s16[2]", epVDF_Short2 },
+    { "s16", epVDF_Short },
+    { "u16[4]", epVDF_UShort4 },
+    { "u16[2]", epVDF_UShort2 },
+    { "u16", epVDF_UShort },
+    { "s8[4]", epVDF_Byte4N },
+    { "u8[4]", epVDF_UByte4N_RGBA },
   };
   for (size_t i = 0; i<UDARRAYSIZE(s_typeMap); ++i)
   {
     if (type.eq(s_typeMap[i].pName))
       return s_typeMap[i].format;
   }
-  return udVDF_Unknown;
+  return epVDF_Unknown;
 }
 
 RenderArray::RenderArray(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, ArrayUsage usage)
   : RenderResource(pRenderer)
 {
-  udArrayDataFormat elements[16];
+  epArrayDataFormat elements[16];
   size_t numElements = 0;
 
-  udString type = spArrayBuffer->GetType();
+  epString type = spArrayBuffer->GetType();
   if (type[0] == '{')
     type = type.slice(1, type.length-1);
 
-  udString element;
+  epString element;
   while ((element = type.popToken(",")) != nullptr)
     elements[numElements++] = GetElementType(type);
 
   if (usage == ArrayUsage::VertexData)
   {
-    pArray = udVertex_CreateVertexBuffer(elements, numElements);
+    pArray = epVertex_CreateVertexBuffer(elements, numElements);
   }
   else
   {
-    UDASSERT(numElements == 1, "Index buffers may only have a single integer element!");
-    pArray = udVertex_CreateIndexBuffer(elements[0]);
+    EPASSERT(numElements == 1, "Index buffers may only have a single integer element!");
+    pArray = epVertex_CreateIndexBuffer(elements[0]);
   }
 
-  udSlice<const void> data = spArrayBuffer->MapForRead();
-  udVertex_SetArrayBufferData(pArray, data.ptr, data.length);
+  epSlice<const void> data = spArrayBuffer->MapForRead();
+  epVertex_SetArrayBufferData(pArray, data.ptr, data.length);
   spArrayBuffer->Unmap();
 }
 RenderArray::~RenderArray()
 {
-  udVertex_DestroyArrayBuffer(&pArray);
+  epVertex_DestroyArrayBuffer(&pArray);
 }
 
 RenderTexture::RenderTexture(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, TextureUsage usage)
   : RenderResource(pRenderer)
 {
-//  pTexture = udTexture_CreateTexture();
+//  pTexture = epTexture_CreateTexture();
 }
 RenderTexture::~RenderTexture()
 {
-  udTexture_DestroyTexture(&pTexture);
+  epTexture_DestroyTexture(&pTexture);
 }
 
-RenderShader::RenderShader(Renderer *pRenderer, ShaderRef spShader, udShaderType type)
+RenderShader::RenderShader(Renderer *pRenderer, ShaderRef spShader, epShaderType type)
   : RenderResource(pRenderer), type(type)
 {
-  pShader = udShader_CreateShader(spShader->code.toStringz(), spShader->code.length, type);
+  pShader = epShader_CreateShader(spShader->code.toStringz(), spShader->code.length, type);
 }
 RenderShader::~RenderShader()
 {
@@ -103,7 +103,7 @@ RenderShaderProgram::RenderShaderProgram(Renderer *pRenderer, RenderShaderRef vs
   : RenderResource(pRenderer)
 {
   // link the shader
-  pProgram = udShader_CreateShaderProgram(vs->pShader, ps->pShader);
+  pProgram = epShader_CreateShaderProgram(vs->pShader, ps->pShader);
   if (!pProgram)
     return;
 
@@ -121,24 +121,24 @@ RenderShaderProgram::~RenderShaderProgram()
 }
 size_t RenderShaderProgram::numAttributes()
 {
-  return udShader_GetNumAttributes(pProgram);
+  return epShader_GetNumAttributes(pProgram);
 }
-udString RenderShaderProgram::getAttributeName(size_t i)
+epString RenderShaderProgram::getAttributeName(size_t i)
 {
-  return udShader_GetAttributeName(pProgram, i);
+  return epShader_GetAttributeName(pProgram, i);
 }
 size_t RenderShaderProgram::numUniforms()
 {
-  return udShader_GetNumUniforms(pProgram);
+  return epShader_GetNumUniforms(pProgram);
 }
-udString RenderShaderProgram::getUniformName(size_t i)
+epString RenderShaderProgram::getUniformName(size_t i)
 {
-  return udShader_GetUniformName(pProgram, i);
+  return epShader_GetUniformName(pProgram, i);
 }
 void RenderShaderProgram::setUniform(int i, const udFloat4 &v)
 {
-  udShader_SetCurrent(pProgram);
-  udShader_SetProgramData(i, v);
+  epShader_SetCurrent(pProgram);
+  epShader_SetProgramData(i, v);
 }
 
 
@@ -149,15 +149,15 @@ RenderVertexFormat::RenderVertexFormat(Renderer *pRenderer, const udArrayElement
   uint32_t key = 0;
   pRenderer->vertexFormats.Insert(key, this);
 
-  pFormat = udVertex_CreateFormatDeclaration(pElements, (int)numElements);
+  pFormat = epVertex_CreateFormatDeclaration(pElements, (int)numElements);
 }
 RenderVertexFormat::~RenderVertexFormat()
 {
-  udVertex_DestroyFormatDeclaration(&pFormat);
+  epVertex_DestroyFormatDeclaration(&pFormat);
 
   // TODO: derive KEY from 'this'
   uint32_t key = 0;
   pRenderer->vertexFormats.Remove(key);
 }
 
-} // namespace ud
+} // namespace ep

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UDVIEW_H
-#define UDVIEW_H
+#ifndef EPVIEW_H
+#define EPVIEW_H
 
 #include "udRender.h"
 #include "udMath.h"
@@ -8,7 +8,7 @@
 #include "component.h"
 #include "hal/input.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(RenderableView);
@@ -20,9 +20,9 @@ PROTOTYPE_COMPONENT(View);
 class View : public Component
 {
 public:
-  UD_COMPONENT(View);
+  EP_COMPONENT(View);
 
-  virtual bool InputEvent(const udInputEvent &ev);
+  virtual bool InputEvent(const epInputEvent &ev);
   virtual udResult Resize(int width, int height);
 
   RenderableViewRef GetRenderableView();
@@ -39,8 +39,8 @@ public:
   void SetRenderOptions(const udRenderOptions &options) { this->options = options; }
   const udRenderOptions& GetRenderOptions() const { return options; }
 
-  udEvent<> Dirty;
-  udEvent<> FrameReady;
+  epEvent<> Dirty;
+  epEvent<> FrameReady;
 
   // TODO: remove these!
   void RegisterResizeCallback(void (*pCallback)(ViewRef pView, int w, int h)) { pResizeCallback = pCallback; }
@@ -69,14 +69,14 @@ protected:
   void(*pPreRenderCallback)(ViewRef, SceneRef) = nullptr;
   void(*pPostRenderCallback)(ViewRef, SceneRef) = nullptr;
 
-  View(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  View(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Component(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
 
-  void SetLatestFrame(udUniquePtr<RenderableView> spFrame);
+  void SetLatestFrame(epUniquePtr<RenderableView> spFrame);
 
   void OnDirty();
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // UDVIEW_H
+#endif // EPVIEW_H

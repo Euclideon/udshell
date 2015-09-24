@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _UD_UDMODEL_H
-#define _UD_UDMODEL_H
+#ifndef _EP_EPMODEL_H
+#define _EP_EPMODEL_H
 
 #include "udPlatform.h"
 #include "udOctree.h"
@@ -11,7 +11,7 @@
 #include "udRender.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(UDModel);
@@ -19,12 +19,12 @@ SHARED_CLASS(UDModel);
 class UDModel : public Resource
 {
 public:
-  UD_COMPONENT(UDModel);
+  EP_COMPONENT(UDModel);
 
   udOctree *GetOctreePtr() const { return pOctree; }
   friend class UDDataSource;
 protected:
-  UDModel(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  UDModel(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~UDModel();
 
@@ -38,7 +38,7 @@ struct NodeRenderModel : public udRenderModel
 
   udDouble4x4 matrix;
   udRenderClipArea clipArea;
-  udDelegate<SimpleVoxelDlgt> simpleVoxelDel;
+  epDelegate<SimpleVoxelDlgt> simpleVoxelDel;
 
   static unsigned VoxelShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex)
   {
@@ -51,6 +51,6 @@ struct NodeRenderModel : public udRenderModel
   }
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // _UD_UDMODEL_H
+#endif // _EP_EPMODEL_H

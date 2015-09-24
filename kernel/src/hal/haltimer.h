@@ -1,9 +1,8 @@
 #pragma once
-#ifndef HALTIMER_H
-#define HALTIMER_H
+#ifndef EP_HALTIMER_H
+#define EP_HALTIMER_H
 
-#include "udPlatform.h"
-#include "udResult.h"
+#include "ep/epplatform.h"
 
 struct HalTimer;
 
@@ -25,4 +24,4 @@ typedef void (HalTimerCallback)(HalTimer *pTimer, void *pUserData);
 HalTimer *HalTimer_Create(HalTimerType tt, uint32_t duration,  HalTimerCallback *pCallBack, void *pUserData);
 void HalTimer_Destroy(HalTimer **ppTimer);
 
-#endif // HALTIMER_H
+#endif // EP_HALTIMER_H

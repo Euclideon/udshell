@@ -4,7 +4,7 @@
 
 #include "node.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(Model);
@@ -14,13 +14,13 @@ PROTOTYPE_COMPONENT(GeomNode);
 class GeomNode : public Node
 {
 public:
-  UD_COMPONENT(GeomNode);
+  EP_COMPONENT(GeomNode);
 
   ModelRef GetModel() const { return spModel; }
   void SetModel(ModelRef spModel) { this->spModel = spModel; }
 
 protected:
-  GeomNode(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  GeomNode(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Node(pType, pKernel, uid, initParams) {}
   virtual ~GeomNode() {}
 
@@ -29,6 +29,6 @@ protected:
   ModelRef spModel = nullptr;
 };
 
-} // namespace ud
+} // namespace ep
 
 #endif // _GEOMNODE_H

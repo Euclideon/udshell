@@ -1,16 +1,15 @@
 
-#include "udPlatform.h"
-#include "udPlatformUtil.h"
+#include "ep/epplatform.h"
 
 #include "kernel.h"
 #include "components/logger.h"
 
 // TODO: shut up about sprintf! **REMOVE ME**
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
 #pragma warning(disable: 4996)
-#endif // UDPLATFORM_WINDOWS
+#endif // defined(EP_WINDOWS)
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -72,11 +71,11 @@ ComponentDesc Component::descriptor =
   "Component", // displayName
   "Is a component", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 
-void Component::Init(udInitParams initParams)
+void Component::Init(epInitParams initParams)
 {
   for (auto &kv : initParams)
   {
@@ -90,9 +89,9 @@ void Component::Init(udInitParams initParams)
 
   // allocate property change events
   propertyChange.length = pType->propertyTree.Size();
-  propertyChange.ptr = udAllocType(udEvent<>, propertyChange.length, udAF_None);
+  propertyChange.ptr = udAllocType(epEvent<>, propertyChange.length, udAF_None);
   for (size_t i = 0; i<propertyChange.length; ++i)
-    new(&propertyChange.ptr[i]) udEvent<>();
+    new(&propertyChange.ptr[i]) epEvent<>();
 */
 }
 
@@ -103,7 +102,7 @@ Component::~Component()
 }
 
 
-bool Component::IsType(udString type) const
+bool Component::IsType(epString type) const
 {
   const ComponentDesc *pDesc = pType;
   while (pDesc)
@@ -115,21 +114,21 @@ bool Component::IsType(udString type) const
   return false;
 }
 
-const PropertyDesc *Component::GetPropertyDesc(udString name) const
+const PropertyDesc *Component::GetPropertyDesc(epString name) const
 {
   const PropertyDesc *pDesc = instanceProperties.Get(name);
   if (!pDesc)
     pDesc = pType->propertyTree.Get(name);
   return pDesc;
 }
-const MethodDesc *Component::GetMethodDesc(udString name) const
+const MethodDesc *Component::GetMethodDesc(epString name) const
 {
   const MethodDesc *pDesc = instanceMethods.Get(name);
   if (!pDesc)
     pDesc = pType->methodTree.Get(name);
   return pDesc;
 }
-const EventDesc *Component::GetEventDesc(udString name) const
+const EventDesc *Component::GetEventDesc(epString name) const
 {
   const EventDesc *pDesc = instanceEvents.Get(name);
   if (!pDesc)
@@ -137,7 +136,7 @@ const EventDesc *Component::GetEventDesc(udString name) const
   return pDesc;
 }
 
-const StaticFuncDesc *Component::GetStaticFuncDesc(udString name) const
+const StaticFuncDesc *Component::GetStaticFuncDesc(epString name) const
 {
   return pType->staticFuncTree.Get(name);
 }
@@ -155,20 +154,20 @@ void Component::AddDynamicEvent(const EventDesc &event)
   instanceEvents.Insert(event.info.id, event);
 }
 
-void Component::RemoveDynamicProperty(udString name)
+void Component::RemoveDynamicProperty(epString name)
 {
   instanceProperties.Remove(name);
 }
-void Component::RemoveDynamicMethod(udString name)
+void Component::RemoveDynamicMethod(epString name)
 {
   instanceMethods.Remove(name);
 }
-void Component::RemoveDynamicEvent(udString name)
+void Component::RemoveDynamicEvent(epString name)
 {
   instanceEvents.Remove(name);
 }
 
-void Component::SetProperty(udString property, const udVariant &value)
+void Component::SetProperty(epString property, const epVariant &value)
 {
   const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
@@ -185,34 +184,34 @@ void Component::SetProperty(udString property, const udVariant &value)
 //  propertyChange[pDesc->index].Signal();
 }
 
-udVariant Component::GetProperty(udString property) const
+epVariant Component::GetProperty(epString property) const
 {
   const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
   {
     LogWarning(2, "No property '{0}' for component '{1}'", property, name.empty() ? uid : name);
-    return udVariant();
+    return epVariant();
   }
   if (!pDesc->getter)
   {
     LogWarning(2, "Property '{0}' for component '{1}' is write-only", property, name.empty() ? uid : name);
-    return udVariant();
+    return epVariant();
   }
   return pDesc->getter->get(this);
 }
 
-udVariant Component::CallMethod(udString method, udSlice<udVariant> args)
+epVariant Component::CallMethod(epString method, epSlice<epVariant> args)
 {
   const MethodDesc *pDesc = GetMethodDesc(method);
   if (!pDesc)
   {
     LogWarning(1, "Method not found!");
-    return udVariant();
+    return epVariant();
   }
   return pDesc->method->call(this, args);
 }
 
-void Component::Subscribe(udString eventName, const udVariant::VarDelegate &d)
+void Component::Subscribe(epString eventName, const epVariant::VarDelegate &d)
 {
   const EventDesc *pDesc = GetEventDesc(eventName);
   if (!pDesc)
@@ -229,11 +228,11 @@ void Component::Unsubscribe()
 }
 
 
-udResult Component::ReceiveMessage(udString message, udString sender, const udVariant &data)
+udResult Component::ReceiveMessage(epString message, epString sender, const epVariant &data)
 {
   if (message.eqIC("set"))
   {
-    udSlice<udVariant> arr = data.asArray();
+    epSlice<epVariant> arr = data.asArray();
     SetProperty(arr[0].asString(), arr[1]);
   }
   else if (message.eqIC("get"))
@@ -241,7 +240,7 @@ udResult Component::ReceiveMessage(udString message, udString sender, const udVa
     if (!sender.empty())
     {
       char mem[1024];
-      udSlice<char> buffer(mem, sizeof(mem));
+      epSlice<char> buffer(mem, sizeof(mem));
 //      GetProperty(data, &buffer);
 //      SendMessage(sender, "val", buffer);
     }
@@ -249,19 +248,19 @@ udResult Component::ReceiveMessage(udString message, udString sender, const udVa
   return udR_Success;
 }
 
-udResult Component::SendMessage(udString target, udString message, const udVariant &data)
+udResult Component::SendMessage(epString target, epString message, const epVariant &data)
 {
   return pKernel->SendMessage(target, uid, message, data);
 }
 
-void Component::LogInternal(int level, udString text, int category, udString componentUID) const
+void Component::LogInternal(int level, epString text, int category, epString componentUID) const
 {
   pKernel->GetLogger()->Log(level, text, (LogCategories)category, componentUID);
 }
 
-} // namespace ud
+} // namespace ep
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, ud::ComponentRef spComponent, const udVarArg *pArgs)
+ptrdiff_t epStringify(epSlice<char> buffer, epString format, ep::ComponentRef spComponent, const epVarArg *pArgs)
 {
   ptrdiff_t len = spComponent->uid.length + 1;
   if (!buffer.ptr)
@@ -270,6 +269,6 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, ud::ComponentRef sp
     return -len;
 
   // HACK: this could be a lot nicer!
-  udMutableString<64> uid; uid.concat("@", spComponent->uid);
-  return udStringifyTemplate(buffer, format, uid, pArgs);
+  epMutableString<64> uid; uid.concat("@", spComponent->uid);
+  return epStringifyTemplate(buffer, format, uid, pArgs);
 }

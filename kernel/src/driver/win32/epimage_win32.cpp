@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDIMAGE_DRIVER == UDDRIVER_WIN32
+#if EPIMAGE_DRIVER == EPDRIVER_WIN32
 
 #include "hal/image.h"
 
@@ -25,20 +25,20 @@ void udImage_DeinitInternal()
     pFactory->Release();
 }
 
-static udImageFormat GUIDToImageFormat(WICPixelFormatGUID format)
+static epImageFormat GUIDToImageFormat(WICPixelFormatGUID format)
 {
   if (format == GUID_WICPixelFormat32bppBGRA)
-    return udIF_BGRA8;
+    return epIF_BGRA8;
   else  if (format == GUID_WICPixelFormat32bppRGBA)
-    return udIF_RGBA8;
+    return epIF_RGBA8;
   else  if (format == GUID_WICPixelFormat32bppBGR)
-    return udIF_BGR8;
+    return epIF_BGR8;
   else  if (format == GUID_WICPixelFormat32bppRGB)
-    return udIF_RGB8;
-  return udIF_Unknown;
+    return epIF_RGB8;
+  return epIF_Unknown;
 }
 
-udImage* udImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
+epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
 {
   HGLOBAL hGlobal = GlobalAlloc(0, bufferLen);
   void *pMem = GlobalLock(hGlobal);
@@ -54,8 +54,8 @@ udImage* udImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
   UINT frames;
   pDecoder->GetFrameCount(&frames);
 
-  udImage *pOutput = (udImage*)udAlloc(sizeof(udImage) + frames*sizeof(udImageSurface));
-  pOutput->pSurfaces = (udImageSurface*)&pOutput[1];
+  epImage *pOutput = (epImage*)udAlloc(sizeof(epImage) + frames*sizeof(epImageSurface));
+  pOutput->pSurfaces = (epImageSurface*)&pOutput[1];
   pOutput->elements = frames;
   pOutput->mips = 1;
 
@@ -64,7 +64,7 @@ udImage* udImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
 
   for (UINT i = 0; i < frames; ++i)
   {
-    udImageSurface &surface = pOutput->pSurfaces[i];
+    epImageSurface &surface = pOutput->pSurfaces[i];
 
     IWICBitmapFrameDecode *pBitmapSource;
     pDecoder->GetFrame(0, &pBitmapSource);
@@ -104,7 +104,7 @@ udImage* udImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
   return pOutput;
 }
 
-void* udImage_WriteImage(udImage *pImage, const char *pFileExt, size_t *pOutputSize)
+void* epImage_WriteImage(epImage *pImage, const char *pFileExt, size_t *pOutputSize)
 {
   pImage;
   pFileExt;

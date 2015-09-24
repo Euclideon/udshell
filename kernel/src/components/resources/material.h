@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _UD_MATERIAL_H
-#define _UD_MATERIAL_H
+#ifndef _EP_MATERIAL_H
+#define _EP_MATERIAL_H
 
 #include "components/resources/resource.h"
 #include "components/resources/shader.h"
@@ -8,7 +8,7 @@
 #include "ep/epstring.h"
 #include "ep/epavltree.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(ArrayBuffer);
@@ -19,7 +19,7 @@ PROTOTYPE_COMPONENT(Material);
 class Material : public Resource
 {
 public:
-  UD_COMPONENT(Material);
+  EP_COMPONENT(Material);
 
   UD_ENUM(BlendMode,
           None,
@@ -48,19 +48,19 @@ public:
   CullMode GetCullMode() const { return cullMode; }
   void SetCullMode(CullMode cullMode) { this->cullMode = cullMode; }
 
-  void SetMaterialProperty(udSharedString property, const udFloat4 &val);
+  void SetMaterialProperty(epSharedString property, const udFloat4 &val);
 
 protected:
   friend class GeomNode;
 
-  Material(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  Material(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Material()
   {
     for (ShaderRef &s : shaders)
     {
       if (s)
-        s->Changed.Unsubscribe(udDelegate<void()>(this, &Material::OnShaderChanged));
+        s->Changed.Unsubscribe(epDelegate<void()>(this, &Material::OnShaderChanged));
     }
   }
 
@@ -75,11 +75,11 @@ protected:
   BlendMode blendMode = BlendMode::None;
   CullMode cullMode = CullMode::None;
 
-  udAVLTree<udSharedString, udFloat4> properties;
+  epAVLTree<epSharedString, udFloat4> properties;
 
   RenderShaderProgramRef spRenderProgram = nullptr;
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // _UD_MATERIAL_H
+#endif // _EP_MATERIAL_H

@@ -10,13 +10,13 @@
 #include <QOpenGLDebugLogger>
 
 // internal storage of the Qt GL Context
-struct udQtGLContext
+struct epQtGLContext
 {
   QOpenGLFunctions_2_0 *pFunc;
   QOpenGLDebugLogger *pDebugger;
 };
 
-extern udQtGLContext s_QtGLContext;
+extern epQtGLContext s_QtGLContext;
 
 
 class QOpenGLTexture;
@@ -24,43 +24,43 @@ class QOpenGLShader;
 class QOpenGLShaderProgram;
 class QOpenGLBuffer;
 
-struct udTexture
+struct epTexture
 {
-  udTextureType type;
-  udImageFormat format;
+  epTextureType type;
+  epImageFormat format;
   size_t width, height, depth;
   size_t elements;
   int levels;
   QOpenGLTexture *pTexture;
 };
 
-struct udArrayElementData
+struct epArrayElementData
 {
   int offset;
   int stride;
 };
 
-struct udFormatDeclaration
+struct epFormatDeclaration
 {
   udArrayElement *pElements;
-  udArrayElementData *pElementData;
+  epArrayElementData *pElementData;
   int numElements;
 };
 
-struct udArrayBuffer
+struct epArrayBuffer
 {
   QOpenGLBuffer *pBuffer;
 
-  udArrayDataFormat *pFormat;
+  epArrayDataFormat *pFormat;
   size_t numElements;
 };
 
-struct udShader
+struct epShader
 {
   QOpenGLShader *pShader;
 };
 
-struct udShaderProgram
+struct epShaderProgram
 {
   QOpenGLShaderProgram *pProgram;
 

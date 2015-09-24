@@ -6,10 +6,10 @@
 #include "ep/epdelegate.h"
 #include "components/datasources/uddatasource.h"
 
-namespace ud
+namespace ep
 {
 
-static const udSlice<const EnumKVP> renderFlags =
+static const epSlice<const EnumKVP> renderFlags =
 {
   { "udRenderFlags::None",             udRF_None },
   { "udRenderFlags::NoOrtho",          udRF_NoOrtho },
@@ -134,12 +134,12 @@ ComponentDesc UDNode::descriptor =
   "UDNode",  // displayName
   "Is a UD model node", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 
-int UDNode::Load(udString name, bool useStreamer)
+int UDNode::Load(epString name, bool useStreamer)
 {
   udResult result = udR_Failure_;
   if (source.empty())
@@ -197,7 +197,7 @@ BoundingVolume UDNode::GetBoundingVolume() const
 {
   BoundingVolume vol;
 
-  UDASSERT(udMat.a[0] == udMat.a[5] && udMat.a[0] == udMat.a[10], "NonUniform Scale");
+  EPASSERT(udMat.a[0] == udMat.a[5] && udMat.a[0] == udMat.a[10], "NonUniform Scale");
 
   udDouble3 min = -(udMat.axis.t.toVector3());
   udDouble3 max = min + udDouble3::create(udMat.a[0]);
@@ -214,4 +214,4 @@ BoundingVolume UDNode::GetBoundingVolume() const
   return vol;
 }
 
-} // namespace ud
+} // namespace ep

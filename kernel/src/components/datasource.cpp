@@ -4,7 +4,7 @@
 #include "components/stream.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -61,19 +61,19 @@ ComponentDesc DataSource::descriptor =
   "Data Source", // displayName
   "Provides data", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
 };
 
-StreamRef DataSource::OpenStream(const udVariant &source)
+StreamRef DataSource::OpenStream(const epVariant &source)
 {
   ComponentRef spComp = nullptr;
   StreamRef spSource = nullptr;
 
-  //  const udVariant &flags = initParams["flags"];
+  //  const epVariant &flags = initParams["flags"];
   //  size_t f = flags.as<size_t>();
 
-  if (source.is(udVariant::Type::String))
+  if (source.is(epVariant::Type::String))
   {
     // path or url?
     spSource = pKernel->CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
@@ -105,10 +105,10 @@ StreamRef DataSource::OpenStream(const udVariant &source)
   return spSource;
 }
 
-DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
 
 }
 
-} // namespace ud
+} // namespace ep

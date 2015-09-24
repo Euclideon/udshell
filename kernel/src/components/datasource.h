@@ -1,12 +1,12 @@
 #pragma once
-#if !defined(_UD_DATASOURCE_H)
-#define _UD_DATASOURCE_H
+#if !defined(_EP_DATASOURCE_H)
+#define _EP_DATASOURCE_H
 
 #include "component.h"
 #include "components/stream.h"
 #include "resources/resource.h"
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(DataSource);
@@ -14,7 +14,7 @@ PROTOTYPE_COMPONENT(DataSource);
 class DataSource : public Component
 {
 public:
-  UD_COMPONENT(Component);
+  EP_COMPONENT(Component);
 
   enum class Flags : size_t
   {
@@ -24,7 +24,7 @@ public:
     DeferredLoad = 1<<3,
   };
 
-  virtual udSlice<const udString> GetFileExtensions() const { return nullptr; }
+  virtual epSlice<const epString> GetFileExtensions() const { return nullptr; }
 
   virtual udResult Flush()
   {
@@ -35,7 +35,7 @@ public:
   {
     return resources.Size();
   }
-  udString GetResourceName(size_t index) const
+  epString GetResourceName(size_t index) const
   {
     size_t i = 0;
     for (auto iter = resources.begin(); iter != resources.end(); ++iter)
@@ -58,7 +58,7 @@ public:
     }
     return nullptr;
   }
-  ResourceRef GetResource(udString name) const
+  ResourceRef GetResource(epString name) const
   {
     ResourceRef *r = const_cast<ResourceRef*>(resources.Get(name));
     if (r)
@@ -67,22 +67,22 @@ public:
   }
 
   template<typename T>
-  udSharedPtr<T> GetResourceAs(size_t index) const
+  epSharedPtr<T> GetResourceAs(size_t index) const
   {
     return component_cast<T>(GetResource(index));
   }
   template<typename T>
-  udSharedPtr<T> GetResourceAs(udString name) const
+  epSharedPtr<T> GetResourceAs(epString name) const
   {
     return component_cast<T>(GetResource(name));
   }
 
-  void SetResource(udString name, const ResourceRef &spResource)
+  void SetResource(epString name, const ResourceRef &spResource)
   {
     resources.Insert(name, spResource);
   }
 
-  size_t CountResources(udString prefix)
+  size_t CountResources(epString prefix)
   {
     // TODO: ...
     return 0;
@@ -95,30 +95,30 @@ public:
   }
 
   // HACK: this should be private!!
-  ResourceRef GetResourceByVariant(udVariant index) const
+  ResourceRef GetResourceByVariant(epVariant index) const
   {
-    if (index.is(udVariant::Type::String))
+    if (index.is(epVariant::Type::String))
       return GetResource(index.asString());
     else
       return GetResource((size_t)index.asInt());
   }
 
 protected:
-  DataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  DataSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
-  StreamRef OpenStream(const udVariant &source);
+  StreamRef OpenStream(const epVariant &source);
 
   struct StringCompare {
-    UDFORCE_INLINE ptrdiff_t operator()(udString a, udString b)
+    __forceinline ptrdiff_t operator()(epString a, epString b)
     {
       return a.cmp(b);
     }
   };
 
-  udAVLTree<udSharedString, ResourceRef> resources;
+  epAVLTree<epSharedString, ResourceRef> resources;
   Flags flags;
 };
 
 }
 
-#endif // _UD_DATASOURCE_H
+#endif // _EP_DATASOURCE_H

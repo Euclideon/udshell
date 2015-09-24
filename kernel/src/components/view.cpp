@@ -1,11 +1,10 @@
-
 #include "view.h"
 #include "kernel.h"
 #include "scene.h"
 #include "nodes/camera.h"
 #include "renderscene.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -42,12 +41,12 @@ ComponentDesc View::descriptor =
   "View",    // displayName
   "Is a view", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr,
-  udSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
+  epSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
-bool View::InputEvent(const udInputEvent &ev)
+bool View::InputEvent(const epInputEvent &ev)
 {
   bool handled = false;
 
@@ -130,7 +129,7 @@ void View::GetRenderDimensions(int *pWidth, int *pHeight) const
     *pHeight = renderHeight;
 }
 
-void View::SetLatestFrame(udUniquePtr<RenderableView> spFrame)
+void View::SetLatestFrame(epUniquePtr<RenderableView> spFrame)
 {
   spLatestFrame = spFrame;
   FrameReady.Signal();
@@ -140,7 +139,7 @@ void View::OnDirty()
 {
   if (spScene && spCamera)
   {
-    udUniquePtr<RenderableView> spRenderView = udUniquePtr<RenderableView>(new RenderableView);
+    epUniquePtr<RenderableView> spRenderView = epUniquePtr<RenderableView>(new RenderableView);
 
     Renderer *pRenderer = pKernel->GetRenderer();
     spRenderView->pRenderEngine = pRenderer->GetRenderEngine();
@@ -169,4 +168,4 @@ void View::OnDirty()
   Dirty.Signal();
 }
 
-} // namespace ud
+} // namespace ep

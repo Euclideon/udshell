@@ -6,9 +6,9 @@
 
 struct InputState
 {
-  uint8_t keys[MAX_KEYBOARDS][udKC_Max];
-  float mouse[MAX_MOUSES][udMC_Max];
-  float gamepad[MAX_GAMEPADS][udGC_Max];
+  uint8_t keys[MAX_KEYBOARDS][epKC_Max];
+  float mouse[MAX_MOUSES][epMC_Max];
+  float gamepad[MAX_GAMEPADS][epGC_Max];
 };
 
 extern InputState gInputState[2];
@@ -16,8 +16,8 @@ extern int gCurrentInputState;
 
 extern unsigned char udAsciiToUDKey[128];
 
-void udInput_Init();
-void udInput_Update();
+void epInput_Init();
+void epInput_Update();
 
-void udInput_InitInternal();
-void udInput_UpdateInternal();
+void epInput_InitInternal();
+void epInput_UpdateInternal();

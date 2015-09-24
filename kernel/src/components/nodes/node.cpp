@@ -1,6 +1,6 @@
 #include "node.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -53,7 +53,7 @@ ComponentDesc Node::descriptor =
   "Node",    // displayName
   "Is a scene node", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 udResult Node::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
@@ -63,7 +63,7 @@ udResult Node::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
   return udR_Success;
 }
 
-bool Node::InputEvent(const udInputEvent &ev)
+bool Node::InputEvent(const epInputEvent &ev)
 {
   for (auto &c : children)
   {
@@ -117,4 +117,4 @@ void Node::CalculateWorldMatrix(udDouble4x4 *pMatrix) const
   }
 }
 
-} // namespace ud
+} // namespace ep

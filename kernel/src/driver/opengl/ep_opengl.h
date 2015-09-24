@@ -10,13 +10,13 @@
 #elif defined(USE_GLES)
 # include <GLES2/gl2.h>
 # include <GLES2/gl2ext.h>
-#elif UDWINDOW_DRIVER == UDDRIVER_GLUT
+#elif EPWINDOW_DRIVER == EPDRIVER_GLUT
 # define FREEGLUT_STATIC
 # define FREEGLUT_LIB_PRAGMAS 0
 # define FREEGLUT_BUILDING_LIB
 # include "GL/freeglut.h"
 # include "GL/glext.h"
-#elif UDWINDOW_DRIVER == UDDRIVER_SDL
+#elif EPWINDOW_DRIVER == EPDRIVER_SDL
 # include <SDL2/SDL_opengl.h>
 #else
 # include <GL/gl.h>
@@ -36,16 +36,16 @@
 #include "hal/texture.h"
 #include "hal/vertex.h"
 
-enum udArrayType
+enum epArrayType
 {
-  udAT_VertexArray,
-  udAT_IndexArray,
+  epAT_VertexArray,
+  epAT_IndexArray,
 };
 
-struct udTexture
+struct epTexture
 {
-  udTextureType type;
-  udImageFormat format;
+  epTextureType type;
+  epImageFormat format;
   size_t width, height, depth;
   size_t elements;
   int levels;
@@ -53,44 +53,44 @@ struct udTexture
   void *pMappedBuffer;
 };
 
-struct udGLTextureFormat
+struct epGLTextureFormat
 {
   GLint internalFormat;
   GLenum format;
   GLenum type;
 };
 
-struct udArrayElementData
+struct epArrayElementData
 {
   int offset;
   int stride;
 };
 
-struct udFormatDeclaration
+struct epFormatDeclaration
 {
   udArrayElement *pElements;
-  udArrayElementData *pElementData;
+  epArrayElementData *pElementData;
   int numElements;
 };
 
-struct udArrayBuffer
+struct epArrayBuffer
 {
-  udArrayType type;
+  epArrayType type;
 
   GLuint buffer;
   size_t bufferLen;
   void *pMappedBuffer;
 
-  udArrayDataFormat *pFormat;
+  epArrayDataFormat *pFormat;
   size_t numElements;
 };
 
-struct udShader
+struct epShader
 {
   GLuint shader;
 };
 
-struct udShaderProgram
+struct epShaderProgram
 {
   GLuint program;
 

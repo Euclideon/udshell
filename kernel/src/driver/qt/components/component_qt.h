@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UD_COMPONENT_QT_H
-#define UD_COMPONENT_QT_H
+#ifndef EP_COMPONENT_QT_H
+#define EP_COMPONENT_QT_H
 
 #include <QVariant>
 #include <QJSValue>
@@ -10,16 +10,16 @@
 namespace qt
 {
 
-class QtUDComponent : public QObject
+class QtEPComponent : public QObject
 {
   Q_OBJECT
 
 public:
-  QtUDComponent() : QObject(nullptr) {}
-  QtUDComponent(ud::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) {}
-  QtUDComponent(const QtUDComponent &val) : QObject(nullptr), spComponent(val.spComponent) {}
+  QtEPComponent() : QObject(nullptr) {}
+  QtEPComponent(ep::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) {}
+  QtEPComponent(const QtEPComponent &val) : QObject(nullptr), spComponent(val.spComponent) {}
 
-  ud::ComponentRef GetComponent() const { return spComponent; }
+  ep::ComponentRef GetComponent() const { return spComponent; }
 
   // methods to inspect internals
   //..
@@ -56,11 +56,11 @@ public:
   Q_INVOKABLE void Subscribe(QString eventName, QJSValue func) const;
 
 private:
-  ud::ComponentRef spComponent;
+  ep::ComponentRef spComponent;
 };
 
 } // namespace qt
 
-Q_DECLARE_METATYPE(qt::QtUDComponent);
+Q_DECLARE_METATYPE(qt::QtEPComponent);
 
-#endif // UD_COMPONENT_QT_H
+#endif // EP_COMPONENT_QT_H

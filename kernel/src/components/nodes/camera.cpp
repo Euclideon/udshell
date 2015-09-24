@@ -1,10 +1,10 @@
-#include "udPlatform.h"
+#include "ep/epplatform.h"
 
 #include "camera.h"
 #include "kernel.h"
 #include "hal/input.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -49,8 +49,8 @@ ComponentDesc Camera::descriptor =
   "Camera",    // displayName
   "Is a camera", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 
@@ -104,7 +104,7 @@ ComponentDesc SimpleCamera::descriptor =
   "SimpleCamera",     // displayName
   "Is a simple camera", // description
 
-  udSlice<CPropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
+  epSlice<CPropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
 };
 
 
@@ -120,46 +120,46 @@ void Camera::GetProjectionMatrix(double aspectRatio, udDouble4x4 *pMatrix) const
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-bool SimpleCamera::ViewportInputEvent(const udInputEvent &ev)
+bool SimpleCamera::ViewportInputEvent(const epInputEvent &ev)
 {
-  if (ev.deviceType == udID_Keyboard)
+  if (ev.deviceType == epID_Keyboard)
   {
-    if (ev.eventType == udInputEvent::EventType::Key)
+    if (ev.eventType == epInputEvent::EventType::Key)
     {
       switch (ev.key.key)
       {
-        case udKC_W:
-        case udKC_Up:
+        case epKC_W:
+        case epKC_Up:
           keyState[(int)Keys::Up] += ev.key.state ? 1 : -1;
           return true;
-        case udKC_S:
-        case udKC_Down:
+        case epKC_S:
+        case epKC_Down:
           keyState[(int)Keys::Down] += ev.key.state ? 1 : -1;
           return true;
-        case udKC_A:
-        case udKC_Left:
+        case epKC_A:
+        case epKC_Left:
           keyState[(int)Keys::Left] += ev.key.state ? 1 : -1;
           return true;
-        case udKC_D:
-        case udKC_Right:
+        case epKC_D:
+        case epKC_Right:
           keyState[(int)Keys::Right] += ev.key.state ? 1 : -1;
           return true;
-        case udKC_R:
-        case udKC_PageUp:
+        case epKC_R:
+        case epKC_PageUp:
           keyState[(int)Keys::Elevate] += ev.key.state ? 1 : -1;
           return true;
-        case udKC_F:
-        case udKC_PageDown:
+        case epKC_F:
+        case epKC_PageDown:
           keyState[(int)Keys::Descend] += ev.key.state ? 1 : -1;
           return true;
-        case udKC_LShift:
-        case udKC_RShift:
+        case epKC_LShift:
+        case epKC_RShift:
           keyState[(int)Keys::Boost] += ev.key.state ? 1 : -1;
           return true;
       }
     }
   }
-  else if (ev.deviceType == udID_Mouse)
+  else if (ev.deviceType == epID_Mouse)
   {
 
   }
@@ -179,24 +179,24 @@ bool SimpleCamera::Update(double timeDelta)
 
   // rotations
   double rotSpeed = 3.14159*0.5*timeDelta;
-  if(fabs(s = udInput_State(udID_Gamepad, udGC_AxisRY)) > 0.2f)
+  if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisRY)) > 0.2f)
     pitch += s*yInvert*rotSpeed;
-  if(fabs(s = udInput_State(udID_Gamepad, udGC_AxisRX)) > 0.2f)
+  if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisRX)) > 0.2f)
     yaw += -s*rotSpeed;
 
-  if(udInput_State(udID_Mouse, udMC_LeftButton))
+  if(epInput_State(epID_Mouse, epMC_LeftButton))
   {
-    pitch += udInput_State(udID_Mouse, udMC_YDelta)*yInvert*0.005;
-    yaw += -udInput_State(udID_Mouse, udMC_XDelta)*0.005;
+    pitch += epInput_State(epID_Mouse, epMC_YDelta)*yInvert*0.005;
+    yaw += -epInput_State(epID_Mouse, epMC_XDelta)*0.005;
   }
 
-  yaw += udInput_State(udID_Keyboard, udKC_Q)*rotSpeed
-         -udInput_State(udID_Keyboard, udKC_E)*rotSpeed;
+  yaw += epInput_State(epID_Keyboard, epKC_Q)*rotSpeed
+         -epInput_State(epID_Keyboard, epKC_E)*rotSpeed;
 
   // translations
-  if(fabs(s = udInput_State(udID_Gamepad, udGC_AxisLY)) > 0.2f)
+  if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisLY)) > 0.2f)
     ty += -s;
-  if(fabs(s = udInput_State(udID_Gamepad, udGC_AxisLX)) > 0.2f)
+  if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisLX)) > 0.2f)
     tx += s;
 
   ty += keyState[(int)Keys::Up]
@@ -205,32 +205,32 @@ bool SimpleCamera::Update(double timeDelta)
         -keyState[(int)Keys::Left];
   tz += keyState[(int)Keys::Elevate]
         -keyState[(int)Keys::Descend]
-        +udInput_State(udID_Gamepad, udGC_ButtonDUp)
-        -udInput_State(udID_Gamepad, udGC_ButtonDDown)
-        +udInput_State(udID_Gamepad, udGC_ButtonRT)
-        -udInput_State(udID_Gamepad, udGC_ButtonLT);
+        +epInput_State(epID_Gamepad, epGC_ButtonDUp)
+        -epInput_State(epID_Gamepad, epGC_ButtonDDown)
+        +epInput_State(epID_Gamepad, epGC_ButtonRT)
+        -epInput_State(epID_Gamepad, epGC_ButtonLT);
 
   // mode switch
 #if 0
-  bool bToggle = !!udInput_WasPressed(udID_Gamepad, udGC_ButtonY);
-  if(udInput_State(udID_Keyboard, udKC_1) || (bToggle && bHelicopter))
+  bool bToggle = !!epInput_WasPressed(epID_Gamepad, epGC_ButtonY);
+  if(epInput_State(epID_Keyboard, epKC_1) || (bToggle && bHelicopter))
     helicopterMode(false);
-  else if(udInput_State(udID_Keyboard, udKC_2) || (bToggle && !bHelicopter))
+  else if(epInput_State(epID_Keyboard, epKC_2) || (bToggle && !bHelicopter))
     helicopterMode(true);
 #endif // 0
   double speed = 1.0;
-  if((s = -udInput_State(udID_Mouse, udMC_Wheel)) != 0.0)
+  if((s = -epInput_State(epID_Mouse, epMC_Wheel)) != 0.0)
     speed = pow(1.2, s);
-  if(udInput_State(udID_Gamepad, udGC_ButtonA) || udInput_State(udID_Keyboard, udKC_Equals) || udInput_State(udID_Keyboard, udKC_NumpadPlus))
+  if(epInput_State(epID_Gamepad, epGC_ButtonA) || epInput_State(epID_Keyboard, epKC_Equals) || epInput_State(epID_Keyboard, epKC_NumpadPlus))
     speed = 1.0 + 1.0*timeDelta;
-  if(udInput_State(udID_Gamepad, udGC_ButtonB) || udInput_State(udID_Keyboard, udKC_Hyphen) || udInput_State(udID_Keyboard, udKC_NumpadMinus))
+  if(epInput_State(epID_Gamepad, epGC_ButtonB) || epInput_State(epID_Keyboard, epKC_Hyphen) || epInput_State(epID_Keyboard, epKC_NumpadMinus))
     speed = 1.0 - 0.5*timeDelta;
   this->speed = udClamp(this->speed * speed, 0.001, 999.0);
 
   float multiplier = 1.f;
-  if (keyState[(int)Keys::Boost] || udInput_State(udID_Gamepad, udGC_ButtonRB))
+  if (keyState[(int)Keys::Boost] || epInput_State(epID_Gamepad, epGC_ButtonRB))
     multiplier *= 3.f;
-  if(udInput_State(udID_Gamepad, udGC_ButtonLB))
+  if(epInput_State(epID_Gamepad, epGC_ButtonLB))
     multiplier *= 0.333f;
 
   speed = this->speed * multiplier * timeDelta;
@@ -275,9 +275,9 @@ bool SimpleCamera::Update(double timeDelta)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
 {
   return udNew(SimpleCamera, pType, pKernel, uid, initParams);
 }
 
-} // namespace ud
+} // namespace ep

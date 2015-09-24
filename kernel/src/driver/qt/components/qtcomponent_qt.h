@@ -1,22 +1,22 @@
 #pragma once
-#ifndef UD_QTCOMPONENT_QT_H
-#define UD_QTCOMPONENT_QT_H
+#ifndef EP_QTCOMPONENT_QT_H
+#define EP_QTCOMPONENT_QT_H
 
 #include <QObject>
 
 #include "components/component.h"
 
-class ud::Kernel;
+class ep::Kernel;
 
 namespace qt
 {
 
-class QtComponent : public ud::Component
+class QtComponent : public ep::Component
 {
-  UD_COMPONENT(QtComponent);
+  EP_COMPONENT(QtComponent);
 
 public:
-  QtComponent(const ud::ComponentDesc *pType, ud::Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  QtComponent(const ep::ComponentDesc *pType, ep::Kernel *pKernel, epSharedString uid, epInitParams initParams);
   virtual ~QtComponent();
 
   QObject *GetQObject() const { return pQObject; }
@@ -27,4 +27,4 @@ private:
 
 } // namespace qt
 
-#endif // UD_QTCOMPONENT_QT_H
+#endif // EP_QTCOMPONENT_QT_H

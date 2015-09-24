@@ -1,10 +1,10 @@
 #include "hal/driver.h"
 
-#if UDWINDOW_DRIVER == UDDRIVER_NULL
+#if EPWINDOW_DRIVER == EPDRIVER_NULL
 
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 class NullKernel : public Kernel
@@ -14,7 +14,7 @@ public:
   udResult InitInternal() { return udR_Success; }
 };
 
-Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
 {
   return new NullKernel;
 }

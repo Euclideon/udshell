@@ -1,19 +1,19 @@
 #pragma once
-#ifndef UDRENDERRESOURCE_H
-#define UDRENDERRESOURCE_H
+#ifndef EPRENDERRESOURCE_H
+#define EPRENDERRESOURCE_H
 
 #include "components/resources/array.h"
 #include "components/resources/model.h"
 #include "hal/shader.h"
 
-struct udFormatDeclaration;
+struct epFormatDeclaration;
 struct udArrayElement;
-struct udArrayBuffer;
-struct udTexture;
-struct udShader;
-struct udShaderProgram;
+struct epArrayBuffer;
+struct epTexture;
+struct epShader;
+struct epShaderProgram;
 
-namespace ud
+namespace ep
 {
 
 class Renderer;
@@ -36,7 +36,7 @@ enum class TextureUsage
 };
 
 // base render resource
-class RenderResource : public udRefCounted
+class RenderResource : public epRefCounted
 {
 public:
   RenderResource(Renderer *pRenderer) : pRenderer(pRenderer) {}
@@ -54,7 +54,7 @@ public:
   RenderArray(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, ArrayUsage usage);
   virtual ~RenderArray();
 
-  udArrayBuffer *pArray;
+  epArrayBuffer *pArray;
 };
 SHARED_CLASS(RenderArray);
 
@@ -65,7 +65,7 @@ public:
   RenderTexture(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, TextureUsage usage);
   virtual ~RenderTexture();
 
-  udTexture *pTexture;
+  epTexture *pTexture;
 };
 SHARED_CLASS(RenderTexture);
 
@@ -73,11 +73,11 @@ SHARED_CLASS(RenderTexture);
 class RenderShader : public RenderResource
 {
 public:
-  RenderShader(Renderer *pRenderer, ShaderRef spShader, udShaderType type);
+  RenderShader(Renderer *pRenderer, ShaderRef spShader, epShaderType type);
   virtual ~RenderShader();
 
-  udShader *pShader;
-  udShaderType type;
+  epShader *pShader;
+  epShaderType type;
 };
 SHARED_CLASS(RenderShader);
 
@@ -88,13 +88,13 @@ public:
   RenderShaderProgram(Renderer *pRenderer, RenderShaderRef vs, RenderShaderRef ps);
   virtual ~RenderShaderProgram();
 
-  udShaderProgram *pProgram;
+  epShaderProgram *pProgram;
 
   size_t numAttributes();
-  udString getAttributeName(size_t i);
+  epString getAttributeName(size_t i);
 
   size_t numUniforms();
-  udString getUniformName(size_t i);
+  epString getUniformName(size_t i);
 
   void setUniform(int i, const udFloat4 &v4);
 };
@@ -107,10 +107,10 @@ public:
   RenderVertexFormat(Renderer *pRenderer, const udArrayElement *pElements, size_t numElements);
   virtual ~RenderVertexFormat();
 
-  udFormatDeclaration *pFormat;
+  epFormatDeclaration *pFormat;
 };
 SHARED_CLASS(RenderVertexFormat);
 
-} // namespace ud
+} // namespace ep
 
-#endif // UDRENDERRESOURCE_H
+#endif // EPRENDERRESOURCE_H

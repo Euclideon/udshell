@@ -4,9 +4,9 @@
 #include "udOctree.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
-const udFixedSlice<const udString> UDDataSource::extensions = { ".uds", ".ssf", ".upc", ".udi", ".oct3" };
+const epArray<const epString> UDDataSource::extensions = { ".uds", ".ssf", ".upc", ".udi", ".oct3" };
 
 ComponentDesc UDDataSource::descriptor =
 {
@@ -26,17 +26,17 @@ ComponentDesc UDDataSource::descriptor =
   &RegisterExtensions // init
 };
 
-UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : DataSource(pType, pKernel, uid, initParams)
 {
-  const udVariant &source = initParams["src"];
+  const epVariant &source = initParams["src"];
 
-  if (source.is(udVariant::Type::String))
+  if (source.is(epVariant::Type::String))
   {
-    const udVariant &useStreamer = initParams["useStreamer"];
+    const epVariant &useStreamer = initParams["useStreamer"];
 
     udOctree *pOctree = nullptr;
-    udResult result = udOctree_Create(&pOctree, source.asString().toStringz(), useStreamer.is(udVariant::Type::Bool) ? useStreamer.asBool() : true, 0);
+    udResult result = udOctree_Create(&pOctree, source.asString().toStringz(), useStreamer.is(epVariant::Type::Bool) ? useStreamer.asBool() : true, 0);
     if (result == udR_Success)
     {
       UDModelRef model = pKernel->CreateComponent<UDModel>();
@@ -69,4 +69,4 @@ udResult UDDataSource::RegisterExtensions(Kernel *pKernel)
   return pKernel->RegisterExtensions(&descriptor, extensions);
 }
 
-} // namespace ud
+} // namespace ep

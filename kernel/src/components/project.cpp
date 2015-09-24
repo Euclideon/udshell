@@ -4,7 +4,7 @@
 #include "kernel.h"
 #include "rapidxml.hpp"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc Project::descriptor =
@@ -23,14 +23,14 @@ ComponentDesc Project::descriptor =
   nullptr, // events
 };
 
-Project::Project(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+Project::Project(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  const udVariant &src = initParams["src"];
+  const epVariant &src = initParams["src"];
   StreamRef spSrc = nullptr;
   ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
 
-  if (src.is(udVariant::Type::String))
+  if (src.is(epVariant::Type::String))
   {
     // path or url?
     spSrc = pKernel->CreateComponent<File>({ { "path", src }, { "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
@@ -48,7 +48,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
 
   int64_t len = spSrc->Length();
   char *pBuffer = (char *)udAlloc(len + 1);
-  spSrc->Read(udSlice<void>(pBuffer, len));
+  spSrc->Read(epSlice<void>(pBuffer, len));
   pBuffer[len] = '\0';
 
   using namespace rapidxml;
@@ -62,12 +62,12 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
     xml_node<> *nDataSources = nProject->first_node("datasources");
     for (xml_node<> *nDataSource = nDataSources->first_node("datasource"); nDataSource; nDataSource = nDataSource->next_sibling("datasource"))
     {
-      udFixedSlice<const udKeyValuePair, 256> dsParams;
+      epArray<const epKeyValuePair, 256> dsParams;
       for (xml_attribute<> *attr = nDataSource->first_attribute(); attr; attr = attr->next_attribute())
       {
-        dsParams.concat(udKeyValuePair(attr->name(), attr->value()));
+        dsParams.concat(epKeyValuePair(attr->name(), attr->value()));
       }
-      spResourceManager->LoadResourcesFromFile(udInitParams(dsParams));
+      spResourceManager->LoadResourcesFromFile(epInitParams(dsParams));
     }
   }
   catch (parse_error e)
@@ -78,4 +78,4 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
   udFree(pBuffer);
 }
 
-} // namespace ud
+} // namespace ep

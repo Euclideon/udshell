@@ -13,7 +13,7 @@
 
 // Qt type conversion to/from UD
 
-inline udString AllocUDStringFromQString(const QString &string)
+inline epString AllocUDStringFromQString(const QString &string)
 {
   QByteArray byteArray = string.toUtf8();
 
@@ -22,42 +22,42 @@ inline udString AllocUDStringFromQString(const QString &string)
   char *pString = udAllocType(char, length, udAF_None);
   memcpy(pString, byteArray.data(), length);
 
-  return udString(pString, length - 1);
+  return epString(pString, length - 1);
 }
 
-inline udVariant udToVariant(const QString &string)
+inline epVariant epToVariant(const QString &string)
 {
-  return udVariant(AllocUDStringFromQString(string), true);
+  return epVariant(AllocUDStringFromQString(string), true);
 }
 
-inline void udFromVariant(const udVariant &variant, QString *pString)
+inline void epFromVariant(const epVariant &variant, QString *pString)
 {
-  udString s = variant.asString();
+  epString s = variant.asString();
   if (!s.empty())
     *pString = QString::fromUtf8(s.ptr, static_cast<int>(s.length));
 }
 
-inline udVariant udToVariant(const QVariant &var)
+inline epVariant epToVariant(const QVariant &var)
 {
   if (!var.isValid() || var.isNull())
-    return udVariant();
+    return epVariant();
 
   switch (static_cast<QMetaType::Type>(var.type()))
   {
-    // udVariant::Type::Null
+    // epVariant::Type::Null
     case QMetaType::Void:
-      return udVariant();
+      return epVariant();
 
-    // udVariant::Type::Bool
+    // epVariant::Type::Bool
     case QMetaType::Bool:
-      return udVariant(var.toBool());
+      return epVariant(var.toBool());
 
-    // udVariant::Type::Float
+    // epVariant::Type::Float
     case QMetaType::Float:
     case QMetaType::Double:
-      return udVariant(var.toDouble());
+      return epVariant(var.toDouble());
 
-    // udVariant::Type::Int
+    // epVariant::Type::Int
     case QMetaType::Char:
     case QMetaType::UChar:
     case QMetaType::Short:
@@ -68,102 +68,102 @@ inline udVariant udToVariant(const QVariant &var)
     case QMetaType::ULong:
     case QMetaType::LongLong:
     case QMetaType::ULongLong:
-      return udVariant((int64_t)var.toLongLong());
+      return epVariant((int64_t)var.toLongLong());
 
-    // udVariant::Type::String
+    // epVariant::Type::String
     // TODO: optimise - reduce unnecessary copies
     case QMetaType::QByteArray:
     case QMetaType::QString:
     case QMetaType::QChar:
-      return udVariant(AllocUDStringFromQString(var.toString()), true);
+      return epVariant(AllocUDStringFromQString(var.toString()), true);
 
     case QMetaType::QObjectStar:
     {
       QObject *pQObj = var.value<QObject*>();
 
-      qt::QtUDComponent *pQC = qobject_cast<qt::QtUDComponent*>(pQObj);
+      qt::QtEPComponent *pQC = qobject_cast<qt::QtEPComponent*>(pQObj);
       if (pQC)
-        return udVariant(pQC->GetComponent());
+        return epVariant(pQC->GetComponent());
 
-      udDebugPrintf("udToVariant: Unsupported QObject conversion '%s'", pQObj->metaObject()->className());
+      udDebugPrintf("epToVariant: Unsupported QObject conversion '%s'", pQObj->metaObject()->className());
 
       // TODO: create generic QtComponent which thinly wraps a QObject
 //      pKernel->CreateComponent<QtComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
-      return udVariant();
+      return epVariant();
     }
 
     // TODO: serialize other types?
 
-    // udVariant::Type::Array
+    // epVariant::Type::Array
 
-    // udVariant::Type::AssocArray
+    // epVariant::Type::AssocArray
 
     default:
-      udDebugPrintf("udToVariant: Unsupported type '%s' (support me!)\n", var.typeName());
-      return udVariant();
+      udDebugPrintf("epToVariant: Unsupported type '%s' (support me!)\n", var.typeName());
+      return epVariant();
   };
 }
 
-inline void udFromVariant(const udVariant &variant, QVariant *pVariant)
+inline void epFromVariant(const epVariant &variant, QVariant *pVariant)
 {
-  UDASSERT(pVariant->isNull(), "pVariant is not null");
+  EPASSERT(pVariant->isNull(), "pVariant is not null");
 
   switch (variant.type())
   {
-    case udVariant::Type::Null:
+    case epVariant::Type::Null:
       // *pVariant is already null right?
       break;
 
-    case udVariant::Type::Bool:
+    case epVariant::Type::Bool:
       pVariant->setValue(variant.asBool());
       break;
 
-    case udVariant::Type::Int:
+    case epVariant::Type::Int:
       pVariant->setValue(variant.asInt());
       break;
 
-    case udVariant::Type::Float:
+    case epVariant::Type::Float:
       pVariant->setValue(variant.asFloat());
       break;
 
-    case udVariant::Type::Component:
-      pVariant->setValue(qt::QtUDComponent(variant.asComponent()));
+    case epVariant::Type::Component:
+      pVariant->setValue(qt::QtEPComponent(variant.asComponent()));
       break;
 
-    //case udVariant::Type::Delegate:
+    //case epVariant::Type::Delegate:
 
     // TODO: optimise?
-    case udVariant::Type::String:
+    case epVariant::Type::String:
       pVariant->setValue(variant.as<QString>());
       break;
 
-    //case udVariant::Type::Array:
+    //case epVariant::Type::Array:
 
-    //case udVariant::Type::AssocArray:
+    //case epVariant::Type::AssocArray:
 
     default:
-      udDebugPrintf("udFromVariant: Unsupported type '%d'\n", variant.type());
+      udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
   };
 }
 
-inline udVariant udToVariant(const QJSValue &jsValue)
+inline epVariant epToVariant(const QJSValue &jsValue)
 {
-  return udToVariant(jsValue.toVariant());
+  return epToVariant(jsValue.toVariant());
 }
 
-inline void udFromVariant(const udVariant &variant, QJSValue *pJSValue)
+inline void epFromVariant(const epVariant &variant, QJSValue *pJSValue)
 {
   switch (variant.type())
   {
-    case udVariant::Type::Null:
+    case epVariant::Type::Null:
       *pJSValue = QJSValue(QJSValue::NullValue);
       break;
 
-    case udVariant::Type::Bool:
+    case epVariant::Type::Bool:
       *pJSValue = QJSValue(variant.asBool());
       break;
 
-    case udVariant::Type::Int:
+    case epVariant::Type::Int:
     {
       int64_t i = variant.asInt();
       if (i >= 0)
@@ -173,20 +173,20 @@ inline void udFromVariant(const udVariant &variant, QJSValue *pJSValue)
       break;
     }
 
-    case udVariant::Type::Float:
+    case epVariant::Type::Float:
       *pJSValue = QJSValue(variant.asFloat());
       break;
 
-    //case udVariant::Type::Component:
+    //case epVariant::Type::Component:
 
-    case udVariant::Type::String:
+    case epVariant::Type::String:
       *pJSValue = QJSValue(variant.asString().toStringz());
 
-    //case udVariant::Type::Array:
-    //case udVariant::Type::AssocArray:
+    //case epVariant::Type::Array:
+    //case epVariant::Type::AssocArray:
 
     default:
-      udDebugPrintf("udFromVariant: Unsupported type '%d'\n", variant.type());
+      udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
   };
 }
 

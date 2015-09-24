@@ -1,48 +1,48 @@
 #pragma once
-#ifndef UDSHADER_H
-#define UDSHADER_H
+#ifndef EPSHADER_H
+#define EPSHADER_H
 
 #include "udMath.h"
 
-struct udShader;
-struct udShaderProgram;
+struct epShader;
+struct epShaderProgram;
 
-enum udShaderType
+enum epShaderType
 {
-  udST_VertexShader,
-  udST_PixelShader,
+  epST_VertexShader,
+  epST_PixelShader,
 
-  udST_Max
+  epST_Max
 };
 
-udShader* udShader_CreateShaderFromFile(const char *pFilename, udShaderType type);
-udShader* udShader_CreateShader(const char *pSource, size_t length, udShaderType type);
+epShader* epShader_CreateShaderFromFile(const char *pFilename, epShaderType type);
+epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType type);
 
-udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader *pPixelShader);
+epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader *pPixelShader);
 
-size_t udShader_GetNumAttributes(udShaderProgram *pProgram);
-const char *udShader_GetAttributeName(udShaderProgram *pProgram, size_t i);
-size_t udShader_GetAttributeType(udShaderProgram *pProgram, size_t i);
+size_t epShader_GetNumAttributes(epShaderProgram *pProgram);
+const char *epShader_GetAttributeName(epShaderProgram *pProgram, size_t i);
+size_t epShader_GetAttributeType(epShaderProgram *pProgram, size_t i);
 
-size_t udShader_GetNumUniforms(udShaderProgram *pProgram);
-const char *udShader_GetUniformName(udShaderProgram *pProgram, size_t i);
-size_t udShader_GetUniformType(udShaderProgram *pProgram, size_t i);
+size_t epShader_GetNumUniforms(epShaderProgram *pProgram);
+const char *epShader_GetUniformName(epShaderProgram *pProgram, size_t i);
+size_t epShader_GetUniformType(epShaderProgram *pProgram, size_t i);
 
-int udShader_FindShaderParameter(udShaderProgram *pProgram, const char *pName);
+int epShader_FindShaderParameter(epShaderProgram *pProgram, const char *pName);
 
-void udShader_SetCurrent(udShaderProgram *pProgram);
+void epShader_SetCurrent(epShaderProgram *pProgram);
 
-void udShader_SetProgramData(int param, bool value);
-void udShader_SetProgramData(int param, int value);
-void udShader_SetProgramData(int param, float value);
-void udShader_SetProgramData(int param, const udFloat4 &value);
-void udShader_SetProgramData(int param, const udFloat4x4 &value);
-void udShader_SetProgramData(int textureUnit, int param, struct udTexture *pTexture);
+void epShader_SetProgramData(int param, bool value);
+void epShader_SetProgramData(int param, int value);
+void epShader_SetProgramData(int param, float value);
+void epShader_SetProgramData(int param, const udFloat4 &value);
+void epShader_SetProgramData(int param, const udFloat4x4 &value);
+void epShader_SetProgramData(int textureUnit, int param, struct epTexture *pTexture);
 
-//void udShader_SetProgramData(udShaderProgram *pProgram, int param, const bool *pValues, size_t count);
-void udShader_SetProgramData(int param, const int *pValues, size_t count);
-void udShader_SetProgramData(int param, const float *pValues, size_t count);
-void udShader_SetProgramData(int param, const udFloat4 *pValues, size_t count);
-void udShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count);
+//void epShader_SetProgramData(epShaderProgram *pProgram, int param, const bool *pValues, size_t count);
+void epShader_SetProgramData(int param, const int *pValues, size_t count);
+void epShader_SetProgramData(int param, const float *pValues, size_t count);
+void epShader_SetProgramData(int param, const udFloat4 *pValues, size_t count);
+void epShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count);
 
-#endif // UDSHADER_H
+#endif // EPSHADER_H

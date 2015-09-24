@@ -1,11 +1,11 @@
 #pragma once
-#ifndef UDHELPERS_H
-#define UDHELPERS_H
+#ifndef EPHELPERS_H
+#define EPHELPERS_H
 
 #include "ep/epvariant.h"
 
-udSharedSlice<const udKeyValuePair> udParseCommandLine(const char *pCommandLine);
-udSharedSlice<const udKeyValuePair> udParseCommandLine(int argc, char *argv[]);
-udSharedSlice<const udKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
+epSharedSlice<const epKeyValuePair> udParseCommandLine(const char *pCommandLine);
+epSharedSlice<const epKeyValuePair> udParseCommandLine(int argc, char *argv[]);
+epSharedSlice<const epKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
 
-#endif // UDHELPERS_H
+#endif // EPHELPERS_H

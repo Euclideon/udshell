@@ -1,11 +1,11 @@
 #pragma once
-#ifndef UDCAMERA_H
-#define UDCAMERA_H
+#ifndef EPCAMERA_H
+#define EPCAMERA_H
 
 #include "../component.h"
 #include "node.h"
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(Camera);
@@ -14,7 +14,7 @@ PROTOTYPE_COMPONENT(SimpleCamera);
 class Camera : public Node
 {
 public:
-  UD_COMPONENT(Camera);
+  EP_COMPONENT(Camera);
 
   udDouble4x4 GetCameraMatrix() const { udDouble4x4 m; CalculateWorldMatrix(&m); return m; }
   udDouble4x4 GetViewMatrix() const { return GetCameraMatrix().inverse(); }
@@ -34,11 +34,11 @@ protected:
   double zNear = 0.1;
   double zFar = 1000.0;
 
-  Camera(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  Camera(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Node(pType, pKernel, uid, initParams) {}
 
-  bool InputEvent(const udInputEvent &ev) override { return false; }
-  virtual bool ViewportInputEvent(const udInputEvent &ev) { return false; }
+  bool InputEvent(const epInputEvent &ev) override { return false; }
+  virtual bool ViewportInputEvent(const epInputEvent &ev) { return false; }
   bool Update(double timeStep) override { return udR_Success; }
 };
 
@@ -46,9 +46,9 @@ protected:
 class SimpleCamera : public Camera
 {
 public:
-  UD_COMPONENT(SimpleCamera);
+  EP_COMPONENT(SimpleCamera);
 
-  static Component *CreateInstance(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  static Component *CreateInstance(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
   virtual void SetMatrix(const udDouble4x4 &matrix) { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); Camera::SetMatrix(matrix); }
   virtual void SetPosition(const udDouble3 &pos) { this->pos = pos; Camera::SetPosition(pos); }
@@ -74,16 +74,16 @@ protected:
   };
   char keyState[(int)Keys::Max];
 
-  SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Camera(pType, pKernel, uid, initParams)
   {
     memset(keyState, 0, sizeof(keyState));
   }
 
-  bool ViewportInputEvent(const udInputEvent &ev) override;
+  bool ViewportInputEvent(const epInputEvent &ev) override;
   bool Update(double timeStep) override;
 };
 
-} // namespace ud
+} // namespace ep
 
 #endif

@@ -1,25 +1,25 @@
 
 #include <type_traits>
 
-ptrdiff_t udStringifyVariant(udSlice<char> buffer, udString format, const udVariant &var, const udVarArg*);
+ptrdiff_t epStringifyVariant(epSlice<char> buffer, epString format, const epVariant &var, const epVarArg*);
 
 namespace ud_internal
 {
-  template<> struct StringifyProxy<udVariant>
+  template<> struct StringifyProxy<epVariant>
   {
-    inline static ptrdiff_t stringify(udSlice<char> buffer, udString format, const void *pData, const udVarArg *pArgs) { return udStringifyVariant(buffer, format, *(udVariant*)pData, pArgs); }
-    inline static int64_t intify(const void *pData) { return ((udVariant*)pData)->asInt(); }
+    inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringifyVariant(buffer, format, *(epVariant*)pData, pArgs); }
+    inline static int64_t intify(const void *pData) { return ((epVariant*)pData)->asInt(); }
   };
 }
 
 // constructors...
-inline udVariant::udVariant()
+inline epVariant::epVariant()
   : t((size_t)Type::Null)
   , ownsContent(0)
   , length(0)
 {}
 
-inline udVariant::udVariant(udVariant &&rval)
+inline epVariant::epVariant(epVariant &&rval)
   : t(rval.t)
   , ownsContent(rval.ownsContent)
   , length(rval.length)
@@ -29,7 +29,7 @@ inline udVariant::udVariant(udVariant &&rval)
   rval.ownsContent = 0;
 }
 
-inline udVariant::udVariant(const udVariant &val)
+inline epVariant::epVariant(const epVariant &val)
   : t(val.t)
   , ownsContent(val.ownsContent)
   , length(val.length)
@@ -39,7 +39,7 @@ inline udVariant::udVariant(const udVariant &val)
   {
     if (is(Type::Component))
     {
-      new((void*)&p) ud::ComponentRef((ud::ComponentRef&)val.c);
+      new((void*)&p) ep::ComponentRef((ep::ComponentRef&)val.c);
     }
     else if (is(Type::Delegate))
     {
@@ -53,98 +53,98 @@ inline udVariant::udVariant(const udVariant &val)
     }
     else if (is(Type::Array))
     {
-      a = (udVariant*)udAlloc(sizeof(udVariant)*length);
+      a = (epVariant*)udAlloc(sizeof(epVariant)*length);
       for (size_t i = 0; i<length; ++i)
-        new((void*)&a[i]) udVariant((const udVariant&)val.a[i]);
+        new((void*)&a[i]) epVariant((const epVariant&)val.a[i]);
     }
     else if (is(Type::AssocArray))
     {
-      aa = (udKeyValuePair*)udAlloc(sizeof(udKeyValuePair)*length);
+      aa = (epKeyValuePair*)udAlloc(sizeof(epKeyValuePair)*length);
       for (size_t i = 0; i<length; ++i)
       {
-        new((void*)&aa[i].key) udVariant((const udVariant&)val.aa[i].key);
-        new((void*)&aa[i].value) udVariant((const udVariant&)val.aa[i].value);
+        new((void*)&aa[i].key) epVariant((const epVariant&)val.aa[i].key);
+        new((void*)&aa[i].value) epVariant((const epVariant&)val.aa[i].value);
       }
     }
   }
 }
 
-inline udVariant::udVariant(bool b)
+inline epVariant::epVariant(bool b)
   : t((size_t)Type::Bool)
   , ownsContent(0)
   , length(0)
   , b(b)
 {}
-inline udVariant::udVariant(int64_t i)
+inline epVariant::epVariant(int64_t i)
   : t((size_t)Type::Int)
   , ownsContent(0)
   , length(0)
   , i(i)
 {}
-inline udVariant::udVariant(double f)
+inline epVariant::epVariant(double f)
   : t((size_t)Type::Float)
   , ownsContent(0)
   , length(0)
   , f(f)
 {}
-inline udVariant::udVariant(size_t val, const udEnumDesc *pDesc, bool isBitfield)
+inline epVariant::epVariant(size_t val, const epEnumDesc *pDesc, bool isBitfield)
   : t(isBitfield ? (size_t)Type::Bitfield : (size_t)Type::Enum)
   , ownsContent(0)
   , length(val)
   , p((void*)pDesc)
 {}
-inline udVariant::udVariant(ud::ComponentRef &&spC)
+inline epVariant::epVariant(ep::ComponentRef &&spC)
   : t((size_t)Type::Component)
   , ownsContent(1)
   , length(0)
 {
-  new(&p) ud::ComponentRef(std::move(spC));
+  new(&p) ep::ComponentRef(std::move(spC));
 }
-inline udVariant::udVariant(const ud::ComponentRef &spC)
+inline epVariant::epVariant(const ep::ComponentRef &spC)
   : t((size_t)Type::Component)
   , ownsContent(1)
   , length(0)
 {
-  new(&p) ud::ComponentRef(spC);
+  new(&p) ep::ComponentRef(spC);
 }
-inline udVariant::udVariant(const VarDelegate &d)
+inline epVariant::epVariant(const VarDelegate &d)
   : t((size_t)Type::Delegate)
   , ownsContent(1)
   , length(0)
 {
   new(&p) VarDelegate(d);
 }
-inline udVariant::udVariant(VarDelegate &&d)
+inline epVariant::epVariant(VarDelegate &&d)
   : t((size_t)Type::Delegate)
   , ownsContent(1)
   , length(0)
 {
   new(&p) VarDelegate(std::move(d));
 }
-inline udVariant::udVariant(udString s, bool ownsMemory)
+inline epVariant::epVariant(epString s, bool ownsMemory)
   : t((size_t)Type::String)
   , ownsContent(ownsMemory ? 1 : 0)
   , length(s.length)
   , s(s.ptr)
 {}
-inline udVariant::udVariant(udSlice<udVariant> a, bool ownsMemory)
+inline epVariant::epVariant(epSlice<epVariant> a, bool ownsMemory)
   : t((size_t)Type::Array)
   , ownsContent(ownsMemory ? 1 : 0)
   , length(a.length)
   , a(a.ptr)
 {}
-inline udVariant::udVariant(udSlice<udKeyValuePair> aa, bool ownsMemory)
+inline epVariant::epVariant(epSlice<epKeyValuePair> aa, bool ownsMemory)
   : t((size_t)Type::AssocArray)
   , ownsContent(ownsMemory ? 1 : 0)
   , length(aa.length)
   , aa(aa.ptr)
 {}
 
-inline udVariant& udVariant::operator=(udVariant &&rval)
+inline epVariant& epVariant::operator=(epVariant &&rval)
 {
   if (this != &rval)
   {
-    this->~udVariant();
+    this->~epVariant();
 
     t = rval.t;
     ownsContent = rval.ownsContent;
@@ -157,78 +157,78 @@ inline udVariant& udVariant::operator=(udVariant &&rval)
   return *this;
 }
 
-inline udVariant& udVariant::operator=(const udVariant &rval)
+inline epVariant& epVariant::operator=(const epVariant &rval)
 {
   if (this != &rval)
   {
-    this->~udVariant();
-    new(this) udVariant(rval);
+    this->~epVariant();
+    new(this) epVariant(rval);
   }
   return *this;
 }
 
-inline udVariant::Type udVariant::type() const
+inline epVariant::Type epVariant::type() const
 {
   return (Type)t;
 }
 
-inline bool udVariant::is(Type type) const
+inline bool epVariant::is(Type type) const
 {
   return (Type)t == type;
 }
 
 
 // ***************************************************
-// ** template construction machinery for udVariant **
+// ** template construction machinery for epVariant **
 // **         HERE BE RADIOACTIVE DRAGONS!!         **
 // ***************************************************
 
 // horrible hack to facilitate partial specialisations (support all of the types!)
 template<typename T>
-struct udVariant_Construct
+struct epVariant_Construct
 {
-  UDFORCE_INLINE static udVariant construct(T &&rval)
+  __forceinline static epVariant construct(T &&rval)
   {
-    return udToVariant(std::move(rval));
+    return epToVariant(std::move(rval));
   }
-  UDFORCE_INLINE static udVariant construct(const T &v)
+  __forceinline static epVariant construct(const T &v)
   {
-    return udToVariant(v);
+    return epToVariant(v);
   }
 };
 
-// These pipe through to `struct udVariant_Construct<>` to facilitate a bunch of partial specialisation madness
+// These pipe through to `struct epVariant_Construct<>` to facilitate a bunch of partial specialisation madness
 template<typename T>
-UDFORCE_INLINE udVariant::udVariant(T &&rval)
-  : udVariant(udVariant_Construct<typename std::remove_reference<T>::type>::construct(std::forward<T>(rval)))
+__forceinline epVariant::epVariant(T &&rval)
+  : epVariant(epVariant_Construct<typename std::remove_reference<T>::type>::construct(std::forward<T>(rval)))
 {}
 
-// specialisation of non-const udVariant, which annoyingly gets hooked by the T& constructor instead of the copy constructor
-template<> struct udVariant_Construct<udVariant>  { UDFORCE_INLINE static udVariant construct(const udVariant &v) { return udVariant(v); } };
+// specialisation of non-const epVariant, which annoyingly gets hooked by the T& constructor instead of the copy constructor
+template<> struct epVariant_Construct<epVariant>  { __forceinline static epVariant construct(const epVariant &v) { return epVariant(v); } };
 
 // ** suite of specialisations required to wrangle every conceivable combination of 'const'
 template<typename T>
-struct udVariant_Construct<const T>               { UDFORCE_INLINE static udVariant construct(const T &v) { return udVariant((T&)v); } };
+struct epVariant_Construct<const T>               { __forceinline static epVariant construct(const T &v) { return epVariant((T&)v); } };
 template<typename T, size_t N>
-struct udVariant_Construct<const T[N]>            { UDFORCE_INLINE static udVariant construct(const T v[N]) { return udVariant_Construct<T[N]>::construct(v); } };
+struct epVariant_Construct<const T[N]>            { __forceinline static epVariant construct(const T v[N]) { return epVariant_Construct<T[N]>::construct(v); } };
 template<typename T>
-struct udVariant_Construct<const T *>             { UDFORCE_INLINE static udVariant construct(const T *v) { return udVariant((T*)v); } };
+struct epVariant_Construct<const T *>             { __forceinline static epVariant construct(const T *v) { return epVariant((T*)v); } };
 
 // specialisations for all the basic types
-template<> struct udVariant_Construct <nullptr_t> { UDFORCE_INLINE static udVariant construct(nullptr_t)       { return udVariant(); } };
-template<> struct udVariant_Construct <float>     { UDFORCE_INLINE static udVariant construct(float f)         { return udVariant((double)f); } };
-template<> struct udVariant_Construct <int8_t>    { UDFORCE_INLINE static udVariant construct(int8_t i)        { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <uint8_t>   { UDFORCE_INLINE static udVariant construct(uint8_t i)       { return udVariant((int64_t)(uint64_t)i); } };
-template<> struct udVariant_Construct <int16_t>   { UDFORCE_INLINE static udVariant construct(int16_t i)       { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <uint16_t>  { UDFORCE_INLINE static udVariant construct(uint16_t i)      { return udVariant((int64_t)(uint64_t)i); } };
-template<> struct udVariant_Construct <int32_t>   { UDFORCE_INLINE static udVariant construct(int32_t i)       { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <uint32_t>  { UDFORCE_INLINE static udVariant construct(uint32_t i)      { return udVariant((int64_t)(uint64_t)i); } };
-template<> struct udVariant_Construct <uint64_t>  { UDFORCE_INLINE static udVariant construct(uint64_t i)      { return udVariant((int64_t)i); } };
-template<> struct udVariant_Construct <char*>     { UDFORCE_INLINE static udVariant construct(const char *s)   { return udVariant(udString(s)); } };
+template<> struct epVariant_Construct <nullptr_t> { __forceinline static epVariant construct(nullptr_t)       { return epVariant(); } };
+template<> struct epVariant_Construct <float>     { __forceinline static epVariant construct(float f)         { return epVariant((double)f); } };
+template<> struct epVariant_Construct <int8_t>    { __forceinline static epVariant construct(int8_t i)        { return epVariant((int64_t)i); } };
+template<> struct epVariant_Construct <uint8_t>   { __forceinline static epVariant construct(uint8_t i)       { return epVariant((int64_t)(uint64_t)i); } };
+template<> struct epVariant_Construct <int16_t>   { __forceinline static epVariant construct(int16_t i)       { return epVariant((int64_t)i); } };
+template<> struct epVariant_Construct <uint16_t>  { __forceinline static epVariant construct(uint16_t i)      { return epVariant((int64_t)(uint64_t)i); } };
+template<> struct epVariant_Construct <int32_t>   { __forceinline static epVariant construct(int32_t i)       { return epVariant((int64_t)i); } };
+template<> struct epVariant_Construct <uint32_t>  { __forceinline static epVariant construct(uint32_t i)      { return epVariant((int64_t)(uint64_t)i); } };
+template<> struct epVariant_Construct <uint64_t>  { __forceinline static epVariant construct(uint64_t i)      { return epVariant((int64_t)i); } };
+template<> struct epVariant_Construct <char*>     { __forceinline static epVariant construct(const char *s)   { return epVariant(epString(s)); } };
 template<size_t N>
-struct udVariant_Construct <char[N]>              { UDFORCE_INLINE static udVariant construct(const char s[N]) { return udVariant(udString(s, N-1)); } };
+struct epVariant_Construct <char[N]>              { __forceinline static epVariant construct(const char s[N]) { return epVariant(epString(s, N-1)); } };
 template<typename T, size_t N>
-struct udVariant_Construct <T[N]>                 { UDFORCE_INLINE static udVariant construct(const T a[N])    { return udVariant(udSlice<T>(a, N)); } };
+struct epVariant_Construct <T[N]>                 { __forceinline static epVariant construct(const T a[N])    { return epVariant(epSlice<T>(a, N)); } };
 
 // ******************************************************
 // ** Take a breath; you survived, now back to sanity! **
@@ -236,83 +236,83 @@ struct udVariant_Construct <T[N]>                 { UDFORCE_INLINE static udVari
 
 // enum & bitfield keys
 template<typename T, typename std::enable_if<std::is_enum<T>::value>::type* = nullptr>
-inline udVariant udToVariant(T e)
+inline epVariant epToVariant(T e)
 {
-  return udToVariant(udGetValAsEnum(e));
+  return epToVariant(epGetValAsEnum(e));
 }
 
 // enums & bitfields
 template<typename T,
   typename std::enable_if<
-    std::is_base_of<udEnum, T>::value ||
-    std::is_base_of<udBitfield, T>::value
+    std::is_base_of<epEnum, T>::value ||
+    std::is_base_of<epBitfield, T>::value
   >::type* = nullptr>
-inline udVariant udToVariant(T e)
+inline epVariant epToVariant(T e)
 {
-  return udVariant(e.v, e.Desc(), std::is_base_of<udBitfield, T>::value);
+  return epVariant(e.v, e.Desc(), std::is_base_of<epBitfield, T>::value);
 }
 
 // for arrays
 template<typename T>
-inline udVariant udToVariant(const udSlice<T> arr)
+inline epVariant epToVariant(const epSlice<T> arr)
 {
-  udVariant r;
-  udVariant *a = r.allocArray(arr.length);
+  epVariant r;
+  epVariant *a = r.allocArray(arr.length);
   for (size_t i = 0; i<arr.length; ++i)
-    new(&a[i]) udVariant(arr[i]);
+    new(&a[i]) epVariant(arr[i]);
   return r;
 }
 
 // for components
-UDFORCE_INLINE udVariant udToVariant(ud::ComponentRef &&rval)
+__forceinline epVariant epToVariant(ep::ComponentRef &&rval)
 {
-  return udVariant(std::move(rval));
+  return epVariant(std::move(rval));
 }
-UDFORCE_INLINE udVariant udToVariant(const ud::ComponentRef &c)
+__forceinline epVariant epToVariant(const ep::ComponentRef &c)
 {
-  return udVariant(c);
+  return epVariant(c);
 }
 
 // vectors and matrices (require partial specialisation)
 #include "udMath.h"
 
 template<typename F>
-inline udVariant udToVariant(const udVector2<F> &v)
+inline epVariant epToVariant(const udVector2<F> &v)
 {
-  udVariant r;
-  udVariant *a = r.allocArray(2);
-  new(&a[0]) udVariant(v.x);
-  new(&a[1]) udVariant(v.y);
+  epVariant r;
+  epVariant *a = r.allocArray(2);
+  new(&a[0]) epVariant(v.x);
+  new(&a[1]) epVariant(v.y);
   return r;
 }
 template<typename F>
-inline udVariant udToVariant(const udVector3<F> &v)
+inline epVariant epToVariant(const udVector3<F> &v)
 {
-  udVariant r;
-  udVariant *a = r.allocArray(3);
-  new(&a[0]) udVariant(v.x);
-  new(&a[1]) udVariant(v.y);
-  new(&a[2]) udVariant(v.z);
+  epVariant r;
+  epVariant *a = r.allocArray(3);
+  new(&a[0]) epVariant(v.x);
+  new(&a[1]) epVariant(v.y);
+  new(&a[2]) epVariant(v.z);
   return r;
 }
 template<typename F>
-inline udVariant udToVariant(const udVector4<F> &v)
+inline epVariant epToVariant(const udVector4<F> &v)
 {
-  udVariant r;
-  udVariant *a = r.allocArray(4);
-  new(&a[0]) udVariant(v.x);
-  new(&a[1]) udVariant(v.y);
-  new(&a[2]) udVariant(v.z);
-  new(&a[3]) udVariant(v.w);
+  epVariant r;
+  epVariant *a = r.allocArray(4);
+  new(&a[0]) epVariant(v.x);
+  new(&a[1]) epVariant(v.y);
+  new(&a[2]) epVariant(v.z);
+  new(&a[3]) epVariant(v.w);
   return r;
 }
 template<typename F>
-inline udVariant udToVariant(const udMatrix4x4<F> &m)
+inline epVariant epToVariant(const udMatrix4x4<F> &m)
 {
-  udVariant r;
-  udVariant *a = r.allocArray(16);
+  epVariant r;
+  epVariant *a = r.allocArray(16);
   for (size_t i = 0; i<16; ++i)
-    new(&a[i]) udVariant(m.a[i]);
+    new(&a[i]) epVariant(m.a[i]);
   return r;
 }
 
@@ -328,52 +328,52 @@ template<typename Signature>
 class VarDelegate;
 
 template<typename R, typename... Args>
-class VarDelegate<R(Args...)> : public udDelegateMemento
+class VarDelegate<R(Args...)> : public epDelegateMemento
 {
 protected:
   template<typename T>
-  friend class udSharedPtr;
+  friend class epSharedPtr;
 
   template<size_t ...S>
-  UDFORCE_INLINE static udVariant callFuncHack(udSlice<udVariant> args, const udDelegate<R(Args...)> &d, Sequence<S...>)
+  __forceinline static epVariant callFuncHack(epSlice<epVariant> args, const epDelegate<R(Args...)> &d, Sequence<S...>)
   {
-    return udVariant(d(args[S].as<typename std::remove_reference<Args>::type>()...));
+    return epVariant(d(args[S].as<typename std::remove_reference<Args>::type>()...));
   }
 
-  udVariant to(udSlice<udVariant> args) const
+  epVariant to(epSlice<epVariant> args) const
   {
     // we need a call shim which can give an integer sequence as S... (Bjarne!!!)
-    return callFuncHack(args, udDelegate<R(Args...)>(target), typename GenSequence<sizeof...(Args)>::type());
+    return callFuncHack(args, epDelegate<R(Args...)>(target), typename GenSequence<sizeof...(Args)>::type());
   }
 
   R from(Args... args) const
   {
-    udVariant::VarDelegate d(target);
+    epVariant::VarDelegate d(target);
 
     // HAX: added 1 to support the case of zero args
-    udVariant vargs[sizeof...(args)+1] = { udVariant(args)... };
-    udSlice<udVariant> sargs(vargs, sizeof...(args));
+    epVariant vargs[sizeof...(args)+1] = { epVariant(args)... };
+    epSlice<epVariant> sargs(vargs, sizeof...(args));
 
     return d(sargs).as<R>();
   }
 
-  // *to* udVariant::Delegate constructor
-  VarDelegate(const udDelegate<R(Args...)> &d)
+  // *to* epVariant::Delegate constructor
+  VarDelegate(const epDelegate<R(Args...)> &d)
     : target(d.GetMemento())
   {
-    FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &VarDelegate::to);
+    FastDelegate<epVariant(epSlice<epVariant>)> shim(this, &VarDelegate::to);
     m = shim.GetMemento();
   }
 
-  // *from* udVariant::Delegate constructor
-  VarDelegate(const udVariant::VarDelegate &d)
+  // *from* epVariant::Delegate constructor
+  VarDelegate(const epVariant::VarDelegate &d)
     : target(d.GetMemento())
   {
     FastDelegate<R(Args...)> shim(this, &VarDelegate::from);
     m = shim.GetMemento();
   }
 
-  const udDelegateMementoRef target;
+  const epDelegateMementoRef target;
 
 private:
   VarDelegate<R(Args...)>& operator=(const VarDelegate<R(Args...)> &rh) = delete;
@@ -381,64 +381,64 @@ private:
 
 // specialise for 'void' return type
 template<typename... Args>
-class VarDelegate<void(Args...)> : public udDelegateMemento
+class VarDelegate<void(Args...)> : public epDelegateMemento
 {
 protected:
   template<typename T>
-  friend class udSharedPtr;
+  friend class epSharedPtr;
 
   template<size_t ...S>
-  UDFORCE_INLINE static void callFuncHack(udSlice<udVariant> args, const udDelegate<void(Args...)> &d, Sequence<S...>)
+  __forceinline static void callFuncHack(epSlice<epVariant> args, const epDelegate<void(Args...)> &d, Sequence<S...>)
   {
     d(args[S].as<typename std::remove_reference<Args>::type>()...);
   }
 
-  udVariant to(udSlice<udVariant> args) const
+  epVariant to(epSlice<epVariant> args) const
   {
     // we need a call shim which can give an integer sequence as S... (Bjarne!!!)
-    callFuncHack(args, udDelegate<void(Args...)>(target), typename GenSequence<sizeof...(Args)>::type());
-    return udVariant();
+    callFuncHack(args, epDelegate<void(Args...)>(target), typename GenSequence<sizeof...(Args)>::type());
+    return epVariant();
   }
 
   void from(Args... args) const
   {
-    udVariant::VarDelegate d(target);
+    epVariant::VarDelegate d(target);
 
     // HAX: added 1 to support the case of zero args
-    udVariant vargs[sizeof...(args)+1] = { udVariant(args)... };
-    udSlice<udVariant> sargs(vargs, sizeof...(args));
+    epVariant vargs[sizeof...(args)+1] = { epVariant(args)... };
+    epSlice<epVariant> sargs(vargs, sizeof...(args));
 
     d(sargs);
   }
 
-  // *to* udVariant::Delegate constructor
-  VarDelegate(const udDelegate<void(Args...)> &d)
+  // *to* epVariant::Delegate constructor
+  VarDelegate(const epDelegate<void(Args...)> &d)
     : target(d.GetMemento())
   {
-    FastDelegate<udVariant(udSlice<udVariant>)> shim(this, &VarDelegate::to);
+    FastDelegate<epVariant(epSlice<epVariant>)> shim(this, &VarDelegate::to);
     m = shim.GetMemento();
   }
 
-  // *from* udVariant::Delegate constructor
-  VarDelegate(const udVariant::VarDelegate &d)
+  // *from* epVariant::Delegate constructor
+  VarDelegate(const epVariant::VarDelegate &d)
     : target(d.GetMemento())
   {
     FastDelegate<void(Args...)> shim(this, &VarDelegate::from);
     m = shim.GetMemento();
   }
 
-  const udDelegateMementoRef target;
+  const epDelegateMementoRef target;
 
 private:
   VarDelegate<void(Args...)>& operator=(const VarDelegate<void(Args...)> &rh) = delete;
 };
 
 template<typename R, typename... Args>
-inline udVariant udToVariant(const udDelegate<R(Args...)> &d)
+inline epVariant epToVariant(const epDelegate<R(Args...)> &d)
 {
-  typedef udSharedPtr<VarDelegate<R(Args...)>> VarDelegateRef;
+  typedef epSharedPtr<VarDelegate<R(Args...)>> VarDelegateRef;
 
-  return udVariant::VarDelegate(VarDelegateRef::create(d));
+  return epVariant::VarDelegate(VarDelegateRef::create(d));
 }
 
 
@@ -448,56 +448,56 @@ inline udVariant udToVariant(const udDelegate<R(Args...)> &d)
 
 // HAX: this is a horrible hax to satisfy the C++ compiler!
 template<typename T>
-struct udVariant_Cast
+struct epVariant_Cast
 {
-  inline static T as(const udVariant &v) { T r; udFromVariant(v, &r); return r; }
+  inline static T as(const epVariant &v) { T r; epFromVariant(v, &r); return r; }
 };
 
 template<typename T>
-inline T udVariant::as() const
+inline T epVariant::as() const
 {
   // HACK: pipe this through a class so we can partial-specialise
-  return udVariant_Cast<T>::as(*this);
+  return epVariant_Cast<T>::as(*this);
 }
 
 // partial specialisation for const
 template<typename T>
-struct udVariant_Cast < const T >
+struct epVariant_Cast < const T >
 {
-  inline static const T as(const udVariant &v)
+  inline static const T as(const epVariant &v)
   {
-    return udVariant_Cast<T>::as(v);
+    return epVariant_Cast<T>::as(v);
   }
 };
 
 // specialisations for udVeriant::as()
-template<> struct udVariant_Cast < bool     > { inline static bool     as(const udVariant &v) { return v.asBool(); } };
-template<> struct udVariant_Cast < float    > { inline static float    as(const udVariant &v) { return (float)v.asFloat(); } };
-template<> struct udVariant_Cast < double   > { inline static double   as(const udVariant &v) { return v.asFloat(); } };
-template<> struct udVariant_Cast < int8_t   > { inline static int8_t   as(const udVariant &v) { return (int8_t)v.asInt(); } };
-template<> struct udVariant_Cast < uint8_t  > { inline static uint8_t  as(const udVariant &v) { return (uint8_t)v.asInt(); } };
-template<> struct udVariant_Cast < int16_t  > { inline static int16_t  as(const udVariant &v) { return (int16_t)v.asInt(); } };
-template<> struct udVariant_Cast < uint16_t > { inline static uint16_t as(const udVariant &v) { return (uint16_t)v.asInt(); } };
-template<> struct udVariant_Cast < int32_t  > { inline static int32_t  as(const udVariant &v) { return (int32_t)v.asInt(); } };
-template<> struct udVariant_Cast < uint32_t > { inline static uint32_t as(const udVariant &v) { return (uint32_t)v.asInt(); } };
-template<> struct udVariant_Cast < int64_t  > { inline static int64_t  as(const udVariant &v) { return (int64_t)v.asInt(); } };
-template<> struct udVariant_Cast < uint64_t > { inline static uint64_t as(const udVariant &v) { return (uint64_t)v.asInt(); } };
-template<> struct udVariant_Cast < udString > { inline static udString as(const udVariant &v) { return v.asString(); } };
+template<> struct epVariant_Cast < bool     > { inline static bool     as(const epVariant &v) { return v.asBool(); } };
+template<> struct epVariant_Cast < float    > { inline static float    as(const epVariant &v) { return (float)v.asFloat(); } };
+template<> struct epVariant_Cast < double   > { inline static double   as(const epVariant &v) { return v.asFloat(); } };
+template<> struct epVariant_Cast < int8_t   > { inline static int8_t   as(const epVariant &v) { return (int8_t)v.asInt(); } };
+template<> struct epVariant_Cast < uint8_t  > { inline static uint8_t  as(const epVariant &v) { return (uint8_t)v.asInt(); } };
+template<> struct epVariant_Cast < int16_t  > { inline static int16_t  as(const epVariant &v) { return (int16_t)v.asInt(); } };
+template<> struct epVariant_Cast < uint16_t > { inline static uint16_t as(const epVariant &v) { return (uint16_t)v.asInt(); } };
+template<> struct epVariant_Cast < int32_t  > { inline static int32_t  as(const epVariant &v) { return (int32_t)v.asInt(); } };
+template<> struct epVariant_Cast < uint32_t > { inline static uint32_t as(const epVariant &v) { return (uint32_t)v.asInt(); } };
+template<> struct epVariant_Cast < int64_t  > { inline static int64_t  as(const epVariant &v) { return (int64_t)v.asInt(); } };
+template<> struct epVariant_Cast < uint64_t > { inline static uint64_t as(const epVariant &v) { return (uint64_t)v.asInt(); } };
+template<> struct epVariant_Cast < epString > { inline static epString as(const epVariant &v) { return v.asString(); } };
 
-template<> struct udVariant_Cast < udVariant > { inline static udVariant as(const udVariant &v) { return v; } };
+template<> struct epVariant_Cast < epVariant > { inline static epVariant as(const epVariant &v) { return v; } };
 
 // enums & bitfields
 template<typename T,
   typename std::enable_if<
-    std::is_base_of<udEnum, T>::value ||
-    std::is_base_of<udBitfield, T>::value
+    std::is_base_of<epEnum, T>::value ||
+    std::is_base_of<epBitfield, T>::value
   >::type* = nullptr>
-inline void udFromVariant(const udVariant &v, T *pE)
+inline void epFromVariant(const epVariant &v, T *pE)
 {
-  if (v.is(std::is_base_of<udBitfield, T>::value ? udVariant::Type::Bitfield : udVariant::Type::Enum))
+  if (v.is(std::is_base_of<epBitfield, T>::value ? epVariant::Type::Bitfield : epVariant::Type::Enum))
   {
     size_t val;
-    const udEnumDesc *pDesc = v.asEnum(&val);
+    const epEnumDesc *pDesc = v.asEnum(&val);
     if (!pDesc->name.eq(T::Name()))
     {
       // TODO: complain about invalid enum type?! error or something?
@@ -505,18 +505,18 @@ inline void udFromVariant(const udVariant &v, T *pE)
     }
     *pE = T((typename T::Type)val);
   }
-  else if (v.is(udVariant::Type::Int))
+  else if (v.is(epVariant::Type::Int))
     *pE = T((typename T::Type)v.asInt());
-  else if (v.is(udVariant::Type::String))
+  else if (v.is(epVariant::Type::String))
     *pE = T(v.asString());
 }
 
 // udMath types
 template<typename U>
-inline void udFromVariant(const udVariant &v, udVector2<U> *pR)
+inline void epFromVariant(const epVariant &v, udVector2<U> *pR)
 {
   *pR = udVector2<U>::zero();
-  if (v.is(udVariant::Type::Array))
+  if (v.is(epVariant::Type::Array))
   {
     auto a = v.asArray();
     if (a.length >= 2)
@@ -525,7 +525,7 @@ inline void udFromVariant(const udVariant &v, udVector2<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
-  else if (v.is(udVariant::Type::AssocArray))
+  else if (v.is(epVariant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
     if (aa.length >= 2)
@@ -536,10 +536,10 @@ inline void udFromVariant(const udVariant &v, udVector2<U> *pR)
   }
 }
 template<typename U>
-inline void udFromVariant(const udVariant &v, udVector3<U> *pR)
+inline void epFromVariant(const epVariant &v, udVector3<U> *pR)
 {
   *pR = udVector3<U>::zero();
-  if (v.is(udVariant::Type::Array))
+  if (v.is(epVariant::Type::Array))
   {
     auto a = v.asArray();
     if (a.length >= 3)
@@ -548,7 +548,7 @@ inline void udFromVariant(const udVariant &v, udVector3<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
-  else if (v.is(udVariant::Type::AssocArray))
+  else if (v.is(epVariant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
     if (aa.length >= 3)
@@ -559,10 +559,10 @@ inline void udFromVariant(const udVariant &v, udVector3<U> *pR)
   }
 }
 template<typename U>
-inline void udFromVariant(const udVariant &v, udVector4<U> *pR)
+inline void epFromVariant(const epVariant &v, udVector4<U> *pR)
 {
   *pR = udVector4<U>::zero();
-  if (v.is(udVariant::Type::Array))
+  if (v.is(epVariant::Type::Array))
   {
     auto a = v.asArray();
     if (a.length >= 4)
@@ -571,7 +571,7 @@ inline void udFromVariant(const udVariant &v, udVector4<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
-  else if (v.is(udVariant::Type::AssocArray))
+  else if (v.is(epVariant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
     if (aa.length >= 4)
@@ -582,10 +582,10 @@ inline void udFromVariant(const udVariant &v, udVector4<U> *pR)
   }
 }
 template<typename U>
-inline void udFromVariant(const udVariant &v, udMatrix4x4<U> *pR)
+inline void epFromVariant(const epVariant &v, udMatrix4x4<U> *pR)
 {
   *pR = udMatrix4x4<U>::identity();
-  if (v.is(udVariant::Type::Array))
+  if (v.is(epVariant::Type::Array))
   {
     auto a = v.asArray();
     if (a.length >= 16)
@@ -594,7 +594,7 @@ inline void udFromVariant(const udVariant &v, udMatrix4x4<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
-  else if (v.is(udVariant::Type::AssocArray))
+  else if (v.is(epVariant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
     if (aa.length >= 16)
@@ -606,12 +606,12 @@ inline void udFromVariant(const udVariant &v, udMatrix4x4<U> *pR)
 }
 
 template<typename R, typename... Args>
-inline void udFromVariant(const udVariant &v, udDelegate<R(Args...)> *pD)
+inline void epFromVariant(const epVariant &v, epDelegate<R(Args...)> *pD)
 {
-  typedef udSharedPtr<VarDelegate<R(Args...)>> VarDelegateRef;
+  typedef epSharedPtr<VarDelegate<R(Args...)>> VarDelegateRef;
 
   if (v.asDelegate())
-    *pD = udDelegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
+    *pD = epDelegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
   else
     *pD = nullptr;
 }

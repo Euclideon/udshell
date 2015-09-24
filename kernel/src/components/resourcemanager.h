@@ -1,10 +1,10 @@
 #pragma once
-#ifndef UD_RESOURCE_MANAGER_H
-#define UD_RESOURCE_MANAGER_H
+#ifndef EP_RESOURCE_MANAGER_H
+#define EP_RESOURCE_MANAGER_H
 
 #include "component.h"
 
-namespace ud
+namespace ep
 {
 PROTOTYPE_COMPONENT(ResourceManager);
 SHARED_CLASS(Resource);
@@ -12,31 +12,31 @@ SHARED_CLASS(Resource);
 class ResourceManager : public Component
 {
 public:
-  UD_COMPONENT(ResourceManager);
+  EP_COMPONENT(ResourceManager);
 
   // Resource getter/setters
   size_t NumResources() const { return resources.Size(); }
   void AddResource(ResourceRef res);
   void RemoveResource(ResourceRef res);
-  ResourceRef GetResource(udString key) const { return *resources.Get(key); }
+  ResourceRef GetResource(epString key) const { return *resources.Get(key); }
   template<typename CT>
-  udFixedSlice<ResourceRef> GetResourcesByType() const
+  epArray<ResourceRef> GetResourcesByType() const
   {
     return GetResourcesByType(&CT::descriptor);
   }
-  udFixedSlice<ResourceRef> GetResourcesByType(const ComponentDesc *pBase) const;
+  epArray<ResourceRef> GetResourcesByType(const ComponentDesc *pBase) const;
   // TODO GetResourcesByPrefix with optional Type filter
 
   // Resource loading/saving functions
-  void LoadResourcesFromFile(udInitParams initParams);
-  void SaveResourcesToFile(udSlice<ResourceRef>, udInitParams initParams);
+  void LoadResourcesFromFile(epInitParams initParams);
+  void SaveResourcesToFile(epSlice<ResourceRef>, epInitParams initParams);
 
 protected:
-  ResourceManager(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  ResourceManager(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   ~ResourceManager();
 
-  udAVLTree<udString, ResourceRef> resources;
+  epAVLTree<epString, ResourceRef> resources;
 };
 
-} //namespace ud
-#endif // UD_RESOURCE_MANAGER_H
+} //namespace ep
+#endif // EP_RESOURCE_MANAGER_H

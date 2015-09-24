@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDUI_DRIVER == UDDRIVER_QT
+#if EPUI_DRIVER == EPDRIVER_QT
 
 #include "../epkernel_qt.h"
 #include "signaltodelegate_qt.h"
@@ -15,16 +15,16 @@ QMetaMethod QtSignalToDelegate::lookupSignalHandler(const QMetaMethod &m)
   int indexOfOpenBracket = methodSig.indexOf('(');
   if (indexOfOpenBracket != -1)
   {
-    udMutableString128 signalHandlerName;
+    epMutableString128 signalHandlerName;
     signalHandlerName.concat("SignalHandler", methodSig.right(methodSig.size() - indexOfOpenBracket).data());
-    QtApplication::Kernel()->LogDebug(3, udSharedString::concat("Checking for signal handler: ", signalHandlerName.toStringz()));
+    QtApplication::Kernel()->LogDebug(3, epSharedString::concat("Checking for signal handler: ", signalHandlerName.toStringz()));
     methodIndex = metaObject()->indexOfMethod(signalHandlerName.toStringz());
   }
 
   // TODO: remove this before release, maybe allow fallback on most closest match and error log/warn?
   if (methodIndex == -1)
   {
-    UDASSERT(false, "Attempted to connect to unsupported signal: '%s' ", m.methodSignature().data());
+    EPASSERT(false, "Attempted to connect to unsupported signal: '%s' ", m.methodSignature().data());
     return QMetaMethod();
   }
 
@@ -33,4 +33,4 @@ QMetaMethod QtSignalToDelegate::lookupSignalHandler(const QMetaMethod &m)
 
 } // namespace qt
 
-#endif  // UDUI_DRIVER == UDDRIVER_QT
+#endif  // EPUI_DRIVER == EPDRIVER_QT

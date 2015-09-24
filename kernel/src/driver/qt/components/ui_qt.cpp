@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDUI_DRIVER == UDDRIVER_QT
+#if EPUI_DRIVER == EPDRIVER_QT
 
 #if defined(_MSC_VER)
 #pragma warning(disable:4512) // assignment operator could not be generated
@@ -18,14 +18,14 @@
 
 #include "../ui/renderview_qt.h"
 
-namespace ud
+namespace ep
 {
 
-udResult UIComponent::CreateInternal(udInitParams initParams)
+udResult UIComponent::CreateInternal(epInitParams initParams)
 {
   LogTrace("UIComponent::CreateInternal()");
 
-  udString file = initParams["file"].as<udString>();
+  epString file = initParams["file"].as<epString>();
   if (file.empty())
   {
     LogError("Attempted to create ui component without source file");
@@ -42,7 +42,7 @@ udResult UIComponent::CreateInternal(udInitParams initParams)
     // TODO: better error information/handling
     LogError("Error creating QtComponent");
     foreach(const QQmlError &error, component.errors())
-      LogError(udSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
+      LogError(epSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
     throw udR_Failure_;
   }
 
@@ -73,7 +73,7 @@ void UIComponent::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-udResult Viewport::CreateInternal(udInitParams initParams)
+udResult Viewport::CreateInternal(epInitParams initParams)
 {
   LogTrace("Viewport::CreateInternal()");
 
@@ -107,13 +107,13 @@ void Viewport::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-udResult Window::CreateInternal(udInitParams initParams)
+udResult Window::CreateInternal(epInitParams initParams)
 {
   LogTrace("Window::CreateInternal()");
 
   qt::QtKernel *pQtKernel = static_cast<qt::QtKernel*>(pKernel);
 
-  udString file = initParams["file"].as<udString>();
+  epString file = initParams["file"].as<epString>();
   if (file.empty())
   {
     LogError("Attempted to create ui component without source file");
@@ -130,7 +130,7 @@ udResult Window::CreateInternal(udInitParams initParams)
     // TODO: better error information/handling
     LogError("Error creating QtComponent");
     foreach(const QQmlError &error, component.errors())
-      LogError(udSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
+      LogError(epSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
     throw udR_Failure_;
   }
 
@@ -186,6 +186,6 @@ void Window::SetTopLevelUI(UIComponentRef spUIComponent)
     pQtItem->setParentItem(pQtWindow->contentItem());
 }
 
-} // namespace ud
+} // namespace ep
 
 #endif

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UDERROR_H
-#define UDERROR_H
+#ifndef EPERROR_H
+#define EPERROR_H
 #include <functional>
 struct epErrorNode
 {
@@ -44,4 +44,4 @@ struct epError
 #define EPKNLERROR_CLEANUP(lambdaBody)  do {{ __error__.AddNode(new(alloca(sizeof(epErrorNode))) epErrorNode([&]()mutable lambdaBody));} } while(false);
 
 
-#endif // UDERROR_H
+#endif // EPERROR_H

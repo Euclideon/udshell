@@ -3,7 +3,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -89,7 +89,7 @@ ComponentDesc Material::descriptor =
   "Material", // displayName
   "Material resource", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
 };
 
 void Material::SetShader(ShaderType type, ShaderRef spShader)
@@ -97,14 +97,14 @@ void Material::SetShader(ShaderType type, ShaderRef spShader)
   if (shaders[(int)type] == spShader)
     return;
   if (shaders[(int)type])
-    shaders[(int)type]->Changed.Unsubscribe(udDelegate<void()>(this, &Material::OnShaderChanged));
+    shaders[(int)type]->Changed.Unsubscribe(epDelegate<void()>(this, &Material::OnShaderChanged));
   shaders[(int)type] = spShader;
   if (spShader)
-    spShader->Changed.Subscribe(udDelegate<void()>(this, &Material::OnShaderChanged));
+    spShader->Changed.Subscribe(epDelegate<void()>(this, &Material::OnShaderChanged));
   OnShaderChanged();
 }
 
-void Material::SetMaterialProperty(udSharedString property, const udFloat4 &val)
+void Material::SetMaterialProperty(epSharedString property, const udFloat4 &val)
 {
   properties.Insert(property, val);
 }
@@ -128,7 +128,7 @@ void Material::SetRenderstate()
   size_t numUniforms = spRenderProgram->numUniforms();
   for (size_t i = 0; i < numUniforms; ++i)
   {
-    udString name = spRenderProgram->getUniformName(i);
+    epString name = spRenderProgram->getUniformName(i);
     const udFloat4 *pVal = properties.Get(name);
     if (pVal)
       spRenderProgram->setUniform((int)i, *pVal);
@@ -139,8 +139,8 @@ RenderShaderProgramRef Material::GetRenderProgram()
 {
   if (!spRenderProgram)
   {
-    RenderShaderRef spVS = shaders[0] ? shaders[0]->GetRenderShader(udST_VertexShader) : nullptr;
-    RenderShaderRef spPS = shaders[1] ? shaders[1]->GetRenderShader(udST_PixelShader) : nullptr;
+    RenderShaderRef spVS = shaders[0] ? shaders[0]->GetRenderShader(epST_VertexShader) : nullptr;
+    RenderShaderRef spPS = shaders[1] ? shaders[1]->GetRenderShader(epST_PixelShader) : nullptr;
     if (spVS && spPS)
     {
       // TODO: check if this program already exists in `pRenderer->shaderPrograms`
@@ -161,4 +161,4 @@ RenderShaderProgramRef Material::GetRenderProgram()
   return spRenderProgram;
 }
 
-} // namespace ud
+} // namespace ep

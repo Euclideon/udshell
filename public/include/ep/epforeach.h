@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_FOREACH_H)
-#define _FOREACH_H
+#if !defined(_EP_FOREACH_H)
+#define _EP_FOREACH_H
 
 #define EXPAND( X ) X
 
@@ -63,4 +63,4 @@
 
 #define FOR_EACH(DO, ...)       EXPAND( _FOR_EACH_2(DO, NUM_ARGS(__VA_ARGS__), __VA_ARGS__) )
 
-#endif // _FOREACH_H
+#endif // _EP_FOREACH_H

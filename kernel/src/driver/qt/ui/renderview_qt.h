@@ -21,10 +21,10 @@ public:
 
   Renderer *createRenderer() const;
 
-  void AttachView(ud::ViewRef spView);
+  void AttachView(ep::ViewRef spView);
 
 private:
-  ud::ViewRef spView;
+  ep::ViewRef spView;
   bool dirty;
 
   // TODO: Avoid this crap

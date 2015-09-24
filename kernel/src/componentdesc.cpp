@@ -1,6 +1,6 @@
 #include "componentdesc.h"
 
-namespace ud
+namespace ep
 {
 
 void ComponentDesc::InitProps()
@@ -73,7 +73,7 @@ void ComponentDesc::BuildSearchTrees()
   InitStaticFuncs();
 }
 
-StaticFunc *ComponentDesc::GetStaticFunc(udString id) const
+StaticFunc *ComponentDesc::GetStaticFunc(epString id) const
 {
   const StaticFuncDesc *pFuncDesc;
   const ComponentDesc *pCompDesc = this;
@@ -90,4 +90,4 @@ StaticFunc *ComponentDesc::GetStaticFunc(udString id) const
   return nullptr;
 }
 
-} // namespace ud
+} // namespace ep

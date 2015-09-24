@@ -1,44 +1,45 @@
 #pragma once
-#ifndef UD_SHORTCUT_MANAGER_H
-#define UD_SHORTCUT_MANAGER_H
+#ifndef EP_SHORTCUT_MANAGER_H
+#define EP_SHORTCUT_MANAGER_H
 
 #include "component.h"
 #include "ep/epdelegate.h"
 
-namespace ud
+namespace ep
 {
+
 PROTOTYPE_COMPONENT(ShortcutManager);
 
 class ShortcutManager : public Component
 {
 public:
-  UD_COMPONENT(ShortcutManager);
+  EP_COMPONENT(ShortcutManager);
 
-  bool SetShortcutString(udString id, udString shortcutString);
-  udSharedString GetShortcutString(udString id) const;
-  bool RegisterShortcut(udString id, udString shortcutString, bool bFailIfExists = false);
-  void UnregisterShortcut(udString id);
-  bool HandleShortcutEvent(udString shortcutString);
-  bool SetShortcutFunction(udString id, udDelegate<void()> func);
-  bool SetShortcutScript(udString id, udString script);
+  bool SetShortcutString(epString id, epString shortcutString);
+  epSharedString GetShortcutString(epString id) const;
+  bool RegisterShortcut(epString id, epString shortcutString, bool bFailIfExists = false);
+  void UnregisterShortcut(epString id);
+  bool HandleShortcutEvent(epString shortcutString);
+  bool SetShortcutFunction(epString id, epDelegate<void()> func);
+  bool SetShortcutScript(epString id, epString script);
 
 protected:
-  ShortcutManager(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
-  udString StripWhitespace(udSlice<char> output, udString input);
+  ShortcutManager(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  epString StripWhitespace(epSlice<char> output, epString input);
 
   struct Shortcut
   {
-    Shortcut(udSharedString id, udSharedString shortcutString) : id(id), shortcutString(shortcutString) {}
+    Shortcut(epSharedString id, epSharedString shortcutString) : id(id), shortcutString(shortcutString) {}
 
-    udSharedString id;
-    udSharedString shortcutString;
-    udSharedString script;
-    udDelegate<void()> func;
+    epSharedString id;
+    epSharedString shortcutString;
+    epSharedString script;
+    epDelegate<void()> func;
   };
 
-  udAVLTree<udSharedString, struct Shortcut> shortcutRegistry;
+  epAVLTree<epSharedString, struct Shortcut> shortcutRegistry;
 };
 
-} //namespace ud
-#endif // UD_SHORTCUT_MANAGER_H
+} //namespace ep
 
+#endif // EP_SHORTCUT_MANAGER_H

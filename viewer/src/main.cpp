@@ -1,16 +1,15 @@
-// ud includes
-#include "udPlatform.h"
-#include "udPlatformUtil.h"
-#include "udOctree.h"
-
 // kernel includes
+#include "ep/epplatform.h"
 #include "ep/epstring.h"
+#include "eperror.h"
 #include "kernel.h"
 #include "components/view.h"
 #include "components/scene.h"
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
-#include "eperror.h"
+
+// ud includes
+#include "udPlatformUtil.h"
 
 static void ProcessCmdline(int argc, char *argv[]);
 
@@ -18,17 +17,17 @@ static void ProcessCmdline(int argc, char *argv[]);
 // Author: David Ely, September 2015
 static struct
 {
-  udMutableString<256> filename;          // TODO: make this udString
+  epMutableString<256> filename;          // TODO: make this udString
 
   uint32_t rendererThreadCount;
   uint32_t streamerMemoryLimit;
 
-  ud::Kernel *pKernel;
+  ep::Kernel *pKernel;
 
-  ud::ViewRef spView;
-  ud::SceneRef spScene;
-  ud::SimpleCameraRef spSimpleCamera;
-  ud::UDNodeRef spUDNode;
+  ep::ViewRef spView;
+  ep::SceneRef spScene;
+  ep::SimpleCameraRef spSimpleCamera;
+  ep::UDNodeRef spUDNode;
 } mData = {
 #if UDPLATFORM_WINDOWS
                "/src/data/DirCube.uds", // filename
@@ -48,12 +47,12 @@ static struct
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
-static void ViewerInit(udString sender, udString message, const udVariant &data)
+static void ViewerInit(epString sender, epString message, const epVariant &data)
 {
   udResult result = udR_Success;
   EPERROR(result);
 
-  using namespace ud;
+  using namespace ep;
   //TODO: Error handling for the whole function, perhaps send message with error?
   mData.spView = mData.pKernel->CreateComponent<View>();
   EPERROR_NULL(mData.spView, udR_Failure_, { mData.spView = nullptr; });
@@ -116,11 +115,11 @@ int main(int argc, char* argv[])
 {
   udMemoryDebugTrackingInit();
 
-  using namespace ud;
+  using namespace ep;
   mData.rendererThreadCount = udGetHardwareThreadCount() - 1;
   ProcessCmdline(argc, argv);
 
-  udResult result = ud::Kernel::Create(&mData.pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
+  udResult result = Kernel::Create(&mData.pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
   if (result != udR_Success)
     return -1;
 
@@ -201,9 +200,9 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, char *cmdline, int)
 }
 #endif // UDPLATFORM_WINDOWS
 
-void update(ud::ViewRef spView, ud::SceneRef spScene)
+void update(ep::ViewRef spView, ep::SceneRef spScene)
 {
-  using namespace ud;
+  using namespace ep;
   int displayWidth, displayHeight;
   mData.spView->GetDimensions(&displayWidth, &displayHeight);
 

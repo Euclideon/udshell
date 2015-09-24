@@ -1,6 +1,6 @@
 #include "udmodel.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc UDModel::descriptor =
@@ -21,4 +21,4 @@ UDModel::~UDModel()
     pOctree->pDestroy(pOctree);
 }
 
-} // namespace ud
+} // namespace ep

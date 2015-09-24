@@ -1,10 +1,10 @@
 #pragma once
-#if !defined(_UD_UDSOURCE_H)
-#define _UD_UDSOURCE_H
+#if !defined(_EP_EPSOURCE_H)
+#define _EP_EPSOURCE_H
 
 #include "components/datasource.h"
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(UDDataSource);
@@ -12,7 +12,7 @@ PROTOTYPE_COMPONENT(UDDataSource);
 class UDDataSource : public DataSource
 {
 public:
-  UD_COMPONENT(UDDataSource);
+  EP_COMPONENT(UDDataSource);
 
   enum class Flags : size_t
   {
@@ -22,19 +22,19 @@ public:
     DeferredLoad = 1<<3,
   };
 
-  udSlice<const udString> GetFileExtensions() const override
+  epSlice<const epString> GetFileExtensions() const override
   {
     return extensions;
   }
 
 protected:
-  static const udFixedSlice<const udString> extensions;
+  static const epArray<const epString> extensions;
 
   static udResult RegisterExtensions(Kernel *pKernel);
 
-  UDDataSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  UDDataSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 };
 
 }
 
-#endif // _UD_UDSOURCE_H
+#endif // _EP_EPSOURCE_H

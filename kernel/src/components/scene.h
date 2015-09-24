@@ -1,13 +1,13 @@
 #pragma once
-#ifndef UDSCENE_H
-#define UDSCENE_H
+#ifndef EPSCENE_H
+#define EPSCENE_H
 
 #include "udRender.h"
 
 #include "component.h"
 #include "nodes/node.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(RenderScene);
@@ -19,16 +19,16 @@ class Scene : public Component
 {
   friend class View;
 public:
-  UD_COMPONENT(Scene);
+  EP_COMPONENT(Scene);
 
-  virtual bool InputEvent(const udInputEvent &ev);
+  virtual bool InputEvent(const epInputEvent &ev);
   virtual void Update(double timeDelta);
 
   NodeRef GetRootNode() const { return rootNode; }
 
   RenderSceneRef GetRenderScene();
 
-  udEvent<> Dirty;
+  epEvent<> Dirty;
 
   // TODO: HACK: fix this api!
   udResult SetRenderModels(struct udRenderModel models[], size_t numModels);
@@ -51,10 +51,10 @@ protected:
   udRenderModel renderModels[16];
   size_t numRenderModels = 0;
 
-  Scene(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  Scene(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   virtual ~Scene();
 };
 
 };
 
-#endif // UDSCENE_H
+#endif // EPSCENE_H

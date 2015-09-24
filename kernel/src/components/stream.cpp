@@ -1,7 +1,7 @@
 #include "components/stream.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc Stream::descriptor =
@@ -21,17 +21,17 @@ BufferRef Stream::ReadBuffer(size_t bytes)
   BufferRef spBuffer = pKernel->CreateComponent<Buffer>();
   spBuffer->Allocate(bytes);
 
-  udSlice<void> buffer = spBuffer->Map();
-  IF_UDASSERT(udSlice<void> read =) Read(buffer);
+  epSlice<void> buffer = spBuffer->Map();
+  IF_UDASSERT(epSlice<void> read =) Read(buffer);
   spBuffer->Unmap();
 
-  UDASSERT(read.length == bytes, "TODO: handle the case where we read less bytes than we expect!");
+  EPASSERT(read.length == bytes, "TODO: handle the case where we read less bytes than we expect!");
 
   return spBuffer;
 }
 size_t Stream::WriteBuffer(BufferRef spData)
 {
-  udSlice<const void> buffer = spData->MapForRead();
+  epSlice<const void> buffer = spData->MapForRead();
   size_t bytes = Write(buffer);
   spData->Unmap();
   return bytes;
@@ -46,7 +46,7 @@ BufferRef Stream::Load()
   BufferRef spBuffer = pKernel->CreateComponent<Buffer>();
   spBuffer->Allocate((size_t)len);
 
-  udSlice<void> buffer = spBuffer->Map();
+  epSlice<void> buffer = spBuffer->Map();
   Seek(SeekOrigin::Begin, 0);
   Read(buffer);
   spBuffer->Unmap();
@@ -58,7 +58,7 @@ void Stream::Save(BufferRef spBuffer)
 {
   // TODO: check and bail if stream is not writable...
 
-  udSlice<const void> buffer = spBuffer->MapForRead();
+  epSlice<const void> buffer = spBuffer->MapForRead();
 
   Seek(SeekOrigin::Begin, 0);
   Write(buffer);
@@ -66,11 +66,11 @@ void Stream::Save(BufferRef spBuffer)
   spBuffer->Unmap();
 }
 
-size_t Stream::WriteLn(udString str)
+size_t Stream::WriteLn(epString str)
 {
   size_t written;
 
-  udMutableString<256> temp;
+  epMutableString<256> temp;
   temp = str;
   temp.append("\n");
   written = Write(temp);
@@ -78,11 +78,11 @@ size_t Stream::WriteLn(udString str)
   return written;
 }
 
-udString Stream::ReadLn(udSlice<char> buf)
+epString Stream::ReadLn(epSlice<char> buf)
 {
-  UDASSERT(false, "TODO");
+  EPASSERT(false, "TODO");
 
   return nullptr;
 }
 
-} // namespace ud
+} // namespace ep

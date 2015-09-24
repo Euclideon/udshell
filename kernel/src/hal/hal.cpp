@@ -1,17 +1,17 @@
-#include "udPlatform.h"
+#include "ep/epplatform.h"
 
 #include "hal.h"
 
 static bool bInitialised = false;
 static bool bRenderInitialised = false;
 
-udResult udHAL_Init()
+udResult epHAL_Init()
 {
   if (bInitialised)
     return udR_Success;
 
-  void udInput_Init();
-  udInput_Init();
+  void epInput_Init();
+  epInput_Init();
 
   void udImage_InitInternal();
   udImage_InitInternal();
@@ -20,43 +20,43 @@ udResult udHAL_Init()
   return udR_Success;
 }
 
-udResult udHAL_InitRender()
+udResult epHAL_InitRender()
 {
   if (bRenderInitialised)
     return udR_Success;
 
-  void udGPU_Init();
-  udGPU_Init();
+  void epGPU_Init();
+  epGPU_Init();
 
-  void udDebugFont_Init();
-  udDebugFont_Init();
+  void epDebugFont_Init();
+  epDebugFont_Init();
 
   bRenderInitialised = true;
   return udR_Success;
 }
 
-udResult udHAL_DeinitRender()
+udResult epHAL_DeinitRender()
 {
   if (bRenderInitialised)
   {
-    void udDebugFont_Deinit();
-    udDebugFont_Deinit();
+    void epDebugFont_Deinit();
+    epDebugFont_Deinit();
 
-    void udGPU_Deinit();
-    udGPU_Deinit();
+    void epGPU_Deinit();
+    epGPU_Deinit();
     bRenderInitialised = false;
   }
   return udR_Success;
 }
 
-udResult udHAL_Deinit()
+udResult epHAL_Deinit()
 {
   if (bInitialised)
   {
     void udImage_DeinitInternal();
     udImage_DeinitInternal();
-    void udInput_Deinit();
-    udInput_Deinit();
+    void epInput_Deinit();
+    epInput_Deinit();
     bInitialised = false;
   }
   return udR_Success;

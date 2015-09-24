@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_UDENUM_H)
-#define _UDENUM_H
+#if !defined(_EPENUM_H)
+#define _EPENUM_H
 
 #include "ep/epstring.h"
 #include "ep/epforeach.h"
@@ -9,18 +9,18 @@
 #define STRINGIFY(a, i) #a,
 #define SHIFT_LEFT(a, i) a = 1u<<(i),
 
-struct udEnum {};
-struct udBitfield {};
+struct epEnum {};
+struct epBitfield {};
 
-struct udEnumDesc
+struct epEnumDesc
 {
-  udString name;
-  udSlice<const udString> keys;
-  void (*stringify)(size_t val, udMutableString64 &s);
+  epString name;
+  epSlice<const epString> keys;
+  void (*stringify)(size_t val, epMutableString64 &s);
 };
 
 #define UD_ENUM(NAME, ...)                                                        \
-  struct NAME : public udEnum                                                     \
+  struct NAME : public epEnum                                                     \
   {                                                                               \
     enum EnumKeys                                                                 \
     {                                                                             \
@@ -34,9 +34,9 @@ struct udEnumDesc
     NAME() : v(Invalid) {}                                                        \
     NAME(const NAME &e) : v(e.v) {}                                               \
     NAME(Type v) : v(v) {}                                                        \
-    NAME(udString s)                                                              \
+    NAME(epString s)                                                              \
     {                                                                             \
-      udSlice<const udString> keys = Keys();                                      \
+      epSlice<const epString> keys = Keys();                                      \
       for(size_t i = 0; i < keys.length; ++i)                                     \
       {                                                                           \
         if (keys.ptr[i].eq(s))                                                    \
@@ -49,35 +49,35 @@ struct udEnumDesc
                                                                                   \
     operator Type() const { return v; }                                           \
                                                                                   \
-    udString StringOf() const                                                     \
+    epString StringOf() const                                                     \
     {                                                                             \
       return v == -1 ? "Invalid" : Keys()[v];                                     \
     }                                                                             \
                                                                                   \
-    static udString Name()                                                        \
+    static epString Name()                                                        \
     {                                                                             \
-      static udString name(#NAME);                                                \
+      static epString name(#NAME);                                                \
       return name;                                                                \
     }                                                                             \
-    static udSlice<const udString> Keys()                                         \
+    static epSlice<const epString> Keys()                                         \
     {                                                                             \
-      static udFixedSlice<const udString, 16> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
+      static epArray<const epString, 16> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
     }                                                                             \
-    static const udEnumDesc* Desc()                                               \
+    static const epEnumDesc* Desc()                                               \
     {                                                                             \
-      static const udEnumDesc desc = { Name(), Keys(),                            \
-        [](size_t v, udMutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
+      static const epEnumDesc desc = { Name(), Keys(),                            \
+        [](size_t v, epMutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
   };                                                                              \
-  inline NAME udGetValAsEnum(NAME::EnumKeys e)                                    \
+  inline NAME epGetValAsEnum(NAME::EnumKeys e)                                    \
   {                                                                               \
     return NAME(e);                                                               \
   }
 
 #define UD_BITFIELD(NAME, ...)                                                    \
-  struct NAME : public udBitfield                                                 \
+  struct NAME : public epBitfield                                                 \
   {                                                                               \
     enum EnumKeys                                                                 \
     {                                                                             \
@@ -90,9 +90,9 @@ struct udEnumDesc
     NAME() : v(0) {}                                                              \
     NAME(const NAME &e) : v(e.v) {}                                               \
     NAME(Type v) : v(v) {}                                                        \
-    NAME(udString s)                                                              \
+    NAME(epString s)                                                              \
     {                                                                             \
-      udSlice<const udString> keys = Keys();                                      \
+      epSlice<const epString> keys = Keys();                                      \
       for(size_t i = 0; i < keys.length; ++i)                                     \
       {                                                                           \
         if (keys.ptr[i].eq(s))                                                    \
@@ -109,9 +109,9 @@ struct udEnumDesc
     NAME& operator &=(NAME rh) { v = v & rh.v; return *this; }                    \
     NAME& operator ^=(NAME rh) { v = v ^ rh.v; return *this; }                    \
                                                                                   \
-    udMutableString64 StringOf()                                                  \
+    epMutableString64 StringOf()                                                  \
     {                                                                             \
-      udMutableString64 r;                                                        \
+      epMutableString64 r;                                                        \
       for(size_t i = 0; i < 32; ++i)                                              \
       {                                                                           \
         if (v & (1<<i))                                                           \
@@ -124,27 +124,27 @@ struct udEnumDesc
       return r;                                                                   \
     }                                                                             \
                                                                                   \
-    static udString Name()                                                        \
+    static epString Name()                                                        \
     {                                                                             \
-      static udString name = #NAME;                                               \
+      static epString name = #NAME;                                               \
       return name;                                                                \
     }                                                                             \
-    static udSlice<const udString> Keys()                                         \
+    static epSlice<const epString> Keys()                                         \
     {                                                                             \
-      static udFixedSlice<const udString, 16> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
+      static epArray<const epString, 16> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
     }                                                                             \
-    static const udEnumDesc* Desc()                                               \
+    static const epEnumDesc* Desc()                                               \
     {                                                                             \
-      static const udEnumDesc desc = { Name(), Keys(),                            \
-        [](size_t v, udMutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
+      static const epEnumDesc desc = { Name(), Keys(),                            \
+        [](size_t v, epMutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
   };                                                                              \
-  inline NAME udGetValAsEnum(NAME::EnumKeys e)                                    \
+  inline NAME epGetValAsEnum(NAME::EnumKeys e)                                    \
   {                                                                               \
     return NAME(e);                                                               \
   }
 
 
-#endif // _UDENUM_H
+#endif // _EPENUM_H

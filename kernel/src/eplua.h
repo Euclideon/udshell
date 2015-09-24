@@ -1,12 +1,12 @@
 #pragma once
-#if !defined(_UDLUA_H)
-#define _UDLUA_H
+#if !defined(_EPLUA_H)
+#define _EPLUA_H
 
 #include "components/component.h"
 
 #include "lua.hpp"
 
-namespace ud
+namespace ep
 {
 
 enum class ConsoleColor
@@ -67,8 +67,8 @@ public:
   lua_State *state();
   Kernel *kernel();
 
-  void exec(udString code);
-  void print(udString str);
+  void exec(epString code);
+  void print(epString str);
 
   int top();
 
@@ -83,20 +83,20 @@ public:
   void pushBool(bool val);
   void pushFloat(lua_Number val);
   void pushInt(lua_Integer val);
-  void pushString(udString val);
+  void pushString(epString val);
   void pushLightUserData(void *val);
 
   void pushComponent(const ComponentRef &c);
-  void pushDelegate(const udVariant::VarDelegate &d);
+  void pushDelegate(const epVariant::VarDelegate &d);
 
-  void push(const udVariant &v);
+  void push(const epVariant &v);
 
   // pop***
   void pop(int count = 1);
   bool popBool();
   lua_Number popFloat();
   lua_Integer popInt();
-  udString popString();
+  epString popString();
   lua_CFunction popFunction();
   void* popUserData();
 
@@ -104,20 +104,20 @@ public:
   bool toBool(int idx = -1);
   lua_Number toFloat(int idx = -1);
   lua_Integer toInt(int idx = -1);
-  udString toString(int idx = -1);
+  epString toString(int idx = -1);
   lua_CFunction toFunction(int idx = -1);
   void* toUserData(int idx = -1);
 
   ComponentRef toComponent(int idx = -1);
-  udVariant::VarDelegate toDelegate(int idx = -1);
+  epVariant::VarDelegate toDelegate(int idx = -1);
 
-  udVariant get(int idx = -1);
+  epVariant get(int idx = -1);
 
   // set
-  void setNil(udVariant key, LuaLocation loc = LuaLocation::Global);
-  void setComponent(udVariant key, ComponentRef c, LuaLocation loc = LuaLocation::Global);
+  void setNil(epVariant key, LuaLocation loc = LuaLocation::Global);
+  void setComponent(epVariant key, ComponentRef c, LuaLocation loc = LuaLocation::Global);
 
-  void set(udVariant key, udVariant v, LuaLocation loc = LuaLocation::Global);
+  void set(epVariant key, epVariant v, LuaLocation loc = LuaLocation::Global);
 
 private:
   lua_State *L;
@@ -195,8 +195,8 @@ public:
   }
 };
 
-} // namespace ud
+} // namespace ep
 
 #include "eplua.inl"
 
-#endif // _UDLUA_H
+#endif // _EPLUA_H

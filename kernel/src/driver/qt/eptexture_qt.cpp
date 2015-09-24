@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDRENDER_DRIVER == UDDRIVER_QT
+#if EPRENDER_DRIVER == EPDRIVER_QT
 
 #include "hal/texture.h"
 
@@ -9,7 +9,7 @@
 #include <QOpenGLTexture>
 
 
-struct udQtGLFormats
+struct epQtGLFormats
 {
   QOpenGLTexture::TextureFormat internalFormat;
   QOpenGLTexture::PixelFormat format;
@@ -17,7 +17,7 @@ struct udQtGLFormats
 };
 
 
-static QOpenGLTexture::Target s_textureType[udTT_Max] =
+static QOpenGLTexture::Target s_textureType[epTT_Max] =
 {
   QOpenGLTexture::Target1D,
   QOpenGLTexture::Target1DArray,
@@ -28,21 +28,21 @@ static QOpenGLTexture::Target s_textureType[udTT_Max] =
   QOpenGLTexture::Target3D
 };
 
-udQtGLFormats s_GLFormats[udIF_Max] =
+epQtGLFormats s_GLFormats[epIF_Max] =
 {
-  { QOpenGLTexture::RGBA8_UNorm, QOpenGLTexture::RGBA, QOpenGLTexture::UInt32_RGBA8_Rev },    // udIF_RGBA8
-  { QOpenGLTexture::RGBA8_UNorm, QOpenGLTexture::BGRA, QOpenGLTexture::UInt32_RGBA8_Rev },    // udIF_BGRA8
-  //{ QOpenGLTexture::LuminanceFormat, QOpenGLTexture::Luminance, QOpenGLTexture::Float32 },  // udIF_R_F32
+  { QOpenGLTexture::RGBA8_UNorm, QOpenGLTexture::RGBA, QOpenGLTexture::UInt32_RGBA8_Rev },    // epIF_RGBA8
+  { QOpenGLTexture::RGBA8_UNorm, QOpenGLTexture::BGRA, QOpenGLTexture::UInt32_RGBA8_Rev },    // epIF_BGRA8
+  //{ QOpenGLTexture::LuminanceFormat, QOpenGLTexture::Luminance, QOpenGLTexture::Float32 },  // epIF_R_F32
   // TODO: does this work with older gl versions?
-  { QOpenGLTexture::R32F, QOpenGLTexture::Red, QOpenGLTexture::Float32 },                     // udIF_R_F32
+  { QOpenGLTexture::R32F, QOpenGLTexture::Red, QOpenGLTexture::Float32 },                     // epIF_R_F32
 };
 
 
 // ***************************************************************************************
-udTexture *udTexture_CreateTexture(udTextureType type, size_t width, size_t height, int levels, udImageFormat format)
+epTexture *epTexture_CreateTexture(epTextureType type, size_t width, size_t height, int levels, epImageFormat format)
 {
   bool result = true;
-  udTexture *pTex = nullptr;
+  epTexture *pTex = nullptr;
 
   QOpenGLTexture *pQtTexture = new QOpenGLTexture(s_textureType[type]);
   UD_ERROR_IF(!pQtTexture->create(), false);
@@ -50,7 +50,7 @@ udTexture *udTexture_CreateTexture(udTextureType type, size_t width, size_t heig
   pQtTexture->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
   pQtTexture->setWrapMode(QOpenGLTexture::ClampToEdge);
 
-  pTex = udAllocType(udTexture, 1, udAF_None);
+  pTex = udAllocType(epTexture, 1, udAF_None);
 
   pTex->type = type;
   pTex->format = format;
@@ -71,10 +71,10 @@ epilogue:
 }
 
 // ***************************************************************************************
-void udTexture_DestroyTexture(udTexture **ppTex)
+void epTexture_DestroyTexture(epTexture **ppTex)
 {
   QOpenGLTexture *pQtTexture = (*ppTex)->pTexture;
-  UDASSERT(pQtTexture, "QOpenGLTexture object has not been created");
+  EPASSERT(pQtTexture, "QOpenGLTexture object has not been created");
 
   pQtTexture->release();
   pQtTexture->destroy();
@@ -85,26 +85,26 @@ void udTexture_DestroyTexture(udTexture **ppTex)
 }
 
 // ***************************************************************************************
-void udTexture_SetImageData(udTexture *pTex, int udUnusedParam(element), int level, void *pImage)
+void epTexture_SetImageData(epTexture *pTex, int epUnusedParam(element), int level, void *pImage)
 {
   // TODO: should we use the function pointer instead? maybe api check?
 
   QOpenGLTexture *pQtTexture = pTex->pTexture;
 
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
-  UDASSERT(pQtTexture, "QOpenGLTexture object has not been created");
-  UDASSERT(pQtTexture->isCreated(), "GL Texture has not been created");
-  UDASSERT(!pQtTexture->isStorageAllocated(), "Texture storage has already been allocated");
-  UDASSERT(pTex->type == udTT_2D, "Qt currently driver currently only supports udTT_2D type textures");
+  EPASSERT(pQtTexture, "QOpenGLTexture object has not been created");
+  EPASSERT(pQtTexture->isCreated(), "GL Texture has not been created");
+  EPASSERT(!pQtTexture->isStorageAllocated(), "Texture storage has already been allocated");
+  EPASSERT(pTex->type == epTT_2D, "Qt currently driver currently only supports epTT_2D type textures");
 
-  udQtGLFormats &format = s_GLFormats[pTex->format];
+  epQtGLFormats &format = s_GLFormats[pTex->format];
   pQtTexture->bind();
 
   int elementWidth = static_cast<int>(pTex->width >> level);
   int elementHeight = static_cast<int>(pTex->height >> level);
   //int elementDepth = static_cast<int>(pTex->depth >> level);
 
-  // TODO: move these to udTexture_CreateTexture ?
+  // TODO: move these to epTexture_CreateTexture ?
   pQtTexture->setFormat(format.internalFormat);
   pQtTexture->setMipLevels(pTex->levels);
   pQtTexture->setSize(elementWidth, elementHeight);
@@ -120,4 +120,4 @@ void udTexture_SetImageData(udTexture *pTex, int udUnusedParam(element), int lev
   pQtTexture->setData(level, format.format, format.type, pImage);
 }
 
-#endif // UDRENDER_DRIVER == UDDRIVER_QT
+#endif // EPRENDER_DRIVER == EPDRIVER_QT

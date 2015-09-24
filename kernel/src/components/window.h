@@ -4,7 +4,7 @@
 
 #include "component.h"
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(Window);
@@ -14,7 +14,7 @@ SHARED_CLASS(UIComponent);
 class Window : public Component
 {
 public:
-  UD_COMPONENT(Window);
+  EP_COMPONENT(Window);
 
   void SetTopLevelUI(UIComponentRef spUIComponent);
   UIComponentRef GetTopLevelUI() const { return spTopLevelUI; }
@@ -23,10 +23,10 @@ public:
   const void *GetInternalData() const { return pInternal; }
 
 protected:
-  Window(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  Window(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   virtual ~Window();
 
-  udResult CreateInternal(udInitParams initParams);
+  udResult CreateInternal(epInitParams initParams);
   void DestroyInternal();
 
   UIComponentRef spTopLevelUI = nullptr;
@@ -34,6 +34,6 @@ protected:
   void *pInternal = nullptr;
 };
 
-} // namespace ud
+} // namespace ep
 
 #endif // UD_WINDOW_H

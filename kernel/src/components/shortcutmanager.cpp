@@ -1,7 +1,7 @@
 #include "components/shortcutmanager.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 static CMethodDesc methods[] =
 {
@@ -12,7 +12,7 @@ static CMethodDesc methods[] =
     },
     &ShortcutManager::SetShortcutString, // method
   },
-  // TODO - uncomment this once udVariant can be constructed from a udSharedString
+  // TODO - uncomment this once epVariant can be constructed from a epSharedString
   /*{
     {
       "getshortcutstring", // id
@@ -69,15 +69,15 @@ ComponentDesc ShortcutManager::descriptor =
   "Registers keyboard shortcuts and handles shortcut events", // description
 
   nullptr, // properties
-  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
   nullptr, // events
 };
 
-ShortcutManager::ShortcutManager(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+ShortcutManager::ShortcutManager(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {}
 
-udSharedString ShortcutManager::GetShortcutString(udString id) const
+epSharedString ShortcutManager::GetShortcutString(epString id) const
 {
   const Shortcut *pSh = shortcutRegistry.Get(id);
   if (!pSh)
@@ -86,7 +86,7 @@ udSharedString ShortcutManager::GetShortcutString(udString id) const
     pSh->shortcutString;
 }
 
-bool ShortcutManager::SetShortcutString(udString id, udString shortcutString)
+bool ShortcutManager::SetShortcutString(epString id, epString shortcutString)
 {
   Shortcut *sh = shortcutRegistry.Get(id);
   if (!sh)
@@ -100,7 +100,7 @@ bool ShortcutManager::SetShortcutString(udString id, udString shortcutString)
   return true;
 }
 
-bool ShortcutManager::RegisterShortcut(udString id, udString shortcutString, bool bFailIfExists)
+bool ShortcutManager::RegisterShortcut(epString id, epString shortcutString, bool bFailIfExists)
 {
   if (bFailIfExists && shortcutRegistry.Get(id))
   {
@@ -117,7 +117,7 @@ bool ShortcutManager::RegisterShortcut(udString id, udString shortcutString, boo
     }
   }
 
-  udMutableString<256> mShortcut;
+  epMutableString<256> mShortcut;
   mShortcut.reserve(shortcutString.length);
   mShortcut.length = shortcutString.length;
   StripWhitespace(mShortcut, shortcutString);
@@ -127,7 +127,7 @@ bool ShortcutManager::RegisterShortcut(udString id, udString shortcutString, boo
   return true;
 }
 
-udString ShortcutManager::StripWhitespace(udSlice<char> output, udString input)
+epString ShortcutManager::StripWhitespace(epSlice<char> output, epString input)
 {
   size_t len = 0;
   for (int i = 0; i < input.length; i++)
@@ -138,12 +138,12 @@ udString ShortcutManager::StripWhitespace(udSlice<char> output, udString input)
   return output.slice(0, len);
 }
 
-void ShortcutManager::UnregisterShortcut(udString id)
+void ShortcutManager::UnregisterShortcut(epString id)
 {
   shortcutRegistry.Remove(id);
 }
 
-bool ShortcutManager::HandleShortcutEvent(udString shortcutString)
+bool ShortcutManager::HandleShortcutEvent(epString shortcutString)
 {
   for (Shortcut &sh : shortcutRegistry)
   {
@@ -161,7 +161,7 @@ bool ShortcutManager::HandleShortcutEvent(udString shortcutString)
   return false;
 }
 
-bool ShortcutManager::SetShortcutFunction(udString id, udDelegate<void()> func)
+bool ShortcutManager::SetShortcutFunction(epString id, epDelegate<void()> func)
 {
   Shortcut *sh = shortcutRegistry.Get(id);
   if (!sh)
@@ -176,7 +176,7 @@ bool ShortcutManager::SetShortcutFunction(udString id, udDelegate<void()> func)
   return true;
 }
 
-bool ShortcutManager::SetShortcutScript(udString id, udString script)
+bool ShortcutManager::SetShortcutScript(epString id, epString script)
 {
   Shortcut *sh = shortcutRegistry.Get(id);
   if (!sh)
@@ -191,4 +191,4 @@ bool ShortcutManager::SetShortcutScript(udString id, udString script)
   return true;
 }
 
-} // namespace ud
+} // namespace ep

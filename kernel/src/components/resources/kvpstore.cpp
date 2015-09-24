@@ -1,6 +1,6 @@
 #include "kvpstore.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -57,8 +57,8 @@ ComponentDesc KVPStore::descriptor =
   "Metadata", // displayName
   "Metadata resource", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
-} // namespace ud
+} // namespace ep

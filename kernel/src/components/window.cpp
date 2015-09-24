@@ -1,7 +1,7 @@
 #include "window.h"
 #include "ui.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc windowProps[] =
@@ -28,14 +28,14 @@ ComponentDesc Window::descriptor =
   "Window",               // displayName
   "Is a window",          // description
 
-  udSlice<CPropertyDesc>(windowProps, UDARRAYSIZE(windowProps)), // properties
+  epSlice<CPropertyDesc>(windowProps, UDARRAYSIZE(windowProps)), // properties
   nullptr,
   nullptr
 };
 
 
 // ---------------------------------------------------------------------------------------
-Window::Window(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+Window::Window(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != udR_Success)
@@ -48,4 +48,4 @@ Window::~Window()
   DestroyInternal();
 }
 
-} // namespace ud
+} // namespace ep

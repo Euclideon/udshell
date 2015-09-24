@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDWINDOW_DRIVER == UDDRIVER_QT
+#if EPWINDOW_DRIVER == EPDRIVER_QT
 
 #include "hal/haltimer.h"
 #include <QTimer>
@@ -61,4 +61,4 @@ void HalTimer_Destroy(HalTimer **ppTimer)
   }
 }
 
-#endif // UDWINDOW_DRIVER == UDDRIVER_QT
+#endif // EPWINDOW_DRIVER == EPDRIVER_QT

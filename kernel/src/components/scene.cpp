@@ -4,7 +4,7 @@
 #include "kernel.h"
 #include "renderscene.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -51,13 +51,13 @@ ComponentDesc Scene::descriptor =
   "Scene",    // displayName
   "Is a scene", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
-  udSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  epSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 
-bool Scene::InputEvent(const udInputEvent &ev)
+bool Scene::InputEvent(const epInputEvent &ev)
 {
   // do anything here?
   //...
@@ -100,7 +100,7 @@ udResult Scene::SetRenderModels(struct udRenderModel models[], size_t numModels)
   return udR_Success;
 }
 
-Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams) :
+Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams) :
   Component(pType, pKernel, uid, initParams)
 {
   timeStep = 1.0 / 30.0;
@@ -114,4 +114,4 @@ Scene::~Scene()
 {
 
 }
-}  // namespace ud
+}  // namespace ep

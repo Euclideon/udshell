@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _UD_ARRAYBUFFER_H
-#define _UD_ARRAYBUFFER_H
+#ifndef _EP_ARRAYBUFFER_H
+#define _EP_ARRAYBUFFER_H
 
 #include "components/resources/buffer.h"
 #include "ep/epsharedptr.h"
@@ -9,7 +9,7 @@
 
 #include <type_traits>
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(RenderResource);
@@ -19,17 +19,17 @@ PROTOTYPE_COMPONENT(ArrayBuffer);
 class ArrayBuffer : public Buffer
 {
 public:
-  UD_COMPONENT(ArrayBuffer);
+  EP_COMPONENT(ArrayBuffer);
 
   // array allocation
-  inline void Allocate(udSharedString elementType, size_t elementSize, size_t length)
+  inline void Allocate(epSharedString elementType, size_t elementSize, size_t length)
   {
-    Allocate(elementType, elementSize, udSlice<size_t>(&length, 1));
+    Allocate(elementType, elementSize, epSlice<size_t>(&length, 1));
   }
-  void Allocate(udSharedString elementType, size_t elementSize, udSlice<const size_t> shape)
+  void Allocate(epSharedString elementType, size_t elementSize, epSlice<const size_t> shape)
   {
-    UDASSERT(shape.length > 0, "No dimensions given!");
-    UDASSERT(shape.length <= 4, "More than 4 dimensional matrices is not supported...");
+    EPASSERT(shape.length > 0, "No dimensions given!");
+    EPASSERT(shape.length <= 4, "More than 4 dimensional matrices is not supported...");
 
     dimensions = shape.length;
     this->elementType = elementType;
@@ -54,17 +54,17 @@ public:
   template<typename ElementType>
   inline void Allocate(size_t length)
   {
-    Allocate<ElementType>(udSlice<size_t>(&length, 1));
+    Allocate<ElementType>(epSlice<size_t>(&length, 1));
   }
   template<typename ElementType>
-  inline void Allocate(udSlice<const size_t> shape)
+  inline void Allocate(epSlice<const size_t> shape)
   {
     Allocate(stringof<ElementType>(), sizeof(ElementType), shape);
   }
 
   // allocate from existing data
   template<typename ElementType>
-  inline void AllocateFromData(udSlice<const ElementType> data)
+  inline void AllocateFromData(epSlice<const ElementType> data)
   {
     Allocate<ElementType>(data.length);
 
@@ -79,7 +79,7 @@ public:
     }
   }
 
-  udSharedString GetElementType() const { return elementType; }
+  epSharedString GetElementType() const { return elementType; }
   size_t GetElementSize() const { return elementSize; }
   size_t GetNumDimensions() const { return dimensions; }
 
@@ -90,37 +90,37 @@ public:
       elements *= shape[i];
     return elements;
   }
-  udSlice<const size_t> GetShape() const
+  epSlice<const size_t> GetShape() const
   {
-    return udSlice<const size_t>(shape, dimensions);
+    return epSlice<const size_t>(shape, dimensions);
   }
 
   // ArrayBuffer overrides the map functions
   template<typename T = void>
-  udSlice<T> Map()
+  epSlice<T> Map()
   {
-    UDASSERT(stringof<T>().eq(elementType), "Incompatible type!");
-    udSlice<void> buffer = Buffer::Map();
-    return udSlice<T>((T*)buffer.ptr, buffer.length/sizeof(T));
+    EPASSERT(stringof<T>().eq(elementType), "Incompatible type!");
+    epSlice<void> buffer = Buffer::Map();
+    return epSlice<T>((T*)buffer.ptr, buffer.length/sizeof(T));
   }
 
   template<typename T = void>
-  udSlice<const T> MapForRead()
+  epSlice<const T> MapForRead()
   {
-    UDASSERT(stringof<T>().eq(elementType), "Incompatible type!");
-    udSlice<void> buffer = Buffer::MapForRead();
+    EPASSERT(stringof<T>().eq(elementType), "Incompatible type!");
+    epSlice<void> buffer = Buffer::MapForRead();
     if (pNumElements)
       *pNumElements = buffer.length/sizeof(T);
-    return udSlice<const T>((const T*)buffer.ptr, buffer.length/sizeof(T));
+    return epSlice<const T>((const T*)buffer.ptr, buffer.length/sizeof(T));
   }
 
   template<typename T>
-  void SetData(udSlice<const T> data)
+  void SetData(epSlice<const T> data)
   {
-    UDASSERT(stringof<T>().eq(elementType), "Incompatible type!");
+    EPASSERT(stringof<T>().eq(elementType), "Incompatible type!");
 
     size_t numElements = GetLength();
-    UDASSERT(buffer.length == sizeof(T)*numElements, "Incorrect number of elements!");
+    EPASSERT(buffer.length == sizeof(T)*numElements, "Incorrect number of elements!");
 
     // initialise buffer
     if (std::is_pod<T>::value)
@@ -136,14 +136,14 @@ public:
 protected:
   friend class GeomNode;
 
-  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Buffer(pType, pKernel, uid, initParams)
   {
-    Changed.Subscribe(udDelegate<void()>(this, &ArrayBuffer::OnBufferDirty));
+    Changed.Subscribe(epDelegate<void()>(this, &ArrayBuffer::OnBufferDirty));
   }
   ~ArrayBuffer()
   {
-    Changed.Unsubscribe(udDelegate<void()>(this, &ArrayBuffer::OnBufferDirty));
+    Changed.Unsubscribe(epDelegate<void()>(this, &ArrayBuffer::OnBufferDirty));
   }
 
   void OnBufferDirty()
@@ -159,7 +159,7 @@ protected:
   };
   RenderResourceRef GetRenderResource(RenderResourceType type);
 
-  udSharedString elementType;
+  epSharedString elementType;
   size_t elementSize;
   size_t dimensions;
   size_t shape[4];
@@ -168,12 +168,12 @@ protected:
 };
 
 template<>
-inline udSlice<void> ArrayBuffer::Map<void>() { return Buffer::Map(); }
+inline epSlice<void> ArrayBuffer::Map<void>() { return Buffer::Map(); }
 
 template<>
-inline udSlice<const void> ArrayBuffer::MapForRead<void>() { return Buffer::MapForRead(); }
+inline epSlice<const void> ArrayBuffer::MapForRead<void>() { return Buffer::MapForRead(); }
 
 
-} // namespace ud
+} // namespace ep
 
-#endif // _UD_ARRAYBUFFER_H
+#endif // _EP_ARRAYBUFFER_H

@@ -2,7 +2,7 @@
 #include "renderresource.h"
 #include "renderscene.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc Buffer::descriptor =
@@ -81,22 +81,22 @@ size_t Buffer::GetBufferSize() const
   return logicalSize;
 }
 
-udSlice<void> Buffer::Map()
+epSlice<void> Buffer::Map()
 {
   if (!buffer.ptr || mapDepth > 0)
     return nullptr;
   readMap = false;
   ++mapDepth;
-  return udSlice<void>(buffer.ptr, logicalSize);
+  return epSlice<void>(buffer.ptr, logicalSize);
 }
 
-udSlice<const void> Buffer::MapForRead()
+epSlice<const void> Buffer::MapForRead()
 {
   if (!buffer.ptr || (mapDepth > 0 && !readMap))
     return nullptr;
   readMap = true;
   ++mapDepth;
-  return udSlice<void>(buffer.ptr, logicalSize);
+  return epSlice<void>(buffer.ptr, logicalSize);
 }
 
 void Buffer::Unmap()
@@ -110,8 +110,8 @@ bool Buffer::CopyBuffer(BufferRef buffer)
   if (mapDepth > 0)
     return false; // TODO Error handling
 
-  udSlice<const void> buf = buffer->MapForRead();
-  UDASSERT(buf != nullptr, "Unable to map buffer!");
+  epSlice<const void> buf = buffer->MapForRead();
+  EPASSERT(buf != nullptr, "Unable to map buffer!");
   if (buf != nullptr)
   {
     CopyBuffer(buf);
@@ -121,7 +121,7 @@ bool Buffer::CopyBuffer(BufferRef buffer)
   return true; // TODO Error handling
 }
 
-bool Buffer::CopyBuffer(udSlice<const void> _buffer)
+bool Buffer::CopyBuffer(epSlice<const void> _buffer)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
@@ -135,4 +135,4 @@ bool Buffer::CopyBuffer(udSlice<const void> _buffer)
   return true; // TODO Error handling
 }
 
-} // namespace ud
+} // namespace ep

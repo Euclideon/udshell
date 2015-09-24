@@ -1,6 +1,6 @@
 #include "viewport.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc Viewport::descriptor =
@@ -17,7 +17,7 @@ ComponentDesc Viewport::descriptor =
 
 
 // ---------------------------------------------------------------------------------------
-Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != udR_Success)
@@ -30,4 +30,4 @@ Viewport::~Viewport()
   DestroyInternal();
 }
 
-} // namespace ud
+} // namespace ep

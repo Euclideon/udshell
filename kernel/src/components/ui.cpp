@@ -1,6 +1,6 @@
 #include "ui.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc UIComponent::descriptor =
@@ -16,7 +16,7 @@ ComponentDesc UIComponent::descriptor =
 };
 
 
-UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != udR_Success)
@@ -28,4 +28,4 @@ UIComponent::~UIComponent()
   DestroyInternal();
 }
 
-} // namespace ud
+} // namespace ep

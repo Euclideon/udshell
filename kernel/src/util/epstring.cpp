@@ -27,7 +27,7 @@ const char s_charDetails[256] =
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
 
-udSharedString udSharedString::sprintf(const char *pFormat, ...)
+epSharedString epSharedString::sprintf(const char *pFormat, ...)
 {
   va_list args;
   va_start(args, pFormat);
@@ -35,12 +35,12 @@ udSharedString udSharedString::sprintf(const char *pFormat, ...)
   size_t len = vsprintf(nullptr, pFormat, args) + 1;
   len = numToAlloc(len);
 
-  udSharedString r;
-  r.rc = (udRC*)udAlloc(sizeof(udRC) + len);
+  epSharedString r;
+  r.rc = (epRC*)udAlloc(sizeof(epRC) + len);
   r.rc->refCount = 1;
   r.rc->allocatedCount = len;
-  r.ptr = ((const char*)r.rc)+sizeof(udRC);
-#if UDPLATFORM_NACL
+  r.ptr = ((const char*)r.rc)+sizeof(epRC);
+#if defined(EP_NACL)
   r.length = vsprintf((char*)r.ptr, pFormat, args);
 #else
   r.length = vsnprintf((char*)r.ptr, len, pFormat, args);
@@ -51,14 +51,14 @@ udSharedString udSharedString::sprintf(const char *pFormat, ...)
   return r;
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), nullptr_t, const udVarArg *udUnusedParam(pArgs))
+ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), nullptr_t, const epVarArg *epUnusedParam(pArgs))
 {
   if (buffer.ptr)
-    udString("null", 4).copyTo(buffer);
+    epString("null", 4).copyTo(buffer);
   return 4;
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s, const udVarArg *pArgs)
+ptrdiff_t epStringify(epSlice<char> buffer, epString format, epString s, const epVarArg *pArgs)
 {
   // parse format string
   bool rightJustify = false;
@@ -73,9 +73,9 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s, const u
     else if (format[0] == '*')
     {
       int64_t i = format.slice(1, format.length).parseInt();
-      UDASSERT(pArgs[i].HasIntify(), "Argument can not be interpreted as an integer!");
+      EPASSERT(pArgs[i].HasIntify(), "Argument can not be interpreted as an integer!");
       minimumLen = pArgs[i].GetInt();
-      UDASSERT(minimumLen >= 0, "Invalid string length!");
+      EPASSERT(minimumLen >= 0, "Invalid string length!");
       break;
     }
     else
@@ -116,7 +116,7 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString format, udString s, const u
   return length;
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), bool b, const udVarArg *udUnusedParam(pArgs))
+ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), bool b, const epVarArg *epUnusedParam(pArgs))
 {
   if (b == true)
   {
@@ -124,7 +124,7 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), bool
     {
       if (buffer.length < 4)
         return buffer.length - 4;
-      udString("true", 4).copyTo(buffer);
+      epString("true", 4).copyTo(buffer);
     }
     return 4;
   }
@@ -134,13 +134,13 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), bool
     {
       if (buffer.length < 5)
         return buffer.length - 5;
-      udString("false", 5).copyTo(buffer);
+      epString("false", 5).copyTo(buffer);
     }
     return 5;
   }
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), int64_t i, const udVarArg *udUnusedParam(pArgs))
+ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), int64_t i, const epVarArg *epUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for ints?
 
@@ -185,7 +185,7 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), int6
   return len;
 }
 
-ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), uint64_t i, const udVarArg *udUnusedParam(pArgs))
+ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), uint64_t i, const epVarArg *epUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for ints?
 
@@ -213,32 +213,32 @@ ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), uint
   }
   return len;
 }
-ptrdiff_t udStringify(udSlice<char> buffer, udString udUnusedParam(format), double f, const udVarArg *udUnusedParam(pArgs))
+ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), double f, const epVarArg *epUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for floats?
-  UDASSERT(false, "No fun!");
+  EPASSERT(false, "No fun!");
   return 0;
 }
 
 namespace ud_internal
 {
-  size_t getLength(udSlice<udVarArg> args)
+  size_t getLength(epSlice<epVarArg> args)
   {
     size_t len = 0;
     for (auto &a : args)
       len += a.GetStringLength();
     return len;
   }
-  udSlice<char> concatenate(udSlice<char> buffer, udSlice<udVarArg> args)
+  epSlice<char> concatenate(epSlice<char> buffer, epSlice<epVarArg> args)
   {
     size_t len = 0;
     for (auto &a : args)
       len += a.GetString(buffer.slice(len, buffer.length));
     return buffer.slice(0, len);
   }
-  udSlice<char> format(udString format, udSlice<char> buffer, udSlice<udVarArg> args)
+  epSlice<char> format(epString format, epSlice<char> buffer, epSlice<epVarArg> args)
   {
-    udMutableString64 indirectFormat;
+    epMutableString64 indirectFormat;
 
     size_t offset = 0;
     char *pBuffer = buffer.ptr;
@@ -269,7 +269,7 @@ namespace ud_internal
         // get the arg index
         if (!isNumeric(*pC))
         {
-          UDASSERT(false, "Invalid format string!");
+          EPASSERT(false, "Invalid format string!");
           return nullptr;
         }
         size_t arg = 0;
@@ -277,7 +277,7 @@ namespace ud_internal
           arg = arg*10 + (*pC++ - '0');
         if (arg >= args.length)
         {
-          UDASSERT(false, "Format string references invalid parameter!");
+          EPASSERT(false, "Format string references invalid parameter!");
           return nullptr;
         }
         while (isWhitespace(*pC) && pC < pEnd)
@@ -286,7 +286,7 @@ namespace ud_internal
           return nullptr;
 
         // get the format string (if present)
-        udString format;
+        epString format;
         if (*pC == ',')
         {
           ++pC;
@@ -307,7 +307,7 @@ namespace ud_internal
         // expect terminating '}'
         if (*pC++ != '}')
         {
-          UDASSERT(false, "Invalid format string!");
+          EPASSERT(false, "Invalid format string!");
           return nullptr;
         }
 
@@ -318,16 +318,16 @@ namespace ud_internal
           if (format[0] == '@')
           {
             int64_t i = format.slice(1, format.length).parseInt(false);
-            UDASSERT(i >= 0 && (size_t)i < args.length, "Invalid indirect format index!");
+            EPASSERT(i >= 0 && (size_t)i < args.length, "Invalid indirect format index!");
             ptrdiff_t formatLen = args[i].GetStringLength();
             indirectFormat.reserve((size_t)formatLen);
             args[i].GetString(indirectFormat.getBuffer());
-            format = udString(indirectFormat.ptr, formatLen);
+            format = epString(indirectFormat.ptr, formatLen);
           }
         }
 
         // append the arg
-        offset += args[arg].GetString(udSlice<char>(pBuffer ? pBuffer + offset : nullptr, pBuffer ? buffer.length - offset : 0), format, args.ptr);
+        offset += args[arg].GetString(epSlice<char>(pBuffer ? pBuffer + offset : nullptr, pBuffer ? buffer.length - offset : 0), format, args.ptr);
       }
       else
       {
@@ -337,44 +337,44 @@ namespace ud_internal
         ++pC;
       }
     }
-    return udSlice<char>(pBuffer, offset);
+    return epSlice<char>(pBuffer, offset);
   }
 }
 
-udSharedString udSharedString::concatInternal(udSlice<udVarArg> args)
+epSharedString epSharedString::concatInternal(epSlice<epVarArg> args)
 {
   size_t len = ud_internal::getLength(args);
 
-  // allocate a new udSharedString
-  udRC *pRC = (udRC*)udAlloc(sizeof(udRC) + sizeof(char)*(len+1));
+  // allocate a new epSharedString
+  epRC *pRC = (epRC*)udAlloc(sizeof(epRC) + sizeof(char)*(len+1));
   pRC->refCount = 0;
   pRC->allocatedCount = len;
   char *ptr = (char*)(pRC + 1);
 
-  ud_internal::concatenate(udSlice<char>(ptr, len), args);
+  ud_internal::concatenate(epSlice<char>(ptr, len), args);
   ptr[len] = 0;
 
-  return udSharedString(ptr, len, pRC);
+  return epSharedString(ptr, len, pRC);
 }
-udSharedString udSharedString::formatInternal(udString format, udSlice<udVarArg> args)
+epSharedString epSharedString::formatInternal(epString format, epSlice<epVarArg> args)
 {
   size_t len = ud_internal::format(format, nullptr, args).length;
 
-  // allocate a new udSharedString
-  udRC *pRC = (udRC*)udAlloc(sizeof(udRC) + sizeof(char)*(len+1));
+  // allocate a new epSharedString
+  epRC *pRC = (epRC*)udAlloc(sizeof(epRC) + sizeof(char)*(len+1));
   pRC->refCount = 0;
   pRC->allocatedCount = len;
   char *ptr = (char*)(pRC + 1);
 
-  ud_internal::format(format, udSlice<char>(ptr, len), args);
+  ud_internal::format(format, epSlice<char>(ptr, len), args);
   ptr[len] = 0;
 
-  return udSharedString(ptr, len, pRC);
+  return epSharedString(ptr, len, pRC);
 }
 
-int64_t udString::parseInt(bool bDetectBase, int base) const
+int64_t epString::parseInt(bool bDetectBase, int base) const
 {
-  udString s = trim(true, false);
+  epString s = trim(true, false);
   if (s.length == 0)
     return 0; // this isn't really right!
 
@@ -432,9 +432,9 @@ int64_t udString::parseInt(bool bDetectBase, int base) const
   return number;
 }
 
-double udString::parseFloat() const
+double epString::parseFloat() const
 {
-  udString s = trim(true, false);
+  epString s = trim(true, false);
   if (s.length == 0)
     return 0; // this isn't really right!
 
@@ -471,13 +471,13 @@ double udString::parseFloat() const
   return (double)number * frac;
 }
 
-udResult udSlice_Test()
+udResult epSlice_Test()
 {
   // usSlice<> tests
   int i[100];
 
-  udSlice<int> i1(i, 100);        // slice from array
-  udSlice<const int> ci1(i, 100); // const slice from mutable array
+  epSlice<int> i1(i, 100);        // slice from array
+  epSlice<const int> ci1(i, 100); // const slice from mutable array
   ci1 = i1;                       // assign mutable to const
 
   ci1 == i1;                      // compare pointer AND length are equal
@@ -486,7 +486,7 @@ udResult udSlice_Test()
   i1.eq(ci1);                     // test elements for equality
 
   short s[100];
-  udSlice<short> s1(s, 100);
+  epSlice<short> s1(s, 100);
 
   i1.eq(s1);                      // test elements of different (compatible) types for equality (ie, int == short)
 
@@ -496,16 +496,16 @@ udResult udSlice_Test()
   slice.empty();                  // ptr == nullptr || length == 0
 
 
-  // udFixedSlice<>
-  udFixedSlice<int> s_i(i1);
-  udFixedSlice<const int> s_ci(s1);
+  // epArray<>
+  epArray<int> s_i(i1);
+  epArray<const int> s_ci(s1);
 
-  udSlice<int> s_slice = s_i.slice(1, 3); // slices of udFixedSlice are not owned; they die when the parent allocation dies
+  epSlice<int> s_slice = s_i.slice(1, 3); // slices of epArray are not owned; they die when the parent allocation dies
 
 
-  // udSharedSlice<> tests
-  udSharedSlice<int> rc_i1(i1);       // rc_i1 is an allocated, ref-counted copy of the slice i1
-  udSharedSlice<const int> rc_ci1(s1);// rc_ci1 initialised from different (compatible) types (ie, short -> int, float -> double)
+  // epSharedSlice<> tests
+  epSharedSlice<int> rc_i1(i1);       // rc_i1 is an allocated, ref-counted copy of the slice i1
+  epSharedSlice<const int> rc_ci1(s1);// rc_ci1 initialised from different (compatible) types (ie, short -> int, float -> double)
 
   // TODO: assign mutable RCSlice to const RCSlice without copy, should only bump RC
 
@@ -515,9 +515,9 @@ udResult udSlice_Test()
 
   rc_i1 = rc_slice;               // assignment between RC slices of the same array elide rc fiddling; only updates the offset/length
 
-  i1 == rc_i2;                    // comparison of udSlice and udSharedSlice; compares ptr && length as usual
+  i1 == rc_i2;                    // comparison of epSlice and epSharedSlice; compares ptr && length as usual
 
-  rc_i1.eq(i1);                   // element comparison between udSlice and udSharedSlice
+  rc_i1.eq(i1);                   // element comparison between epSlice and epSharedSlice
 
   for (auto i : i1)
   {
@@ -528,7 +528,7 @@ udResult udSlice_Test()
   return udR_Success;
 }
 
-void receivesString(udString)
+void receivesString(epString)
 {
 }
 void receivesCString(const char*)
@@ -537,77 +537,77 @@ void receivesCString(const char*)
 
 #include "ep/epvariant.h"
 
-udResult udString_Test()
+udResult epString_Test()
 {
-  // udString
+  // epString
   char buffer[] = "world";
 
-  udString s1 = "hello";        // initialise from string
-  udString s2(buffer, 3);       // initialise to sub-string; ie, "wor"
+  epString s1 = "hello";        // initialise from string
+  epString s2(buffer, 3);       // initialise to sub-string; ie, "wor"
 
   s1.eq(s2);                    // strcmp() == 0
   s1.eqIC(s2);                   // case insensitive; stricmp() == 0
   s1.eq("hello");               // compare with c-string
 
-  udSharedSlice<wchar_t> wcs(s1);   // init w_char string from c-string! yay unicode! (except we probably also want to decode utf-8...)
+  epSharedSlice<wchar_t> wcs(s1);   // init w_char string from c-string! yay unicode! (except we probably also want to decode utf-8...)
 
   wcs.eq(s1);                   // compare wide-char and ascii strings
 
   auto subStr = s1.slice(1, 4); // string slice; "ell"
 
-  s2.toStringz(buffer, sizeof(buffer)); // write udString to c-string
+  s2.toStringz(buffer, sizeof(buffer)); // write epString to c-string
 
 
-  // udMutableString
-  udMutableString<64> s_s1(s1);
-  udString s_slice = s_s1.slice(1, 4); // slices of udFixedSlice are not owned; they die when the parent allocation dies
+  // epMutableString
+  epMutableString<64> s_s1(s1);
+  epString s_slice = s_s1.slice(1, 4); // slices of epArray are not owned; they die when the parent allocation dies
 
   s_s1.eqIC("HELLO");            // string comparison against string literals
 
   receivesString(s_s1);         // pass to functions
 
   s_s1.reserve(100);            // reserve a big buffer
-  UDASSERT(s_s1.eq(s1), "!");   // the existing contents is preserved
+  EPASSERT(s_s1.eq(s1), "!");   // the existing contents is preserved
 
-  s_s1.concat(s1, "!!", udString("world"));
+  s_s1.concat(s1, "!!", epString("world"));
 
 
-  // udSharedString
-  udSharedString rcs1(s1);          // RC string initialised from some slice
-  udSharedString rcs2("string");    // also from literal
-  udSharedString rcs3(buffer, 4);   // also from c-string (and optionally a slice thereof)
+  // epSharedString
+  epSharedString rcs1(s1);          // RC string initialised from some slice
+  epSharedString rcs2("string");    // also from literal
+  epSharedString rcs3(buffer, 4);   // also from c-string (and optionally a slice thereof)
 
   receivesString(rcs1);         // pass to functions
 
-  udMutableString<64> ss2 = rcs2; // stack string takes copy of a udSharedString
-  udSharedString rcs4 = ss2;        // rc strings take copy of stack strings too
+  epMutableString<64> ss2 = rcs2; // stack string takes copy of a epSharedString
+  epSharedString rcs4 = ss2;        // rc strings take copy of stack strings too
 
-  rcs1 == s1;                   // compare udSharedString and udString pointers
+  rcs1 == s1;                   // compare epSharedString and epString pointers
 
-  rcs1.eqIC(s1);                 // string comparison works too between udSharedString and udString
+  rcs1.eqIC(s1);                 // string comparison works too between epSharedString and epString
 
-//  udSharedString::format("Format: %s", "hello");  // create from format string
+//  epSharedString::format("Format: %s", "hello");  // create from format string
 
 //  char temp[256];
-//  fopen(rcs1.toStringz(temp, sizeof(temp)), "ro"); // write udSharedString to c-string, for passing to OS functions or C api's
+//  fopen(rcs1.toStringz(temp, sizeof(temp)), "ro"); // write epSharedString to c-string, for passing to OS functions or C api's
                                                    // unlike c_str(), user supplies buffer (saves allocations)
 
-  udSharedString r2 = udSharedString::concat(s1, "!!", rcs1, udString("world"), s_s1);
-//  udSharedString::format("x{1}_{2}", "10", "200");
+  epSharedString r2 = epSharedString::concat(s1, "!!", rcs1, epString("world"), s_s1);
+//  epSharedString::format("x{1}_{2}", "10", "200");
 
   receivesCString(r2.toStringz());
 
   const char *pName = "manu";
-  udSharedString cc = udSharedString::concat("hello ", pName, 10);
-  udSharedString fmt = udSharedString::format("{ 1 }, {2}, { 0 , hello }", "hello ", pName, 10);
+  epSharedString cc = epSharedString::concat("hello ", pName, 10);
+  epSharedString fmt = epSharedString::format("{ 1 }, {2}, { 0 , hello }", "hello ", pName, 10);
 
-  udMutableString<0> ms; ms.concat("hello ", pName, 10);
+  epMutableString<0> ms; ms.concat("hello ", pName, 10);
   ms.append("poop!");
 
   int arr[] = { 1, 2, 30 };
-  ms.format("{1}, {2}, {0,@5} {3}, {4}", "hello ", pName, 10, udSlice<int>(arr, 3), udVariant(true), "*6", 10);
+  ms.format("{1}, {2}, {0,@5} {3}, {4}", "hello ", pName, 10, epSlice<int>(arr, 3), epVariant(true), "*6", 10);
 
-  udSlice<const void> poo;
+  epSlice<const void> poo;
 //  poo.slice(1, 3);
 //  poo[2];
 //  poo.alloc(10);

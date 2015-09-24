@@ -3,7 +3,7 @@
 #include "components/datasource.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 /*
@@ -28,14 +28,14 @@ ComponentDesc ResourceManager::descriptor =
   "Resource Manager", // displayName
   "Manages resource components", // description
 
-  //udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  //udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  //epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  //epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
   nullptr, // properties
   nullptr, // methods
   nullptr, // events
 };
 
-ResourceManager::ResourceManager(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+ResourceManager::ResourceManager(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
 
@@ -49,9 +49,9 @@ ResourceManager::~ResourceManager()
 void ResourceManager::AddResource(ResourceRef res) { resources.Insert(res->uid, res); }
 void ResourceManager::RemoveResource(ResourceRef res) { resources.Remove(res->uid); }
 
-udFixedSlice<ResourceRef> ResourceManager::GetResourcesByType(const ComponentDesc *pBase) const
+epArray<ResourceRef> ResourceManager::GetResourcesByType(const ComponentDesc *pBase) const
 {
-  udFixedSlice<ResourceRef> outs;
+  epArray<ResourceRef> outs;
 
   for (ResourceRef spRes : resources)
   {
@@ -71,10 +71,10 @@ udFixedSlice<ResourceRef> ResourceManager::GetResourcesByType(const ComponentDes
   return outs;
 }
 
-void ResourceManager::LoadResourcesFromFile(udInitParams initParams)
+void ResourceManager::LoadResourcesFromFile(epInitParams initParams)
 {
-  udVariant src = initParams["src"];
-  udString ext = src.asString().getRightAtLast('.');
+  epVariant src = initParams["src"];
+  epString ext = src.asString().getRightAtLast('.');
   if (ext.empty())
   {
     LogWarning(2, "LoadResourcesFromFile - \"src\" parameter is invalid");
@@ -96,9 +96,9 @@ void ResourceManager::LoadResourcesFromFile(udInitParams initParams)
   }
 }
 
-void ResourceManager::SaveResourcesToFile(udSlice<ResourceRef>, udInitParams initParams)
+void ResourceManager::SaveResourcesToFile(epSlice<ResourceRef>, epInitParams initParams)
 {
 
 }
 
-} // namespace ud
+} // namespace ep

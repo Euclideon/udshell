@@ -1,6 +1,6 @@
 #include "text.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc Text::descriptor =
@@ -15,4 +15,4 @@ ComponentDesc Text::descriptor =
   "Text resource", // description
 };
 
-} // namespace ud
+} // namespace ep

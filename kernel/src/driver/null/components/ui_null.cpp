@@ -1,15 +1,15 @@
 #include "hal/driver.h"
 
-#if UDUI_DRIVER == UDDRIVER_NULL
+#if EPUI_DRIVER == EPDRIVER_NULL
 
 #include "components/ui.h"
 #include "components/viewport.h"
 #include "components/window.h"
 
-namespace ud
+namespace ep
 {
 
-udResult UIComponent::CreateInternal(udInitParams udUnusedParam(initParams))
+udResult UIComponent::CreateInternal(epInitParams epUnusedParam(initParams))
 {
   return udR_Success;
 }
@@ -21,7 +21,7 @@ void UIComponent::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-udResult Viewport::CreateInternal(udInitParams udUnusedParam(initParams))
+udResult Viewport::CreateInternal(epInitParams epUnusedParam(initParams))
 {
   return udR_Success;
 }
@@ -33,7 +33,7 @@ void Viewport::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-udResult Window::CreateInternal(udInitParams udUnusedParam(initParams))
+udResult Window::CreateInternal(epInitParams epUnusedParam(initParams))
 {
   return udR_Success;
 }
@@ -44,10 +44,10 @@ void Window::DestroyInternal()
 }
 
 // ---------------------------------------------------------------------------------------
-void Window::SetTopLevelUI(UIComponentRef udUnusedParam(spUIComponent))
+void Window::SetTopLevelUI(UIComponentRef epUnusedParam(spUIComponent))
 {
 }
 
-} // namespace ud
+} // namespace ep
 
 #endif

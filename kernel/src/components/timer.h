@@ -1,13 +1,13 @@
 #pragma once
-#if !defined(_UD_TIMER_H)
-#define _UD_TIMER_H
+#if !defined(_EP_TIMER_H)
+#define _EP_TIMER_H
 
 #include "component.h"
 #include "components/stream.h"
 #include "resources/resource.h"
 #include "hal/haltimer.h"
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(Timer);
@@ -15,14 +15,14 @@ PROTOTYPE_COMPONENT(Timer);
 class Timer : public Component
 {
 public:
-  UD_COMPONENT(Timer);
+  EP_COMPONENT(Timer);
 
   UD_ENUM(TimerType,
     Interval,
     CountDown
     );
 
-  udEvent<> Event;
+  epEvent<> Event;
 
   uint32_t GetDuration() const { return pTimer ? pTimer->duration : 0; };
   TimerType GetTimerType() const { return pTimer ? TimerType(pTimer->timerType) : TimerType::Interval;}
@@ -35,7 +35,7 @@ public:
   void MessageCallback(Kernel *pKernel);
 
 private:
-  Timer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  Timer(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   virtual ~Timer();
 
   static void TimerCallback(HalTimer *pTimer, void *pParam);
@@ -46,4 +46,4 @@ private:
 
 }
 
-#endif // _UD_TIMER_H
+#endif // _EP_TIMER_H

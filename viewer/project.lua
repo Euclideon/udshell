@@ -4,11 +4,13 @@ project "epviewer"
 	flags { "StaticRuntime" }
 
 	files { "src/**.cpp", "src/**.h" }
-	files { "../premake5.lua", "project.lua" }
+	files { "premake5.lua", "project.lua" }
+
+	includedirs { "../public/include" }
+	includedirs { "../kernel/src" }
 
 	includedirs { "../ud/udPlatform/Include" }
 	includedirs { "../ud/udPointCloud/Include" }
-	includedirs { "../kernel/src" }
 
 	links { "GLEW" }
 	links { "SDL2" }
@@ -36,12 +38,7 @@ project "epviewer"
 	configuration { }
 
 	-- include common stuff
-	dofile "../ud/common-proj.lua"
+	dofile "../common-proj.lua"
 
-	exceptionhandling "Default"
-
-	-- common-proj.lua set objdir and targetdir, we'll reset them correctly for epviewer
-	objdir "../int/%{cfg.buildcfg}_%{cfg.platform}"
+	-- viewer goes to public/bin
 	targetdir "../public/bin/%{cfg.buildcfg}_%{cfg.platform}"
-
-

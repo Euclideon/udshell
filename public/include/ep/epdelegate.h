@@ -1,6 +1,6 @@
 #pragma once
-#if !defined(_UDDELEGATE_H)
-#define _UDDELEGATE_H
+#if !defined(_EPDELEGATE_H)
+#define _EPDELEGATE_H
 
 #include "ep/epfastdelegate.h"
 #include "ep/epsharedptr.h"
@@ -8,63 +8,63 @@
 using fastdelegate::FastDelegate;
 typedef fastdelegate::DelegateMemento FastDelegateMemento;
 
-class udDelegateMemento : public udRefCounted
+class epDelegateMemento : public epRefCounted
 {
 protected:
   template<typename Signature>
-  friend class udDelegate;
+  friend class epDelegate;
   template<typename T>
-  friend class udSharedPtr;
+  friend class epSharedPtr;
 
-  udDelegateMemento() {}
-  udDelegateMemento(FastDelegateMemento m) : m(m) {}
+  epDelegateMemento() {}
+  epDelegateMemento(FastDelegateMemento m) : m(m) {}
 
   FastDelegateMemento m;
 };
-typedef udSharedPtr<udDelegateMemento> udDelegateMementoRef;
+typedef epSharedPtr<epDelegateMemento> epDelegateMementoRef;
 
 
 // facilitate using the function template syntax
 template<typename Signature>
-class udDelegate;
+class epDelegate;
 
 template<typename R, typename... Args>
-class udDelegate<R(Args...)>
+class epDelegate<R(Args...)>
 {
 public:
-  udDelegate() {}
-  udDelegate(nullptr_t) {}
-  udDelegate(udDelegate<R(Args...)> &&rval)
+  epDelegate() {}
+  epDelegate(nullptr_t) {}
+  epDelegate(epDelegate<R(Args...)> &&rval)
   {
     // blind-copy the pointer
     (void*&)m = (void*&)rval.m;
     // inhibit the rval destructor
     (void*&)rval.m = nullptr;
   }
-  udDelegate(const udDelegate<R(Args...)> &d)   : m(d.m) {}
+  epDelegate(const epDelegate<R(Args...)> &d)   : m(d.m) {}
 
-  udDelegate(udSharedPtr<udDelegateMemento> m)  : m(m) {}
+  epDelegate(epSharedPtr<epDelegateMemento> m)  : m(m) {}
 
-  udDelegate(FastDelegate<R(Args...)> d)        : m(udDelegateMementoRef::create(d.GetMemento())) {}
+  epDelegate(FastDelegate<R(Args...)> d)        : m(epDelegateMementoRef::create(d.GetMemento())) {}
   template <class X, class Y>
-  udDelegate(Y *i, R(X::*f)(Args...))           : udDelegate(Delegate(i, f)) {}
+  epDelegate(Y *i, R(X::*f)(Args...))           : epDelegate(Delegate(i, f)) {}
   template <class X, class Y>
-  udDelegate(Y *i, R(X::*f)(Args...) const)     : udDelegate(Delegate(i, f)) {}
-  udDelegate(R(*f)(Args...))                    : udDelegate(Delegate(f)) {}
+  epDelegate(Y *i, R(X::*f)(Args...) const)     : epDelegate(Delegate(i, f)) {}
+  epDelegate(R(*f)(Args...))                    : epDelegate(Delegate(f)) {}
 
   explicit operator bool () { return m ? !m->m.empty() : false; }
 
-  udDelegate& operator=(const udDelegate &d)
+  epDelegate& operator=(const epDelegate &d)
   {
     if (this != &d)
     {
-      this->~udDelegate();
-      new (this) udDelegate(d);
+      this->~epDelegate();
+      new (this) epDelegate(d);
     }
     return *this;
   }
 
-  udDelegate& operator=(udDelegate &&rval)
+  epDelegate& operator=(epDelegate &&rval)
   {
     if (this != &rval)
     {
@@ -75,27 +75,27 @@ public:
   }
 
 
-  UDFORCE_INLINE R operator()(Args... args) const
+  __forceinline R operator()(Args... args) const
   {
     Delegate d;
     d.SetMemento(m->m);
     return d(args...);
   }
 
-  void SetMemento(udDelegateMementoRef m) { this->m = m; }
-  udDelegateMementoRef GetMemento() const { return m; }
+  void SetMemento(epDelegateMementoRef m) { this->m = m; }
+  epDelegateMementoRef GetMemento() const { return m; }
 
 protected:
   typedef FastDelegate<R(Args...)> Delegate;
 
-  udDelegateMementoRef m = nullptr;
+  epDelegateMementoRef m = nullptr;
 };
 
 template<typename R, typename... Args>
-inline ptrdiff_t udStringify(udSlice<char> udUnusedParam(buffer), udString udUnusedParam(format), udDelegate<R(Args...)> udUnusedParam(d), const udVarArg *udUnusedParam(pArgs))
+inline ptrdiff_t epStringify(epSlice<char> epUnusedParam(buffer), epString epUnusedParam(format), epDelegate<R(Args...)> epUnusedParam(d), const epVarArg *epUnusedParam(pArgs))
 {
-  UDASSERT(false, "TODO! Write me!");
+  EPASSERT(false, "TODO! Write me!");
   return 0;
 }
 
-#endif // _UDDELEGATE_H
+#endif // _EPDELEGATE_H

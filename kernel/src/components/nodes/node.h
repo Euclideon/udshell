@@ -1,13 +1,13 @@
 #pragma once
-#ifndef UDNODE_H
-#define UDNODE_H
+#ifndef EPNODE_H
+#define EPNODE_H
 
 #include "udMath.h"
 
 #include "../resources/resource.h"
 #include "hal/input.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(RenderScene);
@@ -17,7 +17,7 @@ PROTOTYPE_COMPONENT(Node);
 class Node : public Resource
 {
 public:
-  UD_COMPONENT(Node);
+  EP_COMPONENT(Node);
 
   virtual void SetMatrix(const udDouble4x4 &mat) { matrix = mat; }
   const udDouble4x4& GetMatrix() const { return matrix; }
@@ -26,7 +26,7 @@ public:
   const udDouble3& GetPosition() const { return matrix.axis.t.toVector3(); }
 
   NodeRef Parent() const { return NodeRef(pParent); }
-  const udSlice<NodeRef> Children() const { return children; }
+  const epSlice<NodeRef> Children() const { return children; }
 
   void AddChild(NodeRef c);
   void RemoveChild(NodeRef c);
@@ -38,21 +38,21 @@ public:
 protected:
   friend class Scene;
 
-  Node(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  Node(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
-  virtual bool InputEvent(const udInputEvent &ev);
+  virtual bool InputEvent(const epInputEvent &ev);
   virtual bool Update(double timeStep);
   virtual udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat);
 
   Node *pParent = nullptr;
-  udFixedSlice<NodeRef, 3> children;
+  epArray<NodeRef, 3> children;
 
   udDouble4x4 matrix = udDouble4x4::identity();
 
   // TODO: enable/visible/etc flags
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // UDNODE_H
+#endif // EPNODE_H

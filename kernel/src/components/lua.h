@@ -5,7 +5,7 @@
 #include "component.h"
 #include "stream.h"
 
-namespace ud
+namespace ep
 {
 
 PROTOTYPE_COMPONENT(Lua);
@@ -14,7 +14,7 @@ class LuaState;
 class Lua : public Component
 {
 public:
-  UD_COMPONENT(Lua);
+  EP_COMPONENT(Lua);
 
   StreamRef GetOutputStream() const { return outputStream; }
   void SetOutputStream(StreamRef stream);
@@ -22,14 +22,14 @@ public:
   StreamRef GetErrorStream() const { return errorStream; }
   void SetErrorStream(StreamRef stream);
 
-  udVariant GetGlobal(udVariant key) const;
-  void SetGlobal(udVariant key, udVariant value);
+  epVariant GetGlobal(epVariant key) const;
+  void SetGlobal(epVariant key, epVariant value);
 
-  void Execute(udString code);
-  void Print(udString str) const;
+  void Execute(epString code);
+  void Print(epString str) const;
 
 private:
-  Lua(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  Lua(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   ~Lua() override;
 
   class LuaState *pLua = nullptr;
@@ -38,6 +38,6 @@ private:
   StreamRef errorStream;
 };
 
-} // namespace ud
+} // namespace ep
 
 #endif // _LUA_H

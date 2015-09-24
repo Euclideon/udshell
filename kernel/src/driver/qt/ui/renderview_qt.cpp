@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDUI_DRIVER == UDDRIVER_QT
+#if EPUI_DRIVER == EPDRIVER_QT
 
 // Warning from QSGGeometry
 #if _MSC_VER
@@ -15,7 +15,7 @@
 #include "renderview_qt.h"
 #include "renderscene.h"
 
-udKeyCode qtKeyToUDKey(Qt::Key qk);
+epKeyCode qtKeyToEPKey(Qt::Key qk);
 
 namespace qt
 {
@@ -55,7 +55,7 @@ public:
   }
 
   const QQuickFramebufferObject *m_item;
-  ud::RenderableViewRef spRenderView = nullptr;
+  ep::RenderableViewRef spRenderView = nullptr;
 };
 
 
@@ -76,7 +76,7 @@ RenderView::~RenderView()
   QtApplication::Kernel()->LogTrace("Destroy RenderView Quick Item");
 
   if (spView)
-    spView->FrameReady.Unsubscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
+    spView->FrameReady.Unsubscribe(epDelegate<void()>(this, &RenderView::OnFrameReady));
 }
 
 QQuickFramebufferObject::Renderer *RenderView::createRenderer() const
@@ -85,12 +85,12 @@ QQuickFramebufferObject::Renderer *RenderView::createRenderer() const
   return new FboRenderer(this);
 }
 
-void RenderView::AttachView(ud::ViewRef _spView)
+void RenderView::AttachView(ep::ViewRef _spView)
 {
   QtApplication::Kernel()->LogTrace("RenderView::AttachView()");
 
   spView = _spView;
-  spView->FrameReady.Subscribe(udDelegate<void()>(this, &RenderView::OnFrameReady));
+  spView->FrameReady.Subscribe(epDelegate<void()>(this, &RenderView::OnFrameReady));
 
   // TEMP HAX:
   QtApplication::Kernel()->SetFocusView(spView);
@@ -123,13 +123,13 @@ QSGNode *RenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeD
 
 void RenderView::keyPressEvent(QKeyEvent *pEv)
 {
-  udKeyCode kc = qtKeyToUDKey((Qt::Key)pEv->key());
-  if (kc == udKC_Unknown)
+  epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
+  if (kc == epKC_Unknown)
     return;
-  udInputEvent ev;
-  ev.deviceType = udID_Keyboard;
+  epInputEvent ev;
+  ev.deviceType = epID_Keyboard;
   ev.deviceId = 0; // TODO: get keyboard id
-  ev.eventType = udInputEvent::Key;
+  ev.eventType = epInputEvent::Key;
   ev.key.key = kc;
   ev.key.state = 1;
   if (spView && spView->InputEvent(ev))
@@ -138,13 +138,13 @@ void RenderView::keyPressEvent(QKeyEvent *pEv)
 
 void RenderView::keyReleaseEvent(QKeyEvent *pEv)
 {
-  udKeyCode kc = qtKeyToUDKey((Qt::Key)pEv->key());
-  if (kc == udKC_Unknown)
+  epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
+  if (kc == epKC_Unknown)
     return;
-  udInputEvent ev;
-  ev.deviceType = udID_Keyboard;
+  epInputEvent ev;
+  ev.deviceType = epID_Keyboard;
   ev.deviceId = 0; // TODO: get keyboard id
-  ev.eventType = udInputEvent::Key;
+  ev.eventType = epInputEvent::Key;
   ev.key.key = kc;
   ev.key.state = 0;
   if (spView && spView->InputEvent(ev))
@@ -173,10 +173,10 @@ void RenderView::mouseMoveEvent(QMouseEvent *pEv)
     lastY = y;
   }
 
-  udInputEvent ev;
-  ev.deviceType = udID_Mouse;
+  epInputEvent ev;
+  ev.deviceType = epID_Mouse;
   ev.deviceId = 0; // TODO: get mouse id
-  ev.eventType = udInputEvent::Move;
+  ev.eventType = epInputEvent::Move;
   ev.move.xDelta = (float)(lastX - x); // TODO: MASSIVE HAX!!! FIX ME!!
   ev.move.yDelta = (float)(lastY - y); // TODO: MASSIVE HAX!!! FIX ME!!
   ev.move.xAbsolute = (float)x;
@@ -190,10 +190,10 @@ void RenderView::mouseMoveEvent(QMouseEvent *pEv)
 
 void RenderView::mousePressEvent(QMouseEvent *pEv)
 {
-  udInputEvent ev;
-  ev.deviceType = udID_Mouse;
+  epInputEvent ev;
+  ev.deviceType = epID_Mouse;
   ev.deviceId = 0; // TODO: get mouse id
-  ev.eventType = udInputEvent::Key;
+  ev.eventType = epInputEvent::Key;
   ev.key.key = pEv->button();
   ev.key.state = 1;
   if (spView && spView->InputEvent(ev))
@@ -202,10 +202,10 @@ void RenderView::mousePressEvent(QMouseEvent *pEv)
 
 void RenderView::mouseReleaseEvent(QMouseEvent *pEv)
 {
-  udInputEvent ev;
-  ev.deviceType = udID_Mouse;
+  epInputEvent ev;
+  ev.deviceType = epID_Mouse;
   ev.deviceId = 0; // TODO: get mouse id
-  ev.eventType = udInputEvent::Key;
+  ev.eventType = epInputEvent::Key;
   ev.key.key = pEv->button();
   ev.key.state = 0;
   if (spView && spView->InputEvent(ev))
@@ -222,4 +222,4 @@ void RenderView::touchEvent(QTouchEvent *pEv)
 
 } // namespace qt
 
-#endif  // UDUI_DRIVER == UDDRIVER_QT
+#endif  // EPUI_DRIVER == EPDRIVER_QT

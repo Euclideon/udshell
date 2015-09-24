@@ -1,10 +1,10 @@
 #pragma once
-#ifndef UDHAL_H
-#define UDHAL_H
+#ifndef EPHAL_H
+#define EPHAL_H
 
-udResult udHAL_Init();
-udResult udHAL_InitRender();
-udResult udHAL_DeinitRender();
-udResult udHAL_Deinit();
+udResult epHAL_Init();
+udResult epHAL_InitRender();
+udResult epHAL_DeinitRender();
+udResult epHAL_Deinit();
 
-#endif // UDHAL_H
+#endif // EPHAL_H

@@ -1,7 +1,5 @@
-#include "udPlatform.h"
+#include "ep/epplatform.h"
 #include "kernel.h"
-#include "udRender.h"
-#include "udBlockStreamer.h"
 
 #include "hal/hal.h"
 #include "components/stream.h"
@@ -40,7 +38,9 @@
 #include "renderscene.h"
 #include "eplua.h"
 
-namespace ud
+#include "udPlatformUtil.h"
+
+namespace ep
 {
 udResult udRenderScene_Init(Kernel*);
 udResult udRenderScene_InitRender(Kernel*);
@@ -48,7 +48,7 @@ udResult udRenderScene_InitRender(Kernel*);
 udResult udRenderScene_Deinit(Kernel*);
 udResult udRenderScene_DeinitRender(Kernel*); // Not sure if both Deinit's are necessary
 
-udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount)
+udResult Kernel::Create(Kernel **ppInstance, epInitParams commandLine, int renderThreadCount)
 {
   udResult result;
   StreamRef spDebugFile, spConsole;
@@ -107,7 +107,7 @@ udResult Kernel::Create(Kernel **ppInstance, udInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<UDDataSource>());
 
   // init the HAL
-  UD_ERROR_CHECK(udHAL_Init());
+  UD_ERROR_CHECK(epHAL_Init());
 
   // create internal stuff
   pKernel->spLua = pKernel->CreateComponent<Lua>();
@@ -151,7 +151,7 @@ udResult Kernel::DoInit(Kernel *pKernel)
   // init the components
   if (pKernel->InitComponents() != udR_Success)
   {
-    UDASSERT(false, "Oh no! Can't boot!");
+    EPASSERT(false, "Oh no! Can't boot!");
     return udR_Failure_;
   }
 
@@ -203,7 +203,7 @@ udResult Kernel::Destroy()
   // TODO: fix!
   //delete pRenderer;
 
-  udHAL_Deinit();
+  epHAL_Deinit();
 
   delete this;
 
@@ -250,9 +250,9 @@ void Kernel::StreamerUpdate()
   }
 }
 
-udFixedSlice<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase)
+epArray<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase)
 {
-  udFixedSlice<const ComponentDesc *> derivedDescs;
+  epArray<const ComponentDesc *> derivedDescs;
 
   for (ComponentType &ct : componentRegistry)
   {
@@ -274,7 +274,7 @@ udFixedSlice<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const Compo
   return derivedDescs;
 }
 
-udResult Kernel::SendMessage(udString target, udString sender, udString message, const udVariant &data)
+udResult Kernel::SendMessage(epString target, epString sender, epString message, const epVariant &data)
 {
   if (target.empty())
     return udR_Failure_; // TODO: no target!!
@@ -327,13 +327,13 @@ udResult Kernel::SendMessage(udString target, udString sender, udString message,
   return udR_Failure_; // TODO: error, invalid target!
 }
 
-udResult Kernel::ReceiveMessage(udString sender, udString message, const udVariant &data)
+udResult Kernel::ReceiveMessage(epString sender, epString message, const epVariant &data)
 {
 
   return udR_Success;
 }
 
-void Kernel::RegisterMessageHandler(udSharedString name, MessageHandler messageHandler)
+void Kernel::RegisterMessageHandler(epSharedString name, MessageHandler messageHandler)
 {
   MessageCallback handler;
   handler.name = name;
@@ -345,7 +345,7 @@ udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
 {
   if (pDesc->id.exists('@') || pDesc->id.exists('$') || pDesc->id.exists('#'))
   {
-    UDASSERT(false, "Invalid component id");
+    EPASSERT(false, "Invalid component id");
     return udR_Failure_;
   }
 
@@ -358,7 +358,7 @@ udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
   return udR_Success;
 }
 
-udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, ComponentRef *pNewInstance)
+udResult Kernel::CreateComponent(epString typeId, epInitParams initParams, ComponentRef *pNewInstance)
 {
   ComponentType *pType = componentRegistry.Get(typeId.hash());
   if (!pType)
@@ -369,7 +369,7 @@ udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, Compo
     const ComponentDesc *pDesc = pType->pDesc;
 
     // TODO: should we have a better uid generator than this?
-    udMutableString64 uid; uid.concat(pDesc->id, pType->createCount++);
+    epMutableString64 uid; uid.concat(pDesc->id, pType->createCount++);
 
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
     if (!spComponent)
@@ -380,7 +380,7 @@ udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, Compo
     instanceRegistry.Add(spComponent->uid.hash(), spComponent.ptr());
 
     if (spLua)
-      spLua->SetGlobal(udString(spComponent->uid), spComponent);
+      spLua->SetGlobal(epString(spComponent->uid), spComponent);
 
     // TODO: inform partner kernels that I created a component
     //...
@@ -402,7 +402,7 @@ udResult Kernel::CreateComponent(udString typeId, udInitParams initParams, Compo
 
 udResult Kernel::DestroyComponent(Component *pInstance)
 {
-  spLua->SetGlobal(udString(pInstance->uid), nullptr);
+  spLua->SetGlobal(epString(pInstance->uid), nullptr);
 
   // TODO: remove from component registry
   instanceRegistry.Destroy(pInstance->uid.toStringz());
@@ -413,7 +413,7 @@ udResult Kernel::DestroyComponent(Component *pInstance)
   return udR_Success;
 }
 
-ComponentRef Kernel::FindComponent(udString uid)
+ComponentRef Kernel::FindComponent(epString uid)
 {
   if (uid.empty() || uid[0] == '$' || uid[0] == '#')
     return nullptr;
@@ -440,36 +440,36 @@ udResult Kernel::InitComponents()
 
 udResult Kernel::InitRender()
 {
-  udHAL_InitRender();
+  epHAL_InitRender();
 
   return udR_Success;
 }
 
 udResult Kernel::DeinitRender()
 {
-  udHAL_DeinitRender();
+  epHAL_DeinitRender();
 
   return udR_Success;
 }
 
-void Kernel::Exec(udString code)
+void Kernel::Exec(epString code)
 {
   spLua->Execute(code);
 }
 
 // Helper functions for the kernel's logger
-void Kernel::LogError(udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Error, componentUID); }
-void Kernel::LogWarning(int level, udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Warning, componentUID); }
-void Kernel::LogDebug(int level, udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Debug, componentUID); }
-void Kernel::LogInfo(int level, udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Info, componentUID); }
-void Kernel::LogScript(udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Script, componentUID); }
-void Kernel::LogTrace(udString text, udString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, componentUID); }
+void Kernel::LogError(epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Error, componentUID); }
+void Kernel::LogWarning(int level, epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Warning, componentUID); }
+void Kernel::LogDebug(int level, epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Debug, componentUID); }
+void Kernel::LogInfo(int level, epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Info, componentUID); }
+void Kernel::LogScript(epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Script, componentUID); }
+void Kernel::LogTrace(epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, componentUID); }
 // Calls LogDebug() with level 2
-void Kernel::Log(udString text, const udString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, componentUID); }
+void Kernel::Log(epString text, const epString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, componentUID); }
 
-udResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const udSlice<const udString> exts)
+udResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const epSlice<const epString> exts)
 {
-  for (const udString &e : exts)
+  for (const epString &e : exts)
   {
     extensionsRegistry.Insert(e, pDesc);
   }
@@ -477,7 +477,7 @@ udResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const udSlice<co
   return udR_Success;
 }
 
-DataSourceRef Kernel::CreateDataSourceFromExtension(udString ext, udInitParams initParams)
+DataSourceRef Kernel::CreateDataSourceFromExtension(epString ext, epInitParams initParams)
 {
   const ComponentDesc **pDesc = extensionsRegistry.Get(ext);
   if (!pDesc)
@@ -491,17 +491,17 @@ DataSourceRef Kernel::CreateDataSourceFromExtension(udString ext, udInitParams i
   return shared_pointer_cast<DataSource>(spNewDataSource);
 }
 
-} // namespace ud
+} // namespace ep
 
 // synchronised pointer destroy function (it's here because there's no udsharedptr.cpp file)
 template<class T>
-void udSynchronisedPtr<T>::destroy()
+void epSynchronisedPtr<T>::destroy()
 {
   struct S
   {
-    void Destroy(ud::Kernel *pKernel)
+    void Destroy(ep::Kernel *pKernel)
     {
-      ((udSharedPtr<T>&)this)->release();
+      ((epSharedPtr<T>&)this)->release();
     }
   };
 

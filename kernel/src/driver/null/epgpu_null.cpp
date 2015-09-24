@@ -1,38 +1,38 @@
 #include "hal/driver.h"
 
-#if UDRENDER_DRIVER == UDDRIVER_NULL
+#if EPRENDER_DRIVER == EPDRIVER_NULL
 
 #include "hal/render.h"
 #include "hal/shader.h"
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udGPU_RenderVertices(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udPrimitiveType primType, size_t vertexCount, size_t firstVertex)
+void epGPU_RenderVertices(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epPrimitiveType primType, size_t vertexCount, size_t firstVertex)
 {
 }
 
-void udGPU_RenderIndices(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udArrayBuffer *pIB, udPrimitiveType primType, size_t indexCount,
-  size_t udUnusedParam(firstIndex), size_t udUnusedParam(firstVertex))
-{
-}
-
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-void udGPU_RenderRanges(udShaderProgram *pProgram, udFormatDeclaration *pVertexDecl, udArrayBuffer *pVB[], udPrimitiveType primType,
-  udVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
+void epGPU_RenderIndices(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epArrayBuffer *pIB, epPrimitiveType primType, size_t indexCount,
+  size_t epUnusedParam(firstIndex), size_t epUnusedParam(firstVertex))
 {
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udGPU_Init()
+void epGPU_RenderRanges(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epPrimitiveType primType,
+  epVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
 {
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udGPU_Deinit()
+void epGPU_Init()
 {
 }
 
-#endif // UDRENDER_DRIVER == UDDRIVER_OPENGL
+// ***************************************************************************************
+// Author: Manu Evans, May 2015
+void epGPU_Deinit()
+{
+}
+
+#endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

@@ -1,10 +1,10 @@
 #pragma once
-#ifndef _UD_KVPSTORE_H
-#define _UD_KVPSTORE_H
+#ifndef _EP_KVPSTORE_H
+#define _EP_KVPSTORE_H
 
 #include "components/resources/resource.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(KVPStore);
@@ -12,34 +12,34 @@ SHARED_CLASS(KVPStore);
 class KVPStore : public Resource
 {
 public:
-  UD_COMPONENT(KVPStore);
+  EP_COMPONENT(KVPStore);
 
   virtual size_t NumRecords() const { return 0; }
 
-  virtual void Insert(udVariant &&, udVariant &&) {}
-  virtual void Insert(const udVariant &, udVariant &&) {}
-  virtual void Insert(udVariant &&, const udVariant &) {}
-  virtual void Insert(const udVariant &, const udVariant &) {}
+  virtual void Insert(epVariant &&, epVariant &&) {}
+  virtual void Insert(const epVariant &, epVariant &&) {}
+  virtual void Insert(epVariant &&, const epVariant &) {}
+  virtual void Insert(const epVariant &, const epVariant &) {}
 
-  virtual void Remove(const udVariant &) {}
+  virtual void Remove(const epVariant &) {}
 
-  virtual bool Exists(const udVariant &) const { return false; }
+  virtual bool Exists(const epVariant &) const { return false; }
 
-  virtual udVariant Get(const udVariant &) const { return udVariant(); }
+  virtual epVariant Get(const epVariant &) const { return epVariant(); }
 
-  udVariant operator[](const udVariant &key) const
+  epVariant operator[](const epVariant &key) const
   {
     return Get(key);
   }
 
   // TODO: THIS IS ONLY HERE BECAUSE DESCRIPTOR CAN'T GET TO PROTECTED
-  void InsertMethod(const udVariant &key, const udVariant &value) { Insert(key, value); }
+  void InsertMethod(const epVariant &key, const epVariant &value) { Insert(key, value); }
 
 protected:
-  KVPStore(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  KVPStore(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 };
 
 }
 
-#endif // _UD_KVPSTORE_H
+#endif // _EP_KVPSTORE_H

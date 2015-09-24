@@ -1,10 +1,10 @@
 #include "hal/driver.h"
 
-#if UDWINDOW_DRIVER == UDDRIVER_GLUT
+#if EPWINDOW_DRIVER == EPDRIVER_GLUT
 
 #include "udGLUT_Internal.h"
 
-void udGPU_Init();
+void epGPU_Init();
 
 
 // ---------------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ void udViewerDriver_Init(udViewerInstance *pInstance)
   glutDisplayFunc(udViewerGLUT_Display);
   glutReshapeFunc(udViewerGLUT_Resize);
 
-  udGPU_Init();
+  epGPU_Init();
 }
 
 // ---------------------------------------------------------------------------------------

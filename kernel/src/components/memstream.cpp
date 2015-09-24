@@ -1,7 +1,7 @@
 #include "components/memstream.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 static CPropertyDesc props[] =
 {
@@ -27,23 +27,23 @@ ComponentDesc MemStream::descriptor =
   "MemStream", // displayName
   "Memory stream", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr,
   nullptr
 };
 
-MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   BufferRef inBuffer;
 
-  const udVariant &fl = initParams["flags"];
+  const epVariant &fl = initParams["flags"];
   oFlags = fl.as<OpenFlags>();
   if (!(oFlags & (OpenFlags::Write | OpenFlags::Read)))
     throw udR_InvalidParameter_;
 
-  const udVariant &buf = initParams["buffer"];
-  if (buf.is(udVariant::Type::Null))
+  const epVariant &buf = initParams["buffer"];
+  if (buf.is(epVariant::Type::Null))
   {
       inBuffer = pKernel->CreateComponent<Buffer>();
       inBuffer->Allocate(DefaultBufferSize);
@@ -92,7 +92,7 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
   else if (oFlags & OpenFlags::Read)
   {
     auto map = spBuffer->MapForRead();
-    buffer = udSlice<void>(const_cast<void*>(map.ptr), map.length);
+    buffer = epSlice<void>(const_cast<void*>(map.ptr), map.length);
     if (!buffer)
       LogError("Can't reserve Buffer for reading.");
   }
@@ -105,7 +105,7 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
   }
 }
 
-udSlice<void> MemStream::Read(udSlice<void> buffer)
+epSlice<void> MemStream::Read(epSlice<void> buffer)
 {
   if (!spBuffer)
     return 0;
@@ -117,10 +117,10 @@ udSlice<void> MemStream::Read(udSlice<void> buffer)
   memcpy(buffer.ptr, (const char*)buffer.ptr + pos, bytes);
   pos += bytes;
 
-  return udSlice<void>(buffer.ptr, bytes);
+  return epSlice<void>(buffer.ptr, bytes);
 }
 
-size_t MemStream::Write(udSlice<const void> data)
+size_t MemStream::Write(epSlice<const void> data)
 {
   if (!(oFlags & OpenFlags::Write) || !spBuffer)
     return 0;
@@ -163,4 +163,4 @@ int64_t MemStream::Seek(SeekOrigin rel, int64_t offset)
   return pos;
 }
 
-} // namespace ud
+} // namespace ep

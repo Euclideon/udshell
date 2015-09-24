@@ -1,22 +1,24 @@
 #pragma once
-#ifndef UD_PROJECT_H
-#define UD_PROJECT_H
+#ifndef EP_PROJECT_H
+#define EP_PROJECT_H
 
 #include "component.h"
 
-namespace ud
+namespace ep
 {
+
 PROTOTYPE_COMPONENT(Project);
 
 class Project : public Component
 {
 public:
-  UD_COMPONENT(Project);
+  EP_COMPONENT(Project);
 
 protected:
-  Project(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  Project(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
 };
 
-} //namespace ud
-#endif // UD_PROJECT_H
+} //namespace ep
+
+#endif // EP_PROJECT_H

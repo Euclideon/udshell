@@ -3,9 +3,9 @@
 #include "hal/image.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
-const udFixedSlice<const udString> ImageSource::extensions = { ".bmp", ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".tga", ".dds", ".webp" };
+const epArray<const epString> ImageSource::extensions = { ".bmp", ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".tga", ".dds", ".webp" };
 
 ComponentDesc ImageSource::descriptor =
 {
@@ -32,30 +32,30 @@ void ImageSource::Create(StreamRef spSource)
   void *pBuffer = udAlloc((size_t)len);
 
   // read file from source
-  udSlice<void> buf(pBuffer, (size_t)len);
+  epSlice<void> buf(pBuffer, (size_t)len);
   buf = spSource->Read(buf);
-  UDASSERT((int64_t)buf.length == len, "!");
+  EPASSERT((int64_t)buf.length == len, "!");
 
   // load the image
-  udImage *pImage = udImage_ReadImage(pBuffer, (size_t)len, nullptr);
+  epImage *pImage = epImage_ReadImage(pBuffer, (size_t)len, nullptr);
 
   for (size_t i = 0; i<pImage->elements; ++i)
   {
-    udImageSurface &s = pImage->pSurfaces[i];
+    epImageSurface &s = pImage->pSurfaces[i];
 
     // create image for each image element
     ArrayBufferRef spImage = pKernel->CreateComponent<ArrayBuffer>();
     spImage->Allocate("{u8[4]}", 4, { s.width, s.height });
 
     // write image to to the array buffer
-    udSlice<void> mem = spImage->Map();
-    UDASSERT(mem.length == s.width*s.height*4, "Wrong size?!");
-//    mem.copyTo(udSlice<void>(s.pImage, s.width*s.height*4)); // TODO: use copyTo()...
+    epSlice<void> mem = spImage->Map();
+    EPASSERT(mem.length == s.width*s.height*4, "Wrong size?!");
+//    mem.copyTo(epSlice<void>(s.pImage, s.width*s.height*4)); // TODO: use copyTo()...
     memcpy(mem.ptr, s.pImage, s.width*s.height*4);
     spImage->Unmap();
 
     // add resource
-    udMutableString64 buffer; buffer.concat("image", i);
+    epMutableString64 buffer; buffer.concat("image", i);
     resources.Insert(buffer, spImage);
   }
 
@@ -67,4 +67,4 @@ udResult ImageSource::RegisterExtensions(Kernel *pKernel)
   return pKernel->RegisterExtensions(&descriptor, extensions);
 }
 
-} // namespace ud
+} // namespace ep

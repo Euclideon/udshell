@@ -1,10 +1,10 @@
 
 #include "helpers.h"
 
-udSharedSlice<const udKeyValuePair> udParseCommandLine(const char *pCommandLine)
+epSharedSlice<const epKeyValuePair> udParseCommandLine(const char *pCommandLine)
 {
-  udFixedSlice<const udKeyValuePair, 64> output;
-  output.concat(udKeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
+  epArray<const epKeyValuePair, 64> output;
+  output.concat(epKeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
@@ -22,32 +22,32 @@ udSharedSlice<const udKeyValuePair> udParseCommandLine(const char *pCommandLine)
       ++i;
     }
     if (i > start)
-      output.pushBack(udKeyValuePair(nullptr, udString(pCommandLine + start, i - start)));
+      output.pushBack(epKeyValuePair(nullptr, epString(pCommandLine + start, i - start)));
   }
 
-  return udSharedSlice<const udKeyValuePair>(output);
+  return epSharedSlice<const epKeyValuePair>(output);
 }
 
-udSharedSlice<const udKeyValuePair> udParseCommandLine(int argc, char *argv[])
+epSharedSlice<const epKeyValuePair> udParseCommandLine(int argc, char *argv[])
 {
-  udFixedSlice<const udKeyValuePair, 64> output;
+  epArray<const epKeyValuePair, 64> output;
   output.reserve(argc);
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
   for (int i = 0; i < argc; ++i)
-    output.pushBack(udKeyValuePair(nullptr, udString(argv[i])));
+    output.pushBack(epKeyValuePair(nullptr, epString(argv[i])));
 
-  return udSharedSlice<const udKeyValuePair>(output.slice(0, argc));
+  return epSharedSlice<const epKeyValuePair>(output.slice(0, argc));
 }
 
-udSharedSlice<const udKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
+epSharedSlice<const epKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
 {
-  udFixedSlice<const udKeyValuePair, 64> output;
+  epArray<const epKeyValuePair, 64> output;
   output.reserve(argc);
 
   for (uint32_t i = 0; i < argc; ++i)
-    output.pushBack(udKeyValuePair(udString(argn[i]), udString(argv[i])));
+    output.pushBack(epKeyValuePair(epString(argn[i]), epString(argv[i])));
 
-  return udSharedSlice<const udKeyValuePair>(output.slice(0, argc));
+  return epSharedSlice<const epKeyValuePair>(output.slice(0, argc));
 }

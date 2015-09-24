@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _UD_MODEL_H
-#define _UD_MODEL_H
+#ifndef _EP_MODEL_H
+#define _EP_MODEL_H
 
 #include "components/resources/resource.h"
 #include "components/resources/array.h"
@@ -8,7 +8,7 @@
 #include "ep/epsharedptr.h"
 #include "ep/epstring.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(RenderShaderProgram);
@@ -19,18 +19,18 @@ PROTOTYPE_COMPONENT(Model);
 class Model : public Resource
 {
 public:
-  UD_COMPONENT(Model);
+  EP_COMPONENT(Model);
 
   MaterialRef GetMaterial() const { return spMaterial; }
   void SetMaterial(MaterialRef spMaterial) { this->spMaterial = spMaterial; }
 
-  void SetVertexArray(ArrayBufferRef spVertices, udSlice<const udSharedString> attributeNames);
+  void SetVertexArray(ArrayBufferRef spVertices, epSlice<const epSharedString> attributeNames);
   void SetIndexArray(ArrayBufferRef spIndices) { this->spIndices = spIndices; }
 
 protected:
   friend class GeomNode;
 
-  Model(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  Model(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
   void OnArrayChanged()
@@ -43,16 +43,16 @@ protected:
   struct VertexArray
   {
     ArrayBufferRef spArray;
-    udFixedSlice<udSharedString, 1> attributes;
+    epArray<epSharedString, 1> attributes;
   };
 
-  udFixedSlice<VertexArray, 2> vertexArrays;
+  epArray<VertexArray, 2> vertexArrays;
   ArrayBufferRef spIndices;
   MaterialRef spMaterial;
 
   RenderVertexFormatRef spRenderVertexFormat = nullptr;
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // _UD_MODEL_H
+#endif // _EP_MODEL_H

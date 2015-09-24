@@ -1,6 +1,6 @@
 #include "components/console.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc Console::descriptor =
@@ -15,7 +15,7 @@ ComponentDesc Console::descriptor =
   "Standard in/out console", // description
 };
 
-Console::Console(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+Console::Console(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   bDbgOutput = false;
@@ -27,7 +27,7 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
   if (out == ConsoleOutputs::StdDbg)
   {
     pOut = stderr;
-#if UD_DEBUG && UDPLATFORM_WINDOWS
+#if UD_DEBUG && defined(EP_WINDOWS)
     if (IsDebuggerPresent())
     {
       pOut = nullptr;
@@ -41,18 +41,18 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid
     pOut = stdout;
 }
 
-udSlice<void> Console::Read(udSlice<void> buffer)
+epSlice<void> Console::Read(epSlice<void> buffer)
 {
   size_t read = fread(buffer.ptr, 1, buffer.length, pIn);
   return buffer.slice(0, read);
 }
 
-size_t Console::Write(udSlice<const void> data)
+size_t Console::Write(epSlice<const void> data)
 {
   if (bDbgOutput)
   {
-#if UDPLATFORM_WINDOWS
-    udString s((const char*)data.ptr, data.length);
+#if defined(EP_WINDOWS)
+    epString s((const char*)data.ptr, data.length);
     OutputDebugString((LPCSTR)s.toStringz());
 #endif
     return data.length;
@@ -72,4 +72,4 @@ int Console::Flush()
   return 0;
 }
 
-} // namespace ud
+} // namespace ep

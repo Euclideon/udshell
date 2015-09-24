@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDINPUT_DRIVER == UDDRIVER_GLUT
+#if EPINPUT_DRIVER == EPDRIVER_GLUT
 
 #include "udGLUT_Internal.h"
 #include "udPlatformUtil.h"
@@ -10,31 +10,31 @@
 
 static unsigned char fkeysToUDKey[] =
 {
-  udKC_F1,
-  udKC_F2,
-  udKC_F3,
-  udKC_F4,
-  udKC_F5,
-  udKC_F6,
-  udKC_F7,
-  udKC_F8,
-  udKC_F9,
-  udKC_F10,
-  udKC_F11,
-  udKC_F12
+  epKC_F1,
+  epKC_F2,
+  epKC_F3,
+  epKC_F4,
+  epKC_F5,
+  epKC_F6,
+  epKC_F7,
+  epKC_F8,
+  epKC_F9,
+  epKC_F10,
+  epKC_F11,
+  epKC_F12
 };
 
 static unsigned char specialToUDKey[] =
 {
-  udKC_Left,
-  udKC_Up,
-  udKC_Right,
-  udKC_Down,
-  udKC_PageUp,
-  udKC_PageDown,
-  udKC_Home,
-  udKC_End,
-  udKC_Insert
+  epKC_Left,
+  epKC_Up,
+  epKC_Right,
+  epKC_Down,
+  epKC_PageUp,
+  epKC_PageDown,
+  epKC_Home,
+  epKC_End,
+  epKC_Insert
 };
 
 
@@ -44,7 +44,7 @@ InputState gInputAccum;
 // Author: Manu Evans, March 2015
 static void KeyPressedFunc(unsigned char key, int, int)
 {
-  if(udAsciiToUDKey[key] != udKC_Unknown)
+  if(udAsciiToUDKey[key] != epKC_Unknown)
     gInputAccum.keys[0][udAsciiToUDKey[key]] = 1;
 }
 
@@ -52,7 +52,7 @@ static void KeyPressedFunc(unsigned char key, int, int)
 // Author: Manu Evans, March 2015
 static void KeyReleasedFunc(unsigned char key, int, int)
 {
-  if(udAsciiToUDKey[key] != udKC_Unknown)
+  if(udAsciiToUDKey[key] != epKC_Unknown)
     gInputAccum.keys[0][udAsciiToUDKey[key]] = 0;
 }
 
@@ -81,22 +81,22 @@ static void SpecialKeyReleasedFunc(int key, int, int)
 static void MouseFunc(int button, int state, int x, int y)
 {
   if (button >= 0 && button < 4)
-    gInputAccum.mouse[0][udMC_LeftButton + button] = state == GLUT_DOWN ? 1.f : 0.f;
-  gInputAccum.mouse[0][udMC_XAbsolute] = (float)x;
-  gInputAccum.mouse[0][udMC_YAbsolute] = (float)y;
+    gInputAccum.mouse[0][epMC_LeftButton + button] = state == GLUT_DOWN ? 1.f : 0.f;
+  gInputAccum.mouse[0][epMC_XAbsolute] = (float)x;
+  gInputAccum.mouse[0][epMC_YAbsolute] = (float)y;
 }
 
 // --------------------------------------------------------
 // Author: Manu Evans, March 2015
 static void PassiveMotionFunc(int x, int y)
 {
-  gInputAccum.mouse[0][udMC_XAbsolute] = (float)x;
-  gInputAccum.mouse[0][udMC_YAbsolute] = (float)y;
+  gInputAccum.mouse[0][epMC_XAbsolute] = (float)x;
+  gInputAccum.mouse[0][epMC_YAbsolute] = (float)y;
 }
 
 // --------------------------------------------------------
 // Author: Manu Evans, March 2015
-void udInput_InitInternal()
+void epInput_InitInternal()
 {
   memset(&gInputAccum, 0, sizeof(gInputAccum));
 
@@ -111,7 +111,7 @@ void udInput_InitInternal()
 
 // --------------------------------------------------------
 // Author: Manu Evans, March 2015
-void udInput_UpdateInternal()
+void epInput_UpdateInternal()
 {
   InputState &input = gInputState[gCurrentInputState];
   InputState &prev = gInputState[1 - gCurrentInputState];
@@ -119,29 +119,29 @@ void udInput_UpdateInternal()
   input = gInputAccum;
 
   // update deltas
-  input.mouse[0][udMC_XDelta] = input.mouse[0][udMC_XAbsolute] - prev.mouse[0][udMC_XAbsolute];
-  input.mouse[0][udMC_YDelta] = input.mouse[0][udMC_YAbsolute] - prev.mouse[0][udMC_YAbsolute];
+  input.mouse[0][epMC_XDelta] = input.mouse[0][epMC_XAbsolute] - prev.mouse[0][epMC_XAbsolute];
+  input.mouse[0][epMC_YDelta] = input.mouse[0][epMC_YAbsolute] - prev.mouse[0][epMC_YAbsolute];
 
   // poll gamepads
   //...
 
   // Fix up numpad
-  input.keys[0][udKC_NumpadMinus]   = input.keys[0][udKC_Hyphen];
-  input.keys[0][udKC_NumpadDivide]  = input.keys[0][udKC_ForwardSlash];
-  input.keys[0][udKC_NumpadDecimal] = input.keys[0][udKC_Period];
-  input.keys[0][udKC_NumpadEnter]   = input.keys[0][udKC_Enter];
+  input.keys[0][epKC_NumpadMinus]   = input.keys[0][epKC_Hyphen];
+  input.keys[0][epKC_NumpadDivide]  = input.keys[0][epKC_ForwardSlash];
+  input.keys[0][epKC_NumpadDecimal] = input.keys[0][epKC_Period];
+  input.keys[0][epKC_NumpadEnter]   = input.keys[0][epKC_Enter];
 
-  input.keys[0][udKC_Numpad0]   = input.keys[0][udKC_0];
-  input.keys[0][udKC_Numpad1]   = input.keys[0][udKC_1];
-  input.keys[0][udKC_Numpad2]   = input.keys[0][udKC_2];
-  input.keys[0][udKC_Numpad3]   = input.keys[0][udKC_3];
-  input.keys[0][udKC_Numpad4]   = input.keys[0][udKC_4];
+  input.keys[0][epKC_Numpad0]   = input.keys[0][epKC_0];
+  input.keys[0][epKC_Numpad1]   = input.keys[0][epKC_1];
+  input.keys[0][epKC_Numpad2]   = input.keys[0][epKC_2];
+  input.keys[0][epKC_Numpad3]   = input.keys[0][epKC_3];
+  input.keys[0][epKC_Numpad4]   = input.keys[0][epKC_4];
 
-  input.keys[0][udKC_Numpad5]   = input.keys[0][udKC_5];
-  input.keys[0][udKC_Numpad6]   = input.keys[0][udKC_6];
-  input.keys[0][udKC_Numpad7]   = input.keys[0][udKC_7];
-  input.keys[0][udKC_Numpad8]   = input.keys[0][udKC_8];
-  input.keys[0][udKC_Numpad9]   = input.keys[0][udKC_9];
+  input.keys[0][epKC_Numpad5]   = input.keys[0][epKC_5];
+  input.keys[0][epKC_Numpad6]   = input.keys[0][epKC_6];
+  input.keys[0][epKC_Numpad7]   = input.keys[0][epKC_7];
+  input.keys[0][epKC_Numpad8]   = input.keys[0][epKC_8];
+  input.keys[0][epKC_Numpad9]   = input.keys[0][epKC_9];
 
 
 }

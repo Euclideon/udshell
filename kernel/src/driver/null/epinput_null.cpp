@@ -1,16 +1,16 @@
 #include "hal/driver.h"
 
-#if UDINPUT_DRIVER == UDDRIVER_NULL
+#if EPINPUT_DRIVER == EPDRIVER_NULL
 
 // --------------------------------------------------------
 // Author: Manu Evans, March 2015
-void udInput_InitInternal()
+void epInput_InitInternal()
 {
 }
 
 // --------------------------------------------------------
 // Author: Manu Evans, March 2015
-void udInput_UpdateInternal()
+void epInput_UpdateInternal()
 {
 }
 

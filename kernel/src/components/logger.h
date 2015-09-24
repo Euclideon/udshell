@@ -1,10 +1,10 @@
 #pragma once
-#ifndef UD_LOGGER_H
-#define UD_LOGGER_H
+#ifndef EP_LOGGER_H
+#define EP_LOGGER_H
 
 #include "component.h"
 
-namespace ud
+namespace ep
 {
 PROTOTYPE_COMPONENT(Logger);
 SHARED_CLASS(Stream);
@@ -69,7 +69,7 @@ UD_ENUM(LogDefaults,
 class Logger : public Component
 {
 public:
-  UD_COMPONENT(Logger);
+  EP_COMPONENT(Logger);
 
   struct LogStream
   {
@@ -82,7 +82,7 @@ public:
     LogFormatSpecs format;
   };
 
-  void Log(int level, udString text, LogCategories category = LogCategories::Debug, udString componentUID = nullptr);
+  void Log(int level, epString text, LogCategories category = LogCategories::Debug, epString componentUID = nullptr);
 
   bool GetEnabled() const { return bEnabled; }
   void SetEnabled(bool bEnable) { this->bEnabled = bEnable; }
@@ -97,20 +97,20 @@ public:
 
   int GetFilterLevel(LogCategories category) const;
   void SetFilterLevel(LogCategories categories, int level);
-  udSlice<udSharedString> GetFilterComponents() const;
-  void SetFilterComponents(udSlice<const udString> comps);
+  epSlice<epSharedString> GetFilterComponents() const;
+  void SetFilterComponents(epSlice<const epString> comps);
   void RemoveFilters();
 protected:
-  Logger(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  Logger(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
   LogStream *FindLogStream(StreamRef spStream) const;
 
-  udFixedSlice<LogStream, 1> streamList;
+  epArray<LogStream, 1> streamList;
   bool bEnabled = true, bLogging = false;
 
   int levelsFilter[NUM_LOG_CATEGORIES];
-  udFixedSlice<udSharedString> componentsFilter;
+  epArray<epSharedString> componentsFilter;
 };
 
-} //namespace ud
-#endif // UDLOGGER_H
+} //namespace ep
+#endif // EP_LOGGER_H

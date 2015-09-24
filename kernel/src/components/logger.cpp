@@ -2,7 +2,7 @@
 
 #include <time.h>
 
-namespace ud
+namespace ep
 {
 static CPropertyDesc props[] =
 {
@@ -40,7 +40,7 @@ static CMethodDesc methods[] =
     },
     &Logger::SetFilterLevel, // method
   },
-  // TODO udVariant doesn't support udSlice<const udString>. fix this with wrappers?
+  // TODO epVariant doesn't support epSlice<const epString>. fix this with wrappers?
   /*{ T
     {
       "getfiltercomponents", // id
@@ -103,12 +103,12 @@ ComponentDesc Logger::descriptor =
   "Logger", // displayName
   "Logger", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
   nullptr, // events
 };
 
-Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   RemoveFilters();
@@ -125,9 +125,9 @@ Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
   return nullptr;
 }
 
-void Logger::Log(int level, udString text, LogCategories category, udString componentUID)
+void Logger::Log(int level, epString text, LogCategories category, epString componentUID)
 {
-  udMutableString<1024> out;
+  epMutableString<1024> out;
   char timeStr[64];
 
   // Check category level filter
@@ -143,7 +143,7 @@ void Logger::Log(int level, udString text, LogCategories category, udString comp
   if (componentUID != nullptr && !componentsFilter.empty())
   {
     bool componentFound = false;
-    for (udString comp : componentsFilter)
+    for (epString comp : componentsFilter)
     {
       if (!comp.cmp(componentUID))
       {
@@ -168,7 +168,7 @@ void Logger::Log(int level, udString text, LogCategories category, udString comp
       if (s.format & LogFormatSpecs::Timestamp)
       {
         time_t ti = time(nullptr);
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
         tm _tm, *pTm = &_tm;
         localtime_s(&_tm, &ti);
 #else
@@ -278,7 +278,7 @@ int Logger::GetFilterLevel(LogCategories category) const
   return levelsFilter[catIndex];
 }
 
-udSlice<udSharedString> Logger::GetFilterComponents() const
+epSlice<epSharedString> Logger::GetFilterComponents() const
 {
   return componentsFilter;
 }
@@ -294,7 +294,7 @@ void Logger::SetFilterLevel(LogCategories categories, int level)
   }
 }
 
-void Logger::SetFilterComponents(udSlice<const udString> comps)
+void Logger::SetFilterComponents(epSlice<const epString> comps)
 {
   componentsFilter = comps;
 }
@@ -305,4 +305,4 @@ void Logger::RemoveFilters()
   componentsFilter = nullptr;
 }
 
-} // namespace ud
+} // namespace ep

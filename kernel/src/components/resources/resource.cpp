@@ -2,7 +2,7 @@
 #include "metadata.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -28,7 +28,7 @@ ComponentDesc Resource::descriptor =
   "Resource", // displayName
   "Base resource", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
 };
 
 MetadataRef Resource::GetMetadata() const
@@ -38,4 +38,4 @@ MetadataRef Resource::GetMetadata() const
   return metadata;
 }
 
-} // namespace ud
+} // namespace ep

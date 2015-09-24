@@ -12,7 +12,7 @@
 #include "components/timer.h"
 #include "hal/debugfont.h"
 
-using namespace ud;
+using namespace ep;
 
 static Kernel *pKernel = nullptr;
 
@@ -24,14 +24,14 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
     // TODO: replace this with something more robust - maybe a full logging system and status console
     switch (type) {
       case QtDebugMsg:
-        pKernel->LogDebug(2, udSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
+        pKernel->LogDebug(2, epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
         break;
       case QtWarningMsg:
-        pKernel->LogWarning(2, udSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
+        pKernel->LogWarning(2, epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
         break;
       case QtCriticalMsg:
       case QtFatalMsg:
-        pKernel->LogError(udSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
+        pKernel->LogError(epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
     }
   }
   else
@@ -40,7 +40,7 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
 }
 
-void Init(udString sender, udString message, const udVariant &data)
+void Init(epString sender, epString message, const epVariant &data)
 {
   // TODO: load a project file...
 
@@ -95,10 +95,10 @@ int main(int argc, char *argv[])
   udMemoryDebugTrackingInit();
 
   // unit test
-  udResult udSlice_Test();
-  udSlice_Test();
-  udResult udString_Test();
-  udString_Test();
+  udResult epSlice_Test();
+  epSlice_Test();
+  udResult epString_Test();
+  epString_Test();
 
   // install our qt message handler
   qInstallMessageHandler(DbgMessageHandler);

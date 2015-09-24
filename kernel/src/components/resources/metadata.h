@@ -1,11 +1,11 @@
 #pragma once
-#ifndef _UD_METADATA_H
-#define _UD_METADATA_H
+#ifndef _EP_METADATA_H
+#define _EP_METADATA_H
 
 #include "components/resources/kvpstore.h"
 #include "ep/epavltree.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(Metadata);
@@ -13,48 +13,48 @@ SHARED_CLASS(Metadata);
 class Metadata : public KVPStore
 {
 public:
-  UD_COMPONENT(Metadata);
+  EP_COMPONENT(Metadata);
 
   size_t NumRecords() const override
   {
     return metadata.Size();
   }
 
-  void Insert(udVariant &&key, udVariant &&value) override           { metadata.Insert(std::move(key), std::move(value)); }
-  void Insert(const udVariant &key, udVariant &&value) override      { metadata.Insert(key, std::move(value)); }
-  void Insert(udVariant &&key, const udVariant &value) override      { metadata.Insert(std::move(key), value); }
-  void Insert(const udVariant &key, const udVariant &value) override { metadata.Insert(key, value); }
+  void Insert(epVariant &&key, epVariant &&value) override           { metadata.Insert(std::move(key), std::move(value)); }
+  void Insert(const epVariant &key, epVariant &&value) override      { metadata.Insert(key, std::move(value)); }
+  void Insert(epVariant &&key, const epVariant &value) override      { metadata.Insert(std::move(key), value); }
+  void Insert(const epVariant &key, const epVariant &value) override { metadata.Insert(key, value); }
 
-  void Remove(const udVariant &key) override
+  void Remove(const epVariant &key) override
   {
     metadata.Remove(key);
   }
 
-  bool Exists(const udVariant &key) const override
+  bool Exists(const epVariant &key) const override
   {
     return !!metadata.Get(key);
   }
 
-  udVariant Get(const udVariant &key) const override
+  epVariant Get(const epVariant &key) const override
   {
-    udVariant *v = const_cast<udVariant*>(metadata.Get(key));
-    return v ? *v : udVariant();
+    epVariant *v = const_cast<epVariant*>(metadata.Get(key));
+    return v ? *v : epVariant();
   }
 
 protected:
-  Metadata(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  Metadata(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : KVPStore(pType, pKernel, uid, initParams) {}
 
   struct VariantCompare {
-    UDFORCE_INLINE ptrdiff_t operator()(const udVariant &a, const udVariant &b)
+    __forceinline ptrdiff_t operator()(const epVariant &a, const epVariant &b)
     {
       return a.compare(b);
     }
   };
 
-  udAVLTree<udVariant, udVariant, VariantCompare> metadata;
+  epAVLTree<epVariant, epVariant, VariantCompare> metadata;
 };
 
 }
 
-#endif // _UD_METADATA_H
+#endif // _EP_METADATA_H

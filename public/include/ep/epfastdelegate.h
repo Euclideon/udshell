@@ -1,4 +1,4 @@
-//						FastDelegate.h
+//						epfastdelegate.h
 //	Efficient delegates in C++ that generate only two lines of asm code!
 //  Documentation is found at http://www.codeproject.com/cpp/FastDelegate.asp
 //
@@ -44,6 +44,7 @@
 //				  * Fully supported by CodePlay VectorC
 //                * Bugfix for Metrowerks: empty() was buggy because a valid MFP can be 0 on MWCC!
 //                * More optimal assignment,== and != operators for static function pointers.
+// 24-Sep-15      * Fork by Euclideon for warning fixes and local tweaks.
 
 #ifndef FASTDELEGATE_H
 #define FASTDELEGATE_H

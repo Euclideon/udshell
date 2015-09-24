@@ -3,7 +3,7 @@
 
 #include "eplua.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -69,12 +69,12 @@ ComponentDesc Lua::descriptor =
   "Lua",    // displayName
   "Lua VM", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  udSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
   nullptr // events
 };
 
-Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   pLua = udNew(LuaState, pKernel);
@@ -89,34 +89,34 @@ void Lua::SetOutputStream(StreamRef stream)
 {
   outputStream = stream;
 
-  UDASSERT(false, "TODO: work out how to override stdout in lua");
+  EPASSERT(false, "TODO: work out how to override stdout in lua");
 }
 
 void Lua::SetErrorStream(StreamRef stream)
 {
   errorStream = stream;
 
-  UDASSERT(false, "TODO: work out how to override stderr in lua");
+  EPASSERT(false, "TODO: work out how to override stderr in lua");
 }
 
-udVariant Lua::GetGlobal(udVariant key) const
+epVariant Lua::GetGlobal(epVariant key) const
 {
-  UDASSERT(false, "TODO: look up 'key' from global table");
+  EPASSERT(false, "TODO: look up 'key' from global table");
   return pLua->get(-1);
 }
-void Lua::SetGlobal(udVariant key, udVariant value)
+void Lua::SetGlobal(epVariant key, epVariant value)
 {
   pLua->set(key, value, LuaLocation::Global);
 }
 
-void Lua::Execute(udString code)
+void Lua::Execute(epString code)
 {
   pLua->exec(code);
 }
 
-void Lua::Print(udString str) const
+void Lua::Print(epString str) const
 {
   pLua->print(str);
 }
 
-} // namespace ud
+} // namespace ep

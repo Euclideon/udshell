@@ -2,7 +2,7 @@
 #include "components/datasource.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 static CPropertyDesc props[] =
@@ -81,28 +81,28 @@ ComponentDesc Timer::descriptor =
   "Timer", // displayName
   "Timer ", // description
 
-  udSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr,
-  udSlice<CEventDesc>(events, UDARRAYSIZE(events))
+  epSlice<CEventDesc>(events, UDARRAYSIZE(events))
 };
 
 
-Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams), pTimer(nullptr)
 {
-  const udVariant intervalVar = initParams["duration"];
+  const epVariant intervalVar = initParams["duration"];
 
   uint32_t duration = intervalVar.as<uint32_t>();
-  if (!intervalVar.is(udVariant::Type::Int) ||!duration)
+  if (!intervalVar.is(epVariant::Type::Int) ||!duration)
   {
     throw udR_InvalidParameter_;
   }
 
   TimerType timerType = TimerType::Interval;
-  const udVariant typeVar = initParams["timertype"];
-  if (typeVar.is(udVariant::Type::String))
+  const epVariant typeVar = initParams["timertype"];
+  if (typeVar.is(epVariant::Type::String))
   {
-    udString typeStr = typeVar.as<udString>();
+    epString typeStr = typeVar.as<epString>();
     if (typeStr.eqIC("Interval"))
       timerType = TimerType::Interval;
     else if (typeStr.eqIC("CountDown"))
@@ -141,4 +141,4 @@ void Timer::TimerCallback(HalTimer *pTimer, void *pParam)
   pThis->pKernel->DispatchToMainThread(MakeDelegate(pThis, &Timer::MessageCallback));
 }
 
-} // namespace ud
+} // namespace ep

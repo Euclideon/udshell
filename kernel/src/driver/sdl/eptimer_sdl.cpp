@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDWINDOW_DRIVER == UDDRIVER_SDL
+#if EPWINDOW_DRIVER == EPDRIVER_SDL
 
 #include "hal/haltimer.h"
 #include "SDL2/SDL_timer.h"
@@ -58,4 +58,4 @@ void HalTimer_Destroy(HalTimer **ppTimer)
   }
 }
 
-#endif // UDWINDOW_DRIVER == UDDRIVER_SDL
+#endif // EPWINDOW_DRIVER == EPDRIVER_SDL

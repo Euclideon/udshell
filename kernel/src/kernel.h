@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UDKERNEL_H
-#define UDKERNEL_H
+#ifndef EPKERNEL_H
+#define EPKERNEL_H
 
 #include "components/component.h"
 #include "components/lua.h"
@@ -13,7 +13,7 @@ using namespace fastdelegate;
 
 struct udRenderEngine;
 
-namespace ud
+namespace ep
 {
 
 class LuaState;
@@ -32,14 +32,14 @@ class Kernel
   friend class Component;
 public:
   // TODO: MessageHandler returns void, should we return some error state??
-  typedef FastDelegate<void(udString sender, udString message, const udVariant &data)> MessageHandler;
+  typedef FastDelegate<void(epString sender, epString message, const epVariant &data)> MessageHandler;
 
-  static udResult Create(Kernel **ppInstance, udInitParams commandLine, int renderThreadCount = 0);
+  static udResult Create(Kernel **ppInstance, epInitParams commandLine, int renderThreadCount = 0);
   virtual udResult Destroy();
 
-  udResult SendMessage(udString target, udString sender, udString message, const udVariant &data);
+  udResult SendMessage(epString target, epString sender, epString message, const epVariant &data);
 
-  void RegisterMessageHandler(udSharedString name, MessageHandler messageHandler);
+  void RegisterMessageHandler(epSharedString name, MessageHandler messageHandler);
 
   // synchronisation
   typedef FastDelegate<void(Kernel*)> MainThreadCallback;
@@ -52,40 +52,40 @@ public:
   udResult RegisterComponent();
 
   template<typename CT>
-  udFixedSlice<const ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase)
+  epArray<const ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase)
   {
     return GetDerivedComponentDescs(&CT::descriptor, bIncludeBase);
   }
-  udFixedSlice<const ComponentDesc *> GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase);
+  epArray<const ComponentDesc *> GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase);
 
-  udResult CreateComponent(udString typeId, udInitParams initParams, ComponentRef *pNewInstance);
+  udResult CreateComponent(epString typeId, epInitParams initParams, ComponentRef *pNewInstance);
 
   template<typename T>
-  udSharedPtr<T> CreateComponent(udInitParams initParams = nullptr);
+  epSharedPtr<T> CreateComponent(epInitParams initParams = nullptr);
 
-  ComponentRef FindComponent(udString uid);
+  ComponentRef FindComponent(epString uid);
 
   Renderer *GetRenderer() const { return pRenderer; }
 
   // script
   LuaRef GetLua() const { return spLua; }
-  void Exec(udString code);
+  void Exec(epString code);
 
   // logger functions
   LoggerRef GetLogger() const { return spLogger; }
-  void LogError(const udString text, const udString componentUID = nullptr);
-  void LogWarning(int level, const udString text, const udString componentUID = nullptr);
-  void LogDebug(int level, const udString text, const udString componentUID = nullptr);
-  void LogInfo(int level, const udString text, const udString componentUID = nullptr);
-  void LogScript(const udString text, const udString componentUID = nullptr);
-  void LogTrace(const udString text, const udString componentUID = nullptr);
-  void Log(const udString text, const udString componentUID = nullptr);
+  void LogError(const epString text, const epString componentUID = nullptr);
+  void LogWarning(int level, const epString text, const epString componentUID = nullptr);
+  void LogDebug(int level, const epString text, const epString componentUID = nullptr);
+  void LogInfo(int level, const epString text, const epString componentUID = nullptr);
+  void LogScript(const epString text, const epString componentUID = nullptr);
+  void LogTrace(const epString text, const epString componentUID = nullptr);
+  void Log(const epString text, const epString componentUID = nullptr);
 
   // Functions for resource management
   ResourceManagerRef GetResourceManager() const { return spResourceManager; }
 
-  udResult RegisterExtensions(const ComponentDesc *pDesc, const udSlice<const udString> exts);
-  DataSourceRef CreateDataSourceFromExtension(udString ext, udInitParams initParams);
+  udResult RegisterExtensions(const ComponentDesc *pDesc, const epSlice<const epString> exts);
+  DataSourceRef CreateDataSourceFromExtension(epString ext, epInitParams initParams);
 
   // other functions
   ViewRef GetFocusView() const { return spFocusView; }
@@ -103,18 +103,18 @@ protected:
   };
   struct MessageCallback
   {
-    udSharedString name;
+    epSharedString name;
     MessageHandler callback;
   };
 
   struct ForeignInstance
   {
-    udSharedString localUID;
-    udSharedString remoteUID;
-    udSharedString kernelUID;
+    epSharedString localUID;
+    epSharedString remoteUID;
+    epSharedString kernelUID;
   };
 
-  udSharedString uid;
+  epSharedString uid;
 
   udHashMap<ComponentType> componentRegistry;
   udHashMap<Component*> instanceRegistry;
@@ -136,7 +136,7 @@ protected:
 
   udResult DoInit(Kernel *pKernel);
 
-  static Kernel *CreateInstanceInternal(udInitParams commandLine);
+  static Kernel *CreateInstanceInternal(epInitParams commandLine);
   virtual udResult InitInternal() = 0;
 
   udResult InitComponents();
@@ -145,7 +145,7 @@ protected:
 
   udResult DestroyComponent(Component *pInstance);
 
-  udResult ReceiveMessage(udString sender, udString message, const udVariant &data);
+  udResult ReceiveMessage(epString sender, epString message, const epVariant &data);
 
   int SendMessage(LuaState L);
 
@@ -153,13 +153,13 @@ protected:
   void StreamerUpdate();
 
   template<typename CT>
-  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams);
+  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
-  udAVLTree<udString, const ComponentDesc *> extensionsRegistry;
+  epAVLTree<epString, const ComponentDesc *> extensionsRegistry;
 };
 
 template<typename T>
-udSharedPtr<T> Kernel::CreateComponent(udInitParams initParams)
+epSharedPtr<T> Kernel::CreateComponent(epInitParams initParams)
 {
   ComponentRef c = nullptr;
   udResult r = CreateComponent(T::descriptor.id, initParams, &c);
@@ -169,9 +169,9 @@ udSharedPtr<T> Kernel::CreateComponent(udInitParams initParams)
 }
 
 template<typename CT>
-Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
 {
-  udMutableString128 t; t.format("New: {0} - {1}", pType->id, uid);
+  epMutableString128 t; t.format("New: {0} - {1}", pType->id, uid);
   pKernel->LogDebug(4, t);
   return udNew(CT, pType, pKernel, uid, initParams);
 }
@@ -183,6 +183,6 @@ udResult Kernel::RegisterComponent()
   return RegisterComponentType(&CT::descriptor);
 }
 
-} //namespace ud
+} //namespace ep
 
-#endif // UDKERNEL_H
+#endif // EPKERNEL_H

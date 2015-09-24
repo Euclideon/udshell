@@ -1,18 +1,18 @@
 #pragma once
-#ifndef UDGPU_H
-#define UDGPU_H
+#ifndef EPGPU_H
+#define EPGPU_H
 
-enum udPrimitiveType
+enum epPrimitiveType
 {
-  udPT_Points,
-  udPT_Lines,
-  udPT_LineStrip,
-  udPT_Triangles,
-  udPT_TriangleStrip,
-  udPT_TriangleFan
+  epPT_Points,
+  epPT_Lines,
+  epPT_LineStrip,
+  epPT_Triangles,
+  epPT_TriangleStrip,
+  epPT_TriangleFan
 };
 
-struct udVertexRange
+struct epVertexRange
 {
   uint32_t firstVertex;
   uint32_t vertexCount;
@@ -20,8 +20,8 @@ struct udVertexRange
 
 typedef void (PrimCallback)(size_t index, void *pUserData);
 
-void udGPU_RenderVertices(struct udShaderProgram *pProgram, struct udFormatDeclaration *pVertexDecl, struct udArrayBuffer *pVB[], udPrimitiveType primType, size_t vertexCount, size_t firstVertex = 0);
-void udGPU_RenderIndices(struct udShaderProgram *pProgram, struct udFormatDeclaration *pVertexDecl, struct udArrayBuffer *pVB[], struct udArrayBuffer *pIB, udPrimitiveType primType, size_t indexCount, size_t firstIndex = 0, size_t firstVertex = 0);
-void udGPU_RenderRanges(struct udShaderProgram *pProgram, struct udFormatDeclaration *pVertexDecl, struct udArrayBuffer *pVB[], udPrimitiveType primType, udVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback = nullptr, void *pCallbackData = nullptr);
+void epGPU_RenderVertices(struct epShaderProgram *pProgram, struct epFormatDeclaration *pVertexDecl, struct epArrayBuffer *pVB[], epPrimitiveType primType, size_t vertexCount, size_t firstVertex = 0);
+void epGPU_RenderIndices(struct epShaderProgram *pProgram, struct epFormatDeclaration *pVertexDecl, struct epArrayBuffer *pVB[], struct epArrayBuffer *pIB, epPrimitiveType primType, size_t indexCount, size_t firstIndex = 0, size_t firstVertex = 0);
+void epGPU_RenderRanges(struct epShaderProgram *pProgram, struct epFormatDeclaration *pVertexDecl, struct epArrayBuffer *pVB[], epPrimitiveType primType, epVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback = nullptr, void *pCallbackData = nullptr);
 
-#endif // UDGPU_H
+#endif // EPGPU_H

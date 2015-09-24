@@ -1,34 +1,34 @@
 #pragma once
-#ifndef UDTEXTURE_H
-#define UDTEXTURE_H
+#ifndef EPTEXTURE_H
+#define EPTEXTURE_H
 
-enum udImageFormat
+enum epImageFormat
 {
-  udIF_RGBA8,
-  udIF_BGRA8,
+  epIF_RGBA8,
+  epIF_BGRA8,
 
-  udIF_R_F32,
+  epIF_R_F32,
 
-  udIF_Max
+  epIF_Max
 };
 
-enum udTextureType
+enum epTextureType
 {
-  udTT_1D,
-  udTT_1DArray,
-  udTT_2D,
-  udTT_2DArray,
-  udTT_Cube,
-  udTT_CubeArray,
-  udTT_3D,
-  udTT_Max
+  epTT_1D,
+  epTT_1DArray,
+  epTT_2D,
+  epTT_2DArray,
+  epTT_Cube,
+  epTT_CubeArray,
+  epTT_3D,
+  epTT_Max
 };
 
-struct udTexture;
+struct epTexture;
 
-udTexture* udTexture_CreateTexture(udTextureType type, size_t width, size_t height, int levels, udImageFormat format);
-void udTexture_DestroyTexture(udTexture **ppTex);
+epTexture* epTexture_CreateTexture(epTextureType type, size_t width, size_t height, int levels, epImageFormat format);
+void epTexture_DestroyTexture(epTexture **ppTex);
 
-void udTexture_SetImageData(udTexture *pTex, int element, int level, void *pImage);
+void epTexture_SetImageData(epTexture *pTex, int element, int level, void *pImage);
 
-#endif // UDTEXTURE_H
+#endif // EPTEXTURE_H

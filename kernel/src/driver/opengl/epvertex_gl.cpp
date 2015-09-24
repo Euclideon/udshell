@@ -1,54 +1,54 @@
 #include "hal/driver.h"
 
-#if UDRENDER_DRIVER == UDDRIVER_OPENGL
+#if EPRENDER_DRIVER == EPDRIVER_OPENGL
 
 #include "hal/vertex.h"
 
 #include "ep_opengl.h"
 
 
-const int s_VertexDataStride[udVDF_Max] =
+const int s_VertexDataStride[epVDF_Max] =
 {
-  16,	// udVDF_Float4
-  12,	// udVDF_Float3
-  8,	// udVDF_Float2
-  4,	// udVDF_Float
-  4,	// udVDF_UByte4N_RGBA
-  4,	// udVDF_UByte4N_BGRA
-  16, // udVDF_Int4
-  12, // udVDF_Int3
-  8,  // udVDF_Int2
-  4,  // udVDF_Int
-  16, // udVDF_UInt4
-  12, // udVDF_UInt3
-  8,  // udVDF_UInt2
-  4,  // udVDF_UInt
-  8,  // udVDF_Short4
-  4,  // udVDF_Short2
-  8,  // udVDF_Short4N
-  4,  // udVDF_Short2N
-  2,  // udVDF_Short
-  8,  // udVDF_UShort4
-  4,  // udVDF_UShort2
-  8,  // udVDF_UShort4N
-  4,  // udVDF_UShort2N
-  2,  // udVDF_UShort
-  4,  // udVDF_Byte4
-  4,  // udVDF_UByte4
-  4,  // udVDF_Byte4N
-  1,  // udVDF_Byte
-  1,  // udVDF_UByte
+  16,	// epVDF_Float4
+  12,	// epVDF_Float3
+  8,	// epVDF_Float2
+  4,	// epVDF_Float
+  4,	// epVDF_UByte4N_RGBA
+  4,	// epVDF_UByte4N_BGRA
+  16, // epVDF_Int4
+  12, // epVDF_Int3
+  8,  // epVDF_Int2
+  4,  // epVDF_Int
+  16, // epVDF_UInt4
+  12, // epVDF_UInt3
+  8,  // epVDF_UInt2
+  4,  // epVDF_UInt
+  8,  // epVDF_Short4
+  4,  // epVDF_Short2
+  8,  // epVDF_Short4N
+  4,  // epVDF_Short2N
+  2,  // epVDF_Short
+  8,  // epVDF_UShort4
+  4,  // epVDF_UShort2
+  8,  // epVDF_UShort4N
+  4,  // epVDF_UShort2N
+  2,  // epVDF_UShort
+  4,  // epVDF_Byte4
+  4,  // epVDF_UByte4
+  4,  // epVDF_Byte4N
+  1,  // epVDF_Byte
+  1,  // epVDF_UByte
 };
 
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udFormatDeclaration *udVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount)
+epFormatDeclaration *epVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount)
 {
-  size_t size = sizeof(udFormatDeclaration) + (sizeof(udArrayElement) + sizeof(udArrayElementData))*elementCount;
-  udFormatDeclaration *pDecl = (udFormatDeclaration*)udAlloc(size);
+  size_t size = sizeof(epFormatDeclaration) + (sizeof(udArrayElement) + sizeof(epArrayElementData))*elementCount;
+  epFormatDeclaration *pDecl = (epFormatDeclaration*)udAlloc(size);
   pDecl->pElements = (udArrayElement*)&pDecl[1];
-  pDecl->pElementData = (udArrayElementData*)(pDecl->pElements + elementCount);
+  pDecl->pElementData = (epArrayElementData*)(pDecl->pElements + elementCount);
   pDecl->numElements = elementCount;
 
   memcpy(pDecl->pElements, pElementArray, sizeof(udArrayElement)*elementCount);
@@ -69,7 +69,7 @@ udFormatDeclaration *udVertex_CreateFormatDeclaration(const udArrayElement *pEle
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udVertex_DestroyFormatDeclaration(udFormatDeclaration **ppDeclaration)
+void epVertex_DestroyFormatDeclaration(epFormatDeclaration **ppDeclaration)
 {
   udFree(*ppDeclaration);
   *ppDeclaration = nullptr;
@@ -77,11 +77,11 @@ void udVertex_DestroyFormatDeclaration(udFormatDeclaration **ppDeclaration)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udArrayBuffer* udVertex_CreateIndexBuffer(udArrayDataFormat format)
+epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format)
 {
-  udArrayBuffer *pIB = (udArrayBuffer*)udAlloc(sizeof(udArrayBuffer) + sizeof(udArrayDataFormat)*1);
-  pIB->pFormat = (udArrayDataFormat*)&(pIB[1]);
-  pIB->type = udAT_IndexArray;
+  epArrayBuffer *pIB = (epArrayBuffer*)udAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*1);
+  pIB->pFormat = (epArrayDataFormat*)&(pIB[1]);
+  pIB->type = epAT_IndexArray;
   *pIB->pFormat = format;
   pIB->numElements = 1;
 
@@ -93,12 +93,12 @@ udArrayBuffer* udVertex_CreateIndexBuffer(udArrayDataFormat format)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udArrayBuffer* udVertex_CreateVertexBuffer(udArrayDataFormat elements[], size_t numElements)
+epArrayBuffer* epVertex_CreateVertexBuffer(epArrayDataFormat elements[], size_t numElements)
 {
-  udArrayBuffer *pVB = (udArrayBuffer*)udAlloc(sizeof(udArrayBuffer) + sizeof(udArrayDataFormat)*numElements);
-  pVB->pFormat = (udArrayDataFormat*)&(pVB[1]);
-  pVB->type = udAT_VertexArray;
-  memcpy(pVB->pFormat, elements, sizeof(udArrayDataFormat)*numElements);
+  epArrayBuffer *pVB = (epArrayBuffer*)udAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*numElements);
+  pVB->pFormat = (epArrayDataFormat*)&(pVB[1]);
+  pVB->type = epAT_VertexArray;
+  memcpy(pVB->pFormat, elements, sizeof(epArrayDataFormat)*numElements);
   pVB->numElements = numElements;
 
   glGenBuffers(1, &pVB->buffer);
@@ -109,7 +109,7 @@ udArrayBuffer* udVertex_CreateVertexBuffer(udArrayDataFormat elements[], size_t 
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udVertex_DestroyArrayBuffer(udArrayBuffer **ppBuffer)
+void epVertex_DestroyArrayBuffer(epArrayBuffer **ppBuffer)
 {
   glDeleteBuffers(1, &(*ppBuffer)->buffer);
   udFree(*ppBuffer);
@@ -118,9 +118,9 @@ void udVertex_DestroyArrayBuffer(udArrayBuffer **ppBuffer)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udVertex_SetArrayBufferData(udArrayBuffer *pBuffer, const void *pVertexData, size_t bufferLen)
+void epVertex_SetArrayBufferData(epArrayBuffer *pBuffer, const void *pVertexData, size_t bufferLen)
 {
-  GLenum type = pBuffer->type == udAT_IndexArray ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
+  GLenum type = pBuffer->type == epAT_IndexArray ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
   glBindBuffer(type, pBuffer->buffer);
   glBufferData(type, bufferLen, pVertexData, GL_STATIC_DRAW);
 
@@ -128,4 +128,4 @@ void udVertex_SetArrayBufferData(udArrayBuffer *pBuffer, const void *pVertexData
 }
 
 
-#endif // UDRENDER_DRIVER == UDDRIVER_OPENGL
+#endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

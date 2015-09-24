@@ -2,7 +2,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc Model::descriptor =
@@ -21,7 +21,7 @@ RenderVertexFormatRef Model::GetRenderVertexFormat(RenderShaderProgramRef spShad
 {
   if (!spRenderVertexFormat)
   {
-    UDASSERT(false, "TODO");
+    EPASSERT(false, "TODO");
 
     // get the attributes from the material
 
@@ -33,9 +33,9 @@ RenderVertexFormatRef Model::GetRenderVertexFormat(RenderShaderProgramRef spShad
   return spRenderVertexFormat;
 }
 
-void Model::SetVertexArray(ArrayBufferRef spVertices, udSlice<const udSharedString> attributeNames)
+void Model::SetVertexArray(ArrayBufferRef spVertices, epSlice<const epSharedString> attributeNames)
 {
-//  udString type = spVertices->GetType();
+//  epString type = spVertices->GetType();
   // TODO: assert that type has the same number of elements as `attributeNames.length`.
 
   auto &a = vertexArrays.pushBack();
@@ -43,4 +43,4 @@ void Model::SetVertexArray(ArrayBufferRef spVertices, udSlice<const udSharedStri
   a.attributes = attributeNames;
 }
 
-} // namespace ud
+} // namespace ep

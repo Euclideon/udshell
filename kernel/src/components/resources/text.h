@@ -1,11 +1,11 @@
 #pragma once
-#ifndef _UD_TEXT_H
-#define _UD_TEXT_H
+#ifndef _EP_TEXT_H
+#define _EP_TEXT_H
 
 #include "components/resources/buffer.h"
 #include "ep/epstring.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(Buffer);
@@ -13,19 +13,19 @@ SHARED_CLASS(Buffer);
 class Text : public Buffer
 {
 public:
-  UD_COMPONENT(Text);
+  EP_COMPONENT(Text);
 
-  udVariant ParseXml() const;
-  udVariant ParseJson() const;
+  epVariant ParseXml() const;
+  epVariant ParseJson() const;
 
-  void CopyBuffer(udString text) { Buffer::CopyBuffer(text); }
+  void CopyBuffer(epString text) { Buffer::CopyBuffer(text); }
 
 protected:
-  Text(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  Text(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Buffer(pType, pKernel, uid, initParams) {}
   virtual ~Text() {}
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // _UD_TEXT_H
+#endif // _EP_TEXT_H

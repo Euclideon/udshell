@@ -21,32 +21,32 @@ namespace qt
 // Ugly macros to simplify creation of new slots
 #define QT_SIGNAL_HANDLER_0() \
   void SignalHandler() { \
-    udDelegate<void()> del = v.as<udDelegate<void()>>(); \
+    epDelegate<void()> del = v.as<epDelegate<void()>>(); \
     del(); \
   }
 
 #define QT_SIGNAL_HANDLER_1(TYPE1) \
   void SignalHandler(TYPE1 arg1) { \
-    udDelegate<void(udVariant)> del = v.as<udDelegate<void(udVariant)>>(); \
-    del(udVariant(arg1)); \
+    epDelegate<void(epVariant)> del = v.as<epDelegate<void(epVariant)>>(); \
+    del(epVariant(arg1)); \
   }
 
 #define QT_SIGNAL_HANDLER_2(TYPE1, TYPE2) \
   void SignalHandler(TYPE1 arg1, TYPE2 arg2) { \
-    udDelegate<void(udVariant, udVariant)> del = v.as<udDelegate<void(udVariant,udVariant)>>(); \
-    del(udVariant(arg1), udVariant(arg2)); \
+    epDelegate<void(epVariant, epVariant)> del = v.as<epDelegate<void(epVariant,epVariant)>>(); \
+    del(epVariant(arg1), epVariant(arg2)); \
   }
 
 #define QT_SIGNAL_HANDLER_3(TYPE1, TYPE2, TYPE3) \
   void SignalHandler(TYPE1 arg1, TYPE2 arg2, TYPE3 arg3) { \
-    udDelegate<void(udVariant,udVariant,udVariant)> del = v.as<udDelegate<void(udVariant,udVariant,udVariant)>>(); \
-    del(udVariant(arg1), udVariant(arg2), udVariant(arg3)); \
+    epDelegate<void(epVariant,epVariant,epVariant)> del = v.as<epDelegate<void(epVariant,epVariant,epVariant)>>(); \
+    del(epVariant(arg1), epVariant(arg2), epVariant(arg3)); \
   }
 
 #define QT_SIGNAL_HANDLER_4(TYPE1, TYPE2, TYPE3, TYPE4) \
   void SignalHandler(TYPE1 arg1, TYPE2 arg2, TYPE3 arg3, TYPE4 arg4) { \
-    udDelegate<void(udVariant,udVariant,udVariant,udVariant)> del = v.as<udDelegate<void(udVariant,udVariant,udVariant,udVariant)>>(); \
-    del(udVariant(arg1), udVariant(arg2), udVariant(arg3), udVariant(arg4)); \
+    epDelegate<void(epVariant,epVariant,epVariant,epVariant)> del = v.as<epDelegate<void(epVariant,epVariant,epVariant,epVariant)>>(); \
+    del(epVariant(arg1), epVariant(arg2), epVariant(arg3), epVariant(arg4)); \
   }
 
 
@@ -55,7 +55,7 @@ class QtSignalToDelegate : public QObject
   Q_OBJECT
 
 public:
-  QtSignalToDelegate(const QObject *pSourceObj, const QMetaMethod &m, const udVariant::VarDelegate &d) : v(d)
+  QtSignalToDelegate(const QObject *pSourceObj, const QMetaMethod &m, const epVariant::VarDelegate &d) : v(d)
   {
     QMetaMethod sigHandler = lookupSignalHandler(m);
     if (sigHandler.isValid())
@@ -83,7 +83,7 @@ private slots:
 
 private:
   QMetaObject::Connection connection;
-  udVariant v;
+  epVariant v;
 };
 
 } // namespace qt

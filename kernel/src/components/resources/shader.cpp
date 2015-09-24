@@ -2,7 +2,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace ud
+namespace ep
 {
 
 ComponentDesc Shader::descriptor =
@@ -21,7 +21,7 @@ RenderShaderRef Shader::GetRenderShader(int type)
 {
   if (!spRenderShader)
   {
-    RenderShader *pShader = new RenderShader(pKernel->GetRenderer(), ShaderRef(this), (udShaderType)type);
+    RenderShader *pShader = new RenderShader(pKernel->GetRenderer(), ShaderRef(this), (epShaderType)type);
     if (!pShader->pShader)
     {
       delete pShader;
@@ -33,4 +33,4 @@ RenderShaderRef Shader::GetRenderShader(int type)
   return spRenderShader;
 }
 
-} // namespace ud
+} // namespace ep

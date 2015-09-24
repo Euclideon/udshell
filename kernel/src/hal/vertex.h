@@ -1,66 +1,66 @@
 #pragma once
-#ifndef UDVERTEX_H
-#define UDVERTEX_H
+#ifndef EPVERTEX_H
+#define EPVERTEX_H
 
-struct udFormatDeclaration;
-struct udArrayBuffer;
+struct epFormatDeclaration;
+struct epArrayBuffer;
 
-enum udArrayDataFormat
+enum epArrayDataFormat
 {
-  udVDF_Unknown = -1,
+  epVDF_Unknown = -1,
 
-  udVDF_Float4 = 0,
-  udVDF_Float3,
-  udVDF_Float2,
-  udVDF_Float,
-  udVDF_UByte4N_RGBA,
-  udVDF_UByte4N_BGRA,
-  udVDF_Int4,
-  udVDF_Int3,
-  udVDF_Int2,
-  udVDF_Int,
-  udVDF_UInt4,
-  udVDF_UInt3,
-  udVDF_UInt2,
-  udVDF_UInt,
-  udVDF_Short4,
-  udVDF_Short2,
-  udVDF_Short4N,
-  udVDF_Short2N,
-  udVDF_Short,
-  udVDF_UShort4,
-  udVDF_UShort2,
-  udVDF_UShort4N,
-  udVDF_UShort2N,
-  udVDF_UShort,
-  udVDF_Byte4,
-  udVDF_UByte4,
-  udVDF_Byte4N,
-  udVDF_Byte,
-  udVDF_UByte,
+  epVDF_Float4 = 0,
+  epVDF_Float3,
+  epVDF_Float2,
+  epVDF_Float,
+  epVDF_UByte4N_RGBA,
+  epVDF_UByte4N_BGRA,
+  epVDF_Int4,
+  epVDF_Int3,
+  epVDF_Int2,
+  epVDF_Int,
+  epVDF_UInt4,
+  epVDF_UInt3,
+  epVDF_UInt2,
+  epVDF_UInt,
+  epVDF_Short4,
+  epVDF_Short2,
+  epVDF_Short4N,
+  epVDF_Short2N,
+  epVDF_Short,
+  epVDF_UShort4,
+  epVDF_UShort2,
+  epVDF_UShort4N,
+  epVDF_UShort2N,
+  epVDF_UShort,
+  epVDF_Byte4,
+  epVDF_UByte4,
+  epVDF_Byte4N,
+  epVDF_Byte,
+  epVDF_UByte,
 
-  udVDF_Max,
-  udVDF_ForceInt = 0x7f
+  epVDF_Max,
+  epVDF_ForceInt = 0x7f
 };
 
 struct udArrayElement
 {
   char attributeName[56];
-  udArrayDataFormat format;
+  epArrayDataFormat format;
 //  int componentCount;
   int stream;
 };
 
-udFormatDeclaration *udVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount);
-void udVertex_DestroyFormatDeclaration(udFormatDeclaration **ppDeclaration);
+epFormatDeclaration *epVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount);
+void epVertex_DestroyFormatDeclaration(epFormatDeclaration **ppDeclaration);
 
-udArrayBuffer* udVertex_CreateIndexBuffer(udArrayDataFormat format);
-udArrayBuffer* udVertex_CreateVertexBuffer(udArrayDataFormat elements[], size_t numElements);
-void udVertex_DestroyArrayBuffer(udArrayBuffer **ppVB);
+epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format);
+epArrayBuffer* epVertex_CreateVertexBuffer(epArrayDataFormat elements[], size_t numElements);
+void epVertex_DestroyArrayBuffer(epArrayBuffer **ppVB);
 
-void udVertex_SetArrayBufferData(udArrayBuffer *pVB, const void *pData, size_t bufferLen);
+void epVertex_SetArrayBufferData(epArrayBuffer *pVB, const void *pData, size_t bufferLen);
 
-//void udVertex_SetVertexBuffer(const udArrayBuffer *pVertexBuffer);
-//void udVertex_SetIndexBuffer(const udIndexBuffer *pIndexBuffer);
+//void epVertex_SetVertexBuffer(const epArrayBuffer *pVertexBuffer);
+//void epVertex_SetIndexBuffer(const udIndexBuffer *pIndexBuffer);
 
-#endif // UDVERTEX_H
+#endif // EPVERTEX_H

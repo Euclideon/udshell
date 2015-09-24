@@ -1,46 +1,46 @@
 #pragma once
-#if !defined(_UDAVLTREE_H)
-#define _UDAVLTREE_H
+#if !defined(_EPAVLTREE_H)
+#define _EPAVLTREE_H
 
 template<typename T>
 struct AVLCompare
 {
-  UDFORCE_INLINE ptrdiff_t operator()(const T &a, const T &b)
+  __forceinline ptrdiff_t operator()(const T &a, const T &b)
   {
     return a < b ? -1 : (a > b ? 1 : 0);
   }
 };
 
 template<>
-struct AVLCompare<udString>
+struct AVLCompare<epString>
 {
-  UDFORCE_INLINE ptrdiff_t operator()(udString a, udString b)
+  __forceinline ptrdiff_t operator()(epString a, epString b)
   {
     return a.cmp(b);
   }
 };
 template<>
-struct AVLCompare<udSharedString>
+struct AVLCompare<epSharedString>
 {
-  UDFORCE_INLINE ptrdiff_t operator()(udString a, udString b)
+  __forceinline ptrdiff_t operator()(epString a, epString b)
   {
     return a.cmp(b);
   }
 };
 
 template<typename K, typename V, typename PredFunctor = AVLCompare<K>>
-class udAVLTree
+class epAVLTree
 {
 public:
-  udAVLTree() {}
-  udAVLTree(nullptr_t) {}
-  udAVLTree(udAVLTree &&rval)
+  epAVLTree() {}
+  epAVLTree(nullptr_t) {}
+  epAVLTree(epAVLTree &&rval)
     : size(size), root(root)
   {
     rval.root = nullptr;
   }
 
-  ~udAVLTree()
+  ~epAVLTree()
   {
     // TODO: ** CLEAN UP HERE **
   }
@@ -104,7 +104,7 @@ public:
   V& operator[](const K &key) const
   {
     V *v = Get(key);
-    UDASSERT(v, "Invalid index");
+    EPASSERT(v, "Invalid index");
     return *v;
   }
 
@@ -470,4 +470,4 @@ public:
   };
 };
 
-#endif // _UDAVLTREE_H
+#endif // _EPAVLTREE_H

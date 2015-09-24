@@ -1,13 +1,13 @@
 #include "hal/driver.h"
 
-#if UDRENDER_DRIVER == UDDRIVER_OPENGL
+#if EPRENDER_DRIVER == EPDRIVER_OPENGL
 
 #include "hal/texture.h"
 
 #include "ep_opengl.h"
 
 
-GLenum s_textureType[udTT_Max] =
+GLenum s_textureType[epTT_Max] =
 {
 #if !defined(USE_GLES)
   GL_TEXTURE_1D,
@@ -39,27 +39,27 @@ static GLuint s_cubeFace[6] =
 };
 
 #if !defined(USE_GLES)
-udGLTextureFormat s_GLFormats[udIF_Max] =
+epGLTextureFormat s_GLFormats[epIF_Max] =
 {
-  { GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV },   // udIF_RGBA8
-  { GL_RGBA8, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV },   // udIF_BGRA8
-  { GL_LUMINANCE, GL_LUMINANCE, GL_FLOAT },             // udIF_R_F32
+  { GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV },   // epIF_RGBA8
+  { GL_RGBA8, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV },   // epIF_BGRA8
+  { GL_LUMINANCE, GL_LUMINANCE, GL_FLOAT },             // epIF_R_F32
 };
 #else
-udGLTextureFormat s_GLFormats[udIF_Max] =
+epGLTextureFormat s_GLFormats[epIF_Max] =
 {
-  { GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE },               // udIF_RGBA8
-  { GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE },               // udIF_BGRA8
-  { GL_LUMINANCE, GL_LUMINANCE, GL_FLOAT },             // udIF_R_F32
+  { GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE },               // epIF_RGBA8
+  { GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE },               // epIF_BGRA8
+  { GL_LUMINANCE, GL_LUMINANCE, GL_FLOAT },             // epIF_R_F32
 };
 #endif
 
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udTexture* udTexture_CreateTexture(udTextureType type, size_t width, size_t height, int levels, udImageFormat format)
+epTexture* epTexture_CreateTexture(epTextureType type, size_t width, size_t height, int levels, epImageFormat format)
 {
-  udTexture *pTex = (udTexture*)udAlloc(sizeof(udTexture));
+  epTexture *pTex = (epTexture*)udAlloc(sizeof(epTexture));
 
   pTex->type = type;
   pTex->format = format;
@@ -78,7 +78,7 @@ udTexture* udTexture_CreateTexture(udTextureType type, size_t width, size_t heig
   glTexParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 #if !defined(USE_GLES)
-  if(pTex->type == udTT_3D)
+  if(pTex->type == epTT_3D)
     glTexParameteri(t, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 #endif
 
@@ -87,7 +87,7 @@ udTexture* udTexture_CreateTexture(udTextureType type, size_t width, size_t heig
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udTexture_DestroyTexture(udTexture **ppTex)
+void epTexture_DestroyTexture(epTexture **ppTex)
 {
   glDeleteTextures(1, &(*ppTex)->texture);
   udFree(*ppTex);
@@ -96,9 +96,9 @@ void udTexture_DestroyTexture(udTexture **ppTex)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udTexture_SetImageData(udTexture *pTex, int element, int level, void *pImage)
+void epTexture_SetImageData(epTexture *pTex, int element, int level, void *pImage)
 {
-  udGLTextureFormat &format = s_GLFormats[pTex->format];
+  epGLTextureFormat &format = s_GLFormats[pTex->format];
   GLuint type = s_textureType[pTex->type];
 
   GLsizei elementWidth = GLsizei(pTex->width >> level);
@@ -110,43 +110,43 @@ void udTexture_SetImageData(udTexture *pTex, int element, int level, void *pImag
   // texture arrays
   switch(pTex->type)
   {
-    case udTT_1D:
+    case epTT_1D:
 #if !defined(USE_GLES)
       glTexImage1D(type, level, format.internalFormat, elementWidth, 0, format.format, format.type, pImage);
 #else
-      UDASSERT(false, "Not supported in GLES2!");
+      EPASSERT(false, "Not supported in GLES2!");
 #endif
       break;
-    case udTT_1DArray:
+    case epTT_1DArray:
       if(element == -1)
         glTexImage2D(type, level, format.internalFormat, elementWidth, (GLsizei)pTex->elements, 0, format.format, format.type, pImage);
       else
         glTexSubImage2D(type, level, 0, element, elementWidth, 1, format.format, format.type, pImage);
       break;
-    case udTT_2D:
+    case epTT_2D:
       glTexImage2D(type, level, format.internalFormat, elementWidth, elementHeight, 0, format.format, format.type, pImage);
       break;
-    case udTT_2DArray:
+    case epTT_2DArray:
 #if !defined(USE_GLES)
       if(element == -1)
         glTexImage3D(type, level, format.internalFormat, elementWidth, elementHeight, (GLsizei)pTex->elements, 0, format.format, format.type, pImage);
       else
         glTexSubImage3D(type, level, 0, 0, element, elementWidth, elementHeight, 1, format.format, format.type, pImage);
 #else
-      UDASSERT(false, "Not supported in GLES2!");
+      EPASSERT(false, "Not supported in GLES2!");
 #endif
       break;
-    case udTT_Cube:
+    case epTT_Cube:
       glTexImage2D(s_cubeFace[element], level, format.internalFormat, elementWidth, elementHeight, 0, format.format, format.type, pImage);
       break;
-    case udTT_CubeArray:
-      UDASSERT(false, "TODO: cubemap arrays!");
+    case epTT_CubeArray:
+      EPASSERT(false, "TODO: cubemap arrays!");
       break;
-    case udTT_3D:
+    case epTT_3D:
 #if !defined(USE_GLES)
       glTexImage3D(type, level, format.internalFormat, elementWidth, elementHeight, elementDepth, 0, format.format, format.type, pImage);
 #else
-      UDASSERT(false, "Not supported in GLES2!");
+      EPASSERT(false, "Not supported in GLES2!");
 #endif
       break;
     default:
@@ -154,4 +154,4 @@ void udTexture_SetImageData(udTexture *pTex, int element, int level, void *pImag
   }
 }
 
-#endif // UDRENDER_DRIVER == UDDRIVER_OPENGL
+#endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

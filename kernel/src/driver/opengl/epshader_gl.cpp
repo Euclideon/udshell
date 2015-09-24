@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDRENDER_DRIVER == UDDRIVER_OPENGL
+#if EPRENDER_DRIVER == EPDRIVER_OPENGL
 
 #include "hal/shader.h"
 #include "hal/texture.h"
@@ -9,30 +9,30 @@
 #include "ep_opengl.h"
 
 
-static GLenum s_shaderType[udST_Max] =
+static GLenum s_shaderType[epST_Max] =
 {
   GL_VERTEX_SHADER,
   GL_FRAGMENT_SHADER
 };
 
-extern GLenum s_textureType[udTT_Max];
+extern GLenum s_textureType[epTT_Max];
 
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udShader* udShader_CreateShaderFromFile(const char *pFilename, udShaderType type)
+epShader* epShader_CreateShaderFromFile(const char *pFilename, epShaderType type)
 {
-  udUnused(pFilename);
+  epUnused(pFilename);
   // load file
   //...
   GLchar *pSource = nullptr;
 
-  return udShader_CreateShader(pSource, 0, type);
+  return epShader_CreateShader(pSource, 0, type);
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udShader* udShader_CreateShader(const char *pSource, size_t length, udShaderType type)
+epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType type)
 {
   GLuint shader = glCreateShader(s_shaderType[type]);
 
@@ -53,7 +53,7 @@ udShader* udShader_CreateShader(const char *pSource, size_t length, udShaderType
     return 0;
   }
 
-  udShader *pShader = udAllocType(udShader, 1, udAF_None);
+  epShader *pShader = udAllocType(epShader, 1, udAF_None);
   pShader->shader = shader;
 
   return pShader;
@@ -61,7 +61,7 @@ udShader* udShader_CreateShader(const char *pSource, size_t length, udShaderType
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader *pPixelShader)
+epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader *pPixelShader)
 {
   GLuint program = glCreateProgram();
   glAttachShader(program, pPixelShader->shader);
@@ -80,7 +80,7 @@ udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader 
     return 0;
   }
 
-  udShaderProgram *pProgram = udAllocType(udShaderProgram, 1, udAF_None);
+  epShaderProgram *pProgram = udAllocType(epShaderProgram, 1, udAF_None);
   pProgram->program = program;
 
   size_t extraBytes = 0;
@@ -109,14 +109,14 @@ udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader 
     extraBytes += length + 1;
   }
 
-  extraBytes += sizeof(udShaderProgram::Param) * (numAttributes + numUniforms);
+  extraBytes += sizeof(epShaderProgram::Param) * (numAttributes + numUniforms);
 
-  pProgram = (udShaderProgram*)udAlloc(sizeof(udShaderProgram) + extraBytes);
+  pProgram = (epShaderProgram*)udAlloc(sizeof(epShaderProgram) + extraBytes);
   pProgram->program = program;
   pProgram->numAttributes = numAttributes;
   pProgram->numUniforms = numUniforms;
-  pProgram->pAttributes = (udShaderProgram::Param*)&pProgram[1];
-  pProgram->pUniforms = (udShaderProgram::Param*)&pProgram->pAttributes[numAttributes];
+  pProgram->pAttributes = (epShaderProgram::Param*)&pProgram[1];
+  pProgram->pUniforms = (epShaderProgram::Param*)&pProgram->pAttributes[numAttributes];
   char *pStrings = (char*)&pProgram->pUniforms[numUniforms];
 
   for (GLint i = 0; i < numAttributes; ++i)
@@ -146,51 +146,51 @@ udShaderProgram* udShader_CreateShaderProgram(udShader *pVertexShader, udShader 
 }
 
 // ***************************************************************************************
-size_t udShader_GetNumAttributes(udShaderProgram *pProgram)
+size_t epShader_GetNumAttributes(epShaderProgram *pProgram)
 {
   return pProgram->numAttributes;
 }
 
 // ***************************************************************************************
-const char *udShader_GetAttributeName(udShaderProgram *pProgram, size_t i)
+const char *epShader_GetAttributeName(epShaderProgram *pProgram, size_t i)
 {
   return pProgram->pAttributes[i].pName;
 }
 
 // ***************************************************************************************
-size_t udShader_GetAttributeType(udShaderProgram *pProgram, size_t i)
+size_t epShader_GetAttributeType(epShaderProgram *pProgram, size_t i)
 {
   return pProgram->pAttributes[i].type;
 }
 
 // ***************************************************************************************
-size_t udShader_GetNumUniforms(udShaderProgram *pProgram)
+size_t epShader_GetNumUniforms(epShaderProgram *pProgram)
 {
   return pProgram->numUniforms;
 }
 
 // ***************************************************************************************
-const char *udShader_GetUniformName(udShaderProgram *pProgram, size_t i)
+const char *epShader_GetUniformName(epShaderProgram *pProgram, size_t i)
 {
   return pProgram->pUniforms[i].pName;
 }
 
 // ***************************************************************************************
-size_t udShader_GetUniformType(udShaderProgram *pProgram, size_t i)
+size_t epShader_GetUniformType(epShaderProgram *pProgram, size_t i)
 {
   return pProgram->pUniforms[i].type;
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-int udShader_FindShaderParameter(udShaderProgram *pProgram, const char *pName)
+int epShader_FindShaderParameter(epShaderProgram *pProgram, const char *pName)
 {
   return (int)glGetUniformLocation(pProgram->program, pName);
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetCurrent(udShaderProgram *pProgram)
+void epShader_SetCurrent(epShaderProgram *pProgram)
 {
   if(pProgram)
     glUseProgram(pProgram->program);
@@ -200,7 +200,7 @@ void udShader_SetCurrent(udShaderProgram *pProgram)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int param, bool value)
+void epShader_SetProgramData(int param, bool value)
 {
   if(param < 0)
     return;
@@ -209,7 +209,7 @@ void udShader_SetProgramData(int param, bool value)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int param, int value)
+void epShader_SetProgramData(int param, int value)
 {
   if(param < 0)
     return;
@@ -218,7 +218,7 @@ void udShader_SetProgramData(int param, int value)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int param, float value)
+void epShader_SetProgramData(int param, float value)
 {
   if(param < 0)
     return;
@@ -227,7 +227,7 @@ void udShader_SetProgramData(int param, float value)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int param, const udFloat4 &value)
+void epShader_SetProgramData(int param, const udFloat4 &value)
 {
   if(param < 0)
     return;
@@ -236,7 +236,7 @@ void udShader_SetProgramData(int param, const udFloat4 &value)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int param, const udFloat4x4 &value)
+void epShader_SetProgramData(int param, const udFloat4x4 &value)
 {
   if(param < 0)
     return;
@@ -245,7 +245,7 @@ void udShader_SetProgramData(int param, const udFloat4x4 &value)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int textureUnit, int param, struct udTexture *pTexture)
+void epShader_SetProgramData(int textureUnit, int param, struct epTexture *pTexture)
 {
   if(param < 0)
     return;
@@ -256,7 +256,7 @@ void udShader_SetProgramData(int textureUnit, int param, struct udTexture *pText
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int param, const int *pValues, size_t count)
+void epShader_SetProgramData(int param, const int *pValues, size_t count)
 {
   if(param < 0)
     return;
@@ -265,7 +265,7 @@ void udShader_SetProgramData(int param, const int *pValues, size_t count)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int param, const float *pValues, size_t count)
+void epShader_SetProgramData(int param, const float *pValues, size_t count)
 {
   if(param < 0)
     return;
@@ -274,7 +274,7 @@ void udShader_SetProgramData(int param, const float *pValues, size_t count)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
+void epShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
 {
   if(param < 0)
     return;
@@ -283,11 +283,11 @@ void udShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void udShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
+void epShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
 {
   if(param < 0)
     return;
   glUniformMatrix4fv(param, (GLsizei)count, 0, (GLfloat*)pValues);
 }
 
-#endif // UDRENDER_DRIVER == UDDRIVER_OPENGL
+#endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

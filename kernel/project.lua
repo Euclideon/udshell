@@ -4,6 +4,7 @@ project "epkernel"
 	flags { "StaticRuntime", "OmitDefaultLibrary" }
 
 	files { "src/**" }
+	files { "../public/include/**" }
 	files { "script/**" }
 	files { "shaders/**" }
 	files { "project.lua" }
@@ -11,8 +12,10 @@ project "epkernel"
 
 	includedirs { "src" }
 	includedirs { "../public/include" }
+
 	includedirs { "../ud/udPlatform/Include" }
 	includedirs { "../ud/udPointCloud/Include" }
+
 	includedirs { "../3rdparty/lua/" .. luaPath .. "/src"}
 	includedirs { "../3rdparty/assimp-3.1.1/include" }
 	includedirs { "../3rdparty/rapidxml-1.13" }
@@ -28,18 +31,17 @@ project "epkernel"
 		includedirs { "../ud/3rdParty/sdl2/include" }
 	filter "PNaCl"
 		buildoptions { "-std=c++11" }
+	filter {}
 
 	-- include common stuff
-	dofile "../ud/common-proj.lua"
-
-	exceptionhandling "Default"
-
-	-- common-proj.lua set objdir and targetdir, we'll reset them correctly for udShell
-	objdir "../int/%{cfg.buildcfg}_%{cfg.platform}"
-	targetdir "../public/lib/%{cfg.buildcfg}_%{cfg.platform}"
+	dofile "../common-proj.lua"
 
 	includedirs { "%{cfg.objdir}/script" }
 	includedirs { "%{cfg.objdir}/shaders" }
+
+	-- HACK: kernel seems to get the path wrong!
+	includedirs { "%{cfg.objdir}/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}/script" }
+	includedirs { "%{cfg.objdir}/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}/shaders" }
 
 	filter "files:script/**"
 		buildmessage 'text2c.sh %{file.relpath} %{cfg.objdir}/script/%{file.basename}.inc'

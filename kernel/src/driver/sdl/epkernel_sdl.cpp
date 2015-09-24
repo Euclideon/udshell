@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDWINDOW_DRIVER == UDDRIVER_SDL
+#if EPWINDOW_DRIVER == EPDRIVER_SDL
 
 #include "kernel.h"
 #include "renderscene.h"
@@ -15,7 +15,7 @@ bool s_done = false;
 static int s_displayWidth, s_displayHeight;
 static Uint32 s_sdlEvent = (Uint32)-1;
 
-using namespace ud;
+using namespace ep;
 
 class SDLKernel : public Kernel
 {
@@ -27,7 +27,7 @@ public:
   udResult RunMainLoop() override;
 };
 
-Kernel *Kernel::CreateInstanceInternal(udInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
 {
   return new SDLKernel;
 }
@@ -187,7 +187,7 @@ udResult SDLKernel::RunMainLoop()
     }
 
     // TODO: need to translate input polling into messages...
-    udInput_Update();
+    epInput_Update();
 
     // render a frame (this could move to another thread!)
     RenderableViewRef spRenderView = spFocusView->GetRenderableView();

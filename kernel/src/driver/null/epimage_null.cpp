@@ -1,6 +1,6 @@
 #include "hal/driver.h"
 
-#if UDIMAGE_DRIVER == UDDRIVER_NULL
+#if EPIMAGE_DRIVER == EPDRIVER_NULL
 
 #include "hal/image.h"
 
@@ -12,12 +12,12 @@ void udImage_DeinitInternal()
 {
 }
 
-udImage* udImage_ReadImage(void *pBuffer, size_t bufferLen, const char *pFileExt)
+epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *pFileExt)
 {
   return nullptr;
 }
 
-void* udImage_WriteImage(udImage *pImage, const char *pFileExt, size_t *pOutputSize)
+void* epImage_WriteImage(epImage *pImage, const char *pFileExt, size_t *pOutputSize)
 {
   *pOutputSize = 0;
   return nullptr;

@@ -1,76 +1,76 @@
 #pragma once
-#if !defined(_UDEVENT_H)
-#define _UDEVENT_H
+#if !defined(_EPEVENT_H)
+#define _EPEVENT_H
 
 #include "ep/epdelegate.h"
 #include "ep/epslice.h"
 
 using fastdelegate::FastDelegate;
 
-class udSubscriber;
-namespace ud
+class epSubscriber;
+namespace ep
 {
   class Component;
-  typedef udSharedPtr<Component> ComponentRef;
+  typedef epSharedPtr<Component> ComponentRef;
 };
 
-class udBaseEvent
+class epBaseEvent
 {
 public:
-  ~udBaseEvent();
+  ~epBaseEvent();
 
 protected:
-  friend class udSubscriber;
+  friend class epSubscriber;
 
-  void AddSubscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber = nullptr);
-  void RemoveSubscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber = nullptr);
+  void AddSubscription(const epDelegateMementoRef &spM, epSubscriber *pSubscriber = nullptr);
+  void RemoveSubscription(const epDelegateMementoRef &spM, epSubscriber *pSubscriber = nullptr);
 
   struct Subscription
   {
-    Subscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber = nullptr)
+    Subscription(const epDelegateMementoRef &spM, epSubscriber *pSubscriber = nullptr)
       : spM(spM), pSubscriber(pSubscriber) {}
 
-    udDelegateMementoRef spM;
-    udSubscriber *pSubscriber;
+    epDelegateMementoRef spM;
+    epSubscriber *pSubscriber;
   };
-  udFixedSlice<Subscription, 4> subscribers;
+  epArray<Subscription, 4> subscribers;
 };
 
 template<typename... Args>
-class udEvent : public udBaseEvent
+class epEvent : public epBaseEvent
 {
 public:
-  typedef udDelegate<void(Args...)> Delegate;
+  typedef epDelegate<void(Args...)> Delegate;
 
   // subscribe
   void Subscribe(Delegate callback)
   {
     AddSubscription(callback.GetMemento());
   }
-  void Subscribe(const udEvent<Args...> &ev)
+  void Subscribe(const epEvent<Args...> &ev)
   {
     Subscribe(ev.GetDelegate());
   }
 
   template <typename X>
-  void Subscribe(ud::Component *pC, void(X::*func)(Args...));
+  void Subscribe(ep::Component *pC, void(X::*func)(Args...));
   template <typename X>
-  void Subscribe(ud::ComponentRef c, void(X::*func)(Args...)) { Subscribe(c.ptr(), func); }
+  void Subscribe(ep::ComponentRef c, void(X::*func)(Args...)) { Subscribe(c.ptr(), func); }
 
   // unsubscribe
   void Unsubscribe(Delegate callback)
   {
     RemoveSubscription(callback.GetMemento());
   }
-  void Unsubscribe(const udEvent<Args...> &ev)
+  void Unsubscribe(const epEvent<Args...> &ev)
   {
     Unsubscribe(ev.GetDelegate());
   }
 
   template <typename X>
-  void Unsubscribe(ud::Component *pC, void(X::*func)(Args...));
+  void Unsubscribe(ep::Component *pC, void(X::*func)(Args...));
   template <typename X>
-  void Unsubscribe(ud::ComponentRef c, void(X::*func)(Args...))
+  void Unsubscribe(ep::ComponentRef c, void(X::*func)(Args...))
   {
     Unsubscribe(c.ptr(), func);
   }
@@ -94,51 +94,51 @@ public:
 };
 
 
-class udSubscriber
+class epSubscriber
 {
 public:
-  ~udSubscriber();
+  ~epSubscriber();
 
   template<typename... Args>
-  void Subscribe(udEvent<Args...> &ev, typename udEvent<Args...>::Delegate d);
+  void Subscribe(epEvent<Args...> &ev, typename epEvent<Args...>::Delegate d);
 
   template<typename... Args>
-  void Unsubscribe(udEvent<Args...> &ev, typename udEvent<Args...>::Delegate d);
+  void Unsubscribe(epEvent<Args...> &ev, typename epEvent<Args...>::Delegate d);
 
 protected:
-  void RemoveSubscription(const udDelegateMementoRef &spM, udBaseEvent *pEvent);
+  void RemoveSubscription(const epDelegateMementoRef &spM, epBaseEvent *pEvent);
 
 private:
-  friend class udBaseEvent;
+  friend class epBaseEvent;
 
   struct Subscription
   {
-    Subscription(const udDelegateMementoRef &spM, udBaseEvent *pEvent)
+    Subscription(const epDelegateMementoRef &spM, epBaseEvent *pEvent)
       : spM(spM), pEvent(pEvent) {}
 
-    udDelegateMementoRef spM;
-    udBaseEvent *pEvent;
+    epDelegateMementoRef spM;
+    epBaseEvent *pEvent;
   };
 
-  udFixedSlice<Subscription, 4> events;
+  epArray<Subscription, 4> events;
 };
 
 
 
 /*** implementation ***/
 
-inline udBaseEvent::~udBaseEvent()
+inline epBaseEvent::~epBaseEvent()
 {
   for (auto &s : subscribers)
     s.pSubscriber->RemoveSubscription(s.spM, this);
 }
 
-inline void udBaseEvent::AddSubscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber)
+inline void epBaseEvent::AddSubscription(const epDelegateMementoRef &spM, epSubscriber *pSubscriber)
 {
   subscribers.pushBack(Subscription(spM, pSubscriber));
 }
 
-inline void udBaseEvent::RemoveSubscription(const udDelegateMementoRef &spM, udSubscriber *pSubscriber)
+inline void epBaseEvent::RemoveSubscription(const epDelegateMementoRef &spM, epSubscriber *pSubscriber)
 {
   for (size_t i = 0; i < subscribers.length; ++i)
   {
@@ -151,24 +151,24 @@ inline void udBaseEvent::RemoveSubscription(const udDelegateMementoRef &spM, udS
 }
 
 
-inline udSubscriber::~udSubscriber()
+inline epSubscriber::~epSubscriber()
 {
   for (auto &e : events)
     e.pEvent->RemoveSubscription(e.spM, this);
 }
 
 template<typename... Args>
-inline void udSubscriber::Subscribe(udEvent<Args...> &ev, typename udEvent<Args...>::Delegate d)
+inline void epSubscriber::Subscribe(epEvent<Args...> &ev, typename epEvent<Args...>::Delegate d)
 {
-  udDelegateMementoRef spM = d.GetMemento();
+  epDelegateMementoRef spM = d.GetMemento();
   ev.AddSubscription(spM, this);
   events.pushBack(Subscription(spM, &ev));
 }
 
 template<typename... Args>
-inline void udSubscriber::Unsubscribe(udEvent<Args...> &ev, typename udEvent<Args...>::Delegate d)
+inline void epSubscriber::Unsubscribe(epEvent<Args...> &ev, typename epEvent<Args...>::Delegate d)
 {
-  udDelegateMementoRef spM = d.GetMemento();
+  epDelegateMementoRef spM = d.GetMemento();
   for (size_t i = 0; i < events.length; ++i)
   {
     if (events[i].spM == spM && events[i].pEvent == &ev)
@@ -180,7 +180,7 @@ inline void udSubscriber::Unsubscribe(udEvent<Args...> &ev, typename udEvent<Arg
   }
 }
 
-inline void udSubscriber::RemoveSubscription(const udDelegateMementoRef &spM, udBaseEvent *pEvent)
+inline void epSubscriber::RemoveSubscription(const epDelegateMementoRef &spM, epBaseEvent *pEvent)
 {
   for (size_t i = 0; i < events.length; ++i)
   {
@@ -192,4 +192,4 @@ inline void udSubscriber::RemoveSubscription(const udDelegateMementoRef &spM, ud
   }
 }
 
-#endif // _UDEVENT_H
+#endif // _EPEVENT_H

@@ -1,12 +1,12 @@
 #pragma once
-#if !defined(_UD_IMAGESOURCE_H)
-#define _UD_IMAGESOURCE_H
+#if !defined(_EP_IMAGESOURCE_H)
+#define _EP_IMAGESOURCE_H
 
 #include "components/datasource.h"
 #include "components/resources/array.h"
 #include "components/stream.h"
 
-namespace ud
+namespace ep
 {
 
 SHARED_CLASS(ImageSource);
@@ -14,19 +14,19 @@ SHARED_CLASS(ImageSource);
 class ImageSource : public DataSource
 {
 public:
-  UD_COMPONENT(ImageSource);
+  EP_COMPONENT(ImageSource);
 
-  udSlice<const udString> GetFileExtensions() const override
+  epSlice<const epString> GetFileExtensions() const override
   {
     return extensions;
   }
 
 protected:
-  static const udFixedSlice<const udString> extensions;
+  static const epArray<const epString> extensions;
 
   static udResult RegisterExtensions(Kernel *pKernel);
 
-  ImageSource(const ComponentDesc *pType, Kernel *pKernel, udSharedString uid, udInitParams initParams)
+  ImageSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
     StreamRef ref = OpenStream(initParams["src"]);
@@ -36,6 +36,6 @@ protected:
   void Create(StreamRef spSource);
 };
 
-} // namespace ud
+} // namespace ep
 
-#endif // _UD_IMAGESOURCE_H
+#endif // _EP_IMAGESOURCE_H
