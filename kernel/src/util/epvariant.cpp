@@ -459,6 +459,7 @@ ptrdiff_t epStringifyVariant(epSlice<char> buffer, epString format, const epVari
     case epVariant::Type::Float:
       return epStringifyTemplate(buffer, format, v.asFloat(), pArgs);
     case epVariant::Type::Enum:
+    case epVariant::Type::Bitfield:
       EPASSERT(false, "TODO! Please write me!");
       return 0;
     case epVariant::Type::String:

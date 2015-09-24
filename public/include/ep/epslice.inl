@@ -541,13 +541,13 @@ template <typename T, size_t Count>
 T epArray<T, Count>::popFront()
 {
   // TODO: this should be removed and uses replaced with a udQueue type.
-  T copy(std::move(ptr[0]));
-  for (int i = 1; i < length; ++i)
+  T copy(std::move(this->ptr[0]));
+  for (int i = 1; i < this->length; ++i)
   {
-    ptr[i-1].~T();
-    new((void*)&ptr[i-1]) T(std::move(ptr[i]));
+    this->ptr[i-1].~T();
+    new((void*)&this->ptr[i-1]) T(std::move(this->ptr[i]));
   }
-  ptr[--length].~T();
+  this->ptr[--this->length].~T();
   return copy;
 }
 

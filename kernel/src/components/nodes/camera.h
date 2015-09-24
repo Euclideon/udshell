@@ -50,8 +50,8 @@ public:
 
   static Component *CreateInstance(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
-  virtual void SetMatrix(const udDouble4x4 &matrix) { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); Camera::SetMatrix(matrix); }
-  virtual void SetPosition(const udDouble3 &pos) { this->pos = pos; Camera::SetPosition(pos); }
+  void SetMatrix(const udDouble4x4 &matrix) override { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); Camera::SetMatrix(matrix); }
+  void SetPosition(const udDouble3 &pos) override { this->pos = pos; Camera::SetPosition(pos); }
 
   void SetOrientation(const udDouble3 &_ypr) { ypr = _ypr; matrix = udDouble4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos); }
   void SetSpeed(double speed) { this->speed = speed; }
