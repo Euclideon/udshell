@@ -13,8 +13,8 @@ udResult epHAL_Init()
   void epInput_Init();
   epInput_Init();
 
-  void udImage_InitInternal();
-  udImage_InitInternal();
+  void epImage_InitInternal();
+  epImage_InitInternal();
 
   bInitialised = true;
   return udR_Success;
@@ -53,8 +53,8 @@ udResult epHAL_Deinit()
 {
   if (bInitialised)
   {
-    void udImage_DeinitInternal();
-    udImage_DeinitInternal();
+    void epImage_DeinitInternal();
+    epImage_DeinitInternal();
     void epInput_Deinit();
     epInput_Deinit();
     bInitialised = false;

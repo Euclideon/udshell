@@ -9,7 +9,7 @@
 
 static IWICImagingFactory *pFactory = nullptr;
 
-void udImage_InitInternal()
+void epImage_InitInternal()
 {
   CoInitialize(nullptr);
 
@@ -19,7 +19,7 @@ void udImage_InitInternal()
     udDebugPrintf("Failed to create WICImagingFactory");
 }
 
-void udImage_DeinitInternal()
+void epImage_DeinitInternal()
 {
   if (pFactory)
     pFactory->Release();

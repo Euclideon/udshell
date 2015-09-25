@@ -4,11 +4,11 @@
 
 #include "hal/image.h"
 
-void udImage_InitInternal()
+void epImage_InitInternal()
 {
 }
 
-void udImage_DeinitInternal()
+void epImage_DeinitInternal()
 {
 }
 
