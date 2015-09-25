@@ -4,7 +4,7 @@
 
 #include "stream.h"
 
-UD_ENUM(ConsoleOutputs,
+EP_ENUM(ConsoleOutputs,
   StdOut,
   StdErr,
   StdDbg

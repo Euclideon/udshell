@@ -9,12 +9,12 @@ namespace ep
 {
 PROTOTYPE_COMPONENT(Stream);
 
-UD_BITFIELD(OpenFlags,
+EP_BITFIELD(OpenFlags,
   Read,
   Write
 );
 
-UD_ENUM(SeekOrigin,
+EP_ENUM(SeekOrigin,
   Begin,
   CurrentPos,
   End

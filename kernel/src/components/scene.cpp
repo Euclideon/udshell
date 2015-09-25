@@ -44,8 +44,8 @@ ComponentDesc Scene::descriptor =
 {
   &Component::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  EPSHELL_APIVERSION, // epVersion
+  EPSHELL_PLUGINVERSION, // pluginVersion
 
   "scene",      // id
   "Scene",    // displayName

@@ -72,7 +72,7 @@ void epGPU_RenderVertices(epShaderProgram *pProgram, epFormatDeclaration *pVerte
 // Author: Manu Evans, Aug 2015
 void epGPU_RenderIndices(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epArrayBuffer *pIB, epPrimitiveType primType, size_t indexCount, size_t epUnusedParam(firstIndex), size_t epUnusedParam(firstVertex))
 {
-  udArrayElement *pElements = pVertexDecl->pElements;
+  epArrayElement *pElements = pVertexDecl->pElements;
   epArrayElementData *pElementData = pVertexDecl->pElementData;
 
   // bind the vertex streams to the shader attributes
@@ -131,7 +131,7 @@ void epGPU_RenderIndices(epShaderProgram *pProgram, epFormatDeclaration *pVertex
 // Author: Manu Evans, May 2015
 void epGPU_RenderRanges(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epPrimitiveType primType, epVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
 {
-  udArrayElement *pElements = pVertexDecl->pElements;
+  epArrayElement *pElements = pVertexDecl->pElements;
   epArrayElementData *pElementData = pVertexDecl->pElementData;
 
   // bind the vertex streams to the shader attributes

@@ -7,7 +7,7 @@
 #include "hal/shader.h"
 
 struct epFormatDeclaration;
-struct udArrayElement;
+struct epArrayElement;
 struct epArrayBuffer;
 struct epTexture;
 struct epShader;
@@ -104,7 +104,7 @@ SHARED_CLASS(RenderShaderProgram);
 class RenderVertexFormat : public RenderResource
 {
 public:
-  RenderVertexFormat(Renderer *pRenderer, const udArrayElement *pElements, size_t numElements);
+  RenderVertexFormat(Renderer *pRenderer, const epArrayElement *pElements, size_t numElements);
   virtual ~RenderVertexFormat();
 
   epFormatDeclaration *pFormat;

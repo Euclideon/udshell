@@ -42,7 +42,7 @@ struct epArrayElementData
 
 struct epFormatDeclaration
 {
-  udArrayElement *pElements;
+  epArrayElement *pElements;
   epArrayElementData *pElementData;
   int numElements;
 };

@@ -7,8 +7,8 @@ ComponentDesc Console::descriptor =
 {
   &Stream::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  EPSHELL_APIVERSION, // epVersion
+  EPSHELL_PLUGINVERSION, // pluginVersion
 
   "console", // id
   "Console", // displayName

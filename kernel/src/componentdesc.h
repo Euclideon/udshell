@@ -348,8 +348,8 @@ struct CStaticFuncDesc
 };
 
 // component description
-enum { UDSHELL_APIVERSION = 100 };
-enum { UDSHELL_PLUGINVERSION = UDSHELL_APIVERSION };
+enum { EPSHELL_APIVERSION = 100 };
+enum { EPSHELL_PLUGINVERSION = EPSHELL_APIVERSION };
 
 typedef udResult(InitComponent)(Kernel*);
 typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
@@ -357,17 +357,17 @@ typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *
 struct ComponentDesc
 {
   ComponentDesc() = delete;
-  ComponentDesc(ComponentDesc *pSuperDesc, int udVersion, int pluginVersion, epString id, epString displayName, epString description,
+  ComponentDesc(ComponentDesc *pSuperDesc, int epVersion, int pluginVersion, epString id, epString displayName, epString description,
     epSlice<CPropertyDesc> properties = nullptr, epSlice<CMethodDesc> methods = nullptr, epSlice<CEventDesc> events = nullptr, epSlice<CStaticFuncDesc> staticFuncs = nullptr,
     InitComponent *pInit = nullptr, CreateInstanceCallback *pCreateInstance = nullptr)
-    : pSuperDesc(pSuperDesc), udVersion(udVersion), pluginVersion(pluginVersion), id(id), displayName(displayName), description(description)
+    : pSuperDesc(pSuperDesc), epVersion(epVersion), pluginVersion(pluginVersion), id(id), displayName(displayName), description(description)
     , properties(properties), methods(methods), events(events), staticFuncs(staticFuncs), pInit(pInit), pCreateInstance(pCreateInstance) {}
 
   ComponentDesc& operator=(const ComponentDesc&) = delete;
 
   ComponentDesc *pSuperDesc;
 
-  int udVersion;
+  int epVersion;
   int pluginVersion;
 
   epString id;          // an id for this component

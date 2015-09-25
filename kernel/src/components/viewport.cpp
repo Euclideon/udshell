@@ -7,8 +7,8 @@ ComponentDesc Viewport::descriptor =
 {
   &UIComponent::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION,     // udVersion
-  UDSHELL_PLUGINVERSION,  // pluginVersion
+  EPSHELL_APIVERSION,     // epVersion
+  EPSHELL_PLUGINVERSION,  // pluginVersion
 
   "viewport",             // id
   "Viewport",             // displayName

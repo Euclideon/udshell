@@ -9,7 +9,7 @@ namespace ep
 
 PROTOTYPE_COMPONENT(File);
 
-UD_BITFIELD(FileOpenFlags,
+EP_BITFIELD(FileOpenFlags,
   Read,
   Write,
   Create,

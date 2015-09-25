@@ -11,8 +11,8 @@ ep::ComponentDesc QtComponent::descriptor =
 {
   &ep::Component::descriptor, // pSuperDesc
 
-  ep::UDSHELL_APIVERSION,         // udVersion
-  ep::UDSHELL_PLUGINVERSION,      // pluginVersion
+  ep::EPSHELL_APIVERSION,         // epVersion
+  ep::EPSHELL_PLUGINVERSION,      // pluginVersion
 
   "qtcomponent",              // id
   "qtcomponent",              // displayName

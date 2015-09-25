@@ -21,8 +21,8 @@ ComponentDesc ResourceManager::descriptor =
 {
   &Component::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  EPSHELL_APIVERSION, // epVersion
+  EPSHELL_PLUGINVERSION, // pluginVersion
 
   "resourcemanager", // id
   "Resource Manager", // displayName

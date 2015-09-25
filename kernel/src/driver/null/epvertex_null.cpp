@@ -6,7 +6,7 @@
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-epFormatDeclaration *epVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount)
+epFormatDeclaration *epVertex_CreateFormatDeclaration(const epArrayElement *pElementArray, int elementCount)
 {
   return nullptr;
 }
