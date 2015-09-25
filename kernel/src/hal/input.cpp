@@ -24,7 +24,7 @@ static int ignoreMouseEvents = 0;
 // Author: Manu Evans, March 2015
 epInputDeviceState epInput_GetDeviceState(epInputDevice, int)
 {
-  return udIDS_Ready;
+  return epIDS_Ready;
 }
 
 // ********************************************************
@@ -148,7 +148,7 @@ void epInput_Update()
 }
 
 
-unsigned char udAsciiToUDKey[128] =
+unsigned char epAsciiToEPKey[128] =
 {
   epKC_Unknown, // 0	000	00	00000000	NUL	&#000;	 	Null char
   epKC_Unknown, // 1	001	01	00000001	SOH	&#001;	 	Start of Heading

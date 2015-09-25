@@ -30,7 +30,7 @@ void epInput_UpdateInternal()
   //...
 }
 
-static unsigned char qtKeyToUDKeyLower[] =
+static unsigned char qtKeyToEPKeyLower[] =
 {
   epKC_Space, // Qt::Key_Space	0x20
   epKC_Unknown, // Qt::Key_Exclam	0x21
@@ -250,7 +250,7 @@ static unsigned char qtKeyToUDKeyLower[] =
   epKC_Unknown, // Qt::Key_ydiaeresis	0x0ff
 };
 
-static unsigned char qtKeyToUDKeyHighBit[] =
+static unsigned char qtKeyToEPKeyHighBit[] =
 {
   epKC_Escape, // Qt::Key_Escape	0x01000000
   epKC_Tab, // Qt::Key_Tab	0x01000001
@@ -555,9 +555,9 @@ static unsigned char qtKeyToUDKeyHighBit[] =
 epKeyCode qtKeyToEPKey(Qt::Key qk)
 {
   if ((qk & ~0xFF) == 0)
-    return (epKeyCode)qtKeyToUDKeyLower[qk - 0x20];
+    return (epKeyCode)qtKeyToEPKeyLower[qk - 0x20];
   else if ((qk & 0xFFFFFF00) == 0x01000000)
-    return (epKeyCode)qtKeyToUDKeyHighBit[qk & 0xFFF];
+    return (epKeyCode)qtKeyToEPKeyHighBit[qk & 0xFFF];
   else
   {
 //    epKC_RAlt, // Qt::Key_AltGr	0x01001103	On Windows, when the KeyDown event for this key is sent, the Ctrl+Alt modifiers are also set.

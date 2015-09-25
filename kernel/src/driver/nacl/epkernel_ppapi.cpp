@@ -261,7 +261,7 @@ void udNewPepperInstance::RenderFrame(int32_t)
 }
 
 // ---------------------------------------------------------------------------------------
-static inline int32_t MapPPKeyToUDKey(int32_t )
+static inline int32_t MapPPKeyToEPKey(int32_t )
 {
   // TODO: Implement this
   return 0;
@@ -345,7 +345,7 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
       inputEvent.deviceId = 0;
       inputEvent.eventType = epInputEvent::Key;
 
-      inputEvent.key.key = MapPPKeyToUDKey(keyEvent.GetKeyCode());
+      inputEvent.key.key = MapPPKeyToEPKey(keyEvent.GetKeyCode());
       inputEvent.key.state = pepperEvent.GetType() == PP_INPUTEVENT_TYPE_KEYDOWN ? 1 : 0;
       spView->InputEvent(inputEvent);
     }
