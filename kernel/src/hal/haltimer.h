@@ -24,4 +24,6 @@ typedef void (HalTimerCallback)(HalTimer *pTimer, void *pUserData);
 HalTimer *HalTimer_Create(HalTimerType tt, uint32_t duration,  HalTimerCallback *pCallBack, void *pUserData);
 void HalTimer_Destroy(HalTimer **ppTimer);
 
+double epPerformanceCounter();
+
 #endif // EP_HALTIMER_H
