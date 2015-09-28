@@ -1,6 +1,6 @@
 #include "components/stream.h"
-
-#include <time.h>
+#include "ep/epdatetime.h"
+#include "hal/haltimer.h"
 
 namespace ep
 {
@@ -163,15 +163,13 @@ LogStream *Logger::FindLogStream(StreamRef spStream) const
 
 void Logger::Log(int level, epString text, LogCategories category, epString componentUID)
 {
-  time_t ti = time(nullptr);
-
   if (bLogging)
     return;
   bLogging = true;
 
   /** Add log line to the internal log **/
 
-  internalLog.pushBack(LogLine(level, text, category, componentUID, ti));
+  internalLog.pushBack(LogLine(level, text, category, componentUID));
   Changed.Signal();
   LogLine &line = internalLog.back();
 
@@ -233,7 +231,7 @@ epSharedString LogLine::ToString(LogFormatSpecs format) const
     ((format & LogFormatSpecs::ComponentUID) ? componentUID : ""),
     ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? ")" : ""),
     ((format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? " " : ""),
-    ((format & LogFormatSpecs::Category) ? const_cast<LogCategories &>(category).StringOf() : ""),
+    ((format & LogFormatSpecs::Category) ? category.StringOf() : ""),
     ((format & LogFormatSpecs::Category) ? ": " : ""),
     text,
     format & LogFormatSpecs::Level
@@ -386,6 +384,16 @@ bool LogFilter::FilterLogLine(LogLine &line) const
   }
 
   return true;
+}
+
+LogLine::LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID) :
+level(level), category(category)
+{
+  timestamp = time(nullptr);
+  ordering = epPerformanceCounter();
+
+  this->text = text;
+  this->componentUID = componentUID;
 }
 
 } // namespace ep

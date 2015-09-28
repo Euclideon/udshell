@@ -68,12 +68,7 @@ EP_ENUM(LogDefaults,
 
 struct LogLine
 {
-  LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID, time_t timestamp) :
-    level(level), category(category), timestamp(timestamp)
-  {
-    this->text = text;
-    this->componentUID = componentUID;
-  }
+  LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID);
 
   epSharedString ToString(LogFormatSpecs format) const;
 
@@ -82,6 +77,7 @@ struct LogLine
   LogCategories category;
   epSharedString componentUID;
   time_t timestamp;
+  double ordering;
 };
 ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs));
 
