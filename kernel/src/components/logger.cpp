@@ -96,8 +96,8 @@ ComponentDesc Logger::descriptor =
 {
   &Component::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  EPSHELL_APIVERSION, // epVersion
+  EPSHELL_PLUGINVERSION, // pluginVersion
 
   "logger", // id
   "Logger", // displayName

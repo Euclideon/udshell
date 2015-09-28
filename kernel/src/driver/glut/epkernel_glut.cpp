@@ -9,9 +9,9 @@ void epGPU_Init();
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-static void udViewerGLUT_Resize(int width, int height)
+static void epViewerGLUT_Resize(int width, int height)
 {
-  udViewer_ResizeFrame(width, height);
+  epViewer_ResizeFrame(width, height);
 
   // Update the view port with the new screen dimensions and cause a refresh
   glViewport(0, 0, width, height);
@@ -20,9 +20,9 @@ static void udViewerGLUT_Resize(int width, int height)
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-static void udViewerGLUT_Display()
+static void epViewerGLUT_Display()
 {
-  udViewer_MainLoop();
+  epViewer_MainLoop();
 
   glutSwapBuffers();
   glutPostRedisplay();
@@ -30,14 +30,14 @@ static void udViewerGLUT_Display()
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udViewerInstance* udViewerDriver_CreateInstance()
+epViewerInstance* epViewerDriver_CreateInstance()
 {
-  return udAllocType(udViewerInstance, 1, udAF_Zero);
+  return udAllocType(epViewerInstance, 1, udAF_Zero);
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_Init(udViewerInstance *pInstance)
+void epViewerDriver_Init(epViewerInstance *pInstance)
 {
   glutInit(&pInstance->initParams.argc, pInstance->initParams.argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -45,15 +45,15 @@ void udViewerDriver_Init(udViewerInstance *pInstance)
   // TODO: split this out into udWindow or something
   glutInitWindowSize(1280, 720);           // TODO: get these values from somewhere
   glutCreateWindow("udPointCloud Viewer"); // TODO: get this string from somewhere
-  glutDisplayFunc(udViewerGLUT_Display);
-  glutReshapeFunc(udViewerGLUT_Resize);
+  glutDisplayFunc(epViewerGLUT_Display);
+  glutReshapeFunc(epViewerGLUT_Resize);
 
   epGPU_Init();
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_Deinit(udViewerInstance *)
+void epViewerDriver_Deinit(epViewerInstance *)
 {
   // deinit renderer
   //...
@@ -61,14 +61,14 @@ void udViewerDriver_Deinit(udViewerInstance *)
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_RunMainLoop(udViewerInstance *)
+void epViewerDriver_RunMainLoop(epViewerInstance *)
 {
   glutMainLoop();
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_Quit(udViewerInstance *)
+void epViewerDriver_Quit(epViewerInstance *)
 {
   glutLeaveMainLoop();
 }

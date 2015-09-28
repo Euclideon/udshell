@@ -8,7 +8,7 @@
 #include "hal/input_internal.h"
 
 
-static unsigned char fkeysToUDKey[] =
+static unsigned char fkeysToEPKey[] =
 {
   epKC_F1,
   epKC_F2,
@@ -24,7 +24,7 @@ static unsigned char fkeysToUDKey[] =
   epKC_F12
 };
 
-static unsigned char specialToUDKey[] =
+static unsigned char specialToEPKey[] =
 {
   epKC_Left,
   epKC_Up,
@@ -44,16 +44,16 @@ InputState gInputAccum;
 // Author: Manu Evans, March 2015
 static void KeyPressedFunc(unsigned char key, int, int)
 {
-  if(udAsciiToUDKey[key] != epKC_Unknown)
-    gInputAccum.keys[0][udAsciiToUDKey[key]] = 1;
+  if(epAsciiToEPKey[key] != epKC_Unknown)
+    gInputAccum.keys[0][epAsciiToEPKey[key]] = 1;
 }
 
 // --------------------------------------------------------
 // Author: Manu Evans, March 2015
 static void KeyReleasedFunc(unsigned char key, int, int)
 {
-  if(udAsciiToUDKey[key] != epKC_Unknown)
-    gInputAccum.keys[0][udAsciiToUDKey[key]] = 0;
+  if(epAsciiToEPKey[key] != epKC_Unknown)
+    gInputAccum.keys[0][epAsciiToEPKey[key]] = 0;
 }
 
 // --------------------------------------------------------
@@ -61,9 +61,9 @@ static void KeyReleasedFunc(unsigned char key, int, int)
 static void SpecialKeyPressedFunc(int key, int, int)
 {
   if(key >= GLUT_KEY_F1 && key <= GLUT_KEY_F12)
-    gInputAccum.keys[0][fkeysToUDKey[key - GLUT_KEY_F1]] = 1;
+    gInputAccum.keys[0][fkeysToEPKey[key - GLUT_KEY_F1]] = 1;
   else if(key >= GLUT_KEY_LEFT && key <= GLUT_KEY_INSERT)
-    gInputAccum.keys[0][specialToUDKey[key - GLUT_KEY_LEFT]] = 1;
+    gInputAccum.keys[0][specialToEPKey[key - GLUT_KEY_LEFT]] = 1;
 }
 
 // --------------------------------------------------------
@@ -71,9 +71,9 @@ static void SpecialKeyPressedFunc(int key, int, int)
 static void SpecialKeyReleasedFunc(int key, int, int)
 {
   if(key >= GLUT_KEY_F1 && key <= GLUT_KEY_F12)
-    gInputAccum.keys[0][fkeysToUDKey[key - GLUT_KEY_F1]] = 0;
+    gInputAccum.keys[0][fkeysToEPKey[key - GLUT_KEY_F1]] = 0;
   else if(key >= GLUT_KEY_LEFT && key <= GLUT_KEY_INSERT)
-    gInputAccum.keys[0][specialToUDKey[key - GLUT_KEY_LEFT]] = 0;
+    gInputAccum.keys[0][specialToEPKey[key - GLUT_KEY_LEFT]] = 0;
 }
 
 // --------------------------------------------------------

@@ -13,7 +13,7 @@ SHARED_CLASS(RenderShader);
 
 PROTOTYPE_COMPONENT(Shader);
 
-UD_ENUM(ShaderType,
+EP_ENUM(ShaderType,
         VertexShader,
         PixelShader);
 

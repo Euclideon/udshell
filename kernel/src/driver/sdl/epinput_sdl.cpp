@@ -8,7 +8,7 @@
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_gamecontroller.h>
 
-static unsigned char sdlScanCodeToUDKey[] =
+static unsigned char sdlScanCodeToEPKey[] =
 {
   epKC_Unknown, // 0     SDL_SCANCODE_UNKNOWN,
   epKC_Unknown, // 1
@@ -310,15 +310,15 @@ void epInput_UpdateInternal()
   InputState &prev = gInputState[1 - gCurrentInputState];
 
   // poll keyboard
-  const int MaxKeys = sizeof(sdlScanCodeToUDKey)/sizeof(sdlScanCodeToUDKey[0]);
+  const int MaxKeys = sizeof(sdlScanCodeToEPKey)/sizeof(sdlScanCodeToEPKey[0]);
   int numKeys;
   const Uint8 *state = SDL_GetKeyboardState(&numKeys);
   numKeys = numKeys < MaxKeys ? numKeys : MaxKeys;
   for(int i=0; i<numKeys; ++i)
   {
-    if(sdlScanCodeToUDKey[i] == epKC_Unknown)
+    if(sdlScanCodeToEPKey[i] == epKC_Unknown)
       continue;
-    input.keys[0][sdlScanCodeToUDKey[i]] = (unsigned char)state[i];
+    input.keys[0][sdlScanCodeToEPKey[i]] = (unsigned char)state[i];
   }
 
   // poll mouse

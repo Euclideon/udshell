@@ -142,7 +142,7 @@ void RenderShaderProgram::setUniform(int i, const udFloat4 &v)
 }
 
 
-RenderVertexFormat::RenderVertexFormat(Renderer *pRenderer, const udArrayElement *pElements, size_t numElements)
+RenderVertexFormat::RenderVertexFormat(Renderer *pRenderer, const epArrayElement *pElements, size_t numElements)
   : RenderResource(pRenderer)
 {
   // TODO: derive KEY from 'this'

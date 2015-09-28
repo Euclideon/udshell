@@ -14,7 +14,7 @@ struct InputState
 extern InputState gInputState[2];
 extern int gCurrentInputState;
 
-extern unsigned char udAsciiToUDKey[128];
+extern unsigned char epAsciiToEPKey[128];
 
 void epInput_Init();
 void epInput_Update();

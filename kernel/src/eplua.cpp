@@ -385,7 +385,7 @@ void LuaState::pushDescriptor(const ComponentDesc &desc)
 {
   lua_createtable(L, 0, 6);
 
-  pushInt(desc.udVersion);
+  pushInt(desc.epVersion);
   lua_setfield(L, -2, "apiversion");
   pushInt(desc.pluginVersion);
   lua_setfield(L, -2, "pluginversion");

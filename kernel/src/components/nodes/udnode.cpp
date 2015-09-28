@@ -127,8 +127,8 @@ ComponentDesc UDNode::descriptor =
 {
   &Node::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  EPSHELL_APIVERSION, // epVersion
+  EPSHELL_PLUGINVERSION, // pluginVersion
 
   "udnode",    // id
   "UDNode",  // displayName

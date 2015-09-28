@@ -19,7 +19,7 @@ struct epEnumDesc
   void (*stringify)(size_t val, epMutableString64 &s);
 };
 
-#define UD_ENUM(NAME, ...)                                                        \
+#define EP_ENUM(NAME, ...)                                                        \
   struct NAME : public epEnum                                                     \
   {                                                                               \
     enum EnumKeys                                                                 \
@@ -76,7 +76,7 @@ struct epEnumDesc
     return NAME(e);                                                               \
   }
 
-#define UD_BITFIELD(NAME, ...)                                                    \
+#define EP_BITFIELD(NAME, ...)                                                    \
   struct NAME : public epBitfield                                                 \
   {                                                                               \
     enum EnumKeys                                                                 \

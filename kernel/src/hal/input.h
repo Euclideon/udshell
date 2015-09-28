@@ -19,8 +19,8 @@ enum epInputDevice
 
 enum epInputDeviceState
 {
-  udIDS_Ready,
-  udIDS_Unavailable
+  epIDS_Ready,
+  epIDS_Unavailable
 };
 
 epInputDeviceState epInput_GetDeviceState(epInputDevice device, int deviceIndex);
@@ -249,8 +249,8 @@ struct epInputEvent
 
 inline epKeyCode epInput_AsciiToKeyCode(unsigned char c)
 {
-  extern unsigned char udAsciiToUDKey[128];
-  return (epKeyCode)udAsciiToUDKey[c];
+  extern unsigned char epAsciiToEPKey[128];
+  return (epKeyCode)epAsciiToEPKey[c];
 }
 
 

@@ -42,8 +42,8 @@ ComponentDesc Camera::descriptor =
 {
   &Node::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  EPSHELL_APIVERSION, // epVersion
+  EPSHELL_PLUGINVERSION, // pluginVersion
 
   "camera",      // id
   "Camera",    // displayName
@@ -97,8 +97,8 @@ ComponentDesc SimpleCamera::descriptor =
 {
   &Camera::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  EPSHELL_APIVERSION, // epVersion
+  EPSHELL_PLUGINVERSION, // pluginVersion
 
   "simplecamera",       // id
   "SimpleCamera",     // displayName

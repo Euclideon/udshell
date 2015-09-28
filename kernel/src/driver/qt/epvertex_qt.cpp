@@ -44,15 +44,15 @@ const int s_VertexDataStride[epVDF_Max] =
 
 
 // ***************************************************************************************
-epFormatDeclaration *epVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount)
+epFormatDeclaration *epVertex_CreateFormatDeclaration(const epArrayElement *pElementArray, int elementCount)
 {
-  size_t size = sizeof(epFormatDeclaration) + (sizeof(udArrayElement) + sizeof(epArrayElementData))*elementCount;
+  size_t size = sizeof(epFormatDeclaration) + (sizeof(epArrayElement) + sizeof(epArrayElementData))*elementCount;
   epFormatDeclaration *pDecl = (epFormatDeclaration*)udAlloc(size);
-  pDecl->pElements = (udArrayElement*)&pDecl[1];
+  pDecl->pElements = (epArrayElement*)&pDecl[1];
   pDecl->pElementData = (epArrayElementData*)(pDecl->pElements + elementCount);
   pDecl->numElements = elementCount;
 
-  memcpy(pDecl->pElements, pElementArray, sizeof(udArrayElement)*elementCount);
+  memcpy(pDecl->pElements, pElementArray, sizeof(epArrayElement)*elementCount);
 
   // set the element data and calculate the strides
   int streamOffset[64] = { 0 };

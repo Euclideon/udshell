@@ -28,17 +28,17 @@
 using namespace ep;
 
 // Pepper module
-class udPepperModule : public pp::Module
+class epPepperModule : public pp::Module
 {
 public:
-  udPepperModule();
-  virtual ~udPepperModule();
+  epPepperModule();
+  virtual ~epPepperModule();
   virtual pp::Instance* CreateInstance(PP_Instance instance);
 
-  static udPepperModule *gpModule;
+  static epPepperModule *gpModule;
 };
 
-udPepperModule *udPepperModule::gpModule = nullptr;
+epPepperModule *epPepperModule::gpModule = nullptr;
 
 class udNewPepperInstance : public pp::Instance, public Kernel
 {
@@ -106,7 +106,7 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 
 udResult Kernel::RunMainLoop()
 {
-//  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
+//  epNaClInstance *pInternal = (epNaClInstance*)pInstance;
 //
 //  // kick off the main loop (which is asynchronous)
 //  pInternal->pPepperInstance->RenderFrame(0);
@@ -119,7 +119,7 @@ udResult Kernel::RunMainLoop()
 
 udResult Kernel::Terminate()
 {
-//  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
+//  epNaClInstance *pInternal = (epNaClInstance*)pInstance;
 //
 //  // signal to exit the main loop
 //  pInternal->pPepperInstance->bQuit = true;
@@ -261,7 +261,7 @@ void udNewPepperInstance::RenderFrame(int32_t)
 }
 
 // ---------------------------------------------------------------------------------------
-static inline int32_t MapPPKeyToUDKey(int32_t )
+static inline int32_t MapPPKeyToEPKey(int32_t )
 {
   // TODO: Implement this
   return 0;
@@ -345,7 +345,7 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
       inputEvent.deviceId = 0;
       inputEvent.eventType = epInputEvent::Key;
 
-      inputEvent.key.key = MapPPKeyToUDKey(keyEvent.GetKeyCode());
+      inputEvent.key.key = MapPPKeyToEPKey(keyEvent.GetKeyCode());
       inputEvent.key.state = pepperEvent.GetType() == PP_INPUTEVENT_TYPE_KEYDOWN ? 1 : 0;
       spView->InputEvent(inputEvent);
     }
@@ -381,17 +381,17 @@ void udNewPepperInstance::HandleMessage(const pp::Var& message)
 
 
 #if 0
-struct udNaClInstance : public udViewerInstance
+struct epNaClInstance : public epViewerInstance
 {
-  struct udPepperInstance *pPepperInstance;
+  struct epPepperInstance *pPepperInstance;
 };
 
 // pepper classes
-class udPepperInstance : public pp::Instance
+class epPepperInstance : public pp::Instance
 {
 public:
-  explicit udPepperInstance(PP_Instance instance);
-  virtual ~udPepperInstance();
+  explicit epPepperInstance(PP_Instance instance);
+  virtual ~epPepperInstance();
 
   virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
   virtual void DidChangeView(const pp::View& view); // this needs to route to an external view
@@ -404,13 +404,13 @@ public:
   int width, height;
   volatile bool bQuit;
 
-  udNaClInstance *pInstance;
+  epNaClInstance *pInstance;
 
   udSemaphore *pTerminateSem;
   udSemaphore *pTerminatedSem;
 
   pp::Graphics3D glContext;
-  pp::CompletionCallbackFactory<udPepperInstance> callbackFactory;
+  pp::CompletionCallbackFactory<epPepperInstance> callbackFactory;
 
   static uint32_t MainThread(void *pUserData);
   static void JSMessageHandler(const char *pMessage, void *pUserData);
@@ -418,23 +418,23 @@ public:
 };
 
 
-udPepperModule *udPepperModule::gpModule = nullptr;
+epPepperModule *epPepperModule::gpModule = nullptr;
 
-UDTHREADLOCAL udPepperInstance *s_pStartingInstance;
+UDTHREADLOCAL epPepperInstance *s_pStartingInstance;
 
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udViewerInstance* udViewerDriver_CreateInstance()
+epViewerInstance* epViewerDriver_CreateInstance()
 {
-  return udAllocType(udNaClInstance, 1, udAF_Zero);
+  return udAllocType(epNaClInstance, 1, udAF_Zero);
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_Init(udViewerInstance *pInstance)
+void epViewerDriver_Init(epViewerInstance *pInstance)
 {
-  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
+  epNaClInstance *pInternal = (epNaClInstance*)pInstance;
 
   s_pStartingInstance->pInstance = pInternal;
   pInternal->pPepperInstance = s_pStartingInstance;
@@ -443,14 +443,14 @@ void udViewerDriver_Init(udViewerInstance *pInstance)
 
   epGPU_Init();
 
-//  udViewer_ResizeFrame(width, height);
+//  epViewer_ResizeFrame(width, height);
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udViewerDriver_Deinit(udViewerInstance *pInstance)
+void epViewerDriver_Deinit(epViewerInstance *pInstance)
 {
-  udNaClInstance *pInternal = (udNaClInstance*)pInstance;
+  epNaClInstance *pInternal = (epNaClInstance*)pInstance;
 
   // deinit renderer
   //...
@@ -460,15 +460,15 @@ void udViewerDriver_Deinit(udViewerInstance *pInstance)
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
 int udMain(int, char*[]);
-uint32_t udPepperInstance::MainThread(void *pUserData)
+uint32_t epPepperInstance::MainThread(void *pUserData)
 {
-  udPepperInstance *pPepper = (udPepperInstance*)pUserData;
+  epPepperInstance *pPepper = (epPepperInstance*)pUserData;
   s_pStartingInstance = pPepper;
 
   glSetCurrentContextPPAPI(pPepper->glContext.pp_resource());
 
   char *pArgs[] = {
-    (char*)"udViewer" // TODO: can I know the pexe name? get it from the frontend?
+    (char*)"epViewer" // TODO: can I know the pexe name? get it from the frontend?
   };
   udMain(1, pArgs);
 
@@ -478,21 +478,21 @@ uint32_t udPepperInstance::MainThread(void *pUserData)
   return 0;
 }
 
-void udPepperInstance::DebugPrintfCallback(const char *pString)
+void epPepperInstance::DebugPrintfCallback(const char *pString)
 {
-  udViewer_PostMessage("js", "log", "%s", pString);
+  epViewer_PostMessage("js", "log", "%s", pString);
   fprintf(stdout, "%s\n", pString);
 }
 
-void udPepperInstance::JSMessageHandler(const char *pMessage, void *pUserData)
+void epPepperInstance::JSMessageHandler(const char *pMessage, void *pUserData)
 {
-  udPepperInstance *pPepper = (udPepperInstance*)pUserData;
+  epPepperInstance *pPepper = (epPepperInstance*)pUserData;
   pPepper->PostMessage(pMessage);
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udPepperInstance::udPepperInstance(PP_Instance instance)
+epPepperInstance::epPepperInstance(PP_Instance instance)
   : pp::Instance(instance)
   , width(0)
   , height(0)
@@ -507,9 +507,9 @@ udPepperInstance::udPepperInstance(PP_Instance instance)
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udPepperInstance::~udPepperInstance()
+epPepperInstance::~epPepperInstance()
 {
-  udViewer_SetCurrentInstance(pInstance);
+  epViewer_SetCurrentInstance(pInstance);
 
   // signal to return from main
   bQuit = true;
@@ -526,10 +526,10 @@ udPepperInstance::~udPepperInstance()
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-bool udPepperInstance::Init(uint32_t argc, const char* argn[], const char* argv[])
+bool epPepperInstance::Init(uint32_t argc, const char* argn[], const char* argv[])
 {
   pThreadLocalInstance = this;
-  udViewer_RegisterMessageHandler("js", &JSMessageHandler, this);
+  epViewer_RegisterMessageHandler("js", &JSMessageHandler, this);
 
   // TODO: communicate with frontend?
   //... get commandline (url) args, get pexe name
@@ -550,7 +550,7 @@ bool udPepperInstance::Init(uint32_t argc, const char* argn[], const char* argv[
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udPepperInstance::InitRenderer()
+void epPepperInstance::InitRenderer()
 {
   if (!glInitializePPAPI(pp::Module::Get()->get_browser_interface()))
   {
@@ -584,9 +584,9 @@ void udPepperInstance::InitRenderer()
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udPepperInstance::RenderFrame(int32_t)
+void epPepperInstance::RenderFrame(int32_t)
 {
-  udViewer_MainLoop();
+  epViewer_MainLoop();
 
   if(bQuit)
   {
@@ -596,15 +596,15 @@ void udPepperInstance::RenderFrame(int32_t)
   else
   {
     // set a callback to recurse this function on 'SwapBuffers'
-    glContext.SwapBuffers(callbackFactory.NewCallback(&udPepperInstance::RenderFrame));
+    glContext.SwapBuffers(callbackFactory.NewCallback(&epPepperInstance::RenderFrame));
   }
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udPepperInstance::DidChangeView(const pp::View& view)
+void epPepperInstance::DidChangeView(const pp::View& view)
 {
-  udViewer_SetCurrentInstance(pInstance);
+  epViewer_SetCurrentInstance(pInstance);
 
   width = view.GetRect().width();
   height = view.GetRect().height();
@@ -612,16 +612,16 @@ void udPepperInstance::DidChangeView(const pp::View& view)
   if (!glContext.is_null())
   {
     int32_t result = glContext.ResizeBuffers(width, height);
-    udViewer_ResizeFrame(width, height);
+    epViewer_ResizeFrame(width, height);
     glViewport(0, 0, width, height);
   }
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-bool udPepperInstance::HandleInputEvent(const pp::InputEvent& event)
+bool epPepperInstance::HandleInputEvent(const pp::InputEvent& event)
 {
-  udViewer_SetCurrentInstance(pInstance);
+  epViewer_SetCurrentInstance(pInstance);
 
   switch (event.GetType())
   {
@@ -685,9 +685,9 @@ bool udPepperInstance::HandleInputEvent(const pp::InputEvent& event)
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void udPepperInstance::HandleMessage(const pp::Var& message)
+void epPepperInstance::HandleMessage(const pp::Var& message)
 {
-  udViewer_SetCurrentInstance(pInstance);
+  epViewer_SetCurrentInstance(pInstance);
 
   if(pInstance->initParams.pReceiveMessage)
   {
@@ -703,27 +703,27 @@ void udPepperInstance::HandleMessage(const pp::Var& message)
 #endif
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udPepperModule::udPepperModule() : pp::Module()
+epPepperModule::epPepperModule() : pp::Module()
 {
   gpModule = this;
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udPepperModule::~udPepperModule()
+epPepperModule::~epPepperModule()
 {
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-pp::Instance* udPepperModule::CreateInstance(PP_Instance instance)
+pp::Instance* epPepperModule::CreateInstance(PP_Instance instance)
 {
   return udNew(udNewPepperInstance, instance);
 }
 
 namespace pp
 {
-  Module* CreateModule() { return udNew(udPepperModule); }
+  Module* CreateModule() { return udNew(epPepperModule); }
 }
 
 #endif

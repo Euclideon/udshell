@@ -42,7 +42,7 @@ SHARED_CLASS(Stream);
 *
 * Trace: Used to follow the program flow. It is not unusual to place LogTrace() calls at the top of functions.
 */
-UD_BITFIELD(LogCategories,
+EP_BITFIELD(LogCategories,
   Error,
   Warning,
   Debug,
@@ -52,14 +52,14 @@ UD_BITFIELD(LogCategories,
 );
 #define NUM_LOG_CATEGORIES  6
 
-UD_BITFIELD(LogFormatSpecs,
+EP_BITFIELD(LogFormatSpecs,
   Timestamp,
   Category,
   Level,
   ComponentUID
 );
 
-UD_ENUM(LogDefaults,
+EP_ENUM(LogDefaults,
   LogLevel = 2,
   StreamLevel = 5,
   Categories = (LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace),

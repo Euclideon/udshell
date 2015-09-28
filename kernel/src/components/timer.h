@@ -17,7 +17,7 @@ class Timer : public Component
 public:
   EP_COMPONENT(Timer);
 
-  UD_ENUM(TimerType,
+  EP_ENUM(TimerType,
     Interval,
     CountDown
     );

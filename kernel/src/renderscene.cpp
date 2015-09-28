@@ -79,7 +79,7 @@ udResult udRenderScene_InitRender(Kernel*)
     return udR_Failure_;
   }
 
-  udArrayElement elements[] = {
+  epArrayElement elements[] = {
 //    { udVET_Position, 0, 2, epVDF_Float2 },
     { "a_position", format[0], 0 },
   };

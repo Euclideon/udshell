@@ -7,8 +7,8 @@ ComponentDesc UDModel::descriptor =
 {
   &Resource::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  EPSHELL_APIVERSION, // epVersion
+  EPSHELL_PLUGINVERSION, // pluginVersion
 
   "udmodel", // id
   "UD Model", // displayName

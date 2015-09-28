@@ -43,7 +43,7 @@ enum epArrayDataFormat
   epVDF_ForceInt = 0x7f
 };
 
-struct udArrayElement
+struct epArrayElement
 {
   char attributeName[56];
   epArrayDataFormat format;
@@ -51,7 +51,7 @@ struct udArrayElement
   int stream;
 };
 
-epFormatDeclaration *epVertex_CreateFormatDeclaration(const udArrayElement *pElementArray, int elementCount);
+epFormatDeclaration *epVertex_CreateFormatDeclaration(const epArrayElement *pElementArray, int elementCount);
 void epVertex_DestroyFormatDeclaration(epFormatDeclaration **ppDeclaration);
 
 epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format);

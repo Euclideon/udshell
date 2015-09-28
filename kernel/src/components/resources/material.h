@@ -21,12 +21,12 @@ class Material : public Resource
 public:
   EP_COMPONENT(Material);
 
-  UD_ENUM(BlendMode,
+  EP_ENUM(BlendMode,
           None,
           Alpha,
           Additive);
 
-  UD_ENUM(CullMode,
+  EP_ENUM(CullMode,
           None,
           CW,
           CCW);

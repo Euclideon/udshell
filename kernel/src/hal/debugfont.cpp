@@ -88,7 +88,7 @@ void epDebugFont_Init()
   pFontShaderP = epShader_CreateShader(s_pixelShader, sizeof(s_pixelShader), epST_PixelShader);
   pShader = epShader_CreateShaderProgram(pFontShaderV, pFontShaderP);
 
-  static udArrayElement vertDesc[] =
+  static epArrayElement vertDesc[] =
   {
 //    { udVET_Position, DcVCT_Short2, DcVCU_Position, 0, 0 }
 //    { udVET_Position, 0, 2, epVDF_Float2 }

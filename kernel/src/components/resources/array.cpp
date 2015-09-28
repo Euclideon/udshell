@@ -9,8 +9,8 @@ ComponentDesc ArrayBuffer::descriptor =
 {
   &Resource::descriptor, // pSuperDesc
 
-  UDSHELL_APIVERSION, // udVersion
-  UDSHELL_PLUGINVERSION, // pluginVersion
+  EPSHELL_APIVERSION, // epVersion
+  EPSHELL_PLUGINVERSION, // pluginVersion
 
   "array", // id
   "Array", // displayName
