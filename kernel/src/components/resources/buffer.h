@@ -19,7 +19,7 @@ public:
   bool Allocate(size_t size);
   bool Free();
 
-  bool Resize(size_t size) { return _Resize(size, true); }
+  bool Resize(size_t size) { return ResizeInternal(size, true); }
   size_t GetBufferSize() const;
 
   epSlice<void> Map();
@@ -34,7 +34,7 @@ protected:
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Buffer() { Free(); }
 
-  bool _Resize(size_t size, bool copy);
+  bool ResizeInternal(size_t size, bool copy);
 
   epSlice<void> buffer;
 

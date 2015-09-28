@@ -44,7 +44,7 @@ bool Buffer::Free()
   return true;
 }
 
-bool Buffer::_Resize(size_t size, bool copy)
+bool Buffer::ResizeInternal(size_t size, bool copy)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
@@ -105,31 +105,31 @@ void Buffer::Unmap()
     Changed.Signal();
 }
 
-bool Buffer::CopyBuffer(BufferRef buffer)
+bool Buffer::CopyBuffer(BufferRef buf)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
 
-  epSlice<const void> buf = buffer->MapForRead();
-  EPASSERT(buf != nullptr, "Unable to map buffer!");
-  if (buf != nullptr)
+  epSlice<const void> mBuf = buf->MapForRead();
+  EPASSERT(mBuf != nullptr, "Unable to map buffer!");
+  if (mBuf != nullptr)
   {
-    CopyBuffer(buf);
-    buffer->Unmap();
+    CopyBuffer(mBuf);
+    buf->Unmap();
   }
 
   return true; // TODO Error handling
 }
 
-bool Buffer::CopyBuffer(epSlice<const void> _buffer)
+bool Buffer::CopyBuffer(epSlice<const void> buf)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
 
-  if (logicalSize < _buffer.length)
-    _Resize(_buffer.length, false);
+  if (logicalSize < buf.length)
+    ResizeInternal(buf.length, false);
 
-  memcpy(buffer.ptr, _buffer.ptr, _buffer.length);
+  memcpy(buffer.ptr, buf.ptr, buf.length);
 
   Changed.Signal();
   return true; // TODO Error handling
