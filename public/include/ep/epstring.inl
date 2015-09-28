@@ -6,22 +6,151 @@
 #include <utility>
 
 
+namespace ep_internal
+{
+  inline size_t UTF8SequenceLength(char32_t c)
+  {
+    if (c < 0x80)
+      return 1;
+    else if (c < 0x800)
+      return 2;
+    else if (c < 0x10000)
+      return 3;
+    return 4;
+/*
+    // NOTE: unicode was restricted to 20 bits, so we will stop here.
+    else if(c < 0x200000)
+      return 4;
+    else if (c < 0x4000000)
+      return 5;
+    return 6;
+*/
+  }
+  inline size_t UTF8SequenceLength(const char *pUTF8)
+  {
+    if (pUTF8[0] < 128)
+      return 1;
+    else if ((pUTF8[0] & 0xE0) == 0xC0)
+      return 2;
+    else if ((pUTF8[0] & 0xF0) == 0xE0)
+      return 3;
+    else
+      return 4;
+  }
+
+  inline size_t UTF16SequenceLength(char32_t c)
+  {
+    return c < 0x10000 ? 1 : 2;
+  }
+  inline size_t UTF16SequenceLength(const char16_t *pUTF16)
+  {
+    if (pUTF16[0] >= 0xD800 && (pUTF16[0] & 0xFC00) == 0xD800)
+      return 2;
+    else
+      return 1;
+  }
+
+  inline size_t UTF8Encode(char32_t c, char *pUTF8)
+  {
+    if (c < 0x80)
+    {
+      pUTF8[0] = (char)c;
+      return 1;
+    }
+    else if (c < 0x800)
+    {
+      pUTF8[1] = c & 0x3f; c >>= 6;
+      pUTF8[0] = (c & 0x1f) | 0xc0;
+      return 2;
+    }
+    else if (c < 0x10000)
+    {
+      pUTF8[2] = c & 0x3f; c >>= 6;
+      pUTF8[1] = c & 0x3f; c >>= 6;
+      pUTF8[0] = (c & 0x0f) | 0xe0;
+      return 3;
+    }
+    else // NOTE: unicode was restricted to 20 bits, so we will stop here. the upper bits of a char32_t are truncated.
+    {
+      pUTF8[3] = c & 0x3f; c >>= 6;
+      pUTF8[2] = c & 0x3f; c >>= 6;
+      pUTF8[1] = c & 0x3f; c >>= 6;
+      pUTF8[0] = (c & 0x07) | 0xf0;
+      return 4;
+    }
+  }
+  inline size_t EncodeUTF16(char32_t c, char16_t *pUTF16)
+  {
+    if (c < 0x10000)
+    {
+      pUTF16[0] = (char16_t)c;
+      return 1;
+    }
+    else
+    {
+      c -= 0x10000;
+      pUTF16[0] = (char16_t)(0xD800 | (c >> 10));
+      pUTF16[1] = (char16_t)(0xDC00 | (c & 0x3FF));
+      return 2;
+    }
+  }
+
+  inline size_t DecodeUTF8(const char *pUTF8, char32_t *pC)
+  {
+    if (pUTF8[0] < 128)
+    {
+      *pC = pUTF8[0];
+      return 1;
+    }
+    else if ((pUTF8[0] & 0xE0) == 0xC0)
+    {
+      *pC = ((char32_t)(pUTF8[0] & 0x1F) << 6) | (pUTF8[1] & 0x3F);
+      return 2;
+    }
+    else if ((pUTF8[0] & 0xF0) == 0xE0)
+    {
+      *pC = ((char32_t)(pUTF8[0] & 0x0F) << 12) | ((char32_t)(pUTF8[1] & 0x3F) << 6) | (pUTF8[2] & 0x3F);
+      return 3;
+    }
+    else
+    {
+      *pC = ((char32_t)(pUTF8[0] & 0x07) << 18) | ((char32_t)(pUTF8[1] & 0x3F) << 12) | ((char32_t)(pUTF8[2] & 0x3F) << 6) | (pUTF8[3] & 0x3F);
+      return 4;
+    }
+  }
+  inline size_t DecodeUTF16(const char16_t *pUTF16, char32_t *pC)
+  {
+    if (pUTF16[0] >= 0xD800 && (pUTF16[0] & 0xFC00) == 0xD800)
+    {
+      *pC = ((char32_t)(pUTF16[0] & 0x3FF) << 10) | (pUTF16[1] & 0x3FF);
+      return 2;
+    }
+    else
+    {
+      *pC = pUTF16[0];
+      return 1;
+    }
+  }
+}
+
+
+template<typename C>
 class epCString
 {
-  friend struct epString;
+  friend struct epBaseString<C>;
 public:
-  operator const char*() const { return pCStr; }
+  operator const C*() const { return pCStr; }
   ~epCString()
   {
     udFree(pCStr);
   }
 
 private:
-  const char *pCStr;
-  epCString(epString str)
+  const C *pCStr;
+  epCString(epBaseString<C> str)
   {
-    char *buf = (char*)udAlloc(str.length + 1);
-    memcpy(buf, str.ptr, str.length);
+    C *buf = (C*)udAlloc((str.length + 1) * sizeof(C));
+    memcpy(buf, str.ptr, str.length*sizeof(C));
     buf[str.length] = 0;
     pCStr = buf;
   }
@@ -29,54 +158,183 @@ private:
 
 
 // epString
-inline epString::epString()
-{}
-
-inline epString::epString(const char *ptr, size_t length)
-  : epSlice<const char>(ptr, length)
+template<typename C>
+inline epBaseString<C>::epBaseString()
 {}
 
 template<typename C>
-inline epString::epString(epSlice<C> rh)
-  : epSlice<const char>(rh)
+inline epBaseString<C>::epBaseString(const C *ptr, size_t length)
+  : epSlice<const C>(ptr, length)
 {}
 
-inline epString::epString(const char *pString)
-  : epSlice<const char>(pString, pString ? strlen(pString) : 0)
+template<typename C>
+template<typename C2>
+inline epBaseString<C>::epBaseString(epSlice<C2> rh)
+  : epSlice<const C>(rh)
 {}
 
+template<typename C>
+inline epBaseString<C>::epBaseString(const C *pString)
+  : epSlice<const C>(pString, pString ? strlen(pString) : 0)
+{}
+
+template<typename C>
 template<size_t N>
-inline epString::epString(const char str[N])
-  : epSlice<const char>(str, N)
+inline epBaseString<C>::epBaseString(const C str[N])
+  : epSlice<const C>(str, N)
 {}
 
-inline epString& epString::operator =(epSlice<const char> rh)
+template<typename C>
+inline epBaseString<C>& epBaseString<C>::operator =(epSlice<const C> rh)
 {
   length = rh.length;
   ptr = rh.ptr;
   return *this;
 }
 
-inline epString& epString::operator =(const char *pString)
+template<typename C>
+inline epBaseString<C>& epBaseString<C>::operator =(const C *pString)
 {
   ptr = pString;
   length = pString ? strlen(pString) : (size_t)0;
   return *this;
 }
 
-inline epString epString::slice(ptrdiff_t first, ptrdiff_t last) const
+template<typename C>
+inline epBaseString<C> epBaseString<C>::slice(ptrdiff_t first, ptrdiff_t last) const
 {
   size_t start = (size_t)(first < 0 ? first + length : first);
   size_t end = (size_t)(last < 0 ? last + length : last);
   EPASSERT(end <= length && start <= end, "Index out of range!");
-  return epString(ptr + start, end - start);
+  return epBaseString<C>(ptr + start, end - start);
 }
 
-inline bool epString::eq(epString rh) const
+template<typename C>
+inline size_t epBaseString<C>::numChars() const
 {
-  return epSlice<const char>::eq(rh);
+  epBaseString<C> t = *this;
+  size_t numChars = 0;
+  while (t.length)
+  {
+    t.popFrontChar();
+    ++numChars;
+  }
+  return numChars;
 }
-inline bool epString::eqIC(epString rh) const
+template<>
+inline size_t epBaseString<char32_t>::numChars() const
+{
+  return length;
+}
+
+template<>
+inline char32_t epBaseString<char>::frontChar() const
+{
+  char32_t r;
+  ep_internal::DecodeUTF8(ptr, &r);
+  return r;
+}
+template<>
+inline char32_t epBaseString<char16_t>::frontChar() const
+{
+  char32_t r;
+  ep_internal::DecodeUTF16(ptr, &r);
+  return r;
+}
+template<>
+inline char32_t epBaseString<char32_t>::frontChar() const
+{
+  return ptr[0];
+}
+template<>
+inline char32_t epBaseString<char>::backChar() const
+{
+  const char *pLast = ptr + length-1;
+  while ((*pLast & 0xC) == 0x80)
+    --pLast;
+  char32_t r;
+  ep_internal::DecodeUTF8(pLast, &r);
+  return r;
+}
+template<>
+inline char32_t epBaseString<char16_t>::backChar() const
+{
+  char16_t back = ptr[length-1];
+  if (back >= 0xD800 && (back & 0xFC00) == 0xDC00)
+  {
+    char32_t r;
+    ep_internal::DecodeUTF16(ptr + length-2, &r);
+    return r;
+  }
+  return back;
+}
+template<>
+inline char32_t epBaseString<char32_t>::backChar() const
+{
+  return ptr[length-1];
+}
+
+template<>
+inline char32_t epBaseString<char>::popFrontChar()
+{
+  char32_t r;
+  size_t codeUnits = ep_internal::DecodeUTF8(ptr, &r);
+  ptr += codeUnits;
+  length -= codeUnits;
+  return r;
+}
+template<>
+inline char32_t epBaseString<char16_t>::popFrontChar()
+{
+  char32_t r;
+  size_t codeUnits = ep_internal::DecodeUTF16(ptr, &r);
+  ptr += codeUnits;
+  length -= codeUnits;
+  return r;
+}
+template<>
+inline char32_t epBaseString<char32_t>::popFrontChar()
+{
+  ++ptr;
+  --length;
+  return ptr[-1];
+}
+template<>
+inline char32_t epBaseString<char>::popBackChar()
+{
+  size_t numChars = 1;
+  while ((ptr[length - numChars] & 0xC) == 0x80)
+    --numChars;
+  char32_t r;
+  ep_internal::DecodeUTF8(ptr + length - numChars, &r);
+  length -= numChars;
+  return r;
+}
+template<>
+inline char32_t epBaseString<char16_t>::popBackChar()
+{
+  char16_t back = ptr[--length];
+  if (back >= 0xD800 && (back & 0xFC00) == 0xDC00)
+  {
+    char32_t r;
+    ep_internal::DecodeUTF16(ptr + --length, &r);
+    return r;
+  }
+  return back;
+}
+template<>
+inline char32_t epBaseString<char32_t>::popBackChar()
+{
+  return ptr[--length];
+}
+
+template<typename C>
+inline bool epBaseString<C>::eq(epBaseString<C> rh) const
+{
+  return epSlice<const C>::eq(rh);
+}
+template<typename C>
+inline bool epBaseString<C>::eqIC(epBaseString<C> rh) const
 {
   if(length != rh.length)
     return false;
@@ -85,32 +343,38 @@ inline bool epString::eqIC(epString rh) const
       return false;
   return true;
 }
-inline bool epString::beginsWith(epString rh) const
+template<typename C>
+inline bool epBaseString<C>::beginsWith(epBaseString<C> rh) const
 {
-  return epSlice<const char>::beginsWith(rh);
+  return epSlice<const C>::beginsWith(rh);
 }
-inline bool epString::beginsWithIC(epString rh) const
+template<typename C>
+inline bool epBaseString<C>::beginsWithIC(epBaseString<C> rh) const
 {
   if (length < rh.length)
     return false;
   return slice(0, rh.length).eqIC(rh);
 }
-inline bool epString::endsWith(epString rh) const
+template<typename C>
+inline bool epBaseString<C>::endsWith(epBaseString<C> rh) const
 {
-  return epSlice<const char>::endsWith(rh);
+  return epSlice<const C>::endsWith(rh);
 }
-inline bool epString::endsWithIC(epString rh) const
+template<typename C>
+inline bool epBaseString<C>::endsWithIC(epBaseString<C> rh) const
 {
   if (length < rh.length)
     return false;
   return slice(length - rh.length, length).eqIC(rh);
 }
 
-inline ptrdiff_t epString::cmp(epString rh) const
+template<typename C>
+inline ptrdiff_t epBaseString<C>::cmp(epBaseString<C> rh) const
 {
-  return epSlice<const char>::cmp(rh);
+  return epSlice<const C>::cmp(rh);
 }
-inline ptrdiff_t epString::cmpIC(epString rh) const
+template<typename C>
+inline ptrdiff_t epBaseString<C>::cmpIC(epBaseString<C> rh) const
 {
   size_t len = length < rh.length ? length : rh.length;
   for (size_t i = 0; i < len; ++i)
@@ -123,7 +387,8 @@ inline ptrdiff_t epString::cmpIC(epString rh) const
   return length - rh.length;
 }
 
-inline char* epString::toStringz(char *pBuffer, size_t bufferLen) const
+template<typename C>
+inline C* epBaseString<C>::toStringz(C *pBuffer, size_t bufferLen) const
 {
   size_t len = length < bufferLen-1 ? length : bufferLen-1;
   memcpy(pBuffer, ptr, len);
@@ -131,12 +396,14 @@ inline char* epString::toStringz(char *pBuffer, size_t bufferLen) const
   return pBuffer;
 }
 
-inline epCString epString::toStringz() const
+template<typename C>
+inline epCString<C> epBaseString<C>::toStringz() const
 {
-  return epCString(*this);
+  return epCString<C>(*this);
 }
 
-inline size_t epString::findFirstIC(epString s) const
+template<typename C>
+inline size_t epBaseString<C>::findFirstIC(epBaseString<C> s) const
 {
   if (s.empty())
     return 0;
@@ -154,7 +421,8 @@ inline size_t epString::findFirstIC(epString s) const
   }
   return length;
 }
-inline size_t epString::findLastIC(epString s) const
+template<typename C>
+inline size_t epBaseString<C>::findLastIC(epBaseString<C> s) const
 {
   if (s.empty())
     return length;
@@ -172,24 +440,29 @@ inline size_t epString::findLastIC(epString s) const
   return length;
 }
 
-inline epString epString::getLeftAtFirstIC(epString s, bool bInclusive) const
+template<typename C>
+inline epBaseString<C> epBaseString<C>::getLeftAtFirstIC(epBaseString<C> s, bool bInclusive) const
 {
   return slice(0, findFirstIC(s) + (bInclusive ? s.length : 0));
 }
-inline epString epString::getLeftAtLastIC(epString s, bool bInclusive) const
+template<typename C>
+inline epBaseString<C> epBaseString<C>::getLeftAtLastIC(epBaseString<C> s, bool bInclusive) const
 {
   return slice(0, findLastIC(s) + (bInclusive ? s.length : 0));
 }
-inline epString epString::getRightAtFirstIC(epString s, bool bInclusive) const
+template<typename C>
+inline epBaseString<C> epBaseString<C>::getRightAtFirstIC(epBaseString<C> s, bool bInclusive) const
 {
   return slice(findFirstIC(s) + (bInclusive ? 0 : s.length), length);
 }
-inline epString epString::getRightAtLastIC(epString s, bool bInclusive) const
+template<typename C>
+inline epBaseString<C> epBaseString<C>::getRightAtLastIC(epBaseString<C> s, bool bInclusive) const
 {
   return slice(findLastIC(s) + (bInclusive ? 0 : s.length), length);
 }
 
-inline epString epString::trim(bool front, bool back) const
+template<typename C>
+inline epBaseString<C> epBaseString<C>::trim(bool front, bool back) const
 {
   size_t first = 0, last = length;
   if (front)
@@ -205,19 +478,22 @@ inline epString epString::trim(bool front, bool back) const
   return slice(first, last);
 }
 
+template<typename C>
 template<bool skipEmptyTokens>
-inline epString epString::popToken(epString delimiters)
+inline epBaseString<C> epBaseString<C>::popToken(epBaseString<C> delimiters)
 {
-  return epSlice<const char>::popToken<skipEmptyTokens>(delimiters);
+  return epSlice<const C>::popToken<skipEmptyTokens>(delimiters);
 }
 
+template<typename C>
 template<bool skipEmptyTokens>
-inline epSlice<epString> epString::tokenise(epSlice<epString> tokens, epString delimiters)
+inline epSlice<epBaseString<C>> epBaseString<C>::tokenise(epSlice<epBaseString<C>> tokens, epBaseString<C> delimiters)
 {
-  return epSlice<const char>::tokenise<skipEmptyTokens>(tokens, delimiters);
+  return epSlice<const C>::tokenise<skipEmptyTokens>(tokens, delimiters);
 }
 
-inline uint32_t epString::hash(uint32_t hash) const
+template<typename C>
+inline uint32_t epBaseString<C>::hash(uint32_t hash) const
 {
   size_t i = 0;
   while (i < length)
@@ -332,9 +608,9 @@ inline epMutableString<Size>& epMutableString<Size>::toLower()
 }
 
 template<size_t Size>
-inline epCString epMutableString<Size>::toStringz() const
+inline epCString<char> epMutableString<Size>::toStringz() const
 {
-  return ((epString*)this)->toStringz();
+  return ((epBaseString<char>*)this)->toStringz();
 }
 
 
@@ -412,7 +688,7 @@ inline epSharedString epSharedString::slice(ptrdiff_t first, ptrdiff_t last) con
   return epSharedString(s.ptr, s.length, rc);
 }
 
-inline epCString epSharedString::toStringz() const
+inline epCString<char> epSharedString::toStringz() const
 {
   return ((epString*)this)->toStringz();
 }

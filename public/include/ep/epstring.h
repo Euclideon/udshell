@@ -6,12 +6,12 @@
 
 extern const char s_charDetails[256];
 
-#define isNewline(c) (s_charDetails[(uint8_t)c] & 8)
-#define isWhitespace(c) (s_charDetails[(uint8_t)c] & 0xC)
-#define isAlpha(c) (s_charDetails[(uint8_t)c] & 1)
-#define isNumeric(c) (s_charDetails[(uint8_t)c] & 2)
-#define isAlphaNumeric(c) (s_charDetails[(uint8_t)c] & 3)
-#define isHex(c) (isAlphaNumeric(c) && (uint8_t(c)|0x20) <= 'F')
+#define isNewline(c) (c < 256 && (s_charDetails[c] & 8))
+#define isWhitespace(c) (c < 256 && (s_charDetails[c] & 0xC))
+#define isAlpha(c) (c < 256 && (s_charDetails[c] & 1))
+#define isNumeric(c) (c < 256 && (s_charDetails[c] & 2))
+#define isAlphaNumeric(c) (c < 256 && (s_charDetails[c] & 3))
+#define isHex(c) (isAlphaNumeric(c) && (c|0x20) <= 'f')
 
 __forceinline char toLower(char c) { return isAlpha(c) ? c|0x20 : c; }
 __forceinline char toUpper(char c) { return isAlpha(c) ? c&~0x20 : c; }
@@ -27,6 +27,7 @@ struct epString
 
 #else
 
+template<typename C>
 class epCString;
 struct epVarArg;
 
@@ -37,60 +38,71 @@ struct epVarArg;
 // epString implements an immutable string
 // does not retain ownership; useful for local temporaries, passing as arguments, etc... analogous to using 'const char*'
 // epString adds typical string functions, including conversion to zero-terminated strings for passing to foreign APIs, akin to c_str()
-struct epString : public epSlice<const char>
+template<typename C>
+struct epBaseString : public epSlice<const C>
 {
   // constructors
-  epString();
-  epString(const char *ptr, size_t length);
-  template<typename C>
-  epString(epSlice<C> rh);
-  epString(const char *pString);
+  epBaseString();
+  epBaseString(const C *ptr, size_t length);
+  template<typename C2>
+  epBaseString(epSlice<C2> rh);
+  epBaseString(const C *pString);
   template<size_t N>
-  epString(const char str[N]);
+  epBaseString(const C str[N]);
 
   // assignment
-  epString& operator =(epSlice<const char> rh);
-  epString& operator =(const char *pString);
+  epBaseString<C>& operator =(epSlice<const C> rh);
+  epBaseString<C>& operator =(const C *pString);
 
   // contents
-  epString slice(ptrdiff_t first, ptrdiff_t last) const;
+  epBaseString<C> slice(ptrdiff_t first, ptrdiff_t last) const;
+
+  // unicode support
+  size_t numChars() const;
+  char32_t frontChar() const;
+  char32_t backChar() const;
+  char32_t popFrontChar();
+  char32_t popBackChar();
 
   // comparison
-  bool eq(epString rh) const;
-  bool eqIC(epString rh) const;
-  bool beginsWith(epString rh) const;
-  bool beginsWithIC(epString rh) const;
-  bool endsWith(epString rh) const;
-  bool endsWithIC(epString rh) const;
+  bool eq(epBaseString<C> rh) const;
+  bool eqIC(epBaseString<C> rh) const;
+  bool beginsWith(epBaseString<C> rh) const;
+  bool beginsWithIC(epBaseString<C> rh) const;
+  bool endsWith(epBaseString<C> rh) const;
+  bool endsWithIC(epBaseString<C> rh) const;
 
-  ptrdiff_t cmp(epString rh) const;
-  ptrdiff_t cmpIC(epString rh) const;
+  ptrdiff_t cmp(epBaseString<C> rh) const;
+  ptrdiff_t cmpIC(epBaseString<C> rh) const;
 
   // c-string compatibility
-  char* toStringz(char *pBuffer, size_t bufferLen) const;
-  epCString toStringz() const;
+  C* toStringz(C *pBuffer, size_t bufferLen) const;
+  epCString<C> toStringz() const;
 
   // useful functions
-  size_t findFirstIC(epString s) const;
-  size_t findLastIC(epString s) const;
+  size_t findFirstIC(epBaseString<C> s) const;
+  size_t findLastIC(epBaseString<C> s) const;
 
-  epString getLeftAtFirstIC(epString s, bool bInclusive = false) const;
-  epString getLeftAtLastIC(epString s, bool bInclusive = false) const;
-  epString getRightAtFirstIC(epString s, bool bInclusive = true) const;
-  epString getRightAtLastIC(epString s, bool bInclusive = true) const;
+  epBaseString<C> getLeftAtFirstIC(epBaseString<C> s, bool bInclusive = false) const;
+  epBaseString<C> getLeftAtLastIC(epBaseString<C> s, bool bInclusive = false) const;
+  epBaseString<C> getRightAtFirstIC(epBaseString<C> s, bool bInclusive = true) const;
+  epBaseString<C> getRightAtLastIC(epBaseString<C> s, bool bInclusive = true) const;
 
-  epString trim(bool front = true, bool back = true) const;
+  epBaseString<C> trim(bool front = true, bool back = true) const;
 
   template<bool skipEmptyTokens = true>
-  epString popToken(epString delimiters = " \t\r\n");
+  epBaseString<C> popToken(epBaseString<C> delimiters = " \t\r\n");
   template<bool skipEmptyTokens = true>
-  epSlice<epString> tokenise(epSlice<epString> tokens, epString delimiters = " \t\r\n");
+  epSlice<epBaseString<C>> tokenise(epSlice<epBaseString<C>> tokens, epBaseString<C> delimiters = " \t\r\n");
 
   int64_t parseInt(bool bDetectBase = true, int base = 10) const;
   double parseFloat() const;
 
   uint32_t hash(uint32_t hash = 0) const;
 };
+
+typedef epBaseString<char> epString;
+//typedef epBaseString<wchar_t> epWString;
 
 
 // a static-length and/or stack-allocated string, useful for holding constructured temporaries (ie, target for sprintf/format)
@@ -142,7 +154,7 @@ struct epMutableString : public epArray<char, Size>
 
   // c-string compatibility
   char* toStringz(char *pBuffer, size_t bufferLen) const                                { return ((epString*)this)->toStringz(pBuffer, bufferLen); }
-  epCString toStringz() const;
+  epCString<char> toStringz() const;
 
   // useful functions
   size_t findFirstIC(epString s) const                                                  { return ((epString*)this)->findFirstIC(s); }
@@ -223,7 +235,7 @@ struct epSharedString : public epSharedSlice<const char>
 
   // c-string compatibility
   char* toStringz(char *pBuffer, size_t bufferLen) const                                { return ((epString*)this)->toStringz(pBuffer, bufferLen); }
-  epCString toStringz() const;
+  epCString<char> toStringz() const;
 
   // transformation
   template<typename... Args> epSharedString append(const Args&... args) const           { return concat(*this, args...); }
