@@ -13,6 +13,6 @@ project(luaPath)
   includedirs { luaPath .. "/src" }
 
   -- include common stuff
-  dofile "../../ud/common-proj.lua"
+  dofile "../../common-proj.lua"
 
   warnings "Off"
