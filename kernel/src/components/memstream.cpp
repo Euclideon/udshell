@@ -85,39 +85,39 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
   size_t len = 0;
   if (oFlags & OpenFlags::Write)
   {
-    buffer = spBuffer->Map();
-    if (!buffer)
+    bufferSlice = spBuffer->Map();
+    if (!bufferSlice)
       LogError("Can't reserve Buffer for writing.");
   }
   else if (oFlags & OpenFlags::Read)
   {
     auto map = spBuffer->MapForRead();
-    buffer = epSlice<void>(const_cast<void*>(map.ptr), map.length);
-    if (!buffer)
+    bufferSlice = epSlice<void>(const_cast<void*>(map.ptr), map.length);
+    if (!bufferSlice)
       LogError("Can't reserve Buffer for reading.");
   }
   length = len;
 
-  if (!buffer)
+  if (!bufferSlice)
   {
     spBuffer = nullptr;
     return; // TODO Error handling
   }
 }
 
-epSlice<void> MemStream::Read(epSlice<void> buffer)
+epSlice<void> MemStream::Read(epSlice<void> buf)
 {
   if (!spBuffer)
     return 0;
 
-  size_t bytes = buffer.length;
+  size_t bytes = buf.length;
   if (pos + bytes > (size_t)length)
     bytes = size_t(length - pos);
 
-  memcpy(buffer.ptr, (const char*)buffer.ptr + pos, bytes);
+  memcpy(buf.ptr, (const char*)bufferSlice.ptr + pos, bytes);
   pos += bytes;
 
-  return epSlice<void>(buffer.ptr, bytes);
+  return epSlice<void>(buf.ptr, bytes);
 }
 
 size_t MemStream::Write(epSlice<const void> data)
@@ -130,11 +130,11 @@ size_t MemStream::Write(epSlice<const void> data)
     spBuffer->Unmap();
     spBuffer->Resize(size_t(pos + data.length));
 
-    buffer = spBuffer->Map();
-    length = buffer.length;
+    bufferSlice = spBuffer->Map();
+    length = bufferSlice.length;
   }
 
-  memcpy((char*)buffer.ptr + pos, data.ptr, data.length);
+  memcpy((char*)bufferSlice.ptr + pos, data.ptr, data.length);
   pos += data.length;
 
   spBuffer->Changed.Signal();

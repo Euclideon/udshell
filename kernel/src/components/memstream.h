@@ -29,7 +29,7 @@ protected:
   static const size_t DefaultBufferSize = 102400;
 
   BufferRef spBuffer;
-  epSlice<void> buffer;
+  epSlice<void> bufferSlice;
   OpenFlags oFlags;
 };
 
