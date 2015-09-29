@@ -373,8 +373,8 @@ template<typename T>
 template<typename U>
 inline void epSlice<T>::copyTo(epSlice<U> dest) const
 {
-  EPASSERT(length >= dest.length, "Not enough elements!");
-  for (size_t i = 0; i<dest.length; ++i)
+  EPASSERT(dest.length >= length, "Not enough elements!");
+  for (size_t i = 0; i<length; ++i)
     dest.ptr[i] = ptr[i];
 }
 
