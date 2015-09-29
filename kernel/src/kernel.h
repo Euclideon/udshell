@@ -75,13 +75,13 @@ public:
 
   // logger functions
   LoggerRef GetLogger() const { return spLogger; }
-  void LogError(const epString text, const epString componentUID = nullptr);
-  void LogWarning(int level, const epString text, const epString componentUID = nullptr);
-  void LogDebug(int level, const epString text, const epString componentUID = nullptr);
-  void LogInfo(int level, const epString text, const epString componentUID = nullptr);
-  void LogScript(const epString text, const epString componentUID = nullptr);
-  void LogTrace(const epString text, const epString componentUID = nullptr);
-  void Log(const epString text, const epString componentUID = nullptr);
+  template<typename ...Args> void LogError(epString text, Args... args) const;
+  template<typename ...Args> void LogWarning(int level, epString text, Args... args) const;
+  template<typename ...Args> void LogDebug(int level, epString text, Args... args) const;
+  template<typename ...Args> void LogInfo(int level, epString text, Args... args) const;
+  template<typename ...Args> void LogScript(epString text, Args... args) const;
+  template<typename ...Args> void LogTrace(epString text, Args... args) const;
+  template<typename ...Args> void Log(epString text, Args... args) const; // Calls LogDebug() with level 2
 
   // Functions for resource management
   ResourceManagerRef GetResourceManager() const { return spResourceManager; }
@@ -194,5 +194,89 @@ epResult Kernel::RegisterComponent()
 }
 
 } //namespace ep
+
+#include "components/logger.h"
+namespace ep
+{
+
+template<typename ...Args>
+inline void Kernel::LogError(epString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Error, nullptr);
+  else
+  {
+    epMutableString128 tmp; tmp.format(text, args...);
+    spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Error, nullptr);
+  }
+}
+template<typename ...Args>
+inline void Kernel::LogWarning(int level, epString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    spLogger->Log(level, text, LogCategories::Warning, nullptr);
+  else
+  {
+    epMutableString128 tmp; tmp.format(text, args...);
+    spLogger->Log(level, tmp, LogCategories::Warning, nullptr);
+  }
+}
+template<typename ...Args>
+inline void Kernel::LogDebug(int level, epString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    spLogger->Log(level, text, LogCategories::Debug, nullptr);
+  else
+  {
+    epMutableString128 tmp; tmp.format(text, args...);
+    spLogger->Log(level, tmp, LogCategories::Debug, nullptr);
+  }
+}
+template<typename ...Args>
+inline void Kernel::LogInfo(int level, epString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    spLogger->Log(level, text, LogCategories::Info, nullptr);
+  else
+  {
+    epMutableString128 tmp; tmp.format(text, args...);
+    spLogger->Log(level, tmp, LogCategories::Info, nullptr);
+  }
+}
+template<typename ...Args>
+inline void Kernel::LogScript(epString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Script, nullptr);
+  else
+  {
+    epMutableString128 tmp; tmp.format(text, args...);
+    spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Script, nullptr);
+  }
+}
+template<typename ...Args>
+inline void Kernel::LogTrace(epString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, nullptr);
+  else
+  {
+    epMutableString128 tmp; tmp.format(text, args...);
+    spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Trace, nullptr);
+  }
+}
+template<typename ...Args>
+inline void Kernel::Log(epString text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, nullptr);
+  else
+  {
+    epMutableString128 tmp; tmp.format(text, args...);
+    spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Debug, nullptr);
+  }
+}
+
+} // namespace ep
 
 #endif // EPKERNEL_H

@@ -155,7 +155,7 @@ protected:
   Logger(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   LogStream *FindLogStream(StreamRef spStream) const;
 
-  epArray<LogStream, 1> streamList;
+  epArray<LogStream> streamList;
   LogFilter filter;
   epArray<LogLine> internalLog;
   bool bEnabled = true, bLogging = false;

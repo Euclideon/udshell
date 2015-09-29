@@ -163,7 +163,7 @@ LogStream *Logger::FindLogStream(StreamRef spStream) const
 
 void Logger::Log(int level, epString text, LogCategories category, epString componentUID)
 {
-  if (bLogging)
+  if (!this || bLogging)
     return;
   bLogging = true;
 
