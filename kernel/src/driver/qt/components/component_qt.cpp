@@ -15,7 +15,7 @@ QVariant QtEPComponent::Get(const QString &name) const
   epString prop(byteArray.data(), byteArray.size());
 
   QVariant res;
-  epFromVariant(spComponent->GetProperty(prop), &res);
+  epFromVariant(pComponent->GetProperty(prop), &res);
   return res;
 }
 
@@ -23,7 +23,7 @@ void QtEPComponent::Set(const QString &name, QVariant val)
 {
   QByteArray byteArray = name.toUtf8();
   epString prop(byteArray.data(), byteArray.size());
-  spComponent->SetProperty(prop, epToVariant(val));
+  pComponent->SetProperty(prop, epToVariant(val));
 }
 
 QVariant QtEPComponent::Call(const QString &name) const
@@ -31,7 +31,7 @@ QVariant QtEPComponent::Call(const QString &name) const
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epSlice<epVariant>()), &res);
+  epFromVariant(pComponent->CallMethod(method, epSlice<epVariant>()), &res);
   return res;
 }
 
@@ -40,7 +40,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0) const
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0)), &res);
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0)), &res);
   return res;
 }
 
@@ -49,7 +49,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1) 
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1)), &res);
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1)), &res);
   return res;
 }
 
@@ -58,7 +58,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
   return res;
 }
 
@@ -67,7 +67,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
   return res;
 }
 
@@ -76,7 +76,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4)), &res);
   return res;
 }
@@ -88,7 +88,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
   epArray<epVariant, 6> vargs = {  };
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5)), &res);
   return res;
 }
@@ -99,7 +99,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6)), &res);
   return res;
 }
@@ -110,7 +110,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6), epToVariant(arg7)), &res);
   return res;
 }
@@ -121,7 +121,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6),
     epToVariant(arg7), epToVariant(arg8)), &res);
   return res;
@@ -133,7 +133,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(spComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5),
     epToVariant(arg6), epToVariant(arg7), epToVariant(arg8), epToVariant(arg9)), &res);
   return res;
@@ -177,14 +177,14 @@ void QtEPComponent::Subscribe(QString eventName, QJSValue func) const
 
   if (!func.isCallable())
   {
-    spComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString().data());
+    pComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString().data());
     return;
   }
 
   QByteArray byteArray = eventName.toUtf8();
   epString event(byteArray.data(), byteArray.size());
 
-  spComponent->Subscribe(event, epVariant::VarDelegate(JSValueDelegateRef::create(func)));
+  pComponent->Subscribe(event, epVariant::VarDelegate(JSValueDelegateRef::create(func)));
 }
 
 } // namespace qt

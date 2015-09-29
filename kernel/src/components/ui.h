@@ -22,6 +22,7 @@ protected:
   virtual ~UIComponent();
 
   udResult CreateInternal(epInitParams initParams);
+  udResult InitComplete() override;
   void DestroyInternal();
 
   void *pInternal = nullptr;

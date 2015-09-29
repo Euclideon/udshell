@@ -106,6 +106,7 @@ protected:
   virtual ~Component();
 
   void Init(epInitParams initParams);
+  virtual udResult InitComplete() { return udR_Success; }
 
   virtual udResult ReceiveMessage(epString message, epString sender, const epVariant &data);
 
