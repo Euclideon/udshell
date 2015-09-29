@@ -59,3 +59,18 @@ void HalTimer_Destroy(HalTimer **ppTimer)
 }
 
 #endif // EPWINDOW_DRIVER == EPDRIVER_WIN32
+
+#if EPSYSTEM_DRIVER == EPDRIVER_WIN32
+
+#include "hal/haltimer.h"
+
+double epPerformanceCounter()
+{
+  LARGE_INTEGER counter, freq;
+  QueryPerformanceCounter(&counter);
+  QueryPerformanceFrequency(&freq);
+
+  return (double)counter.QuadPart / freq.QuadPart;
+}
+
+#endif // EPSYSTEM_DRIVER == EPDRIVER_WIN32

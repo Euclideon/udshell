@@ -14,3 +14,14 @@ void HalTimer_Destroy(HalTimer **)
 }
 
 #endif // EPWINDOW_DRIVER == EPDRIVER_NULL
+
+#if EPSYSTEM_DRIVER == EPDRIVER_NULL
+
+#include "hal/haltimer.h"
+
+double epPerformanceCounter()
+{
+  return 0.0;
+}
+
+#endif // EPSYSTEM_DRIVER == EPDRIVER_NULL
