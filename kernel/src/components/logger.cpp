@@ -14,60 +14,17 @@ static CPropertyDesc props[] =
     },
     &Logger::GetEnabled, // getter
     &Logger::SetEnabled, // setter
-  }
+  },
 };
 
 static CMethodDesc methods[] =
 {
   {
     {
-      "removefilters", // id
-      "Remove all logging filters", // description
+      "log", // id
+      "Write a line to the log", // description
     },
-    &Logger::RemoveFilters, // method
-  },
-  {
-    {
-      "getfilterlevel", // id
-      "Get filter level for the specified category", // description
-    },
-    &Logger::GetFilterLevel, // method
-  },
-  {
-    {
-      "setfilterlevel", // id
-      "Filter logging for a category to the specified level", // description
-    },
-    &Logger::SetFilterLevel, // method
-  },
-  // TODO epVariant doesn't support epSlice<const epString>. fix this with wrappers?
-  /*{ T
-    {
-      "getfiltercomponents", // id
-      "Get filtered components uids", // description
-    },
-    &Logger::GetFilterComponents, // method
-  },
-  {
-    {
-      "setfiltercomponents", // id
-      "Filter logging to the specified component UIDs", // description
-    },
-    &Logger::SetFilterComponents, // method
-  },*/
-  {
-    {
-      "setlevel", // id
-      "Set severity level for this log stream", // description
-    },
-    &Logger::SetLevel, // method
-  },
-  {
-    {
-      "setcategories", // id
-      "Set logging categories to output to this stream", // description
-    },
-    &Logger::SetCategories, // method
+    &Logger::Log, // method
   },
   {
     {
@@ -85,11 +42,90 @@ static CMethodDesc methods[] =
   },
   {
     {
-      "log", // id
-      "Write a line to the log", // description
+      "resetfilter", // id
+      "Resets log filter to a non-filtering state", // description
     },
-    &Logger::Log, // method
-  }
+    &Logger::ResetFilter, // method
+  },
+  {
+    {
+      "getlevel", // id
+      "Get filter level for the specified category", // description
+    },
+    &Logger::GetLevel, // method
+  },
+  {
+    {
+      "setlevel", // id
+      "Filter logging for a bitfield of categories to the specified level", // description
+    },
+    &Logger::SetLevel, // method
+  },
+  // TODO epVariant doesn't support epSlice<const epString>. fix this with wrappers?
+  /*
+  {
+    {
+      "getcomponents", // id
+      "Get filtered components uids", // description
+    },
+    &Logger::GetComponents, // method
+  },
+  {
+    {
+      "setcomponents", // id
+      "Filter logging to the specified component UIDs", // description
+    },
+    &Logger::SetComponents, // method
+  }*/
+  {
+    {
+      "resetstreamfilter", // id
+      "Resets a stream's log filter to a non-filtering state", // description
+    },
+    &Logger::ResetStreamFilter, // method
+  },
+  {
+    {
+      "getstreamlevel", // id
+      "Get a category's filter level for the given stream", // description
+    },
+    &Logger::GetStreamLevel, // method
+  },
+  {
+    {
+      "setstreamlevel", // id
+      "Filter category levels for the given stream", // description
+    },
+    &Logger::SetStreamLevel, // method
+  },
+  // TODO epVariant doesn't support epSlice<const epString>. fix this with wrappers?
+  /*
+  {
+    {
+      "getstreamcomponents", // id
+      "Get the filtered components uids for the given stream", // description
+    },
+    &Logger::GetStreamComponents, // method
+  },
+  {
+    {
+      "setstreamcomponents", // id
+      "Filter logging for the given stream to the specified component UIDs", // description
+    },
+    &Logger::SetStreamComponents, // method
+  }*/
+};
+
+static CEventDesc events[] =
+{
+  {
+    {
+      "changed", // id
+      "Changed", // displayName
+      "Log has been updated with a new entry", // description
+    },
+    &Logger::Changed, // event
+  },
 };
 
 ComponentDesc Logger::descriptor =
@@ -103,18 +139,18 @@ ComponentDesc Logger::descriptor =
   "Logger", // displayName
   "Logger", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)),   // properties
   epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
-  nullptr, // events
+  epSlice<CEventDesc>(events, UDARRAYSIZE(events)),    // events
 };
 
 Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  RemoveFilters();
+
 }
 
-Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
+LogStream *Logger::FindLogStream(StreamRef spStream) const
 {
   for (auto &s : streamList)
   {
@@ -127,80 +163,30 @@ Logger::LogStream *Logger::FindLogStream(StreamRef spStream) const
 
 void Logger::Log(int level, epString text, LogCategories category, epString componentUID)
 {
-  epMutableString<1024> out;
-  char timeStr[64];
-
-  // Check category level filter
-  int catIndex;
-  LogCategories tempCat = category;
-  for (catIndex = 0; !(tempCat & 1); catIndex++)
-    tempCat = tempCat >> 1;
-
-  if (levelsFilter[catIndex] != -1 && levelsFilter[catIndex] < level)
-    return;
-
-  // Check component ids filter
-  if (componentUID != nullptr && !componentsFilter.empty())
-  {
-    bool componentFound = false;
-    for (epString comp : componentsFilter)
-    {
-      if (!comp.cmp(componentUID))
-      {
-        componentFound = true;
-        break;
-      }
-    }
-    if (!componentFound)
-      return;
-  }
+  time_t ti = time(nullptr);
 
   if (bLogging)
     return;
   bLogging = true;
 
+  /** Add log line to the internal log **/
+
+  internalLog.pushBack(LogLine(level, text, category, componentUID, ti));
+  Changed.Signal();
+  LogLine &line = internalLog.back();
+
+  /** Output to streams **/
+  if(!filter.FilterLogLine(line))
+  {
+    bLogging = false;
+    return;
+  }
+
   for (auto &s : streamList)
   {
-    out = nullptr;
-
-    if ((s.categories & category) && s.level >= level)
+    if (s.filter.FilterLogLine(line))
     {
-      if (s.format & LogFormatSpecs::Timestamp)
-      {
-        time_t ti = time(nullptr);
-#if defined(EP_WINDOWS)
-        tm _tm, *pTm = &_tm;
-        localtime_s(&_tm, &ti);
-#else
-        tm *pTm = localtime(&ti);
-#endif
-        strftime(timeStr, sizeof(timeStr), "[%d/%m/%d %H:%M:%S]", pTm);
-        out.append((const char*)timeStr);
-      }
-      if (s.format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID))
-      {
-        out.append("(");
-
-        if (s.format & LogFormatSpecs::Level)
-        {
-          out.append(level);
-          if (s.format & LogFormatSpecs::ComponentUID && componentUID != nullptr)
-            out.append(", ");
-        }
-        if (s.format & LogFormatSpecs::ComponentUID)
-          out.append(componentUID);
-
-        out.append(")");
-      }
-
-      if (s.format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID))
-        out.append(" ");
-
-      if (s.format & LogFormatSpecs::Category)
-        out.append(category.StringOf(), ": ");
-
-      out.append(text);
-
+      epSharedString out = line.ToString(s.format);
       s.spStream->WriteLn(out);
       s.spStream->Flush();
     }
@@ -209,9 +195,55 @@ void Logger::Log(int level, epString text, LogCategories category, epString comp
   bLogging = false;
 }
 
-void Logger::AddStream(StreamRef spStream, LogCategories categories, int level, LogFormatSpecs format)
+ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
 {
-  streamList.pushBack(LogStream(spStream, categories, level, format));
+  epSharedString out = line.ToString(LogDefaults::Format);
+
+  // if we're only counting
+  if (!buffer.ptr)
+    return out.length;
+
+  // if the buffer is too small
+  if (buffer.length < out.length)
+    return buffer.length - out.length;
+
+  out.copyTo(buffer);
+
+  return out.length;
+}
+
+epSharedString LogLine::ToString(LogFormatSpecs format) const
+{
+  epMutableString<256> out;
+  char timeStr[64];
+
+#if defined(EP_WINDOWS)
+  tm _tm, *pTm = &_tm;
+  localtime_s(&_tm, &timestamp);
+#else
+  tm *pTm = localtime(&timestamp);
+#endif
+  strftime(timeStr, sizeof(timeStr), "[%d/%m/%d %H:%M:%S]", pTm);
+
+  out.format("{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}",
+    ((format & LogFormatSpecs::Timestamp) ? (const char*)timeStr : ""),
+    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? "(" : ""),
+    ((format & LogFormatSpecs::Level) ? epMutableString<2>().append(level) : ""),
+    ((format & (LogFormatSpecs::ComponentUID | LogFormatSpecs::Level)) && componentUID != nullptr ? ", " : ""),
+    ((format & LogFormatSpecs::ComponentUID) ? componentUID : ""),
+    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? ")" : ""),
+    ((format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? " " : ""),
+    ((format & LogFormatSpecs::Category) ? const_cast<LogCategories &>(category).StringOf() : ""),
+    ((format & LogFormatSpecs::Category) ? ": " : ""),
+    text
+  );
+
+  return out;
+}
+
+void Logger::AddStream(StreamRef spStream, LogFormatSpecs format)
+{
+  streamList.pushBack(LogStream(spStream, format, LogFilter()));
 }
 
 int Logger::RemoveStream(StreamRef spStream)
@@ -227,11 +259,38 @@ int Logger::RemoveStream(StreamRef spStream)
   return -1;
 }
 
-int Logger::SetLevel(StreamRef spStream, int level)
+LogStream *Logger::GetLogStream(StreamRef spStream)
+{
+  return FindLogStream(spStream);
+}
+
+/** Stream filter helper functions **/
+
+int Logger::ResetStreamFilter(StreamRef spStream)
 {
   if (LogStream *pLogStream = FindLogStream(spStream))
   {
-    pLogStream->level = level;
+    pLogStream->filter.ResetFilter();
+    return 0;
+  }
+
+  return -1;
+}
+
+int Logger::GetStreamLevel(StreamRef spStream, LogCategories category) const
+{
+  if (LogStream *pLogStream = FindLogStream(spStream))
+    return pLogStream->filter.GetLevel(category);
+
+  // TODO Fix error checking
+  return -1;
+}
+
+int Logger::SetStreamLevel(StreamRef spStream, LogCategories categories, int level)
+{
+  if (LogStream *pLogStream = FindLogStream(spStream))
+  {
+    pLogStream->filter.SetLevel(categories, level);
     return 0;
   }
 
@@ -239,20 +298,20 @@ int Logger::SetLevel(StreamRef spStream, int level)
   return -1;
 }
 
-int Logger::GetLevel(StreamRef spStream) const
+epSlice<epSharedString> Logger::GetStreamComponents(StreamRef spStream) const
 {
   if (LogStream *pLogStream = FindLogStream(spStream))
-    return pLogStream->level;
+    return pLogStream->filter.GetComponents();
 
   // TODO Fix error checking
-  return -1;
+  return nullptr;
 }
 
-int Logger::SetCategories(StreamRef spStream, LogCategories categories)
+int Logger::SetStreamComponents(StreamRef spStream, epSlice<const epString> comps)
 {
   if (LogStream *pLogStream = FindLogStream(spStream))
   {
-    pLogStream->categories = categories;
+    pLogStream->filter.SetComponents(comps);
     return 0;
   }
 
@@ -260,16 +319,9 @@ int Logger::SetCategories(StreamRef spStream, LogCategories categories)
   return -1;
 }
 
-LogCategories Logger::GetCategories(StreamRef spStream) const
-{
-  if (LogStream *pLogStream = FindLogStream(spStream))
-    return pLogStream->categories;
+/** LogFilter functions **/
 
-  // TODO Fix error checking
-  return -1;
-}
-
-int Logger::GetFilterLevel(LogCategories category) const
+int LogFilter::GetLevel(LogCategories category) const
 {
   int catIndex;
   for (catIndex = 0; !(category & 1); catIndex++)
@@ -278,12 +330,7 @@ int Logger::GetFilterLevel(LogCategories category) const
   return levelsFilter[catIndex];
 }
 
-epSlice<epSharedString> Logger::GetFilterComponents() const
-{
-  return componentsFilter;
-}
-
-void Logger::SetFilterLevel(LogCategories categories, int level)
+void LogFilter::SetLevel(LogCategories categories, int level)
 {
   for (int i = 0; categories; i++)
   {
@@ -294,15 +341,50 @@ void Logger::SetFilterLevel(LogCategories categories, int level)
   }
 }
 
-void Logger::SetFilterComponents(epSlice<const epString> comps)
+epSlice<epSharedString> LogFilter::GetComponents() const
+{
+  return componentsFilter;
+}
+
+void LogFilter::SetComponents(epSlice<const epString> comps)
 {
   componentsFilter = comps;
 }
 
-void Logger::RemoveFilters()
+void LogFilter::ResetFilter()
 {
   memset(levelsFilter, -1, sizeof(levelsFilter));
   componentsFilter = nullptr;
+}
+
+bool LogFilter::FilterLogLine(LogLine &line) const
+{
+  // Check category level filter
+  int catIndex;
+  LogCategories tempCat = line.category;
+  for (catIndex = 0; !(tempCat & 1); catIndex++)
+    tempCat = tempCat >> 1;
+
+  if (levelsFilter[catIndex] != -1 && levelsFilter[catIndex] < line.level)
+    return false;
+
+  // Check component ids filter
+  if (line.componentUID != nullptr && !componentsFilter.empty())
+  {
+    bool componentFound = false;
+    for (epString comp : componentsFilter)
+    {
+      if (!comp.cmp(line.componentUID))
+      {
+        componentFound = true;
+        break;
+      }
+    }
+    if (!componentFound)
+      return false;
+  }
+
+  return true;
 }
 
 } // namespace ep

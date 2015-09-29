@@ -118,15 +118,15 @@ udResult Kernel::Create(Kernel **ppInstance, epInitParams commandLine, int rende
   spDebugFile = pKernel->CreateComponent<File>({ { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
   if (spDebugFile)
   {
-    pKernel->spLogger->AddStream(spDebugFile, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
+    pKernel->spLogger->AddStream(spDebugFile);
     spDebugFile->WriteLn("\n*** Logging started ***");
   }
 
   spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
   if (spConsole)
-     pKernel->spLogger->AddStream(spConsole, LogCategories::Error | LogCategories::Warning | LogCategories::Debug | LogCategories::Info | LogCategories::Script | LogCategories::Trace, 5, LogDefaults::Format);
+     pKernel->spLogger->AddStream(spConsole);
 
-  pKernel->spLogger->SetFilterLevel(LogCategories::Trace, 0);
+  pKernel->spLogger->SetLevel(LogCategories::Trace, 0);
 
   // resource manager
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
