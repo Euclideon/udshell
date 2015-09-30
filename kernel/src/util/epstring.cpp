@@ -372,9 +372,10 @@ epSharedString epSharedString::formatInternal(epString format, epSlice<epVarArg>
   return epSharedString(ptr, len, pRC);
 }
 
-int64_t epString::parseInt(bool bDetectBase, int base) const
+template<typename C>
+int64_t epBaseString<C>::parseInt(bool bDetectBase, int base) const
 {
-  epString s = trim(true, false);
+  epBaseString<C> s = trim(true, false);
   if (s.length == 0)
     return 0; // this isn't really right!
 
@@ -390,7 +391,7 @@ int64_t epString::parseInt(bool bDetectBase, int base) const
 
     while (s.length > 0)
     {
-      int digit = s.popFront();
+      C digit = s.popFront();
       if (!isHex(digit))
         return number;
       number <<= 4;
@@ -420,7 +421,7 @@ int64_t epString::parseInt(bool bDetectBase, int base) const
 
     while (s.length > 0)
     {
-      unsigned char c = s.popFront();
+      C c = s.popFront();
       if (!isNumeric(c))
         break;
       number = number*10 + c - '0';
@@ -432,9 +433,10 @@ int64_t epString::parseInt(bool bDetectBase, int base) const
   return number;
 }
 
-double epString::parseFloat() const
+template<typename C>
+double epBaseString<C>::parseFloat() const
 {
-  epString s = trim(true, false);
+  epBaseString<C> s = trim(true, false);
   if (s.length == 0)
     return 0; // this isn't really right!
 
@@ -452,7 +454,7 @@ double epString::parseFloat() const
   bool bHasDot = false;
   while (s.length > 0)
   {
-    int digit = s.popFront();
+    C digit = s.popFront();
     if (!isNumeric(digit) && (bHasDot || digit != '.'))
       break;
     if (digit == '.')
@@ -470,6 +472,13 @@ double epString::parseFloat() const
 
   return (double)number * frac;
 }
+
+template int64_t epBaseString<char>::parseInt(bool, int) const;
+template double epBaseString<char>::parseFloat() const;
+//template int64_t epBaseString<char16_t>::parseInt(bool, int) const;
+//template double epBaseString<char16_t>::parseFloat() const;
+//template int64_t epBaseString<char32_t>::parseInt(bool, int) const;
+//template double epBaseString<char32_t>::parseFloat() const;
 
 udResult epSlice_Test()
 {
