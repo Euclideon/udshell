@@ -2,17 +2,25 @@
 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-<Type Name="udString">
+<Type Name="epBaseString&lt;char&gt;">
     <DisplayString>{ptr,[length]s8}</DisplayString>
 </Type>
-<Type Name="udMutableString&lt;*&gt;">
-    <DisplayString>{ptr,[length]s8}</DisplayString>
+<Type Name="epBaseString&lt;char16_t&gt;">
+    <DisplayString>{ptr,[length]s16}</DisplayString>
 </Type>
-<Type Name="udSharedString">
+<Type Name="epBaseString&lt;char32_t&gt;">
+    <DisplayString>{ptr,[length]s32}</DisplayString>
+</Type>
+
+<Type Name="epMutableString&lt;*&gt;">
     <DisplayString>{ptr,[length]s8}</DisplayString>
 </Type>
 
-<Type Name="udSlice&lt;*&gt;">
+<Type Name="epSharedString">
+    <DisplayString>{ptr,[length]s8}</DisplayString>
+</Type>
+
+<Type Name="epSlice&lt;*&gt;">
     <Expand>
         <Item Name="length">length</Item>
         <Item Name="ptr">ptr,[length]</Item>
@@ -22,7 +30,7 @@
         </ArrayItems>
     </Expand>
 </Type>
-<Type Name="udFixedSlice&lt;*&gt;">
+<Type Name="epFixedSlice&lt;*&gt;">
     <Expand>
         <Item Name="length">length</Item>
         <Item Name="ptr">ptr,[length]</Item>
@@ -32,7 +40,7 @@
         </ArrayItems>
     </Expand>
 </Type>
-<Type Name="udSharedSlice&lt;*&gt;">
+<Type Name="epSharedSlice&lt;*&gt;">
     <Expand>
         <Item Name="length">length</Item>
         <Item Name="ptr">ptr,[length]</Item>
@@ -44,7 +52,19 @@
     </Expand>
 </Type>
 
-<Type Name="udVariant">
+<Type Name="epAVLTree&lt;*,*,*&gt;">
+    <Expand>
+        <TreeItems>
+            <Size>size</Size>
+            <HeadPointer>root</HeadPointer>
+            <LeftPointer>left</LeftPointer>
+            <RightPointer>right</RightPointer>
+            <ValueNode>v</ValueNode>
+        </TreeItems>
+    </Expand>
+</Type>
+
+<Type Name="epVariant">
     <DisplayString Condition="t == 0">Nil</DisplayString>
     <DisplayString Condition="t == 1">{b}</DisplayString>
     <DisplayString Condition="t == 2">{i}</DisplayString>
@@ -74,7 +94,7 @@
     </Expand>
 </Type>
 
-<Type Name="udKeyValuePair">
+<Type Name="epKeyValuePair">
     <DisplayString>{key} = {value}</DisplayString>
 </Type>
 
