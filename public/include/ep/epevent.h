@@ -2,8 +2,8 @@
 #if !defined(_EPEVENT_H)
 #define _EPEVENT_H
 
+#include "ep/epplatform.h"
 #include "ep/epdelegate.h"
-#include "ep/epslice.h"
 
 using fastdelegate::FastDelegate;
 

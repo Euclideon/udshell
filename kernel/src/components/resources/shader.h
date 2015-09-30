@@ -4,7 +4,6 @@
 
 #include "components/resources/resource.h"
 #include "ep/epsharedptr.h"
-#include "ep/epstring.h"
 
 namespace ep
 {

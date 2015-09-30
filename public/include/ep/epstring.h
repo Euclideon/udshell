@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_EP_STRING)
 #define _EP_STRING
 
@@ -300,8 +301,6 @@ private:
 
 // unit tests
 udResult epString_Test();
-
-#include "ep/epstring.inl"
 
 #endif
 

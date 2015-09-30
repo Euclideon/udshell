@@ -17,14 +17,14 @@ QMetaMethod QtSignalToDelegate::lookupSignalHandler(const QMetaMethod &m)
   {
     epMutableString128 signalHandlerName;
     signalHandlerName.concat("SignalHandler", methodSig.right(methodSig.size() - indexOfOpenBracket).data());
-    QtApplication::Kernel()->LogDebug(3, epSharedString::concat("Checking for signal handler: ", signalHandlerName.toStringz()));
+    QtApplication::Kernel()->LogDebug(3, epSharedString::concat("Checking for signal handler: ", signalHandlerName));
     methodIndex = metaObject()->indexOfMethod(signalHandlerName.toStringz());
   }
 
   // TODO: remove this before release, maybe allow fallback on most closest match and error log/warn?
   if (methodIndex == -1)
   {
-    EPASSERT(false, "Attempted to connect to unsupported signal: '%s' ", m.methodSignature().data());
+    EPASSERT(false, "Attempted to connect to unsupported signal: '{0}' ", m.methodSignature().data());
     return QMetaMethod();
   }
 

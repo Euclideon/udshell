@@ -4,7 +4,6 @@
 
 #include "ep/epplatform.h"
 
-#include "ep/epstring.h"
 #include "ep/epsharedptr.h"
 #include "ep/epvariant.h"
 #include "ep/epevent.h"

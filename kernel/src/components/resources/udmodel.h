@@ -7,7 +7,6 @@
 
 #include "components/resources/resource.h"
 #include "ep/epsharedptr.h"
-#include "ep/epstring.h"
 #include "udRender.h"
 #include "kernel.h"
 

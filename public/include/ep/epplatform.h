@@ -303,77 +303,6 @@ struct epTheTypeIs;
 # define EP_RELEASE 1
 #endif
 
-
-#if defined(__GNUC__)
-# if EP_DEBUG
-#   include <signal.h>
-#   define __debugbreak() raise(SIGTRAP)
-#   define DebugBreak() raise(SIGTRAP)
-# else
-#   define __debugbreak()
-#   define DebugBreak()
-# endif
-#endif
-
-#if EP_DEBUG
-
-# define EPTRACE_ON     0     // Set to 1 to enable, set to 2 for printf on entry/exit of every function
-# define EPASSERT_ON    1
-# define EPRELASSERT_ON 1
-
-#elif EP_RELEASE
-
-#if !defined(EPTRACE_ON)
-# define EPTRACE_ON     0
-# endif
-# define EPASSERT_ON    0
-# define EPRELASSERT_ON 1
-
-#endif
-
-#if EPTRACE_ON
-# define EPTRACE() udTrace __udtrace##__LINE__(__FUNCTION__, EPTRACE_ON)
-# define EPTRACE_LINE() udTrace::Message("Line %d\n", __LINE__)
-# define EPTRACE_SCOPE(id) udTrace __udtrace##__LINE__(id, EPTRACE_ON)
-# define EPTRACE_MESSAGE(format,...) udTrace::Message(format,__VA_ARGS__)
-# define EPTRACE_VARIABLE(var) udTrace_Variable(#var, var, __LINE__)
-# define EPTRACE_MEMORY(var,length) udTrace_Memory(#var, var, length, __LINE__)
-#else
-# define EPTRACE()
-# define EPTRACE_LINE()
-# define EPTRACE_SCOPE(id)
-# define EPTRACE_MESSAGE(format,...)
-# define EPTRACE_VARIABLE(var)
-# define EPTRACE_MEMORY(var,length)
-#endif
-
-// TODO: Make assertion system handle pop-up window where possible
-#if EPASSERT_ON
-# define EPASSERT(condition, ...) do { bool testCondition = !!(condition); if (!testCondition) { udDebugPrintf(__VA_ARGS__); DebugBreak(); udDebugPrintf("\n"); } } while (0)
-# define IF_EPASSERT(x) x
-#else
-# define EPASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
-# define IF_EPASSERT(x)
-#endif
-
-#if EPRELASSERT_ON
-# define EPRELASSERT(condition, ...) do { bool testCondition = !!(condition); if (!testCondition) { udDebugPrintf(__VA_ARGS__); DebugBreak(); udDebugPrintf("\n"); } } while(0)
-# define IF_EPRELASSERT(x) x
-#else
-# define EPRELASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
-# define IF_EPRELASSERT(x)
-#endif
-
-#if EP_CPP11
-# define EP_STATICASSERT(a_condition, a_error) static_assert(a_condition, #a_error)
-#else
-# if EP_WINDOWS
-#   define EP_STATICASSERT(a_condition, a_error) typedef char EP_STATICASSERT##a_error[(a_condition)?1:-1]
-# else
-#   define EP_STATICASSERT(a_condition, a_error) typedef char EP_STATICASSERT##a_error[(a_condition)?1:-1] __attribute__ ((unused))
-# endif
-#endif
-
 #if EP_DEBUG
 # define EPASSUME(condition) EPASSERT((condition), "Bad assumption: "##condition);
 # define EPUNREACHABLE EPASSERT(false, "Shouldn't be here!");
@@ -454,19 +383,119 @@ struct epTheTypeIs;
 # define epUnusedParam(x)
 #endif
 
-
+// dependent headers
 #include <stdint.h>
 #include <stdlib.h>
 #include <new>
 
+// TODO: remove these!
 #include "udResult.h"
 #if 1
 # include "udPlatform.h"
 #else
-  // Outputs a string to debug console
-  void udDebugPrintf(const char *format, ...) EPPRINTF_FUNC(1, 2);
-  // Optional, set this pointer to redirect debug printfs
-  extern void(*gpudDebugPrintfOutputCallback)(const char *pString);
+// Outputs a string to debug console
+void udDebugPrintf(const char *format, ...) EPPRINTF_FUNC(1, 2);
+// Optional, set this pointer to redirect debug printfs
+extern void(*gpudDebugPrintfOutputCallback)(const char *pString);
 #endif
+
+#include "ep/epstring.h"
+
+
+// debug stuff...
+#if defined(__GNUC__)
+# if EP_DEBUG
+#   include <signal.h>
+#   define __debugbreak() raise(SIGTRAP)
+#   define DebugBreak() raise(SIGTRAP)
+# else
+#   define __debugbreak()
+#   define DebugBreak()
+# endif
+#endif
+
+#if EP_DEBUG
+
+# define EPTRACE_ON     0     // Set to 1 to enable, set to 2 for printf on entry/exit of every function
+# define EPASSERT_ON    1
+# define EPRELASSERT_ON 1
+
+#elif EP_RELEASE
+
+#if !defined(EPTRACE_ON)
+# define EPTRACE_ON     0
+# endif
+# define EPASSERT_ON    0
+# define EPRELASSERT_ON 1
+
+#endif
+
+#if EPTRACE_ON
+# define EPTRACE() udTrace __udtrace##__LINE__(__FUNCTION__, EPTRACE_ON)
+# define EPTRACE_LINE() udTrace::Message("Line %d\n", __LINE__)
+# define EPTRACE_SCOPE(id) udTrace __udtrace##__LINE__(id, EPTRACE_ON)
+# define EPTRACE_MESSAGE(format,...) udTrace::Message(format,__VA_ARGS__)
+# define EPTRACE_VARIABLE(var) udTrace_Variable(#var, var, __LINE__)
+# define EPTRACE_MEMORY(var,length) udTrace_Memory(#var, var, length, __LINE__)
+#else
+# define EPTRACE()
+# define EPTRACE_LINE()
+# define EPTRACE_SCOPE(id)
+# define EPTRACE_MESSAGE(format,...)
+# define EPTRACE_VARIABLE(var)
+# define EPTRACE_MEMORY(var,length)
+#endif
+
+namespace ep_internal
+{
+  void epAssertFailed(epString condition, epString message, epString file, int line);
+}
+
+// TODO: Make assertion system handle pop-up window where possible
+#if EPASSERT_ON
+
+namespace ep_internal
+{
+  extern epMutableString256 assertBuffer;
+
+  inline void epAssertTemplate(epString condition, epString file, int line)
+  {
+    epAssertFailed(condition, nullptr, file, line);
+  }
+  template<typename ...Args>
+  inline void epAssertTemplate(epString condition, epString file, int line, epString format, Args... args)
+  {
+    assertBuffer.format(format, args...);
+    epAssertFailed(condition, assertBuffer, file, line);
+  }
+}
+
+# define EPASSERT(condition, ...) do { if (!(condition)) { ep_internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+# define IF_EPASSERT(x) x
+#else
+# define EPASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
+# define IF_EPASSERT(x)
+#endif
+
+#if EPRELASSERT_ON
+# define EPRELASSERT(condition, ...) do { if (!(condition)) { ep_internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+# define IF_EPRELASSERT(x) x
+#else
+# define EPRELASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
+# define IF_EPRELASSERT(x)
+#endif
+
+#if EP_CPP11
+# define EP_STATICASSERT(a_condition, a_error) static_assert(a_condition, #a_error)
+#else
+# if EP_WINDOWS
+#   define EP_STATICASSERT(a_condition, a_error) typedef char EP_STATICASSERT##a_error[(a_condition)?1:-1]
+# else
+#   define EP_STATICASSERT(a_condition, a_error) typedef char EP_STATICASSERT##a_error[(a_condition)?1:-1] __attribute__ ((unused))
+# endif
+#endif
+
+#include "ep/epslice.inl"
+#include "ep/epstring.inl"
 
 #endif // _EP_PLATFORM_H

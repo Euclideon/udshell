@@ -1,7 +1,6 @@
+#pragma once
 #if !defined(_EP_SLICE)
 #define _EP_SLICE
-
-#include "ep/epplatform.h"
 
 #include <initializer_list>
 
@@ -232,8 +231,5 @@ protected:
 
 // unit tests
 udResult epSlice_Test();
-
-
-#include "ep/epslice.inl"
 
 #endif // _EP_SLICE

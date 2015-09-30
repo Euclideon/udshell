@@ -6,7 +6,6 @@
 #include "components/resources/array.h"
 #include "components/resources/material.h"
 #include "ep/epsharedptr.h"
-#include "ep/epstring.h"
 
 namespace ep
 {
