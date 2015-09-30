@@ -139,13 +139,16 @@ inline typename epSlice<T>::ET& epSlice<T>::back() const
 template<typename T>
 inline typename epSlice<T>::ET& epSlice<T>::popFront()
 {
-  *this = slice(1, length);
+  EPASSERT(length > 0, "Empty slice!");
+  ++ptr;
+  --length;
   return ((ET*)ptr)[-1];
 }
 template<typename T>
 inline typename epSlice<T>::ET& epSlice<T>::popBack()
 {
-  *this = slice(0, length - 1);
+  EPASSERT(length > 0, "Empty slice!");
+  --length;
   return ((ET*)ptr)[length];
 }
 

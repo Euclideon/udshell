@@ -3,14 +3,15 @@
 
 #include "ep/epslice.h"
 
+namespace ud_internal {
+  extern const char charDetails[256];
+}
 
-extern const char s_charDetails[256];
-
-#define isNewline(c) (c < 256 && (s_charDetails[c] & 8))
-#define isWhitespace(c) (c < 256 && (s_charDetails[c] & 0xC))
-#define isAlpha(c) (c < 256 && (s_charDetails[c] & 1))
-#define isNumeric(c) (c < 256 && (s_charDetails[c] & 2))
-#define isAlphaNumeric(c) (c < 256 && (s_charDetails[c] & 3))
+#define isNewline(c) (c < 256 && (ud_internal::charDetails[c] & 8))
+#define isWhitespace(c) (c < 256 && (ud_internal::charDetails[c] & 0xC))
+#define isAlpha(c) (c < 256 && (ud_internal::charDetails[c] & 1))
+#define isNumeric(c) (c < 256 && (ud_internal::charDetails[c] & 2))
+#define isAlphaNumeric(c) (c < 256 && (ud_internal::charDetails[c] & 3))
 #define isHex(c) (isAlphaNumeric(c) && (c|0x20) <= 'f')
 
 __forceinline char toLower(char c) { return isAlpha(c) ? c|0x20 : c; }
@@ -88,7 +89,8 @@ struct epBaseString : public epSlice<const C>
   epBaseString<C> getRightAtFirstIC(epBaseString<C> s, bool bInclusive = true) const;
   epBaseString<C> getRightAtLastIC(epBaseString<C> s, bool bInclusive = true) const;
 
-  epBaseString<C> trim(bool front = true, bool back = true) const;
+  template<bool Front = true, bool Back = true>
+  epBaseString<C> trim() const;
 
   template<bool skipEmptyTokens = true>
   epBaseString<C> popToken(epBaseString<C> delimiters = " \t\r\n");
@@ -165,7 +167,8 @@ struct epMutableString : public epArray<char, Size>
   epString getRightAtFirstIC(epString s, bool bInclusive = true) const                  { return ((epString*)this)->getRightAtFirstIC(s, bInclusive); }
   epString getRightAtLastIC(epString s, bool bInclusive = true) const                   { return ((epString*)this)->getRightAtLastIC(s, bInclusive); }
 
-  epString trim(bool front = true, bool back = true) const                              { return ((epString*)this)->trim(front, back); }
+  template<bool Front = true, bool Back = true>
+  epString trim() const                                                                 { return ((epString*)this)->trim<Front, Back>(); }
 
   template<bool skipEmptyTokens = true>
   epString popToken(epString delimiters = " \t\r\n")                                    { return ((epString*)this)->popToken<skipEmptyTokens>(delimiters); }
@@ -252,7 +255,8 @@ struct epSharedString : public epSharedSlice<const char>
   epSharedString getRightAtFirstIC(epString s, bool bInclusive = true) const;
   epSharedString getRightAtLastIC(epString s, bool bInclusive = true) const;
 
-  epSharedString trim(bool front = true, bool back = true) const;
+  template<bool Front = true, bool Back = true>
+  epSharedString trim() const;
 
   template<bool skipEmptyTokens = true>
   epSharedString popToken(epString delimiters = " \t\r\n");
