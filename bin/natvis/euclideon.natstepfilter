@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StepFilter xmlns="http://schemas.microsoft.com/vstudio/debugger/natstepfilter/2010">
-  <Function><Name>udSlice&lt;.*&gt;::udSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udFixedSlice&lt;.*&gt;::udFixedSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udSharedSlice&lt;.*&gt;::udSharedSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udString::udString</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udMutableString&lt;.*&gt;::udMutableString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udSharedString::udSharedString</Name><Action>NoStepInto</Action></Function>
 
-  <Function><Name>udVariant::udVariant</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udKeyValuePair::udKeyValuePair</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epSlice&lt;.*&gt;::epSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epArray&lt;.*&gt;::epArray&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epSharedSlice&lt;.*&gt;::epSharedSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
 
-  <Function><Name>udSharedPtr&lt;.*&gt;::operator*</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udSharedPtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udSharedPtr&lt;.*&gt;::operator bool;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udUniquePtr&lt;.*&gt;::operator*</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udUniquePtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udUniquePtr&lt;.*&gt;::operator bool;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udSynchronisedPtr&lt;.*&gt;::operator*</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udSynchronisedPtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>udSynchronisedPtr&lt;.*&gt;::operator bool;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epBaseString&lt;.*&gt;::epBaseString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epMutableString&lt;.*&gt;::epMutableString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epSharedString::epSharedString</Name><Action>NoStepInto</Action></Function>
+
+  <Function><Name>epVariant::epVariant</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epKeyValuePair::epKeyValuePair</Name><Action>NoStepInto</Action></Function>
+
+  <Function><Name>epSharedPtr&lt;.*&gt;::operator\*</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epSharedPtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epSharedPtr&lt;.*&gt;::operator bool</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epUniquePtr&lt;.*&gt;::operator\*</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epUniquePtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epUniquePtr&lt;.*&gt;::operator bool</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epSynchronisedPtr&lt;.*&gt;::operator\*</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epSynchronisedPtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>epSynchronisedPtr&lt;.*&gt;::operator bool</Name><Action>NoStepInto</Action></Function>
 
   <Function><Name>fastdelegate::detail::ClosurePtr&lt;.*&gt;::GetClosureThis</Name><Action>NoStepInto</Action></Function>
   <Function><Name>fastdelegate::detail::ClosurePtr&lt;.*&gt;::GetClosureMemPtr</Name><Action>NoStepInto</Action></Function>
+
 </StepFilter>
