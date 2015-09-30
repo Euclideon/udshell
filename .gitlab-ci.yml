@@ -1,0 +1,29 @@
+windows_debug_64:
+  stage: build
+  script: "build\\build.sh Debug x64"
+  tags:
+    - windows
+    - vs2013
+
+windows_release_64:
+  stage: build
+  script: "build\\build.sh Release x64"
+  tags:
+    - windows
+    - vs2013
+
+linux_deb:
+  stage: build
+  script: "./build/build.sh Release x64"
+  tags:
+    - linux
+    - deb
+  allow_failure: true
+
+linux_rpm:
+  stage: build
+  script: "./build/build.sh Release x64"
+  tags:
+    - linux
+    - rpm
+  allow_failure: true
