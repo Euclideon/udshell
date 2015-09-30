@@ -4,13 +4,22 @@
 
 namespace ep_internal
 {
-
+  bool gUnitTesting = false;
   epMutableString256 assertBuffer;
 
   void epAssertFailed(epString condition, epString message, epString file, int line)
   {
-    epMutableString256 t; t.format("ASSERT FAILED : {0}\n{1}\n{2}({3})", condition, message, file, line);
-    epDebugWrite(t.ptr);
+    // TODO: Agree on formatting of assets
+    if (gUnitTesting)
+    {
+      fprintf(stderr, message.toStringz());
+      exit(EXIT_FAILURE);
+    }
+    else
+    {
+      epMutableString256 t; t.format("ASSERT FAILED : {0}\n{1}\n{2}({3})", condition, message, file, line);
+      epDebugWrite(t.ptr);
+    }
   }
 
 }

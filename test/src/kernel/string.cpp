@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
-#include "ep/epstring.h"
-
+#include "ep/epplatform.h"
 // TODO: fill out these tests
 
 TEST(EPStringTest, EmptyString) {
