@@ -10,14 +10,11 @@
 // forward declare
 namespace qt {
   class QtKernel;
-}
-namespace internal {
-  udResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
-}
 
+  namespace internal {
+    udResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
+  }
 
-namespace qt
-{
 
 class QtEPComponent : public QObject
 {

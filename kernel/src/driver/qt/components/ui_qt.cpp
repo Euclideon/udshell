@@ -19,8 +19,8 @@
 
 #include "../ui/renderview_qt.h"
 
-namespace internal
-{
+namespace qt {
+namespace internal {
 
 // Helper function
 udResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal)
@@ -71,13 +71,14 @@ void CleanupInternalData(QObject **ppInternal)
   *ppInternal = nullptr;
 }
 
-}   // namespace internal
+} // namespace internal
+} // namespace qt
 
-namespace ep
-{
 
-using internal::SetupFromQmlFile;
-using internal::CleanupInternalData;
+namespace ep {
+
+using qt::internal::SetupFromQmlFile;
+using qt::internal::CleanupInternalData;
 
 // ---------------------------------------------------------------------------------------
 udResult UIComponent::CreateInternal(epInitParams initParams)
