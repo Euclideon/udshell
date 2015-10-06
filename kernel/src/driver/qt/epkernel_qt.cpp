@@ -142,7 +142,7 @@ udResult QtKernel::InitInternal()
     // TODO: better error information/handling
     LogError("Error creating Splash Screen");
     foreach(const QQmlError &error, component.errors())
-      LogError(epSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
+      LogError(epSharedString::concat("QML Error: ", error.toString().toUtf8().data()));
     return udR_Failure_;
   }
 

@@ -42,7 +42,7 @@ udResult UIComponent::CreateInternal(epInitParams initParams)
     // TODO: better error information/handling
     LogError("Error creating QtComponent");
     foreach(const QQmlError &error, component.errors())
-      LogError(epSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
+      LogError(epSharedString::concat("QML Error: ", error.toString().toUtf8().data()));
     throw udR_Failure_;
   }
 
@@ -130,7 +130,7 @@ udResult Window::CreateInternal(epInitParams initParams)
     // TODO: better error information/handling
     LogError("Error creating QtComponent");
     foreach(const QQmlError &error, component.errors())
-      LogError(epSharedString::concat("QML Error: ", error.toString().toLatin1().data()));
+      LogError(epSharedString::concat("QML Error: ", error.toString().toUtf8().data()));
     throw udR_Failure_;
   }
 
