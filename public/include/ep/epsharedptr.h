@@ -22,6 +22,11 @@ template<class T>
 class epUniquePtr;
 
 
+// weak pointer is just an alias for obvious annotation in code, may be fleshed out for debug at some point...
+template<typename T, typename std::enable_if<std::is_base_of<epRefCounted, T>::value>::type* = nullptr>
+using epWeakPtr = T*;
+
+
 // shared pointers are ref counted
 template<class T>
 class epSharedPtr
