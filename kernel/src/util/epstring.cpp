@@ -149,7 +149,8 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), int6
   size_t len;
   if (i < 0)
   {
-    buffer.ptr[0] = '-';
+    if (buffer.ptr)
+      buffer.ptr[0] = '-';
     start = len = 1;
     do
     {
