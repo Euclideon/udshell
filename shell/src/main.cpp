@@ -24,19 +24,19 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
     // TODO: replace this with something more robust - maybe a full logging system and status console
     switch (type) {
       case QtDebugMsg:
-        pKernel->LogDebug(2, epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
+        pKernel->LogDebug(2, epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
       case QtWarningMsg:
-        pKernel->LogWarning(2, epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
+        pKernel->LogWarning(2, epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
       case QtCriticalMsg:
       case QtFatalMsg:
-        pKernel->LogError(epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toLatin1().data(), context.file, context.line, context.function));
+        pKernel->LogError(epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
     }
   }
   else
   {
-    udDebugPrintf("Qt Dbg: %s (%s:%d, %s)\n", msg.toLatin1().data(), context.file, context.line, context.function);
+    udDebugPrintf("Qt Dbg: %s (%s:%d, %s)\n", msg.toUtf8().data(), context.file, context.line, context.function);
   }
 }
 
