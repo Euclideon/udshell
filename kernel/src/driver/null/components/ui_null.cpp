@@ -15,6 +15,11 @@ udResult UIComponent::CreateInternal(epInitParams epUnusedParam(initParams))
 }
 
 // ---------------------------------------------------------------------------------------
+udResult UIComponent::InitComplete()
+{
+}
+
+// ---------------------------------------------------------------------------------------
 void UIComponent::DestroyInternal()
 {
 }

@@ -93,6 +93,7 @@ void Component::Init(epInitParams initParams)
   for (size_t i = 0; i<propertyChange.length; ++i)
     new(&propertyChange.ptr[i]) epEvent<>();
 */
+  InitComplete();
 }
 
 Component::~Component()

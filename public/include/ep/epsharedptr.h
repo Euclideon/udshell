@@ -22,6 +22,11 @@ template<class T>
 class epUniquePtr;
 
 
+// weak pointer is just an alias for obvious annotation in code, may be fleshed out for debug at some point...
+template<typename T, typename std::enable_if<std::is_base_of<epRefCounted, T>::value>::type* = nullptr>
+using epWeakPtr = T*;
+
+
 // shared pointers are ref counted
 template<class T>
 class epSharedPtr
@@ -122,6 +127,7 @@ private:
 //------------------------------------------------------------------------------------------
 
 // **HAX** this crap allows us to delete a epRefCounted!
+namespace ep {
 namespace internal {
   template<typename T, bool isref>
   struct Destroy;
@@ -140,7 +146,8 @@ namespace internal {
       delete rc;
     }
   };
-};
+} // namespace internal
+} // namespace ep
 
 // unique pointers nullify the source pointer on assignment
 template<class T>
@@ -162,7 +169,7 @@ public:
   }
   ~epUniquePtr()
   {
-    internal::Destroy<T, std::is_base_of<epRefCounted, T>::value>::destroy(pInstance);
+    ep::internal::Destroy<T, std::is_base_of<epRefCounted, T>::value>::destroy(pInstance);
   }
 
   epUniquePtr &operator=(const epUniquePtr &ptr)
@@ -295,7 +302,7 @@ public:
   template<typename T>
   friend class epSharedPtr;
   template<typename T, bool isrc>
-  friend struct internal::Destroy;
+  friend struct ep::internal::Destroy;
 };
 inline epRefCounted::~epRefCounted() {}
 

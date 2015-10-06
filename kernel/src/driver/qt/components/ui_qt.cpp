@@ -8,6 +8,7 @@
 
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QQmlContext>
 
 #include "../epkernel_qt.h"
 #include "../util/qmlbindings_qt.h"
@@ -18,45 +19,99 @@
 
 #include "../ui/renderview_qt.h"
 
-namespace ep
-{
+namespace qt {
+namespace internal {
 
+// Helper function
+udResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal)
+{
+  epString file = initParams["file"].as<epString>();
+  if (file.empty())
+  {
+    pComponent->LogError("Attempted to create ui component without source file");
+    return udR_Failure_;
+  }
+
+  // create QObject wrapper for this component and expose it to the qml context for this ui component
+  qt::QtEPComponent *pEPComponent = new qt::QtEPComponent(pComponent);
+  QQmlContext *pContext = new QQmlContext(pKernel->QmlEngine()->rootContext());
+  pContext->setContextProperty("thisComponent", pEPComponent);
+
+  // create the qml component for the associated script
+  QString filename = QString::fromUtf8(file.ptr, (int)file.length);
+  QQmlComponent component(pKernel->QmlEngine(), QUrl(filename));
+
+  QObject *pQtObject = component.create(pContext);
+  if (!pQtObject)
+  {
+    // TODO: better error information/handling
+    pComponent->LogError("Error creating QtComponent");
+    foreach(const QQmlError &error, component.errors())
+      pComponent->LogError(epSharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+
+    delete pContext;
+    delete pEPComponent;
+
+    return udR_Failure_;
+  }
+
+  // transfer ownership of our qt objects so they are cleaned up
+  pContext->setParent(pQtObject);
+  pEPComponent->setParent(pQtObject);
+
+  *ppInternal = pQtObject;
+
+  return udR_Success;
+}
+
+// Helper function
+void CleanupInternalData(QObject **ppInternal)
+{
+  delete *ppInternal;
+  *ppInternal = nullptr;
+}
+
+} // namespace internal
+} // namespace qt
+
+
+namespace ep {
+
+using qt::internal::SetupFromQmlFile;
+using qt::internal::CleanupInternalData;
+
+// ---------------------------------------------------------------------------------------
 udResult UIComponent::CreateInternal(epInitParams initParams)
 {
   LogTrace("UIComponent::CreateInternal()");
 
-  epString file = initParams["file"].as<epString>();
-  if (file.empty())
-  {
-    LogError("Attempted to create ui component without source file");
-    throw udR_Failure_;
-  }
+  if (SetupFromQmlFile(initParams, (qt::QtKernel*)pKernel, this, (QObject**)&pInternal) != udR_Success)
+    return udR_Failure_;
 
-  // create the qml component for the associated script
-  QString filename = QString::fromUtf8(file.ptr, static_cast<int>(file.length));
-  QQmlComponent component(static_cast<qt::QtKernel*>(pKernel)->QmlEngine(), QUrl(filename));
-
-  QObject *pQtObject = component.create();
-  if (!pQtObject)
-  {
-    // TODO: better error information/handling
-    LogError("Error creating QtComponent");
-    foreach(const QQmlError &error, component.errors())
-      LogError(epSharedString::concat("QML Error: ", error.toString().toUtf8().data()));
-    throw udR_Failure_;
-  }
+  QObject *pQtObject = (QObject*)pInternal;
 
   // We expect a QQuickItem object
   if (qobject_cast<QQuickItem*>(pQtObject) == nullptr)
   {
     LogError("UIComponent must create a QQuickItem");
-    throw udR_Failure_;
+    CleanupInternalData((QObject**)&pInternal);
+    return udR_Failure_;
   }
 
   // Decorate the descriptor with meta object information
   qt::PopulateComponentDesc<UIComponent>(this, pQtObject);
 
-  pInternal = pQtObject;
+  return udR_Success;
+}
+
+// ---------------------------------------------------------------------------------------
+udResult UIComponent::InitComplete()
+{
+  // let qml know that the enclosing object has finished being created
+  QObject *pQtObject = (QObject*)pInternal;
+  qt::QtEPComponent *epComponent = pQtObject->findChild<qt::QtEPComponent*>(QString(), Qt::FindDirectChildrenOnly);
+  if (epComponent)
+    epComponent->Done();
 
   return udR_Success;
 }
@@ -65,10 +120,7 @@ udResult UIComponent::CreateInternal(epInitParams initParams)
 void UIComponent::DestroyInternal()
 {
   LogTrace("UIComponent::DestroyInternal()");
-
-  QQuickItem *pQtObject = (QQuickItem*)pInternal;
-  delete pQtObject;
-  pInternal = nullptr;
+  CleanupInternalData((QObject**)&pInternal);
 }
 
 
@@ -111,48 +163,29 @@ udResult Window::CreateInternal(epInitParams initParams)
 {
   LogTrace("Window::CreateInternal()");
 
-  qt::QtKernel *pQtKernel = static_cast<qt::QtKernel*>(pKernel);
+  qt::QtKernel *pQtKernel = (qt::QtKernel*)pKernel;
+  if (SetupFromQmlFile(initParams, pQtKernel, this, (QObject**)&pInternal) != udR_Success)
+    return udR_Failure_;
 
-  epString file = initParams["file"].as<epString>();
-  if (file.empty())
-  {
-    LogError("Attempted to create ui component without source file");
-    throw udR_Failure_;
-  }
-
-  // create the qml component for the associated script
-  QString filename = QString::fromUtf8(file.ptr, static_cast<int>(file.length));
-  QQmlComponent component(pQtKernel->QmlEngine(), QUrl(filename));
-
-  QObject *pQtObject = component.create();
-  if (!pQtObject)
-  {
-    // TODO: better error information/handling
-    LogError("Error creating QtComponent");
-    foreach(const QQmlError &error, component.errors())
-      LogError(epSharedString::concat("QML Error: ", error.toString().toUtf8().data()));
-    throw udR_Failure_;
-  }
-
+  QQuickWindow *pQtWindow = qobject_cast<QQuickWindow*>((QObject*)pInternal);
   // We expect a QQuickWindow object
-  QQuickWindow *pQtWindow = qobject_cast<QQuickWindow*>(pQtObject);
   if (pQtWindow == nullptr)
   {
     LogError("Window must create a QQuickWindow");
-    throw udR_Failure_;
+    CleanupInternalData((QObject**)&pInternal);
+    return udR_Failure_;
   }
 
   // Decorate the descriptor with meta object information
-  qt::PopulateComponentDesc<Window>(this, pQtObject);
-
-  pInternal = pQtObject;
+  qt::PopulateComponentDesc<Window>(this, pQtWindow);
 
   // register the window with the kernel
   if (pQtKernel->RegisterWindow(pQtWindow) != udR_Success)
   {
     // TODO: error handling
     LogError("Unable to register window");
-    throw udR_Failure_;
+    CleanupInternalData((QObject**)&pInternal);
+    return udR_Failure_;
   }
 
   return udR_Success;
@@ -162,10 +195,7 @@ udResult Window::CreateInternal(epInitParams initParams)
 void Window::DestroyInternal()
 {
   LogTrace("Window::DestroyInternal()");
-
-  QQuickWindow *pQtWindow = (QQuickWindow*)pInternal;
-  delete pQtWindow;
-  pInternal = nullptr;
+  CleanupInternalData((QObject**)&pInternal);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -181,7 +211,7 @@ void Window::SetTopLevelUI(UIComponentRef spUIComponent)
     pChild->setParentItem(nullptr);
 
   // set the new one
-  QQuickItem *pQtItem = reinterpret_cast<QQuickItem*>(spUIComponent->GetInternalData());
+  QQuickItem *pQtItem = (QQuickItem*)spUIComponent->GetInternalData();
   if (pQtItem)
     pQtItem->setParentItem(pQtWindow->contentItem());
 }

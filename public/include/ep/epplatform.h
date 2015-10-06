@@ -289,6 +289,9 @@
 using std::nullptr_t;
 #endif
 
+template<typename T>
+struct epTheTypeIs;
+
 
 // helper macros
 

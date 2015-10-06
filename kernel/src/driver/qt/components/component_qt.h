@@ -7,24 +7,33 @@
 
 #include "components/component.h"
 
-namespace qt
-{
+// forward declare
+namespace qt {
+  class QtKernel;
+
+  namespace internal {
+    udResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
+  }
+
 
 class QtEPComponent : public QObject
 {
   Q_OBJECT
 
 public:
-  QtEPComponent() : QObject(nullptr) {}
-  QtEPComponent(ep::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) {}
-  QtEPComponent(const QtEPComponent &val) : QObject(nullptr), spComponent(val.spComponent) {}
+  QtEPComponent() : QObject(nullptr), wpComponent(nullptr) {}
+  QtEPComponent(ep::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) { wpComponent = spComponent.ptr(); }
+  QtEPComponent(const QtEPComponent &val) : spComponent(ep::ComponentRef(val.wpComponent)), wpComponent(val.wpComponent) {}
+  ~QtEPComponent() {}
 
-  ep::ComponentRef GetComponent() const { return spComponent; }
+  ep::ComponentRef GetComponent() const { return ep::ComponentRef(wpComponent); }
 
   // methods to inspect internals
   //..
 
 public:
+  void Done() { emit completed(); }
+
   Q_INVOKABLE QVariant Get(const QString &name) const;
   Q_INVOKABLE void Set(const QString &name, QVariant val);
 
@@ -55,8 +64,15 @@ public:
 
   Q_INVOKABLE void Subscribe(QString eventName, QJSValue func) const;
 
+signals:
+  void completed();
+
 private:
+  friend udResult internal::SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
+  QtEPComponent(epWeakPtr<ep::Component> wpComp) : QObject(nullptr), wpComponent(wpComp) {}
+
   ep::ComponentRef spComponent;
+  epWeakPtr<ep::Component> wpComponent; // used to avoid circular references
 };
 
 } // namespace qt
