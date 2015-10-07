@@ -260,7 +260,8 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), null
   return 4;
 }
 
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, epString s, const epVarArg *pArgs)
+template<typename C>
+ptrdiff_t epStringify(epSlice<char> buffer, epString format, epBaseString<C> s, const epVarArg *pArgs)
 {
   // parse format string
   bool rightJustify = false;
@@ -287,6 +288,20 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString format, epString s, const e
     }
   }
 
+  // calculate UTF8 source len
+  size_t secLen = 0;
+  if (sizeof(C) == sizeof(char)) // type of buffer
+    secLen = s.length;
+  else
+  {
+    for (size_t i = 0; i<s.length; )
+    {
+      size_t l;
+      secLen += epUTF8SequenceLength(s.ptr + i, &l);
+      i += l;
+    }
+  }
+
   // calculate string length
   bool needPadding = (size_t)minimumLen > s.length;
   size_t length = needPadding ? (size_t)minimumLen : s.length;
@@ -309,14 +324,27 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString format, epString s, const e
   }
 
   // copy string
-  memcpy(pBuffer, s.ptr, s.length);
+  if (sizeof(C) == sizeof(char)) // type of buffer
+    memcpy(pBuffer, s.ptr, sizeof(C)*s.length);
+  else
+  {
+    size_t offset = 0;
+    while (s)
+    {
+      char32_t c = s.popFrontChar();
+      offset += epUTFEncode(c, pBuffer + offset);
+    }
+  }
 
   // do right padding
   if (!rightJustify && needPadding)
-    memset(pBuffer + s.length, ' ', length - s.length);
+    memset(pBuffer + secLen, ' ', length - secLen);
 
   return length;
 }
+template ptrdiff_t epStringify<char>(epSlice<char> buffer, epString format, epBaseString<char> s, const epVarArg *pArgs);
+template ptrdiff_t epStringify<char16_t>(epSlice<char> buffer, epString format, epBaseString<char16_t> s, const epVarArg *pArgs);
+template ptrdiff_t epStringify<char32_t>(epSlice<char> buffer, epString format, epBaseString<char32_t> s, const epVarArg *pArgs);
 
 ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), bool b, const epVarArg *epUnusedParam(pArgs))
 {
@@ -670,7 +698,7 @@ udResult epString_Test()
   s1.eqIC(s2);                   // case insensitive; stricmp() == 0
   s1.eq("hello");               // compare with c-string
 
-  epSharedSlice<wchar_t> wcs(s1);   // init w_char string from c-string! yay unicode! (except we probably also want to decode utf-8...)
+  epSharedSlice<char16_t> wcs(s1);   // init wchar string from c-string! yay unicode! (except we probably also want to decode utf-8...)
 
   wcs.eq(s1);                   // compare wide-char and ascii strings
 
@@ -732,6 +760,9 @@ udResult epString_Test()
 //  poo.slice(1, 3);
 //  poo[2];
 //  poo.alloc(10);
+
+  epWString wstr = (const char16_t*)L"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
+  ms.format("{0}", wstr);
 
   return udR_Success;
 }
