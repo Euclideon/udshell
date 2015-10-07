@@ -177,7 +177,7 @@ void QtEPComponent::Subscribe(QString eventName, QJSValue func) const
 
   if (!func.isCallable())
   {
-    wpComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString().data());
+    wpComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", (char16_t*)func.toString().utf16());
     return;
   }
 

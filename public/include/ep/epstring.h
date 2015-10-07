@@ -33,12 +33,10 @@ class epCString;
 struct epVarArg;
 
 
-// epString is a layer above epSlice<>, defined for 'const char' (utf-8) and adds string-specific methods
-// epString and epSlice<> are fully compatible
-
-// epString implements an immutable string
+// epBaseString implements an immutable string; a layer above epSlice<>, defined for 'const C' (ie, char, char16_t, char32_t) and adds string-specific methods
+// epBaseString<C> and epSlice<C> are fully compatible
 // does not retain ownership; useful for local temporaries, passing as arguments, etc... analogous to using 'const char*'
-// epString adds typical string functions, including conversion to zero-terminated strings for passing to foreign APIs, akin to c_str()
+// epBaseString adds typical string functions, including conversion to zero-terminated strings for passing to foreign APIs, akin to c_str()
 template<typename C>
 struct epBaseString : public epSlice<const C>
 {
@@ -104,7 +102,8 @@ struct epBaseString : public epSlice<const C>
 };
 
 typedef epBaseString<char> epString;
-//typedef epBaseString<wchar_t> epWString;
+typedef epBaseString<char16_t> epWString;
+typedef epBaseString<char32_t> epDString;
 
 
 // a static-length and/or stack-allocated string, useful for holding constructured temporaries (ie, target for sprintf/format)
