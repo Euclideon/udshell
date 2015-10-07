@@ -34,35 +34,23 @@ public:
 public:
   void Done() { emit completed(); }
 
-  Q_INVOKABLE QVariant Get(const QString &name) const;
-  Q_INVOKABLE void Set(const QString &name, QVariant val);
+  Q_INVOKABLE QVariant get(const QString &name) const;
+  Q_INVOKABLE void set(const QString &name, QVariant val);
 
   // Ugly but necessary
-  Q_INVOKABLE QVariant Call(const QString &name) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0, QVariant arg1) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0,
-    QVariant arg1, QVariant arg2) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0,
-    QVariant arg1, QVariant arg2, QVariant arg3) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0,
-    QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0,
-    QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0,
-    QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4,
-    QVariant arg5, QVariant arg6) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0,
-    QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4,
-    QVariant arg5, QVariant arg6, QVariant arg7) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0,
-    QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4,
-    QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8) const;
-  Q_INVOKABLE QVariant Call(const QString &name, QVariant arg0,
-    QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4,
-    QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const;
+  Q_INVOKABLE QVariant call(const QString &name) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8) const;
+  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const;
 
-  Q_INVOKABLE void Subscribe(QString eventName, QJSValue func) const;
+  Q_INVOKABLE void subscribe(QString eventName, QJSValue func) const;
 
 signals:
   void completed();
