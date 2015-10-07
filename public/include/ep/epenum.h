@@ -61,7 +61,7 @@ struct epEnumDesc
     }                                                                             \
     static epSlice<const epString> Keys()                                         \
     {                                                                             \
-      static epArray<const epString, 16> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
+      static epArray<const epString> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
     }                                                                             \
     static const epEnumDesc* Desc()                                               \
@@ -109,7 +109,7 @@ struct epEnumDesc
     NAME& operator &=(NAME rh) { v = v & rh.v; return *this; }                    \
     NAME& operator ^=(NAME rh) { v = v ^ rh.v; return *this; }                    \
                                                                                   \
-    epMutableString64 StringOf()                                                  \
+    epMutableString64 StringOf() const                                            \
     {                                                                             \
       epMutableString64 r;                                                        \
       for(size_t i = 0; i < 32; ++i)                                              \
@@ -131,7 +131,7 @@ struct epEnumDesc
     }                                                                             \
     static epSlice<const epString> Keys()                                         \
     {                                                                             \
-      static epArray<const epString, 16> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
+      static epArray<const epString> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
     }                                                                             \
     static const epEnumDesc* Desc()                                               \
