@@ -190,4 +190,12 @@ inline void epFromVariant(const epVariant &variant, QJSValue *pJSValue)
   };
 }
 
+namespace ud_internal {
+
+template<> struct StringifyProxy<QChar*>        { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const QChar *pS = *(QChar**)pData;       return epStringify(buffer, format, epWString((const char16_t*)pS, epStrlen((const char16_t*)pS)), pArgs); } static const size_t intify = 0; };
+template<> struct StringifyProxy<const QChar*>  { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const QChar *pS = *(const QChar**)pData; return epStringify(buffer, format, epWString((const char16_t*)pS, epStrlen((const char16_t*)pS)), pArgs); } static const size_t intify = 0; };
+template<> struct StringifyProxy<QString>       { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const QString *pS = (QString*)pData;     return epStringify(buffer, format, epWString((const char16_t*)pS->data(), pS->size()), pArgs); }            static const size_t intify = 0; };
+
+}
+
 #endif  // TYPECONVERT_H

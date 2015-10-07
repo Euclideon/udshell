@@ -7,7 +7,6 @@
 #include "udChunkedArray.h"
 
 #include "ep/epsharedptr.h"
-#include "ep/epslice.h"
 #include "components/view.h"
 #include "components/resources/udmodel.h"
 #include "components/resources/array.h"

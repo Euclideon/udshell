@@ -3,7 +3,6 @@
 #define _EP_TEXT_H
 
 #include "components/resources/buffer.h"
-#include "ep/epstring.h"
 
 namespace ep
 {

@@ -1,5 +1,6 @@
+#include "ep/epplatform.h"
+
 #include <stdio.h>
-#include "ep/epstring.h"
 
 #if defined(EP_COMPILER_VISUALC)
 // _CRT_SECURE_NO_WARNINGS warning (vsprintf_s)

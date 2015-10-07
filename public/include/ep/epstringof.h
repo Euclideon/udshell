@@ -2,7 +2,7 @@
 #if !defined(_STRINGOF_H)
 #define _STRINGOF_H
 
-#include "ep/epstring.h"
+#include "ep/epplatform.h"
 
 #include <type_traits>
 #include <tuple>

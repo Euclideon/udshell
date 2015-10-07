@@ -1,4 +1,3 @@
-#include "ep/epplatform.h"
 
 #include "eputf.h"
 

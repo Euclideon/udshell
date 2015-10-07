@@ -9,7 +9,7 @@
 namespace qt
 {
 
-QVariant QtEPComponent::Get(const QString &name) const
+QVariant QtEPComponent::get(const QString &name) const
 {
   QByteArray byteArray = name.toUtf8();
   epString prop(byteArray.data(), byteArray.size());
@@ -19,14 +19,14 @@ QVariant QtEPComponent::Get(const QString &name) const
   return res;
 }
 
-void QtEPComponent::Set(const QString &name, QVariant val)
+void QtEPComponent::set(const QString &name, QVariant val)
 {
   QByteArray byteArray = name.toUtf8();
   epString prop(byteArray.data(), byteArray.size());
   wpComponent->SetProperty(prop, epToVariant(val));
 }
 
-QVariant QtEPComponent::Call(const QString &name) const
+QVariant QtEPComponent::call(const QString &name) const
 {
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
@@ -35,7 +35,7 @@ QVariant QtEPComponent::Call(const QString &name) const
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0) const
+QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
 {
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
@@ -44,7 +44,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0) const
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1) const
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) const
 {
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
@@ -53,7 +53,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1) 
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const
 {
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
@@ -62,7 +62,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const
 {
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
@@ -71,7 +71,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const
 {
   QByteArray byteArray = name.toUtf8();
   epString method(byteArray.data(), byteArray.size());
@@ -81,7 +81,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5) const
 {
   QByteArray byteArray = name.toUtf8();
@@ -93,7 +93,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5, QVariant arg6) const
 {
   QByteArray byteArray = name.toUtf8();
@@ -104,7 +104,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7) const
 {
   QByteArray byteArray = name.toUtf8();
@@ -115,7 +115,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8) const
 {
   QByteArray byteArray = name.toUtf8();
@@ -127,7 +127,7 @@ QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, 
   return res;
 }
 
-QVariant QtEPComponent::Call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const
 {
   QByteArray byteArray = name.toUtf8();
@@ -171,13 +171,13 @@ protected:
 };
 
 
-void QtEPComponent::Subscribe(QString eventName, QJSValue func) const
+void QtEPComponent::subscribe(QString eventName, QJSValue func) const
 {
   typedef epSharedPtr<JSValueDelegate> JSValueDelegateRef;
 
   if (!func.isCallable())
   {
-    wpComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", (char16_t*)func.toString().utf16());
+    wpComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString());
     return;
   }
 

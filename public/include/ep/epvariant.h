@@ -2,7 +2,7 @@
 #if !defined(EPVARIANT_H)
 #define EPVARIANT_H
 
-#include "ep/epstring.h"
+#include "ep/epplatform.h"
 #include "ep/epenum.h"
 #include "ep/epdelegate.h"
 

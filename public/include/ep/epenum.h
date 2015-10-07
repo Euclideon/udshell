@@ -2,7 +2,7 @@
 #if !defined(_EPENUM_H)
 #define _EPENUM_H
 
-#include "ep/epstring.h"
+#include "ep/epplatform.h"
 #include "ep/epforeach.h"
 #include <type_traits>
 
