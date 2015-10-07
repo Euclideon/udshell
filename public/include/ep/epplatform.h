@@ -392,14 +392,20 @@ struct epTheTypeIs;
 #include "udResult.h"
 #if 1
 # include "udPlatform.h"
-#else
-// Outputs a string to debug console
-void udDebugPrintf(const char *format, ...) EPPRINTF_FUNC(1, 2);
-// Optional, set this pointer to redirect debug printfs
-extern void(*gpudDebugPrintfOutputCallback)(const char *pString);
 #endif
 
 #include "ep/epstring.h"
+
+
+// Outputs a string to debug console
+void epDebugWrite(const char *pString);
+void epDebugPrintf(const char *format, ...) EPPRINTF_FUNC(1, 2);
+template<typename ...Args>
+inline void epDebugFormat(epString format, Args... args)
+{
+  epMutableString64 t.format(format, args...);
+  epDebugWrite(t.ptr);
+}
 
 
 // debug stuff...
