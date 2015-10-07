@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "ep/epstring.h"
 
-#if defined(_MSC_VER)
+#if defined(EP_COMPILER_VISUALC)
 // _CRT_SECURE_NO_WARNINGS warning (vsprintf_s)
 # pragma warning(disable: 4996)
 #endif
@@ -428,7 +428,11 @@ epSharedString epSharedString::sprintf(const char *pFormat, ...)
   va_list args;
   va_start(args, pFormat);
 
+#if defined(EP_COMPILER_VISUALC)
+  size_t len = _vscprintf(pFormat, args) + 1;
+#else
   size_t len = vsprintf(nullptr, pFormat, args) + 1;
+#endif
   len = numToAlloc(len);
 
   epSharedString r;
@@ -438,6 +442,8 @@ epSharedString epSharedString::sprintf(const char *pFormat, ...)
   r.ptr = ((const char*)r.rc)+sizeof(epRC);
 #if defined(EP_NACL)
   r.length = vsprintf((char*)r.ptr, pFormat, args);
+#elif defined(EP_COMPILER_VISUALC)
+  r.length = vsnprintf_s((char*)r.ptr, len, len, pFormat, args);
 #else
   r.length = vsnprintf((char*)r.ptr, len, pFormat, args);
 #endif

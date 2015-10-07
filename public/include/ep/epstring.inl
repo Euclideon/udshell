@@ -570,7 +570,7 @@ inline epMutableString<Size>& epMutableString<Size>::sprintf(const char *pFormat
   va_list args;
   va_start(args, pFormat);
 
-#if defined(_MSC_VER)
+#if defined(EP_COMPILER_VISUALC)
   size_t len = _vscprintf(pFormat, args) + 1;
 #else
   size_t len = vsprintf(nullptr, pFormat, args) + 1;
@@ -578,7 +578,7 @@ inline epMutableString<Size>& epMutableString<Size>::sprintf(const char *pFormat
 
   this->reserve(len + 1);
 
-#if defined(_MSC_VER)
+#if defined(EP_COMPILER_VISUALC)
   this->length = vsnprintf_s(this->ptr, len, len, pFormat, args);
 #else
   this->length = vsnprintf(this->ptr, len, pFormat, args);
