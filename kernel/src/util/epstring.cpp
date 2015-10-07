@@ -6,49 +6,251 @@
 # pragma warning(disable: 4996)
 #endif
 
-// 1 = alpha, 2 = numeric, 4 = white, 8 = newline
-const char s_charDetails[256] =
+int64_t epStringify_ParseInt(epString &format, const epVarArg *pArgs)
 {
-  0,0,0,0,0,0,0,0,0,4,8,0,0,8,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,
-  0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
-  0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-};
+  if (!format)
+    return -1; // number expected!
 
-epSharedString epSharedString::sprintf(const char *pFormat, ...)
+  if (format.front() == '*')
+  {
+    format.popFront();
+    int64_t i = epStringify_ParseInt(format, pArgs);
+    if (i < 0)
+      return i;
+    if (!pArgs[i].HasIntify())
+    {
+      EPASSERT(false, "Argument can not be interpreted as an integer!");
+      return -1;
+    }
+    return pArgs[i].GetInt();
+  }
+
+  if (!isNumeric(format.front()))
+    return -1; // no number!
+
+  size_t i = 0;
+  while (format && isNumeric(format.front()))
+    i = i*10 + (format.popFront() - '0');
+  return i;
+}
+
+namespace ud_internal
 {
-  va_list args;
-  va_start(args, pFormat);
+  // 1 = alpha, 2 = numeric, 4 = white, 8 = newline
+  const char charDetails[256] =
+  {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 0, 0, 8, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  };
 
-  size_t len = vsprintf(nullptr, pFormat, args) + 1;
-  len = numToAlloc(len);
+  size_t getLength(epSlice<epVarArg> args)
+  {
+    size_t len = 0;
+    for (auto &a : args)
+      len += a.GetStringLength();
+    return len;
+  }
+  epSlice<char> concatenate(epSlice<char> buffer, epSlice<epVarArg> args)
+  {
+    size_t len = 0;
+    for (auto &a : args)
+      len += a.GetString(buffer.slice(len, buffer.length));
+    return buffer.slice(0, len);
+  }
 
-  epSharedString r;
-  r.rc = (epRC*)udAlloc(sizeof(epRC) + len);
-  r.rc->refCount = 1;
-  r.rc->allocatedCount = len;
-  r.ptr = ((const char*)r.rc)+sizeof(epRC);
-#if defined(EP_NACL)
-  r.length = vsprintf((char*)r.ptr, pFormat, args);
-#else
-  r.length = vsnprintf((char*)r.ptr, len, pFormat, args);
-#endif
+  ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg> args);
 
-  va_end(args);
+  epSlice<char> format(epString format, epSlice<char> buffer, epSlice<epVarArg> args)
+  {
+    char *pBuffer = buffer.ptr;
+    size_t length = 0;
 
-  return r;
+    while (format)
+    {
+      if (format.length > 1 && format.front() == '\\')
+      {
+        format.popFront();
+        goto write_char;
+      }
+      else if (format.front() == '{')
+      {
+        ptrdiff_t len = parseFormat(format, buffer, args);
+        if (len < 0)
+        {
+          EPASSERT(false, "Bad format string!");
+          return nullptr;
+        }
+        length += len;
+      }
+//      else if (0) // TODO: handle ANSI codes for colour and shiz...?
+//      {
+//      }
+      else
+      {
+  write_char:
+        char c = format.popFront();
+        if (buffer.ptr)
+          buffer.popFront() = c;
+        ++length;
+      }
+    }
+    return epSlice<char>(pBuffer, length);
+  }
+
+  ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg> args)
+  {
+    if (format.popFront() != '{')
+    {
+      EPASSERT(false, "Not a format string!");
+      return -1;
+    }
+
+    format = format.trim<true, false>();
+    if (!format)
+      return -1;
+
+    // check for indirection
+    epString immediate = nullptr;
+    bool bIndirect = false;
+    int64_t arg = 0;
+    if (format.front() == '\'')
+    {
+      format.popFront();
+      immediate.ptr = format.ptr;
+      while (format && format.front() != '\'')
+        format.popFront();
+      if (!format)
+        return -1;
+      immediate.length = format.ptr - immediate.ptr;
+      format.popFront();
+    }
+    else
+    {
+      if (format.front() == '@')
+      {
+        bIndirect = true;
+        format.popFront();
+      }
+
+      // get the arg index
+      arg = epStringify_ParseInt(format, args.ptr);
+      if (arg < 0)
+      {
+        EPASSERT(false, "Invalid format string: Number expected!");
+        return -1;
+      }
+      if ((size_t)arg >= args.length)
+      {
+        EPASSERT(false, "Format string references invalid parameter!");
+        return -1;
+      }
+    }
+
+    format = format.trim<true, false>();
+    if (!format)
+      return -1;
+
+    // get the format string (if present)
+    epString formatSpec;
+    if (format.front() == ',')
+    {
+      format.popFront();
+      formatSpec.ptr = format.ptr;
+      while (format && format.front() != '}')
+        format.popFront();
+      if (!format)
+        return -1;
+      formatSpec.length = format.ptr - formatSpec.ptr;
+      formatSpec = formatSpec.trim();
+    }
+
+    // expect terminating '}'
+    if (format.popFront() != '}')
+    {
+      EPASSERT(false, "Invalid format string!");
+      return -1;
+    }
+
+    // check for universal format strings
+    epMutableString64 indirectFormatSpec;
+    if (formatSpec)
+    {
+      // indrect formatting allows to take the format string from another parameter
+      while (formatSpec && (formatSpec.front() == '?' || formatSpec.front() == '!' || formatSpec.front() == '@'))
+      {
+        char token = formatSpec.popFront();
+
+        int64_t i = epStringify_ParseInt(formatSpec, args.ptr);
+        if (i < 0)
+        {
+          EPASSERT(false, "Invalid format string: Number expected!");
+          return -1;
+        }
+        if ((size_t)i >= args.length)
+        {
+          EPASSERT(false, "Format indirection references invalid parameter!");
+          return -1;
+        }
+
+        if (token == '?' || token == '!')
+        {
+          if (!args[i].HasIntify())
+          {
+            EPASSERT(false, "Argument can not be interpreted as an integer!");
+            return -1;
+          }
+          int64_t condition = args[i].GetInt();
+          if ((token == '?' && !condition) || (token == '!' && condition))
+            return 0;
+        }
+        else if (token == '@')
+        {
+          ptrdiff_t formatLen = args[i].GetStringLength();
+          indirectFormatSpec.reserve((size_t)formatLen);
+          args[i].GetString(indirectFormatSpec.getBuffer());
+          formatSpec = epString(indirectFormatSpec.ptr, formatLen);
+        }
+      }
+    }
+
+    size_t len;
+    if (immediate.ptr)
+    {
+      len = epStringify(buffer, formatSpec, immediate, args.ptr);
+    }
+    else if (bIndirect)
+    {
+      // interpret the arg as an indirect format string
+      epMutableString128 indirectFormat;
+      ptrdiff_t bytes = args[arg].GetStringLength(formatSpec, args.ptr);
+      indirectFormat.reserve(bytes);
+      args[arg].GetString(indirectFormat.getBuffer(), formatSpec, args.ptr);
+      len = ud_internal::format(epString(indirectFormat.ptr, bytes), buffer, args).length;
+    }
+    else
+    {
+      // append the arg
+      len = args[arg].GetString(buffer, formatSpec, args.ptr);
+    }
+
+    if (buffer.ptr)
+      buffer.pop(len);
+    return len;
+  }
 }
 
 ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), nullptr_t, const epVarArg *epUnusedParam(pArgs))
@@ -220,125 +422,28 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), doub
   return 0;
 }
 
-namespace ud_internal
+epSharedString epSharedString::sprintf(const char *pFormat, ...)
 {
-  size_t getLength(epSlice<epVarArg> args)
-  {
-    size_t len = 0;
-    for (auto &a : args)
-      len += a.GetStringLength();
-    return len;
-  }
-  epSlice<char> concatenate(epSlice<char> buffer, epSlice<epVarArg> args)
-  {
-    size_t len = 0;
-    for (auto &a : args)
-      len += a.GetString(buffer.slice(len, buffer.length));
-    return buffer.slice(0, len);
-  }
-  epSlice<char> format(epString format, epSlice<char> buffer, epSlice<epVarArg> args)
-  {
-    epMutableString64 indirectFormat;
+  va_list args;
+  va_start(args, pFormat);
 
-    size_t offset = 0;
-    char *pBuffer = buffer.ptr;
+  size_t len = vsprintf(nullptr, pFormat, args) + 1;
+  len = numToAlloc(len);
 
-    const char *pC = format.ptr;
-    const char *pEnd = format.ptr + format.length;
-    while (pC < pEnd)
-    {
-      if (*pC == '\\' && pC[1] != 0)
-      {
-        // print escaped characters directly
-        ++pC;
-        if (pC == pEnd)
-          break;
-        if (pBuffer)
-          pBuffer[offset] = *pC;
-        ++offset;
-        ++pC;
-      }
-      else if (*pC == '{')
-      {
-        ++pC;
-        while (isWhitespace(*pC) && pC < pEnd)
-          ++pC;
-        if (pC == pEnd)
-          return nullptr;
+  epSharedString r;
+  r.rc = (epRC*)udAlloc(sizeof(epRC) + len);
+  r.rc->refCount = 1;
+  r.rc->allocatedCount = len;
+  r.ptr = ((const char*)r.rc)+sizeof(epRC);
+#if defined(EP_NACL)
+  r.length = vsprintf((char*)r.ptr, pFormat, args);
+#else
+  r.length = vsnprintf((char*)r.ptr, len, pFormat, args);
+#endif
 
-        // get the arg index
-        if (!isNumeric(*pC))
-        {
-          EPASSERT(false, "Invalid format string!");
-          return nullptr;
-        }
-        size_t arg = 0;
-        while (isNumeric(*pC) && pC < pEnd)
-          arg = arg*10 + (*pC++ - '0');
-        if (arg >= args.length)
-        {
-          EPASSERT(false, "Format string references invalid parameter!");
-          return nullptr;
-        }
-        while (isWhitespace(*pC) && pC < pEnd)
-          ++pC;
-        if (pC == pEnd)
-          return nullptr;
+  va_end(args);
 
-        // get the format string (if present)
-        epString format;
-        if (*pC == ',')
-        {
-          ++pC;
-          while (isWhitespace(*pC) && pC < pEnd)
-            ++pC;
-          if (pC == pEnd)
-            return nullptr;
-          format.ptr = pC;
-          while (*pC != '}' && !isWhitespace(*pC) && pC < pEnd)
-            pC++;
-          format.length = pC - format.ptr;
-        }
-        while (isWhitespace(*pC) && pC < pEnd)
-          ++pC;
-        if (pC == pEnd)
-          return nullptr;
-
-        // expect terminating '}'
-        if (*pC++ != '}')
-        {
-          EPASSERT(false, "Invalid format string!");
-          return nullptr;
-        }
-
-        // check for universal format strings
-        if (format)
-        {
-          // indrect formatting allows to take the format string from another parameter
-          if (format[0] == '@')
-          {
-            int64_t i = format.slice(1, format.length).parseInt(false);
-            EPASSERT(i >= 0 && (size_t)i < args.length, "Invalid indirect format index!");
-            ptrdiff_t formatLen = args[i].GetStringLength();
-            indirectFormat.reserve((size_t)formatLen);
-            args[i].GetString(indirectFormat.getBuffer());
-            format = epString(indirectFormat.ptr, formatLen);
-          }
-        }
-
-        // append the arg
-        offset += args[arg].GetString(epSlice<char>(pBuffer ? pBuffer + offset : nullptr, pBuffer ? buffer.length - offset : 0), format, args.ptr);
-      }
-      else
-      {
-        if (pBuffer)
-          pBuffer[offset] = *pC;
-        ++offset;
-        ++pC;
-      }
-    }
-    return epSlice<char>(pBuffer, offset);
-  }
+  return r;
 }
 
 epSharedString epSharedString::concatInternal(epSlice<epVarArg> args)
@@ -375,7 +480,7 @@ epSharedString epSharedString::formatInternal(epString format, epSlice<epVarArg>
 template<typename C>
 int64_t epBaseString<C>::parseInt(bool bDetectBase, int base) const
 {
-  epBaseString<C> s = trim(true, false);
+  epBaseString<C> s = trim<true, false>();
   if (s.length == 0)
     return 0; // this isn't really right!
 
@@ -436,7 +541,7 @@ int64_t epBaseString<C>::parseInt(bool bDetectBase, int base) const
 template<typename C>
 double epBaseString<C>::parseFloat() const
 {
-  epBaseString<C> s = trim(true, false);
+  epBaseString<C> s = trim<true, false>();
   if (s.length == 0)
     return 0; // this isn't really right!
 
@@ -614,7 +719,7 @@ udResult epString_Test()
   ms.append("poop!");
 
   int arr[] = { 1, 2, 30 };
-  ms.format("{1}, {2}, {0,@5} {3}, {4}", "hello ", pName, 10, epSlice<int>(arr, 3), epVariant(true), "*6", 10);
+  ms.format("{1}, {'?',?8}{'!',!8}, {@7} {3}, {4}", "hello ", pName, 10, epSlice<int>(arr, 3), epVariant(true), "*6", 10, "!{0,@5}!", false);
 
   epSlice<const void> poo;
 //  poo.slice(1, 3);

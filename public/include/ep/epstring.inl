@@ -462,20 +462,21 @@ inline epBaseString<C> epBaseString<C>::getRightAtLastIC(epBaseString<C> s, bool
 }
 
 template<typename C>
-inline epBaseString<C> epBaseString<C>::trim(bool front, bool back) const
+template<bool Front, bool Back>
+inline epBaseString<C> epBaseString<C>::trim() const
 {
   size_t first = 0, last = length;
-  if (front)
+  if (Front)
   {
     while (isWhitespace(ptr[first]) && first < length)
       ++first;
   }
-  if (back)
+  if (Back)
   {
     while (last > first && isWhitespace(ptr[last - 1]))
       --last;
   }
-  return slice(first, last);
+  return epBaseString<C>(ptr + first, last - first);
 }
 
 template<typename C>
@@ -721,9 +722,10 @@ inline epSharedString epSharedString::getRightAtLastIC(epString s, bool bInclusi
   return slice(findLastIC(s) + (bInclusive ? 0 : s.length), length);
 }
 
-inline epSharedString epSharedString::trim(bool front, bool back) const
+template<bool Front, bool Back>
+inline epSharedString epSharedString::trim() const
 {
-  epString s = ((epString*)this)->trim(front, back);
+  epString s = ((epString*)this)->trim<Front, Back>();
   return epSharedString(s.ptr, s.length, rc);
 }
 
@@ -813,6 +815,7 @@ namespace ud_internal
   };
 
   // make the numeric types promote explicitly
+  template<> struct StringifyProxy<bool>     { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, *(bool*)pData, pArgs); }               inline static int64_t intify(const void *pData) { return *(bool*)pData ? 1 : 0; } };
   template<> struct StringifyProxy<uint8_t>  { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (uint64_t)*(uint8_t*)pData, pArgs); }  inline static int64_t intify(const void *pData) { return (int64_t)*(uint8_t*)pData; } };
   template<> struct StringifyProxy<int8_t>   { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (int64_t)*(int8_t*)pData, pArgs); }    inline static int64_t intify(const void *pData) { return (int64_t)*(int8_t*)pData; } };
   template<> struct StringifyProxy<uint16_t> { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (uint64_t)*(uint16_t*)pData, pArgs); } inline static int64_t intify(const void *pData) { return (int64_t)*(uint16_t*)pData; } };
