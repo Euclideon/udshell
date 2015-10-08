@@ -6,8 +6,7 @@
 #include "components/view.h"
 
 
-namespace qt
-{
+namespace qt {
 
 class FboRenderer;
 
@@ -30,9 +29,9 @@ private:
   // TODO: Avoid this crap
   friend class FboRenderer;
 
-  void componentComplete();
+  void componentComplete() override;
 
-  QSGNode *updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData);
+  QSGNode *updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData) override;
 
   void keyPressEvent(QKeyEvent * event) override;
   void keyReleaseEvent(QKeyEvent * event) override;

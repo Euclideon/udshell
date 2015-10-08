@@ -44,6 +44,7 @@
 #endif
 
 #if EP_USE_QT
+# undef  USE_GLEW
 # undef  EPWINDOW_DRIVER
 # define EPWINDOW_DRIVER EPDRIVER_QT
 # undef  EPRENDER_DRIVER
