@@ -225,17 +225,18 @@ epSharedString LogLine::ToString(LogFormatSpecs format) const
 #endif
   strftime(timeStr, sizeof(timeStr), "[%d/%m/%d %H:%M:%S]", pTm);
 
-  out.format("{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}",
+  out.format("{0}{1}{2,?10}{3}{4}{5}{6}{7}{8}{9}",
     ((format & LogFormatSpecs::Timestamp) ? (const char*)timeStr : ""),
     ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? "(" : ""),
-    ((format & LogFormatSpecs::Level) ? epMutableString<2>().append(level) : ""),
+    level,
     ((format & (LogFormatSpecs::ComponentUID | LogFormatSpecs::Level)) && componentUID != nullptr ? ", " : ""),
     ((format & LogFormatSpecs::ComponentUID) ? componentUID : ""),
     ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? ")" : ""),
     ((format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? " " : ""),
     ((format & LogFormatSpecs::Category) ? const_cast<LogCategories &>(category).StringOf() : ""),
     ((format & LogFormatSpecs::Category) ? ": " : ""),
-    text
+    text,
+    format & LogFormatSpecs::Level
   );
 
   return out;

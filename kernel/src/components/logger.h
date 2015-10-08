@@ -110,6 +110,13 @@ struct LogStream
   LogStream(StreamRef spStream, LogFormatSpecs format, LogFilter filter) :
     spStream(spStream), format(format), filter(filter) {}
 
+  LogStream &operator=(const LogStream &other)
+  {
+    // epArray requires assignment for certain functionality - implement the assignment path if those features become needed
+    EPASSERT(false, "LogStream assignment is unsupported");
+    return *this;
+  }
+
   StreamRef spStream;
   LogFilter filter;
   LogFormatSpecs format;
