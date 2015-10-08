@@ -37,8 +37,8 @@ public:
   template<typename T>
   bool IsType() const { return IsType(T::descriptor.id); }
 
-  virtual epVariant GetProperty(epString property) const;
-  virtual void SetProperty(epString property, const epVariant &value);
+  epVariant GetProperty(epString property) const;
+  void SetProperty(epString property, const epVariant &value);
 
   epVariant CallMethod(epString method, epSlice<epVariant> args);
   template<typename ...Args>
@@ -100,6 +100,8 @@ public:
   void RemoveDynamicMethod(epString name);
   void RemoveDynamicEvent(epString name);
 
+  void* GetUserData() const { return pUserData; }
+
 protected:
   Component(const ComponentDesc *_pType, Kernel *_pKernel, epSharedString _uid, epInitParams initParams)
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
@@ -130,6 +132,8 @@ protected:
   epAVLTree<epString, EventDesc> instanceEvents;
 
   epSubscriber subscriber;
+
+  void *pUserData = nullptr;
 
 private:
   template<typename... Args>

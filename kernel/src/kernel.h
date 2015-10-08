@@ -12,24 +12,24 @@
 using namespace fastdelegate;
 
 struct udRenderEngine;
+struct epPluginInstance;
 
 namespace ep
 {
 
 class LuaState;
-class udBlockStreamer;
 class Renderer;
 
 SHARED_CLASS(View);
 SHARED_CLASS(UIComponent);
 SHARED_CLASS(Window);
 SHARED_CLASS(Logger);
+SHARED_CLASS(PluginManager);
 SHARED_CLASS(ResourceManager);
 SHARED_CLASS(ShortcutManager);
 
 class Kernel
 {
-  friend class Component;
 public:
   // TODO: MessageHandler returns void, should we return some error state??
   typedef FastDelegate<void(epString sender, epString message, const epVariant &data)> MessageHandler;
@@ -50,6 +50,8 @@ public:
   udResult RegisterComponentType(ComponentDesc *pDesc);
   template<typename ComponentType>
   udResult RegisterComponent();
+
+  const ComponentDesc* GetComponentDesc(epString id);
 
   template<typename CT>
   epArray<const ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase)
@@ -96,6 +98,9 @@ public:
   udResult Terminate();
 
 protected:
+  friend class Component;
+  friend class PluginManager;
+
   struct ComponentType
   {
     const ComponentDesc *pDesc;
@@ -121,16 +126,21 @@ protected:
   udHashMap<ForeignInstance> foreignInstanceRegistry;
   udHashMap<MessageCallback> messageHandlers;
 
+  epAVLTree<epString, const ComponentDesc *> extensionsRegistry;
+
   Renderer *pRenderer = nullptr;
 
   LuaRef spLua = nullptr;
 
   LoggerRef spLogger = nullptr;
+  PluginManagerRef spPluginManager = nullptr;
   ResourceManagerRef spResourceManager = nullptr;
   ShortcutManagerRef spShortcutManager = nullptr;
   ViewRef spFocusView = nullptr;
   TimerRef spStreamerTimer = nullptr;
   TimerRef spUpdateTimer = nullptr;
+
+  epPluginInstance *pPluginInstance = nullptr;
 
   virtual ~Kernel() {}
 
@@ -149,13 +159,13 @@ protected:
 
   int SendMessage(LuaState L);
 
+  epPluginInstance *GetPluginInterface();
+
   void Update();
   void StreamerUpdate();
 
   template<typename CT>
   static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
-
-  epAVLTree<epString, const ComponentDesc *> extensionsRegistry;
 };
 
 template<typename T>

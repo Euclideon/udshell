@@ -19,6 +19,7 @@
 #include "components/nodes/camera.h"
 #include "components/nodes/geomnode.h"
 #include "components/nodes/udnode.h"
+#include "components/pluginmanager.h"
 #include "components/resourcemanager.h"
 #include "components/shortcutmanager.h"
 #include "components/project.h"
@@ -71,6 +72,7 @@ udResult Kernel::Create(Kernel **ppInstance, epInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<Console>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<MemStream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<PluginManager>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<ResourceManager>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<ShortcutManager>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Project>());
@@ -164,17 +166,21 @@ udResult Kernel::DoInit(Kernel *pKernel)
   if (result != udR_Success)
     return result;
 
+  pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>();
+  if (!pKernel->spPluginManager)
+    return udR_Failure_;
+
+  // load plugins
+  //...
 
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   if (!pKernel->spStreamerTimer)
     return udR_Failure_;
-
   pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
 
   pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
   if (!pKernel->spUpdateTimer)
     return udR_Failure_;
-
   pKernel->spUpdateTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
 
   // call application init
@@ -356,6 +362,14 @@ udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
   ComponentType t = { pDesc, 0 };
   componentRegistry.Add(pDesc->id.hash(), t);
   return udR_Success;
+}
+
+const ComponentDesc* Kernel::GetComponentDesc(epString id)
+{
+  ComponentType *pCT = componentRegistry.Get(id.hash());
+  if (!pCT)
+    return nullptr;
+  return pCT->pDesc;
 }
 
 udResult Kernel::CreateComponent(epString typeId, epInitParams initParams, ComponentRef *pNewInstance)
