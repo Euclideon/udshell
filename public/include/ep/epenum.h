@@ -97,7 +97,7 @@ struct epEnumDesc
       {                                                                           \
         if (keys.ptr[i].eq(s))                                                    \
         {                                                                         \
-          v = (Type)i;                                                            \
+          v = 1<<i;                                                               \
           break;                                                                  \
         }                                                                         \
       }                                                                           \
