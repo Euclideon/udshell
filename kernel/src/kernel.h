@@ -81,7 +81,6 @@ public:
   template<typename ...Args> void LogInfo(int level, epString text, Args... args) const;
   template<typename ...Args> void LogScript(epString text, Args... args) const;
   template<typename ...Args> void LogTrace(epString text, Args... args) const;
-  template<typename ...Args> void Log(epString text, Args... args) const; // Calls LogDebug() with level 2
 
   // Functions for resource management
   ResourceManagerRef GetResourceManager() const { return spResourceManager; }
@@ -263,17 +262,6 @@ inline void Kernel::LogTrace(epString text, Args... args) const
   {
     epMutableString128 tmp; tmp.format(text, args...);
     spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Trace, nullptr);
-  }
-}
-template<typename ...Args>
-inline void Kernel::Log(epString text, Args... args) const
-{
-  if (sizeof...(Args) == 0)
-    spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, nullptr);
-  else
-  {
-    epMutableString128 tmp; tmp.format(text, args...);
-    spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Debug, nullptr);
   }
 }
 

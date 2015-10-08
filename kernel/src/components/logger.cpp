@@ -193,53 +193,6 @@ void Logger::Log(int level, epString text, LogCategories category, epString comp
   bLogging = false;
 }
 
-ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
-{
-  epSharedString out = line.ToString(LogDefaults::Format);
-
-  // if we're only counting
-  if (!buffer.ptr)
-    return out.length;
-
-  // if the buffer is too small
-  if (buffer.length < out.length)
-    return buffer.length - out.length;
-
-  out.copyTo(buffer);
-
-  return out.length;
-}
-
-epSharedString LogLine::ToString(LogFormatSpecs format) const
-{
-  epMutableString<256> out;
-  char timeStr[64];
-
-#if defined(EP_WINDOWS)
-  tm _tm, *pTm = &_tm;
-  localtime_s(&_tm, &timestamp);
-#else
-  tm *pTm = localtime(&timestamp);
-#endif
-  strftime(timeStr, sizeof(timeStr), "[%d/%m/%d %H:%M:%S]", pTm);
-
-  out.format("{0}{1}{2,?10}{3}{4}{5}{6}{7}{8}{9}",
-    ((format & LogFormatSpecs::Timestamp) ? (const char*)timeStr : ""),
-    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? "(" : ""),
-    level,
-    ((format & (LogFormatSpecs::ComponentUID | LogFormatSpecs::Level)) && componentUID != nullptr ? ", " : ""),
-    ((format & LogFormatSpecs::ComponentUID) ? componentUID : ""),
-    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? ")" : ""),
-    ((format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? " " : ""),
-    ((format & LogFormatSpecs::Category) ? category.StringOf() : ""),
-    ((format & LogFormatSpecs::Category) ? ": " : ""),
-    text,
-    format & LogFormatSpecs::Level
-  );
-
-  return out;
-}
-
 void Logger::AddStream(StreamRef spStream, LogFormatSpecs format)
 {
   streamList.pushBack(LogStream(spStream, format, LogFilter()));
@@ -387,13 +340,60 @@ bool LogFilter::FilterLogLine(LogLine &line) const
 }
 
 LogLine::LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID) :
-level(level), category(category)
+    level(level), category(category)
 {
   timestamp = time(nullptr);
   ordering = epPerformanceCounter();
 
   this->text = text;
   this->componentUID = componentUID;
+}
+
+ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
+{
+  epSharedString out = line.ToString(LogDefaults::Format);
+
+  // if we're only counting
+  if (!buffer.ptr)
+    return out.length;
+
+  // if the buffer is too small
+  if (buffer.length < out.length)
+    return buffer.length - out.length;
+
+  out.copyTo(buffer);
+
+  return out.length;
+}
+
+epSharedString LogLine::ToString(LogFormatSpecs format) const
+{
+  epMutableString<256> out;
+  char timeStr[64];
+
+#if defined(EP_WINDOWS)
+  tm _tm, *pTm = &_tm;
+  localtime_s(&_tm, &timestamp);
+#else
+  tm *pTm = localtime(&timestamp);
+#endif
+  strftime(timeStr, sizeof(timeStr), "[%d/%m/%d %H:%M:%S]", pTm);
+
+  out.format("{0}{1}{2,?10}{3}{4}{5}{6}{7}{8}{9}",
+    ((format & LogFormatSpecs::Timestamp) ? (const char*)timeStr : ""),
+    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? "(" : ""),
+    level,
+    ((format & (LogFormatSpecs::ComponentUID | LogFormatSpecs::Level)) && componentUID != nullptr ? ", " : ""),
+    ((format & LogFormatSpecs::ComponentUID) ? componentUID : ""),
+    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? ")" : ""),
+    ((format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? " " : ""),
+    ((format & LogFormatSpecs::Category) ? category.StringOf() : ""),
+    ((format & LogFormatSpecs::Category) ? ": " : ""),
+    text,
+    format & LogFormatSpecs::Level
+    );
+
+  return out;
 }
 
 } // namespace ep
