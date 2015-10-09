@@ -44,14 +44,12 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epIn
   // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?
   epString cPath = path.asString();
   int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cPath.ptr, (int)cPath.length, nullptr, 0);
-  wchar_t *widePath = udAllocType(wchar_t, len + 1, udAF_None);
+  wchar_t *widePath = (wchar_t*)alloca(sizeof(wchar_t) * (len + 1));
   if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cPath.ptr, (int)cPath.length, widePath, len) == 0)
     *widePath = 0;
   widePath[len] = 0;
 
   _wsopen_s(&fd, widePath, posixFlags, SH_DENYNO, S_IREAD | S_IWRITE);
-
-  udFree(widePath);
 #else
   fd = open(path.asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
 #endif
