@@ -186,10 +186,10 @@ inline epSlice<T> epSlice<T>::strip(ptrdiff_t n) const
 template<typename T>
 inline bool epSlice<T>::exists(const typename epSlice<T>::ET &c, size_t *pIndex) const
 {
-  size_t i = findFirst(c) != -1;
+  size_t i = findFirst(c);
   if (pIndex)
     *pIndex = i;
-  return i == length;
+  return i != length;
 }
 
 template<typename T>
