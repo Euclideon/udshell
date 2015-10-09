@@ -448,7 +448,7 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), uint
   }
   return len;
 }
-ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), double f, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(epSlice<char> epUnusedParam(buffer), epString epUnusedParam(format), double epUnusedParam(f), const epVarArg *epUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for floats?
   EPASSERT(false, "No fun!");
@@ -674,6 +674,7 @@ udResult epSlice_Test()
 
   for (auto i : i1)
   {
+    i;
     // iterate the elements in i1
     //...
   }
