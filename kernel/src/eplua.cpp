@@ -132,9 +132,10 @@ static int FindComponent(lua_State *L)
 #if defined(EP_WINDOWS)
 // HAX! debug tools for windows
 #pragma warning(disable: 4996)
+#define EP_DISPATCH_BUFFER_SIZE   2048
 struct Dispatch
 {
-  char buffer[2048];
+  char buffer[EP_DISPATCH_BUFFER_SIZE];
   epString s;
 
   void Exec(Kernel *pKernel)
@@ -151,7 +152,7 @@ static uint32_t StdinThread(void *data)
     Dispatch *pDispatch = new Dispatch;
     putc('>', stdout);
     putc(' ', stdout);
-    gets(pDispatch->buffer);
+    gets_s(pDispatch->buffer, EP_DISPATCH_BUFFER_SIZE);
     pDispatch->s = pDispatch->buffer;
     pKernel->DispatchToMainThreadAndWait(MakeDelegate(pDispatch, &Dispatch::Exec));
     putc('\n', stdout);
