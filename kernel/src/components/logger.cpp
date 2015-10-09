@@ -321,7 +321,7 @@ bool LogFilter::FilterLogLine(LogLine &line) const
     return false;
 
   // Check component ids filter
-  if (line.componentUID != nullptr && !componentsFilter.empty())
+  if (!componentsFilter.empty())
   {
     bool componentFound = false;
     for (epString comp : componentsFilter)
