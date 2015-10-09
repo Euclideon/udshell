@@ -4,19 +4,23 @@
 
 #include "ep/epslice.h"
 
-namespace ud_internal {
-  extern const char charDetails[256];
-}
+namespace ep {
+namespace internal {
 
-#define isNewline(c) (c < 256 && (ud_internal::charDetails[c] & 8))
-#define isWhitespace(c) (c < 256 && (ud_internal::charDetails[c] & 0xC))
-#define isAlpha(c) (c < 256 && (ud_internal::charDetails[c] & 1))
-#define isNumeric(c) (c < 256 && (ud_internal::charDetails[c] & 2))
-#define isAlphaNumeric(c) (c < 256 && (ud_internal::charDetails[c] & 3))
+  extern const char charDetails[256];
+
+} // namespace internal
+} // namespace ep
+
+#define isNewline(c) (c < 256 && (ep::internal::charDetails[c] & 8))
+#define isWhitespace(c) (c < 256 && (ep::internal::charDetails[c] & 0xC))
+#define isAlpha(c) (c < 256 && (ep::internal::charDetails[c] & 1))
+#define isNumeric(c) (c < 256 && (ep::internal::charDetails[c] & 2))
+#define isAlphaNumeric(c) (c < 256 && (ep::internal::charDetails[c] & 3))
 #define isHex(c) (isAlphaNumeric(c) && (c|0x20) <= 'f')
 
-__forceinline char toLower(char c) { return isAlpha(c) ? c|0x20 : c; }
-__forceinline char toUpper(char c) { return isAlpha(c) ? c&~0x20 : c; }
+epforceinline char toLower(char c) { return isAlpha(c) ? c|0x20 : c; }
+epforceinline char toUpper(char c) { return isAlpha(c) ? c&~0x20 : c; }
 
 #if !defined(__cplusplus)
 
@@ -149,7 +153,7 @@ struct epMutableString : public epArray<char, Size>
   template<typename... Args> epMutableString& append(const Args&... args);
 
   template<typename... Args> epMutableString& format(epString format, const Args&... args);
-  epMutableString& sprintf(const char *pFormat, ...)  EPPRINTF_FUNC(2, 3);
+  epMutableString& sprintf(const char *pFormat, ...)  epprintf_func(2, 3);
 
   epMutableString& toUpper();
   epMutableString& toLower();
@@ -211,7 +215,7 @@ struct epSharedString : public epSharedSlice<const char>
   // construction
   template<typename... Args> static epSharedString concat(const Args&... args);
   template<typename... Args> static epSharedString format(epString format, const Args&... args);
-  static epSharedString sprintf(const char *pFormat, ...) EPPRINTF_FUNC(1, 2);
+  static epSharedString sprintf(const char *pFormat, ...) epprintf_func(1, 2);
 
   // assignment
   epSharedString& operator =(const epSharedSlice<const char> &rh);

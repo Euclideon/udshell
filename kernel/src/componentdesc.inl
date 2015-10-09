@@ -68,7 +68,7 @@ inline CMethod::CMethod(Ret(X::*func)(Args...) const)
 
 template<typename Ret, typename... Args>
 template<size_t ...S>
-__forceinline epVariant CMethod::Partial<Ret, Args...>::callFuncHack(epSlice<epVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>)
+epforceinline epVariant CMethod::Partial<Ret, Args...>::callFuncHack(epSlice<epVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>)
 {
   return epVariant(d(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
 }
@@ -91,7 +91,7 @@ template<typename... Args>
 struct CMethod::Partial<void, Args...>
 {
   template<size_t ...S>
-  __forceinline static void callFuncHack(epSlice<epVariant> args, FastDelegate<void(Args...)> d, Sequence<S...>)
+  epforceinline static void callFuncHack(epSlice<epVariant> args, FastDelegate<void(Args...)> d, Sequence<S...>)
   {
     d(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
   }
@@ -122,7 +122,7 @@ inline CStaticFunc::CStaticFunc(Ret(*func)(Args...))
 
 template<typename Ret, typename... Args>
 template<size_t ...S>
-__forceinline epVariant CStaticFunc::Partial<Ret, Args...>::callFuncHack(epSlice<epVariant> args, Ret (*f)(Args...), Sequence<S...>)
+epforceinline epVariant CStaticFunc::Partial<Ret, Args...>::callFuncHack(epSlice<epVariant> args, Ret (*f)(Args...), Sequence<S...>)
 {
   return epVariant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
 }
@@ -141,7 +141,7 @@ template<typename... Args>
 struct CStaticFunc::Partial < void, Args... >
 {
   template<size_t ...S>
-  __forceinline static void callFuncHack(epSlice<epVariant> args, void (*f)(Args...), Sequence<S...>)
+  epforceinline static void callFuncHack(epSlice<epVariant> args, void (*f)(Args...), Sequence<S...>)
   {
     f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
   }

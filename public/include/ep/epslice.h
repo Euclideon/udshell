@@ -4,11 +4,15 @@
 
 #include <initializer_list>
 
-namespace ep_internal {
-  template<typename T> struct ElementType { typedef T Ty; };
-  template<> struct ElementType<void> { typedef uint8_t Ty; };
-  template<> struct ElementType<const void> { typedef const uint8_t Ty; };
-}
+namespace ep {
+namespace internal {
+
+template<typename T> struct ElementType { typedef T Ty; };
+template<> struct ElementType<void> { typedef uint8_t Ty; };
+template<> struct ElementType<const void> { typedef const uint8_t Ty; };
+
+} // namespace internal
+} // namespace ep
 
 
 struct epRC
@@ -20,9 +24,9 @@ struct epRC
 
 // slices are bounded arrays, unlike C's conventional unbounded pointers (typically, with separate length stored in parallel)
 // no attempt is made to create a one-size-fits-all implementation, as it is recognised that usages offer distinct advantages/disadvantages
-// slise is the basis of the suite however, and everything is based on epSlice. derived types address specifics in usage and/or ownership patterns
+// slice is the basis of the suite however, and everything is based on epSlice. derived types address specifics in usage and/or ownership patterns
 
-// declare an iterator so it works with standard range pased functions (foreach!)
+// declare an iterator so it works with standard range passed functions (foreach!)
 template<typename T>
 class epIterator
 {
@@ -42,7 +46,7 @@ struct epSlice
 {
 private:
 public:
-  typedef typename ep_internal::ElementType<T>::Ty ET;
+  typedef typename ep::internal::ElementType<T>::Ty ET;
 
   size_t length;
   T *ptr;

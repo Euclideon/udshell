@@ -46,7 +46,7 @@ protected:
     : KVPStore(pType, pKernel, uid, initParams) {}
 
   struct VariantCompare {
-    __forceinline ptrdiff_t operator()(const epVariant &a, const epVariant &b)
+    epforceinline ptrdiff_t operator()(const epVariant &a, const epVariant &b)
     {
       return a.compare(b);
     }
