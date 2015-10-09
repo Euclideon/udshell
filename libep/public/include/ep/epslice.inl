@@ -324,7 +324,11 @@ inline epSlice<T> epSlice<T>::popToken(epSlice<T> delimiters)
     while (offset < length && delimiters.exists(ptr[offset]))
       ++offset;
     if (offset == length)
+    {
+      ptr += offset;
+      length = 0;
       return epSlice<T>();
+    }
   }
   size_t end = offset;
   while (end < length && !delimiters.exists(ptr[end]))
