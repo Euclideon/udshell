@@ -2,27 +2,29 @@
 
 #include "udPlatform.h"
 
-namespace ep_internal
+namespace ep {
+namespace internal {
+
+bool gUnitTesting = false;
+epMutableString256 assertBuffer;
+
+void epAssertFailed(epString condition, epString message, epString file, int line)
 {
-  bool gUnitTesting = false;
-  epMutableString256 assertBuffer;
-
-  void epAssertFailed(epString condition, epString message, epString file, int line)
+  // TODO: Agree on formatting of assets
+  if (gUnitTesting)
   {
-    // TODO: Agree on formatting of assets
-    if (gUnitTesting)
-    {
-      fprintf(stderr, message.toStringz());
-      exit(EXIT_FAILURE);
-    }
-    else
-    {
-      epMutableString256 t; t.format("ASSERT FAILED : {0}\n{1}\n{2}({3})", condition, message, file, line);
-      epDebugWrite(t.ptr);
-    }
+    fprintf(stderr, message.toStringz());
+    exit(EXIT_FAILURE);
   }
-
+  else
+  {
+    epMutableString256 t; t.format("ASSERT FAILED : {0}\n{1}\n{2}({3})", condition, message, file, line);
+    epDebugWrite(t.ptr);
+  }
 }
+
+} // namespace internal
+} // namespace ep
 
 void epDebugWrite(const char *pString)
 {

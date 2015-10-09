@@ -309,17 +309,17 @@ struct epTheTypeIs;
 #endif
 
 #if defined(EP_COMPILER_VISUALC)
-# define EPALIGN_BEGIN(n) __declspec(align(n))
-# define EPALIGN_END(n)
-# define EPDEPRECATED_BEGIN() __declspec(deprecated)
-# define EPDEPRECATED_END(message)
-# define EPCONST
-# define EPPURE
-# define EPPACKED
-# define EPALWAYS_INLINE __forceinline
-# define EPPRINTF_FUNC(formatarg, vararg)
-# define EPPRINTF_METHOD(formatarg, vararg)
-# define EPNOTHROW __declspec(nothrow)
+# define epalign_begin(n) __declspec(align(n))
+# define epalign_end(n)
+# define epdepricated_begin() __declspec(deprecated)
+# define epdepricated_end(message)
+# define epconst
+# define eppure
+# define epnothrow __declspec(nothrow)
+# define eppacked
+# define epforceinline __forceinline
+# define epprintf_func(formatarg, vararg)
+# define epprintf_method(formatarg, vararg)
 # if !EP_DEBUG
 #   define EPASSUME(condition) __assume(condition)
 #   define EPUNREACHABLE __assume(0)
@@ -329,17 +329,17 @@ struct epTheTypeIs;
 # define EPFMT_PTRDIFF_T "%Id"
 #elif defined(EP_COMPILER_GCC) || defined(EP_COMPILER_CLANG)
   // TODO: use #if __has_builtin()/__has_attribute() to test if these are available?
-# define EPALIGN_BEGIN(n)
-# define EPALIGN_END(n) __attribute__((aligned(n)))
-# define EPDEPRECATED_BEGIN()
-# define EPDEPRECATED_END(message) __attribute__((deprecated(message)))
-# define EPCONST __attribute__((const))
-# define EPPURE __attribute__((pure))
-# define EPPACKED __attribute__((packed))
-# define EPALWAYS_INLINE inline __attribute__((always_inline))
-# define EPPRINTF_FUNC(formatarg, vararg) __attribute__((format(printf, formatarg, vararg)))
-# define EPPRINTF_METHOD(formatarg, vararg) __attribute__((format(printf, formatarg + 1, vararg + 1)))
-# define EPNOTHROW nothrow
+# define epalign_begin(n)
+# define epalign_end(n) __attribute__((aligned(n)))
+# define epdepricated_begin()
+# define epdepricated_end(message) __attribute__((deprecated(message)))
+# define epconst __attribute__((const))
+# define eppure __attribute__((pure))
+# define epnothrow __attribute__((nothrow))
+# define eppacked __attribute__((packed))
+# define epforceinline inline __attribute__((always_inline))
+# define epprintf_func(formatarg, vararg) __attribute__((format(printf, formatarg, vararg)))
+# define epprintf_method(formatarg, vararg) __attribute__((format(printf, formatarg + 1, vararg + 1)))
 # if !EP_DEBUG
     // TODO: use #if __has_builtin(__builtin_unreachable) ??
 #   define EPASSUME(condition) if(!(condition)) { __builtin_unreachable(); }
@@ -349,17 +349,17 @@ struct epTheTypeIs;
 # define EPFMT_SSIZE_T "%zd"
 # define EPFMT_PTRDIFF_T "%zd"
 #else
-# define EPALIGN_BEGIN(n)
-# define EPALIGN_END(n)
-# define EPDEPRECATED_BEGIN()
-# define EPDEPRECATED_END(message)
-# define EPCONST
-# define EPPURE
-# define EPPACKED
-# define EPALWAYS_INLINE inline
-# define EPPRINTF_FUNC(formatarg, vararg)
-# define EPPRINTF_METHOD(formatarg, vararg)
-# define EPNOTHROW
+# define epalign_begin(n)
+# define epalign_end(n)
+# define epdepricated_begin()
+# define epdepricated_end(message)
+# define epconst
+# define eppure
+# define epnothrow
+# define eppacked
+# define epforceinline inline
+# define epprintf_func(formatarg, vararg)
+# define epprintf_method(formatarg, vararg)
 # if !EP_DEBUG
 #   define EPASSUME(condition)
 #   define EPUNREACHABLE
@@ -399,7 +399,7 @@ struct epTheTypeIs;
 
 // Outputs a string to debug console
 void epDebugWrite(const char *pString);
-void epDebugPrintf(const char *format, ...) EPPRINTF_FUNC(1, 2);
+void epDebugPrintf(const char *format, ...) epprintf_func(1, 2);
 template<typename ...Args>
 inline void epDebugFormat(epString format, Args... args)
 {
@@ -452,31 +452,37 @@ inline void epDebugFormat(epString format, Args... args)
 # define EPTRACE_MEMORY(var,length)
 #endif
 
-namespace ep_internal
-{
-  void epAssertFailed(epString condition, epString message, epString file, int line);
-}
+namespace ep {
+namespace internal {
+
+void epAssertFailed(epString condition, epString message, epString file, int line);
+
+} // namespace internal
+} // namespace ep
 
 // TODO: Make assertion system handle pop-up window where possible
 #if EPASSERT_ON
 
-namespace ep_internal
-{
-  extern epMutableString256 assertBuffer;
+namespace ep {
+namespace internal {
 
-  inline void epAssertTemplate(epString condition, epString file, int line)
-  {
-    epAssertFailed(condition, nullptr, file, line);
-  }
-  template<typename ...Args>
-  inline void epAssertTemplate(epString condition, epString file, int line, epString format, Args... args)
-  {
-    assertBuffer.format(format, args...);
-    epAssertFailed(condition, assertBuffer, file, line);
-  }
+extern epMutableString256 assertBuffer;
+
+inline void epAssertTemplate(epString condition, epString file, int line)
+{
+  epAssertFailed(condition, nullptr, file, line);
+}
+template<typename ...Args>
+inline void epAssertTemplate(epString condition, epString file, int line, epString format, Args... args)
+{
+  assertBuffer.format(format, args...);
+  epAssertFailed(condition, assertBuffer, file, line);
 }
 
-# define EPASSERT(condition, ...) do { if (!(condition)) { ep_internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+} // namespace internal
+} // namespace ep
+
+# define EPASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
 # define IF_EPASSERT(x) x
 #else
 # define EPASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
@@ -484,7 +490,7 @@ namespace ep_internal
 #endif
 
 #if EPRELASSERT_ON
-# define EPRELASSERT(condition, ...) do { if (!(condition)) { ep_internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+# define EPRELASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
 # define IF_EPRELASSERT(x) x
 #else
 # define EPRELASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)

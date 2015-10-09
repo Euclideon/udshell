@@ -19,8 +19,8 @@ namespace internal {
 #define isAlphaNumeric(c) (c < 256 && (ep::internal::charDetails[c] & 3))
 #define isHex(c) (isAlphaNumeric(c) && (c|0x20) <= 'f')
 
-EPALWAYS_INLINE char toLower(char c) { return isAlpha(c) ? c|0x20 : c; }
-EPALWAYS_INLINE char toUpper(char c) { return isAlpha(c) ? c&~0x20 : c; }
+epforceinline char toLower(char c) { return isAlpha(c) ? c|0x20 : c; }
+epforceinline char toUpper(char c) { return isAlpha(c) ? c&~0x20 : c; }
 
 #if !defined(__cplusplus)
 
@@ -153,7 +153,7 @@ struct epMutableString : public epArray<char, Size>
   template<typename... Args> epMutableString& append(const Args&... args);
 
   template<typename... Args> epMutableString& format(epString format, const Args&... args);
-  epMutableString& sprintf(const char *pFormat, ...)  EPPRINTF_FUNC(2, 3);
+  epMutableString& sprintf(const char *pFormat, ...)  epprintf_func(2, 3);
 
   epMutableString& toUpper();
   epMutableString& toLower();
@@ -215,7 +215,7 @@ struct epSharedString : public epSharedSlice<const char>
   // construction
   template<typename... Args> static epSharedString concat(const Args&... args);
   template<typename... Args> static epSharedString format(epString format, const Args&... args);
-  static epSharedString sprintf(const char *pFormat, ...) EPPRINTF_FUNC(1, 2);
+  static epSharedString sprintf(const char *pFormat, ...) epprintf_func(1, 2);
 
   // assignment
   epSharedString& operator =(const epSharedSlice<const char> &rh);

@@ -5,7 +5,7 @@
 template<typename T>
 struct AVLCompare
 {
-  EPALWAYS_INLINE ptrdiff_t operator()(const T &a, const T &b)
+  epforceinline ptrdiff_t operator()(const T &a, const T &b)
   {
     return a < b ? -1 : (a > b ? 1 : 0);
   }
@@ -14,7 +14,7 @@ struct AVLCompare
 template<>
 struct AVLCompare<epString>
 {
-  EPALWAYS_INLINE ptrdiff_t operator()(epString a, epString b)
+  epforceinline ptrdiff_t operator()(epString a, epString b)
   {
     return a.cmp(b);
   }
@@ -22,7 +22,7 @@ struct AVLCompare<epString>
 template<>
 struct AVLCompare<epSharedString>
 {
-  EPALWAYS_INLINE ptrdiff_t operator()(epString a, epString b)
+  epforceinline ptrdiff_t operator()(epString a, epString b)
   {
     return a.cmp(b);
   }

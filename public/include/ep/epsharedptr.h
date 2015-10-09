@@ -108,13 +108,13 @@ public:
 
   inline size_t count() const;
 
-  EPALWAYS_INLINE bool unique() const { return count() == 1; }
+  epforceinline bool unique() const { return count() == 1; }
 
-  EPALWAYS_INLINE explicit operator bool() const { return count() > 0; }
+  epforceinline explicit operator bool() const { return count() > 0; }
 
-  EPALWAYS_INLINE T& operator*() const { return *(T*)pInstance; }
-  EPALWAYS_INLINE T* operator->() const { return (T*)pInstance; }
-  EPALWAYS_INLINE T* ptr() const { return (T*)pInstance; }
+  epforceinline T& operator*() const { return *(T*)pInstance; }
+  epforceinline T* operator->() const { return (T*)pInstance; }
+  epforceinline T* ptr() const { return (T*)pInstance; }
 
 private:
   template<class U> friend class epSharedPtr;
@@ -135,14 +135,14 @@ template<typename T, bool isref>
 struct Destroy;
 template<class T>
 struct Destroy<T, false> {
-  EPALWAYS_INLINE static void destroy(T *ptr)
+  epforceinline static void destroy(T *ptr)
   {
     delete ptr;
   }
 };
 template<class T>
 struct Destroy<T, true> {
-  EPALWAYS_INLINE static void destroy(T *ptr)
+  epforceinline static void destroy(T *ptr)
   {
     epRefCounted *rc = ptr;
     delete rc;
@@ -195,12 +195,12 @@ public:
   }
 
   // reference counter operations :
-  EPALWAYS_INLINE explicit operator bool() const { return pInstance != nullptr; }
+  epforceinline explicit operator bool() const { return pInstance != nullptr; }
 
   // underlying pointer operations :
-  EPALWAYS_INLINE T& operator*() const { return *pInstance; }
-  EPALWAYS_INLINE T* operator->() const { return pInstance; }
-  EPALWAYS_INLINE T* ptr() const { return pInstance; }
+  epforceinline T& operator*() const { return *pInstance; }
+  epforceinline T* operator->() const { return pInstance; }
+  epforceinline T* ptr() const { return pInstance; }
 
 private:
   template<typename U> friend class epSharedPtr;
@@ -379,13 +379,13 @@ inline epSharedPtr<T>& epSharedPtr<T>::operator=(const epUniquePtr<U> &ptr)
 }
 
 template<class T>
-EPALWAYS_INLINE size_t epSharedPtr<T>::count() const
+epforceinline size_t epSharedPtr<T>::count() const
 {
   return pInstance ? pInstance->rc : 0;
 }
 
 template<class T>
-EPALWAYS_INLINE void epSharedPtr<T>::acquire()
+epforceinline void epSharedPtr<T>::acquire()
 {
   if (pInstance)
   {

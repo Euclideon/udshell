@@ -190,11 +190,11 @@ inline bool epVariant::is(Type type) const
 template<typename T>
 struct epVariant_Construct
 {
-  EPALWAYS_INLINE static epVariant construct(T &&rval)
+  epforceinline static epVariant construct(T &&rval)
   {
     return epToVariant(std::move(rval));
   }
-  EPALWAYS_INLINE static epVariant construct(const T &v)
+  epforceinline static epVariant construct(const T &v)
   {
     return epToVariant(v);
   }
@@ -202,36 +202,36 @@ struct epVariant_Construct
 
 // These pipe through to `struct epVariant_Construct<>` to facilitate a bunch of partial specialisation madness
 template<typename T>
-EPALWAYS_INLINE epVariant::epVariant(T &&rval)
+epforceinline epVariant::epVariant(T &&rval)
   : epVariant(epVariant_Construct<typename std::remove_reference<T>::type>::construct(std::forward<T>(rval)))
 {}
 
 // specialisation of non-const epVariant, which annoyingly gets hooked by the T& constructor instead of the copy constructor
-template<> struct epVariant_Construct<epVariant>  { EPALWAYS_INLINE static epVariant construct(const epVariant &v) { return epVariant(v); } };
+template<> struct epVariant_Construct<epVariant>  { epforceinline static epVariant construct(const epVariant &v) { return epVariant(v); } };
 
 // ** suite of specialisations required to wrangle every conceivable combination of 'const'
 template<typename T>
-struct epVariant_Construct<const T>               { EPALWAYS_INLINE static epVariant construct(const T &v) { return epVariant((T&)v); } };
+struct epVariant_Construct<const T>               { epforceinline static epVariant construct(const T &v) { return epVariant((T&)v); } };
 template<typename T, size_t N>
-struct epVariant_Construct<const T[N]>            { EPALWAYS_INLINE static epVariant construct(const T v[N]) { return epVariant_Construct<T[N]>::construct(v); } };
+struct epVariant_Construct<const T[N]>            { epforceinline static epVariant construct(const T v[N]) { return epVariant_Construct<T[N]>::construct(v); } };
 template<typename T>
-struct epVariant_Construct<const T *>             { EPALWAYS_INLINE static epVariant construct(const T *v) { return epVariant((T*)v); } };
+struct epVariant_Construct<const T *>             { epforceinline static epVariant construct(const T *v) { return epVariant((T*)v); } };
 
 // specialisations for all the basic types
-template<> struct epVariant_Construct <nullptr_t> { EPALWAYS_INLINE static epVariant construct(nullptr_t)       { return epVariant(); } };
-template<> struct epVariant_Construct <float>     { EPALWAYS_INLINE static epVariant construct(float f)         { return epVariant((double)f); } };
-template<> struct epVariant_Construct <int8_t>    { EPALWAYS_INLINE static epVariant construct(int8_t i)        { return epVariant((int64_t)i); } };
-template<> struct epVariant_Construct <uint8_t>   { EPALWAYS_INLINE static epVariant construct(uint8_t i)       { return epVariant((int64_t)(uint64_t)i); } };
-template<> struct epVariant_Construct <int16_t>   { EPALWAYS_INLINE static epVariant construct(int16_t i)       { return epVariant((int64_t)i); } };
-template<> struct epVariant_Construct <uint16_t>  { EPALWAYS_INLINE static epVariant construct(uint16_t i)      { return epVariant((int64_t)(uint64_t)i); } };
-template<> struct epVariant_Construct <int32_t>   { EPALWAYS_INLINE static epVariant construct(int32_t i)       { return epVariant((int64_t)i); } };
-template<> struct epVariant_Construct <uint32_t>  { EPALWAYS_INLINE static epVariant construct(uint32_t i)      { return epVariant((int64_t)(uint64_t)i); } };
-template<> struct epVariant_Construct <uint64_t>  { EPALWAYS_INLINE static epVariant construct(uint64_t i)      { return epVariant((int64_t)i); } };
-template<> struct epVariant_Construct <char*>     { EPALWAYS_INLINE static epVariant construct(const char *s)   { return epVariant(epString(s)); } };
+template<> struct epVariant_Construct <nullptr_t> { epforceinline static epVariant construct(nullptr_t)       { return epVariant(); } };
+template<> struct epVariant_Construct <float>     { epforceinline static epVariant construct(float f)         { return epVariant((double)f); } };
+template<> struct epVariant_Construct <int8_t>    { epforceinline static epVariant construct(int8_t i)        { return epVariant((int64_t)i); } };
+template<> struct epVariant_Construct <uint8_t>   { epforceinline static epVariant construct(uint8_t i)       { return epVariant((int64_t)(uint64_t)i); } };
+template<> struct epVariant_Construct <int16_t>   { epforceinline static epVariant construct(int16_t i)       { return epVariant((int64_t)i); } };
+template<> struct epVariant_Construct <uint16_t>  { epforceinline static epVariant construct(uint16_t i)      { return epVariant((int64_t)(uint64_t)i); } };
+template<> struct epVariant_Construct <int32_t>   { epforceinline static epVariant construct(int32_t i)       { return epVariant((int64_t)i); } };
+template<> struct epVariant_Construct <uint32_t>  { epforceinline static epVariant construct(uint32_t i)      { return epVariant((int64_t)(uint64_t)i); } };
+template<> struct epVariant_Construct <uint64_t>  { epforceinline static epVariant construct(uint64_t i)      { return epVariant((int64_t)i); } };
+template<> struct epVariant_Construct <char*>     { epforceinline static epVariant construct(const char *s)   { return epVariant(epString(s)); } };
 template<size_t N>
-struct epVariant_Construct <char[N]>              { EPALWAYS_INLINE static epVariant construct(const char s[N]) { return epVariant(epString(s, N-1)); } };
+struct epVariant_Construct <char[N]>              { epforceinline static epVariant construct(const char s[N]) { return epVariant(epString(s, N-1)); } };
 template<typename T, size_t N>
-struct epVariant_Construct <T[N]>                 { EPALWAYS_INLINE static epVariant construct(const T a[N])    { return epVariant(epSlice<T>(a, N)); } };
+struct epVariant_Construct <T[N]>                 { epforceinline static epVariant construct(const T a[N])    { return epVariant(epSlice<T>(a, N)); } };
 
 // ******************************************************
 // ** Take a breath; you survived, now back to sanity! **
@@ -267,11 +267,11 @@ inline epVariant epToVariant(const epSlice<T> arr)
 }
 
 // for components
-EPALWAYS_INLINE epVariant epToVariant(ep::ComponentRef &&rval)
+epforceinline epVariant epToVariant(ep::ComponentRef &&rval)
 {
   return epVariant(std::move(rval));
 }
-EPALWAYS_INLINE epVariant epToVariant(const ep::ComponentRef &c)
+epforceinline epVariant epToVariant(const ep::ComponentRef &c)
 {
   return epVariant(c);
 }
@@ -338,7 +338,7 @@ protected:
   friend class epSharedPtr;
 
   template<size_t ...S>
-  EPALWAYS_INLINE static epVariant callFuncHack(epSlice<epVariant> args, const epDelegate<R(Args...)> &d, Sequence<S...>)
+  epforceinline static epVariant callFuncHack(epSlice<epVariant> args, const epDelegate<R(Args...)> &d, Sequence<S...>)
   {
     return epVariant(d(args[S].as<typename std::remove_reference<Args>::type>()...));
   }
@@ -391,7 +391,7 @@ protected:
   friend class epSharedPtr;
 
   template<size_t ...S>
-  EPALWAYS_INLINE static void callFuncHack(epSlice<epVariant> args, const epDelegate<void(Args...)> &d, Sequence<S...>)
+  epforceinline static void callFuncHack(epSlice<epVariant> args, const epDelegate<void(Args...)> &d, Sequence<S...>)
   {
     d(args[S].as<typename std::remove_reference<Args>::type>()...);
   }
