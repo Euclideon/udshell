@@ -2,10 +2,6 @@
 
 #if EPWINDOW_DRIVER == EPDRIVER_QT
 
-#if defined(_MSC_VER)
-#pragma warning(disable:4512) // assignment operator could not be generated
-#endif // defined(_MSC_VER)
-
 #include <QSemaphore>
 
 #include "epkernel_qt.h"

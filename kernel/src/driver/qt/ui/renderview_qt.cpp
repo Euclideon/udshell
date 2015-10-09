@@ -2,14 +2,17 @@
 
 #if EPUI_DRIVER == EPDRIVER_QT
 
-// Warning from QSGGeometry
-#if _MSC_VER
-# pragma warning(disable: 4512)
+// suppress warnings from qt
+#if defined(_MSC_VER)
+# pragma warning(push,3)
 #endif
-
 #include <QtQuick/QQuickWindow>
+#include <QtQuick/QQuickFramebufferObject>
 #include <QtGui/QOpenGLFramebufferObject>
 #include <QSGSimpleTextureNode>
+#if defined(_MSC_VER)
+# pragma warning(pop)
+#endif
 
 #include "../epkernel_qt.h"
 #include "renderview_qt.h"
@@ -17,8 +20,7 @@
 
 epKeyCode qtKeyToEPKey(Qt::Key qk);
 
-namespace qt
-{
+namespace qt {
 
 class FboRenderer : public QQuickFramebufferObject::Renderer
 {
