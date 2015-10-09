@@ -70,7 +70,7 @@ struct LogLine
 {
   LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID);
 
-  epSharedString ToString(LogFormatSpecs format) const;
+  epSharedString ToString(LogFormatSpecs format = LogDefaults::Format) const;
 
   int level;
   epSharedString text;
