@@ -75,7 +75,7 @@ public:
   }
 
 
-  __forceinline R operator()(Args... args) const
+  EPALWAYS_INLINE R operator()(Args... args) const
   {
     Delegate d;
     d.SetMemento(m->m);

@@ -319,6 +319,7 @@ struct epTheTypeIs;
 # define EPALWAYS_INLINE __forceinline
 # define EPPRINTF_FUNC(formatarg, vararg)
 # define EPPRINTF_METHOD(formatarg, vararg)
+# define EPNOTHROW __declspec(nothrow)
 # if !EP_DEBUG
 #   define EPASSUME(condition) __assume(condition)
 #   define EPUNREACHABLE __assume(0)
@@ -338,6 +339,7 @@ struct epTheTypeIs;
 # define EPALWAYS_INLINE inline __attribute__((always_inline))
 # define EPPRINTF_FUNC(formatarg, vararg) __attribute__((format(printf, formatarg, vararg)))
 # define EPPRINTF_METHOD(formatarg, vararg) __attribute__((format(printf, formatarg + 1, vararg + 1)))
+# define EPNOTHROW nothrow
 # if !EP_DEBUG
     // TODO: use #if __has_builtin(__builtin_unreachable) ??
 #   define EPASSUME(condition) if(!(condition)) { __builtin_unreachable(); }
@@ -357,6 +359,7 @@ struct epTheTypeIs;
 # define EPALWAYS_INLINE inline
 # define EPPRINTF_FUNC(formatarg, vararg)
 # define EPPRINTF_METHOD(formatarg, vararg)
+# define EPNOTHROW
 # if !EP_DEBUG
 #   define EPASSUME(condition)
 #   define EPUNREACHABLE
@@ -370,9 +373,6 @@ struct epTheTypeIs;
 #   define EPFMT_SSIZE_T "%d"
 #   define EPFMT_PTRDIFF_T "%d"
 # endif
-#endif
-#if !defined(EP_COMPILER_VISUALC) && !defined(__forceinline)
-# define __forceinline EPALWAYS_INLINE
 #endif
 
 #define epUnused(x) (void)x

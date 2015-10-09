@@ -109,7 +109,7 @@ protected:
   StreamRef OpenStream(const epVariant &source);
 
   struct StringCompare {
-    __forceinline ptrdiff_t operator()(epString a, epString b)
+    EPALWAYS_INLINE ptrdiff_t operator()(epString a, epString b)
     {
       return a.cmp(b);
     }

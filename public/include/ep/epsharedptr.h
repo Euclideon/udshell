@@ -3,6 +3,7 @@
 #define _EPSHAREDPTR_H
 
 #include <type_traits>
+#include "ep/epplatform.h"
 
 #if defined(EP_COMPILER_VISUALC)
 // TODO: REMOVE THIS!!!
@@ -107,13 +108,13 @@ public:
 
   inline size_t count() const;
 
-  __forceinline bool unique() const { return count() == 1; }
+  EPALWAYS_INLINE bool unique() const { return count() == 1; }
 
-  __forceinline explicit operator bool() const { return count() > 0; }
+  EPALWAYS_INLINE explicit operator bool() const { return count() > 0; }
 
-  __forceinline T& operator*() const { return *(T*)pInstance; }
-  __forceinline T* operator->() const { return (T*)pInstance; }
-  __forceinline T* ptr() const { return (T*)pInstance; }
+  EPALWAYS_INLINE T& operator*() const { return *(T*)pInstance; }
+  EPALWAYS_INLINE T* operator->() const { return (T*)pInstance; }
+  EPALWAYS_INLINE T* ptr() const { return (T*)pInstance; }
 
 private:
   template<class U> friend class epSharedPtr;
@@ -129,23 +130,25 @@ private:
 // **HAX** this crap allows us to delete a epRefCounted!
 namespace ep {
 namespace internal {
-  template<typename T, bool isref>
-  struct Destroy;
-  template<class T>
-  struct Destroy<T, false> {
-    __forceinline static void destroy(T *ptr)
-    {
-      delete ptr;
-    }
-  };
-  template<class T>
-  struct Destroy<T, true> {
-    __forceinline static void destroy(T *ptr)
-    {
-      epRefCounted *rc = ptr;
-      delete rc;
-    }
-  };
+
+template<typename T, bool isref>
+struct Destroy;
+template<class T>
+struct Destroy<T, false> {
+  EPALWAYS_INLINE static void destroy(T *ptr)
+  {
+    delete ptr;
+  }
+};
+template<class T>
+struct Destroy<T, true> {
+  EPALWAYS_INLINE static void destroy(T *ptr)
+  {
+    epRefCounted *rc = ptr;
+    delete rc;
+  }
+};
+
 } // namespace internal
 } // namespace ep
 
@@ -192,12 +195,12 @@ public:
   }
 
   // reference counter operations :
-  __forceinline explicit operator bool() const { return pInstance != nullptr; }
+  EPALWAYS_INLINE explicit operator bool() const { return pInstance != nullptr; }
 
   // underlying pointer operations :
-  __forceinline T& operator*() const { return *pInstance; }
-  __forceinline T* operator->() const { return pInstance; }
-  __forceinline T* ptr() const { return pInstance; }
+  EPALWAYS_INLINE T& operator*() const { return *pInstance; }
+  EPALWAYS_INLINE T* operator->() const { return pInstance; }
+  EPALWAYS_INLINE T* ptr() const { return pInstance; }
 
 private:
   template<typename U> friend class epSharedPtr;
@@ -376,13 +379,13 @@ inline epSharedPtr<T>& epSharedPtr<T>::operator=(const epUniquePtr<U> &ptr)
 }
 
 template<class T>
-__forceinline size_t epSharedPtr<T>::count() const
+EPALWAYS_INLINE size_t epSharedPtr<T>::count() const
 {
   return pInstance ? pInstance->rc : 0;
 }
 
 template<class T>
-__forceinline void epSharedPtr<T>::acquire()
+EPALWAYS_INLINE void epSharedPtr<T>::acquire()
 {
   if (pInstance)
   {
