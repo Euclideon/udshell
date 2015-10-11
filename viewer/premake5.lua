@@ -15,27 +15,27 @@ solution "epviewer"
 	startproject "epviewer"
 
 	dofile "../ud/3rdParty/GL/glew/project.lua"
-	-- common-proj.lua set objdir and targetdir, we'll reset them correctly for udviewer
+	-- common-proj.lua set objdir and targetdir, we'll reset them correctly for epviewer
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
 	dofile "../ud/udPlatform/project.lua"
-  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for udviewer
+  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for epviewer
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
 	dofile "../ud/udPointCloud/project.lua"
-  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for udviewer
+  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for epviewer
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
 	dofile "../3rdparty/lua/project.lua"
-  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for udviewer
+  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for epviewer
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
 	dofile "../kernel/project.lua"
-  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for udviewer
+  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for epviewer
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
