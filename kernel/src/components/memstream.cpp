@@ -28,7 +28,7 @@ ComponentDesc MemStream::descriptor =
   "Memory stream", // description
 
   epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  nullptr,
+  nullptr, // methods,
   nullptr
 };
 
@@ -74,19 +74,19 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
   if (spBuffer)
   {
     spBuffer->Unmap();
-    length = pos = 0;
+    pos = 0;
   }
 
+  length = 0;
   spBuffer = spNewBuffer;
 
   if (!spBuffer)
     return;
 
-  size_t len = 0;
   if (oFlags & OpenFlags::Write)
   {
     bufferSlice = spBuffer->Map();
-    if (!bufferSlice)
+    if (bufferSlice == nullptr)
       LogError("Can't reserve Buffer for writing.");
   }
   else if (oFlags & OpenFlags::Read)
@@ -96,13 +96,17 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
     if (!bufferSlice)
       LogError("Can't reserve Buffer for reading.");
   }
-  length = len;
 
-  if (!bufferSlice)
+  if (bufferSlice == nullptr)
   {
     spBuffer = nullptr;
     return; // TODO Error handling
   }
+
+  length = bufferSlice.length;
+
+  if (length > 0)
+    Changed.Signal();
 }
 
 epSlice<void> MemStream::Read(epSlice<void> buf)
@@ -137,7 +141,7 @@ size_t MemStream::Write(epSlice<const void> data)
   memcpy((char*)bufferSlice.ptr + pos, data.ptr, data.length);
   pos += data.length;
 
-  spBuffer->Changed.Signal();
+  Changed.Signal();
 
   return data.length;
 }
