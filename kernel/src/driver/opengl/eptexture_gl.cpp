@@ -59,7 +59,7 @@ epGLTextureFormat s_GLFormats[epIF_Max] =
 // Author: Manu Evans, May 2015
 epTexture* epTexture_CreateTexture(epTextureType type, size_t width, size_t height, int levels, epImageFormat format)
 {
-  epTexture *pTex = (epTexture*)udAlloc(sizeof(epTexture));
+  epTexture *pTex = (epTexture*)epAlloc(sizeof(epTexture));
 
   pTex->type = type;
   pTex->format = format;
@@ -90,7 +90,7 @@ epTexture* epTexture_CreateTexture(epTextureType type, size_t width, size_t heig
 void epTexture_DestroyTexture(epTexture **ppTex)
 {
   glDeleteTextures(1, &(*ppTex)->texture);
-  udFree(*ppTex);
+  epFree(*ppTex);
   *ppTex = nullptr;
 }
 

@@ -348,7 +348,7 @@ struct CStaticFuncDesc
 };
 
 // component description
-typedef udResult(InitComponent)(Kernel*);
+typedef epResult(InitComponent)(Kernel*);
 typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
 struct ComponentDesc

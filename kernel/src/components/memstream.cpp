@@ -40,7 +40,7 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, epSharedString
   const epVariant &fl = initParams["flags"];
   oFlags = fl.as<OpenFlags>();
   if (!(oFlags & (OpenFlags::Write | OpenFlags::Read)))
-    throw udR_InvalidParameter_;
+    throw epR_InvalidParameter_;
 
   const epVariant &buf = initParams["buffer"];
   if (buf.is(epVariant::Type::Null))
@@ -52,7 +52,7 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, epSharedString
   {
     inBuffer = buf.as<BufferRef>();
     if (!inBuffer)
-      throw udR_InvalidParameter_;
+      throw epR_InvalidParameter_;
   }
 
   SetBuffer(inBuffer);

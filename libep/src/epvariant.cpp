@@ -19,12 +19,12 @@ epVariant::~epVariant()
         ((VarDelegate*)&p)->~VarDelegate();
         break;
       case Type::String:
-        udFree(s);
+        epFree((void*)s);
         break;
       case Type::Array:
         for (size_t i = 0; i < length; ++i)
           a[i].~epVariant();
-        udFree(a);
+        epFree((void*)a);
         break;
       case Type::AssocArray:
         for (size_t i = 0; i < length; ++i)
@@ -32,7 +32,7 @@ epVariant::~epVariant()
           aa[i].key.~epVariant();
           aa[i].value.~epVariant();
         }
-        udFree(aa);
+        epFree((void*)aa);
         break;
       default:
         break;

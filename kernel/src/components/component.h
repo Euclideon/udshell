@@ -51,8 +51,8 @@ public:
   void Subscribe(epString eventName, const epVariant::VarDelegate &d);
   void Unsubscribe();
 
-  udResult SendMessage(epString target, epString message, const epVariant &data);
-  udResult SendMessage(Component *pComponent, epString message, const epVariant &data) { epMutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp, message, data); }
+  epResult SendMessage(epString target, epString message, const epVariant &data);
+  epResult SendMessage(Component *pComponent, epString message, const epVariant &data) { epMutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp, message, data); }
 
   const PropertyInfo *GetPropertyInfo(epString name) const
   {
@@ -108,9 +108,9 @@ protected:
   virtual ~Component();
 
   void Init(epInitParams initParams);
-  virtual udResult InitComplete() { return udR_Success; }
+  virtual epResult InitComplete() { return epR_Success; }
 
-  virtual udResult ReceiveMessage(epString message, epString sender, const epVariant &data);
+  virtual epResult ReceiveMessage(epString message, epString sender, const epVariant &data);
 
   void LogInternal(int level, epString text, int category, epString componentUID) const;
 

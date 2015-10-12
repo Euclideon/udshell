@@ -56,11 +56,11 @@ ComponentDesc Node::descriptor =
   epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
-udResult Node::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
+epResult Node::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
 {
   for (NodeRef &n : children)
     n->Render(spScene, mat * n->matrix);
-  return udR_Success;
+  return epR_Success;
 }
 
 bool Node::InputEvent(const epInputEvent &ev)

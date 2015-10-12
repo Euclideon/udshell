@@ -85,7 +85,7 @@ void GeomSource::Create(StreamRef spSource)
 
   // allocate for file
   int64_t len = spSource->Length();
-  void *pBuffer = udAlloc((size_t)len);
+  void *pBuffer = epAlloc((size_t)len);
 
   // read file from source
   epSlice<void> buf(pBuffer, (size_t)len);
@@ -133,7 +133,7 @@ void GeomSource::Create(StreamRef spSource)
     resources.Insert("scene0", spRoot);
   }
 
-  udFree(pBuffer);
+  epFree(pBuffer);
 }
 
 void GeomSource::ParseMaterials(const aiScene *pScene)
@@ -367,7 +367,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   return spNode;
 }
 
-udResult GeomSource::RegisterExtensions(Kernel *pKernel)
+epResult GeomSource::RegisterExtensions(Kernel *pKernel)
 {
   return pKernel->RegisterExtensions(&descriptor, extensions);
 }

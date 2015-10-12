@@ -47,7 +47,7 @@ const int s_VertexDataStride[epVDF_Max] =
 epFormatDeclaration *epVertex_CreateFormatDeclaration(const epArrayElement *pElementArray, int elementCount)
 {
   size_t size = sizeof(epFormatDeclaration) + (sizeof(epArrayElement) + sizeof(epArrayElementData))*elementCount;
-  epFormatDeclaration *pDecl = (epFormatDeclaration*)udAlloc(size);
+  epFormatDeclaration *pDecl = (epFormatDeclaration*)epAlloc(size);
   pDecl->pElements = (epArrayElement*)&pDecl[1];
   pDecl->pElementData = (epArrayElementData*)(pDecl->pElements + elementCount);
   pDecl->numElements = elementCount;
@@ -71,7 +71,7 @@ epFormatDeclaration *epVertex_CreateFormatDeclaration(const epArrayElement *pEle
 // ***************************************************************************************
 void epVertex_DestroyFormatDeclaration(epFormatDeclaration **ppDeclaration)
 {
-  udFree(*ppDeclaration);
+  epFree(*ppDeclaration);
   *ppDeclaration = nullptr;
 }
 
@@ -81,10 +81,10 @@ epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format)
   bool result = true;
   epArrayBuffer *pIB = nullptr;
   QOpenGLBuffer *pQtBuffer = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
-  UD_ERROR_IF(!pQtBuffer->create(), false);
-  UD_ERROR_IF(!pQtBuffer->bind(), false);
+  EP_ERROR_IF(!pQtBuffer->create(), false);
+  EP_ERROR_IF(!pQtBuffer->bind(), false);
 
-  pIB = (epArrayBuffer*)udAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*1);
+  pIB = (epArrayBuffer*)epAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*1);
   pIB->pFormat = (epArrayDataFormat*)&pIB[1];
   *pIB->pFormat = format;
   pIB->numElements = 1;
@@ -93,7 +93,7 @@ epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format)
 epilogue:
   if (!result)
   {
-    udDebugPrintf("Error creating vertex buffer\n");
+    epDebugPrintf("Error creating vertex buffer\n");
     delete pQtBuffer;
   }
   return pIB;
@@ -105,10 +105,10 @@ epArrayBuffer* epVertex_CreateVertexBuffer(epArrayDataFormat elements[], size_t 
   bool result = true;
   epArrayBuffer *pVB = nullptr;
   QOpenGLBuffer *pQtBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-  UD_ERROR_IF(!pQtBuffer->create(), false);
-  UD_ERROR_IF(!pQtBuffer->bind(), false);
+  EP_ERROR_IF(!pQtBuffer->create(), false);
+  EP_ERROR_IF(!pQtBuffer->bind(), false);
 
-  pVB = (epArrayBuffer*)udAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*numElements);
+  pVB = (epArrayBuffer*)epAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*numElements);
   pVB->pFormat = (epArrayDataFormat*)&pVB[1];
   memcpy(pVB->pFormat, elements, sizeof(epArrayDataFormat)*numElements);
   pVB->numElements = numElements;
@@ -117,7 +117,7 @@ epArrayBuffer* epVertex_CreateVertexBuffer(epArrayDataFormat elements[], size_t 
 epilogue:
   if (!result)
   {
-    udDebugPrintf("Error creating vertex buffer\n");
+    epDebugPrintf("Error creating vertex buffer\n");
     delete pQtBuffer;
   }
   return pVB;
@@ -129,7 +129,7 @@ void epVertex_DestroyArrayBuffer(epArrayBuffer **ppBuffer)
   (*ppBuffer)->pBuffer->release();
   (*ppBuffer)->pBuffer->destroy();
   delete (*ppBuffer)->pBuffer;
-  udFree(*ppBuffer);
+  epFree(*ppBuffer);
   *ppBuffer = nullptr;
 }
 

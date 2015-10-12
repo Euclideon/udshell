@@ -9,7 +9,7 @@ public:
   epFreeList(size_t listSize)
     : numAllocated(0)
   {
-    pList = pFreeList = udAllocType(T, listSize, udAF_None);
+    pList = pFreeList = epAllocType(T, listSize, udAF_None);
     for (size_t i = 0; i<listSize; ++i)
       (T*&)pList[i] = i < listSize-1 ? &pList[i+1] : nullptr;
   }
@@ -17,7 +17,7 @@ public:
   {
     // TODO: free allocated items...
 
-    udFree(pList);
+    epFree(pList);
   }
 
   template<typename... Args>

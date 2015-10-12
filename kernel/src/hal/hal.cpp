@@ -5,10 +5,10 @@
 static bool bInitialised = false;
 static bool bRenderInitialised = false;
 
-udResult epHAL_Init()
+epResult epHAL_Init()
 {
   if (bInitialised)
-    return udR_Success;
+    return epR_Success;
 
   void epInput_Init();
   epInput_Init();
@@ -17,13 +17,13 @@ udResult epHAL_Init()
   epImage_InitInternal();
 
   bInitialised = true;
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult epHAL_InitRender()
+epResult epHAL_InitRender()
 {
   if (bRenderInitialised)
-    return udR_Success;
+    return epR_Success;
 
   void epGPU_Init();
   epGPU_Init();
@@ -32,10 +32,10 @@ udResult epHAL_InitRender()
   epDebugFont_Init();
 
   bRenderInitialised = true;
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult epHAL_DeinitRender()
+epResult epHAL_DeinitRender()
 {
   if (bRenderInitialised)
   {
@@ -46,10 +46,10 @@ udResult epHAL_DeinitRender()
     epGPU_Deinit();
     bRenderInitialised = false;
   }
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult epHAL_Deinit()
+epResult epHAL_Deinit()
 {
   if (bInitialised)
   {
@@ -59,5 +59,5 @@ udResult epHAL_Deinit()
     epInput_Deinit();
     bInitialised = false;
   }
-  return udR_Success;
+  return epR_Success;
 }

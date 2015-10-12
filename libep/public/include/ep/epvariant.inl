@@ -50,19 +50,19 @@ inline epVariant::epVariant(const epVariant &val)
     }
     else if (is(Type::String))
     {
-      char *pS = (char*)udAlloc(length);
+      char *pS = (char*)epAlloc(length);
       memcpy(pS, val.s, length);
       s = pS;
     }
     else if (is(Type::Array))
     {
-      a = (epVariant*)udAlloc(sizeof(epVariant)*length);
+      a = (epVariant*)epAlloc(sizeof(epVariant)*length);
       for (size_t i = 0; i<length; ++i)
         new((void*)&a[i]) epVariant((const epVariant&)val.a[i]);
     }
     else if (is(Type::AssocArray))
     {
-      aa = (epKeyValuePair*)udAlloc(sizeof(epKeyValuePair)*length);
+      aa = (epKeyValuePair*)epAlloc(sizeof(epKeyValuePair)*length);
       for (size_t i = 0; i<length; ++i)
       {
         new((void*)&aa[i].key) epVariant((const epVariant&)val.aa[i].key);

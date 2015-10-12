@@ -73,7 +73,7 @@ static int SendMessage(lua_State *L)
   if (numArgs >= 4)
     new(&args) epVariant(epVariant::luaGet(l, 4));
 
-  /*udResult r = */l.kernel()->SendMessage(target, sender, message, args);
+  /*epResult r = */l.kernel()->SendMessage(target, sender, message, args);
 
   // TODO: push result and return 1?
   return 0;  // number of results
@@ -104,8 +104,8 @@ static int CreateComponent(lua_State *L)
   }
 
   ComponentRef c = nullptr;
-  udResult r = l.kernel()->CreateComponent(type, init, &c);
-  if (r == udR_Failure_)
+  epResult r = l.kernel()->CreateComponent(type, init, &c);
+  if (r == epR_Failure_)
     l.pushNil();
   else
     l.pushComponent(c);
@@ -206,7 +206,7 @@ int LuaState::udLuaPanic(lua_State *L)
 void* LuaState::udLuaAlloc(void *, void *ptr, size_t, size_t nsize)
 {
   if (nsize == 0) {
-    udFree(ptr);
+    epFree(ptr);
     return nullptr;
   }
   else

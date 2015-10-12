@@ -33,7 +33,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epIn
   const epVariant &path = initParams["path"];
 
   if (!path.is(epVariant::Type::String))
-	  throw udR_InvalidParameter_;
+	  throw epR_InvalidParameter_;
 
   const epVariant &flags = initParams["flags"];
   FileOpenFlags of = flags.as<FileOpenFlags>();
@@ -54,7 +54,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epIn
   fd = open(path.asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
 #endif
   if (fd == -1)
-    throw udR_File_OpenFailure;
+    throw epR_File_OpenFailure;
 
   uint64_t curr = lseek(fd, 0L, SEEK_CUR);
   length = lseek(fd, 0L, SEEK_END);

@@ -32,7 +32,7 @@ static void epViewerGLUT_Display()
 // Author: Manu Evans, May 2015
 epViewerInstance* epViewerDriver_CreateInstance()
 {
-  return udAllocType(epViewerInstance, 1, udAF_Zero);
+  return epAllocType(epViewerInstance, 1, udAF_Zero);
 }
 
 // ---------------------------------------------------------------------------------------

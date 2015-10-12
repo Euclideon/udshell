@@ -26,7 +26,7 @@ protected:
   Window(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   virtual ~Window();
 
-  udResult CreateInternal(epInitParams initParams);
+  epResult CreateInternal(epInitParams initParams);
   void DestroyInternal();
 
   UIComponentRef spTopLevelUI = nullptr;

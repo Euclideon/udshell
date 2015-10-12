@@ -16,7 +16,7 @@ void epImage_InitInternal()
   HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr,
                                 CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFactory));
   if (FAILED(hr))
-    udDebugPrintf("Failed to create WICImagingFactory");
+    epDebugPrintf("Failed to create WICImagingFactory");
 }
 
 void epImage_DeinitInternal()
@@ -54,7 +54,7 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
   UINT frames;
   pDecoder->GetFrameCount(&frames);
 
-  epImage *pOutput = (epImage*)udAlloc(sizeof(epImage) + frames*sizeof(epImageSurface));
+  epImage *pOutput = (epImage*)epAlloc(sizeof(epImage) + frames*sizeof(epImageSurface));
   pOutput->pSurfaces = (epImageSurface*)&pOutput[1];
   pOutput->elements = frames;
   pOutput->mips = 1;
@@ -87,7 +87,7 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
     pBitmapSource->GetPixelFormat(&format);
     surface.format = GUIDToImageFormat(format);
 
-    surface.pImage = udAlloc(w*h*4);
+    surface.pImage = epAlloc(w*h*4);
     pBitmapSource->CopyPixels(nullptr, w*4, w*h*4, (BYTE*)surface.pImage);
 
     // this is useful metadata

@@ -161,7 +161,7 @@ int UDNode::Load(epString name, bool useStreamer)
 }
 
 
-udResult UDNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
+epResult UDNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
 {
   UDJob &job = spScene->ud.pushBack();
   memset(&job, 0, sizeof(job));
@@ -189,7 +189,7 @@ udResult UDNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
     job.renderModel.pClip = &job.renderModel.clipArea;
   }
 
-  return udR_Success;
+  return epR_Success;
 }
 
 

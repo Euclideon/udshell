@@ -19,13 +19,13 @@ namespace qt {
 namespace internal {
 
 // Helper function
-udResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal)
+epResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal)
 {
   epString file = initParams["file"].as<epString>();
   if (file.empty())
   {
     pComponent->LogError("Attempted to create ui component without source file");
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   // create QObject wrapper for this component and expose it to the qml context for this ui component
@@ -48,7 +48,7 @@ udResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Co
     delete pContext;
     delete pEPComponent;
 
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   // transfer ownership of our qt objects so they are cleaned up
@@ -57,7 +57,7 @@ udResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Co
 
   *ppInternal = pQtObject;
 
-  return udR_Success;
+  return epR_Success;
 }
 
 // Helper function
@@ -77,12 +77,12 @@ using qt::internal::SetupFromQmlFile;
 using qt::internal::CleanupInternalData;
 
 // ---------------------------------------------------------------------------------------
-udResult UIComponent::CreateInternal(epInitParams initParams)
+epResult UIComponent::CreateInternal(epInitParams initParams)
 {
   LogTrace("UIComponent::CreateInternal()");
 
-  if (SetupFromQmlFile(initParams, (qt::QtKernel*)pKernel, this, (QObject**)&pInternal) != udR_Success)
-    return udR_Failure_;
+  if (SetupFromQmlFile(initParams, (qt::QtKernel*)pKernel, this, (QObject**)&pInternal) != epR_Success)
+    return epR_Failure_;
 
   QObject *pQtObject = (QObject*)pInternal;
 
@@ -91,17 +91,17 @@ udResult UIComponent::CreateInternal(epInitParams initParams)
   {
     LogError("UIComponent must create a QQuickItem");
     CleanupInternalData((QObject**)&pInternal);
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   // Decorate the descriptor with meta object information
   qt::PopulateComponentDesc<UIComponent>(this, pQtObject);
 
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-udResult UIComponent::InitComplete()
+epResult UIComponent::InitComplete()
 {
   // let qml know that the enclosing object has finished being created
   QObject *pQtObject = (QObject*)pInternal;
@@ -109,7 +109,7 @@ udResult UIComponent::InitComplete()
   if (epComponent)
     epComponent->Done();
 
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -121,7 +121,7 @@ void UIComponent::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-udResult Viewport::CreateInternal(epInitParams initParams)
+epResult Viewport::CreateInternal(epInitParams initParams)
 {
   LogTrace("Viewport::CreateInternal()");
 
@@ -131,7 +131,7 @@ udResult Viewport::CreateInternal(epInitParams initParams)
   if (renderViews.size() != 1)
   {
     LogWarning(1, "Viewport component must contain 1 RenderView QML item");
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   // check if we passed in a view, otherwise create a default one
@@ -144,7 +144,7 @@ udResult Viewport::CreateInternal(epInitParams initParams)
 
   renderViews.first()->AttachView(spView);
 
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -155,13 +155,13 @@ void Viewport::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-udResult Window::CreateInternal(epInitParams initParams)
+epResult Window::CreateInternal(epInitParams initParams)
 {
   LogTrace("Window::CreateInternal()");
 
   qt::QtKernel *pQtKernel = (qt::QtKernel*)pKernel;
-  if (SetupFromQmlFile(initParams, pQtKernel, this, (QObject**)&pInternal) != udR_Success)
-    return udR_Failure_;
+  if (SetupFromQmlFile(initParams, pQtKernel, this, (QObject**)&pInternal) != epR_Success)
+    return epR_Failure_;
 
   QQuickWindow *pQtWindow = qobject_cast<QQuickWindow*>((QObject*)pInternal);
   // We expect a QQuickWindow object
@@ -169,22 +169,22 @@ udResult Window::CreateInternal(epInitParams initParams)
   {
     LogError("Window must create a QQuickWindow");
     CleanupInternalData((QObject**)&pInternal);
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   // Decorate the descriptor with meta object information
   qt::PopulateComponentDesc<Window>(this, pQtWindow);
 
   // register the window with the kernel
-  if (pQtKernel->RegisterWindow(pQtWindow) != udR_Success)
+  if (pQtKernel->RegisterWindow(pQtWindow) != epR_Success)
   {
     // TODO: error handling
     LogError("Unable to register window");
     CleanupInternalData((QObject**)&pInternal);
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------

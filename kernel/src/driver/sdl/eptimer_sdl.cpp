@@ -29,7 +29,7 @@ static uint32_t SDLCallback(uint32_t duration, void *pUserData)
 
 HalTimer *HalTimer_Create(HalTimerType tt, uint32_t duration,  HalTimerCallback *pCallBack, void *pUserData)
 {
-  HalTimerSDL *pTimer = udAllocType(HalTimerSDL, 1, udAF_Zero);
+  HalTimerSDL *pTimer = epAllocType(HalTimerSDL, 1, udAF_Zero);
   if (!pTimer)
     return nullptr;
 
@@ -42,7 +42,7 @@ HalTimer *HalTimer_Create(HalTimerType tt, uint32_t duration,  HalTimerCallback 
   pTimer->timerID = SDL_AddTimer(duration, SDLCallback, pTimer);
 
   if (pTimer->timerID == 0)
-    udFree(pTimer);
+    epFree(pTimer);
 
   return pTimer;
 }
@@ -54,7 +54,7 @@ void HalTimer_Destroy(HalTimer **ppTimer)
   {
     HalTimerSDL *pTimer = (HalTimerSDL*)*ppTimer;
     SDL_RemoveTimer(pTimer->timerID);
-    udFree((*ppTimer));
+    epFree((*ppTimer));
   }
 }
 

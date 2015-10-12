@@ -18,7 +18,7 @@ protected:
   Viewport(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   virtual ~Viewport();
 
-  udResult CreateInternal(epInitParams initParams);
+  epResult CreateInternal(epInitParams initParams);
   void DestroyInternal();
 };
 

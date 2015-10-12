@@ -54,7 +54,7 @@ epComponentAPI g_componentAPI =
   },
 
   // SendMessage
-  [](epComponent *pComponent, epString target, epString message, const epVariant *pData) -> udResult
+  [](epComponent *pComponent, epString target, epString message, const epVariant *pData) -> epResult
   {
     Component *pC = (Component*)pComponent;
     return pC->SendMessage(target, message, *pData);

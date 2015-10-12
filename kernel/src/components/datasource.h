@@ -26,9 +26,9 @@ public:
 
   virtual epSlice<const epString> GetFileExtensions() const { return nullptr; }
 
-  virtual udResult Flush()
+  virtual epResult Flush()
   {
-    return udR_Success;
+    return epR_Success;
   }
 
   size_t GetNumResources() const

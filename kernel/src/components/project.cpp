@@ -37,17 +37,17 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid
     if (!spSrc)
     {
       LogWarning(5, "\"src\" file path not found: {0}", src);
-      throw udR_File_OpenFailure;
+      throw epR_File_OpenFailure;
     }
   }
   else
   {
     LogError("Missing or invalid parameter \"src\" when creating Project");
-    throw udR_InvalidParameter_;
+    throw epR_InvalidParameter_;
   }
 
   int64_t len = spSrc->Length();
-  char *pBuffer = (char *)udAlloc(len + 1);
+  char *pBuffer = (char *)epAlloc(len + 1);
   spSrc->Read(epSlice<void>(pBuffer, len));
   pBuffer[len] = '\0';
 
@@ -75,7 +75,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid
     LogError("Unable to parse project file: {0} at byte {1} : {2}", src.asString(), (size_t)(e.where<char>() - pBuffer), e.what());
   }
 
-  udFree(pBuffer);
+  epFree(pBuffer);
 }
 
 } // namespace ep

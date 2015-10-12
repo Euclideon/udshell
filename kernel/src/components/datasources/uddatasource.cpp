@@ -45,7 +45,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, epShared
 
       // Populate meta data
       int32_t count;
-      result =  udOctree_GetMetadataCount(pOctree, &count);
+      result = udOctree_GetMetadataCount(pOctree, &count);
       if (result == udR_Success)
       {
         for (int32_t i = 0; i < count; ++i)
@@ -64,7 +64,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, epShared
   }
 }
 
-udResult UDDataSource::RegisterExtensions(Kernel *pKernel)
+epResult UDDataSource::RegisterExtensions(Kernel *pKernel)
 {
   return pKernel->RegisterExtensions(&descriptor, extensions);
 }

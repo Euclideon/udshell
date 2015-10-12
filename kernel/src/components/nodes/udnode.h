@@ -60,7 +60,7 @@ protected:
   UDNode(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Node(pType, pKernel, uid, initParams) { clipArea.minX = clipArea.minY = clipArea.maxX = clipArea.maxY = 0; }
 
-  udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;
+  epResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;
 
   udRender_VoxelShaderFunc *pVoxelShader = nullptr;
   epDelegate<NodeRenderModel::SimpleVoxelDlgt> simpleVoxelDel;
@@ -89,7 +89,7 @@ inline void UDNode::SetSimpleVoxelDelegate(epDelegate<NodeRenderModel::SimpleVox
 
 inline epVariant epToVariant(const BoundingVolume &volume)
 {
-  epKeyValuePair *pPairs = udAllocType(epKeyValuePair, 6, udAF_None);
+  epKeyValuePair *pPairs = epAllocType(epKeyValuePair, 6, epAF_None);
   if (pPairs)
   {
     epSlice<epKeyValuePair> slice(pPairs, 6);
@@ -121,7 +121,7 @@ inline void epFromVariant(const epVariant &variant, BoundingVolume *pVolume)
 
 inline epVariant epToVariant(const udRenderClipArea& area)
 {
-  epKeyValuePair *pPairs = udAllocType(epKeyValuePair, 4, udAF_None);
+  epKeyValuePair *pPairs = epAllocType(epKeyValuePair, 4, epAF_None);
   if (pPairs)
   {
     epSlice<epKeyValuePair> slice(pPairs, 4);

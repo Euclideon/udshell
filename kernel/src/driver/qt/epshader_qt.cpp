@@ -37,7 +37,7 @@ epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType
     return 0;
   }
 
-  epShader *pShader = udAllocType(epShader, 1, udAF_None);
+  epShader *pShader = epAllocType(epShader, 1, epAF_None);
   pShader->pShader = pQtShader;
   return pShader;
 }
@@ -85,7 +85,7 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader 
 
     extraBytes += sizeof(epShaderProgram::Param) * (numAttributes + numUniforms);
 
-    pProgram = (epShaderProgram*)udAlloc(sizeof(epShaderProgram) + extraBytes);
+    pProgram = (epShaderProgram*)epAlloc(sizeof(epShaderProgram) + extraBytes);
     pProgram->pProgram = pQtProgram;
     pProgram->numAttributes = numAttributes;
     pProgram->numUniforms = numUniforms;

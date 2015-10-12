@@ -12,7 +12,7 @@ namespace qt {
   class QtKernel;
 
   namespace internal {
-    udResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
+    epResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
   }
 
 
@@ -56,7 +56,7 @@ signals:
   void completed();
 
 private:
-  friend udResult internal::SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
+  friend epResult internal::SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
   QtEPComponent(epWeakPtr<ep::Component> wpComp) : QObject(nullptr), wpComponent(wpComp) {}
 
   ep::ComponentRef spComponent;

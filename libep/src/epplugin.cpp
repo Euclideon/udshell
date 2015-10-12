@@ -4,18 +4,17 @@ extern "C" {
 
 epPluginInstance *s_pPluginInstance = nullptr;
 
-bool epPlugin_Init(epPluginInstance *pPlugin)
+bool epPluginAttach();
+
+EP_EXPORT bool epPlugin_Init(epPluginInstance *pPlugin)
 {
   s_pPluginInstance = pPlugin;
-
-  // TODO: register exports...
-
-  return false;
+  return epPluginAttach();
 }
 
 }
 
-#if defined(EP_WINDOWS)
+#if 0 //defined(EP_WINDOWS) // TODO: why does the CRT hog this? we might need to do things here...
 BOOLEAN WINAPI DllMain(IN HINSTANCE epUnusedParam(hDllHandle), IN DWORD nReason, IN LPVOID epUnusedParam(Reserved))
 {
   BOOLEAN bSuccess = TRUE;

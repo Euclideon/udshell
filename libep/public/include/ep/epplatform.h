@@ -246,7 +246,7 @@
 
 // silence warnings
 #if defined(EP_COMPILER_VISUALC)
-//# pragma warning(disable:4127) // conditional expression is constant
+# pragma warning(disable:4127) // conditional expression is constant
 //# pragma warning(disable:4100) // disable 'unreferenced formal parameter'
 //# pragma warning(disable:4996) // disable depreciated warnings
 //# pragma warning(disable:4190) // disable C-linkage returning UDT (user data type)
@@ -263,12 +263,15 @@
 #if defined(EP_COMPILER_VISUALC)
 # define EP_EXPORT __declspec(dllexport)
 # define EP_EXPORT_VARIABLE __declspec(dllexport)
+# if defined(_WINDLL)
+#   define EP_SHAREDLIB 1
+# endif
 #else
 # define EP_EXPORT
 # define EP_EXPORT_VARIABLE
 #endif
 
-#if defined(EP_SHAREDLIB)
+#if EP_SHAREDLIB
 # define EP_API extern "C" EP_EXPORT
 #else
 # define EP_API extern "C"
@@ -388,12 +391,7 @@ struct epTheTypeIs;
 #include <stdlib.h>
 #include <new>
 
-// TODO: remove these!
-#include "udResult.h"
-#if 1
-# include "udPlatform.h"
-#endif
-
+#include "ep/eperror.h"
 #include "ep/epstring.h"
 
 
@@ -527,6 +525,37 @@ void epAssertFailed(epString condition, epString message, epString file, int lin
 #   define EP_STATICASSERT(a_condition, a_error) typedef char EP_STATICASSERT##a_error[(a_condition)?1:-1] __attribute__ ((unused))
 # endif
 #endif
+
+
+// HACK: rejig these
+#define __MEMORY_DEBUG__  0
+
+#if __MEMORY_DEBUG__
+# define IF_MEMORY_DEBUG(x,y) ,x,y
+#else
+# define IF_MEMORY_DEBUG(x,y)
+#endif //  __MEMORY_DEBUG__
+
+extern "C" {
+enum epAllocationFlags
+{
+  epAF_None = 0,
+  epAF_Zero = 1
+};
+
+void *_epAlloc(size_t size, epAllocationFlags flags = epAF_None IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epAlloc(size) _epAlloc(size, epAF_None IF_MEMORY_DEBUG(__FILE__, __LINE__))
+
+void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epAllocAligned(size, alignment, flags) _epAllocAligned(size, alignment, flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
+
+#define epAllocFlags(size, flags) _epAlloc(size, flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
+#define epAllocType(type, count, flags) (type*)_epAlloc(sizeof(type) * (count), flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
+
+void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epFree(pMemory) _epFree(pMemory IF_MEMORY_DEBUG(__FILE__, __LINE__))
+}
+
 
 #include "ep/epslice.inl"
 #include "ep/epstring.inl"

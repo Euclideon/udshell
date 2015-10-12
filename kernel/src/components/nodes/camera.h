@@ -39,7 +39,7 @@ protected:
 
   bool InputEvent(const epInputEvent &ev) override { return false; }
   virtual bool ViewportInputEvent(const epInputEvent &ev) { return false; }
-  bool Update(double timeStep) override { return udR_Success; }
+  bool Update(double timeStep) override { return epR_Success; }
 };
 
 

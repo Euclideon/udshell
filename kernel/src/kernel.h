@@ -34,10 +34,10 @@ public:
   // TODO: MessageHandler returns void, should we return some error state??
   typedef FastDelegate<void(epString sender, epString message, const epVariant &data)> MessageHandler;
 
-  static udResult Create(Kernel **ppInstance, epInitParams commandLine, int renderThreadCount = 0);
-  virtual udResult Destroy();
+  static epResult Create(Kernel **ppInstance, epInitParams commandLine, int renderThreadCount = 0);
+  virtual epResult Destroy();
 
-  udResult SendMessage(epString target, epString sender, epString message, const epVariant &data);
+  epResult SendMessage(epString target, epString sender, epString message, const epVariant &data);
 
   void RegisterMessageHandler(epSharedString name, MessageHandler messageHandler);
 
@@ -47,9 +47,9 @@ public:
   void DispatchToMainThreadAndWait(MainThreadCallback callback);
 
   // component registry
-  udResult RegisterComponentType(ComponentDesc *pDesc);
+  epResult RegisterComponentType(ComponentDesc *pDesc);
   template<typename ComponentType>
-  udResult RegisterComponent();
+  epResult RegisterComponent();
 
   const ComponentDesc* GetComponentDesc(epString id);
 
@@ -60,7 +60,7 @@ public:
   }
   epArray<const ComponentDesc *> GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase);
 
-  udResult CreateComponent(epString typeId, epInitParams initParams, ComponentRef *pNewInstance);
+  epResult CreateComponent(epString typeId, epInitParams initParams, ComponentRef *pNewInstance);
 
   template<typename T>
   epSharedPtr<T> CreateComponent(epInitParams initParams = nullptr);
@@ -86,7 +86,7 @@ public:
   // Functions for resource management
   ResourceManagerRef GetResourceManager() const { return spResourceManager; }
 
-  udResult RegisterExtensions(const ComponentDesc *pDesc, const epSlice<const epString> exts);
+  epResult RegisterExtensions(const ComponentDesc *pDesc, const epSlice<const epString> exts);
   DataSourceRef CreateDataSourceFromExtension(epString ext, epInitParams initParams);
 
   // other functions
@@ -94,8 +94,8 @@ public:
   ViewRef SetFocusView(ViewRef spView);
   ShortcutManagerRef GetShortcutManager() const { return spShortcutManager; }
 
-  virtual udResult RunMainLoop() { return udR_Success; }
-  udResult Terminate();
+  virtual epResult RunMainLoop() { return epR_Success; }
+  epResult Terminate();
 
 protected:
   friend class Component;
@@ -144,18 +144,18 @@ protected:
 
   virtual ~Kernel() {}
 
-  udResult DoInit(Kernel *pKernel);
+  epResult DoInit(Kernel *pKernel);
 
   static Kernel *CreateInstanceInternal(epInitParams commandLine);
-  virtual udResult InitInternal() = 0;
+  virtual epResult InitInternal() = 0;
 
-  udResult InitComponents();
-  udResult InitRender();
-  udResult DeinitRender();
+  epResult InitComponents();
+  epResult InitRender();
+  epResult DeinitRender();
 
-  udResult DestroyComponent(Component *pInstance);
+  epResult DestroyComponent(Component *pInstance);
 
-  udResult ReceiveMessage(epString sender, epString message, const epVariant &data);
+  epResult ReceiveMessage(epString sender, epString message, const epVariant &data);
 
   int SendMessage(LuaState L);
 
@@ -172,8 +172,8 @@ template<typename T>
 epSharedPtr<T> Kernel::CreateComponent(epInitParams initParams)
 {
   ComponentRef c = nullptr;
-  udResult r = CreateComponent(T::descriptor.id, initParams, &c);
-  if (r != udR_Success)
+  epResult r = CreateComponent(T::descriptor.id, initParams, &c);
+  if (r != epR_Success)
     return nullptr;
   return shared_pointer_cast<T>(c);
 }
@@ -186,7 +186,7 @@ Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, epS
   return udNew(CT, pType, pKernel, uid, initParams);
 }
 template<typename CT>
-udResult Kernel::RegisterComponent()
+epResult Kernel::RegisterComponent()
 {
   if (!CT::descriptor.pCreateInstance)
     CT::descriptor.pCreateInstance = &NewComponent<CT>;

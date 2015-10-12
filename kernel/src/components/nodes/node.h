@@ -43,7 +43,7 @@ protected:
 
   virtual bool InputEvent(const epInputEvent &ev);
   virtual bool Update(double timeStep);
-  virtual udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat);
+  virtual epResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat);
 
   Node *pParent = nullptr;
   epArray<NodeRef, 3> children;

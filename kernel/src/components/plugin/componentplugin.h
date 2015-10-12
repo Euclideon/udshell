@@ -19,19 +19,19 @@ private:
   {
     pUserData = pCallbacks->pCreateInstance((epComponent*)this, initParams.params.ptr, initParams.params.length);
     if (!pUserData)
-      throw udR_Failure_;
+      throw epR_Failure_;
   }
   virtual ~ComponentPlugin()
   {
     pCallbacks->pDestroy((epComponent*)this, pUserData);
   }
 
-  udResult InitComplete() override
+  epResult InitComplete() override
   {
     return pCallbacks->pInitComplete((epComponent*)this, pUserData);
   }
 
-  udResult ReceiveMessage(epString message, epString sender, const epVariant &data) override
+  epResult ReceiveMessage(epString message, epString sender, const epVariant &data) override
   {
     return pCallbacks->pReceiveMessage((epComponent*)this, pUserData, message, sender, &data);
   }

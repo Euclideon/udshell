@@ -43,19 +43,19 @@
 
 namespace ep
 {
-udResult udRenderScene_Init(Kernel*);
-udResult udRenderScene_InitRender(Kernel*);
+epResult udRenderScene_Init(Kernel*);
+epResult udRenderScene_InitRender(Kernel*);
 
-udResult udRenderScene_Deinit(Kernel*);
-udResult udRenderScene_DeinitRender(Kernel*); // Not sure if both Deinit's are necessary
+epResult udRenderScene_Deinit(Kernel*);
+epResult udRenderScene_DeinitRender(Kernel*); // Not sure if both Deinit's are necessary
 
-udResult Kernel::Create(Kernel **ppInstance, epInitParams commandLine, int renderThreadCount)
+epResult Kernel::Create(Kernel **ppInstance, epInitParams commandLine, int renderThreadCount)
 {
-  udResult result;
+  epResult result;
   StreamRef spDebugFile, spConsole;
   Kernel *pKernel = CreateInstanceInternal(commandLine);
 
-  UD_ERROR_NULL(pKernel, udR_Failure_);
+  UD_ERROR_NULL(pKernel, epR_Failure_);
 
   pKernel->componentRegistry.Init(256);
   pKernel->instanceRegistry.Init(256);
@@ -140,7 +140,7 @@ udResult Kernel::Create(Kernel **ppInstance, epInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->InitInternal());
 
 epilogue:
-  if (result != udR_Success)
+  if (result != epR_Success)
   {
     // TODO: clean up code
   }
@@ -148,50 +148,50 @@ epilogue:
   return result;
 }
 
-udResult Kernel::DoInit(Kernel *pKernel)
+epResult Kernel::DoInit(Kernel *pKernel)
 {
   // init the components
-  if (pKernel->InitComponents() != udR_Success)
+  if (pKernel->InitComponents() != epR_Success)
   {
     EPASSERT(false, "Oh no! Can't boot!");
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
-  udResult result = udRenderScene_Init(pKernel);
-  if (result != udR_Success)
+  epResult result = udRenderScene_Init(pKernel);
+  if (result != epR_Success)
     return result;
 
   result = udRenderScene_InitRender(pKernel);
 
-  if (result != udR_Success)
+  if (result != epR_Success)
     return result;
 
   pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>();
   if (!pKernel->spPluginManager)
-    return udR_Failure_;
+    return epR_Failure_;
 
   // load plugins
   //...
 
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   if (!pKernel->spStreamerTimer)
-    return udR_Failure_;
+    return epR_Failure_;
   pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
 
   pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
   if (!pKernel->spUpdateTimer)
-    return udR_Failure_;
+    return epR_Failure_;
   pKernel->spUpdateTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
 
   // call application init
   return SendMessage("$init", "#", "init", nullptr);
 }
 
-udResult Kernel::Destroy()
+epResult Kernel::Destroy()
 {
-  udResult result = udR_Success;
-  udResult renderSceneRenderResult = udRenderScene_DeinitRender(this);
-  udResult renderSceneResult = udRenderScene_Deinit(this);
+  epResult result = epR_Success;
+  epResult renderSceneRenderResult = udRenderScene_DeinitRender(this);
+  epResult renderSceneResult = udRenderScene_Deinit(this);
 
   // unregister components, free stuff
   //...
@@ -213,9 +213,9 @@ udResult Kernel::Destroy()
 
   delete this;
 
-  if (renderSceneRenderResult != udR_Success)
+  if (renderSceneRenderResult != epR_Success)
     result = renderSceneRenderResult;
-  else if (renderSceneResult != udR_Success)
+  else if (renderSceneResult != epR_Success)
     result = renderSceneResult;
 
   return result;
@@ -280,10 +280,10 @@ epArray<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const ComponentD
   return derivedDescs;
 }
 
-udResult Kernel::SendMessage(epString target, epString sender, epString message, const epVariant &data)
+epResult Kernel::SendMessage(epString target, epString sender, epString message, const epVariant &data)
 {
   if (target.empty())
-    return udR_Failure_; // TODO: no target!!
+    return epR_Failure_; // TODO: no target!!
 
   char targetType = target.popFront();
   if (targetType == '@')
@@ -299,7 +299,7 @@ udResult Kernel::SendMessage(epString target, epString sender, epString message,
     {
       // TODO: check if it's in the foreign component registry and send it there
 
-      return udR_Failure_; // TODO: no component!
+      return epR_Failure_; // TODO: no component!
     }
   }
   else if (targetType == '#')
@@ -314,7 +314,7 @@ udResult Kernel::SendMessage(epString target, epString sender, epString message,
     {
       // TODO: foreign kernels?!
 
-      return udR_Failure_; // TODO: invalid kernel!
+      return epR_Failure_; // TODO: invalid kernel!
     }
   }
   else if (targetType == '$')
@@ -324,19 +324,19 @@ udResult Kernel::SendMessage(epString target, epString sender, epString message,
     if (pHandler)
     {
       pHandler->callback(sender, message, data);
-      return udR_Success;
+      return epR_Success;
     }
     else
-      return udR_Failure_; // TODO: no message handler
+      return epR_Failure_; // TODO: no message handler
   }
 
-  return udR_Failure_; // TODO: error, invalid target!
+  return epR_Failure_; // TODO: error, invalid target!
 }
 
-udResult Kernel::ReceiveMessage(epString sender, epString message, const epVariant &data)
+epResult Kernel::ReceiveMessage(epString sender, epString message, const epVariant &data)
 {
 
-  return udR_Success;
+  return epR_Success;
 }
 
 void Kernel::RegisterMessageHandler(epSharedString name, MessageHandler messageHandler)
@@ -347,12 +347,12 @@ void Kernel::RegisterMessageHandler(epSharedString name, MessageHandler messageH
   messageHandlers.Add(name.hash(), handler);
 }
 
-udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
+epResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
 {
   if (pDesc->id.exists('@') || pDesc->id.exists('$') || pDesc->id.exists('#'))
   {
     EPASSERT(false, "Invalid component id");
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   // build search trees
@@ -361,7 +361,7 @@ udResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
   // add to registry
   ComponentType t = { pDesc, 0 };
   componentRegistry.Add(pDesc->id.hash(), t);
-  return udR_Success;
+  return epR_Success;
 }
 
 const ComponentDesc* Kernel::GetComponentDesc(epString id)
@@ -372,11 +372,11 @@ const ComponentDesc* Kernel::GetComponentDesc(epString id)
   return pCT->pDesc;
 }
 
-udResult Kernel::CreateComponent(epString typeId, epInitParams initParams, ComponentRef *pNewInstance)
+epResult Kernel::CreateComponent(epString typeId, epInitParams initParams, ComponentRef *pNewInstance)
 {
   ComponentType *pType = componentRegistry.Get(typeId.hash());
   if (!pType)
-    return udR_Failure_;
+    return epR_Failure_;
 
   try
   {
@@ -387,7 +387,7 @@ udResult Kernel::CreateComponent(epString typeId, epInitParams initParams, Compo
 
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
     if (!spComponent)
-      return udR_MemoryAllocationFailure;
+      return epR_MemoryAllocationFailure;
 
     spComponent->Init(initParams);
 
@@ -400,9 +400,9 @@ udResult Kernel::CreateComponent(epString typeId, epInitParams initParams, Compo
     //...
 
     *pNewInstance = spComponent;
-    return udR_Success;
+    return epR_Success;
   }
-  catch (udResult r)
+  catch (epResult r)
   {
     LogDebug(3, "Create component failed!");
     return r;
@@ -410,11 +410,11 @@ udResult Kernel::CreateComponent(epString typeId, epInitParams initParams, Compo
   catch (...)
   {
     LogDebug(3, "Create component failed!");
-    return udR_Failure_;
+    return epR_Failure_;
   }
 }
 
-udResult Kernel::DestroyComponent(Component *pInstance)
+epResult Kernel::DestroyComponent(Component *pInstance)
 {
   spLua->SetGlobal(epString(pInstance->uid), nullptr);
 
@@ -424,7 +424,7 @@ udResult Kernel::DestroyComponent(Component *pInstance)
   // TODO: inform partners that I destroyed a component
   //...
 
-  return udR_Success;
+  return epR_Success;
 }
 
 ComponentRef Kernel::FindComponent(epString uid)
@@ -437,33 +437,33 @@ ComponentRef Kernel::FindComponent(epString uid)
   return ppComponent ? ComponentRef(*ppComponent) : nullptr;
 }
 
-udResult Kernel::InitComponents()
+epResult Kernel::InitComponents()
 {
-  udResult r = udR_Success;
+  epResult r = epR_Success;
   for (auto i : componentRegistry)
   {
     if (i.pDesc->pInit)
     {
       r = i.pDesc->pInit(this);
-      if (r != udR_Success)
+      if (r != epR_Success)
         break;
     }
   }
   return r;
 }
 
-udResult Kernel::InitRender()
+epResult Kernel::InitRender()
 {
   epHAL_InitRender();
 
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult Kernel::DeinitRender()
+epResult Kernel::DeinitRender()
 {
   epHAL_DeinitRender();
 
-  return udR_Success;
+  return epR_Success;
 }
 
 void Kernel::Exec(epString code)
@@ -481,14 +481,14 @@ void Kernel::LogTrace(epString text, epString componentUID) { if (!spLogger) ret
 // Calls LogDebug() with level 2
 void Kernel::Log(epString text, const epString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, componentUID); }
 
-udResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const epSlice<const epString> exts)
+epResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const epSlice<const epString> exts)
 {
   for (const epString &e : exts)
   {
     extensionsRegistry.Insert(e, pDesc);
   }
 
-  return udR_Success;
+  return epR_Success;
 }
 
 DataSourceRef Kernel::CreateDataSourceFromExtension(epString ext, epInitParams initParams)
@@ -498,8 +498,8 @@ DataSourceRef Kernel::CreateDataSourceFromExtension(epString ext, epInitParams i
     return nullptr;
 
   ComponentRef spNewDataSource = nullptr;
-  udResult r = CreateComponent((*pDesc)->id, initParams, &spNewDataSource);
-  if (r != udR_Success)
+  epResult r = CreateComponent((*pDesc)->id, initParams, &spNewDataSource);
+  if (r != epR_Success)
     return nullptr;
 
   return shared_pointer_cast<DataSource>(spNewDataSource);

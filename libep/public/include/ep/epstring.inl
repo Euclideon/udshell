@@ -16,14 +16,14 @@ public:
   operator const C*() const { return pCStr; }
   ~epCString()
   {
-    udFree(pCStr);
+    epFree((void*)pCStr);
   }
 
 private:
   const C *pCStr;
   epCString(epBaseString<C> str)
   {
-    C *buf = (C*)udAlloc((str.length + 1) * sizeof(C));
+    C *buf = (C*)epAlloc((str.length + 1) * sizeof(C));
     memcpy(buf, str.ptr, str.length*sizeof(C));
     buf[str.length] = 0;
     pCStr = buf;

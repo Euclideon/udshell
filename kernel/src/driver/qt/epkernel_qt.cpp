@@ -77,7 +77,7 @@ QtKernel::QtKernel(epInitParams commandLine)
 // ---------------------------------------------------------------------------------------
 QtKernel::~QtKernel()
 {
-  if (DeinitRender() != udR_Success)
+  if (DeinitRender() != epR_Success)
   {
     // TODO: gracefully handle error with DeinitRender ?
     LogError("Error cleaning up renderer");
@@ -91,7 +91,7 @@ QtKernel::~QtKernel()
 }
 
 // ---------------------------------------------------------------------------------------
-udResult QtKernel::InitInternal()
+epResult QtKernel::InitInternal()
 {
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   EPASSERT(argc >= 1, "argc must contain at least 1");
@@ -100,10 +100,10 @@ udResult QtKernel::InitInternal()
   LogTrace("QtKernel::InitInternal()");
   LogInfo(2, "Initialising udShell...");
 
-  if (RegisterComponent<QtComponent>() != udR_Success)
+  if (RegisterComponent<QtComponent>() != epR_Success)
   {
     LogError("Unable to register QtComponent");
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   // create our qapplication
@@ -139,18 +139,18 @@ udResult QtKernel::InitInternal()
     LogError("Error creating Splash Screen");
     foreach(const QQmlError &error, component.errors())
       LogError(epSharedString::concat("QML Error: ", error.toString().toUtf8().data()));
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   // defer the heavier init stuff and app specific init to after Qt hits the event loop
   // we'll hook into the splash screen to do this
   QObject::connect(pTopLevelWindow, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender, Qt::DirectConnection);
 
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-udResult QtKernel::RunMainLoop()
+epResult QtKernel::RunMainLoop()
 {
   LogTrace("QtKernel::RunMainLoop()");
 
@@ -158,7 +158,7 @@ udResult QtKernel::RunMainLoop()
   EPASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
   // run the Qt event loop - this may never return
-  return (pApplication->exec() == 0) ? udR_Success : udR_Failure_;
+  return (pApplication->exec() == 0) ? epR_Success : epR_Failure_;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -173,7 +173,7 @@ void QtKernel::PostEvent(QEvent *pEvent, int priority)
 }
 
 // ---------------------------------------------------------------------------------------
-udResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
+epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
 {
   LogTrace("QtKernel::RegisterWindow()");
 
@@ -201,10 +201,10 @@ udResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
   {
     // TODO: error handle
     LogError("Error making main gl context current");
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -268,7 +268,7 @@ void QtKernel::DoInit(ep::Kernel *)
   }
 
   // init the HAL's render system
-  if (ep::Kernel::InitRender() != udR_Success)
+  if (ep::Kernel::InitRender() != epR_Success)
   {
     // TODO: gracefully handle error with InitRender ?
     LogError("Error initialising renderer");
@@ -320,10 +320,10 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 }
 
 // ---------------------------------------------------------------------------------------
-udResult Kernel::Terminate()
+epResult Kernel::Terminate()
 {
   // TODO: wire this up? Is this obsolete?
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------

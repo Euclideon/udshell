@@ -45,8 +45,8 @@ public:
   QtKernel(epInitParams commandLine);
   virtual ~QtKernel();
 
-  udResult InitInternal() override;
-  udResult RunMainLoop() override;
+  epResult InitInternal() override;
+  epResult RunMainLoop() override;
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
   bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
@@ -55,7 +55,7 @@ public:
 
   QQmlEngine *QmlEngine() { return pQmlEngine; }
 
-  udResult RegisterWindow(QQuickWindow *pWindow);
+  epResult RegisterWindow(QQuickWindow *pWindow);
 
 private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);

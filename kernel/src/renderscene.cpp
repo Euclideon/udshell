@@ -54,29 +54,29 @@ static epShaderProgram *s_shader = nullptr;
 
 #include "kernel.h"
 
-udResult udRenderScene_Init(Kernel*)
+epResult udRenderScene_Init(Kernel*)
 {
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult udRenderScene_Deinit(Kernel*)
+epResult udRenderScene_Deinit(Kernel*)
 {
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult udRenderScene_InitRender(Kernel*)
+epResult udRenderScene_InitRender(Kernel*)
 {
   // create a vertex buffer to render the quad to the screen
   epArrayDataFormat format[] = { epVDF_Float2 };
   s_pQuadVB = epVertex_CreateVertexBuffer(format, 1);
   if (!s_pQuadVB)
-    return udR_Failure_;
+    return epR_Failure_;
 
   s_pQuadIB = epVertex_CreateIndexBuffer(epVDF_UInt);
   if (!s_pQuadIB)
   {
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   epArrayElement elements[] = {
@@ -89,7 +89,7 @@ udResult udRenderScene_InitRender(Kernel*)
   {
     epVertex_DestroyArrayBuffer(&s_pQuadIB);
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return udR_Failure_;
+    return epR_Failure_;
   }
   struct Vertex
   {
@@ -112,7 +112,7 @@ udResult udRenderScene_InitRender(Kernel*)
     epVertex_DestroyFormatDeclaration(&s_pPosUV);
     epVertex_DestroyArrayBuffer(&s_pQuadIB);
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   epShader *pPS = epShader_CreateShader(s_blitShader, sizeof(s_blitShader), epST_PixelShader);
@@ -123,7 +123,7 @@ udResult udRenderScene_InitRender(Kernel*)
     epVertex_DestroyFormatDeclaration(&s_pPosUV);
     epVertex_DestroyArrayBuffer(&s_pQuadIB);
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   s_shader = epShader_CreateShaderProgram(pVS, pPS);
@@ -135,13 +135,13 @@ udResult udRenderScene_InitRender(Kernel*)
     epVertex_DestroyFormatDeclaration(&s_pPosUV);
     epVertex_DestroyArrayBuffer(&s_pQuadIB);
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult udRenderScene_DeinitRender(Kernel*)
+epResult udRenderScene_DeinitRender(Kernel*)
 {
   // TODO: Add in calls to epShader_Destroy when implemented.
   //epShader_DestroyShaderProgram(s_shader);
@@ -150,7 +150,7 @@ udResult udRenderScene_DeinitRender(Kernel*)
   epVertex_DestroyFormatDeclaration(&s_pPosUV);
   epVertex_DestroyArrayBuffer(&s_pQuadIB);
   epVertex_DestroyArrayBuffer(&s_pQuadVB);
-  return udR_Success;
+  return epR_Success;
 }
 
 RenderableView::RenderableView()
@@ -164,9 +164,9 @@ RenderableView::~RenderableView()
     udRender_DestroyView(&pRenderView);
 
   if (pColorBuffer)
-    udFree(pColorBuffer);
+    epFree(pColorBuffer);
   if (pDepthBuffer)
-    udFree(pDepthBuffer);
+    epFree(pDepthBuffer);
 
   if (pColorTexture)
     epTexture_DestroyTexture(&pColorTexture);
@@ -193,8 +193,8 @@ void RenderableView::RenderUD()
     // allocate render buffers
     uint32_t colorPitch = renderWidth*sizeof(uint32_t);
     uint32_t depthPitch = renderWidth*sizeof(float);
-    pColorBuffer = udAlloc(colorPitch * renderHeight);
-    pDepthBuffer = udAlloc(depthPitch * renderHeight);
+    pColorBuffer = epAlloc(colorPitch * renderHeight);
+    pDepthBuffer = epAlloc(depthPitch * renderHeight);
     udRender_SetTarget(pRenderView, udRTT_Color32, pColorBuffer, colorPitch, 0x80202080);
     udRender_SetTarget(pRenderView, udRTT_Depth32, pDepthBuffer, depthPitch, 0x3F800000);
 
@@ -205,8 +205,8 @@ void RenderableView::RenderUD()
   {
     uint32_t colorPitch = renderWidth*sizeof(uint32_t);
     uint32_t depthPitch = renderWidth*sizeof(float);
-    pColorBuffer = udAllocFlags(colorPitch * renderHeight, udAF_Zero);
-    pDepthBuffer = udAllocFlags(depthPitch * renderHeight, udAF_Zero);
+    pColorBuffer = epAllocFlags(colorPitch * renderHeight, epAF_Zero);
+    pDepthBuffer = epAllocFlags(depthPitch * renderHeight, epAF_Zero);
   }
 }
 

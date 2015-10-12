@@ -2,6 +2,7 @@
 #if !defined(_EP_COMPONENT_H)
 #define _EP_COMPONENT_H
 
+#include "ep/epplugin.h"
 #include "ep/epcomponentdesc.h"
 
 //extern "C" {
@@ -25,9 +26,7 @@ inline int epRelease(epComponent *pComponent)
 {
   if (--pComponent->refCount == 0)
   {
-#if defined(EP_PLUGIN)
     s_pPluginInstance->DestroyComponent(pComponent);
-#endif
   }
 }
 
@@ -47,7 +46,7 @@ struct epComponentAPI
 
   void(*Subscribe)(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate);
 
-  udResult(*SendMessage)(epComponent *pComponent, epString target, epString message, const epVariant *pData);
+  epResult(*SendMessage)(epComponent *pComponent, epString target, epString message, const epVariant *pData);
 /*
   const PropertyInfo *(*GetPropertyInfo)(epComponent *pComponent, epString name);
   const FunctionInfo *(*GetMethodInfo)(epComponent *pComponent, epString name);
@@ -64,8 +63,8 @@ struct epComponentOverrides
 
   void* (*pCreateInstance)(epComponent *pBaseInstance, const epKeyValuePair *pInitParams, size_t numInitParams);
   void (*pDestroy)(epComponent *pBaseInstance, void *pDerivedInstance);
-  udResult (*pInitComplete)(epComponent *pBaseInstance, void *pDerivedInstance);
-  udResult (*pReceiveMessage)(epComponent *pBaseInstance, void *pDerivedInstance, epString message, epString sender, const epVariant *pData);
+  epResult (*pInitComplete)(epComponent *pBaseInstance, void *pDerivedInstance);
+  epResult (*pReceiveMessage)(epComponent *pBaseInstance, void *pDerivedInstance, epString message, epString sender, const epVariant *pData);
 };
 
 
@@ -78,7 +77,7 @@ struct epNodePlugin
   void SetPosition(const udDouble3 &pos) { matrix.axis.t = udDouble4::create(pos, matrix.axis.t.w); }
   bool InputEvent(const epInputEvent &ev);
   bool Update(double timeStep);
-  udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat);
+  epResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat);
 };
 */
 

@@ -2,10 +2,11 @@
 #include "kernel.h"
 
 #include "ep/epplugin.h"
+#include "ep/epkernel.h"
 #include "ep/epcomponent.h"
 
 extern "C" {
-  typedef bool (epPlugin_Init)(epPluginInstance *pPlugin);
+  typedef bool (epPlugin_InitProc)(epPluginInstance *pPlugin);
 }
 
 namespace ep {
@@ -176,7 +177,7 @@ static epKernelAPI s_kernelAPI =
     // TODO: sizeof(...) needs to be dynamic, we need to ask it from pSuper somehow...
     if (_pDesc->pOverrides->structSize != sizeof(epComponentOverrides))
     {
-      return udR_Failure_;
+      return epR_Failure_;
     }
 
     ComponentDesc *pDesc = new ComponentDesc(
@@ -204,9 +205,9 @@ static epKernelAPI s_kernelAPI =
     Kernel *pKernel = (Kernel*)_pKernel;
 
     ComponentRef spC;
-    udResult r = pKernel->CreateComponent(typeId, initParams, &spC);
+    epResult r = pKernel->CreateComponent(typeId, initParams, &spC);
 
-    if (r != udR_Success)
+    if (r != epR_Success)
       return r;
 
     spC->IncRef();
@@ -320,7 +321,7 @@ bool PluginManager::LoadPlugin(epString filename)
   if (hDll == NULL)
     return false;
 
-  epPlugin_Init *pInit = (epPlugin_Init*)GetProcAddress(hDll, "epPlugin_Init");
+  epPlugin_InitProc *pInit = (epPlugin_InitProc*)GetProcAddress(hDll, "epPlugin_Init");
   if (!pInit)
   {
     FreeLibrary(hDll);

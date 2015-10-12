@@ -31,7 +31,7 @@ public:
   epEvent<> Dirty;
 
   // TODO: HACK: fix this api!
-  udResult SetRenderModels(struct udRenderModel models[], size_t numModels);
+  epResult SetRenderModels(struct udRenderModel models[], size_t numModels);
   const udRenderModel* GetRenderModels(size_t *pNumModels) const { if (pNumModels) { *pNumModels = numRenderModels; } return renderModels; }
 
   void MakeDirty()

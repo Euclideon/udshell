@@ -11,7 +11,7 @@ class NullKernel : public Kernel
 {
 public:
   NullKernel() {}
-  udResult InitInternal() { return udR_Success; }
+  epResult InitInternal() { return epR_Success; }
 };
 
 Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
@@ -21,16 +21,16 @@ Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udResult Kernel::RunMainLoop()
+epResult Kernel::RunMainLoop()
 {
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-udResult Kernel::Terminate()
+epResult Kernel::Terminate()
 {
-  return udR_Success;
+  return epR_Success;
 }
 
 void Kernel::DispatchToMainThread(MainThreadCallback callback)

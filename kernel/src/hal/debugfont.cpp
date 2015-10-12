@@ -289,7 +289,7 @@ epDebugFont::epDebugFont(int _nCharacters, VectorCharacter *_pCharacters, Hershe
   }
 
   // Create a geo buffer big enough for all the primitives
-  epDebugFontVertex *pBuffer = udAllocType(epDebugFontVertex, totalVertices, udAF_None);
+  epDebugFontVertex *pBuffer = epAllocType(epDebugFontVertex, totalVertices, epAF_None);
 
   int vertexIndex = 0;
   int minY = 32767, maxY = -32767;
@@ -327,7 +327,7 @@ epDebugFont::epDebugFont(int _nCharacters, VectorCharacter *_pCharacters, Hershe
   epArrayDataFormat elements[1] = { epVDF_Float2 };
   pGeoBuffer = epVertex_CreateVertexBuffer(elements, 1);
   epVertex_SetArrayBufferData(pGeoBuffer, pBuffer, sizeof(epDebugFontVertex)*totalVertices);
-  udFree(pBuffer);
+  epFree(pBuffer);
 }
 
 //-------------------------------------------------------------------

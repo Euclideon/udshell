@@ -95,7 +95,7 @@ Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, ep
   uint32_t duration = intervalVar.as<uint32_t>();
   if (!intervalVar.is(epVariant::Type::Int) ||!duration)
   {
-    throw udR_InvalidParameter_;
+    throw epR_InvalidParameter_;
   }
 
   TimerType timerType = TimerType::Interval;
@@ -108,12 +108,12 @@ Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, ep
     else if (typeStr.eqIC("CountDown"))
       timerType = TimerType::CountDown;
     else
-      throw udR_InvalidParameter_;
+      throw epR_InvalidParameter_;
   }
 
   pTimer = HalTimer_Create(HalTimerType(timerType.v), duration, TimerCallback, this);
   if (!pTimer)
-    throw udR_Failure_;
+    throw epR_Failure_;
 }
 
 
