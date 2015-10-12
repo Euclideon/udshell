@@ -167,26 +167,39 @@ void Logger::Log(int level, epString text, LogCategories category, epString comp
     return;
   bLogging = true;
 
-  /** Add log line to the internal log **/
+  int numLines = 0;
 
-  internalLog.pushBack(LogLine(level, text, category, componentUID));
-  Changed.Signal();
-  LogLine &line = internalLog.back();
-
-  /** Output to streams **/
-  if(!filter.FilterLogLine(line))
+  // Add log line to the internal log
+  while (!text.empty())
   {
-    bLogging = false;
-    return;
+    epString token = text.popToken("\n");
+    if (!token.empty())
+    {
+      numLines++;
+      internalLog.pushBack(LogLine(level, token, category, componentUID));
+      Changed.Signal();
+    }
   }
 
-  for (auto &s : streamList)
+  for (int i = 0; i < numLines; i++)
   {
-    if (s.filter.FilterLogLine(line))
+    LogLine &line = internalLog[internalLog.length - numLines + i];
+
+    // Output to streams
+    if(!filter.FilterLogLine(line))
     {
-      epSharedString out = line.ToString(s.format);
-      s.spStream->WriteLn(out);
-      s.spStream->Flush();
+      bLogging = false;
+      return;
+    }
+
+    for (auto &s : streamList)
+    {
+      if (s.filter.FilterLogLine(line))
+      {
+        epSharedString out = line.ToString(s.format);
+        s.spStream->WriteLn(out);
+        s.spStream->Flush();
+      }
     }
   }
 
@@ -216,7 +229,7 @@ LogStream *Logger::GetLogStream(StreamRef spStream)
   return FindLogStream(spStream);
 }
 
-/** Stream filter helper functions **/
+// Stream filter helper functions
 
 int Logger::ResetStreamFilter(StreamRef spStream)
 {
@@ -271,7 +284,7 @@ int Logger::SetStreamComponents(StreamRef spStream, epSlice<const epString> comp
   return -1;
 }
 
-/** LogFilter functions **/
+// LogFilter functions
 
 int LogFilter::GetLevel(LogCategories category) const
 {
