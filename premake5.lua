@@ -33,4 +33,6 @@ solution "epshell"
 
 	dofile "shell/project.lua"
 
+	dofile "plugin/vieweractivity/project.lua"
+
 	dofile "test/project.lua"
