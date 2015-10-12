@@ -25,7 +25,8 @@ bool Buffer::Allocate(size_t size)
   Free();
 
   buffer.ptr = (char*)epAlloc(size);
-  buffer.length = logicalSize = size;
+  buffer.length = size;
+  logicalSize = 0;
 
   return true;
 }
