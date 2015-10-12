@@ -4,6 +4,8 @@ dofile "ud/common-proj.lua"
 
 -- override with local settings
 
+includedirs { "libep/public/include" }
+
 -- we use exceptions
 exceptionhandling "Default"
 

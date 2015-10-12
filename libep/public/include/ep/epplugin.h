@@ -76,7 +76,7 @@ struct epPluginInstance
 
 
 #if defined(EP_PLUGIN)
-extern static epPluginInstance *s_pPluginInstance;
+extern epPluginInstance *s_pPluginInstance;
 #endif
 
 }

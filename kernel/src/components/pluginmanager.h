@@ -4,8 +4,7 @@
 
 #include "component.h"
 
-namespace ep
-{
+namespace ep {
 
 PROTOTYPE_COMPONENT(PluginManager);
 

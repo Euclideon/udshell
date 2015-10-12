@@ -27,6 +27,8 @@ solution "epshell"
 	dofile "3rdparty/lua/project.lua"
 	dofile "3rdparty/googletest/project.lua"
 
+	dofile "libep/project.lua"
+
 	dofile "kernel/project.lua"
 
 	dofile "shell/project.lua"

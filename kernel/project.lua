@@ -4,14 +4,12 @@ project "epkernel"
 	flags { "StaticRuntime", "OmitDefaultLibrary" }
 
 	files { "src/**" }
-	files { "../public/include/**" }
 	files { "script/**" }
 	files { "shaders/**" }
 	files { "project.lua" }
 	files { "text2c.sh" }
 
 	includedirs { "src" }
-	includedirs { "../public/include" }
 
 	includedirs { "../ud/udPlatform/Include" }
 	includedirs { "../ud/udPointCloud/Include" }

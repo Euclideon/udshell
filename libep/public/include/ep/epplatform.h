@@ -398,14 +398,18 @@ struct epTheTypeIs;
 
 
 // Outputs a string to debug console
+extern "C" {
 void epDebugWrite(const char *pString);
 void epDebugPrintf(const char *format, ...) epprintf_func(1, 2);
+}
+#if defined(__cplusplus)
 template<typename ...Args>
 inline void epDebugFormat(epString format, Args... args)
 {
   epMutableString64 t.format(format, args...);
   epDebugWrite(t.ptr);
 }
+#endif
 
 
 // debug stuff...
@@ -452,50 +456,67 @@ inline void epDebugFormat(epString format, Args... args)
 # define EPTRACE_MEMORY(var,length)
 #endif
 
-namespace ep {
-namespace internal {
-
-void epAssertFailed(epString condition, epString message, epString file, int line);
-
-} // namespace internal
-} // namespace ep
-
 // TODO: Make assertion system handle pop-up window where possible
 #if EPASSERT_ON
 
-namespace ep {
-namespace internal {
-
-extern epMutableString256 assertBuffer;
-
-inline void epAssertTemplate(epString condition, epString file, int line)
-{
-  epAssertFailed(condition, nullptr, file, line);
-}
-template<typename ...Args>
-inline void epAssertTemplate(epString condition, epString file, int line, epString format, Args... args)
-{
-  assertBuffer.format(format, args...);
-  epAssertFailed(condition, assertBuffer, file, line);
+extern "C" {
+void epAssertFailed(epString condition, epString message, epString file, int line);
 }
 
-} // namespace internal
-} // namespace ep
+# if defined(__cplusplus)
 
-# define EPASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
-# define IF_EPASSERT(x) x
-#else
+  // C++ assert code uses our fancy variadic format() function
+  namespace ep {
+  namespace internal {
+  extern epMutableString256 assertBuffer;
+  inline void epAssertTemplate(epString condition, epString file, int line)
+  {
+    epAssertFailed(condition, nullptr, file, line);
+  }
+  template<typename ...Args>
+  inline void epAssertTemplate(epString condition, epString file, int line, epString format, Args... args)
+  {
+    assertBuffer.format(format, args...);
+    epAssertFailed(condition, assertBuffer, file, line);
+  }
+  } // namespace internal
+  } // namespace ep
+
+#   define EPASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+#   define IF_EPASSERT(x) x
+
+#   if EPRELASSERT_ON
+#     define EPRELASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+#     define IF_EPRELASSERT(x) x
+#   else
+#     define EPRELASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
+#     define IF_EPRELASSERT(x)
+#   endif
+
+# else // defined(__cplusplus)
+
+    // C assert just has a fixed message...
+#   define EPASSERT(condition, message) do { if (!(condition)) { epAssertFailed(#condition, message, __FILE__, __LINE__); DebugBreak(); } } while (0)
+#   define IF_EPASSERT(x) x
+
+#   if EPRELASSERT_ON
+#     define EPRELASSERT(condition, message) do { if (!(condition)) { epAssertFailed(#condition, message, __FILE__, __LINE__); DebugBreak(); } } while (0)
+#     define IF_EPRELASSERT(x) x
+#   else
+#     define EPRELASSERT(condition, message) // TODO: Make platform-specific __assume(condition)
+#     define IF_EPRELASSERT(x)
+#   endif
+
+# endif // defined(__cplusplus)
+
+#else // EPASSERT_ON
+
 # define EPASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
 # define IF_EPASSERT(x)
-#endif
-
-#if EPRELASSERT_ON
-# define EPRELASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
-# define IF_EPRELASSERT(x) x
-#else
 # define EPRELASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
 # define IF_EPRELASSERT(x)
-#endif
+
+#endif // EPASSERT_ON
 
 #if EP_CPP11
 # define EP_STATICASSERT(a_condition, a_error) static_assert(a_condition, #a_error)

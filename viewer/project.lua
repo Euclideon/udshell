@@ -16,6 +16,7 @@ project "epviewer"
 	links { "SDL2" }
 	links { "udPlatform" }
 	links { "udPointCloud" }
+	links { "libep" }
 	links { "epkernel" }
 	links { luaPath }
 

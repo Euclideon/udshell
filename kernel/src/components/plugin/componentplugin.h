@@ -5,8 +5,7 @@
 #include "components/component.h"
 #include "ep/epcomponent.h"
 
-namespace ep
-{
+namespace ep {
 
 class ComponentPlugin : public Component
 {

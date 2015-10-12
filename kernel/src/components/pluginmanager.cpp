@@ -8,8 +8,7 @@ extern "C" {
   typedef bool (epPlugin_Init)(epPluginInstance *pPlugin);
 }
 
-namespace ep
-{
+namespace ep {
 
 // ----- plugin glue -----
 class PluginGetter : public Getter
@@ -252,9 +251,10 @@ epPluginInstance *Kernel::GetPluginInterface()
     pPluginInstance->pKernelInstance = (epKernel*)this;
     pPluginInstance->DestroyComponent = [](epComponent *pInstance) -> void
     {
+      // NOTE: this was called when an RC reached zero...
       Component *pC = (Component*)pInstance;
-      pC->IncRef();
-      pC->DecRef();
+      pC->IncRef(); // HACK: we'll inc it back to 1
+      pC->DecRef(); //       and then dec it with the internal function which actually performs the cleanup
     };
     pPluginInstance->pKernelAPI = &s_kernelAPI;
     pPluginInstance->pComponentAPI = &g_componentAPI;

@@ -6,12 +6,19 @@ namespace ep {
 namespace internal {
 
 bool gUnitTesting = false;
+
 epMutableString256 assertBuffer;
+
+} // namespace internal
+} // namespace ep
+
+// Plugin API API
+extern "C" {
 
 void epAssertFailed(epString condition, epString message, epString file, int line)
 {
   // TODO: Agree on formatting of assets
-  if (gUnitTesting)
+  if (ep::internal::gUnitTesting)
   {
     fprintf(stderr, message.toStringz());
     exit(EXIT_FAILURE);
@@ -22,9 +29,6 @@ void epAssertFailed(epString condition, epString message, epString file, int lin
     epDebugWrite(t.ptr);
   }
 }
-
-} // namespace internal
-} // namespace ep
 
 void epDebugWrite(const char *pString)
 {
@@ -55,3 +59,5 @@ void epDebugPrintf(const char *format, ...)
 
   epDebugWrite(pBuffer);
 }
+
+} // extern "C"

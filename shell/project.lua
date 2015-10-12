@@ -15,6 +15,7 @@ project "epshell"
 
 	links { "udPlatform" }
 	links { "udPointCloud" }
+	links { "libep" }
 	links { "epkernel" }
 	links { luaPath }
 
