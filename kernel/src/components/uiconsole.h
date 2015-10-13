@@ -69,16 +69,26 @@ protected:
 
   struct ConsoleLine
   {
-    ConsoleLine(epString text);
+    ConsoleLine(epString text, int logIndex = -1);
+    LogLine *GetLogLine() const
+    {
+      if (logIndex != -1)
+        return &spLogger->GetLog()[logIndex];
+
+      return nullptr;
+    }
 
     epSharedString text;
     double ordering;
+    int logIndex;
   };
 
+  static LoggerRef spLogger;
   MemStreamRef spInStream = nullptr;
   MemStreamRef spOutStream = nullptr;
   int64_t pos = 0;
   epArray<ConsoleLine> consoleLines;
+  epArray<ConsoleLine> logLines;
   bool bOutputsMerged = false;
   epMutableString<256> textFilter;
 };

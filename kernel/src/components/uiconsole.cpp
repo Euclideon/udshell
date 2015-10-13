@@ -88,9 +88,13 @@ ComponentDesc UIConsole::descriptor =
   nullptr, // events
 };
 
+LoggerRef UIConsole::spLogger;
+
 UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
+  spLogger = pKernel->GetLogger();
+
   // Create stream for shell output
   auto spOutBuffer = pKernel->CreateComponent<Buffer>();
   spOutBuffer->Allocate(1024);
@@ -117,25 +121,21 @@ void UIConsole::ToggleVisible()
 
 void UIConsole::RebuildOutput()
 {
-  epSlice<LogLine> log = pKernel->GetLogger()->GetLog();
-  epMutableString<256> lineStr;
-
   if (bOutputsMerged)
   {
+    if (logLines.length == 0 && consoleLines.length == 0)
+      return;
+
     epMutableString<0> outText;
-    outText.reserve(256 * (log.length + consoleLines.length));
+    outText.reserve(256 * (logLines.length + consoleLines.length));
 
     int logIndex = 0, consoleIndex = 0;
-    while (logIndex < log.length && consoleIndex < consoleLines.length)
+    while (logIndex < logLines.length && consoleIndex < consoleLines.length)
     {
-      if (log[logIndex].ordering < consoleLines[consoleIndex].ordering)
+      if (logLines[logIndex].ordering < consoleLines[consoleIndex].ordering)
       {
-        if (logFilter.FilterLogLine(log[logIndex]))
-        {
-          lineStr = log[logIndex].ToString();
-          if(FilterTextLine(lineStr))
-            outText.append(lineStr, "\n");
-        }
+        if (logFilter.FilterLogLine(*logLines[logIndex].GetLogLine()) && FilterTextLine(logLines[logIndex].text))
+          outText.append(logLines[logIndex].text, "\n");
         logIndex++;
       }
       else
@@ -145,14 +145,10 @@ void UIConsole::RebuildOutput()
         consoleIndex++;
       }
     }
-    while (logIndex < log.length)
+    while (logIndex < logLines.length)
     {
-      if (logFilter.FilterLogLine(log[logIndex]))
-      {
-        lineStr = log[logIndex].ToString();
-        if (FilterTextLine(lineStr))
-          outText.append(lineStr, "\n");
-      }
+      if (logFilter.FilterLogLine(*logLines[logIndex].GetLogLine()) && FilterTextLine(logLines[logIndex].text))
+        outText.append(logLines[logIndex].text, "\n");
       logIndex++;
     }
     while (consoleIndex < consoleLines.length)
@@ -170,34 +166,36 @@ void UIConsole::RebuildOutput()
   else
   {
     epMutableString<0> outText;
-    outText.reserve(256 * (consoleLines.length > log.length ? consoleLines.length : log.length));
+    outText.reserve(256 * (consoleLines.length > logLines.length ? consoleLines.length : logLines.length));
 
-    for(int i = 0; i < consoleLines.length; i++)
+    if (consoleLines.length > 0)
     {
-      if (FilterTextLine(consoleLines[i].text))
-        outText.append(consoleLines[i].text, "\n");
-    }
-
-    if (outText.back() == '\n')
-      outText.length--;
-
-    CallMethod("setconsoletext", (epString)outText);
-
-    outText.length = 0;
-    for (int i = 0; i < log.length; i++)
-    {
-      if (logFilter.FilterLogLine(log[i]))
+      for (int i = 0; i < consoleLines.length; i++)
       {
-        lineStr = log[i].ToString();
-        if (FilterTextLine(lineStr))
-          outText.append(lineStr, "\n");
+        if (FilterTextLine(consoleLines[i].text))
+          outText.append(consoleLines[i].text, "\n");
       }
+
+      if (outText.back() == '\n')
+        outText.length--;
+
+      CallMethod("setconsoletext", (epString)outText);
     }
 
-    if (outText.back() == '\n')
-      outText.length--;
+    if (logLines.length > 0)
+    {
+      outText.length = 0;
+      for (int i = 0; i < logLines.length; i++)
+      {
+        if (logFilter.FilterLogLine(*logLines[i].GetLogLine()) && FilterTextLine(logLines[i].text))
+          outText.append(logLines[i].text, "\n");
+      }
 
-    CallMethod("setlogtext", (epString)outText);
+      if (outText.back() == '\n')
+        outText.length--;
+
+      CallMethod("setlogtext", (epString)outText);
+    }
   }
 }
 
@@ -206,19 +204,17 @@ void UIConsole::OnLogChanged()
   epSlice<LogLine> log = pKernel->GetLogger()->GetLog();
   LogLine &line = log.back();
 
+  logLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1));
+  ConsoleLine &cLine = logLines.back();
+
   // Do filtering
-  if (!logFilter.FilterLogLine(line))
-    return;
-
-  epMutableString<256> lineStr = line.ToString(LogDefaults::Format);
-
-  if(!FilterTextLine(lineStr))
+  if (!logFilter.FilterLogLine(line) || !FilterTextLine(cLine.text))
     return;
 
   if (bOutputsMerged)
-    CallMethod("appendconsoletext", (epString)lineStr);
+    CallMethod("appendconsoletext", (epString)cLine.text);
   else
-    CallMethod("appendlogtext", (epString)lineStr);
+    CallMethod("appendlogtext", (epString)cLine.text);
 }
 
 void UIConsole::RelayInput(epString str)
@@ -252,10 +248,14 @@ void UIConsole::OnStreamOutput()
   }
 }
 
-UIConsole::ConsoleLine::ConsoleLine(epString text)
+UIConsole::ConsoleLine::ConsoleLine(epString text, int logIndex)
 {
   this->text = text;
-  ordering = epPerformanceCounter();
+  this->logIndex = logIndex;
+  if (logIndex != -1)
+    ordering = spLogger->GetLog()[logIndex].ordering;
+  else
+    ordering = epPerformanceCounter();
 }
 
 // Filter getter/setter helper functions
