@@ -34,10 +34,19 @@ solution "epviewer"
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
+  dofile "../libep/project.lua"
+  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for epviewer
+	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
+	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
+  
 	dofile "../kernel/project.lua"
   -- common-proj.lua set objdir and targetdir, we'll reset them correctly for epviewer
 	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
+	dofile "../plugin/vieweractivity/project.lua"
+  -- common-proj.lua set objdir and targetdir, we'll reset them correctly for epviewer
+	objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
+	targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
 	dofile "project.lua"

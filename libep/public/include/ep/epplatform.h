@@ -311,8 +311,8 @@ struct epTheTypeIs;
 #endif
 
 #if EP_DEBUG
-# define EPASSUME(condition) EPASSERT((condition), "Bad assumption: "##condition);
-# define EPUNREACHABLE EPASSERT(false, "Shouldn't be here!");
+# define EPASSUME(condition) EPASSERT((condition), "Bad assumption: "##condition)
+# define EPUNREACHABLE EPASSERT(false, "Shouldn't be here!")
 #endif
 
 #if defined(EP_COMPILER_VISUALC)

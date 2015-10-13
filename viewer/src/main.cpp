@@ -1,7 +1,7 @@
 // kernel includes
 #include "ep/epplatform.h"
 #include "ep/epstring.h"
-#include "eperror.h"
+#include "ep/eperror.h"
 #include "kernel.h"
 #include "components/view.h"
 #include "components/scene.h"
@@ -49,22 +49,22 @@ static struct
 // Author: David Ely, September 2015
 static void ViewerInit(epString sender, epString message, const epVariant &data)
 {
-  udResult result = udR_Success;
+  epResult result = epR_Success;
   EPERROR(result);
 
   using namespace ep;
   //TODO: Error handling for the whole function, perhaps send message with error?
   mData.spView = mData.pKernel->CreateComponent<View>();
-  EPERROR_NULL(mData.spView, udR_Failure_, { mData.spView = nullptr; });
+  EPERROR_NULL(mData.spView, epR_Failure_, { mData.spView = nullptr; });
 
   mData.spScene = mData.pKernel->CreateComponent<Scene>();
-  EPERROR_NULL(mData.spScene, udR_Failure_, { mData.spScene = nullptr; });
+  EPERROR_NULL(mData.spScene, epR_Failure_, { mData.spScene = nullptr; });
 
   mData.spSimpleCamera = mData.pKernel->CreateComponent<SimpleCamera>();
-  EPERROR_NULL(mData.spSimpleCamera, udR_Failure_, { mData.spSimpleCamera = nullptr; });
+  EPERROR_NULL(mData.spSimpleCamera, epR_Failure_, { mData.spSimpleCamera = nullptr; });
 
   mData.spUDNode = mData.pKernel->CreateComponent<UDNode>();
-  EPERROR_NULL(mData.spUDNode, udR_Failure_, { mData.spUDNode = nullptr; });
+  EPERROR_NULL(mData.spUDNode, epR_Failure_, { mData.spUDNode = nullptr; });
 
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None, nullptr, nullptr, nullptr };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
@@ -92,7 +92,7 @@ static void ViewerInit(epString sender, epString message, const epVariant &data)
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
-udResult ViewerDeinit()
+epResult ViewerDeinit()
 {
   mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
 
@@ -106,7 +106,7 @@ udResult ViewerDeinit()
 
   udOctree_Shutdown();
 
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -119,13 +119,13 @@ int main(int argc, char* argv[])
   mData.rendererThreadCount = udGetHardwareThreadCount() - 1;
   ProcessCmdline(argc, argv);
 
-  udResult result = Kernel::Create(&mData.pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
-  if (result != udR_Success)
+  epResult result = Kernel::Create(&mData.pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
+  if (result != epR_Success)
     return -1;
 
   mData.pKernel->RegisterMessageHandler("init", &ViewerInit);
 
-  if (mData.pKernel->RunMainLoop() != udR_Success)
+  if (mData.pKernel->RunMainLoop() != epR_Success)
   {
     // TODO: improve error handling/reporting
     udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
   udMemoryOutputLeaks();
   udMemoryDebugTrackingDeinit();
 
-  if (result != udR_Success)
+  if (result != epR_Success)
     return -1;
 
   return 0;

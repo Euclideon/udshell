@@ -53,7 +53,7 @@ epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType
     return 0;
   }
 
-  epShader *pShader = epAllocType(epShader, 1, udAF_None);
+  epShader *pShader = epAllocType(epShader, 1, epAF_None);
   pShader->shader = shader;
 
   return pShader;
@@ -80,7 +80,7 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader 
     return 0;
   }
 
-  epShaderProgram *pProgram = epAllocType(epShaderProgram, 1, udAF_None);
+  epShaderProgram *pProgram = epAllocType(epShaderProgram, 1, epAF_None);
   pProgram->program = program;
 
   size_t extraBytes = 0;
