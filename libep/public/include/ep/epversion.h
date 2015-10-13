@@ -1,0 +1,8 @@
+#pragma once
+#if !defined(EPVERSION_H)
+#define EPVERSION_H
+
+enum { EPSHELL_APIVERSION = 100 };
+enum { EPSHELL_PLUGINVERSION = EPSHELL_APIVERSION };
+
+#endif // EPVERSION_H

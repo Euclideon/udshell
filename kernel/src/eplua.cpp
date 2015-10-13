@@ -2,6 +2,8 @@
 #include "eplua.h"
 #include "kernel.h"
 
+#include "ep/epvariant.h"
+
 namespace ep
 {
 
@@ -71,7 +73,7 @@ static int SendMessage(lua_State *L)
   if (numArgs >= 4)
     new(&args) epVariant(epVariant::luaGet(l, 4));
 
-  /*udResult r = */l.kernel()->SendMessage(target, sender, message, args);
+  /*epResult r = */l.kernel()->SendMessage(target, sender, message, args);
 
   // TODO: push result and return 1?
   return 0;  // number of results
@@ -102,8 +104,8 @@ static int CreateComponent(lua_State *L)
   }
 
   ComponentRef c = nullptr;
-  udResult r = l.kernel()->CreateComponent(type, init, &c);
-  if (r == udR_Failure_)
+  epResult r = l.kernel()->CreateComponent(type, init, &c);
+  if (r == epR_Failure_)
     l.pushNil();
   else
     l.pushComponent(c);
@@ -204,7 +206,7 @@ int LuaState::udLuaPanic(lua_State *L)
 void* LuaState::udLuaAlloc(void *, void *ptr, size_t, size_t nsize)
 {
   if (nsize == 0) {
-    udFree(ptr);
+    epFree(ptr);
     return nullptr;
   }
   else
@@ -946,3 +948,144 @@ int LuaState::subscribe(lua_State* L)
 }
 
 } // namespace ep
+
+
+// HAX: define epVariant::Lua functions here to reduce include spam
+void epVariant::luaPush(ep::LuaState &l) const
+{
+  switch ((Type)t)
+  {
+    case Type::Null:
+      l.pushNil();
+      break;
+    case Type::Bool:
+      l.pushBool(b);
+      break;
+    case Type::Int:
+      l.pushInt(i);
+      break;
+    case Type::Float:
+      l.pushFloat(f);
+      break;
+    case Type::Enum:
+    case Type::Bitfield:
+    {
+      size_t val;
+      const epEnumDesc *pDesc = asEnum(&val);
+      epMutableString64 s;
+      pDesc->stringify(val, s);
+      l.pushString(s);
+      break;
+    }
+    case Type::Component:
+      l.pushComponent(ep::ComponentRef(c));
+      break;
+    case Type::Delegate:
+      l.pushDelegate((VarDelegate&)p);
+      break;
+    case Type::String:
+      l.pushString(epString(s, length));
+      break;
+    case Type::Array:
+    {
+      lua_State *L = l.state();
+      lua_createtable(L, (int)length, 0);
+      for (size_t i = 0; i<length; ++i)
+      {
+        l.push(a[i]);
+        lua_seti(L, -2, i+1);
+      }
+      break;
+    }
+    case Type::AssocArray:
+    {
+      lua_State *L = l.state();
+      lua_createtable(L, 0, 0); // TODO: estimate narr and nrec?
+      for (size_t i = 0; i<length; ++i)
+      {
+        l.push(aa[i].key);
+        l.push(aa[i].value);
+        lua_settable(L, -3);
+      }
+      break;
+    }
+  }
+}
+
+epVariant epVariant::luaGet(ep::LuaState &l, int idx)
+{
+  ep::LuaType t = l.getType(idx);
+  switch (t)
+  {
+    case ep::LuaType::Nil:
+      return epVariant();
+    case ep::LuaType::Boolean:
+      return epVariant(l.toBool(idx));
+    case ep::LuaType::LightUserData:
+      return epVariant();
+    case ep::LuaType::Number:
+      if (l.isInteger(idx))
+        return epVariant((int64_t)l.toInt(idx));
+      else
+        return epVariant(l.toFloat(idx));
+    case ep::LuaType::String:
+      return epVariant(l.toString(idx));
+    case ep::LuaType::Function:
+      return l.toDelegate(idx);
+    case ep::LuaType::UserData:
+    {
+      lua_State *L = l.state();
+      if (lua_getmetatable(L, idx) == 0)
+        luaL_error(L, "attempt to get 'userdata: %p' as a Component", lua_topointer(L, idx));
+
+      lua_getfield(L, -1, "__udtype"); // must be a Component
+      const char *type = lua_tostring(L, -1);
+      lua_pop(L, 1);
+
+      epVariant v;
+      if (!strcmp(type, "component"))
+        return epVariant(l.toComponent(idx));
+      else if (!strcmp(type, "delegate"))
+        return epVariant(l.toDelegate(idx));
+      //      else if (!strcmp(type, "event"))
+      //        return epVariant(l.toEvent(idx));
+      return epVariant();
+    }
+    case ep::LuaType::Table:
+    {
+      lua_State *L = l.state();
+
+      int pos = idx < 0 ? idx-1 : idx;
+
+      // work out how many items are in the table
+      // HACK: we are doing a brute-force count!
+      // TODO: this should be replaced with better stuff
+      size_t numElements = 0;
+      l.pushNil();  // first key
+      while (lua_next(L, pos) != 0)
+      {
+        ++numElements;
+        l.pop();
+      }
+
+      // alloc for table
+      epVariant v;
+      epKeyValuePair *pAA = v.allocAssocArray(numElements);
+
+      // populate the table
+      l.pushNil();  // first key
+      int i = 0;
+      while (lua_next(L, pos) != 0)
+      {
+        new(&pAA[i].key) epVariant(l.get(-2));
+        new(&pAA[i].value) epVariant(l.get(-1));
+        l.pop();
+        ++i;
+      }
+      return v;
+    }
+    default:
+      // TODO: make a noise of some sort...?
+      return epVariant();
+  }
+}

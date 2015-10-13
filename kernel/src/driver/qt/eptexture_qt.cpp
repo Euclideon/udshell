@@ -45,12 +45,12 @@ epTexture *epTexture_CreateTexture(epTextureType type, size_t width, size_t heig
   epTexture *pTex = nullptr;
 
   QOpenGLTexture *pQtTexture = new QOpenGLTexture(s_textureType[type]);
-  UD_ERROR_IF(!pQtTexture->create(), false);
+  EP_ERROR_IF(!pQtTexture->create(), false);
   pQtTexture->bind();
   pQtTexture->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
   pQtTexture->setWrapMode(QOpenGLTexture::ClampToEdge);
 
-  pTex = udAllocType(epTexture, 1, udAF_None);
+  pTex = epAllocType(epTexture, 1, epAF_None);
 
   pTex->type = type;
   pTex->format = format;
@@ -64,7 +64,7 @@ epTexture *epTexture_CreateTexture(epTextureType type, size_t width, size_t heig
 epilogue:
   if (!result)
   {
-    udDebugPrintf("Error creating texture\n");
+    epDebugPrintf("Error creating texture\n");
     delete pQtTexture;
   }
   return pTex;
@@ -80,7 +80,7 @@ void epTexture_DestroyTexture(epTexture **ppTex)
   pQtTexture->destroy();
   delete pQtTexture;
 
-  udFree(*ppTex);
+  epFree(*ppTex);
   *ppTex = nullptr;
 }
 
@@ -113,7 +113,7 @@ void epTexture_SetImageData(epTexture *pTex, int epUnusedParam(element), int lev
   if (!pQtTexture->isStorageAllocated())
   {
     // TODO: handle this error?
-    udDebugPrintf("Error allocating texture storage\n");
+    epDebugPrintf("Error allocating texture storage\n");
     return;
   }
 

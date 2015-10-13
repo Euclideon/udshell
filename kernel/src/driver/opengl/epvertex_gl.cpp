@@ -46,7 +46,7 @@ const int s_VertexDataStride[epVDF_Max] =
 epFormatDeclaration *epVertex_CreateFormatDeclaration(const epArrayElement *pElementArray, int elementCount)
 {
   size_t size = sizeof(epFormatDeclaration) + (sizeof(epArrayElement) + sizeof(epArrayElementData))*elementCount;
-  epFormatDeclaration *pDecl = (epFormatDeclaration*)udAlloc(size);
+  epFormatDeclaration *pDecl = (epFormatDeclaration*)epAlloc(size);
   pDecl->pElements = (epArrayElement*)&pDecl[1];
   pDecl->pElementData = (epArrayElementData*)(pDecl->pElements + elementCount);
   pDecl->numElements = elementCount;
@@ -71,7 +71,7 @@ epFormatDeclaration *epVertex_CreateFormatDeclaration(const epArrayElement *pEle
 // Author: Manu Evans, May 2015
 void epVertex_DestroyFormatDeclaration(epFormatDeclaration **ppDeclaration)
 {
-  udFree(*ppDeclaration);
+  epFree(*ppDeclaration);
   *ppDeclaration = nullptr;
 }
 
@@ -79,7 +79,7 @@ void epVertex_DestroyFormatDeclaration(epFormatDeclaration **ppDeclaration)
 // Author: Manu Evans, May 2015
 epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format)
 {
-  epArrayBuffer *pIB = (epArrayBuffer*)udAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*1);
+  epArrayBuffer *pIB = (epArrayBuffer*)epAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*1);
   pIB->pFormat = (epArrayDataFormat*)&(pIB[1]);
   pIB->type = epAT_IndexArray;
   *pIB->pFormat = format;
@@ -95,7 +95,7 @@ epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format)
 // Author: Manu Evans, May 2015
 epArrayBuffer* epVertex_CreateVertexBuffer(epArrayDataFormat elements[], size_t numElements)
 {
-  epArrayBuffer *pVB = (epArrayBuffer*)udAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*numElements);
+  epArrayBuffer *pVB = (epArrayBuffer*)epAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*numElements);
   pVB->pFormat = (epArrayDataFormat*)&(pVB[1]);
   pVB->type = epAT_VertexArray;
   memcpy(pVB->pFormat, elements, sizeof(epArrayDataFormat)*numElements);
@@ -112,7 +112,7 @@ epArrayBuffer* epVertex_CreateVertexBuffer(epArrayDataFormat elements[], size_t 
 void epVertex_DestroyArrayBuffer(epArrayBuffer **ppBuffer)
 {
   glDeleteBuffers(1, &(*ppBuffer)->buffer);
-  udFree(*ppBuffer);
+  epFree(*ppBuffer);
   *ppBuffer = nullptr;
 }
 

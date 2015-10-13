@@ -457,7 +457,7 @@ inline epArray<T, Count>::~epArray()
   if (hasAllocation())
   {
     Header *pHeader = getHeader();
-    udFree(pHeader);
+    epFree(pHeader);
   }
 }
 
@@ -472,7 +472,7 @@ inline void epArray<T, Count>::reserve(size_t count)
     bool needsExtend = hasAlloc && getHeader()->numAllocated < count;
     if (!hasAlloc || needsExtend)
     {
-      Header *pH = (Header*)udAlloc(sizeof(Header) + sizeof(T)*count);
+      Header *pH = (Header*)epAlloc(sizeof(Header) + sizeof(T)*count);
       pH->numAllocated = count;
       T *pNew = (T*)&pH[1];
       if (std::is_pod<T>::value)
@@ -485,7 +485,7 @@ inline void epArray<T, Count>::reserve(size_t count)
       if (hasAlloc)
       {
         pH = getHeader();
-        udFree(pH);
+        epFree(pH);
       }
       this->ptr = pNew;
     }
@@ -657,7 +657,7 @@ template <typename T>
 inline epSharedSlice<T>::~epSharedSlice()
 {
   if (rc && --rc->refCount == 0)
-    udFree(rc);
+    epFree(rc);
 }
 
 template <typename T>
@@ -695,7 +695,7 @@ inline epSharedSlice<T>& epSharedSlice<T>::operator =(epSlice<U> rh)
 template <typename T>
 inline epSharedSlice<T> epSharedSlice<T>::alloc(size_t elements)
 {
-  return epSharedSlice<T>(udAllocType(ET, elements, udAF_None), elements);
+  return epSharedSlice<T>(epAllocType(ET, elements, udAF_None), elements);
 }
 
 template <typename T>
@@ -728,7 +728,7 @@ inline epSlice<T> epSharedSlice<T>::alloc(U *ptr, size_t length)
   if(!ptr || !length)
     return epSlice<T>();
   size_t alloc = numToAlloc(length);
-  return epSlice<T>((T*)udAlloc(sizeof(epRC) + alloc*sizeof(typename epSharedSlice<T>::ET)), alloc);
+  return epSlice<T>((T*)epAlloc(sizeof(epRC) + alloc*sizeof(typename epSharedSlice<T>::ET)), alloc);
 }
 
 template <typename T>
@@ -797,7 +797,7 @@ template<typename... Things>
 inline epSharedSlice<T> epSharedSlice<T>::concat(const Things&... things)
 {
   size_t len = count(0, things...);
-  epRC *pRC = (epRC*)udAlloc(sizeof(epRC) + sizeof(T)*len);
+  epRC *pRC = (epRC*)epAlloc(sizeof(epRC) + sizeof(T)*len);
   pRC->refCount = 0;
   pRC->allocatedCount = len;
   T *ptr = (T*)(pRC + 1);

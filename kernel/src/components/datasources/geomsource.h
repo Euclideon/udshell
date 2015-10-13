@@ -31,7 +31,7 @@ public:
 protected:
   static const epArray<const epString> extensions;
 
-  static udResult RegisterExtensions(Kernel *pKernel);
+  static epResult RegisterExtensions(Kernel *pKernel);
 
   GeomSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)

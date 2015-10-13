@@ -23,7 +23,7 @@ public:
   EP_COMPONENT(View);
 
   virtual bool InputEvent(const epInputEvent &ev);
-  virtual udResult Resize(int width, int height);
+  virtual epResult Resize(int width, int height);
 
   RenderableViewRef GetRenderableView();
 

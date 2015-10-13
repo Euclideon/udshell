@@ -50,7 +50,7 @@ public:
 
   void Insert(K &&key, V &&rval)
   {
-    Node* node = (Node*)udAlloc(sizeof(Node));
+    Node* node = (Node*)epAlloc(sizeof(Node));
     new(&node->k) K(std::move(key));
     new(&node->v) V(std::move(rval));
     node->left = node->right = nullptr;
@@ -59,7 +59,7 @@ public:
   }
   void Insert(const K &key, V &&rval)
   {
-    Node* node = (Node*)udAlloc(sizeof(Node));
+    Node* node = (Node*)epAlloc(sizeof(Node));
     new(&node->k) K(key);
     new(&node->v) V(std::move(rval));
     node->left = node->right = nullptr;
@@ -68,7 +68,7 @@ public:
   }
   void Insert(K &&key, const V &v)
   {
-    Node* node = (Node*)udAlloc(sizeof(Node));
+    Node* node = (Node*)epAlloc(sizeof(Node));
     new(&node->k) K(std::move(key));
     new(&node->v) V(v);
     node->left = node->right = nullptr;
@@ -77,7 +77,7 @@ public:
   }
   void Insert(const K &key, const V &v)
   {
-    Node* node = (Node*)udAlloc(sizeof(Node));
+    Node* node = (Node*)epAlloc(sizeof(Node));
     new(&node->k) K(key);
     new(&node->v) V(v);
     node->left = node->right = nullptr;
@@ -216,7 +216,7 @@ private:
       newnode->height = n->height;
 
       n->~Node();
-      udFree(n);
+      epFree(n);
 
       return newnode;
     }
@@ -319,7 +319,7 @@ private:
         }
 
         temp->~Node();
-        udFree(temp);
+        epFree(temp);
 
         --size;
       }

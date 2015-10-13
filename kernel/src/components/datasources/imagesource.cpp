@@ -29,7 +29,7 @@ void ImageSource::Create(StreamRef spSource)
 {
   // allocate for file
   int64_t len = spSource->Length();
-  void *pBuffer = udAlloc((size_t)len);
+  void *pBuffer = epAlloc((size_t)len);
 
   // read file from source
   epSlice<void> buf(pBuffer, (size_t)len);
@@ -59,10 +59,10 @@ void ImageSource::Create(StreamRef spSource)
     resources.Insert(buffer, spImage);
   }
 
-  udFree(pBuffer);
+  epFree(pBuffer);
 }
 
-udResult ImageSource::RegisterExtensions(Kernel *pKernel)
+epResult ImageSource::RegisterExtensions(Kernel *pKernel)
 {
   return pKernel->RegisterExtensions(&descriptor, extensions);
 }

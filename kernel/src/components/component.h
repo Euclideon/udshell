@@ -37,8 +37,8 @@ public:
   template<typename T>
   bool IsType() const { return IsType(T::descriptor.id); }
 
-  virtual epVariant GetProperty(epString property) const;
-  virtual void SetProperty(epString property, const epVariant &value);
+  epVariant GetProperty(epString property) const;
+  void SetProperty(epString property, const epVariant &value);
 
   epVariant CallMethod(epString method, epSlice<epVariant> args);
   template<typename ...Args>
@@ -51,8 +51,8 @@ public:
   void Subscribe(epString eventName, const epVariant::VarDelegate &d);
   void Unsubscribe();
 
-  udResult SendMessage(epString target, epString message, const epVariant &data);
-  udResult SendMessage(Component *pComponent, epString message, const epVariant &data) { epMutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp, message, data); }
+  epResult SendMessage(epString target, epString message, const epVariant &data);
+  epResult SendMessage(Component *pComponent, epString message, const epVariant &data) { epMutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp, message, data); }
 
   const PropertyInfo *GetPropertyInfo(epString name) const
   {
@@ -100,15 +100,17 @@ public:
   void RemoveDynamicMethod(epString name);
   void RemoveDynamicEvent(epString name);
 
+  void* GetUserData() const { return pUserData; }
+
 protected:
   Component(const ComponentDesc *_pType, Kernel *_pKernel, epSharedString _uid, epInitParams initParams)
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
   virtual ~Component();
 
   void Init(epInitParams initParams);
-  virtual udResult InitComplete() { return udR_Success; }
+  virtual epResult InitComplete() { return epR_Success; }
 
-  virtual udResult ReceiveMessage(epString message, epString sender, const epVariant &data);
+  virtual epResult ReceiveMessage(epString message, epString sender, const epVariant &data);
 
   void LogInternal(int level, epString text, int category, epString componentUID) const;
 
@@ -130,6 +132,8 @@ protected:
   epAVLTree<epString, EventDesc> instanceEvents;
 
   epSubscriber subscriber;
+
+  void *pUserData = nullptr;
 
 private:
   template<typename... Args>

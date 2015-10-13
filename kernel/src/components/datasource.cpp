@@ -80,7 +80,7 @@ StreamRef DataSource::OpenStream(const epVariant &source)
     if (!spSource)
     {
       LogWarning(5, "\"src\" file path not found: {0}", source.asString());
-      throw udR_File_OpenFailure;
+      throw epR_File_OpenFailure;
     }
   }
   else if ((spComp = source.as<ComponentRef>()))
@@ -99,7 +99,7 @@ StreamRef DataSource::OpenStream(const epVariant &source)
   if (!spSource)
   {
     LogError("Unknown type for \"src\" init paramater");
-    throw udR_InvalidParameter_;
+    throw epR_InvalidParameter_;
   }
 
   return spSource;

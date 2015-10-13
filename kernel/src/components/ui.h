@@ -21,8 +21,8 @@ protected:
   UIComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   virtual ~UIComponent();
 
-  udResult CreateInternal(epInitParams initParams);
-  udResult InitComplete() override;
+  epResult CreateInternal(epInitParams initParams);
+  epResult InitComplete() override;
   void DestroyInternal();
 
   void *pInternal = nullptr;

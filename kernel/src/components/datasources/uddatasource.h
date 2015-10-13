@@ -30,7 +30,7 @@ public:
 protected:
   static const epArray<const epString> extensions;
 
-  static udResult RegisterExtensions(Kernel *pKernel);
+  static epResult RegisterExtensions(Kernel *pKernel);
 
   UDDataSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 };

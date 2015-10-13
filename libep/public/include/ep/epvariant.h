@@ -9,7 +9,6 @@
 namespace ep
 {
   SHARED_CLASS(Component);
-  SHARED_CLASS(Resource);
   class LuaState;
 };
 
@@ -90,6 +89,7 @@ public:
   epVariant* allocArray(size_t len);
   epKeyValuePair* allocAssocArray(size_t len);
 
+  // TODO: these shouldn't be part of the public API!
   void luaPush(ep::LuaState &l) const;
   static epVariant luaGet(ep::LuaState &l, int idx = -1);
 

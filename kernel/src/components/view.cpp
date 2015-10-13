@@ -60,7 +60,7 @@ bool View::InputEvent(const epInputEvent &ev)
   return handled;
 }
 
-udResult View::Resize(int width, int height)
+epResult View::Resize(int width, int height)
 {
   int oldRenderWidth = renderWidth;
   int oldRenderHeight = renderHeight;
@@ -82,7 +82,7 @@ udResult View::Resize(int width, int height)
   if (pResizeCallback)
     pResizeCallback(ViewRef(this), width, height);
 
-  return udR_Success;
+  return epR_Success;
 }
 
 RenderableViewRef View::GetRenderableView()

@@ -468,7 +468,7 @@ epSharedString epSharedString::sprintf(const char *pFormat, ...)
   len = numToAlloc(len);
 
   epSharedString r;
-  r.rc = (epRC*)udAlloc(sizeof(epRC) + len);
+  r.rc = (epRC*)epAlloc(sizeof(epRC) + len);
   r.rc->refCount = 1;
   r.rc->allocatedCount = len;
   r.ptr = ((const char*)r.rc)+sizeof(epRC);
@@ -490,7 +490,7 @@ epSharedString epSharedString::concatInternal(epSlice<epVarArg> args)
   size_t len = ep::internal::getLength(args);
 
   // allocate a new epSharedString
-  epRC *pRC = (epRC*)udAlloc(sizeof(epRC) + sizeof(char)*(len+1));
+  epRC *pRC = (epRC*)epAlloc(sizeof(epRC) + sizeof(char)*(len+1));
   pRC->refCount = 0;
   pRC->allocatedCount = len;
   char *ptr = (char*)(pRC + 1);
@@ -505,7 +505,7 @@ epSharedString epSharedString::formatInternal(epString format, epSlice<epVarArg>
   size_t len = ep::internal::format(format, nullptr, args).length;
 
   // allocate a new epSharedString
-  epRC *pRC = (epRC*)udAlloc(sizeof(epRC) + sizeof(char)*(len+1));
+  epRC *pRC = (epRC*)epAlloc(sizeof(epRC) + sizeof(char)*(len+1));
   pRC->refCount = 0;
   pRC->allocatedCount = len;
   char *ptr = (char*)(pRC + 1);
@@ -624,7 +624,7 @@ template double epBaseString<char>::parseFloat() const;
 //template int64_t epBaseString<char32_t>::parseInt(bool, int) const;
 //template double epBaseString<char32_t>::parseFloat() const;
 
-udResult epSlice_Test()
+epResult epSlice_Test()
 {
   // usSlice<> tests
   int i[100];
@@ -648,6 +648,8 @@ udResult epSlice_Test()
 
   slice.empty();                  // ptr == nullptr || length == 0
 
+
+  epSlice<void> tttt = (epSlice<void>)s1;
 
   // epArray<>
   epArray<int> s_i(i1);
@@ -679,7 +681,7 @@ udResult epSlice_Test()
     //...
   }
 
-  return udR_Success;
+  return epR_Success;
 }
 
 void receivesString(epString)
@@ -691,7 +693,7 @@ void receivesCString(const char*)
 
 #include "ep/epvariant.h"
 
-udResult epString_Test()
+epResult epString_Test()
 {
   // epString
   char buffer[] = "world";
@@ -769,6 +771,6 @@ udResult epString_Test()
   epWString wstr = (const char16_t*)L"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
   ms.format("{0}", wstr);
 
-  return udR_Success;
+  return epR_Success;
 }
 

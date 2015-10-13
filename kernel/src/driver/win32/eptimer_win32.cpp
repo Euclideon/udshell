@@ -28,7 +28,7 @@ static void Win32Callback(HWND , UINT , UINT_PTR idEvent, DWORD )
 
 HalTimer *HalTimer_Create(HalTimerType tt, uint32_t duration,  HalTimerCallback *pCallBack, void *pUserData)
 {
-  HalTimerWin32 *pTimer = udAllocType(HalTimerWin32, 1, udAF_Zero);
+  HalTimerWin32 *pTimer = epAllocType(HalTimerWin32, 1, udAF_Zero);
   if (!pTimer)
     return nullptr;
 
@@ -42,7 +42,7 @@ HalTimer *HalTimer_Create(HalTimerType tt, uint32_t duration,  HalTimerCallback 
   pTimer->timer = SetTimer(pTimer->hwnd, (UINT_PTR)pTimer, duration, Win32Callback);
 
   if (pTimer->timer == 0)
-    udFree(pTimer);
+    epFree(pTimer);
 
   return pTimer;
 }
@@ -54,7 +54,7 @@ void HalTimer_Destroy(HalTimer **ppTimer)
   {
     HalTimerWin32 *pTimer = (HalTimerWin32*)*ppTimer;
     KillTimer(pTimer->hwnd, pTimer->timer);
-    udFree((*ppTimer));
+    epFree((*ppTimer));
   }
 }
 

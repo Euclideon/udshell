@@ -24,7 +24,7 @@ bool Buffer::Allocate(size_t size)
 
   Free();
 
-  buffer.ptr = (char*)udAlloc(size);
+  buffer.ptr = (char*)epAlloc(size);
   buffer.length = logicalSize = size;
 
   return true;
@@ -34,7 +34,7 @@ bool Buffer::Free()
 {
   if (buffer.ptr && mapDepth == 0)
   {
-    udFree(buffer.ptr);
+    epFree(buffer.ptr);
     buffer.ptr = nullptr;
     buffer.length = 0;
   }
@@ -61,12 +61,12 @@ bool Buffer::ResizeInternal(size_t size, bool copy)
 
   if (physSize > buffer.length)
   {
-    char *newBuf = (char*)udAlloc(physSize);
+    char *newBuf = (char*)epAlloc(physSize);
     if (buffer.ptr)
     {
       if (copy)
         memcpy(newBuf, buffer.ptr, logicalSize);
-      udFree(buffer.ptr);
+      epFree(buffer.ptr);
     }
     buffer.ptr = newBuf;
     buffer.length = physSize;

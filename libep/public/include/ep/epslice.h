@@ -234,6 +234,6 @@ protected:
 };
 
 // unit tests
-udResult epSlice_Test();
+epResult epSlice_Test();
 
 #endif // _EP_SLICE

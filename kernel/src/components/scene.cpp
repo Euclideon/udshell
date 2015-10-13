@@ -91,13 +91,13 @@ RenderSceneRef Scene::GetRenderScene()
   return spCache;
 }
 
-udResult Scene::SetRenderModels(struct udRenderModel models[], size_t numModels)
+epResult Scene::SetRenderModels(struct udRenderModel models[], size_t numModels)
 {
   for (size_t i = 0; i < numModels; ++i)
     renderModels[i] = models[i];
   numRenderModels = numModels;
 
-  return udR_Success;
+  return epR_Success;
 }
 
 Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams) :

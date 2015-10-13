@@ -95,9 +95,7 @@ int main(int argc, char *argv[])
   udMemoryDebugTrackingInit();
 
   // unit test
-  udResult epSlice_Test();
   epSlice_Test();
-  udResult epString_Test();
   epString_Test();
 
   // install our qt message handler
@@ -109,8 +107,8 @@ int main(int argc, char *argv[])
   qputenv("QSG_RENDER_LOOP", "threaded");
 
   // create a kernel
-  udResult r = Kernel::Create(&pKernel, udParseCommandLine(argc, argv), 8);
-  if (r == udR_Failure_)
+  epResult r = Kernel::Create(&pKernel, udParseCommandLine(argc, argv), 8);
+  if (r == epR_Failure_)
   {
     // TODO: improve error handling/reporting
     udDebugPrintf("Error creating Kernel\n");

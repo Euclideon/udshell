@@ -22,9 +22,9 @@ class SDLKernel : public Kernel
 public:
   SDLKernel() {}
 
-  udResult InitInternal() override;
-  udResult Destroy() override;
-  udResult RunMainLoop() override;
+  epResult InitInternal() override;
+  epResult Destroy() override;
+  epResult RunMainLoop() override;
 };
 
 Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
@@ -32,27 +32,27 @@ Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
   return new SDLKernel;
 }
 
-udResult SDLKernel::InitInternal()
+epResult SDLKernel::InitInternal()
 {
   s_displayWidth = 1280;
   s_displayHeight = 720;
 
   int sdlInit = SDL_Init(SDL_INIT_VIDEO);
   if (sdlInit < 0)
-    return udR_Failure_;
+    return epR_Failure_;
 
   s_sdlEvent = SDL_RegisterEvents(1);
   if (s_sdlEvent < 0)
   {
     SDL_Quit();
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   s_window = SDL_CreateWindow("udPointCloud Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_displayWidth, s_displayHeight, SDL_WINDOW_OPENGL);
   if (!s_window)
   {
     SDL_Quit();
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
   s_context = SDL_GL_CreateContext(s_window);
@@ -60,11 +60,11 @@ udResult SDLKernel::InitInternal()
   {
     SDL_DestroyWindow(s_window);
     SDL_Quit();
-    return udR_Failure_;
+    return epR_Failure_;
   }
 
-  udResult result = InitRender();
-  if (result != udR_Success)
+  epResult result = InitRender();
+  if (result != epR_Success)
   {
     SDL_GL_DeleteContext(s_context);
     SDL_DestroyWindow(s_window);
@@ -72,17 +72,17 @@ udResult SDLKernel::InitInternal()
     return result;
   }
 
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult SDLKernel::Destroy()
+epResult SDLKernel::Destroy()
 {
   // this
   SDL_GL_DeleteContext(s_context);
   SDL_Quit();
 
   DeinitRender();
-  return udR_Success;
+  return epR_Success;
 }
 
 ViewRef Kernel::SetFocusView(ViewRef spView)
@@ -129,7 +129,7 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   udDestroySemaphore(&dispatch.pSem);
 }
 
-udResult SDLKernel::RunMainLoop()
+epResult SDLKernel::RunMainLoop()
 {
   DoInit(this);
 
@@ -196,13 +196,13 @@ udResult SDLKernel::RunMainLoop()
 
     SDL_GL_SwapWindow(s_window);
   }
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult Kernel::Terminate()
+epResult Kernel::Terminate()
 {
   s_done = true;
-  return udR_Success;
+  return epR_Success;
 }
 
 #endif

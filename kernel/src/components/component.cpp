@@ -89,7 +89,7 @@ void Component::Init(epInitParams initParams)
 
   // allocate property change events
   propertyChange.length = pType->propertyTree.Size();
-  propertyChange.ptr = udAllocType(epEvent<>, propertyChange.length, udAF_None);
+  propertyChange.ptr = epAllocType(epEvent<>, propertyChange.length, udAF_None);
   for (size_t i = 0; i<propertyChange.length; ++i)
     new(&propertyChange.ptr[i]) epEvent<>();
 */
@@ -229,7 +229,7 @@ void Component::Unsubscribe()
 }
 
 
-udResult Component::ReceiveMessage(epString message, epString sender, const epVariant &data)
+epResult Component::ReceiveMessage(epString message, epString sender, const epVariant &data)
 {
   if (message.eqIC("set"))
   {
@@ -246,10 +246,10 @@ udResult Component::ReceiveMessage(epString message, epString sender, const epVa
 //      SendMessage(sender, "val", buffer);
     }
   }
-  return udR_Success;
+  return epR_Success;
 }
 
-udResult Component::SendMessage(epString target, epString message, const epVariant &data)
+epResult Component::SendMessage(epString target, epString message, const epVariant &data)
 {
   return pKernel->SendMessage(target, uid, message, data);
 }

@@ -3,7 +3,7 @@
 #define EPCOMPONENTDESC_H
 
 #include "ep/epplatform.h"
-
+#include "ep/epversion.h"
 #include "ep/epsharedptr.h"
 #include "ep/epvariant.h"
 #include "ep/epevent.h"
@@ -19,6 +19,7 @@
 #define PROTOTYPE_COMPONENT(Name) \
   SHARED_CLASS(Name)
 
+struct epComponentDesc;
 
 namespace ep
 {
@@ -347,10 +348,7 @@ struct CStaticFuncDesc
 };
 
 // component description
-enum { EPSHELL_APIVERSION = 100 };
-enum { EPSHELL_PLUGINVERSION = EPSHELL_APIVERSION };
-
-typedef udResult(InitComponent)(Kernel*);
+typedef epResult(InitComponent)(Kernel*);
 typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
 
 struct ComponentDesc
@@ -358,9 +356,9 @@ struct ComponentDesc
   ComponentDesc() = delete;
   ComponentDesc(ComponentDesc *pSuperDesc, int epVersion, int pluginVersion, epString id, epString displayName, epString description,
     epSlice<CPropertyDesc> properties = nullptr, epSlice<CMethodDesc> methods = nullptr, epSlice<CEventDesc> events = nullptr, epSlice<CStaticFuncDesc> staticFuncs = nullptr,
-    InitComponent *pInit = nullptr, CreateInstanceCallback *pCreateInstance = nullptr)
+    InitComponent *pInit = nullptr, CreateInstanceCallback *pCreateInstance = nullptr, const epComponentDesc *pExternalDesc = nullptr)
     : pSuperDesc(pSuperDesc), epVersion(epVersion), pluginVersion(pluginVersion), id(id), displayName(displayName), description(description)
-    , properties(properties), methods(methods), events(events), staticFuncs(staticFuncs), pInit(pInit), pCreateInstance(pCreateInstance) {}
+    , properties(properties), methods(methods), events(events), staticFuncs(staticFuncs), pInit(pInit), pCreateInstance(pCreateInstance), pExternalDesc(pExternalDesc) {}
 
   ComponentDesc& operator=(const ComponentDesc&) = delete;
 
@@ -384,6 +382,8 @@ struct ComponentDesc
 
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
+
+  const epComponentDesc *pExternalDesc;
 
   epAVLTree<epString, PropertyDesc> propertyTree;
   epAVLTree<epString, MethodDesc> methodTree;

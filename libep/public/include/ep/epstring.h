@@ -304,7 +304,7 @@ private:
 
 
 // unit tests
-udResult epString_Test();
+epResult epString_Test();
 
 #endif
 

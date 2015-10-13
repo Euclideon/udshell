@@ -19,7 +19,7 @@ inline epString AllocUDStringFromQString(const QString &string)
 
   // Need to do a deep copy and give ownership to the variant
   size_t length = byteArray.size() + 1;
-  char *pString = udAllocType(char, length, udAF_None);
+  char *pString = epAllocType(char, length, epAF_None);
   memcpy(pString, byteArray.data(), length);
 
   return epString(pString, length - 1);

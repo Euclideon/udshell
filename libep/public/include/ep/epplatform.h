@@ -85,6 +85,10 @@
 # include <Windows.h>
 # include <Intrin.h>
 
+# if defined(SendMessage)
+#   undef SendMessage
+# endif
+
 # if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x501
 #   undef _WIN32_WINNT
 # endif
@@ -246,7 +250,7 @@
 
 // silence warnings
 #if defined(EP_COMPILER_VISUALC)
-//# pragma warning(disable:4127) // conditional expression is constant
+# pragma warning(disable:4127) // conditional expression is constant
 //# pragma warning(disable:4100) // disable 'unreferenced formal parameter'
 //# pragma warning(disable:4996) // disable depreciated warnings
 //# pragma warning(disable:4190) // disable C-linkage returning UDT (user data type)
@@ -263,12 +267,15 @@
 #if defined(EP_COMPILER_VISUALC)
 # define EP_EXPORT __declspec(dllexport)
 # define EP_EXPORT_VARIABLE __declspec(dllexport)
+# if defined(_WINDLL)
+#   define EP_SHAREDLIB 1
+# endif
 #else
 # define EP_EXPORT
 # define EP_EXPORT_VARIABLE
 #endif
 
-#if defined(EP_SHAREDLIB)
+#if EP_SHAREDLIB
 # define EP_API extern "C" EP_EXPORT
 #else
 # define EP_API extern "C"
@@ -388,24 +395,23 @@ struct epTheTypeIs;
 #include <stdlib.h>
 #include <new>
 
-// TODO: remove these!
-#include "udResult.h"
-#if 1
-# include "udPlatform.h"
-#endif
-
+#include "ep/eperror.h"
 #include "ep/epstring.h"
 
 
 // Outputs a string to debug console
+extern "C" {
 void epDebugWrite(const char *pString);
 void epDebugPrintf(const char *format, ...) epprintf_func(1, 2);
+}
+#if defined(__cplusplus)
 template<typename ...Args>
 inline void epDebugFormat(epString format, Args... args)
 {
   epMutableString64 t.format(format, args...);
   epDebugWrite(t.ptr);
 }
+#endif
 
 
 // debug stuff...
@@ -452,50 +458,67 @@ inline void epDebugFormat(epString format, Args... args)
 # define EPTRACE_MEMORY(var,length)
 #endif
 
-namespace ep {
-namespace internal {
-
-void epAssertFailed(epString condition, epString message, epString file, int line);
-
-} // namespace internal
-} // namespace ep
-
 // TODO: Make assertion system handle pop-up window where possible
 #if EPASSERT_ON
 
-namespace ep {
-namespace internal {
-
-extern epMutableString256 assertBuffer;
-
-inline void epAssertTemplate(epString condition, epString file, int line)
-{
-  epAssertFailed(condition, nullptr, file, line);
-}
-template<typename ...Args>
-inline void epAssertTemplate(epString condition, epString file, int line, epString format, Args... args)
-{
-  assertBuffer.format(format, args...);
-  epAssertFailed(condition, assertBuffer, file, line);
+extern "C" {
+void epAssertFailed(epString condition, epString message, epString file, int line);
 }
 
-} // namespace internal
-} // namespace ep
+# if defined(__cplusplus)
 
-# define EPASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
-# define IF_EPASSERT(x) x
-#else
+  // C++ assert code uses our fancy variadic format() function
+  namespace ep {
+  namespace internal {
+  extern epMutableString256 assertBuffer;
+  inline void epAssertTemplate(epString condition, epString file, int line)
+  {
+    epAssertFailed(condition, nullptr, file, line);
+  }
+  template<typename ...Args>
+  inline void epAssertTemplate(epString condition, epString file, int line, epString format, Args... args)
+  {
+    assertBuffer.format(format, args...);
+    epAssertFailed(condition, assertBuffer, file, line);
+  }
+  } // namespace internal
+  } // namespace ep
+
+#   define EPASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+#   define IF_EPASSERT(x) x
+
+#   if EPRELASSERT_ON
+#     define EPRELASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+#     define IF_EPRELASSERT(x) x
+#   else
+#     define EPRELASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
+#     define IF_EPRELASSERT(x)
+#   endif
+
+# else // defined(__cplusplus)
+
+    // C assert just has a fixed message...
+#   define EPASSERT(condition, message) do { if (!(condition)) { epAssertFailed(#condition, message, __FILE__, __LINE__); DebugBreak(); } } while (0)
+#   define IF_EPASSERT(x) x
+
+#   if EPRELASSERT_ON
+#     define EPRELASSERT(condition, message) do { if (!(condition)) { epAssertFailed(#condition, message, __FILE__, __LINE__); DebugBreak(); } } while (0)
+#     define IF_EPRELASSERT(x) x
+#   else
+#     define EPRELASSERT(condition, message) // TODO: Make platform-specific __assume(condition)
+#     define IF_EPRELASSERT(x)
+#   endif
+
+# endif // defined(__cplusplus)
+
+#else // EPASSERT_ON
+
 # define EPASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
 # define IF_EPASSERT(x)
-#endif
-
-#if EPRELASSERT_ON
-# define EPRELASSERT(condition, ...) do { if (!(condition)) { ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
-# define IF_EPRELASSERT(x) x
-#else
 # define EPRELASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
 # define IF_EPRELASSERT(x)
-#endif
+
+#endif // EPASSERT_ON
 
 #if EP_CPP11
 # define EP_STATICASSERT(a_condition, a_error) static_assert(a_condition, #a_error)
@@ -506,6 +529,37 @@ inline void epAssertTemplate(epString condition, epString file, int line, epStri
 #   define EP_STATICASSERT(a_condition, a_error) typedef char EP_STATICASSERT##a_error[(a_condition)?1:-1] __attribute__ ((unused))
 # endif
 #endif
+
+
+// HACK: rejig these
+#define __MEMORY_DEBUG__  0
+
+#if __MEMORY_DEBUG__
+# define IF_MEMORY_DEBUG(x,y) ,x,y
+#else
+# define IF_MEMORY_DEBUG(x,y)
+#endif //  __MEMORY_DEBUG__
+
+extern "C" {
+enum epAllocationFlags
+{
+  epAF_None = 0,
+  epAF_Zero = 1
+};
+
+void *_epAlloc(size_t size, epAllocationFlags flags = epAF_None IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epAlloc(size) _epAlloc(size, epAF_None IF_MEMORY_DEBUG(__FILE__, __LINE__))
+
+void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epAllocAligned(size, alignment, flags) _epAllocAligned(size, alignment, flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
+
+#define epAllocFlags(size, flags) _epAlloc(size, flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
+#define epAllocType(type, count, flags) (type*)_epAlloc(sizeof(type) * (count), flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
+
+void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epFree(pMemory) _epFree(pMemory IF_MEMORY_DEBUG(__FILE__, __LINE__))
+}
+
 
 #include "ep/epslice.inl"
 #include "ep/epstring.inl"

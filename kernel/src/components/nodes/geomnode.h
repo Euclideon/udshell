@@ -24,7 +24,7 @@ protected:
     : Node(pType, pKernel, uid, initParams) {}
   virtual ~GeomNode() {}
 
-  udResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;
+  epResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;
 
   ModelRef spModel = nullptr;
 };
