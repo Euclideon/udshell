@@ -6,6 +6,6 @@
     <file>console.qml</file>
     <file>consolefilter.qml</file>
     <file>popupokcancel.qml</file>
-	<file>popup.qml</file>
+	  <file>popup.qml</file>
   </qresource>
 </RCC>

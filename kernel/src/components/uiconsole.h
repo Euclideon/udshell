@@ -18,7 +18,11 @@ public:
   StreamRef GetOutStream() const { return spOutStream; }
   StreamRef GetInStream() const { return spInStream; }
 
-  void UIConsole::RelayInput(epString str);
+  void UIConsole::RelayInput(String str);
+
+  int GetNumConsoleLines() const { return (int)filteredConsole.length; }
+  int GetNumLogLines() const { return (int)filteredLog.length; }
+  int GetNumMergedLines() const { return (int)filteredMerged.length; }
 
   bool GetOutputsMerged() const { return bOutputsMerged; }
   void SetOutputsMerged(bool bMerged)
@@ -44,19 +48,19 @@ public:
     RebuildOutput();
   }
 
-  epString GetFilterComponents() const;
-  void SetFilterComponents(epString str);
+  String GetFilterComponents() const;
+  void SetFilterComponents(String str);
 
-  bool FilterTextLine(epString line) const;
-  epString GetFilterText() const { return textFilter; }
-  void SetFilterText(epString str)
+  bool FilterTextLine(String line) const;
+  String GetFilterText() const { return textFilter; }
+  void SetFilterText(String str)
   {
     textFilter = str;
     RebuildOutput();
   }
 
 protected:
-  UIConsole(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   virtual ~UIConsole() {}
 
   void ToggleVisible();
@@ -69,7 +73,7 @@ protected:
 
   struct ConsoleLine
   {
-    ConsoleLine(epString text, int logIndex = -1);
+    ConsoleLine(String text, int logIndex = -1);
     LogLine *GetLogLine() const
     {
       if (logIndex != -1)
@@ -78,7 +82,7 @@ protected:
       return nullptr;
     }
 
-    epSharedString text;
+    SharedString text;
     double ordering;
     int logIndex;
   };
@@ -87,10 +91,25 @@ protected:
   MemStreamRef spInStream = nullptr;
   MemStreamRef spOutStream = nullptr;
   int64_t pos = 0;
-  epArray<ConsoleLine> consoleLines;
-  epArray<ConsoleLine> logLines;
+
+  MutableString<256> textFilter;
+  Array<ConsoleLine> consoleLines;
+  Array<ConsoleLine> logLines;
+  Array<int> filteredConsole;
+  Array<int> filteredLog;
+
+  enum {
+    typeConsole,
+    typeLog
+  };
+  struct MergedLine {
+    MergedLine(int type, int index) : type(type), index(index) {}
+
+    int type;
+    int index;
+  };
+  Array<MergedLine> filteredMerged;
   bool bOutputsMerged = false;
-  epMutableString<256> textFilter;
 };
 
 } // namespace ep

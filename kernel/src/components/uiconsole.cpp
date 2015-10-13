@@ -3,12 +3,11 @@
 #include "components/logger.h"
 #include "components/resources/buffer.h"
 #include "components/shortcutmanager.h"
-#include "ep/epdelegate.h"
+#include "ep/cpp/delegate.h"
 #include "kernel.h"
 
 namespace ep
 {
-
 static CPropertyDesc props[] =
 {
   {
@@ -37,6 +36,33 @@ static CPropertyDesc props[] =
     },
     &UIConsole::GetFilterText, // getter
     &UIConsole::SetFilterText, // setter
+  },
+  {
+    {
+      "numconsolelines", // id
+      "NumConsoleLines", // displayName
+      "Number of console lines to output", // description
+    },
+    &UIConsole::GetNumConsoleLines, // getter
+    nullptr,
+  },
+  {
+    {
+      "numloglines", // id
+      "NumLogLines", // displayName
+      "Number of log lines to output", // description
+    },
+    &UIConsole::GetNumLogLines, // getter
+    nullptr,
+  },
+  {
+    {
+      "nummergedlines", // id
+      "NumMergedLines", // displayName
+      "Number of merged log + console lines to output", // description
+    },
+    &UIConsole::GetNumMergedLines, // getter
+    nullptr,
   },
 };
 
@@ -74,7 +100,7 @@ static CMethodDesc methods[] =
 
 ComponentDesc UIConsole::descriptor =
 {
-  &Component::descriptor, // pSuperDesc
+  &UIComponent::descriptor, // pSuperDesc
 
   EPSHELL_APIVERSION, // epVersion
   EPSHELL_PLUGINVERSION, // pluginVersion
@@ -83,14 +109,14 @@ ComponentDesc UIConsole::descriptor =
   "UIConsole",     // displayName
   "Is a UI for a Console Panel with input and output text controls", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)),   // properties
-  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)),   // properties
+  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
   nullptr, // events
 };
 
 LoggerRef UIConsole::spLogger;
 
-UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
   spLogger = pKernel->GetLogger();
@@ -110,10 +136,9 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, epSharedString
 
   auto spShortcutManager = pKernel->GetShortcutManager();
   spShortcutManager->RegisterShortcut("showhideconsolewindow", "`");
-  spShortcutManager->SetShortcutFunction("showhideconsolewindow", epDelegate<void()>(this, &UIConsole::ToggleVisible));
+  spShortcutManager->SetShortcutFunction("showhideconsolewindow", Delegate<void()>(this, &UIConsole::ToggleVisible));
 }
 
-// Change this once QML bindings support passing a QML function to C++?
 void UIConsole::ToggleVisible()
 {
   CallMethod("togglevisible");
@@ -121,13 +146,12 @@ void UIConsole::ToggleVisible()
 
 void UIConsole::RebuildOutput()
 {
+  filteredConsole = nullptr;
+  filteredLog = nullptr;
+  filteredMerged = nullptr;
+
   if (bOutputsMerged)
   {
-    if (logLines.length == 0 && consoleLines.length == 0)
-      return;
-
-    epMutableString<0> outText;
-    outText.reserve(256 * (logLines.length + consoleLines.length));
 
     int logIndex = 0, consoleIndex = 0;
     while (logIndex < logLines.length && consoleIndex < consoleLines.length)
@@ -135,73 +159,89 @@ void UIConsole::RebuildOutput()
       if (logLines[logIndex].ordering < consoleLines[consoleIndex].ordering)
       {
         if (logFilter.FilterLogLine(*logLines[logIndex].GetLogLine()) && FilterTextLine(logLines[logIndex].text))
-          outText.append(logLines[logIndex].text, "\n");
+          filteredMerged.pushBack(MergedLine(typeLog, logIndex));
         logIndex++;
       }
       else
       {
         if(FilterTextLine(consoleLines[consoleIndex].text))
-          outText.append(consoleLines[consoleIndex].text, "\n");
+          filteredMerged.pushBack(MergedLine(typeConsole, consoleIndex));
         consoleIndex++;
       }
     }
     while (logIndex < logLines.length)
     {
       if (logFilter.FilterLogLine(*logLines[logIndex].GetLogLine()) && FilterTextLine(logLines[logIndex].text))
-        outText.append(logLines[logIndex].text, "\n");
+        filteredMerged.pushBack(MergedLine(typeLog, logIndex));
       logIndex++;
     }
     while (consoleIndex < consoleLines.length)
     {
       if (FilterTextLine(consoleLines[consoleIndex].text))
-        outText.append(consoleLines[consoleIndex].text, "\n");
+        filteredMerged.pushBack(MergedLine(typeConsole, consoleIndex));
       consoleIndex++;
     }
 
-    if (outText.back() == '\n')
+    // TODO Change below when adding virtual scrollbar support
+
+    MutableString<0> outText;
+    outText.reserve(256 * filteredMerged.length);
+
+    for (MergedLine &m : filteredMerged)
+    {
+      if (m.type == typeConsole)
+        outText.append(consoleLines[m.index].text, "\n");
+      else
+        outText.append(logLines[m.index].text, "\n");
+    }
+
+    if (!outText.empty() && outText.back() == '\n')
       outText.length--;
 
-    CallMethod("setconsoletext", (epString)outText);
+    CallMethod("setconsoletext", (String)outText);
   }
   else
   {
-    epMutableString<0> outText;
-    outText.reserve(256 * (consoleLines.length > logLines.length ? consoleLines.length : logLines.length));
-
-    if (consoleLines.length > 0)
+    for (int i = 0; i < consoleLines.length; i++)
     {
-      for (int i = 0; i < consoleLines.length; i++)
-      {
-        if (FilterTextLine(consoleLines[i].text))
-          outText.append(consoleLines[i].text, "\n");
-      }
-
-      if (outText.back() == '\n')
-        outText.length--;
-
-      CallMethod("setconsoletext", (epString)outText);
+      if (FilterTextLine(consoleLines[i].text))
+        filteredConsole.pushBack(i);
     }
 
-    if (logLines.length > 0)
+    for (int i = 0; i < logLines.length; i++)
     {
-      outText.length = 0;
-      for (int i = 0; i < logLines.length; i++)
-      {
-        if (logFilter.FilterLogLine(*logLines[i].GetLogLine()) && FilterTextLine(logLines[i].text))
-          outText.append(logLines[i].text, "\n");
-      }
-
-      if (outText.back() == '\n')
-        outText.length--;
-
-      CallMethod("setlogtext", (epString)outText);
+      if (logFilter.FilterLogLine(*logLines[i].GetLogLine()) && FilterTextLine(logLines[i].text))
+        filteredLog.pushBack(i);
     }
+
+    // TODO Change below when adding virtual scrollbar support
+
+    MutableString<0> outText;
+    outText.reserve(256 * (filteredConsole.length > filteredLog.length ? filteredConsole.length : filteredLog.length));
+
+    for (int i : filteredConsole)
+      outText.append(consoleLines[i].text, "\n");
+
+    if (!outText.empty() && outText.back() == '\n')
+      outText.length--;
+
+    CallMethod("setconsoletext", (String)outText);
+
+    outText.length = 0;
+
+    for (int i : filteredLog)
+      outText.append(logLines[i].text, "\n");
+
+    if (!outText.empty() && outText.back() == '\n')
+      outText.length--;
+
+    CallMethod("setlogtext", (String)outText);
   }
 }
 
 void UIConsole::OnLogChanged()
 {
-  epSlice<LogLine> log = pKernel->GetLogger()->GetLog();
+  Slice<LogLine> log = pKernel->GetLogger()->GetLog();
   LogLine &line = log.back();
 
   logLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1));
@@ -212,12 +252,48 @@ void UIConsole::OnLogChanged()
     return;
 
   if (bOutputsMerged)
-    CallMethod("appendconsoletext", (epString)cLine.text);
+  {
+    filteredMerged.pushBack(MergedLine(typeLog, (int)logLines.length - 1));
+    CallMethod("appendconsoletext", (String)cLine.text);
+  }
   else
-    CallMethod("appendlogtext", (epString)cLine.text);
+  {
+    filteredLog.pushBack((int)logLines.length - 1);
+    CallMethod("appendlogtext", (String)cLine.text);
+  }
 }
 
-void UIConsole::RelayInput(epString str)
+void UIConsole::OnStreamOutput()
+{
+  int64_t newPos = spOutStream->GetPos();
+  MutableString<0> buf;
+  buf.reserve(newPos - pos);
+
+  spOutStream->Seek(SeekOrigin::Begin, 0);
+  Slice<void> readSlice = spOutStream->Read(buf.getBuffer());
+  String readStr = (String &)readSlice;
+  spOutStream->Seek(SeekOrigin::Begin, 0);
+
+  while (!readStr.empty())
+  {
+    String token = readStr.popToken("\n");
+    if (!token.empty())
+    {
+      consoleLines.pushBack(ConsoleLine(token));
+      if (FilterTextLine(token))
+      {
+        if (bOutputsMerged)
+          filteredConsole.pushBack((int)consoleLines.length - 1);
+        else
+          filteredMerged.pushBack(MergedLine(typeConsole, (int)consoleLines.length - 1));
+
+        CallMethod("appendconsoletext", token);
+      }
+    }
+  }
+}
+
+void UIConsole::RelayInput(String str)
 {
   auto spInBuffer = pKernel->CreateComponent<Buffer>();
   spInBuffer->Allocate(1024);
@@ -225,30 +301,7 @@ void UIConsole::RelayInput(epString str)
   spInStream->SetBuffer(spInBuffer);
 }
 
-void UIConsole::OnStreamOutput()
-{
-  int64_t newPos = spOutStream->GetPos();
-  epMutableString<0> buf;
-  buf.reserve(newPos - pos);
-
-  spOutStream->Seek(SeekOrigin::Begin, 0);
-  epSlice<void> readSlice = spOutStream->Read(buf.getBuffer());
-  epString readStr = (epString &)readSlice;
-  spOutStream->Seek(SeekOrigin::Begin, 0);
-
-  while (!readStr.empty())
-  {
-    epString token = readStr.popToken("\n");
-    if (!token.empty())
-    {
-      consoleLines.pushBack(ConsoleLine(token));
-      if (FilterTextLine(token))
-        CallMethod("appendconsoletext", token);
-    }
-  }
-}
-
-UIConsole::ConsoleLine::ConsoleLine(epString text, int logIndex)
+UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex)
 {
   this->text = text;
   this->logIndex = logIndex;
@@ -260,12 +313,12 @@ UIConsole::ConsoleLine::ConsoleLine(epString text, int logIndex)
 
 // Filter getter/setter helper functions
 
-epString UIConsole::GetFilterComponents() const
+String UIConsole::GetFilterComponents() const
 {
-  epMutableString<1024> str;
+  MutableString<1024> str;
 
-  epArray<epSharedString> comps = logFilter.GetComponents();
-  for (epSharedString &c: comps)
+  Array<SharedString> comps = logFilter.GetComponents();
+  for (SharedString &c: comps)
   {
     if (c.length == 0)
       str.append("$;");
@@ -279,10 +332,10 @@ epString UIConsole::GetFilterComponents() const
   return str;
 }
 
-void UIConsole::SetFilterComponents(epString str)
+void UIConsole::SetFilterComponents(String str)
 {
-  epString token;
-  epArray<epString> comps;
+  String token;
+  Array<String> comps;
 
   while (!str.empty())
   {
@@ -300,7 +353,7 @@ void UIConsole::SetFilterComponents(epString str)
   RebuildOutput();
 }
 
-bool UIConsole::FilterTextLine(epString line) const
+bool UIConsole::FilterTextLine(String line) const
 {
   if (!textFilter.empty() && line.findFirstIC(textFilter) == line.length)
     return false;

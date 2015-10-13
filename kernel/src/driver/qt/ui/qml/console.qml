@@ -1,10 +1,21 @@
 import QtQuick 2.4
-import QtQuick.Window 2.2
+import QtQuick.Window 2.1
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 
 Item {
+  id: consoleWin
+  visible: false
+  enabled: false
+  anchors.bottom: parent.bottom
+  width: parent.width
+  height: parent.height / 2
+
+  property var consoleOut
+  property var consoleIn
+  property var logOut
+
   function togglevisible()
   {
     consoleWin.visible = !consoleWin.visible;
@@ -50,9 +61,6 @@ Item {
     logOut.flickableItem.contentY = Math.max(0, logOut.flickableItem.contentHeight - logOut.flickableItem.height);
   }
 
-  property var consoleOut
-  property var consoleIn
-  property var logOut
   Component.onCompleted: {
     logOut = Qt.binding(function() { return logTab.item.textArea; });
     consoleOut = Qt.binding(function() { return consoleTab.item.consoleOutLoader.item.textArea; });
@@ -63,13 +71,6 @@ Item {
     target: thisComponent
     onCompleted: tv.splitTabs()
   }
-
-  id: consoleWin
-  visible: false
-  enabled: false
-  anchors.bottom: parent.bottom
-  width: parent.width
-  height: parent.height / 2
 
   FontLoader { id: fixedFont; name: "Courier" }
 
@@ -253,14 +254,6 @@ Item {
       }
     }
 
-    // Stupid hack to fix scrollbar bug (outputting to a TextArea in a tab when that tab is not selected)
-    onCurrentIndexChanged: {
-      if(currentIndex == 1)
-      {
-        logOut.flickableItem.contentY = Math.max(0, logOut.flickableItem.contentHeight - logOut.flickableItem.height);
-      }
-    }
-
     Tab {
       id: consoleTab
       title: "Shell"
@@ -328,7 +321,6 @@ Item {
                     cursorPosition = 0;
                     text = "";
                   }
-                  consoleWin.appendconsoletext("blah blah blah blah blah blah blah blah blah blah blah blah blah blah");
                   event.accepted = true;
                 }
               }
