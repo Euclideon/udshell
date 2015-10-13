@@ -36,6 +36,7 @@
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
 #include "components/datasources/uddatasource.h"
+#include "components/plugin/componentplugin.h"
 #include "renderscene.h"
 #include "eplua.h"
 
@@ -107,6 +108,9 @@ epResult Kernel::Create(Kernel **ppInstance, epInitParams commandLine, int rende
   UD_ERROR_CHECK(pKernel->RegisterComponent<ImageSource>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<GeomSource>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UDDataSource>());
+
+  // plugin interfaces
+  UD_ERROR_CHECK(pKernel->RegisterComponent<ComponentPlugin>());
 
   // init the HAL
   UD_ERROR_CHECK(epHAL_Init());

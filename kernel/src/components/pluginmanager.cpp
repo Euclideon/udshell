@@ -313,7 +313,7 @@ bool PluginManager::LoadPlugin(epString filename)
   int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, filename.ptr, (int)filename.length, nullptr, 0);
   wchar_t *widePath = (wchar_t*)alloca(sizeof(wchar_t) * (len + 1));
   if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, filename.ptr, (int)filename.length, widePath, len) == 0)
-    *widePath = 0;
+    return false;
   widePath[len] = 0;
 
   // try and load library

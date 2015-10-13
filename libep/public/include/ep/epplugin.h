@@ -11,7 +11,9 @@
 # endif
 #endif
 
+#if defined(__cplusplus)
 extern "C" {
+#endif
 
 struct epKernel;
 struct epComponent;
@@ -33,8 +35,10 @@ extern epPluginInstance *s_pPluginInstance;
 /**
  * Get the active kernel instance.
  */
-inline epKernel *epPlugin_GetKernel() { return s_pPluginInstance->pKernelInstance; }
+static inline epKernel *epPlugin_GetKernel() { return s_pPluginInstance->pKernelInstance; }
 
+#if defined(__cplusplus)
 }
+#endif
 
 #endif

@@ -14,26 +14,35 @@ public:
 
 
 private:
-  ComponentPlugin(const ComponentDesc *pType, Kernel *_pKernel, epSharedString _uid, epInitParams initParams)
+  ComponentPlugin(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pUserData = pCallbacks->pCreateInstance((epComponent*)this, initParams.params.ptr, initParams.params.length);
-    if (!pUserData)
-      throw epR_Failure_;
+    pCallbacks = pType->pExternalDesc->pOverrides;
+    if (pCallbacks->pCreateInstance)
+    {
+      pUserData = pCallbacks->pCreateInstance((epComponent*)this, initParams.params.ptr, initParams.params.length);
+      if (!pUserData)
+        throw epR_Failure_;
+    }
   }
   virtual ~ComponentPlugin()
   {
-    pCallbacks->pDestroy((epComponent*)this, pUserData);
+    if (pCallbacks->pDestroy)
+      pCallbacks->pDestroy((epComponent*)this, pUserData);
   }
 
   epResult InitComplete() override
   {
-    return pCallbacks->pInitComplete((epComponent*)this, pUserData);
+    if (pCallbacks->pInitComplete)
+      return pCallbacks->pInitComplete((epComponent*)this, pUserData);
+    return epR_Success;
   }
 
   epResult ReceiveMessage(epString message, epString sender, const epVariant &data) override
   {
-    return pCallbacks->pReceiveMessage((epComponent*)this, pUserData, message, sender, &data);
+    if (pCallbacks->pReceiveMessage)
+      return pCallbacks->pReceiveMessage((epComponent*)this, pUserData, message, sender, &data);
+    return epR_Success;
   }
 
   epComponentOverrides *pCallbacks;

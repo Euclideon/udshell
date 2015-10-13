@@ -85,6 +85,10 @@
 # include <Windows.h>
 # include <Intrin.h>
 
+# if defined(SendMessage)
+#   undef SendMessage
+# endif
+
 # if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x501
 #   undef _WIN32_WINNT
 # endif

@@ -5,7 +5,9 @@
 #include "ep/epplugin.h"
 #include "ep/epcomponentdesc.h"
 
+#if defined(__cplusplus)
 //extern "C" {
+#endif
 
 // component API
 struct epComponent
@@ -17,18 +19,17 @@ struct epComponent
   struct epKernel *pKernel;
 };
 
-inline int epAcquire(epComponent *pComponent)
-{
-  ++pComponent->refCount;
-}
 
-inline int epRelease(epComponent *pComponent)
+// component virtuals, used to derive from component
+struct epComponentOverrides
 {
-  if (--pComponent->refCount == 0)
-  {
-    s_pPluginInstance->DestroyComponent(pComponent);
-  }
-}
+  size_t structSize;
+
+  void*(*pCreateInstance)(epComponent *pBaseInstance, const epKeyValuePair *pInitParams, size_t numInitParams);
+  void(*pDestroy)(epComponent *pBaseInstance, void *pDerivedInstance);
+  epResult(*pInitComplete)(epComponent *pBaseInstance, void *pDerivedInstance);
+  epResult(*pReceiveMessage)(epComponent *pBaseInstance, void *pDerivedInstance, epString message, epString sender, const epVariant *pData);
+};
 
 
 // fast-access API for component
@@ -56,18 +57,6 @@ struct epComponentAPI
 };
 
 
-// component virtuals, used to derive from component
-struct epComponentOverrides
-{
-  size_t structSize;
-
-  void* (*pCreateInstance)(epComponent *pBaseInstance, const epKeyValuePair *pInitParams, size_t numInitParams);
-  void (*pDestroy)(epComponent *pBaseInstance, void *pDerivedInstance);
-  epResult (*pInitComplete)(epComponent *pBaseInstance, void *pDerivedInstance);
-  epResult (*pReceiveMessage)(epComponent *pBaseInstance, void *pDerivedInstance, epString message, epString sender, const epVariant *pData);
-};
-
-
 /*
 struct epNodePlugin
 {
@@ -81,6 +70,30 @@ struct epNodePlugin
 };
 */
 
+static inline int epComponent_Acquire(epComponent *pComponent)
+{
+  ++pComponent->refCount;
+}
+
+static inline int epComponent_Release(epComponent *pComponent)
+{
+  if (--pComponent->refCount == 0)
+  {
+    s_pPluginInstance->DestroyComponent(pComponent);
+  }
+}
+
+static inline epString  epComponent_GetUID(epComponent *pComponent)                                                                 { return s_pPluginInstance->pComponentAPI->GetUID(pComponent); }
+static inline epString  epComponent_GetName(epComponent *pComponent)                                                                { return s_pPluginInstance->pComponentAPI->GetName(pComponent); }
+static inline bool      epComponent_IsType(epComponent *pComponent, epString type)                                                  { return s_pPluginInstance->pComponentAPI->IsType(pComponent, type); }
+static inline epVariant epComponent_GetProperty(epComponent *pComponent, epString property)                                         { return s_pPluginInstance->pComponentAPI->GetProperty(pComponent, property); }
+static inline void      epComponent_SetProperty(epComponent *pComponent, epString property, const epVariant *pValue)                { s_pPluginInstance->pComponentAPI->SetProperty(pComponent, property, pValue); }
+static inline epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs)    { return s_pPluginInstance->pComponentAPI->CallMethod(pComponent, method, pArgs, numArgs); }
+static inline void      epComponent_Subscribe(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate)          { s_pPluginInstance->pComponentAPI->Subscribe(pComponent, eventName, pDelegate); }
+static inline epResult  epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData) { return s_pPluginInstance->pComponentAPI->SendMessage(pComponent, target, message, pData); }
+
+#if defined(__cplusplus)
 //}
+#endif
 
 #endif
