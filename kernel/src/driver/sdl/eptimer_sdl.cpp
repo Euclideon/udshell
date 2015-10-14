@@ -29,7 +29,7 @@ static uint32_t SDLCallback(uint32_t duration, void *pUserData)
 
 HalTimer *HalTimer_Create(HalTimerType tt, uint32_t duration,  HalTimerCallback *pCallBack, void *pUserData)
 {
-  HalTimerSDL *pTimer = epAllocType(HalTimerSDL, 1, udAF_Zero);
+  HalTimerSDL *pTimer = epAllocType(HalTimerSDL, 1, epAF_Zero);
   if (!pTimer)
     return nullptr;
 

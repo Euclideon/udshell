@@ -17,7 +17,7 @@ epResult UIComponent::CreateInternal(epInitParams epUnusedParam(initParams))
 // ---------------------------------------------------------------------------------------
 epResult UIComponent::InitComplete()
 {
-  return udR_Success;
+  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------

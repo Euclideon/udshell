@@ -150,7 +150,7 @@ void epTexture_SetImageData(epTexture *pTex, int element, int level, void *pImag
 #endif
       break;
     default:
-      UDUNREACHABLE();
+      EPUNREACHABLE;
   }
 }
 
