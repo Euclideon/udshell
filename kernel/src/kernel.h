@@ -6,6 +6,7 @@
 #include "components/lua.h"
 #include "components/view.h"
 #include "components/timer.h"
+#include "components/logger.h"
 #include "helpers.h"
 
 #include "ep/epfastdelegate.h"
@@ -32,14 +33,14 @@ class Kernel
 {
 public:
   // TODO: MessageHandler returns void, should we return some error state??
-  typedef FastDelegate<void(epString sender, epString message, const epVariant &data)> MessageHandler;
+  typedef FastDelegate<void(String sender, String message, const Variant &data)> MessageHandler;
 
-  static epResult Create(Kernel **ppInstance, epInitParams commandLine, int renderThreadCount = 0);
+  static epResult Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount = 0);
   virtual epResult Destroy();
 
-  epResult SendMessage(epString target, epString sender, epString message, const epVariant &data);
+  epResult SendMessage(String target, String sender, String message, const Variant &data);
 
-  void RegisterMessageHandler(epSharedString name, MessageHandler messageHandler);
+  void RegisterMessageHandler(SharedString name, MessageHandler messageHandler);
 
   // synchronisation
   typedef FastDelegate<void(Kernel*)> MainThreadCallback;
@@ -51,42 +52,42 @@ public:
   template<typename ComponentType>
   epResult RegisterComponent();
 
-  const ComponentDesc* GetComponentDesc(epString id);
+  const ComponentDesc* GetComponentDesc(String id);
 
   template<typename CT>
-  epArray<const ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase)
+  Array<const ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase)
   {
     return GetDerivedComponentDescs(&CT::descriptor, bIncludeBase);
   }
-  epArray<const ComponentDesc *> GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase);
+  Array<const ComponentDesc *> GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase);
 
-  epResult CreateComponent(epString typeId, epInitParams initParams, ComponentRef *pNewInstance);
+  epResult CreateComponent(String typeId, InitParams initParams, ComponentRef *pNewInstance);
 
   template<typename T>
-  epSharedPtr<T> CreateComponent(epInitParams initParams = nullptr);
+  SharedPtr<T> CreateComponent(InitParams initParams = nullptr);
 
-  ComponentRef FindComponent(epString uid);
+  ComponentRef FindComponent(String uid);
 
   Renderer *GetRenderer() const { return pRenderer; }
 
   // script
   LuaRef GetLua() const { return spLua; }
-  void Exec(epString code);
+  void Exec(String code);
 
   // logger functions
   LoggerRef GetLogger() const { return spLogger; }
-  template<typename ...Args> void LogError(epString text, Args... args) const;
-  template<typename ...Args> void LogWarning(int level, epString text, Args... args) const;
-  template<typename ...Args> void LogDebug(int level, epString text, Args... args) const;
-  template<typename ...Args> void LogInfo(int level, epString text, Args... args) const;
-  template<typename ...Args> void LogScript(epString text, Args... args) const;
-  template<typename ...Args> void LogTrace(epString text, Args... args) const;
+  template<typename ...Args> void LogError(String text, Args... args) const;
+  template<typename ...Args> void LogWarning(int level, String text, Args... args) const;
+  template<typename ...Args> void LogDebug(int level, String text, Args... args) const;
+  template<typename ...Args> void LogInfo(int level, String text, Args... args) const;
+  template<typename ...Args> void LogScript(String text, Args... args) const;
+  template<typename ...Args> void LogTrace(String text, Args... args) const;
 
   // Functions for resource management
   ResourceManagerRef GetResourceManager() const { return spResourceManager; }
 
-  epResult RegisterExtensions(const ComponentDesc *pDesc, const epSlice<const epString> exts);
-  DataSourceRef CreateDataSourceFromExtension(epString ext, epInitParams initParams);
+  epResult RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts);
+  DataSourceRef CreateDataSourceFromExtension(String ext, InitParams initParams);
 
   // other functions
   ViewRef GetFocusView() const { return spFocusView; }
@@ -107,25 +108,25 @@ protected:
   };
   struct MessageCallback
   {
-    epSharedString name;
+    SharedString name;
     MessageHandler callback;
   };
 
   struct ForeignInstance
   {
-    epSharedString localUID;
-    epSharedString remoteUID;
-    epSharedString kernelUID;
+    SharedString localUID;
+    SharedString remoteUID;
+    SharedString kernelUID;
   };
 
-  epSharedString uid;
+  SharedString uid;
 
   udHashMap<ComponentType> componentRegistry;
   udHashMap<Component*> instanceRegistry;
   udHashMap<ForeignInstance> foreignInstanceRegistry;
   udHashMap<MessageCallback> messageHandlers;
 
-  epAVLTree<epString, const ComponentDesc *> extensionsRegistry;
+  AVLTree<String, const ComponentDesc *> extensionsRegistry;
 
   Renderer *pRenderer = nullptr;
 
@@ -145,7 +146,7 @@ protected:
 
   epResult DoInit(Kernel *pKernel);
 
-  static Kernel *CreateInstanceInternal(epInitParams commandLine);
+  static Kernel *CreateInstanceInternal(InitParams commandLine);
   virtual epResult InitInternal() = 0;
 
   epResult InitComponents();
@@ -154,7 +155,7 @@ protected:
 
   epResult DestroyComponent(Component *pInstance);
 
-  epResult ReceiveMessage(epString sender, epString message, const epVariant &data);
+  epResult ReceiveMessage(String sender, String message, const Variant &data);
 
   int SendMessage(LuaState L);
 
@@ -164,11 +165,11 @@ protected:
   void StreamerUpdate();
 
   template<typename CT>
-  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 };
 
 template<typename T>
-epSharedPtr<T> Kernel::CreateComponent(epInitParams initParams)
+SharedPtr<T> Kernel::CreateComponent(InitParams initParams)
 {
   ComponentRef c = nullptr;
   epResult r = CreateComponent(T::descriptor.id, initParams, &c);
@@ -178,9 +179,9 @@ epSharedPtr<T> Kernel::CreateComponent(epInitParams initParams)
 }
 
 template<typename CT>
-Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
 {
-  epMutableString128 t; t.format("New: {0} - {1}", pType->id, uid);
+  MutableString128 t; t.format("New: {0} - {1}", pType->id, uid);
   pKernel->LogDebug(4, t);
   return udNew(CT, pType, pKernel, uid, initParams);
 }
@@ -192,75 +193,70 @@ epResult Kernel::RegisterComponent()
   return RegisterComponentType(&CT::descriptor);
 }
 
-} //namespace ep
-
-#include "components/logger.h"
-namespace ep
-{
 
 template<typename ...Args>
-inline void Kernel::LogError(epString text, Args... args) const
+inline void Kernel::LogError(String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
     spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Error, nullptr);
   else
   {
-    epMutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp; tmp.format(text, args...);
     spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Error, nullptr);
   }
 }
 template<typename ...Args>
-inline void Kernel::LogWarning(int level, epString text, Args... args) const
+inline void Kernel::LogWarning(int level, String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
     spLogger->Log(level, text, LogCategories::Warning, nullptr);
   else
   {
-    epMutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp; tmp.format(text, args...);
     spLogger->Log(level, tmp, LogCategories::Warning, nullptr);
   }
 }
 template<typename ...Args>
-inline void Kernel::LogDebug(int level, epString text, Args... args) const
+inline void Kernel::LogDebug(int level, String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
     spLogger->Log(level, text, LogCategories::Debug, nullptr);
   else
   {
-    epMutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp; tmp.format(text, args...);
     spLogger->Log(level, tmp, LogCategories::Debug, nullptr);
   }
 }
 template<typename ...Args>
-inline void Kernel::LogInfo(int level, epString text, Args... args) const
+inline void Kernel::LogInfo(int level, String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
     spLogger->Log(level, text, LogCategories::Info, nullptr);
   else
   {
-    epMutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp; tmp.format(text, args...);
     spLogger->Log(level, tmp, LogCategories::Info, nullptr);
   }
 }
 template<typename ...Args>
-inline void Kernel::LogScript(epString text, Args... args) const
+inline void Kernel::LogScript(String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
     spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Script, nullptr);
   else
   {
-    epMutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp; tmp.format(text, args...);
     spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Script, nullptr);
   }
 }
 template<typename ...Args>
-inline void Kernel::LogTrace(epString text, Args... args) const
+inline void Kernel::LogTrace(String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
     spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, nullptr);
   else
   {
-    epMutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp; tmp.format(text, args...);
     spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Trace, nullptr);
   }
 }

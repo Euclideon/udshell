@@ -53,7 +53,7 @@ ComponentDesc Node::descriptor =
   "Node",    // displayName
   "Is a scene node", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 epResult Node::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)

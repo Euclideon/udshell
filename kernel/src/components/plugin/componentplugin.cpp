@@ -7,57 +7,61 @@ namespace ep {
 epComponentAPI g_componentAPI =
 {
   // GetUID
-  [](epComponent *pComponent) -> epString
+  [](const epComponent *pComponent) -> epString
   {
     Component *pC = (Component*)pComponent;
-    return pC->uid;
+    return (epString&)pC->uid;
   },
   // GetName
-  [](epComponent *pComponent) -> epString
+  [](const epComponent *pComponent) -> epString
   {
     Component *pC = (Component*)pComponent;
-    return pC->name;
+    return (epString&)pC->name;
   },
 
   // IsType
-  [](epComponent *pComponent, epString type) -> bool
+  [](const epComponent *pComponent, epString type) -> bool
   {
     Component *pC = (Component*)pComponent;
     return pC->IsType(type);
   },
 
-  //GetProperty
-  [](epComponent *pComponent, epString property) -> epVariant
+  // GetProperty
+  [](const epComponent *pComponent, epString property) -> epVariant
   {
     Component *pC = (Component*)pComponent;
-    return pC->GetProperty(property);
+    epVariant r;
+    new(&r) Variant(pC->GetProperty(property));
+    return r;
   },
   // SetProperty
   [](epComponent *pComponent, epString property, const epVariant *pValue) -> void
   {
     Component *pC = (Component*)pComponent;
-    pC->SetProperty(property, *pValue);
+    pC->SetProperty(property, *(const Variant*)pValue);
   },
 
   // CallMethod
   [](epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs) -> epVariant
   {
     Component *pC = (Component*)pComponent;
-    return pC->CallMethod(method, epSlice<const epVariant>(pArgs, numArgs));
+    epVariant r;
+    new(&r) Variant(pC->CallMethod(method, Slice<const Variant>((const Variant*)pArgs, numArgs)));
+    return r;
   },
 
   // Subscribe
   [](epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate) -> void
   {
     Component *pC = (Component*)pComponent;
-    pC->Subscribe(eventName, (epVariant::VarDelegate&)pDelegate);
+    pC->Subscribe(eventName, (Variant::VarDelegate&)pDelegate);
   },
 
   // SendMessage
   [](epComponent *pComponent, epString target, epString message, const epVariant *pData) -> epResult
   {
     Component *pC = (Component*)pComponent;
-    return pC->SendMessage(target, message, *pData);
+    return pC->SendMessage(target, message, *(const Variant*)pData);
   }
 };
 
@@ -73,7 +77,7 @@ ComponentDesc ComponentPlugin::descriptor =
   "ComponentBase", // displayName
   "Component plugin base class", // description
 
-//  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+//  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 

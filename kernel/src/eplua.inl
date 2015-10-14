@@ -57,11 +57,11 @@ inline lua_Integer LuaState::toInt(int idx)
   // TODO: check isnum
   return i;
 }
-inline epString LuaState::toString(int idx)
+inline String LuaState::toString(int idx)
 {
   size_t len;
   const char *pS = lua_tolstring(L, idx, &len);
-  return epString(pS, len);
+  return String(pS, len);
 }
 inline lua_CFunction LuaState::toFunction(int idx)
 {
@@ -95,9 +95,9 @@ inline lua_Integer LuaState::popInt()
   lua_pop(L, 1);
   return r;
 }
-inline epString LuaState::popString()
+inline String LuaState::popString()
 {
-  epString r = toString(-1);
+  String r = toString(-1);
   lua_pop(L, 1);
   return r;
 }
@@ -131,7 +131,7 @@ inline void LuaState::pushInt(lua_Integer val)
 {
   lua_pushinteger(L, val);
 }
-inline void LuaState::pushString(epString val)
+inline void LuaState::pushString(String val)
 {
   lua_pushlstring(L, val.ptr, val.length);
 }
@@ -142,7 +142,7 @@ inline void LuaState::pushLightUserData(void *val)
   else
     lua_pushlightuserdata(L, val);
 }
-inline void LuaState::push(const epVariant &v)
+inline void LuaState::push(const Variant &v)
 {
   v.luaPush(*this);
 }

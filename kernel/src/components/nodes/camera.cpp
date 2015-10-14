@@ -1,4 +1,4 @@
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 
 #include "camera.h"
 #include "kernel.h"
@@ -49,8 +49,8 @@ ComponentDesc Camera::descriptor =
   "Camera",    // displayName
   "Is a camera", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 
@@ -104,7 +104,7 @@ ComponentDesc SimpleCamera::descriptor =
   "SimpleCamera",     // displayName
   "Is a simple camera", // description
 
-  epSlice<CPropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
+  Slice<CPropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
 };
 
 
@@ -275,7 +275,7 @@ bool SimpleCamera::Update(double timeDelta)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
 {
   return udNew(SimpleCamera, pType, pKernel, uid, initParams);
 }

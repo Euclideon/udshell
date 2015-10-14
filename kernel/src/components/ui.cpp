@@ -16,7 +16,7 @@ ComponentDesc UIComponent::descriptor =
 };
 
 
-UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != epR_Success)

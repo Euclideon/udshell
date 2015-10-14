@@ -18,8 +18,8 @@ ComponentDesc GeomNode::descriptor =
   "GeomNode",  // displayName
   "Is a geometry node", // description
 
-//  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-//  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+//  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+//  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 epResult GeomNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)

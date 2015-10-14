@@ -16,7 +16,7 @@
 
 namespace ep
 {
-const epArray<const epString> GeomSource::extensions = {
+const Array<const String> GeomSource::extensions = {
   // mesh formats
   ".fbx", // Autodesk FBX
   ".dae", // Collada
@@ -60,9 +60,9 @@ ComponentDesc GeomSource::descriptor =
   &RegisterExtensions // init
 };
 
-static inline epString FromAIString(const aiString &name)
+static inline String FromAIString(const aiString &name)
 {
-  return epString(name.C_Str(), name.length);
+  return String(name.C_Str(), name.length);
 }
 
 static inline udFloat4 CopyAIColor(const aiColor4D &m)
@@ -88,7 +88,7 @@ void GeomSource::Create(StreamRef spSource)
   void *pBuffer = epAlloc((size_t)len);
 
   // read file from source
-  epSlice<void> buf(pBuffer, (size_t)len);
+  Slice<void> buf(pBuffer, (size_t)len);
   buf = spSource->Read(buf);
   EPASSERT((int64_t)buf.length == len, "!");
 
@@ -147,7 +147,7 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
     aiMat.Get(AI_MATKEY_NAME, _name);
     LogDebug(4, "Material {0}: \"{1}\"", i, FromAIString(_name));
 
-    epString name = FromAIString(_name);
+    String name = FromAIString(_name);
     MaterialRef spMat = pKernel->CreateComponent<Material>({ { "name", name } });
 
     aiColor4D color(1.f, 1.f, 1.f, 1.f);
@@ -178,7 +178,7 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
     }
 
     // add resource
-    resources.Insert(epSharedString::concat("material", i), spMat);
+    resources.Insert(SharedString::concat("material", i), spMat);
   }
 }
 
@@ -195,7 +195,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     ModelRef spMesh = pKernel->CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
 
     // get material
-    ResourceRef *pspMat = resources.Get(epSharedString::concat("material", mesh.mMaterialIndex));
+    ResourceRef *pspMat = resources.Get(SharedString::concat("material", mesh.mMaterialIndex));
     if (pspMat)
     {
       spMesh->SetMaterial(component_cast<Material>(*pspMat));
@@ -209,12 +209,12 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
     // positions
     typedef std::tuple<float[3]> VertPos;
-    epSlice<VertPos> verts((VertPos*)mesh.mVertices, mesh.mNumVertices);
+    Slice<VertPos> verts((VertPos*)mesh.mVertices, mesh.mNumVertices);
 
     ArrayBufferRef spVerts = pKernel->CreateComponent<ArrayBuffer>();
     spVerts->AllocateFromData<VertPos>(verts);
 
-    resources.Insert(epSharedString::concat("positions", i), spVerts);
+    resources.Insert(SharedString::concat("positions", i), spVerts);
 
     spMesh->SetVertexArray(spVerts, { "a_position" });
 
@@ -222,12 +222,12 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     if (mesh.HasNormals())
     {
       typedef std::tuple<float[3]> VertNorm;
-      epSlice<VertNorm> normals((VertNorm*)mesh.mNormals, mesh.mNumVertices);
+      Slice<VertNorm> normals((VertNorm*)mesh.mNormals, mesh.mNumVertices);
 
       ArrayBufferRef spNormals = pKernel->CreateComponent<ArrayBuffer>();
       spNormals->AllocateFromData<VertNorm>(normals);
 
-      resources.Insert(epSharedString::concat("normals", i), spNormals);
+      resources.Insert(SharedString::concat("normals", i), spNormals);
 
       spMesh->SetVertexArray(spNormals, { "a_normal" });
     }
@@ -240,7 +240,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       ArrayBufferRef spBinTan = pKernel->CreateComponent<ArrayBuffer>();
       spBinTan->Allocate<VertBinTan>(mesh.mNumVertices);
 
-      epSlice<VertBinTan> bt = spBinTan->Map<VertBinTan>();
+      Slice<VertBinTan> bt = spBinTan->Map<VertBinTan>();
       for (uint32_t j = 0; j<mesh.mNumVertices; ++j)
       {
         std::get<0>(bt.ptr[j])[0] = mesh.mBitangents[j].x;
@@ -252,7 +252,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       }
       spBinTan->Unmap();
 
-      resources.Insert(epSharedString::concat("binormalstangents", i), spBinTan);
+      resources.Insert(SharedString::concat("binormalstangents", i), spBinTan);
 
       spMesh->SetVertexArray(spBinTan, { "a_binormal", "a_tangent" });
     }
@@ -261,35 +261,35 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     for (uint32_t t = 0; t<mesh.GetNumUVChannels(); ++t)
     {
       typedef std::tuple<float[3]> VertUV;
-      epSlice<VertUV> uvs((VertUV*)mesh.mTextureCoords[t], mesh.mNumVertices);
+      Slice<VertUV> uvs((VertUV*)mesh.mTextureCoords[t], mesh.mNumVertices);
 
       ArrayBufferRef spUVs = pKernel->CreateComponent<ArrayBuffer>();
       spUVs->AllocateFromData<VertUV>(uvs);
 
-      resources.Insert(epSharedString::concat("uvs", i, "_", t), spUVs);
+      resources.Insert(SharedString::concat("uvs", i, "_", t), spUVs);
 
-      spMesh->SetVertexArray(spUVs, { epSharedString::concat("a_uv", t) });
+      spMesh->SetVertexArray(spUVs, { SharedString::concat("a_uv", t) });
     }
 
     // Colors
     for (uint32_t c = 0; c<mesh.GetNumColorChannels(); ++c)
     {
       typedef std::tuple<float[4]> VertColor;
-      epSlice<VertColor> colors((VertColor*)mesh.mColors[c], mesh.mNumVertices);
+      Slice<VertColor> colors((VertColor*)mesh.mColors[c], mesh.mNumVertices);
 
       ArrayBufferRef spColors = pKernel->CreateComponent<ArrayBuffer>();
       spColors->AllocateFromData<VertColor>(colors);
 
-      resources.Insert(epSharedString::concat("colors", i, "_", c), spColors);
+      resources.Insert(SharedString::concat("colors", i, "_", c), spColors);
 
-      spMesh->SetVertexArray(spColors, { epSharedString::concat("a_color", c) });
+      spMesh->SetVertexArray(spColors, { SharedString::concat("a_color", c) });
     }
 
     // indices (faces)
     ArrayBufferRef spIndices = pKernel->CreateComponent<ArrayBuffer>();
     spIndices->Allocate<uint32_t>(mesh.mNumFaces * 3);
 
-    epSlice<uint32_t> indices = spIndices->Map<uint32_t>();
+    Slice<uint32_t> indices = spIndices->Map<uint32_t>();
     uint32_t *pIndices = indices.ptr;
     for (uint32_t j = 0; j<mesh.mNumFaces; ++j)
     {
@@ -302,12 +302,12 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     EPASSERT(pIndices - indices.ptr == (ptrdiff_t)indices.length, "Wrong number of indices?!");
     spIndices->Unmap();
 
-    resources.Insert(epSharedString::concat("indices", i), spIndices);
+    resources.Insert(SharedString::concat("indices", i), spIndices);
 
     spMesh->SetIndexArray(spIndices);
 
     // add mesh resource
-    resources.Insert(epSharedString::concat("mesh", i), spMesh);
+    resources.Insert(SharedString::concat("mesh", i), spMesh);
   }
 }
 
@@ -337,7 +337,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   // parse node mesh
   for (uint32_t i = 0; i<node.mNumMeshes; ++i)
   {
-    ResourceRef *pspMesh = resources.Get(epSharedString::concat("mesh", node.mMeshes[i]));
+    ResourceRef *pspMesh = resources.Get(SharedString::concat("mesh", node.mMeshes[i]));
     if (pspMesh)
     {
       // create geom node

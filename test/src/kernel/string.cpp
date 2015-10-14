@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 // TODO: fill out these tests
 
 TEST(EPStringTest, EmptyString) {
-  epString nullStr;
+  String nullStr;
   EXPECT_TRUE(nullStr.empty());
   EXPECT_FALSE(nullStr);  // operator bool
   EXPECT_TRUE(!nullStr);  // operator bool
@@ -12,7 +12,7 @@ TEST(EPStringTest, EmptyString) {
 }
 
 TEST(EPStringTest, NotEmptyString) {
-  epString nullStr("blah");
+  String nullStr("blah");
   EXPECT_FALSE(nullStr.empty());
   EXPECT_FALSE(!nullStr);   // operator bool
   EXPECT_TRUE(nullStr);     // operator bool

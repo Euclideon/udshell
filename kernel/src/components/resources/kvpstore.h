@@ -16,27 +16,27 @@ public:
 
   virtual size_t NumRecords() const { return 0; }
 
-  virtual void Insert(epVariant &&, epVariant &&) {}
-  virtual void Insert(const epVariant &, epVariant &&) {}
-  virtual void Insert(epVariant &&, const epVariant &) {}
-  virtual void Insert(const epVariant &, const epVariant &) {}
+  virtual void Insert(Variant &&, Variant &&) {}
+  virtual void Insert(const Variant &, Variant &&) {}
+  virtual void Insert(Variant &&, const Variant &) {}
+  virtual void Insert(const Variant &, const Variant &) {}
 
-  virtual void Remove(const epVariant &) {}
+  virtual void Remove(const Variant &) {}
 
-  virtual bool Exists(const epVariant &) const { return false; }
+  virtual bool Exists(const Variant &) const { return false; }
 
-  virtual epVariant Get(const epVariant &) const { return epVariant(); }
+  virtual Variant Get(const Variant &) const { return Variant(); }
 
-  epVariant operator[](const epVariant &key) const
+  Variant operator[](const Variant &key) const
   {
     return Get(key);
   }
 
   // TODO: THIS IS ONLY HERE BECAUSE DESCRIPTOR CAN'T GET TO PROTECTED
-  void InsertMethod(const epVariant &key, const epVariant &value) { Insert(key, value); }
+  void InsertMethod(const Variant &key, const Variant &value) { Insert(key, value); }
 
 protected:
-  KVPStore(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  KVPStore(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 };
 

@@ -7,7 +7,6 @@ project "vieweractivity"
 	files { "project.lua" }
 
 	includedirs { "src" }
-	includedirs { "../../ud/udPlatform/Include" } -- HAX HAX!! REMOVE THIS!
 
 	links { "libep" }
 

@@ -3,7 +3,7 @@
 #define EP_SHORTCUT_MANAGER_H
 
 #include "component.h"
-#include "ep/epdelegate.h"
+#include "ep/cpp/delegate.h"
 
 namespace ep
 {
@@ -15,29 +15,29 @@ class ShortcutManager : public Component
 public:
   EP_COMPONENT(ShortcutManager);
 
-  bool SetShortcutString(epString id, epString shortcutString);
-  epSharedString GetShortcutString(epString id) const;
-  bool RegisterShortcut(epString id, epString shortcutString, bool bFailIfExists = false);
-  void UnregisterShortcut(epString id);
-  bool HandleShortcutEvent(epString shortcutString);
-  bool SetShortcutFunction(epString id, epDelegate<void()> func);
-  bool SetShortcutScript(epString id, epString script);
+  bool SetShortcutString(String id, String shortcutString);
+  SharedString GetShortcutString(String id) const;
+  bool RegisterShortcut(String id, String shortcutString, bool bFailIfExists = false);
+  void UnregisterShortcut(String id);
+  bool HandleShortcutEvent(String shortcutString);
+  bool SetShortcutFunction(String id, Delegate<void()> func);
+  bool SetShortcutScript(String id, String script);
 
 protected:
-  ShortcutManager(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
-  epString StripWhitespace(epSlice<char> output, epString input);
+  ShortcutManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  String StripWhitespace(Slice<char> output, String input);
 
   struct Shortcut
   {
-    Shortcut(epSharedString id, epSharedString shortcutString) : id(id), shortcutString(shortcutString) {}
+    Shortcut(SharedString id, SharedString shortcutString) : id(id), shortcutString(shortcutString) {}
 
-    epSharedString id;
-    epSharedString shortcutString;
-    epSharedString script;
-    epDelegate<void()> func;
+    SharedString id;
+    SharedString shortcutString;
+    SharedString script;
+    Delegate<void()> func;
   };
 
-  epAVLTree<epSharedString, struct Shortcut> shortcutRegistry;
+  AVLTree<SharedString, struct Shortcut> shortcutRegistry;
 };
 
 } //namespace ep

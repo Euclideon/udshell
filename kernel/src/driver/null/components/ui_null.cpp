@@ -9,7 +9,7 @@
 namespace ep
 {
 
-epResult UIComponent::CreateInternal(epInitParams epUnusedParam(initParams))
+epResult UIComponent::CreateInternal(InitParams epUnusedParam(initParams))
 {
   return epR_Success;
 }
@@ -27,7 +27,7 @@ void UIComponent::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Viewport::CreateInternal(epInitParams epUnusedParam(initParams))
+epResult Viewport::CreateInternal(InitParams epUnusedParam(initParams))
 {
   return epR_Success;
 }
@@ -39,7 +39,7 @@ void Viewport::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Window::CreateInternal(epInitParams epUnusedParam(initParams))
+epResult Window::CreateInternal(InitParams epUnusedParam(initParams))
 {
   return epR_Success;
 }

@@ -78,7 +78,7 @@ RenderView::~RenderView()
   QtApplication::Kernel()->LogTrace("Destroy RenderView Quick Item");
 
   if (spView)
-    spView->FrameReady.Unsubscribe(epDelegate<void()>(this, &RenderView::OnFrameReady));
+    spView->FrameReady.Unsubscribe(Delegate<void()>(this, &RenderView::OnFrameReady));
 }
 
 QQuickFramebufferObject::Renderer *RenderView::createRenderer() const
@@ -92,7 +92,7 @@ void RenderView::AttachView(ep::ViewRef _spView)
   QtApplication::Kernel()->LogTrace("RenderView::AttachView()");
 
   spView = _spView;
-  spView->FrameReady.Subscribe(epDelegate<void()>(this, &RenderView::OnFrameReady));
+  spView->FrameReady.Subscribe(Delegate<void()>(this, &RenderView::OnFrameReady));
 
   // TEMP HAX:
   QtApplication::Kernel()->SetFocusView(spView);

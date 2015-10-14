@@ -2,12 +2,12 @@
 #ifndef EPCOMPONENTDESC_H
 #define EPCOMPONENTDESC_H
 
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 #include "ep/epversion.h"
-#include "ep/epsharedptr.h"
-#include "ep/epvariant.h"
-#include "ep/epevent.h"
-#include "ep/epavltree.h"
+#include "ep/cpp/sharedptr.h"
+#include "ep/cpp/variant.h"
+#include "ep/cpp/event.h"
+#include "ep/cpp/avltree.h"
 
 
 // TODO: remove this!
@@ -40,13 +40,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  epVariant get(const ep::Component *pThis) const
+  Variant get(const Component *pThis) const
   {
     return shim(this, pThis);
   }
 
 protected:
-  typedef epVariant(Shim)(const Getter* const, const ep::Component*);
+  typedef Variant(Shim)(const Getter* const, const Component*);
   Shim *shim;
 };
 
@@ -58,13 +58,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  void set(ep::Component *pThis, const epVariant &value) const
+  void set(Component *pThis, const Variant &value) const
   {
     shim(this, pThis, value);
   }
 
 protected:
-  typedef void(Shim)(const Setter* const, ep::Component*, const epVariant&);
+  typedef void(Shim)(const Setter* const, Component*, const Variant&);
   Shim *shim;
 };
 
@@ -76,13 +76,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  epVariant call(ep::Component *pThis, epSlice<epVariant> args) const
+  Variant call(Component *pThis, Slice<Variant> args) const
   {
     return shim(this, pThis, args);
   }
 
 protected:
-  typedef epVariant(Shim)(const Method* const, ep::Component*, epSlice<epVariant>);
+  typedef Variant(Shim)(const Method* const, Component*, Slice<Variant>);
   Shim *shim;
 };
 
@@ -94,13 +94,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  epVariant call(epSlice<epVariant> args) const
+  Variant call(Slice<Variant> args) const
   {
     return shim(this, args);
   }
 
 protected:
-  typedef epVariant(Shim)(const StaticFunc* const, epSlice<epVariant>);
+  typedef Variant(Shim)(const StaticFunc* const, Slice<Variant>);
   Shim *shim;
 };
 
@@ -112,13 +112,13 @@ public:
 
   explicit operator bool() const { return pSubscribe != nullptr; }
 
-  void subscribe(const ep::ComponentRef &c, const epVariant::VarDelegate &d)
+  void subscribe(const ComponentRef &c, const Variant::VarDelegate &d)
   {
     pSubscribe(this, c, d);
   }
 
 protected:
-  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const epVariant::VarDelegate&);
+  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const Variant::VarDelegate&);
   SubscribeFunc *pSubscribe = nullptr;
 };
 
@@ -137,7 +137,7 @@ protected:
   FastDelegateMemento m;
 
   template<typename T>
-  static epVariant shimFunc(const Getter * const pGetter, const ep::Component *pThis);
+  static Variant shimFunc(const Getter * const pGetter, const Component *pThis);
 };
 
 // setter glue
@@ -152,7 +152,7 @@ protected:
   FastDelegateMemento m;
 
   template<typename T>
-  static void shimFunc(const Setter * const pSetter, ep::Component *pThis, const epVariant &value);
+  static void shimFunc(const Setter * const pSetter, Component *pThis, const Variant &value);
 };
 
 // method glue
@@ -173,9 +173,9 @@ protected:
   {
     // this is a nasty hack to get ...S (integer sequence) as a parameter pack
     template<size_t ...S>
-    static epVariant callFuncHack(epSlice<epVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>);
+    static Variant callFuncHack(Slice<Variant> args, FastDelegate<Ret(Args...)> d, internal::Sequence<S...>);
 
-    static epVariant shimFunc(const Method * const pSetter, ep::Component *pThis, epSlice<epVariant> value);
+    static Variant shimFunc(const Method * const pSetter, Component *pThis, Slice<Variant> value);
   };
 };
 
@@ -195,9 +195,9 @@ protected:
   {
     // this is a nasty hack to get ...S (integer sequence) as a parameter pack
     template<size_t ...S>
-    static epVariant callFuncHack(epSlice<epVariant> args, Ret(*f)(Args...), Sequence<S...>);
+    static Variant callFuncHack(Slice<Variant> args, Ret(*f)(Args...), internal::Sequence<S...>);
 
-    static epVariant shimFunc(const StaticFunc * const pSetter, epSlice<epVariant> value);
+    static Variant shimFunc(const StaticFunc * const pSetter, Slice<Variant> value);
   };
 };
 
@@ -213,7 +213,7 @@ protected:
   void* CEvent::*pEvent;
 
   template<typename X, typename... Args>
-  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const epVariant::VarDelegate &d);
+  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const Variant::VarDelegate &d);
 };
 
 
@@ -225,9 +225,9 @@ enum PropertyFlags : uint32_t
 
 struct EnumKVP
 {
-  EnumKVP(epString key, int64_t v) : key(key), value(v) {}
+  EnumKVP(String key, int64_t v) : key(key), value(v) {}
 
-  epString key;
+  String key;
   int64_t value;
 };
 #define EnumKVP(e) EnumKVP( #e, (int64_t)e )
@@ -235,16 +235,16 @@ struct EnumKVP
 struct PropertyInfo
 {
   PropertyInfo() = delete;
-  PropertyInfo(epString id, epString displayName, epString description, epString displayType = nullptr, uint32_t flags = 0)
+  PropertyInfo(String id, String displayName, String description, String displayType = nullptr, uint32_t flags = 0)
     : id(id), displayName(displayName), description(description), displayType(displayType), flags(flags) {}
   PropertyInfo(const PropertyInfo &rh)
     : id(rh.id), displayName(rh.displayName), description(rh.description), displayType(rh.displayType), flags(rh.flags) {}
 
-  epString id;
-  epString displayName;
-  epString description;
+  String id;
+  String displayName;
+  String description;
 
-  epString displayType;
+  String displayType;
   uint32_t flags;
 };
 
@@ -264,13 +264,13 @@ struct PropertyDesc
 struct FunctionInfo
 {
   FunctionInfo() = delete;
-  FunctionInfo(epString id, epString description)
+  FunctionInfo(String id, String description)
     : id(id), description(description) {}
   FunctionInfo(const FunctionInfo &rh)
     : id(rh.id), description(rh.description) {}
 
-  epString id;
-  epString description;
+  String id;
+  String description;
 };
 
 struct MethodDesc
@@ -299,14 +299,14 @@ struct StaticFuncDesc
 struct EventInfo
 {
   EventInfo() = delete;
-  EventInfo(epString id, epString displayName, epString description)
+  EventInfo(String id, String displayName, String description)
     : id(id), displayName(displayName), description(description) {}
   EventInfo(const EventInfo &rh)
     : id(rh.id), displayName(rh.displayName), description(rh.description) {}
 
-  epString id;
-  epString displayName;
-  epString description;
+  String id;
+  String displayName;
+  String description;
 };
 
 struct EventDesc
@@ -349,13 +349,13 @@ struct CStaticFuncDesc
 
 // component description
 typedef epResult(InitComponent)(Kernel*);
-typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 
 struct ComponentDesc
 {
   ComponentDesc() = delete;
-  ComponentDesc(ComponentDesc *pSuperDesc, int epVersion, int pluginVersion, epString id, epString displayName, epString description,
-    epSlice<CPropertyDesc> properties = nullptr, epSlice<CMethodDesc> methods = nullptr, epSlice<CEventDesc> events = nullptr, epSlice<CStaticFuncDesc> staticFuncs = nullptr,
+  ComponentDesc(ComponentDesc *pSuperDesc, int epVersion, int pluginVersion, String id, String displayName, String description,
+    Slice<CPropertyDesc> properties = nullptr, Slice<CMethodDesc> methods = nullptr, Slice<CEventDesc> events = nullptr, Slice<CStaticFuncDesc> staticFuncs = nullptr,
     InitComponent *pInit = nullptr, CreateInstanceCallback *pCreateInstance = nullptr, const epComponentDesc *pExternalDesc = nullptr)
     : pSuperDesc(pSuperDesc), epVersion(epVersion), pluginVersion(pluginVersion), id(id), displayName(displayName), description(description)
     , properties(properties), methods(methods), events(events), staticFuncs(staticFuncs), pInit(pInit), pCreateInstance(pCreateInstance), pExternalDesc(pExternalDesc) {}
@@ -367,30 +367,30 @@ struct ComponentDesc
   int epVersion;
   int pluginVersion;
 
-  epString id;          // an id for this component
-  epString displayName; // display name
-  epString description; // description
+  String id;          // an id for this component
+  String displayName; // display name
+  String description; // description
 
   // icon image...
 
   // TODO: add flags ('Abstract' (can't create) flag)
 
-  epSlice<CPropertyDesc> properties;
-  epSlice<CMethodDesc> methods;
-  epSlice<CEventDesc> events;
-  epSlice<CStaticFuncDesc> staticFuncs;
+  Slice<CPropertyDesc> properties;
+  Slice<CMethodDesc> methods;
+  Slice<CEventDesc> events;
+  Slice<CStaticFuncDesc> staticFuncs;
 
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
 
   const epComponentDesc *pExternalDesc;
 
-  epAVLTree<epString, PropertyDesc> propertyTree;
-  epAVLTree<epString, MethodDesc> methodTree;
-  epAVLTree<epString, EventDesc> eventTree;
-  epAVLTree<epString, StaticFuncDesc> staticFuncTree;
+  AVLTree<String, PropertyDesc> propertyTree;
+  AVLTree<String, MethodDesc> methodTree;
+  AVLTree<String, EventDesc> eventTree;
+  AVLTree<String, StaticFuncDesc> staticFuncTree;
 
-  StaticFunc *GetStaticFunc(epString id) const;
+  StaticFunc *GetStaticFunc(String id) const;
 
   void BuildSearchTrees();
   void InitProps();

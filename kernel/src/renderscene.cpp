@@ -287,7 +287,7 @@ Renderer::~Renderer()
   udRender_Destroy(&pRenderEngine);
 }
 
-void Renderer::AddUDRenderJob(epUniquePtr<RenderableView> job)
+void Renderer::AddUDRenderJob(UniquePtr<RenderableView> job)
 {
   udLockMutex(pUDMutex);
 
@@ -312,9 +312,9 @@ void Renderer::UDThread()
 {
   struct JobDone
   {
-    JobDone(const epUniquePtr<RenderableView> &job) : job(job) {}
+    JobDone(const UniquePtr<RenderableView> &job) : job(job) {}
 
-    epUniquePtr<RenderableView> job;
+    UniquePtr<RenderableView> job;
 
     void FinishJob(Kernel *pKernel)
     {
@@ -336,7 +336,7 @@ void Renderer::UDThread()
       udReleaseMutex(pUDMutex);
       break;
     }
-    epUniquePtr<RenderableView> job = udRenderQueue.popFront();
+    UniquePtr<RenderableView> job = udRenderQueue.popFront();
     udReleaseMutex(pUDMutex);
 
     job->RenderUD();

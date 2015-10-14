@@ -1,10 +1,22 @@
-#include "ep/epplugin.h"
+#include "ep/c/plugin.h"
 
 extern "C" {
 
 epPluginInstance *s_pPluginInstance = nullptr;
 
 bool epPluginAttach();
+
+#if defined(EP_COMPILER_VISUALC)
+bool epPluginAttachWeak()
+{
+  return false;
+}
+# if defined(EP_ARCH_X86)
+#   pragma comment(linker, "/alternatename:_epPluginAttach=_epPluginAttachWeak")
+# else
+#   pragma comment(linker, "/alternatename:epPluginAttach=epPluginAttachWeak")
+# endif
+#endif
 
 EP_EXPORT bool epPlugin_Init(epPluginInstance *pPlugin)
 {

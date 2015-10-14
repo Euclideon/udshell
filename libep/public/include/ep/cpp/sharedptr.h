@@ -1,9 +1,10 @@
 #pragma once
-#if !defined(_EPSHAREDPTR_H)
-#define _EPSHAREDPTR_H
+#if !defined(_EPSHAREDPTR_HPP)
+#define _EPSHAREDPTR_HPP
 
 #include <type_traits>
-#include "ep/epplatform.h"
+
+#include "ep/cpp/platform.h"
 
 #if defined(EP_COMPILER_VISUALC)
 // TODO: REMOVE THIS!!!
@@ -12,56 +13,59 @@
 
 #define SHARED_CLASS(Name) \
   class Name; \
-  typedef epSharedPtr<Name> Name##Ref;
+  typedef ::ep::SharedPtr<Name> Name##Ref;
 
 #define SHARED_STRUCT(Name) \
   struct Name; \
-  typedef epSharedPtr<Name> Name##Ref;
+  typedef ::ep::SharedPtr<Name> Name##Ref;
 
-class epRefCounted;
+namespace ep {
+
+class Kernel;
+class RefCounted;
 template<class T>
-class epUniquePtr;
+class UniquePtr;
 
 
 // weak pointer is just an alias for obvious annotation in code, may be fleshed out for debug at some point...
-template<typename T, typename std::enable_if<std::is_base_of<epRefCounted, T>::value>::type* = nullptr>
-using epWeakPtr = T*;
+template<typename T, typename std::enable_if<std::is_base_of<RefCounted, T>::value>::type* = nullptr>
+using WeakPtr = T*;
 
 
 // shared pointers are ref counted
 template<class T>
-class epSharedPtr
+class SharedPtr
 {
 public:
   // create a new instance of T
   template<typename... Args>
-  static epSharedPtr<T> create(Args... args)
+  static SharedPtr<T> create(Args... args)
   {
-    return epSharedPtr<T>(new T(args...));
+    return SharedPtr<T>(new T(args...));
   }
 
   // constructors
-  epSharedPtr(const epSharedPtr<T> &ptr) : pInstance(ptr.pInstance) { acquire(); }
+  SharedPtr(const SharedPtr<T> &ptr) : pInstance(ptr.pInstance) { acquire(); }
   template <class U> // the U allows us to accept const
-  epSharedPtr(const epSharedPtr<U> &ptr) : pInstance(ptr.pInstance) { acquire(); }
-  epSharedPtr(epSharedPtr<T> &&ptr)
+  SharedPtr(const SharedPtr<U> &ptr) : pInstance(ptr.pInstance) { acquire(); }
+  SharedPtr(SharedPtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    if(this != &ptr)
+    if (this != &ptr)
       ptr.pInstance = nullptr;
   }
   template <class U> // the U allows us to accept const
-  epSharedPtr(const epUniquePtr<U> &ptr);
-  epSharedPtr(epUniquePtr<T> &&ptr);
+  SharedPtr(const UniquePtr<U> &ptr);
+  SharedPtr(UniquePtr<T> &&ptr);
 
-  epSharedPtr() {}
-  epSharedPtr(nullptr_t) {}
+  SharedPtr() {}
+  SharedPtr(nullptr_t) {}
 
-  explicit epSharedPtr(T *p) : pInstance(p) { acquire(); }
+  explicit SharedPtr(T *p) : pInstance(p) { acquire(); }
 
-  inline ~epSharedPtr() { release(); }
+  inline ~SharedPtr() { release(); }
 
-  epSharedPtr& operator=(epSharedPtr<T> &&ptr)
+  SharedPtr& operator=(SharedPtr<T> &&ptr)
   {
     if (pInstance != ptr.pInstance)
     {
@@ -71,7 +75,7 @@ public:
     }
     return *this;
   }
-  epSharedPtr& operator=(const epSharedPtr<T> &ptr)
+  SharedPtr& operator=(const SharedPtr<T> &ptr)
   {
     if (pInstance != ptr.pInstance)
     {
@@ -82,7 +86,7 @@ public:
     return *this;
   }
   template <class U> // the U allows us to accept const
-  epSharedPtr& operator=(const epSharedPtr<U> &ptr)
+  SharedPtr& operator=(const SharedPtr<U> &ptr)
   {
     if (pInstance != ptr.pInstance)
     {
@@ -92,10 +96,10 @@ public:
     }
     return *this;
   }
-  epSharedPtr& operator=(epUniquePtr<T> &&ptr);
+  SharedPtr& operator=(UniquePtr<T> &&ptr);
   template <class U> // the U allows us to accept const
-  epSharedPtr& operator=(const epUniquePtr<U> &ptr);
-  epSharedPtr& operator=(nullptr_t)
+  SharedPtr& operator=(const UniquePtr<U> &ptr);
+  SharedPtr& operator=(nullptr_t)
   {
     release();
     return *this;
@@ -117,18 +121,17 @@ public:
   epforceinline T* ptr() const { return (T*)pInstance; }
 
 private:
-  template<class U> friend class epSharedPtr;
+  template<class U> friend class SharedPtr;
 
   inline void acquire();
   inline void release();
 
-  epRefCounted *pInstance = nullptr;
+  RefCounted *pInstance = nullptr;
 };
 
 //------------------------------------------------------------------------------------------
 
-// **HAX** this crap allows us to delete a epRefCounted!
-namespace ep {
+// **HAX** this crap allows us to delete a RefCounted!
 namespace internal {
 
 template<typename T, bool isref>
@@ -144,38 +147,37 @@ template<class T>
 struct Destroy<T, true> {
   epforceinline static void destroy(T *ptr)
   {
-    epRefCounted *rc = ptr;
+    RefCounted *rc = ptr;
     delete rc;
   }
 };
 
 } // namespace internal
-} // namespace ep
 
 // unique pointers nullify the source pointer on assignment
 template<class T>
-class epUniquePtr
+class UniquePtr
 {
 public:
-  epUniquePtr() {}
-  explicit epUniquePtr(T *p) : pInstance(p) {}
+  UniquePtr() {}
+  explicit UniquePtr(T *p) : pInstance(p) {}
   template <class U>
-  epUniquePtr(const epUniquePtr<U> &ptr)
+  UniquePtr(const UniquePtr<U> &ptr)
     : pInstance(ptr.pInstance)
   {
     ptr.pInstance = nullptr;
   }
-  epUniquePtr(const epUniquePtr &ptr)
+  UniquePtr(const UniquePtr &ptr)
     : pInstance(ptr.pInstance)
   {
     ptr.pInstance = nullptr;
   }
-  ~epUniquePtr()
+  ~UniquePtr()
   {
-    ep::internal::Destroy<T, std::is_base_of<epRefCounted, T>::value>::destroy(pInstance);
+    internal::Destroy<T, std::is_base_of<RefCounted, T>::value>::destroy(pInstance);
   }
 
-  epUniquePtr &operator=(const epUniquePtr &ptr)
+  UniquePtr &operator=(const UniquePtr &ptr)
   {
     reset();
     pInstance = ptr.pInstance;
@@ -185,7 +187,7 @@ public:
 
   inline void reset()
   {
-    this->~epUniquePtr();
+    this->~UniquePtr();
     pInstance = nullptr;
   }
 
@@ -203,8 +205,8 @@ public:
   epforceinline T* ptr() const { return pInstance; }
 
 private:
-  template<typename U> friend class epSharedPtr;
-  template<typename U> friend class epUniquePtr;
+  template<typename U> friend class SharedPtr;
+  template<typename U> friend class UniquePtr;
   template<typename U, bool isref> friend struct Destroy;
 
   mutable T *pInstance = nullptr;
@@ -212,48 +214,46 @@ private:
 
 //------------------------------------------------------------------------------------------
 
-// unique pointers that can be passed between threads, destruction is deferred to main thread
-namespace ep { class Kernel; }
-
+// synchronised pointers that can be passed between threads, destruction is deferred to main thread
 template<class T>
-class epSynchronisedPtr
+class SynchronisedPtr
 {
 public:
-  epSynchronisedPtr() {}
+  SynchronisedPtr() {}
   template <class U>
-  explicit epSynchronisedPtr(const epSharedPtr<U> &p, ep::Kernel *pKernel)
+  explicit SynchronisedPtr(const SharedPtr<U> &p, Kernel *pKernel)
     : pInstance(p.ptr())
     , pKernel(pKernel)
   {
     p.acquire();
   }
   template <class U>
-  epSynchronisedPtr(const epSynchronisedPtr<U> &ptr)
+  SynchronisedPtr(const SynchronisedPtr<U> &ptr)
     : pInstance(ptr.pInstance)
     , pKernel(ptr.pKernel)
   {
-    const_cast<epSynchronisedPtr<U>&>(ptr).pInstance = nullptr;
-    const_cast<epSynchronisedPtr<U>&>(ptr).pKernel = nullptr;
+    const_cast<SynchronisedPtr<U>&>(ptr).pInstance = nullptr;
+    const_cast<SynchronisedPtr<U>&>(ptr).pKernel = nullptr;
   }
-  epSynchronisedPtr(const epSynchronisedPtr &ptr)
+  SynchronisedPtr(const SynchronisedPtr &ptr)
     : pInstance(ptr.pInstance)
     , pKernel(ptr.pKernel)
   {
-    const_cast<epSynchronisedPtr&>(ptr).pInstance = nullptr;
-    const_cast<epSynchronisedPtr&>(ptr).pKernel = nullptr;
+    const_cast<SynchronisedPtr&>(ptr).pInstance = nullptr;
+    const_cast<SynchronisedPtr&>(ptr).pKernel = nullptr;
   }
-  inline ~epSynchronisedPtr()
+  inline ~SynchronisedPtr()
   {
     destroy();
   }
 
-  epSynchronisedPtr &operator=(const epSynchronisedPtr &ptr)
+  SynchronisedPtr &operator=(const SynchronisedPtr &ptr)
   {
     destroy();
     pInstance = ptr.pInstance;
     pKernel = ptr.pKernel;
-    const_cast<epSynchronisedPtr&>(ptr).pInstance = nullptr;
-    const_cast<epSynchronisedPtr&>(ptr).pKernel = nullptr;
+    const_cast<SynchronisedPtr&>(ptr).pInstance = nullptr;
+    const_cast<SynchronisedPtr&>(ptr).pKernel = nullptr;
     return *this;
   }
 
@@ -276,22 +276,22 @@ public:
   inline T* ptr() const { return pInstance; }
 
 private:
-  template<typename U> friend class epSynchronisedPtr;
+  template<typename U> friend class SynchronisedPtr;
 
   void destroy();
 
   T *pInstance = nullptr;
-  ep::Kernel *pKernel = nullptr;
+  Kernel *pKernel = nullptr;
 };
 
 
 // ref counting base class
-class epRefCounted
+class RefCounted
 {
   mutable size_t rc = 0;
 
 protected:
-  virtual ~epRefCounted() = 0;
+  virtual ~RefCounted() = 0;
 public:
   size_t RefCount() { return rc; }
   size_t IncRef() { return ++rc; }
@@ -303,48 +303,16 @@ public:
   }
 
   template<typename T>
-  friend class epSharedPtr;
+  friend class SharedPtr;
   template<typename T, bool isrc>
-  friend struct ep::internal::Destroy;
+  friend struct internal::Destroy;
 };
-inline epRefCounted::~epRefCounted() {}
+inline RefCounted::~RefCounted() {}
 
 
-// cast functions
-template<class T, class U>
-inline epSharedPtr<T> shared_pointer_cast(const epSharedPtr<U> &ptr)
-{
-  return epSharedPtr<T>((T*)ptr.ptr());
-}
-
-
-// comparaison operators
-template<class T, class U> inline bool operator==(const epSharedPtr<T> &l, const epSharedPtr<U> &r) { return l.ptr() == r.ptr(); }
-template<class T, class U> inline bool operator!=(const epSharedPtr<T> &l, const epSharedPtr<U> &r) { return l.ptr() != r.ptr(); }
-template<class T, class U> inline bool operator<=(const epSharedPtr<T> &l, const epSharedPtr<U> &r) { return l.ptr() <= r.ptr(); }
-template<class T, class U> inline bool operator<(const epSharedPtr<T> &l, const epSharedPtr<U> &r) { return l.ptr() < r.ptr(); }
-template<class T, class U> inline bool operator>=(const epSharedPtr<T> &l, const epSharedPtr<U> &r) { return l.ptr() >= r.ptr(); }
-template<class T, class U> inline bool operator>(const epSharedPtr<T> &l, const epSharedPtr<U> &r) { return l.ptr() > r.ptr(); }
-template<class T, class U> inline bool operator==(const epSharedPtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
-template<class T, class U> inline bool operator!=(const epSharedPtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
-template<class T, class U> inline bool operator==(nullptr_t, const epSharedPtr<U> &r) { return nullptr == r.ptr(); }
-template<class T, class U> inline bool operator!=(nullptr_t, const epSharedPtr<U> &r) { return nullptr != r.ptr(); }
-
-template<class T, class U> inline bool operator==(const epUniquePtr<T> &l, const epUniquePtr<U> &r) { return l.ptr() == r.ptr(); }
-template<class T, class U> inline bool operator!=(const epUniquePtr<T> &l, const epUniquePtr<U> &r) { return l.ptr() != r.ptr(); }
-template<class T, class U> inline bool operator<=(const epUniquePtr<T> &l, const epUniquePtr<U> &r) { return l.ptr() <= r.ptr(); }
-template<class T, class U> inline bool operator<(const epUniquePtr<T> &l, const epUniquePtr<U> &r) { return l.ptr() < r.ptr(); }
-template<class T, class U> inline bool operator>=(const epUniquePtr<T> &l, const epUniquePtr<U> &r) { return l.ptr() >= r.ptr(); }
-template<class T, class U> inline bool operator>(const epUniquePtr<T> &l, const epUniquePtr<U> &r) { return l.ptr() > r.ptr(); }
-template<class T, class U> inline bool operator==(const epUniquePtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
-template<class T, class U> inline bool operator!=(const epUniquePtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
-template<class T, class U> inline bool operator==(nullptr_t, const epUniquePtr<U> &r) { return nullptr == r.ptr(); }
-template<class T, class U> inline bool operator!=(nullptr_t, const epUniquePtr<U> &r) { return nullptr != r.ptr(); }
-
-
-// epSharedPtr constructors and assignments
+// SharedPtr constructors and assignments
 template <class T>
-inline epSharedPtr<T>::epSharedPtr(epUniquePtr<T> &&ptr)
+inline SharedPtr<T>::SharedPtr(UniquePtr<T> &&ptr)
   : pInstance(ptr.pInstance)
 {
   pInstance->rc = 1;
@@ -352,14 +320,14 @@ inline epSharedPtr<T>::epSharedPtr(epUniquePtr<T> &&ptr)
 }
 template <class T>
 template <class U>
-inline epSharedPtr<T>::epSharedPtr(const epUniquePtr<U> &ptr)
+inline SharedPtr<T>::SharedPtr(const UniquePtr<U> &ptr)
   : pInstance(ptr.pInstance)
 {
   pInstance->rc = 1;
   ptr.pInstance = nullptr;
 }
 template <class T>
-inline epSharedPtr<T>& epSharedPtr<T>::operator=(epUniquePtr<T> &&ptr)
+inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<T> &&ptr)
 {
   release();
   pInstance = ptr.pInstance;
@@ -369,7 +337,7 @@ inline epSharedPtr<T>& epSharedPtr<T>::operator=(epUniquePtr<T> &&ptr)
 }
 template <class T>
 template <class U>
-inline epSharedPtr<T>& epSharedPtr<T>::operator=(const epUniquePtr<U> &ptr)
+inline SharedPtr<T>& SharedPtr<T>::operator=(const UniquePtr<U> &ptr)
 {
   release();
   pInstance = ptr.pInstance;
@@ -379,13 +347,13 @@ inline epSharedPtr<T>& epSharedPtr<T>::operator=(const epUniquePtr<U> &ptr)
 }
 
 template<class T>
-epforceinline size_t epSharedPtr<T>::count() const
+epforceinline size_t SharedPtr<T>::count() const
 {
   return pInstance ? pInstance->rc : 0;
 }
 
 template<class T>
-epforceinline void epSharedPtr<T>::acquire()
+epforceinline void SharedPtr<T>::acquire()
 {
   if (pInstance)
   {
@@ -393,7 +361,7 @@ epforceinline void epSharedPtr<T>::acquire()
   }
 }
 template<class T>
-inline void epSharedPtr<T>::release()
+inline void SharedPtr<T>::release()
 {
   if (pInstance)
   {
@@ -403,4 +371,44 @@ inline void epSharedPtr<T>::release()
   }
 }
 
-#endif // _EPSHAREDPTR_H
+} // namespace ep
+
+
+// cast functions
+template<class T, class U>
+inline SharedPtr<T> shared_pointer_cast(const SharedPtr<U> &ptr)
+{
+  return SharedPtr<T>((T*)ptr.ptr());
+}
+
+// comparaison operators
+template<class T, class U> inline bool operator==(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() == r.ptr(); }
+template<class T, class U> inline bool operator!=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() != r.ptr(); }
+template<class T, class U> inline bool operator<=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() <= r.ptr(); }
+template<class T, class U> inline bool operator<(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() < r.ptr(); }
+template<class T, class U> inline bool operator>=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() >= r.ptr(); }
+template<class T, class U> inline bool operator>(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() > r.ptr(); }
+template<class T, class U> inline bool operator==(const SharedPtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
+template<class T, class U> inline bool operator!=(const SharedPtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
+template<class T, class U> inline bool operator==(nullptr_t, const SharedPtr<U> &r) { return nullptr == r.ptr(); }
+template<class T, class U> inline bool operator!=(nullptr_t, const SharedPtr<U> &r) { return nullptr != r.ptr(); }
+
+template<class T, class U> inline bool operator==(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() == r.ptr(); }
+template<class T, class U> inline bool operator!=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() != r.ptr(); }
+template<class T, class U> inline bool operator<=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() <= r.ptr(); }
+template<class T, class U> inline bool operator<(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() < r.ptr(); }
+template<class T, class U> inline bool operator>=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() >= r.ptr(); }
+template<class T, class U> inline bool operator>(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() > r.ptr(); }
+template<class T, class U> inline bool operator==(const UniquePtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
+template<class T, class U> inline bool operator!=(const UniquePtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
+template<class T, class U> inline bool operator==(nullptr_t, const UniquePtr<U> &r) { return nullptr == r.ptr(); }
+template<class T, class U> inline bool operator!=(nullptr_t, const UniquePtr<U> &r) { return nullptr != r.ptr(); }
+
+
+template<typename T>
+ptrdiff_t epStringify(Slice<char> buffer, String format, SharedPtr<T> spT, const epVarArg *pArgs)
+{
+  return epStringifyTemplate(buffer, format, spT.ptr(), pArgs);
+}
+
+#endif // _EPSHAREDPTR_HPP

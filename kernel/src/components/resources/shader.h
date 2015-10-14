@@ -3,7 +3,7 @@
 #define _EP_SHADER_H
 
 #include "components/resources/resource.h"
-#include "ep/epsharedptr.h"
+#include "ep/cpp/sharedptr.h"
 
 namespace ep
 {
@@ -21,20 +21,20 @@ class Shader : public Resource
 public:
   EP_COMPONENT(Shader);
 
-  epSharedString GetCode() const { return code; }
-  void SetCode(epSharedString code) { this->code = code; }
+  SharedString GetCode() const { return code; }
+  void SetCode(SharedString code) { this->code = code; }
 
 protected:
   friend class Material;
   friend class RenderShader;
 
-  Shader(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  Shader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Shader() {}
 
   RenderShaderRef GetRenderShader(int type);
 
-  epSharedString code;
+  SharedString code;
 
   RenderShaderRef spRenderShader = nullptr;
 };

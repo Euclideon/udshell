@@ -1,15 +1,15 @@
 #include "gtest/gtest.h"
-#include "ep/epvariant.h"
+#include "ep/cpp/variant.h"
 #include <random>
 
 TEST(EPVariant, EPVariantNull)
 {
-  epVariant var(nullptr);
+  Variant var(nullptr);
 
-  EXPECT_EQ(var.type(), epVariant::Type::Null);
-  EXPECT_TRUE(var.is(epVariant::Type::Null));
+  EXPECT_EQ(var.type(), Variant::Type::Null);
+  EXPECT_TRUE(var.is(Variant::Type::Null));
 
-  EXPECT_EQ(0, var.stringify().cmp(epString("nil")));
+  EXPECT_EQ(0, var.stringify().cmp(String("nil")));
 
   EXPECT_FALSE(var.asBool());
   EXPECT_EQ(0, var.asInt());
@@ -28,21 +28,21 @@ TEST(EPVariant, EPVariantNull)
   EXPECT_EQ(0, var.arrayLen());
   EXPECT_EQ(0, var.assocArraySeriesLen());
 
-  EXPECT_TRUE(var[0].is(epVariant::Type::Null));
-  EXPECT_TRUE(var["dummy"].is(epVariant::Type::Null));
+  EXPECT_TRUE(var[0].is(Variant::Type::Null));
+  EXPECT_TRUE(var["dummy"].is(Variant::Type::Null));
 
 }
 
 TEST(EPVariant, EPVariantBool)
 {
-  epVariant varTrue(true);
-  epVariant varFalse(false);
+  Variant varTrue(true);
+  Variant varFalse(false);
 
-  EXPECT_EQ(varTrue.type(), epVariant::Type::Bool);
-  EXPECT_TRUE(varTrue.is(epVariant::Type::Bool));
+  EXPECT_EQ(varTrue.type(), Variant::Type::Bool);
+  EXPECT_TRUE(varTrue.is(Variant::Type::Bool));
 
-  EXPECT_EQ(0, varTrue.stringify().cmp(epString("true")));
-  EXPECT_EQ(0, varFalse.stringify().cmp(epString("false")));
+  EXPECT_EQ(0, varTrue.stringify().cmp(String("true")));
+  EXPECT_EQ(0, varFalse.stringify().cmp(String("false")));
 
   EXPECT_TRUE(varTrue.asBool());
   EXPECT_FALSE(varFalse.asBool());
@@ -66,8 +66,8 @@ TEST(EPVariant, EPVariantBool)
   EXPECT_EQ(0, varTrue.arrayLen());
   EXPECT_EQ(0, varTrue.assocArraySeriesLen());
 
-  EXPECT_TRUE(varTrue[0].is(epVariant::Type::Null));
-  EXPECT_TRUE(varTrue["dummy"].is(epVariant::Type::Null));
+  EXPECT_TRUE(varTrue[0].is(Variant::Type::Null));
+  EXPECT_TRUE(varTrue["dummy"].is(Variant::Type::Null));
 }
 
 TEST(EPVariant, EPVariantInt)
@@ -78,7 +78,7 @@ TEST(EPVariant, EPVariantInt)
   for (int64_t i = 0; i < 1000; ++i)
   {
     int64_t rInt = dist(eng);
-    epVariant varInt(rInt);
+    Variant varInt(rInt);
 
     EXPECT_EQ(!!rInt, varInt.asBool());
     EXPECT_EQ(rInt, varInt.asInt());
@@ -86,10 +86,10 @@ TEST(EPVariant, EPVariantInt)
   }
 
   int64_t rInt = dist(eng);
-  epVariant varInt(rInt);
+  Variant varInt(rInt);
 
-  EXPECT_EQ(varInt.type(), epVariant::Type::Int);
-  EXPECT_TRUE(varInt.is(epVariant::Type::Int));
+  EXPECT_EQ(varInt.type(), Variant::Type::Int);
+  EXPECT_TRUE(varInt.is(Variant::Type::Int));
   EXPECT_TRUE(varInt.stringify().empty());
 
   EXPECT_FALSE(varInt.asEnum(nullptr));
@@ -105,8 +105,8 @@ TEST(EPVariant, EPVariantInt)
   EXPECT_EQ(0, varInt.arrayLen());
   EXPECT_EQ(0, varInt.assocArraySeriesLen());
 
-  EXPECT_TRUE(varInt[0].is(epVariant::Type::Null));
-  EXPECT_TRUE(varInt["dummy"].is(epVariant::Type::Null));
+  EXPECT_TRUE(varInt[0].is(Variant::Type::Null));
+  EXPECT_TRUE(varInt["dummy"].is(Variant::Type::Null));
 }
 
 
@@ -118,7 +118,7 @@ TEST(EPVariant, EPVariantDbl)
   for (int64_t i = 0; i < 1000; ++i)
   {
     double rDbl = dist(eng);
-    epVariant varDbl(rDbl);
+    Variant varDbl(rDbl);
 
     EXPECT_EQ(!!rDbl, varDbl.asBool());
     EXPECT_EQ((int64_t)rDbl, varDbl.asInt());
@@ -126,10 +126,10 @@ TEST(EPVariant, EPVariantDbl)
   }
 
   double rDbl = dist(eng);
-  epVariant varDbl(rDbl);
+  Variant varDbl(rDbl);
 
-  EXPECT_EQ(varDbl.type(), epVariant::Type::Float);
-  EXPECT_TRUE(varDbl.is(epVariant::Type::Float));
+  EXPECT_EQ(varDbl.type(), Variant::Type::Float);
+  EXPECT_TRUE(varDbl.is(Variant::Type::Float));
   EXPECT_TRUE(varDbl.stringify().empty());
 
   EXPECT_FALSE(varDbl.asEnum(nullptr));
@@ -145,23 +145,23 @@ TEST(EPVariant, EPVariantDbl)
   EXPECT_EQ(0, varDbl.arrayLen());
   EXPECT_EQ(0, varDbl.assocArraySeriesLen());
 
-  EXPECT_TRUE(varDbl[0].is(epVariant::Type::Null));
-  EXPECT_TRUE(varDbl["dummy"].is(epVariant::Type::Null));
+  EXPECT_TRUE(varDbl[0].is(Variant::Type::Null));
+  EXPECT_TRUE(varDbl["dummy"].is(Variant::Type::Null));
 }
 
 
 TEST(EPVariant, EPVariantSlice)
 {
-  epVariant var0(0);
-  epVariant var1(1);
-  epVariant var2(2);
-  epVariant testArray[] = { var0, var1, var2 };
-  epSlice<epVariant> testSlice(testArray, 3);
+  Variant var0(0);
+  Variant var1(1);
+  Variant var2(2);
+  Variant testArray[] = { var0, var1, var2 };
+  Slice<Variant> testSlice(testArray, 3);
 
-  epVariant varSlice(testSlice);
+  Variant varSlice(testSlice);
 
-  EXPECT_EQ(varSlice.type(), epVariant::Type::Array);
-  EXPECT_TRUE(varSlice.is(epVariant::Type::Array));
+  EXPECT_EQ(varSlice.type(), Variant::Type::Array);
+  EXPECT_TRUE(varSlice.is(Variant::Type::Array));
   EXPECT_TRUE(varSlice.stringify().empty());
 
   EXPECT_DEATH(varSlice.asBool(), "Wrong type!");

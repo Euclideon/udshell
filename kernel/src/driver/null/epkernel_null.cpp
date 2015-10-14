@@ -14,7 +14,7 @@ public:
   epResult InitInternal() { return epR_Success; }
 };
 
-Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
   return new NullKernel;
 }

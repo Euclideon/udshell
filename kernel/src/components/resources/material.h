@@ -4,8 +4,8 @@
 
 #include "components/resources/resource.h"
 #include "components/resources/shader.h"
-#include "ep/epsharedptr.h"
-#include "ep/epavltree.h"
+#include "ep/cpp/sharedptr.h"
+#include "ep/cpp/avltree.h"
 
 namespace ep
 {
@@ -47,19 +47,19 @@ public:
   CullMode GetCullMode() const { return cullMode; }
   void SetCullMode(CullMode cullMode) { this->cullMode = cullMode; }
 
-  void SetMaterialProperty(epSharedString property, const udFloat4 &val);
+  void SetMaterialProperty(SharedString property, const udFloat4 &val);
 
 protected:
   friend class GeomNode;
 
-  Material(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  Material(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Material()
   {
     for (ShaderRef &s : shaders)
     {
       if (s)
-        s->Changed.Unsubscribe(epDelegate<void()>(this, &Material::OnShaderChanged));
+        s->Changed.Unsubscribe(Delegate<void()>(this, &Material::OnShaderChanged));
     }
   }
 
@@ -74,7 +74,7 @@ protected:
   BlendMode blendMode = BlendMode::None;
   CullMode cullMode = CullMode::None;
 
-  epAVLTree<epSharedString, udFloat4> properties;
+  AVLTree<SharedString, udFloat4> properties;
 
   RenderShaderProgramRef spRenderProgram = nullptr;
 };

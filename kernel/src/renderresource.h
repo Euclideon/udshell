@@ -36,7 +36,7 @@ enum class TextureUsage
 };
 
 // base render resource
-class RenderResource : public epRefCounted
+class RenderResource : public RefCounted
 {
 public:
   RenderResource(Renderer *pRenderer) : pRenderer(pRenderer) {}
@@ -91,10 +91,10 @@ public:
   epShaderProgram *pProgram;
 
   size_t numAttributes();
-  epString getAttributeName(size_t i);
+  String getAttributeName(size_t i);
 
   size_t numUniforms();
-  epString getUniformName(size_t i);
+  String getUniformName(size_t i);
 
   void setUniform(int i, const udFloat4 &v4);
 };

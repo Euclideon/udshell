@@ -15,7 +15,7 @@ inline CGetter::CGetter(Type(X::*func)() const)
 }
 
 template<typename T>
-inline epVariant CGetter::shimFunc(const Getter * const _pGetter, const ep::Component *pThis)
+inline Variant CGetter::shimFunc(const Getter * const _pGetter, const Component *pThis)
 {
   CGetter *pGetter = (CGetter*)_pGetter;
   auto m = pGetter->m;
@@ -24,7 +24,7 @@ inline epVariant CGetter::shimFunc(const Getter * const _pGetter, const ep::Comp
   FastDelegate0<T> d;
   d.SetMemento(m);
 
-  return epVariant(d());
+  return Variant(d());
 }
 
 // setter stuff
@@ -37,7 +37,7 @@ inline CSetter::CSetter(void(X::*func)(Type))
 }
 
 template<typename T>
-inline void CSetter::shimFunc(const Setter * const _pSetter, ep::Component *pThis, const epVariant &value)
+inline void CSetter::shimFunc(const Setter * const _pSetter, Component *pThis, const Variant &value)
 {
   CSetter *pSetter = (CSetter*)_pSetter;
 
@@ -68,13 +68,13 @@ inline CMethod::CMethod(Ret(X::*func)(Args...) const)
 
 template<typename Ret, typename... Args>
 template<size_t ...S>
-epforceinline epVariant CMethod::Partial<Ret, Args...>::callFuncHack(epSlice<epVariant> args, FastDelegate<Ret(Args...)> d, Sequence<S...>)
+epforceinline Variant CMethod::Partial<Ret, Args...>::callFuncHack(Slice<Variant> args, FastDelegate<Ret(Args...)> d, internal::Sequence<S...>)
 {
-  return epVariant(d(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+  return Variant(d(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
 }
 
 template<typename Ret, typename... Args>
-inline epVariant CMethod::Partial<Ret, Args ...>::shimFunc(const Method * const _pMethod, Component *pThis, epSlice<epVariant> value)
+inline Variant CMethod::Partial<Ret, Args ...>::shimFunc(const Method * const _pMethod, Component *pThis, Slice<Variant> value)
 {
   CMethod *pMethod = (CMethod*)_pMethod;
 
@@ -84,19 +84,19 @@ inline epVariant CMethod::Partial<Ret, Args ...>::shimFunc(const Method * const 
   FastDelegate<Ret(Args...)> d;
   d.SetMemento(m);
 
-  return epVariant(callFuncHack(value, d, typename GenSequence<sizeof...(Args)>::type()));
+  return Variant(callFuncHack(value, d, typename internal::GenSequence<sizeof...(Args)>::type()));
 }
 
 template<typename... Args>
 struct CMethod::Partial<void, Args...>
 {
   template<size_t ...S>
-  epforceinline static void callFuncHack(epSlice<epVariant> args, FastDelegate<void(Args...)> d, Sequence<S...>)
+  epforceinline static void callFuncHack(Slice<Variant> args, FastDelegate<void(Args...)> d, internal::Sequence<S...>)
   {
     d(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
   }
 
-  inline static epVariant shimFunc(const Method * const _pMethod, Component *pThis, epSlice<epVariant> value)
+  inline static Variant shimFunc(const Method * const _pMethod, Component *pThis, Slice<Variant> value)
   {
     CMethod *pMethod = (CMethod*)_pMethod;
 
@@ -106,8 +106,8 @@ struct CMethod::Partial<void, Args...>
     FastDelegate<void(Args...)> d;
     d.SetMemento(m);
 
-    callFuncHack(value, d, typename GenSequence<sizeof...(Args)>::type());
-    return epVariant();
+    callFuncHack(value, d, typename internal::GenSequence<sizeof...(Args)>::type());
+    return Variant();
   }
 };
 
@@ -122,38 +122,38 @@ inline CStaticFunc::CStaticFunc(Ret(*func)(Args...))
 
 template<typename Ret, typename... Args>
 template<size_t ...S>
-epforceinline epVariant CStaticFunc::Partial<Ret, Args...>::callFuncHack(epSlice<epVariant> args, Ret (*f)(Args...), Sequence<S...>)
+epforceinline Variant CStaticFunc::Partial<Ret, Args...>::callFuncHack(Slice<Variant> args, Ret(*f)(Args...), internal::Sequence<S...>)
 {
-  return epVariant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+  return Variant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
 }
 
 template<typename Ret, typename... Args>
-inline epVariant CStaticFunc::Partial<Ret, Args ...>::shimFunc(const StaticFunc * const _pStaticFunc, epSlice<epVariant> value)
+inline Variant CStaticFunc::Partial<Ret, Args ...>::shimFunc(const StaticFunc * const _pStaticFunc, Slice<Variant> value)
 {
   CStaticFunc *pStaticFunc = (CStaticFunc*)_pStaticFunc;
 
   auto f = (Ret(*)(Args ...)) pStaticFunc->f;
 
-  return epVariant(callFuncHack(value, f, typename GenSequence<sizeof...(Args)>::type()));
+  return Variant(callFuncHack(value, f, typename internal::GenSequence<sizeof...(Args)>::type()));
 }
 
 template<typename... Args>
 struct CStaticFunc::Partial < void, Args... >
 {
   template<size_t ...S>
-  epforceinline static void callFuncHack(epSlice<epVariant> args, void (*f)(Args...), Sequence<S...>)
+  epforceinline static void callFuncHack(Slice<Variant> args, void(*f)(Args...), internal::Sequence<S...>)
   {
     f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
   }
 
-  inline static epVariant shimFunc(const StaticFunc * const _staticFunc, epSlice<epVariant> value)
+  inline static Variant shimFunc(const StaticFunc * const _staticFunc, Slice<Variant> value)
   {
     CStaticFunc *pStaticFunc = (CStaticFunc*)_pStaticFunc;
 
     auto f = (void(*)(Args ...)) pStaticFunc->f;
 
-    callFuncHack(value, f, typename GenSequence<sizeof...(Args)>::type());
-    return epVariant();
+    callFuncHack(value, f, typename internal::GenSequence<sizeof...(Args)>::type());
+    return Variant();
   }
 };
 
@@ -167,7 +167,7 @@ inline CEvent::CEvent(epEvent<Args...> X::*ev)
 }
 
 template<typename X, typename... Args>
-inline void CEvent::doSubscribe(const VarEvent *_pEv, const ComponentRef &c, const epVariant::VarDelegate &d)
+inline void CEvent::doSubscribe(const VarEvent *_pEv, const ComponentRef &c, const Variant::VarDelegate &d)
 {
   CEvent *pEv = (CEvent*)_pEv;
 
@@ -180,8 +180,8 @@ inline void CEvent::doSubscribe(const VarEvent *_pEv, const ComponentRef &c, con
   // deref the pointer-to-member to get the event we want to subscribe to
   epEvent<Args...> &e = pComponent->*ev;
 
-  epVariant v(d);
-  e.Subscribe(v.as<epDelegate<void(Args...)>>());
+  Variant v(d);
+  e.Subscribe(v.as<Delegate<void(Args...)>>());
 }
 
 }  // namespace ep

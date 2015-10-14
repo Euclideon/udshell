@@ -17,7 +17,7 @@ ComponentDesc Viewport::descriptor =
 
 
 // ---------------------------------------------------------------------------------------
-Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != epR_Success)

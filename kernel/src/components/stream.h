@@ -30,11 +30,11 @@ public:
   int64_t GetPos() const { return pos; }
   virtual int64_t Seek(SeekOrigin rel, int64_t offset) { return 0; }
 
-  virtual epSlice<void> Read(epSlice<void> buffer) { return 0; }
-  virtual size_t Write(epSlice<const void> data) { return 0; }
+  virtual Slice<void> Read(Slice<void> buffer) { return 0; }
+  virtual size_t Write(Slice<const void> data) { return 0; }
 
-  virtual epString ReadLn(epSlice<char> buf);
-  virtual size_t WriteLn(epString str);
+  virtual String ReadLn(Slice<char> buf);
+  virtual size_t WriteLn(String str);
 
   virtual int Flush() { return 0; }
 
@@ -48,7 +48,7 @@ public:
   // TODO: remove support for sync operations?
 
 protected:
-  Stream(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  Stream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Component(pType, pKernel, uid, initParams), pos(0)
   {}
 

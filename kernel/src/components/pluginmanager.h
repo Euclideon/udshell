@@ -13,10 +13,10 @@ class PluginManager : public Component
 public:
   EP_COMPONENT(PluginManager);
 
-  bool LoadPlugin(epString filename);
+  bool LoadPlugin(String filename);
 
 protected:
-  PluginManager(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   ~PluginManager();
 
 //  udAVLTree<udString, ResourceRef> plugins;

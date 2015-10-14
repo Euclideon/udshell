@@ -51,9 +51,9 @@ ComponentDesc Scene::descriptor =
   "Scene",    // displayName
   "Is a scene", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
-  epSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  Slice<CEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 
@@ -100,7 +100,7 @@ epResult Scene::SetRenderModels(struct udRenderModel models[], size_t numModels)
   return epR_Success;
 }
 
-Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams) :
+Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams) :
   Component(pType, pKernel, uid, initParams)
 {
   timeStep = 1.0 / 30.0;

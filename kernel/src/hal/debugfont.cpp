@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 #include "udMath.h"
 
 #include "debugfont.h"

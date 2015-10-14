@@ -2,10 +2,10 @@
 #ifndef EPHELPERS_H
 #define EPHELPERS_H
 
-#include "ep/epvariant.h"
+#include "ep/cpp/variant.h"
 
-epSharedSlice<const epKeyValuePair> udParseCommandLine(const char *pCommandLine);
-epSharedSlice<const epKeyValuePair> udParseCommandLine(int argc, char *argv[]);
-epSharedSlice<const epKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
+SharedSlice<const KeyValuePair> udParseCommandLine(const char *pCommandLine);
+SharedSlice<const KeyValuePair> udParseCommandLine(int argc, char *argv[]);
+SharedSlice<const KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
 
 #endif // EPHELPERS_H

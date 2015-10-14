@@ -1,169 +1,157 @@
 #pragma once
-#if !defined(EPVARIANT_H)
-#define EPVARIANT_H
+#if !defined(EPVARIANT_HPP)
+#define EPVARIANT_HPP
 
-#include "ep/epplatform.h"
-#include "ep/epenum.h"
-#include "ep/epdelegate.h"
+#include "ep/cpp/sharedptr.h"
+#include "ep/cpp/delegate.h"
 
-namespace ep
-{
-  SHARED_CLASS(Component);
-  class LuaState;
-};
+#include "ep/c/variant.h"
 
-struct epKeyValuePair;
+namespace ep {
 
-struct epVariant
+SHARED_CLASS(Component);
+class LuaState;
+
+struct KeyValuePair;
+
+struct Variant : protected epVariant
 {
 public:
-  typedef epDelegate<epVariant(epSlice<epVariant>)> VarDelegate;
+  typedef Delegate<Variant(Slice<Variant>)> VarDelegate;
 
   enum class Type
   {
-    Null,
-    Bool,
-    Int,
-    Float,
-    Enum,
-    Bitfield,
-    Component,
-    Delegate,
-    String,
-    Array,
-    AssocArray
+    Null = epVT_Null,
+    Bool = epVT_Bool,
+    Int = epVT_Int,
+    Float = epVT_Float,
+    Enum = epVT_Enum,
+    Bitfield = epVT_Bitfield,
+    Component = epVT_Component,
+    Delegate = epVT_Delegate,
+    String = epVT_String,
+    Array = epVT_Array,
+    AssocArray = epVT_AssocArray
   };
 
-  epVariant();
-  epVariant(epVariant &&rval);
-  epVariant(const epVariant &val);
+  Variant();
+  Variant(Variant &&rval);
+  Variant(const Variant &val);
 
-  epVariant(bool);
-  epVariant(int64_t);
-  epVariant(double);
-  epVariant(size_t val, const epEnumDesc *pDesc, bool isBitfield);
-  epVariant(ep::ComponentRef &&spC);
-  epVariant(const ep::ComponentRef &spC);
-  epVariant(VarDelegate &&d);
-  epVariant(const VarDelegate &d);
-  epVariant(epString, bool ownsMemory = false);
-  epVariant(epSlice<epVariant> a, bool ownsMemory = false);
-  epVariant(epSlice<epKeyValuePair> aa, bool ownsMemory = false);
+  Variant(epVariant &&rval);
+  Variant(const epVariant &val);
 
-  template<typename T> epVariant(T &&rval);
+  Variant(bool);
+  Variant(int64_t);
+  Variant(double);
+  Variant(size_t val, const epEnumDesc *pDesc, bool isBitfield);
+  Variant(ComponentRef &&spC);
+  Variant(const ComponentRef &spC);
+  Variant(VarDelegate &&d);
+  Variant(const VarDelegate &d);
+  Variant(String, bool ownsMemory = false);
+  Variant(Slice<Variant> a, bool ownsMemory = false);
+  Variant(Slice<KeyValuePair> aa, bool ownsMemory = false);
 
-  ~epVariant();
+  template<typename T> Variant(T &&rval);
+
+  ~Variant();
 
   // assignment operators
-  epVariant& operator=(epVariant &&rval);
-  epVariant& operator=(const epVariant &rval);
+  Variant& operator=(Variant &&rval);
+  Variant& operator=(const Variant &rval);
 
   // actual methods
   Type type() const;
   bool is(Type type) const;
 
-  epSharedString stringify() const;
+  SharedString stringify() const;
 
   template<typename T>
   T as() const;
 
-  ptrdiff_t compare(const epVariant &v) const;
+  ptrdiff_t compare(const Variant &v) const;
 
   bool asBool() const;
   int64_t asInt() const;
   double asFloat() const;
   const epEnumDesc* asEnum(size_t *pVal) const;
-  ep::ComponentRef asComponent() const;
+  ComponentRef asComponent() const;
   VarDelegate asDelegate() const;
-  epString asString() const;
-  epSlice<epVariant> asArray() const;
-  epSlice<epKeyValuePair> asAssocArray() const;
-  epSlice<epKeyValuePair> asAssocArraySeries() const;
+  String asString() const;
+  Slice<Variant> asArray() const;
+  Slice<KeyValuePair> asAssocArray() const;
+  Slice<KeyValuePair> asAssocArraySeries() const;
 
   size_t arrayLen() const;
   size_t assocArraySeriesLen() const;
 
-  epVariant operator[](size_t i) const;
-  epVariant operator[](epString key) const;
+  Variant operator[](size_t i) const;
+  Variant operator[](String key) const;
 
-  epVariant* allocArray(size_t len);
-  epKeyValuePair* allocAssocArray(size_t len);
+  Variant* allocArray(size_t len);
+  KeyValuePair* allocAssocArray(size_t len);
 
   // TODO: these shouldn't be part of the public API!
-  void luaPush(ep::LuaState &l) const;
-  static epVariant luaGet(ep::LuaState &l, int idx = -1);
-
-private:
-  size_t t : 4;
-  size_t ownsContent : 1;
-  size_t length : (sizeof(size_t)*8)-5; // NOTE: if you change this, update the shift's in asEnum()!!!
-  union
-  {
-    bool b;
-    int64_t i;
-    double f;
-    ep::Component *c;
-    const char *s;
-    epVariant *a;
-    epKeyValuePair *aa;
-    void *p;
-  };
+  void luaPush(LuaState &l) const;
+  static Variant luaGet(LuaState &l, int idx = -1);
 };
 
-struct epKeyValuePair
+struct KeyValuePair
 {
-  epKeyValuePair() {}
-  epKeyValuePair(epKeyValuePair &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
-  epKeyValuePair(const epKeyValuePair &val) : key(val.key), value(val.value) {}
+  KeyValuePair() {}
+  KeyValuePair(KeyValuePair &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
+  KeyValuePair(const KeyValuePair &val) : key(val.key), value(val.value) {}
 
-  epKeyValuePair(const epVariant &key, const epVariant &value) : key(key), value(value) {}
-  epKeyValuePair(const epVariant &key, epVariant &&value) : key(key), value(std::move(value)) {}
-  epKeyValuePair(epVariant &&key, const epVariant &value) : key(std::move(key)), value(value) {}
-  epKeyValuePair(epVariant &&key, epVariant &&value) : key(std::move(key)), value(std::move(value)) {}
+  KeyValuePair(const Variant &key, const Variant &value) : key(key), value(value) {}
+  KeyValuePair(const Variant &key, Variant &&value) : key(key), value(std::move(value)) {}
+  KeyValuePair(Variant &&key, const Variant &value) : key(std::move(key)), value(value) {}
+  KeyValuePair(Variant &&key, Variant &&value) : key(std::move(key)), value(std::move(value)) {}
 
-  epVariant key;
-  epVariant value;
+  Variant key;
+  Variant value;
 };
 
-class epInitParams
+class InitParams
 {
 public:
-  epInitParams() {}
-  epInitParams(nullptr_t) {}
-  epInitParams(const epInitParams& rh) : params(rh.params) {}
-  epInitParams(epSlice<const epKeyValuePair> kvp) : params(kvp) {}
-  epInitParams(std::initializer_list<const epKeyValuePair> list) : epInitParams(epSlice<const epKeyValuePair>(list.begin(), list.size())) {}
+  InitParams() {}
+  InitParams(nullptr_t) {}
+  InitParams(const InitParams& rh) : params(rh.params) {}
+  InitParams(Slice<const KeyValuePair> kvp) : params(kvp) {}
+  InitParams(std::initializer_list<const KeyValuePair> list) : InitParams(Slice<const KeyValuePair>(list.begin(), list.size())) {}
 
-  epSlice<const epKeyValuePair> params;
+  Slice<const KeyValuePair> params;
 
-  const epKeyValuePair& operator[](size_t index) const
+  const KeyValuePair& operator[](size_t index) const
   {
     return params[index];
   }
-  const epVariant& operator[](epString key) const
+  const Variant& operator[](String key) const
   {
     for (auto &p : params)
     {
-      if (p.key.is(epVariant::Type::String) && p.key.asString().eq(key))
+      if (p.key.is(Variant::Type::String) && p.key.asString().eq(key))
         return p.value;
     }
     return varNull;
   }
 
-  epIterator<const epKeyValuePair> begin() const
+  Iterator<const KeyValuePair> begin() const
   {
     return params.begin();
   }
-  epIterator<const epKeyValuePair> end() const
+  Iterator<const KeyValuePair> end() const
   {
     return params.end();
   }
 
 private:
-  static const epVariant varNull;
+  static const Variant varNull;
 };
 
+} // namespace ep
 
-#include "ep/epvariant.inl"
+#include "ep/cpp/internal/variant_inl.h"
 
-#endif // EPVARIANT_H
+#endif // EPVARIANT_HPP

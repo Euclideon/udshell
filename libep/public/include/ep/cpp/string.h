@@ -1,65 +1,48 @@
 #pragma once
-#if !defined(_EP_STRING)
-#define _EP_STRING
+#if !defined(_EP_STRING_HPP)
+#define _EP_STRING_HPP
 
-#include "ep/epslice.h"
+#include "ep/c/string.h"
+
+#include "ep/cpp/slice.h"
 
 namespace ep {
-namespace internal {
 
-  extern const char charDetails[256];
+epforceinline char toLower(char c) { return epIsAlpha(c) ? c|0x20 : c; }
+epforceinline char toUpper(char c) { return epIsAlpha(c) ? c&~0x20 : c; }
 
-} // namespace internal
-} // namespace ep
-
-#define isNewline(c) (c < 256 && (ep::internal::charDetails[c] & 8))
-#define isWhitespace(c) (c < 256 && (ep::internal::charDetails[c] & 0xC))
-#define isAlpha(c) (c < 256 && (ep::internal::charDetails[c] & 1))
-#define isNumeric(c) (c < 256 && (ep::internal::charDetails[c] & 2))
-#define isAlphaNumeric(c) (c < 256 && (ep::internal::charDetails[c] & 3))
-#define isHex(c) (isAlphaNumeric(c) && (c|0x20) <= 'f')
-
-epforceinline char toLower(char c) { return isAlpha(c) ? c|0x20 : c; }
-epforceinline char toUpper(char c) { return isAlpha(c) ? c&~0x20 : c; }
-
-#if !defined(__cplusplus)
-
-// C compilers just define epString as a simple struct
-struct epString
-{
-  size_t length;
-  const char *ptr;
-};
-
-#else
 
 template<typename C>
-class epCString;
+class CString;
 struct epVarArg;
 
 
-// epBaseString implements an immutable string; a layer above epSlice<>, defined for 'const C' (ie, char, char16_t, char32_t) and adds string-specific methods
-// epBaseString<C> and epSlice<C> are fully compatible
+// BaseString implements an immutable string; a layer above Slice<>, defined for 'const C' (ie, char, char16_t, char32_t) and adds string-specific methods
+// BaseString<C> and Slice<C> are fully compatible
 // does not retain ownership; useful for local temporaries, passing as arguments, etc... analogous to using 'const char*'
-// epBaseString adds typical string functions, including conversion to zero-terminated strings for passing to foreign APIs, akin to c_str()
+// BaseString adds typical string functions, including conversion to zero-terminated strings for passing to foreign APIs, akin to c_str()
 template<typename C>
-struct epBaseString : public epSlice<const C>
+struct BaseString : public Slice<const C>
 {
   // constructors
-  epBaseString();
-  epBaseString(const C *ptr, size_t length);
+  BaseString();
+  BaseString(const C *ptr, size_t length);
   template<typename C2>
-  epBaseString(epSlice<C2> rh);
-  epBaseString(const C *pString);
+  BaseString(Slice<C2> rh);
+  BaseString(const C *pString);
   template<size_t N>
-  epBaseString(const C str[N]);
+  BaseString(const C str[N]);
+
+  // epString compatibility
+  BaseString(epString s);
+  operator epString() const;
 
   // assignment
-  epBaseString<C>& operator =(epSlice<const C> rh);
-  epBaseString<C>& operator =(const C *pString);
+  BaseString<C>& operator =(Slice<const C> rh);
+  BaseString<C>& operator =(const C *pString);
 
   // contents
-  epBaseString<C> slice(ptrdiff_t first, ptrdiff_t last) const;
+  BaseString<C> slice(ptrdiff_t first, ptrdiff_t last) const;
 
   // unicode support
   size_t numChars() const;
@@ -69,36 +52,36 @@ struct epBaseString : public epSlice<const C>
   char32_t popBackChar();
 
   // comparison
-  bool eq(epBaseString<C> rh) const;
-  bool eqIC(epBaseString<C> rh) const;
-  bool beginsWith(epBaseString<C> rh) const;
-  bool beginsWithIC(epBaseString<C> rh) const;
-  bool endsWith(epBaseString<C> rh) const;
-  bool endsWithIC(epBaseString<C> rh) const;
+  bool eq(BaseString<C> rh) const;
+  bool eqIC(BaseString<C> rh) const;
+  bool beginsWith(BaseString<C> rh) const;
+  bool beginsWithIC(BaseString<C> rh) const;
+  bool endsWith(BaseString<C> rh) const;
+  bool endsWithIC(BaseString<C> rh) const;
 
-  ptrdiff_t cmp(epBaseString<C> rh) const;
-  ptrdiff_t cmpIC(epBaseString<C> rh) const;
+  ptrdiff_t cmp(BaseString<C> rh) const;
+  ptrdiff_t cmpIC(BaseString<C> rh) const;
 
   // c-string compatibility
   C* toStringz(C *pBuffer, size_t bufferLen) const;
-  epCString<C> toStringz() const;
+  CString<C> toStringz() const;
 
   // useful functions
-  size_t findFirstIC(epBaseString<C> s) const;
-  size_t findLastIC(epBaseString<C> s) const;
+  size_t findFirstIC(BaseString<C> s) const;
+  size_t findLastIC(BaseString<C> s) const;
 
-  epBaseString<C> getLeftAtFirstIC(epBaseString<C> s, bool bInclusive = false) const;
-  epBaseString<C> getLeftAtLastIC(epBaseString<C> s, bool bInclusive = false) const;
-  epBaseString<C> getRightAtFirstIC(epBaseString<C> s, bool bInclusive = true) const;
-  epBaseString<C> getRightAtLastIC(epBaseString<C> s, bool bInclusive = true) const;
+  BaseString<C> getLeftAtFirstIC(BaseString<C> s, bool bInclusive = false) const;
+  BaseString<C> getLeftAtLastIC(BaseString<C> s, bool bInclusive = false) const;
+  BaseString<C> getRightAtFirstIC(BaseString<C> s, bool bInclusive = true) const;
+  BaseString<C> getRightAtLastIC(BaseString<C> s, bool bInclusive = true) const;
 
   template<bool Front = true, bool Back = true>
-  epBaseString<C> trim() const;
+  BaseString<C> trim() const;
 
   template<bool skipEmptyTokens = true>
-  epBaseString<C> popToken(epBaseString<C> delimiters = " \t\r\n");
+  BaseString<C> popToken(BaseString<C> delimiters = " \t\r\n");
   template<bool skipEmptyTokens = true>
-  epSlice<epBaseString<C>> tokenise(epSlice<epBaseString<C>> tokens, epBaseString<C> delimiters = " \t\r\n");
+  Slice<BaseString<C>> tokenise(Slice<BaseString<C>> tokens, BaseString<C> delimiters = " \t\r\n");
 
   int64_t parseInt(bool bDetectBase = true, int base = 10) const;
   double parseFloat() const;
@@ -106,178 +89,177 @@ struct epBaseString : public epSlice<const C>
   uint32_t hash(uint32_t hash = 0) const;
 };
 
-typedef epBaseString<char> epString;
-typedef epBaseString<char16_t> epWString;
-typedef epBaseString<char32_t> epDString;
+typedef BaseString<char> String;
+typedef BaseString<char16_t> WString;
+typedef BaseString<char32_t> DString;
 
 
 // a static-length and/or stack-allocated string, useful for holding constructured temporaries (ie, target for sprintf/format)
 // alternatively useful for holding a string as a member of an aggregate without breaking out to separate allocations
 // useful in cases where 'char buffer[len]' is typically found
 template<size_t Size>
-struct epMutableString : public epArray<char, Size>
+struct MutableString : public Array<char, Size>
 {
   // constructors
-  epMutableString();
-  epMutableString(epMutableString<Size> &&rval);
-  epMutableString(epArray<char, Size> &&rval);
+  MutableString();
+  MutableString(MutableString<Size> &&rval);
+  MutableString(Array<char, Size> &&rval);
   template <typename U>
-  epMutableString(U *ptr, size_t length);
+  MutableString(U *ptr, size_t length);
   template <typename U>
-  epMutableString(epSlice<U> slice);
-  epMutableString(const char *pString);
+  MutableString(Slice<U> slice);
+  MutableString(const char *pString);
 
   // assignment
-  epMutableString& operator =(epMutableString<Size> &&rval);
-  epMutableString& operator =(epArray<char, Size> &&rval);
+  MutableString& operator =(MutableString<Size> &&rval);
+  MutableString& operator =(Array<char, Size> &&rval);
   template <typename U>
-  epMutableString& operator =(epSlice<U> rh);
-  epMutableString& operator =(const char *pString);
+  MutableString& operator =(Slice<U> rh);
+  MutableString& operator =(const char *pString);
 
   // contents
-  epString slice(ptrdiff_t first, ptrdiff_t last) const                                 { return ((epString*)this)->slice(first, last); }
+  String slice(ptrdiff_t first, ptrdiff_t last) const                                 { return ((String*)this)->slice(first, last); }
 
   // comparison
-  bool eq(epString rh) const                                                            { return ((epString*)this)->eq(rh); }
-  bool eqIC(epString rh) const                                                          { return ((epString*)this)->eqIC(rh); }
-  bool beginsWith(epString rh) const                                                    { return ((epString*)this)->beginsWith(rh); }
-  bool beginsWithIC(epString rh) const                                                  { return ((epString*)this)->beginsWithIC(rh); }
-  bool endsWith(epString rh) const                                                      { return ((epString*)this)->endsWith(rh); }
-  bool endsWithIC(epString rh) const                                                    { return ((epString*)this)->endsWithIC(rh); }
+  bool eq(String rh) const                                                            { return ((String*)this)->eq(rh); }
+  bool eqIC(String rh) const                                                          { return ((String*)this)->eqIC(rh); }
+  bool beginsWith(String rh) const                                                    { return ((String*)this)->beginsWith(rh); }
+  bool beginsWithIC(String rh) const                                                  { return ((String*)this)->beginsWithIC(rh); }
+  bool endsWith(String rh) const                                                      { return ((String*)this)->endsWith(rh); }
+  bool endsWithIC(String rh) const                                                    { return ((String*)this)->endsWithIC(rh); }
 
-  ptrdiff_t cmp(epString rh) const                                                      { return ((epString*)this)->cmp(rh); }
-  ptrdiff_t cmpIC(epString rh) const                                                    { return ((epString*)this)->cmpIC(rh); }
+  ptrdiff_t cmp(String rh) const                                                      { return ((String*)this)->cmp(rh); }
+  ptrdiff_t cmpIC(String rh) const                                                    { return ((String*)this)->cmpIC(rh); }
 
   // manipulation
-  template<typename... Args> epMutableString& concat(const Args&... args);
-  template<typename... Args> epMutableString& append(const Args&... args);
+  template<typename... Args> MutableString& concat(const Args&... args);
+  template<typename... Args> MutableString& append(const Args&... args);
 
-  template<typename... Args> epMutableString& format(epString format, const Args&... args);
-  epMutableString& sprintf(const char *pFormat, ...)  epprintf_func(2, 3);
+  template<typename... Args> MutableString& format(String format, const Args&... args);
+  MutableString& sprintf(const char *pFormat, ...)  epprintf_func(2, 3);
 
-  epMutableString& toUpper();
-  epMutableString& toLower();
+  MutableString& toUpper();
+  MutableString& toLower();
 
   // c-string compatibility
-  char* toStringz(char *pBuffer, size_t bufferLen) const                                { return ((epString*)this)->toStringz(pBuffer, bufferLen); }
-  epCString<char> toStringz() const;
+  char* toStringz(char *pBuffer, size_t bufferLen) const                                { return ((String*)this)->toStringz(pBuffer, bufferLen); }
+  CString<char> toStringz() const;
 
   // useful functions
-  size_t findFirstIC(epString s) const                                                  { return ((epString*)this)->findFirstIC(s); }
-  size_t findLastIC(epString s) const                                                   { return ((epString*)this)->findLastIC(s); }
+  size_t findFirstIC(String s) const                                                  { return ((String*)this)->findFirstIC(s); }
+  size_t findLastIC(String s) const                                                   { return ((String*)this)->findLastIC(s); }
 
-  epString getLeftAtFirstIC(epString s, bool bInclusive = false) const                  { return ((epString*)this)->getLeftAtFirstIC(s, bInclusive); }
-  epString getLeftAtLastIC(epString s, bool bInclusive = false) const                   { return ((epString*)this)->getLeftAtLastIC(s, bInclusive); }
-  epString getRightAtFirstIC(epString s, bool bInclusive = true) const                  { return ((epString*)this)->getRightAtFirstIC(s, bInclusive); }
-  epString getRightAtLastIC(epString s, bool bInclusive = true) const                   { return ((epString*)this)->getRightAtLastIC(s, bInclusive); }
+  String getLeftAtFirstIC(String s, bool bInclusive = false) const                  { return ((String*)this)->getLeftAtFirstIC(s, bInclusive); }
+  String getLeftAtLastIC(String s, bool bInclusive = false) const                   { return ((String*)this)->getLeftAtLastIC(s, bInclusive); }
+  String getRightAtFirstIC(String s, bool bInclusive = true) const                  { return ((String*)this)->getRightAtFirstIC(s, bInclusive); }
+  String getRightAtLastIC(String s, bool bInclusive = true) const                   { return ((String*)this)->getRightAtLastIC(s, bInclusive); }
 
   template<bool Front = true, bool Back = true>
-  epString trim() const                                                                 { return ((epString*)this)->trim<Front, Back>(); }
+  String trim() const                                                                 { return ((String*)this)->trim<Front, Back>(); }
 
-  // TODO: Add proper popToken support to epMutableString which copies the remaining chars to the start of the buffer
-  // template<bool skipEmptyTokens = true>
-  // epString popToken(epString delimiters = " \t\r\n")                                    { return ((epString*)this)->popToken<skipEmptyTokens>(delimiters); }
+//  template<bool skipEmptyTokens = true>
+//  String popToken(String delimiters = " \t\r\n")                                    { return ((String*)this)->popToken<skipEmptyTokens>(delimiters); }
   template<bool skipEmptyTokens = true>
-  epSlice<epString> tokenise(epSlice<epString> tokens, epString delimiters = " \t\r\n") { return ((epString*)this)->tokenise<skipEmptyTokens>(tokens, delimiters); }
+  Slice<String> tokenise(Slice<String> tokens, String delimiters = " \t\r\n") { return ((String*)this)->tokenise<skipEmptyTokens>(tokens, delimiters); }
 
-  int64_t parseInt(bool bDetectBase = true, int base = 10) const                        { return ((epString*)this)->parseInt(bDetectBase, base); }
-  double parseFloat() const                                                             { return ((epString*)this)->parseFloat(); }
+  int64_t parseInt(bool bDetectBase = true, int base = 10) const                        { return ((String*)this)->parseInt(bDetectBase, base); }
+  double parseFloat() const                                                             { return ((String*)this)->parseFloat(); }
 
-  uint32_t hash(uint32_t hash = 0) const                                                { return ((epString*)this)->hash(hash); }
+  uint32_t hash(uint32_t hash = 0) const                                                { return ((String*)this)->hash(hash); }
 
 private:
-  void appendInternal(epSlice<epVarArg> args);
-  void formatInternal(epString format, epSlice<epVarArg> args);
+  void appendInternal(Slice<epVarArg> args);
+  void formatInternal(String format, Slice<epVarArg> args);
 };
 
 // we'll typedef these such that the desired size compensates for the other internal members
-typedef epMutableString<64 - sizeof(epSlice<char>)> epMutableString64;
-typedef epMutableString<128 - sizeof(epSlice<char>)> epMutableString128;
-typedef epMutableString<256 - sizeof(epSlice<char>)> epMutableString256;
+typedef MutableString<64 - sizeof(Slice<char>)> MutableString64;
+typedef MutableString<128 - sizeof(Slice<char>)> MutableString128;
+typedef MutableString<256 - sizeof(Slice<char>)> MutableString256;
 
 
 // reference-counted allocated string, used to retain ownership of arbitrary length strings
 // reference counting allows allocations to be shared between multiple owners
 // useful in situations where std::string would usually be found, but without the endless allocation and copying or linkage problems
-struct epSharedString : public epSharedSlice<const char>
+struct SharedString : public SharedSlice<const char>
 {
   // constructors
-  epSharedString();
-  epSharedString(epSharedString &&rval);
-  epSharedString(const epSharedString &val);
-  epSharedString(epSharedSlice<const char> &&rval);
-  epSharedString(const epSharedSlice<const char> &rcstr);
+  SharedString();
+  SharedString(SharedString &&rval);
+  SharedString(const SharedString &val);
+  SharedString(SharedSlice<const char> &&rval);
+  SharedString(const SharedSlice<const char> &rcstr);
   template <typename U>
-  epSharedString(U *ptr, size_t length);
+  SharedString(U *ptr, size_t length);
   template <typename U>
-  epSharedString(epSlice<U> slice);
-  epSharedString(const char *pString);
+  SharedString(Slice<U> slice);
+  SharedString(const char *pString);
 
   // construction
-  template<typename... Args> static epSharedString concat(const Args&... args);
-  template<typename... Args> static epSharedString format(epString format, const Args&... args);
-  static epSharedString sprintf(const char *pFormat, ...) epprintf_func(1, 2);
+  template<typename... Args> static SharedString concat(const Args&... args);
+  template<typename... Args> static SharedString format(String format, const Args&... args);
+  static SharedString sprintf(const char *pFormat, ...) epprintf_func(1, 2);
 
   // assignment
-  epSharedString& operator =(const epSharedSlice<const char> &rh);
-  epSharedString& operator =(const epSharedString &rval);
-  epSharedString& operator =(epSharedString &&rval);
-  epSharedString& operator =(epSharedSlice<const char> &&rval);
+  SharedString& operator =(const SharedSlice<const char> &rh);
+  SharedString& operator =(const SharedString &rval);
+  SharedString& operator =(SharedString &&rval);
+  SharedString& operator =(SharedSlice<const char> &&rval);
   template <typename U>
-  epSharedString& operator =(epSlice<U> rh);
-  epSharedString& operator =(const char *pString);
+  SharedString& operator =(Slice<U> rh);
+  SharedString& operator =(const char *pString);
 
   // contents
-  epSharedString slice(ptrdiff_t first, ptrdiff_t last) const;
+  SharedString slice(ptrdiff_t first, ptrdiff_t last) const;
 
   // comparison
-  bool eq(epString rh) const                                                            { return ((epString*)this)->eq(rh); }
-  bool eqIC(epString rh) const                                                          { return ((epString*)this)->eqIC(rh); }
-  bool beginsWith(epString rh) const                                                    { return ((epString*)this)->beginsWith(rh); }
-  bool beginsWithIC(epString rh) const                                                  { return ((epString*)this)->beginsWithIC(rh); }
-  bool endsWith(epString rh) const                                                      { return ((epString*)this)->endsWith(rh); }
-  bool endsWithIC(epString rh) const                                                    { return ((epString*)this)->endsWithIC(rh); }
+  bool eq(String rh) const                                                            { return ((String*)this)->eq(rh); }
+  bool eqIC(String rh) const                                                          { return ((String*)this)->eqIC(rh); }
+  bool beginsWith(String rh) const                                                    { return ((String*)this)->beginsWith(rh); }
+  bool beginsWithIC(String rh) const                                                  { return ((String*)this)->beginsWithIC(rh); }
+  bool endsWith(String rh) const                                                      { return ((String*)this)->endsWith(rh); }
+  bool endsWithIC(String rh) const                                                    { return ((String*)this)->endsWithIC(rh); }
 
-  ptrdiff_t cmp(epString rh) const                                                      { return ((epString*)this)->cmp(rh); }
-  ptrdiff_t cmpIC(epString rh) const                                                    { return ((epString*)this)->cmpIC(rh); }
+  ptrdiff_t cmp(String rh) const                                                      { return ((String*)this)->cmp(rh); }
+  ptrdiff_t cmpIC(String rh) const                                                    { return ((String*)this)->cmpIC(rh); }
 
   // c-string compatibility
-  char* toStringz(char *pBuffer, size_t bufferLen) const                                { return ((epString*)this)->toStringz(pBuffer, bufferLen); }
-  epCString<char> toStringz() const;
+  char* toStringz(char *pBuffer, size_t bufferLen) const                                { return ((String*)this)->toStringz(pBuffer, bufferLen); }
+  CString<char> toStringz() const;
 
   // transformation
-  template<typename... Args> epSharedString append(const Args&... args) const           { return concat(*this, args...); }
+  template<typename... Args> SharedString append(const Args&... args) const           { return concat(*this, args...); }
 
-  epSharedString asUpper() const;
-  epSharedString asLower() const;
+  SharedString asUpper() const;
+  SharedString asLower() const;
 
   // useful functions
-  size_t findFirstIC(epString s) const                                                  { return ((epString*)this)->findFirstIC(s); }
-  size_t findLastIC(epString s) const                                                   { return ((epString*)this)->findLastIC(s); }
+  size_t findFirstIC(String s) const                                                  { return ((String*)this)->findFirstIC(s); }
+  size_t findLastIC(String s) const                                                   { return ((String*)this)->findLastIC(s); }
 
-  epSharedString getLeftAtFirstIC(epString s, bool bInclusive = false) const;
-  epSharedString getLeftAtLastIC(epString s, bool bInclusive = false) const;
-  epSharedString getRightAtFirstIC(epString s, bool bInclusive = true) const;
-  epSharedString getRightAtLastIC(epString s, bool bInclusive = true) const;
+  SharedString getLeftAtFirstIC(String s, bool bInclusive = false) const;
+  SharedString getLeftAtLastIC(String s, bool bInclusive = false) const;
+  SharedString getRightAtFirstIC(String s, bool bInclusive = true) const;
+  SharedString getRightAtLastIC(String s, bool bInclusive = true) const;
 
   template<bool Front = true, bool Back = true>
-  epSharedString trim() const;
+  SharedString trim() const;
 
   template<bool skipEmptyTokens = true>
-  epSharedString popToken(epString delimiters = " \t\r\n");
+  SharedString popToken(String delimiters = " \t\r\n");
   template<bool skipEmptyTokens = true>
-  epSlice<epSharedString> tokenise(epSlice<epSharedString> tokens, epString delimiters = " \t\r\n") const;
+  Slice<SharedString> tokenise(Slice<SharedString> tokens, String delimiters = " \t\r\n") const;
 
-  int64_t parseInt(bool bDetectBase = true, int base = 10) const                        { return ((epString*)this)->parseInt(bDetectBase, base); }
-  double parseFloat() const                                                             { return ((epString*)this)->parseFloat(); }
+  int64_t parseInt(bool bDetectBase = true, int base = 10) const                        { return ((String*)this)->parseInt(bDetectBase, base); }
+  double parseFloat() const                                                             { return ((String*)this)->parseFloat(); }
 
-  uint32_t hash(uint32_t hash = 0) const                                                { return ((epString*)this)->hash(hash); }
+  uint32_t hash(uint32_t hash = 0) const                                                { return ((String*)this)->hash(hash); }
 
 private:
-  epSharedString(const char *ptr, size_t length, epRC *rc);
+  SharedString(const char *ptr, size_t length, RC *rc);
 
-  static epSharedString concatInternal(epSlice<epVarArg> args);
-  static epSharedString formatInternal(epString format, epSlice<epVarArg> args);
+  static SharedString concatInternal(Slice<epVarArg> args);
+  static SharedString formatInternal(String format, Slice<epVarArg> args);
 };
 
 
@@ -290,12 +272,12 @@ struct epVarArg
 
   bool HasIntify() const { return pIntProxy != nullptr; }
 
-  ptrdiff_t GetString(epSlice<char> buffer, epString format = nullptr, const epVarArg *pArgs = nullptr) const { return pStringProxy(buffer, format, pArg, pArgs); }
-  ptrdiff_t GetStringLength(epString format = nullptr, const epVarArg *pArgs = nullptr) const { return pStringProxy(nullptr, format, pArg, pArgs); }
+  ptrdiff_t GetString(Slice<char> buffer, String format = nullptr, const epVarArg *pArgs = nullptr) const { return pStringProxy(buffer, format, pArg, pArgs); }
+  ptrdiff_t GetStringLength(String format = nullptr, const epVarArg *pArgs = nullptr) const { return pStringProxy(nullptr, format, pArg, pArgs); }
   int64_t GetInt() const { return pIntProxy ? pIntProxy(pArg) : 0; }
 
 private:
-  typedef ptrdiff_t(StringifyFunc)(epSlice<char>, epString, const void*, const epVarArg*);
+  typedef ptrdiff_t(StringifyFunc)(Slice<char>, String, const void*, const epVarArg*);
   typedef int64_t(IntConvFunc)(const void*);
 
   const void *pArg;
@@ -303,10 +285,9 @@ private:
   IntConvFunc *pIntProxy;
 };
 
+} // namespace ep
 
 // unit tests
 epResult epString_Test();
 
-#endif
-
-#endif // _EP_STRING
+#endif // _EP_STRING_HPP

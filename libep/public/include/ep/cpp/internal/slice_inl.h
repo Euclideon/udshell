@@ -1,36 +1,38 @@
 #include <type_traits>
 #include <utility>
 
-// epSlice
+namespace ep {
+
+// Slice
 template<typename T>
-inline epSlice<T>::epSlice()
+inline Slice<T>::Slice()
   : length(0), ptr(nullptr)
 {}
 
 template<typename T>
-inline epSlice<T>::epSlice(nullptr_t)
+inline Slice<T>::Slice(nullptr_t)
   : length(0), ptr(nullptr)
 {}
 
 template<typename T>
-inline epSlice<T>::epSlice(std::initializer_list<ET> list)
-  : length(list.size()) , ptr(list.begin())
+inline Slice<T>::Slice(std::initializer_list<ET> list)
+  : length(list.size()), ptr(list.begin())
 {}
 
 template<typename T>
-inline epSlice<T>::epSlice(T* ptr, size_t length)
+inline Slice<T>::Slice(T* ptr, size_t length)
   : length(length), ptr(ptr)
 {}
 
 template<typename T>
 template<typename U>
-inline epSlice<T>::epSlice(epSlice<U> rh)
+inline Slice<T>::Slice(Slice<U> rh)
   : length(rh.length), ptr(rh.ptr)
 {}
 
 template<typename T>
 template<typename U>
-inline epSlice<T>& epSlice<T>::operator =(epSlice<U> rh)
+inline Slice<T>& Slice<T>::operator =(Slice<U> rh)
 {
   length = rh.length;
   ptr = rh.ptr;
@@ -38,7 +40,7 @@ inline epSlice<T>& epSlice<T>::operator =(epSlice<U> rh)
 }
 
 template<typename T>
-inline typename epSlice<T>::ET& epSlice<T>::operator[](ptrdiff_t i) const
+inline typename Slice<T>::ET& Slice<T>::operator[](ptrdiff_t i) const
 {
   size_t offset = (size_t)(i < 0 ? i + length : i);
   EPASSERT(offset < length, "Index out of range!");
@@ -46,39 +48,39 @@ inline typename epSlice<T>::ET& epSlice<T>::operator[](ptrdiff_t i) const
 }
 
 template<typename T>
-inline epSlice<T> epSlice<T>::slice(ptrdiff_t first, ptrdiff_t last) const
+inline Slice<T> Slice<T>::slice(ptrdiff_t first, ptrdiff_t last) const
 {
   size_t start = (size_t)(first < 0 ? first + length : first);
   size_t end = (size_t)(last < 0 ? last + length : last);
   EPASSERT(end <= length && start <= end, "Index out of range!");
-  return epSlice<T>((ET*)ptr + start, end - start);
+  return Slice<T>((ET*)ptr + start, end - start);
 }
 
 template<typename T>
-inline bool epSlice<T>::empty() const
+inline bool Slice<T>::empty() const
 {
   return length == 0;
 }
 
 template<typename T>
-inline bool epSlice<T>::operator ==(epSlice<const T> rh) const
+inline bool Slice<T>::operator ==(Slice<const T> rh) const
 {
   return ptr == rh.ptr && length == rh.length;
 }
 
 template<typename T>
-inline bool epSlice<T>::operator !=(epSlice<const T> rh) const
+inline bool Slice<T>::operator !=(Slice<const T> rh) const
 {
   return ptr != rh.ptr || length != rh.length;
 }
 
 template<typename T>
 template<typename U>
-inline bool epSlice<T>::eq(epSlice<U> rh) const
+inline bool Slice<T>::eq(Slice<U> rh) const
 {
-  if(length != rh.length)
+  if (length != rh.length)
     return false;
-  for(size_t i=0; i<length; ++i)
+  for (size_t i = 0; i<length; ++i)
     if (((ET*)ptr)[i] != ((ET*)rh.ptr)[i])
       return false;
   return true;
@@ -86,7 +88,7 @@ inline bool epSlice<T>::eq(epSlice<U> rh) const
 
 template<typename T>
 template<typename U>
-inline ptrdiff_t epSlice<T>::cmp(epSlice<U> rh) const
+inline ptrdiff_t Slice<T>::cmp(Slice<U> rh) const
 {
   size_t len = length < rh.length ? length : rh.length;
   for (size_t i = 0; i < len; ++i)
@@ -100,7 +102,7 @@ inline ptrdiff_t epSlice<T>::cmp(epSlice<U> rh) const
 
 template<typename T>
 template<typename U>
-inline bool epSlice<T>::beginsWith(epSlice<U> rh) const
+inline bool Slice<T>::beginsWith(Slice<U> rh) const
 {
   if (length < rh.length)
     return false;
@@ -108,7 +110,7 @@ inline bool epSlice<T>::beginsWith(epSlice<U> rh) const
 }
 template<typename T>
 template<typename U>
-inline bool epSlice<T>::endsWith(epSlice<U> rh) const
+inline bool Slice<T>::endsWith(Slice<U> rh) const
 {
   if (length < rh.length)
     return false;
@@ -116,28 +118,28 @@ inline bool epSlice<T>::endsWith(epSlice<U> rh) const
 }
 
 template<typename T>
-inline epIterator<T> epSlice<T>::begin() const
+inline Iterator<T> Slice<T>::begin() const
 {
-  return epIterator<T>(&ptr[0]);
+  return Iterator<T>(&ptr[0]);
 }
 template<typename T>
-inline epIterator<T> epSlice<T>::end() const
+inline Iterator<T> Slice<T>::end() const
 {
-  return epIterator<T>(&ptr[length]);
+  return Iterator<T>(&ptr[length]);
 }
 
 template<typename T>
-inline typename epSlice<T>::ET& epSlice<T>::front() const
+inline typename Slice<T>::ET& Slice<T>::front() const
 {
   return ((ET*)ptr)[0];
 }
 template<typename T>
-inline typename epSlice<T>::ET& epSlice<T>::back() const
+inline typename Slice<T>::ET& Slice<T>::back() const
 {
   return ((ET*)ptr)[length-1];
 }
 template<typename T>
-inline typename epSlice<T>::ET& epSlice<T>::popFront()
+inline typename Slice<T>::ET& Slice<T>::popFront()
 {
   EPASSERT(length > 0, "Empty slice!");
   ++ptr;
@@ -145,7 +147,7 @@ inline typename epSlice<T>::ET& epSlice<T>::popFront()
   return ((ET*)ptr)[-1];
 }
 template<typename T>
-inline typename epSlice<T>::ET& epSlice<T>::popBack()
+inline typename Slice<T>::ET& Slice<T>::popBack()
 {
   EPASSERT(length > 0, "Empty slice!");
   --length;
@@ -153,7 +155,7 @@ inline typename epSlice<T>::ET& epSlice<T>::popBack()
 }
 
 template<typename T>
-inline epSlice<T> epSlice<T>::get(ptrdiff_t n) const
+inline Slice<T> Slice<T>::get(ptrdiff_t n) const
 {
   if (n < 0)
     return slice(n, length);
@@ -161,21 +163,21 @@ inline epSlice<T> epSlice<T>::get(ptrdiff_t n) const
     return slice(0, n);
 }
 template<typename T>
-inline epSlice<T> epSlice<T>::pop(ptrdiff_t n)
+inline Slice<T> Slice<T>::pop(ptrdiff_t n)
 {
   if (n < 0)
   {
     *this = slice(0, n);
-    return epSlice<T>(ptr - n, -n);
+    return Slice<T>(ptr - n, -n);
   }
   else
   {
     *this = slice(n, length);
-    return epSlice<T>(ptr - n, n);
+    return Slice<T>(ptr - n, n);
   }
 }
 template<typename T>
-inline epSlice<T> epSlice<T>::strip(ptrdiff_t n) const
+inline Slice<T> Slice<T>::strip(ptrdiff_t n) const
 {
   if (n < 0)
     return slice(0, n);
@@ -184,7 +186,7 @@ inline epSlice<T> epSlice<T>::strip(ptrdiff_t n) const
 }
 
 template<typename T>
-inline bool epSlice<T>::exists(const typename epSlice<T>::ET &c, size_t *pIndex) const
+inline bool Slice<T>::exists(const typename Slice<T>::ET &c, size_t *pIndex) const
 {
   size_t i = findFirst(c);
   if (pIndex)
@@ -193,7 +195,7 @@ inline bool epSlice<T>::exists(const typename epSlice<T>::ET &c, size_t *pIndex)
 }
 
 template<typename T>
-inline size_t epSlice<T>::findFirst(const typename epSlice<T>::ET &c) const
+inline size_t Slice<T>::findFirst(const typename Slice<T>::ET &c) const
 {
   size_t offset = 0;
   while (offset < length && ptr[offset] != c)
@@ -201,7 +203,7 @@ inline size_t epSlice<T>::findFirst(const typename epSlice<T>::ET &c) const
   return offset;
 }
 template<typename T>
-inline size_t epSlice<T>::findLast(const typename epSlice<T>::ET &c) const
+inline size_t Slice<T>::findLast(const typename Slice<T>::ET &c) const
 {
   ptrdiff_t last = length-1;
   while (last >= 0 && ptr[last] != c)
@@ -210,7 +212,7 @@ inline size_t epSlice<T>::findLast(const typename epSlice<T>::ET &c) const
 }
 template<typename T>
 template<typename U>
-inline size_t epSlice<T>::findFirst(epSlice<U> s) const
+inline size_t Slice<T>::findFirst(Slice<U> s) const
 {
   if (s.empty())
     return 0;
@@ -230,7 +232,7 @@ inline size_t epSlice<T>::findFirst(epSlice<U> s) const
 }
 template<typename T>
 template<typename U>
-inline size_t epSlice<T>::findLast(epSlice<U> s) const
+inline size_t Slice<T>::findLast(Slice<U> s) const
 {
   if (s.empty())
     return length;
@@ -249,53 +251,53 @@ inline size_t epSlice<T>::findLast(epSlice<U> s) const
 }
 
 template<typename T>
-inline epSlice<T> epSlice<T>::getLeftAtFirst(const typename epSlice<T>::ET &c, bool bInclusive) const
+inline Slice<T> Slice<T>::getLeftAtFirst(const typename Slice<T>::ET &c, bool bInclusive) const
 {
   return slice(0, findFirst(c) + (bInclusive ? 1 : 0));
 }
 template<typename T>
-inline epSlice<T> epSlice<T>::getLeftAtLast(const typename epSlice<T>::ET &c, bool bInclusive) const
+inline Slice<T> Slice<T>::getLeftAtLast(const typename Slice<T>::ET &c, bool bInclusive) const
 {
   return slice(0, findLast(c) + (bInclusive ? 1 : 0));
 }
 template<typename T>
-inline epSlice<T> epSlice<T>::getRightAtFirst(const typename epSlice<T>::ET &c, bool bInclusive) const
+inline Slice<T> Slice<T>::getRightAtFirst(const typename Slice<T>::ET &c, bool bInclusive) const
 {
   return slice(findFirst(c) + (bInclusive ? 0 : 1), length);
 }
 template<typename T>
-inline epSlice<T> epSlice<T>::getRightAtLast(const typename epSlice<T>::ET &c, bool bInclusive) const
+inline Slice<T> Slice<T>::getRightAtLast(const typename Slice<T>::ET &c, bool bInclusive) const
 {
   return slice(findLast(c) + (bInclusive ? 0 : 1), length);
 }
 
 template<typename T>
 template<typename U>
-inline epSlice<T> epSlice<T>::getLeftAtFirst(epSlice<U> s, bool bInclusive) const
+inline Slice<T> Slice<T>::getLeftAtFirst(Slice<U> s, bool bInclusive) const
 {
   return slice(0, findFirst(s) + (bInclusive ? s.length : 0));
 }
 template<typename T>
 template<typename U>
-inline epSlice<T> epSlice<T>::getLeftAtLast(epSlice<U> s, bool bInclusive) const
+inline Slice<T> Slice<T>::getLeftAtLast(Slice<U> s, bool bInclusive) const
 {
   return slice(0, findLast(s) + (bInclusive ? s.length : 0));
 }
 template<typename T>
 template<typename U>
-inline epSlice<T> epSlice<T>::getRightAtFirst(epSlice<U> s, bool bInclusive) const
+inline Slice<T> Slice<T>::getRightAtFirst(Slice<U> s, bool bInclusive) const
 {
   return slice(findFirst(s) + (bInclusive ? 0 : s.length), length);
 }
 template<typename T>
 template<typename U>
-inline epSlice<T> epSlice<T>::getRightAtLast(epSlice<U> s, bool bInclusive) const
+inline Slice<T> Slice<T>::getRightAtLast(Slice<U> s, bool bInclusive) const
 {
   return slice(findLast(s) + (bInclusive ? 0 : s.length), length);
 }
 
 template<typename T>
-inline ptrdiff_t epSlice<T>::indexOfElement(const T *c) const
+inline ptrdiff_t Slice<T>::indexOfElement(const T *c) const
 {
   size_t offset = 0;
   while (offset < length && &ptr[offset] != c)
@@ -304,7 +306,7 @@ inline ptrdiff_t epSlice<T>::indexOfElement(const T *c) const
 }
 
 template<typename T>
-inline T* epSlice<T>::search(Predicate pred) const
+inline T* Slice<T>::search(Predicate pred) const
 {
   for (auto &e : *this)
   {
@@ -316,7 +318,7 @@ inline T* epSlice<T>::search(Predicate pred) const
 
 template<typename T>
 template<bool skipEmptyTokens>
-inline epSlice<T> epSlice<T>::popToken(epSlice<T> delimiters)
+inline Slice<T> Slice<T>::popToken(Slice<T> delimiters)
 {
   size_t offset = 0;
   if (skipEmptyTokens)
@@ -327,13 +329,13 @@ inline epSlice<T> epSlice<T>::popToken(epSlice<T> delimiters)
     {
       ptr += offset;
       length = 0;
-      return epSlice<T>();
+      return Slice<T>();
     }
   }
   size_t end = offset;
   while (end < length && !delimiters.exists(ptr[end]))
     ++end;
-  epSlice<T> token = slice(offset, end);
+  Slice<T> token = slice(offset, end);
   if (end < length)
     ++end;
   ptr += end;
@@ -343,7 +345,7 @@ inline epSlice<T> epSlice<T>::popToken(epSlice<T> delimiters)
 
 template<typename T>
 template<bool skipEmptyTokens>
-inline epSlice<epSlice<T>> epSlice<T>::tokenise(epSlice<epSlice<T>> tokens, epSlice<T> delimiters)
+inline Slice<Slice<T>> Slice<T>::tokenise(Slice<Slice<T>> tokens, Slice<T> delimiters)
 {
   size_t numTokens = 0;
   size_t offset = 0;
@@ -378,7 +380,7 @@ inline epSlice<epSlice<T>> epSlice<T>::tokenise(epSlice<epSlice<T>> tokens, epSl
 
 template<typename T>
 template<typename U>
-inline void epSlice<T>::copyTo(epSlice<U> dest) const
+inline void Slice<T>::copyTo(Slice<U> dest) const
 {
   EPASSERT(dest.length >= length, "Not enough elements!");
   for (size_t i = 0; i<length; ++i)
@@ -386,27 +388,27 @@ inline void epSlice<T>::copyTo(epSlice<U> dest) const
 }
 
 
-// epArray
+// Array
 template <typename T, size_t Count>
-inline epArray<T, Count>::epArray()
+inline Array<T, Count>::Array()
 {}
 
 template <typename T, size_t Count>
-inline epArray<T, Count>::epArray(nullptr_t)
+inline Array<T, Count>::Array(nullptr_t)
 {}
 
 template <typename T, size_t Count>
-inline epArray<T, Count>::epArray(std::initializer_list<T> list)
-  : epArray(list.begin(), list.size())
+inline Array<T, Count>::Array(std::initializer_list<T> list)
+  : Array(list.begin(), list.size())
 {}
 
 template <typename T, size_t Count>
-inline epArray<T, Count>::epArray(const epArray<T, Count> &val)
-  : epArray(val.ptr, val.length)
+inline Array<T, Count>::Array(const Array<T, Count> &val)
+  : Array(val.ptr, val.length)
 {}
 
 template <typename T, size_t Count>
-inline epArray<T, Count>::epArray(epArray<T, Count> &&rval)
+inline Array<T, Count>::Array(Array<T, Count> &&rval)
 {
   this->length = rval.length;
   if (rval.hasAllocation())
@@ -432,14 +434,14 @@ inline epArray<T, Count>::epArray(epArray<T, Count> &&rval)
 
 template <typename T, size_t Count>
 template <typename U>
-inline epArray<T, Count>::epArray(U *ptr, size_t length)
-  : epSlice<T>()
+inline Array<T, Count>::Array(U *ptr, size_t length)
+  : Slice<T>()
 {
   reserve(length);
   this->length = length;
-//  if (std::is_pod<T>::value) // TODO: this is only valid if T and U are the same!
-//    memcpy((void*)this->ptr, ptr, sizeof(T)*length);
-//  else
+  //  if (std::is_pod<T>::value) // TODO: this is only valid if T and U are the same!
+  //    memcpy((void*)this->ptr, ptr, sizeof(T)*length);
+  //  else
   {
     for (size_t i = 0; i < length; ++i)
       new((void*)&this->ptr[i]) T(ptr[i]);
@@ -448,13 +450,13 @@ inline epArray<T, Count>::epArray(U *ptr, size_t length)
 
 template <typename T, size_t Count>
 template <typename U>
-inline epArray<T, Count>::epArray(epSlice<U> slice)
-  : epArray<T, Count>(slice.ptr, slice.length)
+inline Array<T, Count>::Array(Slice<U> slice)
+  : Array<T, Count>(slice.ptr, slice.length)
 {
 }
 
 template <typename T, size_t Count>
-inline epArray<T, Count>::~epArray()
+inline Array<T, Count>::~Array()
 {
   for (size_t i = 0; i < this->length; ++i)
     this->ptr[i].~T();
@@ -466,7 +468,7 @@ inline epArray<T, Count>::~epArray()
 }
 
 template <typename T, size_t Count>
-inline void epArray<T, Count>::reserve(size_t count)
+inline void Array<T, Count>::reserve(size_t count)
 {
   bool hasAlloc = hasAllocation();
   if (!hasAlloc && count <= Count)
@@ -497,42 +499,42 @@ inline void epArray<T, Count>::reserve(size_t count)
 }
 
 template <typename T, size_t Count>
-inline epSlice<T> epArray<T, Count>::getBuffer() const
+inline Slice<T> Array<T, Count>::getBuffer() const
 {
   if (hasAllocation())
-    return epSlice<T>(this->ptr, getHeader()->numAllocated);
-  return epSlice<T>(buffer.ptr(), Count);
+    return Slice<T>(this->ptr, getHeader()->numAllocated);
+  return Slice<T>(buffer.ptr(), Count);
 }
 
 template <typename T, size_t Count>
-inline epArray<T, Count>& epArray<T, Count>::operator =(epArray<T, Count> &&rval)
+inline Array<T, Count>& Array<T, Count>::operator =(Array<T, Count> &&rval)
 {
   if (this != &rval)
   {
-    this->~epArray();
-    new(this) epArray<T, Count>(std::move(rval));
+    this->~Array();
+    new(this) Array<T, Count>(std::move(rval));
   }
   return *this;
 }
 
 template <typename T, size_t Count>
 template <typename U>
-inline epArray<T, Count>& epArray<T, Count>::operator =(epSlice<U> rh)
+inline Array<T, Count>& Array<T, Count>::operator =(Slice<U> rh)
 {
-  this->~epArray();
-  new(this) epArray<T, Count>(rh.ptr, rh.length);
+  this->~Array();
+  new(this) Array<T, Count>(rh.ptr, rh.length);
   return *this;
 }
 
 template<typename T, size_t Count>
-inline void epArray<T, Count>::clear()
+inline void Array<T, Count>::clear()
 {
   this->length = 0;
 }
 
 template <typename T, size_t Count>
 template <typename U>
-inline epArray<T, Count>& epArray<T, Count>::pushBack(U &&item)
+inline Array<T, Count>& Array<T, Count>::pushBack(U &&item)
 {
   reserve(this->length + 1);
   new((void*)&(this->ptr[this->length++])) T(std::forward<U>(item));
@@ -540,16 +542,16 @@ inline epArray<T, Count>& epArray<T, Count>::pushBack(U &&item)
 }
 
 template <typename T, size_t Count>
-T& epArray<T, Count>::front() const
+T& Array<T, Count>::front() const
 {
   return this->ptr[0];
 }
 template <typename T, size_t Count>
-T epArray<T, Count>::popFront()
+T Array<T, Count>::popFront()
 {
   // TODO: this should be removed and uses replaced with a udQueue type.
   T copy(std::move(this->ptr[0]));
-  for (int i = 1; i < this->length; ++i)
+  for (size_t i = 1; i < this->length; ++i)
   {
     this->ptr[i-1].~T();
     new((void*)&this->ptr[i-1]) T(std::move(this->ptr[i]));
@@ -559,7 +561,7 @@ T epArray<T, Count>::popFront()
 }
 
 template <typename T, size_t Count>
-inline T& epArray<T, Count>::pushBack()
+inline T& Array<T, Count>::pushBack()
 {
   reserve(this->length + 1);
   new((void*)&(this->ptr[this->length])) T();
@@ -567,7 +569,7 @@ inline T& epArray<T, Count>::pushBack()
 }
 
 template <typename T, size_t Count>
-void epArray<T, Count>::remove(size_t i)
+void Array<T, Count>::remove(size_t i)
 {
   --this->length;
   for (; i < this->length; ++i)
@@ -575,45 +577,45 @@ void epArray<T, Count>::remove(size_t i)
   this->ptr[i].~T();
 }
 template <typename T, size_t Count>
-inline void epArray<T, Count>::remove(const T *pItem)
+inline void Array<T, Count>::remove(const T *pItem)
 {
   remove(this->indexOfElement(pItem));
 }
 template <typename T, size_t Count>
-inline void epArray<T, Count>::removeSwapLast(size_t i)
+inline void Array<T, Count>::removeSwapLast(size_t i)
 {
   if (i < this->length - 1)
     this->ptr[i] = this->ptr[this->length-1];
   this->ptr[--this->length].~T();
 }
 template <typename T, size_t Count>
-inline void epArray<T, Count>::removeSwapLast(const T *pItem)
+inline void Array<T, Count>::removeSwapLast(const T *pItem)
 {
   removeSwapLast(this->indexOfElement(pItem));
 }
 
 template <typename T, size_t Count>
-inline size_t epArray<T, Count>::numToAlloc(size_t i)
+inline size_t Array<T, Count>::numToAlloc(size_t i)
 {
   // TODO: i'm sure we can imagine a better heuristic...
   return i > 16 ? i * 2 : 16;
 }
 
 
-// epSharedSlice
+// SharedSlice
 template <typename T>
-inline epSharedSlice<T>::epSharedSlice()
+inline SharedSlice<T>::SharedSlice()
   : rc(nullptr)
 {}
 
 template<typename T>
-inline epSharedSlice<T>::epSharedSlice(nullptr_t)
+inline SharedSlice<T>::SharedSlice(nullptr_t)
   : rc(nullptr)
 {}
 
 template<typename T>
-inline epSharedSlice<T>::epSharedSlice(std::initializer_list<typename epSharedSlice<T>::ET> list)
-  : epSlice<T>(alloc(list.begin(), list.size()))
+inline SharedSlice<T>::SharedSlice(std::initializer_list<typename SharedSlice<T>::ET> list)
+  : Slice<T>(alloc(list.begin(), list.size()))
   , rc(nullptr)
 {
   init(list.begin(), list.size());
@@ -623,16 +625,16 @@ inline epSharedSlice<T>::epSharedSlice(std::initializer_list<typename epSharedSl
 }
 
 template <typename T>
-inline epSharedSlice<T>::epSharedSlice(epSharedSlice<T> &&rval)
-  : epSlice<T>(rval)
+inline SharedSlice<T>::SharedSlice(SharedSlice<T> &&rval)
+  : Slice<T>(rval)
   , rc(rval.rc)
 {
   rval.rc = nullptr;
 }
 
 template <typename T>
-inline epSharedSlice<T>::epSharedSlice(const epSharedSlice<T> &rcslice)
-  : epSlice<T>(rcslice)
+inline SharedSlice<T>::SharedSlice(const SharedSlice<T> &rcslice)
+  : Slice<T>(rcslice)
   , rc(rcslice.rc)
 {
   if (rc)
@@ -641,8 +643,8 @@ inline epSharedSlice<T>::epSharedSlice(const epSharedSlice<T> &rcslice)
 
 template <typename T>
 template <typename U>
-inline epSharedSlice<T>::epSharedSlice(U *ptr, size_t length)
-  : epSlice<T>(alloc(ptr, length))
+inline SharedSlice<T>::SharedSlice(U *ptr, size_t length)
+  : Slice<T>(alloc(ptr, length))
   , rc(nullptr)
 {
   init(ptr, length);
@@ -650,26 +652,26 @@ inline epSharedSlice<T>::epSharedSlice(U *ptr, size_t length)
 
 template <typename T>
 template <typename U>
-inline epSharedSlice<T>::epSharedSlice(epSlice<U> slice)
-  : epSlice<T>(alloc(slice.ptr, slice.length))
+inline SharedSlice<T>::SharedSlice(Slice<U> slice)
+  : Slice<T>(alloc(slice.ptr, slice.length))
   , rc(nullptr)
 {
   init(slice.ptr, slice.length);
 }
 
 template <typename T>
-inline epSharedSlice<T>::~epSharedSlice()
+inline SharedSlice<T>::~SharedSlice()
 {
   if (rc && --rc->refCount == 0)
     epFree(rc);
 }
 
 template <typename T>
-inline epSharedSlice<T>& epSharedSlice<T>::operator =(const epSharedSlice<T> &rh)
+inline SharedSlice<T>& SharedSlice<T>::operator =(const SharedSlice<T> &rh)
 {
-  if(rc != rh.rc)
+  if (rc != rh.rc)
   {
-    this->~epSharedSlice();
+    this->~SharedSlice();
     rc = rh.rc;
     ++rc->refCount;
   }
@@ -678,40 +680,40 @@ inline epSharedSlice<T>& epSharedSlice<T>::operator =(const epSharedSlice<T> &rh
 }
 
 template <typename T>
-inline epSharedSlice<T>& epSharedSlice<T>::operator =(epSharedSlice<T> &&rval)
+inline SharedSlice<T>& SharedSlice<T>::operator =(SharedSlice<T> &&rval)
 {
   if (this != &rval)
   {
-    this->~epSharedSlice();
-    new(this) epSharedSlice<T>(std::move(rval));
+    this->~SharedSlice();
+    new(this) SharedSlice<T>(std::move(rval));
   }
   return *this;
 }
 
 template <typename T>
 template <typename U>
-inline epSharedSlice<T>& epSharedSlice<T>::operator =(epSlice<U> rh)
+inline SharedSlice<T>& SharedSlice<T>::operator =(Slice<U> rh)
 {
-  *this = epSharedSlice(rh);
+  *this = SharedSlice(rh);
   return *this;
 }
 
 template <typename T>
-inline epSharedSlice<T> epSharedSlice<T>::alloc(size_t elements)
+inline SharedSlice<T> SharedSlice<T>::alloc(size_t elements)
 {
-  return epSharedSlice<T>(epAllocType(ET, elements, udAF_None), elements);
+  return SharedSlice<T>(epAllocType(ET, elements, udAF_None), elements);
 }
 
 template <typename T>
-inline epSharedSlice<T> epSharedSlice<T>::slice(size_t first, size_t last) const
+inline SharedSlice<T> SharedSlice<T>::slice(size_t first, size_t last) const
 {
   EPASSERT(last <= this->length && first <= last, "Index out of range!");
-  return epSharedSlice(this->ptr + first, last - first, rc);
+  return SharedSlice(this->ptr + first, last - first, rc);
 }
 
 template <typename T>
-inline epSharedSlice<T>::epSharedSlice(T *ptr, size_t length, epRC *rc)
-  : epSlice<T>(ptr, length)
+inline SharedSlice<T>::SharedSlice(T *ptr, size_t length, RC *rc)
+  : Slice<T>(ptr, length)
   , rc(rc)
 {
   if (rc)
@@ -719,7 +721,7 @@ inline epSharedSlice<T>::epSharedSlice(T *ptr, size_t length, epRC *rc)
 }
 
 template <typename T>
-inline size_t epSharedSlice<T>::numToAlloc(size_t i)
+inline size_t SharedSlice<T>::numToAlloc(size_t i)
 {
   // TODO: i'm sure we can imagine a better heuristic...
   return i > 16 ? i : 16;
@@ -727,32 +729,32 @@ inline size_t epSharedSlice<T>::numToAlloc(size_t i)
 
 template <typename T>
 template <typename U>
-inline epSlice<T> epSharedSlice<T>::alloc(U *ptr, size_t length)
+inline Slice<T> SharedSlice<T>::alloc(U *ptr, size_t length)
 {
-  if(!ptr || !length)
-    return epSlice<T>();
+  if (!ptr || !length)
+    return Slice<T>();
   size_t alloc = numToAlloc(length);
-  return epSlice<T>((T*)epAlloc(sizeof(epRC) + alloc*sizeof(typename epSharedSlice<T>::ET)), alloc);
+  return Slice<T>((T*)epAlloc(sizeof(RC) + alloc*sizeof(typename SharedSlice<T>::ET)), alloc);
 }
 
 template <typename T>
 template <typename U>
-inline void epSharedSlice<T>::init(U *ptr, size_t length)
+inline void SharedSlice<T>::init(U *ptr, size_t length)
 {
-  if(!ptr || !length)
+  if (!ptr || !length)
     return;
 
   // init the RC
-  rc = (epRC*)this->ptr;
+  rc = (RC*)this->ptr;
   rc->refCount = 1;
   rc->allocatedCount = this->length;
 
   // copy the data
-  this->ptr = (T*)((char*)this->ptr + sizeof(epRC));
+  this->ptr = (T*)((char*)this->ptr + sizeof(RC));
   this->length = length;
-//  if (std::is_pod<T>::value) // TODO: this is only valid if T and U are the same!
-//    memcpy((void*)this->ptr, ptr, sizeof(T)*length);
-//  else
+  //  if (std::is_pod<T>::value) // TODO: this is only valid if T and U are the same!
+  //    memcpy((void*)this->ptr, ptr, sizeof(T)*length);
+  //  else
   {
     for (size_t i = 0; i<length; ++i)
       new((void*)&(this->ptr[i])) T(ptr[i]);
@@ -762,7 +764,7 @@ inline void epSharedSlice<T>::init(U *ptr, size_t length)
 
 /**** concatenation code ****/
 
-// TODO: support concatenating compatible epSlice<T>'s
+// TODO: support concatenating compatible Slice<T>'s
 
 // functions that count the length of inputs
 inline size_t count(size_t len) // terminator
@@ -787,7 +789,7 @@ inline void append(T *pBuffer, const U &a, const Args&... args)
 
 template<typename T, size_t Count>
 template<typename... Things>
-inline epArray<T, Count>& epArray<T, Count>::concat(const Things&... things)
+inline Array<T, Count>& Array<T, Count>::concat(const Things&... things)
 {
   size_t len = this->length + count(0, things...);
   reserve(len);
@@ -798,13 +800,15 @@ inline epArray<T, Count>& epArray<T, Count>::concat(const Things&... things)
 
 template<typename T>
 template<typename... Things>
-inline epSharedSlice<T> epSharedSlice<T>::concat(const Things&... things)
+inline SharedSlice<T> SharedSlice<T>::concat(const Things&... things)
 {
   size_t len = count(0, things...);
-  epRC *pRC = (epRC*)epAlloc(sizeof(epRC) + sizeof(T)*len);
+  RC *pRC = (RC*)epAlloc(sizeof(RC) + sizeof(T)*len);
   pRC->refCount = 0;
   pRC->allocatedCount = len;
   T *ptr = (T*)(pRC + 1);
   append<T>(ptr, things...);
-  return epSharedSlice(ptr, len, pRC);
+  return SharedSlice(ptr, len, pRC);
 }
+
+} // namespace ep

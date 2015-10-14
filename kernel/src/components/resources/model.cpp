@@ -33,9 +33,9 @@ RenderVertexFormatRef Model::GetRenderVertexFormat(RenderShaderProgramRef spShad
   return spRenderVertexFormat;
 }
 
-void Model::SetVertexArray(ArrayBufferRef spVertices, epSlice<const epSharedString> attributeNames)
+void Model::SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> attributeNames)
 {
-//  epString type = spVertices->GetType();
+//  String type = spVertices->GetType();
   // TODO: assert that type has the same number of elements as `attributeNames.length`.
 
   auto &a = vertexArrays.pushBack();

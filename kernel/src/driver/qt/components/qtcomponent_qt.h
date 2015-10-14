@@ -11,12 +11,12 @@ class ep::Kernel;
 namespace qt
 {
 
-class QtComponent : public ep::Component
+class QtComponent : public Component
 {
   EP_COMPONENT(QtComponent);
 
 public:
-  QtComponent(const ep::ComponentDesc *pType, ep::Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  QtComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   virtual ~QtComponent();
 
   QObject *GetQObject() const { return pQObject; }

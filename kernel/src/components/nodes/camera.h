@@ -34,7 +34,7 @@ protected:
   double zNear = 0.1;
   double zFar = 1000.0;
 
-  Camera(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  Camera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Node(pType, pKernel, uid, initParams) {}
 
   bool InputEvent(const epInputEvent &ev) override { return false; }
@@ -48,7 +48,7 @@ class SimpleCamera : public Camera
 public:
   EP_COMPONENT(SimpleCamera);
 
-  static Component *CreateInstance(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  static Component *CreateInstance(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 
   void SetMatrix(const udDouble4x4 &matrix) override { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); Camera::SetMatrix(matrix); }
   void SetPosition(const udDouble3 &pos) override { this->pos = pos; Camera::SetPosition(pos); }
@@ -74,7 +74,7 @@ protected:
   };
   char keyState[(int)Keys::Max];
 
-  SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Camera(pType, pKernel, uid, initParams)
   {
     memset(keyState, 0, sizeof(keyState));

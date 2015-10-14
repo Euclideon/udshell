@@ -61,19 +61,19 @@ ComponentDesc DataSource::descriptor =
   "Data Source", // displayName
   "Provides data", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
 };
 
-StreamRef DataSource::OpenStream(const epVariant &source)
+StreamRef DataSource::OpenStream(const Variant &source)
 {
   ComponentRef spComp = nullptr;
   StreamRef spSource = nullptr;
 
-  //  const epVariant &flags = initParams["flags"];
+  //  const Variant &flags = initParams["flags"];
   //  size_t f = flags.as<size_t>();
 
-  if (source.is(epVariant::Type::String))
+  if (source.is(Variant::Type::String))
   {
     // path or url?
     spSource = pKernel->CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
@@ -105,7 +105,7 @@ StreamRef DataSource::OpenStream(const epVariant &source)
   return spSource;
 }
 
-DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
 

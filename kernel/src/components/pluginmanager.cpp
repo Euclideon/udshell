@@ -1,9 +1,9 @@
 #include "components/pluginmanager.h"
 #include "kernel.h"
 
-#include "ep/epplugin.h"
-#include "ep/epkernel.h"
-#include "ep/epcomponent.h"
+#include "ep/c/plugin.h"
+#include "ep/c/kernel.h"
+#include "ep/c/component.h"
 
 extern "C" {
   typedef bool (epPlugin_InitProc)(epPluginInstance *pPlugin);
@@ -23,10 +23,12 @@ public:
 protected:
   epGetter *pGetter;
 
-  static epVariant shimFunc(const Getter * const _pGetter, const ep::Component *pThis)
+  static Variant shimFunc(const Getter * const _pGetter, const Component *pThis)
   {
     PluginGetter *pGetter = (PluginGetter*)_pGetter;
-    return pGetter->pGetter((const epComponent*)pThis, pThis->GetUserData());
+    Variant v;
+    (epVariant&)v = pGetter->pGetter((const epComponent*)pThis, pThis->GetUserData());
+    return v;
   }
 };
 
@@ -41,10 +43,10 @@ public:
 protected:
   epSetter *pSetter;
 
-  static void shimFunc(const Setter * const _pSetter, ep::Component *pThis, const epVariant &value)
+  static void shimFunc(const Setter * const _pSetter, Component *pThis, const Variant &value)
   {
     PluginSetter *pSetter = (PluginSetter*)_pSetter;
-    return pSetter->pSetter((epComponent*)pThis, pThis->GetUserData(), &value);
+    return pSetter->pSetter((epComponent*)pThis, pThis->GetUserData(), (const epVariant*)&value);
   }
 };
 
@@ -59,10 +61,12 @@ public:
 protected:
   epMethodCall *pMethod;
 
-  static epVariant shimFunc(const Method* const _pMethod, ep::Component *pThis, epSlice<epVariant> args)
+  static Variant shimFunc(const Method* const _pMethod, Component *pThis, Slice<Variant> args)
   {
     PluginMethod *pMethod = (PluginMethod*)_pMethod;
-    return pMethod->pMethod((epComponent*)pThis, pThis->GetUserData(), args.ptr, args.length);
+    Variant v;
+    (epVariant&)v = pMethod->pMethod((epComponent*)pThis, pThis->GetUserData(), (const epVariant*)args.ptr, args.length);
+    return v;
   }
 };
 
@@ -77,10 +81,12 @@ public:
 protected:
   epStaticCall *pFunc;
 
-  static epVariant shimFunc(const StaticFunc* const _pFunc, epSlice<epVariant> args)
+  static Variant shimFunc(const StaticFunc* const _pFunc, Slice<Variant> args)
   {
     PluginStaticFunc *pFunc = (PluginStaticFunc*)_pFunc;
-    return pFunc->pFunc(args.ptr, args.length);
+    Variant v;
+    (epVariant&)v = pFunc->pFunc((const epVariant*)args.ptr, args.length);
+    return v;
   }
 };
 
@@ -95,7 +101,7 @@ public:
 protected:
   epSubscribe *pSubscribeFunc;
 
-  static void doSubscribe(const VarEvent *_pEv, const ComponentRef &c, const epVariant::VarDelegate &d)
+  static void doSubscribe(const VarEvent *_pEv, const ComponentRef &c, const Variant::VarDelegate &d)
   {
     PluginEvent *pEv = (PluginEvent*)_pEv;
     pEv->pSubscribeFunc((epComponent*)c.ptr(), c->GetUserData(), (epVarDelegate*&)d);
@@ -151,7 +157,7 @@ EventDesc* MakePluginEventDesc(const epEventDesc &ev)
 }
 
 // ----- public plugin API definition -----
-static Component* CreatePluginInstance(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+static Component* CreatePluginInstance(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
 {
   return pType->pSuperDesc->pCreateInstance(pType, pKernel, uid, initParams);
 }
@@ -163,7 +169,7 @@ static epKernelAPI s_kernelAPI =
   [](epKernel *_pKernel, epString target, epString sender, epString message, const epVariant* pData) -> epResult
   {
     Kernel *pKernel = (Kernel*)_pKernel;
-    return pKernel->SendMessage(target, sender, message, *pData);
+    return pKernel->SendMessage(target, sender, message, *(Variant*)pData);
   },
 
   // RegisterComponentType
@@ -171,7 +177,7 @@ static epKernelAPI s_kernelAPI =
   {
     Kernel *pKernel = (Kernel*)_pKernel;
 
-    epMutableString64 baseName; baseName.concat(_pDesc->baseClass, "plugin");
+    MutableString64 baseName; baseName.concat(_pDesc->baseClass, "plugin");
     const ComponentDesc *pSuper = pKernel->GetComponentDesc(baseName);
 
     // TODO: sizeof(...) needs to be dynamic, we need to ask it from pSuper somehow...
@@ -200,12 +206,12 @@ static epKernelAPI s_kernelAPI =
   },
 
   // CreateComponent
-  [](epKernel *_pKernel, epString typeId, epInitParams initParams, epComponent **ppNewInstance) -> epResult
+  [](epKernel *_pKernel, epString typeId, const epKeyValuePair *pInitParams, size_t numInitParams, epComponent **ppNewInstance) -> epResult
   {
     Kernel *pKernel = (Kernel*)_pKernel;
 
     ComponentRef spC;
-    epResult r = pKernel->CreateComponent(typeId, initParams, &spC);
+    epResult r = pKernel->CreateComponent(typeId, Slice<const KeyValuePair>((const KeyValuePair*)pInitParams, numInitParams), &spC);
 
     if (r != epR_Success)
       return r;
@@ -288,14 +294,14 @@ ComponentDesc PluginManager::descriptor =
   "Plugin Manager", // displayName
   "Manages plugins", // description
 
-  //epSlice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-  //epSlice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
+  //Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
+  //Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
   nullptr, // properties
   nullptr, // methods
   nullptr, // events
 };
 
-PluginManager::PluginManager(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+PluginManager::PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
 
@@ -306,7 +312,7 @@ PluginManager::~PluginManager()
 
 }
 
-bool PluginManager::LoadPlugin(epString filename)
+bool PluginManager::LoadPlugin(String filename)
 {
 #if defined(EP_WINDOWS)
   // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?

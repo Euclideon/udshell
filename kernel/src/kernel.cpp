@@ -1,4 +1,4 @@
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 #include "kernel.h"
 
 #include "hal/hal.h"
@@ -50,7 +50,7 @@ epResult udRenderScene_InitRender(Kernel*);
 epResult udRenderScene_Deinit(Kernel*);
 epResult udRenderScene_DeinitRender(Kernel*); // Not sure if both Deinit's are necessary
 
-epResult Kernel::Create(Kernel **ppInstance, epInitParams commandLine, int renderThreadCount)
+epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount)
 {
   epResult result;
   StreamRef spDebugFile, spConsole;
@@ -175,8 +175,12 @@ epResult Kernel::DoInit(Kernel *pKernel)
     return epR_Failure_;
 
   // load plugins
-  //...
+/*
+  pKernel->spPluginManager->LoadPlugin("C:/ud2/shell/bin/Debug_x64/vieweractivity.dll");
 
+  ComponentRef spTest;
+  pKernel->CreateComponent("plugtest", nullptr, &spTest);
+*/
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   if (!pKernel->spStreamerTimer)
     return epR_Failure_;
@@ -260,9 +264,9 @@ void Kernel::StreamerUpdate()
   }
 }
 
-epArray<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase)
+Array<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase)
 {
-  epArray<const ComponentDesc *> derivedDescs;
+  Array<const ComponentDesc *> derivedDescs;
 
   for (ComponentType &ct : componentRegistry)
   {
@@ -284,7 +288,7 @@ epArray<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const ComponentD
   return derivedDescs;
 }
 
-epResult Kernel::SendMessage(epString target, epString sender, epString message, const epVariant &data)
+epResult Kernel::SendMessage(String target, String sender, String message, const Variant &data)
 {
   if (target.empty())
     return epR_Failure_; // TODO: no target!!
@@ -337,13 +341,13 @@ epResult Kernel::SendMessage(epString target, epString sender, epString message,
   return epR_Failure_; // TODO: error, invalid target!
 }
 
-epResult Kernel::ReceiveMessage(epString sender, epString message, const epVariant &data)
+epResult Kernel::ReceiveMessage(String sender, String message, const Variant &data)
 {
 
   return epR_Success;
 }
 
-void Kernel::RegisterMessageHandler(epSharedString name, MessageHandler messageHandler)
+void Kernel::RegisterMessageHandler(SharedString name, MessageHandler messageHandler)
 {
   MessageCallback handler;
   handler.name = name;
@@ -368,7 +372,7 @@ epResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
   return epR_Success;
 }
 
-const ComponentDesc* Kernel::GetComponentDesc(epString id)
+const ComponentDesc* Kernel::GetComponentDesc(String id)
 {
   ComponentType *pCT = componentRegistry.Get(id.hash());
   if (!pCT)
@@ -376,7 +380,7 @@ const ComponentDesc* Kernel::GetComponentDesc(epString id)
   return pCT->pDesc;
 }
 
-epResult Kernel::CreateComponent(epString typeId, epInitParams initParams, ComponentRef *pNewInstance)
+epResult Kernel::CreateComponent(String typeId, InitParams initParams, ComponentRef *pNewInstance)
 {
   ComponentType *pType = componentRegistry.Get(typeId.hash());
   if (!pType)
@@ -387,7 +391,7 @@ epResult Kernel::CreateComponent(epString typeId, epInitParams initParams, Compo
     const ComponentDesc *pDesc = pType->pDesc;
 
     // TODO: should we have a better uid generator than this?
-    epMutableString64 uid; uid.concat(pDesc->id, pType->createCount++);
+    MutableString64 uid; uid.concat(pDesc->id, pType->createCount++);
 
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
     if (!spComponent)
@@ -398,7 +402,7 @@ epResult Kernel::CreateComponent(epString typeId, epInitParams initParams, Compo
     instanceRegistry.Add(spComponent->uid.hash(), spComponent.ptr());
 
     if (spLua)
-      spLua->SetGlobal(epString(spComponent->uid), spComponent);
+      spLua->SetGlobal(String(spComponent->uid), spComponent);
 
     // TODO: inform partner kernels that I created a component
     //...
@@ -420,7 +424,7 @@ epResult Kernel::CreateComponent(epString typeId, epInitParams initParams, Compo
 
 epResult Kernel::DestroyComponent(Component *pInstance)
 {
-  spLua->SetGlobal(epString(pInstance->uid), nullptr);
+  spLua->SetGlobal(String(pInstance->uid), nullptr);
 
   // TODO: remove from component registry
   instanceRegistry.Destroy(pInstance->uid.toStringz());
@@ -431,7 +435,7 @@ epResult Kernel::DestroyComponent(Component *pInstance)
   return epR_Success;
 }
 
-ComponentRef Kernel::FindComponent(epString uid)
+ComponentRef Kernel::FindComponent(String uid)
 {
   if (uid.empty() || uid[0] == '$' || uid[0] == '#')
     return nullptr;
@@ -470,14 +474,14 @@ epResult Kernel::DeinitRender()
   return epR_Success;
 }
 
-void Kernel::Exec(epString code)
+void Kernel::Exec(String code)
 {
   spLua->Execute(code);
 }
 
-epResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const epSlice<const epString> exts)
+epResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts)
 {
-  for (const epString &e : exts)
+  for (const String &e : exts)
   {
     extensionsRegistry.Insert(e, pDesc);
   }
@@ -485,7 +489,7 @@ epResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const epSlice<co
   return epR_Success;
 }
 
-DataSourceRef Kernel::CreateDataSourceFromExtension(epString ext, epInitParams initParams)
+DataSourceRef Kernel::CreateDataSourceFromExtension(String ext, InitParams initParams)
 {
   const ComponentDesc **pDesc = extensionsRegistry.Get(ext);
   if (!pDesc)
@@ -503,13 +507,13 @@ DataSourceRef Kernel::CreateDataSourceFromExtension(epString ext, epInitParams i
 
 // synchronised pointer destroy function (it's here because there's no udsharedptr.cpp file)
 template<class T>
-void epSynchronisedPtr<T>::destroy()
+void SynchronisedPtr<T>::destroy()
 {
   struct S
   {
-    void Destroy(ep::Kernel *pKernel)
+    void Destroy(Kernel *pKernel)
     {
-      ((epSharedPtr<T>&)this)->release();
+      ((SharedPtr<T>&)this)->release();
     }
   };
 

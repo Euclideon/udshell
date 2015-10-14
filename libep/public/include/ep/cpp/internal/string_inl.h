@@ -1,5 +1,5 @@
 
-#include "eputf.h"
+#include "ep/eputf.h"
 
 // TODO: remove these?
 #include <string.h>
@@ -7,21 +7,70 @@
 
 #include <utility>
 
+ptrdiff_t epStringify(Slice<char> buffer, String format, nullptr_t, const epVarArg *pArgs);
+template<typename C>
+ptrdiff_t epStringify(Slice<char> buffer, String format, BaseString<C> s, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, bool b, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, int64_t i, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, uint64_t i, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, double i, const epVarArg *pArgs);
+template<typename T>
+ptrdiff_t epStringify(Slice<char> buffer, String format, Slice<T> arr, const epVarArg *pArgs)
+{
+  ptrdiff_t len = 2; // for the "[" .. "]"
+  len += arr.length > 1 ? (arr.length-1)*2 : 0; // bytes for the ", " separator sequences
+
+  if (!buffer.ptr)
+  {
+    for (auto &v : arr)
+      len += epStringifyTemplate(nullptr, format, v, pArgs);
+  }
+  else
+  {
+    if (buffer.length < (size_t)len)
+      return -len;
+
+    buffer[0] = '['; buffer.popFront();
+    for (size_t i = 0; i < arr.length; ++i)
+    {
+      if (i > 0)
+      {
+        buffer[0] = ','; buffer[1] = ' ';
+        buffer.pop(2);
+      }
+      ptrdiff_t l = epStringifyTemplate(buffer, format, arr[i], pArgs);
+      if (l < 0)
+        return l - len;
+      buffer.pop(l);
+      len += l;
+    }
+    buffer[0] = ']';
+  }
+  return len;
+}
+
+template<typename T>
+epforceinline ptrdiff_t epStringifyTemplate(Slice<char> buffer, String format, const T &val, const epVarArg *pArgs)
+{
+  return internal::StringifyProxy<T>::stringify(buffer, format, (void*)&val, pArgs);
+}
+
+namespace ep {
 
 template<typename C>
-class epCString
+class CString
 {
-  friend struct epBaseString<C>;
+  friend struct BaseString<C>;
 public:
   operator const C*() const { return pCStr; }
-  ~epCString()
+  ~CString()
   {
     epFree((void*)pCStr);
   }
 
 private:
   const C *pCStr;
-  epCString(epBaseString<C> str)
+  CString(BaseString<C> str)
   {
     C *buf = (C*)epAlloc((str.length + 1) * sizeof(C));
     memcpy(buf, str.ptr, str.length*sizeof(C));
@@ -72,35 +121,51 @@ inline size_t epUTF8Len(const char32_t *pStr)
   return len;
 }
 
-// epString
+// String
 template<typename C>
-inline epBaseString<C>::epBaseString()
+inline BaseString<C>::BaseString()
 {}
 
 template<typename C>
-inline epBaseString<C>::epBaseString(const C *ptr, size_t length)
-  : epSlice<const C>(ptr, length)
+inline BaseString<C>::BaseString(const C *ptr, size_t length)
+  : Slice<const C>(ptr, length)
 {}
 
 template<typename C>
 template<typename C2>
-inline epBaseString<C>::epBaseString(epSlice<C2> rh)
-  : epSlice<const C>(rh)
+inline BaseString<C>::BaseString(Slice<C2> rh)
+  : Slice<const C>(rh)
 {}
 
 template<typename C>
-inline epBaseString<C>::epBaseString(const C *pString)
-  : epSlice<const C>(pString, pString ? epStrlen(pString) : 0)
+inline BaseString<C>::BaseString(const C *pString)
+  : Slice<const C>(pString, pString ? epStrlen(pString) : 0)
 {}
 
 template<typename C>
 template<size_t N>
-inline epBaseString<C>::epBaseString(const C str[N])
-  : epSlice<const C>(str, N)
+inline BaseString<C>::BaseString(const C str[N])
+  : Slice<const C>(str, N)
 {}
 
 template<typename C>
-inline epBaseString<C>& epBaseString<C>::operator =(epSlice<const C> rh)
+BaseString<C>::BaseString(epString s)
+  : Slice<const C>((const C*)s.ptr, s.length)
+{
+  EPASSERT(sizeof(C) == sizeof(char), "Wrong type!");
+}
+template<typename C>
+BaseString<C>::operator epString() const
+{
+  EPASSERT(sizeof(C) == sizeof(char), "Wrong type!");
+  epString s;
+  s.length = this->length;
+  s.ptr = this->ptr;
+  return s;
+}
+
+template<typename C>
+inline BaseString<C>& BaseString<C>::operator =(Slice<const C> rh)
 {
   length = rh.length;
   ptr = rh.ptr;
@@ -108,7 +173,7 @@ inline epBaseString<C>& epBaseString<C>::operator =(epSlice<const C> rh)
 }
 
 template<typename C>
-inline epBaseString<C>& epBaseString<C>::operator =(const C *pString)
+inline BaseString<C>& BaseString<C>::operator =(const C *pString)
 {
   ptr = pString;
   length = pString ? epStrlen(pString) : (size_t)0;
@@ -116,18 +181,18 @@ inline epBaseString<C>& epBaseString<C>::operator =(const C *pString)
 }
 
 template<typename C>
-inline epBaseString<C> epBaseString<C>::slice(ptrdiff_t first, ptrdiff_t last) const
+inline BaseString<C> BaseString<C>::slice(ptrdiff_t first, ptrdiff_t last) const
 {
   size_t start = (size_t)(first < 0 ? first + length : first);
   size_t end = (size_t)(last < 0 ? last + length : last);
   EPASSERT(end <= length && start <= end, "Index out of range!");
-  return epBaseString<C>(ptr + start, end - start);
+  return BaseString<C>(ptr + start, end - start);
 }
 
 template<typename C>
-inline size_t epBaseString<C>::numChars() const
+inline size_t BaseString<C>::numChars() const
 {
-  epBaseString<C> t = *this;
+  BaseString<C> t = *this;
   size_t numChars = 0;
   while (t.length)
   {
@@ -137,20 +202,20 @@ inline size_t epBaseString<C>::numChars() const
   return numChars;
 }
 template<>
-inline size_t epBaseString<char32_t>::numChars() const
+inline size_t BaseString<char32_t>::numChars() const
 {
   return length;
 }
 
 template<typename C>
-inline char32_t epBaseString<C>::frontChar() const
+inline char32_t BaseString<C>::frontChar() const
 {
   char32_t r;
   epUTFDecode(ptr, &r);
   return r;
 }
 template<>
-inline char32_t epBaseString<char>::backChar() const
+inline char32_t BaseString<char>::backChar() const
 {
   const char *pLast = ptr + length-1;
   while ((*pLast & 0xC) == 0x80)
@@ -160,7 +225,7 @@ inline char32_t epBaseString<char>::backChar() const
   return r;
 }
 template<>
-inline char32_t epBaseString<char16_t>::backChar() const
+inline char32_t BaseString<char16_t>::backChar() const
 {
   char16_t back = ptr[length-1];
   if (back >= 0xD800 && (back & 0xFC00) == 0xDC00)
@@ -172,13 +237,13 @@ inline char32_t epBaseString<char16_t>::backChar() const
   return back;
 }
 template<>
-inline char32_t epBaseString<char32_t>::backChar() const
+inline char32_t BaseString<char32_t>::backChar() const
 {
   return ptr[length-1];
 }
 
 template<typename C>
-inline char32_t epBaseString<C>::popFrontChar()
+inline char32_t BaseString<C>::popFrontChar()
 {
   char32_t r;
   size_t codeUnits = epUTFDecode(ptr, &r);
@@ -187,7 +252,7 @@ inline char32_t epBaseString<C>::popFrontChar()
   return r;
 }
 template<>
-inline char32_t epBaseString<char>::popBackChar()
+inline char32_t BaseString<char>::popBackChar()
 {
   size_t numChars = 1;
   while ((ptr[length - numChars] & 0xC) == 0x80)
@@ -198,7 +263,7 @@ inline char32_t epBaseString<char>::popBackChar()
   return r;
 }
 template<>
-inline char32_t epBaseString<char16_t>::popBackChar()
+inline char32_t BaseString<char16_t>::popBackChar()
 {
   char16_t back = ptr[--length];
   if (back >= 0xD800 && (back & 0xFC00) == 0xDC00)
@@ -210,20 +275,20 @@ inline char32_t epBaseString<char16_t>::popBackChar()
   return back;
 }
 template<>
-inline char32_t epBaseString<char32_t>::popBackChar()
+inline char32_t BaseString<char32_t>::popBackChar()
 {
   return ptr[--length];
 }
 
 template<typename C>
-inline bool epBaseString<C>::eq(epBaseString<C> rh) const
+inline bool BaseString<C>::eq(BaseString<C> rh) const
 {
-  return epSlice<const C>::eq(rh);
+  return Slice<const C>::eq(rh);
 }
 template<typename C>
-inline bool epBaseString<C>::eqIC(epBaseString<C> rh) const
+inline bool BaseString<C>::eqIC(BaseString<C> rh) const
 {
-  if(length != rh.length)
+  if (length != rh.length)
     return false;
   for (size_t i = 0; i<length; ++i)
     if (toLower(ptr[i]) != toLower(rh.ptr[i]))
@@ -231,24 +296,24 @@ inline bool epBaseString<C>::eqIC(epBaseString<C> rh) const
   return true;
 }
 template<typename C>
-inline bool epBaseString<C>::beginsWith(epBaseString<C> rh) const
+inline bool BaseString<C>::beginsWith(BaseString<C> rh) const
 {
-  return epSlice<const C>::beginsWith(rh);
+  return Slice<const C>::beginsWith(rh);
 }
 template<typename C>
-inline bool epBaseString<C>::beginsWithIC(epBaseString<C> rh) const
+inline bool BaseString<C>::beginsWithIC(BaseString<C> rh) const
 {
   if (length < rh.length)
     return false;
   return slice(0, rh.length).eqIC(rh);
 }
 template<typename C>
-inline bool epBaseString<C>::endsWith(epBaseString<C> rh) const
+inline bool BaseString<C>::endsWith(BaseString<C> rh) const
 {
-  return epSlice<const C>::endsWith(rh);
+  return Slice<const C>::endsWith(rh);
 }
 template<typename C>
-inline bool epBaseString<C>::endsWithIC(epBaseString<C> rh) const
+inline bool BaseString<C>::endsWithIC(BaseString<C> rh) const
 {
   if (length < rh.length)
     return false;
@@ -256,12 +321,12 @@ inline bool epBaseString<C>::endsWithIC(epBaseString<C> rh) const
 }
 
 template<typename C>
-inline ptrdiff_t epBaseString<C>::cmp(epBaseString<C> rh) const
+inline ptrdiff_t BaseString<C>::cmp(BaseString<C> rh) const
 {
-  return epSlice<const C>::cmp(rh);
+  return Slice<const C>::cmp(rh);
 }
 template<typename C>
-inline ptrdiff_t epBaseString<C>::cmpIC(epBaseString<C> rh) const
+inline ptrdiff_t BaseString<C>::cmpIC(BaseString<C> rh) const
 {
   size_t len = length < rh.length ? length : rh.length;
   for (size_t i = 0; i < len; ++i)
@@ -275,7 +340,7 @@ inline ptrdiff_t epBaseString<C>::cmpIC(epBaseString<C> rh) const
 }
 
 template<typename C>
-inline C* epBaseString<C>::toStringz(C *pBuffer, size_t bufferLen) const
+inline C* BaseString<C>::toStringz(C *pBuffer, size_t bufferLen) const
 {
   size_t len = length < bufferLen-1 ? length : bufferLen-1;
   memcpy(pBuffer, ptr, len);
@@ -284,13 +349,13 @@ inline C* epBaseString<C>::toStringz(C *pBuffer, size_t bufferLen) const
 }
 
 template<typename C>
-inline epCString<C> epBaseString<C>::toStringz() const
+inline CString<C> BaseString<C>::toStringz() const
 {
-  return epCString<C>(*this);
+  return CString<C>(*this);
 }
 
 template<typename C>
-inline size_t epBaseString<C>::findFirstIC(epBaseString<C> s) const
+inline size_t BaseString<C>::findFirstIC(BaseString<C> s) const
 {
   if (s.empty())
     return 0;
@@ -309,7 +374,7 @@ inline size_t epBaseString<C>::findFirstIC(epBaseString<C> s) const
   return length;
 }
 template<typename C>
-inline size_t epBaseString<C>::findLastIC(epBaseString<C> s) const
+inline size_t BaseString<C>::findLastIC(BaseString<C> s) const
 {
   if (s.empty())
     return length;
@@ -328,60 +393,60 @@ inline size_t epBaseString<C>::findLastIC(epBaseString<C> s) const
 }
 
 template<typename C>
-inline epBaseString<C> epBaseString<C>::getLeftAtFirstIC(epBaseString<C> s, bool bInclusive) const
+inline BaseString<C> BaseString<C>::getLeftAtFirstIC(BaseString<C> s, bool bInclusive) const
 {
   return slice(0, findFirstIC(s) + (bInclusive ? s.length : 0));
 }
 template<typename C>
-inline epBaseString<C> epBaseString<C>::getLeftAtLastIC(epBaseString<C> s, bool bInclusive) const
+inline BaseString<C> BaseString<C>::getLeftAtLastIC(BaseString<C> s, bool bInclusive) const
 {
   return slice(0, findLastIC(s) + (bInclusive ? s.length : 0));
 }
 template<typename C>
-inline epBaseString<C> epBaseString<C>::getRightAtFirstIC(epBaseString<C> s, bool bInclusive) const
+inline BaseString<C> BaseString<C>::getRightAtFirstIC(BaseString<C> s, bool bInclusive) const
 {
   return slice(findFirstIC(s) + (bInclusive ? 0 : s.length), length);
 }
 template<typename C>
-inline epBaseString<C> epBaseString<C>::getRightAtLastIC(epBaseString<C> s, bool bInclusive) const
+inline BaseString<C> BaseString<C>::getRightAtLastIC(BaseString<C> s, bool bInclusive) const
 {
   return slice(findLastIC(s) + (bInclusive ? 0 : s.length), length);
 }
 
 template<typename C>
 template<bool Front, bool Back>
-inline epBaseString<C> epBaseString<C>::trim() const
+inline BaseString<C> BaseString<C>::trim() const
 {
   size_t first = 0, last = length;
   if (Front)
   {
-    while (isWhitespace(ptr[first]) && first < length)
+    while (epIsWhitespace(ptr[first]) && first < length)
       ++first;
   }
   if (Back)
   {
-    while (last > first && isWhitespace(ptr[last - 1]))
+    while (last > first && epIsWhitespace(ptr[last - 1]))
       --last;
   }
-  return epBaseString<C>(ptr + first, last - first);
+  return BaseString<C>(ptr + first, last - first);
 }
 
 template<typename C>
 template<bool skipEmptyTokens>
-inline epBaseString<C> epBaseString<C>::popToken(epBaseString<C> delimiters)
+inline BaseString<C> BaseString<C>::popToken(BaseString<C> delimiters)
 {
-  return epSlice<const C>::popToken<skipEmptyTokens>(delimiters);
+  return Slice<const C>::popToken<skipEmptyTokens>(delimiters);
 }
 
 template<typename C>
 template<bool skipEmptyTokens>
-inline epSlice<epBaseString<C>> epBaseString<C>::tokenise(epSlice<epBaseString<C>> tokens, epBaseString<C> delimiters)
+inline Slice<BaseString<C>> BaseString<C>::tokenise(Slice<BaseString<C>> tokens, BaseString<C> delimiters)
 {
-  return epSlice<const C>::tokenise<skipEmptyTokens>(tokens, delimiters);
+  return Slice<const C>::tokenise<skipEmptyTokens>(tokens, delimiters);
 }
 
 template<typename C>
-inline uint32_t epBaseString<C>::hash(uint32_t hash) const
+inline uint32_t BaseString<C>::hash(uint32_t hash) const
 {
   size_t i = 0;
   while (i < length)
@@ -393,66 +458,66 @@ inline uint32_t epBaseString<C>::hash(uint32_t hash) const
 }
 
 
-// epMutableString
+// MutableString
 template<size_t Size>
-inline epMutableString<Size>::epMutableString()
+inline MutableString<Size>::MutableString()
 {}
 
 template<size_t Size>
-inline epMutableString<Size>::epMutableString(epMutableString<Size> &&rval)
-  : epArray<char, Size>(std::move(rval))
+inline MutableString<Size>::MutableString(MutableString<Size> &&rval)
+  : Array<char, Size>(std::move(rval))
 {}
 
 template<size_t Size>
-inline epMutableString<Size>::epMutableString(epArray<char, Size> &&rval)
-  : epArray<char, Size>(std::move(rval))
-{}
-
-template<size_t Size>
-template <typename U>
-inline epMutableString<Size>::epMutableString(U *ptr, size_t length)
-  : epArray<char, Size>(ptr, length)
+inline MutableString<Size>::MutableString(Array<char, Size> &&rval)
+  : Array<char, Size>(std::move(rval))
 {}
 
 template<size_t Size>
 template <typename U>
-inline epMutableString<Size>::epMutableString(epSlice<U> slice)
-  : epArray<char, Size>(slice)
+inline MutableString<Size>::MutableString(U *ptr, size_t length)
+  : Array<char, Size>(ptr, length)
 {}
 
 template<size_t Size>
-inline epMutableString<Size>::epMutableString(const char *pString)
-  : epArray<char, Size>(pString, pString ? epStrlen(pString) : 0)
+template <typename U>
+inline MutableString<Size>::MutableString(Slice<U> slice)
+  : Array<char, Size>(slice)
 {}
 
 template<size_t Size>
-inline epMutableString<Size>& epMutableString<Size>::operator =(epMutableString<Size> &&rval)
+inline MutableString<Size>::MutableString(const char *pString)
+  : Array<char, Size>(pString, pString ? epStrlen(pString) : 0)
+{}
+
+template<size_t Size>
+inline MutableString<Size>& MutableString<Size>::operator =(MutableString<Size> &&rval)
 {
-  epArray<char, Size>::operator=(std::move(rval));
+  Array<char, Size>::operator=(std::move(rval));
   return *this;
 }
 template<size_t Size>
-inline epMutableString<Size>& epMutableString<Size>::operator =(epArray<char, Size> &&rval)
+inline MutableString<Size>& MutableString<Size>::operator =(Array<char, Size> &&rval)
 {
-  epArray<char, Size>::operator=(std::move(rval));
+  Array<char, Size>::operator=(std::move(rval));
   return *this;
 }
 template<size_t Size>
 template <typename U>
-inline epMutableString<Size>& epMutableString<Size>::operator =(epSlice<U> rh)
+inline MutableString<Size>& MutableString<Size>::operator =(Slice<U> rh)
 {
-  epArray<char, Size>::operator=(rh);
+  Array<char, Size>::operator=(rh);
   return *this;
 }
 template<size_t Size>
-inline epMutableString<Size>& epMutableString<Size>::operator =(const char *pString)
+inline MutableString<Size>& MutableString<Size>::operator =(const char *pString)
 {
-  epArray<char, Size>::operator=(epString(pString, pString ? epStrlen(pString) : 0));
+  Array<char, Size>::operator=(String(pString, pString ? epStrlen(pString) : 0));
   return *this;
 }
 
 template<size_t Size>
-inline epMutableString<Size>& epMutableString<Size>::sprintf(const char *pFormat, ...)
+inline MutableString<Size>& MutableString<Size>::sprintf(const char *pFormat, ...)
 {
   va_list args;
   va_start(args, pFormat);
@@ -477,7 +542,7 @@ inline epMutableString<Size>& epMutableString<Size>::sprintf(const char *pFormat
 }
 
 template<size_t Size>
-inline epMutableString<Size>& epMutableString<Size>::toUpper()
+inline MutableString<Size>& MutableString<Size>::toUpper()
 {
   for (size_t i = 0; i < this->length; ++i)
   {
@@ -486,7 +551,7 @@ inline epMutableString<Size>& epMutableString<Size>::toUpper()
   }
 }
 template<size_t Size>
-inline epMutableString<Size>& epMutableString<Size>::toLower()
+inline MutableString<Size>& MutableString<Size>::toLower()
 {
   for (size_t i = 0; i < this->length; ++i)
   {
@@ -496,146 +561,146 @@ inline epMutableString<Size>& epMutableString<Size>::toLower()
 }
 
 template<size_t Size>
-inline epCString<char> epMutableString<Size>::toStringz() const
+inline CString<char> MutableString<Size>::toStringz() const
 {
-  return ((epBaseString<char>*)this)->toStringz();
+  return ((BaseString<char>*)this)->toStringz();
 }
 
 
-// epSharedString
-inline epSharedString::epSharedString()
+// SharedString
+inline SharedString::SharedString()
 {}
 
-inline epSharedString::epSharedString(const epSharedString &val)
-  : epSharedSlice<const char>(val)
+inline SharedString::SharedString(const SharedString &val)
+  : SharedSlice<const char>(val)
 {}
 
 
-inline epSharedString::epSharedString(epSharedString &&rval)
-  : epSharedSlice<const char>(std::move(rval))
+inline SharedString::SharedString(SharedString &&rval)
+  : SharedSlice<const char>(std::move(rval))
 {}
 
-inline epSharedString::epSharedString(epSharedSlice<const char> &&rval)
-  : epSharedSlice<const char>(std::move(rval))
+inline SharedString::SharedString(SharedSlice<const char> &&rval)
+  : SharedSlice<const char>(std::move(rval))
 {}
 
-inline epSharedString::epSharedString(const epSharedSlice<const char> &rcstr)
-  : epSharedSlice<const char>(rcstr)
-{}
-
-template <typename U>
-inline epSharedString::epSharedString(U *ptr, size_t length)
-  : epSharedSlice<const char>(ptr, length)
+inline SharedString::SharedString(const SharedSlice<const char> &rcstr)
+  : SharedSlice<const char>(rcstr)
 {}
 
 template <typename U>
-inline epSharedString::epSharedString(epSlice<U> slice)
-  : epSharedSlice<const char>(slice)
+inline SharedString::SharedString(U *ptr, size_t length)
+  : SharedSlice<const char>(ptr, length)
 {}
 
-inline epSharedString::epSharedString(const char *pString)
-  : epSharedSlice<const char>(pString, pString ? epStrlen(pString) : 0)
+template <typename U>
+inline SharedString::SharedString(Slice<U> slice)
+  : SharedSlice<const char>(slice)
 {}
 
-inline epSharedString& epSharedString::operator =(const epSharedSlice<const char> &rh)
+inline SharedString::SharedString(const char *pString)
+  : SharedSlice<const char>(pString, pString ? epStrlen(pString) : 0)
+{}
+
+inline SharedString& SharedString::operator =(const SharedSlice<const char> &rh)
 {
-  epSharedSlice<const char>::operator=(rh);
+  SharedSlice<const char>::operator=(rh);
   return *this;
 }
-inline epSharedString& epSharedString::operator =(const epSharedString &val)
+inline SharedString& SharedString::operator =(const SharedString &val)
 {
-  epSharedSlice<const char>::operator=(val);
+  SharedSlice<const char>::operator=(val);
   return *this;
 }
 
-inline epSharedString& epSharedString::operator =(epSharedString &&rval)
+inline SharedString& SharedString::operator =(SharedString &&rval)
 {
-  epSharedSlice<const char>::operator=(std::move(rval));
+  SharedSlice<const char>::operator=(std::move(rval));
   return *this;
 }
-inline epSharedString& epSharedString::operator =(epSharedSlice<const char> &&rval)
+inline SharedString& SharedString::operator =(SharedSlice<const char> &&rval)
 {
-  epSharedSlice<const char>::operator=(std::move(rval));
+  SharedSlice<const char>::operator=(std::move(rval));
   return *this;
 }
 template <typename U>
-inline epSharedString& epSharedString::operator =(epSlice<U> rh)
+inline SharedString& SharedString::operator =(Slice<U> rh)
 {
-  *this = epSharedSlice<U>(rh);
+  *this = SharedSlice<U>(rh);
   return *this;
 }
-inline epSharedString& epSharedString::operator =(const char *pString)
+inline SharedString& SharedString::operator =(const char *pString)
 {
-  *this = epSharedString(pString);
+  *this = SharedString(pString);
   return *this;
 }
 
-inline epSharedString epSharedString::slice(ptrdiff_t first, ptrdiff_t last) const
+inline SharedString SharedString::slice(ptrdiff_t first, ptrdiff_t last) const
 {
-  epString s = ((epString*)this)->slice(first, last);
-  return epSharedString(s.ptr, s.length, rc);
+  String s = ((String*)this)->slice(first, last);
+  return SharedString(s.ptr, s.length, rc);
 }
 
-inline epCString<char> epSharedString::toStringz() const
+inline CString<char> SharedString::toStringz() const
 {
-  return ((epString*)this)->toStringz();
+  return ((String*)this)->toStringz();
 }
 
-inline epSharedString epSharedString::asUpper() const
+inline SharedString SharedString::asUpper() const
 {
   EPASSERT(false, "TODO");
   return nullptr;
 }
-inline epSharedString epSharedString::asLower() const
+inline SharedString SharedString::asLower() const
 {
   EPASSERT(false, "TODO");
   return nullptr;
 }
 
-inline epSharedString epSharedString::getLeftAtFirstIC(epString s, bool bInclusive) const
+inline SharedString SharedString::getLeftAtFirstIC(String s, bool bInclusive) const
 {
   return slice(0, findFirstIC(s) + (bInclusive ? s.length : 0));
 }
-inline epSharedString epSharedString::getLeftAtLastIC(epString s, bool bInclusive) const
+inline SharedString SharedString::getLeftAtLastIC(String s, bool bInclusive) const
 {
   return slice(0, findLastIC(s) + (bInclusive ? s.length : 0));
 }
-inline epSharedString epSharedString::getRightAtFirstIC(epString s, bool bInclusive) const
+inline SharedString SharedString::getRightAtFirstIC(String s, bool bInclusive) const
 {
   return slice(findFirstIC(s) + (bInclusive ? 0 : s.length), length);
 }
-inline epSharedString epSharedString::getRightAtLastIC(epString s, bool bInclusive) const
+inline SharedString SharedString::getRightAtLastIC(String s, bool bInclusive) const
 {
   return slice(findLastIC(s) + (bInclusive ? 0 : s.length), length);
 }
 
 template<bool Front, bool Back>
-inline epSharedString epSharedString::trim() const
+inline SharedString SharedString::trim() const
 {
-  epString s = ((epString*)this)->trim<Front, Back>();
-  return epSharedString(s.ptr, s.length, rc);
+  String s = ((String*)this)->trim<Front, Back>();
+  return SharedString(s.ptr, s.length, rc);
 }
 
 template<bool skipEmptyTokens>
-inline epSharedString epSharedString::popToken(epString delimiters)
+inline SharedString SharedString::popToken(String delimiters)
 {
-  epString s = ((epString*)this)->popToken<skipEmptyTokens>(delimiters);
-  return epSharedString(s.ptr, s.length, rc);
+  String s = ((String*)this)->popToken<skipEmptyTokens>(delimiters);
+  return SharedString(s.ptr, s.length, rc);
 }
 template<bool skipEmptyTokens>
-inline epSlice<epSharedString> epSharedString::tokenise(epSlice<epSharedString> tokens, epString delimiters) const
+inline Slice<SharedString> SharedString::tokenise(Slice<SharedString> tokens, String delimiters) const
 {
-  epArray<epString, 64> t;
+  Array<String, 64> t;
   t.reserve(tokens.length);
   t.length = tokens.length;
-  epSlice<epString> tok = ((epString*)this)->tokenise<skipEmptyTokens>(t, delimiters);
+  Slice<String> tok = ((String*)this)->tokenise<skipEmptyTokens>(t, delimiters);
   for (size_t i = 0; i < tok.length; ++i)
-    new(&tokens.ptr[i]) epSharedString(tok.ptr[i].ptr, tok.ptr[i].length, rc);
+    new(&tokens.ptr[i]) SharedString(tok.ptr[i].ptr, tok.ptr[i].length, rc);
   return tokens.slice(0, tok.length);
 }
 
-inline epSharedString::epSharedString(const char *ptr, size_t length, epRC *rc)
-  : epSharedSlice<const char>(ptr, length, rc)
+inline SharedString::SharedString(const char *ptr, size_t length, RC *rc)
+  : SharedSlice<const char>(ptr, length, rc)
 {}
 
 
@@ -643,180 +708,123 @@ inline epSharedString::epSharedString(const char *ptr, size_t length, epRC *rc)
 // varargs functions....
 //
 
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, nullptr_t, const epVarArg *pArgs);
-template<typename C>
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, epBaseString<C> s, const epVarArg *pArgs);
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, bool b, const epVarArg *pArgs);
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, int64_t i, const epVarArg *pArgs);
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, uint64_t i, const epVarArg *pArgs);
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, double i, const epVarArg *pArgs);
-template<typename T>
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, epSlice<T> arr, const epVarArg *pArgs)
-{
-  ptrdiff_t len = 2; // for the "[" .. "]"
-  len += arr.length > 1 ? (arr.length-1)*2 : 0; // bytes for the ", " separator sequences
-
-  if (!buffer.ptr)
-  {
-    for (auto &v : arr)
-      len += epStringifyTemplate(nullptr, format, v, pArgs);
-  }
-  else
-  {
-    if (buffer.length < (size_t)len)
-      return -len;
-
-    buffer[0] = '['; buffer.popFront();
-    for (size_t i = 0; i < arr.length; ++i)
-    {
-      if (i > 0)
-      {
-        buffer[0] = ','; buffer[1] = ' ';
-        buffer.pop(2);
-      }
-      ptrdiff_t l = epStringifyTemplate(buffer, format, arr[i], pArgs);
-      if (l < 0)
-        return l - len;
-      buffer.pop(l);
-      len += l;
-    }
-    buffer[0] = ']';
-  }
-  return len;
-}
-
-
 // stringify helper
-namespace ep {
 namespace internal {
 
-template<typename T>
-struct StringifyProxy
-{
-  inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs)
+  template<typename T>
+  struct StringifyProxy
   {
-    return epStringify(buffer, format, *(T*)pData, pArgs);
-  }
-  static const size_t intify = 0;
-};
+    inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs)
+    {
+      return ::epStringify(buffer, format, *(T*)pData, pArgs);
+    }
+    static const size_t intify = 0;
+  };
 
-// make the numeric types promote explicitly
-template<> struct StringifyProxy<bool>     { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, *(bool*)pData, pArgs); }               inline static int64_t intify(const void *pData) { return *(bool*)pData ? 1 : 0; } };
-template<> struct StringifyProxy<uint8_t>  { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (uint64_t)*(uint8_t*)pData, pArgs); }  inline static int64_t intify(const void *pData) { return (int64_t)*(uint8_t*)pData; } };
-template<> struct StringifyProxy<int8_t>   { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (int64_t)*(int8_t*)pData, pArgs); }    inline static int64_t intify(const void *pData) { return (int64_t)*(int8_t*)pData; } };
-template<> struct StringifyProxy<uint16_t> { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (uint64_t)*(uint16_t*)pData, pArgs); } inline static int64_t intify(const void *pData) { return (int64_t)*(uint16_t*)pData; } };
-template<> struct StringifyProxy<int16_t>  { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (int64_t)*(int16_t*)pData, pArgs); }   inline static int64_t intify(const void *pData) { return (int64_t)*(int16_t*)pData; } };
-template<> struct StringifyProxy<uint32_t> { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (uint64_t)*(uint32_t*)pData, pArgs); } inline static int64_t intify(const void *pData) { return (int64_t)*(uint32_t*)pData; } };
-template<> struct StringifyProxy<int32_t>  { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (int64_t)*(int32_t*)pData, pArgs); }   inline static int64_t intify(const void *pData) { return (int64_t)*(int32_t*)pData; } };
-template<> struct StringifyProxy<uint64_t> { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, *(uint64_t*)pData, pArgs); }           inline static int64_t intify(const void *pData) { return (int64_t)*(uint64_t*)pData; } };
-template<> struct StringifyProxy<int64_t>  { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, *(int64_t*)pData, pArgs); }            inline static int64_t intify(const void *pData) { return *(int64_t*)pData; } };
-template<> struct StringifyProxy<float>    { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, (double)*(float*)pData, pArgs); }      inline static int64_t intify(const void *pData) { return (int64_t)*(float*)pData; } };
-template<> struct StringifyProxy<double>   { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, *(double*)pData, pArgs); }             inline static int64_t intify(const void *pData) { return (int64_t)*(double*)pData; } };
+  // make the numeric types promote explicitly
+  template<> struct StringifyProxy<bool>     { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, *(bool*)pData, pArgs); }               inline static int64_t intify(const void *pData) { return *(bool*)pData ? 1 : 0; } };
+  template<> struct StringifyProxy<uint8_t>  { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, (uint64_t)*(uint8_t*)pData, pArgs); }  inline static int64_t intify(const void *pData) { return (int64_t)*(uint8_t*)pData; } };
+  template<> struct StringifyProxy<int8_t>   { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, (int64_t)*(int8_t*)pData, pArgs); }    inline static int64_t intify(const void *pData) { return (int64_t)*(int8_t*)pData; } };
+  template<> struct StringifyProxy<uint16_t> { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, (uint64_t)*(uint16_t*)pData, pArgs); } inline static int64_t intify(const void *pData) { return (int64_t)*(uint16_t*)pData; } };
+  template<> struct StringifyProxy<int16_t>  { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, (int64_t)*(int16_t*)pData, pArgs); }   inline static int64_t intify(const void *pData) { return (int64_t)*(int16_t*)pData; } };
+  template<> struct StringifyProxy<uint32_t> { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, (uint64_t)*(uint32_t*)pData, pArgs); } inline static int64_t intify(const void *pData) { return (int64_t)*(uint32_t*)pData; } };
+  template<> struct StringifyProxy<int32_t>  { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, (int64_t)*(int32_t*)pData, pArgs); }   inline static int64_t intify(const void *pData) { return (int64_t)*(int32_t*)pData; } };
+  template<> struct StringifyProxy<uint64_t> { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, *(uint64_t*)pData, pArgs); }           inline static int64_t intify(const void *pData) { return (int64_t)*(uint64_t*)pData; } };
+  template<> struct StringifyProxy<int64_t>  { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, *(int64_t*)pData, pArgs); }            inline static int64_t intify(const void *pData) { return *(int64_t*)pData; } };
+  template<> struct StringifyProxy<float>    { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, (double)*(float*)pData, pArgs); }      inline static int64_t intify(const void *pData) { return (int64_t)*(float*)pData; } };
+  template<> struct StringifyProxy<double>   { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, *(double*)pData, pArgs); }             inline static int64_t intify(const void *pData) { return (int64_t)*(double*)pData; } };
 
-template<> struct StringifyProxy<char*>           { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const char *pS = *(char**)pData;               return epStringify(buffer, format, epString(pS, pS ? epStrlen(pS) : 0), pArgs); }  static const size_t intify = 0; };
-template<> struct StringifyProxy<char16_t*>       { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const char16_t *pS = *(char16_t**)pData;       return epStringify(buffer, format, epWString(pS, pS ? epStrlen(pS) : 0), pArgs); } static const size_t intify = 0; };
-template<> struct StringifyProxy<char32_t*>       { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const char32_t *pS = *(char32_t**)pData;       return epStringify(buffer, format, epDString(pS, pS ? epStrlen(pS) : 0), pArgs); } static const size_t intify = 0; };
-template<> struct StringifyProxy<const char*>     { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const char *pS = *(const char**)pData;         return epStringify(buffer, format, epString(pS, pS ? epStrlen(pS) : 0), pArgs); }  static const size_t intify = 0; };
-template<> struct StringifyProxy<const char16_t*> { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const char16_t *pS = *(const char16_t**)pData; return epStringify(buffer, format, epWString(pS, pS ? epStrlen(pS) : 0), pArgs); } static const size_t intify = 0; };
-template<> struct StringifyProxy<const char32_t*> { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const char32_t *pS = *(const char32_t**)pData; return epStringify(buffer, format, epDString(pS, pS ? epStrlen(pS) : 0), pArgs); } static const size_t intify = 0; };
-template<size_t N>
-struct StringifyProxy<const char[N]>              { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const char *pS = (const char*)pData;         return epStringify(buffer, format, epString(pS, N-1), pArgs); }  static const size_t intify = 0; };
-template<size_t N>
-struct StringifyProxy<const char16_t[N]>          { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const char16_t *pS = (const char16_t*)pData; return epStringify(buffer, format, epWString(pS, N-1), pArgs); } static const size_t intify = 0; };
-template<size_t N>
-struct StringifyProxy<const char32_t[N]>          { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const char32_t *pS = (const char32_t*)pData; return epStringify(buffer, format, epDString(pS, N-1), pArgs); } static const size_t intify = 0; };
-template<size_t N>
-struct StringifyProxy<epMutableString<N>>         { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, *(epString*)pData, pArgs); } static const size_t intify = 0; };
-template<> struct StringifyProxy<epSharedString>  { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { return epStringify(buffer, format, *(epString*)pData, pArgs); } static const size_t intify = 0; };
+  template<> struct StringifyProxy<char*>           { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const char *pS = *(char**)pData;               return ::epStringify(buffer, format, String(pS, pS ? epStrlen(pS) : 0), pArgs); }  static const size_t intify = 0; };
+  template<> struct StringifyProxy<char16_t*>       { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const char16_t *pS = *(char16_t**)pData;       return ::epStringify(buffer, format, WString(pS, pS ? epStrlen(pS) : 0), pArgs); } static const size_t intify = 0; };
+  template<> struct StringifyProxy<char32_t*>       { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const char32_t *pS = *(char32_t**)pData;       return ::epStringify(buffer, format, DString(pS, pS ? epStrlen(pS) : 0), pArgs); } static const size_t intify = 0; };
+  template<> struct StringifyProxy<const char*>     { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const char *pS = *(const char**)pData;         return ::epStringify(buffer, format, String(pS, pS ? epStrlen(pS) : 0), pArgs); }  static const size_t intify = 0; };
+  template<> struct StringifyProxy<const char16_t*> { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const char16_t *pS = *(const char16_t**)pData; return ::epStringify(buffer, format, WString(pS, pS ? epStrlen(pS) : 0), pArgs); } static const size_t intify = 0; };
+  template<> struct StringifyProxy<const char32_t*> { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const char32_t *pS = *(const char32_t**)pData; return ::epStringify(buffer, format, DString(pS, pS ? epStrlen(pS) : 0), pArgs); } static const size_t intify = 0; };
+  template<size_t N>
+  struct StringifyProxy<const char[N]>              { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const char *pS = (const char*)pData;         return ::epStringify(buffer, format, String(pS, N-1), pArgs); }  static const size_t intify = 0; };
+  template<size_t N>
+  struct StringifyProxy<const char16_t[N]>          { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const char16_t *pS = (const char16_t*)pData; return ::epStringify(buffer, format, WString(pS, N-1), pArgs); } static const size_t intify = 0; };
+  template<size_t N>
+  struct StringifyProxy<const char32_t[N]>          { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const char32_t *pS = (const char32_t*)pData; return ::epStringify(buffer, format, DString(pS, N-1), pArgs); } static const size_t intify = 0; };
+  template<size_t N>
+  struct StringifyProxy<MutableString<N>>         { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, *(String*)pData, pArgs); } static const size_t intify = 0; };
+  template<> struct StringifyProxy<SharedString>  { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return ::epStringify(buffer, format, *(String*)pData, pArgs); } static const size_t intify = 0; };
 
-size_t getLength(epSlice<epVarArg> args);
-epSlice<char> concatenate(epSlice<char> buffer, epSlice<epVarArg> args);
-epSlice<char> format(epString format, epSlice<char> buffer, epSlice<epVarArg> args);
+  size_t getLength(Slice<epVarArg> args);
+  Slice<char> concatenate(Slice<char> buffer, Slice<epVarArg> args);
+  Slice<char> format(String format, Slice<char> buffer, Slice<epVarArg> args);
 
 } // namespace internal
-} // namespace ep
 
 template<typename T>
 epVarArg::epVarArg(const T& arg)
-: pArg(&arg)
-, pStringProxy(ep::internal::StringifyProxy<T>::stringify)
-, pIntProxy((IntConvFunc*)ep::internal::StringifyProxy<T>::intify)
+  : pArg(&arg)
+  , pStringProxy(internal::StringifyProxy<T>::stringify)
+  , pIntProxy((IntConvFunc*)internal::StringifyProxy<T>::intify)
 {}
 
 
-template<typename T>
-inline ptrdiff_t epStringifyTemplate(epSlice<char> buffer, epString format, const T &val, const epVarArg *pArgs)
-{
-  return ep::internal::StringifyProxy<T>::stringify(buffer, format, (void*)&val, pArgs);
-}
-
-
-// epMutableString
+// MutableString
 
 template<size_t Size>
 template<typename... Args>
-inline epMutableString<Size>& epMutableString<Size>::concat(const Args&... args)
+inline MutableString<Size>& MutableString<Size>::concat(const Args&... args)
 {
-  using namespace ep::internal;
   this->clear();
   epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
-  appendInternal(epSlice<epVarArg>(proxies, sizeof...(Args)));
+  appendInternal(Slice<epVarArg>(proxies, sizeof...(Args)));
   return *this;
 }
 template<size_t Size>
 template<typename... Args>
-inline epMutableString<Size>& epMutableString<Size>::append(const Args&... args)
+inline MutableString<Size>& MutableString<Size>::append(const Args&... args)
 {
-  using namespace ep::internal;
   epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
-  appendInternal(epSlice<epVarArg>(proxies, sizeof...(Args)));
+  appendInternal(Slice<epVarArg>(proxies, sizeof...(Args)));
   return *this;
 }
 template<size_t Size>
 template<typename... Args>
-inline epMutableString<Size>& epMutableString<Size>::format(epString format, const Args&... args)
+inline MutableString<Size>& MutableString<Size>::format(String format, const Args&... args)
 {
-  using namespace ep::internal;
   epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
-  formatInternal(format, epSlice<epVarArg>(proxies, sizeof...(Args)));
+  formatInternal(format, Slice<epVarArg>(proxies, sizeof...(Args)));
   return *this;
 }
 
 template<size_t Size>
-inline void epMutableString<Size>::appendInternal(epSlice<epVarArg> args)
+inline void MutableString<Size>::appendInternal(Slice<epVarArg> args)
 {
-  using namespace ep::internal;
-  size_t len = getLength(args);
+  size_t len = internal::getLength(args);
   this->reserve(this->length + len + 1);
-  ep::internal::concatenate(epSlice<char>(this->ptr + this->length, len), args);
+  internal::concatenate(Slice<char>(this->ptr + this->length, len), args);
   this->length += len;
   this->ptr[this->length] = 0;
 }
 template<size_t Size>
-inline void epMutableString<Size>::formatInternal(epString format, epSlice<epVarArg> args)
+inline void MutableString<Size>::formatInternal(String format, Slice<epVarArg> args)
 {
-  using namespace ep::internal;
-  size_t len = ep::internal::format(format, nullptr, args).length;
+  size_t len = internal::format(format, nullptr, args).length;
   this->reserve(len + 1);
-  ep::internal::format(format, epSlice<char>(this->ptr, len), args);
+  internal::format(format, Slice<char>(this->ptr, len), args);
   this->length = len;
   this->ptr[len] = 0;
 }
 
 
-// epSharedString
+// SharedString
 
 template<typename... Args>
-inline epSharedString epSharedString::concat(const Args&... args)
+inline SharedString SharedString::concat(const Args&... args)
 {
-  using namespace ep::internal;
   epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
-  return concatInternal(epSlice<epVarArg>(proxies, sizeof...(Args)));
+  return concatInternal(Slice<epVarArg>(proxies, sizeof...(Args)));
 }
 template<typename... Args>
-inline epSharedString epSharedString::format(epString format, const Args&... args)
+inline SharedString SharedString::format(String format, const Args&... args)
 {
-  using namespace ep::internal;
   epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
-  return formatInternal(format, epSlice<epVarArg>(proxies, sizeof...(Args)));
+  return formatInternal(format, Slice<epVarArg>(proxies, sizeof...(Args)));
 }
+
+} // namespace ep

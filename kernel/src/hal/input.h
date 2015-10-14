@@ -2,7 +2,7 @@
 #ifndef EPINPUT_H
 #define EPINPUT_H
 
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 
 // input API
 enum epInputDevice

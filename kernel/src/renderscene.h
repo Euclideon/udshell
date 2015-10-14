@@ -6,7 +6,7 @@
 #include "udMath.h"
 #include "udChunkedArray.h"
 
-#include "ep/epsharedptr.h"
+#include "ep/cpp/sharedptr.h"
 #include "components/view.h"
 #include "components/resources/udmodel.h"
 #include "components/resources/array.h"
@@ -48,24 +48,24 @@ struct GeomJob
   // render states
 };
 
-class RenderScene : public epRefCounted
+class RenderScene : public RefCounted
 {
 public:
   // ud thread
-  epArray<UDJob, 4> ud;
+  Array<UDJob, 4> ud;
 
   // render thread
-  epArray<GeomJob, 16> geom;
+  Array<GeomJob, 16> geom;
 
 protected:
   ~RenderScene()
   {
   }
 };
-typedef epSharedPtr<RenderScene> RenderSceneRef;
+typedef SharedPtr<RenderScene> RenderSceneRef;
 
 
-class RenderableView : public epRefCounted
+class RenderableView : public RefCounted
 {
 public:
   RenderableView();
@@ -100,7 +100,7 @@ public:
 protected:
   ~RenderableView() override;
 };
-typedef epSharedPtr<RenderableView> RenderableViewRef;
+typedef SharedPtr<RenderableView> RenderableViewRef;
 
 
 // renderer interface
@@ -112,7 +112,7 @@ public:
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
 
-  void AddUDRenderJob(epUniquePtr<RenderableView> job);
+  void AddUDRenderJob(UniquePtr<RenderableView> job);
 
 protected:
   friend class View;
@@ -132,10 +132,10 @@ protected:
 
   udMutex *pUDMutex;
   udSemaphore *pUDSemaphore, *pUDTerminateSemaphore;
-  epArray<epUniquePtr<RenderableView>, 4> udRenderQueue;
+  Array<UniquePtr<RenderableView>, 4> udRenderQueue;
 
-  epAVLTree<uint32_t, RenderShaderProgram*> shaderPrograms;
-  epAVLTree<uint32_t, RenderVertexFormat*> vertexFormats;
+  AVLTree<uint32_t, RenderShaderProgram*> shaderPrograms;
+  AVLTree<uint32_t, RenderVertexFormat*> vertexFormats;
 };
 
 } // namespace ep

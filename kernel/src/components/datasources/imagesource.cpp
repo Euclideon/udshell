@@ -5,7 +5,7 @@
 
 namespace ep
 {
-const epArray<const epString> ImageSource::extensions = { ".bmp", ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".tga", ".dds", ".webp" };
+const Array<const String> ImageSource::extensions = { ".bmp", ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".tga", ".dds", ".webp" };
 
 ComponentDesc ImageSource::descriptor =
 {
@@ -32,7 +32,7 @@ void ImageSource::Create(StreamRef spSource)
   void *pBuffer = epAlloc((size_t)len);
 
   // read file from source
-  epSlice<void> buf(pBuffer, (size_t)len);
+  Slice<void> buf(pBuffer, (size_t)len);
   buf = spSource->Read(buf);
   EPASSERT((int64_t)buf.length == len, "!");
 
@@ -48,14 +48,14 @@ void ImageSource::Create(StreamRef spSource)
     spImage->Allocate("{u8[4]}", 4, { s.width, s.height });
 
     // write image to to the array buffer
-    epSlice<void> mem = spImage->Map();
+    Slice<void> mem = spImage->Map();
     EPASSERT(mem.length == s.width*s.height*4, "Wrong size?!");
-//    mem.copyTo(epSlice<void>(s.pImage, s.width*s.height*4)); // TODO: use copyTo()...
+//    mem.copyTo(Slice<void>(s.pImage, s.width*s.height*4)); // TODO: use copyTo()...
     memcpy(mem.ptr, s.pImage, s.width*s.height*4);
     spImage->Unmap();
 
     // add resource
-    epMutableString64 buffer; buffer.concat("image", i);
+    MutableString64 buffer; buffer.concat("image", i);
     resources.Insert(buffer, spImage);
   }
 

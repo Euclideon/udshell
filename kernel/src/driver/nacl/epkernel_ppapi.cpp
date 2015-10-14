@@ -25,8 +25,6 @@
 #include "components/scene.h"
 #include "components/nodes/camera.h"
 
-using namespace ep;
-
 // Pepper module
 class epPepperModule : public pp::Module
 {
@@ -69,23 +67,23 @@ public:
 
   static void DebugPrintfCallback(const char *pString);
   static UDTHREADLOCAL udNewPepperInstance *pThreadLocalInstance;
-  void SendToJsCallback(epString senderUID, epString message, const epVariant &data);
+  void SendToJsCallback(String senderUID, String message, const Variant &data);
 };
 
 UDTHREADLOCAL udNewPepperInstance* udNewPepperInstance::pThreadLocalInstance = NULL; // This can't be nullptr it creates a compile error.
 
 
 // ---------------------------------------------------------------------------------------
-Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
   return udNewPepperInstance::pThreadLocalInstance;
 }
 
 // ---------------------------------------------------------------------------------------
-void udNewPepperInstance::SendToJsCallback(epString sender, epString message, const epVariant &data)
+void udNewPepperInstance::SendToJsCallback(String sender, String message, const Variant &data)
 {
   // TODO: Need to wrangle this to include the sender
-  epSharedString s = data.stringify();
+  SharedString s = data.stringify();
   PostMessageToJS(message.toStringz(), ":%s", (const char*)s.toStringz());
 }
 
@@ -371,10 +369,10 @@ void udNewPepperInstance::HandleMessage(const pp::Var& message)
   if (message.is_string())
   {
     std::string str = message.AsString();
-    epString data(str.c_str(), str.size());
+    String data(str.c_str(), str.size());
 
     // TODO: js needs to be adapted to include the destination (ie, $webview)
-    epString msg = data.popToken(":");
+    String msg = data.popToken(":");
     SendMessage("$webview", "$js", msg, data);
   }
 }

@@ -14,8 +14,8 @@ class MemStream : public Stream
 public:
   EP_COMPONENT(MemStream);
 
-  epSlice<void> Read(epSlice<void> buffer) override;
-  size_t Write(epSlice<const void> data) override;
+  Slice<void> Read(Slice<void> buffer) override;
+  size_t Write(Slice<const void> data) override;
 
   int64_t Seek(SeekOrigin rel, int64_t offset) override;
 
@@ -24,13 +24,13 @@ public:
 
   epEvent<> Changed;
 protected:
-  MemStream(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   ~MemStream();
 
   static const size_t DefaultBufferSize = 102400;
 
   BufferRef spBuffer;
-  epSlice<void> bufferSlice;
+  Slice<void> bufferSlice;
   OpenFlags oFlags;
 };
 

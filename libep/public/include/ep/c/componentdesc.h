@@ -1,8 +1,7 @@
-#pragma once
 #if !defined(_EP_COMPONENTDESC_H)
 #define _EP_COMPONENTDESC_H
 
-#include "ep/epvariant.h"
+#include "ep/c/variant.h"
 
 //extern "C" {
 

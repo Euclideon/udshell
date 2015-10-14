@@ -15,7 +15,7 @@ ComponentDesc Console::descriptor =
   "Standard in/out console", // description
 };
 
-Console::Console(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   bDbgOutput = false;
@@ -41,18 +41,18 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid
     pOut = stdout;
 }
 
-epSlice<void> Console::Read(epSlice<void> buffer)
+Slice<void> Console::Read(Slice<void> buffer)
 {
   size_t read = fread(buffer.ptr, 1, buffer.length, pIn);
   return buffer.slice(0, read);
 }
 
-size_t Console::Write(epSlice<const void> data)
+size_t Console::Write(Slice<const void> data)
 {
   if (bDbgOutput)
   {
 #if defined(EP_WINDOWS)
-    epString s((const char*)data.ptr, data.length);
+    String s((const char*)data.ptr, data.length);
     OutputDebugString((LPCSTR)s.toStringz());
 #endif
     return data.length;

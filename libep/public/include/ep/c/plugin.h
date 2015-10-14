@@ -1,8 +1,7 @@
-#pragma once
 #if !defined(_EP_PLUGIN_H)
 #define _EP_PLUGIN_H
 
-#include "ep/epplatform.h"
+#include "ep/c/platform.h"
 #include "ep/epversion.h"
 
 #if EP_SHAREDLIB

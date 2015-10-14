@@ -3,7 +3,7 @@
 #define EPCOMPONENTPLUGIN_H
 
 #include "components/component.h"
-#include "ep/epcomponent.h"
+#include "ep/c/component.h"
 
 namespace ep {
 
@@ -14,13 +14,13 @@ public:
 
 
 private:
-  ComponentPlugin(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  ComponentPlugin(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Component(pType, pKernel, uid, initParams)
   {
     pCallbacks = pType->pExternalDesc->pOverrides;
     if (pCallbacks->pCreateInstance)
     {
-      pUserData = pCallbacks->pCreateInstance((epComponent*)this, initParams.params.ptr, initParams.params.length);
+      pUserData = pCallbacks->pCreateInstance((epComponent*)this, (const epKeyValuePair*)initParams.params.ptr, initParams.params.length);
       if (!pUserData)
         throw epR_Failure_;
     }
@@ -38,10 +38,10 @@ private:
     return epR_Success;
   }
 
-  epResult ReceiveMessage(epString message, epString sender, const epVariant &data) override
+  epResult ReceiveMessage(String message, String sender, const Variant &data) override
   {
     if (pCallbacks->pReceiveMessage)
-      return pCallbacks->pReceiveMessage((epComponent*)this, pUserData, message, sender, &data);
+      return pCallbacks->pReceiveMessage((epComponent*)this, pUserData, message, sender, (const epVariant*)&data);
     return epR_Success;
   }
 

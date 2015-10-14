@@ -2,7 +2,7 @@
 #ifndef EP_HALTIMER_H
 #define EP_HALTIMER_H
 
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 
 struct HalTimer;
 

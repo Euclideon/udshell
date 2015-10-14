@@ -8,12 +8,12 @@
 
 #include "../components/component_qt.h"
 
-#include "ep/epvariant.h"
+#include "ep/cpp/variant.h"
 
 
 // Qt type conversion to/from UD
 
-inline epString AllocUDStringFromQString(const QString &string)
+inline String AllocUDStringFromQString(const QString &string)
 {
   QByteArray byteArray = string.toUtf8();
 
@@ -22,42 +22,42 @@ inline epString AllocUDStringFromQString(const QString &string)
   char *pString = epAllocType(char, length, epAF_None);
   memcpy(pString, byteArray.data(), length);
 
-  return epString(pString, length - 1);
+  return String(pString, length - 1);
 }
 
-inline epVariant epToVariant(const QString &string)
+inline Variant epToVariant(const QString &string)
 {
-  return epVariant(AllocUDStringFromQString(string), true);
+  return Variant(AllocUDStringFromQString(string), true);
 }
 
-inline void epFromVariant(const epVariant &variant, QString *pString)
+inline void epFromVariant(const Variant &variant, QString *pString)
 {
-  epString s = variant.asString();
+  String s = variant.asString();
   if (!s.empty())
     *pString = QString::fromUtf8(s.ptr, static_cast<int>(s.length));
 }
 
-inline epVariant epToVariant(const QVariant &var)
+inline Variant epToVariant(const QVariant &var)
 {
   if (!var.isValid() || var.isNull())
-    return epVariant();
+    return Variant();
 
   switch (static_cast<QMetaType::Type>(var.type()))
   {
-    // epVariant::Type::Null
+    // Variant::Type::Null
     case QMetaType::Void:
-      return epVariant();
+      return Variant();
 
-    // epVariant::Type::Bool
+    // Variant::Type::Bool
     case QMetaType::Bool:
-      return epVariant(var.toBool());
+      return Variant(var.toBool());
 
-    // epVariant::Type::Float
+    // Variant::Type::Float
     case QMetaType::Float:
     case QMetaType::Double:
-      return epVariant(var.toDouble());
+      return Variant(var.toDouble());
 
-    // epVariant::Type::Int
+    // Variant::Type::Int
     case QMetaType::Char:
     case QMetaType::UChar:
     case QMetaType::Short:
@@ -68,14 +68,14 @@ inline epVariant epToVariant(const QVariant &var)
     case QMetaType::ULong:
     case QMetaType::LongLong:
     case QMetaType::ULongLong:
-      return epVariant((int64_t)var.toLongLong());
+      return Variant((int64_t)var.toLongLong());
 
-    // epVariant::Type::String
+    // Variant::Type::String
     // TODO: optimise - reduce unnecessary copies
     case QMetaType::QByteArray:
     case QMetaType::QString:
     case QMetaType::QChar:
-      return epVariant(AllocUDStringFromQString(var.toString()), true);
+      return Variant(AllocUDStringFromQString(var.toString()), true);
 
     case QMetaType::QObjectStar:
     {
@@ -83,87 +83,87 @@ inline epVariant epToVariant(const QVariant &var)
 
       qt::QtEPComponent *pQC = qobject_cast<qt::QtEPComponent*>(pQObj);
       if (pQC)
-        return epVariant(pQC->GetComponent());
+        return Variant(pQC->GetComponent());
 
       udDebugPrintf("epToVariant: Unsupported QObject conversion '%s'", pQObj->metaObject()->className());
 
       // TODO: create generic QtComponent which thinly wraps a QObject
 //      pKernel->CreateComponent<QtComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
-      return epVariant();
+      return Variant();
     }
 
     // TODO: serialize other types?
 
-    // epVariant::Type::Array
+    // Variant::Type::Array
 
-    // epVariant::Type::AssocArray
+    // Variant::Type::AssocArray
 
     default:
       udDebugPrintf("epToVariant: Unsupported type '%s' (support me!)\n", var.typeName());
-      return epVariant();
+      return Variant();
   };
 }
 
-inline void epFromVariant(const epVariant &variant, QVariant *pVariant)
+inline void epFromVariant(const Variant &variant, QVariant *pVariant)
 {
   EPASSERT(pVariant->isNull(), "pVariant is not null");
 
   switch (variant.type())
   {
-    case epVariant::Type::Null:
+    case Variant::Type::Null:
       // *pVariant is already null right?
       break;
 
-    case epVariant::Type::Bool:
+    case Variant::Type::Bool:
       pVariant->setValue(variant.asBool());
       break;
 
-    case epVariant::Type::Int:
+    case Variant::Type::Int:
       pVariant->setValue(variant.asInt());
       break;
 
-    case epVariant::Type::Float:
+    case Variant::Type::Float:
       pVariant->setValue(variant.asFloat());
       break;
 
-    case epVariant::Type::Component:
+    case Variant::Type::Component:
       pVariant->setValue(qt::QtEPComponent(variant.asComponent()));
       break;
 
-    //case epVariant::Type::Delegate:
+    //case Variant::Type::Delegate:
 
     // TODO: optimise?
-    case epVariant::Type::String:
+    case Variant::Type::String:
       pVariant->setValue(variant.as<QString>());
       break;
 
-    //case epVariant::Type::Array:
+    //case Variant::Type::Array:
 
-    //case epVariant::Type::AssocArray:
+    //case Variant::Type::AssocArray:
 
     default:
       udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
   };
 }
 
-inline epVariant epToVariant(const QJSValue &jsValue)
+inline Variant epToVariant(const QJSValue &jsValue)
 {
   return epToVariant(jsValue.toVariant());
 }
 
-inline void epFromVariant(const epVariant &variant, QJSValue *pJSValue)
+inline void epFromVariant(const Variant &variant, QJSValue *pJSValue)
 {
   switch (variant.type())
   {
-    case epVariant::Type::Null:
+    case Variant::Type::Null:
       *pJSValue = QJSValue(QJSValue::NullValue);
       break;
 
-    case epVariant::Type::Bool:
+    case Variant::Type::Bool:
       *pJSValue = QJSValue(variant.asBool());
       break;
 
-    case epVariant::Type::Int:
+    case Variant::Type::Int:
     {
       int64_t i = variant.asInt();
       if (i >= 0)
@@ -173,17 +173,17 @@ inline void epFromVariant(const epVariant &variant, QJSValue *pJSValue)
       break;
     }
 
-    case epVariant::Type::Float:
+    case Variant::Type::Float:
       *pJSValue = QJSValue(variant.asFloat());
       break;
 
-    //case epVariant::Type::Component:
+    //case Variant::Type::Component:
 
-    case epVariant::Type::String:
+    case Variant::Type::String:
       *pJSValue = QJSValue(variant.asString().toStringz());
 
-    //case epVariant::Type::Array:
-    //case epVariant::Type::AssocArray:
+    //case Variant::Type::Array:
+    //case Variant::Type::AssocArray:
 
     default:
       udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
@@ -193,9 +193,9 @@ inline void epFromVariant(const epVariant &variant, QJSValue *pJSValue)
 namespace ep {
 namespace internal {
 
-template<> struct StringifyProxy<QChar*>        { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const QChar *pS = *(QChar**)pData;       return epStringify(buffer, format, epWString((const char16_t*)pS, epStrlen((const char16_t*)pS)), pArgs); } static const size_t intify = 0; };
-template<> struct StringifyProxy<const QChar*>  { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const QChar *pS = *(const QChar**)pData; return epStringify(buffer, format, epWString((const char16_t*)pS, epStrlen((const char16_t*)pS)), pArgs); } static const size_t intify = 0; };
-template<> struct StringifyProxy<QString>       { inline static ptrdiff_t stringify(epSlice<char> buffer, epString format, const void *pData, const epVarArg *pArgs) { const QString *pS = (QString*)pData;     return epStringify(buffer, format, epWString((const char16_t*)pS->data(), pS->size()), pArgs); }            static const size_t intify = 0; };
+template<> struct StringifyProxy<QChar*>        { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const QChar *pS = *(QChar**)pData;       return ::epStringify(buffer, format, WString((const char16_t*)pS, epStrlen((const char16_t*)pS)), pArgs); } static const size_t intify = 0; };
+template<> struct StringifyProxy<const QChar*>  { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const QChar *pS = *(const QChar**)pData; return ::epStringify(buffer, format, WString((const char16_t*)pS, epStrlen((const char16_t*)pS)), pArgs); } static const size_t intify = 0; };
+template<> struct StringifyProxy<QString>       { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const QString *pS = (QString*)pData;     return ::epStringify(buffer, format, WString((const char16_t*)pS->data(), pS->size()), pArgs); }            static const size_t intify = 0; };
 
 } // namespace internal
 } // namespace ep

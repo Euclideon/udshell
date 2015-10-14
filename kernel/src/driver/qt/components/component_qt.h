@@ -12,7 +12,7 @@ namespace qt {
   class QtKernel;
 
   namespace internal {
-    epResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
+    epResult SetupFromQmlFile(InitParams initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal);
   }
 
 
@@ -56,11 +56,11 @@ signals:
   void completed();
 
 private:
-  friend epResult internal::SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal);
-  QtEPComponent(epWeakPtr<ep::Component> wpComp) : QObject(nullptr), wpComponent(wpComp) {}
+  friend epResult internal::SetupFromQmlFile(InitParams initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal);
+  QtEPComponent(WeakPtr<Component> wpComp) : QObject(nullptr), wpComponent(wpComp) {}
 
   ep::ComponentRef spComponent;
-  epWeakPtr<ep::Component> wpComponent; // used to avoid circular references
+  WeakPtr<Component> wpComponent; // used to avoid circular references
 };
 
 } // namespace qt
