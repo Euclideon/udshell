@@ -174,8 +174,9 @@ struct epMutableString : public epArray<char, Size>
   template<bool Front = true, bool Back = true>
   epString trim() const                                                                 { return ((epString*)this)->trim<Front, Back>(); }
 
-  template<bool skipEmptyTokens = true>
-  epString popToken(epString delimiters = " \t\r\n")                                    { return ((epString*)this)->popToken<skipEmptyTokens>(delimiters); }
+  // TODO: Add proper popToken support to epMutableString which copies the remaining chars to the start of the buffer
+  // template<bool skipEmptyTokens = true>
+  // epString popToken(epString delimiters = " \t\r\n")                                    { return ((epString*)this)->popToken<skipEmptyTokens>(delimiters); }
   template<bool skipEmptyTokens = true>
   epSlice<epString> tokenise(epSlice<epString> tokens, epString delimiters = " \t\r\n") { return ((epString*)this)->tokenise<skipEmptyTokens>(tokens, delimiters); }
 
