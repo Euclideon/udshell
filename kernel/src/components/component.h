@@ -88,7 +88,6 @@ public:
   template<typename ...Args> void LogInfo(int level, epString text, Args... args) const;
   template<typename ...Args> void LogScript(epString text, Args... args) const;
   template<typename ...Args> void LogTrace(epString text, Args... args) const;
-  template<typename ...Args> void Log(epString text, Args... args) const; // Calls LogDebug() with level 2
 
   void SetName(epString name) { this->name = name; }
 
@@ -216,18 +215,6 @@ inline void Component::LogTrace(epString text, Args... args) const
     LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Trace, uid);
   }
 }
-template<typename ...Args>
-inline void Component::Log(epString text, Args... args) const
-{
-  if (sizeof...(Args) == 0)
-    LogInternal(LogDefaults::LogLevel, text, LogCategories::Debug, uid);
-  else
-  {
-    epMutableString128 tmp; tmp.format(text, args...);
-    LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Debug, uid);
-  }
-}
-
 
 template<typename T>
 inline epSharedPtr<T> component_cast(ComponentRef pComponent)

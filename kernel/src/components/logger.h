@@ -68,20 +68,16 @@ EP_ENUM(LogDefaults,
 
 struct LogLine
 {
-  LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID, time_t timestamp) :
-    level(level), category(category), timestamp(timestamp)
-  {
-    this->text = text;
-    this->componentUID = componentUID;
-  }
+  LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID);
 
-  epSharedString ToString(LogFormatSpecs format) const;
+  epSharedString ToString(LogFormatSpecs format = LogDefaults::Format) const;
 
   int level;
   epSharedString text;
   LogCategories category;
   epSharedString componentUID;
   time_t timestamp;
+  double ordering;
 };
 ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs));
 
@@ -159,7 +155,7 @@ protected:
   Logger(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
   LogStream *FindLogStream(StreamRef spStream) const;
 
-  epArray<LogStream, 1> streamList;
+  epArray<LogStream> streamList;
   LogFilter filter;
   epArray<LogLine> internalLog;
   bool bEnabled = true, bLogging = false;

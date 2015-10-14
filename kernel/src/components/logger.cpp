@@ -1,6 +1,6 @@
 #include "components/stream.h"
-
-#include <time.h>
+#include "ep/epdatetime.h"
+#include "hal/haltimer.h"
 
 namespace ep
 {
@@ -163,83 +163,47 @@ LogStream *Logger::FindLogStream(StreamRef spStream) const
 
 void Logger::Log(int level, epString text, LogCategories category, epString componentUID)
 {
-  time_t ti = time(nullptr);
-
-  if (bLogging)
+  if (!this || bLogging)
     return;
   bLogging = true;
 
-  /** Add log line to the internal log **/
+  int numLines = 0;
 
-  internalLog.pushBack(LogLine(level, text, category, componentUID, ti));
-  Changed.Signal();
-  LogLine &line = internalLog.back();
-
-  /** Output to streams **/
-  if(!filter.FilterLogLine(line))
+  // Add log line to the internal log
+  while (!text.empty())
   {
-    bLogging = false;
-    return;
+    epString token = text.popToken("\n");
+    if (!token.empty())
+    {
+      numLines++;
+      internalLog.pushBack(LogLine(level, token, category, componentUID));
+      Changed.Signal();
+    }
   }
 
-  for (auto &s : streamList)
+  for (int i = 0; i < numLines; i++)
   {
-    if (s.filter.FilterLogLine(line))
+    LogLine &line = internalLog[internalLog.length - numLines + i];
+
+    // Output to streams
+    if(!filter.FilterLogLine(line))
     {
-      epSharedString out = line.ToString(s.format);
-      s.spStream->WriteLn(out);
-      s.spStream->Flush();
+      bLogging = false;
+      return;
+    }
+
+    for (auto &s : streamList)
+    {
+      if (s.filter.FilterLogLine(line))
+      {
+        epSharedString out = line.ToString(s.format);
+        s.spStream->WriteLn(out);
+        s.spStream->Flush();
+      }
     }
   }
 
   bLogging = false;
-}
-
-ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
-{
-  epSharedString out = line.ToString(LogDefaults::Format);
-
-  // if we're only counting
-  if (!buffer.ptr)
-    return out.length;
-
-  // if the buffer is too small
-  if (buffer.length < out.length)
-    return buffer.length - out.length;
-
-  out.copyTo(buffer);
-
-  return out.length;
-}
-
-epSharedString LogLine::ToString(LogFormatSpecs format) const
-{
-  epMutableString<256> out;
-  char timeStr[64];
-
-#if defined(EP_WINDOWS)
-  tm _tm, *pTm = &_tm;
-  localtime_s(&_tm, &timestamp);
-#else
-  tm *pTm = localtime(&timestamp);
-#endif
-  strftime(timeStr, sizeof(timeStr), "[%d/%m/%d %H:%M:%S]", pTm);
-
-  out.format("{0}{1}{2,?10}{3}{4}{5}{6}{7}{8}{9}",
-    ((format & LogFormatSpecs::Timestamp) ? (const char*)timeStr : ""),
-    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? "(" : ""),
-    level,
-    ((format & (LogFormatSpecs::ComponentUID | LogFormatSpecs::Level)) && componentUID != nullptr ? ", " : ""),
-    ((format & LogFormatSpecs::ComponentUID) ? componentUID : ""),
-    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? ")" : ""),
-    ((format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? " " : ""),
-    ((format & LogFormatSpecs::Category) ? const_cast<LogCategories &>(category).StringOf() : ""),
-    ((format & LogFormatSpecs::Category) ? ": " : ""),
-    text,
-    format & LogFormatSpecs::Level
-  );
-
-  return out;
 }
 
 void Logger::AddStream(StreamRef spStream, LogFormatSpecs format)
@@ -265,7 +229,7 @@ LogStream *Logger::GetLogStream(StreamRef spStream)
   return FindLogStream(spStream);
 }
 
-/** Stream filter helper functions **/
+// Stream filter helper functions
 
 int Logger::ResetStreamFilter(StreamRef spStream)
 {
@@ -320,7 +284,7 @@ int Logger::SetStreamComponents(StreamRef spStream, epSlice<const epString> comp
   return -1;
 }
 
-/** LogFilter functions **/
+// LogFilter functions
 
 int LogFilter::GetLevel(LogCategories category) const
 {
@@ -370,7 +334,7 @@ bool LogFilter::FilterLogLine(LogLine &line) const
     return false;
 
   // Check component ids filter
-  if (line.componentUID != nullptr && !componentsFilter.empty())
+  if (!componentsFilter.empty())
   {
     bool componentFound = false;
     for (epString comp : componentsFilter)
@@ -386,6 +350,63 @@ bool LogFilter::FilterLogLine(LogLine &line) const
   }
 
   return true;
+}
+
+LogLine::LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID) :
+    level(level), category(category)
+{
+  timestamp = time(nullptr);
+  ordering = epPerformanceCounter();
+
+  this->text = text;
+  this->componentUID = componentUID;
+}
+
+ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
+{
+  epSharedString out = line.ToString(LogDefaults::Format);
+
+  // if we're only counting
+  if (!buffer.ptr)
+    return out.length;
+
+  // if the buffer is too small
+  if (buffer.length < out.length)
+    return buffer.length - out.length;
+
+  out.copyTo(buffer);
+
+  return out.length;
+}
+
+epSharedString LogLine::ToString(LogFormatSpecs format) const
+{
+  epMutableString<256> out;
+  char timeStr[64];
+
+#if defined(EP_WINDOWS)
+  tm _tm, *pTm = &_tm;
+  localtime_s(&_tm, &timestamp);
+#else
+  tm *pTm = localtime(&timestamp);
+#endif
+  strftime(timeStr, sizeof(timeStr), "[%d/%m/%d %H:%M:%S]", pTm);
+
+  out.format("{0}{1}{2,?10}{3}{4}{5}{6}{7}{8}{9}",
+    ((format & LogFormatSpecs::Timestamp) ? (const char*)timeStr : ""),
+    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? "(" : ""),
+    level,
+    ((format & (LogFormatSpecs::ComponentUID | LogFormatSpecs::Level)) && componentUID != nullptr ? ", " : ""),
+    ((format & LogFormatSpecs::ComponentUID) ? componentUID : ""),
+    ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? ")" : ""),
+    ((format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? " " : ""),
+    ((format & LogFormatSpecs::Category) ? category.StringOf() : ""),
+    ((format & LogFormatSpecs::Category) ? ": " : ""),
+    text,
+    format & LogFormatSpecs::Level
+    );
+
+  return out;
 }
 
 } // namespace ep

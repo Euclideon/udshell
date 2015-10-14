@@ -475,16 +475,6 @@ void Kernel::Exec(epString code)
   spLua->Execute(code);
 }
 
-// Helper functions for the kernel's logger
-void Kernel::LogError(epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Error, componentUID); }
-void Kernel::LogWarning(int level, epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Warning, componentUID); }
-void Kernel::LogDebug(int level, epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Debug, componentUID); }
-void Kernel::LogInfo(int level, epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(level, text, LogCategories::Info, componentUID); }
-void Kernel::LogScript(epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Script, componentUID); }
-void Kernel::LogTrace(epString text, epString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, componentUID); }
-// Calls LogDebug() with level 2
-void Kernel::Log(epString text, const epString componentUID) { if (!spLogger) return; spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Debug, componentUID); }
-
 epResult Kernel::RegisterExtensions(const ComponentDesc *pDesc, const epSlice<const epString> exts)
 {
   for (const epString &e : exts)
