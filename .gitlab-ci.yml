@@ -1,20 +1,20 @@
 windows_shell_debug_64:
   stage: build
-  script: "build\\build.sh epshell Debug x64"
+  script: "build\\build.sh epshell Debug x64 merge"
   tags:
     - windows
     - vs2013
 
 windows_shell_release_64:
   stage: build
-  script: "build\\build.sh epshell Release x64"
+  script: "build\\build.sh epshell Release x64 merge"
   tags:
     - windows
     - vs2013
 
 linux_shell_deb:
   stage: build
-  script: "./build/build.sh epshell Release x64"
+  script: "./build/build.sh epshell Release x64 merge"
   tags:
     - linux
     - deb
@@ -22,7 +22,7 @@ linux_shell_deb:
 
 linux_shell_rpm:
   stage: build
-  script: "./build/build.sh epshell Release x64"
+  script: "./build/build.sh epshell Release x64 merge"
   tags:
     - linux
     - rpm
@@ -30,35 +30,35 @@ linux_shell_rpm:
  
 windows_viewer_debug_64:
   stage: build
-  script: "build\\build.sh epviewer Debug x64"
+  script: "build\\build.sh epviewer Debug x64 merge"
   tags:
     - windows
     - vs2013
 
 windows_viewer_release_64:
   stage: build
-  script: "build\\build.sh epviewer Release x64"
+  script: "build\\build.sh epviewer Release x64 merge"
   tags:
     - windows
     - vs2013
    
 windows_viewer_debug_32:
   stage: build
-  script: "build\\build.sh epviewer Debug win32"
+  script: "build\\build.sh epviewer Debug win32 merge"
   tags:
     - windows
     - vs2013
 
 windows_viewer_release_32:
   stage: build
-  script: "build\\build.sh epviewer Release win32"
+  script: "build\\build.sh epviewer Release win32 merge"
   tags:
     - windows
     - vs2013
     
 linux_viewer_deb:
   stage: build
-  script: "./build/build.sh epviewer Release x64"
+  script: "./build/build.sh epviewer Release x64 merge"
   tags:
     - linux
     - deb
@@ -66,7 +66,7 @@ linux_viewer_deb:
 
 linux_viewer_rpm:
   stage: build
-  script: "./build/build.sh epviewer Release x64"
+  script: "./build/build.sh epviewer Release x64 merge"
   tags:
     - linux
     - rpm

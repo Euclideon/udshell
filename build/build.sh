@@ -47,6 +47,16 @@ function execute_build() {
   fi
 }
 
+function merge_master() {
+  git merge master
+  if [ $? -ne 0 ]; then 
+    echo "merged with master failed"
+    git merge --abort
+    exit 3; 
+  fi
+  echo "merged successfully with master"
+}
+
 if [ $# -eq 0 ]; then # if no args just build shell debug x64
   git submodule update --init --recursive
   if [ $? -ne 0 ]; then exit 3; fi
@@ -90,7 +100,12 @@ else
   if [ $# -eq 3 ]; then 
     execute_build $1 $2 $3
   else
-    execute_build $1 $2 $3 $4    
+    if [ $4 == "merge" ]; then
+      merge_master
+      execute_build $1 $2 $3
+    else
+      execute_build $1 $2 $3 $4    
+    fi
   fi
 fi
  
