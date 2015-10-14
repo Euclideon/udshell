@@ -39,6 +39,9 @@ public:
   void SetRenderOptions(const udRenderOptions &options) { this->options = options; }
   const udRenderOptions& GetRenderOptions() const { return options; }
 
+  void Activate();
+  void Deactivate();
+
   Event<> Dirty;
   Event<> FrameReady;
 
@@ -70,11 +73,22 @@ protected:
   void(*pPostRenderCallback)(ViewRef, SceneRef) = nullptr;
 
   View(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
-    : Component(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
+    : Component(pType, pKernel, uid, initParams)
+  {
+    memset(&options, 0, sizeof(options));
+
+    // TODO: Remove this when Unsubscribe can be called with some kind of subscription identifier
+    updateFunc = Delegate<void(double)>(this, &View::Update);
+  }
+
+  ~View() { Deactivate(); }
 
   void SetLatestFrame(UniquePtr<RenderableView> spFrame);
-
+  void Update(double timeStep);
   void OnDirty();
+
+  // TODO: Remove this when Unsubscribe can be called with some kind of subscription identifier
+  Delegate<void(double)> updateFunc;
 };
 
 } // namespace ep

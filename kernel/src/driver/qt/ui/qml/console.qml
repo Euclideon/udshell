@@ -8,9 +8,7 @@ Item {
   id: consoleWin
   visible: false
   enabled: false
-  anchors.bottom: parent.bottom
-  width: parent.width
-  height: parent.height / 2
+  anchors.fill: parent
 
   property var consoleOut
   property var consoleIn
@@ -282,7 +280,7 @@ Item {
         Rectangle {
           color: "black"
           opacity: 0.9
-          Layout.preferredHeight: innerRect.height + 1
+          Layout.preferredHeight: innerRect.height + 2
           Layout.fillWidth: true
           Rectangle {
             id: innerRect

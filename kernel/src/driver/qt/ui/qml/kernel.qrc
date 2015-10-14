@@ -6,6 +6,7 @@
     <file>console.qml</file>
     <file>consolefilter.qml</file>
     <file>popupokcancel.qml</file>
-	  <file>popup.qml</file>
+    <file>popup.qml</file>
+    <file>activities/viewer/viewer.qml</file>
   </qresource>
 </RCC>

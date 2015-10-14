@@ -168,4 +168,24 @@ void View::OnDirty()
   Dirty.Signal();
 }
 
+void View::Update(double timeStep)
+{
+  CameraRef spCamera = GetCamera();
+  if (spCamera)
+  {
+    if (spCamera->Update(timeStep))
+      ForceDirty();
+  }
+}
+
+void View::Activate()
+{
+  pKernel->UpdatePulse.Subscribe(updateFunc);
+}
+
+void View::Deactivate()
+{
+  pKernel->UpdatePulse.Unsubscribe(updateFunc);
+}
+
 } // namespace ep
