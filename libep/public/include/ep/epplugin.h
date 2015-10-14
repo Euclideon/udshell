@@ -7,7 +7,11 @@
 
 #if EP_SHAREDLIB
 # if defined(EP_COMPILER_VISUALC)
-#   pragma comment (linker, "/export:epPlugin_Init")
+#   if defined(EP_ARCH_X86)
+#     pragma comment (linker, "/export:_epPlugin_Init")
+#   else
+#     pragma comment (linker, "/export:epPlugin_Init")
+#   endif
 # endif
 #endif
 

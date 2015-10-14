@@ -320,8 +320,12 @@ bool PluginManager::LoadPlugin(epString filename)
   HMODULE hDll = LoadLibraryW(widePath);
   if (hDll == NULL)
     return false;
-
-  epPlugin_InitProc *pInit = (epPlugin_InitProc*)GetProcAddress(hDll, "epPlugin_Init");
+#if defined(EP_ARCH_X86)
+  const char *pFuncName = "_epPlugin_Init";
+#else
+  const char *pFuncName = "epPlugin_Init";
+#endif
+  epPlugin_InitProc *pInit = (epPlugin_InitProc*)GetProcAddress(hDll, pFuncName);
   if (!pInit)
   {
     FreeLibrary(hDll);
