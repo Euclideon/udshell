@@ -7,7 +7,7 @@
 namespace ep
 {
 
-static epArrayDataFormat GetElementType(epString type)
+static epArrayDataFormat GetElementType(String type)
 {
   static const struct TypeMap
   {
@@ -52,11 +52,11 @@ RenderArray::RenderArray(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, Arra
   epArrayDataFormat elements[16];
   size_t numElements = 0;
 
-  epString type = spArrayBuffer->GetType();
+  String type = spArrayBuffer->GetType();
   if (type[0] == '{')
     type = type.slice(1, type.length-1);
 
-  epString element;
+  String element;
   while ((element = type.popToken(",")) != nullptr)
     elements[numElements++] = GetElementType(type);
 
@@ -70,7 +70,7 @@ RenderArray::RenderArray(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, Arra
     pArray = epVertex_CreateIndexBuffer(elements[0]);
   }
 
-  epSlice<const void> data = spArrayBuffer->MapForRead();
+  Slice<const void> data = spArrayBuffer->MapForRead();
   epVertex_SetArrayBufferData(pArray, data.ptr, data.length);
   spArrayBuffer->Unmap();
 }
@@ -123,7 +123,7 @@ size_t RenderShaderProgram::numAttributes()
 {
   return epShader_GetNumAttributes(pProgram);
 }
-epString RenderShaderProgram::getAttributeName(size_t i)
+String RenderShaderProgram::getAttributeName(size_t i)
 {
   return epShader_GetAttributeName(pProgram, i);
 }
@@ -131,7 +131,7 @@ size_t RenderShaderProgram::numUniforms()
 {
   return epShader_GetNumUniforms(pProgram);
 }
-epString RenderShaderProgram::getUniformName(size_t i)
+String RenderShaderProgram::getUniformName(size_t i)
 {
   return epShader_GetUniformName(pProgram, i);
 }

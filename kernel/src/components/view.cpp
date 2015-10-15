@@ -41,9 +41,9 @@ ComponentDesc View::descriptor =
   "View",    // displayName
   "Is a view", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr,
-  epSlice<CEventDesc>(events, UDARRAYSIZE(events)) // events
+  Slice<CEventDesc>(events, UDARRAYSIZE(events)) // events
 };
 
 bool View::InputEvent(const epInputEvent &ev)
@@ -129,7 +129,7 @@ void View::GetRenderDimensions(int *pWidth, int *pHeight) const
     *pHeight = renderHeight;
 }
 
-void View::SetLatestFrame(epUniquePtr<RenderableView> spFrame)
+void View::SetLatestFrame(UniquePtr<RenderableView> spFrame)
 {
   spLatestFrame = spFrame;
   FrameReady.Signal();
@@ -139,7 +139,7 @@ void View::OnDirty()
 {
   if (spScene && spCamera)
   {
-    epUniquePtr<RenderableView> spRenderView = epUniquePtr<RenderableView>(new RenderableView);
+    UniquePtr<RenderableView> spRenderView = UniquePtr<RenderableView>(new RenderableView);
 
     Renderer *pRenderer = pKernel->GetRenderer();
     spRenderView->pRenderEngine = pRenderer->GetRenderEngine();

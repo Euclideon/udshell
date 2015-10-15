@@ -3,13 +3,13 @@
 #include "renderscene.h"
 #include "kernel.h"
 #include "udRender.h"
-#include "ep/epdelegate.h"
+#include "ep/cpp/delegate.h"
 #include "components/datasources/uddatasource.h"
 
 namespace ep
 {
 
-static const epSlice<const EnumKVP> renderFlags =
+static const Slice<const EnumKVP> renderFlags =
 {
   { "udRenderFlags::None",             udRF_None },
   { "udRenderFlags::NoOrtho",          udRF_NoOrtho },
@@ -134,12 +134,12 @@ ComponentDesc UDNode::descriptor =
   "UDNode",  // displayName
   "Is a UD model node", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
 
-int UDNode::Load(epString name, bool useStreamer)
+int UDNode::Load(String name, bool useStreamer)
 {
   udResult result = udR_Failure_;
   if (source.empty())
@@ -215,3 +215,58 @@ BoundingVolume UDNode::GetBoundingVolume() const
 }
 
 } // namespace ep
+
+Variant epToVariant(const BoundingVolume &volume)
+{
+  KeyValuePair *pPairs = epAllocType(KeyValuePair, 6, epAF_None);
+  if (pPairs)
+  {
+    Slice<KeyValuePair> slice(pPairs, 6);
+
+    new (&slice[0]) KeyValuePair("minx", volume.min.x);
+    new (&slice[1]) KeyValuePair("miny", volume.min.y);
+    new (&slice[2]) KeyValuePair("minz", volume.min.z);
+    new (&slice[3]) KeyValuePair("maxx", volume.max.x);
+    new (&slice[4]) KeyValuePair("maxy", volume.max.y);
+    new (&slice[5]) KeyValuePair("maxz", volume.max.z);
+    return Variant(slice, true);
+  }
+
+  return Variant();
+}
+
+void epFromVariant(const Variant &variant, BoundingVolume *pVolume)
+{
+  pVolume->min.x = variant["minx"].as<double>();
+  pVolume->min.y = variant["miny"].as<double>();
+  pVolume->min.z = variant["minz"].as<double>();
+  pVolume->max.x = variant["maxx"].as<double>();
+  pVolume->max.y = variant["maxy"].as<double>();
+  pVolume->max.z = variant["maxz"].as<double>();
+}
+
+Variant epToVariant(const udRenderClipArea& area)
+{
+  KeyValuePair *pPairs = epAllocType(KeyValuePair, 4, epAF_None);
+  if (pPairs)
+  {
+    Slice<KeyValuePair> slice(pPairs, 4);
+
+    new (&slice[0]) KeyValuePair("minx", area.minX);
+    new (&slice[1]) KeyValuePair("miny", area.minY);
+    new (&slice[2]) KeyValuePair("maxx", area.maxX);
+    new (&slice[3]) KeyValuePair("maxy", area.maxX);
+
+    return Variant(slice, true);
+  }
+
+  return Variant();
+}
+
+void epFromVariant(const Variant &variant, udRenderClipArea *pArea)
+{
+  pArea->minX = variant["minx"].as<uint32_t>();
+  pArea->minY = variant["miny"].as<uint32_t>();
+  pArea->maxX = variant["maxx"].as<uint32_t>();
+  pArea->maxY = variant["maxy"].as<uint32_t>();
+}

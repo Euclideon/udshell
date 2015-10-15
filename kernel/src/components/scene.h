@@ -51,7 +51,7 @@ protected:
   udRenderModel renderModels[16];
   size_t numRenderModels = 0;
 
-  Scene(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  Scene(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   virtual ~Scene();
 };
 

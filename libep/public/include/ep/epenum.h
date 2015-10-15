@@ -2,7 +2,7 @@
 #if !defined(_EPENUM_H)
 #define _EPENUM_H
 
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 #include "ep/epforeach.h"
 #include <type_traits>
 
@@ -14,9 +14,9 @@ struct epBitfield {};
 
 struct epEnumDesc
 {
-  epString name;
-  epSlice<const epString> keys;
-  void (*stringify)(size_t val, epMutableString64 &s);
+  String name;
+  Slice<const String> keys;
+  void (*stringify)(size_t val, MutableString64 &s);
 };
 
 #define EP_ENUM(NAME, ...)                                                        \
@@ -34,9 +34,9 @@ struct epEnumDesc
     NAME() : v(Invalid) {}                                                        \
     NAME(const NAME &e) : v(e.v) {}                                               \
     NAME(Type v) : v(v) {}                                                        \
-    NAME(epString s)                                                              \
+    NAME(String s)                                                              \
     {                                                                             \
-      epSlice<const epString> keys = Keys();                                      \
+      Slice<const String> keys = Keys();                                      \
       for(size_t i = 0; i < keys.length; ++i)                                     \
       {                                                                           \
         if (keys.ptr[i].eq(s))                                                    \
@@ -49,25 +49,25 @@ struct epEnumDesc
                                                                                   \
     operator Type() const { return v; }                                           \
                                                                                   \
-    epString StringOf() const                                                     \
+    String StringOf() const                                                     \
     {                                                                             \
       return v == -1 ? "Invalid" : Keys()[v];                                     \
     }                                                                             \
                                                                                   \
-    static epString Name()                                                        \
+    static String Name()                                                        \
     {                                                                             \
-      static epString name(#NAME);                                                \
+      static String name(#NAME);                                                \
       return name;                                                                \
     }                                                                             \
-    static epSlice<const epString> Keys()                                         \
+    static Slice<const String> Keys()                                         \
     {                                                                             \
-      static epArray<const epString> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
+      static Array<const String> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
     }                                                                             \
     static const epEnumDesc* Desc()                                               \
     {                                                                             \
       static const epEnumDesc desc = { Name(), Keys(),                            \
-        [](size_t v, epMutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
+        [](size_t v, MutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
   };                                                                              \
@@ -90,9 +90,9 @@ struct epEnumDesc
     NAME() : v(0) {}                                                              \
     NAME(const NAME &e) : v(e.v) {}                                               \
     NAME(Type v) : v(v) {}                                                        \
-    NAME(epString s)                                                              \
+    NAME(String s)                                                              \
     {                                                                             \
-      epSlice<const epString> keys = Keys();                                      \
+      Slice<const String> keys = Keys();                                      \
       for(size_t i = 0; i < keys.length; ++i)                                     \
       {                                                                           \
         if (keys.ptr[i].eq(s))                                                    \
@@ -109,9 +109,9 @@ struct epEnumDesc
     NAME& operator &=(NAME rh) { v = v & rh.v; return *this; }                    \
     NAME& operator ^=(NAME rh) { v = v ^ rh.v; return *this; }                    \
                                                                                   \
-    epMutableString64 StringOf() const                                            \
+    MutableString64 StringOf() const                                            \
     {                                                                             \
-      epMutableString64 r;                                                        \
+      MutableString64 r;                                                        \
       for(size_t i = 0; i < 32; ++i)                                              \
       {                                                                           \
         if (v & (1<<i))                                                           \
@@ -124,20 +124,20 @@ struct epEnumDesc
       return r;                                                                   \
     }                                                                             \
                                                                                   \
-    static epString Name()                                                        \
+    static String Name()                                                        \
     {                                                                             \
-      static epString name = #NAME;                                               \
+      static String name = #NAME;                                               \
       return name;                                                                \
     }                                                                             \
-    static epSlice<const epString> Keys()                                         \
+    static Slice<const String> Keys()                                         \
     {                                                                             \
-      static epArray<const epString> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
+      static Array<const String> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) }; \
       return keys;                                                                \
     }                                                                             \
     static const epEnumDesc* Desc()                                               \
     {                                                                             \
       static const epEnumDesc desc = { Name(), Keys(),                            \
-        [](size_t v, epMutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
+        [](size_t v, MutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
   };                                                                              \

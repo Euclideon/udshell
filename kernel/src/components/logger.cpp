@@ -1,9 +1,9 @@
 #include "components/stream.h"
-#include "ep/epdatetime.h"
+#include "ep/cpp/datetime.h"
 #include "hal/haltimer.h"
 
-namespace ep
-{
+namespace ep {
+
 static CPropertyDesc props[] =
 {
   {
@@ -61,7 +61,7 @@ static CMethodDesc methods[] =
     },
     &Logger::SetLevel, // method
   },
-  // TODO epVariant doesn't support epSlice<const epString>. fix this with wrappers?
+  // TODO Variant doesn't support Slice<const String>. fix this with wrappers?
   /*
   {
     {
@@ -98,7 +98,7 @@ static CMethodDesc methods[] =
     },
     &Logger::SetStreamLevel, // method
   },
-  // TODO epVariant doesn't support epSlice<const epString>. fix this with wrappers?
+  // TODO Variant doesn't support Slice<const String>. fix this with wrappers?
   /*
   {
     {
@@ -139,12 +139,12 @@ ComponentDesc Logger::descriptor =
   "Logger", // displayName
   "Logger", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)),   // properties
-  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
-  epSlice<CEventDesc>(events, UDARRAYSIZE(events)),    // events
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)),   // properties
+  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  Slice<CEventDesc>(events, UDARRAYSIZE(events)),    // events
 };
 
-Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
 
@@ -161,7 +161,7 @@ LogStream *Logger::FindLogStream(StreamRef spStream) const
   return nullptr;
 }
 
-void Logger::Log(int level, epString text, LogCategories category, epString componentUID)
+void Logger::Log(int level, String text, LogCategories category, String componentUID)
 {
   if (!this || bLogging)
     return;
@@ -172,7 +172,7 @@ void Logger::Log(int level, epString text, LogCategories category, epString comp
   // Add log line to the internal log
   while (!text.empty())
   {
-    epString token = text.popToken("\n");
+    String token = text.popToken("\n");
     if (!token.empty())
     {
       numLines++;
@@ -196,7 +196,7 @@ void Logger::Log(int level, epString text, LogCategories category, epString comp
     {
       if (s.filter.FilterLogLine(line))
       {
-        epSharedString out = line.ToString(s.format);
+        SharedString out = line.ToString(s.format);
         s.spStream->WriteLn(out);
         s.spStream->Flush();
       }
@@ -263,7 +263,7 @@ int Logger::SetStreamLevel(StreamRef spStream, LogCategories categories, int lev
   return -1;
 }
 
-epSlice<epSharedString> Logger::GetStreamComponents(StreamRef spStream) const
+Slice<SharedString> Logger::GetStreamComponents(StreamRef spStream) const
 {
   if (LogStream *pLogStream = FindLogStream(spStream))
     return pLogStream->filter.GetComponents();
@@ -272,7 +272,7 @@ epSlice<epSharedString> Logger::GetStreamComponents(StreamRef spStream) const
   return nullptr;
 }
 
-int Logger::SetStreamComponents(StreamRef spStream, epSlice<const epString> comps)
+int Logger::SetStreamComponents(StreamRef spStream, Slice<const String> comps)
 {
   if (LogStream *pLogStream = FindLogStream(spStream))
   {
@@ -306,12 +306,12 @@ void LogFilter::SetLevel(LogCategories categories, int level)
   }
 }
 
-epSlice<epSharedString> LogFilter::GetComponents() const
+Slice<SharedString> LogFilter::GetComponents() const
 {
   return componentsFilter;
 }
 
-void LogFilter::SetComponents(epSlice<const epString> comps)
+void LogFilter::SetComponents(Slice<const String> comps)
 {
   componentsFilter = comps;
 }
@@ -337,7 +337,7 @@ bool LogFilter::FilterLogLine(LogLine &line) const
   if (!componentsFilter.empty())
   {
     bool componentFound = false;
-    for (epString comp : componentsFilter)
+    for (String comp : componentsFilter)
     {
       if (!comp.cmp(line.componentUID))
       {
@@ -352,7 +352,7 @@ bool LogFilter::FilterLogLine(LogLine &line) const
   return true;
 }
 
-LogLine::LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID) :
+LogLine::LogLine(int level, SharedString text, LogCategories category, SharedString componentID) :
     level(level), category(category)
 {
   timestamp = time(nullptr);
@@ -362,9 +362,9 @@ LogLine::LogLine(int level, epSharedString text, LogCategories category, epShare
   this->componentUID = componentUID;
 }
 
-ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
 {
-  epSharedString out = line.ToString(LogDefaults::Format);
+  SharedString out = line.ToString(LogDefaults::Format);
 
   // if we're only counting
   if (!buffer.ptr)
@@ -379,9 +379,9 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), cons
   return out.length;
 }
 
-epSharedString LogLine::ToString(LogFormatSpecs format) const
+SharedString LogLine::ToString(LogFormatSpecs format) const
 {
-  epMutableString<256> out;
+  MutableString256 out;
   char timeStr[64];
 
 #if defined(EP_WINDOWS)
@@ -410,3 +410,20 @@ epSharedString LogLine::ToString(LogFormatSpecs format) const
 }
 
 } // namespace ep
+
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
+{
+  SharedString out = line.ToString(LogDefaults::Format);
+
+  // if we're only counting
+  if (!buffer.ptr)
+    return out.length;
+
+  // if the buffer is too small
+  if (buffer.length < out.length)
+    return buffer.length - out.length;
+
+  out.copyTo(buffer);
+
+  return out.length;
+}

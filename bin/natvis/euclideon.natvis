@@ -2,25 +2,29 @@
 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-<Type Name="epBaseString&lt;char&gt;">
+<Type Name="epString">
     <DisplayString>{ptr,[length]s8}</DisplayString>
 </Type>
-<Type Name="epBaseString&lt;char16_t&gt;">
+
+<Type Name="ep::BaseString&lt;char&gt;">
+    <DisplayString>{ptr,[length]s8}</DisplayString>
+</Type>
+<Type Name="ep::BaseString&lt;char16_t&gt;">
     <DisplayString>{ptr,[length]s16}</DisplayString>
 </Type>
-<Type Name="epBaseString&lt;char32_t&gt;">
+<Type Name="ep::BaseString&lt;char32_t&gt;">
     <DisplayString>{ptr,[length]s32}</DisplayString>
 </Type>
 
-<Type Name="epMutableString&lt;*&gt;">
+<Type Name="ep::MutableString&lt;*&gt;">
     <DisplayString>{ptr,[length]s8}</DisplayString>
 </Type>
 
-<Type Name="epSharedString">
+<Type Name="ep::SharedString">
     <DisplayString>{ptr,[length]s8}</DisplayString>
 </Type>
 
-<Type Name="epSlice&lt;*&gt;">
+<Type Name="ep::Slice&lt;*&gt;">
     <Expand>
         <Item Name="length">length</Item>
         <Item Name="ptr">ptr,[length]</Item>
@@ -30,7 +34,7 @@
         </ArrayItems>
     </Expand>
 </Type>
-<Type Name="epFixedSlice&lt;*&gt;">
+<Type Name="ep::FixedSlice&lt;*&gt;">
     <Expand>
         <Item Name="length">length</Item>
         <Item Name="ptr">ptr,[length]</Item>
@@ -40,7 +44,7 @@
         </ArrayItems>
     </Expand>
 </Type>
-<Type Name="epSharedSlice&lt;*&gt;">
+<Type Name="ep::SharedSlice&lt;*&gt;">
     <Expand>
         <Item Name="length">length</Item>
         <Item Name="ptr">ptr,[length]</Item>
@@ -52,7 +56,7 @@
     </Expand>
 </Type>
 
-<Type Name="epAVLTree&lt;*,*,*&gt;">
+<Type Name="ep::AVLTree&lt;*,*,*&gt;">
     <Expand>
         <TreeItems>
             <Size>size</Size>
@@ -64,7 +68,7 @@
     </Expand>
 </Type>
 
-<Type Name="epVariant">
+<Type Name="ep::Variant">
     <DisplayString Condition="t == 0">Nil</DisplayString>
     <DisplayString Condition="t == 1">{b}</DisplayString>
     <DisplayString Condition="t == 2">{i}</DisplayString>
@@ -94,7 +98,7 @@
     </Expand>
 </Type>
 
-<Type Name="epKeyValuePair">
+<Type Name="ep::KeyValuePair">
     <DisplayString>{key} = {value}</DisplayString>
 </Type>
 

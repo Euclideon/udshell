@@ -12,8 +12,6 @@
 #include "components/timer.h"
 #include "hal/debugfont.h"
 
-using namespace ep;
-
 static Kernel *pKernel = nullptr;
 
 // ---------------------------------------------------------------------------------------
@@ -24,14 +22,14 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
     // TODO: replace this with something more robust - maybe a full logging system and status console
     switch (type) {
       case QtDebugMsg:
-        pKernel->LogDebug(2, epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        pKernel->LogDebug(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
       case QtWarningMsg:
-        pKernel->LogWarning(2, epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        pKernel->LogWarning(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
       case QtCriticalMsg:
       case QtFatalMsg:
-        pKernel->LogError(epSharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        pKernel->LogError(SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
     }
   }
   else
@@ -40,7 +38,7 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
 }
 
-void Init(epString sender, epString message, const epVariant &data)
+void Init(String sender, String message, const Variant &data)
 {
   // TODO: load a project file...
 

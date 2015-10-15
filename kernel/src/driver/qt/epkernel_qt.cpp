@@ -52,7 +52,7 @@ public:
 /** QtKernel *********************************************/
 
 // ---------------------------------------------------------------------------------------
-QtKernel::QtKernel(epInitParams commandLine)
+QtKernel::QtKernel(InitParams commandLine)
   : QObject(0)
   , pApplication(nullptr)
   , pQmlEngine(nullptr)
@@ -62,10 +62,10 @@ QtKernel::QtKernel(epInitParams commandLine)
   , mainThreadId(QThread::currentThreadId())
   , renderThreadId(nullptr)
 {
-  // convert epInitParams back into a string list for Qt
+  // convert InitParams back into a string list for Qt
   // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
   // NOTE: the state of our argv may be changed by Qt as it removes args that it recognises
-  epArray<char *, 1> args;
+  Array<char *, 1> args;
   args.reserve(commandLine.params.length);
   argc = static_cast<int>(commandLine.params.length);
   for (int i = 0; i < argc; i++)
@@ -138,7 +138,7 @@ epResult QtKernel::InitInternal()
     // TODO: better error information/handling
     LogError("Error creating Splash Screen");
     foreach(const QQmlError &error, component.errors())
-      LogError(epSharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+      LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
     return epR_Failure_;
   }
 
@@ -292,7 +292,7 @@ void QtKernel::customEvent(QEvent *pEvent)
   }
   else
   {
-    LogWarning(2, epSharedString::concat("Unknown event received in Kernel: TYPE ", (int)pEvent->type()));
+    LogWarning(2, SharedString::concat("Unknown event received in Kernel: TYPE ", (int)pEvent->type()));
   }
 }
 
@@ -305,7 +305,7 @@ namespace ep
 {
 
 // ---------------------------------------------------------------------------------------
-Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
   return new qt::QtKernel(commandLine);
 }

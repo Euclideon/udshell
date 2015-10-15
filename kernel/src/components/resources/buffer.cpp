@@ -82,22 +82,22 @@ size_t Buffer::GetBufferSize() const
   return logicalSize;
 }
 
-epSlice<void> Buffer::Map()
+Slice<void> Buffer::Map()
 {
   if (!buffer.ptr || mapDepth > 0)
     return nullptr;
   readMap = false;
   ++mapDepth;
-  return epSlice<void>(buffer.ptr, logicalSize);
+  return Slice<void>(buffer.ptr, logicalSize);
 }
 
-epSlice<const void> Buffer::MapForRead()
+Slice<const void> Buffer::MapForRead()
 {
   if (!buffer.ptr || (mapDepth > 0 && !readMap))
     return nullptr;
   readMap = true;
   ++mapDepth;
-  return epSlice<void>(buffer.ptr, logicalSize);
+  return Slice<void>(buffer.ptr, logicalSize);
 }
 
 void Buffer::Unmap()
@@ -111,7 +111,7 @@ bool Buffer::CopyBuffer(BufferRef buf)
   if (mapDepth > 0)
     return false; // TODO Error handling
 
-  epSlice<const void> mBuf = buf->MapForRead();
+  Slice<const void> mBuf = buf->MapForRead();
   EPASSERT(mBuf != nullptr, "Unable to map buffer!");
   if (mBuf != nullptr)
   {
@@ -122,7 +122,7 @@ bool Buffer::CopyBuffer(BufferRef buf)
   return true; // TODO Error handling
 }
 
-bool Buffer::CopyBuffer(epSlice<const void> buf)
+bool Buffer::CopyBuffer(Slice<const void> buf)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling

@@ -21,7 +21,7 @@ public:
   epEvent<> Changed;
 
 protected:
-  Resource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  Resource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Component(pType, pKernel, uid, initParams)
   {}
 

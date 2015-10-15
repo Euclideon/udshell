@@ -23,10 +23,10 @@ public:
   const void *GetInternalData() const { return pInternal; }
 
 protected:
-  Window(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   virtual ~Window();
 
-  epResult CreateInternal(epInitParams initParams);
+  epResult CreateInternal(InitParams initParams);
   void DestroyInternal();
 
   UIComponentRef spTopLevelUI = nullptr;

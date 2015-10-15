@@ -22,12 +22,12 @@ class File : public Stream
 public:
   EP_COMPONENT(File);
 
-  epSlice<void> Read(epSlice<void> buffer) override;
-  size_t Write(epSlice<const void> data) override;
+  Slice<void> Read(Slice<void> buffer) override;
+  size_t Write(Slice<const void> data) override;
   int64_t Seek(SeekOrigin rel, int64_t offset) override;
 
 protected:
-  File(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   ~File();
 
   int GetPosixOpenFlags(FileOpenFlags flags) const;

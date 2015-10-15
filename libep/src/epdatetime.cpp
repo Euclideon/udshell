@@ -1,16 +1,16 @@
-#include "ep/epdatetime.h"
+#include "ep/cpp/datetime.h"
 #include <time.h>
 
-epDateTime::epDateTime() : epDateTime(time(nullptr)) {}
+DateTime::DateTime() : DateTime(time(nullptr)) {}
 
-epDateTime::epDateTime(time_t ti)
+DateTime::DateTime(time_t ti)
 {
   TimeStampToDateTime(ti);
 }
 
-epMutableString<64> epDateTime::ToString(epString format) const
+MutableString64 DateTime::ToString(String format) const
 {
-  epMutableString<64> timeStr;
+  MutableString64 timeStr;
   if (format.empty())
     format = DEFAULT_DATETIME_STRING;
 
@@ -22,14 +22,14 @@ epMutableString<64> epDateTime::ToString(epString format) const
   return timeStr;
 }
 
-time_t epDateTime::ToTimeStamp() const
+time_t DateTime::ToTimeStamp() const
 {
   tm t;
 
   return mktime(&t);
 }
 
-void epDateTime::TimeStampToDateTime(time_t ti)
+void DateTime::TimeStampToDateTime(time_t ti)
 {
 #if defined(EP_WINDOWS)
   tm t, *pTm = &t;
@@ -41,7 +41,7 @@ void epDateTime::TimeStampToDateTime(time_t ti)
   TmToDateTime(pTm);
 }
 
-void epDateTime::TmToDateTime(tm *pTm)
+void DateTime::TmToDateTime(tm *pTm)
 {
   sec   = pTm->tm_sec;
   min   = pTm->tm_min;
@@ -54,7 +54,7 @@ void epDateTime::TmToDateTime(tm *pTm)
   isdst = pTm->tm_isdst;
 }
 
-tm epDateTime::DateTimeToTm() const
+tm DateTime::DateTimeToTm() const
 {
   tm t;
 
@@ -71,14 +71,14 @@ tm epDateTime::DateTimeToTm() const
   return t;
 }
 
-int16_t epDateTime::GetAbsoluteYear() const
+int16_t DateTime::GetAbsoluteYear() const
 {
   return START_YEAR + (int16_t)year;
 }
 
-inline ptrdiff_t epStringify(epSlice<char> buffer, epString format, const epDateTime &dt, const epVarArg *epUnusedParam(pArgs))
+inline ptrdiff_t epStringify(Slice<char> buffer, String format, const DateTime &dt, const epVarArg *epUnusedParam(pArgs))
 {
-  epSharedString out = dt.ToString(format);
+  SharedString out = dt.ToString(format);
 
   // if we're only counting
   if (!buffer.ptr)
@@ -93,25 +93,25 @@ inline ptrdiff_t epStringify(epSlice<char> buffer, epString format, const epDate
   return out.length;
 }
 
-epVariant epToVariant(const epDateTime &dt)
+Variant epToVariant(const DateTime &dt)
 {
-  epVariant v;
-  epKeyValuePair *pPairs = v.allocAssocArray(9);
+  Variant v;
+  KeyValuePair *pPairs = v.allocAssocArray(9);
 
-  new (&pPairs[0]) epKeyValuePair("hour",  dt.hour);
-  new (&pPairs[1]) epKeyValuePair("isdst", dt.isdst);
-  new (&pPairs[2]) epKeyValuePair("mday",  dt.mday);
-  new (&pPairs[3]) epKeyValuePair("min",   dt.min);
-  new (&pPairs[4]) epKeyValuePair("mon",   dt.mon);
-  new (&pPairs[5]) epKeyValuePair("sec",   dt.sec);
-  new (&pPairs[6]) epKeyValuePair("wday",  dt.wday);
-  new (&pPairs[7]) epKeyValuePair("yday",  dt.yday);
-  new (&pPairs[8]) epKeyValuePair("year",  dt.year);
+  new (&pPairs[0]) KeyValuePair("hour",  dt.hour);
+  new (&pPairs[1]) KeyValuePair("isdst", dt.isdst);
+  new (&pPairs[2]) KeyValuePair("mday",  dt.mday);
+  new (&pPairs[3]) KeyValuePair("min",   dt.min);
+  new (&pPairs[4]) KeyValuePair("mon",   dt.mon);
+  new (&pPairs[5]) KeyValuePair("sec",   dt.sec);
+  new (&pPairs[6]) KeyValuePair("wday",  dt.wday);
+  new (&pPairs[7]) KeyValuePair("yday",  dt.yday);
+  new (&pPairs[8]) KeyValuePair("year",  dt.year);
 
   return v;
 }
 
-void epFromVariant(const epVariant &variant, epDateTime *pDt)
+void epFromVariant(const Variant &variant, DateTime *pDt)
 {
   pDt->hour   = variant["hour"].as<uint8_t>();
   pDt->isdst  = variant["isdst"].as<bool>();

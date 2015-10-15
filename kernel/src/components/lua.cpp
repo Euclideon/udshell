@@ -69,12 +69,12 @@ ComponentDesc Lua::descriptor =
   "Lua",    // displayName
   "Lua VM", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
   nullptr // events
 };
 
-Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   pLua = udNew(LuaState, pKernel);
@@ -99,22 +99,22 @@ void Lua::SetErrorStream(StreamRef stream)
   EPASSERT(false, "TODO: work out how to override stderr in lua");
 }
 
-epVariant Lua::GetGlobal(epVariant key) const
+Variant Lua::GetGlobal(Variant key) const
 {
   EPASSERT(false, "TODO: look up 'key' from global table");
   return pLua->get(-1);
 }
-void Lua::SetGlobal(epVariant key, epVariant value)
+void Lua::SetGlobal(Variant key, Variant value)
 {
   pLua->set(key, value, LuaLocation::Global);
 }
 
-void Lua::Execute(epString code)
+void Lua::Execute(String code)
 {
   pLua->exec(code);
 }
 
-void Lua::Print(epString str) const
+void Lua::Print(String str) const
 {
   pLua->print(str);
 }

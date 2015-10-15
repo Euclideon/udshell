@@ -81,28 +81,28 @@ ComponentDesc Timer::descriptor =
   "Timer", // displayName
   "Timer ", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr,
-  epSlice<CEventDesc>(events, UDARRAYSIZE(events))
+  Slice<CEventDesc>(events, UDARRAYSIZE(events))
 };
 
 
-Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams), pTimer(nullptr)
 {
-  const epVariant intervalVar = initParams["duration"];
+  const Variant intervalVar = initParams["duration"];
 
   uint32_t duration = intervalVar.as<uint32_t>();
-  if (!intervalVar.is(epVariant::Type::Int) ||!duration)
+  if (!intervalVar.is(Variant::Type::Int) ||!duration)
   {
     throw epR_InvalidParameter_;
   }
 
   TimerType timerType = TimerType::Interval;
-  const epVariant typeVar = initParams["timertype"];
-  if (typeVar.is(epVariant::Type::String))
+  const Variant typeVar = initParams["timertype"];
+  if (typeVar.is(Variant::Type::String))
   {
-    epString typeStr = typeVar.as<epString>();
+    String typeStr = typeVar.as<String>();
     if (typeStr.eqIC("Interval"))
       timerType = TimerType::Interval;
     else if (typeStr.eqIC("CountDown"))

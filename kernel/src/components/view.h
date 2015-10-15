@@ -69,10 +69,10 @@ protected:
   void(*pPreRenderCallback)(ViewRef, SceneRef) = nullptr;
   void(*pPostRenderCallback)(ViewRef, SceneRef) = nullptr;
 
-  View(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  View(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Component(pType, pKernel, uid, initParams) { memset(&options, 0, sizeof(options)); }
 
-  void SetLatestFrame(epUniquePtr<RenderableView> spFrame);
+  void SetLatestFrame(UniquePtr<RenderableView> spFrame);
 
   void OnDirty();
 };

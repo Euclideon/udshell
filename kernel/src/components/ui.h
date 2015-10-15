@@ -18,10 +18,10 @@ public:
   const void *GetInternalData() const { return pInternal; }
 
 protected:
-  UIComponent(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   virtual ~UIComponent();
 
-  epResult CreateInternal(epInitParams initParams);
+  epResult CreateInternal(InitParams initParams);
   epResult InitComplete() override;
   void DestroyInternal();
 

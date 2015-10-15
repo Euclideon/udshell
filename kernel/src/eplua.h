@@ -67,8 +67,8 @@ public:
   lua_State *state();
   Kernel *kernel();
 
-  void exec(epString code);
-  void print(epString str);
+  void exec(String code);
+  void print(String str);
 
   int top();
 
@@ -83,20 +83,20 @@ public:
   void pushBool(bool val);
   void pushFloat(lua_Number val);
   void pushInt(lua_Integer val);
-  void pushString(epString val);
+  void pushString(String val);
   void pushLightUserData(void *val);
 
   void pushComponent(const ComponentRef &c);
-  void pushDelegate(const epVariant::VarDelegate &d);
+  void pushDelegate(const Variant::VarDelegate &d);
 
-  void push(const epVariant &v);
+  void push(const Variant &v);
 
   // pop***
   void pop(int count = 1);
   bool popBool();
   lua_Number popFloat();
   lua_Integer popInt();
-  epString popString();
+  String popString();
   lua_CFunction popFunction();
   void* popUserData();
 
@@ -104,20 +104,20 @@ public:
   bool toBool(int idx = -1);
   lua_Number toFloat(int idx = -1);
   lua_Integer toInt(int idx = -1);
-  epString toString(int idx = -1);
+  String toString(int idx = -1);
   lua_CFunction toFunction(int idx = -1);
   void* toUserData(int idx = -1);
 
   ComponentRef toComponent(int idx = -1);
-  epVariant::VarDelegate toDelegate(int idx = -1);
+  Variant::VarDelegate toDelegate(int idx = -1);
 
-  epVariant get(int idx = -1);
+  Variant get(int idx = -1);
 
   // set
-  void setNil(epVariant key, LuaLocation loc = LuaLocation::Global);
-  void setComponent(epVariant key, ComponentRef c, LuaLocation loc = LuaLocation::Global);
+  void setNil(Variant key, LuaLocation loc = LuaLocation::Global);
+  void setComponent(Variant key, ComponentRef c, LuaLocation loc = LuaLocation::Global);
 
-  void set(epVariant key, epVariant v, LuaLocation loc = LuaLocation::Global);
+  void set(Variant key, Variant v, LuaLocation loc = LuaLocation::Global);
 
 private:
   lua_State *L;

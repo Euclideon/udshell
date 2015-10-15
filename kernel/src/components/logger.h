@@ -6,6 +6,7 @@
 
 namespace ep
 {
+
 PROTOTYPE_COMPONENT(Logger);
 SHARED_CLASS(Stream);
 
@@ -68,18 +69,17 @@ EP_ENUM(LogDefaults,
 
 struct LogLine
 {
-  LogLine(int level, epSharedString text, LogCategories category, epSharedString componentID);
+  LogLine(int level, SharedString text, LogCategories category, SharedString componentID);
 
-  epSharedString ToString(LogFormatSpecs format = LogDefaults::Format) const;
+  SharedString ToString(LogFormatSpecs format = LogDefaults::Format) const;
 
   int level;
-  epSharedString text;
+  SharedString text;
   LogCategories category;
-  epSharedString componentUID;
+  SharedString componentUID;
   time_t timestamp;
   double ordering;
 };
-ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs));
 
 class LogFilter
 {
@@ -87,8 +87,8 @@ public:
   // Log level filtering for streams
   int GetLevel(LogCategories category) const;
   void SetLevel(LogCategories categories, int level);
-  epSlice<epSharedString> GetComponents() const;
-  void SetComponents(epSlice<const epString> comps);
+  Slice<SharedString> GetComponents() const;
+  void SetComponents(Slice<const String> comps);
   void ResetFilter();
   bool FilterLogLine(LogLine &line) const;
 
@@ -98,7 +98,7 @@ public:
   }
 protected:
   int levelsFilter[NUM_LOG_CATEGORIES];
-  epArray<epSharedString> componentsFilter;
+  Array<SharedString> componentsFilter;
 };
 
 struct LogStream
@@ -108,7 +108,7 @@ struct LogStream
 
   LogStream &operator=(const LogStream &other)
   {
-    // epArray requires assignment for certain functionality - implement the assignment path if those features become needed
+    // Array requires assignment for certain functionality - implement the assignment path if those features become needed
     EPASSERT(false, "LogStream assignment is unsupported");
     return *this;
   }
@@ -123,12 +123,12 @@ class Logger : public Component
 public:
   EP_COMPONENT(Logger);
 
-  void Log(int level, epString text, LogCategories category = LogCategories::Debug, epString componentUID = nullptr);
+  void Log(int level, String text, LogCategories category = LogCategories::Debug, String componentUID = nullptr);
 
   bool GetEnabled() const { return bEnabled; }
   void SetEnabled(bool bEnable) { this->bEnabled = bEnable; }
 
-  const epSlice<LogLine> GetLog() const { return internalLog; }
+  const Slice<LogLine> GetLog() const { return internalLog; }
 
   void AddStream(StreamRef spStream, LogFormatSpecs format = LogDefaults::Format);
   int RemoveStream(StreamRef spStream);
@@ -138,28 +138,31 @@ public:
   // Stream level filtering
   int GetStreamLevel(StreamRef spStream, LogCategories category) const;
   int SetStreamLevel(StreamRef spStream, LogCategories categories, int level);
-  epSlice<epSharedString> GetStreamComponents(StreamRef spStream) const;
-  int SetStreamComponents(StreamRef spStream, epSlice<const epString> comps);
+  Slice<SharedString> GetStreamComponents(StreamRef spStream) const;
+  int SetStreamComponents(StreamRef spStream, Slice<const String> comps);
   int ResetStreamFilter(StreamRef spStream);
 
   // Logger level filtering
   LogFilter &GetFilter() { return filter; }
   int GetLevel(LogCategories category) const { return filter.GetLevel(category); }
   void SetLevel(LogCategories categories, int level) { return filter.SetLevel(categories, level); }
-  epSlice<epSharedString> GetComponents() { return filter.GetComponents(); }
-  void SetComponents(epSlice<const epString> comps) { filter.SetComponents(comps); }
+  Slice<SharedString> GetComponents() { return filter.GetComponents(); }
+  void SetComponents(Slice<const String> comps) { filter.SetComponents(comps); }
   void ResetFilter() { filter.ResetFilter(); }
 
   epEvent<> Changed;
 protected:
-  Logger(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   LogStream *FindLogStream(StreamRef spStream) const;
 
-  epArray<LogStream> streamList;
+  Array<LogStream> streamList;
   LogFilter filter;
-  epArray<LogLine> internalLog;
+  Array<LogLine> internalLog;
   bool bEnabled = true, bLogging = false;
 };
 
 } //namespace ep
+
+ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const epVarArg *pArgs);
+
 #endif // EPLOGGER_H

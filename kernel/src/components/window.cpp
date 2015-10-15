@@ -28,14 +28,14 @@ ComponentDesc Window::descriptor =
   "Window",               // displayName
   "Is a window",          // description
 
-  epSlice<CPropertyDesc>(windowProps, UDARRAYSIZE(windowProps)), // properties
+  Slice<CPropertyDesc>(windowProps, UDARRAYSIZE(windowProps)), // properties
   nullptr,
   nullptr
 };
 
 
 // ---------------------------------------------------------------------------------------
-Window::Window(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+Window::Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != epR_Success)

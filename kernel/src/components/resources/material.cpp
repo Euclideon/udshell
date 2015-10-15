@@ -89,7 +89,7 @@ ComponentDesc Material::descriptor =
   "Material", // displayName
   "Material resource", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
 };
 
 void Material::SetShader(ShaderType type, ShaderRef spShader)
@@ -97,14 +97,14 @@ void Material::SetShader(ShaderType type, ShaderRef spShader)
   if (shaders[(int)type] == spShader)
     return;
   if (shaders[(int)type])
-    shaders[(int)type]->Changed.Unsubscribe(epDelegate<void()>(this, &Material::OnShaderChanged));
+    shaders[(int)type]->Changed.Unsubscribe(Delegate<void()>(this, &Material::OnShaderChanged));
   shaders[(int)type] = spShader;
   if (spShader)
-    spShader->Changed.Subscribe(epDelegate<void()>(this, &Material::OnShaderChanged));
+    spShader->Changed.Subscribe(Delegate<void()>(this, &Material::OnShaderChanged));
   OnShaderChanged();
 }
 
-void Material::SetMaterialProperty(epSharedString property, const udFloat4 &val)
+void Material::SetMaterialProperty(SharedString property, const udFloat4 &val)
 {
   properties.Insert(property, val);
 }
@@ -128,7 +128,7 @@ void Material::SetRenderstate()
   size_t numUniforms = spRenderProgram->numUniforms();
   for (size_t i = 0; i < numUniforms; ++i)
   {
-    epString name = spRenderProgram->getUniformName(i);
+    String name = spRenderProgram->getUniformName(i);
     const udFloat4 *pVal = properties.Get(name);
     if (pVal)
       spRenderProgram->setUniform((int)i, *pVal);

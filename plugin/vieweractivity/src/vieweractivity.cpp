@@ -1,7 +1,7 @@
-#include "ep/epplugin.h"
-#include "ep/epcomponentdesc.h"
-#include "ep/epcomponent.h"
-#include "ep/epkernel.h"
+#include "ep/c/plugin.h"
+#include "ep/c/componentdesc.h"
+#include "ep/c/component.h"
+#include "ep/c/kernel.h"
 
 #define PLUGIN_VER 100
 
@@ -18,7 +18,8 @@ epComponentOverrides s_testComponentVirtuals = {
   sizeof(epComponentOverrides),
 
   // pCreateInstance
-  [](epComponent *pBaseInstance, const epKeyValuePair *epUnusedParam(pInitParams), size_t epUnusedParam(numInitParams)) -> void* {
+  [](epComponent *pBaseInstance, const epKeyValuePair *epUnusedParam(pInitParams), size_t epUnusedParam(numInitParams)) -> void*
+  {
     TestComponent *pNew = new TestComponent;
     pNew->pBase = pBaseInstance;
     pNew->x = 100;
@@ -26,18 +27,21 @@ epComponentOverrides s_testComponentVirtuals = {
   },
 
   // pDestroy
-  [](epComponent *epUnusedParam(pBaseInstance), void *pDerivedInstance) -> void {
+  [](epComponent *epUnusedParam(pBaseInstance), void *pDerivedInstance) -> void
+  {
     TestComponent *pC = (TestComponent*)pDerivedInstance;
     delete pC;
   },
 
   // pInitComplete
-  [](epComponent *epUnusedParam(pBaseInstance), void *epUnusedParam(pDerivedInstance)) -> epResult {
+  [](epComponent *epUnusedParam(pBaseInstance), void *epUnusedParam(pDerivedInstance)) -> epResult
+  {
     return epR_Success;
   },
 
   // pReceiveMessage
-  [](epComponent *epUnusedParam(pBaseInstance), void *epUnusedParam(pDerivedInstance), epString epUnusedParam(message), epString epUnusedParam(sender), const epVariant *epUnusedParam(pData)) -> epResult {
+  [](epComponent *epUnusedParam(pBaseInstance), void *epUnusedParam(pDerivedInstance), epString epUnusedParam(message), epString epUnusedParam(sender), const epVariant *epUnusedParam(pData)) -> epResult
+  {
     return epR_Success;
   }
 };
@@ -50,13 +54,15 @@ epPropertyDesc prop = {
   "type",
   0,
 
-  [](const epComponent *epUnusedParam(pBaseComponent), const void *pDerivedInstance) -> epVariant {
+  [](const epComponent *epUnusedParam(pBaseComponent), const void *pDerivedInstance) -> epVariant
+  {
     TestComponent *pC = (TestComponent*)pDerivedInstance;
-    return pC->x;
+    return epVariant_CreateInt(pC->x);
   },
-  [](epComponent *epUnusedParam(pBaseComponent), void *pDerivedInstance, const epVariant *pValue) -> void {
+  [](epComponent *epUnusedParam(pBaseComponent), void *pDerivedInstance, const epVariant *pValue) -> void
+  {
     TestComponent *pC = (TestComponent*)pDerivedInstance;
-    pC->x = 0;
+    pC->x = (int)epVariant_AsInt(*pValue);
   }
 };
 
@@ -68,8 +74,8 @@ extern "C" bool epPluginAttach()
   desc.description = "Plugin Test!"; // description
   desc.baseClass = "component";
   desc.pOverrides = &s_testComponentVirtuals;
-  desc.pProperties = nullptr;
-  desc.numProperties = 0;
+  desc.pProperties = &prop;
+  desc.numProperties = 1;
   desc.pMethods = nullptr;
   desc.numMethods = 0;
   desc.pEvents = nullptr;

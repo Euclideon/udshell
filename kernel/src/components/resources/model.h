@@ -5,7 +5,7 @@
 #include "components/resources/resource.h"
 #include "components/resources/array.h"
 #include "components/resources/material.h"
-#include "ep/epsharedptr.h"
+#include "ep/cpp/sharedptr.h"
 
 namespace ep
 {
@@ -23,13 +23,13 @@ public:
   MaterialRef GetMaterial() const { return spMaterial; }
   void SetMaterial(MaterialRef spMaterial) { this->spMaterial = spMaterial; }
 
-  void SetVertexArray(ArrayBufferRef spVertices, epSlice<const epSharedString> attributeNames);
+  void SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> attributeNames);
   void SetIndexArray(ArrayBufferRef spIndices) { this->spIndices = spIndices; }
 
 protected:
   friend class GeomNode;
 
-  Model(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  Model(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
   void OnArrayChanged()
@@ -42,10 +42,10 @@ protected:
   struct VertexArray
   {
     ArrayBufferRef spArray;
-    epArray<epSharedString, 1> attributes;
+    Array<SharedString, 1> attributes;
   };
 
-  epArray<VertexArray, 2> vertexArrays;
+  Array<VertexArray, 2> vertexArrays;
   ArrayBufferRef spIndices;
   MaterialRef spMaterial;
 

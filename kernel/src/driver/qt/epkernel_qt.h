@@ -42,7 +42,7 @@ class QtKernel : public QObject, public ep::Kernel
   Q_OBJECT
 
 public:
-  QtKernel(epInitParams commandLine);
+  QtKernel(InitParams commandLine);
   virtual ~QtKernel();
 
   epResult InitInternal() override;
@@ -68,7 +68,7 @@ private:
 
   // Members
   int argc;
-  epSharedSlice<char *> argv;
+  SharedSlice<char *> argv;
 
   QtApplication *pApplication;
   QQmlEngine *pQmlEngine;

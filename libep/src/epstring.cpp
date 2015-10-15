@@ -1,4 +1,4 @@
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 
 #include <stdio.h>
 
@@ -7,39 +7,8 @@
 # pragma warning(disable: 4996)
 #endif
 
-int64_t epStringify_ParseInt(epString &format, const epVarArg *pArgs)
-{
-  if (!format)
-    return -1; // number expected!
-
-  if (format.front() == '*')
-  {
-    format.popFront();
-    int64_t i = epStringify_ParseInt(format, pArgs);
-    if (i < 0)
-      return i;
-    if (!pArgs[i].HasIntify())
-    {
-      EPASSERT(false, "Argument can not be interpreted as an integer!");
-      return -1;
-    }
-    return pArgs[i].GetInt();
-  }
-
-  if (!isNumeric(format.front()))
-    return -1; // no number!
-
-  size_t i = 0;
-  while (format && isNumeric(format.front()))
-    i = i*10 + (format.popFront() - '0');
-  return i;
-}
-
-namespace ep {
-namespace internal {
-
 // 1 = alpha, 2 = numeric, 4 = white, 8 = newline
-const char charDetails[256] =
+const char s_epCharDetails[256] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 0, 0, 8, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -59,14 +28,17 @@ const char charDetails[256] =
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-size_t getLength(epSlice<epVarArg> args)
+namespace ep {
+namespace internal {
+
+size_t getLength(Slice<epVarArg> args)
 {
   size_t len = 0;
   for (auto &a : args)
     len += a.GetStringLength();
   return len;
 }
-epSlice<char> concatenate(epSlice<char> buffer, epSlice<epVarArg> args)
+Slice<char> concatenate(Slice<char> buffer, Slice<epVarArg> args)
 {
   size_t len = 0;
   for (auto &a : args)
@@ -74,9 +46,37 @@ epSlice<char> concatenate(epSlice<char> buffer, epSlice<epVarArg> args)
   return buffer.slice(0, len);
 }
 
-ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg> args);
+ptrdiff_t parseFormat(String &format, Slice<char> &buffer, Slice<epVarArg> args);
 
-epSlice<char> format(epString format, epSlice<char> buffer, epSlice<epVarArg> args)
+int64_t parseInt(String &format, const epVarArg *pArgs)
+{
+  if (!format)
+    return -1; // number expected!
+
+  if (format.front() == '*')
+  {
+    format.popFront();
+    int64_t i = parseInt(format, pArgs);
+    if (i < 0)
+      return i;
+    if (!pArgs[i].HasIntify())
+    {
+      EPASSERT(false, "Argument can not be interpreted as an integer!");
+      return -1;
+    }
+    return pArgs[i].GetInt();
+  }
+
+  if (!epIsNumeric(format.front()))
+    return -1; // no number!
+
+  size_t i = 0;
+  while (format && epIsNumeric(format.front()))
+    i = i*10 + (format.popFront() - '0');
+  return i;
+}
+
+Slice<char> format(String format, Slice<char> buffer, Slice<epVarArg> args)
 {
   char *pBuffer = buffer.ptr;
   size_t length = 0;
@@ -98,9 +98,9 @@ epSlice<char> format(epString format, epSlice<char> buffer, epSlice<epVarArg> ar
       }
       length += len;
     }
-//      else if (0) // TODO: handle ANSI codes for colour and shiz...?
-//      {
-//      }
+//    else if (0) // TODO: handle ANSI codes for colour and shiz...?
+//    {
+//    }
     else
     {
 write_char:
@@ -110,10 +110,10 @@ write_char:
       ++length;
     }
   }
-  return epSlice<char>(pBuffer, length);
+  return Slice<char>(pBuffer, length);
 }
 
-ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg> args)
+ptrdiff_t parseFormat(String &format, Slice<char> &buffer, Slice<epVarArg> args)
 {
   if (format.popFront() != '{')
   {
@@ -126,7 +126,7 @@ ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg>
     return -1;
 
   // check for indirection
-  epString immediate = nullptr;
+  String immediate = nullptr;
   bool bIndirect = false;
   int64_t arg = 0;
   if (format.front() == '\'')
@@ -149,13 +149,13 @@ ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg>
     }
 
     // get the arg index
-    arg = epStringify_ParseInt(format, args.ptr);
+    arg = parseInt(format, args.ptr);
     if (arg < 0)
     {
       EPASSERT(false, "Invalid format string: Number expected!");
       return -1;
     }
-    if ((size_t)arg >= args.length)
+    if (arg >= (int64_t)args.length)
     {
       EPASSERT(false, "Format string references invalid parameter!");
       return -1;
@@ -167,7 +167,7 @@ ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg>
     return -1;
 
   // get the format string (if present)
-  epString formatSpec;
+  String formatSpec;
   if (format.front() == ',')
   {
     format.popFront();
@@ -188,7 +188,7 @@ ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg>
   }
 
   // check for universal format strings
-  epMutableString64 indirectFormatSpec;
+  MutableString64 indirectFormatSpec;
   if (formatSpec)
   {
     // indrect formatting allows to take the format string from another parameter
@@ -196,17 +196,18 @@ ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg>
     {
       char token = formatSpec.popFront();
 
-      int64_t i = epStringify_ParseInt(formatSpec, args.ptr);
-      if (i < 0)
+      int64_t index = parseInt(formatSpec, args.ptr);
+      if (index < 0)
       {
         EPASSERT(false, "Invalid format string: Number expected!");
         return -1;
       }
-      if ((size_t)i >= args.length)
+      if ((size_t)index >= args.length)
       {
         EPASSERT(false, "Format indirection references invalid parameter!");
         return -1;
       }
+      size_t i = (size_t)index;
 
       if (token == '?' || token == '!')
       {
@@ -224,7 +225,7 @@ ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg>
         ptrdiff_t formatLen = args[i].GetStringLength();
         indirectFormatSpec.reserve((size_t)formatLen);
         args[i].GetString(indirectFormatSpec.getBuffer());
-        formatSpec = epString(indirectFormatSpec.ptr, formatLen);
+        formatSpec = String(indirectFormatSpec.ptr, formatLen);
       }
     }
   }
@@ -237,16 +238,16 @@ ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg>
   else if (bIndirect)
   {
     // interpret the arg as an indirect format string
-    epMutableString128 indirectFormat;
-    ptrdiff_t bytes = args[arg].GetStringLength(formatSpec, args.ptr);
+    MutableString128 indirectFormat;
+    ptrdiff_t bytes = args[(size_t)arg].GetStringLength(formatSpec, args.ptr);
     indirectFormat.reserve(bytes);
-    args[arg].GetString(indirectFormat.getBuffer(), formatSpec, args.ptr);
-    len = ep::internal::format(epString(indirectFormat.ptr, bytes), buffer, args).length;
+    args[(size_t)arg].GetString(indirectFormat.getBuffer(), formatSpec, args.ptr);
+    len = internal::format(String(indirectFormat.ptr, bytes), buffer, args).length;
   }
   else
   {
     // append the arg
-    len = args[arg].GetString(buffer, formatSpec, args.ptr);
+    len = args[(size_t)arg].GetString(buffer, formatSpec, args.ptr);
   }
 
   if (buffer.ptr)
@@ -255,17 +256,187 @@ ptrdiff_t parseFormat(epString &format, epSlice<char> &buffer, epSlice<epVarArg>
 }
 
 } // namespace internal
+
+SharedString SharedString::sprintf(const char *pFormat, ...)
+{
+  va_list args;
+  va_start(args, pFormat);
+
+#if defined(EP_COMPILER_VISUALC)
+  size_t len = _vscprintf(pFormat, args) + 1;
+#else
+  size_t len = vsprintf(nullptr, pFormat, args) + 1;
+#endif
+  len = numToAlloc(len);
+
+  SharedString r;
+  r.rc = (RC*)epAlloc(sizeof(RC) + len);
+  r.rc->refCount = 1;
+  r.rc->allocatedCount = len;
+  r.ptr = ((const char*)r.rc)+sizeof(RC);
+#if defined(EP_NACL)
+  r.length = vsprintf((char*)r.ptr, pFormat, args);
+#elif defined(EP_COMPILER_VISUALC)
+  r.length = vsnprintf_s((char*)r.ptr, len, len, pFormat, args);
+#else
+  r.length = vsnprintf((char*)r.ptr, len, pFormat, args);
+#endif
+
+  va_end(args);
+
+  return r;
+}
+
+SharedString SharedString::concatInternal(Slice<epVarArg> args)
+{
+  size_t len = internal::getLength(args);
+
+  // allocate a new SharedString
+  RC *pRC = (RC*)epAlloc(sizeof(RC) + sizeof(char)*(len+1));
+  pRC->refCount = 0;
+  pRC->allocatedCount = len;
+  char *ptr = (char*)(pRC + 1);
+
+  internal::concatenate(Slice<char>(ptr, len), args);
+  ptr[len] = 0;
+
+  return SharedString(ptr, len, pRC);
+}
+SharedString SharedString::formatInternal(String format, Slice<epVarArg> args)
+{
+  size_t len = internal::format(format, nullptr, args).length;
+
+  // allocate a new SharedString
+  RC *pRC = (RC*)epAlloc(sizeof(RC) + sizeof(char)*(len+1));
+  pRC->refCount = 0;
+  pRC->allocatedCount = len;
+  char *ptr = (char*)(pRC + 1);
+
+  internal::format(format, Slice<char>(ptr, len), args);
+  ptr[len] = 0;
+
+  return SharedString(ptr, len, pRC);
+}
+
+template<typename C>
+int64_t BaseString<C>::parseInt(bool bDetectBase, int base) const
+{
+  BaseString<C> s = trim<true, false>();
+  if (s.length == 0)
+    return 0; // this isn't really right!
+
+  int number = 0;
+
+  if (base == 16 || (bDetectBase && (s.eqIC("0x") || s.eq("$"))))
+  {
+    // hex number
+    if (s.eqIC("0x"))
+      s.pop(2);
+    else if (s.eq("$"))
+      s.pop(1);
+
+    while (s.length > 0)
+    {
+      C digit = s.popFront();
+      if (!epIsHex(digit))
+        return number;
+      number <<= 4;
+      number += epIsNumeric(digit) ? digit - '0' : (digit|0x20) - 'a' + 10;
+    }
+  }
+  else if (base == 2 || (bDetectBase && s.eqIC("b")))
+  {
+    if (s.eqIC("b"))
+      s.pop(1);
+
+    while (s.length > 0 && (s.ptr[0] == '0' || s.ptr[0] == '1'))
+    {
+      number <<= 1;
+      number |= s.ptr[0] - '0';
+    }
+  }
+  else if (base == 10)
+  {
+    // decimal number
+    bool neg = false;
+    if (s.ptr[0] == '-' || s.ptr[0] == '+')
+    {
+      neg = s.ptr[0] == '-';
+      s.pop(1);
+    }
+
+    while (s.length > 0)
+    {
+      C c = s.popFront();
+      if (!epIsNumeric(c))
+        break;
+      number = number*10 + c - '0';
+    }
+    if (neg)
+      number = -number;
+  }
+
+  return number;
+}
+
+template<typename C>
+double BaseString<C>::parseFloat() const
+{
+  BaseString<C> s = trim<true, false>();
+  if (s.length == 0)
+    return 0; // this isn't really right!
+
+  int64_t number = 0;
+  double frac = 1;
+
+  // floating poiont number
+  bool neg = false;
+  if (s.ptr[0] == '-' || s.ptr[0] == '+')
+  {
+    neg = s.ptr[0] == '-';
+    s.popFront();
+  }
+
+  bool bHasDot = false;
+  while (s.length > 0)
+  {
+    C digit = s.popFront();
+    if (!epIsNumeric(digit) && (bHasDot || digit != '.'))
+      break;
+    if (digit == '.')
+      bHasDot = true;
+    else
+    {
+      number = number*10 + digit - '0';
+      if (bHasDot)
+        frac *= 0.1f;
+    }
+  }
+
+  if (neg)
+    number = -number;
+
+  return (double)number * frac;
+}
+
+template int64_t BaseString<char>::parseInt(bool, int) const;
+template double BaseString<char>::parseFloat() const;
+//template int64_t BaseString<char16_t>::parseInt(bool, int) const;
+//template double BaseString<char16_t>::parseFloat() const;
+//template int64_t BaseString<char32_t>::parseInt(bool, int) const;
+//template double BaseString<char32_t>::parseFloat() const;
+
 } // ep
 
-ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), nullptr_t, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), nullptr_t, const epVarArg *epUnusedParam(pArgs))
 {
   if (buffer.ptr)
-    epString("null", 4).copyTo(buffer);
+    String("null", 4).copyTo(buffer);
   return 4;
 }
 
 template<typename C>
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, epBaseString<C> s, const epVarArg *pArgs)
+ptrdiff_t epStringify(Slice<char> buffer, String format, BaseString<C> s, const epVarArg *pArgs)
 {
   // parse format string
   bool rightJustify = false;
@@ -346,11 +517,11 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString format, epBaseString<C> s, 
 
   return length;
 }
-template ptrdiff_t epStringify<char>(epSlice<char> buffer, epString format, epBaseString<char> s, const epVarArg *pArgs);
-template ptrdiff_t epStringify<char16_t>(epSlice<char> buffer, epString format, epBaseString<char16_t> s, const epVarArg *pArgs);
-template ptrdiff_t epStringify<char32_t>(epSlice<char> buffer, epString format, epBaseString<char32_t> s, const epVarArg *pArgs);
+template ptrdiff_t epStringify<char>(Slice<char> buffer, String format, BaseString<char> s, const epVarArg *pArgs);
+template ptrdiff_t epStringify<char16_t>(Slice<char> buffer, String format, BaseString<char16_t> s, const epVarArg *pArgs);
+template ptrdiff_t epStringify<char32_t>(Slice<char> buffer, String format, BaseString<char32_t> s, const epVarArg *pArgs);
 
-ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), bool b, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), bool b, const epVarArg *epUnusedParam(pArgs))
 {
   if (b == true)
   {
@@ -358,7 +529,7 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), bool
     {
       if (buffer.length < 4)
         return buffer.length - 4;
-      epString("true", 4).copyTo(buffer);
+      String("true", 4).copyTo(buffer);
     }
     return 4;
   }
@@ -368,13 +539,13 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), bool
     {
       if (buffer.length < 5)
         return buffer.length - 5;
-      epString("false", 5).copyTo(buffer);
+      String("false", 5).copyTo(buffer);
     }
     return 5;
   }
 }
 
-ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), int64_t i, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), int64_t i, const epVarArg *epUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for ints?
 
@@ -420,7 +591,7 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), int6
   return len;
 }
 
-ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), uint64_t i, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), uint64_t i, const epVarArg *epUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for ints?
 
@@ -448,189 +619,20 @@ ptrdiff_t epStringify(epSlice<char> buffer, epString epUnusedParam(format), uint
   }
   return len;
 }
-ptrdiff_t epStringify(epSlice<char> epUnusedParam(buffer), epString epUnusedParam(format), double epUnusedParam(f), const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(Slice<char> epUnusedParam(buffer), String epUnusedParam(format), double epUnusedParam(f), const epVarArg *epUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for floats?
   EPASSERT(false, "No fun!");
   return 0;
 }
 
-epSharedString epSharedString::sprintf(const char *pFormat, ...)
-{
-  va_list args;
-  va_start(args, pFormat);
-
-#if defined(EP_COMPILER_VISUALC)
-  size_t len = _vscprintf(pFormat, args) + 1;
-#else
-  size_t len = vsprintf(nullptr, pFormat, args) + 1;
-#endif
-  len = numToAlloc(len);
-
-  epSharedString r;
-  r.rc = (epRC*)epAlloc(sizeof(epRC) + len);
-  r.rc->refCount = 1;
-  r.rc->allocatedCount = len;
-  r.ptr = ((const char*)r.rc)+sizeof(epRC);
-#if defined(EP_NACL)
-  r.length = vsprintf((char*)r.ptr, pFormat, args);
-#elif defined(EP_COMPILER_VISUALC)
-  r.length = vsnprintf_s((char*)r.ptr, len, len, pFormat, args);
-#else
-  r.length = vsnprintf((char*)r.ptr, len, pFormat, args);
-#endif
-
-  va_end(args);
-
-  return r;
-}
-
-epSharedString epSharedString::concatInternal(epSlice<epVarArg> args)
-{
-  size_t len = ep::internal::getLength(args);
-
-  // allocate a new epSharedString
-  epRC *pRC = (epRC*)epAlloc(sizeof(epRC) + sizeof(char)*(len+1));
-  pRC->refCount = 0;
-  pRC->allocatedCount = len;
-  char *ptr = (char*)(pRC + 1);
-
-  ep::internal::concatenate(epSlice<char>(ptr, len), args);
-  ptr[len] = 0;
-
-  return epSharedString(ptr, len, pRC);
-}
-epSharedString epSharedString::formatInternal(epString format, epSlice<epVarArg> args)
-{
-  size_t len = ep::internal::format(format, nullptr, args).length;
-
-  // allocate a new epSharedString
-  epRC *pRC = (epRC*)epAlloc(sizeof(epRC) + sizeof(char)*(len+1));
-  pRC->refCount = 0;
-  pRC->allocatedCount = len;
-  char *ptr = (char*)(pRC + 1);
-
-  ep::internal::format(format, epSlice<char>(ptr, len), args);
-  ptr[len] = 0;
-
-  return epSharedString(ptr, len, pRC);
-}
-
-template<typename C>
-int64_t epBaseString<C>::parseInt(bool bDetectBase, int base) const
-{
-  epBaseString<C> s = trim<true, false>();
-  if (s.length == 0)
-    return 0; // this isn't really right!
-
-  int number = 0;
-
-  if (base == 16 || (bDetectBase && (s.eqIC("0x") || s.eq("$"))))
-  {
-    // hex number
-    if (s.eqIC("0x"))
-      s.pop(2);
-    else if (s.eq("$"))
-      s.pop(1);
-
-    while (s.length > 0)
-    {
-      C digit = s.popFront();
-      if (!isHex(digit))
-        return number;
-      number <<= 4;
-      number += isNumeric(digit) ? digit - '0' : (digit|0x20) - 'a' + 10;
-    }
-  }
-  else if (base == 2 || (bDetectBase && s.eqIC("b")))
-  {
-    if (s.eqIC("b"))
-      s.pop(1);
-
-    while (s.length > 0 && (s.ptr[0] == '0' || s.ptr[0] == '1'))
-    {
-      number <<= 1;
-      number |= s.ptr[0] - '0';
-    }
-  }
-  else if (base == 10)
-  {
-    // decimal number
-    bool neg = false;
-    if (s.ptr[0] == '-' || s.ptr[0] == '+')
-    {
-      neg = s.ptr[0] == '-';
-      s.pop(1);
-    }
-
-    while (s.length > 0)
-    {
-      C c = s.popFront();
-      if (!isNumeric(c))
-        break;
-      number = number*10 + c - '0';
-    }
-    if (neg)
-      number = -number;
-  }
-
-  return number;
-}
-
-template<typename C>
-double epBaseString<C>::parseFloat() const
-{
-  epBaseString<C> s = trim<true, false>();
-  if (s.length == 0)
-    return 0; // this isn't really right!
-
-  int64_t number = 0;
-  double frac = 1;
-
-  // floating poiont number
-  bool neg = false;
-  if (s.ptr[0] == '-' || s.ptr[0] == '+')
-  {
-    neg = s.ptr[0] == '-';
-    s.popFront();
-  }
-
-  bool bHasDot = false;
-  while (s.length > 0)
-  {
-    C digit = s.popFront();
-    if (!isNumeric(digit) && (bHasDot || digit != '.'))
-      break;
-    if (digit == '.')
-      bHasDot = true;
-    else
-    {
-      number = number*10 + digit - '0';
-      if (bHasDot)
-        frac *= 0.1f;
-    }
-  }
-
-  if (neg)
-    number = -number;
-
-  return (double)number * frac;
-}
-
-template int64_t epBaseString<char>::parseInt(bool, int) const;
-template double epBaseString<char>::parseFloat() const;
-//template int64_t epBaseString<char16_t>::parseInt(bool, int) const;
-//template double epBaseString<char16_t>::parseFloat() const;
-//template int64_t epBaseString<char32_t>::parseInt(bool, int) const;
-//template double epBaseString<char32_t>::parseFloat() const;
-
 epResult epSlice_Test()
 {
   // usSlice<> tests
   int i[100];
 
-  epSlice<int> i1(i, 100);        // slice from array
-  epSlice<const int> ci1(i, 100); // const slice from mutable array
+  Slice<int> i1(i, 100);        // slice from array
+  Slice<const int> ci1(i, 100); // const slice from mutable array
   ci1 = i1;                       // assign mutable to const
 
   ci1 == i1;                      // compare pointer AND length are equal
@@ -639,7 +641,7 @@ epResult epSlice_Test()
   i1.eq(ci1);                     // test elements for equality
 
   short s[100];
-  epSlice<short> s1(s, 100);
+  Slice<short> s1(s, 100);
 
   i1.eq(s1);                      // test elements of different (compatible) types for equality (ie, int == short)
 
@@ -649,18 +651,18 @@ epResult epSlice_Test()
   slice.empty();                  // ptr == nullptr || length == 0
 
 
-  epSlice<void> tttt = (epSlice<void>)s1;
+  Slice<void> tttt = (Slice<void>)s1;
 
-  // epArray<>
-  epArray<int> s_i(i1);
-  epArray<const int> s_ci(s1);
+  // Array<>
+  Array<int> s_i(i1);
+  Array<const int> s_ci(s1);
 
-  epSlice<int> s_slice = s_i.slice(1, 3); // slices of epArray are not owned; they die when the parent allocation dies
+  Slice<int> s_slice = s_i.slice(1, 3); // slices of Array are not owned; they die when the parent allocation dies
 
 
-  // epSharedSlice<> tests
-  epSharedSlice<int> rc_i1(i1);       // rc_i1 is an allocated, ref-counted copy of the slice i1
-  epSharedSlice<const int> rc_ci1(s1);// rc_ci1 initialised from different (compatible) types (ie, short -> int, float -> double)
+  // SharedSlice<> tests
+  SharedSlice<int> rc_i1(i1);       // rc_i1 is an allocated, ref-counted copy of the slice i1
+  SharedSlice<const int> rc_ci1(s1);// rc_ci1 initialised from different (compatible) types (ie, short -> int, float -> double)
 
   // TODO: assign mutable RCSlice to const RCSlice without copy, should only bump RC
 
@@ -670,9 +672,9 @@ epResult epSlice_Test()
 
   rc_i1 = rc_slice;               // assignment between RC slices of the same array elide rc fiddling; only updates the offset/length
 
-  i1 == rc_i2;                    // comparison of epSlice and epSharedSlice; compares ptr && length as usual
+  i1 == rc_i2;                    // comparison of Slice and SharedSlice; compares ptr && length as usual
 
-  rc_i1.eq(i1);                   // element comparison between epSlice and epSharedSlice
+  rc_i1.eq(i1);                   // element comparison between Slice and SharedSlice
 
   for (auto i : i1)
   {
@@ -684,39 +686,39 @@ epResult epSlice_Test()
   return epR_Success;
 }
 
-void receivesString(epString)
+void receivesString(String)
 {
 }
 void receivesCString(const char*)
 {
 }
 
-#include "ep/epvariant.h"
+#include "ep/cpp/variant.h"
 
 epResult epString_Test()
 {
-  // epString
+  // String
   char buffer[] = "world";
 
-  epString s1 = "hello";        // initialise from string
-  epString s2(buffer, 3);       // initialise to sub-string; ie, "wor"
+  String s1 = "hello";        // initialise from string
+  String s2(buffer, 3);       // initialise to sub-string; ie, "wor"
 
   s1.eq(s2);                    // strcmp() == 0
   s1.eqIC(s2);                   // case insensitive; stricmp() == 0
   s1.eq("hello");               // compare with c-string
 
-  epSharedSlice<char16_t> wcs(s1);   // init wchar string from c-string! yay unicode! (except we probably also want to decode utf-8...)
+  SharedSlice<char16_t> wcs(s1);   // init wchar string from c-string! yay unicode! (except we probably also want to decode utf-8...)
 
   wcs.eq(s1);                   // compare wide-char and ascii strings
 
   auto subStr = s1.slice(1, 4); // string slice; "ell"
 
-  s2.toStringz(buffer, sizeof(buffer)); // write epString to c-string
+  s2.toStringz(buffer, sizeof(buffer)); // write String to c-string
 
 
-  // epMutableString
-  epMutableString<64> s_s1(s1);
-  epString s_slice = s_s1.slice(1, 4); // slices of epArray are not owned; they die when the parent allocation dies
+  // MutableString
+  MutableString<64> s_s1(s1);
+  String s_slice = s_s1.slice(1, 4); // slices of Array are not owned; they die when the parent allocation dies
 
   s_s1.eqIC("HELLO");            // string comparison against string literals
 
@@ -725,50 +727,50 @@ epResult epString_Test()
   s_s1.reserve(100);            // reserve a big buffer
   EPASSERT(s_s1.eq(s1), "!");   // the existing contents is preserved
 
-  s_s1.concat(s1, "!!", epString("world"));
+  s_s1.concat(s1, "!!", String("world"));
 
 
-  // epSharedString
-  epSharedString rcs1(s1);          // RC string initialised from some slice
-  epSharedString rcs2("string");    // also from literal
-  epSharedString rcs3(buffer, 4);   // also from c-string (and optionally a slice thereof)
+  // SharedString
+  SharedString rcs1(s1);          // RC string initialised from some slice
+  SharedString rcs2("string");    // also from literal
+  SharedString rcs3(buffer, 4);   // also from c-string (and optionally a slice thereof)
 
   receivesString(rcs1);         // pass to functions
 
-  epMutableString<64> ss2 = rcs2; // stack string takes copy of a epSharedString
-  epSharedString rcs4 = ss2;        // rc strings take copy of stack strings too
+  MutableString<64> ss2 = rcs2; // stack string takes copy of a SharedString
+  SharedString rcs4 = ss2;        // rc strings take copy of stack strings too
 
-  rcs1 == s1;                   // compare epSharedString and epString pointers
+  rcs1 == s1;                   // compare SharedString and String pointers
 
-  rcs1.eqIC(s1);                 // string comparison works too between epSharedString and epString
+  rcs1.eqIC(s1);                 // string comparison works too between SharedString and String
 
-//  epSharedString::format("Format: %s", "hello");  // create from format string
+//  SharedString::format("Format: %s", "hello");  // create from format string
 
 //  char temp[256];
-//  fopen(rcs1.toStringz(temp, sizeof(temp)), "ro"); // write epSharedString to c-string, for passing to OS functions or C api's
+//  fopen(rcs1.toStringz(temp, sizeof(temp)), "ro"); // write SharedString to c-string, for passing to OS functions or C api's
                                                    // unlike c_str(), user supplies buffer (saves allocations)
 
-  epSharedString r2 = epSharedString::concat(s1, "!!", rcs1, epString("world"), s_s1);
-//  epSharedString::format("x{1}_{2}", "10", "200");
+  SharedString r2 = SharedString::concat(s1, "!!", rcs1, String("world"), s_s1);
+//  SharedString::format("x{1}_{2}", "10", "200");
 
   receivesCString(r2.toStringz());
 
   const char *pName = "manu";
-  epSharedString cc = epSharedString::concat("hello ", pName, 10);
-  epSharedString fmt = epSharedString::format("{ 1 }, {2}, { 0 , hello }", "hello ", pName, 10);
+  SharedString cc = SharedString::concat("hello ", pName, 10);
+  SharedString fmt = SharedString::format("{ 1 }, {2}, { 0 , hello }", "hello ", pName, 10);
 
-  epMutableString<0> ms; ms.concat("hello ", pName, 10);
+  MutableString<0> ms; ms.concat("hello ", pName, 10);
   ms.append("poop!");
 
   int arr[] = { 1, 2, 30 };
-  ms.format("{1}, {'?',?8}{'!',!8}, {@7} {3}, {4}", "hello ", pName, 10, epSlice<int>(arr, 3), epVariant(true), "*6", 10, "!{0,@5}!", false);
+  ms.format("{1}, {'?',?8}{'!',!8}, {@7} {3}, {4}", "hello ", pName, 10, Slice<int>(arr, 3), Variant(true), "*6", 10, "!{0,@5}!", false);
 
-  epSlice<const void> poo;
+  Slice<const void> poo;
 //  poo.slice(1, 3);
 //  poo[2];
 //  poo.alloc(10);
 
-  epWString wstr = (const char16_t*)L"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
+  WString wstr = (const char16_t*)L"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
   ms.format("{0}", wstr);
 
   return epR_Success;

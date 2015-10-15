@@ -27,23 +27,23 @@ ComponentDesc MemStream::descriptor =
   "MemStream", // displayName
   "Memory stream", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
   nullptr, // methods,
   nullptr
 };
 
-MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   BufferRef inBuffer;
 
-  const epVariant &fl = initParams["flags"];
+  const Variant &fl = initParams["flags"];
   oFlags = fl.as<OpenFlags>();
   if (!(oFlags & (OpenFlags::Write | OpenFlags::Read)))
     throw epR_InvalidParameter_;
 
-  const epVariant &buf = initParams["buffer"];
-  if (buf.is(epVariant::Type::Null))
+  const Variant &buf = initParams["buffer"];
+  if (buf.is(Variant::Type::Null))
   {
       inBuffer = pKernel->CreateComponent<Buffer>();
       inBuffer->Allocate(DefaultBufferSize);
@@ -92,7 +92,7 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
   else if (oFlags & OpenFlags::Read)
   {
     auto map = spBuffer->MapForRead();
-    bufferSlice = epSlice<void>(const_cast<void*>(map.ptr), map.length);
+    bufferSlice = Slice<void>(const_cast<void*>(map.ptr), map.length);
     if (!bufferSlice)
       LogError("Can't reserve Buffer for reading.");
   }
@@ -109,7 +109,7 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
     Changed.Signal();
 }
 
-epSlice<void> MemStream::Read(epSlice<void> buf)
+Slice<void> MemStream::Read(Slice<void> buf)
 {
   if (!spBuffer)
     return 0;
@@ -121,10 +121,10 @@ epSlice<void> MemStream::Read(epSlice<void> buf)
   memcpy(buf.ptr, (const char*)bufferSlice.ptr + pos, bytes);
   pos += bytes;
 
-  return epSlice<void>(buf.ptr, bytes);
+  return Slice<void>(buf.ptr, bytes);
 }
 
-size_t MemStream::Write(epSlice<const void> data)
+size_t MemStream::Write(Slice<const void> data)
 {
   if (!(oFlags & OpenFlags::Write) || !spBuffer)
     return 0;

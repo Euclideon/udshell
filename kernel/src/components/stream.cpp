@@ -21,8 +21,8 @@ BufferRef Stream::ReadBuffer(size_t bytes)
   BufferRef spBuffer = pKernel->CreateComponent<Buffer>();
   spBuffer->Allocate(bytes);
 
-  epSlice<void> buffer = spBuffer->Map();
-  IF_UDASSERT(epSlice<void> read =) Read(buffer);
+  Slice<void> buffer = spBuffer->Map();
+  IF_UDASSERT(Slice<void> read =) Read(buffer);
   spBuffer->Unmap();
 
   EPASSERT(read.length == bytes, "TODO: handle the case where we read less bytes than we expect!");
@@ -31,7 +31,7 @@ BufferRef Stream::ReadBuffer(size_t bytes)
 }
 size_t Stream::WriteBuffer(BufferRef spData)
 {
-  epSlice<const void> buffer = spData->MapForRead();
+  Slice<const void> buffer = spData->MapForRead();
   size_t bytes = Write(buffer);
   spData->Unmap();
   return bytes;
@@ -46,7 +46,7 @@ BufferRef Stream::Load()
   BufferRef spBuffer = pKernel->CreateComponent<Buffer>();
   spBuffer->Allocate((size_t)len);
 
-  epSlice<void> buffer = spBuffer->Map();
+  Slice<void> buffer = spBuffer->Map();
   Seek(SeekOrigin::Begin, 0);
   Read(buffer);
   spBuffer->Unmap();
@@ -58,7 +58,7 @@ void Stream::Save(BufferRef spBuffer)
 {
   // TODO: check and bail if stream is not writable...
 
-  epSlice<const void> buffer = spBuffer->MapForRead();
+  Slice<const void> buffer = spBuffer->MapForRead();
 
   Seek(SeekOrigin::Begin, 0);
   Write(buffer);
@@ -66,11 +66,11 @@ void Stream::Save(BufferRef spBuffer)
   spBuffer->Unmap();
 }
 
-size_t Stream::WriteLn(epString str)
+size_t Stream::WriteLn(String str)
 {
   size_t written;
 
-  epMutableString<256> temp;
+  MutableString<256> temp;
   temp = str;
   temp.append("\n");
   written = Write(temp);
@@ -78,7 +78,7 @@ size_t Stream::WriteLn(epString str)
   return written;
 }
 
-epString Stream::ReadLn(epSlice<char> buf)
+String Stream::ReadLn(Slice<char> buf)
 {
   EPASSERT(false, "TODO");
 

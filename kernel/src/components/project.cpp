@@ -23,14 +23,14 @@ ComponentDesc Project::descriptor =
   nullptr, // events
 };
 
-Project::Project(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  const epVariant &src = initParams["src"];
+  const Variant &src = initParams["src"];
   StreamRef spSrc = nullptr;
   ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
 
-  if (src.is(epVariant::Type::String))
+  if (src.is(Variant::Type::String))
   {
     // path or url?
     spSrc = pKernel->CreateComponent<File>({ { "path", src }, { "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
@@ -46,9 +46,9 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid
     throw epR_InvalidParameter_;
   }
 
-  int64_t len = spSrc->Length();
+  size_t len = (size_t)spSrc->Length();
   char *pBuffer = (char *)epAlloc(len + 1);
-  spSrc->Read(epSlice<void>(pBuffer, len));
+  spSrc->Read(Slice<void>(pBuffer, len));
   pBuffer[len] = '\0';
 
   using namespace rapidxml;
@@ -62,12 +62,12 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid
     xml_node<> *nDataSources = nProject->first_node("datasources");
     for (xml_node<> *nDataSource = nDataSources->first_node("datasource"); nDataSource; nDataSource = nDataSource->next_sibling("datasource"))
     {
-      epArray<const epKeyValuePair, 256> dsParams;
+      Array<const KeyValuePair, 256> dsParams;
       for (xml_attribute<> *attr = nDataSource->first_attribute(); attr; attr = attr->next_attribute())
       {
-        dsParams.concat(epKeyValuePair(attr->name(), attr->value()));
+        dsParams.concat(KeyValuePair(attr->name(), attr->value()));
       }
-      spResourceManager->LoadResourcesFromFile(epInitParams(dsParams));
+      spResourceManager->LoadResourcesFromFile(InitParams(dsParams));
     }
   }
   catch (parse_error e)

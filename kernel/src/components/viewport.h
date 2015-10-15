@@ -15,10 +15,10 @@ public:
   EP_COMPONENT(Viewport);
 
 protected:
-  Viewport(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   virtual ~Viewport();
 
-  epResult CreateInternal(epInitParams initParams);
+  epResult CreateInternal(InitParams initParams);
   void DestroyInternal();
 };
 

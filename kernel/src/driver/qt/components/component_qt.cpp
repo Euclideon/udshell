@@ -12,7 +12,7 @@ namespace qt
 QVariant QtEPComponent::get(const QString &name) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString prop(byteArray.data(), byteArray.size());
+  String prop(byteArray.data(), byteArray.size());
 
   QVariant res;
   epFromVariant(wpComponent->GetProperty(prop), &res);
@@ -22,23 +22,23 @@ QVariant QtEPComponent::get(const QString &name) const
 void QtEPComponent::set(const QString &name, QVariant val)
 {
   QByteArray byteArray = name.toUtf8();
-  epString prop(byteArray.data(), byteArray.size());
+  String prop(byteArray.data(), byteArray.size());
   wpComponent->SetProperty(prop, epToVariant(val));
 }
 
 QVariant QtEPComponent::call(const QString &name) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(wpComponent->CallMethod(method, epSlice<epVariant>()), &res);
+  epFromVariant(wpComponent->CallMethod(method, Slice<Variant>()), &res);
   return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0)), &res);
   return res;
@@ -47,7 +47,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1)), &res);
   return res;
@@ -56,7 +56,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
   return res;
@@ -65,7 +65,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
   return res;
@@ -74,7 +74,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4)), &res);
@@ -85,9 +85,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant arg4, QVariant arg5) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epArray<epVariant, 6> vargs = {  };
+  Array<Variant, 6> vargs = {  };
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5)), &res);
   return res;
@@ -97,7 +97,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant arg4, QVariant arg5, QVariant arg6) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6)), &res);
@@ -108,7 +108,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6), epToVariant(arg7)), &res);
@@ -119,7 +119,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6),
@@ -131,7 +131,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const
 {
   QByteArray byteArray = name.toUtf8();
-  epString method(byteArray.data(), byteArray.size());
+  String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(wpComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5),
@@ -140,13 +140,13 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 }
 
 // Shim class
-class JSValueDelegate : public epDelegateMemento
+class JSValueDelegate : public DelegateMemento
 {
 protected:
   template<typename T>
-  friend class ::epSharedPtr;
+  friend class ::SharedPtr;
 
-  epVariant call(epSlice<epVariant> args)
+  Variant call(Slice<Variant> args)
   {
     QJSValueList jsArgs;
     jsArgs.reserve(static_cast<int>(args.length));
@@ -161,7 +161,7 @@ protected:
   JSValueDelegate(const QJSValue &jsValue) : jsVal(jsValue)
   {
     // set the memento to our call shim
-    FastDelegate<epVariant(epSlice<epVariant>)> shim(this, &JSValueDelegate::call);
+    FastDelegate<Variant(Slice<Variant>)> shim(this, &JSValueDelegate::call);
     m = shim.GetMemento();
   }
 
@@ -173,7 +173,7 @@ protected:
 
 void QtEPComponent::subscribe(QString eventName, QJSValue func) const
 {
-  typedef epSharedPtr<JSValueDelegate> JSValueDelegateRef;
+  typedef SharedPtr<JSValueDelegate> JSValueDelegateRef;
 
   if (!func.isCallable())
   {
@@ -182,9 +182,9 @@ void QtEPComponent::subscribe(QString eventName, QJSValue func) const
   }
 
   QByteArray byteArray = eventName.toUtf8();
-  epString event(byteArray.data(), byteArray.size());
+  String event(byteArray.data(), byteArray.size());
 
-  wpComponent->Subscribe(event, epVariant::VarDelegate(JSValueDelegateRef::create(func)));
+  wpComponent->Subscribe(event, Variant::VarDelegate(JSValueDelegateRef::create(func)));
 }
 
 } // namespace qt

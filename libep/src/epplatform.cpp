@@ -1,4 +1,4 @@
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 
 #include "udPlatform.h"
 
@@ -7,7 +7,7 @@ namespace internal {
 
 bool gUnitTesting = false;
 
-epMutableString256 assertBuffer;
+MutableString256 assertBuffer;
 
 } // namespace internal
 } // namespace ep
@@ -18,14 +18,14 @@ extern "C" {
 void epAssertFailed(epString condition, epString message, epString file, int line)
 {
   // TODO: Agree on formatting of assets
-  if (ep::internal::gUnitTesting)
+  if (internal::gUnitTesting)
   {
-    fprintf(stderr, message.toStringz());
+    fprintf(stderr, "%.*s", (int)message.length, message.ptr);
     exit(EXIT_FAILURE);
   }
   else
   {
-    epMutableString256 t; t.format("ASSERT FAILED : {0}\n{1}\n{2}({3})", condition, message, file, line);
+    MutableString256 t; t.format("ASSERT FAILED : {0}\n{1}\n{2}({3})", (String&)condition, (String&)message, (String&)file, line);
     epDebugWrite(t.ptr);
   }
 }

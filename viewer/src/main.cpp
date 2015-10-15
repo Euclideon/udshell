@@ -1,7 +1,7 @@
 // kernel includes
-#include "ep/epplatform.h"
-#include "ep/epstring.h"
-#include "ep/eperror.h"
+#include "ep/cpp/platform.h"
+#include "ep/cpp/string.h"
+#include "ep/cpp/error.h"
 #include "kernel.h"
 #include "components/view.h"
 #include "components/scene.h"
@@ -17,17 +17,17 @@ static void ProcessCmdline(int argc, char *argv[]);
 // Author: David Ely, September 2015
 static struct
 {
-  epMutableString<256> filename;          // TODO: make this udString
+  MutableString256 filename;          // TODO: make this udString
 
   uint32_t rendererThreadCount;
   uint32_t streamerMemoryLimit;
 
-  ep::Kernel *pKernel;
+  Kernel *pKernel;
 
-  ep::ViewRef spView;
-  ep::SceneRef spScene;
-  ep::SimpleCameraRef spSimpleCamera;
-  ep::UDNodeRef spUDNode;
+  ViewRef spView;
+  SceneRef spScene;
+  SimpleCameraRef spSimpleCamera;
+  UDNodeRef spUDNode;
 } mData = {
 #if UDPLATFORM_WINDOWS
                "/src/data/DirCube.uds", // filename
@@ -47,7 +47,7 @@ static struct
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
-static void ViewerInit(epString sender, epString message, const epVariant &data)
+static void ViewerInit(String sender, String message, const Variant &data)
 {
   epResult result = epR_Success;
   EPERROR(result);

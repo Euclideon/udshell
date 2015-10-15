@@ -19,9 +19,9 @@ namespace qt {
 namespace internal {
 
 // Helper function
-epResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Component *pComponent, QObject **ppInternal)
+epResult SetupFromQmlFile(InitParams initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal)
 {
-  epString file = initParams["file"].as<epString>();
+  String file = initParams["file"].as<String>();
   if (file.empty())
   {
     pComponent->LogError("Attempted to create ui component without source file");
@@ -43,7 +43,7 @@ epResult SetupFromQmlFile(epInitParams initParams, qt::QtKernel *pKernel, ep::Co
     // TODO: better error information/handling
     pComponent->LogError("Error creating QtComponent");
     foreach(const QQmlError &error, component.errors())
-      pComponent->LogError(epSharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+      pComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
 
     delete pContext;
     delete pEPComponent;
@@ -77,7 +77,7 @@ using qt::internal::SetupFromQmlFile;
 using qt::internal::CleanupInternalData;
 
 // ---------------------------------------------------------------------------------------
-epResult UIComponent::CreateInternal(epInitParams initParams)
+epResult UIComponent::CreateInternal(InitParams initParams)
 {
   LogTrace("UIComponent::CreateInternal()");
 
@@ -121,7 +121,7 @@ void UIComponent::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Viewport::CreateInternal(epInitParams initParams)
+epResult Viewport::CreateInternal(InitParams initParams)
 {
   LogTrace("Viewport::CreateInternal()");
 
@@ -155,7 +155,7 @@ void Viewport::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Window::CreateInternal(epInitParams initParams)
+epResult Window::CreateInternal(InitParams initParams)
 {
   LogTrace("Window::CreateInternal()");
 

@@ -14,13 +14,13 @@ class Text : public Buffer
 public:
   EP_COMPONENT(Text);
 
-  epVariant ParseXml() const;
-  epVariant ParseJson() const;
+  Variant ParseXml() const;
+  Variant ParseJson() const;
 
-  void CopyBuffer(epString text) { Buffer::CopyBuffer(text); }
+  void CopyBuffer(String text) { Buffer::CopyBuffer(text); }
 
 protected:
-  Text(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  Text(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Buffer(pType, pKernel, uid, initParams) {}
   virtual ~Text() {}
 };

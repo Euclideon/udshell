@@ -1,5 +1,5 @@
 
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 
 #include "kernel.h"
 #include "components/logger.h"
@@ -71,11 +71,11 @@ ComponentDesc Component::descriptor =
   "Component", // displayName
   "Is a component", // description
 
-  epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
 
-void Component::Init(epInitParams initParams)
+void Component::Init(InitParams initParams)
 {
   for (auto &kv : initParams)
   {
@@ -103,7 +103,7 @@ Component::~Component()
 }
 
 
-bool Component::IsType(epString type) const
+bool Component::IsType(String type) const
 {
   const ComponentDesc *pDesc = pType;
   while (pDesc)
@@ -115,21 +115,21 @@ bool Component::IsType(epString type) const
   return false;
 }
 
-const PropertyDesc *Component::GetPropertyDesc(epString name) const
+const PropertyDesc *Component::GetPropertyDesc(String name) const
 {
   const PropertyDesc *pDesc = instanceProperties.Get(name);
   if (!pDesc)
     pDesc = pType->propertyTree.Get(name);
   return pDesc;
 }
-const MethodDesc *Component::GetMethodDesc(epString name) const
+const MethodDesc *Component::GetMethodDesc(String name) const
 {
   const MethodDesc *pDesc = instanceMethods.Get(name);
   if (!pDesc)
     pDesc = pType->methodTree.Get(name);
   return pDesc;
 }
-const EventDesc *Component::GetEventDesc(epString name) const
+const EventDesc *Component::GetEventDesc(String name) const
 {
   const EventDesc *pDesc = instanceEvents.Get(name);
   if (!pDesc)
@@ -137,7 +137,7 @@ const EventDesc *Component::GetEventDesc(epString name) const
   return pDesc;
 }
 
-const StaticFuncDesc *Component::GetStaticFuncDesc(epString name) const
+const StaticFuncDesc *Component::GetStaticFuncDesc(String name) const
 {
   return pType->staticFuncTree.Get(name);
 }
@@ -155,20 +155,20 @@ void Component::AddDynamicEvent(const EventDesc &event)
   instanceEvents.Insert(event.info.id, event);
 }
 
-void Component::RemoveDynamicProperty(epString name)
+void Component::RemoveDynamicProperty(String name)
 {
   instanceProperties.Remove(name);
 }
-void Component::RemoveDynamicMethod(epString name)
+void Component::RemoveDynamicMethod(String name)
 {
   instanceMethods.Remove(name);
 }
-void Component::RemoveDynamicEvent(epString name)
+void Component::RemoveDynamicEvent(String name)
 {
   instanceEvents.Remove(name);
 }
 
-void Component::SetProperty(epString property, const epVariant &value)
+void Component::SetProperty(String property, const Variant &value)
 {
   const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
@@ -185,34 +185,34 @@ void Component::SetProperty(epString property, const epVariant &value)
 //  propertyChange[pDesc->index].Signal();
 }
 
-epVariant Component::GetProperty(epString property) const
+Variant Component::GetProperty(String property) const
 {
   const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
   {
     LogWarning(2, "No property '{0}' for component '{1}'", property, name.empty() ? uid : name);
-    return epVariant();
+    return Variant();
   }
   if (!pDesc->getter)
   {
     LogWarning(2, "Property '{0}' for component '{1}' is write-only", property, name.empty() ? uid : name);
-    return epVariant();
+    return Variant();
   }
   return pDesc->getter->get(this);
 }
 
-epVariant Component::CallMethod(epString method, epSlice<epVariant> args)
+Variant Component::CallMethod(String method, Slice<Variant> args)
 {
   const MethodDesc *pDesc = GetMethodDesc(method);
   if (!pDesc)
   {
     LogWarning(1, "Method not found!");
-    return epVariant();
+    return Variant();
   }
   return pDesc->method->call(this, args);
 }
 
-void Component::Subscribe(epString eventName, const epVariant::VarDelegate &d)
+void Component::Subscribe(String eventName, const Variant::VarDelegate &d)
 {
   const EventDesc *pDesc = GetEventDesc(eventName);
   if (!pDesc)
@@ -229,11 +229,11 @@ void Component::Unsubscribe()
 }
 
 
-epResult Component::ReceiveMessage(epString message, epString sender, const epVariant &data)
+epResult Component::ReceiveMessage(String message, String sender, const Variant &data)
 {
   if (message.eqIC("set"))
   {
-    epSlice<epVariant> arr = data.asArray();
+    Slice<Variant> arr = data.asArray();
     SetProperty(arr[0].asString(), arr[1]);
   }
   else if (message.eqIC("get"))
@@ -241,7 +241,7 @@ epResult Component::ReceiveMessage(epString message, epString sender, const epVa
     if (!sender.empty())
     {
       char mem[1024];
-      epSlice<char> buffer(mem, sizeof(mem));
+      Slice<char> buffer(mem, sizeof(mem));
 //      GetProperty(data, &buffer);
 //      SendMessage(sender, "val", buffer);
     }
@@ -249,27 +249,29 @@ epResult Component::ReceiveMessage(epString message, epString sender, const epVa
   return epR_Success;
 }
 
-epResult Component::SendMessage(epString target, epString message, const epVariant &data)
+epResult Component::SendMessage(String target, String message, const Variant &data)
 {
   return pKernel->SendMessage(target, uid, message, data);
 }
 
-void Component::LogInternal(int level, epString text, int category, epString componentUID) const
+void Component::LogInternal(int level, String text, int category, String componentUID) const
 {
   pKernel->GetLogger()->Log(level, text, (LogCategories)category, componentUID);
 }
 
 } // namespace ep
 
-ptrdiff_t epStringify(epSlice<char> buffer, epString format, ep::ComponentRef spComponent, const epVarArg *pArgs)
+/*
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs)
 {
-  ptrdiff_t len = spComponent->uid.length + 1;
+  ptrdiff_t len = pComponent->uid.length + 1;
   if (!buffer.ptr)
     return len;
   if (buffer.length < (size_t)len)
     return -len;
 
   // HACK: this could be a lot nicer!
-  epMutableString<64> uid; uid.concat("@", spComponent->uid);
+  MutableString<64> uid; uid.concat("@", pComponent->uid);
   return epStringifyTemplate(buffer, format, uid, pArgs);
 }
+*/

@@ -3,7 +3,7 @@
 #define _EP_METADATA_H
 
 #include "components/resources/kvpstore.h"
-#include "ep/epavltree.h"
+#include "ep/cpp/avltree.h"
 
 namespace ep
 {
@@ -20,39 +20,39 @@ public:
     return metadata.Size();
   }
 
-  void Insert(epVariant &&key, epVariant &&value) override           { metadata.Insert(std::move(key), std::move(value)); }
-  void Insert(const epVariant &key, epVariant &&value) override      { metadata.Insert(key, std::move(value)); }
-  void Insert(epVariant &&key, const epVariant &value) override      { metadata.Insert(std::move(key), value); }
-  void Insert(const epVariant &key, const epVariant &value) override { metadata.Insert(key, value); }
+  void Insert(Variant &&key, Variant &&value) override           { metadata.Insert(std::move(key), std::move(value)); }
+  void Insert(const Variant &key, Variant &&value) override      { metadata.Insert(key, std::move(value)); }
+  void Insert(Variant &&key, const Variant &value) override      { metadata.Insert(std::move(key), value); }
+  void Insert(const Variant &key, const Variant &value) override { metadata.Insert(key, value); }
 
-  void Remove(const epVariant &key) override
+  void Remove(const Variant &key) override
   {
     metadata.Remove(key);
   }
 
-  bool Exists(const epVariant &key) const override
+  bool Exists(const Variant &key) const override
   {
     return !!metadata.Get(key);
   }
 
-  epVariant Get(const epVariant &key) const override
+  Variant Get(const Variant &key) const override
   {
-    epVariant *v = const_cast<epVariant*>(metadata.Get(key));
-    return v ? *v : epVariant();
+    Variant *v = const_cast<Variant*>(metadata.Get(key));
+    return v ? *v : Variant();
   }
 
 protected:
-  Metadata(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  Metadata(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : KVPStore(pType, pKernel, uid, initParams) {}
 
   struct VariantCompare {
-    epforceinline ptrdiff_t operator()(const epVariant &a, const epVariant &b)
+    epforceinline ptrdiff_t operator()(const Variant &a, const Variant &b)
     {
       return a.compare(b);
     }
   };
 
-  epAVLTree<epVariant, epVariant, VariantCompare> metadata;
+  AVLTree<Variant, Variant, VariantCompare> metadata;
 };
 
 }

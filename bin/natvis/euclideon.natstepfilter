@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <StepFilter xmlns="http://schemas.microsoft.com/vstudio/debugger/natstepfilter/2010">
 
-  <Function><Name>epSlice&lt;.*&gt;::epSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epArray&lt;.*&gt;::epArray&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epSharedSlice&lt;.*&gt;::epSharedSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::Slice&lt;.*&gt;::Slice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::Array&lt;.*&gt;::Array&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::SharedSlice&lt;.*&gt;::SharedSlice&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
 
-  <Function><Name>epBaseString&lt;.*&gt;::epBaseString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epMutableString&lt;.*&gt;::epMutableString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epSharedString::epSharedString</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::BaseString&lt;.*&gt;::BaseString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::MutableString&lt;.*&gt;::MutableString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::SharedString::SharedString</Name><Action>NoStepInto</Action></Function>
 
-  <Function><Name>epVariant::epVariant</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epKeyValuePair::epKeyValuePair</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::Variant::Variant</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::KeyValuePair::KeyValuePair</Name><Action>NoStepInto</Action></Function>
 
-  <Function><Name>epSharedPtr&lt;.*&gt;::operator\*</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epSharedPtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epSharedPtr&lt;.*&gt;::operator bool</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epUniquePtr&lt;.*&gt;::operator\*</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epUniquePtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epUniquePtr&lt;.*&gt;::operator bool</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epSynchronisedPtr&lt;.*&gt;::operator\*</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epSynchronisedPtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
-  <Function><Name>epSynchronisedPtr&lt;.*&gt;::operator bool</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::SharedPtr&lt;.*&gt;::operator\*</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::SharedPtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::SharedPtr&lt;.*&gt;::operator bool</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::UniquePtr&lt;.*&gt;::operator\*</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::UniquePtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::UniquePtr&lt;.*&gt;::operator bool</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::SynchronisedPtr&lt;.*&gt;::operator\*</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::SynchronisedPtr&lt;.*&gt;::operator-&gt;</Name><Action>NoStepInto</Action></Function>
+  <Function><Name>ep::SynchronisedPtr&lt;.*&gt;::operator bool</Name><Action>NoStepInto</Action></Function>
 
   <Function><Name>fastdelegate::detail::ClosurePtr&lt;.*&gt;::GetClosureThis</Name><Action>NoStepInto</Action></Function>
   <Function><Name>fastdelegate::detail::ClosurePtr&lt;.*&gt;::GetClosureMemPtr</Name><Action>NoStepInto</Action></Function>

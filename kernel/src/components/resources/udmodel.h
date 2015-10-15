@@ -6,7 +6,7 @@
 #include "udOctree.h"
 
 #include "components/resources/resource.h"
-#include "ep/epsharedptr.h"
+#include "ep/cpp/sharedptr.h"
 #include "udRender.h"
 #include "kernel.h"
 
@@ -23,7 +23,7 @@ public:
   udOctree *GetOctreePtr() const { return pOctree; }
   friend class UDDataSource;
 protected:
-  UDModel(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  UDModel(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~UDModel();
 
@@ -37,7 +37,7 @@ struct NodeRenderModel : public udRenderModel
 
   udDouble4x4 matrix;
   udRenderClipArea clipArea;
-  epDelegate<SimpleVoxelDlgt> simpleVoxelDel;
+  Delegate<SimpleVoxelDlgt> simpleVoxelDel;
 
   static unsigned VoxelShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex)
   {

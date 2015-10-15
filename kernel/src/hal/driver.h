@@ -2,7 +2,7 @@
 #ifndef EP_DRIVER_H
 #define EP_DRIVER_H
 
-#include "ep/epplatform.h"
+#include "ep/cpp/platform.h"
 
 #define EPDRIVER_NULL   100
 #define EPDRIVER_OPENGL 101

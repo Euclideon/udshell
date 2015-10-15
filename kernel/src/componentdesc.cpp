@@ -1,5 +1,5 @@
 #include "componentdesc.h"
-#include "ep/epcomponentdesc.h"
+#include "ep/c/componentdesc.h"
 
 namespace ep
 {
@@ -140,7 +140,7 @@ void ComponentDesc::BuildSearchTrees()
   InitStaticFuncs();
 }
 
-StaticFunc *ComponentDesc::GetStaticFunc(epString id) const
+StaticFunc *ComponentDesc::GetStaticFunc(String id) const
 {
   const StaticFuncDesc *pFuncDesc;
   const ComponentDesc *pCompDesc = this;

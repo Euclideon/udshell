@@ -1,6 +1,10 @@
 #pragma once
-#if !defined(_EPAVLTREE_H)
-#define _EPAVLTREE_H
+#if !defined(_EPAVLTREE_HPP)
+#define _EPAVLTREE_HPP
+
+#include "ep/cpp/platform.h"
+
+namespace ep {
 
 template<typename T>
 struct AVLCompare
@@ -12,35 +16,35 @@ struct AVLCompare
 };
 
 template<>
-struct AVLCompare<epString>
+struct AVLCompare<String>
 {
-  epforceinline ptrdiff_t operator()(epString a, epString b)
+  epforceinline ptrdiff_t operator()(String a, String b)
   {
     return a.cmp(b);
   }
 };
 template<>
-struct AVLCompare<epSharedString>
+struct AVLCompare<SharedString>
 {
-  epforceinline ptrdiff_t operator()(epString a, epString b)
+  epforceinline ptrdiff_t operator()(String a, String b)
   {
     return a.cmp(b);
   }
 };
 
 template<typename K, typename V, typename PredFunctor = AVLCompare<K>>
-class epAVLTree
+class AVLTree
 {
 public:
-  epAVLTree() {}
-  epAVLTree(nullptr_t) {}
-  epAVLTree(epAVLTree &&rval)
+  AVLTree() {}
+  AVLTree(nullptr_t) {}
+  AVLTree(AVLTree &&rval)
     : size(size), root(root)
   {
     rval.root = nullptr;
   }
 
-  ~epAVLTree()
+  ~AVLTree()
   {
     // TODO: ** CLEAN UP HERE **
   }
@@ -470,4 +474,6 @@ public:
   };
 };
 
-#endif // _EPAVLTREE_H
+} // namespace ep
+
+#endif // _EPAVLTREE_HPP

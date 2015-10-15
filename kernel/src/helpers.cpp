@@ -1,10 +1,10 @@
 
 #include "helpers.h"
 
-epSharedSlice<const epKeyValuePair> udParseCommandLine(const char *pCommandLine)
+SharedSlice<const KeyValuePair> udParseCommandLine(const char *pCommandLine)
 {
-  epArray<const epKeyValuePair, 64> output;
-  output.concat(epKeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
+  Array<const KeyValuePair, 64> output;
+  output.concat(KeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
@@ -12,42 +12,42 @@ epSharedSlice<const epKeyValuePair> udParseCommandLine(const char *pCommandLine)
   bool bInQuotes = false;
   while (pCommandLine[i] != 0)
   {
-    while (isWhitespace(pCommandLine[i]))
+    while (epIsWhitespace(pCommandLine[i]))
       ++i;
     start = i;
-    while (pCommandLine[i] && (!isWhitespace(pCommandLine[i]) || bInQuotes))
+    while (pCommandLine[i] && (!epIsWhitespace(pCommandLine[i]) || bInQuotes))
     {
       if (pCommandLine[i] == '\"')
         bInQuotes = !bInQuotes;
       ++i;
     }
     if (i > start)
-      output.pushBack(epKeyValuePair(nullptr, epString(pCommandLine + start, i - start)));
+      output.pushBack(KeyValuePair(nullptr, String(pCommandLine + start, i - start)));
   }
 
-  return epSharedSlice<const epKeyValuePair>(output);
+  return SharedSlice<const KeyValuePair>(output);
 }
 
-epSharedSlice<const epKeyValuePair> udParseCommandLine(int argc, char *argv[])
+SharedSlice<const KeyValuePair> udParseCommandLine(int argc, char *argv[])
 {
-  epArray<const epKeyValuePair, 64> output;
+  Array<const KeyValuePair, 64> output;
   output.reserve(argc);
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
   for (int i = 0; i < argc; ++i)
-    output.pushBack(epKeyValuePair(nullptr, epString(argv[i])));
+    output.pushBack(KeyValuePair(nullptr, String(argv[i])));
 
-  return epSharedSlice<const epKeyValuePair>(output.slice(0, argc));
+  return SharedSlice<const KeyValuePair>(output.slice(0, argc));
 }
 
-epSharedSlice<const epKeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
+SharedSlice<const KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
 {
-  epArray<const epKeyValuePair, 64> output;
+  Array<const KeyValuePair, 64> output;
   output.reserve(argc);
 
   for (uint32_t i = 0; i < argc; ++i)
-    output.pushBack(epKeyValuePair(epString(argn[i]), epString(argv[i])));
+    output.pushBack(KeyValuePair(String(argn[i]), String(argv[i])));
 
-  return epSharedSlice<const epKeyValuePair>(output.slice(0, argc));
+  return SharedSlice<const KeyValuePair>(output.slice(0, argc));
 }

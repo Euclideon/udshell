@@ -28,14 +28,14 @@ ComponentDesc ResourceManager::descriptor =
   "Resource Manager", // displayName
   "Manages resource components", // description
 
-  //epSlice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  //epSlice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  //Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  //Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
   nullptr, // properties
   nullptr, // methods
   nullptr, // events
 };
 
-ResourceManager::ResourceManager(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+ResourceManager::ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
 
@@ -49,9 +49,9 @@ ResourceManager::~ResourceManager()
 void ResourceManager::AddResource(ResourceRef res) { resources.Insert(res->uid, res); }
 void ResourceManager::RemoveResource(ResourceRef res) { resources.Remove(res->uid); }
 
-epArray<ResourceRef> ResourceManager::GetResourcesByType(const ComponentDesc *pBase) const
+Array<ResourceRef> ResourceManager::GetResourcesByType(const ComponentDesc *pBase) const
 {
-  epArray<ResourceRef> outs;
+  Array<ResourceRef> outs;
 
   for (ResourceRef spRes : resources)
   {
@@ -71,10 +71,10 @@ epArray<ResourceRef> ResourceManager::GetResourcesByType(const ComponentDesc *pB
   return outs;
 }
 
-void ResourceManager::LoadResourcesFromFile(epInitParams initParams)
+void ResourceManager::LoadResourcesFromFile(InitParams initParams)
 {
-  epVariant src = initParams["src"];
-  epString ext = src.asString().getRightAtLast('.');
+  Variant src = initParams["src"];
+  String ext = src.asString().getRightAtLast('.');
   if (ext.empty())
   {
     LogWarning(2, "LoadResourcesFromFile - \"src\" parameter is invalid");
@@ -89,14 +89,14 @@ void ResourceManager::LoadResourcesFromFile(epInitParams initParams)
   }
 
   size_t numResources = spDS->GetNumResources();
-  for (int i = 0; i < numResources; i++)
+  for (size_t i = 0; i < numResources; i++)
   {
     ResourceRef spResource = spDS->GetResource(i);
     resources.Insert(spResource->uid, spResource);
   }
 }
 
-void ResourceManager::SaveResourcesToFile(epSlice<ResourceRef>, epInitParams initParams)
+void ResourceManager::SaveResourcesToFile(Slice<ResourceRef>, InitParams initParams)
 {
 
 }

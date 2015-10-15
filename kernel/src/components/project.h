@@ -15,7 +15,7 @@ public:
   EP_COMPONENT(Project);
 
 protected:
-  Project(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 
 };
 

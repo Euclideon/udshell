@@ -18,24 +18,24 @@ public:
   size_t NumResources() const { return resources.Size(); }
   void AddResource(ResourceRef res);
   void RemoveResource(ResourceRef res);
-  ResourceRef GetResource(epString key) const { return *resources.Get(key); }
+  ResourceRef GetResource(String key) const { return *resources.Get(key); }
   template<typename CT>
-  epArray<ResourceRef> GetResourcesByType() const
+  Array<ResourceRef> GetResourcesByType() const
   {
     return GetResourcesByType(&CT::descriptor);
   }
-  epArray<ResourceRef> GetResourcesByType(const ComponentDesc *pBase) const;
+  Array<ResourceRef> GetResourcesByType(const ComponentDesc *pBase) const;
   // TODO GetResourcesByPrefix with optional Type filter
 
   // Resource loading/saving functions
-  void LoadResourcesFromFile(epInitParams initParams);
-  void SaveResourcesToFile(epSlice<ResourceRef>, epInitParams initParams);
+  void LoadResourcesFromFile(InitParams initParams);
+  void SaveResourcesToFile(Slice<ResourceRef>, InitParams initParams);
 
 protected:
-  ResourceManager(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   ~ResourceManager();
 
-  epAVLTree<epString, ResourceRef> resources;
+  AVLTree<String, ResourceRef> resources;
 };
 
 } //namespace ep

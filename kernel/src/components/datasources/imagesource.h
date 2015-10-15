@@ -16,17 +16,17 @@ class ImageSource : public DataSource
 public:
   EP_COMPONENT(ImageSource);
 
-  epSlice<const epString> GetFileExtensions() const override
+  Slice<const String> GetFileExtensions() const override
   {
     return extensions;
   }
 
 protected:
-  static const epArray<const epString> extensions;
+  static const Array<const String> extensions;
 
   static epResult RegisterExtensions(Kernel *pKernel);
 
-  ImageSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams)
+  ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
     StreamRef ref = OpenStream(initParams["src"]);

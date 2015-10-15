@@ -15,8 +15,6 @@ bool s_done = false;
 static int s_displayWidth, s_displayHeight;
 static Uint32 s_sdlEvent = (Uint32)-1;
 
-using namespace ep;
-
 class SDLKernel : public Kernel
 {
 public:
@@ -27,7 +25,7 @@ public:
   epResult RunMainLoop() override;
 };
 
-Kernel *Kernel::CreateInstanceInternal(epInitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
 {
   return new SDLKernel;
 }

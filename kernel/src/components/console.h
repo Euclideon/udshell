@@ -20,12 +20,12 @@ class Console : public Stream
 public:
   EP_COMPONENT(Console);
 
-  epSlice<void> Read(epSlice<void> buffer) override;
-  size_t Write(epSlice<const void> data) override;
+  Slice<void> Read(Slice<void> buffer) override;
+  size_t Write(Slice<const void> data) override;
   int Flush() override;
 
 protected:
-  Console(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 
   FILE *pIn, *pOut;
   bool bDbgOutput;

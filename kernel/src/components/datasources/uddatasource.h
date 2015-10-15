@@ -22,17 +22,17 @@ public:
     DeferredLoad = 1<<3,
   };
 
-  epSlice<const epString> GetFileExtensions() const override
+  Slice<const String> GetFileExtensions() const override
   {
     return extensions;
   }
 
 protected:
-  static const epArray<const epString> extensions;
+  static const Array<const String> extensions;
 
   static epResult RegisterExtensions(Kernel *pKernel);
 
-  UDDataSource(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 };
 
 }

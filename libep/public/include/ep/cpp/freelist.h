@@ -1,19 +1,21 @@
 #pragma once
-#if !defined(_EPFREELIST_H)
-#define _EPFREELIST_H
+#if !defined(_EPFREELIST_HPP)
+#define _EPFREELIST_HPP
+
+namespace ep {
 
 template<typename T>
-class epFreeList
+class FreeList
 {
 public:
-  epFreeList(size_t listSize)
+  FreeList(size_t listSize)
     : numAllocated(0)
   {
     pList = pFreeList = epAllocType(T, listSize, udAF_None);
     for (size_t i = 0; i<listSize; ++i)
       (T*&)pList[i] = i < listSize-1 ? &pList[i+1] : nullptr;
   }
-  ~epFreeList()
+  ~FreeList()
   {
     // TODO: free allocated items...
 
@@ -30,7 +32,7 @@ public:
     pFreeList = *(T**)pFreeList;
     ++numAllocated;
 
-    return new(pNew) T(args...);
+    return new(pNew)T(args...);
   }
 
   void Free(T *pItem)
@@ -47,4 +49,6 @@ private:
   size_t numAllocated;
 };
 
-#endif // _EPFREELIST_H
+} // namespace ep
+
+#endif // _EPFREELIST_HPP

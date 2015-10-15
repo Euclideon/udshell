@@ -7,9 +7,9 @@
 namespace qt
 {
 
-ep::ComponentDesc QtComponent::descriptor =
+ComponentDesc QtComponent::descriptor =
 {
-  &ep::Component::descriptor, // pSuperDesc
+  &Component::descriptor, // pSuperDesc
 
   EPSHELL_APIVERSION,         // epVersion
   EPSHELL_PLUGINVERSION,      // pluginVersion
@@ -19,8 +19,8 @@ ep::ComponentDesc QtComponent::descriptor =
   "Is a Qt component",        // description
 };
 
-QtComponent::QtComponent(const ep::ComponentDesc *pType, ep::Kernel *pKernel, epSharedString uid, epInitParams initParams)
-  : ep::Component(pType, pKernel, uid, initParams)
+QtComponent::QtComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  : Component(pType, pKernel, uid, initParams)
 {
   int64_t ptr = initParams["object"].asInt();
   pQObject = (QObject*)(size_t)ptr;

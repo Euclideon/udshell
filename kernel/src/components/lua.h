@@ -22,14 +22,14 @@ public:
   StreamRef GetErrorStream() const { return errorStream; }
   void SetErrorStream(StreamRef stream);
 
-  epVariant GetGlobal(epVariant key) const;
-  void SetGlobal(epVariant key, epVariant value);
+  Variant GetGlobal(Variant key) const;
+  void SetGlobal(Variant key, Variant value);
 
-  void Execute(epString code);
-  void Print(epString str) const;
+  void Execute(String code);
+  void Print(String str) const;
 
 private:
-  Lua(const ComponentDesc *pType, Kernel *pKernel, epSharedString uid, epInitParams initParams);
+  Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   ~Lua() override;
 
   class LuaState *pLua = nullptr;
