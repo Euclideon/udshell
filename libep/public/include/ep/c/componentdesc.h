@@ -3,7 +3,9 @@
 
 #include "ep/c/variant.h"
 
-//extern "C" {
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 struct epComponent;
 struct epVarDelegate;
@@ -67,18 +69,20 @@ struct epComponentDesc
   const char *description; // description
 
   const char *baseClass;
-  struct epComponentOverrides *pOverrides;
+  const struct epComponentOverrides *pOverrides;
 
-  epPropertyDesc *pProperties;
   size_t numProperties;
-  epMethodDesc *pMethods;
+  const epPropertyDesc *pProperties;
   size_t numMethods;
-  epEventDesc *pEvents;
+  const epMethodDesc *pMethods;
   size_t numEvents;
-  epStaticFuncDesc *pStaticFuncs;
+  const epEventDesc *pEvents;
   size_t numStaticFuncs;
+  const epStaticFuncDesc *pStaticFuncs;
 };
 
-//}
+#if defined(__cplusplus)
+}
+#endif
 
 #endif

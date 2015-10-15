@@ -254,8 +254,31 @@ epPluginInstance *Kernel::GetPluginInterface()
   if (!pPluginInstance)
   {
     pPluginInstance = new epPluginInstance;
+
     pPluginInstance->apiVersion = EPSHELL_APIVERSION;
+
     pPluginInstance->pKernelInstance = (epKernel*)this;
+
+    pPluginInstance->Alloc = [](size_t size) -> void*
+    {
+      return epAlloc(size);
+    },
+    pPluginInstance->AllocAligned = [](size_t size, size_t alignment) -> void*
+    {
+      return epAllocAligned(size, alignment, epAF_None);
+    },
+    pPluginInstance->Free = [](void *pMem) -> void
+    {
+      epFree(pMem);
+    },
+
+    pPluginInstance->AssertFailed = [](epString condition, epString message, epString file, int line) -> void
+    {
+#if EPASSERT_ON
+      epAssertFailed(condition, message, file, line);
+#endif
+    },
+
     pPluginInstance->DestroyComponent = [](epComponent *pInstance) -> void
     {
       // NOTE: this was called when an RC reached zero...
@@ -263,6 +286,7 @@ epPluginInstance *Kernel::GetPluginInterface()
       pC->IncRef(); // HACK: we'll inc it back to 1
       pC->DecRef(); //       and then dec it with the internal function which actually performs the cleanup
     };
+
     pPluginInstance->pKernelAPI = &s_kernelAPI;
     pPluginInstance->pComponentAPI = &g_componentAPI;
   }

@@ -24,6 +24,27 @@ EP_EXPORT bool epPlugin_Init(epPluginInstance *pPlugin)
   return epPluginAttach();
 }
 
+
+epKernel *epPlugin_GetKernel()
+{
+  return s_pPluginInstance->pKernelInstance;
+}
+
+void* epPlugin_Alloc(size_t size)
+{
+  return s_pPluginInstance->Alloc(size);
+}
+
+void* epPlugin_AllocAligned(size_t size, size_t alignment)
+{
+  return s_pPluginInstance->AllocAligned(size, alignment);
+}
+
+void epPlugin_Free(void *pMem)
+{
+  s_pPluginInstance->Free(pMem);
+}
+
 }
 
 #if 0 //defined(EP_WINDOWS) // TODO: why does the CRT hog this? we might need to do things here...

@@ -1,6 +1,10 @@
 #if !defined(_EP_STRING_H)
 #define _EP_STRING_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 extern const char s_epCharDetails[256];
 
 #define epIsNewline(c) ((c) < 256 && (s_epCharDetails[c] & 8))
@@ -21,5 +25,9 @@ struct epString
 };
 
 // TODO: blah blah
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif // _EP_STRING_H

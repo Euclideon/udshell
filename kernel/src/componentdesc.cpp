@@ -19,7 +19,7 @@ void ComponentDesc::InitProps()
     {
       for (size_t i = 0; i < desc->pExternalDesc->numProperties; ++i)
       {
-        epPropertyDesc &prop = desc->pExternalDesc->pProperties[i];
+        const epPropertyDesc &prop = desc->pExternalDesc->pProperties[i];
         if (!propertyTree.Get(prop.id))
         {
           PropertyDesc *p = MakePluginPropertyDesc(prop);
@@ -48,7 +48,7 @@ void ComponentDesc::InitMethods()
     {
       for (size_t i = 0; i < desc->pExternalDesc->numMethods; ++i)
       {
-        epMethodDesc &method = desc->pExternalDesc->pMethods[i];
+        const epMethodDesc &method = desc->pExternalDesc->pMethods[i];
         if (!methodTree.Get(method.id))
         {
           MethodDesc *m = MakePluginMethodDesc(method);
@@ -77,7 +77,7 @@ void ComponentDesc::InitStaticFuncs()
     {
       for (size_t i = 0; i < desc->pExternalDesc->numStaticFuncs; ++i)
       {
-        epStaticFuncDesc &func = desc->pExternalDesc->pStaticFuncs[i];
+        const epStaticFuncDesc &func = desc->pExternalDesc->pStaticFuncs[i];
         if (!staticFuncTree.Get(func.id))
         {
           StaticFuncDesc *f = MakePluginStaticFuncDesc(func);
@@ -106,7 +106,7 @@ void ComponentDesc::InitEvents()
     {
       for (size_t i = 0; i < desc->pExternalDesc->numEvents; ++i)
       {
-        epEventDesc &ev = desc->pExternalDesc->pEvents[i];
+        const epEventDesc &ev = desc->pExternalDesc->pEvents[i];
         if (!eventTree.Get(ev.id))
         {
           EventDesc *e = MakePluginEventDesc(ev);

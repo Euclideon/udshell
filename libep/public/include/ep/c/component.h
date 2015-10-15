@@ -32,6 +32,18 @@ struct epComponentOverrides
   epResult(*pReceiveMessage)(epComponent *pBaseInstance, void *pDerivedInstance, epString message, epString sender, const epVariant *pData);
 };
 
+int epComponent_Acquire(epComponent *pComponent);
+int epComponent_Release(epComponent *pComponent);
+
+epString  epComponent_GetUID(const epComponent *pComponent);
+epString  epComponent_GetName(const epComponent *pComponent);
+bool      epComponent_IsType(const epComponent *pComponent, epString type);
+epVariant epComponent_GetProperty(const epComponent *pComponent, epString property);
+void      epComponent_SetProperty(epComponent *pComponent, epString property, const epVariant *pValue);
+epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs);
+void      epComponent_Subscribe(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate);
+epResult  epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData);
+
 
 // fast-access API for component
 struct epComponentAPI
@@ -56,29 +68,6 @@ struct epComponentAPI
   const FunctionInfo *(*GetStaticFuncInfo)(epComponent *pComponent, epString name);
 */
 };
-
-
-inline int epComponent_Acquire(epComponent *pComponent)
-{
-  ++pComponent->refCount;
-}
-
-inline int epComponent_Release(epComponent *pComponent)
-{
-  if (--pComponent->refCount == 0)
-  {
-    s_pPluginInstance->DestroyComponent(pComponent);
-  }
-}
-
-inline epString  epComponent_GetUID(const epComponent *pComponent)                                                                 { return s_pPluginInstance->pComponentAPI->GetUID(pComponent); }
-inline epString  epComponent_GetName(const epComponent *pComponent)                                                                { return s_pPluginInstance->pComponentAPI->GetName(pComponent); }
-inline bool      epComponent_IsType(const epComponent *pComponent, epString type)                                                  { return s_pPluginInstance->pComponentAPI->IsType(pComponent, type); }
-inline epVariant epComponent_GetProperty(const epComponent *pComponent, epString property)                                         { return s_pPluginInstance->pComponentAPI->GetProperty(pComponent, property); }
-inline void      epComponent_SetProperty(epComponent *pComponent, epString property, const epVariant *pValue)                { s_pPluginInstance->pComponentAPI->SetProperty(pComponent, property, pValue); }
-inline epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs)    { return s_pPluginInstance->pComponentAPI->CallMethod(pComponent, method, pArgs, numArgs); }
-inline void      epComponent_Subscribe(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate)          { s_pPluginInstance->pComponentAPI->Subscribe(pComponent, eventName, pDelegate); }
-inline epResult  epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData) { return s_pPluginInstance->pComponentAPI->SendMessage(pComponent, target, message, pData); }
 
 #if defined(__cplusplus)
 }

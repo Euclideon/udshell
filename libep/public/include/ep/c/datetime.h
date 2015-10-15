@@ -5,6 +5,10 @@
 
 #include <time.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #define DEFAULT_DATETIME_STRING "%d/%m/%y %H:%M:%S"
 #define START_YEAR -10000 // 10000 BC
 
@@ -21,5 +25,9 @@ struct epDateTime
   uint64_t yday : 9;
   uint64_t year : 15;
 };
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif // _EPDATETIME_H

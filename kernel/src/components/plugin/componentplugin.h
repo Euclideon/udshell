@@ -45,7 +45,7 @@ private:
     return epR_Success;
   }
 
-  epComponentOverrides *pCallbacks;
+  const epComponentOverrides *pCallbacks;
 };
 
 } // namespace ep

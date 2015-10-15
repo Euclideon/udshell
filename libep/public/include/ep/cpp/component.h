@@ -21,9 +21,15 @@ public:
   Variant GetProperty(String property) const                                { return s_pPluginInstance->pComponentAPI->GetProperty((const epComponent*)this, property); }
   void SetProperty(String property, const Variant &value)                   { s_pPluginInstance->pComponentAPI->SetProperty((epComponent*)this, property, (const epVariant*)&value); }
 
-  Variant CallMethod(String method, const Variant *pArgs, size_t numArgs)   { return s_pPluginInstance->pComponentAPI->CallMethod((epComponent*)this, method, (const epVariant*)pArgs, numArgs); }
+  Variant CallMethod(String method, Slice<const Variant> args)              { return s_pPluginInstance->pComponentAPI->CallMethod((epComponent*)this, method, (const epVariant*)args.ptr, args.length); }
+  template<typename ...Args>
+  Variant CallMethod(String method, Args... args)
+  {
+    const Variant varargs[sizeof...(Args)+1] = { args... };
+    return CallMethod(method, Slice<const Variant>(varargs, sizeof...(Args)));
+  }
 
-  void Subscribe(String eventName, const epVarDelegate *pDelegate)          { s_pPluginInstance->pComponentAPI->Subscribe((epComponent*)this, eventName, pDelegate); }
+  void Subscribe(String eventName, Variant::VarDelegate delegate)           { s_pPluginInstance->pComponentAPI->Subscribe((epComponent*)this, eventName, (const epVarDelegate*&)delegate); }
 
   epResult SendMessage(String target, String message, const Variant &data)  { return s_pPluginInstance->pComponentAPI->SendMessage((epComponent*)this, target, message, (const epVariant*)&data); }
 };
