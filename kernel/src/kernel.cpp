@@ -12,6 +12,7 @@
 #include "components/scene.h"
 #include "components/view.h"
 #include "components/ui.h"
+#include "components/uiconsole.h"
 #include "components/viewport.h"
 #include "components/window.h"
 #include "components/datasource.h"
@@ -80,6 +81,7 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<UIConsole>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Viewport>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Window>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<View>());

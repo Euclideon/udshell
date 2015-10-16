@@ -3,5 +3,9 @@
     <file>qmldir</file>
     <file>splashscreen.qml</file>
     <file>viewport.qml</file>
+    <file>console.qml</file>
+    <file>consolefilter.qml</file>
+    <file>popupokcancel.qml</file>
+	  <file>popup.qml</file>
   </qresource>
 </RCC>
