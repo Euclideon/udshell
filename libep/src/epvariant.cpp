@@ -11,109 +11,90 @@ void epVariant_Release(epVariant v)
   (epVariant&)t = v;
 }
 
+epVariant epVariant_CreateNull()
+{
+  epVariant v;
+  new(&v) Variant(nullptr);
+  return v;
+}
+epVariant epVariant_CreateBool(char b)
+{
+  epVariant v;
+  new(&v) Variant(b ? true : false);
+  return v;
+}
+epVariant epVariant_CreateInt(int64_t i)
+{
+  epVariant v;
+  new(&v) Variant(i);
+  return v;
+}
+epVariant epVariant_CreateFloat(double f)
+{
+  epVariant v;
+  new(&v) Variant(f);
+  return v;
+}
+epVariant epVariant_CreateComponent(epComponent *pComponent)
+{
+  epVariant v;
+  new(&v) Variant((ComponentRef&)pComponent);
+  return v;
+}
+//inline epVariant epVariant_CreateDelegate() {}
+epVariant epVariant_CreateCString(const char *pString)
+{
+  epVariant v;
+  new(&v) Variant(String(pString));
+  return v;
+}
+epVariant epVariant_CreateString(epString string)
+{
+  epVariant v;
+  new(&v) Variant((String&)string);
+  return v;
+}
+
+epVariantType epVariant_GetType(epVariant v)
+{
+  return (epVariantType)v.t;
+}
+
 int epVariant_IsNull(epVariant v)
 {
   return v.t == epVT_Null || (v.t == epVT_String && v.length == 0) || (v.t == epVT_Component && v.p == NULL);
 }
 char epVariant_AsBool(epVariant v)
 {
-  switch ((epVariantType)v.t)
-  {
-    case epVT_Null:
-      return false;
-    case epVT_Bool:
-      return v.b;
-    case epVT_Int:
-      return !!v.i;
-    case epVT_Float:
-      return v.f != 0;
-    case epVT_String:
-    {
-      String str(v.s, v.length);
-      if (str.eqIC("true"))
-        return true;
-      else if (str.eqIC("false"))
-        return false;
-      return !str.empty();
-    }
-    default:
-      EPASSERT(v.t == epVT_Bool, "Wrong type!");
-      return false;
-  }
+  return (char)((Variant&)v).asBool();
 }
 int64_t epVariant_AsInt(epVariant v)
 {
-  switch ((epVariantType)v.t)
-  {
-    case epVT_Null:
-      return 0;
-    case epVT_Bool:
-      return v.b ? 1 : 0;
-    case epVT_Int:
-      return v.i;
-    case epVT_Float:
-      return (int64_t)v.f;
-    case epVT_String:
-      return String(v.s, v.length).parseInt();
-    default:
-      EPASSERT(v.t == epVT_Int, "Wrong type!");
-      return 0;
-  }
+  return ((Variant&)v).asInt();
 }
 double epVariant_AsFloat(epVariant v)
 {
-  switch ((epVariantType)v.t)
-  {
-    case epVT_Null:
-      return 0.0;
-    case epVT_Bool:
-      return v.b ? 1.0 : 0.0;
-    case epVT_Int:
-      return (double)v.i;
-    case epVT_Float:
-      return v.f;
-    case epVT_String:
-      return String(v.s, v.length).parseFloat();
-    default:
-      EPASSERT(v.t == epVT_Float, "Wrong type!");
-      return 0.0;
-  }
+  return ((Variant&)v).asFloat();
 }
 epComponent* epVariant_AsComponent(epVariant v)
 {
-  switch ((epVariantType)v.t)
-  {
-    case epVT_Null:
-      return nullptr;
-    case epVT_Component:
-      if (v.p)
-        ++((epComponent*)v.p)->refCount;
-      return (epComponent*)v.p;
-    default:
-      EPASSERT(v.t == epVT_Component, "Wrong type!");
-      return nullptr;
-  }
+  epComponent *pC;
+  new(&pC) ComponentRef(((Variant&)v).asComponent());
+  return pC;
 }
 //char epVariant_GetDelegate(epVariantHandle v) {}
 epString epVariant_AsString(epVariant v)
 {
-  // TODO: it would be nice to be able to string-ify other types
-  // ...but we don't have any output buffer
-  epString s = { 0, nullptr };
-  switch ((epVariantType)v.t)
-  {
-    case epVT_Null:
-      break;
-    case epVT_String:
-      s.length = v.length;
-      s.ptr = v.s;
-      break;
-    case epVT_Component:
-      return epComponent_GetUID((epComponent*)v.p);
-    default:
-      EPASSERT(v.t == epVT_String, "Wrong type!");
-  }
-  return s;
+  epString r;
+  new(&r) String(((Variant&)v).asString());
+  return r;
+}
+
+const epVariant* epVariant_AsArray(epVariant v, size_t *pLength)
+{
+  Slice<Variant> arr = ((Variant&)v).asArray();
+  *pLength = arr.length;
+  return (epVariant*)arr.ptr;
 }
 
 } // extern "C"

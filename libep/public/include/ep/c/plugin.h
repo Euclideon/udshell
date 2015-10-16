@@ -21,11 +21,26 @@ extern "C" {
 struct epKernel;
 struct epComponent;
 
+/**
+* Get the active kernel instance.
+*/
+epKernel* epPlugin_GetKernel();
+
+void* epPlugin_Alloc(size_t size);
+void* epPlugin_AllocAligned(size_t size, size_t alignment);
+void epPlugin_Free(void *pMem);
+
 struct epPluginInstance
 {
   int apiVersion;
 
   epKernel *pKernelInstance;
+
+  void*(*Alloc)(size_t size);
+  void*(*AllocAligned)(size_t size, size_t alignment);
+  void(*Free)(void *pMemory);
+
+  void(*AssertFailed)(epString condition, epString message, epString file, int line);
 
   void(*DestroyComponent)(epComponent *pInstance);
 
@@ -34,11 +49,6 @@ struct epPluginInstance
 };
 
 extern epPluginInstance *s_pPluginInstance;
-
-/**
- * Get the active kernel instance.
- */
-static inline epKernel *epPlugin_GetKernel() { return s_pPluginInstance->pKernelInstance; }
 
 #if defined(__cplusplus)
 }

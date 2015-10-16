@@ -7,6 +7,8 @@
 # pragma warning(disable: 4996)
 #endif
 
+extern "C" {
+
 // 1 = alpha, 2 = numeric, 4 = white, 8 = newline
 const char s_epCharDetails[256] =
 {
@@ -27,6 +29,9 @@ const char s_epCharDetails[256] =
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
+
+} // extern "C"
+
 
 namespace ep {
 namespace internal {

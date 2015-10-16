@@ -1,6 +1,10 @@
 #ifndef EPERROR_H
 #define EPERROR_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 enum epResult
 {
   epR_Success,
@@ -18,5 +22,9 @@ enum epResult
 #define EP_ERROR_NULL(ptr, code)  do { if (ptr == nullptr) { result = code; if (EP_ERROR_BREAK_ON_ERROR) { __debugbreak(); } goto epilogue; }             } while(0)
 #define EP_ERROR_CHECK(funcCall)  do { result = funcCall; if (result != epR_Success) { if (EP_ERROR_BREAK_ON_ERROR) { __debugbreak(); } goto epilogue; }  } while(0)
 #define EP_ERROR_HANDLE()         do { if (result != epR_Success) { if (EP_ERROR_BREAK_ON_ERROR) { __debugbreak(); } goto epilogue; }                     } while(0)
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif // EPERROR_H

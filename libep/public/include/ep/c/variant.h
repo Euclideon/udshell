@@ -5,7 +5,6 @@
 #include "ep/c/delegate.h"
 #include "ep/epenum.h"
 
-// C API
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -69,11 +68,10 @@ double       epVariant_AsFloat(epVariant v);
 epComponent* epVariant_AsComponent(epVariant v);
 //char       epVariant_AsDelegate(epVariant v);
 epString     epVariant_AsString(epVariant v);
+const epVariant* epVariant_AsArray(epVariant v, size_t *pLength);
 
 #if defined(__cplusplus)
 }
 #endif
-
-#include "ep/c/internal/variant_inl.h"
 
 #endif // EPVARIANT_H
