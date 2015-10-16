@@ -178,6 +178,8 @@
 #elif defined(__linux) || defined(__linux__) || defined(__gnu_linux__) || linux == 1
 # define EP_LINUX
 
+# include <memory.h>
+
 # if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
 #   define EP_ARCH_X64
 # elif defined(__i386__) || defined(__i386) || defined(_M_IX86)
@@ -254,7 +256,8 @@
 //# pragma warning(disable:4996) // disable depreciated warnings
 //# pragma warning(disable:4190) // disable C-linkage returning UDT (user data type)
 #elif defined(EP_COMPILER_GCC)
-//# pragma GCC diagnostic ignored "-Wstrict-aliasing"   // disable strict-aliasing complaint
+# pragma GCC diagnostic ignored "-Wtype-limits"       // disable (char < 256) complaints  TODO: REMOVE ME!!!
+# pragma GCC diagnostic ignored "-Wstrict-aliasing"   // disable strict-aliasing complaint
 //# pragma GCC diagnostic ignored "-Wformat-security"   // stop complaining about variable format strings
 //# pragma GCC diagnostic ignored "-Wunused-parameter"  // stop complaining about unused parameters
 //# pragma GCC diagnostic ignored "-Wmissing-field-initializers" // stop complaining about missing field initialisers

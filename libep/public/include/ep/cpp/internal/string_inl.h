@@ -7,6 +7,9 @@
 
 #include <utility>
 
+template<typename T>
+ptrdiff_t epStringifyTemplate(Slice<char> buffer, String format, const T &val, const epVarArg *pArgs);
+
 ptrdiff_t epStringify(Slice<char> buffer, String format, nullptr_t, const epVarArg *pArgs);
 template<typename C>
 ptrdiff_t epStringify(Slice<char> buffer, String format, BaseString<C> s, const epVarArg *pArgs);
@@ -47,12 +50,6 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, Slice<T> arr, const epV
     buffer[0] = ']';
   }
   return len;
-}
-
-template<typename T>
-epforceinline ptrdiff_t epStringifyTemplate(Slice<char> buffer, String format, const T &val, const epVarArg *pArgs)
-{
-  return internal::StringifyProxy<T>::stringify(buffer, format, (void*)&val, pArgs);
 }
 
 namespace ep {
@@ -167,26 +164,26 @@ BaseString<C>::operator epString() const
 template<typename C>
 inline BaseString<C>& BaseString<C>::operator =(Slice<const C> rh)
 {
-  length = rh.length;
-  ptr = rh.ptr;
+  this->length = rh.length;
+  this->ptr = rh.ptr;
   return *this;
 }
 
 template<typename C>
 inline BaseString<C>& BaseString<C>::operator =(const C *pString)
 {
-  ptr = pString;
-  length = pString ? epStrlen(pString) : (size_t)0;
+  this->ptr = pString;
+  this->length = pString ? epStrlen(pString) : (size_t)0;
   return *this;
 }
 
 template<typename C>
 inline BaseString<C> BaseString<C>::slice(ptrdiff_t first, ptrdiff_t last) const
 {
-  size_t start = (size_t)(first < 0 ? first + length : first);
-  size_t end = (size_t)(last < 0 ? last + length : last);
+  size_t start = (size_t)(first < 0 ? first + this->length : first);
+  size_t end = (size_t)(last < 0 ? last + this->length : last);
   EPASSERT(end <= length && start <= end, "Index out of range!");
-  return BaseString<C>(ptr + start, end - start);
+  return BaseString<C>(this->ptr + start, end - start);
 }
 
 template<typename C>
@@ -211,7 +208,7 @@ template<typename C>
 inline char32_t BaseString<C>::frontChar() const
 {
   char32_t r;
-  epUTFDecode(ptr, &r);
+  epUTFDecode(this->ptr, &r);
   return r;
 }
 template<>
@@ -246,9 +243,9 @@ template<typename C>
 inline char32_t BaseString<C>::popFrontChar()
 {
   char32_t r;
-  size_t codeUnits = epUTFDecode(ptr, &r);
-  ptr += codeUnits;
-  length -= codeUnits;
+  size_t codeUnits = epUTFDecode(this->ptr, &r);
+  this->ptr += codeUnits;
+  this->length -= codeUnits;
   return r;
 }
 template<>
@@ -288,10 +285,10 @@ inline bool BaseString<C>::eq(BaseString<C> rh) const
 template<typename C>
 inline bool BaseString<C>::eqIC(BaseString<C> rh) const
 {
-  if (length != rh.length)
+  if (this->length != rh.length)
     return false;
-  for (size_t i = 0; i<length; ++i)
-    if (toLower(ptr[i]) != toLower(rh.ptr[i]))
+  for (size_t i = 0; i<this->length; ++i)
+    if (toLower(this->ptr[i]) != toLower(rh.ptr[i]))
       return false;
   return true;
 }
@@ -303,7 +300,7 @@ inline bool BaseString<C>::beginsWith(BaseString<C> rh) const
 template<typename C>
 inline bool BaseString<C>::beginsWithIC(BaseString<C> rh) const
 {
-  if (length < rh.length)
+  if (this->length < rh.length)
     return false;
   return slice(0, rh.length).eqIC(rh);
 }
@@ -315,9 +312,9 @@ inline bool BaseString<C>::endsWith(BaseString<C> rh) const
 template<typename C>
 inline bool BaseString<C>::endsWithIC(BaseString<C> rh) const
 {
-  if (length < rh.length)
+  if (this->length < rh.length)
     return false;
-  return slice(length - rh.length, length).eqIC(rh);
+  return slice(this->length - rh.length, this->length).eqIC(rh);
 }
 
 template<typename C>
@@ -328,22 +325,22 @@ inline ptrdiff_t BaseString<C>::cmp(BaseString<C> rh) const
 template<typename C>
 inline ptrdiff_t BaseString<C>::cmpIC(BaseString<C> rh) const
 {
-  size_t len = length < rh.length ? length : rh.length;
+  size_t len = this->length < rh.length ? this->length : rh.length;
   for (size_t i = 0; i < len; ++i)
   {
-    char a = toLower(ptr[i]), b = toLower(rh.ptr[i]);
+    char a = toLower(this->ptr[i]), b = toLower(rh.ptr[i]);
     if (a == b)
       continue;
     return a < b ? -1 : 1;
   }
-  return length - rh.length;
+  return this->length - rh.length;
 }
 
 template<typename C>
 inline C* BaseString<C>::toStringz(C *pBuffer, size_t bufferLen) const
 {
-  size_t len = length < bufferLen-1 ? length : bufferLen-1;
-  memcpy(pBuffer, ptr, len);
+  size_t len = this->length < bufferLen-1 ? this->length : bufferLen-1;
+  memcpy(pBuffer, this->ptr, len);
   pBuffer[len] = 0;
   return pBuffer;
 }
@@ -359,37 +356,37 @@ inline size_t BaseString<C>::findFirstIC(BaseString<C> s) const
 {
   if (s.empty())
     return 0;
-  ptrdiff_t len = length-s.length;
+  ptrdiff_t len = this->length-s.length;
   for (ptrdiff_t i = 0; i < len; ++i)
   {
     size_t j = 0;
     for (; j < s.length; ++j)
     {
-      if (toLower(ptr[i + j]) != toLower(s.ptr[j]))
+      if (toLower(this->ptr[i + j]) != toLower(s.ptr[j]))
         break;
     }
     if (j == s.length)
       return i;
   }
-  return length;
+  return this->length;
 }
 template<typename C>
 inline size_t BaseString<C>::findLastIC(BaseString<C> s) const
 {
   if (s.empty())
-    return length;
-  for (ptrdiff_t i = length-s.length; i >= 0; --i)
+    return this->length;
+  for (ptrdiff_t i = this->length-s.length; i >= 0; --i)
   {
     size_t j = 0;
     for (; j < s.length; ++j)
     {
-      if (toLower(ptr[i + j]) != toLower(s.ptr[j]))
+      if (toLower(this->ptr[i + j]) != toLower(s.ptr[j]))
         break;
     }
     if (j == s.length)
       return i;
   }
-  return length;
+  return this->length;
 }
 
 template<typename C>
@@ -405,30 +402,30 @@ inline BaseString<C> BaseString<C>::getLeftAtLastIC(BaseString<C> s, bool bInclu
 template<typename C>
 inline BaseString<C> BaseString<C>::getRightAtFirstIC(BaseString<C> s, bool bInclusive) const
 {
-  return slice(findFirstIC(s) + (bInclusive ? 0 : s.length), length);
+  return slice(findFirstIC(s) + (bInclusive ? 0 : s.length), this->length);
 }
 template<typename C>
 inline BaseString<C> BaseString<C>::getRightAtLastIC(BaseString<C> s, bool bInclusive) const
 {
-  return slice(findLastIC(s) + (bInclusive ? 0 : s.length), length);
+  return slice(findLastIC(s) + (bInclusive ? 0 : s.length), this->length);
 }
 
 template<typename C>
 template<bool Front, bool Back>
 inline BaseString<C> BaseString<C>::trim() const
 {
-  size_t first = 0, last = length;
+  size_t first = 0, last = this->length;
   if (Front)
   {
-    while (epIsWhitespace(ptr[first]) && first < length)
+    while (epIsWhitespace(this->ptr[first]) && first < this->length)
       ++first;
   }
   if (Back)
   {
-    while (last > first && epIsWhitespace(ptr[last - 1]))
+    while (last > first && epIsWhitespace(this->ptr[last - 1]))
       --last;
   }
-  return BaseString<C>(ptr + first, last - first);
+  return BaseString<C>(this->ptr + first, last - first);
 }
 
 template<typename C>
@@ -449,9 +446,9 @@ template<typename C>
 inline uint32_t BaseString<C>::hash(uint32_t hash) const
 {
   size_t i = 0;
-  while (i < length)
+  while (i < this->length)
   {
-    hash ^= (uint32_t)ptr[i++];
+    hash ^= (uint32_t)this->ptr[i++];
     hash *= 0x01000193;
   }
   return hash;
@@ -828,3 +825,9 @@ inline SharedString SharedString::format(String format, const Args&... args)
 }
 
 } // namespace ep
+
+template<typename T>
+epforceinline ptrdiff_t epStringifyTemplate(Slice<char> buffer, String format, const T &val, const epVarArg *pArgs)
+{
+  return internal::StringifyProxy<T>::stringify(buffer, format, (void*)&val, pArgs);
+}

@@ -532,9 +532,9 @@ inline Variant epToVariant(const Delegate<R(Args...)> &d)
 // enums & bitfields
 template<typename T,
   typename std::enable_if<
-  std::is_base_of<epEnum, T>::value ||
-  std::is_base_of<epBitfield, T>::value
->::type* = nullptr>
+    std::is_base_of<epEnum, T>::value ||
+    std::is_base_of<epBitfield, T>::value
+  >::type* = nullptr>
 inline void epFromVariant(const Variant &v, T *pE)
 {
   if (v.is(std::is_base_of<epBitfield, T>::value ? Variant::Type::Bitfield : Variant::Type::Enum))
