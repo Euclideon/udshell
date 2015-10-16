@@ -120,4 +120,6 @@ void epTexture_SetImageData(epTexture *pTex, int epUnusedParam(element), int lev
   pQtTexture->setData(level, format.format, format.type, pImage);
 }
 
+#else
+EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_QT

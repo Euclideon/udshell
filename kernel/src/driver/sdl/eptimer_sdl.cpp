@@ -58,4 +58,6 @@ void HalTimer_Destroy(HalTimer **ppTimer)
   }
 }
 
+#else
+EPEMPTYFILE
 #endif // EPWINDOW_DRIVER == EPDRIVER_SDL

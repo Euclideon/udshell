@@ -56,4 +56,6 @@ void Window::SetTopLevelUI(UIComponentRef epUnusedParam(spUIComponent))
 
 } // namespace ep
 
+#else
+EPEMPTYFILE
 #endif

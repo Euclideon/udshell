@@ -35,4 +35,6 @@ void epGPU_Deinit()
 {
 }
 
+#else
+EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

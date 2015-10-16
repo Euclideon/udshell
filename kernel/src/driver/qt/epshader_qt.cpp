@@ -267,4 +267,6 @@ void epShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
   s_QtGLContext.pFunc->glUniformMatrix4fv(param, (GLsizei)count, 0, (GLfloat*)pValues);
 }
 
+#else
+EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_QT

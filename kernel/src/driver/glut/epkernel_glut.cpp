@@ -73,4 +73,6 @@ void epViewerDriver_Quit(epViewerInstance *)
   glutLeaveMainLoop();
 }
 
+#else
+EPEMPTYFILE
 #endif

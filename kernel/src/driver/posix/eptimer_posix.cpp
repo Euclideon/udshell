@@ -11,4 +11,6 @@ double epPerformanceCounter()
   return ts.tv_sec + (ts.tv_nsec / 1000000000.0);
 }
 
+#else
+EPEMPTYFILE
 #endif // EPSYSTEM_DRIVER == EPDRIVER_POSIX

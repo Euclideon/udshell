@@ -365,4 +365,6 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 
 } // namespace ep
 
+#else
+EPEMPTYFILE
 #endif

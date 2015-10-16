@@ -141,4 +141,6 @@ void epShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
 {
 }
 
+#else
+EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

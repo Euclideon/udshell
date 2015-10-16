@@ -55,4 +55,11 @@
 # define EPUI_DRIVER     EPDRIVER_QT
 #endif
 
+// Suppress no public symbols warnings for the file - works with unity builds
+#if defined(EP_COMPILER_VISUALC)
+#define EPEMPTYFILE   namespace { char __emptyFileDummy##__LINE__; }
+#else
+#define EPEMPTYFILE
+#endif
+
 #endif // EP_DRIVER_H

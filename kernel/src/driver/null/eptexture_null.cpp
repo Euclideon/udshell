@@ -23,4 +23,6 @@ void epTexture_SetImageData(epTexture *pTex, int element, int level, void *pImag
 {
 }
 
+#else
+EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

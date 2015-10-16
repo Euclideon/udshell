@@ -724,4 +724,6 @@ namespace pp
   Module* CreateModule() { return udNew(epPepperModule); }
 }
 
+#else
+EPEMPTYFILE
 #endif

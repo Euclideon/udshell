@@ -127,5 +127,6 @@ void epVertex_SetArrayBufferData(epArrayBuffer *pBuffer, const void *pVertexData
   pBuffer->bufferLen = bufferLen;
 }
 
-
+#else
+EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

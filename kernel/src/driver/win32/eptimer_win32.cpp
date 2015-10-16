@@ -73,4 +73,6 @@ double epPerformanceCounter()
   return (double)counter.QuadPart / freq.QuadPart;
 }
 
+#else
+EPEMPTYFILE
 #endif // EPSYSTEM_DRIVER == EPDRIVER_WIN32

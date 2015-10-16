@@ -214,4 +214,6 @@ void Window::SetTopLevelUI(UIComponentRef spUIComponent)
 
 } // namespace ep
 
+#else
+EPEMPTYFILE
 #endif

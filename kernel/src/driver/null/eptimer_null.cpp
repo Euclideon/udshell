@@ -24,4 +24,6 @@ double epPerformanceCounter()
   return 0.0;
 }
 
+#else
+EPEMPTYFILE
 #endif // EPSYSTEM_DRIVER == EPDRIVER_NULL
