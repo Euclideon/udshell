@@ -45,4 +45,6 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 
 }
 
+#else
+EPEMPTYFILE
 #endif

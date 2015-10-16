@@ -224,4 +224,6 @@ void RenderView::touchEvent(QTouchEvent *pEv)
 
 } // namespace qt
 
+#else
+EPEMPTYFILE
 #endif  // EPUI_DRIVER == EPDRIVER_QT

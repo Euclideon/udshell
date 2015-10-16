@@ -144,5 +144,6 @@ void epVertex_SetArrayBufferData(epArrayBuffer *pBuffer, const void *pVertexData
   pBuffer->pBuffer->allocate(pVertexData, static_cast<int>(bufferLen));
 }
 
-
+#else
+EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_QT

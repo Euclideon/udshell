@@ -189,4 +189,6 @@ void QtEPComponent::subscribe(QString eventName, QJSValue func) const
 
 } // namespace qt
 
+#else
+EPEMPTYFILE
 #endif

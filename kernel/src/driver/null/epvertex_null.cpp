@@ -43,4 +43,6 @@ void epVertex_SetArrayBufferData(epArrayBuffer *pVB, const void *pVertexData, si
 {
 }
 
+#else
+EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_OPENGL

@@ -237,4 +237,6 @@ void epGPU_Deinit()
   s_QtGLContext.pFunc = nullptr;
 }
 
+#else
+EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_QT

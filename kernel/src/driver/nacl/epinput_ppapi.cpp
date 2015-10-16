@@ -33,4 +33,6 @@ void epInput_UpdateInternal()
   //...
 }
 
+#else
+EPEMPTYFILE
 #endif

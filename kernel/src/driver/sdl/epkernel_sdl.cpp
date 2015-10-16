@@ -203,4 +203,6 @@ epResult Kernel::Terminate()
   return epR_Success;
 }
 
+#else
+EPEMPTYFILE
 #endif

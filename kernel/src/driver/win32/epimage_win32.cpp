@@ -113,4 +113,6 @@ void* epImage_WriteImage(epImage *pImage, const char *pFileExt, size_t *pOutputS
   return nullptr;
 }
 
+#else
+EPEMPTYFILE
 #endif

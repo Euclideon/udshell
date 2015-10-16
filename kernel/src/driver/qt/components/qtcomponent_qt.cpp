@@ -32,4 +32,6 @@ QtComponent::~QtComponent()
 
 } // namespace qt
 
+#else
+EPEMPTYFILE
 #endif

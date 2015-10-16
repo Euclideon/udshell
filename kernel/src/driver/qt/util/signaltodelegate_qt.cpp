@@ -33,4 +33,6 @@ QMetaMethod QtSignalToDelegate::lookupSignalHandler(const QMetaMethod &m)
 
 } // namespace qt
 
+#else
+EPEMPTYFILE
 #endif  // EPUI_DRIVER == EPDRIVER_QT

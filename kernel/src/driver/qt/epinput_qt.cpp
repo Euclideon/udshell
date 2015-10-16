@@ -642,4 +642,6 @@ epKeyCode qtKeyToEPKey(Qt::Key qk)
   }
 }
 
+#else
+EPEMPTYFILE
 #endif
