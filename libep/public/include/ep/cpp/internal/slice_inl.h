@@ -701,7 +701,7 @@ inline SharedSlice<T>& SharedSlice<T>::operator =(Slice<U> rh)
 template <typename T>
 inline SharedSlice<T> SharedSlice<T>::alloc(size_t elements)
 {
-  return SharedSlice<T>(epAllocType(ET, elements, udAF_None), elements);
+  return SharedSlice<T>((typename SharedSlice<T>::ET*)epAlloc(sizeof(typename SharedSlice<T>::ET) * elements), elements);
 }
 
 template <typename T>
