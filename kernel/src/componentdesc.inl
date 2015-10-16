@@ -146,7 +146,7 @@ struct CStaticFunc::Partial < void, Args... >
     f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
   }
 
-  inline static Variant shimFunc(const StaticFunc * const _staticFunc, Slice<Variant> value)
+  inline static Variant shimFunc(const StaticFunc * const _pStaticFunc, Slice<Variant> value)
   {
     CStaticFunc *pStaticFunc = (CStaticFunc*)_pStaticFunc;
 

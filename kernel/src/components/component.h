@@ -251,13 +251,13 @@ template<typename... Args>
 template <typename X>
 void epEvent<Args...>::Subscribe(Component *pC, void(X::*func)(Args...))
 {
-  pC->subscriber.Subscribe(*this, Delegate((X*)pC, func));
+  pC->subscriber.Subscribe(*this, EvDelegate((X*)pC, func));
 }
 template<typename... Args>
 template <typename X>
 void epEvent<Args...>::Unsubscribe(Component *pC, void(X::*func)(Args...))
 {
-  pC->subscriber.Unsubscribe(*this, Delegate((X*)pC, func));
+  pC->subscriber.Unsubscribe(*this, EvDelegate((X*)pC, func));
 }
 
 #endif // EPCOMPONENT_H

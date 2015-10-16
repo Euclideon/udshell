@@ -104,7 +104,7 @@ protected:
 struct LogStream
 {
   LogStream(StreamRef spStream, LogFormatSpecs format, LogFilter filter) :
-    spStream(spStream), format(format), filter(filter) {}
+    spStream(spStream), filter(filter), format(format) {}
 
   LogStream &operator=(const LogStream &other)
   {
