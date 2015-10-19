@@ -89,9 +89,9 @@ void Component::Init(InitParams initParams)
 
   // allocate property change events
   propertyChange.length = pType->propertyTree.Size();
-  propertyChange.ptr = epAllocType(epEvent<>, propertyChange.length, udAF_None);
+  propertyChange.ptr = epAllocType(Event<>, propertyChange.length, udAF_None);
   for (size_t i = 0; i<propertyChange.length; ++i)
-    new(&propertyChange.ptr[i]) epEvent<>();
+    new(&propertyChange.ptr[i]) Event<>();
 */
   InitComplete();
 }

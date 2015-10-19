@@ -22,7 +22,7 @@ public:
     CountDown
     );
 
-  epEvent<> Event;
+  Event<> Event;
 
   uint32_t GetDuration() const { return pTimer ? pTimer->duration : 0; };
   TimerType GetTimerType() const { return pTimer ? TimerType(pTimer->timerType) : TimerType::Interval;}

@@ -159,7 +159,7 @@ struct CStaticFunc::Partial < void, Args... >
 
 // event stuff
 template<typename X, typename... Args>
-inline CEvent::CEvent(epEvent<Args...> X::*ev)
+inline CEvent::CEvent(Event<Args...> X::*ev)
   : VarEvent(nullptr)
 {
   pSubscribe = &doSubscribe<X, Args...>;
@@ -172,13 +172,13 @@ inline void CEvent::doSubscribe(const VarEvent *_pEv, const ComponentRef &c, con
   CEvent *pEv = (CEvent*)_pEv;
 
   // cast the pointer-to-member back to it's real type
-  epEvent<Args...> X::*ev = (epEvent<Args...> X::*)pEv->pEvent;
+  Event<Args...> X::*ev = (Event<Args...> X::*)pEv->pEvent;
 
   // TODO: validate that 'X' is actually a component?
   X *pComponent = (X*)c.ptr();
 
   // deref the pointer-to-member to get the event we want to subscribe to
-  epEvent<Args...> &e = pComponent->*ev;
+  Event<Args...> &e = pComponent->*ev;
 
   Variant v(d);
   e.Subscribe(v.as<Delegate<void(Args...)>>());

@@ -39,8 +39,8 @@ public:
   void SetRenderOptions(const udRenderOptions &options) { this->options = options; }
   const udRenderOptions& GetRenderOptions() const { return options; }
 
-  epEvent<> Dirty;
-  epEvent<> FrameReady;
+  Event<> Dirty;
+  Event<> FrameReady;
 
   // TODO: remove these!
   void RegisterResizeCallback(void (*pCallback)(ViewRef pView, int w, int h)) { pResizeCallback = pCallback; }

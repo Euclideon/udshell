@@ -150,7 +150,7 @@ public:
   void SetComponents(Slice<const String> comps) { filter.SetComponents(comps); }
   void ResetFilter() { filter.ResetFilter(); }
 
-  epEvent<> Changed;
+  Event<> Changed;
 protected:
   Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   LogStream *FindLogStream(StreamRef spStream) const;
