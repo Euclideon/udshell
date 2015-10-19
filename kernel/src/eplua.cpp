@@ -986,6 +986,12 @@ void Variant::luaPush(LuaState &l) const
     case Type::String:
       l.pushString(String(s, length));
       break;
+    case Type::SmallString:
+    {
+      uint8_t *pBuffer = (uint8_t*)this;
+      l.pushString(String((char*)pBuffer + 1, pBuffer[0] >> 4));
+      break;
+    }
     case Type::Array:
     {
       lua_State *L = l.state();
@@ -1009,6 +1015,8 @@ void Variant::luaPush(LuaState &l) const
       }
       break;
     }
+    default:
+      EPUNREACHABLE;
   }
 }
 

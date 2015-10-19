@@ -31,7 +31,8 @@ public:
     Delegate = epVT_Delegate,
     String = epVT_String,
     Array = epVT_Array,
-    AssocArray = epVT_AssocArray
+    AssocArray = epVT_AssocArray,
+    SmallString = epVT_SmallString
   };
 
   Variant();
@@ -95,6 +96,9 @@ public:
   // TODO: these shouldn't be part of the public API!
   void luaPush(LuaState &l) const;
   static Variant luaGet(LuaState &l, int idx = -1);
+
+private:
+  void copyContent(const Variant &val);
 };
 
 struct KeyValuePair

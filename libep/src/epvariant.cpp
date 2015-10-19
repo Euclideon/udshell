@@ -117,6 +117,7 @@ ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &v
       EPASSERT(false, "TODO! Please write me!");
       return 0;
     case Variant::Type::String:
+    case Variant::Type::SmallString:
       return epStringifyTemplate(buffer, format, v.asString(), pArgs);
     case Variant::Type::Component:
       return epStringifyTemplate(buffer, format, v.asComponent(), pArgs);
@@ -134,6 +135,51 @@ ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &v
 namespace ep {
 
 const Variant InitParams::varNull;
+
+namespace internal {
+
+const Variant::Type s_typeTranslation[] =
+{
+  Variant::Type::Null,      // epVT_Null
+  Variant::Type::Bool,      // epVT_Bool
+  Variant::Type::Int,       // epVT_Int
+  Variant::Type::Float,     // epVT_Float
+  Variant::Type::Enum,      // epVT_Enum
+  Variant::Type::Bitfield,  // epVT_Bitfield
+  Variant::Type::Component, // epVT_Component
+  Variant::Type::Delegate,  // epVT_Delegate
+  Variant::Type::String,    // epVT_String
+  Variant::Type::Array,     // epVT_Array
+  Variant::Type::AssocArray,// epVT_AssocArray
+
+  // these get reinterpreted
+  Variant::Type::String     // epVT_SmallString
+};
+
+} // namespace internal
+
+// string constructor
+Variant::Variant(String s, bool ownsMemory)
+{
+  const int BufferLen = sizeof(Variant) - 1;
+  EP_STATICASSERT(BufferLen <= 15, "Only 4 bits for length!");
+  if (!ownsMemory && s.length <= BufferLen)
+  {
+    // small string optimisation stashes short strings in the variant struct directly
+    uint8_t *pArray = (uint8_t*)this;
+    *pArray++ = (uint8_t)Type::SmallString | (uint8_t)(s.length << 4);
+    memcpy((char*)pArray, s.ptr, s.length);
+    if (s.length < BufferLen)
+      pArray[s.length] = 0;
+  }
+  else
+  {
+    t = (size_t)Type::String;
+    ownsContent = ownsMemory ? 1 : 0;
+    length = s.length;
+    this->s = s.ptr;
+  }
+}
 
 // destructor
 Variant::~Variant()
@@ -170,6 +216,49 @@ Variant::~Variant()
   }
 }
 
+void Variant::copyContent(const Variant &val)
+{
+  switch ((Type)t)
+  {
+    case Type::Component:
+    {
+      new((void*)&p) ComponentRef((ComponentRef&)val.p);
+      break;
+    }
+    case Type::Delegate:
+    {
+      new((void*)&p) VarDelegate((VarDelegate&)val.p);
+      break;
+    }
+    case Type::String:
+    {
+      char *pS = (char*)epAlloc(length);
+      memcpy(pS, val.s, length);
+      s = pS;
+      break;
+    }
+    case Type::Array:
+    {
+      Variant *a = (Variant*)epAlloc(sizeof(Variant)*length);
+      for (size_t i = 0; i<length; ++i)
+        new((void*)&a[i]) Variant(((const Variant*)val.p)[i]);
+      p = a;
+      break;
+    }
+    case Type::AssocArray:
+    {
+      KeyValuePair *aa = (KeyValuePair*)epAlloc(sizeof(KeyValuePair)*length);
+      for (size_t i = 0; i<length; ++i)
+      {
+        new((void*)&aa[i].key) Variant((const Variant&)((KeyValuePair*)val.p)[i].key);
+        new((void*)&aa[i].value) Variant((const Variant&)((KeyValuePair*)val.p)[i].value);
+      }
+      p = aa;
+      break;
+    }
+  }
+}
+
 SharedString Variant::stringify() const
 {
   switch ((Type)t)
@@ -179,6 +268,7 @@ SharedString Variant::stringify() const
     case Type::Bool:
       return b ? "true" : "false";
     case Type::String:
+    case Type::SmallString:
       return asString();
     default:
       break;
@@ -188,8 +278,10 @@ SharedString Variant::stringify() const
 
 ptrdiff_t Variant::compare(const Variant &v) const
 {
-  if (t != v.t)
-    return t - v.t;
+  Type x = internal::s_typeTranslation[t];
+  Type y = internal::s_typeTranslation[v.t];
+  if (x != y)
+    return (ptrdiff_t)x - (ptrdiff_t)y;
 
   switch ((Type)t)
   {
@@ -202,7 +294,8 @@ ptrdiff_t Variant::compare(const Variant &v) const
     case Type::Float:
       return f < v.f ? -1 : (f > v.f ? 1 : 0);
     case Type::String:
-      return String(s, length).cmp(String(v.s, v.length));
+    case Type::SmallString:
+      return asString().cmp(asString());
     case Type::Component:
       return ((String&)((epComponent*)p)->uid).cmp((String&)((epComponent*)v.p)->uid);
     default:
@@ -223,8 +316,9 @@ bool Variant::asBool() const
     case Type::Float:
       return f != 0;
     case Type::String:
+    case Type::SmallString:
     {
-      String str(s, length);
+      String str = asString();
       if (str.eqIC("true"))
         return true;
       else if (str.eqIC("false"))
@@ -250,6 +344,11 @@ int64_t Variant::asInt() const
       return (int64_t)f;
     case Type::String:
       return String(s, length).parseInt();
+    case Type::SmallString:
+    {
+      uint8_t *pBuffer = (uint8_t*)this;
+      return String((char*)pBuffer + 1, pBuffer[0] >> 4).parseInt();
+    }
     default:
       EPASSERT(type() == Type::Int, "Wrong type!");
       return 0;
@@ -269,6 +368,11 @@ double Variant::asFloat() const
       return f;
     case Type::String:
       return String(s, length).parseFloat();
+    case Type::SmallString:
+    {
+      uint8_t *pBuffer = (uint8_t*)this;
+      return String((char*)pBuffer + 1, pBuffer[0] >> 4).parseFloat();
+    }
     default:
       EPASSERT(type() == Type::Float, "Wrong type!");
       return 0.0;
@@ -319,6 +423,11 @@ String Variant::asString() const
       return String();
     case Type::String:
       return String(s, length);
+    case Type::SmallString:
+    {
+      uint8_t *pBuffer = (uint8_t*)this;
+      return String((char*)pBuffer + 1, pBuffer[0] >> 4);
+    }
     case Type::Component:
       return ((Component*)p)->GetUID();
     default:
