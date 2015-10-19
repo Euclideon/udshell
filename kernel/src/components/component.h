@@ -19,8 +19,7 @@
   static ::ep::ComponentDesc descriptor; \
   typedef ::ep::SharedPtr<Name> Ref;
 
-namespace ep
-{
+namespace ep {
 
 class Component : public RefCounted
 {
@@ -50,6 +49,18 @@ public:
 
   void Subscribe(String eventName, const Variant::VarDelegate &d);
   void Unsubscribe();
+
+  // helper for subscribing a shim
+  template<typename ...Args>
+  void Subscribe(String eventName, const Delegate<void(Args...)> &d);
+
+  // helpers for direct subscription
+  template <class X, class Y, typename ...Args>
+  void Subscribe(String eventName, Y *pThis, void(X::*pMethod)(Args...))        { Subscribe(eventName, Delegate<void(Args...)>(pThis, pMethod)); }
+  template <class X, class Y, typename ...Args>
+  void Subscribe(String eventName, Y *pThis, void(X::*pMethod)(Args...) const)  { Subscribe(eventName, Delegate<void(Args...)>(pThis, pMethod)); }
+  template <typename ...Args>
+  void Subscribe(String eventName, void(*pFunc)(Args...))                       { Subscribe(eventName, Delegate<void(Args...)>(pFunc)); }
 
   epResult SendMessage(String target, String message, const Variant &data);
   epResult SendMessage(Component *pComponent, String message, const Variant &data) { MutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp, message, data); }
@@ -145,9 +156,18 @@ private:
 
 } // namespace ep
 
+// HAX: this needs to be here for stupid C++ forward referencing reasons
 #include "components/logger.h"
-namespace ep
+
+namespace ep {
+
+// inlines...
+template<typename ...Args>
+inline void Component::Subscribe(String eventName, const Delegate<void(Args...)> &d)
 {
+  typedef SharedPtr<internal::VarDelegateMemento<void(Args...)>> VarDelegateMementoRef;
+  Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
+}
 
 template<typename ...Args>
 inline void Component::LogError(String text, Args... args) const
