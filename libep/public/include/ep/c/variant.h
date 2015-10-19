@@ -23,7 +23,8 @@ enum epVariantType
   epVT_Delegate,
   epVT_String,
   epVT_Array,
-  epVT_AssocArray
+  epVT_AssocArray,
+  epVT_SmallString
 };
 
 struct epVariant

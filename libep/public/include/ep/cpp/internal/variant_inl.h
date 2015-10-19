@@ -42,39 +42,7 @@ inline Variant::Variant(const Variant &val)
   p = val.p;
 
   if (ownsContent)
-  {
-    if (is(Type::Component))
-    {
-      new((void*)&p) ComponentRef((ComponentRef&)val.p);
-    }
-    else if (is(Type::Delegate))
-    {
-      new((void*)&p) VarDelegate((VarDelegate&)val.p);
-    }
-    else if (is(Type::String))
-    {
-      char *pS = (char*)epAlloc(length);
-      memcpy(pS, val.s, length);
-      s = pS;
-    }
-    else if (is(Type::Array))
-    {
-      Variant *a = (Variant*)epAlloc(sizeof(Variant)*length);
-      for (size_t i = 0; i<length; ++i)
-        new((void*)&a[i]) Variant(((const Variant*)val.p)[i]);
-      p = a;
-    }
-    else if (is(Type::AssocArray))
-    {
-      KeyValuePair *aa = (KeyValuePair*)epAlloc(sizeof(KeyValuePair)*length);
-      for (size_t i = 0; i<length; ++i)
-      {
-        new((void*)&aa[i].key) Variant((const Variant&)((KeyValuePair*)val.p)[i].key);
-        new((void*)&aa[i].value) Variant((const Variant&)((KeyValuePair*)val.p)[i].value);
-      }
-      p = aa;
-    }
-  }
+    copyContent(val);
 }
 
 inline Variant::Variant(epVariant &&rval)
@@ -140,13 +108,6 @@ inline Variant::Variant(VarDelegate &&d)
   length = 0;
   new(&p) VarDelegate(std::move(d));
 }
-inline Variant::Variant(String s, bool ownsMemory)
-{
-  t = (size_t)Type::String;
-  ownsContent = ownsMemory ? 1 : 0;
-  length = s.length;
-  this->s = s.ptr;
-}
 inline Variant::Variant(Slice<Variant> a, bool ownsMemory)
 {
   t = (size_t)Type::Array;
@@ -189,14 +150,18 @@ inline Variant& Variant::operator=(const Variant &rval)
   return *this;
 }
 
+namespace internal {
+extern const Variant::Type s_typeTranslation[];
+}
+
 inline Variant::Type Variant::type() const
 {
-  return (Type)t;
+  return internal::s_typeTranslation[t];
 }
 
 inline bool Variant::is(Type type) const
 {
-  return (Type)t == type;
+  return internal::s_typeTranslation[t] == type;
 }
 
 
