@@ -130,13 +130,13 @@ protected:
   AVLTree<String, MethodDesc> instanceMethods;
   AVLTree<String, EventDesc> instanceEvents;
 
-  epSubscriber subscriber;
+  Subscriber subscriber;
 
   void *pUserData = nullptr;
 
 private:
   template<typename... Args>
-  friend class ::epEvent;
+  friend class ::Event;
   friend class LuaState;
 
   Component(const Component &) = delete;    // Still not sold on this
@@ -249,13 +249,13 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pCompo
 // HACK: this here because forward referencing! >_<
 template<typename... Args>
 template <typename X>
-void epEvent<Args...>::Subscribe(Component *pC, void(X::*func)(Args...))
+void Event<Args...>::Subscribe(Component *pC, void(X::*func)(Args...))
 {
   pC->subscriber.Subscribe(*this, EvDelegate((X*)pC, func));
 }
 template<typename... Args>
 template <typename X>
-void epEvent<Args...>::Unsubscribe(Component *pC, void(X::*func)(Args...))
+void Event<Args...>::Unsubscribe(Component *pC, void(X::*func)(Args...))
 {
   pC->subscriber.Unsubscribe(*this, EvDelegate((X*)pC, func));
 }

@@ -18,7 +18,7 @@ public:
 
   MetadataRef GetMetadata() const;
 
-  epEvent<> Changed;
+  Event<> Changed;
 
 protected:
   Resource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)

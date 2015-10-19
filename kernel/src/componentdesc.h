@@ -207,7 +207,7 @@ class CEvent : public VarEvent
 public:
   CEvent(nullptr_t) : VarEvent(nullptr) {}
   template<typename X, typename... Args>
-  CEvent(epEvent<Args...> X::*ev);
+  CEvent(Event<Args...> X::*ev);
 
 protected:
   void* CEvent::*pEvent;
