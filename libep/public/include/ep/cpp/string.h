@@ -156,8 +156,6 @@ struct MutableString : public Array<char, Size>
   template<bool Front = true, bool Back = true>
   String trim() const                                                                 { return ((String*)this)->trim<Front, Back>(); }
 
-//  template<bool skipEmptyTokens = true>
-//  String popToken(String delimiters = " \t\r\n")                                    { return ((String*)this)->popToken<skipEmptyTokens>(delimiters); }
   template<bool skipEmptyTokens = true>
   Slice<String> tokenise(Slice<String> tokens, String delimiters = " \t\r\n") { return ((String*)this)->tokenise<skipEmptyTokens>(tokens, delimiters); }
 
@@ -222,7 +220,7 @@ struct SharedString : public SharedArray<const char>
   ptrdiff_t cmpIC(String rh) const                                                    { return ((String*)this)->cmpIC(rh); }
 
   // c-string compatibility
-  char* toStringz(char *pBuffer, size_t bufferLen) const                                { return ((String*)this)->toStringz(pBuffer, bufferLen); }
+  char* toStringz(char *pBuffer, size_t bufferLen) const                              { return ((String*)this)->toStringz(pBuffer, bufferLen); }
   CString<char> toStringz() const;
 
   // transformation
@@ -235,23 +233,21 @@ struct SharedString : public SharedArray<const char>
   size_t findFirstIC(String s) const                                                  { return ((String*)this)->findFirstIC(s); }
   size_t findLastIC(String s) const                                                   { return ((String*)this)->findLastIC(s); }
 
-  SharedString getLeftAtFirstIC(String s, bool bInclusive = false) const;
-  SharedString getLeftAtLastIC(String s, bool bInclusive = false) const;
-  SharedString getRightAtFirstIC(String s, bool bInclusive = true) const;
-  SharedString getRightAtLastIC(String s, bool bInclusive = true) const;
+  String getLeftAtFirstIC(String s, bool bInclusive = false) const                    { return ((String*)this)->getLeftAtFirstIC(s, bInclusive); }
+  String getLeftAtLastIC(String s, bool bInclusive = false) const                     { return ((String*)this)->getLeftAtLastIC(s, bInclusive); }
+  String getRightAtFirstIC(String s, bool bInclusive = true) const                    { return ((String*)this)->getRightAtFirstIC(s, bInclusive); }
+  String getRightAtLastIC(String s, bool bInclusive = true) const                     { return ((String*)this)->getRightAtLastIC(s, bInclusive); }
 
   template<bool Front = true, bool Back = true>
-  SharedString trim() const;
+  String trim() const                                                                 { return ((String*)this)->trim<Front, Back>(); }
 
   template<bool skipEmptyTokens = true>
-  SharedString popToken(String delimiters = " \t\r\n");
-  template<bool skipEmptyTokens = true>
-  Slice<SharedString> tokenise(Slice<SharedString> tokens, String delimiters = " \t\r\n") const;
+  Slice<String> tokenise(Slice<String> tokens, String delimiters = " \t\r\n") const   { return ((String*)this)->tokenise<skipEmptyTokens>(tokens, delimiters); }
 
-  int64_t parseInt(bool bDetectBase = true, int base = 10) const                        { return ((String*)this)->parseInt(bDetectBase, base); }
-  double parseFloat() const                                                             { return ((String*)this)->parseFloat(); }
+  int64_t parseInt(bool bDetectBase = true, int base = 10) const                      { return ((String*)this)->parseInt(bDetectBase, base); }
+  double parseFloat() const                                                           { return ((String*)this)->parseFloat(); }
 
-  uint32_t hash(uint32_t hash = 0) const                                                { return ((String*)this)->hash(hash); }
+  uint32_t hash(uint32_t hash = 0) const                                              { return ((String*)this)->hash(hash); }
 
 private:
   static SharedString concatInternal(Slice<epVarArg> args);

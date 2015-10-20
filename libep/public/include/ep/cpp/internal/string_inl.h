@@ -665,48 +665,6 @@ inline SharedString SharedString::asLower() const
   return nullptr;
 }
 
-inline SharedString SharedString::getLeftAtFirstIC(String s, bool bInclusive) const
-{
-  return slice(0, findFirstIC(s) + (bInclusive ? s.length : 0));
-}
-inline SharedString SharedString::getLeftAtLastIC(String s, bool bInclusive) const
-{
-  return slice(0, findLastIC(s) + (bInclusive ? s.length : 0));
-}
-inline SharedString SharedString::getRightAtFirstIC(String s, bool bInclusive) const
-{
-  return slice(findFirstIC(s) + (bInclusive ? 0 : s.length), length);
-}
-inline SharedString SharedString::getRightAtLastIC(String s, bool bInclusive) const
-{
-  return slice(findLastIC(s) + (bInclusive ? 0 : s.length), length);
-}
-
-template<bool Front, bool Back>
-inline SharedString SharedString::trim() const
-{
-  String s = ((String*)this)->trim<Front, Back>();
-  return SharedString(s.ptr, s.length, rc);
-}
-
-template<bool skipEmptyTokens>
-inline SharedString SharedString::popToken(String delimiters)
-{
-  String s = ((String*)this)->popToken<skipEmptyTokens>(delimiters);
-  return SharedString(s.ptr, s.length, rc);
-}
-template<bool skipEmptyTokens>
-inline Slice<SharedString> SharedString::tokenise(Slice<SharedString> tokens, String delimiters) const
-{
-  Array<String, 64> t;
-  t.reserve(tokens.length);
-  t.length = tokens.length;
-  Slice<String> tok = ((String*)this)->tokenise<skipEmptyTokens>(t, delimiters);
-  for (size_t i = 0; i < tok.length; ++i)
-    new(&tokens.ptr[i]) SharedString(tok.ptr[i].ptr, tok.ptr[i].length, rc);
-  return tokens.slice(0, tok.length);
-}
-
 
 //
 // varargs functions....
