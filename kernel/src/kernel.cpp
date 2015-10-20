@@ -64,7 +64,7 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   pKernel->foreignInstanceRegistry.Init(256);
   pKernel->messageHandlers.Init(64);
 
-  pKernel->pRenderer = udNew(Renderer, pKernel, renderThreadCount);
+  pKernel->pRenderer = new Renderer(pKernel, renderThreadCount);
 
   // register all the builtin component types
   UD_ERROR_CHECK(pKernel->RegisterComponent<Component>());
