@@ -404,7 +404,7 @@ epResult Kernel::CreateComponent(String typeId, InitParams initParams, Component
     instanceRegistry.Add(spComponent->uid.hash(), spComponent.ptr());
 
     if (spLua)
-      spLua->SetGlobal(String(spComponent->uid), spComponent);
+      spLua->SetGlobal(String(spComponent->uid), spComponent.ptr());
 
     // TODO: inform partner kernels that I created a component
     //...

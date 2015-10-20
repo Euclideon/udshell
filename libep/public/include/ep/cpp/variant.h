@@ -48,6 +48,7 @@ public:
   Variant(size_t val, const epEnumDesc *pDesc, bool isBitfield);
   Variant(ComponentRef &&spC);
   Variant(const ComponentRef &spC);
+  Variant(Component *pC);
   Variant(VarDelegate &&d);
   Variant(const VarDelegate &d);
   Variant(String, bool ownsMemory = false);

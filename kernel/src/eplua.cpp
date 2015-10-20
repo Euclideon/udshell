@@ -336,9 +336,9 @@ void LuaState::setComponent(Variant key, ComponentRef c, LuaLocation loc)
 
 
 // *** bind components to Lua ***
-void LuaState::pushComponentMetatable(const ComponentDesc &desc)
+void LuaState::pushComponentMetatable(const ComponentDesc &desc, bool weakPtr)
 {
-  MutableString64 t; t.append("ep::", desc.id, "\0");
+  MutableString64 t; t.append("ep::", desc.id, weakPtr ? "*" : "Ref", "\0");
   if (luaL_newmetatable(L, t.ptr) == 0)
     return;
 
@@ -350,14 +350,17 @@ void LuaState::pushComponentMetatable(const ComponentDesc &desc)
   pushString(desc.id);
   lua_setfield(L, -2, "__type");
 
-  // push a destructor
-  lua_pushcfunction(L, &componentCleaner);
-  lua_setfield(L, -2, "__gc");
+  if (!weakPtr)
+  {
+    // push a destructor
+    lua_pushcfunction(L, &componentCleaner);
+    lua_setfield(L, -2, "__gc");
+  }
 
   // set the parent metatable
   if (desc.pSuperDesc)
   {
-    pushComponentMetatable(*desc.pSuperDesc);
+    pushComponentMetatable(*desc.pSuperDesc, weakPtr);
     lua_setmetatable(L, -2);
   }
 
@@ -436,7 +439,20 @@ void LuaState::pushComponent(const ComponentRef &c)
   }
 
   new(lua_newuserdata(L, sizeof(ComponentRef))) ComponentRef(c);
-  pushComponentMetatable(*c->pType);
+  pushComponentMetatable(*c->pType, false);
+  lua_setmetatable(L, -2);
+}
+
+void LuaState::pushComponent(Component *pC)
+{
+  if (!pC)
+  {
+    lua_pushnil(L);
+    return;
+  }
+
+  new(lua_newuserdata(L, sizeof(Component*))) Component*(pC);
+  pushComponentMetatable(*pC->pType, true);
   lua_setmetatable(L, -2);
 }
 
@@ -978,7 +994,10 @@ void Variant::luaPush(LuaState &l) const
       break;
     }
     case Type::Component:
-      l.pushComponent((ComponentRef&)p);
+      if (ownsContent)
+        l.pushComponent((ComponentRef&)p);
+      else
+        l.pushComponent((Component*)p);
       break;
     case Type::Delegate:
       l.pushDelegate((VarDelegate&)p);
