@@ -240,14 +240,17 @@ void Kernel::Update()
 
   // TODO: this shouldn't require a focus view! get the scene from the project...
 
-  SceneRef spScene = spFocusView->GetScene();
-  if (spScene)
-    spScene->Update(sec);
-  CameraRef spCamera = spFocusView->GetCamera();
-  if (spCamera)
+  if (spFocusView)
   {
-    if (spCamera->Update(sec))
-      spFocusView->ForceDirty();
+    SceneRef spScene = spFocusView->GetScene();
+    if (spScene)
+      spScene->Update(sec);
+    CameraRef spCamera = spFocusView->GetCamera();
+    if (spCamera)
+    {
+      if (spCamera->Update(sec))
+        spFocusView->ForceDirty();
+    }
   }
 }
 
@@ -429,7 +432,7 @@ epResult Kernel::DestroyComponent(Component *pInstance)
   spLua->SetGlobal(String(pInstance->uid), nullptr);
 
   // TODO: remove from component registry
-  instanceRegistry.Destroy(pInstance->uid.toStringz());
+  instanceRegistry.Destroy(pInstance->uid.hash());
 
   // TODO: inform partners that I destroyed a component
   //...
