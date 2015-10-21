@@ -15,6 +15,7 @@ class Buffer : public Resource
 public:
   EP_COMPONENT(Buffer);
 
+  bool Reserve(size_t size);
   bool Allocate(size_t size);
   bool Free();
 
