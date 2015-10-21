@@ -17,17 +17,25 @@ ComponentDesc Buffer::descriptor =
   "Buffer resource", // description
 };
 
-bool Buffer::Allocate(size_t size)
+bool Buffer::Reserve(size_t size)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
 
-  Free();
+  if (size < buffer.length)
+    return true;
 
+  Free();
   buffer.ptr = (char*)epAlloc(size);
   buffer.length = size;
-  logicalSize = 0;
+  return true;
+}
 
+bool Buffer::Allocate(size_t size)
+{
+  if (!Reserve(size))
+    return false;
+  logicalSize = size;
   return true;
 }
 

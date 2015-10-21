@@ -46,7 +46,7 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   if (buf.is(Variant::Type::Null))
   {
       inBuffer = pKernel->CreateComponent<Buffer>();
-      inBuffer->Allocate(DefaultBufferSize);
+      inBuffer->Reserve(DefaultBufferSize);
   }
   else
   {

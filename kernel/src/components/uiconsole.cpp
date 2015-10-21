@@ -123,13 +123,13 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
 
   // Create stream for shell output
   auto spOutBuffer = pKernel->CreateComponent<Buffer>();
-  spOutBuffer->Allocate(1024);
+  spOutBuffer->Reserve(1024);
   spOutStream = pKernel->CreateComponent<MemStream>({ {"buffer", spOutBuffer}, {"flags", OpenFlags::Write} });
   spOutStream->Changed.Subscribe(this, &UIConsole::OnStreamOutput);
 
   // Create stream for shell input
   auto spInBuffer = pKernel->CreateComponent<Buffer>();
-  spInBuffer->Allocate(1024);
+  spInBuffer->Reserve(1024);
   spInStream = pKernel->CreateComponent<MemStream>({ { "buffer", spInBuffer }, { "flags", OpenFlags::Write } });
 
   pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
@@ -296,7 +296,7 @@ void UIConsole::OnStreamOutput()
 void UIConsole::RelayInput(String str)
 {
   auto spInBuffer = pKernel->CreateComponent<Buffer>();
-  spInBuffer->Allocate(1024);
+  spInBuffer->Reserve(1024);
   spInBuffer->CopyBuffer(str);
   spInStream->SetBuffer(spInBuffer);
 }
