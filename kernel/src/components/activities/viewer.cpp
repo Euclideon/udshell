@@ -42,30 +42,35 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, In
 
   ViewRef spView = pKernel->CreateComponent<View>();
   spScene = pKernel->CreateComponent<Scene>();
-  spCamera = pKernel->CreateComponent<SimpleCamera>();
+
+  const Variant &cam = initParams["camera"];
+  if (cam.is(Variant::Type::AssocArray))
+  {
+    Slice<KeyValuePair> cameraParams = cam.asAssocArray();
+    spCamera = pKernel->CreateComponent<SimpleCamera>(InitParams(cameraParams));
+  }
 
   const Variant &model = initParams["model"];
   if (model.is(Variant::Type::String))
   {
-    // TODO: enable streamer once it stops using focusView in Kernel
+    // TODO: enable streamer once we have a tick running to update the streamer
     String modelSrc = model.asString();
     DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", false } });
     if (spModelDS && spModelDS->GetNumResources() > 0)
-    {
       spModel = spModelDS->GetResourceAs<UDModel>(0);
-      UDNodeRef spUDNode = pKernel->CreateComponent<UDNode>();
-      spUDNode->SetUDModel(spModel);
-      spScene->GetRootNode()->AddChild(spUDNode);
-    }
+  }
+  else if (model.is(Variant::Type::Component))
+    spModel = model.as<UDModelRef>();
+
+  if (spModel)
+  {
+    UDNodeRef spUDNode = pKernel->CreateComponent<UDNode>();
+    spUDNode->SetUDModel(spModel);
+    spScene->GetRootNode()->AddChild(spUDNode);
   }
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
   spView->SetRenderOptions(options);
-
-  spCamera->SetSpeed(1.0);
-  spCamera->InvertYAxis(true);
-  spCamera->SetPerspective(UD_PIf / 3.f);
-  spCamera->SetDepthPlanes(0.0001f, 7500.f);
 
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);
@@ -103,6 +108,19 @@ void Viewer::Update(double timeStep)
 {
   if (spScene)
     spScene->Update(timeStep);
+}
+
+Variant Viewer::Save()
+{
+  Array<KeyValuePair> params;
+
+  if (spCamera)
+    params.pushBack( KeyValuePair("camera", spCamera->Save()) );
+
+  if (spModel)
+    params.pushBack( KeyValuePair("model", spModel->GetDataSource()->GetURL()) );
+
+  return Variant(std::move(params));
 }
 
 } // namespace ep

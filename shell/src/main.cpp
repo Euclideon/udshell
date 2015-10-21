@@ -7,12 +7,17 @@
 #include "components/window.h"
 #include "components/ui.h"
 #include "components/uiconsole.h"
+#include "components/project.h"
 #include "components/activities/viewer.h"
 #include "hal/debugfont.h"
 
 static Kernel *pKernel = nullptr;
 static WindowRef spMainWindow;
 static ActivityRef spActiveActivity;
+
+static ProjectRef spProject;
+
+MutableString<1024> projFilePath;
 
 // ---------------------------------------------------------------------------------------
 void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -75,13 +80,20 @@ void OnActivityChanged(String uid)
 
 void Deinit(String sender, String message, const Variant &data)
 {
+  //spProject->SaveProject(); // Uncomment this if you want to dump the state of the Activities into a project file on program close
+
   spActiveActivity = nullptr;
   spMainWindow = nullptr;
+  spProject = nullptr;
 }
 
 void Init(String sender, String message, const Variant &data)
 {
-  // TODO: load a project file...
+  if (!projFilePath.empty())
+    spProject = pKernel->CreateComponent<Project>({ { "src", String(projFilePath) } });
+  else
+    spProject = pKernel->CreateComponent<Project>();
+
   spMainWindow = pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
   if (!spMainWindow)
   {
@@ -104,8 +116,30 @@ void Init(String sender, String message, const Variant &data)
   }
   SetUIConsole(spTopLevelUI, spConsole);
 
-  auto spViewerActivity = pKernel->CreateComponent<Viewer>({ { "model", "data/DirCube.upc" } });
-  AddUIActivity(spTopLevelUI, spViewerActivity);
+  // Load Activities from project file
+  if (spProject)
+  {
+    auto spActivities = spProject->GetActivities();
+    for (auto spActivity : spActivities)
+      AddUIActivity(spTopLevelUI, spActivity);
+  }
+
+  // Hardcode an example Activity in for testing purposes
+  Array<KeyValuePair> cameraParams {
+    { "speed", 1.0 },
+    { "invertyaxis", true },
+    { "perspective", 1.0471975512 },
+    { "depthplanes", Slice<const double>({ 0.0001, 7500.0 }) }
+  };
+
+  auto spExampleActivity = pKernel->CreateComponent<Viewer>({ { "model", "data/DirCube.upc" }, { "camera", cameraParams } });
+  if (spExampleActivity)
+  {
+    AddUIActivity(spTopLevelUI, spExampleActivity);
+    spProject->AddActivity(spExampleActivity);
+  }
+  else
+    pKernel->LogError("Error creating Viewer activity\n");
 
   spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
   spMainWindow->SetTopLevelUI(spTopLevelUI);
@@ -121,6 +155,9 @@ int main(int argc, char *argv[])
   epString_Test();
   epSharedPtr_Test();
   epVariant_Test();
+
+  if (argc > 1)
+    projFilePath.append(argv[1]);
 
   // install our qt message handler
   qInstallMessageHandler(DbgMessageHandler);

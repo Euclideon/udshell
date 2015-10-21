@@ -118,6 +118,20 @@ void Camera::GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const
     *pMatrix = Double4x4::ortho(-orthoHeight*aspectRatio*0.5, orthoHeight*aspectRatio*0.5, -orthoHeight*0.5, orthoHeight*0.5, zNear, zFar);
 }
 
+Variant Camera::Save()
+{
+  Array<KeyValuePair> params;
+
+  params.pushBack(KeyValuePair("matrix", MutableString<256>().format("{0}", Slice<double>(matrix.a, 16))));
+  if (bOrtho)
+    params.pushBack(KeyValuePair("ortho", orthoHeight));
+  else
+    params.pushBack(KeyValuePair("perspective", fovY));
+  params.pushBack(KeyValuePair("depthplanes", MutableString<256>().format("[{0}, {1}]", zNear, zFar)));
+
+  return Variant(std::move(params));
+}
+
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 bool SimpleCamera::ViewportInputEvent(const epInputEvent &ev)
@@ -271,6 +285,18 @@ bool SimpleCamera::Update(double timeDelta)
   if (ty || tx || tz || pitch || yaw)
     return true;
   return false;
+}
+
+Variant SimpleCamera::Save()
+{
+  Variant var = Camera::Save();
+  Array<KeyValuePair> params = var.asAssocArray();
+
+  params.pushBack(KeyValuePair("speed", speed));
+  params.pushBack(KeyValuePair("invertyaxis", (yInvert == -1.0 ? true : false)));
+  params.pushBack(KeyValuePair("helicoptermode", bHelicopter));
+
+  return Variant(std::move(params));
 }
 
 } // namespace ep
