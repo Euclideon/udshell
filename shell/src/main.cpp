@@ -13,6 +13,7 @@
 #include "hal/debugfont.h"
 
 static Kernel *pKernel = nullptr;
+static WindowRef spMainWindow;
 
 // ---------------------------------------------------------------------------------------
 void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -70,7 +71,7 @@ void Init(String sender, String message, const Variant &data)
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);
 
-  auto spMainWindow = pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
+  spMainWindow = pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
   if (!spMainWindow)
   {
     pKernel->LogError("Error creating MainWindow UI Component\n");
