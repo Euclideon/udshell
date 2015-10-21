@@ -88,6 +88,11 @@ void Init(String sender, String message, const Variant &data)
   spMainWindow->SetTopLevelUI(spViewport);
 }
 
+void Deinit(String sender, String message, const Variant &data)
+{
+  spMainWindow = nullptr;
+}
+
 // ---------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
@@ -115,6 +120,7 @@ int main(int argc, char *argv[])
   }
 
   pKernel->RegisterMessageHandler("init", &Init);
+  pKernel->RegisterMessageHandler("deinit", &Deinit);
 
   if (pKernel->RunMainLoop() != udR_Success)
   {

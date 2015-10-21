@@ -199,6 +199,9 @@ epResult Kernel::DoInit(Kernel *pKernel)
 
 epResult Kernel::Destroy()
 {
+  // call application deinit
+  SendMessage("$deinit", "#", "deinit", nullptr);
+
   epResult result = epR_Success;
   epResult renderSceneRenderResult = udRenderScene_DeinitRender(this);
   epResult renderSceneResult = udRenderScene_Deinit(this);
