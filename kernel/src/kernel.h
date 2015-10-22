@@ -183,7 +183,7 @@ Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, Sha
 {
   MutableString128 t; t.format("New: {0} - {1}", pType->id, uid);
   pKernel->LogDebug(4, t);
-  return udNew(CT, pType, pKernel, uid, initParams);
+  return new CT(pType, pKernel, uid, initParams);
 }
 template<typename CT>
 epResult Kernel::RegisterComponent()

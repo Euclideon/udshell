@@ -75,12 +75,12 @@ epResult SDLKernel::InitInternal()
 
 epResult SDLKernel::Destroy()
 {
-  // this
+  DeinitRender();
+
   SDL_GL_DeleteContext(s_context);
   SDL_Quit();
 
-  DeinitRender();
-  return epR_Success;
+  return Kernel::Destroy();
 }
 
 ViewRef Kernel::SetFocusView(ViewRef spView)

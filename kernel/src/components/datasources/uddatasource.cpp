@@ -15,7 +15,7 @@ ComponentDesc UDDataSource::descriptor =
   EPSHELL_APIVERSION,      // epVersion
   EPSHELL_PLUGINVERSION,   // pluginVersion
 
-  "uddataSource",     // id
+  "uddatasource",     // id
   "UDDataSource",    // displayName
   "Provides UD Data", // description
 

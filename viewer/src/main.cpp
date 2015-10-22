@@ -92,7 +92,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
-epResult ViewerDeinit()
+static void ViewerDeinit(String sender, String message, const Variant &data)
 {
   mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
 
@@ -100,13 +100,6 @@ epResult ViewerDeinit()
   mData.spView = nullptr;
   mData.spScene = nullptr;
   mData.spSimpleCamera = nullptr;
-
-  mData.pKernel->Destroy();
-  mData.pKernel = nullptr;
-
-  udOctree_Shutdown();
-
-  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -124,6 +117,7 @@ int main(int argc, char* argv[])
     return -1;
 
   mData.pKernel->RegisterMessageHandler("init", &ViewerInit);
+  mData.pKernel->RegisterMessageHandler("deinit", &ViewerDeinit);
 
   if (mData.pKernel->RunMainLoop() != epR_Success)
   {
@@ -132,7 +126,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  result = ViewerDeinit();
+  mData.pKernel->Destroy();
+  mData.pKernel = nullptr;
 
   udMemoryOutputLeaks();
   udMemoryDebugTrackingDeinit();

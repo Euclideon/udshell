@@ -87,6 +87,7 @@ public:
   void pushLightUserData(void *val);
 
   void pushComponent(const ComponentRef &c);
+  void pushComponent(Component *pC);
   void pushDelegate(const Variant::VarDelegate &d);
 
   void push(const Variant &v);
@@ -125,7 +126,7 @@ private:
   static int udLuaPanic(lua_State *L);
   static void* udLuaAlloc(void *, void *ptr, size_t, size_t nsize);
 
-  void pushComponentMetatable(const ComponentDesc &desc);
+  void pushComponentMetatable(const ComponentDesc &desc, bool weakPtr);
   void pushDescriptor(const ComponentDesc &desc);
   static int componentCleaner(lua_State* L);
   static int componentToString(lua_State* L);

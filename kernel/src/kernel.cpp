@@ -64,7 +64,7 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   pKernel->foreignInstanceRegistry.Init(256);
   pKernel->messageHandlers.Init(64);
 
-  pKernel->pRenderer = udNew(Renderer, pKernel, renderThreadCount);
+  pKernel->pRenderer = new Renderer(pKernel, renderThreadCount);
 
   // register all the builtin component types
   UD_ERROR_CHECK(pKernel->RegisterComponent<Component>());
@@ -199,6 +199,9 @@ epResult Kernel::DoInit(Kernel *pKernel)
 
 epResult Kernel::Destroy()
 {
+  // call application deinit
+  SendMessage("$deinit", "#", "deinit", nullptr);
+
   epResult result = epR_Success;
   epResult renderSceneRenderResult = udRenderScene_DeinitRender(this);
   epResult renderSceneResult = udRenderScene_Deinit(this);
@@ -240,14 +243,17 @@ void Kernel::Update()
 
   // TODO: this shouldn't require a focus view! get the scene from the project...
 
-  SceneRef spScene = spFocusView->GetScene();
-  if (spScene)
-    spScene->Update(sec);
-  CameraRef spCamera = spFocusView->GetCamera();
-  if (spCamera)
+  if (spFocusView)
   {
-    if (spCamera->Update(sec))
-      spFocusView->ForceDirty();
+    SceneRef spScene = spFocusView->GetScene();
+    if (spScene)
+      spScene->Update(sec);
+    CameraRef spCamera = spFocusView->GetCamera();
+    if (spCamera)
+    {
+      if (spCamera->Update(sec))
+        spFocusView->ForceDirty();
+    }
   }
 }
 
@@ -404,7 +410,7 @@ epResult Kernel::CreateComponent(String typeId, InitParams initParams, Component
     instanceRegistry.Add(spComponent->uid.hash(), spComponent.ptr());
 
     if (spLua)
-      spLua->SetGlobal(String(spComponent->uid), spComponent);
+      spLua->SetGlobal(String(spComponent->uid), spComponent.ptr());
 
     // TODO: inform partner kernels that I created a component
     //...
@@ -429,7 +435,7 @@ epResult Kernel::DestroyComponent(Component *pInstance)
   spLua->SetGlobal(String(pInstance->uid), nullptr);
 
   // TODO: remove from component registry
-  instanceRegistry.Destroy(pInstance->uid.toStringz());
+  instanceRegistry.Destroy(pInstance->uid.hash());
 
   // TODO: inform partners that I destroyed a component
   //...
