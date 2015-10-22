@@ -32,6 +32,7 @@ public:
     String = epVT_String,
     Array = epVT_Array,
     AssocArray = epVT_AssocArray,
+    Void = epVT_Void,
     SmallString = epVT_SmallString
   };
 
@@ -42,6 +43,8 @@ public:
   Variant(epVariant &&rval);
   Variant(const epVariant &val);
 
+  Variant(Type);
+  Variant(nullptr_t);
   Variant(bool);
   Variant(int64_t);
   Variant(double);
@@ -139,7 +142,7 @@ public:
       if (p.key.is(Variant::Type::String) && p.key.asString().eq(key))
         return p.value;
     }
-    return varNull;
+    return varNone;
   }
 
   Iterator<const KeyValuePair> begin() const
@@ -152,7 +155,7 @@ public:
   }
 
 private:
-  static const Variant varNull;
+  static const Variant varNone;
 };
 
 } // namespace ep

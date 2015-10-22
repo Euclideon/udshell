@@ -615,7 +615,9 @@ int LuaState::method(lua_State *L)
   // TODO: assert that c is a component!
 
   int numArgs = l.top() - 1;
-  Variant *pArgs = numArgs > 0 ? (Variant*)alloca(sizeof(Variant)*numArgs) : nullptr;
+  Variant *pArgs = nullptr;
+  if(numArgs > 0)
+    pArgs = (Variant*)alloca(sizeof(Variant)*numArgs);
 
   for (int i = 0; i < numArgs; ++i)
     new(&pArgs[i]) Variant(Variant::luaGet(l, 2 + i));
@@ -625,8 +627,12 @@ int LuaState::method(lua_State *L)
   for (int i = 0; i < numArgs; ++i)
     pArgs[i].~Variant();
 
-  v.luaPush(l);
-  return 1;
+  if (v.type() != Variant::Type::Void)
+  {
+    v.luaPush(l);
+    return 1;
+  }
+  return 0;
 }
 
 int LuaState::help(lua_State* L)
@@ -971,6 +977,11 @@ void Variant::luaPush(LuaState &l) const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      // void pushes nothing!
+      // TODO: consider; should this really be supported?
+      //       in a sence, we're treating this void variant like a valid value...
+      break;
     case Type::Null:
       l.pushNil();
       break;
@@ -1045,11 +1056,11 @@ Variant Variant::luaGet(LuaState &l, int idx)
   switch (t)
   {
     case LuaType::Nil:
-      return Variant();
+      return Variant(nullptr);
     case LuaType::Boolean:
       return Variant(l.toBool(idx));
     case LuaType::LightUserData:
-      return Variant();
+      return Variant((int64_t)(size_t)l.toUserData(idx));
     case LuaType::Number:
       if (l.isInteger(idx))
         return Variant((int64_t)l.toInt(idx));
@@ -1074,9 +1085,9 @@ Variant Variant::luaGet(LuaState &l, int idx)
         return Variant(l.toComponent(idx));
       else if (!strcmp(type, "delegate"))
         return Variant(l.toDelegate(idx));
-      //      else if (!strcmp(type, "event"))
-      //        return Variant(l.toEvent(idx));
-      return Variant();
+//      else if (!strcmp(type, "event"))
+//        return Variant(l.toEvent(idx));
+      return Variant(nullptr);
     }
     case LuaType::Table:
     {

@@ -39,12 +39,14 @@ inline void epFromVariant(const Variant &variant, QString *pString)
 
 inline Variant epToVariant(const QVariant &var)
 {
-  if (!var.isValid() || var.isNull())
+  if (!var.isValid())
     return Variant();
+  if (var.isNull())
+    return Variant(nullptr);
 
   switch (static_cast<QMetaType::Type>(var.type()))
   {
-    // Variant::Type::Null
+    // Variant::Type::Void
     case QMetaType::Void:
       return Variant();
 
@@ -89,7 +91,7 @@ inline Variant epToVariant(const QVariant &var)
 
       // TODO: create generic QtComponent which thinly wraps a QObject
 //      pKernel->CreateComponent<QtComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
-      return Variant();
+      return Variant(nullptr);
     }
 
     // TODO: serialize other types?
@@ -110,6 +112,10 @@ inline void epFromVariant(const Variant &variant, QVariant *pVariant)
 
   switch (variant.type())
   {
+    case Variant::Type::Void:
+      pVariant->setValue(QVariant(QVariant::Invalid));
+      break;
+
     case Variant::Type::Null:
       // *pVariant is already null right?
       break;
@@ -155,6 +161,10 @@ inline void epFromVariant(const Variant &variant, QJSValue *pJSValue)
 {
   switch (variant.type())
   {
+    case Variant::Type::Void:
+      *pJSValue = QJSValue(QJSValue::UndefinedValue);
+      break;
+
     case Variant::Type::Null:
       *pJSValue = QJSValue(QJSValue::NullValue);
       break;

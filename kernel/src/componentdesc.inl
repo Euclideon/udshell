@@ -74,9 +74,12 @@ epforceinline Variant CMethod::Partial<Ret, Args...>::callFuncHack(Slice<Variant
 }
 
 template<typename Ret, typename... Args>
-inline Variant CMethod::Partial<Ret, Args ...>::shimFunc(const Method * const _pMethod, Component *pThis, Slice<Variant> value)
+inline Variant CMethod::Partial<Ret, Args ...>::shimFunc(const Method * const _pMethod, Component *pThis, Slice<Variant> args)
 {
   CMethod *pMethod = (CMethod*)_pMethod;
+
+  // TODO: should this be an assert? perhaps soft-error and return a void variant?
+  EPASSERT(args.length >= sizeof...(Args), "Not enough args!");
 
   auto m = pMethod->m;
   m.SetThis((void*)pThis);
@@ -84,7 +87,7 @@ inline Variant CMethod::Partial<Ret, Args ...>::shimFunc(const Method * const _p
   FastDelegate<Ret(Args...)> d;
   d.SetMemento(m);
 
-  return Variant(callFuncHack(value, d, typename internal::GenSequence<sizeof...(Args)>::type()));
+  return Variant(callFuncHack(args, d, typename internal::GenSequence<sizeof...(Args)>::type()));
 }
 
 template<typename... Args>
@@ -96,9 +99,12 @@ struct CMethod::Partial<void, Args...>
     d(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
   }
 
-  inline static Variant shimFunc(const Method * const _pMethod, Component *pThis, Slice<Variant> value)
+  inline static Variant shimFunc(const Method * const _pMethod, Component *pThis, Slice<Variant> args)
   {
     CMethod *pMethod = (CMethod*)_pMethod;
+
+    // TODO: should this be an assert? perhaps soft-error and return a void variant?
+    EPASSERT(args.length >= sizeof...(Args), "Not enough args!");
 
     auto m = pMethod->m;
     m.SetThis((void*)pThis);
@@ -106,8 +112,8 @@ struct CMethod::Partial<void, Args...>
     FastDelegate<void(Args...)> d;
     d.SetMemento(m);
 
-    callFuncHack(value, d, typename internal::GenSequence<sizeof...(Args)>::type());
-    return Variant();
+    callFuncHack(args, d, typename internal::GenSequence<sizeof...(Args)>::type());
+    return Variant(Variant::Type::Void);
   }
 };
 
@@ -128,13 +134,16 @@ epforceinline Variant CStaticFunc::Partial<Ret, Args...>::callFuncHack(Slice<Var
 }
 
 template<typename Ret, typename... Args>
-inline Variant CStaticFunc::Partial<Ret, Args ...>::shimFunc(const StaticFunc * const _pStaticFunc, Slice<Variant> value)
+inline Variant CStaticFunc::Partial<Ret, Args ...>::shimFunc(const StaticFunc * const _pStaticFunc, Slice<Variant> args)
 {
   CStaticFunc *pStaticFunc = (CStaticFunc*)_pStaticFunc;
 
+  // TODO: should this be an assert? perhaps soft-error and return a void variant?
+  EPASSERT(args.length >= sizeof...(Args), "Not enough args!");
+
   auto f = (Ret(*)(Args ...)) pStaticFunc->f;
 
-  return Variant(callFuncHack(value, f, typename internal::GenSequence<sizeof...(Args)>::type()));
+  return Variant(callFuncHack(args, f, typename internal::GenSequence<sizeof...(Args)>::type()));
 }
 
 template<typename... Args>
@@ -146,14 +155,17 @@ struct CStaticFunc::Partial < void, Args... >
     f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
   }
 
-  inline static Variant shimFunc(const StaticFunc * const _pStaticFunc, Slice<Variant> value)
+  inline static Variant shimFunc(const StaticFunc * const _pStaticFunc, Slice<Variant> args)
   {
     CStaticFunc *pStaticFunc = (CStaticFunc*)_pStaticFunc;
 
+    // TODO: should this be an assert? perhaps soft-error and return a void variant?
+    EPASSERT(args.length >= sizeof...(Args), "Not enough args!");
+
     auto f = (void(*)(Args ...)) pStaticFunc->f;
 
-    callFuncHack(value, f, typename internal::GenSequence<sizeof...(Args)>::type());
-    return Variant();
+    callFuncHack(args, f, typename internal::GenSequence<sizeof...(Args)>::type());
+    return Variant(Variant::Type::Void);
   }
 };
 
