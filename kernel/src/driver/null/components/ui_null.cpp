@@ -9,6 +9,11 @@
 namespace ep
 {
 
+Variant UIComponent::GetUIHandle() const
+{
+  return Variant();
+}
+
 epResult UIComponent::CreateInternal(InitParams epUnusedParam(initParams))
 {
   return epR_Success;

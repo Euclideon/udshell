@@ -14,6 +14,8 @@ class UIComponent : public Component
 public:
   EP_COMPONENT(UIComponent);
 
+  Variant GetUIHandle() const;
+
   void *GetInternalData() { return pInternal; }
   const void *GetInternalData() const { return pInternal; }
 
