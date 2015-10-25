@@ -11,6 +11,12 @@ void epVariant_Release(epVariant v)
   (epVariant&)t = v;
 }
 
+epVariant epVariant_CreateVoid()
+{
+  epVariant v;
+  new(&v) Variant(Variant::Type::Void);
+  return v;
+}
 epVariant epVariant_CreateNull()
 {
   epVariant v;
@@ -60,6 +66,10 @@ epVariantType epVariant_GetType(epVariant v)
   return (epVariantType)v.t;
 }
 
+int epVariant_IsVoid(epVariant v)
+{
+  return v.t == epVT_Void;
+}
 int epVariant_IsNull(epVariant v)
 {
   return v.t == epVT_Null || (v.t == epVT_String && v.length == 0) || (v.t == epVT_Component && v.p == NULL);
@@ -104,6 +114,8 @@ ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &v
 {
   switch (v.type())
   {
+    case Variant::Type::Void:
+      return epStringifyTemplate(buffer, format, String("void"), pArgs);
     case Variant::Type::Null:
       return epStringifyTemplate(buffer, format, nullptr, pArgs);
     case Variant::Type::Bool:
@@ -134,7 +146,7 @@ ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &v
 
 namespace ep {
 
-const Variant InitParams::varNull;
+const Variant InitParams::varNone;
 
 namespace internal {
 
@@ -151,6 +163,8 @@ const Variant::Type s_typeTranslation[] =
   Variant::Type::String,    // epVT_String
   Variant::Type::Array,     // epVT_Array
   Variant::Type::AssocArray,// epVT_AssocArray
+
+  Variant::Type::Void,      // epVT_Void
 
   // these get reinterpreted
   Variant::Type::String     // epVT_SmallString
@@ -263,6 +277,8 @@ SharedString Variant::stringify() const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      return "void";
     case Type::Null:
       return "nil";
     case Type::Bool:
@@ -285,6 +301,7 @@ ptrdiff_t Variant::compare(const Variant &v) const
 
   switch ((Type)t)
   {
+    case Type::Void:
     case Type::Null:
       return 0;
     case Type::Bool:
@@ -307,6 +324,8 @@ bool Variant::asBool() const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
     case Type::Null:
       return false;
     case Type::Bool:
@@ -334,6 +353,8 @@ int64_t Variant::asInt() const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
     case Type::Null:
       return 0;
     case Type::Bool:
@@ -358,6 +379,8 @@ double Variant::asFloat() const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
     case Type::Null:
       return 0.0;
     case Type::Bool:
@@ -380,7 +403,9 @@ double Variant::asFloat() const
 }
 const epEnumDesc* Variant::asEnum(size_t *pVal) const
 {
-  if ((Type)t == Type::Enum || (Type)t == Type::Bitfield)
+  if ((Type)t == Type::Void)
+    EPASSERT(false, "Variant is void");
+  else if ((Type)t == Type::Enum || (Type)t == Type::Bitfield)
   {
     *pVal = (ptrdiff_t)(length << 5) >> 5;
     return (const epEnumDesc*)p;
@@ -391,6 +416,8 @@ ComponentRef Variant::asComponent() const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
     case Type::Null:
       return ComponentRef();
     case Type::Component:
@@ -404,6 +431,8 @@ Variant::VarDelegate Variant::asDelegate() const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
     case Type::Null:
       return VarDelegate();
     case Type::Delegate:
@@ -419,6 +448,8 @@ String Variant::asString() const
   // ...but we don't have any output buffer
   switch ((Type)t)
   {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
     case Type::Null:
       return String();
     case Type::String:
@@ -439,6 +470,8 @@ Slice<Variant> Variant::asArray() const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
     case Type::Null:
       return Slice<Variant>();
     case Type::Array:
@@ -452,6 +485,8 @@ Slice<KeyValuePair> Variant::asAssocArray() const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
     case Type::Null:
       return Slice<KeyValuePair>();
     case Type::AssocArray:
@@ -465,6 +500,8 @@ Slice<KeyValuePair> Variant::asAssocArraySeries() const
 {
   switch ((Type)t)
   {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
     case Type::Null:
       return Slice<KeyValuePair>();
     case Type::AssocArray:
@@ -527,20 +564,34 @@ Variant Variant::operator[](String key) const
 Variant* Variant::allocArray(size_t len)
 {
   this->~Variant();
+  ((Variant*&)p) = epAllocType(Variant, len, epAF_None);
+  if (!p)
+  {
+    t = (size_t)Type::Void;
+    ownsContent = false;
+    length = 0;
+    return nullptr;
+  }
   t = (size_t)Type::Array;
   length = len;
   ownsContent = true;
-  ((Variant*&)p) = epAllocType(Variant, len, epAF_None);
   return ((Variant*)p);
 }
 
 KeyValuePair* Variant::allocAssocArray(size_t len)
 {
   this->~Variant();
+  ((KeyValuePair*&)p) = epAllocType(KeyValuePair, len, epAF_None);
+  if (!p)
+  {
+    t = (size_t)Type::Void;
+    ownsContent = false;
+    length = 0;
+    return nullptr;
+  }
   t = (size_t)Type::AssocArray;
   length = len;
   ownsContent = true;
-  ((KeyValuePair*&)p) = epAllocType(KeyValuePair, len, epAF_None);
   return ((KeyValuePair*)p);
 }
 

@@ -24,6 +24,7 @@ enum epVariantType
   epVT_String,
   epVT_Array,
   epVT_AssocArray,
+  epVT_Void,
   epVT_SmallString
 };
 
@@ -51,6 +52,7 @@ struct epKeyValuePair
 
 void epVariant_Release(epVariant v);
 
+epVariant epVariant_CreateVoid();
 epVariant epVariant_CreateNull();
 epVariant epVariant_CreateBool(char b);
 epVariant epVariant_CreateInt(int64_t i);
@@ -62,6 +64,7 @@ epVariant epVariant_CreateString(epString string);
 
 epVariantType epVariant_GetType(epVariant v);
 
+int          epVariant_IsVoid(epVariant v);
 int          epVariant_IsNull(epVariant v);
 char         epVariant_AsBool(epVariant v);
 int64_t      epVariant_AsInt(epVariant v);

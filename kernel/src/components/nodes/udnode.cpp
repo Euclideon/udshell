@@ -218,21 +218,18 @@ BoundingVolume UDNode::GetBoundingVolume() const
 
 Variant epToVariant(const BoundingVolume &volume)
 {
-  KeyValuePair *pPairs = epAllocType(KeyValuePair, 6, epAF_None);
-  if (pPairs)
+  Variant r;
+  KeyValuePair *pKVP = r.allocAssocArray(6);
+  if (pKVP)
   {
-    Slice<KeyValuePair> slice(pPairs, 6);
-
-    new (&slice[0]) KeyValuePair("minx", volume.min.x);
-    new (&slice[1]) KeyValuePair("miny", volume.min.y);
-    new (&slice[2]) KeyValuePair("minz", volume.min.z);
-    new (&slice[3]) KeyValuePair("maxx", volume.max.x);
-    new (&slice[4]) KeyValuePair("maxy", volume.max.y);
-    new (&slice[5]) KeyValuePair("maxz", volume.max.z);
-    return Variant(slice, true);
+    new (&pKVP[0]) KeyValuePair("minx", volume.min.x);
+    new (&pKVP[1]) KeyValuePair("miny", volume.min.y);
+    new (&pKVP[2]) KeyValuePair("minz", volume.min.z);
+    new (&pKVP[3]) KeyValuePair("maxx", volume.max.x);
+    new (&pKVP[4]) KeyValuePair("maxy", volume.max.y);
+    new (&pKVP[5]) KeyValuePair("maxz", volume.max.z);
   }
-
-  return Variant();
+  return r;
 }
 
 void epFromVariant(const Variant &variant, BoundingVolume *pVolume)
@@ -247,20 +244,16 @@ void epFromVariant(const Variant &variant, BoundingVolume *pVolume)
 
 Variant epToVariant(const udRenderClipArea& area)
 {
-  KeyValuePair *pPairs = epAllocType(KeyValuePair, 4, epAF_None);
-  if (pPairs)
+  Variant r;
+  KeyValuePair *pKVP = r.allocAssocArray(4);
+  if (pKVP)
   {
-    Slice<KeyValuePair> slice(pPairs, 4);
-
-    new (&slice[0]) KeyValuePair("minx", area.minX);
-    new (&slice[1]) KeyValuePair("miny", area.minY);
-    new (&slice[2]) KeyValuePair("maxx", area.maxX);
-    new (&slice[3]) KeyValuePair("maxy", area.maxX);
-
-    return Variant(slice, true);
+    new (&pKVP[0]) KeyValuePair("minx", area.minX);
+    new (&pKVP[1]) KeyValuePair("miny", area.minY);
+    new (&pKVP[2]) KeyValuePair("maxx", area.maxX);
+    new (&pKVP[3]) KeyValuePair("maxy", area.maxX);
   }
-
-  return Variant();
+  return r;
 }
 
 void epFromVariant(const Variant &variant, udRenderClipArea *pArea)

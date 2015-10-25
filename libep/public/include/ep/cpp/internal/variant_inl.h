@@ -18,7 +18,7 @@ template<> struct StringifyProxy<Variant>
 // constructors...
 inline Variant::Variant()
 {
-  t = (size_t)Type::Null;
+  t = (size_t)Type::Void;
   ownsContent = 0;
   length = 0;
 }
@@ -52,6 +52,19 @@ inline Variant::Variant(const epVariant &val)
   : Variant((Variant&)val)
 {}
 
+inline Variant::Variant(Type _t)
+{
+  EPASSERT(_t == Type::Void, "Only void type assignment supported!");
+  t = (size_t)_t;
+  ownsContent = 0;
+  length = 0;
+}
+inline Variant::Variant(nullptr_t)
+{
+  t = (size_t)Type::Null;
+  ownsContent = 0;
+  length = 0;
+}
 inline Variant::Variant(bool _b)
 {
   t = (size_t)Type::Bool;
@@ -206,7 +219,6 @@ template<typename T>
 struct Variant_Construct<const T *>             { epforceinline static Variant construct(const T *v) { return Variant((T*)v); } };
 
 // specialisations for all the basic types
-template<> struct Variant_Construct <nullptr_t> { epforceinline static Variant construct(nullptr_t)       { return Variant(); } };
 template<> struct Variant_Construct <float>     { epforceinline static Variant construct(float f)         { return Variant((double)f); } };
 template<> struct Variant_Construct <int8_t>    { epforceinline static Variant construct(int8_t i)        { return Variant((int64_t)i); } };
 template<> struct Variant_Construct <uint8_t>   { epforceinline static Variant construct(uint8_t i)       { return Variant((int64_t)(uint64_t)i); } };
@@ -344,7 +356,7 @@ protected:
   {
     // we need a call shim which can give an integer sequence as S... (Bjarne!!!)
     callFuncHack(args, Delegate<void(Args...)>(target), typename GenSequence<sizeof...(Args)>::type());
-    return Variant();
+    return Variant(Variant::Type::Void);
   }
 
   void from(Args... args) const
@@ -433,8 +445,11 @@ inline Variant epToVariant(const Slice<T> arr)
 {
   Variant r;
   Variant *a = r.allocArray(arr.length);
-  for (size_t i = 0; i<arr.length; ++i)
-    new(&a[i]) Variant(arr[i]);
+  if (a)
+  {
+    for (size_t i = 0; i<arr.length; ++i)
+      new(&a[i]) Variant(arr[i]);
+  }
   return r;
 }
 
@@ -453,8 +468,11 @@ inline Variant epToVariant(const udVector2<F> &v)
 {
   Variant r;
   Variant *a = r.allocArray(2);
-  new(&a[0]) Variant(v.x);
-  new(&a[1]) Variant(v.y);
+  if (a)
+  {
+    new(&a[0]) Variant(v.x);
+    new(&a[1]) Variant(v.y);
+  }
   return r;
 }
 template<typename F>
@@ -462,9 +480,12 @@ inline Variant epToVariant(const udVector3<F> &v)
 {
   Variant r;
   Variant *a = r.allocArray(3);
-  new(&a[0]) Variant(v.x);
-  new(&a[1]) Variant(v.y);
-  new(&a[2]) Variant(v.z);
+  if (a)
+  {
+    new(&a[0]) Variant(v.x);
+    new(&a[1]) Variant(v.y);
+    new(&a[2]) Variant(v.z);
+  }
   return r;
 }
 template<typename F>
@@ -472,10 +493,13 @@ inline Variant epToVariant(const udVector4<F> &v)
 {
   Variant r;
   Variant *a = r.allocArray(4);
-  new(&a[0]) Variant(v.x);
-  new(&a[1]) Variant(v.y);
-  new(&a[2]) Variant(v.z);
-  new(&a[3]) Variant(v.w);
+  if (a)
+  {
+    new(&a[0]) Variant(v.x);
+    new(&a[1]) Variant(v.y);
+    new(&a[2]) Variant(v.z);
+    new(&a[3]) Variant(v.w);
+  }
   return r;
 }
 template<typename F>
@@ -483,8 +507,11 @@ inline Variant epToVariant(const udMatrix4x4<F> &m)
 {
   Variant r;
   Variant *a = r.allocArray(16);
-  for (size_t i = 0; i<16; ++i)
-    new(&a[i]) Variant(m.a[i]);
+  if (a)
+  {
+    for (size_t i = 0; i<16; ++i)
+      new(&a[i]) Variant(m.a[i]);
+  }
   return r;
 }
 
