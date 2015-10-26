@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
   // unit test
   epSlice_Test();
   epString_Test();
+  epSharedPtr_Test();
 
   // install our qt message handler
   qInstallMessageHandler(DbgMessageHandler);
