@@ -6,6 +6,11 @@
 
 namespace ep {
 
+namespace internal {
+template<typename T> const T& epMax(const T &a, const T &b) { return a > b ? a : b; }
+template<typename T> T& epMax(T &a, T &b) { return a > b ? a : b; }
+}
+
 template<typename T>
 struct AVLCompare
 {
@@ -141,7 +146,7 @@ private:
     if (n->left)
     {
       if (n->right)
-        return udMax(n->left->height, n->right->height);
+        return internal::epMax(n->left->height, n->right->height);
       else
         return n->left->height;
     }
@@ -346,7 +351,7 @@ private:
       return root;
 
     // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
-    root->height = udMax(height(root->left), height(root->right)) + 1;
+    root->height = internal::epMax(height(root->left), height(root->right)) + 1;
 
     // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
     //  this Node became unbalanced)
