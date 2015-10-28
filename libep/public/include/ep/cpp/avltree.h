@@ -46,7 +46,8 @@ public:
 
   ~AVLTree()
   {
-    // TODO: ** CLEAN UP HERE **
+    Destroy(root);
+    root = nullptr;
   }
 
   size_t Size() const { return size; }
@@ -197,6 +198,18 @@ private:
     if (c > 0)
       return find(n->right, key);
     return n;
+  }
+
+  void Destroy(Node *n)
+  {
+    if (!n)
+      return;
+
+    Destroy(n->left);
+    Destroy(n->right);
+
+    n->~Node();
+    epFree(n);
   }
 
   Node* insert(Node *n, Node *newnode)
