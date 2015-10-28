@@ -33,7 +33,11 @@ namespace internal {
 }
 
 
-// **HAX** this crap allows us to delete a RefCounted!
+// **HAX** this allows us to delete a RefCounted!
+// Some classes that derive off RefCounted have private/protected destructors. For ~UniquePtr() to be able to
+// destroy a reference to one of these it has to cast to a RefCount* first to be able to
+// call delete. Thee two specialisations of Destroy facilitate that.
+
 namespace internal {
 
   template<typename T, bool isref>
@@ -199,6 +203,8 @@ public:
   epforceinline T& operator*() const { return *(T*)spProxy->pInstance; }
   epforceinline T* operator->() const { return (T*)spProxy->pInstance; }
   epforceinline T* ptr() const { return spProxy ? (T*)spProxy->pInstance : (T*)nullptr; }
+
+  static_assert(std::is_base_of<RefCounted, T>::value, "T must inherit from RefCounted");
 
 private:
   SharedPtr<internal::WeakProxy<T>> spProxy;
@@ -370,7 +376,10 @@ public:
   template<typename T, bool isrc>
   friend struct internal::Destroy;
 };
-inline RefCounted::~RefCounted() {}
+inline RefCounted::~RefCounted()
+{
+  internal::NullifyWeakPtr(this);
+}
 
 
 namespace internal {
@@ -379,6 +388,11 @@ template<typename T>
 class WeakProxy : public RefCounted
 {
 public:
+  ~WeakProxy()
+  {
+    if (pInstance)
+      internal::NullifyWeakPtr(pInstance);
+  }
   T* pInstance;
 };
 
@@ -451,7 +465,6 @@ inline void SharedPtr<T>::release()
   {
     if (--pInstance->rc == 0)
     {
-      internal::NullifyWeakPtr(pInstance);
       delete pInstance;
     }
     pInstance = nullptr;
