@@ -165,7 +165,7 @@ inline Variant::Variant(SharedString &&s)
   length = s.length;
   this->s = s.ptr;
   if (s.ptr)
-    s.rc = nullptr;
+    s.ptr = nullptr;
 }
 
 template<size_t Len>
@@ -188,7 +188,7 @@ inline Variant::Variant(Array<Variant, Len> &&a)
   else
     new(this) Variant((Slice<Variant>)a);
 }
-inline Variant::Variant(const SharedSlice<Variant> &a)
+inline Variant::Variant(const SharedArray<Variant> &a)
 {
   t = (size_t)Type::Array;
   ownsContent = a.ptr ? 1 : 0;
@@ -197,14 +197,14 @@ inline Variant::Variant(const SharedSlice<Variant> &a)
   if (a.ptr)
     ++internal::GetSliceHeader(a.ptr)->refCount;
 }
-inline Variant::Variant(SharedSlice<Variant> &&a)
+inline Variant::Variant(SharedArray<Variant> &&a)
 {
   t = (size_t)Type::Array;
   ownsContent = a.ptr ? 1 : 0;
   length = a.length;
   this->p = a.ptr;
   if (a.ptr)
-    a.rc = nullptr;
+    a.ptr = nullptr;
 }
 
 template<size_t Len>
@@ -227,7 +227,7 @@ inline Variant::Variant(Array<KeyValuePair, Len> &&aa)
   else
     new(this) Variant((Slice<KeyValuePair>)aa);
 }
-inline Variant::Variant(const SharedSlice<KeyValuePair> &aa)
+inline Variant::Variant(const SharedArray<KeyValuePair> &aa)
 {
   t = (size_t)Type::AssocArray;
   ownsContent = aa.ptr ? 1 : 0;
@@ -236,14 +236,14 @@ inline Variant::Variant(const SharedSlice<KeyValuePair> &aa)
   if (aa.ptr)
     ++internal::GetSliceHeader(aa.ptr)->refCount;
 }
-inline Variant::Variant(SharedSlice<KeyValuePair> &&aa)
+inline Variant::Variant(SharedArray<KeyValuePair> &&aa)
 {
   t = (size_t)Type::AssocArray;
   ownsContent = aa.ptr ? 1 : 0;
   length = aa.length;
   this->p = aa.ptr;
   if (aa.ptr)
-    aa.rc = nullptr;
+    aa.ptr = nullptr;
 }
 
 inline Variant& Variant::operator=(Variant &&rval)
@@ -315,9 +315,9 @@ template<>           struct Variant_Construct<Variant>                   { epfor
 template<size_t Len> struct Variant_Construct<MutableString<Len>>        { epforceinline static Variant construct(const MutableString<Len> &v) { return Variant(v); } };
 template<>           struct Variant_Construct<SharedString>              { epforceinline static Variant construct(const SharedString &v) { return Variant(v); } };
 template<size_t Len> struct Variant_Construct<Array<Variant, Len>>       { epforceinline static Variant construct(const Array<Variant, Len> &v) { return Variant(v); } };
-template<>           struct Variant_Construct<SharedSlice<Variant>>      { epforceinline static Variant construct(const SharedSlice<Variant> &v) { return Variant(v); } };
+template<>           struct Variant_Construct<SharedArray<Variant>>      { epforceinline static Variant construct(const SharedArray<Variant> &v) { return Variant(v); } };
 template<size_t Len> struct Variant_Construct<Array<KeyValuePair, Len>>  { epforceinline static Variant construct(const Array<KeyValuePair, Len> &v) { return Variant(v); } };
-template<>           struct Variant_Construct<SharedSlice<KeyValuePair>> { epforceinline static Variant construct(const SharedSlice<KeyValuePair> &v) { return Variant(v); } };
+template<>           struct Variant_Construct<SharedArray<KeyValuePair>> { epforceinline static Variant construct(const SharedArray<KeyValuePair> &v) { return Variant(v); } };
 
 // ** suite of specialisations required to wrangle every conceivable combination of 'const'
 template<typename T>

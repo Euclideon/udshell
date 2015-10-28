@@ -438,7 +438,6 @@ inline Array<T, Count>::Array(Array<T, Count> &&rval)
     // we can copy large buffers efficiently!
     this->ptr = rval.ptr;
     rval.ptr = nullptr;
-    rval.length = 0;
   }
   else
   {
@@ -480,6 +479,8 @@ inline Array<T, Count>::Array(Slice<U> slice)
 template <typename T, size_t Count>
 inline Array<T, Count>::~Array()
 {
+  if (!this->ptr)
+    return;
   for (size_t i = 0; i < this->length; ++i)
     this->ptr[i].~T();
   if (hasAllocation())
@@ -494,7 +495,7 @@ inline void Array<T, Count>::reserve(size_t count)
     this->ptr = buffer.ptr();
   else if (count > Count)
   {
-    bool needsExtend = hasAlloc && getHeader()->allocatedCount < count;
+    bool needsExtend = hasAlloc && internal::GetSliceHeader(ptr)->allocatedCount < count;
     if (!hasAlloc || needsExtend)
     {
       T *pNew = internal::SliceAlloc<T>(count);
@@ -548,7 +549,7 @@ template <typename T, size_t Count>
 inline Slice<T> Array<T, Count>::getBuffer() const
 {
   if (hasAllocation())
-    return Slice<T>(this->ptr, getHeader()->allocatedCount);
+    return Slice<T>(this->ptr, internal::GetSliceHeader(ptr)->allocatedCount);
   return Slice<T>(buffer.ptr(), Count);
 }
 
@@ -652,91 +653,82 @@ inline size_t Array<T, Count>::numToAlloc(size_t i)
 }
 
 
-// SharedSlice
+// SharedArray
 template <typename T>
-inline SharedSlice<T>::SharedSlice()
-  : rc(nullptr)
+inline SharedArray<T>::SharedArray()
 {}
 
 template<typename T>
-inline SharedSlice<T>::SharedSlice(nullptr_t)
-  : rc(nullptr)
+inline SharedArray<T>::SharedArray(nullptr_t)
 {}
 
 template<typename T>
-inline SharedSlice<T>::SharedSlice(std::initializer_list<typename SharedSlice<T>::ET> list)
-  : Slice<T>(alloc(list.begin(), list.size()))
-  , rc(nullptr)
-{
-  init(list.begin(), list.size());
-
-  // TODO: we don't need to copy static contents into an allocated buffer!
-  //       we might want to support RC slices to static data, where the RC is ignored
-}
+inline SharedArray<T>::SharedArray(std::initializer_list<typename SharedArray<T>::ET> list)
+  : SharedArray<T>(list.begin(), list.size())
+{}
 
 template <typename T>
-inline SharedSlice<T>::SharedSlice(const SharedSlice<T> &rcslice)
+inline SharedArray<T>::SharedArray(const SharedArray<T> &rcslice)
   : Slice<T>(rcslice)
-  , rc(rcslice.rc)
 {
-  if (rc)
-    ++rc->refCount;
+  if (ptr)
+    ++internal::GetSliceHeader(ptr)->refCount;
 }
 template <typename T>
-inline SharedSlice<T>::SharedSlice(SharedSlice<T> &&rval)
+inline SharedArray<T>::SharedArray(SharedArray<T> &&rval)
   : Slice<T>(rval)
-  , rc(rval.rc)
 {
-  rval.rc = nullptr;
+  rval.ptr = nullptr;
 }
 
 template <typename T>
 template <typename U, size_t Len>
-inline SharedSlice<T>::SharedSlice(const Array<U, Len> &arr)
-  : SharedSlice<T>(Slice<T>(arr))
+inline SharedArray<T>::SharedArray(const Array<U, Len> &arr)
+  : SharedArray<T>(Slice<T>(arr))
 {}
 template <typename T>
 template <typename U, size_t Len>
-inline SharedSlice<T>::SharedSlice(Array<U, Len> &&rval)
+inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
 {
   if (rval.hasAllocation())
   {
     // if the rvalue has an allocation, we can just claim it
     ptr = rval.ptr;
     length = rval.length;
-    rc = internal::GetSliceHeader(ptr);
-    rc->refcount = 1;
+    internal::GetSliceHeader(ptr)->refCount = 1;
     rval.ptr = nullptr;
   }
   else
-    new(this) SharedSlice<T>(Slice<T>(rval));
+    new(this) SharedArray<T>(Slice<T>(rval));
 }
 
 template <typename T>
 template <typename U>
-inline SharedSlice<T>::SharedSlice(U *ptr, size_t length)
-  : Slice<T>(alloc(ptr, length))
-  , rc(nullptr)
+inline SharedArray<T>::SharedArray(U *ptr, size_t length)
+  : Slice<T>(length ? internal::SliceAlloc<T>(length, 1) : nullptr, length)
 {
-  init(ptr, length);
+  // copy the data
+//  if (std::is_pod<T>::value) // TODO: this is only valid if T and U are the same!
+//    memcpy((void*)this->ptr, ptr, sizeof(T)*length);
+//  else
+  {
+    for (size_t i = 0; i < length; ++i)
+      new((void*)&this->ptr[i]) T(ptr[i]);
+  }
 }
 
 template <typename T>
 template <typename U>
-inline SharedSlice<T>::SharedSlice(Slice<U> slice)
-  : Slice<T>(alloc(slice.ptr, slice.length))
-  , rc(nullptr)
-{
-  init(slice.ptr, slice.length);
-}
+inline SharedArray<T>::SharedArray(Slice<U> slice)
+  : SharedArray<T>(slice.ptr, slice.length)
+{}
 
 template <typename T>
-inline SharedSlice<T>::~SharedSlice()
+inline SharedArray<T>::~SharedArray()
 {
-  if (!rc)
+  if (!this->ptr)
     return;
-//  internal::SliceHeader *pH = internal::GetSliceHeader(this->ptr);
-  internal::SliceHeader *pH = rc;
+  internal::SliceHeader *pH = internal::GetSliceHeader(this->ptr);
   if (pH->refCount == 1)
     destroy();
   else
@@ -744,105 +736,42 @@ inline SharedSlice<T>::~SharedSlice()
 }
 
 template <typename T>
-inline void SharedSlice<T>::destroy()
+inline void SharedArray<T>::destroy()
 {
   for (size_t i = 0; i < this->length; ++i)
     this->ptr[i].~T();
-//  internal::SliceFree(this->ptr);
-  epFree(rc); // TODO: HAX, remove this when we change to SharedArray<>
+  internal::SliceFree(this->ptr);
 }
 
 template <typename T>
-inline SharedSlice<T>& SharedSlice<T>::operator =(const SharedSlice<T> &rh)
+inline SharedArray<T>& SharedArray<T>::operator =(const SharedArray<T> &rh)
 {
-  if (rc != rh.rc)
+  if (ptr != rh.ptr)
   {
-    this->~SharedSlice();
-    rc = rh.rc;
-    ++rc->refCount;
+    this->~SharedArray();
+    new(this) SharedArray<T>(rh);
   }
-  this->ptr = rh.ptr; this->length = rh.length;
   return *this;
 }
 
 template <typename T>
-inline SharedSlice<T>& SharedSlice<T>::operator =(SharedSlice<T> &&rval)
+inline SharedArray<T>& SharedArray<T>::operator =(SharedArray<T> &&rval)
 {
   if (this != &rval)
   {
-    this->~SharedSlice();
-    new(this) SharedSlice<T>(std::move(rval));
+    this->~SharedArray();
+    new(this) SharedArray<T>(std::move(rval));
   }
   return *this;
 }
 
 template <typename T>
 template <typename U>
-inline SharedSlice<T>& SharedSlice<T>::operator =(Slice<U> rh)
+inline SharedArray<T>& SharedArray<T>::operator =(Slice<U> rh)
 {
-  *this = SharedSlice(rh);
+  if (ptr != rh.ptr)
+    *this = SharedArray(rh);
   return *this;
-}
-
-template <typename T>
-inline SharedSlice<T> SharedSlice<T>::alloc(size_t elements)
-{
-  return SharedSlice<T>((typename SharedSlice<T>::ET*)epAlloc(sizeof(typename SharedSlice<T>::ET) * elements), elements);
-}
-
-template <typename T>
-inline SharedSlice<T> SharedSlice<T>::slice(size_t first, size_t last) const
-{
-  EPASSERT(last <= this->length && first <= last, "Index out of range!");
-  return SharedSlice(this->ptr + first, last - first, rc);
-}
-
-template <typename T>
-inline SharedSlice<T>::SharedSlice(T *ptr, size_t length, internal::SliceHeader *rc)
-  : Slice<T>(ptr, length)
-  , rc(rc)
-{
-  if (rc)
-    ++rc->refCount;
-}
-
-template <typename T>
-inline size_t SharedSlice<T>::numToAlloc(size_t i)
-{
-  // TODO: i'm sure we can imagine a better heuristic...
-  return i > 16 ? i : 16;
-}
-
-template <typename T>
-template <typename U>
-inline Slice<T> SharedSlice<T>::alloc(U *ptr, size_t length)
-{
-  if (!ptr || !length)
-    return Slice<T>();
-  size_t alloc = numToAlloc(length);
-  return Slice<T>((T*)internal::SliceAlloc<typename SharedSlice<T>::ET>(alloc), alloc);
-}
-
-template <typename T>
-template <typename U>
-inline void SharedSlice<T>::init(U *ptr, size_t length)
-{
-  if (!ptr || !length)
-    return;
-
-  // init the RC
-  rc = internal::GetSliceHeader(this->ptr);
-  rc->refCount = 1;
-
-  // copy the data
-  this->length = length;
-//  if (std::is_pod<T>::value) // TODO: this is only valid if T and U are the same!
-//    memcpy((void*)this->ptr, ptr, sizeof(T)*length);
-//  else
-  {
-    for (size_t i = 0; i<length; ++i)
-      new((void*)&(this->ptr[i])) T(ptr[i]);
-  }
 }
 
 
@@ -884,12 +813,12 @@ inline Array<T, Count>& Array<T, Count>::concat(const Things&... things)
 
 template<typename T>
 template<typename... Things>
-inline SharedSlice<T> SharedSlice<T>::concat(const Things&... things)
+inline SharedArray<T> SharedArray<T>::concat(const Things&... things)
 {
   size_t len = count(0, things...);
   T *ptr = internal::SliceAlloc<T>(len);
   append<T>(ptr, things...);
-  return SharedSlice(ptr, len, internal::GetSliceHeader(ptr));
+  return SharedArray(ptr, len, internal::GetSliceHeader(ptr));
 }
 
 } // namespace ep

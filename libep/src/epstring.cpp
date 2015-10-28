@@ -272,46 +272,43 @@ SharedString SharedString::sprintf(const char *pFormat, ...)
 #else
   size_t len = vsprintf(nullptr, pFormat, args) + 1;
 #endif
-  len = numToAlloc(len);
 
-  char *ptr = internal::SliceAlloc<char>(len);
+  MutableString<0> r; r.reserve(len);
 
 #if defined(EP_NACL)
-  size_t length = vsprintf((char*)ptr, pFormat, args);
+  r.length = vsprintf(r.ptr, pFormat, args);
 #elif defined(EP_COMPILER_VISUALC)
-  size_t length = vsnprintf_s((char*)ptr, len, len, pFormat, args);
+  r.length = vsnprintf_s(r.ptr, len, len, pFormat, args);
 #else
-  size_t length = vsnprintf((char*)ptr, len, pFormat, args);
+  r.length = vsnprintf(r.ptr, len, pFormat, args);
 #endif
 
   va_end(args);
 
-  return SharedString(ptr, length, internal::GetSliceHeader(ptr));
+  return std::move(r);
 }
 
 SharedString SharedString::concatInternal(Slice<epVarArg> args)
 {
   size_t len = internal::getLength(args);
 
-  // allocate a new SharedString
-  char *ptr = internal::SliceAlloc<char>(len+1);
+  MutableString<0> r; r.reserve(len+1);
 
-  internal::concatenate(Slice<char>(ptr, len), args);
-  ptr[len] = 0;
+  r.length = internal::concatenate(r.getBuffer(), args).length;
+  r.ptr[r.length] = 0;
 
-  return SharedString(ptr, len, internal::GetSliceHeader(ptr));
+  return std::move(r);
 }
 SharedString SharedString::formatInternal(String format, Slice<epVarArg> args)
 {
   size_t len = internal::format(format, nullptr, args).length;
 
-  // allocate a new SharedString
-  char *ptr = internal::SliceAlloc<char>(len+1);
+  MutableString<0> r; r.reserve(len+1);
 
-  internal::format(format, Slice<char>(ptr, len), args);
-  ptr[len] = 0;
+  r.length = internal::format(format, r.getBuffer(), args).length;
+  r.ptr[r.length] = 0;
 
-  return SharedString(ptr, len, internal::GetSliceHeader(ptr));
+  return std::move(r);
 }
 
 template<typename C>
@@ -656,9 +653,9 @@ epResult epSlice_Test()
   Slice<int> s_slice = s_i.slice(1, 3); // slices of Array are not owned; they die when the parent allocation dies
 
 
-  // SharedSlice<> tests
-  SharedSlice<int> rc_i1(i1);       // rc_i1 is an allocated, ref-counted copy of the slice i1
-  SharedSlice<const int> rc_ci1(s1);// rc_ci1 initialised from different (compatible) types (ie, short -> int, float -> double)
+  // SharedArray<> tests
+  SharedArray<int> rc_i1(i1);       // rc_i1 is an allocated, ref-counted copy of the slice i1
+  SharedArray<const int> rc_ci1(s1);// rc_ci1 initialised from different (compatible) types (ie, short -> int, float -> double)
 
   // TODO: assign mutable RCSlice to const RCSlice without copy, should only bump RC
 
@@ -668,9 +665,9 @@ epResult epSlice_Test()
 
   rc_i1 = rc_slice;               // assignment between RC slices of the same array elide rc fiddling; only updates the offset/length
 
-  i1 == rc_i2;                    // comparison of Slice and SharedSlice; compares ptr && length as usual
+  i1 == rc_i2;                    // comparison of Slice and SharedArray; compares ptr && length as usual
 
-  rc_i1.eq(i1);                   // element comparison between Slice and SharedSlice
+  rc_i1.eq(i1);                   // element comparison between Slice and SharedArray
 
   for (auto i : i1)
   {
@@ -703,7 +700,7 @@ epResult epString_Test()
   s1.eqIC(s2);                   // case insensitive; stricmp() == 0
   s1.eq("hello");               // compare with c-string
 
-  SharedSlice<char16_t> wcs(s1);   // init wchar string from c-string! yay unicode! (except we probably also want to decode utf-8...)
+  SharedArray<char16_t> wcs(s1);   // init wchar string from c-string! yay unicode! (except we probably also want to decode utf-8...)
 
   wcs.eq(s1);                   // compare wide-char and ascii strings
 

@@ -102,19 +102,18 @@ struct MutableString : public Array<char, Size>
 {
   // constructors
   MutableString();
+  MutableString(const MutableString<Size> &rh);
   MutableString(MutableString<Size> &&rval);
-  MutableString(Array<char, Size> &&rval);
-  template <typename U>
-  MutableString(U *ptr, size_t length);
-  template <typename U>
-  MutableString(Slice<U> slice);
+  template <size_t Len> MutableString(Array<char, Len> &&rval);
+  template <typename U> MutableString(U *ptr, size_t length);
+  template <typename U> MutableString(Slice<U> slice);
   MutableString(const char *pString);
 
   // assignment
+  MutableString& operator =(const MutableString<Size> &rh);
   MutableString& operator =(MutableString<Size> &&rval);
-  MutableString& operator =(Array<char, Size> &&rval);
-  template <typename U>
-  MutableString& operator =(Slice<U> rh);
+  template <size_t Len> MutableString& operator =(Array<char, Len> &&rval);
+  template <typename U> MutableString& operator =(Slice<U> rh);
   MutableString& operator =(const char *pString);
 
   // contents
@@ -181,18 +180,18 @@ typedef MutableString<256 - sizeof(Slice<char>)> MutableString256;
 // reference-counted allocated string, used to retain ownership of arbitrary length strings
 // reference counting allows allocations to be shared between multiple owners
 // useful in situations where std::string would usually be found, but without the endless allocation and copying or linkage problems
-struct SharedString : public SharedSlice<const char>
+struct SharedString : public SharedArray<const char>
 {
   // constructors
   SharedString();
-  SharedString(SharedString &&rval);
   SharedString(const SharedString &val);
-  SharedString(SharedSlice<const char> &&rval);
-  SharedString(const SharedSlice<const char> &rcstr);
-  template <typename U>
-  SharedString(U *ptr, size_t length);
-  template <typename U>
-  SharedString(Slice<U> slice);
+  SharedString(SharedString &&rval);
+  SharedString(const SharedArray<const char> &rcstr);
+  SharedString(SharedArray<const char> &&rval);
+  template <typename U, size_t Len> SharedString(const Array<U, Len> &arr);
+  template <typename U, size_t Len> SharedString(Array<U, Len> &&rval);
+  template <typename U> SharedString(U *ptr, size_t length);
+  template <typename U> SharedString(Slice<U> slice);
   SharedString(const char *pString);
 
   // construction
@@ -201,16 +200,15 @@ struct SharedString : public SharedSlice<const char>
   static SharedString sprintf(const char *pFormat, ...) epprintf_func(1, 2);
 
   // assignment
-  SharedString& operator =(const SharedSlice<const char> &rh);
-  SharedString& operator =(const SharedString &rval);
+  SharedString& operator =(const SharedString &rh);
   SharedString& operator =(SharedString &&rval);
-  SharedString& operator =(SharedSlice<const char> &&rval);
-  template <typename U>
-  SharedString& operator =(Slice<U> rh);
+  SharedString& operator =(const SharedArray<const char> &rh);
+  SharedString& operator =(SharedArray<const char> &&rval);
+  template <typename U> SharedString& operator =(Slice<U> rh);
   SharedString& operator =(const char *pString);
 
   // contents
-  SharedString slice(ptrdiff_t first, ptrdiff_t last) const;
+  String slice(ptrdiff_t first, ptrdiff_t last) const                                 { return ((String*)this)->slice(first, last); }
 
   // comparison
   bool eq(String rh) const                                                            { return ((String*)this)->eq(rh); }
@@ -256,8 +254,6 @@ struct SharedString : public SharedSlice<const char>
   uint32_t hash(uint32_t hash = 0) const                                                { return ((String*)this)->hash(hash); }
 
 private:
-  SharedString(const char *ptr, size_t length, internal::SliceHeader *rc);
-
   static SharedString concatInternal(Slice<epVarArg> args);
   static SharedString formatInternal(String format, Slice<epVarArg> args);
 };

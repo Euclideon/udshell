@@ -50,11 +50,11 @@ public:
   T *ptr;
 
   // constructors
-  Slice<T>();
-  Slice<T>(nullptr_t);
-  Slice<T>(std::initializer_list<ET> list);
-  Slice<T>(T* ptr, size_t length);
-  template<typename U> Slice<T>(Slice<U> rh);
+  Slice();
+  Slice(nullptr_t);
+  Slice(std::initializer_list<ET> list);
+  Slice(T* ptr, size_t length);
+  template<typename U> Slice(Slice<U> rh);
 
   // assignment
   template<typename U> Slice<T>& operator =(Slice<U> rh);
@@ -127,14 +127,15 @@ template <typename T, size_t Count = 0>
 struct Array : public Slice<T>
 {
   // constructors
-  Array<T, Count>();
-  Array<T, Count>(nullptr_t);
-  Array<T, Count>(std::initializer_list<T> list);
-  Array<T, Count>(const Array<T, Count> &val);
-  Array<T, Count>(Array<T, Count> &&rval);
-  template <typename U> Array<T, Count>(U *ptr, size_t length);
-  template <typename U> Array<T, Count>(Slice<U> slice);
-  ~Array<T, Count>();
+  Array();
+  Array(nullptr_t);
+  Array(std::initializer_list<T> list);
+  Array(const Array<T, Count> &val);
+  Array(Array<T, Count> &&rval);
+  // TODO: Array copy/move constructors for const promotion?
+  template <typename U> Array(U *ptr, size_t length);
+  template <typename U> Array(Slice<U> slice);
+  ~Array();
 
   void reserve(size_t count);
   void alloc(size_t count);
@@ -167,6 +168,7 @@ struct Array : public Slice<T>
 
 protected:
   friend struct Variant;
+  template<typename U> friend struct SharedArray;
 
   template<size_t Len, bool = true>
   struct Buffer
@@ -184,50 +186,39 @@ protected:
 
   static size_t numToAlloc(size_t i);
   bool hasAllocation() const { return buffer.hasAllocation(this->ptr); }
-  internal::SliceHeader* getHeader() const { return ((internal::SliceHeader*)this->ptr) - 1; }
 };
 
 
-// SharedSlice is a reference counted slice, used to retain ownership of some memory, but will not duplicate when copies are made
+// SharedArray is a reference counted slice, used to retain ownership of some memory, but will not duplicate when copies are made
 // useful for long-living data that doesn't consume a fixed amount of their containing struct
 // also useful for sharing between systems, passing between threads, etc.
-// slices of SharedSlice's increment the RC, so that slices can outlive the original owner, but without performing additional allocations and copies
+// slices of SharedArray's increment the RC, so that slices can outlive the original owner, but without performing additional allocations and copies
 template <typename T>
-struct SharedSlice : public Slice<T>
+struct SharedArray : public Slice<T>
 {
-  internal::SliceHeader *rc;
-
   // constructors
-  SharedSlice<T>();
-  SharedSlice<T>(nullptr_t);
-  SharedSlice<T>(std::initializer_list<typename SharedSlice<T>::ET> list);
-  SharedSlice<T>(const SharedSlice<T> &rcslice);
-  SharedSlice<T>(SharedSlice<T> &&rval);
-  template <typename U, size_t Len> SharedSlice<T>(const Array<U, Len> &arr);
-  template <typename U, size_t Len> SharedSlice<T>(Array<U, Len> &&rval);
-  template <typename U> SharedSlice<T>(U *ptr, size_t length);
-  template <typename U> SharedSlice<T>(Slice<U> slice);
-  ~SharedSlice<T>();
+  SharedArray();
+  SharedArray(nullptr_t);
+  SharedArray(std::initializer_list<typename SharedArray<T>::ET> list);
+  SharedArray(const SharedArray<T> &rcslice);
+  SharedArray(SharedArray<T> &&rval);
+  template <typename U, size_t Len> SharedArray(const Array<U, Len> &arr);
+  template <typename U, size_t Len> SharedArray(Array<U, Len> &&rval);
+  template <typename U> SharedArray(U *ptr, size_t length);
+  template <typename U> SharedArray(Slice<U> slice);
+  ~SharedArray();
 
   size_t refcount() const { return rc ? rc->refCount : 0; }
 
   // static constructors (make proper constructors?)
-  template<typename... Things> static SharedSlice<T> concat(const Things&... things);
-  static SharedSlice<T> alloc(size_t elements);
+  template<typename... Things> static SharedArray<T> concat(const Things&... things);
 
   // assignment
-  SharedSlice<T>& operator =(const SharedSlice<T> &rh);
-  SharedSlice<T>& operator =(SharedSlice<T> &&rval);
-  template <typename U> SharedSlice<T>& operator =(Slice<U> rh);
-
-  // contents
-  SharedSlice<T> slice(size_t first, size_t last) const;
+  SharedArray<T>& operator =(const SharedArray<T> &rh);
+  SharedArray<T>& operator =(SharedArray<T> &&rval);
+  template <typename U> SharedArray<T>& operator =(Slice<U> rh);
 
 protected:
-  SharedSlice<T>(T *ptr, size_t length, internal::SliceHeader *rc);
-  static size_t numToAlloc(size_t i);
-  template <typename U> static Slice<T> alloc(U *ptr, size_t length);
-  template <typename U> void init(U *ptr, size_t length);
   void destroy();
 };
 

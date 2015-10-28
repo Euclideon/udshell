@@ -68,15 +68,15 @@ public:
   Variant(Slice<Variant> a, bool unsafeReference = false);
   template<size_t Len> Variant(const Array<Variant, Len> &a);
   template<size_t Len> Variant(Array<Variant, Len> &&a);
-  Variant(const SharedSlice<Variant> &a);
-  Variant(SharedSlice<Variant> &&a);
+  Variant(const SharedArray<Variant> &a);
+  Variant(SharedArray<Variant> &&a);
 
   // assic arrays
   Variant(Slice<KeyValuePair> aa, bool unsafeReference = false);
   template<size_t Len> Variant(const Array<KeyValuePair, Len> &aa);
   template<size_t Len> Variant(Array<KeyValuePair, Len> &&aa);
-  Variant(const SharedSlice<KeyValuePair> &aa);
-  Variant(SharedSlice<KeyValuePair> &&aa);
+  Variant(const SharedArray<KeyValuePair> &aa);
+  Variant(SharedArray<KeyValuePair> &&aa);
 
   template<typename T> Variant(T &&rval);
 
