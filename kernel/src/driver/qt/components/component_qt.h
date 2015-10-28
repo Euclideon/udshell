@@ -21,12 +21,12 @@ class QtEPComponent : public QObject
   Q_OBJECT
 
 public:
-  QtEPComponent() : QObject(nullptr), wpComponent(nullptr) {}
-  QtEPComponent(ep::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) { wpComponent = spComponent.ptr(); }
-  QtEPComponent(const QtEPComponent &val) : spComponent(ep::ComponentRef(val.wpComponent)), wpComponent(val.wpComponent) {}
+  QtEPComponent() : QObject(nullptr), pComponent(nullptr) {}
+  QtEPComponent(ep::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) { pComponent = spComponent.ptr(); }
+  QtEPComponent(const QtEPComponent &val) : spComponent(ep::ComponentRef(val.pComponent)), pComponent(val.pComponent) {}
   ~QtEPComponent() {}
 
-  ep::ComponentRef GetComponent() const { return ep::ComponentRef(wpComponent); }
+  ep::ComponentRef GetComponent() const { return ep::ComponentRef(pComponent); }
 
   // methods to inspect internals
   //..
@@ -57,10 +57,10 @@ signals:
 
 private:
   friend epResult internal::SetupFromQmlFile(InitParams initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal);
-  QtEPComponent(WeakPtr<Component> wpComp) : QObject(nullptr), wpComponent(wpComp) {}
+  QtEPComponent(Component* pComp) : QObject(nullptr), pComponent(pComp) {}
 
   ep::ComponentRef spComponent;
-  WeakPtr<Component> wpComponent; // used to avoid circular references
+  Component* pComponent; // used to avoid circular references
 };
 
 } // namespace qt

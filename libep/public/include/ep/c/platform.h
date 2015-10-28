@@ -252,6 +252,7 @@
 // silence warnings
 #if defined(EP_COMPILER_VISUALC)
 # pragma warning(disable:4127) // conditional expression is constant
+# pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 //# pragma warning(disable:4100) // disable 'unreferenced formal parameter'
 //# pragma warning(disable:4996) // disable depreciated warnings
 //# pragma warning(disable:4190) // disable C-linkage returning UDT (user data type)
