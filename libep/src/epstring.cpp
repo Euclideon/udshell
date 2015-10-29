@@ -274,22 +274,19 @@ SharedString SharedString::sprintf(const char *pFormat, ...)
 #endif
   len = numToAlloc(len);
 
-  SharedString r;
-  r.rc = (RC*)epAlloc(sizeof(RC) + len);
-  r.rc->refCount = 1;
-  r.rc->allocatedCount = len;
-  r.ptr = ((const char*)r.rc)+sizeof(RC);
+  char *ptr = internal::SliceAlloc<char>(len);
+
 #if defined(EP_NACL)
-  r.length = vsprintf((char*)r.ptr, pFormat, args);
+  size_t length = vsprintf((char*)ptr, pFormat, args);
 #elif defined(EP_COMPILER_VISUALC)
-  r.length = vsnprintf_s((char*)r.ptr, len, len, pFormat, args);
+  size_t length = vsnprintf_s((char*)ptr, len, len, pFormat, args);
 #else
-  r.length = vsnprintf((char*)r.ptr, len, pFormat, args);
+  size_t length = vsnprintf((char*)ptr, len, pFormat, args);
 #endif
 
   va_end(args);
 
-  return r;
+  return SharedString(ptr, length, internal::GetSliceHeader(ptr));
 }
 
 SharedString SharedString::concatInternal(Slice<epVarArg> args)
@@ -297,30 +294,24 @@ SharedString SharedString::concatInternal(Slice<epVarArg> args)
   size_t len = internal::getLength(args);
 
   // allocate a new SharedString
-  RC *pRC = (RC*)epAlloc(sizeof(RC) + sizeof(char)*(len+1));
-  pRC->refCount = 0;
-  pRC->allocatedCount = len;
-  char *ptr = (char*)(pRC + 1);
+  char *ptr = internal::SliceAlloc<char>(len+1);
 
   internal::concatenate(Slice<char>(ptr, len), args);
   ptr[len] = 0;
 
-  return SharedString(ptr, len, pRC);
+  return SharedString(ptr, len, internal::GetSliceHeader(ptr));
 }
 SharedString SharedString::formatInternal(String format, Slice<epVarArg> args)
 {
   size_t len = internal::format(format, nullptr, args).length;
 
   // allocate a new SharedString
-  RC *pRC = (RC*)epAlloc(sizeof(RC) + sizeof(char)*(len+1));
-  pRC->refCount = 0;
-  pRC->allocatedCount = len;
-  char *ptr = (char*)(pRC + 1);
+  char *ptr = internal::SliceAlloc<char>(len+1);
 
   internal::format(format, Slice<char>(ptr, len), args);
   ptr[len] = 0;
 
-  return SharedString(ptr, len, pRC);
+  return SharedString(ptr, len, internal::GetSliceHeader(ptr));
 }
 
 template<typename C>

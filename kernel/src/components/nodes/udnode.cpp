@@ -218,18 +218,15 @@ BoundingVolume UDNode::GetBoundingVolume() const
 
 Variant epToVariant(const BoundingVolume &volume)
 {
-  Variant r;
-  KeyValuePair *pKVP = r.allocAssocArray(6);
-  if (pKVP)
-  {
-    new (&pKVP[0]) KeyValuePair("minx", volume.min.x);
-    new (&pKVP[1]) KeyValuePair("miny", volume.min.y);
-    new (&pKVP[2]) KeyValuePair("minz", volume.min.z);
-    new (&pKVP[3]) KeyValuePair("maxx", volume.max.x);
-    new (&pKVP[4]) KeyValuePair("maxy", volume.max.y);
-    new (&pKVP[5]) KeyValuePair("maxz", volume.max.z);
-  }
-  return r;
+  Array<KeyValuePair> kvp;
+  kvp.reserve(6);
+  kvp.pushBack(KeyValuePair("minx", volume.min.x));
+  kvp.pushBack(KeyValuePair("miny", volume.min.y));
+  kvp.pushBack(KeyValuePair("minz", volume.min.z));
+  kvp.pushBack(KeyValuePair("maxx", volume.max.x));
+  kvp.pushBack(KeyValuePair("maxy", volume.max.y));
+  kvp.pushBack(KeyValuePair("maxz", volume.max.z));
+  return std::move(kvp);
 }
 
 void epFromVariant(const Variant &variant, BoundingVolume *pVolume)
@@ -244,16 +241,13 @@ void epFromVariant(const Variant &variant, BoundingVolume *pVolume)
 
 Variant epToVariant(const udRenderClipArea& area)
 {
-  Variant r;
-  KeyValuePair *pKVP = r.allocAssocArray(4);
-  if (pKVP)
-  {
-    new (&pKVP[0]) KeyValuePair("minx", area.minX);
-    new (&pKVP[1]) KeyValuePair("miny", area.minY);
-    new (&pKVP[2]) KeyValuePair("maxx", area.maxX);
-    new (&pKVP[3]) KeyValuePair("maxy", area.maxX);
-  }
-  return r;
+  Array<KeyValuePair> kvp;
+  kvp.reserve(4);
+  kvp.pushBack(KeyValuePair("minx", area.minX));
+  kvp.pushBack(KeyValuePair("miny", area.minY));
+  kvp.pushBack(KeyValuePair("maxx", area.maxX));
+  kvp.pushBack(KeyValuePair("maxy", area.maxX));
+  return std::move(kvp);
 }
 
 void epFromVariant(const Variant &variant, udRenderClipArea *pArea)

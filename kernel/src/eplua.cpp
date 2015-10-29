@@ -1107,20 +1107,19 @@ Variant Variant::luaGet(LuaState &l, int idx)
       }
 
       // alloc for table
-      Variant v;
-      KeyValuePair *pAA = v.allocAssocArray(numElements);
+      Array<KeyValuePair> aa;
+      aa.reserve(numElements);
 
       // populate the table
       l.pushNil();  // first key
       int i = 0;
       while (lua_next(L, pos) != 0)
       {
-        new(&pAA[i].key) Variant(l.get(-2));
-        new(&pAA[i].value) Variant(l.get(-1));
+        aa.pushBack(KeyValuePair(l.get(-2), l.get(-1)));
         l.pop();
         ++i;
       }
-      return v;
+      return std::move(aa);
     }
     default:
       // TODO: make a noise of some sort...?

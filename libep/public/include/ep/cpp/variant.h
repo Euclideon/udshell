@@ -49,14 +49,34 @@ public:
   Variant(int64_t);
   Variant(double);
   Variant(size_t val, const epEnumDesc *pDesc, bool isBitfield);
+
+  Variant(VarDelegate &&d);
+  Variant(const VarDelegate &d);
+
   Variant(ComponentRef &&spC);
   Variant(const ComponentRef &spC);
   Variant(Component *pC);
-  Variant(VarDelegate &&d);
-  Variant(const VarDelegate &d);
-  Variant(String, bool ownsMemory = false);
-  Variant(Slice<Variant> a, bool ownsMemory = false);
-  Variant(Slice<KeyValuePair> aa, bool ownsMemory = false);
+
+  // all the different strings
+  Variant(String s, bool unsafeReference = false);
+  template<size_t Len> Variant(const MutableString<Len> &s);
+  template<size_t Len> Variant(MutableString<Len> &&s);
+  Variant(const SharedString &s);
+  Variant(SharedString &&s);
+
+  // arrays
+  Variant(Slice<Variant> a, bool unsafeReference = false);
+  template<size_t Len> Variant(const Array<Variant, Len> &a);
+  template<size_t Len> Variant(Array<Variant, Len> &&a);
+  Variant(const SharedSlice<Variant> &a);
+  Variant(SharedSlice<Variant> &&a);
+
+  // assic arrays
+  Variant(Slice<KeyValuePair> aa, bool unsafeReference = false);
+  template<size_t Len> Variant(const Array<KeyValuePair, Len> &aa);
+  template<size_t Len> Variant(Array<KeyValuePair, Len> &&aa);
+  Variant(const SharedSlice<KeyValuePair> &aa);
+  Variant(SharedSlice<KeyValuePair> &&aa);
 
   template<typename T> Variant(T &&rval);
 
@@ -93,9 +113,6 @@ public:
 
   Variant operator[](size_t i) const;
   Variant operator[](String key) const;
-
-  Variant* allocArray(size_t len);
-  KeyValuePair* allocAssocArray(size_t len);
 
   // TODO: these shouldn't be part of the public API!
   void luaPush(LuaState &l) const;
@@ -158,8 +175,15 @@ private:
   static const Variant varNone;
 };
 
+namespace internal {
+  static const size_t VariantSmallStringSize = sizeof(Variant) - 1;
+} // namespace internal
+
 } // namespace ep
 
 #include "ep/cpp/internal/variant_inl.h"
+
+// unit tests
+epResult epVariant_Test();
 
 #endif // EPVARIANT_HPP

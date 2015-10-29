@@ -1,9 +1,9 @@
 
 #include "helpers.h"
 
-SharedSlice<const KeyValuePair> udParseCommandLine(const char *pCommandLine)
+Array<const KeyValuePair> udParseCommandLine(const char *pCommandLine)
 {
-  Array<const KeyValuePair, 64> output;
+  Array<const KeyValuePair> output;
   output.concat(KeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
@@ -25,12 +25,12 @@ SharedSlice<const KeyValuePair> udParseCommandLine(const char *pCommandLine)
       output.pushBack(KeyValuePair(nullptr, String(pCommandLine + start, i - start)));
   }
 
-  return SharedSlice<const KeyValuePair>(output);
+  return std::move(output);
 }
 
-SharedSlice<const KeyValuePair> udParseCommandLine(int argc, char *argv[])
+Array<const KeyValuePair> udParseCommandLine(int argc, char *argv[])
 {
-  Array<const KeyValuePair, 64> output;
+  Array<const KeyValuePair> output;
   output.reserve(argc);
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
@@ -38,16 +38,16 @@ SharedSlice<const KeyValuePair> udParseCommandLine(int argc, char *argv[])
   for (int i = 0; i < argc; ++i)
     output.pushBack(KeyValuePair(nullptr, String(argv[i])));
 
-  return SharedSlice<const KeyValuePair>(output.slice(0, argc));
+  return std::move(output);
 }
 
-SharedSlice<const KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
+Array<const KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
 {
-  Array<const KeyValuePair, 64> output;
+  Array<const KeyValuePair> output;
   output.reserve(argc);
 
   for (uint32_t i = 0; i < argc; ++i)
     output.pushBack(KeyValuePair(String(argn[i]), String(argv[i])));
 
-  return SharedSlice<const KeyValuePair>(output.slice(0, argc));
+  return std::move(output);
 }

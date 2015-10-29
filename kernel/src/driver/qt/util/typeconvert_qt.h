@@ -20,12 +20,12 @@
 // Qt type conversion to/from UD
 
 namespace qt {
-String AllocUDStringFromQString(const QString &string);
+MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string);
 }
 
 inline Variant epToVariant(const QString &string)
 {
-  return Variant(qt::AllocUDStringFromQString(string), true);
+  return Variant(qt::AllocUDStringFromQString(string));
 }
 void epFromVariant(const Variant &variant, QString *pString);
 
