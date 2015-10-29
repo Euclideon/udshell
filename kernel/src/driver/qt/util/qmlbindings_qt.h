@@ -29,7 +29,7 @@ protected:
   {
     QtGetter *pGetter = (QtGetter*)_pGetter;
     const QObject *pQObject = (const QObject*)((const ComponentType*)pThis)->GetInternalData();
-    return Variant(pQObject->property(pGetter->propertyId.ptr));
+    return Variant(pQObject->property(pGetter->propertyId.toStringz()));
   }
 };
 
@@ -50,7 +50,7 @@ protected:
   {
     QtSetter *pSetter = (QtSetter*)_pSetter;
     QObject *pQObject = (QObject*)((ComponentType*)pThis)->GetInternalData();
-    pQObject->setProperty(pSetter->propertyId.ptr, value.as<QVariant>());
+    pQObject->setProperty(pSetter->propertyId.toStringz(), value.as<QVariant>());
   }
 };
 
@@ -140,7 +140,7 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
 
     // TODO: keep a list of string names that we manage so we can free
     // TODO: type & flags
-    String propertyName = AllocUDStringFromQString(property.name());
+    SharedString propertyName = AllocUDStringFromQString(property.name());
     ep::PropertyInfo info = { propertyName, propertyName, propertyDescStr };
 
     // TODO: have non lookup qmlproperty version and lookup version for the dynamic properties
@@ -169,7 +169,7 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
 
       // TODO: keep list of strings
       // TODO: keep free list of methods
-      String methodName = AllocUDStringFromQString(method.name());
+      SharedString methodName = AllocUDStringFromQString(method.name());
       ep::FunctionInfo info = { methodName, methodDescStr };
       ep::MethodDesc desc = { info, udNew(QtMethod<ComponentType>, method) };
 
@@ -182,7 +182,7 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
 
       // TODO: keep list of strings
       // TODO: keep free list of events
-      String eventName = AllocUDStringFromQString(method.name());
+      SharedString eventName = AllocUDStringFromQString(method.name());
       ep::EventInfo info = { eventName, eventName, eventDescStr };
       ep::EventDesc desc = { info, udNew(QtVarEvent<ComponentType>, method) };
 
