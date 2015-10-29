@@ -77,28 +77,13 @@ protected:
 
     // TODO: check value length against function arg length minus default args amount - need to parse the signature to get the default arg list?
 
-    char qargs[sizeof(QtEPComponent)*10];
-    QtEPComponent *pQObjStack = (QtEPComponent*)qargs;
-
     QVariant vargs[10];
     QGenericArgument args[10];
     for (int i = 0; i<10; ++i)
     {
       if (i < value.length)
       {
-        if (value[i].is(Variant::Type::Component))
-        {
-          ep::ComponentRef spComponent = value[i].asComponent();
-          if (spComponent->IsType("qtcomponent"))
-            vargs[i] = QVariant::fromValue(shared_pointer_cast<QtComponent>(spComponent)->GetQObject());
-          else
-          {
-            new(pQObjStack) QtEPComponent(spComponent);
-            vargs[i] = QVariant::fromValue(pQObjStack++);
-          }
-        }
-        else
-          vargs[i] = value[i].as<QVariant>();
+        epFromVariant(value[i], &vargs[i]);
         args[i] = Q_ARG(QVariant, vargs[i]);
       }
       else
@@ -108,9 +93,6 @@ protected:
     QVariant retVal;
     pMethod->method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
             args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-
-    while (pQObjStack > (qt::QtEPComponent*)qargs)
-      (--pQObjStack)->~QtEPComponent();
 
     return Variant(retVal);
   }

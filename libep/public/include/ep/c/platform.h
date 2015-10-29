@@ -393,6 +393,9 @@ struct epTheTypeIs;
 # define epUnusedParam(x)
 #endif
 
+#define EPARRAYSIZE(_array) ( sizeof(_array) / sizeof((_array)[0]) )
+
+
 // dependent headers
 #include <stdint.h>
 #include <stdlib.h>

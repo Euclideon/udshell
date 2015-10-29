@@ -11,6 +11,8 @@ class ep::Kernel;
 namespace qt
 {
 
+PROTOTYPE_COMPONENT(QtComponent);
+
 class QtComponent : public Component
 {
   EP_COMPONENT(QtComponent);

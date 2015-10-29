@@ -2,12 +2,19 @@
 
 #if EPUI_DRIVER == EPDRIVER_QT
 
+// Disabled Warnings
+#if defined(EP_COMPILER_VISUALC)
+# pragma warning(disable:4512) // assignment operator could not be generated
+#endif //defined(_MSC_VER)
+
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QQmlContext>
 
 #include "../epkernel_qt.h"
 #include "../util/qmlbindings_qt.h"
+#include "component_qt.h"
+#include "qtcomponent_qt.h"
 
 #include "components/ui.h"
 #include "components/viewport.h"
@@ -75,6 +82,12 @@ namespace ep {
 
 using qt::internal::SetupFromQmlFile;
 using qt::internal::CleanupInternalData;
+
+// ---------------------------------------------------------------------------------------
+Variant UIComponent::GetUIHandle() const
+{
+  return pKernel->CreateComponent<qt::QtComponent>({ { "object", (int64_t)(size_t)pInternal } });
+}
 
 // ---------------------------------------------------------------------------------------
 epResult UIComponent::CreateInternal(InitParams initParams)
