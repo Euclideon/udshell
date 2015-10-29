@@ -7,6 +7,7 @@
 #include "components/scene.h"
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
+#include "components/resources/udmodel.h"
 
 // ud includes
 #include "udPlatformUtil.h"
@@ -25,6 +26,7 @@ static struct
   Kernel *pKernel;
 
   ViewRef spView;
+  UDModelRef spUDModel;
   SceneRef spScene;
   SimpleCameraRef spSimpleCamera;
   UDNodeRef spUDNode;
@@ -77,16 +79,19 @@ static void ViewerInit(String sender, String message, const Variant &data)
   mData.spSimpleCamera->SetPerspective(UD_PIf / 3.f);
   mData.spSimpleCamera->SetDepthPlanes(0.0001f, 7500.f);
 
-  mData.spUDNode->Load(mData.filename, true);
-  mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
-
   mData.spView->SetScene(mData.spScene);
   mData.spView->SetCamera(mData.spSimpleCamera);
   mData.pKernel->SetFocusView(mData.spView);
 
-  if (!mData.spUDNode->GetSource().empty())
-    mData.spScene->GetRootNode()->AddChild(mData.spUDNode);
+  mData.spUDModel = mData.pKernel->CreateComponent<UDModel>();
+  if (!mData.spUDModel)
+    return;
 
+  mData.spUDModel->Load(mData.filename, false);
+  mData.spUDNode->SetUDModel(mData.spUDModel);
+  mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
+
+  mData.spScene->GetRootNode()->AddChild(mData.spUDNode);
   mData.spScene->MakeDirty();
 }
 

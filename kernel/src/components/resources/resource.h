@@ -17,6 +17,7 @@ public:
   EP_COMPONENT(Resource);
 
   MetadataRef GetMetadata() const;
+  DataSourceRef GetDataSource() const { return source; }
 
   Event<> Changed;
 

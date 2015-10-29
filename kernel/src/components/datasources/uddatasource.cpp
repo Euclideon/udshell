@@ -39,9 +39,17 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
     udResult result = udOctree_Create(&pOctree, source.asString().toStringz(), useStreamer.is(Variant::Type::Bool) ? useStreamer.asBool() : true, 0);
     if (result == udR_Success)
     {
-      UDModelRef model = pKernel->CreateComponent<UDModel>();
+      const Variant &udModel = initParams["existingComponent"];
+      UDModelRef model = udModel.is(Variant::Type::Component) ? component_cast<UDModel>(udModel.asComponent()) : pKernel->CreateComponent<UDModel>();
+
+      if (!model)
+      {
+        udOctree_Destroy(&pOctree);
+        throw epR_Failure_;
+      }
+
+      model->spDataSource = ComponentRef(this);
       model->pOctree = pOctree;
-      resources.Insert(source.asString(), model);
 
       // Populate meta data
       int32_t count;
@@ -60,6 +68,10 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
           }
         }
       }
+
+      result = udOctree_GetLocalMatrixF64(model->GetOctreePtr(), model->udMat.a);
+      if (result == udR_Success)
+        resources.Insert(source.asString(), model);
     }
   }
 }

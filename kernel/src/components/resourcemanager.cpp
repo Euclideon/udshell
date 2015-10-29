@@ -71,21 +71,21 @@ Array<ResourceRef> ResourceManager::GetResourcesByType(const ComponentDesc *pBas
   return outs;
 }
 
-void ResourceManager::LoadResourcesFromFile(InitParams initParams)
+DataSourceRef ResourceManager::LoadResourcesFromFile(InitParams initParams)
 {
   Variant src = initParams["src"];
   String ext = src.asString().getRightAtLast('.');
   if (ext.empty())
   {
     LogWarning(2, "LoadResourcesFromFile - \"src\" parameter is invalid");
-    return; // TODO Handle error
+    return nullptr; // TODO Handle error
   }
 
   DataSourceRef spDS = pKernel->CreateDataSourceFromExtension(ext, initParams);
   if (!spDS)
   {
     LogWarning(2, "LoadResourcesFromFile - \"src\" file not found: {0}", src.asString());
-    return; // TODO Fix error returns
+    return nullptr; // TODO Fix error returns
   }
 
   size_t numResources = spDS->GetNumResources();
@@ -94,6 +94,8 @@ void ResourceManager::LoadResourcesFromFile(InitParams initParams)
     ResourceRef spResource = spDS->GetResource(i);
     resources.Insert(spResource->uid, spResource);
   }
+
+  return spDS;
 }
 
 void ResourceManager::SaveResourcesToFile(Slice<ResourceRef>, InitParams initParams)

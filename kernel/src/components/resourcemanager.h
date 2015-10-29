@@ -8,6 +8,7 @@ namespace ep
 {
 PROTOTYPE_COMPONENT(ResourceManager);
 SHARED_CLASS(Resource);
+SHARED_CLASS(DataSource);
 
 class ResourceManager : public Component
 {
@@ -28,7 +29,7 @@ public:
   // TODO GetResourcesByPrefix with optional Type filter
 
   // Resource loading/saving functions
-  void LoadResourcesFromFile(InitParams initParams);
+  DataSourceRef LoadResourcesFromFile(InitParams initParams);
   void SaveResourcesToFile(Slice<ResourceRef>, InitParams initParams);
 
 protected:

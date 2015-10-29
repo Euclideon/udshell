@@ -17,8 +17,18 @@ static CPropertyDesc props[] =
     },
     &DataSource::GetNumResources, // getter
     nullptr  // setter
+  },
+  {
+    {
+      "url", // id
+      "URL", // displayName
+      "the file or location of the DataSource", // description
+    },
+    &DataSource::GetURL, // getter
+    &DataSource::SetURL  // setter
   }
 };
+
 static CMethodDesc methods[] =
 {
   {
@@ -108,7 +118,9 @@ StreamRef DataSource::OpenStream(const Variant &source)
 DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-
+  const Variant &source = initParams["src"];
+  if (source.is(Variant::Type::String))
+    url = source.asString();
 }
 
 } // namespace ep
