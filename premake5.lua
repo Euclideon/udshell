@@ -21,18 +21,18 @@ solution "epshell"
 
 	defines { "EP_USE_QT" }
 
-	dofile "ud/udPlatform/project.lua"
-	dofile "ud/udPointCloud/project.lua"
+	group "libs"
+		dofile "3rdparty/lua/project.lua"
+		dofile "3rdparty/googletest/project.lua"
 
-	dofile "3rdparty/lua/project.lua"
-	dofile "3rdparty/googletest/project.lua"
+		dofile "ud/udPlatform/project.lua"
+		dofile "ud/udPointCloud/project.lua"
 
-	dofile "libep/project.lua"
+	group ""
+		dofile "libep/project.lua"
+		dofile "kernel/project.lua"
+		dofile "shell/project.lua"
+		dofile "test/project.lua"
 
-	dofile "kernel/project.lua"
-
-	dofile "shell/project.lua"
-
-	dofile "plugin/vieweractivity/project.lua"
-
-	dofile "test/project.lua"
+	group "plugins"
+		dofile "plugin/vieweractivity/project.lua"
