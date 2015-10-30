@@ -137,9 +137,9 @@ protected:
 
   // TODO: these substantially inflate the size of base Component and are almost always nullptr
   // ...should we move them to a separate allocation?
-  AVLTree<String, PropertyDesc> instanceProperties;
-  AVLTree<String, MethodDesc> instanceMethods;
-  AVLTree<String, EventDesc> instanceEvents;
+  AVLTree<SharedString, PropertyDesc> instanceProperties;
+  AVLTree<SharedString, MethodDesc> instanceMethods;
+  AVLTree<SharedString, EventDesc> instanceEvents;
 
   Subscriber subscriber;
 

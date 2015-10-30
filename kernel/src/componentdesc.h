@@ -235,16 +235,16 @@ struct EnumKVP
 struct PropertyInfo
 {
   PropertyInfo() = delete;
-  PropertyInfo(String id, String displayName, String description, String displayType = nullptr, uint32_t flags = 0)
+  PropertyInfo(SharedString id, SharedString displayName, SharedString description, SharedString displayType = nullptr, uint32_t flags = 0)
     : id(id), displayName(displayName), description(description), displayType(displayType), flags(flags) {}
   PropertyInfo(const PropertyInfo &rh)
     : id(rh.id), displayName(rh.displayName), description(rh.description), displayType(rh.displayType), flags(rh.flags) {}
 
-  String id;
-  String displayName;
-  String description;
+  SharedString id;
+  SharedString displayName;
+  SharedString description;
 
-  String displayType;
+  SharedString displayType;
   uint32_t flags;
 };
 
@@ -264,13 +264,13 @@ struct PropertyDesc
 struct FunctionInfo
 {
   FunctionInfo() = delete;
-  FunctionInfo(String id, String description)
+  FunctionInfo(SharedString id, SharedString description)
     : id(id), description(description) {}
   FunctionInfo(const FunctionInfo &rh)
     : id(rh.id), description(rh.description) {}
 
-  String id;
-  String description;
+  SharedString id;
+  SharedString description;
 };
 
 struct MethodDesc
@@ -299,14 +299,14 @@ struct StaticFuncDesc
 struct EventInfo
 {
   EventInfo() = delete;
-  EventInfo(String id, String displayName, String description)
+  EventInfo(SharedString id, SharedString displayName, SharedString description)
     : id(id), displayName(displayName), description(description) {}
   EventInfo(const EventInfo &rh)
     : id(rh.id), displayName(rh.displayName), description(rh.description) {}
 
-  String id;
-  String displayName;
-  String description;
+  SharedString id;
+  SharedString displayName;
+  SharedString description;
 };
 
 struct EventDesc
@@ -354,7 +354,7 @@ typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *
 struct ComponentDesc
 {
   ComponentDesc() = delete;
-  ComponentDesc(ComponentDesc *pSuperDesc, int epVersion, int pluginVersion, String id, String displayName, String description,
+  ComponentDesc(ComponentDesc *pSuperDesc, int epVersion, int pluginVersion, SharedString id, SharedString displayName, SharedString description,
     Slice<CPropertyDesc> properties = nullptr, Slice<CMethodDesc> methods = nullptr, Slice<CEventDesc> events = nullptr, Slice<CStaticFuncDesc> staticFuncs = nullptr,
     InitComponent *pInit = nullptr, CreateInstanceCallback *pCreateInstance = nullptr, const epComponentDesc *pExternalDesc = nullptr)
     : pSuperDesc(pSuperDesc), epVersion(epVersion), pluginVersion(pluginVersion), id(id), displayName(displayName), description(description)
@@ -367,9 +367,9 @@ struct ComponentDesc
   int epVersion;
   int pluginVersion;
 
-  String id;          // an id for this component
-  String displayName; // display name
-  String description; // description
+  SharedString id;          // an id for this component
+  SharedString displayName; // display name
+  SharedString description; // description
 
   // icon image...
 
