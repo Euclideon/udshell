@@ -108,8 +108,6 @@ public:
   {
     EPASSERT(stringof<T>().eq(elementType), "Incompatible type!");
     Slice<void> buffer = Buffer::MapForRead();
-    if (pNumElements)
-      *pNumElements = buffer.length/sizeof(T);
     return Slice<const T>((const T*)buffer.ptr, buffer.length/sizeof(T));
   }
 

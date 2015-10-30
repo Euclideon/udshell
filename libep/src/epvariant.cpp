@@ -343,6 +343,8 @@ void Variant::copyContent(const Variant &val)
       p = aa;
       break;
     }
+    default:
+      break;
   }
 }
 

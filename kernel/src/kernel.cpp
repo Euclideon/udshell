@@ -192,12 +192,12 @@ epResult Kernel::DoInit(Kernel *pKernel)
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   if (!pKernel->spStreamerTimer)
     return epR_Failure_;
-  pKernel->spStreamerTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
+  pKernel->spStreamerTimer->Elapsed.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
 
   pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
   if (!pKernel->spUpdateTimer)
     return epR_Failure_;
-  pKernel->spUpdateTimer->Event.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
+  pKernel->spUpdateTimer->Elapsed.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
 
   // call application init
   return SendMessage("$init", "#", "init", nullptr);

@@ -66,7 +66,7 @@ static CEventDesc events[] =
       "Event", // displayName
       "Timer Event", // description
     },
-    &Timer::Event
+    &Timer::Elapsed
   }
 };
 
@@ -131,7 +131,7 @@ void Timer::SetTimer(uint32_t d, TimerType tt)
 
 void Timer::MessageCallback(Kernel*)
 {
-  Event.Signal();
+  Elapsed.Signal();
 }
 
 

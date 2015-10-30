@@ -7,8 +7,7 @@
 #include "resources/resource.h"
 #include "hal/haltimer.h"
 
-namespace ep
-{
+namespace ep {
 
 PROTOTYPE_COMPONENT(Timer);
 
@@ -20,9 +19,9 @@ public:
   EP_ENUM(TimerType,
     Interval,
     CountDown
-    );
+  );
 
-  Event<> Event;
+  Event<> Elapsed;
 
   uint32_t GetDuration() const { return pTimer ? pTimer->duration : 0; };
   TimerType GetTimerType() const { return pTimer ? TimerType(pTimer->timerType) : TimerType::Interval;}
@@ -44,6 +43,6 @@ private:
   HalTimer *pTimer;
 };
 
-}
+} // namespace ep
 
 #endif // _EP_TIMER_H
