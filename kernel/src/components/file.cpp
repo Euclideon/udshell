@@ -94,6 +94,10 @@ int File::GetPosixOpenFlags(FileOpenFlags flags) const
   {
     posixFlags |= O_APPEND;
   }
+  else if (flags & FileOpenFlags::Write)
+  {
+    posixFlags |= O_TRUNC;
+  }
 
   return posixFlags;
 }

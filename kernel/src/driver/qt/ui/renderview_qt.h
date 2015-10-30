@@ -57,6 +57,17 @@ private slots:
     dirty = true;
     update();
   }
+
+  void OnVisibleChanged()
+  {
+    if (spView)
+    {
+      if (isVisible())
+        spView->Activate();
+      else
+        spView->Deactivate();
+    }
+  }
 };
 
 } // namespace qt

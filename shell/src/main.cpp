@@ -1,19 +1,18 @@
 #include <QLoggingCategory>
+#include <QQuickItem>
+#include "driver/qt/util/typeconvert_qt.h"
 
 #include "kernel.h"
-#include "renderscene.h"
 #include "components/logger.h"
 #include "components/window.h"
-#include "components/viewport.h"
-#include "components/view.h"
-#include "components/scene.h"
-#include "components/nodes/camera.h"
-#include "components/nodes/udnode.h"
-#include "components/timer.h"
+#include "components/ui.h"
+#include "components/uiconsole.h"
+#include "components/activities/viewer.h"
 #include "hal/debugfont.h"
 
 static Kernel *pKernel = nullptr;
 static WindowRef spMainWindow;
+static ActivityRef spActiveActivity;
 
 // ---------------------------------------------------------------------------------------
 void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -39,38 +38,50 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
 }
 
+void AddUIActivity(UIComponentRef spTopLevelUI, ActivityRef spActivity)
+{
+  auto spUI = spActivity->GetUI();
+
+  MutableString<128> title;
+  title.append(spActivity->uid);
+  title[0] = toUpper(title[0]);
+
+  spTopLevelUI->CallMethod("addactivity", String(spActivity->uid), String(title), spUI);
+}
+
+void SetUIConsole(UIComponentRef spTopLevelUI, UIComponentRef spUIConsole)
+{
+  spTopLevelUI->SetProperty("uiconsole", spUIConsole);
+}
+
+void OnActivityChanged(String uid)
+{
+  if (spActiveActivity)
+  {
+    spActiveActivity->Deactivate();
+    spActiveActivity = nullptr;
+  }
+
+  ActivityRef spActivity = pKernel->FindComponent(uid);
+  if (!spActivity)
+  {
+    pKernel->LogError("Unable to activate Activity \"{0}\". Component does not exist", uid);
+    return;
+  }
+
+  spActiveActivity = spActivity;
+  spActivity->Activate();
+}
+
+void Deinit(String sender, String message, const Variant &data)
+{
+  spActiveActivity = nullptr;
+  spMainWindow = nullptr;
+}
+
 void Init(String sender, String message, const Variant &data)
 {
   // TODO: load a project file...
-
-  auto spView = pKernel->CreateComponent<View>();
-  auto spScene = pKernel->CreateComponent<Scene>();
-  auto spCamera = pKernel->CreateComponent<SimpleCamera>();
-  auto spUDNode = pKernel->CreateComponent<UDNode>();
-
-  if (spUDNode)
-  {
-    // TODO: enable streamer once we have a tick running to update the streamer
-    spUDNode->Load("data\\DirCube.upc", false);
-//    pUDNode->Load("data\\MCG.uds", true);
-    if (!spUDNode->GetSource().empty())
-    {
-      spScene->GetRootNode()->AddChild(spUDNode);
-    }
-  }
-
-  udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
-  options.flags = udRF_PointCubes | udRF_ClearTargets;
-  spView->SetRenderOptions(options);
-
-  spCamera->SetSpeed(1.0);
-  spCamera->InvertYAxis(true);
-  spCamera->SetPerspective(UD_PIf / 3.f);
-  spCamera->SetDepthPlanes(0.0001f, 7500.f);
-
-  spView->SetScene(spScene);
-  spView->SetCamera(spCamera);
-
   spMainWindow = pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
   if (!spMainWindow)
   {
@@ -78,19 +89,26 @@ void Init(String sender, String message, const Variant &data)
     return;
   }
 
-  auto spViewport = pKernel->CreateComponent<Viewport>({ { "file", "qrc:/kernel/viewport.qml" }, { "view", spView } });
-  if (!spViewport)
+  auto spTopLevelUI = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/main.qml" } });
+  if (!spTopLevelUI)
   {
-    pKernel->LogError("Error creating Main Viewport Component\n");
+    pKernel->LogError("Error creating top Level UI Component\n");
     return;
   }
 
-  spMainWindow->SetTopLevelUI(spViewport);
-}
+  auto spConsole = pKernel->CreateComponent<UIConsole>({ { "file", "qrc:/kernel/console.qml" } });
+  if (!spConsole)
+  {
+    pKernel->LogError("Error creating top Level UI Component\n");
+    return;
+  }
+  SetUIConsole(spTopLevelUI, spConsole);
 
-void Deinit(String sender, String message, const Variant &data)
-{
-  spMainWindow = nullptr;
+  auto spViewerActivity = pKernel->CreateComponent<Viewer>();
+  AddUIActivity(spTopLevelUI, spViewerActivity);
+
+  spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
+  spMainWindow->SetTopLevelUI(spTopLevelUI);
 }
 
 // ---------------------------------------------------------------------------------------

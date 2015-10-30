@@ -92,6 +92,8 @@ public:
   // other functions
   ViewRef GetFocusView() const { return spFocusView; }
   ViewRef SetFocusView(ViewRef spView);
+  Event<double> UpdatePulse;
+
   ShortcutManagerRef GetShortcutManager() const { return spShortcutManager; }
 
   virtual epResult RunMainLoop() { return epR_Success; }

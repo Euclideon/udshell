@@ -37,6 +37,8 @@
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
 #include "components/datasources/uddatasource.h"
+#include "components/activities/activity.h"
+#include "components/activities/viewer.h"
 #include "components/plugin/componentplugin.h"
 #include "renderscene.h"
 #include "eplua.h"
@@ -110,6 +112,10 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   UD_ERROR_CHECK(pKernel->RegisterComponent<ImageSource>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<GeomSource>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<UDDataSource>());
+
+  // activities
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Activity>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<Viewer>());
 
   // plugin interfaces
   UD_ERROR_CHECK(pKernel->RegisterComponent<ComponentPlugin>());
@@ -241,20 +247,7 @@ void Kernel::Update()
   double sec = (double)udPerfCounterMilliseconds(last, now) / 1000.0;
   last = now;
 
-  // TODO: this shouldn't require a focus view! get the scene from the project...
-
-  if (spFocusView)
-  {
-    SceneRef spScene = spFocusView->GetScene();
-    if (spScene)
-      spScene->Update(sec);
-    CameraRef spCamera = spFocusView->GetCamera();
-    if (spCamera)
-    {
-      if (spCamera->Update(sec))
-        spFocusView->ForceDirty();
-    }
-  }
+  UpdatePulse.Signal(sec);
 }
 
 void Kernel::StreamerUpdate()

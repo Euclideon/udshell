@@ -71,6 +71,8 @@ RenderView::RenderView(QQuickItem *pParent)
   // handle resize
   QObject::connect(this, &QQuickItem::widthChanged, this, &RenderView::OnResize);
   QObject::connect(this, &QQuickItem::heightChanged, this, &RenderView::OnResize);
+
+  QObject::connect(this, &QQuickItem::visibleChanged, this, &RenderView::OnVisibleChanged);
 }
 
 RenderView::~RenderView()
