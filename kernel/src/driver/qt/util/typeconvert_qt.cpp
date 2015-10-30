@@ -14,16 +14,10 @@
 
 namespace qt {
 
-String AllocUDStringFromQString(const QString &string)
+MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string)
 {
   QByteArray byteArray = string.toUtf8();
-
-  // Need to do a deep copy and give ownership to the variant
-  size_t length = byteArray.size() + 1;
-  char *pString = epAllocType(char, length, epAF_None);
-  memcpy(pString, byteArray.data(), length);
-
-  return String(pString, length - 1);
+  return MutableString<ep::internal::VariantSmallStringSize>(byteArray.data(), byteArray.size());
 }
 
 }
@@ -75,7 +69,7 @@ Variant epToVariant(const QVariant &var)
     case QMetaType::QByteArray:
     case QMetaType::QString:
     case QMetaType::QChar:
-      return Variant(qt::AllocUDStringFromQString(var.toString()), true);
+      return Variant(qt::AllocUDStringFromQString(var.toString()));
 
     case QMetaType::QObjectStar:
     {

@@ -696,7 +696,7 @@ inline Slice<SharedString> SharedString::tokenise(Slice<SharedString> tokens, St
   return tokens.slice(0, tok.length);
 }
 
-inline SharedString::SharedString(const char *ptr, size_t length, RC *rc)
+inline SharedString::SharedString(const char *ptr, size_t length, internal::SliceHeader *rc)
   : SharedSlice<const char>(ptr, length, rc)
 {}
 

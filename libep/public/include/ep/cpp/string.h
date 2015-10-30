@@ -256,7 +256,7 @@ struct SharedString : public SharedSlice<const char>
   uint32_t hash(uint32_t hash = 0) const                                                { return ((String*)this)->hash(hash); }
 
 private:
-  SharedString(const char *ptr, size_t length, RC *rc);
+  SharedString(const char *ptr, size_t length, internal::SliceHeader *rc);
 
   static SharedString concatInternal(Slice<epVarArg> args);
   static SharedString formatInternal(String format, Slice<epVarArg> args);

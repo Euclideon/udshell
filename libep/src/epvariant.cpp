@@ -172,26 +172,79 @@ const Variant::Type s_typeTranslation[] =
 
 } // namespace internal
 
-// string constructor
-Variant::Variant(String s, bool ownsMemory)
+// string constructors
+Variant::Variant(String s, bool unsafeReference)
 {
-  const int BufferLen = sizeof(Variant) - 1;
-  EP_STATICASSERT(BufferLen <= 15, "Only 4 bits for length!");
-  if (!ownsMemory && s.length <= BufferLen)
+  EP_STATICASSERT(internal::VariantSmallStringSize <= 15, "Only 4 bits for length!");
+  if (unsafeReference)
+  {
+    t = (size_t)Type::String;
+    ownsContent = 0;
+    length = s.length;
+    this->s = s.ptr;
+  }
+  else if (s.length <= internal::VariantSmallStringSize)
   {
     // small string optimisation stashes short strings in the variant struct directly
     uint8_t *pArray = (uint8_t*)this;
     *pArray++ = (uint8_t)Type::SmallString | (uint8_t)(s.length << 4);
     memcpy((char*)pArray, s.ptr, s.length);
-    if (s.length < BufferLen)
+    if (s.length < internal::VariantSmallStringSize)
       pArray[s.length] = 0;
   }
   else
   {
     t = (size_t)Type::String;
-    ownsContent = ownsMemory ? 1 : 0;
+    ownsContent = 1;
     length = s.length;
-    this->s = s.ptr;
+    char *pS = internal::SliceAlloc<char>(s.length + 1, 1);
+    this->s = pS;
+    memcpy(pS, s.ptr, s.length);
+    pS[s.length] = 0;
+  }
+}
+
+// array constructors
+Variant::Variant(Slice<Variant> a, bool unsafeReference)
+{
+  if (unsafeReference)
+  {
+    t = (size_t)Type::Array;
+    ownsContent = 0;
+    length = a.length;
+    this->p = a.ptr;
+  }
+  else
+  {
+    t = (size_t)Type::Array;
+    ownsContent = 1;
+    length = a.length;
+    Variant *pA = internal::SliceAlloc<Variant>(a.length, 1);
+    this->p = pA;
+    for (size_t i = 0; i < length; ++i)
+      new(&pA[i]) Variant(a.ptr[i]);
+  }
+}
+
+// KVP constructors
+Variant::Variant(Slice<KeyValuePair> aa, bool unsafeReference)
+{
+  if (unsafeReference)
+  {
+    t = (size_t)Type::AssocArray;
+    ownsContent = 0;
+    length = aa.length;
+    this->p = aa.ptr;
+  }
+  else
+  {
+    t = (size_t)Type::AssocArray;
+    ownsContent = 1;
+    length = aa.length;
+    KeyValuePair *pAA = internal::SliceAlloc<KeyValuePair>(aa.length, 1);
+    this->p = pAA;
+    for (size_t i = 0; i < length; ++i)
+      new(&pAA[i]) KeyValuePair(aa.ptr[i]);
   }
 }
 
@@ -209,20 +262,42 @@ Variant::~Variant()
         ((VarDelegate&)p).~VarDelegate();
         break;
       case Type::String:
-        epFree((void*)s);
+      {
+        internal::SliceHeader *pH = internal::GetSliceHeader(s);
+        if (pH->refCount == 1)
+          internal::SliceFree(s);
+        else
+          --pH->refCount;
         break;
+      }
       case Type::Array:
-        for (size_t i = 0; i < length; ++i)
-          ((Variant*)p)[i].~Variant();
-        epFree(p);
-        break;
-      case Type::AssocArray:
-        for (size_t i = 0; i < length; ++i)
+      {
+        internal::SliceHeader *pH = internal::GetSliceHeader(p);
+        if (pH->refCount == 1)
         {
-          ((KeyValuePair*)p)[i].key.~Variant();
-          ((KeyValuePair*)p)[i].value.~Variant();
+          for (size_t i = 0; i < length; ++i)
+            ((Variant*)p)[i].~Variant();
+          internal::SliceFree(p);
         }
-        epFree(p);
+        else
+          --pH->refCount;
+        break;
+      }
+      case Type::AssocArray:
+      {
+        internal::SliceHeader *pH = internal::GetSliceHeader(p);
+        if (pH->refCount == 1)
+        {
+          for (size_t i = 0; i < length; ++i)
+            ((KeyValuePair*)p)[i].~KeyValuePair();
+          internal::SliceFree(p);
+        }
+        else
+          --pH->refCount;
+        break;
+      }
+      case Type::SmallString:
+        // SmallString may appear to have the ownsContent bit set, but it's actually a bit of the length ;)
         break;
       default:
         break;
@@ -246,9 +321,7 @@ void Variant::copyContent(const Variant &val)
     }
     case Type::String:
     {
-      char *pS = (char*)epAlloc(length);
-      memcpy(pS, val.s, length);
-      s = pS;
+      ++internal::GetSliceHeader(s)->refCount;
       break;
     }
     case Type::Array:
@@ -561,38 +634,47 @@ Variant Variant::operator[](String key) const
   return Variant(nullptr);
 }
 
-Variant* Variant::allocArray(size_t len)
-{
-  this->~Variant();
-  ((Variant*&)p) = epAllocType(Variant, len, epAF_None);
-  if (!p)
-  {
-    t = (size_t)Type::Void;
-    ownsContent = false;
-    length = 0;
-    return nullptr;
-  }
-  t = (size_t)Type::Array;
-  length = len;
-  ownsContent = true;
-  return ((Variant*)p);
-}
-
-KeyValuePair* Variant::allocAssocArray(size_t len)
-{
-  this->~Variant();
-  ((KeyValuePair*&)p) = epAllocType(KeyValuePair, len, epAF_None);
-  if (!p)
-  {
-    t = (size_t)Type::Void;
-    ownsContent = false;
-    length = 0;
-    return nullptr;
-  }
-  t = (size_t)Type::AssocArray;
-  length = len;
-  ownsContent = true;
-  return ((KeyValuePair*)p);
-}
-
 } // namespace ep
+
+epResult epVariant_Test()
+{
+  Variant t0;
+  EPASSERT(t0.type() == Variant::Type::Void, "!");
+  Variant t1(true);
+  EPASSERT(t1.type() == Variant::Type::Bool && t1.asBool() == true, "!");
+  Variant t2(10);
+  EPASSERT(t2.type() == Variant::Type::Int && t2.asInt() == 10, "!");
+  Variant t3(10.0);
+  EPASSERT(t3.type() == Variant::Type::Float && t3.asFloat() == 10.0, "!");
+
+  // string constructions
+  Variant t4("hello");
+  EPASSERT(t4.type() == Variant::Type::String, "!");
+  Variant t5(String("hello"));
+  EPASSERT(t5.type() == Variant::Type::String, "!");
+  Variant t6(MutableString<0>("hello"));
+  EPASSERT(t6.type() == Variant::Type::String, "!");
+  Variant t7(MutableString<16>("hello"));
+  EPASSERT(t7.type() == Variant::Type::String, "!");
+  Variant t8(MutableString<0>("really long string that will claim allocation"));
+  EPASSERT(t8.type() == Variant::Type::String, "!");
+  Variant t9(SharedString("test"));
+  EPASSERT(t9.type() == Variant::Type::String, "!");
+
+  MutableString<0> x = "123";
+  MutableString<15> y = "123";
+  SharedString z = "123";
+
+  Variant t10(x);
+  EPASSERT(t10.type() == Variant::Type::String, "!");
+  Variant t11(y);
+  EPASSERT(t11.type() == Variant::Type::String, "!");
+  Variant t12(z);
+  EPASSERT(t12.type() == Variant::Type::String, "!");
+
+  ComponentRef spC;
+  Variant t15(spC);
+  Variant t16(ComponentRef(nullptr));
+
+  return epR_Success;
+}

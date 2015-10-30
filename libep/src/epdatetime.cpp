@@ -95,20 +95,18 @@ inline ptrdiff_t epStringify(Slice<char> buffer, String format, const DateTime &
 
 Variant epToVariant(const DateTime &dt)
 {
-  Variant v;
-  KeyValuePair *pPairs = v.allocAssocArray(9);
-
-  new (&pPairs[0]) KeyValuePair("hour",  dt.hour);
-  new (&pPairs[1]) KeyValuePair("isdst", dt.isdst);
-  new (&pPairs[2]) KeyValuePair("mday",  dt.mday);
-  new (&pPairs[3]) KeyValuePair("min",   dt.min);
-  new (&pPairs[4]) KeyValuePair("mon",   dt.mon);
-  new (&pPairs[5]) KeyValuePair("sec",   dt.sec);
-  new (&pPairs[6]) KeyValuePair("wday",  dt.wday);
-  new (&pPairs[7]) KeyValuePair("yday",  dt.yday);
-  new (&pPairs[8]) KeyValuePair("year",  dt.year);
-
-  return v;
+  Array<KeyValuePair> pairs;
+  pairs.reserve(9);
+  pairs.pushBack(KeyValuePair("hour",  dt.hour));
+  pairs.pushBack(KeyValuePair("isdst", dt.isdst));
+  pairs.pushBack(KeyValuePair("mday",  dt.mday));
+  pairs.pushBack(KeyValuePair("min",   dt.min));
+  pairs.pushBack(KeyValuePair("mon",   dt.mon));
+  pairs.pushBack(KeyValuePair("sec",   dt.sec));
+  pairs.pushBack(KeyValuePair("wday",  dt.wday));
+  pairs.pushBack(KeyValuePair("yday",  dt.yday));
+  pairs.pushBack(KeyValuePair("year",  dt.year));
+  return std::move(pairs);
 }
 
 void epFromVariant(const Variant &variant, DateTime *pDt)

@@ -128,19 +128,122 @@ inline Variant::Variant(VarDelegate &&d)
   length = 0;
   new(&p) VarDelegate(std::move(d));
 }
-inline Variant::Variant(Slice<Variant> a, bool ownsMemory)
+
+template<size_t Len>
+inline Variant::Variant(const MutableString<Len> &s)
+  : Variant((String)s)
+{}
+template<size_t Len>
+inline Variant::Variant(MutableString<Len> &&s)
+{
+  if (s.hasAllocation() && s.length)
+  {
+    // if the rvalue has an allocation, we can just claim it
+    t = (size_t)Type::String;
+    ownsContent = 1;
+    length = s.length;
+    this->s = s.ptr;
+    internal::GetSliceHeader(s.ptr)->refCount = 1;
+    s.ptr = nullptr;
+  }
+  else
+    new(this) Variant((String)s);
+}
+inline Variant::Variant(const SharedString &s)
+{
+  t = (size_t)Type::String;
+  ownsContent = s.ptr ? 1 : 0;
+  length = s.length;
+  this->s = s.ptr;
+  if (s.ptr)
+    ++internal::GetSliceHeader(s.ptr)->refCount;
+}
+inline Variant::Variant(SharedString &&s)
+{
+  t = (size_t)Type::String;
+  ownsContent = s.ptr ? 1 : 0;
+  length = s.length;
+  this->s = s.ptr;
+  if (s.ptr)
+    s.rc = nullptr;
+}
+
+template<size_t Len>
+inline Variant::Variant(const Array<Variant, Len> &a)
+  : Variant(Slice<Variant>(a))
+{}
+template<size_t Len>
+inline Variant::Variant(Array<Variant, Len> &&a)
+{
+  if (a.hasAllocation() && a.length)
+  {
+    // if the rvalue has an allocation, we can just claim it
+    t = (size_t)Type::Array;
+    ownsContent = 1;
+    length = a.length;
+    this->p = a.ptr;
+    internal::GetSliceHeader(a.ptr)->refCount = 1;
+    a.ptr = nullptr;
+  }
+  else
+    new(this) Variant((Slice<Variant>)a);
+}
+inline Variant::Variant(const SharedSlice<Variant> &a)
 {
   t = (size_t)Type::Array;
-  ownsContent = ownsMemory ? 1 : 0;
+  ownsContent = a.ptr ? 1 : 0;
   length = a.length;
-  p = a.ptr;
+  this->p = a.ptr;
+  if (a.ptr)
+    ++internal::GetSliceHeader(a.ptr)->refCount;
 }
-inline Variant::Variant(Slice<KeyValuePair> aa, bool ownsMemory)
+inline Variant::Variant(SharedSlice<Variant> &&a)
+{
+  t = (size_t)Type::Array;
+  ownsContent = a.ptr ? 1 : 0;
+  length = a.length;
+  this->p = a.ptr;
+  if (a.ptr)
+    a.rc = nullptr;
+}
+
+template<size_t Len>
+inline Variant::Variant(const Array<KeyValuePair, Len> &aa)
+  : Variant(Slice<KeyValuePair>(aa))
+{}
+template<size_t Len>
+inline Variant::Variant(Array<KeyValuePair, Len> &&aa)
+{
+  if (aa.hasAllocation() && aa.length)
+  {
+    // if the rvalue has an allocation, we can just claim it
+    t = (size_t)Type::AssocArray;
+    ownsContent = 1;
+    length = aa.length;
+    this->p = aa.ptr;
+    internal::GetSliceHeader(aa.ptr)->refCount = 1;
+    aa.ptr = nullptr;
+  }
+  else
+    new(this) Variant((Slice<KeyValuePair>)aa);
+}
+inline Variant::Variant(const SharedSlice<KeyValuePair> &aa)
 {
   t = (size_t)Type::AssocArray;
-  ownsContent = ownsMemory ? 1 : 0;
+  ownsContent = aa.ptr ? 1 : 0;
   length = aa.length;
-  p = aa.ptr;
+  this->p = aa.ptr;
+  if (aa.ptr)
+    ++internal::GetSliceHeader(aa.ptr)->refCount;
+}
+inline Variant::Variant(SharedSlice<KeyValuePair> &&aa)
+{
+  t = (size_t)Type::AssocArray;
+  ownsContent = aa.ptr ? 1 : 0;
+  length = aa.length;
+  this->p = aa.ptr;
+  if (aa.ptr)
+    aa.rc = nullptr;
 }
 
 inline Variant& Variant::operator=(Variant &&rval)
@@ -208,7 +311,13 @@ struct Variant_Construct
 };
 
 // specialisation of non-const Variant, which annoyingly gets hooked by the T& constructor instead of the copy constructor
-template<> struct Variant_Construct<Variant>    { epforceinline static Variant construct(const Variant &v) { return Variant(v); } };
+template<>           struct Variant_Construct<Variant>                   { epforceinline static Variant construct(const Variant &v) { return Variant(v); } };
+template<size_t Len> struct Variant_Construct<MutableString<Len>>        { epforceinline static Variant construct(const MutableString<Len> &v) { return Variant(v); } };
+template<>           struct Variant_Construct<SharedString>              { epforceinline static Variant construct(const SharedString &v) { return Variant(v); } };
+template<size_t Len> struct Variant_Construct<Array<Variant, Len>>       { epforceinline static Variant construct(const Array<Variant, Len> &v) { return Variant(v); } };
+template<>           struct Variant_Construct<SharedSlice<Variant>>      { epforceinline static Variant construct(const SharedSlice<Variant> &v) { return Variant(v); } };
+template<size_t Len> struct Variant_Construct<Array<KeyValuePair, Len>>  { epforceinline static Variant construct(const Array<KeyValuePair, Len> &v) { return Variant(v); } };
+template<>           struct Variant_Construct<SharedSlice<KeyValuePair>> { epforceinline static Variant construct(const SharedSlice<KeyValuePair> &v) { return Variant(v); } };
 
 // ** suite of specialisations required to wrangle every conceivable combination of 'const'
 template<typename T>
@@ -230,6 +339,8 @@ template<> struct Variant_Construct <uint64_t>  { epforceinline static Variant c
 template<> struct Variant_Construct <char*>     { epforceinline static Variant construct(const char *s)   { return Variant(String(s)); } };
 template<size_t N>
 struct Variant_Construct <char[N]>              { epforceinline static Variant construct(const char s[N]) { return Variant(String(s, N-1)); } };
+template<size_t N>
+struct Variant_Construct <const char[N]>        { epforceinline static Variant construct(const char s[N]) { return Variant(String(s, N-1), true); } };
 template<typename T, size_t N>
 struct Variant_Construct <T[N]>                 { epforceinline static Variant construct(const T a[N])    { return Variant(Slice<T>(a, N)); } };
 
@@ -443,14 +554,11 @@ inline Variant epToVariant(T e)
 template<typename T>
 inline Variant epToVariant(const Slice<T> arr)
 {
-  Variant r;
-  Variant *a = r.allocArray(arr.length);
-  if (a)
-  {
-    for (size_t i = 0; i<arr.length; ++i)
-      new(&a[i]) Variant(arr[i]);
-  }
-  return r;
+  Array<Variant> a;
+  a.reserve(arr.length);
+  for (size_t i = 0; i<arr.length; ++i)
+    a.pushBack(arr[i]);
+  return std::move(a);
 }
 
 // for components
@@ -466,53 +574,41 @@ epforceinline Variant epToVariant(const ComponentRef &c)
 template<typename F>
 inline Variant epToVariant(const udVector2<F> &v)
 {
-  Variant r;
-  Variant *a = r.allocArray(2);
-  if (a)
-  {
-    new(&a[0]) Variant(v.x);
-    new(&a[1]) Variant(v.y);
-  }
-  return r;
+  Array<Variant> a;
+  a.reserve(2);
+  a.pushBack(v.x);
+  a.pushBack(v.y);
+  return std::move(a);
 }
 template<typename F>
 inline Variant epToVariant(const udVector3<F> &v)
 {
-  Variant r;
-  Variant *a = r.allocArray(3);
-  if (a)
-  {
-    new(&a[0]) Variant(v.x);
-    new(&a[1]) Variant(v.y);
-    new(&a[2]) Variant(v.z);
-  }
-  return r;
+  Array<Variant> a;
+  a.reserve(3);
+  a.pushBack(v.x);
+  a.pushBack(v.y);
+  a.pushBack(v.z);
+  return std::move(a);
 }
 template<typename F>
 inline Variant epToVariant(const udVector4<F> &v)
 {
-  Variant r;
-  Variant *a = r.allocArray(4);
-  if (a)
-  {
-    new(&a[0]) Variant(v.x);
-    new(&a[1]) Variant(v.y);
-    new(&a[2]) Variant(v.z);
-    new(&a[3]) Variant(v.w);
-  }
-  return r;
+  Array<Variant> a;
+  a.reserve(4);
+  a.pushBack(v.x);
+  a.pushBack(v.y);
+  a.pushBack(v.z);
+  a.pushBack(v.w);
+  return std::move(a);
 }
 template<typename F>
 inline Variant epToVariant(const udMatrix4x4<F> &m)
 {
-  Variant r;
-  Variant *a = r.allocArray(16);
-  if (a)
-  {
-    for (size_t i = 0; i<16; ++i)
-      new(&a[i]) Variant(m.a[i]);
-  }
-  return r;
+  Array<Variant> a;
+  a.reserve(16);
+  for (size_t i = 0; i<16; ++i)
+    a.pushBack(m.a[i]);
+  return std::move(a);
 }
 
 template<typename R, typename... Args>

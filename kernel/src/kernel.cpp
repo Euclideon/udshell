@@ -410,7 +410,7 @@ epResult Kernel::CreateComponent(String typeId, InitParams initParams, Component
     instanceRegistry.Add(spComponent->uid.hash(), spComponent.ptr());
 
     if (spLua)
-      spLua->SetGlobal(String(spComponent->uid), spComponent.ptr());
+      spLua->SetGlobal(spComponent->uid, spComponent.ptr());
 
     // TODO: inform partner kernels that I created a component
     //...
@@ -432,7 +432,7 @@ epResult Kernel::CreateComponent(String typeId, InitParams initParams, Component
 
 epResult Kernel::DestroyComponent(Component *pInstance)
 {
-  spLua->SetGlobal(String(pInstance->uid), nullptr);
+  spLua->SetGlobal(pInstance->uid, nullptr);
 
   // TODO: remove from component registry
   instanceRegistry.Destroy(pInstance->uid.hash());

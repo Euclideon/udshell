@@ -11,14 +11,13 @@ template<typename T> struct ElementType { typedef T Ty; };
 template<> struct ElementType<void> { typedef uint8_t Ty; };
 template<> struct ElementType<const void> { typedef const uint8_t Ty; };
 
-} // namespace internal
-
-
-struct RC
+struct SliceHeader
 {
   size_t refCount;
   size_t allocatedCount;
 };
+
+} // namespace internal
 
 
 // slices are bounded arrays, unlike C's conventional unbounded pointers (typically, with separate length stored in parallel)
@@ -138,13 +137,16 @@ struct Array : public Slice<T>
   ~Array<T, Count>();
 
   void reserve(size_t count);
+  void alloc(size_t count);
+  void resize(size_t count);
+  void clear();
 
   // assignment
+  Array<T, Count>& operator =(const Array<T, Count> &rh);
   Array<T, Count>& operator =(Array<T, Count> &&rval);
   template <typename U> Array<T, Count>& operator =(Slice<U> rh);
 
   // manipulation
-  void clear();
   template <typename... Things> Array<T, Count>& concat(const Things&... things);
 
   T& front() const;
@@ -164,6 +166,8 @@ struct Array : public Slice<T>
   Slice<T> getBuffer() const;
 
 protected:
+  friend struct Variant;
+
   template<size_t Len, bool = true>
   struct Buffer
   {
@@ -171,24 +175,16 @@ protected:
     bool hasAllocation(T *p) const { return p != (T*)buffer && p != nullptr; }
     T* ptr() const { return (T*)buffer; }
   };
-  template<bool dummy> struct Buffer<0, dummy> // SORRY! >_< C++ still sucks! We must partial-specialise here because reasons.
+  template<bool dummy> struct Buffer<0, dummy> // SORRY! C++ still sucks; we must partial-specialise here because can't zero-length-array! >_<
   {
     bool hasAllocation(T *p) const { return p != nullptr; }
     T* ptr() const { return nullptr; }
   };
   Buffer<Count> buffer;
 
-  struct Header
-  {
-    union
-    {
-      char header[64];
-      size_t numAllocated;
-    };
-  };
   static size_t numToAlloc(size_t i);
   bool hasAllocation() const { return buffer.hasAllocation(this->ptr); }
-  Header* getHeader() const { return ((Header*)this->ptr) - 1; }
+  internal::SliceHeader* getHeader() const { return ((internal::SliceHeader*)this->ptr) - 1; }
 };
 
 
@@ -199,14 +195,16 @@ protected:
 template <typename T>
 struct SharedSlice : public Slice<T>
 {
-  RC *rc;
+  internal::SliceHeader *rc;
 
   // constructors
   SharedSlice<T>();
   SharedSlice<T>(nullptr_t);
   SharedSlice<T>(std::initializer_list<typename SharedSlice<T>::ET> list);
-  SharedSlice<T>(SharedSlice<T> &&rval);
   SharedSlice<T>(const SharedSlice<T> &rcslice);
+  SharedSlice<T>(SharedSlice<T> &&rval);
+  template <typename U, size_t Len> SharedSlice<T>(const Array<U, Len> &arr);
+  template <typename U, size_t Len> SharedSlice<T>(Array<U, Len> &&rval);
   template <typename U> SharedSlice<T>(U *ptr, size_t length);
   template <typename U> SharedSlice<T>(Slice<U> slice);
   ~SharedSlice<T>();
@@ -226,10 +224,11 @@ struct SharedSlice : public Slice<T>
   SharedSlice<T> slice(size_t first, size_t last) const;
 
 protected:
-  SharedSlice<T>(T *ptr, size_t length, RC *rc);
+  SharedSlice<T>(T *ptr, size_t length, internal::SliceHeader *rc);
   static size_t numToAlloc(size_t i);
   template <typename U> static Slice<T> alloc(U *ptr, size_t length);
   template <typename U> void init(U *ptr, size_t length);
+  void destroy();
 };
 
 } // namespace ep

@@ -4,8 +4,8 @@
 
 #include "ep/cpp/variant.h"
 
-SharedSlice<const KeyValuePair> udParseCommandLine(const char *pCommandLine);
-SharedSlice<const KeyValuePair> udParseCommandLine(int argc, char *argv[]);
-SharedSlice<const KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
+Array<const KeyValuePair> udParseCommandLine(const char *pCommandLine);
+Array<const KeyValuePair> udParseCommandLine(int argc, char *argv[]);
+Array<const KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
 
 #endif // EPHELPERS_H
