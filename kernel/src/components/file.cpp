@@ -126,7 +126,7 @@ size_t File::Write(Slice<const void> data)
   lseek(fd, pos, SEEK_SET);
   int written = write(fd, data.ptr, (unsigned int)data.length);
   pos = lseek(fd, 0L, SEEK_CUR);
-  length = udMax(pos, length);
+  length = Max(pos, length);
   if (written == -1)
     return 0;
 

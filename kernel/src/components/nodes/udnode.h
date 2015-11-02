@@ -5,6 +5,7 @@
 #include "udMath.h"
 #include "udRender.h"
 
+#include "ep/cpp/math.h"
 #include "../component.h"
 #include "node.h"
 #include "components/resources/udmodel.h"
@@ -17,8 +18,8 @@ namespace ep
 
 struct BoundingVolume
 {
-  udDouble3 min;
-  udDouble3 max;
+  Double3 min;
+  Double3 max;
 };
 
 PROTOTYPE_COMPONENT(UDNode);
@@ -60,7 +61,7 @@ protected:
   UDNode(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Node(pType, pKernel, uid, initParams) { clipArea.minX = clipArea.minY = clipArea.maxX = clipArea.maxY = 0; }
 
-  epResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat) override;
+  epResult Render(RenderSceneRef &spScene, const Double4x4 &mat) override;
 
   udRender_VoxelShaderFunc *pVoxelShader = nullptr;
   Delegate<NodeRenderModel::SimpleVoxelDlgt> simpleVoxelDel;
@@ -74,7 +75,7 @@ protected:
 
   String source;
   UDModelRef spModel = nullptr;
-  udDouble4x4 udMat;
+  Double4x4 udMat;
 };
 
 

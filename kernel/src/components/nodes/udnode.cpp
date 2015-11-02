@@ -161,12 +161,12 @@ int UDNode::Load(String name, bool useStreamer)
 }
 
 
-epResult UDNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
+epResult UDNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
 {
   UDJob &job = spScene->ud.pushBack();
   memset(&job, 0, sizeof(job));
 
-  job.renderModel.matrix = udMul(mat, udMat);
+  (Double4x4&)job.renderModel.matrix = Mul(mat, udMat);
   job.renderModel.pOctree = spModel->GetOctreePtr();
   job.renderModel.pWorldMatrixD = job.renderModel.matrix.a;
   job.renderModel.pVoxelShader = pVoxelShader;
@@ -199,8 +199,8 @@ BoundingVolume UDNode::GetBoundingVolume() const
 
   EPASSERT(udMat.a[0] == udMat.a[5] && udMat.a[0] == udMat.a[10], "NonUniform Scale");
 
-  udDouble3 min = -(udMat.axis.t.toVector3());
-  udDouble3 max = min + udDouble3::create(udMat.a[0]);
+  Double3 min = -(udMat.axis.t.toVector3());
+  Double3 max = min + Double3::create(udMat.a[0]);
 
   // Theoretically there could be rotation so redoing min max
   vol.min.x = udMin(min.x, max.x);

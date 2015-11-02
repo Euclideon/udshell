@@ -2,7 +2,7 @@
 #ifndef EPSHADER_H
 #define EPSHADER_H
 
-#include "udMath.h"
+#include "ep/cpp/math.h"
 
 struct epShader;
 struct epShaderProgram;
@@ -35,14 +35,14 @@ void epShader_SetCurrent(epShaderProgram *pProgram);
 void epShader_SetProgramData(int param, bool value);
 void epShader_SetProgramData(int param, int value);
 void epShader_SetProgramData(int param, float value);
-void epShader_SetProgramData(int param, const udFloat4 &value);
-void epShader_SetProgramData(int param, const udFloat4x4 &value);
+void epShader_SetProgramData(int param, const ep::Float4 &value);
+void epShader_SetProgramData(int param, const ep::Float4x4 &value);
 void epShader_SetProgramData(int textureUnit, int param, struct epTexture *pTexture);
 
 //void epShader_SetProgramData(epShaderProgram *pProgram, int param, const bool *pValues, size_t count);
 void epShader_SetProgramData(int param, const int *pValues, size_t count);
 void epShader_SetProgramData(int param, const float *pValues, size_t count);
-void epShader_SetProgramData(int param, const udFloat4 *pValues, size_t count);
-void epShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count);
+void epShader_SetProgramData(int param, const ep::Float4 *pValues, size_t count);
+void epShader_SetProgramData(int param, const ep::Float4x4 *pValues, size_t count);
 
 #endif // EPSHADER_H

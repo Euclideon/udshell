@@ -35,7 +35,7 @@ struct NodeRenderModel : public udRenderModel
 {
   typedef uint32_t(SimpleVoxelDlgt)(uint32_t color);
 
-  udDouble4x4 matrix;
+  Double4x4 matrix;
   udRenderClipArea clipArea;
   Delegate<SimpleVoxelDlgt> simpleVoxelDel;
 

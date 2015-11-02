@@ -202,7 +202,7 @@ void epGPU_Init()
 
   // TODO: Override the QML GL version??
   // TODO: Create a share GL Context that we have control over?
-  udDebugPrintf("GL VERSION: %d.%d\n",
+  epDebugPrintf("GL VERSION: %d.%d\n",
     QOpenGLContext::currentContext()->format().majorVersion(), QOpenGLContext::currentContext()->format().minorVersion());
 
   // TODO: this might be redundant

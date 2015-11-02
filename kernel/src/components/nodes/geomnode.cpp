@@ -22,7 +22,7 @@ ComponentDesc GeomNode::descriptor =
 //  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
 };
 
-epResult GeomNode::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
+epResult GeomNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
 {
   GeomJob &job = spScene->geom.pushBack();
 

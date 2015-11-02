@@ -32,7 +32,7 @@ epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType
   QOpenGLShader *pQtShader = new QOpenGLShader(s_shaderType[type]);
   if (!pQtShader->compileSourceCode(QByteArray(pSource, static_cast<int>(length))))
   {
-    udDebugPrintf("Shader failed to compile: %s\n", pQtShader->log().toUtf8().data());
+    epDebugPrintf("Shader failed to compile: %s\n", pQtShader->log().toUtf8().data());
     delete pQtShader;
     return 0;
   }
@@ -49,9 +49,9 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader 
   epShaderProgram *pProgram = nullptr;
 
   QOpenGLShaderProgram *pQtProgram = new QOpenGLShaderProgram();
-  UD_ERROR_IF(!pQtProgram->addShader(pVertexShader->pShader), false);
-  UD_ERROR_IF(!pQtProgram->addShader(pPixelShader->pShader), false);
-  UD_ERROR_IF(!pQtProgram->link(), false);
+  EP_ERROR_IF(!pQtProgram->addShader(pVertexShader->pShader), false);
+  EP_ERROR_IF(!pQtProgram->addShader(pPixelShader->pShader), false);
+  EP_ERROR_IF(!pQtProgram->link(), false);
 
   {
     QOpenGLFunctions funcs(QOpenGLContext::currentContext());
@@ -120,7 +120,7 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader 
 epilogue:
   if (!result)
   {
-    udDebugPrintf("Error creating shader program: %s\n", pQtProgram->log().toUtf8().data());
+    epDebugPrintf("Error creating shader program: %s\n", pQtProgram->log().toUtf8().data());
     delete pQtProgram;
   }
 
@@ -177,7 +177,7 @@ void epShader_SetCurrent(epShaderProgram *pProgram)
   if (pProgram)
   {
     if (!pProgram->pProgram->bind())
-      udDebugPrintf("Error binding shader program");
+      epDebugPrintf("Error binding shader program");
   }
   else
     s_QtGLContext.pFunc->glUseProgram(0);
@@ -208,7 +208,7 @@ void epShader_SetProgramData(int param, float value)
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(int param, const udFloat4 &value)
+void epShader_SetProgramData(int param, const ep::Float4 &value)
 {
   if (param < 0)
     return;
@@ -216,7 +216,7 @@ void epShader_SetProgramData(int param, const udFloat4 &value)
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(int param, const udFloat4x4 &value)
+void epShader_SetProgramData(int param, const ep::Float4x4 &value)
 {
   if (param < 0)
     return;
@@ -252,7 +252,7 @@ void epShader_SetProgramData(int param, const float *pValues, size_t count)
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
+void epShader_SetProgramData(int param, const ep::Float4 *pValues, size_t count)
 {
   if (param < 0)
     return;
@@ -260,7 +260,7 @@ void epShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
+void epShader_SetProgramData(int param, const ep::Float4x4 *pValues, size_t count)
 {
   if (param < 0)
     return;

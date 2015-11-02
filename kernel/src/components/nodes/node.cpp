@@ -56,7 +56,7 @@ ComponentDesc Node::descriptor =
   Slice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
 };
 
-epResult Node::Render(RenderSceneRef &spScene, const udDouble4x4 &mat)
+epResult Node::Render(RenderSceneRef &spScene, const Double4x4 &mat)
 {
   for (NodeRef &n : children)
     n->Render(spScene, mat * n->matrix);
@@ -100,17 +100,17 @@ void Node::Detach()
     pParent->RemoveChild(NodeRef(this));
 }
 
-void Node::CalculateWorldMatrix(udDouble4x4 *pMatrix) const
+void Node::CalculateWorldMatrix(Double4x4 *pMatrix) const
 {
   if (pMatrix)
   {
     NodeRef spParent = Parent();
     if (spParent)
     {
-      udDouble4x4 parentMatrix;
+      Double4x4 parentMatrix;
       spParent->CalculateWorldMatrix(&parentMatrix);
 
-      *pMatrix = udMul(parentMatrix, matrix);
+      *pMatrix = Mul(parentMatrix, matrix);
     }
     else
       *pMatrix = matrix;

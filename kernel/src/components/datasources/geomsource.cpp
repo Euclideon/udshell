@@ -65,18 +65,18 @@ static inline String FromAIString(const aiString &name)
   return String(name.C_Str(), name.length);
 }
 
-static inline udFloat4 CopyAIColor(const aiColor4D &m)
+static inline Float4 CopyAIColor(const aiColor4D &m)
 {
-  return udFloat4::create(m.r, m.g, m.b, m.a);
+  return Float4::create(m.r, m.g, m.b, m.a);
 }
 
-static inline udDouble4x4 CopyAIMatrix(const aiMatrix4x4 &m)
+static inline Double4x4 CopyAIMatrix(const aiMatrix4x4 &m)
 {
   // TODO: OH NO! swizzle into UD space!!
-  return udDouble4x4::create(m.a1, m.b1, m.c1, m.d1,
-                             m.a2, m.b2, m.c2, m.d2,
-                             m.a3, m.b3, m.c3, m.d3,
-                             m.a4, m.b4, m.c4, m.d4);
+  return Double4x4::create(m.a1, m.b1, m.c1, m.d1,
+                           m.a2, m.b2, m.c2, m.d2,
+                           m.a3, m.b3, m.c3, m.d3,
+                           m.a4, m.b4, m.c4, m.d4);
 }
 
 void GeomSource::Create(StreamRef spSource)

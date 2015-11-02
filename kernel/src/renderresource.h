@@ -96,7 +96,7 @@ public:
   size_t numUniforms();
   String getUniformName(size_t i);
 
-  void setUniform(int i, const udFloat4 &v4);
+  void setUniform(int i, const Float4 &v4);
 };
 SHARED_CLASS(RenderShaderProgram);
 

@@ -3,9 +3,9 @@
 #define EPRENDERSCENE_H
 
 #include "udRender.h"
-#include "udMath.h"
 #include "udChunkedArray.h"
 
+#include "ep/cpp/math.h"
 #include "ep/cpp/sharedptr.h"
 #include "components/view.h"
 #include "components/resources/udmodel.h"
@@ -30,7 +30,7 @@ struct UDJob
 
 struct GeomJob
 {
-  udDouble4x4 matrix;
+  Double4x4 matrix;
 
   uint32_t numTextures, numArrays;
   RenderTextureRef textures[8];
@@ -77,8 +77,8 @@ public:
   udRenderView *GetRenderView() const { return pRenderView; }
   void *GetColorBuffer() const { return pColorBuffer; }
 
-  udDouble4x4 camera;
-  udDouble4x4 projection;
+  Double4x4 camera;
+  Double4x4 projection;
 
   int displayWidth, displayHeight;
   int renderWidth, renderHeight;

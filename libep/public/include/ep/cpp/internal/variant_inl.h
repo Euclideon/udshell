@@ -1,6 +1,6 @@
 #include <type_traits>
 
-#include "udMath.h"
+#include "ep/cpp/math.h"
 
 ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &var, const epVarArg*);
 
@@ -365,7 +365,7 @@ struct Variant_Cast < const T >
   }
 };
 
-// specialisations for udVeriant::as()
+// specialisations for Veriant::as()
 template<> struct Variant_Cast < bool     > { inline static bool     as(const Variant &v) { return v.asBool(); } };
 template<> struct Variant_Cast < float    > { inline static float    as(const Variant &v) { return (float)v.asFloat(); } };
 template<> struct Variant_Cast < double   > { inline static double   as(const Variant &v) { return v.asFloat(); } };
@@ -576,7 +576,7 @@ epforceinline Variant epToVariant(const ComponentRef &c)
 }
 
 template<typename F>
-inline Variant epToVariant(const udVector2<F> &v)
+inline Variant epToVariant(const Vector2<F> &v)
 {
   Array<Variant> a;
   a.reserve(2);
@@ -585,7 +585,7 @@ inline Variant epToVariant(const udVector2<F> &v)
   return std::move(a);
 }
 template<typename F>
-inline Variant epToVariant(const udVector3<F> &v)
+inline Variant epToVariant(const Vector3<F> &v)
 {
   Array<Variant> a;
   a.reserve(3);
@@ -595,7 +595,7 @@ inline Variant epToVariant(const udVector3<F> &v)
   return std::move(a);
 }
 template<typename F>
-inline Variant epToVariant(const udVector4<F> &v)
+inline Variant epToVariant(const Vector4<F> &v)
 {
   Array<Variant> a;
   a.reserve(4);
@@ -606,7 +606,7 @@ inline Variant epToVariant(const udVector4<F> &v)
   return std::move(a);
 }
 template<typename F>
-inline Variant epToVariant(const udMatrix4x4<F> &m)
+inline Variant epToVariant(const Matrix4x4<F> &m)
 {
   Array<Variant> a;
   a.reserve(16);
@@ -653,11 +653,11 @@ inline void epFromVariant(const Variant &v, T *pE)
     *pE = T(v.asString());
 }
 
-// udMath types
+// math types
 template<typename U>
-inline void epFromVariant(const Variant &v, udVector2<U> *pR)
+inline void epFromVariant(const Variant &v, Vector2<U> *pR)
 {
-  *pR = udVector2<U>::zero();
+  *pR = Vector2<U>::zero();
   if (v.is(Variant::Type::Array))
   {
     auto a = v.asArray();
@@ -678,9 +678,9 @@ inline void epFromVariant(const Variant &v, udVector2<U> *pR)
   }
 }
 template<typename U>
-inline void epFromVariant(const Variant &v, udVector3<U> *pR)
+inline void epFromVariant(const Variant &v, Vector3<U> *pR)
 {
-  *pR = udVector3<U>::zero();
+  *pR = Vector3<U>::zero();
   if (v.is(Variant::Type::Array))
   {
     auto a = v.asArray();
@@ -701,9 +701,9 @@ inline void epFromVariant(const Variant &v, udVector3<U> *pR)
   }
 }
 template<typename U>
-inline void epFromVariant(const Variant &v, udVector4<U> *pR)
+inline void epFromVariant(const Variant &v, Vector4<U> *pR)
 {
-  *pR = udVector4<U>::zero();
+  *pR = Vector4<U>::zero();
   if (v.is(Variant::Type::Array))
   {
     auto a = v.asArray();
@@ -724,9 +724,9 @@ inline void epFromVariant(const Variant &v, udVector4<U> *pR)
   }
 }
 template<typename U>
-inline void epFromVariant(const Variant &v, udMatrix4x4<U> *pR)
+inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
 {
-  *pR = udMatrix4x4<U>::identity();
+  *pR = Matrix4x4<U>::identity();
   if (v.is(Variant::Type::Array))
   {
     auto a = v.asArray();
