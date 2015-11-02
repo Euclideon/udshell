@@ -388,7 +388,7 @@ struct epTheTypeIs;
 #define epUnused(x) (void)x
 
 #if defined(__GNUC__)
-# define epUnusedParam(x) __attribute__((__unused__))x
+# define epUnusedParam(x) x __attribute__((unused))
 #else
 # define epUnusedParam(x)
 #endif

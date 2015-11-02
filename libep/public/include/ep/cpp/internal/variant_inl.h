@@ -302,11 +302,11 @@ struct Variant_Construct
 {
   epforceinline static Variant construct(T &&rval)
   {
-    return ::epToVariant(std::move(rval));
+    return epToVariant(std::move(rval));
   }
   epforceinline static Variant construct(const T &v)
   {
-    return ::epToVariant(v);
+    return epToVariant(v);
   }
 };
 
@@ -353,7 +353,7 @@ struct Variant_Construct <T[N]>                 { epforceinline static Variant c
 template<typename T>
 struct Variant_Cast
 {
-  inline static T as(const Variant &v) { T r; ::epFromVariant(v, &r); return r; }
+  inline static T as(const Variant &v) { T r; epFromVariant(v, &r); return r; }
 };
 
 // partial specialisation for const

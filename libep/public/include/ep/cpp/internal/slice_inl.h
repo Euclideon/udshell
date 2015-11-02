@@ -518,24 +518,24 @@ inline void Array<T, Count>::alloc(size_t count)
   clear();
   reserve(count);
   for (size_t i = 0; i < count; ++i)
-    new(&ptr[i]) T();
-  length = count;
+    new(&this->ptr[i]) T();
+  this->length = count;
 }
 template <typename T, size_t Count>
 inline void Array<T, Count>::resize(size_t count)
 {
-  if (count < length)
+  if (count < this->length)
   {
-    for (size_t i = count; i < length; ++i)
-      ptr[i].~T();
+    for (size_t i = count; i < this->length; ++i)
+      this->ptr[i].~T();
   }
-  else if (length < count)
+  else if (this->length < count)
   {
     reserve(count);
-    for (size_t i = length; i < count; ++i)
-      new(&ptr[i]) T();
+    for (size_t i = this->length; i < count; ++i)
+      new(&this->ptr[i]) T();
   }
-  length = count;
+  this->length = count;
 }
 template<typename T, size_t Count>
 inline void Array<T, Count>::clear()
@@ -693,8 +693,8 @@ inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
   if (rval.hasAllocation())
   {
     // if the rvalue has an allocation, we can just claim it
-    ptr = rval.ptr;
-    length = rval.length;
+    this->ptr = rval.ptr;
+    this->length = rval.length;
     internal::GetSliceHeader(ptr)->refCount = 1;
     rval.ptr = nullptr;
   }
