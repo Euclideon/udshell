@@ -736,6 +736,12 @@ inline SharedArray<T>::~SharedArray()
 }
 
 template <typename T>
+size_t inline SharedArray<T>::refcount() const
+{
+  return this->ptr ? internal::GetSliceHeader(this->ptr)->refCount : 0;
+}
+
+template <typename T>
 inline void SharedArray<T>::destroy()
 {
   for (size_t i = 0; i < this->length; ++i)
