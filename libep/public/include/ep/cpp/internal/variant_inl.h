@@ -287,6 +287,11 @@ inline bool Variant::is(Type type) const
   return internal::s_typeTranslation[t] == type;
 }
 
+inline bool Variant::isValid() const
+{
+  return (Type)t != Type::Void;
+}
+
 
 // *************************************************
 // **        HERE BE RADIOACTIVE DRAGONS!!        **
