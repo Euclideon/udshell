@@ -461,12 +461,17 @@ inline MutableString<Size>::MutableString()
 {}
 
 template<size_t Size>
+inline MutableString<Size>::MutableString(const MutableString<Size> &rh)
+  : Array<char, Size>(rh)
+{}
+template<size_t Size>
 inline MutableString<Size>::MutableString(MutableString<Size> &&rval)
   : Array<char, Size>(std::move(rval))
 {}
 
 template<size_t Size>
-inline MutableString<Size>::MutableString(Array<char, Size> &&rval)
+template <size_t Len>
+inline MutableString<Size>::MutableString(Array<char, Len> &&rval)
   : Array<char, Size>(std::move(rval))
 {}
 
@@ -488,13 +493,20 @@ inline MutableString<Size>::MutableString(const char *pString)
 {}
 
 template<size_t Size>
+inline MutableString<Size>& MutableString<Size>::operator =(const MutableString<Size> &rh)
+{
+  Array<char, Size>::operator=(rh);
+  return *this;
+}
+template<size_t Size>
 inline MutableString<Size>& MutableString<Size>::operator =(MutableString<Size> &&rval)
 {
   Array<char, Size>::operator=(std::move(rval));
   return *this;
 }
 template<size_t Size>
-inline MutableString<Size>& MutableString<Size>::operator =(Array<char, Size> &&rval)
+template <size_t Len>
+inline MutableString<Size>& MutableString<Size>::operator =(Array<char, Len> &&rval)
 {
   Array<char, Size>::operator=(std::move(rval));
   return *this;
@@ -569,73 +581,72 @@ inline SharedString::SharedString()
 {}
 
 inline SharedString::SharedString(const SharedString &val)
-  : SharedSlice<const char>(val)
+  : SharedArray<const char>(val)
 {}
-
-
 inline SharedString::SharedString(SharedString &&rval)
-  : SharedSlice<const char>(std::move(rval))
+  : SharedArray<const char>(std::move(rval))
 {}
 
-inline SharedString::SharedString(SharedSlice<const char> &&rval)
-  : SharedSlice<const char>(std::move(rval))
+inline SharedString::SharedString(const SharedArray<const char> &rcstr)
+  : SharedArray<const char>(rcstr)
+{}
+inline SharedString::SharedString(SharedArray<const char> &&rval)
+  : SharedArray<const char>(std::move(rval))
 {}
 
-inline SharedString::SharedString(const SharedSlice<const char> &rcstr)
-  : SharedSlice<const char>(rcstr)
+template <typename U, size_t Len>
+inline SharedString::SharedString(const Array<U, Len> &arr)
+  : SharedArray<const char>(arr)
+{}
+template <typename U, size_t Len>
+inline SharedString::SharedString(Array<U, Len> &&rval)
+  : SharedArray<const char>(std::move(rval))
 {}
 
 template <typename U>
 inline SharedString::SharedString(U *ptr, size_t length)
-  : SharedSlice<const char>(ptr, length)
+  : SharedArray<const char>(ptr, length)
 {}
-
 template <typename U>
 inline SharedString::SharedString(Slice<U> slice)
-  : SharedSlice<const char>(slice)
+  : SharedArray<const char>(slice)
 {}
 
 inline SharedString::SharedString(const char *pString)
-  : SharedSlice<const char>(pString, pString ? epStrlen(pString) : 0)
+  : SharedArray<const char>(pString, pString ? epStrlen(pString) : 0)
 {}
 
-inline SharedString& SharedString::operator =(const SharedSlice<const char> &rh)
-{
-  SharedSlice<const char>::operator=(rh);
-  return *this;
-}
 inline SharedString& SharedString::operator =(const SharedString &val)
 {
-  SharedSlice<const char>::operator=(val);
+  SharedArray<const char>::operator=(val);
+  return *this;
+}
+inline SharedString& SharedString::operator =(SharedString &&rval)
+{
+  SharedArray<const char>::operator=(std::move(rval));
   return *this;
 }
 
-inline SharedString& SharedString::operator =(SharedString &&rval)
+inline SharedString& SharedString::operator =(const SharedArray<const char> &rh)
 {
-  SharedSlice<const char>::operator=(std::move(rval));
+  SharedArray<const char>::operator=(rh);
   return *this;
 }
-inline SharedString& SharedString::operator =(SharedSlice<const char> &&rval)
+inline SharedString& SharedString::operator =(SharedArray<const char> &&rval)
 {
-  SharedSlice<const char>::operator=(std::move(rval));
+  SharedArray<const char>::operator=(std::move(rval));
   return *this;
 }
 template <typename U>
 inline SharedString& SharedString::operator =(Slice<U> rh)
 {
-  *this = SharedSlice<U>(rh);
+  SharedArray<const char>::operator=(rh);
   return *this;
 }
 inline SharedString& SharedString::operator =(const char *pString)
 {
   *this = SharedString(pString);
   return *this;
-}
-
-inline SharedString SharedString::slice(ptrdiff_t first, ptrdiff_t last) const
-{
-  String s = ((String*)this)->slice(first, last);
-  return SharedString(s.ptr, s.length, rc);
 }
 
 inline CString<char> SharedString::toStringz() const
@@ -695,10 +706,6 @@ inline Slice<SharedString> SharedString::tokenise(Slice<SharedString> tokens, St
     new(&tokens.ptr[i]) SharedString(tok.ptr[i].ptr, tok.ptr[i].length, rc);
   return tokens.slice(0, tok.length);
 }
-
-inline SharedString::SharedString(const char *ptr, size_t length, internal::SliceHeader *rc)
-  : SharedSlice<const char>(ptr, length, rc)
-{}
 
 
 //

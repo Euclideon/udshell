@@ -68,7 +68,7 @@ private:
 
   // Members
   int argc;
-  SharedSlice<char *> argv;
+  SharedArray<char *> argv;
 
   QtApplication *pApplication;
   QQmlEngine *pQmlEngine;
