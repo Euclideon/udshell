@@ -216,11 +216,28 @@ inline bool Slice<T>::exists(const typename Slice<T>::ET &c, size_t *pIndex) con
   return i != length;
 }
 
+namespace internal {
+  // *** horrible specialisation to handle slices of slices
+  template<typename T> struct FindSpecialisation                                  { static inline bool eq(const T &a, const T &b) { return a == b; } };
+  // TODO: maybe this mess can be eliminated with 'classy' use of std::enable_if<>... ;) ;)
+  template<typename U> struct FindSpecialisation<const Slice<U>>                  { static inline bool eq(const Slice<U> &a, const Slice<U> &b) { return a.eq(b); } };
+  template<typename U> struct FindSpecialisation<Slice<U>>                        { static inline bool eq(const Slice<U> &a, const Slice<U> &b) { return a.eq(b); } };
+  template<typename U, size_t Len> struct FindSpecialisation<const Array<U, Len>> { static inline bool eq(const Slice<U> &a, const Slice<U> &b) { return a.eq(b); } };
+  template<typename U, size_t Len> struct FindSpecialisation<Array<U, Len>>       { static inline bool eq(const Slice<U> &a, const Slice<U> &b) { return a.eq(b); } };
+  template<typename U> struct FindSpecialisation<const SharedArray<U>>            { static inline bool eq(const Slice<U> &a, const Slice<U> &b) { return a.eq(b); } };
+  template<typename U> struct FindSpecialisation<SharedArray<U>>                  { static inline bool eq(const Slice<U> &a, const Slice<U> &b) { return a.eq(b); } };
+  template<> struct FindSpecialisation<const String>                              { static inline bool eq(const String &a, const String &b) { return a.eq(b); } };
+  template<> struct FindSpecialisation<String>                                    { static inline bool eq(const String &a, const String &b) { return a.eq(b); } };
+  template<size_t Len> struct FindSpecialisation<const MutableString<Len>>        { static inline bool eq(const String &a, const String &b) { return a.eq(b); } };
+  template<size_t Len> struct FindSpecialisation<MutableString<Len>>              { static inline bool eq(const String &a, const String &b) { return a.eq(b); } };
+  template<> struct FindSpecialisation<const SharedString>                        { static inline bool eq(const String &a, const String &b) { return a.eq(b); } };
+  template<> struct FindSpecialisation<SharedString>                              { static inline bool eq(const String &a, const String &b) { return a.eq(b); } };
+}
 template<typename T>
 inline size_t Slice<T>::findFirst(const typename Slice<T>::ET &c) const
 {
   size_t offset = 0;
-  while (offset < length && ptr[offset] != c)
+  while (offset < length && !internal::FindSpecialisation<typename Slice<T>::ET>::eq(ptr[offset], c))
     ++offset;
   return offset;
 }
@@ -228,7 +245,7 @@ template<typename T>
 inline size_t Slice<T>::findLast(const typename Slice<T>::ET &c) const
 {
   ptrdiff_t last = length-1;
-  while (last >= 0 && ptr[last] != c)
+  while (last >= 0 && !internal::FindSpecialisation<typename Slice<T>::ET>::eq(ptr[last], c))
     --last;
   return last < 0 ? length : last;
 }
@@ -244,7 +261,7 @@ inline size_t Slice<T>::findFirst(Slice<U> s) const
     size_t j = 0;
     for (; j < s.length; ++j)
     {
-      if (ptr[i + j] != s.ptr[j])
+      if (!internal::FindSpecialisation<typename Slice<T>::ET>::eq(ptr[i + j], s.ptr[j]))
         break;
     }
     if (j == s.length)
@@ -263,7 +280,7 @@ inline size_t Slice<T>::findLast(Slice<U> s) const
     size_t j = 0;
     for (; j < s.length; ++j)
     {
-      if (ptr[i + j] != s.ptr[j])
+      if (!internal::FindSpecialisation<typename Slice<T>::ET>::eq(ptr[i + j], s.ptr[j]))
         break;
     }
     if (j == s.length)

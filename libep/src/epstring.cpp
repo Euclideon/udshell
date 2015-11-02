@@ -766,6 +766,8 @@ epResult epString_Test()
   WString wstr = (const char16_t*)L"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
   ms.format("{0}", wstr);
 
+  cc.parseInt();
+
   return epR_Success;
 }
 
