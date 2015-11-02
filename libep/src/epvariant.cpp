@@ -348,6 +348,30 @@ void Variant::copyContent(const Variant &val)
   }
 }
 
+bool Variant::isNull() const
+{
+  switch ((Type)t)
+  {
+    case Type::Void:
+      // TODO: consider, is this correct?
+      EPASSERT(false, "Variant is void; has no value");
+      return true;
+    case Type::Null:
+      return true;
+    case Type::String:
+    case Type::Array:
+    case Type::AssocArray:
+      return length == 0;
+    case Type::Component:
+    case Type::Delegate:
+      return p == nullptr;
+    case Type::SmallString:
+      return (*(uint8_t*)this >> 4) == 0;
+    default:
+      return false;
+  }
+}
+
 SharedString Variant::stringify() const
 {
   switch ((Type)t)
@@ -717,6 +741,9 @@ epResult epVariant_Test()
 
   Variant t18("[1,  2  ,  \"3\" ] ");
   auto a2 = t18.as<Array<SharedString>>();
+
+  Variant t19;
+  EPASSERT(!t19.isValid(), "!");
 
   return epR_Success;
 }

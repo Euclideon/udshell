@@ -90,6 +90,9 @@ public:
   Type type() const;
   bool is(Type type) const;
 
+  bool isValid() const;
+  bool isNull() const;
+
   SharedString stringify() const;
 
   template<typename T>
