@@ -1,11 +1,4 @@
-
 #include "ep/eputf.h"
-
-// TODO: remove these?
-#include <string.h>
-#include <stdarg.h>
-
-#include <utility>
 
 template<typename T>
 ptrdiff_t epStringifyTemplate(Slice<char> buffer, String format, const T &val, const epVarArg *pArgs);
