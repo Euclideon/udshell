@@ -669,9 +669,9 @@ epResult epSlice_Test()
 
   rc_i1.eq(i1);                   // element comparison between Slice and SharedArray
 
-  for (auto i : i1)
+  for (auto j : i1)
   {
-    i;
+    j;
     // iterate the elements in i1
     //...
   }
