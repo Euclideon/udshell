@@ -517,8 +517,6 @@ Variant::VarDelegate Variant::asDelegate() const
 }
 String Variant::asString() const
 {
-  // TODO: it would be nice to be able to string-ify other types
-  // ...but we don't have any output buffer
   switch ((Type)t)
   {
     case Type::Void:
@@ -539,6 +537,41 @@ String Variant::asString() const
       return String();
   }
 }
+SharedString Variant::asSharedString() const
+{
+  switch ((Type)t)
+  {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
+    case Type::Null:
+      return String();
+    case Type::Bool:
+      return b ? "true" : "false";
+    case Type::Int:
+      return SharedString::format("{0}", i);
+    case Type::Float:
+      return SharedString::format("{0}", f);
+    case Type::String:
+    {
+      String str(s, length);
+      if (ownsContent)
+        return (SharedString&)str;
+      else
+        return SharedString(str);
+    }
+    case Type::SmallString:
+    {
+      uint8_t *pBuffer = (uint8_t*)this;
+      return SharedString((char*)pBuffer + 1, pBuffer[0] >> 4);
+    }
+    case Type::Component:
+      return ((Component*)p)->GetUID();
+    default:
+      EPASSERT(type() == Type::String, "Wrong type!");
+      return String();
+  }
+}
+
 Slice<Variant> Variant::asArray() const
 {
   switch ((Type)t)
@@ -675,6 +708,13 @@ epResult epVariant_Test()
   ComponentRef spC;
   Variant t15(spC);
   Variant t16(ComponentRef(nullptr));
+
+  Slice<const Variant> arr = { 1, 2, "3" };
+  Variant t17(arr);
+  auto a1 = t17.as<Array<float>>();
+
+  Variant t18("[1,  2  ,  \"3\" ] ");
+  auto a2 = t18.as<Array<SharedString>>();
 
   return epR_Success;
 }

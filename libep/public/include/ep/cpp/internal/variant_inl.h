@@ -378,7 +378,12 @@ template<> struct Variant_Cast < int32_t  > { inline static int32_t  as(const Va
 template<> struct Variant_Cast < uint32_t > { inline static uint32_t as(const Variant &v) { return (uint32_t)v.asInt(); } };
 template<> struct Variant_Cast < int64_t  > { inline static int64_t  as(const Variant &v) { return (int64_t)v.asInt(); } };
 template<> struct Variant_Cast < uint64_t > { inline static uint64_t as(const Variant &v) { return (uint64_t)v.asInt(); } };
-template<> struct Variant_Cast < String >   { inline static String   as(const Variant &v) { return v.asString(); } };
+
+template<> struct Variant_Cast < String >   { inline static String             as(const Variant &v) { return v.asString(); } };
+template<size_t Len>
+struct Variant_Cast < MutableString<Len> >  { inline static MutableString<Len> as(const Variant &v) { return MutableString<Len>(v.asString()); } };
+template<>
+struct Variant_Cast < SharedString >        { inline static SharedString       as(const Variant &v) { return v.asSharedString(); } };
 
 template<> struct Variant_Cast < Variant >  { inline static Variant  as(const Variant &v) { return v; } };
 
@@ -752,4 +757,40 @@ inline void epFromVariant(const Variant &v, Delegate<R(Args...)> *pD)
     *pD = Delegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
   else
     *pD = nullptr;
+}
+
+template<typename U, size_t Len>
+inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
+{
+  pArr->clear();
+  if (v.is(Variant::Type::Array))
+  {
+    auto a = v.asArray();
+    pArr->reserve(a.length);
+    for (size_t i = 0; i < a.length; ++i)
+      pArr->pushBack(a[i].as<U>());
+  }
+  else if (v.is(Variant::Type::AssocArray))
+  {
+    auto aa = v.asAssocArraySeries();
+    pArr->reserve(aa.length);
+    for (size_t i = 0; i < aa.length; ++i)
+      pArr->pushBack(aa[i].value.as<U>());
+  }
+  else if (v.is(Variant::Type::String))
+  {
+    String s = v.asString();
+    s = s.trim();
+    if (s[0] == '[' && s[s.length-1] == ']')
+    {
+      s.popFront(); s.popBack();
+      size_t offset;
+      do
+      {
+        offset = s.findFirst(',');
+        pArr->pushBack(Variant(s.slice(0, offset), true).as<U>());
+        s.pop(offset < s.length ? offset + 1 : offset);
+      } while (s);
+    }
+  }
 }

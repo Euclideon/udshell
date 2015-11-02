@@ -104,6 +104,7 @@ public:
   ComponentRef asComponent() const;
   VarDelegate asDelegate() const;
   String asString() const;
+  SharedString asSharedString() const;
   Slice<Variant> asArray() const;
   Slice<KeyValuePair> asAssocArray() const;
   Slice<KeyValuePair> asAssocArraySeries() const;
