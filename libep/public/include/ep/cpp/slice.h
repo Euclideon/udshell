@@ -208,7 +208,7 @@ struct SharedArray : public Slice<T>
   template <typename U> SharedArray(Slice<U> slice);
   ~SharedArray();
 
-  size_t refcount() const { return rc ? rc->refCount : 0; }
+  size_t refcount() const;
 
   // static constructors (make proper constructors?)
   template<typename... Things> static SharedArray<T> concat(const Things&... things);
