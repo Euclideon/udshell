@@ -365,7 +365,7 @@ struct Variant_Cast < const T >
   }
 };
 
-// specialisations for Veriant::as()
+// specialisations for Variant::as()
 template<> struct Variant_Cast < bool     > { inline static bool     as(const Variant &v) { return v.asBool(); } };
 template<> struct Variant_Cast < float    > { inline static float    as(const Variant &v) { return (float)v.asFloat(); } };
 template<> struct Variant_Cast < double   > { inline static double   as(const Variant &v) { return v.asFloat(); } };

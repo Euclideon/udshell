@@ -166,7 +166,7 @@ epResult UDNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
   UDJob &job = spScene->ud.pushBack();
   memset(&job, 0, sizeof(job));
 
-  (Double4x4&)job.renderModel.matrix = Mul(mat, udMat);
+  job.renderModel.matrix = Mul(mat, udMat);
   job.renderModel.pOctree = spModel->GetOctreePtr();
   job.renderModel.pWorldMatrixD = job.renderModel.matrix.a;
   job.renderModel.pVoxelShader = pVoxelShader;

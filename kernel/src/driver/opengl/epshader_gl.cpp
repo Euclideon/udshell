@@ -49,7 +49,7 @@ epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType
     char buffer[1024];
     GLsizei length;
     glGetShaderInfoLog(shader, sizeof(buffer), &length, &buffer[0]);
-    udDebugPrintf("Shader failed to compile: %s\n", buffer);
+    epDebugPrintf("Shader failed to compile: %s\n", buffer);
     return 0;
   }
 
@@ -76,7 +76,7 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader 
     char buffer[1024];
     GLsizei length;
     glGetProgramInfoLog(program, sizeof(buffer), &length, &buffer[0]);
-    udDebugPrintf("Program failed to link: %s\n", buffer);
+    epDebugPrintf("Program failed to link: %s\n", buffer);
     return 0;
   }
 
