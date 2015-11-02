@@ -2,7 +2,8 @@
 #ifndef EP_PLUGIN_MANAGER_H
 #define EP_PLUGIN_MANAGER_H
 
-#include "component.h"
+#include "components/component.h"
+#include "components/pluginloader.h"
 
 namespace ep {
 
@@ -13,13 +14,13 @@ class PluginManager : public Component
 public:
   EP_COMPONENT(PluginManager);
 
+  void RegisterPluginLoader(PluginLoaderRef spLoader);
   bool LoadPlugin(String filename);
 
 protected:
   PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
-  ~PluginManager();
 
-//  udAVLTree<udString, ResourceRef> plugins;
+  Array<PluginLoaderRef> loaders;
 };
 
 } //namespace ep
