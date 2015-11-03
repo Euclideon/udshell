@@ -43,7 +43,7 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString u
     throw epR_InvalidParameter_;
 
   const Variant &buf = initParams["buffer"];
-  if (buf.is(Variant::Type::Null))
+  if (buf.is(Variant::Type::Void))
   {
       inBuffer = pKernel->CreateComponent<Buffer>();
       inBuffer->Reserve(DefaultBufferSize);
