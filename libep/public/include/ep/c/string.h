@@ -17,14 +17,32 @@ extern const char s_epCharDetails[256];
 #define epToLower(c) (isAlpha(c) ? (c)|0x20 : (c))
 #define epToUpper(c) (isAlpha(c) ? (c)&~0x20 : (c))
 
-// C compilers just define String as a simple struct
+// C compilers just define epString as a simple struct
 struct epString
 {
   size_t length;
   const char *ptr;
 };
 
-// TODO: blah blah
+inline epString epString_Create(const char *pCString)
+{
+  epString s;
+  s.length = strlen(pCString);
+  s.ptr = pCString;
+  return s;
+}
+
+
+// C compilers just define epSharedString as a simple struct
+struct epSharedString
+{
+  size_t length;
+  const char *ptr;
+};
+
+epSharedString epSharedString_Create(const char *pCString);
+size_t epSharedString_IncRef(const epSharedString *pSS);
+size_t epSharedString_DecRef(const epSharedString *pSS);
 
 #if defined(__cplusplus)
 }

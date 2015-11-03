@@ -609,6 +609,17 @@ inline SharedString::SharedString(const char *pString)
   : SharedArray<const char>(pString, pString ? epStrlen(pString) : 0)
 {}
 
+inline SharedString::SharedString(epSharedString s)
+  : SharedString((SharedString&)s)
+{}
+inline SharedString::operator epSharedString() const
+{
+  epSharedString s;
+  s.length = this->length;
+  s.ptr = this->ptr;
+  return s;
+}
+
 inline SharedString& SharedString::operator =(const SharedString &val)
 {
   SharedArray<const char>::operator=(val);

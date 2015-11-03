@@ -10,6 +10,34 @@
 
 extern "C" {
 
+epSharedString epSharedString_Create(const char *pCString)
+{
+  epSharedString s;
+  new(&s) SharedString(pCString);
+  return s;
+}
+
+size_t epSharedString_IncRef(const epSharedString *pSS)
+{
+  if (!pSS || !pSS->ptr)
+    return 0;
+  internal::SliceHeader *pH = internal::GetSliceHeader(pSS->ptr);
+  return ++pH->refCount;
+}
+size_t epSharedString_DecRef(const epSharedString *pSS)
+{
+  if (!pSS || !pSS->ptr)
+    return 0;
+  internal::SliceHeader *pH = internal::GetSliceHeader(pSS->ptr);
+  if(pH->refCount > 1)
+    return --pH->refCount;
+  internal::SliceFree(pSS->ptr);
+  ((epSharedString*)pSS)->ptr = nullptr;
+  ((epSharedString*)pSS)->length = 0;
+  return 0;
+}
+
+
 // 1 = alpha, 2 = numeric, 4 = white, 8 = newline
 const char s_epCharDetails[256] =
 {
