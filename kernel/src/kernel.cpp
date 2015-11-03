@@ -53,6 +53,14 @@ epResult udRenderScene_InitRender(Kernel*);
 epResult udRenderScene_Deinit(Kernel*);
 epResult udRenderScene_DeinitRender(Kernel*); // Not sure if both Deinit's are necessary
 
+Kernel::Kernel()
+  : componentRegistry(256)
+  , instanceRegistry(256)
+  , foreignInstanceRegistry(256)
+  , messageHandlers(64)
+{
+}
+
 epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount)
 {
   epResult result;
@@ -60,11 +68,6 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   Kernel *pKernel = CreateInstanceInternal(commandLine);
 
   UD_ERROR_NULL(pKernel, epR_Failure_);
-
-  pKernel->componentRegistry.Init(256);
-  pKernel->instanceRegistry.Init(256);
-  pKernel->foreignInstanceRegistry.Init(256);
-  pKernel->messageHandlers.Init(64);
 
   pKernel->pRenderer = new Renderer(pKernel, renderThreadCount);
 
@@ -217,11 +220,6 @@ epResult Kernel::Destroy()
 
   // TODO: Destroy the streamer timer
   // pKernel->spStreamerTimer;
-
-  messageHandlers.Deinit();
-  componentRegistry.Deinit();
-  instanceRegistry.Deinit();
-  foreignInstanceRegistry.Deinit();
 
   udOctree_Shutdown();
 
