@@ -179,6 +179,7 @@
 # define EP_LINUX
 
 # include <memory.h>
+# include <stdarg.h>
 
 # if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
 #   define EP_ARCH_X64

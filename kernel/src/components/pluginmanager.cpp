@@ -362,7 +362,11 @@ bool PluginManager::LoadPlugin(String filename)
     return false;
   }
 #else
+  epPlugin_InitProc *pInit = nullptr;
+
   EPASSERT(false, "Not yet supported!");
+  if (!pInit)
+    return false;
 #endif
 
   bool bSuccess = pInit(pKernel->GetPluginInterface());

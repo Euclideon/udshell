@@ -305,14 +305,8 @@ namespace internal {
 template<typename T>
 struct Variant_Construct
 {
-  epforceinline static Variant construct(T &&rval)
-  {
-    return epToVariant(std::move(rval));
-  }
-  epforceinline static Variant construct(const T &v)
-  {
-    return epToVariant(v);
-  }
+  static Variant construct(T &&rval);
+  static Variant construct(const T &v);
 };
 
 // specialisation of non-const Variant, which annoyingly gets hooked by the T& constructor instead of the copy constructor
@@ -799,3 +793,23 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
     }
   }
 }
+
+namespace ep {
+namespace internal {
+
+template<typename T>
+epforceinline Variant Variant_Construct<T>::construct(T &&rval)
+{
+  using ::epToVariant;
+  return epToVariant(std::move(rval));
+}
+
+template<typename T>
+epforceinline Variant Variant_Construct<T>::construct(const T &v)
+{
+  using ::epToVariant;
+  return epToVariant(v);
+}
+
+} // internal
+} // ep

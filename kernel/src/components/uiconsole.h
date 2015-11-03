@@ -18,7 +18,7 @@ public:
   StreamRef GetOutStream() const { return spOutStream; }
   StreamRef GetInStream() const { return spInStream; }
 
-  void UIConsole::RelayInput(String str);
+  void RelayInput(String str);
 
   int GetNumConsoleLines() const { return (int)filteredConsole.length; }
   int GetNumLogLines() const { return (int)filteredLog.length; }

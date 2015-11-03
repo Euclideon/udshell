@@ -425,7 +425,7 @@ template<typename C>
 template<bool skipEmptyTokens>
 inline BaseString<C> BaseString<C>::popToken(BaseString<C> delimiters)
 {
-  return Slice<const C>::popToken<skipEmptyTokens>(delimiters);
+  return Slice<const C>::template popToken<skipEmptyTokens>(delimiters);
 }
 
 template<typename C>
@@ -669,9 +669,10 @@ namespace internal {
   template<typename T>
   struct StringifyProxy
   {
-    inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs)
+    static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs)
     {
-      return ::epStringify(buffer, format, *(T*)pData, pArgs);
+      using ::epStringify;
+      return epStringify(buffer, format, *(T*)pData, pArgs);
     }
     static const size_t intify = 0;
   };

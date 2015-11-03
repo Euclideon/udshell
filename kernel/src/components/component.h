@@ -251,6 +251,8 @@ inline SharedPtr<T> component_cast(ComponentRef pComponent)
   return nullptr;
 }
 
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs); 
+
 } // namespace ep
 
 
@@ -261,9 +263,6 @@ inline void epFromVariant(const Variant &v, SharedPtr<T> *pR)
 {
   *pR = component_cast<T>(v.asComponent());
 }
-
-
-ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs);
 
 
 // HACK: this here because forward referencing! >_<
