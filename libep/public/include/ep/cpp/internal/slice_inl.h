@@ -512,7 +512,7 @@ inline void Array<T, Count>::reserve(size_t count)
     this->ptr = buffer.ptr();
   else if (count > Count)
   {
-    bool needsExtend = hasAlloc && internal::GetSliceHeader(ptr)->allocatedCount < count;
+    bool needsExtend = hasAlloc && internal::GetSliceHeader(this->ptr)->allocatedCount < count;
     if (!hasAlloc || needsExtend)
     {
       T *pNew = internal::SliceAlloc<T>(count);
@@ -566,7 +566,7 @@ template <typename T, size_t Count>
 inline Slice<T> Array<T, Count>::getBuffer() const
 {
   if (hasAllocation())
-    return Slice<T>(this->ptr, internal::GetSliceHeader(ptr)->allocatedCount);
+    return Slice<T>(this->ptr, internal::GetSliceHeader(this->ptr)->allocatedCount);
   return Slice<T>(buffer.ptr(), Count);
 }
 
@@ -688,8 +688,8 @@ template <typename T>
 inline SharedArray<T>::SharedArray(const SharedArray<T> &rcslice)
   : Slice<T>(rcslice)
 {
-  if (ptr)
-    ++internal::GetSliceHeader(ptr)->refCount;
+  if (this->ptr)
+    ++internal::GetSliceHeader(this->ptr)->refCount;
 }
 template <typename T>
 inline SharedArray<T>::SharedArray(SharedArray<T> &&rval)
@@ -712,7 +712,7 @@ inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
     // if the rvalue has an allocation, we can just claim it
     this->ptr = rval.ptr;
     this->length = rval.length;
-    internal::GetSliceHeader(ptr)->refCount = 1;
+    internal::GetSliceHeader(this->ptr)->refCount = 1;
     rval.ptr = nullptr;
   }
   else
@@ -769,7 +769,7 @@ inline void SharedArray<T>::destroy()
 template <typename T>
 inline SharedArray<T>& SharedArray<T>::operator =(const SharedArray<T> &rh)
 {
-  if (ptr != rh.ptr)
+  if (this->ptr != rh.ptr)
   {
     this->~SharedArray();
     new(this) SharedArray<T>(rh);
@@ -792,7 +792,7 @@ template <typename T>
 template <typename U>
 inline SharedArray<T>& SharedArray<T>::operator =(Slice<U> rh)
 {
-  if (ptr != rh.ptr)
+  if (this->ptr != rh.ptr)
     *this = SharedArray(rh);
   return *this;
 }
