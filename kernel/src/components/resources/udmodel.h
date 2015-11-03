@@ -39,7 +39,7 @@ struct NodeRenderModel : public udRenderModel
   udRenderClipArea clipArea;
   Delegate<SimpleVoxelDlgt> simpleVoxelDel;
 
-  static unsigned VoxelShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex)
+  static unsigned VoxelShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex, udRenderNodeInfo *epUnusedParam(pNodeInfo))
   {
     NodeRenderModel *pNodeModel = static_cast<NodeRenderModel*>(pRenderModel);
     udOctree *pOctree = pRenderModel->pOctree;

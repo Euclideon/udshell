@@ -9,6 +9,7 @@
 #include "components/logger.h"
 #include "helpers.h"
 
+#include "ep/cpp/hashmap.h"
 #include "ep/epfastdelegate.h"
 using namespace fastdelegate;
 
@@ -103,6 +104,8 @@ protected:
   friend class Component;
   friend class PluginManager;
 
+  Kernel();
+
   struct ComponentType
   {
     const ComponentDesc *pDesc;
@@ -123,10 +126,10 @@ protected:
 
   SharedString uid;
 
-  udHashMap<ComponentType> componentRegistry;
-  udHashMap<Component*> instanceRegistry;
-  udHashMap<ForeignInstance> foreignInstanceRegistry;
-  udHashMap<MessageCallback> messageHandlers;
+  HashMap<ComponentType> componentRegistry;
+  HashMap<Component*> instanceRegistry;
+  HashMap<ForeignInstance> foreignInstanceRegistry;
+  HashMap<MessageCallback> messageHandlers;
 
   AVLTree<String, const ComponentDesc *> extensionsRegistry;
 
