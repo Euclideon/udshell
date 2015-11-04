@@ -1,19 +1,19 @@
 function execute_build() {
   if [ $OSTYPE == "msys" ]; then # Windows, MingW
     if [ $1 == "epshell" ]; then # epshell
-      ud/bin/premake/premake5.exe vs2013
+      ud/bin/premake/premake5.exe vs2015
     elif [ $1 == "epviewer" ]; then # epviewer
       cd viewer
-      ../ud/bin/premake/premake5.exe vs2013 
+      ../ud/bin/premake/premake5.exe vs2015 
     else
       exit 4;
     fi
     if [ $? -ne 0 ]; then exit 4; fi
   
     if [[ $# -eq 4 && $4 == "clean" ]]; then
-      "C:/Program Files (x86)/MSBuild/12.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3 //t:clean
+      "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3 //t:clean
     elif [ $# -eq 3 ]; then
-      "C:/Program Files (x86)/MSBuild/12.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3
+      "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3
     else
       exit 5
     fi

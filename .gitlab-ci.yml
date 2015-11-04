@@ -3,14 +3,14 @@ windows_shell_debug_64:
   script: "build\\build.sh epshell Debug x64 merge"
   tags:
     - windows
-    - vs2013
+    - vs2015
 
 windows_shell_release_64:
   stage: build
   script: "build\\build.sh epshell Release x64 merge"
   tags:
     - windows
-    - vs2013
+    - vs2015
 
 linux_shell_deb:
   stage: build
@@ -33,28 +33,28 @@ windows_viewer_debug_64:
   script: "build\\build.sh epviewer Debug x64 merge"
   tags:
     - windows
-    - vs2013
+    - vs2015
 
 windows_viewer_release_64:
   stage: build
   script: "build\\build.sh epviewer Release x64 merge"
   tags:
     - windows
-    - vs2013
+    - vs2015
    
 windows_viewer_debug_32:
   stage: build
   script: "build\\build.sh epviewer Debug win32 merge"
   tags:
     - windows
-    - vs2013
+    - vs2015
 
 windows_viewer_release_32:
   stage: build
   script: "build\\build.sh epviewer Release win32 merge"
   tags:
     - windows
-    - vs2013
+    - vs2015
     
 linux_viewer_deb:
   stage: build
