@@ -110,12 +110,12 @@ ComponentDesc SimpleCamera::descriptor =
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void Camera::GetProjectionMatrix(double aspectRatio, udDouble4x4 *pMatrix) const
+void Camera::GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const
 {
   if (!bOrtho)
-    *pMatrix = udDouble4x4::perspective(fovY, aspectRatio, zNear, zFar);
+    *pMatrix = Double4x4::perspective(fovY, aspectRatio, zNear, zFar);
   else
-    *pMatrix = udDouble4x4::ortho(-orthoHeight*aspectRatio*0.5, orthoHeight*aspectRatio*0.5, -orthoHeight*0.5, orthoHeight*0.5, zNear, zFar);
+    *pMatrix = Double4x4::ortho(-orthoHeight*aspectRatio*0.5, orthoHeight*aspectRatio*0.5, -orthoHeight*0.5, orthoHeight*0.5, zNear, zFar);
 }
 
 // ***************************************************************************************
@@ -255,18 +255,18 @@ bool SimpleCamera::Update(double timeDelta)
   while (ypr.x >= UD_2PI)
     ypr.x -= UD_2PI;
 
-  udDouble4x4 cam = GetCameraMatrix();
+  Double4x4 cam = GetCameraMatrix();
 
-  udDouble3 forward = cam.axis.y.toVector3();
-  udDouble3 xAxis = cam.axis.x.toVector3();
+  Double3 forward = cam.axis.y.toVector3();
+  Double3 xAxis = cam.axis.x.toVector3();
   if(bHelicopter)
-    forward = udCross3(udDouble3::create(0,0,1), xAxis);
+    forward = Cross3(Double3::create(0,0,1), xAxis);
 
   pos += forward*ty*speed;
   pos += xAxis*tx*speed;
   pos.z += tz*speed;
 
-  matrix = udDouble4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos);
+  matrix = Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos);
 
   if (ty || tx || tz || pitch || yaw)
     return true;

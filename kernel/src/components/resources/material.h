@@ -47,7 +47,7 @@ public:
   CullMode GetCullMode() const { return cullMode; }
   void SetCullMode(CullMode cullMode) { this->cullMode = cullMode; }
 
-  void SetMaterialProperty(SharedString property, const udFloat4 &val);
+  void SetMaterialProperty(SharedString property, const Float4 &val);
 
 protected:
   friend class GeomNode;
@@ -74,7 +74,7 @@ protected:
   BlendMode blendMode = BlendMode::None;
   CullMode cullMode = CullMode::None;
 
-  AVLTree<SharedString, udFloat4> properties;
+  AVLTree<SharedString, Float4> properties;
 
   RenderShaderProgramRef spRenderProgram = nullptr;
 };

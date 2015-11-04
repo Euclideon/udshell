@@ -104,7 +104,7 @@ void Material::SetShader(ShaderType type, ShaderRef spShader)
   OnShaderChanged();
 }
 
-void Material::SetMaterialProperty(SharedString property, const udFloat4 &val)
+void Material::SetMaterialProperty(SharedString property, const Float4 &val)
 {
   properties.Insert(property, val);
 }
@@ -129,7 +129,7 @@ void Material::SetRenderstate()
   for (size_t i = 0; i < numUniforms; ++i)
   {
     String name = spRenderProgram->getUniformName(i);
-    const udFloat4 *pVal = properties.Get(name);
+    const Float4 *pVal = properties.Get(name);
     if (pVal)
       spRenderProgram->setUniform((int)i, *pVal);
   }

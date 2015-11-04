@@ -234,9 +234,9 @@ void RenderableView::RenderGPU()
   epShader_SetProgramData(1, u_zbuffer, pDepthTexture);
 
   int u_rect = epShader_FindShaderParameter(s_shader, "u_rect");
-  epShader_SetProgramData(u_rect, udFloat4::create(-1, 1, 2, -2));
+  epShader_SetProgramData(u_rect, Float4::create(-1, 1, 2, -2));
   int u_textureScale = epShader_FindShaderParameter(s_shader, "u_textureScale");
-  epShader_SetProgramData(u_textureScale, udFloat4::create(0, 0, 1, 1));
+  epShader_SetProgramData(u_textureScale, Float4::create(0, 0, 1, 1));
 
   epGPU_RenderIndices(s_shader, s_pPosUV, &s_pQuadVB, s_pQuadIB, epPT_TriangleFan, 4);
 

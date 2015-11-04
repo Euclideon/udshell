@@ -135,7 +135,7 @@ String RenderShaderProgram::getUniformName(size_t i)
 {
   return epShader_GetUniformName(pProgram, i);
 }
-void RenderShaderProgram::setUniform(int i, const udFloat4 &v)
+void RenderShaderProgram::setUniform(int i, const Float4 &v)
 {
   epShader_SetCurrent(pProgram);
   epShader_SetProgramData(i, v);

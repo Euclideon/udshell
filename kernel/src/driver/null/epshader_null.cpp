@@ -101,13 +101,13 @@ void epShader_SetProgramData(int param, float value)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void epShader_SetProgramData(int param, const udFloat4 &value)
+void epShader_SetProgramData(int param, const ep::Float4 &value)
 {
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void epShader_SetProgramData(int param, const udFloat4x4 &value)
+void epShader_SetProgramData(int param, const ep::Float4x4 &value)
 {
 }
 
@@ -131,13 +131,13 @@ void epShader_SetProgramData(int param, const float *pValues, size_t count)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void epShader_SetProgramData(int param, const udFloat4 *pValues, size_t count)
+void epShader_SetProgramData(int param, const ep::Float4 *pValues, size_t count)
 {
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void epShader_SetProgramData(int param, const udFloat4x4 *pValues, size_t count)
+void epShader_SetProgramData(int param, const ep::Float4x4 *pValues, size_t count)
 {
 }
 

@@ -3,8 +3,8 @@
 #define EPVIEW_H
 
 #include "udRender.h"
-#include "udMath.h"
 
+#include "ep/cpp/math.h"
 #include "component.h"
 #include "hal/input.h"
 

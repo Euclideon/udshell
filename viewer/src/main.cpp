@@ -70,7 +70,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
   options.flags = udRF_PointCubes | udRF_ClearTargets;
   mData.spView->SetRenderOptions(options);
 
-  mData.spSimpleCamera->SetPosition(udDouble3::create(0.5, -1.0, 0.5));
+  mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
 
   mData.spSimpleCamera->SetSpeed(1.0);
   mData.spSimpleCamera->InvertYAxis(true);
@@ -78,7 +78,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
   mData.spSimpleCamera->SetDepthPlanes(0.0001f, 7500.f);
 
   mData.spUDNode->Load(mData.filename, true);
-  mData.spUDNode->SetPosition(udDouble3::create(0, 0, 0));
+  mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
 
   mData.spView->SetScene(mData.spScene);
   mData.spView->SetCamera(mData.spSimpleCamera);

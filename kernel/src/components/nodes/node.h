@@ -2,7 +2,7 @@
 #ifndef EPNODE_H
 #define EPNODE_H
 
-#include "udMath.h"
+#include "ep/cpp/math.h"
 
 #include "../resources/resource.h"
 #include "hal/input.h"
@@ -19,11 +19,11 @@ class Node : public Resource
 public:
   EP_COMPONENT(Node);
 
-  virtual void SetMatrix(const udDouble4x4 &mat) { matrix = mat; }
-  const udDouble4x4& GetMatrix() const { return matrix; }
+  virtual void SetMatrix(const Double4x4 &mat) { matrix = mat; }
+  const Double4x4& GetMatrix() const { return matrix; }
 
-  virtual void SetPosition(const udDouble3 &pos) { matrix.axis.t = udDouble4::create(pos, matrix.axis.t.w); }
-  const udDouble3& GetPosition() const { return matrix.axis.t.toVector3(); }
+  virtual void SetPosition(const Double3 &pos) { matrix.axis.t = Double4::create(pos, matrix.axis.t.w); }
+  const Double3& GetPosition() const { return matrix.axis.t.toVector3(); }
 
   NodeRef Parent() const { return NodeRef(pParent); }
   const Slice<NodeRef> Children() const { return children; }
@@ -33,7 +33,7 @@ public:
 
   void Detach();
 
-  void CalculateWorldMatrix(udDouble4x4 *pMatrix) const;
+  void CalculateWorldMatrix(Double4x4 *pMatrix) const;
 
 protected:
   friend class Scene;
@@ -43,12 +43,12 @@ protected:
 
   virtual bool InputEvent(const epInputEvent &ev);
   virtual bool Update(double timeStep);
-  virtual epResult Render(RenderSceneRef &spScene, const udDouble4x4 &mat);
+  virtual epResult Render(RenderSceneRef &spScene, const Double4x4 &mat);
 
   Node *pParent = nullptr;
   Array<NodeRef, 3> children;
 
-  udDouble4x4 matrix = udDouble4x4::identity();
+  Double4x4 matrix = Double4x4::identity();
 
   // TODO: enable/visible/etc flags
 };
