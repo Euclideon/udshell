@@ -34,8 +34,9 @@ public:
   epResult SendMessage(String target, String message, const Variant &data)  { return s_pPluginInstance->pComponentAPI->SendMessage((epComponent*)this, target, message, (const epVariant*)&data); }
 };
 
+ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, const epVarArg *pArgs);
+
 } // namespace ep
 
-ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, const epVarArg *pArgs);
 
 #endif

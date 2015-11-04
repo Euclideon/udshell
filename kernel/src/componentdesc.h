@@ -10,12 +10,6 @@
 #include "ep/cpp/avltree.h"
 
 
-// TODO: remove this!
-#if defined(EP_WINDOWS)
-#pragma warning(disable: 4100)
-#endif // defined(EP_WINDOWS)
-
-
 #define PROTOTYPE_COMPONENT(Name) \
   SHARED_CLASS(Name)
 
