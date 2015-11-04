@@ -259,11 +259,9 @@ void Component::LogInternal(int level, String text, int category, String compone
   pKernel->GetLogger()->Log(level, text, (LogCategories)category, componentUID);
 }
 
-} // namespace ep
-
-/*
 ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs)
 {
+#if 0 // TODO : Fix this
   ptrdiff_t len = pComponent->uid.length + 1;
   if (!buffer.ptr)
     return len;
@@ -273,5 +271,8 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pCompo
   // HACK: this could be a lot nicer!
   MutableString<64> uid; uid.concat("@", pComponent->uid);
   return epStringifyTemplate(buffer, format, uid, pArgs);
+#endif
+  return 0;
 }
-*/
+
+} // namespace ep

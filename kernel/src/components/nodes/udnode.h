@@ -87,11 +87,11 @@ inline void UDNode::SetSimpleVoxelDelegate(Delegate<NodeRenderModel::SimpleVoxel
     simpleVoxelDel = Delegate<NodeRenderModel::SimpleVoxelDlgt>();
 }
 
-} // namespace ep
-
-
 Variant epToVariant(const BoundingVolume &volume);
 void epFromVariant(const Variant &variant, BoundingVolume *pVolume);
+
+} // namespace ep
+
 Variant epToVariant(const udRenderClipArea& area);
 void epFromVariant(const Variant &variant, udRenderClipArea *pArea);
 

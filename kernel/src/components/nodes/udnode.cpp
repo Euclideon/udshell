@@ -214,8 +214,6 @@ BoundingVolume UDNode::GetBoundingVolume() const
   return vol;
 }
 
-} // namespace ep
-
 Variant epToVariant(const BoundingVolume &volume)
 {
   Array<KeyValuePair> kvp;
@@ -238,6 +236,8 @@ void epFromVariant(const Variant &variant, BoundingVolume *pVolume)
   pVolume->max.y = variant["maxy"].as<double>();
   pVolume->max.z = variant["maxz"].as<double>();
 }
+
+} // namespace ep
 
 Variant epToVariant(const udRenderClipArea& area)
 {
