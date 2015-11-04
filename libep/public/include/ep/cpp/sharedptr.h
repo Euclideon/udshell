@@ -6,11 +6,6 @@
 
 #include "ep/cpp/platform.h"
 
-#if defined(EP_COMPILER_VISUALC)
-// TODO: REMOVE THIS!!!
-#pragma warning(disable: 4714)
-#endif
-
 #define SHARED_CLASS(Name) \
   class Name; \
   typedef ::ep::SharedPtr<Name> Name##Ref;

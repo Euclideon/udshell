@@ -55,8 +55,9 @@ epResult epComponent_SendMessage(epComponent *pComponent, epString target, epStr
   return s_pPluginInstance->pComponentAPI->SendMessage(pComponent, target, message, pData);
 }
 
-}
+} // extern "C"
 
+namespace ep {
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, const epVarArg *pArgs)
 {
@@ -70,3 +71,5 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, 
   MutableString64 uid; uid.concat("@", pComponent->GetUID());
   return epStringifyTemplate(buffer, format, uid, pArgs);
 }
+
+} // namespace ep
