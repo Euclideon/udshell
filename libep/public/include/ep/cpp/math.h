@@ -193,8 +193,8 @@ struct Vector3
 {
   T x, y, z;
 
-  Vector3<T>& toVector2() { return *(udVector2<T>*)this; }
-  const Vector3<T>& toVector2() const { return *(udVector2<T>*)this; }
+  Vector3<T>& toVector2() { return *(Vector2<T>*)this; }
+  const Vector3<T>& toVector2() const { return *(Vector2<T>*)this; }
 
   Vector3<T> operator -() const { Vector3<T> r = { -x, -y, -z }; return r; }
 
