@@ -4,7 +4,7 @@ extern "C" {
 
 epPluginInstance *s_pPluginInstance = nullptr;
 
-bool epPluginAttach();
+bool epPluginAttach() epweak;
 
 #if defined(EP_COMPILER_VISUALC)
 bool epPluginAttachWeak()
@@ -16,6 +16,11 @@ bool epPluginAttachWeak()
 # else
 #   pragma comment(linker, "/alternatename:epPluginAttach=epPluginAttachWeak")
 # endif
+#else
+bool epPluginAttach()
+{
+  return false;
+}
 #endif
 
 EP_EXPORT bool epPlugin_Init(epPluginInstance *pPlugin)
