@@ -2,6 +2,7 @@ project "libep"
 	kind "StaticLib"
 	language "C++"
 	flags { "StaticRuntime", "OmitDefaultLibrary" }
+	pic "on"
 
 	files { "src/**" }
 	files { "public/**" }

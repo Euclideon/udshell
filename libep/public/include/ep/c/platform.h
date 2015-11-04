@@ -330,6 +330,7 @@ struct epTheTypeIs;
 # define epnothrow __declspec(nothrow)
 # define eppacked
 # define epforceinline __forceinline
+# define epweak
 # define epprintf_func(formatarg, vararg)
 # define epprintf_method(formatarg, vararg)
 # if !EP_DEBUG
@@ -350,6 +351,7 @@ struct epTheTypeIs;
 # define epnothrow __attribute__((nothrow))
 # define eppacked __attribute__((packed))
 # define epforceinline inline __attribute__((always_inline))
+# define epweak __attribute__((weak))
 # define epprintf_func(formatarg, vararg) __attribute__((format(printf, formatarg, vararg)))
 # define epprintf_method(formatarg, vararg) __attribute__((format(printf, formatarg + 1, vararg + 1)))
 # if !EP_DEBUG
@@ -370,6 +372,7 @@ struct epTheTypeIs;
 # define epnothrow
 # define eppacked
 # define epforceinline inline
+# define epweak
 # define epprintf_func(formatarg, vararg)
 # define epprintf_method(formatarg, vararg)
 # if !EP_DEBUG
