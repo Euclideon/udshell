@@ -8,6 +8,7 @@
 #include "../components/qtcomponent_qt.h"
 
 #include <qqmlengine.h>
+#include <QJSValueIterator>
 
 
 // Qt type conversion to/from UD
@@ -27,6 +28,19 @@ void epFromVariant(const Variant &variant, QString *pString)
   String s = variant.asString();
   if (!s.empty())
     *pString = QString::fromUtf8(s.ptr, static_cast<int>(s.length));
+}
+
+Variant epToVariant(QObject *pQObj)
+{
+  qt::QtEPComponent *pQC = qobject_cast<qt::QtEPComponent*>(pQObj);
+  if (pQC)
+    return Variant(pQC->GetComponent());
+
+  udDebugPrintf("TODO: epToVariant: Unsupported QObject conversion '%s'; we need a global pKernel pointer >_<", pQObj->metaObject()->className());
+
+  // TODO: create generic QtComponent which thinly wraps a QObject
+//  pKernel->CreateComponent<QtComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
+  return Variant(nullptr);
 }
 
 Variant epToVariant(const QVariant &var)
@@ -72,30 +86,18 @@ Variant epToVariant(const QVariant &var)
       return Variant(qt::AllocUDStringFromQString(var.toString()));
 
     case QMetaType::QObjectStar:
+      return epToVariant(var.value<QObject*>());
+
+    case QMetaType::User:
     {
-      QObject *pQObj = var.value<QObject*>();
-
-      qt::QtEPComponent *pQC = qobject_cast<qt::QtEPComponent*>(pQObj);
-      if (pQC)
-        return Variant(pQC->GetComponent());
-
-      udDebugPrintf("TODO: epToVariant: Unsupported QObject conversion '%s'; we need a global pKernel pointer >_<", pQObj->metaObject()->className());
-
-      // TODO: create generic QtComponent which thinly wraps a QObject
-//      pKernel->CreateComponent<QtComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
-      return Variant(nullptr);
+      int userType = var.userType();
+      if (userType == qMetaTypeId<QJSValue>())
+        return epToVariant(var.value<QJSValue>());
     }
-
-    // TODO: serialize other types?
-
-    // Variant::Type::Array
-
-    // Variant::Type::AssocArray
-
     default:
       udDebugPrintf("epToVariant: Unsupported type '%s' (support me!)\n", var.typeName());
       return Variant();
-  };
+  }
 }
 
 void epFromVariant(const Variant &variant, QVariant *pVariant)
@@ -140,20 +142,124 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
       break;
     }
 
-    //case Variant::Type::Delegate:
+    case Variant::Type::Delegate:
+    {
+      EPASSERT(false, "TODO: Support passing delegates...");
+      break;
+    }
 
     // TODO: optimise?
     case Variant::Type::String:
       pVariant->setValue(variant.as<QString>());
       break;
 
-    //case Variant::Type::Array:
+    case Variant::Type::Array:
+    {
+      QVariantList list;
+      Slice<Variant> arr = variant.asArray();
+      list.reserve((int)arr.length);
+      for (auto &v : arr)
+      {
+        QVariant t;
+        epFromVariant(v, &t);
+        list.push_back(t);
+      }
+      // TODO: what?! no move assignment! look into this...
+      pVariant->setValue(list);
+      break;
+    }
 
-    //case Variant::Type::AssocArray:
+    case Variant::Type::AssocArray:
+    {
+      QVariantMap map;
+      Slice<KeyValuePair> aa = variant.asAssocArray();
+      for (auto &v : aa)
+      {
+        if (!v.key.is(Variant::Type::String))
+        {
+          udDebugPrintf("epFromVariant: Key is not string!\n");
+          continue;
+        }
+        String k = v.key.asString();
+        QVariant value;
+        epFromVariant(v.value, &value);
+        map.insert(QLatin1String(k.ptr, (int)k.length), value);
+      }
+      // TODO: what?! no move assignment! look into this...
+      pVariant->setValue(map);
+      break;
+    }
 
     default:
       udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
-  };
+  }
+}
+
+Variant epToVariant(const QJSValue &v)
+{
+  // TODO: investigate if we can switch on some numeric type id?
+
+  if (v.isNumber())
+    return Variant(v.toNumber());
+  else if (v.isString())
+    return Variant(qt::AllocUDStringFromQString(v.toString()));
+  else if (v.isBool())
+    return Variant(v.toBool());
+  else if (v.isNull())
+    return Variant(nullptr);
+  else if (v.isVariant())
+    return epToVariant(v.toVariant());
+  else if (v.isQObject())
+    return epToVariant(v.toQObject());
+  else if (v.isCallable())
+  {
+    EPASSERT(false, "TODO: pinch the code from subscribe...");
+  }
+  else if (v.isArray())
+  {
+    Array<Variant> r;
+    size_t length = (size_t)v.property(QString("length")).toNumber();
+    r.reserve(length);
+
+    QJSValueIterator i(v);
+    size_t index = 0;
+    while (i.hasNext() && index < length)
+    {
+      i.next();
+      EPASSERT(i.name() == QString::number(index++), "Array has fail sequence");
+      r.pushBack(epToVariant(i.value()));
+    }
+    return Variant(std::move(r));
+  }
+  else if (v.isObject())
+  {
+    Array<KeyValuePair> r;
+    QJSValueIterator i(v);
+    while (i.hasNext())
+    {
+      i.next();
+
+      QString name = i.name();
+      QJSValue value = i.value();
+      r.pushBack(KeyValuePair(Variant(qt::AllocUDStringFromQString(name)), epToVariant(value)));
+    }
+    return Variant(std::move(r));
+  }
+  else if (v.isDate())
+  {
+  }
+  else if (v.isError())
+  {
+  }
+  else if (v.isRegExp())
+  {
+  }
+  else if (v.isUndefined())
+  {
+  }
+
+  udDebugPrintf("epToVariant: Unsupported type!\n");
+  return Variant();
 }
 
 void epFromVariant(const Variant &variant, QJSValue *pJSValue)
@@ -196,7 +302,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
 
     default:
       udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
-  };
+  }
 }
 
 #endif
