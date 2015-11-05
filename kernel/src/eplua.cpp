@@ -109,7 +109,7 @@ static int CreateComponent(lua_State *L)
 
   ComponentRef c = nullptr;
   epResult r = l.kernel()->CreateComponent(type, init, &c);
-  if (r == epR_Failure_)
+  if (r == epR_Failure)
     l.pushNil();
   else
     l.pushComponent(c);

@@ -103,7 +103,7 @@ epResult QtKernel::InitInternal()
   if (RegisterComponent<QtComponent>() != epR_Success)
   {
     LogError("Unable to register QtComponent");
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   // create our qapplication
@@ -139,7 +139,7 @@ epResult QtKernel::InitInternal()
     LogError("Error creating Splash Screen");
     foreach(const QQmlError &error, component.errors())
       LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   // defer the heavier init stuff and app specific init to after Qt hits the event loop
@@ -158,7 +158,7 @@ epResult QtKernel::RunMainLoop()
   EPASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
   // run the Qt event loop - this may never return
-  return (pApplication->exec() == 0) ? epR_Success : epR_Failure_;
+  return (pApplication->exec() == 0) ? epR_Success : epR_Failure;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -201,7 +201,7 @@ epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
   {
     // TODO: error handle
     LogError("Error making main gl context current");
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   return epR_Success;

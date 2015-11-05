@@ -33,7 +33,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitPa
   const Variant &path = initParams["path"];
 
   if (!path.is(Variant::Type::String))
-	  throw epR_InvalidParameter_;
+	  throw epR_InvalidParameter;
 
   const Variant &flags = initParams["flags"];
   FileOpenFlags of = flags.as<FileOpenFlags>();

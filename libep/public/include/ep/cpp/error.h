@@ -3,48 +3,83 @@
 #define EPERROR_HPP
 
 #include "ep/c/error.h"
+#include "ep/cpp/string.h"
 
 #include <functional>
 
-struct epErrorNode
+#define EPERROR(__result) ::ep::Error __error__(__result)
+#define EPERROR_IF(x, __result, lambdaBody)  do { if (x) { result =__result;  return;} else { __error__.AddNode(new(alloca(sizeof(epErrorNode))) ::ep::ErrorNode([&]()mutable lambdaBody));} } while(false);
+#define EPERROR_NULL(ptr, __result, lambdaBody)  do {if (!ptr) { result =__result;  return;} else { __error__.AddNode(new(alloca(sizeof(::ep::ErrorNode))) ::ep::ErrorNode([&]()mutable lambdaBody));} } while(false);
+#define EPKNLERROR_CLEANUP(lambdaBody)  do {{ __error__.AddNode(new(alloca(sizeof(::ep::ErrorNode))) ::ep::ErrorNode([&]()mutable lambdaBody));} } while(false);
+
+namespace ep {
+
+#define PushError(error, message) epPushError(error, message, __FILE__, __LINE__)
+epErrorState* GetError();
+void ClearError();
+
+SharedString DumpError();
+
+
+struct ErrorNode
 {
-  epErrorNode(const std::function<void()> &error) : error(error) {}
+  ErrorNode(const std::function<void()> &error) : error(error) {}
   std::function<void()> error;
-  epErrorNode *pNext = nullptr;
+  ErrorNode *pNext = nullptr;
 };
 
-struct epError
+struct Error
 {
-  epError(const epResult &result) : result(result) {}
-  ~epError()
+  Error(const epResult &result) : result(result) {}
+  ~Error()
   {
     if (result != epR_Success)
     {
-      epErrorNode *pNode = pRoot;
+      ErrorNode *pNode = pRoot;
       while (pNode)
       {
-        epErrorNode *pCurrent = pNode;
+        ErrorNode *pCurrent = pNode;
         pNode = pNode->pNext;
 
         pCurrent->error();
-        pCurrent->~epErrorNode();
+        pCurrent->~ErrorNode();
       }
     }
   }
 
-  void operator=(const epError &) = delete;
-  void AddNode(epErrorNode *pNode)
+  void operator=(const Error &) = delete;
+  void AddNode(ErrorNode *pNode)
   {
     pNode->pNext = pRoot;
     pRoot = pNode;
   }
-  epErrorNode *pRoot = nullptr;
+  ErrorNode *pRoot = nullptr;
   const epResult &result;
 };
 
-#define EPERROR(__result) epError __error__(__result)
-#define EPERROR_IF(x, __result, lambdaBody)  do { if (x) { result =__result;  return;} else { __error__.AddNode(new(alloca(sizeof(epErrorNode))) epErrorNode([&]()mutable lambdaBody));} } while(false);
-#define EPERROR_NULL(ptr, __result, lambdaBody)  do {if (!ptr) { result =__result;  return;} else { __error__.AddNode(new(alloca(sizeof(epErrorNode))) epErrorNode([&]()mutable lambdaBody));} } while(false);
-#define EPKNLERROR_CLEANUP(lambdaBody)  do {{ __error__.AddNode(new(alloca(sizeof(epErrorNode))) epErrorNode([&]()mutable lambdaBody));} } while(false);
+
+
+// impl...
+
+namespace internal {
+  extern thread_local epErrorState s_errorStack[256];
+  extern thread_local size_t s_errorDepth;
+}
+
+inline epErrorState* GetError()
+{
+  return internal::s_errorDepth ? &internal::s_errorStack[internal::s_errorDepth-1] : nullptr;
+}
+inline void ClearError()
+{
+  epClearError();
+}
+
+inline SharedString DumpError()
+{
+  return epDumpError();
+}
+
+} // namespace ep
 
 #endif // EPERROR_HPP

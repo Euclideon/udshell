@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 
   // create a kernel
   epResult r = Kernel::Create(&pKernel, udParseCommandLine(argc, argv), 8);
-  if (r == epR_Failure_)
+  if (r == epR_Failure)
   {
     // TODO: improve error handling/reporting
     udDebugPrintf("Error creating Kernel\n");

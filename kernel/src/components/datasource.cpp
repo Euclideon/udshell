@@ -99,7 +99,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
   if (!spSource)
   {
     LogError("Unknown type for \"src\" init paramater");
-    throw epR_InvalidParameter_;
+    throw epR_InvalidParameter;
   }
 
   return spSource;

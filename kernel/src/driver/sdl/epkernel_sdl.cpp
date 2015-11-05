@@ -37,20 +37,20 @@ epResult SDLKernel::InitInternal()
 
   int sdlInit = SDL_Init(SDL_INIT_VIDEO);
   if (sdlInit < 0)
-    return epR_Failure_;
+    return epR_Failure;
 
   s_sdlEvent = SDL_RegisterEvents(1);
   if (s_sdlEvent == (Uint32)-1)
   {
     SDL_Quit();
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   s_window = SDL_CreateWindow("udPointCloud Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_displayWidth, s_displayHeight, SDL_WINDOW_OPENGL);
   if (!s_window)
   {
     SDL_Quit();
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   s_context = SDL_GL_CreateContext(s_window);
@@ -58,7 +58,7 @@ epResult SDLKernel::InitInternal()
   {
     SDL_DestroyWindow(s_window);
     SDL_Quit();
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   epResult result = InitRender();

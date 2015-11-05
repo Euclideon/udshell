@@ -55,16 +55,16 @@ static void ViewerInit(String sender, String message, const Variant &data)
   using namespace ep;
   //TODO: Error handling for the whole function, perhaps send message with error?
   mData.spView = mData.pKernel->CreateComponent<View>();
-  EPERROR_NULL(mData.spView, epR_Failure_, { mData.spView = nullptr; });
+  EPERROR_NULL(mData.spView, epR_Failure, { mData.spView = nullptr; });
 
   mData.spScene = mData.pKernel->CreateComponent<Scene>();
-  EPERROR_NULL(mData.spScene, epR_Failure_, { mData.spScene = nullptr; });
+  EPERROR_NULL(mData.spScene, epR_Failure, { mData.spScene = nullptr; });
 
   mData.spSimpleCamera = mData.pKernel->CreateComponent<SimpleCamera>();
-  EPERROR_NULL(mData.spSimpleCamera, epR_Failure_, { mData.spSimpleCamera = nullptr; });
+  EPERROR_NULL(mData.spSimpleCamera, epR_Failure, { mData.spSimpleCamera = nullptr; });
 
   mData.spUDNode = mData.pKernel->CreateComponent<UDNode>();
-  EPERROR_NULL(mData.spUDNode, epR_Failure_, { mData.spUDNode = nullptr; });
+  EPERROR_NULL(mData.spUDNode, epR_Failure, { mData.spUDNode = nullptr; });
 
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None, nullptr, nullptr, nullptr };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
