@@ -92,13 +92,13 @@ protected:
   DelegateMementoRef m = nullptr;
 };
 
-} // namespace ep
-
 template<typename R, typename... Args>
 inline ptrdiff_t epStringify(Slice<char> epUnusedParam(buffer), String epUnusedParam(format), Delegate<R(Args...)> epUnusedParam(d), const epVarArg *epUnusedParam(pArgs))
 {
   EPASSERT(false, "TODO! Write me!");
   return 0;
 }
+
+} // namespace ep
 
 #endif // _EPDELEGATE_HPP

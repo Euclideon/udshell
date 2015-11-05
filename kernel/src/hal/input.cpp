@@ -50,18 +50,22 @@ bool epInput_WasPressed(epInputDevice device, int control, int deviceIndex)
 
   InputState prev = gInputState[1-gCurrentInputState];
   InputState state = gInputState[gCurrentInputState];
+  bool result = false;
   switch (device)
   {
     case epID_Keyboard:
-      return state.keys[deviceIndex][control] && !prev.keys[deviceIndex][control];
+      result = state.keys[deviceIndex][control] && !prev.keys[deviceIndex][control];
+      break;
     case epID_Mouse:
-      return state.mouse[deviceIndex][control] && !prev.mouse[deviceIndex][control];;
+      result = state.mouse[deviceIndex][control] && !prev.mouse[deviceIndex][control];;
+      break;
     case epID_Gamepad:
-      return state.gamepad[deviceIndex][control] && !prev.gamepad[deviceIndex][control];
+      result = state.gamepad[deviceIndex][control] && !prev.gamepad[deviceIndex][control];
+      break;
     default:
       EPUNREACHABLE;
   }
-  return false;
+  return result;
 }
 
 // ********************************************************
@@ -78,18 +82,22 @@ bool epInput_WasReleased(epInputDevice device, int control, int deviceIndex)
 
   InputState prev = gInputState[1-gCurrentInputState];
   InputState state = gInputState[gCurrentInputState];
+  bool result = false;
   switch (device)
   {
     case epID_Keyboard:
-      return !state.keys[deviceIndex][control] && prev.keys[deviceIndex][control];
+      result = !state.keys[deviceIndex][control] && prev.keys[deviceIndex][control];
+      break;
     case epID_Mouse:
-      return !state.mouse[deviceIndex][control] && prev.mouse[deviceIndex][control];
+      result = !state.mouse[deviceIndex][control] && prev.mouse[deviceIndex][control];
+      break;
     case epID_Gamepad:
-      return !state.gamepad[deviceIndex][control] && prev.gamepad[deviceIndex][control];
+      result = !state.gamepad[deviceIndex][control] && prev.gamepad[deviceIndex][control];
+      break;
     default:
       EPUNREACHABLE;
   }
-  return false;
+  return result;
 }
 
 // ********************************************************
@@ -105,22 +113,26 @@ float epInput_State(epInputDevice device, int control, int deviceIndex)
   }
 
   InputState state = gInputState[gCurrentInputState];
+  float result = 0.0f;
   switch (device)
   {
     case epID_Keyboard:
-      return state.keys[deviceIndex][control] ? 1.f : 0.f;
+      result = state.keys[deviceIndex][control] ? 1.f : 0.f;
+      break;
     case epID_Mouse:
-      return state.mouse[deviceIndex][control];
+      result = state.mouse[deviceIndex][control];
+      break;
     case epID_Gamepad:
-      return state.gamepad[deviceIndex][control];
-//    case epID_TouchScreen:
+      result = state.gamepad[deviceIndex][control];
+      break;
+      //    case epID_TouchScreen:
 //    case epID_Accelerometer:
 //    case epID_Compas:
       // etc...
     default:
       EPUNREACHABLE;
   }
-  return 0.0;
+  return result;
 }
 
 // ********************************************************

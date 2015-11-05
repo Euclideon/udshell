@@ -466,6 +466,12 @@ inline void SharedPtr<T>::release()
   }
 }
 
+template<typename T>
+ptrdiff_t epStringify(Slice<char> buffer, String format, SharedPtr<T> spT, const epVarArg *pArgs)
+{
+  return epStringifyTemplate(buffer, format, spT.ptr(), pArgs);
+}
+ 
 } // namespace ep
 
 
@@ -520,12 +526,6 @@ template<class T> inline bool operator!=(const UniquePtr<T> &l, nullptr_t) { ret
 template<class T> inline bool operator==(nullptr_t, const UniquePtr<T> &r) { return nullptr == r.ptr(); }
 template<class T> inline bool operator!=(nullptr_t, const UniquePtr<T> &r) { return nullptr != r.ptr(); }
 
-
-template<typename T>
-ptrdiff_t epStringify(Slice<char> buffer, String format, SharedPtr<T> spT, const epVarArg *pArgs)
-{
-  return epStringifyTemplate(buffer, format, spT.ptr(), pArgs);
-}
 
 // unit tests
 epResult epSharedPtr_Test();

@@ -33,11 +33,11 @@ protected:
   friend void epFromVariant(const Variant &variant, DateTime *pDt);
 };
 
-} // namespace ep
-
 ptrdiff_t epStringify(Slice<char> buffer, String format, const DateTime &dt, const epVarArg *epUnusedParam(pArgs));
 
 Variant epToVariant(const DateTime& dt);
 void epFromVariant(const Variant &variant, DateTime *pDt);
+
+} // namespace ep
 
 #endif // _EPDATETIME_HPP

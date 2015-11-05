@@ -486,7 +486,7 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, BaseString<C> s, const 
   {
     for (size_t i = 0; i<s.length; )
     {
-      size_t l;
+      size_t l = 0;
       secLen += epUTF8SequenceLength(s.ptr + i, &l);
       i += l;
     }
@@ -692,12 +692,14 @@ epResult epSlice_Test()
 
 
   Slice<void> tttt = (Slice<void>)s1;
+  tttt.ptr = tttt.ptr; // fixes gcc warning
 
   // Array<>
   Array<int> s_i(i1);
   Array<const int> s_ci(s1);
 
   Slice<int> s_slice = s_i.slice(1, 3); // slices of Array are not owned; they die when the parent allocation dies
+  s_slice.ptr = s_slice.ptr; // fixes gcc warning
 
 
   // SharedArray<> tests
@@ -718,7 +720,7 @@ epResult epSlice_Test()
 
   for (auto j : i1)
   {
-    j;
+    j *= 1; // fixes gcc warning
     // iterate the elements in i1
     //...
   }
@@ -752,14 +754,16 @@ epResult epString_Test()
   wcs.eq(s1);                   // compare wide-char and ascii strings
 
   auto subStr = s1.slice(1, 4); // string slice; "ell"
-
+  subStr.ptr = subStr.ptr;      // fixes gcc warnings
+  
   s2.toStringz(buffer, sizeof(buffer)); // write String to c-string
 
 
   // MutableString
   MutableString<64> s_s1(s1);
   String s_slice = s_s1.slice(1, 4); // slices of Array are not owned; they die when the parent allocation dies
-
+  s_slice.ptr = s_slice.ptr;     // fixes gcc warnings
+  
   s_s1.eqIC("HELLO");            // string comparison against string literals
 
   receivesString(s_s1);         // pass to functions

@@ -1,6 +1,9 @@
 #include "ep/cpp/datetime.h"
 #include <time.h>
 
+namespace ep
+{
+
 DateTime::DateTime() : DateTime(time(nullptr)) {}
 
 DateTime::DateTime(time_t ti)
@@ -121,4 +124,6 @@ void epFromVariant(const Variant &variant, DateTime *pDt)
   pDt->yday   = variant["yday"].as<uint16_t>();
   pDt->year   = variant["year"].as<uint16_t>();
 }
+
+} // namespace ep
 

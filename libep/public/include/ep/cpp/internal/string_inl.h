@@ -175,7 +175,7 @@ inline BaseString<C> BaseString<C>::slice(ptrdiff_t first, ptrdiff_t last) const
 {
   size_t start = (size_t)(first < 0 ? first + this->length : first);
   size_t end = (size_t)(last < 0 ? last + this->length : last);
-  EPASSERT(end <= length && start <= end, "Index out of range!");
+  EPASSERT(end <= this->length && start <= end, "Index out of range!");
   return BaseString<C>(this->ptr + start, end - start);
 }
 

@@ -6,7 +6,9 @@
 
 #include "components/component.h"
 
-class ep::Kernel;
+namespace ep {
+class Kernel;
+}
 
 namespace qt
 {

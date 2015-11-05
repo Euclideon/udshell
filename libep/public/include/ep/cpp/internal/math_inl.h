@@ -1,6 +1,8 @@
 #include <float.h>
 #include <math.h>
 
+namespace ep {
+
 template<typename F>
 ptrdiff_t epStringify(Slice<char> buffer, String format, const Vector2<F> &v, const epVarArg *pArgs);
 template<typename F>
@@ -11,8 +13,6 @@ template<typename F>
 ptrdiff_t epStringify(Slice<char> buffer, String format, const Quaternion<F> &q, const epVarArg *pArgs);
 template<typename F>
 ptrdiff_t epStringify(Slice<char> buffer, String format, const Matrix4x4<F> &m, const epVarArg *pArgs);
-
-namespace ep {
 
 epforceinline float Pow(float f, float n) { return powf(f, n); }
 epforceinline double Pow(double d, double n) { return pow(d, n); }

@@ -42,13 +42,17 @@ void SetConsoleColor(ConsoleColor fg, ConsoleColor bg)
     "\x1b[30m", "\x1b[34m", "\x1b[32m", "\x1b[36m", "\x1b[31m", "\x1b[35m", "\x1b[33m", "\x1b[37m", // colors
     "\x1b[30;1m", "\x1b[34;1m", "\x1b[32;1m", "\x1b[36;1m", "\x1b[31;1m", "\x1b[35;1m", "\x1b[33;1m", "\x1b[37;1m", // 'bold'
   };
-  static const char *gb_codes[] = {
+  static const char *bg_codes[] = {
     "\x1b[49m", // default
     "\x1b[40m", "\x1b[44m", "\x1b[42m", "\x1b[46m", "\x1b[41m", "\x1b[45m", "\x1b[43m", "\x1b[47m", // colors
     "\x1b[40;1m", "\x1b[44;1m", "\x1b[42;1m", "\x1b[46;1m", "\x1b[41;1m", "\x1b[45;1m", "\x1b[43;1m", "\x1b[47;1m", // 'bold'
   };
-  printf(fg_codes[(int)fg + 1]);
-  printf(fg_codes[(int)fg + 1]);
+  
+  const char *pFG = fg_codes[(int)fg + 1];
+  const char *pBG = bg_codes[(int)bg + 1];
+  
+  fwrite(pFG, strlen(pFG), 1, stdout);
+  fwrite(pBG, strlen(pBG), 1, stdout);
 }
 #endif
 
@@ -649,10 +653,12 @@ int LuaState::help(lua_State* L)
   MutableString256 buffer;
   if (numArgs > 1)
   {
+#if 0
     // help for member
     String s = l.toString(2);
 
     // find member...
+#endif // 0
   }
   else
   {

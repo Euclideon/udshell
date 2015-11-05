@@ -153,32 +153,32 @@ void UIConsole::RebuildOutput()
   if (bOutputsMerged)
   {
 
-    int logIndex = 0, consoleIndex = 0;
+    size_t logIndex = 0, consoleIndex = 0;
     while (logIndex < logLines.length && consoleIndex < consoleLines.length)
     {
       if (logLines[logIndex].ordering < consoleLines[consoleIndex].ordering)
       {
         if (logFilter.FilterLogLine(*logLines[logIndex].GetLogLine()) && FilterTextLine(logLines[logIndex].text))
-          filteredMerged.pushBack(MergedLine(typeLog, logIndex));
+          filteredMerged.pushBack(MergedLine(typeLog, (int)logIndex));
         logIndex++;
       }
       else
       {
         if(FilterTextLine(consoleLines[consoleIndex].text))
-          filteredMerged.pushBack(MergedLine(typeConsole, consoleIndex));
+          filteredMerged.pushBack(MergedLine(typeConsole, (int)consoleIndex));
         consoleIndex++;
       }
     }
     while (logIndex < logLines.length)
     {
       if (logFilter.FilterLogLine(*logLines[logIndex].GetLogLine()) && FilterTextLine(logLines[logIndex].text))
-        filteredMerged.pushBack(MergedLine(typeLog, logIndex));
+        filteredMerged.pushBack(MergedLine(typeLog, (int)logIndex));
       logIndex++;
     }
     while (consoleIndex < consoleLines.length)
     {
       if (FilterTextLine(consoleLines[consoleIndex].text))
-        filteredMerged.pushBack(MergedLine(typeConsole, consoleIndex));
+        filteredMerged.pushBack(MergedLine(typeConsole, (int)consoleIndex));
       consoleIndex++;
     }
 
@@ -202,16 +202,16 @@ void UIConsole::RebuildOutput()
   }
   else
   {
-    for (int i = 0; i < consoleLines.length; i++)
+    for (size_t i = 0; i < consoleLines.length; i++)
     {
       if (FilterTextLine(consoleLines[i].text))
-        filteredConsole.pushBack(i);
+        filteredConsole.pushBack((int)i);
     }
 
-    for (int i = 0; i < logLines.length; i++)
+    for (size_t i = 0; i < logLines.length; i++)
     {
       if (logFilter.FilterLogLine(*logLines[i].GetLogLine()) && FilterTextLine(logLines[i].text))
-        filteredLog.pushBack(i);
+        filteredLog.pushBack((int)i);
     }
 
     // TODO Change below when adding virtual scrollbar support
@@ -267,7 +267,7 @@ void UIConsole::OnStreamOutput()
 {
   int64_t newPos = spOutStream->GetPos();
   MutableString<0> buf;
-  buf.reserve(newPos - pos);
+  buf.reserve(size_t(newPos - pos));
 
   spOutStream->Seek(SeekOrigin::Begin, 0);
   Slice<void> readSlice = spOutStream->Read(buf.getBuffer());
