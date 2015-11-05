@@ -21,6 +21,8 @@
 #include "components/nodes/geomnode.h"
 #include "components/nodes/udnode.h"
 #include "components/pluginmanager.h"
+#include "components/pluginloader.h"
+#include "components/nativepluginloader.h"
 #include "components/resourcemanager.h"
 #include "components/shortcutmanager.h"
 #include "components/project.h"
@@ -80,6 +82,8 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   UD_ERROR_CHECK(pKernel->RegisterComponent<MemStream>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<PluginManager>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<PluginLoader>());
+  UD_ERROR_CHECK(pKernel->RegisterComponent<NativePluginLoader>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<ResourceManager>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<ShortcutManager>());
   UD_ERROR_CHECK(pKernel->RegisterComponent<Project>());
@@ -181,17 +185,19 @@ epResult Kernel::DoInit(Kernel *pKernel)
   if (result != epR_Success)
     return result;
 
+  // prepare the plugins
   pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>();
   if (!pKernel->spPluginManager)
     return epR_Failure_;
 
-  // load plugins
-/*
-  pKernel->spPluginManager->LoadPlugin("C:/ud2/shell/bin/Debug_x64/vieweractivity.dll");
+  PluginLoaderRef spNativePluginLoader = pKernel->CreateComponent<NativePluginLoader>();
+  if (!spNativePluginLoader)
+    return epR_Failure_;
+  pKernel->spPluginManager->RegisterPluginLoader(spNativePluginLoader);
 
-  ComponentRef spTest;
-  pKernel->CreateComponent("plugtest", nullptr, &spTest);
-*/
+  LoadPlugins();
+
+  // make the kernel timers
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   if (!pKernel->spStreamerTimer)
     return epR_Failure_;
@@ -204,6 +210,31 @@ epResult Kernel::DoInit(Kernel *pKernel)
 
   // call application init
   return SendMessage("$init", "#", "init", nullptr);
+}
+
+void Kernel::LoadPlugins()
+{
+  Slice<String> pluginFilenames;
+
+  // TODO: scan nominated plugin folder and build list of all plugins
+
+  size_t numRemaining = pluginFilenames.length;
+  size_t lastTry;
+  do
+  {
+    // since plugins may depend on other plugins, we'll keep trying to reload plugins while loads are succeeding
+    lastTry = numRemaining;
+    for (auto &filename : pluginFilenames)
+    {
+      if (!filename)
+        continue;
+      if (spPluginManager->LoadPlugin(filename))
+      {
+        filename = nullptr;
+        --numRemaining;
+      }
+    }
+  } while (numRemaining && numRemaining < lastTry);
 }
 
 epResult Kernel::Destroy()

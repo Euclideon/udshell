@@ -102,7 +102,7 @@ public:
 
 protected:
   friend class Component;
-  friend class PluginManager;
+  friend class NativePluginLoader;
 
   Kernel();
 
@@ -150,6 +150,8 @@ protected:
   virtual ~Kernel() {}
 
   epResult DoInit(Kernel *pKernel);
+
+  void LoadPlugins();
 
   static Kernel *CreateInstanceInternal(InitParams commandLine);
   virtual epResult InitInternal() = 0;
