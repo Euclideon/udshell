@@ -7,44 +7,45 @@
 // History:
 // 24-Apr-04 1.0  * Submitted to CodeProject.
 // 28-Apr-04 1.1  * Prevent most unsafe uses of evil static function hack.
-//				  * Improved syntax for horrible_cast (thanks Paul Bludov).
-//				  * Tested on Metrowerks MWCC and Intel ICL (IA32)
-//				  * Compiled, but not run, on Comeau C++ and Intel Itanium ICL.
+//                * Improved syntax for horrible_cast (thanks Paul Bludov).
+//                * Tested on Metrowerks MWCC and Intel ICL (IA32)
+//                * Compiled, but not run, on Comeau C++ and Intel Itanium ICL.
 //	27-Jun-04 1.2 * Now works on Borland C++ Builder 5.5
-//				  * Now works on /clr "managed C++" code on VC7, VC7.1
-//				  * Comeau C++ now compiles without warnings.
-//				  * Prevent the virtual inheritance case from being used on
-//					  VC6 and earlier, which generate incorrect code.
-//				  * Improved warning and error messages. Non-standard hacks
-//					 now have compile-time checks to make them safer.
-//				  * implicit_cast used instead of static_cast in many cases.
-//				  * If calling a const member function, a const class pointer can be used.
-//				  * MakeDelegate() global helper function added to simplify pass-by-value.
-//				  * Added fastdelegate.clear()
+//                * Now works on /clr "managed C++" code on VC7, VC7.1
+//                * Comeau C++ now compiles without warnings.
+//                * Prevent the virtual inheritance case from being used on
+//                  VC6 and earlier, which generate incorrect code.
+//                * Improved warning and error messages. Non-standard hacks
+//                  now have compile-time checks to make them safer.
+//                * implicit_cast used instead of static_cast in many cases.
+//                * If calling a const member function, a const class pointer can be used.
+//                * MakeDelegate() global helper function added to simplify pass-by-value.
+//                * Added fastdelegate.clear()
 // 16-Jul-04 1.2.1* Workaround for gcc bug (const member function pointers in templates)
 // 30-Oct-04 1.3  * Support for (non-void) return values.
-//				  * No more workarounds in client code!
-//					 MSVC and Intel now use a clever hack invented by John Dlugosz:
-//				     - The FASTDELEGATEDECLARE workaround is no longer necessary.
-//					 - No more warning messages for VC6
-//				  * Less use of macros. Error messages should be more comprehensible.
-//				  * Added include guards
-//				  * Added FastDelegate::empty() to test if invocation is safe (Thanks Neville Franks).
-//				  * Now tested on VS 2005 Express Beta, PGI C++
+//                * No more workarounds in client code!
+//                  MSVC and Intel now use a clever hack invented by John Dlugosz:
+//                    - The FASTDELEGATEDECLARE workaround is no longer necessary.
+//                    - No more warning messages for VC6
+//                * Less use of macros. Error messages should be more comprehensible.
+//                * Added include guards
+//                * Added FastDelegate::empty() to test if invocation is safe (Thanks Neville Franks).
+//                * Now tested on VS 2005 Express Beta, PGI C++
 // 24-Dec-04 1.4  * Added DelegateMemento, to allow collections of disparate delegates.
 //                * <,>,<=,>= comparison operators to allow storage in ordered containers.
-//				  * Substantial reduction of code size, especially the 'Closure' class.
-//				  * Standardised all the compiler-specific workarounds.
+//                * Substantial reduction of code size, especially the 'Closure' class.
+//                * Standardised all the compiler-specific workarounds.
 //                * MFP conversion now works for CodePlay (but not yet supported in the full code).
 //                * Now compiles without warnings on _any_ supported compiler, including BCC 5.5.1
-//				  * New syntax: FastDelegate< int (char *, double) >.
+//                * New syntax: FastDelegate< int (char *, double) >.
 // 14-Feb-05 1.4.1* Now treats =0 as equivalent to .clear(), ==0 as equivalent to .empty(). (Thanks elfric).
-//				  * Now tested on Intel ICL for AMD64, VS2005 Beta for AMD64 and Itanium.
+//                * Now tested on Intel ICL for AMD64, VS2005 Beta for AMD64 and Itanium.
 // 30-Mar-05 1.5  * Safebool idiom: "if (dg)" is now equivalent to "if (!dg.empty())"
-//				  * Fully supported by CodePlay VectorC
+//                * Fully supported by CodePlay VectorC
 //                * Bugfix for Metrowerks: empty() was buggy because a valid MFP can be 0 on MWCC!
 //                * More optimal assignment,== and != operators for static function pointers.
-// 24-Sep-15      * Fork by Euclideon for warning fixes and local tweaks.
+// 24-Sep-15      * Fork by Euclideon, support C++11 variadic templates, other modern compiler fixes.
+//                * Removed old style code,
 
 #ifndef FASTDELEGATE_H
 #define FASTDELEGATE_H
@@ -544,7 +545,7 @@ struct SimplifyMemFunc<SINGLE_MEMFUNCPTR_SIZE + 3*sizeof(int) >
 // A static function pointer is stored inside the class.
 // Here are the valid values:
 // +-- Static pointer --+--pThis --+-- pMemFunc-+-- Meaning------+
-// |   0				|  0       |   0        | Empty          |
+// |   0				        |  0       |   0        | Empty          |
 // |   !=0              |(dontcare)|  Invoker   | Static function|
 // |   0                |  !=0     |  !=0*      | Method call    |
 // +--------------------+----------+------------+----------------+
@@ -659,6 +660,9 @@ protected:
 #endif
 	}
 };
+
+// TODO: investigate if this condition can be satisfied
+//static_assert(sizeof(DelegateMemento) == sizeof(void*)*2, "Expect: sizeof(DelegateMemento) is 2 pointers!");
 
 
 //						ClosurePtr<>
@@ -839,7 +843,7 @@ public:
 // Once we have the member function conversion templates, it's easy to make the
 // wrapper classes. So that they will work with as many compilers as possible,
 // the classes are of the form
-//   FastDelegate3<int, char *, double>
+//   FastDelegate<void(int, char *, double)>
 // They can cope with any combination of parameters. The max number of parameters
 // allowed is 8, but it is trivial to increase this limit.
 // Note that we need to treat const member functions seperately.
@@ -867,1134 +871,93 @@ public:
 // in that case the static function constructor is not made explicit; this
 // allows "if (dg==0) ..." to compile.
 
-//N=0
-template<class RetType=detail::DefaultVoid>
-class FastDelegate0 {
-private:
-	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
-	typedef DesiredRetType (*StaticFunctionPtr)();
-	typedef RetType (*UnvoidStaticFunctionPtr)();
-	typedef RetType (detail::GenericClass::*GenericMemFn)();
-	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
-	ClosureType m_Closure;
-public:
-	// Typedefs to aid generic programming
-	typedef FastDelegate0 type;
-
-	// Construction and comparison functions
-	FastDelegate0() { clear(); }
-	FastDelegate0(const FastDelegate0 &x) {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	void operator = (const FastDelegate0 &x)  {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	bool operator ==(const FastDelegate0 &x) const {
-		return m_Closure.IsEqual(x.m_Closure);	}
-	bool operator !=(const FastDelegate0 &x) const {
-		return !m_Closure.IsEqual(x.m_Closure); }
-	bool operator <(const FastDelegate0 &x) const {
-		return m_Closure.IsLess(x.m_Closure);	}
-	bool operator >(const FastDelegate0 &x) const {
-		return x.m_Closure.IsLess(m_Closure);	}
-	// Binding to non-const member functions
-	template < class X, class Y >
-	FastDelegate0(Y *pthis, DesiredRetType (X::* function_to_bind)() ) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
-	template < class X, class Y >
-	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)()) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
-	// Binding to const member functions.
-	template < class X, class Y >
-	FastDelegate0(const Y *pthis, DesiredRetType (X::* function_to_bind)() const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
-	template < class X, class Y >
-	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)() const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
-	// Static functions. We convert them into a member function call.
-	// This constructor also provides implicit conversion
-	FastDelegate0(DesiredRetType (*function_to_bind)() ) {
-		bind(function_to_bind);	}
-	// for efficiency, prevent creation of a temporary
-	void operator = (DesiredRetType (*function_to_bind)() ) {
-		bind(function_to_bind);	}
-	inline void bind(DesiredRetType (*function_to_bind)()) {
-		m_Closure.bindstaticfunc(this, &FastDelegate0::InvokeStaticFunction,
-			function_to_bind); }
-	// Invoke the delegate
-	RetType operator() () const {
-	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(); }
-	// Implicit conversion to "bool" using the safe_bool idiom
-private:
-	typedef struct SafeBoolStruct {
-		int a_data_pointer_to_this_is_0_on_buggy_compilers;
-		StaticFunctionPtr m_nonzero;
-	} UselessTypedef;
-    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
-public:
-	operator unspecified_bool_type() const {
-        return empty()? 0: &SafeBoolStruct::m_nonzero;
-    }
-	// necessary to allow ==0 to work despite the safe_bool idiom
-	inline bool operator==(StaticFunctionPtr funcptr) {
-		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
-	inline bool operator!=(StaticFunctionPtr funcptr) {
-		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
-	inline bool operator ! () const	{	// Is it bound to anything?
-			return !m_Closure; }
-	inline bool empty() const	{
-			return !m_Closure; }
-	void clear() { m_Closure.clear();}
-	// Conversion to and from the DelegateMemento storage class
-	const DelegateMemento & GetMemento() { return m_Closure; }
-	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
-
-private:	// Invoker for static functions
-	RetType InvokeStaticFunction() const {
-	return (*(m_Closure.GetStaticFunction()))(); }
-};
-
-//N=1
-template<class Param1, class RetType=detail::DefaultVoid>
-class FastDelegate1 {
-private:
-	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
-	typedef DesiredRetType (*StaticFunctionPtr)(Param1 p1);
-	typedef RetType (*UnvoidStaticFunctionPtr)(Param1 p1);
-	typedef RetType (detail::GenericClass::*GenericMemFn)(Param1 p1);
-	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
-	ClosureType m_Closure;
-public:
-	// Typedefs to aid generic programming
-	typedef FastDelegate1 type;
-
-	// Construction and comparison functions
-	FastDelegate1() { clear(); }
-	FastDelegate1(const FastDelegate1 &x) {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	void operator = (const FastDelegate1 &x)  {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	bool operator ==(const FastDelegate1 &x) const {
-		return m_Closure.IsEqual(x.m_Closure);	}
-	bool operator !=(const FastDelegate1 &x) const {
-		return !m_Closure.IsEqual(x.m_Closure); }
-	bool operator <(const FastDelegate1 &x) const {
-		return m_Closure.IsLess(x.m_Closure);	}
-	bool operator >(const FastDelegate1 &x) const {
-		return x.m_Closure.IsLess(m_Closure);	}
-	// Binding to non-const member functions
-	template < class X, class Y >
-	FastDelegate1(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1) ) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
-	template < class X, class Y >
-	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1)) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
-	// Binding to const member functions.
-	template < class X, class Y >
-	FastDelegate1(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
-	template < class X, class Y >
-	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
-	// Static functions. We convert them into a member function call.
-	// This constructor also provides implicit conversion
-	FastDelegate1(DesiredRetType (*function_to_bind)(Param1 p1) ) {
-		bind(function_to_bind);	}
-	// for efficiency, prevent creation of a temporary
-	void operator = (DesiredRetType (*function_to_bind)(Param1 p1) ) {
-		bind(function_to_bind);	}
-	inline void bind(DesiredRetType (*function_to_bind)(Param1 p1)) {
-		m_Closure.bindstaticfunc(this, &FastDelegate1::InvokeStaticFunction,
-			function_to_bind); }
-	// Invoke the delegate
-	RetType operator() (Param1 p1) const {
-	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(p1); }
-	// Implicit conversion to "bool" using the safe_bool idiom
-private:
-	typedef struct SafeBoolStruct {
-		int a_data_pointer_to_this_is_0_on_buggy_compilers;
-		StaticFunctionPtr m_nonzero;
-	} UselessTypedef;
-    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
-public:
-	operator unspecified_bool_type() const {
-        return empty()? 0: &SafeBoolStruct::m_nonzero;
-    }
-	// necessary to allow ==0 to work despite the safe_bool idiom
-	inline bool operator==(StaticFunctionPtr funcptr) {
-		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
-	inline bool operator!=(StaticFunctionPtr funcptr) {
-		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
-	inline bool operator ! () const	{	// Is it bound to anything?
-			return !m_Closure; }
-	inline bool empty() const	{
-			return !m_Closure; }
-	void clear() { m_Closure.clear();}
-	// Conversion to and from the DelegateMemento storage class
-	const DelegateMemento & GetMemento() { return m_Closure; }
-	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
-
-private:	// Invoker for static functions
-	RetType InvokeStaticFunction(Param1 p1) const {
-	return (*(m_Closure.GetStaticFunction()))(p1); }
-};
-
-//N=2
-template<class Param1, class Param2, class RetType=detail::DefaultVoid>
-class FastDelegate2 {
-private:
-	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
-	typedef DesiredRetType (*StaticFunctionPtr)(Param1 p1, Param2 p2);
-	typedef RetType (*UnvoidStaticFunctionPtr)(Param1 p1, Param2 p2);
-	typedef RetType (detail::GenericClass::*GenericMemFn)(Param1 p1, Param2 p2);
-	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
-	ClosureType m_Closure;
-public:
-	// Typedefs to aid generic programming
-	typedef FastDelegate2 type;
-
-	// Construction and comparison functions
-	FastDelegate2() { clear(); }
-	FastDelegate2(const FastDelegate2 &x) {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	void operator = (const FastDelegate2 &x)  {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	bool operator ==(const FastDelegate2 &x) const {
-		return m_Closure.IsEqual(x.m_Closure);	}
-	bool operator !=(const FastDelegate2 &x) const {
-		return !m_Closure.IsEqual(x.m_Closure); }
-	bool operator <(const FastDelegate2 &x) const {
-		return m_Closure.IsLess(x.m_Closure);	}
-	bool operator >(const FastDelegate2 &x) const {
-		return x.m_Closure.IsLess(m_Closure);	}
-	// Binding to non-const member functions
-	template < class X, class Y >
-	FastDelegate2(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2) ) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
-	template < class X, class Y >
-	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2)) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
-	// Binding to const member functions.
-	template < class X, class Y >
-	FastDelegate2(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
-	template < class X, class Y >
-	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
-	// Static functions. We convert them into a member function call.
-	// This constructor also provides implicit conversion
-	FastDelegate2(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2) ) {
-		bind(function_to_bind);	}
-	// for efficiency, prevent creation of a temporary
-	void operator = (DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2) ) {
-		bind(function_to_bind);	}
-	inline void bind(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2)) {
-		m_Closure.bindstaticfunc(this, &FastDelegate2::InvokeStaticFunction,
-			function_to_bind); }
-	// Invoke the delegate
-	RetType operator() (Param1 p1, Param2 p2) const {
-	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(p1, p2); }
-	// Implicit conversion to "bool" using the safe_bool idiom
-private:
-	typedef struct SafeBoolStruct {
-		int a_data_pointer_to_this_is_0_on_buggy_compilers;
-		StaticFunctionPtr m_nonzero;
-	} UselessTypedef;
-    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
-public:
-	operator unspecified_bool_type() const {
-        return empty()? 0: &SafeBoolStruct::m_nonzero;
-    }
-	// necessary to allow ==0 to work despite the safe_bool idiom
-	inline bool operator==(StaticFunctionPtr funcptr) {
-		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
-	inline bool operator!=(StaticFunctionPtr funcptr) {
-		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
-	inline bool operator ! () const	{	// Is it bound to anything?
-			return !m_Closure; }
-	inline bool empty() const	{
-			return !m_Closure; }
-	void clear() { m_Closure.clear();}
-	// Conversion to and from the DelegateMemento storage class
-	const DelegateMemento & GetMemento() { return m_Closure; }
-	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
-
-private:	// Invoker for static functions
-	RetType InvokeStaticFunction(Param1 p1, Param2 p2) const {
-	return (*(m_Closure.GetStaticFunction()))(p1, p2); }
-};
-
-//N=3
-template<class Param1, class Param2, class Param3, class RetType=detail::DefaultVoid>
-class FastDelegate3 {
-private:
-	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
-	typedef DesiredRetType (*StaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3);
-	typedef RetType (*UnvoidStaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3);
-	typedef RetType (detail::GenericClass::*GenericMemFn)(Param1 p1, Param2 p2, Param3 p3);
-	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
-	ClosureType m_Closure;
-public:
-	// Typedefs to aid generic programming
-	typedef FastDelegate3 type;
-
-	// Construction and comparison functions
-	FastDelegate3() { clear(); }
-	FastDelegate3(const FastDelegate3 &x) {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	void operator = (const FastDelegate3 &x)  {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	bool operator ==(const FastDelegate3 &x) const {
-		return m_Closure.IsEqual(x.m_Closure);	}
-	bool operator !=(const FastDelegate3 &x) const {
-		return !m_Closure.IsEqual(x.m_Closure); }
-	bool operator <(const FastDelegate3 &x) const {
-		return m_Closure.IsLess(x.m_Closure);	}
-	bool operator >(const FastDelegate3 &x) const {
-		return x.m_Closure.IsLess(m_Closure);	}
-	// Binding to non-const member functions
-	template < class X, class Y >
-	FastDelegate3(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3) ) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
-	template < class X, class Y >
-	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3)) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
-	// Binding to const member functions.
-	template < class X, class Y >
-	FastDelegate3(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
-	template < class X, class Y >
-	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
-	// Static functions. We convert them into a member function call.
-	// This constructor also provides implicit conversion
-	FastDelegate3(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3) ) {
-		bind(function_to_bind);	}
-	// for efficiency, prevent creation of a temporary
-	void operator = (DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3) ) {
-		bind(function_to_bind);	}
-	inline void bind(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3)) {
-		m_Closure.bindstaticfunc(this, &FastDelegate3::InvokeStaticFunction,
-			function_to_bind); }
-	// Invoke the delegate
-	RetType operator() (Param1 p1, Param2 p2, Param3 p3) const {
-	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(p1, p2, p3); }
-	// Implicit conversion to "bool" using the safe_bool idiom
-private:
-	typedef struct SafeBoolStruct {
-		int a_data_pointer_to_this_is_0_on_buggy_compilers;
-		StaticFunctionPtr m_nonzero;
-	} UselessTypedef;
-    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
-public:
-	operator unspecified_bool_type() const {
-        return empty()? 0: &SafeBoolStruct::m_nonzero;
-    }
-	// necessary to allow ==0 to work despite the safe_bool idiom
-	inline bool operator==(StaticFunctionPtr funcptr) {
-		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
-	inline bool operator!=(StaticFunctionPtr funcptr) {
-		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
-	inline bool operator ! () const	{	// Is it bound to anything?
-			return !m_Closure; }
-	inline bool empty() const	{
-			return !m_Closure; }
-	void clear() { m_Closure.clear();}
-	// Conversion to and from the DelegateMemento storage class
-	const DelegateMemento & GetMemento() { return m_Closure; }
-	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
-
-private:	// Invoker for static functions
-	RetType InvokeStaticFunction(Param1 p1, Param2 p2, Param3 p3) const {
-	return (*(m_Closure.GetStaticFunction()))(p1, p2, p3); }
-};
-
-//N=4
-template<class Param1, class Param2, class Param3, class Param4, class RetType=detail::DefaultVoid>
-class FastDelegate4 {
-private:
-	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
-	typedef DesiredRetType (*StaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4);
-	typedef RetType (*UnvoidStaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4);
-	typedef RetType (detail::GenericClass::*GenericMemFn)(Param1 p1, Param2 p2, Param3 p3, Param4 p4);
-	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
-	ClosureType m_Closure;
-public:
-	// Typedefs to aid generic programming
-	typedef FastDelegate4 type;
-
-	// Construction and comparison functions
-	FastDelegate4() { clear(); }
-	FastDelegate4(const FastDelegate4 &x) {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	void operator = (const FastDelegate4 &x)  {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	bool operator ==(const FastDelegate4 &x) const {
-		return m_Closure.IsEqual(x.m_Closure);	}
-	bool operator !=(const FastDelegate4 &x) const {
-		return !m_Closure.IsEqual(x.m_Closure); }
-	bool operator <(const FastDelegate4 &x) const {
-		return m_Closure.IsLess(x.m_Closure);	}
-	bool operator >(const FastDelegate4 &x) const {
-		return x.m_Closure.IsLess(m_Closure);	}
-	// Binding to non-const member functions
-	template < class X, class Y >
-	FastDelegate4(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4) ) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
-	template < class X, class Y >
-	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4)) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
-	// Binding to const member functions.
-	template < class X, class Y >
-	FastDelegate4(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
-	template < class X, class Y >
-	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
-	// Static functions. We convert them into a member function call.
-	// This constructor also provides implicit conversion
-	FastDelegate4(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4) ) {
-		bind(function_to_bind);	}
-	// for efficiency, prevent creation of a temporary
-	void operator = (DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4) ) {
-		bind(function_to_bind);	}
-	inline void bind(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4)) {
-		m_Closure.bindstaticfunc(this, &FastDelegate4::InvokeStaticFunction,
-			function_to_bind); }
-	// Invoke the delegate
-	RetType operator() (Param1 p1, Param2 p2, Param3 p3, Param4 p4) const {
-	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(p1, p2, p3, p4); }
-	// Implicit conversion to "bool" using the safe_bool idiom
-private:
-	typedef struct SafeBoolStruct {
-		int a_data_pointer_to_this_is_0_on_buggy_compilers;
-		StaticFunctionPtr m_nonzero;
-	} UselessTypedef;
-    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
-public:
-	operator unspecified_bool_type() const {
-        return empty()? 0: &SafeBoolStruct::m_nonzero;
-    }
-	// necessary to allow ==0 to work despite the safe_bool idiom
-	inline bool operator==(StaticFunctionPtr funcptr) {
-		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
-	inline bool operator!=(StaticFunctionPtr funcptr) {
-		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
-	inline bool operator ! () const	{	// Is it bound to anything?
-			return !m_Closure; }
-	inline bool empty() const	{
-			return !m_Closure; }
-	void clear() { m_Closure.clear();}
-	// Conversion to and from the DelegateMemento storage class
-	const DelegateMemento & GetMemento() { return m_Closure; }
-	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
-
-private:	// Invoker for static functions
-	RetType InvokeStaticFunction(Param1 p1, Param2 p2, Param3 p3, Param4 p4) const {
-	return (*(m_Closure.GetStaticFunction()))(p1, p2, p3, p4); }
-};
-
-//N=5
-template<class Param1, class Param2, class Param3, class Param4, class Param5, class RetType=detail::DefaultVoid>
-class FastDelegate5 {
-private:
-	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
-	typedef DesiredRetType (*StaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5);
-	typedef RetType (*UnvoidStaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5);
-	typedef RetType (detail::GenericClass::*GenericMemFn)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5);
-	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
-	ClosureType m_Closure;
-public:
-	// Typedefs to aid generic programming
-	typedef FastDelegate5 type;
-
-	// Construction and comparison functions
-	FastDelegate5() { clear(); }
-	FastDelegate5(const FastDelegate5 &x) {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	void operator = (const FastDelegate5 &x)  {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	bool operator ==(const FastDelegate5 &x) const {
-		return m_Closure.IsEqual(x.m_Closure);	}
-	bool operator !=(const FastDelegate5 &x) const {
-		return !m_Closure.IsEqual(x.m_Closure); }
-	bool operator <(const FastDelegate5 &x) const {
-		return m_Closure.IsLess(x.m_Closure);	}
-	bool operator >(const FastDelegate5 &x) const {
-		return x.m_Closure.IsLess(m_Closure);	}
-	// Binding to non-const member functions
-	template < class X, class Y >
-	FastDelegate5(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5) ) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
-	template < class X, class Y >
-	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5)) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
-	// Binding to const member functions.
-	template < class X, class Y >
-	FastDelegate5(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
-	template < class X, class Y >
-	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
-	// Static functions. We convert them into a member function call.
-	// This constructor also provides implicit conversion
-	FastDelegate5(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5) ) {
-		bind(function_to_bind);	}
-	// for efficiency, prevent creation of a temporary
-	void operator = (DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5) ) {
-		bind(function_to_bind);	}
-	inline void bind(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5)) {
-		m_Closure.bindstaticfunc(this, &FastDelegate5::InvokeStaticFunction,
-			function_to_bind); }
-	// Invoke the delegate
-	RetType operator() (Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5) const {
-	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(p1, p2, p3, p4, p5); }
-	// Implicit conversion to "bool" using the safe_bool idiom
-private:
-	typedef struct SafeBoolStruct {
-		int a_data_pointer_to_this_is_0_on_buggy_compilers;
-		StaticFunctionPtr m_nonzero;
-	} UselessTypedef;
-    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
-public:
-	operator unspecified_bool_type() const {
-        return empty()? 0: &SafeBoolStruct::m_nonzero;
-    }
-	// necessary to allow ==0 to work despite the safe_bool idiom
-	inline bool operator==(StaticFunctionPtr funcptr) {
-		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
-	inline bool operator!=(StaticFunctionPtr funcptr) {
-		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
-	inline bool operator ! () const	{	// Is it bound to anything?
-			return !m_Closure; }
-	inline bool empty() const	{
-			return !m_Closure; }
-	void clear() { m_Closure.clear();}
-	// Conversion to and from the DelegateMemento storage class
-	const DelegateMemento & GetMemento() { return m_Closure; }
-	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
-
-private:	// Invoker for static functions
-	RetType InvokeStaticFunction(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5) const {
-	return (*(m_Closure.GetStaticFunction()))(p1, p2, p3, p4, p5); }
-};
-
-//N=6
-template<class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class RetType=detail::DefaultVoid>
-class FastDelegate6 {
-private:
-	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
-	typedef DesiredRetType (*StaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6);
-	typedef RetType (*UnvoidStaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6);
-	typedef RetType (detail::GenericClass::*GenericMemFn)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6);
-	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
-	ClosureType m_Closure;
-public:
-	// Typedefs to aid generic programming
-	typedef FastDelegate6 type;
-
-	// Construction and comparison functions
-	FastDelegate6() { clear(); }
-	FastDelegate6(const FastDelegate6 &x) {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	void operator = (const FastDelegate6 &x)  {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	bool operator ==(const FastDelegate6 &x) const {
-		return m_Closure.IsEqual(x.m_Closure);	}
-	bool operator !=(const FastDelegate6 &x) const {
-		return !m_Closure.IsEqual(x.m_Closure); }
-	bool operator <(const FastDelegate6 &x) const {
-		return m_Closure.IsLess(x.m_Closure);	}
-	bool operator >(const FastDelegate6 &x) const {
-		return x.m_Closure.IsLess(m_Closure);	}
-	// Binding to non-const member functions
-	template < class X, class Y >
-	FastDelegate6(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6) ) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
-	template < class X, class Y >
-	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6)) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
-	// Binding to const member functions.
-	template < class X, class Y >
-	FastDelegate6(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
-	template < class X, class Y >
-	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
-	// Static functions. We convert them into a member function call.
-	// This constructor also provides implicit conversion
-	FastDelegate6(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6) ) {
-		bind(function_to_bind);	}
-	// for efficiency, prevent creation of a temporary
-	void operator = (DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6) ) {
-		bind(function_to_bind);	}
-	inline void bind(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6)) {
-		m_Closure.bindstaticfunc(this, &FastDelegate6::InvokeStaticFunction,
-			function_to_bind); }
-	// Invoke the delegate
-	RetType operator() (Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6) const {
-	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(p1, p2, p3, p4, p5, p6); }
-	// Implicit conversion to "bool" using the safe_bool idiom
-private:
-	typedef struct SafeBoolStruct {
-		int a_data_pointer_to_this_is_0_on_buggy_compilers;
-		StaticFunctionPtr m_nonzero;
-	} UselessTypedef;
-    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
-public:
-	operator unspecified_bool_type() const {
-        return empty()? 0: &SafeBoolStruct::m_nonzero;
-    }
-	// necessary to allow ==0 to work despite the safe_bool idiom
-	inline bool operator==(StaticFunctionPtr funcptr) {
-		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
-	inline bool operator!=(StaticFunctionPtr funcptr) {
-		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
-	inline bool operator ! () const	{	// Is it bound to anything?
-			return !m_Closure; }
-	inline bool empty() const	{
-			return !m_Closure; }
-	void clear() { m_Closure.clear();}
-	// Conversion to and from the DelegateMemento storage class
-	const DelegateMemento & GetMemento() { return m_Closure; }
-	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
-
-private:	// Invoker for static functions
-	RetType InvokeStaticFunction(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6) const {
-	return (*(m_Closure.GetStaticFunction()))(p1, p2, p3, p4, p5, p6); }
-};
-
-//N=7
-template<class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class Param7, class RetType=detail::DefaultVoid>
-class FastDelegate7 {
-private:
-	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
-	typedef DesiredRetType (*StaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7);
-	typedef RetType (*UnvoidStaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7);
-	typedef RetType (detail::GenericClass::*GenericMemFn)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7);
-	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
-	ClosureType m_Closure;
-public:
-	// Typedefs to aid generic programming
-	typedef FastDelegate7 type;
-
-	// Construction and comparison functions
-	FastDelegate7() { clear(); }
-	FastDelegate7(const FastDelegate7 &x) {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	void operator = (const FastDelegate7 &x)  {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	bool operator ==(const FastDelegate7 &x) const {
-		return m_Closure.IsEqual(x.m_Closure);	}
-	bool operator !=(const FastDelegate7 &x) const {
-		return !m_Closure.IsEqual(x.m_Closure); }
-	bool operator <(const FastDelegate7 &x) const {
-		return m_Closure.IsLess(x.m_Closure);	}
-	bool operator >(const FastDelegate7 &x) const {
-		return x.m_Closure.IsLess(m_Closure);	}
-	// Binding to non-const member functions
-	template < class X, class Y >
-	FastDelegate7(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7) ) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
-	template < class X, class Y >
-	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7)) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
-	// Binding to const member functions.
-	template < class X, class Y >
-	FastDelegate7(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
-	template < class X, class Y >
-	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
-	// Static functions. We convert them into a member function call.
-	// This constructor also provides implicit conversion
-	FastDelegate7(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7) ) {
-		bind(function_to_bind);	}
-	// for efficiency, prevent creation of a temporary
-	void operator = (DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7) ) {
-		bind(function_to_bind);	}
-	inline void bind(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7)) {
-		m_Closure.bindstaticfunc(this, &FastDelegate7::InvokeStaticFunction,
-			function_to_bind); }
-	// Invoke the delegate
-	RetType operator() (Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7) const {
-	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(p1, p2, p3, p4, p5, p6, p7); }
-	// Implicit conversion to "bool" using the safe_bool idiom
-private:
-	typedef struct SafeBoolStruct {
-		int a_data_pointer_to_this_is_0_on_buggy_compilers;
-		StaticFunctionPtr m_nonzero;
-	} UselessTypedef;
-    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
-public:
-	operator unspecified_bool_type() const {
-        return empty()? 0: &SafeBoolStruct::m_nonzero;
-    }
-	// necessary to allow ==0 to work despite the safe_bool idiom
-	inline bool operator==(StaticFunctionPtr funcptr) {
-		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
-	inline bool operator!=(StaticFunctionPtr funcptr) {
-		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
-	inline bool operator ! () const	{	// Is it bound to anything?
-			return !m_Closure; }
-	inline bool empty() const	{
-			return !m_Closure; }
-	void clear() { m_Closure.clear();}
-	// Conversion to and from the DelegateMemento storage class
-	const DelegateMemento & GetMemento() { return m_Closure; }
-	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
-
-private:	// Invoker for static functions
-	RetType InvokeStaticFunction(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7) const {
-	return (*(m_Closure.GetStaticFunction()))(p1, p2, p3, p4, p5, p6, p7); }
-};
-
-//N=8
-template<class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class Param7, class Param8, class RetType=detail::DefaultVoid>
-class FastDelegate8 {
-private:
-	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
-	typedef DesiredRetType (*StaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8);
-	typedef RetType (*UnvoidStaticFunctionPtr)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8);
-	typedef RetType (detail::GenericClass::*GenericMemFn)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8);
-	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
-	ClosureType m_Closure;
-public:
-	// Typedefs to aid generic programming
-	typedef FastDelegate8 type;
-
-	// Construction and comparison functions
-	FastDelegate8() { clear(); }
-	FastDelegate8(const FastDelegate8 &x) {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	void operator = (const FastDelegate8 &x)  {
-		m_Closure.CopyFrom(this, x.m_Closure); }
-	bool operator ==(const FastDelegate8 &x) const {
-		return m_Closure.IsEqual(x.m_Closure);	}
-	bool operator !=(const FastDelegate8 &x) const {
-		return !m_Closure.IsEqual(x.m_Closure); }
-	bool operator <(const FastDelegate8 &x) const {
-		return m_Closure.IsLess(x.m_Closure);	}
-	bool operator >(const FastDelegate8 &x) const {
-		return x.m_Closure.IsLess(m_Closure);	}
-	// Binding to non-const member functions
-	template < class X, class Y >
-	FastDelegate8(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8) ) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
-	template < class X, class Y >
-	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8)) {
-		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
-	// Binding to const member functions.
-	template < class X, class Y >
-	FastDelegate8(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
-	template < class X, class Y >
-	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8) const) {
-		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
-	// Static functions. We convert them into a member function call.
-	// This constructor also provides implicit conversion
-	FastDelegate8(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8) ) {
-		bind(function_to_bind);	}
-	// for efficiency, prevent creation of a temporary
-	void operator = (DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8) ) {
-		bind(function_to_bind);	}
-	inline void bind(DesiredRetType (*function_to_bind)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8)) {
-		m_Closure.bindstaticfunc(this, &FastDelegate8::InvokeStaticFunction,
-			function_to_bind); }
-	// Invoke the delegate
-	RetType operator() (Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8) const {
-	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(p1, p2, p3, p4, p5, p6, p7, p8); }
-	// Implicit conversion to "bool" using the safe_bool idiom
-private:
-	typedef struct SafeBoolStruct {
-		int a_data_pointer_to_this_is_0_on_buggy_compilers;
-		StaticFunctionPtr m_nonzero;
-	} UselessTypedef;
-    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
-public:
-	operator unspecified_bool_type() const {
-        return empty()? 0: &SafeBoolStruct::m_nonzero;
-    }
-	// necessary to allow ==0 to work despite the safe_bool idiom
-	inline bool operator==(StaticFunctionPtr funcptr) {
-		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
-	inline bool operator!=(StaticFunctionPtr funcptr) {
-		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
-	inline bool operator ! () const	{	// Is it bound to anything?
-			return !m_Closure; }
-	inline bool empty() const	{
-			return !m_Closure; }
-	void clear() { m_Closure.clear();}
-	// Conversion to and from the DelegateMemento storage class
-	const DelegateMemento & GetMemento() { return m_Closure; }
-	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
-
-private:	// Invoker for static functions
-	RetType InvokeStaticFunction(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8) const {
-	return (*(m_Closure.GetStaticFunction()))(p1, p2, p3, p4, p5, p6, p7, p8); }
-};
-
-
-////////////////////////////////////////////////////////////////////////////////
-//						Fast Delegates, part 4:
-//
-//				FastDelegate<> class (Original author: Jody Hagins)
-//	Allows boost::function style syntax like:
-//			FastDelegate< double (int, long) >
-// instead of:
-//			FastDelegate2< int, long, double >
-//
-////////////////////////////////////////////////////////////////////////////////
-
-#ifdef FASTDELEGATE_ALLOW_FUNCTION_TYPE_SYNTAX
-
-// Declare FastDelegate as a class template.  It will be specialized
-// later for all number of arguments.
-template <typename Signature>
+template<typename Signature>
 class FastDelegate;
 
-//N=0
-// Specialization to allow use of
-// FastDelegate< R (  ) >
-// instead of
-// FastDelegate0 < R >
-template<typename R>
-class FastDelegate< R (  ) >
-  // Inherit from FastDelegate0 so that it can be treated just like a FastDelegate0
-  : public FastDelegate0 < R >
-{
+template<typename RetType, typename ...Args>
+class FastDelegate<RetType(Args...)> {
+private:
+	typedef typename detail::DefaultVoidToVoid<RetType>::type DesiredRetType;
+	typedef DesiredRetType (*StaticFunctionPtr)(Args... args);
+	typedef RetType (*UnvoidStaticFunctionPtr)(Args... args);
+	typedef RetType (detail::GenericClass::*GenericMemFn)(Args... args);
+	typedef detail::ClosurePtr<GenericMemFn, StaticFunctionPtr, UnvoidStaticFunctionPtr> ClosureType;
+	ClosureType m_Closure;
 public:
-  // Make using the base type a bit easier via typedef.
-  typedef FastDelegate0 < R > BaseType;
+	// Typedefs to aid generic programming
+	typedef FastDelegate type;
 
-  // Allow users access to the specific type of this delegate.
-  typedef FastDelegate SelfType;
+	// Construction and comparison functions
+	FastDelegate() { clear(); }
+	FastDelegate(const FastDelegate &x) {
+		m_Closure.CopyFrom(this, x.m_Closure); }
+	void operator = (const FastDelegate &x)  {
+		m_Closure.CopyFrom(this, x.m_Closure); }
+	bool operator ==(const FastDelegate &x) const {
+		return m_Closure.IsEqual(x.m_Closure);	}
+	bool operator !=(const FastDelegate &x) const {
+		return !m_Closure.IsEqual(x.m_Closure); }
+	bool operator <(const FastDelegate &x) const {
+		return m_Closure.IsLess(x.m_Closure);	}
+	bool operator >(const FastDelegate &x) const {
+		return x.m_Closure.IsLess(m_Closure);	}
+	// Binding to non-const member functions
+	template < class X, class Y >
+	FastDelegate(Y *pthis, DesiredRetType (X::* function_to_bind)(Args... args) ) {
+		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
+	template < class X, class Y >
+	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Args... args)) {
+		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind);	}
+	// Binding to const member functions.
+	template < class X, class Y >
+	FastDelegate(const Y *pthis, DesiredRetType (X::* function_to_bind)(Args... args) const) {
+		m_Closure.bindconstmemfunc(detail::implicit_cast<const X*>(pthis), function_to_bind);	}
+	template < class X, class Y >
+	inline void bind(const Y *pthis, DesiredRetType (X::* function_to_bind)(Args... args) const) {
+		m_Closure.bindconstmemfunc(detail::implicit_cast<const X *>(pthis), function_to_bind);	}
+	// Static functions. We convert them into a member function call.
+	// This constructor also provides implicit conversion
+	FastDelegate(DesiredRetType (*function_to_bind)(Args... args) ) {
+		bind(function_to_bind);	}
+	// for efficiency, prevent creation of a temporary
+	void operator = (DesiredRetType (*function_to_bind)(Args... args) ) {
+		bind(function_to_bind);	}
+	inline void bind(DesiredRetType (*function_to_bind)(Args... args)) {
+		m_Closure.bindstaticfunc(this, &FastDelegate::InvokeStaticFunction,
+			function_to_bind); }
+	// Invoke the delegate
+	RetType operator() (Args... args) const {
+	return (m_Closure.GetClosureThis()->*(m_Closure.GetClosureMemPtr()))(args...); }
+	// Implicit conversion to "bool" using the safe_bool idiom
+private:
+	typedef struct SafeBoolStruct {
+		int a_data_pointer_to_this_is_0_on_buggy_compilers;
+		StaticFunctionPtr m_nonzero;
+	} UselessTypedef;
+    typedef StaticFunctionPtr SafeBoolStruct::*unspecified_bool_type;
+public:
+	operator unspecified_bool_type() const {
+        return empty()? 0: &SafeBoolStruct::m_nonzero;
+    }
+	// necessary to allow ==0 to work despite the safe_bool idiom
+	inline bool operator==(StaticFunctionPtr funcptr) {
+		return m_Closure.IsEqualToStaticFuncPtr(funcptr);	}
+	inline bool operator!=(StaticFunctionPtr funcptr) {
+		return !m_Closure.IsEqualToStaticFuncPtr(funcptr);    }
+	inline bool operator ! () const	{	// Is it bound to anything?
+			return !m_Closure; }
+	inline bool empty() const	{
+			return !m_Closure; }
+	void clear() { m_Closure.clear();}
+	// Conversion to and from the DelegateMemento storage class
+	const DelegateMemento & GetMemento() { return m_Closure; }
+	void SetMemento(const DelegateMemento &any) { m_Closure.CopyFrom(this, any); }
 
-  // Mimic the base class constructors.
-  FastDelegate() : BaseType() { }
-  FastDelegate(BaseType d) : BaseType(d) { }
-
-  template < class X, class Y >
-  FastDelegate(Y * pthis,
-    R (X::* function_to_bind)(  ))
-    : BaseType(pthis, function_to_bind)  { }
-
-  template < class X, class Y >
-  FastDelegate(const Y *pthis,
-      R (X::* function_to_bind)(  ) const)
-    : BaseType(pthis, function_to_bind)
-  {  }
-
-  FastDelegate(R (*function_to_bind)(  ))
-    : BaseType(function_to_bind)  { }
-  void operator = (const BaseType &x)  {
-		*static_cast<BaseType*>(this) = x; }
+private:	// Invoker for static functions
+	RetType InvokeStaticFunction(Args... args) const {
+	return (*(m_Closure.GetStaticFunction()))(args...); }
 };
 
-//N=1
-// Specialization to allow use of
-// FastDelegate< R ( Param1 ) >
-// instead of
-// FastDelegate1 < Param1, R >
-template<typename R, class Param1>
-class FastDelegate< R ( Param1 ) >
-  // Inherit from FastDelegate1 so that it can be treated just like a FastDelegate1
-  : public FastDelegate1 < Param1, R >
-{
-public:
-  // Make using the base type a bit easier via typedef.
-  typedef FastDelegate1 < Param1, R > BaseType;
-
-  // Allow users access to the specific type of this delegate.
-  typedef FastDelegate SelfType;
-
-  // Mimic the base class constructors.
-  FastDelegate() : BaseType() { }
-  FastDelegate(BaseType d) : BaseType(d) { }
-
-  template < class X, class Y >
-  FastDelegate(Y * pthis,
-    R (X::* function_to_bind)( Param1 p1 ))
-    : BaseType(pthis, function_to_bind)  { }
-
-  template < class X, class Y >
-  FastDelegate(const Y *pthis,
-      R (X::* function_to_bind)( Param1 p1 ) const)
-    : BaseType(pthis, function_to_bind)
-  {  }
-
-  FastDelegate(R (*function_to_bind)( Param1 p1 ))
-    : BaseType(function_to_bind)  { }
-  void operator = (const BaseType &x)  {
-		*static_cast<BaseType*>(this) = x; }
-};
-
-//N=2
-// Specialization to allow use of
-// FastDelegate< R ( Param1, Param2 ) >
-// instead of
-// FastDelegate2 < Param1, Param2, R >
-template<typename R, class Param1, class Param2>
-class FastDelegate< R ( Param1, Param2 ) >
-  // Inherit from FastDelegate2 so that it can be treated just like a FastDelegate2
-  : public FastDelegate2 < Param1, Param2, R >
-{
-public:
-  // Make using the base type a bit easier via typedef.
-  typedef FastDelegate2 < Param1, Param2, R > BaseType;
-
-  // Allow users access to the specific type of this delegate.
-  typedef FastDelegate SelfType;
-
-  // Mimic the base class constructors.
-  FastDelegate() : BaseType() { }
-  FastDelegate(BaseType d) : BaseType(d) { }
-
-  template < class X, class Y >
-  FastDelegate(Y * pthis,
-    R (X::* function_to_bind)( Param1 p1, Param2 p2 ))
-    : BaseType(pthis, function_to_bind)  { }
-
-  template < class X, class Y >
-  FastDelegate(const Y *pthis,
-      R (X::* function_to_bind)( Param1 p1, Param2 p2 ) const)
-    : BaseType(pthis, function_to_bind)
-  {  }
-
-  FastDelegate(R (*function_to_bind)( Param1 p1, Param2 p2 ))
-    : BaseType(function_to_bind)  { }
-  void operator = (const BaseType &x)  {
-		*static_cast<BaseType*>(this) = x; }
-};
-
-//N=3
-// Specialization to allow use of
-// FastDelegate< R ( Param1, Param2, Param3 ) >
-// instead of
-// FastDelegate3 < Param1, Param2, Param3, R >
-template<typename R, class Param1, class Param2, class Param3>
-class FastDelegate< R ( Param1, Param2, Param3 ) >
-  // Inherit from FastDelegate3 so that it can be treated just like a FastDelegate3
-  : public FastDelegate3 < Param1, Param2, Param3, R >
-{
-public:
-  // Make using the base type a bit easier via typedef.
-  typedef FastDelegate3 < Param1, Param2, Param3, R > BaseType;
-
-  // Allow users access to the specific type of this delegate.
-  typedef FastDelegate SelfType;
-
-  // Mimic the base class constructors.
-  FastDelegate() : BaseType() { }
-  FastDelegate(BaseType d) : BaseType(d) { }
-
-  template < class X, class Y >
-  FastDelegate(Y * pthis,
-    R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3 ))
-    : BaseType(pthis, function_to_bind)  { }
-
-  template < class X, class Y >
-  FastDelegate(const Y *pthis,
-      R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3 ) const)
-    : BaseType(pthis, function_to_bind)
-  {  }
-
-  FastDelegate(R (*function_to_bind)( Param1 p1, Param2 p2, Param3 p3 ))
-    : BaseType(function_to_bind)  { }
-  void operator = (const BaseType &x)  {
-		*static_cast<BaseType*>(this) = x; }
-};
-
-//N=4
-// Specialization to allow use of
-// FastDelegate< R ( Param1, Param2, Param3, Param4 ) >
-// instead of
-// FastDelegate4 < Param1, Param2, Param3, Param4, R >
-template<typename R, class Param1, class Param2, class Param3, class Param4>
-class FastDelegate< R ( Param1, Param2, Param3, Param4 ) >
-  // Inherit from FastDelegate4 so that it can be treated just like a FastDelegate4
-  : public FastDelegate4 < Param1, Param2, Param3, Param4, R >
-{
-public:
-  // Make using the base type a bit easier via typedef.
-  typedef FastDelegate4 < Param1, Param2, Param3, Param4, R > BaseType;
-
-  // Allow users access to the specific type of this delegate.
-  typedef FastDelegate SelfType;
-
-  // Mimic the base class constructors.
-  FastDelegate() : BaseType() { }
-  FastDelegate(BaseType d) : BaseType(d) { }
-
-  template < class X, class Y >
-  FastDelegate(Y * pthis,
-    R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4 ))
-    : BaseType(pthis, function_to_bind)  { }
-
-  template < class X, class Y >
-  FastDelegate(const Y *pthis,
-      R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4 ) const)
-    : BaseType(pthis, function_to_bind)
-  {  }
-
-  FastDelegate(R (*function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4 ))
-    : BaseType(function_to_bind)  { }
-  void operator = (const BaseType &x)  {
-		*static_cast<BaseType*>(this) = x; }
-};
-
-//N=5
-// Specialization to allow use of
-// FastDelegate< R ( Param1, Param2, Param3, Param4, Param5 ) >
-// instead of
-// FastDelegate5 < Param1, Param2, Param3, Param4, Param5, R >
-template<typename R, class Param1, class Param2, class Param3, class Param4, class Param5>
-class FastDelegate< R ( Param1, Param2, Param3, Param4, Param5 ) >
-  // Inherit from FastDelegate5 so that it can be treated just like a FastDelegate5
-  : public FastDelegate5 < Param1, Param2, Param3, Param4, Param5, R >
-{
-public:
-  // Make using the base type a bit easier via typedef.
-  typedef FastDelegate5 < Param1, Param2, Param3, Param4, Param5, R > BaseType;
-
-  // Allow users access to the specific type of this delegate.
-  typedef FastDelegate SelfType;
-
-  // Mimic the base class constructors.
-  FastDelegate() : BaseType() { }
-  FastDelegate(BaseType d) : BaseType(d) { }
-
-  template < class X, class Y >
-  FastDelegate(Y * pthis,
-    R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5 ))
-    : BaseType(pthis, function_to_bind)  { }
-
-  template < class X, class Y >
-  FastDelegate(const Y *pthis,
-      R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5 ) const)
-    : BaseType(pthis, function_to_bind)
-  {  }
-
-  FastDelegate(R (*function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5 ))
-    : BaseType(function_to_bind)  { }
-  void operator = (const BaseType &x)  {
-		*static_cast<BaseType*>(this) = x; }
-};
-
-//N=6
-// Specialization to allow use of
-// FastDelegate< R ( Param1, Param2, Param3, Param4, Param5, Param6 ) >
-// instead of
-// FastDelegate6 < Param1, Param2, Param3, Param4, Param5, Param6, R >
-template<typename R, class Param1, class Param2, class Param3, class Param4, class Param5, class Param6>
-class FastDelegate< R ( Param1, Param2, Param3, Param4, Param5, Param6 ) >
-  // Inherit from FastDelegate6 so that it can be treated just like a FastDelegate6
-  : public FastDelegate6 < Param1, Param2, Param3, Param4, Param5, Param6, R >
-{
-public:
-  // Make using the base type a bit easier via typedef.
-  typedef FastDelegate6 < Param1, Param2, Param3, Param4, Param5, Param6, R > BaseType;
-
-  // Allow users access to the specific type of this delegate.
-  typedef FastDelegate SelfType;
-
-  // Mimic the base class constructors.
-  FastDelegate() : BaseType() { }
-  FastDelegate(BaseType d) : BaseType(d) { }
-
-  template < class X, class Y >
-  FastDelegate(Y * pthis,
-    R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6 ))
-    : BaseType(pthis, function_to_bind)  { }
-
-  template < class X, class Y >
-  FastDelegate(const Y *pthis,
-      R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6 ) const)
-    : BaseType(pthis, function_to_bind)
-  {  }
-
-  FastDelegate(R (*function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6 ))
-    : BaseType(function_to_bind)  { }
-  void operator = (const BaseType &x)  {
-		*static_cast<BaseType*>(this) = x; }
-};
-
-//N=7
-// Specialization to allow use of
-// FastDelegate< R ( Param1, Param2, Param3, Param4, Param5, Param6, Param7 ) >
-// instead of
-// FastDelegate7 < Param1, Param2, Param3, Param4, Param5, Param6, Param7, R >
-template<typename R, class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class Param7>
-class FastDelegate< R ( Param1, Param2, Param3, Param4, Param5, Param6, Param7 ) >
-  // Inherit from FastDelegate7 so that it can be treated just like a FastDelegate7
-  : public FastDelegate7 < Param1, Param2, Param3, Param4, Param5, Param6, Param7, R >
-{
-public:
-  // Make using the base type a bit easier via typedef.
-  typedef FastDelegate7 < Param1, Param2, Param3, Param4, Param5, Param6, Param7, R > BaseType;
-
-  // Allow users access to the specific type of this delegate.
-  typedef FastDelegate SelfType;
-
-  // Mimic the base class constructors.
-  FastDelegate() : BaseType() { }
-  FastDelegate(BaseType d) : BaseType(d) { }
-
-  template < class X, class Y >
-  FastDelegate(Y * pthis,
-    R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7 ))
-    : BaseType(pthis, function_to_bind)  { }
-
-  template < class X, class Y >
-  FastDelegate(const Y *pthis,
-      R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7 ) const)
-    : BaseType(pthis, function_to_bind)
-  {  }
-
-  FastDelegate(R (*function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7 ))
-    : BaseType(function_to_bind)  { }
-  void operator = (const BaseType &x)  {
-		*static_cast<BaseType*>(this) = x; }
-};
-
-//N=8
-// Specialization to allow use of
-// FastDelegate< R ( Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8 ) >
-// instead of
-// FastDelegate8 < Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, R >
-template<typename R, class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class Param7, class Param8>
-class FastDelegate< R ( Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8 ) >
-  // Inherit from FastDelegate8 so that it can be treated just like a FastDelegate8
-  : public FastDelegate8 < Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, R >
-{
-public:
-  // Make using the base type a bit easier via typedef.
-  typedef FastDelegate8 < Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, R > BaseType;
-
-  // Allow users access to the specific type of this delegate.
-  typedef FastDelegate SelfType;
-
-  // Mimic the base class constructors.
-  FastDelegate() : BaseType() { }
-  FastDelegate(BaseType d) : BaseType(d) { }
-
-  template < class X, class Y >
-  FastDelegate(Y * pthis,
-    R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8 ))
-    : BaseType(pthis, function_to_bind)  { }
-
-  template < class X, class Y >
-  FastDelegate(const Y *pthis,
-      R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8 ) const)
-    : BaseType(pthis, function_to_bind)
-  {  }
-
-  FastDelegate(R (*function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8 ))
-    : BaseType(function_to_bind)  { }
-  void operator = (const BaseType &x)  {
-		*static_cast<BaseType*>(this) = x; }
-};
-
-
-#endif //FASTDELEGATE_ALLOW_FUNCTION_TYPE_SYNTAX
 
 ////////////////////////////////////////////////////////////////////////////////
 //						Fast Delegates, part 5:
@@ -2015,119 +978,15 @@ public:
 // That's why two classes (X and Y) appear in the definitions. Y must be implicitly
 // castable to X.
 
-// Workaround for VC6. VC6 needs void return types converted into DefaultVoid.
-// GCC 3.2 and later won't compile this unless it's preceded by 'typename',
-// but VC6 doesn't allow 'typename' in this context.
-// So, I have to use a macro.
-
-#ifdef FASTDLGT_VC6
-#define FASTDLGT_RETTYPE detail::VoidToDefaultVoid<RetType>::type
-#else
-#define FASTDLGT_RETTYPE RetType
-#endif
-
-//N=0
-template <class X, class Y, class RetType>
-FastDelegate0<FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)()) {
-	return FastDelegate0<FASTDLGT_RETTYPE>(x, func);
+template <typename X, typename Y, typename RetType, typename ...Args>
+FastDelegate<RetType(Args...)> MakeDelegate(Y* x, RetType (X::*func)(Args...)) {
+	return FastDelegate<RetType(Args...)>(x, func);
 }
 
-template <class X, class Y, class RetType>
-FastDelegate0<FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)() const) {
-	return FastDelegate0<FASTDLGT_RETTYPE>(x, func);
+template <typename X, typename Y, typename RetType, typename ...Args>
+FastDelegate<RetType(Args...)> MakeDelegate(Y* x, RetType (X::*func)(Args...) const) {
+	return FastDelegate<RetType(Args...)>(x, func);
 }
-
-//N=1
-template <class X, class Y, class Param1, class RetType>
-FastDelegate1<Param1, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1)) {
-	return FastDelegate1<Param1, FASTDLGT_RETTYPE>(x, func);
-}
-
-template <class X, class Y, class Param1, class RetType>
-FastDelegate1<Param1, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1) const) {
-	return FastDelegate1<Param1, FASTDLGT_RETTYPE>(x, func);
-}
-
-//N=2
-template <class X, class Y, class Param1, class Param2, class RetType>
-FastDelegate2<Param1, Param2, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2)) {
-	return FastDelegate2<Param1, Param2, FASTDLGT_RETTYPE>(x, func);
-}
-
-template <class X, class Y, class Param1, class Param2, class RetType>
-FastDelegate2<Param1, Param2, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2) const) {
-	return FastDelegate2<Param1, Param2, FASTDLGT_RETTYPE>(x, func);
-}
-
-//N=3
-template <class X, class Y, class Param1, class Param2, class Param3, class RetType>
-FastDelegate3<Param1, Param2, Param3, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3)) {
-	return FastDelegate3<Param1, Param2, Param3, FASTDLGT_RETTYPE>(x, func);
-}
-
-template <class X, class Y, class Param1, class Param2, class Param3, class RetType>
-FastDelegate3<Param1, Param2, Param3, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3) const) {
-	return FastDelegate3<Param1, Param2, Param3, FASTDLGT_RETTYPE>(x, func);
-}
-
-//N=4
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class RetType>
-FastDelegate4<Param1, Param2, Param3, Param4, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4)) {
-	return FastDelegate4<Param1, Param2, Param3, Param4, FASTDLGT_RETTYPE>(x, func);
-}
-
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class RetType>
-FastDelegate4<Param1, Param2, Param3, Param4, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4) const) {
-	return FastDelegate4<Param1, Param2, Param3, Param4, FASTDLGT_RETTYPE>(x, func);
-}
-
-//N=5
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class Param5, class RetType>
-FastDelegate5<Param1, Param2, Param3, Param4, Param5, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5)) {
-	return FastDelegate5<Param1, Param2, Param3, Param4, Param5, FASTDLGT_RETTYPE>(x, func);
-}
-
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class Param5, class RetType>
-FastDelegate5<Param1, Param2, Param3, Param4, Param5, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5) const) {
-	return FastDelegate5<Param1, Param2, Param3, Param4, Param5, FASTDLGT_RETTYPE>(x, func);
-}
-
-//N=6
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class RetType>
-FastDelegate6<Param1, Param2, Param3, Param4, Param5, Param6, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6)) {
-	return FastDelegate6<Param1, Param2, Param3, Param4, Param5, Param6, FASTDLGT_RETTYPE>(x, func);
-}
-
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class RetType>
-FastDelegate6<Param1, Param2, Param3, Param4, Param5, Param6, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6) const) {
-	return FastDelegate6<Param1, Param2, Param3, Param4, Param5, Param6, FASTDLGT_RETTYPE>(x, func);
-}
-
-//N=7
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class Param7, class RetType>
-FastDelegate7<Param1, Param2, Param3, Param4, Param5, Param6, Param7, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7)) {
-	return FastDelegate7<Param1, Param2, Param3, Param4, Param5, Param6, Param7, FASTDLGT_RETTYPE>(x, func);
-}
-
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class Param7, class RetType>
-FastDelegate7<Param1, Param2, Param3, Param4, Param5, Param6, Param7, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7) const) {
-	return FastDelegate7<Param1, Param2, Param3, Param4, Param5, Param6, Param7, FASTDLGT_RETTYPE>(x, func);
-}
-
-//N=8
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class Param7, class Param8, class RetType>
-FastDelegate8<Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8)) {
-	return FastDelegate8<Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, FASTDLGT_RETTYPE>(x, func);
-}
-
-template <class X, class Y, class Param1, class Param2, class Param3, class Param4, class Param5, class Param6, class Param7, class Param8, class RetType>
-FastDelegate8<Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, FASTDLGT_RETTYPE> MakeDelegate(Y* x, RetType (X::*func)(Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5, Param6 p6, Param7 p7, Param8 p8) const) {
-	return FastDelegate8<Param1, Param2, Param3, Param4, Param5, Param6, Param7, Param8, FASTDLGT_RETTYPE>(x, func);
-}
-
-
- // clean up after ourselves...
-#undef FASTDLGT_RETTYPE
 
 } // namespace fastdelegate
 

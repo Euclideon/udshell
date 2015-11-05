@@ -31,7 +31,7 @@ protected:
     DelegateMementoRef spM;
     Subscriber *pSubscriber;
   };
-  Array<Subscription, 4> subscribers;
+  Array<Subscription, 0> subscribers;
 };
 
 template<typename... Args>

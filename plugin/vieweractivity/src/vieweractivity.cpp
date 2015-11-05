@@ -1,11 +1,18 @@
 #include "ep/c/plugin.h"
 #include "ep/c/componentdesc.h"
-#include "ep/c/component.h"
-#include "ep/c/kernel.h"
+#include "ep/cpp/component.h"
+#include "ep/cpp/kernel.h"
+#include "ep/cpp/event.h"
+
+#include "ep/cpp/interface/icomponent.h"
+
+using namespace ep;
 
 #define PLUGIN_VER 100
 
-epComponentDesc desc;
+// C component
+
+static epComponentDesc s_desc;
 
 struct TestComponent
 {
@@ -14,7 +21,7 @@ struct TestComponent
   int x;
 };
 
-epComponentOverrides s_testComponentVirtuals = {
+static epComponentOverrides s_testComponentVirtuals = {
   sizeof(epComponentOverrides),
 
   // pCreateInstance
@@ -46,7 +53,7 @@ epComponentOverrides s_testComponentVirtuals = {
   }
 };
 
-epPropertyDesc prop = {
+static epPropertyDesc s_prop = {
   "prop",
   "Prop",
   "Test Prop",
@@ -66,24 +73,81 @@ epPropertyDesc prop = {
   }
 };
 
+
+// C++ component
+
+class TestComponent2 : public IComponent
+{
+  EP_DECLARE_COMPONENT(TestComponent2, IComponent, 100, "Plugin Test!")
+public:
+
+  int GetX() const { return x; }
+  void SetX(int _x) { x = _x; }
+
+  int MethodX(int _x) { Kernel::GetInstance()->LogWarning(0, "Wow {0} {1}", _x, x); return x; }
+
+  static int FuncX(int _x) { Kernel::GetInstance()->LogWarning(0, "Wow {0}", _x); return _x; }
+
+  Event<> EvX;
+
+  static Array<epPropertyDesc> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(X, "Desc...", "Display", 0),
+    };
+  }
+
+  static Array<epMethodDesc> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(MethodX, "Wow!"),
+    };
+  }
+
+  static Array<epEventDesc> GetEvents()
+  {
+    return{
+      // TODO: this needs finishing
+//      EP_MAKE_EVENT(EvX, "Wow!"),
+    };
+  }
+
+  static Array<epStaticFuncDesc> GetStaticFuncs()
+  {
+    return{
+      EP_MAKE_STATICFUNC(FuncX, "Wow!"),
+    };
+  }
+
+protected:
+  TestComponent2(Component &baseComponent, Slice<const KeyValuePair> initParams)
+    : IComponent(baseComponent, initParams) {}
+
+  int x;
+};
+
 extern "C" bool epPluginAttach()
 {
-  desc.pluginVersion = PLUGIN_VER;
-  desc.id = "plugtest";          // an id for this component
-  desc.displayName = "plugin Test"; // display name
-  desc.description = "Plugin Test!"; // description
-  desc.baseClass = "component";
-  desc.pOverrides = &s_testComponentVirtuals;
-  desc.pProperties = &prop;
-  desc.numProperties = 1;
-  desc.pMethods = nullptr;
-  desc.numMethods = 0;
-  desc.pEvents = nullptr;
-  desc.numEvents = 0;
-  desc.pStaticFuncs = nullptr;
-  desc.numStaticFuncs = 0;
+  // C test
+  s_desc.info.pluginVersion = PLUGIN_VER;
+  s_desc.info.id = "plugtest";          // an id for this component
+  s_desc.info.displayName = "plugin Test"; // display name
+  s_desc.info.description = "Plugin Test!"; // description
+  s_desc.baseClass = "component";
+  s_desc.pOverrides = &s_testComponentVirtuals;
+  s_desc.pProperties = &s_prop;
+  s_desc.numProperties = 1;
+  s_desc.pMethods = nullptr;
+  s_desc.numMethods = 0;
+  s_desc.pEvents = nullptr;
+  s_desc.numEvents = 0;
+  s_desc.pStaticFuncs = nullptr;
+  s_desc.numStaticFuncs = 0;
 
-  epKernel_RegisterComponentType(&desc);
+  epKernel_RegisterComponentType(&s_desc);
+
+  // C++ test
+  Kernel::GetInstance()->RegisterComponentType<TestComponent2>();
 
   return true;
 }

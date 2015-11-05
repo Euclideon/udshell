@@ -1,8 +1,7 @@
 #include "ep/cpp/datetime.h"
 #include <time.h>
 
-namespace ep
-{
+namespace ep {
 
 DateTime::DateTime() : DateTime(time(nullptr)) {}
 

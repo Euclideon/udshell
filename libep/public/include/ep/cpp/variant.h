@@ -124,6 +124,7 @@ public:
 
 private:
   void copyContent(const Variant &val);
+  void destroy();
 };
 
 struct KeyValuePair

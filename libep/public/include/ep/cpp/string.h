@@ -193,7 +193,8 @@ struct SharedString : public SharedArray<const char>
   SharedString(const char *pString);
 
   // epString compatibility
-  SharedString(epSharedString s);
+  SharedString(const epSharedString &s);
+  SharedString(epSharedString &&s);
   operator epSharedString() const;
 
   // construction

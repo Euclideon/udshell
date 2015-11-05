@@ -41,8 +41,8 @@ struct epSharedString
 };
 
 epSharedString epSharedString_Create(const char *pCString);
-size_t epSharedString_IncRef(const epSharedString *pSS);
-size_t epSharedString_DecRef(const epSharedString *pSS);
+size_t epSharedString_Acquire(const epSharedString *pSS);
+size_t epSharedString_Release(const epSharedString *pSS);
 
 #if defined(__cplusplus)
 }

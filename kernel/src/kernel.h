@@ -67,7 +67,7 @@ public:
   template<typename T>
   SharedPtr<T> CreateComponent(InitParams initParams = nullptr);
 
-  ComponentRef FindComponent(String uid);
+  ComponentRef FindComponent(String uid) const;
 
   Renderer *GetRenderer() const { return pRenderer; }
 
@@ -77,12 +77,12 @@ public:
 
   // logger functions
   LoggerRef GetLogger() const { return spLogger; }
-  template<typename ...Args> void LogError(String text, Args... args) const;
-  template<typename ...Args> void LogWarning(int level, String text, Args... args) const;
-  template<typename ...Args> void LogDebug(int level, String text, Args... args) const;
-  template<typename ...Args> void LogInfo(int level, String text, Args... args) const;
-  template<typename ...Args> void LogScript(String text, Args... args) const;
-  template<typename ...Args> void LogTrace(String text, Args... args) const;
+  template<typename ...Args> void LogError(String format, Args... args) const;
+  template<typename ...Args> void LogWarning(int level, String format, Args... args) const;
+  template<typename ...Args> void LogDebug(int level, String format, Args... args) const;
+  template<typename ...Args> void LogInfo(int level, String format, Args... args) const;
+  template<typename ...Args> void LogScript(String format, Args... args) const;
+  template<typename ...Args> void LogTrace(String format, Args... args) const;
 
   // Functions for resource management
   ResourceManagerRef GetResourceManager() const { return spResourceManager; }

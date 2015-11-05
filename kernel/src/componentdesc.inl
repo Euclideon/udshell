@@ -2,9 +2,6 @@
 namespace ep
 {
 
-using fastdelegate::FastDelegate0;
-using fastdelegate::FastDelegate1;
-
 // getter stuff
 template <class X, class Type>
 inline CGetter::CGetter(Type(X::*func)() const)
@@ -21,7 +18,7 @@ inline Variant CGetter::shimFunc(const Getter * const _pGetter, const Component 
   auto m = pGetter->m;
   m.SetThis((void*)pThis);
 
-  FastDelegate0<T> d;
+  FastDelegate<T()> d;
   d.SetMemento(m);
 
   return Variant(d());
@@ -44,7 +41,7 @@ inline void CSetter::shimFunc(const Setter * const _pSetter, Component *pThis, c
   auto m = pSetter->m;
   m.SetThis((void*)pThis);
 
-  FastDelegate1<T> d;
+  FastDelegate<void(T)> d;
   d.SetMemento(m);
 
   d(value.as<typename std::remove_reference<T>::type>());
