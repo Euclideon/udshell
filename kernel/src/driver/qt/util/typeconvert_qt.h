@@ -32,10 +32,7 @@ void epFromVariant(const Variant &variant, QString *pString);
 Variant epToVariant(const QVariant &var);
 void epFromVariant(const Variant &variant, QVariant *pVariant);
 
-inline Variant epToVariant(const QJSValue &jsValue)
-{
-  return epToVariant(jsValue.toVariant());
-}
+Variant epToVariant(const QJSValue &jsValue);
 void epFromVariant(const Variant &variant, QJSValue *pJSValue);
 
 
