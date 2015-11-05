@@ -148,7 +148,7 @@ inline size_t epUTFSequenceLength(const char32_t*)
 inline size_t epUTF8SequenceLength(const char *pUTF8, size_t *pSrcLen)
 {
   size_t l = epUTFSequenceLength(pUTF8);
-  if (*pSrcLen)
+  if (pSrcLen)
     *pSrcLen = l;
   return l;
 }
@@ -156,13 +156,13 @@ inline size_t epUTF8SequenceLength(const char16_t *pUTF16, size_t *pSrcLen)
 {
   char32_t c;
   size_t l = epUTFDecode(pUTF16, &c);
-  if (*pSrcLen)
+  if (pSrcLen)
     *pSrcLen = l;
   return epUTFSequenceLength<char>(c);
 }
 inline size_t epUTF8SequenceLength(const char32_t *pUTF32, size_t *pSrcLen)
 {
-  if (*pSrcLen)
+  if (pSrcLen)
     *pSrcLen = 1;
   return epUTFSequenceLength<char>(pUTF32[0]);
 }
