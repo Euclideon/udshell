@@ -28,7 +28,7 @@ static void Win32Callback(HWND , UINT , UINT_PTR idEvent, DWORD )
 
 HalTimer *HalTimer_Create(HalTimerType tt, uint32_t duration,  HalTimerCallback *pCallBack, void *pUserData)
 {
-  HalTimerWin32 *pTimer = epAllocType(HalTimerWin32, 1, udAF_Zero);
+  HalTimerWin32 *pTimer = epAllocType(HalTimerWin32, 1, epAF_Zero);
   if (!pTimer)
     return nullptr;
 

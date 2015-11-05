@@ -425,7 +425,7 @@ UDTHREADLOCAL epPepperInstance *s_pStartingInstance;
 // Author: Manu Evans, May 2015
 epViewerInstance* epViewerDriver_CreateInstance()
 {
-  return epAllocType(epNaClInstance, 1, udAF_Zero);
+  return epAllocType(epNaClInstance, 1, epAF_Zero);
 }
 
 // ---------------------------------------------------------------------------------------

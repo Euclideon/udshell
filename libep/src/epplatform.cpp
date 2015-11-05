@@ -66,9 +66,9 @@ void epDebugPrintf(const char *format, ...)
 void *_epAlloc(size_t size, epAllocationFlags flags IF_MEMORY_DEBUG(const char * pFile, int line))
 {
 #if defined(EP_COMPILER_VISUALC)
-  void *pMemory = (flags & udAF_Zero) ? _aligned_recalloc(nullptr, size, 1, EP_DEFAULT_ALIGNMENT) : _aligned_malloc(size, EP_DEFAULT_ALIGNMENT);
+  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc(nullptr, size, 1, EP_DEFAULT_ALIGNMENT) : _aligned_malloc(size, EP_DEFAULT_ALIGNMENT);
 #else
-  void *pMemory = (flags & udAF_Zero) ? calloc(size, 1) : malloc(size);
+  void *pMemory = (flags & epAF_Zero) ? calloc(size, 1) : malloc(size);
 #endif
   return pMemory;
 }
@@ -76,9 +76,9 @@ void *_epAlloc(size_t size, epAllocationFlags flags IF_MEMORY_DEBUG(const char *
 void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags IF_MEMORY_DEBUG(const char * pFile, int line))
 {
 #if defined(EP_COMPILER_VISUALC)
-  void *pMemory = (flags & udAF_Zero) ? _aligned_recalloc(nullptr, size, 1, alignment) : _aligned_malloc(size, alignment);
+  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc(nullptr, size, 1, alignment) : _aligned_malloc(size, alignment);
 #elif EP_NACL
-  void *pMemory = (flags & udAF_Zero) ? calloc(size, 1) : malloc(size);
+  void *pMemory = (flags & epAF_Zero) ? calloc(size, 1) : malloc(size);
 #elif defined(__GNUC__)
   if (alignment < sizeof(size_t))
     alignment = sizeof(size_t);
@@ -87,7 +87,7 @@ void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags IF_
   if (err != 0)
     return nullptr;
 
-  if (flags & udAF_Zero)
+  if (flags & epAF_Zero)
     memset(pMemory, 0, size);
 #endif
   return pMemory;
