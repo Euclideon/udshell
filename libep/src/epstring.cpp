@@ -267,18 +267,16 @@ SharedString SharedString::sprintf(const char *pFormat, ...)
   va_list args;
   va_start(args, pFormat);
 
-#if defined(EP_COMPILER_VISUALC)
-  size_t len = _vscprintf(pFormat, args) + 1;
-#else
+#if defined(EP_NACL)
   size_t len = vsprintf(nullptr, pFormat, args) + 1;
+#else
+  size_t len = vsnprintf(nullptr, 0, pFormat, args) + 1;
 #endif
 
   MutableString<0> r; r.reserve(len);
 
 #if defined(EP_NACL)
   r.length = vsprintf(r.ptr, pFormat, args);
-#elif defined(EP_COMPILER_VISUALC)
-  r.length = vsnprintf_s(r.ptr, len, len, pFormat, args);
 #else
   r.length = vsnprintf(r.ptr, len, pFormat, args);
 #endif
@@ -380,7 +378,10 @@ double BaseString<C>::parseFloat() const
     return 0; // this isn't really right!
 
   int64_t number = 0;
-  double frac = 1;
+  int64_t frac = 0;
+  size_t fracSize = 0;
+  int16_t exponent = 0;
+  int8_t expSign = 1;
 
   // floating poiont number
   bool neg = false;
@@ -391,25 +392,46 @@ double BaseString<C>::parseFloat() const
   }
 
   bool bHasDot = false;
+  bool bHasExp = false;
+
   while (s.length > 0)
   {
     C digit = s.popFront();
-    if (!epIsNumeric(digit) && (bHasDot || digit != '.'))
+    if (!epIsNumeric(digit) && (bHasDot || digit != '.') && (bHasExp || (digit != 'e' && digit != 'E')))
       break;
     if (digit == '.')
       bHasDot = true;
+    else if (digit == 'e' || digit == 'E')
+    {
+      if(s.length > 0 && (s[0] == '-' || s[0] == '+'))
+      {
+        if (s[0] == '-')
+          expSign = -1;
+
+        s.popFront();
+      }
+    }
     else
     {
-      number = number*10 + digit - '0';
-      if (bHasDot)
-        frac *= 0.1f;
+      if (!bHasDot)
+        number = number*10 + digit - '0';
+      else if (!bHasExp)
+      {
+        frac = frac*10 + digit - '0';
+        fracSize++;
+      }
+      else
+        exponent = exponent * 10 + digit - '0';
     }
   }
 
   if (neg)
+  {
     number = -number;
+    frac = -frac;
+  }
 
-  return (double)number * frac;
+  return (double)(number + frac / pow(10.0, fracSize)) * pow(10.0, (expSign * exponent));
 }
 
 template int64_t BaseString<char>::parseInt(bool, int) const;
@@ -588,12 +610,16 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), uint64_t
 {
   // TODO: what formats are interesting for ints?
 
-  // TODO: this will crash if buffer runs out of space!
   size_t len = 0;
   do
   {
     if (buffer.ptr)
+    {
+      if (buffer.length <= len)
+        return 0;
+
       buffer.ptr[len++] = '0' + i % 10;
+    }
     else
       ++len;
   } while ((i /= 10) != 0);
@@ -612,11 +638,32 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), uint64_t
   }
   return len;
 }
-ptrdiff_t epStringify(Slice<char> epUnusedParam(buffer), String epUnusedParam(format), double epUnusedParam(f), const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), double f, const epVarArg *epUnusedParam(pArgs))
 {
-  // TODO: what formats are interesting for floats?
-  EPASSERT(false, "No fun!");
-  return 0;
+  char *defaultFormat = "%.17g";
+  char *pFormat = defaultFormat;
+
+  size_t len = 0;
+
+  // TODO: what formats are interesting for floats? (support format param)
+
+  if (!buffer.ptr)
+  {
+    #if defined(EP_NACL)
+      len = sprintf(nullptr, pFormat, f);
+    #else
+      len = snprintf(nullptr, 0, pFormat, f);
+    #endif
+  }
+  else
+  {
+    #if defined(EP_NACL)
+      len = sprintf(buffer.ptr, pFormat, f);
+    #else
+      len = snprintf(buffer.ptr, buffer.length, pFormat, f);
+    #endif
+  }
+  return len;
 }
 
 epResult epSlice_Test()
