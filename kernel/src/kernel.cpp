@@ -69,66 +69,66 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   StreamRef spDebugFile, spConsole;
   Kernel *pKernel = CreateInstanceInternal(commandLine);
 
-  UD_ERROR_NULL(pKernel, epR_Failure_);
+  EP_ERROR_NULL(pKernel, epR_Failure_);
 
   pKernel->pRenderer = new Renderer(pKernel, renderThreadCount);
 
   // register all the builtin component types
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Component>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<DataSource>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Stream>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<File>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Console>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<MemStream>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<PluginManager>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<PluginLoader>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<NativePluginLoader>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<ResourceManager>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<ShortcutManager>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Project>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<UIConsole>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Viewport>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Window>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<View>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Scene>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Component>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<DataSource>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Stream>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<File>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Console>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<MemStream>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Logger>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<PluginManager>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<PluginLoader>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<NativePluginLoader>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<ResourceManager>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<ShortcutManager>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Project>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Timer>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Lua>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<UIComponent>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<UIConsole>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Viewport>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Window>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<View>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Scene>());
 
   // nodes
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Node>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Camera>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<SimpleCamera>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<GeomNode>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<UDNode>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Node>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Camera>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<SimpleCamera>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<GeomNode>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<UDNode>());
 
   // resources
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Resource>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Buffer>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<ArrayBuffer>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<UDModel>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Shader>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Material>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Model>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Text>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<KVPStore>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Metadata>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Resource>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Buffer>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<ArrayBuffer>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<UDModel>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Shader>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Material>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Model>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Text>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<KVPStore>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Metadata>());
 
   // data sources
-  UD_ERROR_CHECK(pKernel->RegisterComponent<ImageSource>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<GeomSource>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<UDDataSource>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<ImageSource>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<GeomSource>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<UDDataSource>());
 
   // activities
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Activity>());
-  UD_ERROR_CHECK(pKernel->RegisterComponent<Viewer>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Activity>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<Viewer>());
 
   // plugin interfaces
-  UD_ERROR_CHECK(pKernel->RegisterComponent<ComponentPlugin>());
+  EP_ERROR_CHECK(pKernel->RegisterComponent<ComponentPlugin>());
 
   // init the HAL
-  UD_ERROR_CHECK(epHAL_Init());
+  EP_ERROR_CHECK(epHAL_Init());
 
   // create internal stuff
   pKernel->spLua = pKernel->CreateComponent<Lua>();
@@ -156,7 +156,7 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   pKernel->spShortcutManager = pKernel->CreateComponent<ShortcutManager>();
 
   // platform init
-  UD_ERROR_CHECK(pKernel->InitInternal());
+  EP_ERROR_CHECK(pKernel->InitInternal());
 
 epilogue:
   if (result != epR_Success)

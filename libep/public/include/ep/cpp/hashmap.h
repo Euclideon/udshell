@@ -109,10 +109,14 @@ protected:
 
 inline uint32_t HashPointer(void *pPtr)
 {
+#if defined(EP_32BIT)
+  return (uint32_t)pPtr;
+#else // EP_32BIT
   size_t r = (size_t)pPtr;
   if (sizeof(size_t) > 4)
     r = (uint32_t)(r & 0xFFFFFFFF) ^ (uint32_t)(r >> 32);
   return (uint32_t)r;
+#endif // EP_32BIT
 }
 
 } // namespace ep

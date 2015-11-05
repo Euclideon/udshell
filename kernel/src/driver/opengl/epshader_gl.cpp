@@ -47,8 +47,8 @@ epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType
   {
     // Shader failed to compile, let's see what the error is.
     char buffer[1024];
-    GLsizei length;
-    glGetShaderInfoLog(shader, sizeof(buffer), &length, &buffer[0]);
+    GLsizei _length;
+    glGetShaderInfoLog(shader, sizeof(buffer), &_length, &buffer[0]);
     epDebugPrintf("Shader failed to compile: %s\n", buffer);
     return 0;
   }

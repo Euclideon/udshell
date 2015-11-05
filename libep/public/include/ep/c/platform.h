@@ -50,6 +50,7 @@
 # define EP_COMPILER_VISUALC
 #elif defined(__GNUC__)
 # define EP_COMPILER_GCC
+# define EP_GCC_VERSION (GNUC__ * 10000 + __GNUC_MINOR__ * 100  + __GNUC_PATCHLEVEL__)
 #else
 # error "Unrecognised compiler"
 #endif
@@ -263,6 +264,9 @@
 #elif defined(EP_COMPILER_GCC)
 # pragma GCC diagnostic ignored "-Wtype-limits"       // disable (char < 256) complaints  TODO: REMOVE ME!!!
 # pragma GCC diagnostic ignored "-Wstrict-aliasing"   // disable strict-aliasing complaint
+# if EP_GCC_VERSION < 50101
+#   pragma GCC diagnostic ignored "-Wmissing-field-initializers" // missing initializer
+# endif // GCC_VERSION < 50101
 //# pragma GCC diagnostic ignored "-Wformat-security"   // stop complaining about variable format strings
 //# pragma GCC diagnostic ignored "-Wunused-parameter"  // stop complaining about unused parameters
 //# pragma GCC diagnostic ignored "-Wmissing-field-initializers" // stop complaining about missing field initialisers

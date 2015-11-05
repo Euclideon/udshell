@@ -98,11 +98,13 @@ protected:
   Array<int> filteredConsole;
   Array<int> filteredLog;
 
-  enum {
+  enum
+  {
     typeConsole,
     typeLog
   };
-  struct MergedLine {
+  struct MergedLine
+  {
     MergedLine(int type, int index) : type(type), index(index) {}
 
     int type;

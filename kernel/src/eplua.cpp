@@ -47,8 +47,12 @@ void SetConsoleColor(ConsoleColor fg, ConsoleColor bg)
     "\x1b[40m", "\x1b[44m", "\x1b[42m", "\x1b[46m", "\x1b[41m", "\x1b[45m", "\x1b[43m", "\x1b[47m", // colors
     "\x1b[40;1m", "\x1b[44;1m", "\x1b[42;1m", "\x1b[46;1m", "\x1b[41;1m", "\x1b[45;1m", "\x1b[43;1m", "\x1b[47;1m", // 'bold'
   };
-  printf(fg_codes[(int)fg + 1]);
-  printf(bg_codes[(int)bg + 1]);
+  
+  const char *pFG = fg_codes[(int)fg + 1];
+  const char *pBG = bg_codes[(int)bg + 1];
+  
+  fwrite(pFG, strlen(pFG), 1, stdout);
+  fwrite(pBG, strlen(pBG), 1, stdout);
 }
 #endif
 
@@ -649,10 +653,12 @@ int LuaState::help(lua_State* L)
   MutableString256 buffer;
   if (numArgs > 1)
   {
+#if 0
     // help for member
     String s = l.toString(2);
 
     // find member...
+#endif // 0
   }
   else
   {

@@ -161,8 +161,8 @@ protected:
   bool bEnabled = true, bLogging = false;
 };
 
-} //namespace ep
-
 ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const epVarArg *pArgs);
+  
+} //namespace ep
 
 #endif // EPLOGGER_H

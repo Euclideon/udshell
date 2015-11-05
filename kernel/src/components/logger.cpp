@@ -410,20 +410,3 @@ SharedString LogLine::ToString(LogFormatSpecs format) const
 }
 
 } // namespace ep
-
-ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
-{
-  SharedString out = line.ToString(LogDefaults::Format);
-
-  // if we're only counting
-  if (!buffer.ptr)
-    return out.length;
-
-  // if the buffer is too small
-  if (buffer.length < out.length)
-    return buffer.length - out.length;
-
-  out.copyTo(buffer);
-
-  return out.length;
-}
