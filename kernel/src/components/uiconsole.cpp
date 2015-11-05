@@ -153,7 +153,7 @@ void UIConsole::RebuildOutput()
   if (bOutputsMerged)
   {
 
-    int logIndex = 0, consoleIndex = 0;
+    size_t logIndex = 0, consoleIndex = 0;
     while (logIndex < logLines.length && consoleIndex < consoleLines.length)
     {
       if (logLines[logIndex].ordering < consoleLines[consoleIndex].ordering)
@@ -202,13 +202,13 @@ void UIConsole::RebuildOutput()
   }
   else
   {
-    for (int i = 0; i < consoleLines.length; i++)
+    for (size_t i = 0; i < consoleLines.length; i++)
     {
       if (FilterTextLine(consoleLines[i].text))
         filteredConsole.pushBack(i);
     }
 
-    for (int i = 0; i < logLines.length; i++)
+    for (size_t i = 0; i < logLines.length; i++)
     {
       if (logFilter.FilterLogLine(*logLines[i].GetLogLine()) && FilterTextLine(logLines[i].text))
         filteredLog.pushBack(i);

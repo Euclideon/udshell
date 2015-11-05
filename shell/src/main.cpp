@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
   pKernel->RegisterMessageHandler("init", &Init);
   pKernel->RegisterMessageHandler("deinit", &Deinit);
 
-  if (pKernel->RunMainLoop() != udR_Success)
+  if (pKernel->RunMainLoop() != epR_Success)
   {
     // TODO: improve error handling/reporting
     udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
