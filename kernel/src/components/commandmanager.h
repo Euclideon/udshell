@@ -18,9 +18,10 @@ public:
   bool RegisterCommand(String id, Delegate<void()> func, String script, String shortcut = nullptr, bool bFailIfExists = false);
   void UnregisterCommand(String id);
   bool HandleShortcutEvent(String shortcut);
+  bool RunCommand(String id);
   bool SetFunction(String id, Delegate<void()> func);
   bool SetScript(String id, String script);
-  SharedString GetShortcut(String id) const;
+  String GetShortcut(String id) const;
   bool SetShortcut(String id, String shortcut);
 
 protected:
@@ -47,6 +48,7 @@ protected:
       EP_MAKE_METHOD(RegisterCommand, "register a command and assign it a function, script and/or shortcut"),
       EP_MAKE_METHOD(UnregisterCommand, "remove a command from the command manager"),
       EP_MAKE_METHOD(HandleShortcutEvent, "execute the command attached to the given shortcut"),
+      EP_MAKE_METHOD(RunCommand, "call the function or script attached to the given command"),
       EP_MAKE_METHOD(SetFunction, "Assign a callback function to the given command"),
       EP_MAKE_METHOD(SetScript, "Assign a script string to the given command"),
     };

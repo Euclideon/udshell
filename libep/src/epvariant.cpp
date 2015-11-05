@@ -650,7 +650,7 @@ size_t Variant::assocArraySeriesLen() const
   return length;
 }
 
-Variant Variant::operator[](size_t j) const
+Variant& Variant::operator[](size_t j) const
 {
   if (is(Type::Array))
   {
@@ -664,7 +664,7 @@ Variant Variant::operator[](size_t j) const
   }
   return Variant();
 }
-Variant Variant::operator[](String key) const
+Variant& Variant::operator[](String key) const
 {
   if (is(Type::AssocArray))
   {

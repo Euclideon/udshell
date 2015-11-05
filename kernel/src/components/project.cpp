@@ -48,7 +48,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   }
   catch (parse_error e)
   {
-    LogError("Unable to parse project file: {0} on line {1} : {2}", srcString, GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
+    LogError("Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
     throw epR_Failure;
   }
 
@@ -172,20 +172,6 @@ void Project::ParseActivity(Variant node)
     return;
   }
   activities.pushBack(shared_pointer_cast<Activity>(c));
-}
-
-
-uint32_t Project::GetLineNumberFromByteIndex(Slice<char> buffer, size_t index) const
-{
-  int lineNumber = 0;
-
-  for (size_t i = 0; i < buffer.length && i <= index; i++)
-  {
-    if (buffer[i] == '\n')
-      lineNumber++;
-  }
-
-  return lineNumber;
 }
 
 } // namespace kernel

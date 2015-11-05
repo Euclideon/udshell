@@ -7,7 +7,7 @@ CommandManager::CommandManager(const ComponentDesc *pType, Kernel *pKernel, Shar
   : Component(pType, pKernel, uid, initParams)
 {}
 
-SharedString CommandManager::GetShortcut(String id) const
+String CommandManager::GetShortcut(String id) const
 {
   const Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)
@@ -70,6 +70,24 @@ String CommandManager::StripWhitespace(Slice<char> output, String input)
   return output.slice(0, len);
 }
 
+bool CommandManager::RunCommand(String id)
+{
+  for (Command &comm : commandRegistry)
+  {
+    if (!id.cmpIC(comm.id))
+    {
+      if (comm.func)
+        comm.func();
+      else if (!comm.script.empty())
+        pKernel->Exec(comm.script);
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void CommandManager::UnregisterCommand(String id)
 {
   commandRegistry.Remove(id);
@@ -122,5 +140,7 @@ bool CommandManager::SetScript(String id, String script)
 
   return true;
 }
+
+
 
 } // namespace kernel

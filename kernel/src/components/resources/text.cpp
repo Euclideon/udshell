@@ -250,4 +250,17 @@ void Text::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth)
   }
 }
 
+uint32_t Text::GetLineNumberFromByteIndex(String buffer, size_t index)
+{
+  int lineNumber = 0;
+
+  for (size_t i = 0; i < buffer.length && i <= index; i++)
+  {
+    if (buffer[i] == '\n')
+      lineNumber++;
+  }
+
+  return lineNumber;
+}
+
 } // namespace kernel

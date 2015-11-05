@@ -25,8 +25,6 @@ public:
 protected:
   Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
-  uint32_t GetLineNumberFromByteIndex(Slice<char> buffer, size_t index) const;
-
   Variant SaveActivities();
 
   void ParseProject(Variant node);

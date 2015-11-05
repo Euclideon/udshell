@@ -23,6 +23,8 @@ public:
 
   void CopyBuffer(String text) { Buffer::CopyBuffer(text); }
 
+  static uint32_t GetLineNumberFromByteIndex(String buffer, size_t index);
+
 protected:
   Text(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Buffer(pType, pKernel, uid, initParams) {}

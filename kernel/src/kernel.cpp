@@ -154,7 +154,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   // resource manager
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
 
-  // shortcut manager
+  // command manager
   pKernel->spCommandManager = pKernel->CreateComponent<CommandManager>();
 
   // Init capture and broadcast of stdout/stderr
