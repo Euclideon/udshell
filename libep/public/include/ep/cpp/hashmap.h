@@ -1,7 +1,7 @@
 #if !defined(_EP_HASHMAP_HPP)
 #define _EP_HASHMAP_HPP
 
-#include "ep/cpp/chunkedarray.h"
+#include "ep/cpp/freelist.h"
 
 //#define SUPPORT_FLEXIBLE_TABLE_SIZE
 
@@ -80,7 +80,7 @@ public:
   Iterator end() const;
 
 protected:
-  ChunkedArray<Item, 256> itemPool;
+  FreeList<Item> itemPool;
   Item **ppItems;
   size_t tableSize;
   size_t itemCount;

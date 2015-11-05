@@ -11,7 +11,7 @@ public:
   FreeList(size_t listSize)
     : numAllocated(0)
   {
-    pList = pFreeList = epAllocType(T, listSize, udAF_None);
+    pList = pFreeList = epAllocType(T, listSize, epAF_None);
     for (size_t i = 0; i<listSize; ++i)
       (T*&)pList[i] = i < listSize-1 ? &pList[i+1] : nullptr;
   }

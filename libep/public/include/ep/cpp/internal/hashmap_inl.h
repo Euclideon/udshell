@@ -2,7 +2,7 @@ namespace ep {
 
 template <typename T>
 HashMap<T>::HashMap(size_t _tableSize)
-  : itemPool()
+  : itemPool(1024) // TODO: this is not enough, FreeList needs to be enhanced to grow automatically
 {
 #if !defined(SUPPORT_FLEXIBLE_TABLE_SIZE)
   _tableSize = 256;
@@ -52,7 +52,7 @@ inline T& HashMap<T>::Create(size_t hash)
 template <typename T>
 inline T& HashMap<T>::Add(size_t hash, const T& item)
 {
-  Item *pNew = itemPool.PushBack();
+  Item *pNew = itemPool.Alloc();
   new(&pNew->item) T(item);
 
   pNew->hash = hash;
@@ -70,7 +70,7 @@ inline T& HashMap<T>::Add(size_t hash, const T& item)
 template <typename T>
 inline T& HashMap<T>::Add(size_t hash, T&& item)
 {
-  Item *pNew = itemPool.PushBack();
+  Item *pNew = itemPool.Alloc();
   new(&pNew->item) T(std::move(item));
 
   pNew->hash = hash;
@@ -114,7 +114,7 @@ inline void HashMap<T>::Destroy(size_t hash)
   if (pDel)
   {
     pDel->item.~T();
-    itemPool.RemoveSwapLast(pDel);
+    itemPool.Free(pDel);
     --itemCount;
   }
 }
