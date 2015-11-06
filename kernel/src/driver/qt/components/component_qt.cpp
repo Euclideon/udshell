@@ -13,10 +13,9 @@ QVariant QtEPComponent::get(const QString &name) const
 {
   QByteArray byteArray = name.toUtf8();
   String prop(byteArray.data(), byteArray.size());
-
   QVariant res;
   epFromVariant(pComponent->GetProperty(prop), &res);
-  return res;
+  return std::move(res);
 }
 
 void QtEPComponent::set(const QString &name, QVariant val)
@@ -32,7 +31,7 @@ QVariant QtEPComponent::call(const QString &name) const
   String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(pComponent->CallMethod(method, Slice<Variant>()), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
@@ -41,7 +40,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
   String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0)), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) const
@@ -50,7 +49,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) 
   String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1)), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const
@@ -59,7 +58,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const
@@ -68,7 +67,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   String method(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const
@@ -78,7 +77,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4)), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -90,7 +89,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   Array<Variant, 6> vargs = {  };
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5)), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -101,7 +100,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6)), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -112,7 +111,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6), epToVariant(arg7)), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -124,7 +123,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6),
     epToVariant(arg7), epToVariant(arg8)), &res);
-  return res;
+  return std::move(res);
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -136,7 +135,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
     epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5),
     epToVariant(arg6), epToVariant(arg7), epToVariant(arg8), epToVariant(arg9)), &res);
-  return res;
+  return std::move(res);
 }
 
 // Shim class
