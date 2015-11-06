@@ -271,6 +271,8 @@
 //# pragma GCC diagnostic ignored "-Wunused-parameter"  // stop complaining about unused parameters
 //# pragma GCC diagnostic ignored "-Wmissing-field-initializers" // stop complaining about missing field initialisers
 #elif defined(EP_COMPILER_CLANG)
+# pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare" // comparison of constant 128 with expression of type 'const char' is always true
+# pragma clang diagnostic ignored "-Wmissing-field-initializers" // missing field initializer TODO: REMOVE ME!! 
 //# pragma clang diagnostic ignored "-Wreturn-type-c-linkage" // disable C-linkage returning UDT (user data type)
 //# pragma clang diagnostic ignored "-Wformat-security"       // stop complaining about variable format strings
 #endif

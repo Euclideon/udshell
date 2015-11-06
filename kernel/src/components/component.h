@@ -147,7 +147,7 @@ protected:
 
 private:
   template<typename... Args>
-  friend class ::Event;
+  friend class Event;
   friend class LuaState;
 
   Component(const Component &) = delete;    // Still not sold on this

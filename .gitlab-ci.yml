@@ -19,6 +19,13 @@ linux_shell_deb:
     - linux
     - deb
 
+linux_shell_deb_clang:
+  stage: build
+  script: "./build/build.sh epshell ReleaseClang x64 merge"
+  tags:
+    - linux
+    - deb
+
 linux_shell_rpm:
   stage: build
   script: "./build/build.sh epshell Release x64 merge"
@@ -58,6 +65,13 @@ windows_viewer_release_32:
 linux_viewer_deb:
   stage: build
   script: "./build/build.sh epviewer Release x64 merge"
+  tags:
+    - linux
+    - deb
+
+linux_viewer_deb_clang:
+  stage: build
+  script: "./build/build.sh epviewer ReleaseClang x64 merge"
   tags:
     - linux
     - deb

@@ -428,7 +428,7 @@ public:
     const Node *GetNode(uint64_t s, uint64_t d) const
     {
       const Node *pNode = pRoot;
-      for (auto i = 0; i < d; ++i)
+      for (uint64_t i = 0; i < d; ++i)
       {
         if (s & (1LL << i))
           pNode = pNode->left;
