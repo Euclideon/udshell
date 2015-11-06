@@ -146,7 +146,7 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
     // TODO: have non lookup qmlproperty version and lookup version for the dynamic properties
     // TODO: list of qmlproperty - shared between getter and setter
     // TODO: store list to free getter/setter?
-    ep::PropertyDesc desc = { info, udNew(QtGetter<ComponentType>, propertyName), udNew(QtSetter<ComponentType>, propertyName) };
+    ep::PropertyDesc desc = { info, new QtGetter<ComponentType>(propertyName), new QtSetter<ComponentType>(propertyName) };
 
     pComponent->AddDynamicProperty(desc);
   }
@@ -171,7 +171,7 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
       // TODO: keep free list of methods
       SharedString methodName = AllocUDStringFromQString(method.name());
       ep::FunctionInfo info = { methodName, methodDescStr };
-      ep::MethodDesc desc = { info, udNew(QtMethod<ComponentType>, method) };
+      ep::MethodDesc desc = { info, new QtMethod<ComponentType>(method) };
 
       pComponent->AddDynamicMethod(desc);
     }
@@ -184,7 +184,7 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
       // TODO: keep free list of events
       SharedString eventName = AllocUDStringFromQString(method.name());
       ep::EventInfo info = { eventName, eventName, eventDescStr };
-      ep::EventDesc desc = { info, udNew(QtVarEvent<ComponentType>, method) };
+      ep::EventDesc desc = { info, new QtVarEvent<ComponentType>(method) };
 
       pComponent->AddDynamicEvent(desc);
     }

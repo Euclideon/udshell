@@ -77,12 +77,12 @@ ComponentDesc Lua::descriptor =
 Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  pLua = udNew(LuaState, pKernel);
+  pLua = new LuaState(pKernel);
 }
 
 Lua::~Lua()
 {
-  udDelete(pLua);
+  delete pLua;
 }
 
 void Lua::SetOutputStream(StreamRef stream)

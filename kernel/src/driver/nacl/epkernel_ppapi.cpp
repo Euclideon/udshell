@@ -716,12 +716,12 @@ epPepperModule::~epPepperModule()
 // Author: Manu Evans, May 2015
 pp::Instance* epPepperModule::CreateInstance(PP_Instance instance)
 {
-  return udNew(udNewPepperInstance, instance);
+  return new udNewPepperInstance(instance);
 }
 
 namespace pp
 {
-  Module* CreateModule() { return udNew(epPepperModule); }
+  Module* CreateModule() { return new epPepperModule; }
 }
 
 #else
