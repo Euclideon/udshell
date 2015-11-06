@@ -803,7 +803,7 @@ class LuaDelegate : public DelegateMemento
 {
 protected:
   template<typename T>
-  friend class ::SharedPtr;
+  friend class SharedPtr;
 
   Variant call(Slice<Variant> args) const
   {

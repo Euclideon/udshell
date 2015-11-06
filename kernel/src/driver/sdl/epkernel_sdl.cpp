@@ -40,7 +40,7 @@ epResult SDLKernel::InitInternal()
     return epR_Failure_;
 
   s_sdlEvent = SDL_RegisterEvents(1);
-  if (s_sdlEvent < 0)
+  if (s_sdlEvent == (Uint32)-1)
   {
     SDL_Quit();
     return epR_Failure_;

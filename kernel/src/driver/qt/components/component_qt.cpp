@@ -144,7 +144,7 @@ class JSValueDelegate : public DelegateMemento
 {
 protected:
   template<typename T>
-  friend class ::SharedPtr;
+  friend class ep::SharedPtr;
 
   Variant call(Slice<Variant> args)
   {

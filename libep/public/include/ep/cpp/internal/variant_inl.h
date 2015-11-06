@@ -406,7 +406,7 @@ class VarDelegateMemento<R(Args...)> : public DelegateMemento
 {
 protected:
   template<typename T>
-  friend class SharedPtr;
+  friend class ep::SharedPtr;
 
   template<size_t ...S>
   epforceinline static Variant callFuncHack(Slice<Variant> args, const Delegate<R(Args...)> &d, Sequence<S...>)
@@ -459,7 +459,7 @@ class VarDelegateMemento<void(Args...)> : public DelegateMemento
 {
 protected:
   template<typename T>
-  friend class SharedPtr;
+  friend class ep::SharedPtr;
 
   template<size_t ...S>
   epforceinline static void callFuncHack(Slice<Variant> args, const Delegate<void(Args...)> &d, Sequence<S...>)

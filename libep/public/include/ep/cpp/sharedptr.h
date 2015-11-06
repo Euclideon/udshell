@@ -39,18 +39,11 @@ namespace internal {
   struct Destroy;
   template<class T>
   struct Destroy<T, false> {
-    epforceinline static void destroy(T *ptr)
-    {
-      delete ptr;
-    }
+    epforceinline static void destroy(T *ptr);
   };
   template<class T>
   struct Destroy<T, true> {
-    epforceinline static void destroy(T *ptr)
-    {
-      RefCounted *rc = ptr;
-      delete rc;
-    }
+    epforceinline static void destroy(T *ptr);
   };
 
   void* GetWeakPtr(void *pAlloc);
@@ -466,14 +459,27 @@ inline void SharedPtr<T>::release()
   }
 }
 
+namespace internal {
+
+  template<class T>
+  epforceinline void Destroy<T, false>::destroy(T *ptr)
+  {
+    delete ptr;
+  }
+  template<class T>
+  epforceinline void Destroy<T, true>::destroy(T *ptr)
+  {
+    RefCounted *rc = ptr;
+    delete rc;
+  }
+
+} // namespace internal
+
 template<typename T>
 ptrdiff_t epStringify(Slice<char> buffer, String format, SharedPtr<T> spT, const epVarArg *pArgs)
 {
   return epStringifyTemplate(buffer, format, spT.ptr(), pArgs);
 }
- 
-} // namespace ep
-
 
 // cast functions
 template<class T, class U>
@@ -526,6 +532,7 @@ template<class T> inline bool operator!=(const UniquePtr<T> &l, nullptr_t) { ret
 template<class T> inline bool operator==(nullptr_t, const UniquePtr<T> &r) { return nullptr == r.ptr(); }
 template<class T> inline bool operator!=(nullptr_t, const UniquePtr<T> &r) { return nullptr != r.ptr(); }
 
+} // namespace ep
 
 // unit tests
 epResult epSharedPtr_Test();

@@ -36,12 +36,12 @@ function execute_build() {
   
     if [ $# -eq 4 ]; then
       if [ $4 == "clean" ]; then
-        make clean
+        make config=${2,,} clean
       else
         exit 5
       fi     
     elif [ $# -eq 3 ]; then
-      make -j4
+      make config=${2,,} -j4
     fi 
     if [ $? -ne 0 ]; then exit 5; fi
   fi
