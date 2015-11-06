@@ -18,7 +18,6 @@ linux_shell_deb:
   tags:
     - linux
     - deb
-  allow_failure: true
 
 linux_shell_rpm:
   stage: build
@@ -62,7 +61,6 @@ linux_viewer_deb:
   tags:
     - linux
     - deb
-  allow_failure: true
 
 linux_viewer_rpm:
   stage: build
@@ -71,3 +69,4 @@ linux_viewer_rpm:
     - linux
     - rpm
   allow_failure: true
+  
