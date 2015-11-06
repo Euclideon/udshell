@@ -3,6 +3,7 @@
 #define _EP_PLATFORM_HPP
 
 #include "ep/c/platform.h"
+#include <new>
 
 namespace ep {}
 using namespace ep;

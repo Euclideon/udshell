@@ -277,7 +277,7 @@ bool SimpleCamera::Update(double timeDelta)
 // Author: Manu Evans, May 2015
 Component *SimpleCamera::CreateInstance(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
 {
-  return udNew(SimpleCamera, pType, pKernel, uid, initParams);
+  return new SimpleCamera(pType, pKernel, uid, initParams);
 }
 
 } // namespace ep
