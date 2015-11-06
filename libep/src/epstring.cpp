@@ -1,6 +1,7 @@
 #include "ep/cpp/platform.h"
 
 #include <stdio.h>
+#include <math.h>
 
 #if defined(EP_COMPILER_VISUALC)
 // _CRT_SECURE_NO_WARNINGS warning (vsprintf_s)
@@ -640,8 +641,8 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), uint64_t
 }
 ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), double f, const epVarArg *epUnusedParam(pArgs))
 {
-  char *defaultFormat = "%.17g";
-  char *pFormat = defaultFormat;
+  const char *defaultFormat = "%.17g";
+  const char *pFormat = defaultFormat;
 
   size_t len = 0;
 
@@ -755,7 +756,7 @@ epResult epString_Test()
 
   auto subStr = s1.slice(1, 4); // string slice; "ell"
   subStr.ptr = subStr.ptr;      // fixes gcc warnings
-  
+
   s2.toStringz(buffer, sizeof(buffer)); // write String to c-string
 
 
@@ -763,7 +764,7 @@ epResult epString_Test()
   MutableString<64> s_s1(s1);
   String s_slice = s_s1.slice(1, 4); // slices of Array are not owned; they die when the parent allocation dies
   s_slice.ptr = s_slice.ptr;     // fixes gcc warnings
-  
+
   s_s1.eqIC("HELLO");            // string comparison against string literals
 
   receivesString(s_s1);         // pass to functions

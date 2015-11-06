@@ -41,7 +41,7 @@ function execute_build() {
         exit 5
       fi     
     elif [ $# -eq 3 ]; then
-      make
+      make -j4
     fi 
     if [ $? -ne 0 ]; then exit 5; fi
   fi
