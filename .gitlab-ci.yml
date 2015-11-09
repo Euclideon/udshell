@@ -12,21 +12,28 @@ windows_shell_release_64:
     - windows
     - vs2015
 
-linux_shell_deb:
+ubuntu_shell_release_gcc:
   stage: build
   script: "./build/build.sh epshell Release x64 merge"
   tags:
     - linux
     - deb
 
-linux_shell_deb_clang:
+ubuntu_shell_debug_clang:
+  stage: build
+  script: "./build/build.sh epshell DebugClang x64 merge"
+  tags:
+    - linux
+    - deb
+
+ubuntu_shell_release_clang:
   stage: build
   script: "./build/build.sh epshell ReleaseClang x64 merge"
   tags:
     - linux
     - deb
 
-linux_shell_rpm:
+rpm_shell_release_gcc:
   stage: build
   script: "./build/build.sh epshell Release x64 merge"
   tags:
@@ -62,21 +69,28 @@ windows_viewer_release_32:
     - windows
     - vs2015
     
-linux_viewer_deb:
+ubuntu_viewer_release_gcc:
   stage: build
   script: "./build/build.sh epviewer Release x64 merge"
   tags:
     - linux
     - deb
 
-linux_viewer_deb_clang:
+ubuntu_viewer_debug_clang:
+  stage: build
+  script: "./build/build.sh epviewer DebugClang x64 merge"
+  tags:
+    - linux
+    - deb
+
+ubuntu_viewer_release_clang:
   stage: build
   script: "./build/build.sh epviewer ReleaseClang x64 merge"
   tags:
     - linux
     - deb
 
-linux_viewer_rpm:
+rpm_viewer_release_gcc:
   stage: build
   script: "./build/build.sh epviewer Release x64 merge"
   tags:
