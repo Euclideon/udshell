@@ -43,7 +43,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   else
   {
     LogError("Missing or invalid parameter \"src\" when creating Project");
-    throw epR_InvalidParameter_;
+    throw epR_InvalidParameter;
   }
 
   size_t len = (size_t)spSrc->Length();

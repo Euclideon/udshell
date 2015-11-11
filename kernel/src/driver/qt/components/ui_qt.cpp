@@ -32,7 +32,7 @@ epResult SetupFromQmlFile(InitParams initParams, qt::QtKernel *pKernel, Componen
   if (file.empty())
   {
     pComponent->LogError("Attempted to create ui component without source file");
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   // create QObject wrapper for this component and expose it to the qml context for this ui component
@@ -55,7 +55,7 @@ epResult SetupFromQmlFile(InitParams initParams, qt::QtKernel *pKernel, Componen
     delete pContext;
     delete pEPComponent;
 
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   // transfer ownership of our qt objects so they are cleaned up
@@ -95,7 +95,7 @@ epResult UIComponent::CreateInternal(InitParams initParams)
   LogTrace("UIComponent::CreateInternal()");
 
   if (SetupFromQmlFile(initParams, (qt::QtKernel*)pKernel, this, (QObject**)&pInternal) != epR_Success)
-    return epR_Failure_;
+    return epR_Failure;
 
   QObject *pQtObject = (QObject*)pInternal;
 
@@ -104,7 +104,7 @@ epResult UIComponent::CreateInternal(InitParams initParams)
   {
     LogError("UIComponent must create a QQuickItem");
     CleanupInternalData((QObject**)&pInternal);
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   // Decorate the descriptor with meta object information
@@ -144,7 +144,7 @@ epResult Viewport::CreateInternal(InitParams initParams)
   if (renderViews.size() != 1)
   {
     LogWarning(1, "Viewport component must contain 1 RenderView QML item");
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   // check if we passed in a view, otherwise create a default one
@@ -174,7 +174,7 @@ epResult Window::CreateInternal(InitParams initParams)
 
   qt::QtKernel *pQtKernel = (qt::QtKernel*)pKernel;
   if (SetupFromQmlFile(initParams, pQtKernel, this, (QObject**)&pInternal) != epR_Success)
-    return epR_Failure_;
+    return epR_Failure;
 
   QQuickWindow *pQtWindow = qobject_cast<QQuickWindow*>((QObject*)pInternal);
   // We expect a QQuickWindow object
@@ -182,7 +182,7 @@ epResult Window::CreateInternal(InitParams initParams)
   {
     LogError("Window must create a QQuickWindow");
     CleanupInternalData((QObject**)&pInternal);
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   // Decorate the descriptor with meta object information
@@ -194,7 +194,7 @@ epResult Window::CreateInternal(InitParams initParams)
     // TODO: error handling
     LogError("Unable to register window");
     CleanupInternalData((QObject**)&pInternal);
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   return epR_Success;

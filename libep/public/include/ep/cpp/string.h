@@ -192,6 +192,10 @@ struct SharedString : public SharedArray<const char>
   template <typename U> SharedString(Slice<U> slice);
   SharedString(const char *pString);
 
+  // epString compatibility
+  SharedString(epSharedString s);
+  operator epSharedString() const;
+
   // construction
   template<typename... Args> static SharedString concat(const Args&... args);
   template<typename... Args> static SharedString format(String format, const Args&... args);

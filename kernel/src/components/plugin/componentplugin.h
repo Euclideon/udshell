@@ -22,7 +22,7 @@ private:
     {
       pUserData = pCallbacks->pCreateInstance((epComponent*)this, (const epKeyValuePair*)initParams.params.ptr, initParams.params.length);
       if (!pUserData)
-        throw epR_Failure_;
+        throw epR_Failure;
     }
   }
   virtual ~ComponentPlugin()

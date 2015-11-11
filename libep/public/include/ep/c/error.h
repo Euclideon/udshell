@@ -5,15 +5,36 @@
 extern "C" {
 #endif
 
+#include "ep/c/string.h"
+
 enum epResult
 {
   epR_Success,
-  epR_Failure_,
+  epR_Failure,
 
-  epR_InvalidParameter_,
+  epR_InvalidParameter,
   epR_File_OpenFailure,
   epR_MemoryAllocationFailure,
 };
+
+struct epErrorState
+{
+  epResult error;
+  epString message;
+
+  epString file;
+  int line;
+
+  epErrorState *pPredicate;
+};
+
+#define EP_PUSHERROR(error, message) epPushError(error, message, epString_Create(__FILE__), __LINE__)
+
+void epPushError(epResult error, epString message, epString file, int line);
+epErrorState* epGetError();
+void epClearError();
+
+epSharedString epDumpError();
 
 
 #define EP_ERROR_BREAK_ON_ERROR 0  // Set to 1 to have the debugger break on error

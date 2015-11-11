@@ -69,7 +69,7 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   StreamRef spDebugFile, spConsole;
   Kernel *pKernel = CreateInstanceInternal(commandLine);
 
-  EP_ERROR_NULL(pKernel, epR_Failure_);
+  EP_ERROR_NULL(pKernel, epR_Failure);
 
   pKernel->pRenderer = new Renderer(pKernel, renderThreadCount);
 
@@ -173,7 +173,7 @@ epResult Kernel::DoInit(Kernel *pKernel)
   if (pKernel->InitComponents() != epR_Success)
   {
     EPASSERT(false, "Oh no! Can't boot!");
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   epResult result = udRenderScene_Init(pKernel);
@@ -188,11 +188,11 @@ epResult Kernel::DoInit(Kernel *pKernel)
   // prepare the plugins
   pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>();
   if (!pKernel->spPluginManager)
-    return epR_Failure_;
+    return epR_Failure;
 
   PluginLoaderRef spNativePluginLoader = pKernel->CreateComponent<NativePluginLoader>();
   if (!spNativePluginLoader)
-    return epR_Failure_;
+    return epR_Failure;
   pKernel->spPluginManager->RegisterPluginLoader(spNativePluginLoader);
 
   LoadPlugins();
@@ -200,12 +200,12 @@ epResult Kernel::DoInit(Kernel *pKernel)
   // make the kernel timers
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   if (!pKernel->spStreamerTimer)
-    return epR_Failure_;
+    return epR_Failure;
   pKernel->spStreamerTimer->Elapsed.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
 
   pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
   if (!pKernel->spUpdateTimer)
-    return epR_Failure_;
+    return epR_Failure;
   pKernel->spUpdateTimer->Elapsed.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
 
   // call application init
@@ -321,7 +321,7 @@ Array<const ComponentDesc *> Kernel::GetDerivedComponentDescs(const ComponentDes
 epResult Kernel::SendMessage(String target, String sender, String message, const Variant &data)
 {
   if (target.empty())
-    return epR_Failure_; // TODO: no target!!
+    return epR_Failure; // TODO: no target!!
 
   char targetType = target.popFront();
   if (targetType == '@')
@@ -337,7 +337,7 @@ epResult Kernel::SendMessage(String target, String sender, String message, const
     {
       // TODO: check if it's in the foreign component registry and send it there
 
-      return epR_Failure_; // TODO: no component!
+      return epR_Failure; // TODO: no component!
     }
   }
   else if (targetType == '#')
@@ -352,7 +352,7 @@ epResult Kernel::SendMessage(String target, String sender, String message, const
     {
       // TODO: foreign kernels?!
 
-      return epR_Failure_; // TODO: invalid kernel!
+      return epR_Failure; // TODO: invalid kernel!
     }
   }
   else if (targetType == '$')
@@ -365,10 +365,10 @@ epResult Kernel::SendMessage(String target, String sender, String message, const
       return epR_Success;
     }
     else
-      return epR_Failure_; // TODO: no message handler
+      return epR_Failure; // TODO: no message handler
   }
 
-  return epR_Failure_; // TODO: error, invalid target!
+  return epR_Failure; // TODO: error, invalid target!
 }
 
 epResult Kernel::ReceiveMessage(String sender, String message, const Variant &data)
@@ -390,7 +390,7 @@ epResult Kernel::RegisterComponentType(ComponentDesc *pDesc)
   if (pDesc->id.exists('@') || pDesc->id.exists('$') || pDesc->id.exists('#'))
   {
     EPASSERT(false, "Invalid component id");
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   // build search trees
@@ -414,7 +414,7 @@ epResult Kernel::CreateComponent(String typeId, InitParams initParams, Component
 {
   ComponentType *pType = componentRegistry.Get(typeId.hash());
   if (!pType)
-    return epR_Failure_;
+    return epR_Failure;
 
   try
   {
@@ -448,7 +448,7 @@ epResult Kernel::CreateComponent(String typeId, InitParams initParams, Component
   catch (...)
   {
     LogDebug(3, "Create component failed!");
-    return epR_Failure_;
+    return epR_Failure;
   }
 }
 

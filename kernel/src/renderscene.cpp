@@ -70,13 +70,13 @@ epResult udRenderScene_InitRender(Kernel*)
   epArrayDataFormat format[] = { epVDF_Float2 };
   s_pQuadVB = epVertex_CreateVertexBuffer(format, 1);
   if (!s_pQuadVB)
-    return epR_Failure_;
+    return epR_Failure;
 
   s_pQuadIB = epVertex_CreateIndexBuffer(epVDF_UInt);
   if (!s_pQuadIB)
   {
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   epArrayElement elements[] = {
@@ -89,7 +89,7 @@ epResult udRenderScene_InitRender(Kernel*)
   {
     epVertex_DestroyArrayBuffer(&s_pQuadIB);
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure_;
+    return epR_Failure;
   }
   struct Vertex
   {
@@ -112,7 +112,7 @@ epResult udRenderScene_InitRender(Kernel*)
     epVertex_DestroyFormatDeclaration(&s_pPosUV);
     epVertex_DestroyArrayBuffer(&s_pQuadIB);
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   epShader *pPS = epShader_CreateShader(s_blitShader, sizeof(s_blitShader), epST_PixelShader);
@@ -123,7 +123,7 @@ epResult udRenderScene_InitRender(Kernel*)
     epVertex_DestroyFormatDeclaration(&s_pPosUV);
     epVertex_DestroyArrayBuffer(&s_pQuadIB);
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   s_shader = epShader_CreateShaderProgram(pVS, pPS);
@@ -135,7 +135,7 @@ epResult udRenderScene_InitRender(Kernel*)
     epVertex_DestroyFormatDeclaration(&s_pPosUV);
     epVertex_DestroyArrayBuffer(&s_pQuadIB);
     epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure_;
+    return epR_Failure;
   }
 
   return epR_Success;
