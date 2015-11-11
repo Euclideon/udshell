@@ -173,12 +173,12 @@ BoundingVolume UDModel::GetBoundingVolume() const
   return vol;
 }
 
-int UDModel::Load(String name, bool useStreamer)
+int UDModel::Load(String _name, bool useStreamer)
 {
-  epResult result = epR_Failure_;
+  epResult result = epR_Failure;
   if (!spDataSource)
   {
-    spDataSource = pKernel->CreateComponent<UDDataSource>({ { "src", name },
+    spDataSource = pKernel->CreateComponent<UDDataSource>({ { "src", _name },
                                                             { "useStreamer", useStreamer },
                                                             { "existingComponent",  (Component*)this }
                                                           } );

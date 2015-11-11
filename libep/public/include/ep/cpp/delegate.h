@@ -83,7 +83,7 @@ public:
     return d(args...);
   }
 
-  void SetMemento(DelegateMementoRef m) { this->m = m; }
+  void SetMemento(DelegateMementoRef _m) { this->m = _m; }
   DelegateMementoRef GetMemento() const { return m; }
 
 protected:

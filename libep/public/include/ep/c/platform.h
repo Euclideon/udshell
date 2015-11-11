@@ -255,7 +255,6 @@
 #if defined(EP_COMPILER_VISUALC)
 # pragma warning(disable:4127) // conditional expression is constant
 # pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-# pragma warning(disable:4458) // declaration of 'name' hides class member   --- TODO: remove this! but we need to decide on naming convention...
 # pragma warning(disable: 4100) // unreferenced formal parameter
 # pragma warning(disable: 4714) // marked as __forceinline not inlined
 //# pragma warning(disable:4100) // disable 'unreferenced formal parameter'
@@ -272,7 +271,7 @@
 //# pragma GCC diagnostic ignored "-Wmissing-field-initializers" // stop complaining about missing field initialisers
 #elif defined(EP_COMPILER_CLANG)
 # pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare" // comparison of constant 128 with expression of type 'const char' is always true
-# pragma clang diagnostic ignored "-Wmissing-field-initializers" // missing field initializer TODO: REMOVE ME!! 
+# pragma clang diagnostic ignored "-Wmissing-field-initializers" // missing field initializer TODO: REMOVE ME!!
 //# pragma clang diagnostic ignored "-Wreturn-type-c-linkage" // disable C-linkage returning UDT (user data type)
 //# pragma clang diagnostic ignored "-Wformat-security"       // stop complaining about variable format strings
 #endif

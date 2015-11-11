@@ -22,7 +22,7 @@ public:
   EP_COMPONENT(Shader);
 
   SharedString GetCode() const { return code; }
-  void SetCode(SharedString code) { this->code = code; }
+  void SetCode(SharedString _code) { code = _code; }
 
 protected:
   friend class Material;

@@ -325,11 +325,11 @@ struct Matrix4x4
     } m;
   };
 
-  Matrix4x4<T> operator *(const Matrix4x4<T> &m) const { return Mul(*this, m); }
+  Matrix4x4<T> operator *(const Matrix4x4<T> &_m) const { return Mul(*this, _m); }
   Matrix4x4<T> operator *(T f) const { return Mul(*this, f); }
   Vector4<T> operator *(const Vector4<T> &v) const { return Mul(*this, v); }
 
-  Matrix4x4<T>& operator *=(const Matrix4x4<T> &m) { *this = Mul(*this, m); return *this; }
+  Matrix4x4<T>& operator *=(const Matrix4x4<T> &_m) { *this = Mul(*this, _m); return *this; }
   Matrix4x4<T>& operator *=(T f) { *this = Mul(*this, f); return *this; }
 
   bool operator ==(const Matrix4x4& rh) const { return memcmp(this, &rh, sizeof(*this)) == 0; }

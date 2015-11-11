@@ -21,10 +21,10 @@ public:
   EP_COMPONENT(Model);
 
   MaterialRef GetMaterial() const { return spMaterial; }
-  void SetMaterial(MaterialRef spMaterial) { this->spMaterial = spMaterial; }
+  void SetMaterial(MaterialRef _spMaterial) { spMaterial = _spMaterial; }
 
   void SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> attributeNames);
-  void SetIndexArray(ArrayBufferRef spIndices) { this->spIndices = spIndices; }
+  void SetIndexArray(ArrayBufferRef _spIndices) { spIndices = _spIndices; }
 
 protected:
   friend class GeomNode;

@@ -58,9 +58,9 @@ public:
     }
     return nullptr;
   }
-  ResourceRef GetResource(String name) const
+  ResourceRef GetResource(String _name) const
   {
-    ResourceRef *r = const_cast<ResourceRef*>(resources.Get(name));
+    ResourceRef *r = const_cast<ResourceRef*>(resources.Get(_name));
     if (r)
       return *r;
     return nullptr;
@@ -77,9 +77,9 @@ public:
     return component_cast<T>(GetResource(name));
   }
 
-  void SetResource(String name, const ResourceRef &spResource)
+  void SetResource(String _name, const ResourceRef &spResource)
   {
-    resources.Insert(name, spResource);
+    resources.Insert(_name, spResource);
   }
 
   size_t CountResources(String prefix)
@@ -104,7 +104,7 @@ public:
   }
 
   String GetURL() const { return url; }
-  void SetURL(String url) { this->url = url; }
+  void SetURL(String _url) { url = _url; }
 
 protected:
   DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);

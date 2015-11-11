@@ -65,24 +65,24 @@ public:
   epResult SendMessage(String target, String message, const Variant &data);
   epResult SendMessage(Component *pComponent, String message, const Variant &data) { MutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp, message, data); }
 
-  const PropertyInfo *GetPropertyInfo(String name) const
+  const PropertyInfo *GetPropertyInfo(String propName) const
   {
-    const PropertyDesc *pDesc = GetPropertyDesc(name);
+    const PropertyDesc *pDesc = GetPropertyDesc(propName);
     return pDesc ? &pDesc->info : nullptr;
   }
-  const FunctionInfo *GetMethodInfo(String name) const
+  const FunctionInfo *GetMethodInfo(String methName) const
   {
-    const MethodDesc *pDesc = GetMethodDesc(name);
+    const MethodDesc *pDesc = GetMethodDesc(methName);
     return pDesc ? &pDesc->info : nullptr;
   }
-  const EventInfo *GetEventInfo(String name) const
+  const EventInfo *GetEventInfo(String eventName) const
   {
-    const EventDesc *pDesc = GetEventDesc(name);
+    const EventDesc *pDesc = GetEventDesc(eventName);
     return pDesc ? &pDesc->info : nullptr;
   }
-  const FunctionInfo *GetStaticFuncInfo(String name) const
+  const FunctionInfo *GetStaticFuncInfo(String staticFuncName) const
   {
-    const StaticFuncDesc *pDesc = GetStaticFuncDesc(name);
+    const StaticFuncDesc *pDesc = GetStaticFuncDesc(staticFuncName);
     return pDesc ? &pDesc->info : nullptr;
   }
 
@@ -100,7 +100,7 @@ public:
   template<typename ...Args> void LogScript(String text, Args... args) const;
   template<typename ...Args> void LogTrace(String text, Args... args) const;
 
-  void SetName(String name) { this->name = name; }
+  void SetName(String _name) { this->name = _name; }
 
 
   void AddDynamicProperty(const PropertyDesc &property);
@@ -251,7 +251,7 @@ inline SharedPtr<T> component_cast(ComponentRef pComponent)
   return nullptr;
 }
 
-ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs); 
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs);
 
 } // namespace ep
 

@@ -33,7 +33,7 @@ struct epEnumDesc
                                                                                   \
     NAME() : v(Invalid) {}                                                        \
     NAME(const NAME &e) : v(e.v) {}                                               \
-    NAME(Type v) : v(v) {}                                                        \
+    NAME(Type _v) : v(_v) {}                                                      \
     NAME(String s)                                                              \
     {                                                                             \
       Slice<const String> keys = Keys();                                      \
@@ -67,7 +67,7 @@ struct epEnumDesc
     static const epEnumDesc* Desc()                                               \
     {                                                                             \
       static const epEnumDesc desc = { Name(), Keys(),                            \
-        [](size_t v, MutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
+        [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
   };                                                                              \
@@ -89,7 +89,7 @@ struct epEnumDesc
                                                                                   \
     NAME() : v(0) {}                                                              \
     NAME(const NAME &e) : v(e.v) {}                                               \
-    NAME(Type v) : v(v) {}                                                        \
+    NAME(Type _v) : v(_v) {}                                                        \
     NAME(String s)                                                              \
     {                                                                             \
       Slice<const String> keys = Keys();                                      \
@@ -137,7 +137,7 @@ struct epEnumDesc
     static const epEnumDesc* Desc()                                               \
     {                                                                             \
       static const epEnumDesc desc = { Name(), Keys(),                            \
-        [](size_t v, MutableString64 &s) { NAME e((Type)v); s = e.StringOf(); } };\
+        [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
   };                                                                              \

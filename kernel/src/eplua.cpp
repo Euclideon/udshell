@@ -47,10 +47,10 @@ void SetConsoleColor(ConsoleColor fg, ConsoleColor bg)
     "\x1b[40m", "\x1b[44m", "\x1b[42m", "\x1b[46m", "\x1b[41m", "\x1b[45m", "\x1b[43m", "\x1b[47m", // colors
     "\x1b[40;1m", "\x1b[44;1m", "\x1b[42;1m", "\x1b[46;1m", "\x1b[41;1m", "\x1b[45;1m", "\x1b[43;1m", "\x1b[47;1m", // 'bold'
   };
-  
+
   const char *pFG = fg_codes[(int)fg + 1];
   const char *pBG = bg_codes[(int)bg + 1];
-  
+
   fwrite(pFG, strlen(pFG), 1, stdout);
   fwrite(pBG, strlen(pBG), 1, stdout);
 }
@@ -1005,9 +1005,9 @@ void Variant::luaPush(LuaState &l) const
     {
       size_t val;
       const epEnumDesc *pDesc = asEnum(&val);
-      MutableString64 s;
-      pDesc->stringify(val, s);
-      l.pushString(s);
+      MutableString64 str;
+      pDesc->stringify(val, str);
+      l.pushString(str);
       break;
     }
     case Type::Component:
@@ -1032,10 +1032,10 @@ void Variant::luaPush(LuaState &l) const
     {
       lua_State *L = l.state();
       lua_createtable(L, (int)length, 0);
-      for (size_t i = 0; i<length; ++i)
+      for (size_t j = 0; j<length; ++j)
       {
-        l.push(((Variant*)p)[i]);
-        lua_seti(L, -2, i+1);
+        l.push(((Variant*)p)[j]);
+        lua_seti(L, -2, j+1);
       }
       break;
     }
@@ -1043,10 +1043,10 @@ void Variant::luaPush(LuaState &l) const
     {
       lua_State *L = l.state();
       lua_createtable(L, 0, 0); // TODO: estimate narr and nrec?
-      for (size_t i = 0; i<length; ++i)
+      for (size_t j = 0; j<length; ++j)
       {
-        l.push(((KeyValuePair*)p)[i].key);
-        l.push(((KeyValuePair*)p)[i].value);
+        l.push(((KeyValuePair*)p)[j].key);
+        l.push(((KeyValuePair*)p)[j].value);
         lua_settable(L, -3);
       }
       break;
@@ -1058,8 +1058,7 @@ void Variant::luaPush(LuaState &l) const
 
 Variant Variant::luaGet(LuaState &l, int idx)
 {
-  LuaType t = l.getType(idx);
-  switch (t)
+  switch (l.getType(idx))
   {
     case LuaType::Nil:
       return Variant(nullptr);

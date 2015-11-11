@@ -140,14 +140,14 @@ void ComponentDesc::BuildSearchTrees()
   InitStaticFuncs();
 }
 
-StaticFunc *ComponentDesc::GetStaticFunc(String id) const
+StaticFunc *ComponentDesc::GetStaticFunc(String _id) const
 {
   const StaticFuncDesc *pFuncDesc;
   const ComponentDesc *pCompDesc = this;
 
   while(pCompDesc)
   {
-    pFuncDesc = pCompDesc->staticFuncTree.Get(id);
+    pFuncDesc = pCompDesc->staticFuncTree.Get(_id);
     if (pFuncDesc)
       return pFuncDesc->staticFunc;
 

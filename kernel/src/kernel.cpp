@@ -421,9 +421,9 @@ epResult Kernel::CreateComponent(String typeId, InitParams initParams, Component
     const ComponentDesc *pDesc = pType->pDesc;
 
     // TODO: should we have a better uid generator than this?
-    MutableString64 uid; uid.concat(pDesc->id, pType->createCount++);
+    MutableString64 newUid; newUid.concat(pDesc->id, pType->createCount++);
 
-    ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, uid, initParams));
+    ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, newUid, initParams));
     if (!spComponent)
       return epR_MemoryAllocationFailure;
 
@@ -465,13 +465,13 @@ epResult Kernel::DestroyComponent(Component *pInstance)
   return epR_Success;
 }
 
-ComponentRef Kernel::FindComponent(String uid)
+ComponentRef Kernel::FindComponent(String _uid)
 {
-  if (uid.empty() || uid[0] == '$' || uid[0] == '#')
+  if (_uid.empty() || _uid[0] == '$' || _uid[0] == '#')
     return nullptr;
-  if (uid[0] == '@')
-    uid.popFront();
-  Component **ppComponent = instanceRegistry.Get(uid.toStringz());
+  if (_uid[0] == '@')
+    _uid.popFront();
+  Component **ppComponent = instanceRegistry.Get(_uid.toStringz());
   return ppComponent ? ComponentRef(*ppComponent) : nullptr;
 }
 

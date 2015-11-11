@@ -218,14 +218,14 @@ bool SimpleCamera::Update(double timeDelta)
   else if(epInput_State(epID_Keyboard, epKC_2) || (bToggle && !bHelicopter))
     helicopterMode(true);
 #endif // 0
-  double speed = 1.0;
+  double tmpSpeed = 1.0;
   if((s = -epInput_State(epID_Mouse, epMC_Wheel)) != 0.0)
-    speed = pow(1.2, s);
+    tmpSpeed = pow(1.2, s);
   if(epInput_State(epID_Gamepad, epGC_ButtonA) || epInput_State(epID_Keyboard, epKC_Equals) || epInput_State(epID_Keyboard, epKC_NumpadPlus))
-    speed = 1.0 + 1.0*timeDelta;
+    tmpSpeed = 1.0 + 1.0*timeDelta;
   if(epInput_State(epID_Gamepad, epGC_ButtonB) || epInput_State(epID_Keyboard, epKC_Hyphen) || epInput_State(epID_Keyboard, epKC_NumpadMinus))
-    speed = 1.0 - 0.5*timeDelta;
-  this->speed = udClamp(this->speed * speed, 0.001, 999.0);
+    tmpSpeed = 1.0 - 0.5*timeDelta;
+  this->speed = udClamp(speed * tmpSpeed, 0.001, 999.0);
 
   float multiplier = 1.f;
   if (keyState[(int)Keys::Boost] || epInput_State(epID_Gamepad, epGC_ButtonRB))
@@ -233,7 +233,7 @@ bool SimpleCamera::Update(double timeDelta)
   if(epInput_State(epID_Gamepad, epGC_ButtonLB))
     multiplier *= 0.333f;
 
-  speed = this->speed * multiplier * timeDelta;
+  tmpSpeed = speed * multiplier * timeDelta;
 
   // update the camera
   ypr.y += pitch;
@@ -262,9 +262,9 @@ bool SimpleCamera::Update(double timeDelta)
   if(bHelicopter)
     forward = Cross3(Double3::create(0,0,1), xAxis);
 
-  pos += forward*ty*speed;
-  pos += xAxis*tx*speed;
-  pos.z += tz*speed;
+  pos += forward*ty*tmpSpeed;
+  pos += xAxis*tx*tmpSpeed;
+  pos.z += tz*tmpSpeed;
 
   matrix = Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos);
 

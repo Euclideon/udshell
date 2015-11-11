@@ -36,7 +36,7 @@ public:
   void GetRenderDimensions(int *pWidth, int *pHeight) const;
   float GetAspectRatio() const { return (float)displayWidth / (float)displayHeight; }
 
-  void SetRenderOptions(const udRenderOptions &options) { this->options = options; }
+  void SetRenderOptions(const udRenderOptions &_options) { this->options = _options; }
   const udRenderOptions& GetRenderOptions() const { return options; }
 
   void Activate();

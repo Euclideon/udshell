@@ -21,30 +21,30 @@ public:
   EP_COMPONENT(ArrayBuffer);
 
   // array allocation
-  inline void Allocate(SharedString elementType, size_t elementSize, size_t length)
+  inline void Allocate(SharedString _elementType, size_t _elementSize, size_t length)
   {
-    Allocate(elementType, elementSize, Slice<size_t>(&length, 1));
+    Allocate(_elementType, _elementSize, Slice<size_t>(&length, 1));
   }
-  void Allocate(SharedString elementType, size_t elementSize, Slice<const size_t> shape)
+  void Allocate(SharedString _elementType, size_t _elementSize, Slice<const size_t> _shape)
   {
-    EPASSERT(shape.length > 0, "No dimensions given!");
-    EPASSERT(shape.length <= 4, "More than 4 dimensional matrices is not supported...");
+    EPASSERT(_shape.length > 0, "No dimensions given!");
+    EPASSERT(_shape.length <= 4, "More than 4 dimensional matrices is not supported...");
 
-    dimensions = shape.length;
-    this->elementType = elementType;
+    dimensions = _shape.length;
+    elementType = _elementType;
 
     // record dimensions and count total number of elements
     size_t elements = 1;
-    for (size_t i = 0; i<shape.length; ++i)
+    for (size_t i = 0; i<_shape.length; ++i)
     {
-      this->shape[i] = shape.ptr[i];
-      elements *= shape.ptr[i];
+      shape[i] = _shape.ptr[i];
+      elements *= _shape.ptr[i];
     }
 
     // alloc array
     bool alreadyAllocated = buffer.ptr != nullptr;
-    this->elementSize = elementSize;
-    Buffer::Allocate(elementSize*elements);
+    elementSize = _elementSize;
+    Buffer::Allocate(_elementSize*elements);
     if (alreadyAllocated)
       Changed.Signal();
   }
@@ -99,8 +99,8 @@ public:
   Slice<T> Map()
   {
     EPASSERT(stringof<T>().eq(elementType), "Incompatible type!");
-    Slice<void> buffer = Buffer::Map();
-    return Slice<T>((T*)buffer.ptr, buffer.length/sizeof(T));
+    Slice<void> _buffer = Buffer::Map();
+    return Slice<T>((T*)_buffer.ptr, _buffer.length/sizeof(T));
   }
 
   template<typename T = void>
