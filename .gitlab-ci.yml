@@ -4,7 +4,7 @@ windows_shell_debug_64:
   tags:
     - windows
     - vs2015
-    - oldbuild
+    - newbuild
 
 windows_shell_release_64:
   stage: build
@@ -12,7 +12,7 @@ windows_shell_release_64:
   tags:
     - windows
     - vs2015
-    - oldbuild
+    - newbuild
 
 ubuntu_shell_release_gcc:
   stage: build
@@ -49,7 +49,7 @@ windows_viewer_debug_64:
   tags:
     - windows
     - vs2015
-    - oldbuild
+    - newbuild
 
 windows_viewer_release_64:
   stage: build
@@ -57,7 +57,7 @@ windows_viewer_release_64:
   tags:
     - windows
     - vs2015
-    - oldbuild
+    - newbuild
    
 windows_viewer_debug_32:
   stage: build
@@ -65,7 +65,7 @@ windows_viewer_debug_32:
   tags:
     - windows
     - vs2015
-    - oldbuild
+    - newbuild
 
 windows_viewer_release_32:
   stage: build
@@ -73,7 +73,7 @@ windows_viewer_release_32:
   tags:
     - windows
     - vs2015
-    - oldbuild
+    - newbuild
     
 ubuntu_viewer_release_gcc:
   stage: build
