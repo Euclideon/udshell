@@ -1,5 +1,9 @@
 function execute_build() {
   if [ $OSTYPE == "msys" ]; then # Windows, MingW
+    # These must be here until Runner specific variables are implemented
+    export QTDIR="C:/dev/Qt/5.4/msvc2013_64_opengl"
+
+    # generate the project files
     if [ $1 == "epshell" ]; then # epshell
       ud/bin/premake/premake5.exe vs2015
     elif [ $1 == "epviewer" ]; then # epviewer
