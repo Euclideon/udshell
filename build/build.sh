@@ -27,7 +27,7 @@ function execute_build() {
     if [ $? -ne 0 ]; then exit 5; fi
   else
     # These must be here until Runner specific variables are implemented
-    export QTDIR=/opt/Qt5.4.1/5.4/gcc_64/
+    export QTDIR=~/dev/Qt/5.4/gcc_64
     export PATH=$QTDIR/bin:$PATH
 
     # This will need to use the $2 (configuration) and $3 (platform) variables somehow
