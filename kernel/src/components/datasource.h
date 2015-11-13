@@ -103,6 +103,9 @@ public:
       return GetResource((size_t)index.asInt());
   }
 
+  String GetURL() const { return url; }
+  void SetURL(String url) { this->url = url; }
+
 protected:
   DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 
@@ -114,6 +117,8 @@ protected:
       return a.cmp(b);
     }
   };
+
+  SharedString url;
 
   AVLTree<SharedString, ResourceRef> resources;
   Flags flags;

@@ -25,7 +25,7 @@ namespace ep
 struct UDJob
 {
   UDModelRef spModel = nullptr;
-  NodeRenderModel renderModel;
+  UDRenderState renderState;
 };
 
 struct GeomJob

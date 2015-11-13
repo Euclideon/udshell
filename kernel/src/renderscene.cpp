@@ -182,7 +182,7 @@ void RenderableView::RenderUD()
     udRenderModel **ppRenderModels = (udRenderModel**)alloca(size);
 
     for (size_t i = 0; i < spScene->ud.length; ++i)
-      ppRenderModels[i] = &spScene->ud[i].renderModel;
+      ppRenderModels[i] = &spScene->ud[i].renderState;
 
     // allocate view
     udRender_CreateView(&pRenderView, pRenderEngine, renderWidth, renderHeight);

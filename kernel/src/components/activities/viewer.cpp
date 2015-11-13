@@ -7,6 +7,9 @@
 #include "components/nodes/camera.h"
 #include "components/nodes/udnode.h"
 #include "components/timer.h"
+#include "components/resources/udmodel.h"
+#include "components/datasource.h"
+#include "components/resourcemanager.h"
 
 #include "kernel.h"
 
@@ -32,25 +35,29 @@ ComponentDesc Viewer::descriptor =
 Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Activity(pType, pKernel, uid, initParams)
 {
+  ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
+
   // TODO: Remove this once Subscribe returns an identifier for using with Unsubscribe
   updateFunc = Delegate<void(double)>(this, &Viewer::Update);
 
-  UDNodeRef spUDNode = pKernel->CreateComponent<UDNode>();
   ViewRef spView = pKernel->CreateComponent<View>();
   spScene = pKernel->CreateComponent<Scene>();
   spCamera = pKernel->CreateComponent<SimpleCamera>();
 
-  if (spUDNode)
+  const Variant &model = initParams["model"];
+  if (model.is(Variant::Type::String))
   {
-    // TODO: enable streamer once we have a tick running to update the streamer
-    spUDNode->Load("data\\DirCube.upc", false);
-    //    pUDNode->Load("data\\MCG.uds", true);
-    if (!spUDNode->GetSource().empty())
+    // TODO: enable streamer once it stops using focusView in Kernel
+    String modelSrc = model.asString();
+    DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", false } });
+    if (spModelDS && spModelDS->GetNumResources() > 0)
     {
+      spModel = spModelDS->GetResourceAs<UDModel>(0);
+      UDNodeRef spUDNode = pKernel->CreateComponent<UDNode>();
+      spUDNode->SetUDModel(spModel);
       spScene->GetRootNode()->AddChild(spUDNode);
     }
   }
-
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
   spView->SetRenderOptions(options);

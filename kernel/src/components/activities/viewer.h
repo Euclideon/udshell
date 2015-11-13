@@ -7,8 +7,7 @@
 namespace ep
 {
 PROTOTYPE_COMPONENT(Viewer);
-SHARED_CLASS(UDNode);
-SHARED_CLASS(View);
+SHARED_CLASS(UDModel);
 SHARED_CLASS(SimpleCamera);
 SHARED_CLASS(Scene);
 
@@ -30,6 +29,7 @@ protected:
 
   SceneRef spScene;
   SimpleCameraRef spCamera;
+  UDModelRef spModel;
 };
 
 } //namespace ep

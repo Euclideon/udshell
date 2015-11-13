@@ -104,7 +104,7 @@ void Init(String sender, String message, const Variant &data)
   }
   SetUIConsole(spTopLevelUI, spConsole);
 
-  auto spViewerActivity = pKernel->CreateComponent<Viewer>();
+  auto spViewerActivity = pKernel->CreateComponent<Viewer>({ { "model", "data/DirCube.upc" } });
   AddUIActivity(spTopLevelUI, spViewerActivity);
 
   spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
