@@ -9,6 +9,8 @@
 #include "components/uiconsole.h"
 #include "components/project.h"
 #include "components/activities/viewer.h"
+#include "components/resources/menu.h"
+#include "components/file.h"
 #include "hal/debugfont.h"
 
 using namespace kernel;
@@ -56,11 +58,6 @@ void AddUIActivity(UIComponentRef spTopLevelUI, ActivityRef spActivity)
   spTopLevelUI->CallMethod("addactivity", String(spActivity->uid), String(title), spUI);
 }
 
-void SetUIConsole(UIComponentRef spTopLevelUI, UIComponentRef spUIConsole)
-{
-  spTopLevelUI->SetProperty("uiconsole", spUIConsole);
-}
-
 void OnActivityChanged(String uid)
 {
   if (spActiveActivity)
@@ -87,6 +84,20 @@ void Deinit(String sender, String message, const Variant &data)
   spActiveActivity = nullptr;
   spMainWindow = nullptr;
   spProject = nullptr;
+}
+
+MutableString<0> ReadResourceFile(String src)
+{
+  QFile file(QString(src.toStringz()));
+  if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+  {
+    QByteArray qArray = file.readAll();
+    file.close();
+    
+    return String(qArray.constData(), qArray.length());
+  }
+  
+  return String();
 }
 
 void Init(String sender, String message, const Variant &data)
@@ -116,7 +127,7 @@ void Init(String sender, String message, const Variant &data)
     pKernel->LogError("Error creating top Level UI Component\n");
     return;
   }
-  SetUIConsole(spTopLevelUI, spConsole);
+  spTopLevelUI->SetProperty("uiconsole", spConsole);
 
   // Load Activities from project file
   if (spProject)
@@ -149,6 +160,17 @@ void Init(String sender, String message, const Variant &data)
     pKernel->LogError("Error creating Viewer activity\n");
 
   spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
+  
+  String menusPath(":/menus.xml");
+  MutableString<0> menuStr = ReadResourceFile(menusPath);
+  if(menuStr.empty())
+    pKernel->LogWarning(2, "Menus XML file \"{0}\" does not exist.", menusPath);
+
+  MenuRef spMenu = pKernel->CreateComponent<Menu>({ { "src", menuStr } });
+  if (spMenu)
+    spTopLevelUI->SetProperty("menucomp", spMenu);
+
+  spTopLevelUI->SetProperty("commandmanager", pKernel->GetCommandManager());
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
   // Set ui components

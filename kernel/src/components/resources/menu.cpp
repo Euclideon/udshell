@@ -2,85 +2,10 @@
 #include "kernel.h"
 #include "rapidxml.hpp"
 #include "components/resources/text.h"
-#include "components/shortcutmanager.h"
+#include "components/commandmanager.h"
 
 namespace ep
 {
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "menudata", // id
-      "MenuData", // displayName
-      "Heirarchical structure of menus", // description
-    },
-    &Menu::GetMenuData, // getter
-    &Menu::SetMenuData, // setter
-  },
-};
-
-static CMethodDesc methods[] =
-{
-  {
-    {
-      "addxmlitems", // id
-      "Add menu items from an XML string", // description
-    },
-    &Menu::AddXMLItems, // method
-  },
-  {
-    {
-      "removeitem", // id
-      "Remove menu item", // description
-    },
-    &Menu::RemoveItem, // method
-  },
-  // TODO Uncomment functions when we support params of type Slice<const KeyValuePair>
-  /*
-  {
-    {
-      "additem", // id
-      "Add a menu item with the given properties", // description
-    },
-    &Menu::AddItem, // method
-  },
-  {
-    {
-      "setitemproperties", // id
-      "set properties for the given menu item", // description
-    },
-    &Menu::SetItemProperties, // method
-  },
-  */
-};
-
-static CEventDesc events[] =
-{
-  {
-    {
-      "changed", // id
-      "Changed", // displayName
-      "The menu data has changed", // description
-    },
-    &Menu::Changed, // event
-  },
-};
-
-ComponentDesc Menu::descriptor =
-{
-  &Resource::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "menu", // id
-  "Menu", // displayName
-  "Menu resource", // description
-
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)),   // properties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
-  Slice<CEventDesc>(events, UDARRAYSIZE(events)),    // events
-};
 
 Menu::Menu(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Resource(pType, pKernel, uid, initParams)
@@ -134,6 +59,8 @@ Variant Menu::ParseXMLMenu(KeyValuePair inMenu)
   if (!inMenu.value.is(Variant::Type::AssocArray))
     return menu;
   Slice<KeyValuePair> kvps = inMenu.value.asAssocArray();
+
+  menu.pushBack(KeyValuePair("type", inMenu.key));
 
   for (KeyValuePair &kvp : kvps)
   {
@@ -274,10 +201,14 @@ bool Menu::RemoveItem(String path)
 Variant Menu::CreateMenuItem(Slice<const KeyValuePair> properties)
 {
   Array<KeyValuePair> mapArray;
+  mapArray.pushBack(KeyValuePair("type", ""));
   mapArray.pushBack(KeyValuePair("name", ""));
+  mapArray.pushBack(KeyValuePair("description", ""));
+  mapArray.pushBack(KeyValuePair("image", ""));
   mapArray.pushBack(KeyValuePair("checkable", false));
   mapArray.pushBack(KeyValuePair("checked", false));
   mapArray.pushBack(KeyValuePair("exclusivegroup", false));
+  mapArray.pushBack(KeyValuePair("enabled", true));
   mapArray.pushBack(KeyValuePair("separator", false));
   mapArray.pushBack(KeyValuePair("shortcut", ""));
   mapArray.pushBack(KeyValuePair("command", ""));
@@ -299,8 +230,9 @@ void Menu::SetMenuProperties(Variant &menu, Slice<const KeyValuePair> properties
     String itemName = item.key.asString();
 
     if (!itemName.cmp("command"))
-      menu["shortcut"] = pKernel->GetShortcutManager()->GetShortcutString(item.value.asString());
-    else if (!itemName.cmp("children"))
+      menu["shortcut"] = GetKernel().GetCommandManager()->GetShortcut(item.value.asString());
+
+    if (!itemName.cmp("children"))
     {
       Slice<Variant> children = item.value.asArray();
       for (Variant &child : children)
