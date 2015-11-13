@@ -298,46 +298,46 @@ private:
     return current;
   }
 
-  Node* deleteNode(Node *root, const K &key)
+  Node* deleteNode(Node *pRoot, const K &key)
   {
     // STEP 1: PERFORM STANDARD BST DELETE
 
-    if (root == nullptr)
-      return root;
+    if (pRoot == nullptr)
+      return pRoot;
 
-    ptrdiff_t c = PredFunctor()(key, root->k);
+    ptrdiff_t c = PredFunctor()(key, pRoot->k);
 
-    // If the key to be deleted is smaller than the root's key,
+    // If the key to be deleted is smaller than the pRoot's key,
     // then it lies in left subtree
     if (c < 0)
-      root->left = deleteNode(root->left, key);
+      pRoot->left = deleteNode(pRoot->left, key);
 
-    // If the key to be deleted is greater than the root's key,
+    // If the key to be deleted is greater than the pRoot's key,
     // then it lies in right subtree
     else if (c > 0)
-      root->right = deleteNode(root->right, key);
+      pRoot->right = deleteNode(pRoot->right, key);
 
-    // if key is same as root's key, then this is the Node
+    // if key is same as pRoot's key, then this is the Node
     // to be deleted
     else
     {
       // Node with only one child or no child
-      if ((root->left == nullptr) || (root->right == nullptr))
+      if ((pRoot->left == nullptr) || (pRoot->right == nullptr))
       {
-        Node *temp = root->left ? root->left : root->right;
+        Node *temp = pRoot->left ? pRoot->left : pRoot->right;
 
         // No child case
         if (temp == nullptr)
         {
-          temp = root;
-          root = nullptr;
+          temp = pRoot;
+          pRoot = nullptr;
         }
         else // One child case
         {
           // TODO: FIX THIS!!
           // this is copying the child node into the parent node because there is no parent pointer
           // DO: add parent pointer, then fix up the parent's child pointer to the child, and do away with this pointless copy!
-          *root = *temp; // Copy the contents of the non-empty child
+          *pRoot = *temp; // Copy the contents of the non-empty child
         }
 
         temp->~Node();
@@ -349,52 +349,52 @@ private:
       {
         // Node with two children: Get the inorder successor (smallest
         // in the right subtree)
-        struct Node *temp = minValueNode(root->right);
+        struct Node *temp = minValueNode(pRoot->right);
 
         // Copy the inorder successor's data to this Node
-        root->k = temp->k;
+        pRoot->k = temp->k;
 
         // Delete the inorder successor
-        root->right = deleteNode(root->right, temp->k);
+        pRoot->right = deleteNode(pRoot->right, temp->k);
       }
     }
 
     // If the tree had only one Node then return
-    if (root == nullptr)
-      return root;
+    if (pRoot == nullptr)
+      return pRoot;
 
     // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
-    root->height = internal::epMax(height(root->left), height(root->right)) + 1;
+    pRoot->height = internal::epMax(height(pRoot->left), height(pRoot->right)) + 1;
 
     // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
     //  this Node became unbalanced)
-    int balance = getBalance(root);
+    int balance = getBalance(pRoot);
 
     // If this Node becomes unbalanced, then there are 4 cases
 
     // Left Left Case
-    if (balance > 1 && getBalance(root->left) >= 0)
-      return rightRotate(root);
+    if (balance > 1 && getBalance(pRoot->left) >= 0)
+      return rightRotate(pRoot);
 
     // Left Right Case
-    if (balance > 1 && getBalance(root->left) < 0)
+    if (balance > 1 && getBalance(pRoot->left) < 0)
     {
-      root->left = leftRotate(root->left);
-      return rightRotate(root);
+      pRoot->left = leftRotate(pRoot->left);
+      return rightRotate(pRoot);
     }
 
     // Right Right Case
-    if (balance < -1 && getBalance(root->right) <= 0)
-      return leftRotate(root);
+    if (balance < -1 && getBalance(pRoot->right) <= 0)
+      return leftRotate(pRoot);
 
     // Right Left Case
-    if (balance < -1 && getBalance(root->right) > 0)
+    if (balance < -1 && getBalance(pRoot->right) > 0)
     {
-      root->right = rightRotate(root->right);
-      return leftRotate(root);
+      pRoot->right = rightRotate(pRoot->right);
+      return leftRotate(pRoot);
     }
 
-    return root;
+    return pRoot;
   }
 
 public:

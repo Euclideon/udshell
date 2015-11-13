@@ -128,8 +128,7 @@ void Material::SetRenderstate()
   size_t numUniforms = spRenderProgram->numUniforms();
   for (size_t i = 0; i < numUniforms; ++i)
   {
-    String name = spRenderProgram->getUniformName(i);
-    const Float4 *pVal = properties.Get(name);
+    const Float4 *pVal = properties.Get(spRenderProgram->getUniformName(i));
     if (pVal)
       spRenderProgram->setUniform((int)i, *pVal);
   }

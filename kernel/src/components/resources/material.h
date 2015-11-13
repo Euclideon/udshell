@@ -42,10 +42,10 @@ public:
   void SetTexture(int index, ArrayBufferRef spArray) { textures[index] = spArray; }
 
   BlendMode GetBlendMode() const { return blendMode; }
-  void SetBlendMode(BlendMode blendMode) { this->blendMode = blendMode; }
+  void SetBlendMode(BlendMode _blendMode) { blendMode = _blendMode; }
 
   CullMode GetCullMode() const { return cullMode; }
-  void SetCullMode(CullMode cullMode) { this->cullMode = cullMode; }
+  void SetCullMode(CullMode _cullMode) { cullMode = _cullMode; }
 
   void SetMaterialProperty(SharedString property, const Float4 &val);
 

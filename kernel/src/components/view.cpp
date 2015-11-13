@@ -106,9 +106,9 @@ void View::SetScene(SceneRef spNewScene)
   OnDirty();
 }
 
-void View::SetCamera(CameraRef spCamera)
+void View::SetCamera(CameraRef _spCamera)
 {
-  this->spCamera = spCamera;
+  spCamera = _spCamera;
 
   OnDirty();
 }
@@ -170,7 +170,6 @@ void View::OnDirty()
 
 void View::Update(double timeStep)
 {
-  CameraRef spCamera = GetCamera();
   if (spCamera)
   {
     if (spCamera->Update(timeStep))

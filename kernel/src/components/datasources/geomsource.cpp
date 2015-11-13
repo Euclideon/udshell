@@ -143,12 +143,12 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
   {
     aiMaterial &aiMat = *pScene->mMaterials[i];
 
-    aiString _name;
-    aiMat.Get(AI_MATKEY_NAME, _name);
-    LogDebug(4, "Material {0}: \"{1}\"", i, FromAIString(_name));
+    aiString aiName;
+    aiMat.Get(AI_MATKEY_NAME, aiName);
+    LogDebug(4, "Material {0}: \"{1}\"", i, FromAIString(aiName));
 
-    String name = FromAIString(_name);
-    MaterialRef spMat = pKernel->CreateComponent<Material>({ { "name", name } });
+    String _name = FromAIString(aiName);
+    MaterialRef spMat = pKernel->CreateComponent<Material>({ { "name", _name } });
 
     aiColor4D color(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, color);

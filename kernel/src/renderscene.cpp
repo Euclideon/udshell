@@ -316,7 +316,7 @@ void Renderer::UDThread()
 
     UniquePtr<RenderableView> job;
 
-    void FinishJob(Kernel *pKernel)
+    void FinishJob(Kernel *_pKernel)
     {
       ViewRef spView = job->spView;
       spView->SetLatestFrame(job);

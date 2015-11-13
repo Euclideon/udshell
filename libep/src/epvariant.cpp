@@ -221,8 +221,8 @@ Variant::Variant(Slice<Variant> a, bool unsafeReference)
     length = a.length;
     Variant *pA = internal::SliceAlloc<Variant>(a.length, 1);
     this->p = pA;
-    for (size_t i = 0; i < length; ++i)
-      new(&pA[i]) Variant(a.ptr[i]);
+    for (size_t j = 0; j < length; ++j)
+      new(&pA[j]) Variant(a.ptr[j]);
   }
 }
 
@@ -243,8 +243,8 @@ Variant::Variant(Slice<KeyValuePair> aa, bool unsafeReference)
     length = aa.length;
     KeyValuePair *pAA = internal::SliceAlloc<KeyValuePair>(aa.length, 1);
     this->p = pAA;
-    for (size_t i = 0; i < length; ++i)
-      new(&pAA[i]) KeyValuePair(aa.ptr[i]);
+    for (size_t j = 0; j < length; ++j)
+      new(&pAA[j]) KeyValuePair(aa.ptr[j]);
   }
 }
 
@@ -275,8 +275,8 @@ Variant::~Variant()
         internal::SliceHeader *pH = internal::GetSliceHeader(p);
         if (pH->refCount == 1)
         {
-          for (size_t i = 0; i < length; ++i)
-            ((Variant*)p)[i].~Variant();
+          for (size_t j = 0; j < length; ++j)
+            ((Variant*)p)[j].~Variant();
           internal::SliceFree(p);
         }
         else
@@ -288,8 +288,8 @@ Variant::~Variant()
         internal::SliceHeader *pH = internal::GetSliceHeader(p);
         if (pH->refCount == 1)
         {
-          for (size_t i = 0; i < length; ++i)
-            ((KeyValuePair*)p)[i].~KeyValuePair();
+          for (size_t j = 0; j < length; ++j)
+            ((KeyValuePair*)p)[j].~KeyValuePair();
           internal::SliceFree(p);
         }
         else
@@ -327,18 +327,18 @@ void Variant::copyContent(const Variant &val)
     case Type::Array:
     {
       Variant *a = (Variant*)epAlloc(sizeof(Variant)*length);
-      for (size_t i = 0; i<length; ++i)
-        new((void*)&a[i]) Variant(((const Variant*)val.p)[i]);
+      for (size_t j = 0; j < length; ++j)
+        new((void*)&a[j]) Variant(((const Variant*)val.p)[j]);
       p = a;
       break;
     }
     case Type::AssocArray:
     {
       KeyValuePair *aa = (KeyValuePair*)epAlloc(sizeof(KeyValuePair)*length);
-      for (size_t i = 0; i<length; ++i)
+      for (size_t j = 0; j<length; ++j)
       {
-        new((void*)&aa[i].key) Variant((const Variant&)((KeyValuePair*)val.p)[i].key);
-        new((void*)&aa[i].value) Variant((const Variant&)((KeyValuePair*)val.p)[i].value);
+        new((void*)&aa[j].key) Variant((const Variant&)((KeyValuePair*)val.p)[j].key);
+        new((void*)&aa[j].value) Variant((const Variant&)((KeyValuePair*)val.p)[j].value);
       }
       p = aa;
       break;
@@ -656,23 +656,23 @@ size_t Variant::assocArraySeriesLen() const
 {
   if (!is(Type::AssocArray))
     return 0;
-  size_t i = 0;
-  while (i < length && ((KeyValuePair*)p)[i].key.is(Type::Int) && ((KeyValuePair*)p)[i].key.i == (int64_t)i + 1)
-    ++i;
-  return i;
+  size_t j = 0;
+  while (j < length && ((KeyValuePair*)p)[j].key.is(Type::Int) && ((KeyValuePair*)p)[j].key.i == (int64_t)j + 1)
+    ++j;
+  return j;
 }
 
-Variant Variant::operator[](size_t i) const
+Variant Variant::operator[](size_t j) const
 {
   if (is(Type::Array))
   {
-    EPASSERT(i < length, "Index out of range!");
-    return ((Variant*)p)[i];
+    EPASSERT(j < length, "Index out of range!");
+    return ((Variant*)p)[j];
   }
   if (is(Type::AssocArray))
   {
-    EPASSERT(i < assocArraySeriesLen(), "Index out of range!");
-    return ((KeyValuePair*)p)[i].value;
+    EPASSERT(j < assocArraySeriesLen(), "Index out of range!");
+    return ((KeyValuePair*)p)[j].value;
   }
   return Variant(nullptr);
 }
@@ -680,14 +680,14 @@ Variant Variant::operator[](String key) const
 {
   if (is(Type::AssocArray))
   {
-    size_t i = assocArraySeriesLen();
-    for (; i<length; ++i)
+    size_t j = assocArraySeriesLen();
+    for (; j<length; ++j)
     {
-      Variant &k = ((KeyValuePair*)p)[i].key;
+      Variant &k = ((KeyValuePair*)p)[j].key;
       if (!k.is(Type::String))
         continue;
       if (String(k.s, k.length).eq(key))
-        return ((KeyValuePair*)p)[i].value;
+        return ((KeyValuePair*)p)[j].value;
     }
   }
   return Variant(nullptr);

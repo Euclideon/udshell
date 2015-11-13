@@ -45,7 +45,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
       if (!model)
       {
         udOctree_Destroy(&pOctree);
-        throw epR_Failure_;
+        throw epR_Failure;
       }
 
       model->spDataSource = ComponentRef(this);

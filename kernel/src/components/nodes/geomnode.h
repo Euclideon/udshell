@@ -17,7 +17,7 @@ public:
   EP_COMPONENT(GeomNode);
 
   ModelRef GetModel() const { return spModel; }
-  void SetModel(ModelRef spModel) { this->spModel = spModel; }
+  void SetModel(ModelRef _spModel) { spModel = _spModel; }
 
 protected:
   GeomNode(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)

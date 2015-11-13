@@ -115,31 +115,31 @@ bool Component::IsType(String type) const
   return false;
 }
 
-const PropertyDesc *Component::GetPropertyDesc(String name) const
+const PropertyDesc *Component::GetPropertyDesc(String _name) const
 {
-  const PropertyDesc *pDesc = instanceProperties.Get(name);
+  const PropertyDesc *pDesc = instanceProperties.Get(_name);
   if (!pDesc)
-    pDesc = pType->propertyTree.Get(name);
+    pDesc = pType->propertyTree.Get(_name);
   return pDesc;
 }
-const MethodDesc *Component::GetMethodDesc(String name) const
+const MethodDesc *Component::GetMethodDesc(String _name) const
 {
-  const MethodDesc *pDesc = instanceMethods.Get(name);
+  const MethodDesc *pDesc = instanceMethods.Get(_name);
   if (!pDesc)
-    pDesc = pType->methodTree.Get(name);
+    pDesc = pType->methodTree.Get(_name);
   return pDesc;
 }
-const EventDesc *Component::GetEventDesc(String name) const
+const EventDesc *Component::GetEventDesc(String _name) const
 {
-  const EventDesc *pDesc = instanceEvents.Get(name);
+  const EventDesc *pDesc = instanceEvents.Get(_name);
   if (!pDesc)
-    pDesc = pType->eventTree.Get(name);
+    pDesc = pType->eventTree.Get(_name);
   return pDesc;
 }
 
-const StaticFuncDesc *Component::GetStaticFuncDesc(String name) const
+const StaticFuncDesc *Component::GetStaticFuncDesc(String _name) const
 {
-  return pType->staticFuncTree.Get(name);
+  return pType->staticFuncTree.Get(_name);
 }
 
 void Component::AddDynamicProperty(const PropertyDesc &property)
@@ -155,17 +155,17 @@ void Component::AddDynamicEvent(const EventDesc &event)
   instanceEvents.Insert(event.info.id, event);
 }
 
-void Component::RemoveDynamicProperty(String name)
+void Component::RemoveDynamicProperty(String _name)
 {
-  instanceProperties.Remove(name);
+  instanceProperties.Remove(_name);
 }
-void Component::RemoveDynamicMethod(String name)
+void Component::RemoveDynamicMethod(String _name)
 {
-  instanceMethods.Remove(name);
+  instanceMethods.Remove(_name);
 }
-void Component::RemoveDynamicEvent(String name)
+void Component::RemoveDynamicEvent(String _name)
 {
-  instanceEvents.Remove(name);
+  instanceEvents.Remove(_name);
 }
 
 void Component::SetProperty(String property, const Variant &value)

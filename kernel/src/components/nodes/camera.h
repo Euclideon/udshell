@@ -21,9 +21,9 @@ public:
 
   void GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const;
 
-  void SetPerspective(double fovY) { bOrtho = false; this->fovY = fovY; }
-  void SetOrtho(double orthoHeight) { bOrtho = true; this->orthoHeight = orthoHeight; }
-  void SetDepthPlanes(double zNear, double zFar) { this->zNear = zNear; this->zFar = zFar; }
+  void SetPerspective(double _fovY) { bOrtho = false; fovY = _fovY; }
+  void SetOrtho(double _orthoHeight) { bOrtho = true; orthoHeight = _orthoHeight; }
+  void SetDepthPlanes(double _zNear, double _zFar) { zNear = _zNear; zFar = _zFar; }
 
 protected:
   friend class View;
@@ -50,11 +50,11 @@ public:
 
   static Component *CreateInstance(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 
-  void SetMatrix(const Double4x4 &matrix) override { pos = matrix.axis.t.toVector3(); ypr = matrix.extractYPR(); Camera::SetMatrix(matrix); }
-  void SetPosition(const Double3 &pos) override { this->pos = pos; Camera::SetPosition(pos); }
+  void SetMatrix(const Double4x4 &_matrix) override { pos = _matrix.axis.t.toVector3(); ypr = _matrix.extractYPR(); Camera::SetMatrix(_matrix); }
+  void SetPosition(const Double3 &_pos) override { pos = _pos; Camera::SetPosition(_pos); }
 
   void SetOrientation(const Double3 &_ypr) { ypr = _ypr; matrix = Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos); }
-  void SetSpeed(double speed) { this->speed = speed; }
+  void SetSpeed(double _speed) { speed = _speed; }
 
   void InvertYAxis(bool bInvert) { yInvert = bInvert ? -1.0 : 1.0; }
   void HelicopterMode(bool bEnable) { bHelicopter = bEnable; }
