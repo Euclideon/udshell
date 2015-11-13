@@ -8,18 +8,19 @@ template<typename T>
 class FreeList
 {
 public:
-  FreeList(size_t listSize)
-    : numAllocated(0)
-  {
-    pList = pFreeList = epAllocType(T, listSize, epAF_None);
-    for (size_t i = 0; i<listSize; ++i)
-      (T*&)pList[i] = i < listSize-1 ? &pList[i+1] : nullptr;
-  }
+  FreeList(size_t listSize) :
+    blockSize(listSize){}
+
   ~FreeList()
   {
-    // TODO: free allocated items...
-
-    epFree(pList);
+    // TODO: Consider for each item searching the free list and if it doesn't exist calling its destructor.
+    EPASSERT(numAllocated == 0, "numAllocated must be zero as ~FreeList() doesn't call the destructors");
+    while (pBlockList)
+    {
+      void *pBlock = pBlockList;
+      pBlockList = *(void**)((T*)pBlockList + blockSize);
+      epFree(pBlock);
+    }
   }
 
   template<typename... Args>
@@ -27,7 +28,17 @@ public:
   {
     T *pNew = pFreeList;
     if (!pNew)
-      return nullptr;
+    {
+      T *pNewBlock = (T*)epAllocFlags(blockSize * sizeof(T) + sizeof(void*), epAF_None);
+      *(void**)(pNewBlock + blockSize) = pBlockList;
+      pBlockList = pNewBlock;
+
+      T *pList = pFreeList = pNewBlock;
+      for (size_t i = 0; i<blockSize; ++i)
+        (T*&)pList[i] = i < blockSize - 1 ? &pList[i + 1] : nullptr;
+
+      pNew = pFreeList;
+    }
 
     pFreeList = *(T**)pFreeList;
     ++numAllocated;
@@ -40,13 +51,17 @@ public:
     pItem->~T();
     *(T**)pItem = pFreeList;
     pFreeList = pItem;
+    --numAllocated;
   }
 
   size_t Size() const { return numAllocated; }
 
 private:
-  T *pList, *pFreeList;
-  size_t numAllocated;
+
+  void *pBlockList = nullptr;
+  T *pFreeList = nullptr;
+  size_t numAllocated = 0;
+  size_t blockSize;
 };
 
 } // namespace ep
