@@ -2,7 +2,7 @@ namespace ep {
 
 template <typename T>
 HashMap<T>::HashMap(size_t _tableSize)
-  : itemPool(1024) // TODO: this is not enough, FreeList needs to be enhanced to grow automatically
+  : itemPool(_tableSize)
 {
 #if !defined(SUPPORT_FLEXIBLE_TABLE_SIZE)
   _tableSize = 256;
