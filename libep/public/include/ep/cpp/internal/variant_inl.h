@@ -28,7 +28,7 @@ inline Variant::Variant(Variant &&rval)
   t = rval.t;
   ownsContent = rval.ownsContent;
   length = rval.length;
-  p = rval.p;
+  i = rval.i;
 
   rval.t = (size_t)Type::Null;
   rval.ownsContent = 0;
@@ -39,7 +39,7 @@ inline Variant::Variant(const Variant &val)
   t = val.t;
   ownsContent = val.ownsContent;
   length = val.length;
-  p = val.p;
+  i = val.i;
 
   if (ownsContent)
     copyContent(val);
@@ -255,7 +255,7 @@ inline Variant& Variant::operator=(Variant &&rval)
     t = rval.t;
     ownsContent = rval.ownsContent;
     length = rval.length;
-    p = rval.p;
+    i = rval.i;
 
     rval.t = (size_t)Type::Null;
     rval.ownsContent = false;

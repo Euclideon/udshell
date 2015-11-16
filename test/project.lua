@@ -7,6 +7,7 @@ project "eptest"
 
 	includedirs { "../public/include" }
 	includedirs { "../kernel/src" }
+	includedirs { "../test/src" }
 
 	includedirs { "../ud/udPlatform/Include" }
 	includedirs { "../ud/udPointCloud/Include" }
