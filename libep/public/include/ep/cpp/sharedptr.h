@@ -441,19 +441,17 @@ template<class T>
 epforceinline void SharedPtr<T>::acquire()
 {
   if (pInstance)
-  {
     ++pInstance->rc;
-  }
 }
 template<class T>
 inline void SharedPtr<T>::release()
 {
   if (pInstance)
   {
-    if (--pInstance->rc == 0)
-    {
+    if (pInstance->rc == 1)
       delete pInstance;
-    }
+    else
+      --pInstance->rc;
     pInstance = nullptr;
   }
 }

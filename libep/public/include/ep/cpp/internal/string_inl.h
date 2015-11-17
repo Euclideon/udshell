@@ -487,6 +487,51 @@ inline MutableString<Size>::MutableString(const char *pString)
 {}
 
 template<size_t Size>
+inline MutableString<Size>::MutableString(Alloc_T, size_t count)
+  : Array(Alloc, count)
+{}
+template<size_t Size>
+inline MutableString<Size>::MutableString(Reserve_T, size_t count)
+  : Array(Reserve, count)
+{}
+template<size_t Size>
+template <typename... Args>
+inline MutableString<Size>::MutableString(Concat_T, const Args&... args)
+{
+  epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
+  appendInternal(Slice<epVarArg>(proxies, sizeof...(Args)));
+}
+template<size_t Size>
+template <typename... Args>
+inline MutableString<Size>::MutableString(Format_T, String _format, const Args&... args)
+{
+  epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
+  formatInternal(_format, Slice<epVarArg>(proxies, sizeof...(Args)));
+}
+template<size_t Size>
+inline MutableString<Size>::MutableString(Sprintf_T, const char *pFormat, ...)
+{
+  va_list args;
+  va_start(args, pFormat);
+
+#if defined(EP_COMPILER_VISUALC)
+  size_t len = _vscprintf(pFormat, args) + 1;
+#else
+  size_t len = vsprintf(nullptr, pFormat, args) + 1;
+#endif
+
+  this->reserve(len + 1);
+
+#if defined(EP_COMPILER_VISUALC)
+  this->length = vsnprintf_s(this->ptr, len, len, pFormat, args);
+#else
+  this->length = vsnprintf(this->ptr, len, pFormat, args);
+#endif
+
+  va_end(args);
+}
+
+template<size_t Size>
 inline MutableString<Size>& MutableString<Size>::operator =(const MutableString<Size> &rh)
 {
   Array<char, Size>::operator=(rh);
@@ -588,6 +633,15 @@ inline SharedString::SharedString(SharedArray<const char> &&rval)
   : SharedArray<const char>(std::move(rval))
 {}
 
+template <size_t Len>
+inline SharedString::SharedString(const MutableString<Len> &str)
+  : SharedArray<const char>(str)
+{}
+template <size_t Len>
+inline SharedString::SharedString(MutableString<Len> &&rval)
+  : SharedArray<const char>(std::move(rval))
+{}
+
 template <typename U, size_t Len>
 inline SharedString::SharedString(const Array<U, Len> &arr)
   : SharedArray<const char>(arr)
@@ -609,6 +663,42 @@ inline SharedString::SharedString(Slice<U> slice)
 inline SharedString::SharedString(const char *pString)
   : SharedArray<const char>(pString, pString ? epStrlen(pString) : 0)
 {}
+
+template <typename... Args>
+inline SharedString::SharedString(Concat_T, const Args&... args)
+{
+  epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
+  new(this) SharedString(concatInternal(Slice<epVarArg>(proxies, sizeof...(Args))));
+}
+template <typename... Args>
+inline SharedString::SharedString(Format_T, String _format, const Args&... args)
+{
+  epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
+  new(this) SharedString(formatInternal(_format, Slice<epVarArg>(proxies, sizeof...(Args))));
+}
+inline SharedString::SharedString(Sprintf_T, const char *pFormat, ...)
+{
+  va_list args;
+  va_start(args, pFormat);
+
+#if defined(EP_NACL)
+  size_t len = vsprintf(nullptr, pFormat, args) + 1;
+#else
+  size_t len = vsnprintf(nullptr, 0, pFormat, args) + 1;
+#endif
+
+  MutableString<0> s(Reserve, len);
+
+#if defined(EP_NACL)
+  s.length = vsprintf(s.ptr, pFormat, args);
+#else
+  s.length = vsnprintf(s.ptr, len, pFormat, args);
+#endif
+
+  va_end(args);
+
+  new(this) SharedString(std::move(s));
+}
 
 inline SharedString::SharedString(const epSharedString &s)
   : SharedString((const SharedString&)s)
@@ -790,14 +880,12 @@ inline void MutableString<Size>::formatInternal(String format, Slice<epVarArg> a
 template<typename... Args>
 inline SharedString SharedString::concat(const Args&... args)
 {
-  epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
-  return concatInternal(Slice<epVarArg>(proxies, sizeof...(Args)));
+  return SharedString(Concat, args...);
 }
 template<typename... Args>
-inline SharedString SharedString::format(String format, const Args&... args)
+inline SharedString SharedString::format(String _format, const Args&... args)
 {
-  epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
-  return formatInternal(format, Slice<epVarArg>(proxies, sizeof...(Args)));
+  return SharedString(Format, _format, args...);
 }
 
 } // namespace ep
