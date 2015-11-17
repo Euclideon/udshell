@@ -177,7 +177,7 @@ protected:
     bool hasAllocation(T *p) const { return p != (T*)buffer && p != nullptr; }
     T* ptr() const { return (T*)buffer; }
   };
-  template<bool dummy> struct Buffer<0, dummy> // SORRY! C++ still sucks; we must partial-specialise here because can't zero-length-array! >_<
+  template<bool dummy> struct Buffer<0, dummy> // SORRY! VS2015 C99 still sucks; we must specialise here because can't zero-length-array! >_<
   {
     bool hasAllocation(T *p) const { return p != nullptr; }
     T* ptr() const { return nullptr; }

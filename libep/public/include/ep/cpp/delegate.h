@@ -12,6 +12,9 @@ namespace ep {
 
 class DelegateMemento : public RefCounted
 {
+public:
+  epforceinline FastDelegateMemento GetFastDelegate() const { return m; }
+
 protected:
   template<typename Signature>
   friend class Delegate;
