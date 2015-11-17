@@ -55,8 +55,7 @@ void ImageSource::Create(StreamRef spSource)
     spImage->Unmap();
 
     // add resource
-    MutableString64 buffer; buffer.concat("image", i);
-    resources.Insert(buffer, spImage);
+    resources.Insert(MutableString64(Concat, "image", i), spImage);
   }
 
   epFree(pBuffer);

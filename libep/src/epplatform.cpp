@@ -25,7 +25,7 @@ void epAssertFailed(epString condition, epString message, epString file, int lin
   }
   else
   {
-    MutableString256 t; t.format("ASSERT FAILED : {0}\n{1}\n{2}({3})", (String&)condition, (String&)message, (String&)file, line);
+    MutableString256 t(Format, "ASSERT FAILED : {0}\n{1}\n{2}({3})", (String&)condition, (String&)message, (String&)file, line);
     epDebugWrite(t.ptr);
   }
 }

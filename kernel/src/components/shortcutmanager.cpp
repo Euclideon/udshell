@@ -117,8 +117,7 @@ bool ShortcutManager::RegisterShortcut(String id, String shortcutString, bool bF
     }
   }
 
-  MutableString<256> mShortcut;
-  mShortcut.reserve(shortcutString.length);
+  MutableString<256> mShortcut(Reserve, shortcutString.length);
   mShortcut.length = shortcutString.length;
   StripWhitespace(mShortcut, shortcutString);
 

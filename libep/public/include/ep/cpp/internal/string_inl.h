@@ -488,11 +488,11 @@ inline MutableString<Size>::MutableString(const char *pString)
 
 template<size_t Size>
 inline MutableString<Size>::MutableString(Alloc_T, size_t count)
-  : Array(Alloc, count)
+  : Array<char, Size>(Alloc, count)
 {}
 template<size_t Size>
 inline MutableString<Size>::MutableString(Reserve_T, size_t count)
-  : Array(Reserve, count)
+  : Array<char, Size>(Reserve, count)
 {}
 template<size_t Size>
 template <typename... Args>
@@ -635,19 +635,10 @@ inline SharedString::SharedString(SharedArray<const char> &&rval)
 
 template <size_t Len>
 inline SharedString::SharedString(const MutableString<Len> &str)
-  : SharedArray<const char>(str)
+  : SharedArray<const char>((const Array<char, Len>&)str)
 {}
 template <size_t Len>
 inline SharedString::SharedString(MutableString<Len> &&rval)
-  : SharedArray<const char>(std::move(rval))
-{}
-
-template <typename U, size_t Len>
-inline SharedString::SharedString(const Array<U, Len> &arr)
-  : SharedArray<const char>(arr)
-{}
-template <typename U, size_t Len>
-inline SharedString::SharedString(Array<U, Len> &&rval)
   : SharedArray<const char>(std::move(rval))
 {}
 

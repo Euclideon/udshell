@@ -65,8 +65,7 @@ QtKernel::QtKernel(InitParams commandLine)
   // convert InitParams back into a string list for Qt
   // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
   // NOTE: the state of our argv may be changed by Qt as it removes args that it recognises
-  Array<char *, 1> args;
-  args.reserve(commandLine.params.length);
+  Array<char *, 1> args(Reserve, commandLine.params.length);
   argc = static_cast<int>(commandLine.params.length);
   for (int i = 0; i < argc; i++)
     args.pushBack(const_cast<char*>(commandLine[i].value.asString().ptr));

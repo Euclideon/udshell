@@ -217,9 +217,8 @@ Variant epToVariant(const QJSValue &v)
   }
   else if (v.isArray())
   {
-    Array<Variant> r;
     size_t length = (size_t)v.property(QString("length")).toNumber();
-    r.reserve(length);
+    Array<Variant> r(Reserve, length);
 
     QJSValueIterator i(v);
     size_t index = 0;

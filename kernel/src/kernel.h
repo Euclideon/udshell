@@ -188,7 +188,7 @@ SharedPtr<T> Kernel::CreateComponent(InitParams initParams)
 template<typename CT>
 Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
 {
-  MutableString128 t; t.format("New: {0} - {1}", pType->id, uid);
+  MutableString128 t(Format, "New: {0} - {1}", pType->id, uid);
   pKernel->LogDebug(4, t);
   return new CT(pType, pKernel, uid, initParams);
 }
@@ -208,7 +208,7 @@ inline void Kernel::LogError(String text, Args... args) const
     spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Error, nullptr);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Error, nullptr);
   }
 }
@@ -219,7 +219,7 @@ inline void Kernel::LogWarning(int level, String text, Args... args) const
     spLogger->Log(level, text, LogCategories::Warning, nullptr);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     spLogger->Log(level, tmp, LogCategories::Warning, nullptr);
   }
 }
@@ -230,7 +230,7 @@ inline void Kernel::LogDebug(int level, String text, Args... args) const
     spLogger->Log(level, text, LogCategories::Debug, nullptr);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     spLogger->Log(level, tmp, LogCategories::Debug, nullptr);
   }
 }
@@ -241,7 +241,7 @@ inline void Kernel::LogInfo(int level, String text, Args... args) const
     spLogger->Log(level, text, LogCategories::Info, nullptr);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     spLogger->Log(level, tmp, LogCategories::Info, nullptr);
   }
 }
@@ -252,7 +252,7 @@ inline void Kernel::LogScript(String text, Args... args) const
     spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Script, nullptr);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Script, nullptr);
   }
 }
@@ -263,7 +263,7 @@ inline void Kernel::LogTrace(String text, Args... args) const
     spLogger->Log(LogDefaults::LogLevel, text, LogCategories::Trace, nullptr);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     spLogger->Log(LogDefaults::LogLevel, tmp, LogCategories::Trace, nullptr);
   }
 }

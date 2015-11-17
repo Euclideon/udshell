@@ -14,7 +14,7 @@ using namespace ep;
 template<typename ...Args>
 inline void epDebugFormat(String format, Args... args)
 {
-  MutableString64 t; t.format(format, args...);
+  MutableString64 t(Format, format, args...);
   epDebugWrite(t.ptr);
 }
 

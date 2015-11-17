@@ -12,13 +12,12 @@ DateTime::DateTime(time_t ti)
 
 MutableString64 DateTime::ToString(String format) const
 {
-  MutableString64 timeStr;
   if (format.empty())
     format = DEFAULT_DATETIME_STRING;
 
   tm t = DateTimeToTm();
 
-  timeStr.reserve(format.length * 2);
+  MutableString64 timeStr(Reserve, format.length * 2);
   timeStr.length = strftime(timeStr.ptr, format.length * 2, format.toStringz(), &t);
 
   return timeStr;
@@ -97,8 +96,7 @@ inline ptrdiff_t epStringify(Slice<char> buffer, String format, const DateTime &
 
 Variant epToVariant(const DateTime &dt)
 {
-  Array<KeyValuePair> pairs;
-  pairs.reserve(9);
+  Array<KeyValuePair> pairs(Reserve, 9);
   pairs.pushBack(KeyValuePair("hour",  dt.hour));
   pairs.pushBack(KeyValuePair("isdst", dt.isdst));
   pairs.pushBack(KeyValuePair("mday",  dt.mday));
