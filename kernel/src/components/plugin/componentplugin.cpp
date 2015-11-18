@@ -77,7 +77,7 @@ ComponentDesc ComponentPlugin::descriptor =
   "ComponentBase", // displayName
   "Component plugin base class", // description
 
-//  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+//  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)) // propeties
 };
 
 

@@ -69,7 +69,7 @@ ComponentDesc ShortcutManager::descriptor =
   "Registers keyboard shortcuts and handles shortcut events", // description
 
   nullptr, // properties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
   nullptr, // events
 };
 

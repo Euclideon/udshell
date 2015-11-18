@@ -69,8 +69,8 @@ ComponentDesc Lua::descriptor =
   "Lua",    // displayName
   "Lua VM", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // propeties
+  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
   nullptr // events
 };
 

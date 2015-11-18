@@ -135,9 +135,9 @@ ComponentDesc Logger::descriptor =
   "Logger", // displayName
   "Logger", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)),   // properties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
-  Slice<CEventDesc>(events, UDARRAYSIZE(events)),    // events
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)),   // properties
+  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
+  Slice<CEventDesc>(events, EPARRAYSIZE(events)),    // events
 };
 
 Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)

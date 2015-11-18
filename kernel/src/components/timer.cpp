@@ -81,9 +81,9 @@ ComponentDesc Timer::descriptor =
   "Timer", // displayName
   "Timer ", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
   nullptr,
-  Slice<CEventDesc>(events, UDARRAYSIZE(events))
+  Slice<CEventDesc>(events, EPARRAYSIZE(events))
 };
 
 

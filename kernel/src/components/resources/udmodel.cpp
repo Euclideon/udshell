@@ -111,7 +111,7 @@ ComponentDesc UDModel::descriptor =
   "UD Model", // displayName
   "UD model resource", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
 };
 
 UDModel::~UDModel()

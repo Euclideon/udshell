@@ -49,8 +49,8 @@ ComponentDesc Camera::descriptor =
   "Camera",    // displayName
   "Is a camera", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // propeties
+  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)) // methods
 };
 
 
@@ -104,7 +104,7 @@ ComponentDesc SimpleCamera::descriptor =
   "SimpleCamera",     // displayName
   "Is a simple camera", // description
 
-  Slice<CPropertyDesc>(simpleCameraProps, UDARRAYSIZE(simpleCameraProps)) // propeties
+  Slice<CPropertyDesc>(simpleCameraProps, EPARRAYSIZE(simpleCameraProps)) // propeties
 };
 
 
@@ -116,6 +116,20 @@ void Camera::GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const
     *pMatrix = Double4x4::perspective(fovY, aspectRatio, zNear, zFar);
   else
     *pMatrix = Double4x4::ortho(-orthoHeight*aspectRatio*0.5, orthoHeight*aspectRatio*0.5, -orthoHeight*0.5, orthoHeight*0.5, zNear, zFar);
+}
+
+Variant Camera::Save() const
+{
+  Array<KeyValuePair> params;
+
+  params.pushBack(KeyValuePair("matrix", MutableString<0>().format("{0}", matrix)));
+  if (bOrtho)
+    params.pushBack(KeyValuePair("ortho", orthoHeight));
+  else
+    params.pushBack(KeyValuePair("perspective", fovY));
+  params.pushBack(KeyValuePair("depthplanes", MutableString<0>().format("{0}", Array<double, 2>({ zNear, zFar }))));
+
+  return Variant(std::move(params));
 }
 
 // ***************************************************************************************
@@ -271,6 +285,18 @@ bool SimpleCamera::Update(double timeDelta)
   if (ty || tx || tz || pitch || yaw)
     return true;
   return false;
+}
+
+Variant SimpleCamera::Save() const
+{
+  Variant var = Camera::Save();
+  Array<KeyValuePair> params = var.asAssocArray();
+
+  params.pushBack(KeyValuePair("speed", speed));
+  params.pushBack(KeyValuePair("invertyaxis", (yInvert == -1.0 ? true : false)));
+  params.pushBack(KeyValuePair("helicoptermode", bHelicopter));
+
+  return Variant(std::move(params));
 }
 
 } // namespace ep

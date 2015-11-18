@@ -19,6 +19,7 @@ public:
   void Activate() override;
   void Deactivate() override;
   void Update(double timeStep);
+  Variant Save() const override;
 
 protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
@@ -27,9 +28,9 @@ protected:
   // TODO: Remove this when Unsubscribe can be called with some kind of subscription identifier
   Delegate<void(double)> updateFunc;
 
+  UDModelRef spModel;
   SceneRef spScene;
   SimpleCameraRef spCamera;
-  UDModelRef spModel;
 };
 
 } //namespace ep

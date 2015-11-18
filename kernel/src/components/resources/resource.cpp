@@ -28,7 +28,7 @@ ComponentDesc Resource::descriptor =
   "Resource", // displayName
   "Base resource", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
 };
 
 MetadataRef Resource::GetMetadata() const
