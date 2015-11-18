@@ -61,8 +61,6 @@ static CMethodDesc methods[] =
     },
     &Logger::SetLevel, // method
   },
-  // TODO Variant doesn't support Slice<const String>. fix this with wrappers?
-  /*
   {
     {
       "getcomponents", // id
@@ -75,8 +73,8 @@ static CMethodDesc methods[] =
       "setcomponents", // id
       "Filter logging to the specified component UIDs", // description
     },
-    &Logger::SetComponents, // method
-  }*/
+    &Logger::SetComponents_Arr, // method
+  },
   {
     {
       "resetstreamfilter", // id
@@ -98,8 +96,6 @@ static CMethodDesc methods[] =
     },
     &Logger::SetStreamLevel, // method
   },
-  // TODO Variant doesn't support Slice<const String>. fix this with wrappers?
-  /*
   {
     {
       "getstreamcomponents", // id
@@ -112,8 +108,8 @@ static CMethodDesc methods[] =
       "setstreamcomponents", // id
       "Filter logging for the given stream to the specified component UIDs", // description
     },
-    &Logger::SetStreamComponents, // method
-  }*/
+    &Logger::SetStreamComponents_Arr, // method
+  }
 };
 
 static CEventDesc events[] =
