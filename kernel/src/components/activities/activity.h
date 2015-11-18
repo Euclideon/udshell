@@ -15,8 +15,10 @@ public:
   EP_COMPONENT(Activity);
 
   UIComponentRef GetUI() const { return ui; }
+
   virtual void Activate() {}
   virtual void Deactivate() {}
+
   Variant Save() const override { return Variant(); }
 
 protected:

@@ -58,9 +58,8 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   else
     return; // Create empty project
 
-  Array<char> buffer;
   size_t len = (size_t)spSrc->Length() + 1;
-  buffer.reserve(len);
+  Array<char> buffer(Reserve, len);
   buffer.length = spSrc->Read(buffer.getBuffer()).length;
   buffer.pushBack('\0');
 

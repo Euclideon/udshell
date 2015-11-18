@@ -122,12 +122,12 @@ Variant Camera::Save() const
 {
   Array<KeyValuePair> params;
 
-  params.pushBack(KeyValuePair("matrix", MutableString<0>().format("{0}", matrix)));
+  params.pushBack(KeyValuePair("matrix", matrix));
   if (bOrtho)
     params.pushBack(KeyValuePair("ortho", orthoHeight));
   else
     params.pushBack(KeyValuePair("perspective", fovY));
-  params.pushBack(KeyValuePair("depthplanes", MutableString<0>().format("{0}", Array<double, 2>({ zNear, zFar }))));
+  params.pushBack(KeyValuePair("depthplanes", Array<double, 2>({ zNear, zFar })));
 
   return Variant(std::move(params));
 }
