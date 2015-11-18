@@ -48,8 +48,6 @@ class SimpleCamera : public Camera
 public:
   EP_COMPONENT(SimpleCamera);
 
-  static Component *CreateInstance(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
-
   void SetMatrix(const Double4x4 &_matrix) override { pos = _matrix.axis.t.toVector3(); ypr = _matrix.extractYPR(); Camera::SetMatrix(_matrix); }
   void SetPosition(const Double3 &_pos) override { pos = _pos; Camera::SetPosition(_pos); }
 

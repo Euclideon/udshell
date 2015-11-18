@@ -117,6 +117,11 @@ protected:
     : pType(_pType), pKernel(_pKernel), uid(_uid) {}
   virtual ~Component();
 
+  void operator delete(void *p)
+  {
+    ::operator delete(p);
+  }
+
   void Init(InitParams initParams);
   virtual epResult InitComplete() { return epR_Success; }
 
@@ -135,6 +140,8 @@ protected:
   const EventDesc *GetEventDesc(String name) const;
   const StaticFuncDesc *GetStaticFuncDesc(String name) const;
 
+  void *pUserData = nullptr;
+
   // TODO: these substantially inflate the size of base Component and are almost always nullptr
   // ...should we move them to a separate allocation?
   AVLTree<SharedString, PropertyDesc> instanceProperties;
@@ -142,8 +149,6 @@ protected:
   AVLTree<SharedString, EventDesc> instanceEvents;
 
   Subscriber subscriber;
-
-  void *pUserData = nullptr;
 
 private:
   template<typename... Args>

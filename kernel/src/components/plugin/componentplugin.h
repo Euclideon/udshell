@@ -4,6 +4,7 @@
 
 #include "components/component.h"
 #include "ep/c/component.h"
+#include "ep/c/internal/component_inl.h"
 
 namespace ep {
 

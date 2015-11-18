@@ -465,7 +465,7 @@ epResult Kernel::DestroyComponent(Component *pInstance)
   return epR_Success;
 }
 
-ComponentRef Kernel::FindComponent(String _uid)
+ComponentRef Kernel::FindComponent(String _uid) const
 {
   if (_uid.empty() || _uid[0] == '$' || _uid[0] == '#')
     return nullptr;

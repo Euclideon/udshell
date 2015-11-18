@@ -5,38 +5,44 @@
 #include "ep/c/plugin.h"
 #include "ep/cpp/variant.h"
 #include "ep/c/componentdesc.h"
-#include "ep/c/component.h"
+#include "ep/c/internal/component_inl.h"
 
 namespace ep {
 
 // component API
-class Component : protected epComponent
+class Component final : public RefCounted
 {
 public:
-  String GetUID() const                                                     { return (String&)uid; }
-  String GetName() const                                                    { return s_pPluginInstance->pComponentAPI->GetName((const epComponent*)this); }
+  SharedString GetUID() const;
+  SharedString GetName() const;
 
-  bool IsType(String type) const                                            { return s_pPluginInstance->pComponentAPI->IsType((const epComponent*)this, type); }
+  bool IsType(String type) const;
 
-  Variant GetProperty(String property) const                                { return s_pPluginInstance->pComponentAPI->GetProperty((const epComponent*)this, property); }
-  void SetProperty(String property, const Variant &value)                   { s_pPluginInstance->pComponentAPI->SetProperty((epComponent*)this, property, (const epVariant*)&value); }
+  Variant GetProperty(String property) const;
+  void SetProperty(String property, const Variant &value);
 
-  Variant CallMethod(String method, Slice<const Variant> args)              { return s_pPluginInstance->pComponentAPI->CallMethod((epComponent*)this, method, (const epVariant*)args.ptr, args.length); }
+  Variant CallMethod(String method, Slice<const Variant> args);
   template<typename ...Args>
-  Variant CallMethod(String method, Args... args)
-  {
-    const Variant varargs[sizeof...(Args)+1] = { args... };
-    return CallMethod(method, Slice<const Variant>(varargs, sizeof...(Args)));
-  }
+  Variant CallMethod(String method, Args... args);
 
-  void Subscribe(String eventName, Variant::VarDelegate delegate)           { s_pPluginInstance->pComponentAPI->Subscribe((epComponent*)this, eventName, (const epVarDelegate*&)delegate); }
+  void Subscribe(String eventName, Variant::VarDelegate delegate);
 
-  epResult SendMessage(String target, String message, const Variant &data)  { return s_pPluginInstance->pComponentAPI->SendMessage((epComponent*)this, target, message, (const epVariant*)&data); }
+  epResult SendMessage(String target, String message, const Variant &data);
+
+private:
+  const epComponentDesc *pType;
+  class Kernel *pKernel;
+
+  const SharedString uid;
+  SharedString name;
+
+  void *pUserData;
 };
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, const epVarArg *pArgs);
 
 } // namespace ep
 
+#include "ep/cpp/internal/component_inl.h"
 
 #endif

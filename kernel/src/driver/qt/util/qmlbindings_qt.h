@@ -79,7 +79,7 @@ protected:
 
     QVariant vargs[10];
     QGenericArgument args[10];
-    for (int i = 0; i<10; ++i)
+    for (size_t i = 0; i<10; ++i)
     {
       if (i < value.length)
       {

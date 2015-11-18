@@ -13,7 +13,81 @@ template<> struct StringifyProxy<Variant>
   inline static int64_t intify(const void *pData) { return ((Variant*)pData)->asInt(); }
 };
 
+// these horrid templates generate an integer sequence
+template<size_t ...> struct Sequence { };
+template<int N, size_t ...S> struct GenSequence : GenSequence<N-1, N-1, S...> { };
+template<size_t ...S> struct GenSequence<0, S...> { typedef Sequence<S...> type; };
+
+// variadic function call helpers
+template<typename R, typename... Args, size_t... S>
+epforceinline R TupleCallHack(R(*f)(Args...), const std::tuple<Args...> &args, ep::internal::Sequence<S...>)
+{
+  return f(std::get<S>(args)...);
+}
+
+template<typename R, typename... Args>
+struct VarCallHack
+{
+  template<size_t... S>
+  epforceinline static Variant call(R(*f)(Args...), Slice<const Variant> args, ep::internal::Sequence<S...>)
+  {
+    return Variant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+  }
+};
+template<typename... Args>
+struct VarCallHack<void, Args...>
+{
+  template<size_t... S>
+  epforceinline static Variant call(void(*f)(Args...), Slice<const Variant> args, ep::internal::Sequence<S...>)
+  {
+    f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
+    return Variant();
+  }
+};
+
+template<typename R, typename... Args>
+struct MethodCallHack
+{
+  template<size_t... S>
+  epforceinline static Variant call(FastDelegate<R(Args...)> f, Slice<const Variant> args, ep::internal::Sequence<S...>)
+  {
+    return Variant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+  }
+};
+template<typename... Args>
+struct MethodCallHack<void, Args...>
+{
+  template<size_t... S>
+  epforceinline static Variant call(FastDelegate<void(Args...)> f, Slice<const Variant> args, ep::internal::Sequence<S...>)
+  {
+    f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
+    return Variant();
+  }
+};
+
 } // namespace internal
+
+// these perform variadic function calls for different function and arg types
+template<typename R, typename... Args>
+epforceinline R TupleCall(R(*f)(Args...), const std::tuple<Args...> &args)
+{
+  return internal::TupleCallHack(f, args, typename internal::GenSequence<sizeof...(Args)>::type());
+}
+
+template<typename R, typename... Args>
+epforceinline Variant VarCall(R(*f)(Args...), Slice<const Variant> args)
+{
+  return internal::VarCallHack<R, Args...>::call(f, args, typename internal::GenSequence<sizeof...(Args)>::type());
+}
+
+template<typename R, typename... Args>
+epforceinline Variant VarCall(FastDelegate<R(Args...)> f, Slice<const Variant> args)
+{
+  return internal::MethodCallHack<R, Args...>::call(f, args, typename internal::GenSequence<sizeof...(Args)>::type());
+}
+
+
+// *** Variant ***
 
 // constructors...
 inline Variant::Variant()
@@ -246,6 +320,14 @@ inline Variant::Variant(SharedArray<KeyValuePair> &&aa)
     aa.ptr = nullptr;
 }
 
+
+inline Variant::~Variant()
+{
+  if (ownsContent)
+    destroy();
+}
+
+
 inline Variant& Variant::operator=(Variant &&rval)
 {
   if (this != &rval)
@@ -392,11 +474,6 @@ template<> struct Variant_Cast < Variant >  { inline static Variant  as(const Va
 // **************************************************************
 
 // Variant functions (this is quite complex)
-
-// these horrid templates generate an integer sequence
-template<size_t ...> struct Sequence { };
-template<int N, size_t ...S> struct GenSequence : GenSequence<N-1, N-1, S...> { };
-template<size_t ...S> struct GenSequence<0, S...> { typedef Sequence<S...> type; };
 
 template<typename Signature>
 class VarDelegateMemento;

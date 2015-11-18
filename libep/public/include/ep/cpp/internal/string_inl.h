@@ -69,6 +69,7 @@ private:
   }
 };
 
+
 inline size_t epStrlen(const char *pStr) { return strlen(pStr); }
 inline size_t epStrlen(const char16_t *pStr)
 {
@@ -609,14 +610,19 @@ inline SharedString::SharedString(const char *pString)
   : SharedArray<const char>(pString, pString ? epStrlen(pString) : 0)
 {}
 
-inline SharedString::SharedString(epSharedString s)
-  : SharedString((SharedString&)s)
+inline SharedString::SharedString(const epSharedString &s)
+  : SharedString((const SharedString&)s)
+{}
+inline SharedString::SharedString(epSharedString &&s)
+  : SharedString(std::move((SharedString&)s))
 {}
 inline SharedString::operator epSharedString() const
 {
   epSharedString s;
   s.length = this->length;
   s.ptr = this->ptr;
+  if (s.ptr)
+    ++internal::GetSliceHeader(s.ptr)->refCount;
   return s;
 }
 

@@ -22,10 +22,6 @@ template<class T>
 class UniquePtr;
 template<class T>
 class WeakPtr;
-namespace internal {
-  template<class T>
-  class WeakProxy;
-}
 
 
 // **HAX** this allows us to delete a RefCounted!
@@ -34,6 +30,9 @@ namespace internal {
 // call delete. Thee two specialisations of Destroy facilitate that.
 
 namespace internal {
+
+  template<class T>
+  class WeakProxy;
 
   template<typename T, bool isref>
   struct Destroy;
@@ -348,15 +347,15 @@ class RefCounted
   mutable size_t rc = 0;
 
 protected:
-  virtual ~RefCounted() = 0;
+  virtual ~RefCounted();
 public:
   size_t RefCount() { return rc; }
   size_t IncRef() { return ++rc; }
   size_t DecRef()
   {
-    if (--rc == 0)
+    if (rc == 1)
       delete this;
-    return rc;
+    return --rc;
   }
 
   template<typename T>
@@ -475,28 +474,13 @@ namespace internal {
 
 } // namespace internal
 
-template<typename T>
-ptrdiff_t epStringify(Slice<char> buffer, String format, SharedPtr<T> spT, const epVarArg *pArgs)
-{
-  return epStringifyTemplate(buffer, format, spT.ptr(), pArgs);
-}
-
 // cast functions
 template<class T, class U>
-inline UniquePtr<T> unique_pointer_cast(const UniquePtr<U> &ptr)
-{
-  return UniquePtr<T>((T*)ptr.ptr());
-}
+UniquePtr<T> unique_pointer_cast(const UniquePtr<U> &ptr);
 template<class T, class U>
-inline SharedPtr<T> shared_pointer_cast(const SharedPtr<U> &ptr)
-{
-  return SharedPtr<T>((T*)ptr.ptr());
-}
+SharedPtr<T> shared_pointer_cast(const SharedPtr<U> &ptr);
 template<class T, class U>
-inline WeakPtr<T> weak_pointer_cast(const WeakPtr<U> &ptr)
-{
-  return WeakPtr<T>((T*)ptr.ptr());
-}
+WeakPtr<T> weak_pointer_cast(const WeakPtr<U> &ptr);
 
 // comparaison operators
 template<class T, class U> inline bool operator==(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() == r.ptr(); }
@@ -536,5 +520,7 @@ template<class T> inline bool operator!=(nullptr_t, const UniquePtr<T> &r) { ret
 
 // unit tests
 epResult epSharedPtr_Test();
+
+#include "ep/cpp/internal/sharedptr_inl.h"
 
 #endif // _EPSHAREDPTR_HPP

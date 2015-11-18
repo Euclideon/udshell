@@ -2,26 +2,26 @@
 
 extern "C" {
 
-int epComponent_Acquire(epComponent *pComponent)
+size_t epComponent_Acquire(epComponent *pComponent)
 {
-  return (int)(++pComponent->refCount);
+  return ++pComponent->refCount;
 }
 
-int epComponent_Release(epComponent *pComponent)
+size_t epComponent_Release(epComponent *pComponent)
 {
-  if (--pComponent->refCount == 0)
+  if (pComponent->refCount == 1)
   {
     s_pPluginInstance->DestroyComponent(pComponent);
     return 0;
   }
-  return (int)pComponent->refCount;
+  return --pComponent->refCount;
 }
 
-epString epComponent_GetUID(const epComponent *pComponent)
+epSharedString epComponent_GetUID(const epComponent *pComponent)
 {
   return s_pPluginInstance->pComponentAPI->GetUID(pComponent);
 }
-epString epComponent_GetName(const epComponent *pComponent)
+epSharedString epComponent_GetName(const epComponent *pComponent)
 {
   return s_pPluginInstance->pComponentAPI->GetName(pComponent);
 }

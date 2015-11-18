@@ -2,8 +2,8 @@
 #include "kernel.h"
 
 #include "ep/c/plugin.h"
-#include "ep/c/kernel.h"
-#include "ep/c/component.h"
+#include "ep/c/internal/kernel_inl.h"
+#include "ep/c/internal/component_inl.h"
 
 extern "C" {
   typedef bool (epPlugin_InitProc)(epPluginInstance *pPlugin);
@@ -189,10 +189,10 @@ static epKernelAPI s_kernelAPI =
     ComponentDesc *pDesc = new ComponentDesc(
       (ComponentDesc*)pSuper, // pSuperDesc
       EPSHELL_APIVERSION,     // epVersion
-      _pDesc->pluginVersion,  // pluginVersion
-      _pDesc->id,          // id
-      _pDesc->displayName, // displayName
-      _pDesc->description, // description
+      _pDesc->info.pluginVersion,  // pluginVersion
+      _pDesc->info.id,          // id
+      _pDesc->info.displayName, // displayName
+      _pDesc->info.description, // description
       nullptr, // properties
       nullptr, // methods
       nullptr, // events
@@ -283,7 +283,6 @@ epPluginInstance *Kernel::GetPluginInterface()
     {
       // NOTE: this was called when an RC reached zero...
       Component *pC = (Component*)pInstance;
-      pC->IncRef(); // HACK: we'll inc it back to 1
       pC->DecRef(); //       and then dec it with the internal function which actually performs the cleanup
     };
 

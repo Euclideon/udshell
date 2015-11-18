@@ -17,14 +17,14 @@ epSharedString epSharedString_Create(const char *pCString)
   return s;
 }
 
-size_t epSharedString_IncRef(const epSharedString *pSS)
+size_t epSharedString_Acquire(const epSharedString *pSS)
 {
   if (!pSS || !pSS->ptr)
     return 0;
   internal::SliceHeader *pH = internal::GetSliceHeader(pSS->ptr);
   return ++pH->refCount;
 }
-size_t epSharedString_DecRef(const epSharedString *pSS)
+size_t epSharedString_Release(const epSharedString *pSS)
 {
   if (!pSS || !pSS->ptr)
     return 0;

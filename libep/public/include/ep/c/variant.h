@@ -2,7 +2,6 @@
 #define EPVARIANT_H
 
 #include "ep/c/platform.h"
-#include "ep/c/delegate.h"
 #include "ep/epenum.h"
 
 #if defined(__cplusplus)
@@ -73,6 +72,7 @@ epComponent* epVariant_AsComponent(epVariant v);
 //char       epVariant_AsDelegate(epVariant v);
 epString     epVariant_AsString(epVariant v);
 const epVariant* epVariant_AsArray(epVariant v, size_t *pLength);
+const epKeyValuePair* epVariant_AsAssocArray(epVariant v, size_t *pNumElements);
 
 #if defined(__cplusplus)
 }

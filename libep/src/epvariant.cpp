@@ -107,6 +107,13 @@ const epVariant* epVariant_AsArray(epVariant v, size_t *pLength)
   return (epVariant*)arr.ptr;
 }
 
+const epKeyValuePair* epVariant_AsAssocArray(epVariant v, size_t *pNumElements)
+{
+  Slice<KeyValuePair> kvp = ((Variant&)v).asAssocArray();
+  *pNumElements = kvp.length;
+  return (epKeyValuePair*)kvp.ptr;
+}
+
 } // extern "C"
 
 
@@ -248,63 +255,6 @@ Variant::Variant(Slice<KeyValuePair> aa, bool unsafeReference)
   }
 }
 
-// destructor
-Variant::~Variant()
-{
-  if (ownsContent)
-  {
-    switch ((Type)t)
-    {
-      case Type::Component:
-        ((ComponentRef&)p).~SharedPtr();
-        break;
-      case Type::Delegate:
-        ((VarDelegate&)p).~VarDelegate();
-        break;
-      case Type::String:
-      {
-        internal::SliceHeader *pH = internal::GetSliceHeader(s);
-        if (pH->refCount == 1)
-          internal::SliceFree(s);
-        else
-          --pH->refCount;
-        break;
-      }
-      case Type::Array:
-      {
-        internal::SliceHeader *pH = internal::GetSliceHeader(p);
-        if (pH->refCount == 1)
-        {
-          for (size_t j = 0; j < length; ++j)
-            ((Variant*)p)[j].~Variant();
-          internal::SliceFree(p);
-        }
-        else
-          --pH->refCount;
-        break;
-      }
-      case Type::AssocArray:
-      {
-        internal::SliceHeader *pH = internal::GetSliceHeader(p);
-        if (pH->refCount == 1)
-        {
-          for (size_t j = 0; j < length; ++j)
-            ((KeyValuePair*)p)[j].~KeyValuePair();
-          internal::SliceFree(p);
-        }
-        else
-          --pH->refCount;
-        break;
-      }
-      case Type::SmallString:
-        // SmallString may appear to have the ownsContent bit set, but it's actually a bit of the length ;)
-        break;
-      default:
-        break;
-    }
-  }
-}
-
 void Variant::copyContent(const Variant &val)
 {
   switch ((Type)t)
@@ -345,6 +295,59 @@ void Variant::copyContent(const Variant &val)
     }
     default:
       break;
+  }
+}
+
+void Variant::destroy()
+{
+  switch ((Type)t)
+  {
+    case Type::Component:
+      ((ComponentRef&)p).~SharedPtr();
+      break;
+    case Type::Delegate:
+      ((VarDelegate&)p).~VarDelegate();
+      break;
+    case Type::String:
+    {
+      internal::SliceHeader *pH = internal::GetSliceHeader(s);
+      if (pH->refCount == 1)
+        internal::SliceFree(s);
+      else
+        --pH->refCount;
+      break;
+    }
+    case Type::Array:
+    {
+      internal::SliceHeader *pH = internal::GetSliceHeader(p);
+      if (pH->refCount == 1)
+      {
+        for (size_t j = 0; j < length; ++j)
+          ((Variant*)p)[j].~Variant();
+        internal::SliceFree(p);
+      }
+      else
+        --pH->refCount;
+      break;
+    }
+    case Type::AssocArray:
+    {
+      internal::SliceHeader *pH = internal::GetSliceHeader(p);
+      if (pH->refCount == 1)
+      {
+        for (size_t j = 0; j < length; ++j)
+          ((KeyValuePair*)p)[j].~KeyValuePair();
+        internal::SliceFree(p);
+      }
+      else
+        --pH->refCount;
+      break;
+    }
+    case Type::SmallString:
+      // SmallString may appear to have the ownsContent bit set, but it's actually a bit of the length ;)
+      break;
+    default:
+    break;
   }
 }
 

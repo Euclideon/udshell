@@ -11,13 +11,16 @@ extern "C" {
 // component API
 struct epComponent
 {
-  void *_vtbl;
+  const void *_vtbl;
   size_t refCount;
 
   const epComponentDesc *pType;
   struct epKernel *pKernel;
 
-  epString uid;
+  const epSharedString uid;
+  epSharedString name;
+
+  void *pUserData;
 };
 
 
@@ -32,42 +35,17 @@ struct epComponentOverrides
   epResult(*pReceiveMessage)(epComponent *pBaseInstance, void *pDerivedInstance, epString message, epString sender, const epVariant *pData);
 };
 
-int epComponent_Acquire(epComponent *pComponent);
-int epComponent_Release(epComponent *pComponent);
+size_t epComponent_Acquire(epComponent *pComponent);
+size_t epComponent_Release(epComponent *pComponent);
 
-epString  epComponent_GetUID(const epComponent *pComponent);
-epString  epComponent_GetName(const epComponent *pComponent);
+epSharedString epComponent_GetUID(const epComponent *pComponent);
+epSharedString epComponent_GetName(const epComponent *pComponent);
 bool      epComponent_IsType(const epComponent *pComponent, epString type);
 epVariant epComponent_GetProperty(const epComponent *pComponent, epString property);
 void      epComponent_SetProperty(epComponent *pComponent, epString property, const epVariant *pValue);
 epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs);
 void      epComponent_Subscribe(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate);
 epResult  epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData);
-
-
-// fast-access API for component
-struct epComponentAPI
-{
-  epString(*GetUID)(const epComponent *pComponent);
-  epString(*GetName)(const epComponent *pComponent);
-
-  bool(*IsType)(const epComponent *pComponent, epString type);
-
-  epVariant(*GetProperty)(const epComponent *pComponent, epString property);
-  void(*SetProperty)(epComponent *pComponent, epString property, const epVariant *pValue);
-
-  epVariant(*CallMethod)(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs);
-
-  void(*Subscribe)(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate);
-
-  epResult(*SendMessage)(epComponent *pComponent, epString target, epString message, const epVariant *pData);
-/*
-  const PropertyInfo *(*GetPropertyInfo)(epComponent *pComponent, epString name);
-  const FunctionInfo *(*GetMethodInfo)(epComponent *pComponent, epString name);
-  const EventInfo *(*GetEventInfo)(epComponent *pComponent, epString name);
-  const FunctionInfo *(*GetStaticFuncInfo)(epComponent *pComponent, epString name);
-*/
-};
 
 #if defined(__cplusplus)
 }

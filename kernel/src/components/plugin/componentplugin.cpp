@@ -7,16 +7,16 @@ namespace ep {
 epComponentAPI g_componentAPI =
 {
   // GetUID
-  [](const epComponent *pComponent) -> epString
+  [](const epComponent *pComponent) -> epSharedString
   {
     Component *pC = (Component*)pComponent;
-    return (epString&)pC->uid;
+    return pC->uid;
   },
   // GetName
-  [](const epComponent *pComponent) -> epString
+  [](const epComponent *pComponent) -> epSharedString
   {
     Component *pC = (Component*)pComponent;
-    return (epString&)pC->name;
+    return pC->name;
   },
 
   // IsType
