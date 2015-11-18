@@ -71,7 +71,7 @@ public:
   Variant(const SharedArray<Variant> &a);
   Variant(SharedArray<Variant> &&a);
 
-  // assic arrays
+  // assoc arrays
   Variant(Slice<KeyValuePair> aa, bool unsafeReference = false);
   template<size_t Len> Variant(const Array<KeyValuePair, Len> &aa);
   template<size_t Len> Variant(Array<KeyValuePair, Len> &&aa);

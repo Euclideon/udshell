@@ -348,10 +348,17 @@ struct Variant_Construct <T[N]>                 { epforceinline static Variant c
 // ** template casting machinery **
 // ********************************
 
+template<class T>
+struct is_Slice : std::false_type {};
+template<class U>
+struct is_Slice<Slice<U>> : std::true_type {};
+
 // HAX: this is a horrible hax to satisfy the C++ compiler!
 template<typename T>
 struct Variant_Cast
 {
+  static_assert(!is_Slice<T>::value, "Calling Variant::as<Slice<T>> is not supported, consider using as<Array<T>> instead?");
+
   inline static T as(const Variant &v) { T r; epFromVariant(v, &r); return r; }
 };
 

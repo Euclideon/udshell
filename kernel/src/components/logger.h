@@ -146,9 +146,13 @@ public:
   LogFilter &GetFilter() { return filter; }
   int GetLevel(LogCategories category) const { return filter.GetLevel(category); }
   void SetLevel(LogCategories categories, int level) { return filter.SetLevel(categories, level); }
-  Slice<SharedString> GetComponents() { return filter.GetComponents(); }
+  Slice<SharedString> GetComponents() const { return filter.GetComponents(); }
   void SetComponents(Slice<const String> comps) { filter.SetComponents(comps); }
   void ResetFilter() { filter.ResetFilter(); }
+
+  // TODO: Move these to the protected section once the refactor of Methods/Properties in Component is done.
+  void SetComponents_Arr(const Array<const String> &comps) { SetComponents(comps); }
+  int SetStreamComponents_Arr(StreamRef spStream, const Array<const String> &comps) { return SetStreamComponents(spStream, comps); }
 
   Event<> Changed;
 protected:
@@ -162,7 +166,7 @@ protected:
 };
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const epVarArg *pArgs);
-  
+
 } //namespace ep
 
 #endif // EPLOGGER_H
