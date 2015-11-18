@@ -19,7 +19,7 @@ public:
   void Activate() override;
   void Deactivate() override;
   void Update(double timeStep);
-  Variant Save() override;
+  Variant Save() const override;
 
 protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);

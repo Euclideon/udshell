@@ -25,7 +25,7 @@ public:
   void SetOrtho(double _orthoHeight) { bOrtho = true; orthoHeight = _orthoHeight; }
   void SetDepthPlanes(double _zNear, double _zFar) { zNear = _zNear; zFar = _zFar; }
 
-  Variant Save();
+  Variant Save() const override;
 
 protected:
   friend class View;
@@ -40,17 +40,17 @@ protected:
     : Node(pType, pKernel, uid, initParams)
   {
     const Variant &perspParam = initParams["perspective"];
-    if (!perspParam.is(Variant::Type::Void))
+    if (perspParam.isValid())
       SetPerspective(perspParam.asFloat());
 
     const Variant &orthoParam = initParams["ortho"];
-    if (!orthoParam.is(Variant::Type::Void))
+    if (orthoParam.isValid())
       SetOrtho(orthoParam.asFloat());
 
     const Variant &paramDepthPlanes = initParams["depthplanes"];
-    if (!paramDepthPlanes.is(Variant::Type::Void))
+    if (paramDepthPlanes.isValid())
     {
-      Array<double> depthPlanesArray = paramDepthPlanes.as<Array<double>>();
+      auto depthPlanesArray = paramDepthPlanes.as<Array<double, 2>>();
       if (depthPlanesArray.length == 2)
         SetDepthPlanes(depthPlanesArray[0], depthPlanesArray[1]);
     }
@@ -76,7 +76,7 @@ public:
   void InvertYAxis(bool bInvert) { yInvert = bInvert ? -1.0 : 1.0; }
   void HelicopterMode(bool bEnable) { bHelicopter = bEnable; }
 
-  Variant Save();
+  Variant Save() const override;
 
 protected:
   Double3 pos = Double3::zero();
@@ -99,9 +99,9 @@ protected:
     memset(keyState, 0, sizeof(keyState));
 
     const Variant &paramPos = initParams["position"];
-    if (!paramPos.is(Variant::Type::Void))
+    if (paramPos.isValid())
     {
-      Array<double> posArray = paramPos.as<Array<double>>();
+      auto posArray = paramPos.as<Array<double, 3>>();
       if (posArray.length == 3)
       {
         Double3 position = Double3::create(posArray[0], posArray[1], posArray[2]);
@@ -110,9 +110,9 @@ protected:
     }
 
     const Variant &paramOrientation = initParams["orientation"];
-    if (!paramOrientation.is(Variant::Type::Void))
+    if (paramOrientation.isValid())
     {
-      Array<double> oriArray = paramOrientation.as<Array<double>>();
+      auto oriArray = paramOrientation.as<Array<double, 3>>();
       if (oriArray.length == 3)
       {
         Double3 orientation = Double3::create(oriArray[0], oriArray[1], oriArray[2]);
@@ -121,7 +121,7 @@ protected:
     }
 
     const Variant &paramMat = initParams["matrix"];
-    if (!paramMat.is(Variant::Type::Void))
+    if (paramMat.isValid())
     {
       Array<double> matArray = paramMat.as<Array<double>>();
       if (matArray.length == 16)
@@ -129,15 +129,15 @@ protected:
     }
 
     const Variant &paramSpeed = initParams["speed"];
-    if (!paramSpeed.is(Variant::Type::Void))
+    if (paramSpeed.isValid())
       SetSpeed(paramSpeed.asFloat());
 
     const Variant &paramInvert = initParams["invertyaxis"];
-    if (!paramInvert.is(Variant::Type::Void))
+    if (paramInvert.isValid())
       InvertYAxis(paramInvert.asBool());
 
     const Variant &paramHeli = initParams["helicoptermode"];
-    if (!paramHeli.is(Variant::Type::Void))
+    if (paramHeli.isValid())
       HelicopterMode(paramHeli.asBool());
   }
 

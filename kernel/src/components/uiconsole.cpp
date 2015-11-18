@@ -109,8 +109,8 @@ ComponentDesc UIConsole::descriptor =
   "UIConsole",     // displayName
   "Is a UI for a Console Panel with input and output text controls", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)),   // properties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)),   // properties
+  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
   nullptr, // events
 };
 

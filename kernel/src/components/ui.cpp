@@ -27,7 +27,7 @@ ComponentDesc UIComponent::descriptor =
   "UI",                // displayName
   "Is a UI component", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // propeties
 };
 
 UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)

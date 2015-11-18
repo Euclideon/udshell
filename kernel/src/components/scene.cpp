@@ -51,9 +51,9 @@ ComponentDesc Scene::descriptor =
   "Scene",    // displayName
   "Is a scene", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
-  Slice<CEventDesc>(events, UDARRAYSIZE(events)) // events
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // propeties
+  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
+  Slice<CEventDesc>(events, EPARRAYSIZE(events)) // events
 };
 
 

@@ -71,8 +71,8 @@ ComponentDesc DataSource::descriptor =
   "Data Source", // displayName
   "Provides data", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // propeties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // propeties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // propeties
+  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)) // propeties
 };
 
 StreamRef DataSource::OpenStream(const Variant &source)

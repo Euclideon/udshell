@@ -57,8 +57,8 @@ ComponentDesc KVPStore::descriptor =
   "Metadata", // displayName
   "Metadata resource", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)) // methods
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
+  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)) // methods
 };
 
 } // namespace ep

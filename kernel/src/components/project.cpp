@@ -31,7 +31,7 @@ ComponentDesc Project::descriptor =
   "Contains the state of a project", // description
 
   nullptr,                                           // properties
-  Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
   nullptr,                                           // events
 };
 
@@ -81,7 +81,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   }
 
   Slice<KeyValuePair> kvps = rootElements.asAssocArray();
-  if (!kvps[0].key.asString().cmp("project"))
+  if (kvps[0].key.asString().eq("project"))
     ParseProject(kvps[0].value);
   else
   {
@@ -140,7 +140,7 @@ void Project::ParseProject(Variant values)
 
   for (KeyValuePair &kvp : kvps)
   {
-    if (!kvp.key.asString().cmp("activities"))
+    if (kvp.key.asString().eq("activities"))
       ParseActivities(kvp.value);
   }
 }

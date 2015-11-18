@@ -27,7 +27,7 @@ ComponentDesc MemStream::descriptor =
   "MemStream", // displayName
   "Memory stream", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
   nullptr, // methods,
   nullptr
 };
@@ -43,10 +43,10 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString u
     throw epR_InvalidParameter;
 
   const Variant &buf = initParams["buffer"];
-  if (buf.is(Variant::Type::Void))
+  if (!buf.isValid())
   {
-      inBuffer = pKernel->CreateComponent<Buffer>();
-      inBuffer->Reserve(DefaultBufferSize);
+    inBuffer = pKernel->CreateComponent<Buffer>();
+    inBuffer->Reserve(DefaultBufferSize);
   }
   else
   {

@@ -110,7 +110,7 @@ void Viewer::Update(double timeStep)
     spScene->Update(timeStep);
 }
 
-Variant Viewer::Save()
+Variant Viewer::Save() const
 {
   Array<KeyValuePair> params;
 

@@ -41,9 +41,9 @@ ComponentDesc View::descriptor =
   "View",    // displayName
   "Is a view", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
   nullptr,
-  Slice<CEventDesc>(events, UDARRAYSIZE(events)) // events
+  Slice<CEventDesc>(events, EPARRAYSIZE(events)) // events
 };
 
 bool View::InputEvent(const epInputEvent &ev)

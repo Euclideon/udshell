@@ -28,7 +28,7 @@ ComponentDesc Window::descriptor =
   "Window",               // displayName
   "Is a window",          // description
 
-  Slice<CPropertyDesc>(windowProps, UDARRAYSIZE(windowProps)), // properties
+  Slice<CPropertyDesc>(windowProps, EPARRAYSIZE(windowProps)), // properties
   nullptr,
   nullptr
 };

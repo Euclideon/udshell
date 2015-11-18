@@ -17,7 +17,7 @@ static ActivityRef spActiveActivity;
 
 static ProjectRef spProject;
 
-MutableString<1024> projFilePath;
+MutableString256 projFilePath;
 
 // ---------------------------------------------------------------------------------------
 void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)

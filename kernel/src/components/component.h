@@ -110,6 +110,8 @@ public:
   void RemoveDynamicMethod(String name);
   void RemoveDynamicEvent(String name);
 
+  virtual Variant Save() const { return Variant(); }
+
   void* GetUserData() const { return pUserData; }
 
 protected:

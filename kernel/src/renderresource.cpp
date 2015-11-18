@@ -38,7 +38,7 @@ static epArrayDataFormat GetElementType(String type)
     { "s8[4]", epVDF_Byte4N },
     { "u8[4]", epVDF_UByte4N_RGBA },
   };
-  for (size_t i = 0; i<UDARRAYSIZE(s_typeMap); ++i)
+  for (size_t i = 0; i<EPARRAYSIZE(s_typeMap); ++i)
   {
     if (type.eq(s_typeMap[i].pName))
       return s_typeMap[i].format;

@@ -71,7 +71,7 @@ ComponentDesc Component::descriptor =
   "Component", // displayName
   "Is a component", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)) // propeties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)) // propeties
 };
 
 

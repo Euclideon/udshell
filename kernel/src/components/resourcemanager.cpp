@@ -28,8 +28,8 @@ ComponentDesc ResourceManager::descriptor =
   "Resource Manager", // displayName
   "Manages resource components", // description
 
-  //Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
-  //Slice<CMethodDesc>(methods, UDARRAYSIZE(methods)), // methods
+  //Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
+  //Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
   nullptr, // properties
   nullptr, // methods
   nullptr, // events

@@ -17,7 +17,7 @@ public:
   UIComponentRef GetUI() const { return ui; }
   virtual void Activate() {}
   virtual void Deactivate() {}
-  virtual Variant Save() { return Variant(); }
+  Variant Save() const override { return Variant(); }
 
 protected:
   UIComponentRef ui = nullptr;

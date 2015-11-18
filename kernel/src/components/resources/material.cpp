@@ -89,7 +89,7 @@ ComponentDesc Material::descriptor =
   "Material", // displayName
   "Material resource", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
 };
 
 void Material::SetShader(ShaderType type, ShaderRef spShader)

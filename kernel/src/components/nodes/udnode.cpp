@@ -32,7 +32,7 @@ ComponentDesc UDNode::descriptor =
   "UDNode",  // displayName
   "Is a UD model node", // description
 
-  Slice<CPropertyDesc>(props, UDARRAYSIZE(props)), // properties
+  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
 };
 
 epResult UDNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)

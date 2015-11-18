@@ -3,7 +3,6 @@
 #define _EP_TEXT_H
 
 #include "components/resources/buffer.h"
-#include "rapidxml.hpp"
 
 namespace ep
 {
@@ -26,7 +25,6 @@ protected:
     : Buffer(pType, pKernel, uid, initParams) {}
   virtual ~Text() {}
 
-  KeyValuePair ParseXMLNode(rapidxml::xml_node<> *node) const;
   void FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth);
 };
 
