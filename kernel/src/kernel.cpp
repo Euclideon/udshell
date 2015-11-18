@@ -421,7 +421,7 @@ epResult Kernel::CreateComponent(String typeId, InitParams initParams, Component
     const ComponentDesc *pDesc = pType->pDesc;
 
     // TODO: should we have a better uid generator than this?
-    MutableString64 newUid; newUid.concat(pDesc->id, pType->createCount++);
+    MutableString64 newUid(Concat, pDesc->id, pType->createCount++);
 
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, newUid, initParams));
     if (!spComponent)

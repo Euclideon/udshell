@@ -272,9 +272,8 @@ ptrdiff_t parseFormat(String &format, Slice<char> &buffer, Slice<epVarArg> args)
   else if (bIndirect)
   {
     // interpret the arg as an indirect format string
-    MutableString128 indirectFormat;
     ptrdiff_t bytes = args[(size_t)arg].GetStringLength(formatSpec, args.ptr);
-    indirectFormat.reserve(bytes);
+    MutableString128 indirectFormat(Reserve, bytes);
     args[(size_t)arg].GetString(indirectFormat.getBuffer(), formatSpec, args.ptr);
     len = internal::format(String(indirectFormat.ptr, bytes), buffer, args).length;
   }
@@ -302,7 +301,7 @@ SharedString SharedString::sprintf(const char *pFormat, ...)
   size_t len = vsnprintf(nullptr, 0, pFormat, args) + 1;
 #endif
 
-  MutableString<0> r; r.reserve(len);
+  MutableString<0> r(Reserve, len);
 
 #if defined(EP_NACL)
   r.length = vsprintf(r.ptr, pFormat, args);
@@ -319,7 +318,7 @@ SharedString SharedString::concatInternal(Slice<epVarArg> args)
 {
   size_t len = internal::getLength(args);
 
-  MutableString<0> r; r.reserve(len+1);
+  MutableString<0> r(Reserve, len+1);
 
   r.length = internal::concatenate(r.getBuffer(), args).length;
   r.ptr[r.length] = 0;
@@ -330,7 +329,7 @@ SharedString SharedString::formatInternal(String format, Slice<epVarArg> args)
 {
   size_t len = internal::format(format, nullptr, args).length;
 
-  MutableString<0> r; r.reserve(len+1);
+  MutableString<0> r(Reserve, len+1);
 
   r.length = internal::format(format, r.getBuffer(), args).length;
   r.ptr[r.length] = 0;
@@ -832,7 +831,7 @@ epResult epString_Test()
   SharedString cc = SharedString::concat("hello ", pName, 10);
   SharedString fmt = SharedString::format("{ 1 }, {2}, { 0 , hello }", "hello ", pName, 10);
 
-  MutableString<0> ms; ms.concat("hello ", pName, 10);
+  MutableString<0> ms(Concat, "hello ", pName, 10);
   ms.append("poop!");
 
   int arr[] = { 1, 2, 30 };

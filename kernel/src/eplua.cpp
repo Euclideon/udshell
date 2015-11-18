@@ -490,8 +490,7 @@ int LuaState::componentCleaner(lua_State* L)
 int LuaState::componentToString(lua_State* L)
 {
   ComponentRef *pComponent = (ComponentRef*)lua_touserdata(L, 1);
-  MutableString64 s;
-  s.concat("@", (*pComponent)->GetUid());
+  MutableString64 s(Concat, "@", (*pComponent)->GetUid());
   lua_pushlstring(L, s.ptr, s.length);
   return 1;
 }
@@ -565,7 +564,7 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // TODO: make better error message, this doesn't feel right
-  MutableString64 errorMsg; errorMsg.format("Error: '{0}' not found", field);
+  MutableString64 errorMsg(Format, "Error: '{0}' not found", field);
   l.print(errorMsg);
 
   // return nil
@@ -603,7 +602,7 @@ int LuaState::componentNewIndex(lua_State* L)
   }
 
   // return nil (already on stack)
-  MutableString64 errorMsg; errorMsg.format("Error: '{0}' not found", field);
+  MutableString64 errorMsg(Format, "Error: '{0}' not found", field);
   l.print(errorMsg);
   return 0;
 }
@@ -1112,8 +1111,7 @@ Variant Variant::luaGet(LuaState &l, int idx)
       }
 
       // alloc for table
-      Array<KeyValuePair> aa;
-      aa.reserve(numElements);
+      Array<KeyValuePair> aa(Reserve, numElements);
 
       // populate the table
       l.pushNil();  // first key

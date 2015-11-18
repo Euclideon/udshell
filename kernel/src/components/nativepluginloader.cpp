@@ -177,8 +177,7 @@ static epKernelAPI s_kernelAPI =
   {
     Kernel *pKernel = (Kernel*)_pKernel;
 
-    MutableString64 baseName; baseName.concat(_pDesc->baseClass, "plugin");
-    const ComponentDesc *pSuper = pKernel->GetComponentDesc(baseName);
+    const ComponentDesc *pSuper = pKernel->GetComponentDesc(MutableString64(Concat, _pDesc->baseClass, "plugin"));
 
     // TODO: sizeof(...) needs to be dynamic, we need to ask it from pSuper somehow...
     if (_pDesc->pOverrides->structSize != sizeof(epComponentOverrides))

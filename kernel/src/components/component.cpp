@@ -269,8 +269,7 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pCompo
     return -len;
 
   // HACK: this could be a lot nicer!
-  MutableString<64> uid; uid.concat("@", pComponent->uid);
-  return epStringifyTemplate(buffer, format, uid, pArgs);
+  return epStringifyTemplate(buffer, format, MutableString<64>(Concat, "@", pComponent->uid), pArgs);
 #endif
   return 0;
 }

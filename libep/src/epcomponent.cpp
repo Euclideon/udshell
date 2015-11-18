@@ -67,9 +67,7 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, 
   if (buffer.length < (size_t)len)
     return -len;
 
-  // HACK: this could be a lot nicer!
-  MutableString64 uid; uid.concat("@", pComponent->GetUID());
-  return epStringifyTemplate(buffer, format, uid, pArgs);
+  return epStringifyTemplate(buffer, format, MutableString64(Concat, "@", pComponent->GetUID()), pArgs);
 }
 
 } // namespace ep

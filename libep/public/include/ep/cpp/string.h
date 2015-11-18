@@ -12,6 +12,10 @@ epforceinline char toLower(char c) { return epIsAlpha(c) ? c|0x20 : c; }
 epforceinline char toUpper(char c) { return epIsAlpha(c) ? c&~0x20 : c; }
 
 
+enum Format_T { Format };
+enum Sprintf_T { Sprintf };
+
+
 template<typename C>
 class CString;
 struct epVarArg;
@@ -109,6 +113,12 @@ struct MutableString : public Array<char, Size>
   template <typename U> MutableString(Slice<U> slice);
   MutableString(const char *pString);
 
+  MutableString(Alloc_T, size_t count);
+  MutableString(Reserve_T, size_t count);
+  template <typename... Args> MutableString(Concat_T, const Args&... args);
+  template <typename... Args> MutableString(Format_T, String format, const Args&... args);
+  MutableString(Sprintf_T, const char *pFormat, ...) epprintf_func(3, 4);
+
   // assignment
   MutableString& operator =(const MutableString<Size> &rh);
   MutableString& operator =(MutableString<Size> &&rval);
@@ -186,11 +196,15 @@ struct SharedString : public SharedArray<const char>
   SharedString(SharedString &&rval);
   SharedString(const SharedArray<const char> &rcstr);
   SharedString(SharedArray<const char> &&rval);
-  template <typename U, size_t Len> SharedString(const Array<U, Len> &arr);
-  template <typename U, size_t Len> SharedString(Array<U, Len> &&rval);
+  template <size_t Len> SharedString(const MutableString<Len> &arr);
+  template <size_t Len> SharedString(MutableString<Len> &&rval);
   template <typename U> SharedString(U *ptr, size_t length);
   template <typename U> SharedString(Slice<U> slice);
   SharedString(const char *pString);
+
+  template <typename... Args> SharedString(Concat_T, const Args&... args);
+  template <typename... Args> SharedString(Format_T, String format, const Args&... args);
+  SharedString(Sprintf_T, const char *pFormat, ...) epprintf_func(3, 4);
 
   // epString compatibility
   SharedString(const epSharedString &s);

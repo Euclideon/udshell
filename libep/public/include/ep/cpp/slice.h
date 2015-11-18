@@ -20,6 +20,11 @@ struct SliceHeader
 } // namespace internal
 
 
+enum Concat_T  { Concat };
+enum Alloc_T   { Alloc };
+enum Reserve_T { Reserve };
+
+
 // slices are bounded arrays, unlike C's conventional unbounded pointers (typically, with separate length stored in parallel)
 // no attempt is made to create a one-size-fits-all implementation, as it is recognised that usages offer distinct advantages/disadvantages
 // slice is the basis of the suite however, and everything is based on Slice. derived types address specifics in usage and/or ownership patterns
@@ -129,6 +134,9 @@ struct Array : public Slice<T>
   // constructors
   Array();
   Array(nullptr_t);
+  Array(Alloc_T, size_t count);
+  Array(Reserve_T, size_t count);
+  template <typename... Items> Array(Concat_T, Items&&... items);
   Array(std::initializer_list<T> list);
   Array(const Array<T, Count> &val);
   Array(Array<T, Count> &&rval);
@@ -148,7 +156,7 @@ struct Array : public Slice<T>
   template <typename U> Array<T, Count>& operator =(Slice<U> rh);
 
   // manipulation
-  template <typename... Things> Array<T, Count>& concat(const Things&... things);
+  template <typename... Things> Array<T, Count>& concat(Things&&... things);
 
   T& front() const;
   T popFront();
@@ -199,6 +207,7 @@ struct SharedArray : public Slice<T>
   // constructors
   SharedArray();
   SharedArray(nullptr_t);
+  template <typename... Items> SharedArray(Concat_T, Items&&... items);
   SharedArray(std::initializer_list<typename SharedArray<T>::ET> list);
   SharedArray(const SharedArray<T> &rcslice);
   SharedArray(SharedArray<T> &&rval);
@@ -211,7 +220,7 @@ struct SharedArray : public Slice<T>
   size_t refcount() const;
 
   // static constructors (make proper constructors?)
-  template<typename... Things> static SharedArray<T> concat(const Things&... things);
+  template<typename... Things> static SharedArray<T> concat(Things&&... things);
 
   // assignment
   SharedArray<T>& operator =(const SharedArray<T> &rh);

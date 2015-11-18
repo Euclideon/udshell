@@ -4,8 +4,7 @@ namespace ep {
 
 Variant epToVariant(const BoundingVolume &volume)
 {
-  Array<KeyValuePair> kvp;
-  kvp.reserve(6);
+  Array<KeyValuePair> kvp(Reserve, 6);
   kvp.pushBack(KeyValuePair("minx", volume.min.x));
   kvp.pushBack(KeyValuePair("miny", volume.min.y));
   kvp.pushBack(KeyValuePair("minz", volume.min.z));

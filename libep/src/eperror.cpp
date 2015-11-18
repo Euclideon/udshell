@@ -37,8 +37,7 @@ epSharedString epDumpError()
 {
   size_t depth = ep::internal::s_errorDepth;
 
-  MutableString<0> s;
-  s.reserve(depth * 96);
+  MutableString<0> s(Reserve, depth * 96);
   s = "Errors occurred!\n";
 
   while (depth-- > 0)

@@ -93,7 +93,7 @@ inline void Kernel::LogError(String format, Args... args) const
     s_pPluginInstance->pKernelAPI->pLogError(s_pPluginInstance->pKernelInstance, format, String());
   else
   {
-    MutableString128 tmp; tmp.format(format, args...);
+    MutableString128 tmp(Format, format, args...);
     s_pPluginInstance->pKernelAPI->pLogError(s_pPluginInstance->pKernelInstance, (String)tmp, String());
   }
 }
@@ -104,7 +104,7 @@ inline void Kernel::LogWarning(int level, String format, Args... args) const
     s_pPluginInstance->pKernelAPI->pLogWarning(s_pPluginInstance->pKernelInstance, level, format, String());
   else
   {
-    MutableString128 tmp; tmp.format(format, args...);
+    MutableString128 tmp(Format, format, args...);
     s_pPluginInstance->pKernelAPI->pLogWarning(s_pPluginInstance->pKernelInstance, level, (String)tmp, String());
   }
 }
@@ -115,7 +115,7 @@ inline void Kernel::LogDebug(int level, String format, Args... args) const
     s_pPluginInstance->pKernelAPI->pLogDebug(s_pPluginInstance->pKernelInstance, level, format, String());
   else
   {
-    MutableString128 tmp; tmp.format(format, args...);
+    MutableString128 tmp(Format, format, args...);
     s_pPluginInstance->pKernelAPI->pLogDebug(s_pPluginInstance->pKernelInstance, level, (String)tmp, String());
   }
 }
@@ -126,7 +126,7 @@ inline void Kernel::LogInfo(int level, String format, Args... args) const
     s_pPluginInstance->pKernelAPI->pLogInfo(s_pPluginInstance->pKernelInstance, level, format, String());
   else
   {
-    MutableString128 tmp; tmp.format(format, args...);
+    MutableString128 tmp(Format, format, args...);
     s_pPluginInstance->pKernelAPI->pLogInfo(s_pPluginInstance->pKernelInstance, level, (String)tmp, String());
   }
 }
@@ -137,7 +137,7 @@ inline void Kernel::LogScript(String format, Args... args) const
     s_pPluginInstance->pKernelAPI->pLogScript(s_pPluginInstance->pKernelInstance, format, String());
   else
   {
-    MutableString128 tmp; tmp.format(format, args...);
+    MutableString128 tmp(Format, format, args...);
     s_pPluginInstance->pKernelAPI->pLogScript(s_pPluginInstance->pKernelInstance, (String)tmp, String());
   }
 }
@@ -148,7 +148,7 @@ inline void Kernel::LogTrace(String format, Args... args) const
     s_pPluginInstance->pKernelAPI->pLogTrace(s_pPluginInstance->pKernelInstance, format, String());
   else
   {
-    MutableString128 tmp; tmp.format(format, args...);
+    MutableString128 tmp(Format, format, args...);
     s_pPluginInstance->pKernelAPI->pLogTrace(s_pPluginInstance->pKernelInstance, (String)tmp, String());
   }
 }

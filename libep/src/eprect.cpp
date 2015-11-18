@@ -4,8 +4,7 @@ namespace ep {
 
 Variant epToVariant(const Rect& rect)
 {
-  Array<KeyValuePair> kvp;
-  kvp.reserve(4);
+  Array<KeyValuePair> kvp(Reserve, 4);
   kvp.pushBack(KeyValuePair("x", rect.x));
   kvp.pushBack(KeyValuePair("y", rect.y));
   kvp.pushBack(KeyValuePair("width", rect.width));

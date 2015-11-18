@@ -580,8 +580,7 @@ inline Variant epToVariant(T e)
 template<typename T>
 inline Variant epToVariant(const Slice<T> arr)
 {
-  Array<Variant> a;
-  a.reserve(arr.length);
+  Array<Variant> a(Reserve, arr.length);
   for (size_t i = 0; i<arr.length; ++i)
     a.pushBack(arr[i]);
   return std::move(a);
@@ -600,8 +599,7 @@ epforceinline Variant epToVariant(const ComponentRef &c)
 template<typename F>
 inline Variant epToVariant(const Vector2<F> &v)
 {
-  Array<Variant> a;
-  a.reserve(2);
+  Array<Variant> a(Reserve, 2);
   a.pushBack(v.x);
   a.pushBack(v.y);
   return std::move(a);
@@ -609,8 +607,7 @@ inline Variant epToVariant(const Vector2<F> &v)
 template<typename F>
 inline Variant epToVariant(const Vector3<F> &v)
 {
-  Array<Variant> a;
-  a.reserve(3);
+  Array<Variant> a(Reserve, 3);
   a.pushBack(v.x);
   a.pushBack(v.y);
   a.pushBack(v.z);
@@ -619,8 +616,7 @@ inline Variant epToVariant(const Vector3<F> &v)
 template<typename F>
 inline Variant epToVariant(const Vector4<F> &v)
 {
-  Array<Variant> a;
-  a.reserve(4);
+  Array<Variant> a(Reserve, 4);
   a.pushBack(v.x);
   a.pushBack(v.y);
   a.pushBack(v.z);
@@ -630,8 +626,7 @@ inline Variant epToVariant(const Vector4<F> &v)
 template<typename F>
 inline Variant epToVariant(const Matrix4x4<F> &m)
 {
-  Array<Variant> a;
-  a.reserve(16);
+  Array<Variant> a(Reserve, 16);
   for (size_t i = 0; i<16; ++i)
     a.pushBack(m.a[i]);
   return std::move(a);

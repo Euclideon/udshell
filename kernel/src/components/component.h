@@ -63,7 +63,7 @@ public:
   void Subscribe(String eventName, void(*pFunc)(Args...))                       { Subscribe(eventName, Delegate<void(Args...)>(pFunc)); }
 
   epResult SendMessage(String target, String message, const Variant &data);
-  epResult SendMessage(Component *pComponent, String message, const Variant &data) { MutableString128 temp; temp.concat("@", pComponent->uid); return SendMessage(temp, message, data); }
+  epResult SendMessage(Component *pComponent, String message, const Variant &data) { return SendMessage(MutableString128(Concat, "@", pComponent->uid), message, data); }
 
   const PropertyInfo *GetPropertyInfo(String propName) const
   {
@@ -181,7 +181,7 @@ inline void Component::LogError(String text, Args... args) const
     LogInternal(LogDefaults::LogLevel, text, LogCategories::Error, uid);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Error, uid);
   }
 }
@@ -192,7 +192,7 @@ inline void Component::LogWarning(int level, String text, Args... args) const
     LogInternal(level, text, LogCategories::Warning, uid);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     LogInternal(level, tmp, LogCategories::Warning, uid);
   }
 }
@@ -203,7 +203,7 @@ inline void Component::LogDebug(int level, String text, Args... args) const
     LogInternal(level, text, LogCategories::Debug, uid);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     LogInternal(level, tmp, LogCategories::Debug, uid);
   }
 }
@@ -214,7 +214,7 @@ inline void Component::LogInfo(int level, String text, Args... args) const
     LogInternal(level, text, LogCategories::Info, uid);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     LogInternal(level, tmp, LogCategories::Info, uid);
   }
 }
@@ -225,7 +225,7 @@ inline void Component::LogScript(String text, Args... args) const
     LogInternal(LogDefaults::LogLevel, text, LogCategories::Script, uid);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Script, uid);
   }
 }
@@ -236,7 +236,7 @@ inline void Component::LogTrace(String text, Args... args) const
     LogInternal(LogDefaults::LogLevel, text, LogCategories::Trace, uid);
   else
   {
-    MutableString128 tmp; tmp.format(text, args...);
+    MutableString128 tmp(Format, text, args...);
     LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Trace, uid);
   }
 }

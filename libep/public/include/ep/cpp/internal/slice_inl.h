@@ -23,6 +23,17 @@ inline void SliceFree(T *pArray)
   epFree(GetSliceHeader(pArray));
 }
 
+// functions that append inputs (TODO: look into a not-recursive version?)
+template<typename T>
+inline T* append(T *pBuffer) { return pBuffer; }
+template<typename T, typename U, typename... Args>
+inline T* append(T *pBuffer, U &&a, Args&&... args)
+{
+  new((void*)pBuffer) T(std::forward<U>(a));
+  append(pBuffer + 1, std::forward<Args>(args)...);
+  return pBuffer;
+}
+
 } // namespace internal
 
 // Slice
@@ -437,6 +448,22 @@ inline Array<T, Count>::Array(nullptr_t)
 {}
 
 template <typename T, size_t Count>
+inline Array<T, Count>::Array(Alloc_T, size_t count)
+{
+  alloc(count);
+}
+template <typename T, size_t Count>
+inline Array<T, Count>::Array(Reserve_T, size_t count)
+{
+  reserve(count);
+}
+template <typename T, size_t Count>
+template <typename... Items>
+inline Array<T, Count>::Array(Concat_T, Items&&... items)
+  : Slice<T>(internal::append<T>(internal::SliceAlloc<T>(sizeof...(items)), std::forward<Items>(items)...), sizeof...(items))
+{}
+
+template <typename T, size_t Count>
 inline Array<T, Count>::Array(std::initializer_list<T> list)
   : Array(list.begin(), list.size())
 {}
@@ -680,6 +707,12 @@ inline SharedArray<T>::SharedArray(nullptr_t)
 {}
 
 template<typename T>
+template <typename... Items>
+inline SharedArray<T>::SharedArray(Concat_T, Items&&... items)
+  : Slice<T>(internal::append<T>(internal::SliceAlloc<T>(sizeof...(items), 1), std::forward<Items>(items)...), sizeof...(items))
+{}
+
+template<typename T>
 inline SharedArray<T>::SharedArray(std::initializer_list<typename SharedArray<T>::ET> list)
   : SharedArray<T>(list.begin(), list.size())
 {}
@@ -802,46 +835,22 @@ inline SharedArray<T>& SharedArray<T>::operator =(Slice<U> rh)
 
 // TODO: support concatenating compatible Slice<T>'s
 
-// functions that count the length of inputs
-inline size_t count(size_t len) // terminator
-{
-  return len;
-}
-template<typename T, typename... Args>
-inline size_t count(size_t len, const T &, const Args&... args) // T
-{
-  return count(len + 1, args...);
-}
-
-// functions that append inputs
-template<typename T>
-inline void append(T*) {}
-template<typename T, typename U, typename... Args>
-inline void append(T *pBuffer, const U &a, const Args&... args)
-{
-  new((void*)pBuffer) T(a);
-  append(pBuffer + 1, args...);
-}
-
 template<typename T, size_t Count>
 template<typename... Things>
-inline Array<T, Count>& Array<T, Count>::concat(const Things&... things)
+inline Array<T, Count>& Array<T, Count>::concat(Things&&... things)
 {
-  size_t len = this->length + count(0, things...);
+  size_t len = this->length + sizeof...(things);
   reserve(len);
-  append<T>(this->ptr + this->length, things...);
+  internal::append<T>(this->ptr + this->length, std::forward<Things>(things)...);
   this->length = len;
   return *this;
 }
 
 template<typename T>
 template<typename... Things>
-inline SharedArray<T> SharedArray<T>::concat(const Things&... things)
+inline SharedArray<T> SharedArray<T>::concat(Things&&... things)
 {
-  size_t len = count(0, things...);
-  T *ptr = internal::SliceAlloc<T>(len);
-  append<T>(ptr, things...);
-  return SharedArray(ptr, len, internal::GetSliceHeader(ptr));
+  return SharedArray<T>(Concat, std::forward<Things>(things)...);
 }
 
 } // namespace ep

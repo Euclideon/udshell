@@ -184,8 +184,7 @@ void UIConsole::RebuildOutput()
 
     // TODO Change below when adding virtual scrollbar support
 
-    MutableString<0> outText;
-    outText.reserve(256 * filteredMerged.length);
+    MutableString<0> outText(Reserve, 256 * filteredMerged.length);
 
     for (MergedLine &m : filteredMerged)
     {
@@ -216,8 +215,7 @@ void UIConsole::RebuildOutput()
 
     // TODO Change below when adding virtual scrollbar support
 
-    MutableString<0> outText;
-    outText.reserve(256 * (filteredConsole.length > filteredLog.length ? filteredConsole.length : filteredLog.length));
+    MutableString<0> outText(Reserve, 256 * (filteredConsole.length > filteredLog.length ? filteredConsole.length : filteredLog.length));
 
     for (int i : filteredConsole)
       outText.append(consoleLines[i].text, "\n");
@@ -266,8 +264,7 @@ void UIConsole::OnLogChanged()
 void UIConsole::OnStreamOutput()
 {
   int64_t newPos = spOutStream->GetPos();
-  MutableString<0> buf;
-  buf.reserve(size_t(newPos - pos));
+  MutableString<0> buf(Reserve, size_t(newPos - pos));
 
   spOutStream->Seek(SeekOrigin::Begin, 0);
   Slice<void> readSlice = spOutStream->Read(buf.getBuffer());
