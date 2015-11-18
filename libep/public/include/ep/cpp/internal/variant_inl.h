@@ -485,16 +485,11 @@ protected:
   template<typename T>
   friend class ep::SharedPtr;
 
-  template<size_t ...S>
-  epforceinline static Variant callFuncHack(Slice<Variant> args, const Delegate<R(Args...)> &d, Sequence<S...>)
-  {
-    return Variant(d(args[S].as<typename std::remove_reference<Args>::type>()...));
-  }
-
   Variant to(Slice<Variant> args) const
   {
-    // we need a call shim which can give an integer sequence as S... (Bjarne!!!)
-    return callFuncHack(args, Delegate<R(Args...)>(target), typename GenSequence<sizeof...(Args)>::type());
+    fastdelegate::FastDelegate<R(Args...)> d;
+    d.SetMemento(target->GetFastDelegate());
+    return ep::VarCall(d, args);
   }
 
   R from(Args... args) const
@@ -530,60 +525,6 @@ private:
   VarDelegateMemento<R(Args...)>& operator=(const VarDelegateMemento<R(Args...)> &rh) = delete;
 };
 
-// specialise for 'void' return type
-template<typename... Args>
-class VarDelegateMemento<void(Args...)> : public DelegateMemento
-{
-protected:
-  template<typename T>
-  friend class ep::SharedPtr;
-
-  template<size_t ...S>
-  epforceinline static void callFuncHack(Slice<Variant> args, const Delegate<void(Args...)> &d, Sequence<S...>)
-  {
-    d(args[S].as<typename std::remove_reference<Args>::type>()...);
-  }
-
-  Variant to(Slice<Variant> args) const
-  {
-    // we need a call shim which can give an integer sequence as S... (Bjarne!!!)
-    callFuncHack(args, Delegate<void(Args...)>(target), typename GenSequence<sizeof...(Args)>::type());
-    return Variant(Variant::Type::Void);
-  }
-
-  void from(Args... args) const
-  {
-    Variant::VarDelegate d(target);
-
-    // HAX: added 1 to support the case of zero args
-    Variant vargs[sizeof...(args)+1] = { Variant(args)... };
-    Slice<Variant> sargs(vargs, sizeof...(args));
-
-    d(sargs);
-  }
-
-  // *to* Variant::Delegate constructor
-  VarDelegateMemento(const Delegate<void(Args...)> &d)
-    : target(d.GetMemento())
-  {
-    FastDelegate<Variant(Slice<Variant>)> shim(this, &VarDelegateMemento::to);
-    m = shim.GetMemento();
-  }
-
-  // *from* Variant::Delegate constructor
-  VarDelegateMemento(const Variant::VarDelegate &d)
-    : target(d.GetMemento())
-  {
-    FastDelegate<void(Args...)> shim(this, &VarDelegateMemento::from);
-    m = shim.GetMemento();
-  }
-
-  const DelegateMementoRef target;
-
-private:
-  VarDelegateMemento<void(Args...)>& operator=(const VarDelegateMemento<void(Args...)> &rh) = delete;
-};
-
 } // namespace internal
 
 // ******************************************************
@@ -603,6 +544,10 @@ epforceinline T Variant::as() const
 {
   // HACK: pipe this through a class so we can partial-specialise
   return internal::Variant_Cast<T>::as(*this);
+}
+template<>
+epforceinline void Variant::as<void>() const
+{
 }
 
 } // namespace ep

@@ -163,14 +163,7 @@ protected:
   FastDelegateMemento m;
 
   template<typename Ret, typename... Args>
-  struct Partial // this allows us to perform partial specialisation for Ret == void
-  {
-    // this is a nasty hack to get ...S (integer sequence) as a parameter pack
-    template<size_t ...S>
-    static Variant callFuncHack(Slice<Variant> args, FastDelegate<Ret(Args...)> d, internal::Sequence<S...>);
-
-    static Variant shimFunc(const Method * const pSetter, Component *pThis, Slice<Variant> value);
-  };
+  static Variant shimFunc(const Method * const pSetter, Component *pThis, Slice<Variant> value);
 };
 
 // static function glue
@@ -185,14 +178,7 @@ protected:
   void *f; // function pointer
 
   template<typename Ret, typename... Args>
-  struct Partial // this allows us to perform partial specialisation for Ret == void
-  {
-    // this is a nasty hack to get ...S (integer sequence) as a parameter pack
-    template<size_t ...S>
-    static Variant callFuncHack(Slice<Variant> args, Ret(*f)(Args...), internal::Sequence<S...>);
-
-    static Variant shimFunc(const StaticFunc * const pSetter, Slice<Variant> value);
-  };
+  static Variant shimFunc(const StaticFunc * const pSetter, Slice<Variant> value);
 };
 
 // event glue
