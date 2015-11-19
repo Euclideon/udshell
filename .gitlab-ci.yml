@@ -20,6 +20,7 @@ ubuntu_shell_release_gcc:
   tags:
     - linux
     - deb
+    - newbuild
 
 ubuntu_shell_debug_clang:
   stage: build
@@ -27,6 +28,7 @@ ubuntu_shell_debug_clang:
   tags:
     - linux
     - deb
+    - newbuild
 
 ubuntu_shell_release_clang:
   stage: build
@@ -34,6 +36,7 @@ ubuntu_shell_release_clang:
   tags:
     - linux
     - deb
+    - newbuild
 
 rpm_shell_release_gcc:
   stage: build
@@ -41,8 +44,16 @@ rpm_shell_release_gcc:
   tags:
     - linux
     - rpm
-  allow_failure: true
- 
+    - newbuild
+
+rpm_shell_release_clang:
+  stage: build
+  script: "./build/build.sh epshell ReleaseClang x64 merge"
+  tags:
+    - linux
+    - rpm
+    - newbuild
+
 windows_viewer_debug_64:
   stage: build
   script: "build\\build.sh epviewer Debug x64 merge"
@@ -58,7 +69,7 @@ windows_viewer_release_64:
     - windows
     - vs2015
     - newbuild
-   
+
 windows_viewer_debug_32:
   stage: build
   script: "build\\build.sh epviewer Debug win32 merge"
@@ -74,13 +85,14 @@ windows_viewer_release_32:
     - windows
     - vs2015
     - newbuild
-    
+
 ubuntu_viewer_release_gcc:
   stage: build
   script: "./build/build.sh epviewer Release x64 merge"
   tags:
     - linux
     - deb
+    - newbuild
 
 ubuntu_viewer_debug_clang:
   stage: build
@@ -88,6 +100,7 @@ ubuntu_viewer_debug_clang:
   tags:
     - linux
     - deb
+    - newbuild
 
 ubuntu_viewer_release_clang:
   stage: build
@@ -95,6 +108,7 @@ ubuntu_viewer_release_clang:
   tags:
     - linux
     - deb
+    - newbuild
 
 rpm_viewer_release_gcc:
   stage: build
@@ -102,5 +116,12 @@ rpm_viewer_release_gcc:
   tags:
     - linux
     - rpm
-  allow_failure: true
-  
+    - newbuild
+
+rpm_viewer_release_clang:
+  stage: build
+  script: "./build/build.sh epviewer ReleaseClang x64 merge"
+  tags:
+    - linux
+    - rpm
+    - newbuild
