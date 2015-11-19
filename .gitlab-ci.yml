@@ -46,6 +46,14 @@ rpm_shell_release_gcc:
     - rpm
     - newbuild
 
+rpm_shell_debug_clang:
+  stage: build
+  script: "./build/build.sh epshell DebugClang x64 merge"
+  tags:
+    - linux
+    - rpm
+    - newbuild
+
 rpm_shell_release_clang:
   stage: build
   script: "./build/build.sh epshell ReleaseClang x64 merge"
@@ -113,6 +121,14 @@ ubuntu_viewer_release_clang:
 rpm_viewer_release_gcc:
   stage: build
   script: "./build/build.sh epviewer Release x64 merge"
+  tags:
+    - linux
+    - rpm
+    - newbuild
+
+rpm_viewer_debug_clang:
+  stage: build
+  script: "./build/build.sh epviewer DebugClang x64 merge"
   tags:
     - linux
     - rpm
