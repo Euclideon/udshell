@@ -3,7 +3,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -160,4 +160,4 @@ RenderShaderProgramRef Material::GetRenderProgram()
   return spRenderProgram;
 }
 
-} // namespace ep
+} // namespace kernel

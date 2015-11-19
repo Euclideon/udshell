@@ -181,13 +181,6 @@ inline Variant::Variant(const ComponentRef &spC)
   length = 0;
   new(&p) ComponentRef(spC);
 }
-inline Variant::Variant(Component *pC)
-{
-  t = (size_t)Type::Component;
-  ownsContent = 0;
-  length = 0;
-  p = pC;
-}
 inline Variant::Variant(const VarDelegate &d)
 {
   t = (size_t)Type::Delegate;

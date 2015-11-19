@@ -4,7 +4,7 @@
 #include "kernel.h"
 #include "components/resources/model.h"
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc GeomNode::descriptor =
@@ -52,4 +52,4 @@ epResult GeomNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
   return epR_Success;
 }
 
-} // namespace ep
+} // namespace kernel

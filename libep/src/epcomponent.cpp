@@ -1,4 +1,5 @@
 #include "ep/cpp/component.h"
+#include "ep/cpp/kernel.h"
 
 extern "C" {
 
@@ -57,17 +58,37 @@ epResult epComponent_SendMessage(epComponent *pComponent, epString target, epStr
 
 } // extern "C"
 
+#include "../../kernel/src/componentdesc.h"
+
 namespace ep {
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, const epVarArg *pArgs)
 {
-  ptrdiff_t len = pComponent->GetUID().length + 1;
+  ptrdiff_t len = pComponent->GetUid().length + 1;
   if (!buffer.ptr)
     return len;
   if (buffer.length < (size_t)len)
     return -len;
 
-  return epStringifyTemplate(buffer, format, MutableString64(Concat, "@", pComponent->GetUID()), pArgs);
+  return epStringifyTemplate(buffer, format, MutableString64(Concat, "@", pComponent->GetUid()), pArgs);
+}
+
+
+bool Component::IsType(String type) const
+{
+  const kernel::ComponentDesc *pDesc = (kernel::ComponentDesc*)pType;
+  while (pDesc)
+  {
+    if (pDesc->id.eq(type))
+      return true;
+    pDesc = pDesc->pSuperDesc;
+  }
+  return false;
+}
+
+void Component::LogInternal(int category, int level, String text, String componentUID) const
+{
+  GetKernel()->Log(category, level, text, componentUID);
 }
 
 } // namespace ep

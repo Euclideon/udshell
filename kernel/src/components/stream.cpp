@@ -1,7 +1,7 @@
 #include "components/stream.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc Stream::descriptor =
@@ -85,4 +85,4 @@ String Stream::ReadLn(Slice<char> buf)
   return nullptr;
 }
 
-} // namespace ep
+} // namespace kernel

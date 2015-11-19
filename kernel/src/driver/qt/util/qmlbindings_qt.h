@@ -14,7 +14,7 @@ namespace qt
 
 // Qt shims
 template<typename ComponentType>
-struct QtGetter : public Getter
+struct QtGetter : public kernel::Getter
 {
 public:
   QtGetter(String id) : Getter(nullptr), propertyId(id)
@@ -35,7 +35,7 @@ protected:
 
 
 template<typename ComponentType>
-struct QtSetter : public Setter
+struct QtSetter : public kernel::Setter
 {
 public:
   QtSetter(String id) : Setter(nullptr), propertyId(id)
@@ -55,7 +55,7 @@ protected:
 };
 
 template<typename ComponentType>
-struct QtMethod : public Method
+struct QtMethod : public kernel::Method
 {
 public:
   QtMethod(const QMetaMethod &_method) : Method(nullptr), method(_method)
@@ -66,7 +66,7 @@ public:
 protected:
   QMetaMethod method;
 
-  static Variant shimFunc(const Method * const _pMethod, Component *pThis, Slice<Variant> value)
+  static Variant shimFunc(const Method * const _pMethod, Component *pThis, Slice<const Variant> value)
   {
     QtMethod *pMethod = (QtMethod*)_pMethod;
     QObject *pQObject = (QObject*)((ComponentType*)pThis)->GetInternalData();
@@ -99,7 +99,7 @@ protected:
 };
 
 template<typename ComponentType>
-struct QtVarEvent : public VarEvent
+struct QtVarEvent : public kernel::VarEvent
 {
 public:
   QtVarEvent(const QMetaMethod &m) : VarEvent(nullptr), method(m), sigToDel(nullptr)
@@ -141,12 +141,12 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
     // TODO: keep a list of string names that we manage so we can free
     // TODO: type & flags
     SharedString propertyName = AllocUDStringFromQString(property.name());
-    ep::PropertyInfo info = { propertyName, propertyName, propertyDescStr };
+    kernel::PropertyInfo info = { propertyName, propertyName, propertyDescStr };
 
     // TODO: have non lookup qmlproperty version and lookup version for the dynamic properties
     // TODO: list of qmlproperty - shared between getter and setter
     // TODO: store list to free getter/setter?
-    ep::PropertyDesc desc = { info, new QtGetter<ComponentType>(propertyName), new QtSetter<ComponentType>(propertyName) };
+    kernel::PropertyDesc desc = { info, new QtGetter<ComponentType>(propertyName), new QtSetter<ComponentType>(propertyName) };
 
     pComponent->AddDynamicProperty(desc);
   }
@@ -170,8 +170,8 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
       // TODO: keep list of strings
       // TODO: keep free list of methods
       SharedString methodName = AllocUDStringFromQString(method.name());
-      ep::FunctionInfo info = { methodName, methodDescStr };
-      ep::MethodDesc desc = { info, new QtMethod<ComponentType>(method) };
+      kernel::FunctionInfo info = { methodName, methodDescStr };
+      kernel::MethodDesc desc = { info, new QtMethod<ComponentType>(method) };
 
       pComponent->AddDynamicMethod(desc);
     }
@@ -183,8 +183,8 @@ inline void PopulateComponentDesc(ComponentType *pComponent, QObject *pObject)
       // TODO: keep list of strings
       // TODO: keep free list of events
       SharedString eventName = AllocUDStringFromQString(method.name());
-      ep::EventInfo info = { eventName, eventName, eventDescStr };
-      ep::EventDesc desc = { info, new QtVarEvent<ComponentType>(method) };
+      kernel::EventInfo info = { eventName, eventName, eventDescStr };
+      kernel::EventDesc desc = { info, new QtVarEvent<ComponentType>(method) };
 
       pComponent->AddDynamicEvent(desc);
     }

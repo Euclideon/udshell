@@ -10,13 +10,15 @@
 #include "helpers.h"
 
 #include "ep/cpp/hashmap.h"
+#include "ep/cpp/kernel.h"
+
 #include "ep/epfastdelegate.h"
 using namespace fastdelegate;
 
 struct udRenderEngine;
 struct epPluginInstance;
 
-namespace ep
+namespace kernel
 {
 
 class LuaState;
@@ -30,23 +32,19 @@ SHARED_CLASS(PluginManager);
 SHARED_CLASS(ResourceManager);
 SHARED_CLASS(ShortcutManager);
 
-class Kernel
+class Kernel : public ep::Kernel
 {
 public:
-  // TODO: MessageHandler returns void, should we return some error state??
-  typedef FastDelegate<void(String sender, String message, const Variant &data)> MessageHandler;
-
   static epResult Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount = 0);
   virtual epResult Destroy();
 
-  epResult SendMessage(String target, String sender, String message, const Variant &data);
+  epResult SendMessage(String target, String sender, String message, const Variant &data) override final;
 
-  void RegisterMessageHandler(SharedString name, MessageHandler messageHandler);
+  void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) override final;
 
   // synchronisation
-  typedef FastDelegate<void(Kernel*)> MainThreadCallback;
-  void DispatchToMainThread(MainThreadCallback callback);
-  void DispatchToMainThreadAndWait(MainThreadCallback callback);
+  void DispatchToMainThread(MainThreadCallback callback) override final;
+  void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
   // component registry
   epResult RegisterComponentType(ComponentDesc *pDesc);
@@ -62,21 +60,22 @@ public:
   }
   Array<const ComponentDesc *> GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase);
 
-  epResult CreateComponent(String typeId, InitParams initParams, ComponentRef *pNewInstance);
+  epResult CreateComponent(String typeId, InitParams initParams, ep::ComponentRef *pNewInstance) override final;
 
   template<typename T>
   SharedPtr<T> CreateComponent(InitParams initParams = nullptr);
 
-  ComponentRef FindComponent(String uid) const;
+  ep::ComponentRef FindComponent(String uid) const override final;
 
   Renderer *GetRenderer() const { return pRenderer; }
 
   // script
   LuaRef GetLua() const { return spLua; }
-  void Exec(String code);
+  void Exec(String code) override;
 
   // logger functions
   LoggerRef GetLogger() const { return spLogger; }
+  void Log(int kind, int level, String text, String component = nullptr) const override final { spLogger->Log(level, text, (LogCategories)kind, component); }
   template<typename ...Args> void LogError(String format, Args... args) const;
   template<typename ...Args> void LogWarning(int level, String format, Args... args) const;
   template<typename ...Args> void LogDebug(int level, String format, Args... args) const;
@@ -178,7 +177,7 @@ protected:
 template<typename T>
 SharedPtr<T> Kernel::CreateComponent(InitParams initParams)
 {
-  ComponentRef c = nullptr;
+  ep::ComponentRef c = nullptr;
   epResult r = CreateComponent(T::descriptor.id, initParams, &c);
   if (r != epR_Success)
     return nullptr;
@@ -268,6 +267,6 @@ inline void Kernel::LogTrace(String text, Args... args) const
   }
 }
 
-} // namespace ep
+} // namespace kernel
 
 #endif // EPKERNEL_H

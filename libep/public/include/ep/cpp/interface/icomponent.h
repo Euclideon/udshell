@@ -11,7 +11,7 @@ class IComponent
 {
   EP_DECLARE_COMPONENT(IComponent, IComponent, 100, "Component Interface")
 public:
-  SharedString GetUID() const                                               { return component.GetUID(); }
+  SharedString GetUid() const                                               { return component.GetUid(); }
   SharedString GetName() const                                              { return component.GetName(); }
 
   bool IsType(String type) const                                            { return component.IsType(type); }

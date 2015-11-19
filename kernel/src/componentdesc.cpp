@@ -1,7 +1,7 @@
 #include "componentdesc.h"
 #include "ep/c/componentdesc.h"
 
-namespace ep
+namespace kernel
 {
 
 // HAX: just extern here, otherwise we need another header for this...
@@ -157,4 +157,4 @@ StaticFunc *ComponentDesc::GetStaticFunc(String _id) const
   return nullptr;
 }
 
-} // namespace ep
+} // namespace kernel

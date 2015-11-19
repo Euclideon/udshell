@@ -2,7 +2,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc Shader::descriptor =
@@ -33,4 +33,4 @@ RenderShaderRef Shader::GetRenderShader(int type)
   return spRenderShader;
 }
 
-} // namespace ep
+} // namespace kernel

@@ -4,7 +4,7 @@
 #include "kernel.h"
 #include "hal/input.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -299,4 +299,4 @@ Variant SimpleCamera::Save() const
   return Variant(std::move(params));
 }
 
-} // namespace ep
+} // namespace kernel

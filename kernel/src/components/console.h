@@ -10,7 +10,7 @@ EP_ENUM(ConsoleOutputs,
   StdDbg
 );
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(Console);

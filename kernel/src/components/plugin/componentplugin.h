@@ -6,7 +6,7 @@
 #include "ep/c/component.h"
 #include "ep/c/internal/component_inl.h"
 
-namespace ep {
+namespace kernel {
 
 class ComponentPlugin : public Component
 {
@@ -49,6 +49,6 @@ private:
   const epComponentOverrides *pCallbacks;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // EPCOMPONENTPLUGIN_H

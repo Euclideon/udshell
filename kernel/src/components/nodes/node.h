@@ -7,7 +7,7 @@
 #include "../resources/resource.h"
 #include "hal/input.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(RenderScene);
@@ -53,6 +53,6 @@ protected:
   // TODO: enable/visible/etc flags
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // EPNODE_H

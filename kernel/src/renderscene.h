@@ -19,7 +19,7 @@
 
 struct epTexture;
 
-namespace ep
+namespace kernel
 {
 
 struct UDJob
@@ -138,6 +138,6 @@ protected:
   AVLTree<uint32_t, RenderVertexFormat*> vertexFormats;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // EPRENDERSCENE_H

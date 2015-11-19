@@ -15,7 +15,13 @@ bool s_done = false;
 static int s_displayWidth, s_displayHeight;
 static Uint32 s_sdlEvent = (Uint32)-1;
 
-class SDLKernel : public Kernel
+struct DelegateWithSemaphore
+{
+  FastDelegateMemento m;
+  udSemaphore *pSem;
+};
+
+class SDLKernel : public kernel::Kernel
 {
 public:
   SDLKernel() {}
@@ -24,11 +30,6 @@ public:
   epResult Destroy() override;
   epResult RunMainLoop() override;
 };
-
-Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
-{
-  return new SDLKernel;
-}
 
 epResult SDLKernel::InitInternal()
 {
@@ -81,50 +82,6 @@ epResult SDLKernel::Destroy()
   SDL_Quit();
 
   return Kernel::Destroy();
-}
-
-ViewRef Kernel::SetFocusView(ViewRef spView)
-{
-  ViewRef spOld = spFocusView;
-  spFocusView = spView;
-  spFocusView->Resize(s_displayWidth, s_displayHeight);
-  return spOld;
-}
-
-struct DelegateWithSemaphore
-{
-  FastDelegateMemento m;
-  udSemaphore *pSem;
-};
-
-void Kernel::DispatchToMainThread(MainThreadCallback callback)
-{
-  FastDelegateMemento m = callback.GetMemento();
-  void **ppPtrs = (void**)&m;
-
-  SDL_Event e;
-  SDL_zero(e);
-  e.type = s_sdlEvent;
-  e.user.code = 0;
-  e.user.data1 = ppPtrs[0];
-  e.user.data2 = ppPtrs[1];
-  SDL_PushEvent(&e);
-}
-void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
-{
-  DelegateWithSemaphore dispatch;
-  dispatch.m = callback.GetMemento();
-  dispatch.pSem = udCreateSemaphore(1, 0);
-
-  SDL_Event e;
-  SDL_zero(e);
-  e.type = s_sdlEvent;
-  e.user.code = 1;
-  e.user.data1 = &dispatch;
-  SDL_PushEvent(&e);
-
-  udWaitSemaphore(dispatch.pSem);
-  udDestroySemaphore(&dispatch.pSem);
 }
 
 epResult SDLKernel::RunMainLoop()
@@ -188,7 +145,7 @@ epResult SDLKernel::RunMainLoop()
     epInput_Update();
 
     // render a frame (this could move to another thread!)
-    RenderableViewRef spRenderView = spFocusView->GetRenderableView();
+    kernel::RenderableViewRef spRenderView = spFocusView->GetRenderableView();
     if (spRenderView)
       spRenderView->RenderGPU();
 
@@ -197,11 +154,58 @@ epResult SDLKernel::RunMainLoop()
   return epR_Success;
 }
 
+namespace kernel {
+
+Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
+{
+  return new SDLKernel;
+}
+
+ViewRef Kernel::SetFocusView(ViewRef spView)
+{
+  ViewRef spOld = spFocusView;
+  spFocusView = spView;
+  spFocusView->Resize(s_displayWidth, s_displayHeight);
+  return spOld;
+}
+
+void Kernel::DispatchToMainThread(MainThreadCallback callback)
+{
+  FastDelegateMemento m = callback.GetMemento();
+  void **ppPtrs = (void**)&m;
+
+  SDL_Event e;
+  SDL_zero(e);
+  e.type = s_sdlEvent;
+  e.user.code = 0;
+  e.user.data1 = ppPtrs[0];
+  e.user.data2 = ppPtrs[1];
+  SDL_PushEvent(&e);
+}
+void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+{
+  DelegateWithSemaphore dispatch;
+  dispatch.m = callback.GetMemento();
+  dispatch.pSem = udCreateSemaphore(1, 0);
+
+  SDL_Event e;
+  SDL_zero(e);
+  e.type = s_sdlEvent;
+  e.user.code = 1;
+  e.user.data1 = &dispatch;
+  SDL_PushEvent(&e);
+
+  udWaitSemaphore(dispatch.pSem);
+  udDestroySemaphore(&dispatch.pSem);
+}
+
 epResult Kernel::Terminate()
 {
   s_done = true;
   return epR_Success;
 }
+
+} // namespace ep
 
 #else
 EPEMPTYFILE

@@ -4,7 +4,7 @@
 #include "hal/vertex.h"
 #include "hal/shader.h"
 
-namespace ep
+namespace kernel
 {
 
 static epArrayDataFormat GetElementType(String type)
@@ -160,4 +160,4 @@ RenderVertexFormat::~RenderVertexFormat()
   pRenderer->vertexFormats.Remove(key);
 }
 
-} // namespace ep
+} // namespace kernel

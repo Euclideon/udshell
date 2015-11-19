@@ -57,7 +57,7 @@ public:
   }
 
   const QQuickFramebufferObject *m_item;
-  ep::RenderableViewRef spRenderView = nullptr;
+  kernel::RenderableViewRef spRenderView = nullptr;
 };
 
 
@@ -89,7 +89,7 @@ QQuickFramebufferObject::Renderer *RenderView::createRenderer() const
   return new FboRenderer(this);
 }
 
-void RenderView::AttachView(ep::ViewRef _spView)
+void RenderView::AttachView(kernel::ViewRef _spView)
 {
   QtApplication::Kernel()->LogTrace("RenderView::AttachView()");
 

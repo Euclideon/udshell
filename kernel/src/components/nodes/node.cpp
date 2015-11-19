@@ -1,6 +1,6 @@
 #include "node.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -117,4 +117,4 @@ void Node::CalculateWorldMatrix(Double4x4 *pMatrix) const
   }
 }
 
-} // namespace ep
+} // namespace kernel

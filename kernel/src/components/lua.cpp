@@ -3,7 +3,7 @@
 
 #include "eplua.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -119,4 +119,4 @@ void Lua::Print(String str) const
   pLua->print(str);
 }
 
-} // namespace ep
+} // namespace kernel

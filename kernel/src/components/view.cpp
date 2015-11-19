@@ -4,7 +4,7 @@
 #include "nodes/camera.h"
 #include "renderscene.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -187,4 +187,4 @@ void View::Deactivate()
   pKernel->UpdatePulse.Unsubscribe(updateFunc);
 }
 
-} // namespace ep
+} // namespace kernel

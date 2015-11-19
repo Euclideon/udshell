@@ -7,7 +7,7 @@
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/avltree.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(ArrayBuffer);
@@ -79,6 +79,6 @@ protected:
   RenderShaderProgramRef spRenderProgram = nullptr;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _EP_MATERIAL_H

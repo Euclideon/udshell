@@ -6,7 +6,7 @@
 #include "components/viewport.h"
 #include "components/window.h"
 
-namespace ep
+namespace kernel
 {
 
 Variant UIComponent::GetUIHandle() const
@@ -59,7 +59,7 @@ void Window::SetTopLevelUI(UIComponentRef epUnusedParam(spUIComponent))
 {
 }
 
-} // namespace ep
+} // namespace kernel
 
 #else
 EPEMPTYFILE

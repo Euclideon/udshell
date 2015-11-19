@@ -1,5 +1,5 @@
 
-namespace ep
+namespace kernel
 {
 
 // getter stuff
@@ -12,7 +12,7 @@ inline CGetter::CGetter(Type(X::*func)() const)
 }
 
 template<typename T>
-inline Variant CGetter::shimFunc(const Getter * const _pGetter, const Component *pThis)
+inline Variant CGetter::shimFunc(const Getter * const _pGetter, const ep::Component *pThis)
 {
   CGetter *pGetter = (CGetter*)_pGetter;
   auto m = pGetter->m;
@@ -34,7 +34,7 @@ inline CSetter::CSetter(void(X::*func)(Type))
 }
 
 template<typename T>
-inline void CSetter::shimFunc(const Setter * const _pSetter, Component *pThis, const Variant &value)
+inline void CSetter::shimFunc(const Setter * const _pSetter, ep::Component *pThis, const Variant &value)
 {
   CSetter *pSetter = (CSetter*)_pSetter;
 
@@ -64,7 +64,7 @@ inline CMethod::CMethod(Ret(X::*func)(Args...) const)
 }
 
 template<typename Ret, typename... Args>
-inline Variant CMethod::shimFunc(const Method * const _pMethod, Component *pThis, Slice<Variant> args)
+inline Variant CMethod::shimFunc(const Method * const _pMethod, ep::Component *pThis, Slice<const Variant> args)
 {
   CMethod *pMethod = (CMethod*)_pMethod;
 
@@ -90,7 +90,7 @@ inline CStaticFunc::CStaticFunc(Ret(*func)(Args...))
 }
 
 template<typename Ret, typename... Args>
-inline Variant CStaticFunc::shimFunc(const StaticFunc * const _pStaticFunc, Slice<Variant> args)
+inline Variant CStaticFunc::shimFunc(const StaticFunc * const _pStaticFunc, Slice<const Variant> args)
 {
   CStaticFunc *pStaticFunc = (CStaticFunc*)_pStaticFunc;
 
@@ -110,7 +110,7 @@ inline CEvent::CEvent(Event<Args...> X::*ev)
 }
 
 template<typename X, typename... Args>
-inline void CEvent::doSubscribe(const VarEvent *_pEv, const ComponentRef &c, const Variant::VarDelegate &d)
+inline void CEvent::doSubscribe(const VarEvent *_pEv, const ep::ComponentRef &c, const Variant::VarDelegate &d)
 {
   CEvent *pEv = (CEvent*)_pEv;
 
@@ -127,4 +127,4 @@ inline void CEvent::doSubscribe(const VarEvent *_pEv, const ComponentRef &c, con
   e.Subscribe(v.as<Delegate<void(Args...)>>());
 }
 
-}  // namespace ep
+}  // namespace kernel

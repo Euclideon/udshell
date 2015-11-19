@@ -3,7 +3,7 @@
 #include "components/datasource.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 /*
@@ -55,7 +55,7 @@ Array<ResourceRef> ResourceManager::GetResourcesByType(const ComponentDesc *pBas
 
   for (ResourceRef spRes : resources)
   {
-    const ComponentDesc *pDesc = spRes->pType;
+    const ComponentDesc *pDesc = spRes->GetDescriptor();
 
     while (pDesc)
     {
@@ -103,4 +103,4 @@ void ResourceManager::SaveResourcesToFile(Slice<ResourceRef>, InitParams initPar
 
 }
 
-} // namespace ep
+} // namespace kernel

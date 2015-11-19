@@ -4,6 +4,7 @@
 
 #include "componentdesc.h"
 #include "ep/cpp/event.h"
+#include "ep/cpp/component.h"
 
 #include "udHashMap.h"
 
@@ -15,39 +16,35 @@
 
 
 #define EP_COMPONENT(Name) \
-  friend class ::ep::Kernel; \
-  static ::ep::ComponentDesc descriptor; \
+  friend class ::kernel::Kernel; \
+  static ::kernel::ComponentDesc descriptor; \
   typedef ::ep::SharedPtr<Name> Ref;
 
-namespace ep {
+namespace kernel {
 
-class Component : public RefCounted
+class Component : public ep::Component
 {
 public:
   EP_COMPONENT(Component);
 
-  const ComponentDesc* const pType;
-  class Kernel* const pKernel;
+  const ComponentDesc* GetDescriptor() const { return pType; }
 
-  const SharedString uid;
-  SharedString name;
-
-  bool IsType(String type) const;
   template<typename T>
-  bool IsType() const { return IsType(T::descriptor.id); }
+  bool IsType() const             { return ep::Component::IsType(T::descriptor.id); }
+  bool IsType(String type) const  { return ep::Component::IsType(type); }
 
-  Variant GetProperty(String property) const;
-  void SetProperty(String property, const Variant &value);
+  Variant GetProperty(String property) const override final;
+  void SetProperty(String property, const Variant &value) override final;
 
-  Variant CallMethod(String method, Slice<Variant> args);
+  Variant CallMethod(String method, Slice<const Variant> args) override final;
   template<typename ...Args>
   Variant CallMethod(String method, Args... args)
   {
-    Variant varargs[sizeof...(Args) + 1] = { args... };
-    return CallMethod(method, Slice<Variant>(varargs, sizeof...(Args)));
+    const Variant varargs[sizeof...(Args)+1] = { args... };
+    return CallMethod(method, Slice<const Variant>(varargs, sizeof...(Args)));
   }
 
-  void Subscribe(String eventName, const Variant::VarDelegate &d);
+  void Subscribe(String eventName, const Variant::VarDelegate &delegate) override final;
   void Unsubscribe();
 
   // helper for subscribing a shim
@@ -62,7 +59,7 @@ public:
   template <typename ...Args>
   void Subscribe(String eventName, void(*pFunc)(Args...))                       { Subscribe(eventName, Delegate<void(Args...)>(pFunc)); }
 
-  epResult SendMessage(String target, String message, const Variant &data);
+  epResult SendMessage(String target, String message, const Variant &data) override final;
   epResult SendMessage(Component *pComponent, String message, const Variant &data) { return SendMessage(MutableString128(Concat, "@", pComponent->uid), message, data); }
 
   const PropertyInfo *GetPropertyInfo(String propName) const
@@ -87,21 +84,9 @@ public:
   }
 
   // built-in component properties
-  String GetUid() const { return uid; }
-  String GetName() const { return name; }
   String GetType() const { return pType->id; }
   String GetDisplayName() const { return pType->displayName; }
   String GetDescription() const { return pType->description; }
-
-  template<typename ...Args> void LogError(String text, Args... args) const;
-  template<typename ...Args> void LogWarning(int level, String text, Args... args) const;
-  template<typename ...Args> void LogDebug(int level, String text, Args... args) const;
-  template<typename ...Args> void LogInfo(int level, String text, Args... args) const;
-  template<typename ...Args> void LogScript(String text, Args... args) const;
-  template<typename ...Args> void LogTrace(String text, Args... args) const;
-
-  void SetName(String _name) { this->name = _name; }
-
 
   void AddDynamicProperty(const PropertyDesc &property);
   void AddDynamicMethod(const MethodDesc &method);
@@ -110,13 +95,11 @@ public:
   void RemoveDynamicMethod(String name);
   void RemoveDynamicEvent(String name);
 
-  virtual Variant Save() const { return Variant(); }
-
-  void* GetUserData() const { return pUserData; }
+  Variant Save() const override { return Variant(); }
 
 protected:
   Component(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, InitParams initParams)
-    : pType(_pType), pKernel(_pKernel), uid(_uid) {}
+    : ep::Component(_pType, _pKernel, _uid, initParams) {}
   virtual ~Component();
 
   void operator delete(void *p)
@@ -129,8 +112,6 @@ protected:
 
   virtual epResult ReceiveMessage(String message, String sender, const Variant &data);
 
-  void LogInternal(int level, String text, int category, String componentUID) const;
-
   // property access
   size_t NumProperties() const { return instanceProperties.Size() + pType->propertyTree.Size(); }
   size_t NumMethods() const { return instanceMethods.Size() + pType->methodTree.Size(); }
@@ -142,15 +123,11 @@ protected:
   const EventDesc *GetEventDesc(String name) const;
   const StaticFuncDesc *GetStaticFuncDesc(String name) const;
 
-  void *pUserData = nullptr;
-
   // TODO: these substantially inflate the size of base Component and are almost always nullptr
   // ...should we move them to a separate allocation?
   AVLTree<SharedString, PropertyDesc> instanceProperties;
   AVLTree<SharedString, MethodDesc> instanceMethods;
   AVLTree<SharedString, EventDesc> instanceEvents;
-
-  Subscriber subscriber;
 
 private:
   template<typename... Args>
@@ -161,12 +138,12 @@ private:
   void operator=(const Component &) = delete;
 };
 
-} // namespace ep
+} // namespace kernel
 
 // HAX: this needs to be here for stupid C++ forward referencing reasons
 #include "components/logger.h"
 
-namespace ep {
+namespace kernel {
 
 // inlines...
 template<typename ...Args>
@@ -176,79 +153,12 @@ inline void Component::Subscribe(String eventName, const Delegate<void(Args...)>
   Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
 }
 
-template<typename ...Args>
-inline void Component::LogError(String text, Args... args) const
-{
-  if (sizeof...(Args) == 0)
-    LogInternal(LogDefaults::LogLevel, text, LogCategories::Error, uid);
-  else
-  {
-    MutableString128 tmp(Format, text, args...);
-    LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Error, uid);
-  }
-}
-template<typename ...Args>
-inline void Component::LogWarning(int level, String text, Args... args) const
-{
-  if (sizeof...(Args) == 0)
-    LogInternal(level, text, LogCategories::Warning, uid);
-  else
-  {
-    MutableString128 tmp(Format, text, args...);
-    LogInternal(level, tmp, LogCategories::Warning, uid);
-  }
-}
-template<typename ...Args>
-inline void Component::LogDebug(int level, String text, Args... args) const
-{
-  if (sizeof...(Args) == 0)
-    LogInternal(level, text, LogCategories::Debug, uid);
-  else
-  {
-    MutableString128 tmp(Format, text, args...);
-    LogInternal(level, tmp, LogCategories::Debug, uid);
-  }
-}
-template<typename ...Args>
-inline void Component::LogInfo(int level, String text, Args... args) const
-{
-  if (sizeof...(Args) == 0)
-    LogInternal(level, text, LogCategories::Info, uid);
-  else
-  {
-    MutableString128 tmp(Format, text, args...);
-    LogInternal(level, tmp, LogCategories::Info, uid);
-  }
-}
-template<typename ...Args>
-inline void Component::LogScript(String text, Args... args) const
-{
-  if (sizeof...(Args) == 0)
-    LogInternal(LogDefaults::LogLevel, text, LogCategories::Script, uid);
-  else
-  {
-    MutableString128 tmp(Format, text, args...);
-    LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Script, uid);
-  }
-}
-template<typename ...Args>
-inline void Component::LogTrace(String text, Args... args) const
-{
-  if (sizeof...(Args) == 0)
-    LogInternal(LogDefaults::LogLevel, text, LogCategories::Trace, uid);
-  else
-  {
-    MutableString128 tmp(Format, text, args...);
-    LogInternal(LogDefaults::LogLevel, tmp, LogCategories::Trace, uid);
-  }
-}
-
 template<typename T>
 inline SharedPtr<T> component_cast(ComponentRef pComponent)
 {
   if (!pComponent)
     return nullptr;
-  const ComponentDesc *pDesc = pComponent->pType;
+  const ComponentDesc *pDesc = pComponent->GetDescriptor();
   while (pDesc)
   {
     if (pDesc->id.eq(T::descriptor.id))
@@ -260,30 +170,28 @@ inline SharedPtr<T> component_cast(ComponentRef pComponent)
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs);
 
-} // namespace ep
+} // namespace kernel
 
+namespace ep {
+  
+inline Variant epToVariant(ep::Component *pC)
+{
+  epVariant v;
+  v.t = (size_t)Variant::Type::Component;
+  v.ownsContent = 0;
+  v.length = 0;
+  v.p = pC;
+  return std::move(v);
+}
 
 // HACK: this is here because forward referencing!
 // SharedPtr<Component> (and derived types)
 template<typename T, typename std::enable_if<std::is_base_of<Component, T>::value>::type* = nullptr> // O_O
 inline void epFromVariant(const Variant &v, SharedPtr<T> *pR)
 {
-  *pR = component_cast<T>(v.asComponent());
+  *pR = kernel::component_cast<T>(v.asComponent());
 }
 
-
-// HACK: this here because forward referencing! >_<
-template<typename... Args>
-template <typename X>
-void Event<Args...>::Subscribe(Component *pC, void(X::*func)(Args...))
-{
-  pC->subscriber.Subscribe(*this, EvDelegate((X*)pC, func));
-}
-template<typename... Args>
-template <typename X>
-void Event<Args...>::Unsubscribe(Component *pC, void(X::*func)(Args...))
-{
-  pC->subscriber.Unsubscribe(*this, EvDelegate((X*)pC, func));
 }
 
 #endif // EPCOMPONENT_H

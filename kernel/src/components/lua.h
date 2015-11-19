@@ -5,7 +5,7 @@
 #include "component.h"
 #include "stream.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(Lua);
@@ -38,6 +38,6 @@ private:
   StreamRef errorStream;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _LUA_H

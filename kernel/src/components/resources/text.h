@@ -4,7 +4,7 @@
 
 #include "components/resources/buffer.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(Buffer);
@@ -28,6 +28,6 @@ protected:
   void FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth);
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _EP_TEXT_H

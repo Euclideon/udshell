@@ -5,7 +5,7 @@
 #include "component.h"
 #include "resources/buffer.h"
 
-namespace ep
+namespace kernel
 {
 PROTOTYPE_COMPONENT(Stream);
 

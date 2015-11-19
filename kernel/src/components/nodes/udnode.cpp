@@ -5,7 +5,7 @@
 #include "udRender.h"
 #include "components/datasources/uddatasource.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -47,4 +47,4 @@ epResult UDNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
   return epR_Success;
 }
 
-} // namespace ep
+} // namespace kernel

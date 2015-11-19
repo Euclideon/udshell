@@ -1,7 +1,7 @@
 #include "components/shortcutmanager.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 static CMethodDesc methods[] =
 {
@@ -190,4 +190,4 @@ bool ShortcutManager::SetShortcutScript(String id, String script)
   return true;
 }
 
-} // namespace ep
+} // namespace kernel

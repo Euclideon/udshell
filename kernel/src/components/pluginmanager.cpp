@@ -1,7 +1,7 @@
 #include "components/pluginmanager.h"
 #include "kernel.h"
 
-namespace ep {
+namespace kernel {
 
 /*
 static CMethodDesc methods[] =
@@ -56,4 +56,4 @@ bool PluginManager::LoadPlugin(String filename)
   return false;
 }
 
-} // namespace ep
+} // namespace kernel

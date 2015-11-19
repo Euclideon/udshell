@@ -7,7 +7,7 @@
 #include "resources/resource.h"
 #include "hal/haltimer.h"
 
-namespace ep {
+namespace kernel {
 
 PROTOTYPE_COMPONENT(Timer);
 
@@ -31,7 +31,7 @@ public:
   void SetInterval(uint32_t interval) { SetTimer(interval, TimerType::Interval); }
   void SetCountDown(uint32_t countDown) { SetTimer(countDown, TimerType::CountDown); }
 
-  void MessageCallback(Kernel *pKernel);
+  void MessageCallback(ep::Kernel *pKernel);
 
 private:
   Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
@@ -43,6 +43,6 @@ private:
   HalTimer *pTimer;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _EP_TIMER_H

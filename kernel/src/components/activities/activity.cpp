@@ -1,6 +1,6 @@
 #include "components/activities/activity.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -56,4 +56,4 @@ Activity::Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
 
 }
 
-} // namespace ep
+} // namespace kernel

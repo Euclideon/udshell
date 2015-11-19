@@ -8,7 +8,7 @@
 
 #include <type_traits>
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(RenderResource);
@@ -171,6 +171,6 @@ template<>
 inline Slice<const void> ArrayBuffer::MapForRead<void>() { return Buffer::MapForRead(); }
 
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _EP_ARRAYBUFFER_H

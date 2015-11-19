@@ -2,6 +2,7 @@
 #ifndef EPCOMPONENTDESC_H
 #define EPCOMPONENTDESC_H
 
+#include "ep/c/componentdesc.h"
 #include "ep/cpp/platform.h"
 #include "ep/epversion.h"
 #include "ep/cpp/sharedptr.h"
@@ -15,7 +16,7 @@
 
 struct epComponentDesc;
 
-namespace ep
+namespace kernel
 {
 
 class Kernel;
@@ -34,13 +35,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  Variant get(const Component *pThis) const
+  Variant get(const ep::Component *pThis) const
   {
     return shim(this, pThis);
   }
 
 protected:
-  typedef Variant(Shim)(const Getter* const, const Component*);
+  typedef Variant(Shim)(const Getter* const, const ep::Component*);
   Shim *shim;
 };
 
@@ -52,13 +53,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  void set(Component *pThis, const Variant &value) const
+  void set(ep::Component *pThis, const Variant &value) const
   {
     shim(this, pThis, value);
   }
 
 protected:
-  typedef void(Shim)(const Setter* const, Component*, const Variant&);
+  typedef void(Shim)(const Setter* const, ep::Component*, const Variant&);
   Shim *shim;
 };
 
@@ -70,13 +71,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  Variant call(Component *pThis, Slice<Variant> args) const
+  Variant call(ep::Component *pThis, Slice<const Variant> args) const
   {
     return shim(this, pThis, args);
   }
 
 protected:
-  typedef Variant(Shim)(const Method* const, Component*, Slice<Variant>);
+  typedef Variant(Shim)(const Method* const, ep::Component*, Slice<const Variant>);
   Shim *shim;
 };
 
@@ -88,13 +89,13 @@ public:
 
   explicit operator bool() const { return shim != nullptr; }
 
-  Variant call(Slice<Variant> args) const
+  Variant call(Slice<const Variant> args) const
   {
     return shim(this, args);
   }
 
 protected:
-  typedef Variant(Shim)(const StaticFunc* const, Slice<Variant>);
+  typedef Variant(Shim)(const StaticFunc* const, Slice<const Variant>);
   Shim *shim;
 };
 
@@ -106,13 +107,13 @@ public:
 
   explicit operator bool() const { return pSubscribe != nullptr; }
 
-  void subscribe(const ComponentRef &c, const Variant::VarDelegate &d)
+  void subscribe(const ep::ComponentRef &c, const Variant::VarDelegate &d)
   {
     pSubscribe(this, c, d);
   }
 
 protected:
-  typedef void (SubscribeFunc)(const VarEvent*, const ComponentRef&, const Variant::VarDelegate&);
+  typedef void (SubscribeFunc)(const VarEvent*, const ep::ComponentRef&, const Variant::VarDelegate&);
   SubscribeFunc *pSubscribe = nullptr;
 };
 
@@ -131,7 +132,7 @@ protected:
   FastDelegateMemento m;
 
   template<typename T>
-  static Variant shimFunc(const Getter * const pGetter, const Component *pThis);
+  static Variant shimFunc(const Getter * const pGetter, const ep::Component *pThis);
 };
 
 // setter glue
@@ -146,7 +147,7 @@ protected:
   FastDelegateMemento m;
 
   template<typename T>
-  static void shimFunc(const Setter * const pSetter, Component *pThis, const Variant &value);
+  static void shimFunc(const Setter * const pSetter, ep::Component *pThis, const Variant &value);
 };
 
 // method glue
@@ -163,7 +164,7 @@ protected:
   FastDelegateMemento m;
 
   template<typename Ret, typename... Args>
-  static Variant shimFunc(const Method * const pSetter, Component *pThis, Slice<Variant> value);
+  static Variant shimFunc(const Method * const pSetter, ep::Component *pThis, Slice<const Variant> value);
 };
 
 // static function glue
@@ -178,7 +179,7 @@ protected:
   void *f; // function pointer
 
   template<typename Ret, typename... Args>
-  static Variant shimFunc(const StaticFunc * const pSetter, Slice<Variant> value);
+  static Variant shimFunc(const StaticFunc * const pSetter, Slice<const Variant> value);
 };
 
 // event glue
@@ -193,7 +194,7 @@ protected:
   void* CEvent::*pEvent;
 
   template<typename X, typename... Args>
-  static void doSubscribe(const VarEvent *pEv, const ComponentRef &c, const Variant::VarDelegate &d);
+  static void doSubscribe(const VarEvent *pEv, const ep::ComponentRef &c, const Variant::VarDelegate &d);
 };
 
 
@@ -331,7 +332,7 @@ struct CStaticFuncDesc
 typedef epResult(InitComponent)(Kernel*);
 typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 
-struct ComponentDesc
+struct ComponentDesc : public epComponentDesc
 {
   ComponentDesc() = delete;
   ComponentDesc(ComponentDesc *pSuperDesc, int epVersion, int pluginVersion, SharedString id, SharedString displayName, SharedString description,
@@ -379,7 +380,7 @@ struct ComponentDesc
   void InitStaticFuncs();
 };
 
-} // namespace ep
+} // namespace kernel
 
 
 #include "componentdesc.inl"

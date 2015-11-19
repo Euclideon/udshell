@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc File::descriptor =
@@ -153,4 +153,4 @@ int64_t File::Seek(SeekOrigin rel, int64_t offset)
   return pos;
 }
 
-} // namespace ep
+} // namespace kernel

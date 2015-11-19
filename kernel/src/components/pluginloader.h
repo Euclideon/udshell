@@ -4,7 +4,7 @@
 
 #include "components/component.h"
 
-namespace ep {
+namespace kernel {
 
 PROTOTYPE_COMPONENT(PluginLoader);
 
@@ -22,6 +22,6 @@ protected:
   {}
 };
 
-} //namespace ep
+} //namespace kernel
 
 #endif // EP_PLUGIN_LOADER_H

@@ -4,7 +4,7 @@
 
 #include "component.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(Project);
@@ -39,6 +39,6 @@ protected:
   SharedString srcString;
 };
 
-} //namespace ep
+} //namespace kernel
 
 #endif // EP_PROJECT_H

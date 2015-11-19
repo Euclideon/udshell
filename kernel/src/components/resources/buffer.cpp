@@ -2,7 +2,7 @@
 #include "renderresource.h"
 #include "renderscene.h"
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc Buffer::descriptor =
@@ -144,4 +144,4 @@ bool Buffer::CopyBuffer(Slice<const void> buf)
   return true; // TODO Error handling
 }
 
-} // namespace ep
+} // namespace kernel

@@ -7,10 +7,13 @@
 
 #include "ep/c/variant.h"
 
+namespace kernel {
+class LuaState;
+}
+
 namespace ep {
 
 SHARED_CLASS(Component);
-class LuaState;
 
 struct KeyValuePair;
 
@@ -55,7 +58,6 @@ public:
 
   Variant(ComponentRef &&spC);
   Variant(const ComponentRef &spC);
-  Variant(Component *pC);
 
   // all the different strings
   Variant(String s, bool unsafeReference = false);
@@ -119,8 +121,8 @@ public:
   Variant operator[](String key) const;
 
   // TODO: these shouldn't be part of the public API!
-  void luaPush(LuaState &l) const;
-  static Variant luaGet(LuaState &l, int idx = -1);
+  void luaPush(kernel::LuaState &l) const;
+  static Variant luaGet(kernel::LuaState &l, int idx = -1);
 
 private:
   void copyContent(const Variant &val);

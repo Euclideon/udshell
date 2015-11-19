@@ -1,6 +1,11 @@
 namespace ep {
 
-inline SharedString Component::GetUID() const
+inline Kernel* Component::GetKernel() const
+{
+  return (Kernel*)pKernel;
+}
+
+inline SharedString Component::GetUid() const
 {
   return uid;
 }
@@ -8,25 +13,16 @@ inline SharedString Component::GetName() const
 {
   return name;
 }
-
-inline bool Component::IsType(String type) const
+inline void Component::SetName(SharedString _name)
 {
-  return s_pPluginInstance->pComponentAPI->IsType((epComponent*)this, type);
+  name = _name;
 }
 
-inline Variant Component::GetProperty(String property) const
+inline void* Component::GetUserData() const
 {
-  return s_pPluginInstance->pComponentAPI->GetProperty((epComponent*)this, property);
-}
-inline void Component::SetProperty(String property, const Variant &value)
-{
-  s_pPluginInstance->pComponentAPI->SetProperty((epComponent*)this, property, (const epVariant*)&value);
+  return pUserData;
 }
 
-inline Variant Component::CallMethod(String method, Slice<const Variant> args)
-{
-  return s_pPluginInstance->pComponentAPI->CallMethod((epComponent*)this, method, (const epVariant*)args.ptr, args.length);
-}
 template<typename ...Args>
 inline Variant Component::CallMethod(String method, Args... args)
 {
@@ -34,14 +30,53 @@ inline Variant Component::CallMethod(String method, Args... args)
   return CallMethod(method, Slice<const Variant>(varargs, sizeof...(Args)));
 }
 
-inline void Component::Subscribe(String eventName, Variant::VarDelegate delegate)
+template<typename ...Args>
+inline void Component::LogError(String text, Args... args) const
 {
-  s_pPluginInstance->pComponentAPI->Subscribe((epComponent*)this, eventName, (const epVarDelegate*&)delegate);
+  if (sizeof...(Args) == 0)
+    LogInternal(0, 2, text, uid);
+  else
+    LogInternal(0, 2, MutableString128(Format, text, args...), uid);
 }
-
-inline epResult Component::SendMessage(String target, String message, const Variant &data)
+template<typename ...Args>
+inline void Component::LogWarning(int level, String text, Args... args) const
 {
-  return s_pPluginInstance->pComponentAPI->SendMessage((epComponent*)this, target, message, (const epVariant*)&data);
+  if (sizeof...(Args) == 0)
+    LogInternal(1, level, text, uid);
+  else
+    LogInternal(1, level, MutableString128(Format, text, args...), uid);
+}
+template<typename ...Args>
+inline void Component::LogDebug(int level, String text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(2, level, text, uid);
+  else
+    LogInternal(2, level, MutableString128(Format, text, args...), uid);
+}
+template<typename ...Args>
+inline void Component::LogInfo(int level, String text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(3, level, text, uid);
+  else
+    LogInternal(3, level, MutableString128(Format, text, args...), uid);
+}
+template<typename ...Args>
+inline void Component::LogScript(String text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(4, 2, text, uid);
+  else
+    LogInternal(4, 2, MutableString128(Format, text, args...), uid);
+}
+template<typename ...Args>
+inline void Component::LogTrace(String text, Args... args) const
+{
+  if (sizeof...(Args) == 0)
+    LogInternal(5, 2, text, uid);
+  else
+    LogInternal(5, 2, MutableString128(Format, text, args...), uid);
 }
 
 } // namespace ep

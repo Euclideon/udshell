@@ -13,7 +13,7 @@
 
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc Viewer::descriptor =
@@ -123,4 +123,4 @@ Variant Viewer::Save() const
   return Variant(std::move(params));
 }
 
-} // namespace ep
+} // namespace kernel

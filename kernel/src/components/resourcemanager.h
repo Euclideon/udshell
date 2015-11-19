@@ -4,7 +4,7 @@
 
 #include "component.h"
 
-namespace ep
+namespace kernel
 {
 PROTOTYPE_COMPONENT(ResourceManager);
 SHARED_CLASS(Resource);
@@ -62,5 +62,5 @@ protected:
   AVLTree<String, ResourceRef> resources;
 };
 
-} //namespace ep
+} //namespace kernel
 #endif // EP_RESOURCE_MANAGER_H

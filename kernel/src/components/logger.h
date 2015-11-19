@@ -4,7 +4,7 @@
 
 #include "component.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(Logger);
@@ -167,6 +167,6 @@ protected:
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const epVarArg *pArgs);
 
-} //namespace ep
+} //namespace kernel
 
 #endif // EPLOGGER_H

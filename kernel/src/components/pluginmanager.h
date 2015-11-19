@@ -5,7 +5,7 @@
 #include "components/component.h"
 #include "components/pluginloader.h"
 
-namespace ep {
+namespace kernel {
 
 PROTOTYPE_COMPONENT(PluginManager);
 
@@ -23,6 +23,6 @@ protected:
   Array<PluginLoaderRef> loaders;
 };
 
-} //namespace ep
+} //namespace kernel
 
 #endif // EP_PLUGIN_MANAGER_H

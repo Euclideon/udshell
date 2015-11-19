@@ -2,7 +2,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc ArrayBuffer::descriptor =
@@ -37,4 +37,4 @@ RenderResourceRef ArrayBuffer::GetRenderResource(RenderResourceType type)
   return spRenderData;
 }
 
-} // namespace ep
+} // namespace kernel

@@ -6,7 +6,7 @@
 #include "kernel.h"
 #include "rapidxml.hpp"
 
-namespace ep
+namespace kernel
 {
 static CMethodDesc methods[] =
 {
@@ -158,7 +158,7 @@ void Project::ParseActivity(String type, Variant values)
 {
   Slice<KeyValuePair> kvps = values.asAssocArray();
 
-  ComponentRef c = nullptr;
+  ep::ComponentRef c = nullptr;
   epResult r = pKernel->CreateComponent(type, InitParams(kvps), &c);
   if (r != epR_Success)
   {
@@ -182,4 +182,4 @@ uint32_t Project::GetLineNumberFromByteIndex(Slice<char> buffer, size_t index) c
   return lineNumber;
 }
 
-} // namespace ep
+} // namespace kernel

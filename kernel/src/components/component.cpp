@@ -9,7 +9,7 @@
 #pragma warning(disable: 4996)
 #endif // defined(EP_WINDOWS)
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -102,19 +102,6 @@ Component::~Component()
   pKernel->DestroyComponent(this);
 }
 
-
-bool Component::IsType(String type) const
-{
-  const ComponentDesc *pDesc = pType;
-  while (pDesc)
-  {
-    if (pType->id.eq(type))
-      return true;
-    pDesc = pDesc->pSuperDesc;
-  }
-  return false;
-}
-
 const PropertyDesc *Component::GetPropertyDesc(String _name) const
 {
   const PropertyDesc *pDesc = instanceProperties.Get(_name);
@@ -201,7 +188,7 @@ Variant Component::GetProperty(String property) const
   return pDesc->getter->get(this);
 }
 
-Variant Component::CallMethod(String method, Slice<Variant> args)
+Variant Component::CallMethod(String method, Slice<const Variant> args)
 {
   const MethodDesc *pDesc = GetMethodDesc(method);
   if (!pDesc)
@@ -254,11 +241,6 @@ epResult Component::SendMessage(String target, String message, const Variant &da
   return pKernel->SendMessage(target, uid, message, data);
 }
 
-void Component::LogInternal(int level, String text, int category, String componentUID) const
-{
-  pKernel->GetLogger()->Log(level, text, (LogCategories)category, componentUID);
-}
-
 ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs)
 {
 #if 0 // TODO : Fix this
@@ -274,4 +256,4 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pCompo
   return 0;
 }
 
-} // namespace ep
+} // namespace kernel

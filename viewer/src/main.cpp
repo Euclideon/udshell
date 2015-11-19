@@ -9,6 +9,8 @@
 #include "components/nodes/udnode.h"
 #include "components/resources/udmodel.h"
 
+using namespace kernel;
+
 // ud includes
 #include "udPlatformUtil.h"
 
@@ -23,7 +25,7 @@ static struct
   uint32_t rendererThreadCount;
   uint32_t streamerMemoryLimit;
 
-  Kernel *pKernel;
+  kernel::Kernel *pKernel;
 
   ViewRef spView;
   UDModelRef spUDModel;
@@ -117,7 +119,7 @@ int main(int argc, char* argv[])
   mData.rendererThreadCount = udGetHardwareThreadCount() - 1;
   ProcessCmdline(argc, argv);
 
-  epResult result = Kernel::Create(&mData.pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
+  epResult result = kernel::Kernel::Create(&mData.pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
   if (result != epR_Success)
     return -1;
 
@@ -200,7 +202,7 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, char *cmdline, int)
 }
 #endif // UDPLATFORM_WINDOWS
 
-void update(ep::ViewRef spView, ep::SceneRef spScene)
+void update(kernel::ViewRef spView, kernel::SceneRef spScene)
 {
   using namespace ep;
   int displayWidth, displayHeight;

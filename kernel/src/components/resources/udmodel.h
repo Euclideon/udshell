@@ -13,7 +13,7 @@
 #include "ep/cpp/boundingvolume.h"
 #include "ep/cpp/rect.h"
 
-namespace ep {
+namespace kernel {
 
 struct UDRenderState : public udRenderModel
 {
@@ -102,6 +102,6 @@ inline void UDModel::SetSimpleVoxelDelegate(Delegate<UDRenderState::SimpleVoxelD
     simpleVoxelDel = Delegate<UDRenderState::SimpleVoxelDlgt>();
 }
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _EP_EPMODEL_H

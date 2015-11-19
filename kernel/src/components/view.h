@@ -8,7 +8,7 @@
 #include "component.h"
 #include "hal/input.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(RenderableView);
@@ -91,6 +91,6 @@ protected:
   Delegate<void(double)> updateFunc;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // EPVIEW_H

@@ -7,7 +7,7 @@
 #include "components/resources/material.h"
 #include "ep/cpp/sharedptr.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(RenderShaderProgram);
@@ -52,6 +52,6 @@ protected:
   RenderVertexFormatRef spRenderVertexFormat = nullptr;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _EP_MODEL_H

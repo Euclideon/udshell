@@ -9,7 +9,7 @@ extern "C" {
   typedef bool (epPlugin_InitProc)(epPluginInstance *pPlugin);
 }
 
-namespace ep {
+namespace kernel {
 
 // ----- plugin glue -----
 class PluginGetter : public Getter
@@ -23,7 +23,7 @@ public:
 protected:
   epGetter *pGetter;
 
-  static Variant shimFunc(const Getter * const _pGetter, const Component *pThis)
+  static Variant shimFunc(const Getter * const _pGetter, const ep::Component *pThis)
   {
     PluginGetter *pGetter = (PluginGetter*)_pGetter;
     Variant v;
@@ -43,7 +43,7 @@ public:
 protected:
   epSetter *pSetter;
 
-  static void shimFunc(const Setter * const _pSetter, Component *pThis, const Variant &value)
+  static void shimFunc(const Setter * const _pSetter, ep::Component *pThis, const Variant &value)
   {
     PluginSetter *pSetter = (PluginSetter*)_pSetter;
     return pSetter->pSetter((epComponent*)pThis, pThis->GetUserData(), (const epVariant*)&value);
@@ -61,7 +61,7 @@ public:
 protected:
   epMethodCall *pMethod;
 
-  static Variant shimFunc(const Method* const _pMethod, Component *pThis, Slice<Variant> args)
+  static Variant shimFunc(const Method* const _pMethod, ep::Component *pThis, Slice<const Variant> args)
   {
     PluginMethod *pMethod = (PluginMethod*)_pMethod;
     Variant v;
@@ -81,7 +81,7 @@ public:
 protected:
   epStaticCall *pFunc;
 
-  static Variant shimFunc(const StaticFunc* const _pFunc, Slice<Variant> args)
+  static Variant shimFunc(const StaticFunc* const _pFunc, Slice<const Variant> args)
   {
     PluginStaticFunc *pFunc = (PluginStaticFunc*)_pFunc;
     Variant v;
@@ -101,7 +101,7 @@ public:
 protected:
   epSubscribe *pSubscribeFunc;
 
-  static void doSubscribe(const VarEvent *_pEv, const ComponentRef &c, const Variant::VarDelegate &d)
+  static void doSubscribe(const VarEvent *_pEv, const ep::ComponentRef &c, const Variant::VarDelegate &d)
   {
     PluginEvent *pEv = (PluginEvent*)_pEv;
     pEv->pSubscribeFunc((epComponent*)c.ptr(), c->GetUserData(), (epVarDelegate*&)d);
@@ -209,7 +209,7 @@ static epKernelAPI s_kernelAPI =
   {
     Kernel *pKernel = (Kernel*)_pKernel;
 
-    ComponentRef spC;
+    ep::ComponentRef spC;
     epResult r = pKernel->CreateComponent(typeId, Slice<const KeyValuePair>((const KeyValuePair*)pInitParams, numInitParams), &spC);
 
     if (r != epR_Success)
@@ -373,4 +373,4 @@ bool NativePluginLoader::LoadPlugin(String filename)
   return bSuccess;
 }
 
-} // namespace ep
+} // namespace kernel

@@ -78,7 +78,7 @@ void CleanupInternalData(QObject **ppInternal)
 } // namespace qt
 
 
-namespace ep {
+namespace kernel {
 
 using qt::internal::SetupFromQmlFile;
 using qt::internal::CleanupInternalData;
@@ -225,7 +225,7 @@ void Window::SetTopLevelUI(UIComponentRef spUIComponent)
     pQtItem->setParentItem(pQtWindow->contentItem());
 }
 
-} // namespace ep
+} // namespace kernel
 
 #else
 EPEMPTYFILE

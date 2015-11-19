@@ -4,7 +4,7 @@
 #include "kernel.h"
 #include "renderscene.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -114,4 +114,4 @@ Scene::~Scene()
 {
 
 }
-}  // namespace ep
+}  // namespace kernel

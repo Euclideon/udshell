@@ -1,6 +1,6 @@
 #include "components/pluginloader.h"
 
-namespace ep {
+namespace kernel {
 
 ComponentDesc PluginLoader::descriptor =
 {
@@ -20,4 +20,4 @@ ComponentDesc PluginLoader::descriptor =
   nullptr, // events
 };
 
-} // namespace ep
+} // namespace kernel

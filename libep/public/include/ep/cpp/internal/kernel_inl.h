@@ -66,91 +66,53 @@ inline Kernel* Kernel::GetInstance()
   return (Kernel*)s_pPluginInstance->pKernelInstance;
 }
 
-inline epResult Kernel::SendMessage(String target, String sender, String message, const Variant &data)
-{
-  return s_pPluginInstance->pKernelAPI->pSendMessage(s_pPluginInstance->pKernelInstance, target, sender, message, (epVariant*)&data);
-}
-
-inline epResult Kernel::CreateComponent(String typeId, Slice<const KeyValuePair> initParams, Component **ppNewInstance)
-{
-  return s_pPluginInstance->pKernelAPI->pCreateComponent(s_pPluginInstance->pKernelInstance, typeId, (const epKeyValuePair*)initParams.ptr, initParams.length, (epComponent**)ppNewInstance);
-}
-
-inline epComponent* Kernel::FindComponent(String uid) const
-{
-  return s_pPluginInstance->pKernelAPI->pFindComponent(s_pPluginInstance->pKernelInstance, uid);
-}
-
-inline void Kernel::Exec(String code)
-{
-  s_pPluginInstance->pKernelAPI->pExec(s_pPluginInstance->pKernelInstance, code);
-}
-
 template<typename ...Args>
 inline void Kernel::LogError(String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    s_pPluginInstance->pKernelAPI->pLogError(s_pPluginInstance->pKernelInstance, format, String());
+    Log(0, 2, format);
   else
-  {
-    MutableString128 tmp(Format, format, args...);
-    s_pPluginInstance->pKernelAPI->pLogError(s_pPluginInstance->pKernelInstance, (String)tmp, String());
-  }
+    Log(0, 2, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogWarning(int level, String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    s_pPluginInstance->pKernelAPI->pLogWarning(s_pPluginInstance->pKernelInstance, level, format, String());
+    Log(1, level, format);
   else
-  {
-    MutableString128 tmp(Format, format, args...);
-    s_pPluginInstance->pKernelAPI->pLogWarning(s_pPluginInstance->pKernelInstance, level, (String)tmp, String());
-  }
+    Log(1, level, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogDebug(int level, String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    s_pPluginInstance->pKernelAPI->pLogDebug(s_pPluginInstance->pKernelInstance, level, format, String());
+    Log(2, level, format);
   else
-  {
-    MutableString128 tmp(Format, format, args...);
-    s_pPluginInstance->pKernelAPI->pLogDebug(s_pPluginInstance->pKernelInstance, level, (String)tmp, String());
-  }
+    Log(2, level, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogInfo(int level, String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    s_pPluginInstance->pKernelAPI->pLogInfo(s_pPluginInstance->pKernelInstance, level, format, String());
+    Log(3, level, format);
   else
-  {
-    MutableString128 tmp(Format, format, args...);
-    s_pPluginInstance->pKernelAPI->pLogInfo(s_pPluginInstance->pKernelInstance, level, (String)tmp, String());
-  }
+    Log(3, level, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogScript(String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    s_pPluginInstance->pKernelAPI->pLogScript(s_pPluginInstance->pKernelInstance, format, String());
+    Log(4, 2, format);
   else
-  {
-    MutableString128 tmp(Format, format, args...);
-    s_pPluginInstance->pKernelAPI->pLogScript(s_pPluginInstance->pKernelInstance, (String)tmp, String());
-  }
+    Log(4, 2, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogTrace(String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    s_pPluginInstance->pKernelAPI->pLogTrace(s_pPluginInstance->pKernelInstance, format, String());
+    Log(5, 2, format);
   else
-  {
-    MutableString128 tmp(Format, format, args...);
-    s_pPluginInstance->pKernelAPI->pLogTrace(s_pPluginInstance->pKernelInstance, (String)tmp, String());
-  }
+    Log(5, 2,MutableString128(Format, format, args...));
 }
 
 } // namespace ep

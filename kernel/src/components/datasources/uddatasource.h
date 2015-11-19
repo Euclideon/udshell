@@ -4,7 +4,7 @@
 
 #include "components/datasource.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(UDDataSource);
