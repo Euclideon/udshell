@@ -10,8 +10,8 @@ PROTOTYPE_COMPONENT(NativePluginLoader);
 
 class NativePluginLoader : public PluginLoader
 {
+  EP_DECLARE_COMPONENT(NativePluginLoader, PluginLoader, EPKERNEL_PLUGINVERSION, "Loads native plugins")
 public:
-  EP_COMPONENT(NativePluginLoader);
 
   Slice<const String> GetSupportedExtensions() const override;
   bool LoadPlugin(String filename) override;

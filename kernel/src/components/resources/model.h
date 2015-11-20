@@ -17,8 +17,8 @@ PROTOTYPE_COMPONENT(Model);
 
 class Model : public Resource
 {
+  EP_DECLARE_COMPONENT(Model, Resource, EPKERNEL_PLUGINVERSION, "Model desc...")
 public:
-  EP_COMPONENT(Model);
 
   MaterialRef GetMaterial() const { return spMaterial; }
   void SetMaterial(MaterialRef _spMaterial) { spMaterial = _spMaterial; }

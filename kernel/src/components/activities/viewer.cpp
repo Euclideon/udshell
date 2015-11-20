@@ -13,24 +13,7 @@
 
 #include "kernel.h"
 
-namespace kernel
-{
-
-ComponentDesc Viewer::descriptor =
-{
-  &Activity::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "viewer", // id
-  "Viewer", // displayName
-  "Viewer Activity", // description
-
-  nullptr,    // properties
-  nullptr,    // methods
-  nullptr,    // events
-};
+namespace kernel {
 
 Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Activity(pType, pKernel, uid, initParams)
@@ -96,12 +79,12 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, In
 
 void Viewer::Activate()
 {
-  pKernel->UpdatePulse.Subscribe(updateFunc);
+  GetKernel().UpdatePulse.Subscribe(updateFunc);
 }
 
 void Viewer::Deactivate()
 {
-  pKernel->UpdatePulse.Unsubscribe(updateFunc);
+  GetKernel().UpdatePulse.Unsubscribe(updateFunc);
 }
 
 void Viewer::Update(double timeStep)

@@ -43,9 +43,6 @@ struct epPluginInstance
   void(*AssertFailed)(epString condition, epString message, epString file, int line);
 
   void(*DestroyComponent)(epComponent *pInstance);
-
-  struct epKernelAPI *pKernelAPI;
-  struct epComponentAPI *pComponentAPI;
 };
 
 extern epPluginInstance *s_pPluginInstance;

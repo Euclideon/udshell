@@ -8,33 +8,6 @@
 namespace kernel
 {
 
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "udmodel", // id
-      "UDModel", // displayName
-      "The underlying UDModel", // description
-    },
-    &UDNode::GetUDModel,
-    &UDNode::SetUDModel
-  },
-};
-
-ComponentDesc UDNode::descriptor =
-{
-  &Node::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "udnode",    // id
-  "UDNode",  // displayName
-  "Is a UD model node", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-};
-
 epResult UDNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
 {
   UDJob &job = spScene->ud.pushBack();

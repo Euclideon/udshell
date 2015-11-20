@@ -3,27 +3,9 @@
 #include "hal/image.h"
 #include "kernel.h"
 
-namespace kernel
-{
+namespace kernel {
+
 const Array<const String> ImageSource::extensions = { ".bmp", ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".tga", ".dds", ".webp" };
-
-ComponentDesc ImageSource::descriptor =
-{
-  &DataSource::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "imagesource", // id
-  "Image Source", // displayName
-  "Provides images", // description
-
-  nullptr,            // properties
-  nullptr,            // methods
-  nullptr,            // events
-  nullptr,            // static functions
-  &RegisterExtensions // init
-};
 
 void ImageSource::Create(StreamRef spSource)
 {
@@ -44,7 +26,7 @@ void ImageSource::Create(StreamRef spSource)
     epImageSurface &s = pImage->pSurfaces[i];
 
     // create image for each image element
-    ArrayBufferRef spImage = pKernel->CreateComponent<ArrayBuffer>();
+    ArrayBufferRef spImage = GetKernel().CreateComponent<ArrayBuffer>();
     spImage->Allocate("{u8[4]}", 4, { s.width, s.height });
 
     // write image to to the array buffer
@@ -61,9 +43,9 @@ void ImageSource::Create(StreamRef spSource)
   epFree(pBuffer);
 }
 
-epResult ImageSource::RegisterExtensions(Kernel *pKernel)
+epResult ImageSource::StaticInit(ep::Kernel *pKernel)
 {
-  return pKernel->RegisterExtensions(&descriptor, extensions);
+  return pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
 }
 
 } // namespace kernel

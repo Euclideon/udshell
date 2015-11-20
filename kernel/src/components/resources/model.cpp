@@ -5,18 +5,6 @@
 namespace kernel
 {
 
-ComponentDesc Model::descriptor =
-{
-  &Resource::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "model", // id
-  "Model", // displayName
-  "Model resource", // description
-};
-
 RenderVertexFormatRef Model::GetRenderVertexFormat(RenderShaderProgramRef spShaderProgram)
 {
   if (!spRenderVertexFormat)

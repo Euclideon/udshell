@@ -4,8 +4,8 @@
 
 #include "components/activities/activity.h"
 
-namespace kernel
-{
+namespace kernel {
+
 PROTOTYPE_COMPONENT(Viewer);
 SHARED_CLASS(UDModel);
 SHARED_CLASS(SimpleCamera);
@@ -13,8 +13,8 @@ SHARED_CLASS(Scene);
 
 class Viewer : public Activity
 {
+  EP_DECLARE_COMPONENT(Viewer, Activity, EPKERNEL_PLUGINVERSION, "Viewer desc...")
 public:
-  EP_COMPONENT(Viewer);
 
   void Activate() override;
   void Deactivate() override;
@@ -34,4 +34,5 @@ protected:
 };
 
 } //namespace kernel
+
 #endif // EP_VIEWER_H

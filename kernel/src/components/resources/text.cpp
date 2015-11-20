@@ -4,41 +4,7 @@
 
 #include "rapidxml.hpp"
 
-namespace kernel
-{
-static CMethodDesc methods[] =
-{
-  {
-    {
-      "parsexml", // id
-      "Parse XML formatted text in buffer into a heirarchical structure of KeyValuePairs", // description
-    },
-    &Text::ParseXml, // method
-  },
-  {
-    {
-      "formatxml", // id
-      "Format a heirarchical structure of KeyValuePairs as XML text", // description
-    },
-    &Text::FormatXml, // method
-  },
-};
-
-ComponentDesc Text::descriptor =
-{
-  &Buffer::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "text", // id
-  "Text", // displayName
-  "Text resource", // description
-
-  nullptr,                                           // properties
-  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
-  nullptr,                                           // events
-};
+namespace kernel {
 
 static KeyValuePair ParseXMLNode(rapidxml::xml_node<> *node)
 {
@@ -90,7 +56,7 @@ Variant Text::ParseXml()
 
 void Text::FormatXml(Variant root)
 {
-  StreamRef spOut = pKernel->CreateComponent<MemStream>({ { "buffer", ComponentRef(this) }, { "flags", OpenFlags::Write } });
+  StreamRef spOut = GetKernel().CreateComponent<MemStream>({ { "buffer", ComponentRef(this) }, { "flags", OpenFlags::Write } });
   spOut->WriteLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 
   Slice<KeyValuePair> rootElements = root.asAssocArray();

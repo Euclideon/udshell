@@ -13,8 +13,8 @@ PROTOTYPE_COMPONENT(Timer);
 
 class Timer : public Component
 {
+  EP_DECLARE_COMPONENT(Timer, Component, EPKERNEL_PLUGINVERSION, "Timer desc...")
 public:
-  EP_COMPONENT(Timer);
 
   EP_ENUM(TimerType,
     Interval,
@@ -41,6 +41,28 @@ private:
   void SetTimer(uint32_t duration, TimerType tt);
 
   HalTimer *pTimer;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(Duration, "The duration for the timer", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(TimerType, "Gets the Timer Type", nullptr, 0),
+    };
+  }
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(SetInterval, "Sets the Duration and the Timer Type to Interval"),
+      EP_MAKE_METHOD(SetCountDown, "Sets the Duration and the Timer Type to CountDown"),
+      EP_MAKE_METHOD(Reset, "Resets the Timer"),
+    };
+  }
+  static Array<const EventInfo> GetEvents()
+  {
+    return{
+      EP_MAKE_EVENT(Elapsed, "Timer Event"),
+    };
+  }
 };
 
 } // namespace kernel

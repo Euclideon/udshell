@@ -19,8 +19,8 @@ PROTOTYPE_COMPONENT(View);
 
 class View : public Component
 {
+  EP_DECLARE_COMPONENT(View, Component, EPKERNEL_PLUGINVERSION, "View desc...")
 public:
-  EP_COMPONENT(View);
 
   virtual bool InputEvent(const epInputEvent &ev);
   virtual epResult Resize(int width, int height);
@@ -89,6 +89,14 @@ protected:
 
   // TODO: Remove this when Unsubscribe can be called with some kind of subscription identifier
   Delegate<void(double)> updateFunc;
+
+  static Array<const PropertyInfo> GetProperties();
+  static Array<const EventInfo> GetEvents()
+  {
+    return{
+      EP_MAKE_EVENT(Dirty, "View dirty event"),
+    };
+  }
 };
 
 } // namespace kernel

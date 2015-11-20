@@ -4,58 +4,7 @@
 #include "kernel.h"
 #include "renderscene.h"
 
-namespace kernel
-{
-
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "rootnode", // id
-      "RootNode", // displayName
-      "Scene root node", // description
-    },
-    &Scene::GetRootNode, // getter
-    nullptr  // setter
-  }
-};
-static CMethodDesc methods[] =
-{
-  {
-    {
-      "makedirty", // id
-      "Force a dirty signal", // description
-    },
-    &Scene::MakeDirty, // method
-  }
-};
-static CEventDesc events[] =
-{
-  {
-    {
-      "dirty", // id
-      "Dirty", // displayName
-      "Scene dirty event", // description
-    },
-    &Scene::Dirty
-  }
-};
-ComponentDesc Scene::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "scene",      // id
-  "Scene",    // displayName
-  "Is a scene", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // propeties
-  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
-  Slice<CEventDesc>(events, EPARRAYSIZE(events)) // events
-};
-
+namespace kernel {
 
 bool Scene::InputEvent(const epInputEvent &ev)
 {

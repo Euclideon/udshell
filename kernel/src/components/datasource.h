@@ -13,8 +13,8 @@ PROTOTYPE_COMPONENT(DataSource);
 
 class DataSource : public Component
 {
+  EP_DECLARE_COMPONENT(DataSource, Component, EPKERNEL_PLUGINVERSION, "DataSource desc...")
 public:
-  EP_COMPONENT(Component);
 
   enum class Flags : size_t
   {
@@ -122,6 +122,23 @@ protected:
 
   AVLTree<SharedString, ResourceRef> resources;
   Flags flags;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(NumResources, "Number of resources the data source provides", nullptr, 0),
+      EP_MAKE_PROPERTY(URL, "The file or location of the DataSource", nullptr, 0),
+    };
+  }
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(GetResourceName, "Get a resource name by index"),
+      EP_MAKE_METHOD(GetResourceByVariant, "Get a resource by name or index"),
+      EP_MAKE_METHOD(SetResource, "Set a resource by name"),
+      EP_MAKE_METHOD(CountResources, "Count resources with a name prefix"),
+    };
+  }
 };
 
 }

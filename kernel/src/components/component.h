@@ -15,22 +15,18 @@
 #endif
 
 
-#define EP_COMPONENT(Name) \
-  friend class ::kernel::Kernel; \
-  static ::kernel::ComponentDesc descriptor; \
-  typedef ::ep::SharedPtr<Name> Ref;
-
 namespace kernel {
 
 class Component : public ep::Component
 {
+  EP_DECLARE_COMPONENT(Component, ep::Component, EPKERNEL_PLUGINVERSION, "Is a component")
 public:
-  EP_COMPONENT(Component);
 
-  const ComponentDesc* GetDescriptor() const { return pType; }
+  const ComponentDesc* GetDescriptor() const { return (const ComponentDesc*)pType; }
+  Kernel& GetKernel() const { return *(kernel::Kernel*)pKernel; }
 
   template<typename T>
-  bool IsType() const             { return ep::Component::IsType(T::descriptor.id); }
+  bool IsType() const             { return ep::Component::IsType(T::ComponentID()); }
   bool IsType(String type) const  { return ep::Component::IsType(type); }
 
   Variant GetProperty(String property) const override final;
@@ -58,10 +54,7 @@ public:
   void Subscribe(String eventName, Y *pThis, void(X::*pMethod)(Args...) const)  { Subscribe(eventName, Delegate<void(Args...)>(pThis, pMethod)); }
   template <typename ...Args>
   void Subscribe(String eventName, void(*pFunc)(Args...))                       { Subscribe(eventName, Delegate<void(Args...)>(pFunc)); }
-
-  epResult SendMessage(String target, String message, const Variant &data) override final;
-  epResult SendMessage(Component *pComponent, String message, const Variant &data) { return SendMessage(MutableString128(Concat, "@", pComponent->uid), message, data); }
-
+/*
   const PropertyInfo *GetPropertyInfo(String propName) const
   {
     const PropertyDesc *pDesc = GetPropertyDesc(propName);
@@ -82,11 +75,11 @@ public:
     const StaticFuncDesc *pDesc = GetStaticFuncDesc(staticFuncName);
     return pDesc ? &pDesc->info : nullptr;
   }
-
+*/
   // built-in component properties
-  String GetType() const { return pType->id; }
-  String GetDisplayName() const { return pType->displayName; }
-  String GetDescription() const { return pType->description; }
+  String GetType() const { return pType->info.id; }
+  String GetDisplayName() const { return pType->info.displayName; }
+  String GetDescription() const { return pType->info.description; }
 
   void AddDynamicProperty(const PropertyDesc &property);
   void AddDynamicMethod(const MethodDesc &method);
@@ -99,7 +92,7 @@ public:
 
 protected:
   Component(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, InitParams initParams)
-    : ep::Component(_pType, _pKernel, _uid, initParams) {}
+    : ep::Component(_pType, (ep::Kernel*)_pKernel, _uid, initParams) {}
   virtual ~Component();
 
   void operator delete(void *p)
@@ -108,15 +101,12 @@ protected:
   }
 
   void Init(InitParams initParams);
-  virtual epResult InitComplete() { return epR_Success; }
-
-  virtual epResult ReceiveMessage(String message, String sender, const Variant &data);
 
   // property access
-  size_t NumProperties() const { return instanceProperties.Size() + pType->propertyTree.Size(); }
-  size_t NumMethods() const { return instanceMethods.Size() + pType->methodTree.Size(); }
-  size_t NumEvents() const { return instanceEvents.Size() + pType->eventTree.Size(); }
-  size_t NumStaticFuncs() const { return pType->staticFuncTree.Size(); }
+  size_t NumProperties() const { return instanceProperties.Size() + GetDescriptor()->propertyTree.Size(); }
+  size_t NumMethods() const { return instanceMethods.Size() + GetDescriptor()->methodTree.Size(); }
+  size_t NumEvents() const { return instanceEvents.Size() + GetDescriptor()->eventTree.Size(); }
+  size_t NumStaticFuncs() const { return GetDescriptor()->staticFuncTree.Size(); }
 
   const PropertyDesc *GetPropertyDesc(String name) const;
   const MethodDesc *GetMethodDesc(String name) const;
@@ -129,7 +119,19 @@ protected:
   AVLTree<SharedString, MethodDesc> instanceMethods;
   AVLTree<SharedString, EventDesc> instanceEvents;
 
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(Uid, "Component UID", nullptr, 0),
+      EP_MAKE_PROPERTY(Name, "Component Name", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(Type, "Component Type", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(DisplayName, "Component Display Name", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(Description, "Component Description", nullptr, 0),
+    };
+  }
+
 private:
+  friend class Kernel;
   template<typename... Args>
   friend class Event;
   friend class LuaState;
@@ -153,27 +155,12 @@ inline void Component::Subscribe(String eventName, const Delegate<void(Args...)>
   Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
 }
 
-template<typename T>
-inline SharedPtr<T> component_cast(ComponentRef pComponent)
-{
-  if (!pComponent)
-    return nullptr;
-  const ComponentDesc *pDesc = pComponent->GetDescriptor();
-  while (pDesc)
-  {
-    if (pDesc->id.eq(T::descriptor.id))
-      return shared_pointer_cast<T>(pComponent);
-    pDesc = pDesc->pSuperDesc;
-  }
-  return nullptr;
-}
-
 ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs);
 
 } // namespace kernel
 
 namespace ep {
-  
+
 inline Variant epToVariant(ep::Component *pC)
 {
   epVariant v;
@@ -189,7 +176,7 @@ inline Variant epToVariant(ep::Component *pC)
 template<typename T, typename std::enable_if<std::is_base_of<Component, T>::value>::type* = nullptr> // O_O
 inline void epFromVariant(const Variant &v, SharedPtr<T> *pR)
 {
-  *pR = kernel::component_cast<T>(v.asComponent());
+  *pR = component_cast<T>(v.asComponent());
 }
 
 }

@@ -20,40 +20,44 @@ size_t epComponent_Release(epComponent *pComponent)
 
 epSharedString epComponent_GetUID(const epComponent *pComponent)
 {
-  return s_pPluginInstance->pComponentAPI->GetUID(pComponent);
+  return ((const Component*)pComponent)->GetUid();
 }
 epSharedString epComponent_GetName(const epComponent *pComponent)
 {
-  return s_pPluginInstance->pComponentAPI->GetName(pComponent);
+  return ((const Component*)pComponent)->GetName();
 }
 
 bool epComponent_IsType(const epComponent *pComponent, epString type)
 {
-  return s_pPluginInstance->pComponentAPI->IsType(pComponent, type);
+  return ((const Component*)pComponent)->IsType(type);
 }
 
 epVariant epComponent_GetProperty(const epComponent *pComponent, epString property)
 {
-  return s_pPluginInstance->pComponentAPI->GetProperty(pComponent, property);
+  epVariant r;
+  new(&r) Variant(((const Component*)pComponent)->GetProperty(property));
+  return r;
 }
 void epComponent_SetProperty(epComponent *pComponent, epString property, const epVariant *pValue)
 {
-  s_pPluginInstance->pComponentAPI->SetProperty(pComponent, property, pValue);
+  ((Component*)pComponent)->SetProperty(property, *(Variant*)pValue);
 }
 
 epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs)
 {
-  return s_pPluginInstance->pComponentAPI->CallMethod(pComponent, method, pArgs, numArgs);
+  epVariant r;
+  new(&r) Variant(((Component*)pComponent)->CallMethod(method, Slice<const Variant>((const Variant*)pArgs, numArgs)));
+  return r;
 }
 
 void epComponent_Subscribe(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate)
 {
-  s_pPluginInstance->pComponentAPI->Subscribe(pComponent, eventName, pDelegate);
+  ((Component*)pComponent)->Subscribe(eventName, (const Variant::VarDelegate&)pDelegate);
 }
 
 epResult epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData)
 {
-  return s_pPluginInstance->pComponentAPI->SendMessage(pComponent, target, message, pData);
+  return ((const Component*)pComponent)->SendMessage(target, message, *(Variant*)pData);
 }
 
 } // extern "C"
@@ -76,10 +80,10 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, 
 
 bool Component::IsType(String type) const
 {
-  const kernel::ComponentDesc *pDesc = (kernel::ComponentDesc*)pType;
+  const ComponentDesc *pDesc = pType;
   while (pDesc)
   {
-    if (pDesc->id.eq(type))
+    if (pDesc->info.id.eq(type))
       return true;
     pDesc = pDesc->pSuperDesc;
   }
@@ -88,7 +92,32 @@ bool Component::IsType(String type) const
 
 void Component::LogInternal(int category, int level, String text, String componentUID) const
 {
-  GetKernel()->Log(category, level, text, componentUID);
+  GetKernel().Log(category, level, text, componentUID);
+}
+
+epResult Component::ReceiveMessage(String message, String sender, const Variant &data)
+{
+  if (message.eqIC("set"))
+  {
+    Slice<Variant> arr = data.asArray();
+    SetProperty(arr[0].asString(), arr[1]);
+  }
+  else if (message.eqIC("get"))
+  {
+    if (!sender.empty())
+    {
+      char mem[1024];
+      Slice<char> buffer(mem, sizeof(mem));
+//      GetProperty(data, &buffer);
+//      SendMessage(sender, "val", buffer);
+    }
+  }
+  return epR_Success;
+}
+
+epResult Component::SendMessage(String target, String message, const Variant &data) const
+{
+  return pKernel->SendMessage(target, uid, message, data);
 }
 
 } // namespace ep

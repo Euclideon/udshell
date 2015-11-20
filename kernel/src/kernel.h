@@ -18,8 +18,7 @@ using namespace fastdelegate;
 struct udRenderEngine;
 struct epPluginInstance;
 
-namespace kernel
-{
+namespace kernel {
 
 class LuaState;
 class Renderer;
@@ -47,23 +46,22 @@ public:
   void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
   // component registry
-  epResult RegisterComponentType(ComponentDesc *pDesc);
-  template<typename ComponentType>
-  epResult RegisterComponent();
+  const ComponentDesc* RegisterComponentType(const ep::ComponentDesc &desc) override final;
+  template <typename ComponentType>
+  inline epResult RegisterComponentType() { return ep::Kernel::RegisterComponentType<ComponentType>(); }
 
-  const ComponentDesc* GetComponentDesc(String id);
+  const ep::ComponentDesc* GetComponentDesc(String id) override final;
 
   template<typename CT>
   Array<const ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase)
   {
     return GetDerivedComponentDescs(&CT::descriptor, bIncludeBase);
   }
-  Array<const ComponentDesc *> GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase);
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase);
 
   epResult CreateComponent(String typeId, InitParams initParams, ep::ComponentRef *pNewInstance) override final;
-
   template<typename T>
-  SharedPtr<T> CreateComponent(InitParams initParams = nullptr);
+  SharedPtr<T> CreateComponent(InitParams initParams = nullptr) { return ep::Kernel::CreateComponent<T>(initParams); }
 
   ep::ComponentRef FindComponent(String uid) const override final;
 
@@ -86,7 +84,7 @@ public:
   // Functions for resource management
   ResourceManagerRef GetResourceManager() const { return spResourceManager; }
 
-  epResult RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts);
+  epResult RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) override final;
   DataSourceRef CreateDataSourceFromExtension(String ext, InitParams initParams);
 
   // other functions
@@ -130,7 +128,7 @@ protected:
   HashMap<ForeignInstance> foreignInstanceRegistry;
   HashMap<MessageCallback> messageHandlers;
 
-  AVLTree<String, const ComponentDesc *> extensionsRegistry;
+  AVLTree<String, const ep::ComponentDesc *> extensionsRegistry;
 
   Renderer *pRenderer = nullptr;
 
@@ -173,31 +171,6 @@ protected:
   template<typename CT>
   static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 };
-
-template<typename T>
-SharedPtr<T> Kernel::CreateComponent(InitParams initParams)
-{
-  ep::ComponentRef c = nullptr;
-  epResult r = CreateComponent(T::descriptor.id, initParams, &c);
-  if (r != epR_Success)
-    return nullptr;
-  return shared_pointer_cast<T>(c);
-}
-
-template<typename CT>
-Component *Kernel::NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
-{
-  MutableString128 t(Format, "New: {0} - {1}", pType->id, uid);
-  pKernel->LogDebug(4, t);
-  return new CT(pType, pKernel, uid, initParams);
-}
-template<typename CT>
-epResult Kernel::RegisterComponent()
-{
-  if (!CT::descriptor.pCreateInstance)
-    CT::descriptor.pCreateInstance = &NewComponent<CT>;
-  return RegisterComponentType(&CT::descriptor);
-}
 
 
 template<typename ...Args>

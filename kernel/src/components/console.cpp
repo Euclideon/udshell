@@ -3,18 +3,6 @@
 namespace kernel
 {
 
-ComponentDesc Console::descriptor =
-{
-  &Stream::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "console", // id
-  "Console", // displayName
-  "Standard in/out console", // description
-};
-
 Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Stream(pType, pKernel, uid, initParams)
 {

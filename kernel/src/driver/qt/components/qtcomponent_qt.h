@@ -17,9 +17,9 @@ PROTOTYPE_COMPONENT(QtComponent);
 
 class QtComponent : public kernel::Component
 {
-  EP_COMPONENT(QtComponent);
-
+  EP_DECLARE_COMPONENT(QtComponent, kernel::Component, EPKERNEL_PLUGINVERSION, "QtComponent desc...")
 public:
+
   QtComponent(const kernel::ComponentDesc *pType, kernel::Kernel *pKernel, SharedString uid, InitParams initParams);
   virtual ~QtComponent();
 

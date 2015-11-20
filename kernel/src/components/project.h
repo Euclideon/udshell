@@ -13,8 +13,8 @@ SHARED_CLASS(ResourceManager);
 
 class Project : public Component
 {
+  EP_DECLARE_COMPONENT(Project, Component, EPKERNEL_PLUGINVERSION, "Contains the state of a project")
 public:
-  EP_COMPONENT(Project);
 
   void SaveProject();
 
@@ -37,6 +37,13 @@ protected:
 
   ResourceManagerRef spResourceManager;
   SharedString srcString;
+
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(SaveProject, "Save Project to an XML file"),
+    };
+  }
 };
 
 } //namespace kernel

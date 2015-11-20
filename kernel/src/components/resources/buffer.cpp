@@ -5,18 +5,6 @@
 namespace kernel
 {
 
-ComponentDesc Buffer::descriptor =
-{
-  &Resource::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "buffer", // id
-  "Buffer", // displayName
-  "Buffer resource", // description
-};
-
 bool Buffer::Reserve(size_t size)
 {
   if (mapDepth > 0)

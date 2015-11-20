@@ -12,76 +12,13 @@
 namespace kernel
 {
 
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "uid", // id
-      "UID", // displayName
-      "Component UID", // description
-    },
-    &Component::GetUid, // getter
-    nullptr, // setter
-  },
-  {
-    {
-      "name", // id
-      "Name", // displayName
-      "Component Name", // description
-    },
-    &Component::GetName, // getter
-    &Component::SetName, // setter
-  },
-  {
-    {
-      "type", // id
-      "Type", // displayName
-      "Component Type", // description
-    },
-    &Component::GetType, // getter
-    nullptr, // setter
-  },
-  {
-    {
-      "displayname", // id
-      "Display Name", // displayName
-      "Component Display Name", // description
-    },
-    &Component::GetDisplayName, // getter
-    nullptr, // setter
-  },
-  {
-    {
-      "description", // id
-      "Description", // displayName
-      "Component Description", // description
-    },
-    &Component::GetDescription, // getter
-    nullptr, // setter
-  }
-};
-ComponentDesc Component::descriptor =
-{
-  nullptr, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "component", // id
-  "Component", // displayName
-  "Is a component", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)) // propeties
-};
-
-
 void Component::Init(InitParams initParams)
 {
   for (auto &kv : initParams)
   {
     const PropertyDesc *pDesc = GetPropertyDesc(kv.key.asString());
-    if (pDesc && *pDesc->setter)
-      pDesc->setter->set(this, kv.value);
+    if (pDesc && pDesc->setter)
+      pDesc->setter.set(this, kv.value);
   }
 
 /*
@@ -99,47 +36,47 @@ void Component::Init(InitParams initParams)
 Component::~Component()
 {
   LogDebug(4, "Destroy component: {0} ({1})", uid, name);
-  pKernel->DestroyComponent(this);
+  GetKernel().DestroyComponent(this);
 }
 
 const PropertyDesc *Component::GetPropertyDesc(String _name) const
 {
   const PropertyDesc *pDesc = instanceProperties.Get(_name);
   if (!pDesc)
-    pDesc = pType->propertyTree.Get(_name);
+    pDesc = GetDescriptor()->propertyTree.Get(_name);
   return pDesc;
 }
 const MethodDesc *Component::GetMethodDesc(String _name) const
 {
   const MethodDesc *pDesc = instanceMethods.Get(_name);
   if (!pDesc)
-    pDesc = pType->methodTree.Get(_name);
+    pDesc = GetDescriptor()->methodTree.Get(_name);
   return pDesc;
 }
 const EventDesc *Component::GetEventDesc(String _name) const
 {
   const EventDesc *pDesc = instanceEvents.Get(_name);
   if (!pDesc)
-    pDesc = pType->eventTree.Get(_name);
+    pDesc = GetDescriptor()->eventTree.Get(_name);
   return pDesc;
 }
 
 const StaticFuncDesc *Component::GetStaticFuncDesc(String _name) const
 {
-  return pType->staticFuncTree.Get(_name);
+  return GetDescriptor()->staticFuncTree.Get(_name);
 }
 
 void Component::AddDynamicProperty(const PropertyDesc &property)
 {
-  instanceProperties.Insert(property.info.id, property);
+  instanceProperties.Insert(property.id, property);
 }
 void Component::AddDynamicMethod(const MethodDesc &method)
 {
-  instanceMethods.Insert(method.info.id, method);
+  instanceMethods.Insert(method.id, method);
 }
 void Component::AddDynamicEvent(const EventDesc &event)
 {
-  instanceEvents.Insert(event.info.id, event);
+  instanceEvents.Insert(event.id, event);
 }
 
 void Component::RemoveDynamicProperty(String _name)
@@ -163,12 +100,12 @@ void Component::SetProperty(String property, const Variant &value)
     LogWarning(2, "No property '{0}' for component '{1}'", property, name.empty() ? uid : name);
     return;
   }
-  if (!pDesc->setter || pDesc->info.flags & udPF_Immutable)
+  if (!pDesc->setter || pDesc->flags & udPF_Immutable)
   {
     LogWarning(2, "Property '{0}' for component '{1}' is read-only", property, name.empty() ? uid : name);
     return;
   }
-  pDesc->setter->set(this, value);
+  pDesc->setter.set(this, value);
 //  propertyChange[pDesc->index].Signal();
 }
 
@@ -185,7 +122,7 @@ Variant Component::GetProperty(String property) const
     LogWarning(2, "Property '{0}' for component '{1}' is write-only", property, name.empty() ? uid : name);
     return Variant();
   }
-  return pDesc->getter->get(this);
+  return pDesc->getter.get(this);
 }
 
 Variant Component::CallMethod(String method, Slice<const Variant> args)
@@ -196,7 +133,7 @@ Variant Component::CallMethod(String method, Slice<const Variant> args)
     LogWarning(1, "Method not found!");
     return Variant();
   }
-  return pDesc->method->call(this, args);
+  return pDesc->method.call(this, args);
 }
 
 void Component::Subscribe(String eventName, const Variant::VarDelegate &d)
@@ -207,7 +144,7 @@ void Component::Subscribe(String eventName, const Variant::VarDelegate &d)
     LogWarning(2, "No event '{0}' for component '{1}'", eventName, name.empty() ? uid : name);
     return;
   }
-  pDesc->ev->subscribe(ComponentRef(this), d);
+  pDesc->ev.subscribe(this, d);
 }
 
 void Component::Unsubscribe()
@@ -215,31 +152,6 @@ void Component::Unsubscribe()
   // TODO
 }
 
-
-epResult Component::ReceiveMessage(String message, String sender, const Variant &data)
-{
-  if (message.eqIC("set"))
-  {
-    Slice<Variant> arr = data.asArray();
-    SetProperty(arr[0].asString(), arr[1]);
-  }
-  else if (message.eqIC("get"))
-  {
-    if (!sender.empty())
-    {
-      char mem[1024];
-      Slice<char> buffer(mem, sizeof(mem));
-//      GetProperty(data, &buffer);
-//      SendMessage(sender, "val", buffer);
-    }
-  }
-  return epR_Success;
-}
-
-epResult Component::SendMessage(String target, String message, const Variant &data)
-{
-  return pKernel->SendMessage(target, uid, message, data);
-}
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs)
 {

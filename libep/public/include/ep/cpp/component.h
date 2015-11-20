@@ -4,12 +4,11 @@
 
 #include "ep/c/plugin.h"
 #include "ep/cpp/variant.h"
-#include "ep/c/componentdesc.h"
+#include "ep/cpp/componentdesc.h"
 #include "ep/c/internal/component_inl.h"
 
 namespace kernel {
 struct ComponentDesc;
-class Kernel;
 }
 
 namespace ep {
@@ -17,11 +16,14 @@ namespace ep {
 // component API
 class Component : public RefCounted
 {
+  EP_DECLARE_COMPONENT(Component, Component, EPKERNEL_PLUGINVERSION, "Base component")
 public:
+
   const SharedString uid;
   SharedString name;
 
-  Kernel* GetKernel() const;
+  Kernel& GetKernel() const;
+  const ComponentDesc* GetDescriptor() const;
 
   SharedString GetUid() const;
   SharedString GetName() const;
@@ -38,7 +40,8 @@ public:
 
   virtual void Subscribe(String eventName, const Variant::VarDelegate &delegate) = 0;
 
-  virtual epResult SendMessage(String target, String message, const Variant &data) = 0;
+  virtual epResult SendMessage(String target, String message, const Variant &data) const;
+  epResult SendMessage(Component *pComponent, String message, const Variant &data) const;
 
   virtual Variant Save() const = 0;
 
@@ -52,16 +55,37 @@ public:
   void* GetUserData() const;
 
 protected:
-  Component(const kernel::ComponentDesc *_pType, kernel::Kernel *_pKernel, SharedString _uid, InitParams initParams)
-    : uid(_uid), pType(_pType), pKernel(_pKernel) {}
+  Component(const kernel::ComponentDesc *_pType, ep::Kernel *_pKernel, SharedString _uid, InitParams initParams)
+    : uid(_uid), pType((ComponentDesc*)_pType), pKernel(_pKernel) {}
 
-  const kernel::ComponentDesc *const pType;
-  class kernel::Kernel *const pKernel;
+  const ComponentDesc *const pType;
+  class Kernel *const pKernel;
 
   void *pUserData = nullptr;
 
+  virtual epResult InitComplete() { return epR_Success; }
+
+  virtual epResult ReceiveMessage(String message, String sender, const Variant &data);
+
   void LogInternal(int category, int level, String text, String componentUID) const;
 };
+
+// component cast
+template<typename T>
+inline SharedPtr<T> component_cast(ComponentRef pComponent)
+{
+  if (!pComponent)
+    return nullptr;
+  const ComponentDesc *pDesc = pComponent->GetDescriptor();
+  while (pDesc)
+  {
+    if (pDesc->info.id.eq(T::ComponentID()))
+      return shared_pointer_cast<T>(pComponent);
+    pDesc = pDesc->pSuperDesc;
+  }
+  return nullptr;
+}
+// TODO: cast for IComponent types...
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, const epVarArg *pArgs);
 

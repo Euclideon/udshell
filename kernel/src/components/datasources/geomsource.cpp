@@ -42,24 +42,6 @@ const Array<const String> GeomSource::extensions = {
   ".csm", // CharacterStudio Motion (*limited)
 };
 
-ComponentDesc GeomSource::descriptor =
-{
-  &DataSource::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "geomsource", // id
-  "Geometry Source", // displayName
-  "Provides polygon geometry", // description
-
-  nullptr,            // properties
-  nullptr,            // methods
-  nullptr,            // events
-  nullptr,            // static functions
-  &RegisterExtensions // init
-};
-
 static inline String FromAIString(const aiString &name)
 {
   return String(name.C_Str(), name.length);
@@ -148,7 +130,7 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
     LogDebug(4, "Material {0}: \"{1}\"", i, FromAIString(aiName));
 
     String _name = FromAIString(aiName);
-    MaterialRef spMat = pKernel->CreateComponent<Material>({ { "name", _name } });
+    MaterialRef spMat = GetKernel().CreateComponent<Material>({ { "name", _name } });
 
     aiColor4D color(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, color);
@@ -192,7 +174,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     LogDebug(4, "Mesh {0}: {1}", i, FromAIString(mesh.mName));
 
     // create a model
-    ModelRef spMesh = pKernel->CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
+    ModelRef spMesh = GetKernel().CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
 
     // get material
     ResourceRef *pspMat = resources.Get(SharedString::concat("material", mesh.mMaterialIndex));
@@ -211,7 +193,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     typedef std::tuple<float[3]> VertPos;
     Slice<VertPos> verts((VertPos*)mesh.mVertices, mesh.mNumVertices);
 
-    ArrayBufferRef spVerts = pKernel->CreateComponent<ArrayBuffer>();
+    ArrayBufferRef spVerts = GetKernel().CreateComponent<ArrayBuffer>();
     spVerts->AllocateFromData<VertPos>(verts);
 
     resources.Insert(SharedString::concat("positions", i), spVerts);
@@ -224,7 +206,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       typedef std::tuple<float[3]> VertNorm;
       Slice<VertNorm> normals((VertNorm*)mesh.mNormals, mesh.mNumVertices);
 
-      ArrayBufferRef spNormals = pKernel->CreateComponent<ArrayBuffer>();
+      ArrayBufferRef spNormals = GetKernel().CreateComponent<ArrayBuffer>();
       spNormals->AllocateFromData<VertNorm>(normals);
 
       resources.Insert(SharedString::concat("normals", i), spNormals);
@@ -237,7 +219,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     {
       typedef std::tuple<float[3], float[3]> VertBinTan;
 
-      ArrayBufferRef spBinTan = pKernel->CreateComponent<ArrayBuffer>();
+      ArrayBufferRef spBinTan = GetKernel().CreateComponent<ArrayBuffer>();
       spBinTan->Allocate<VertBinTan>(mesh.mNumVertices);
 
       Slice<VertBinTan> bt = spBinTan->Map<VertBinTan>();
@@ -263,7 +245,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       typedef std::tuple<float[3]> VertUV;
       Slice<VertUV> uvs((VertUV*)mesh.mTextureCoords[t], mesh.mNumVertices);
 
-      ArrayBufferRef spUVs = pKernel->CreateComponent<ArrayBuffer>();
+      ArrayBufferRef spUVs = GetKernel().CreateComponent<ArrayBuffer>();
       spUVs->AllocateFromData<VertUV>(uvs);
 
       resources.Insert(SharedString::concat("uvs", i, "_", t), spUVs);
@@ -277,7 +259,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       typedef std::tuple<float[4]> VertColor;
       Slice<VertColor> colors((VertColor*)mesh.mColors[c], mesh.mNumVertices);
 
-      ArrayBufferRef spColors = pKernel->CreateComponent<ArrayBuffer>();
+      ArrayBufferRef spColors = GetKernel().CreateComponent<ArrayBuffer>();
       spColors->AllocateFromData<VertColor>(colors);
 
       resources.Insert(SharedString::concat("colors", i, "_", c), spColors);
@@ -286,7 +268,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     }
 
     // indices (faces)
-    ArrayBufferRef spIndices = pKernel->CreateComponent<ArrayBuffer>();
+    ArrayBufferRef spIndices = GetKernel().CreateComponent<ArrayBuffer>();
     spIndices->Allocate<uint32_t>(mesh.mNumFaces * 3);
 
     Slice<uint32_t> indices = spIndices->Map<uint32_t>();
@@ -327,7 +309,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   LogDebug(4, "{1,*0}  World Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", world.a1, world.b1, world.c1, world.a2, world.b2, world.c2, world.a3, world.b3, world.c3);
 
   // create bone from node
-  NodeRef spNode = pKernel->CreateComponent<Node>({{ "name", FromAIString(node.mName) }});
+  NodeRef spNode = GetKernel().CreateComponent<Node>({{ "name", FromAIString(node.mName) }});
 
 //  if (node.mParent)
 //    spNode->GetMetadata()->Insert("parent", FromAIString(node.mParent->mName));
@@ -341,7 +323,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     if (pspMesh)
     {
       // create geom node
-      GeomNodeRef spGeomNode = pKernel->CreateComponent<GeomNode>();
+      GeomNodeRef spGeomNode = GetKernel().CreateComponent<GeomNode>();
       spGeomNode->SetModel(shared_pointer_cast<Model>(*pspMesh));
 
       // add geom node to world node (we could collapse this if there is only one mesh...)
@@ -367,9 +349,9 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   return spNode;
 }
 
-epResult GeomSource::RegisterExtensions(Kernel *pKernel)
+epResult GeomSource::StaticInit(ep::Kernel *pKernel)
 {
-  return pKernel->RegisterExtensions(&descriptor, extensions);
+  return pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
 }
 
 } // namespace kernel

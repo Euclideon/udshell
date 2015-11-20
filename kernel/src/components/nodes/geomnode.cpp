@@ -7,21 +7,6 @@
 namespace kernel
 {
 
-ComponentDesc GeomNode::descriptor =
-{
-  &Node::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "geomnode",    // id
-  "GeomNode",  // displayName
-  "Is a geometry node", // description
-
-//  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-//  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)) // methods
-};
-
 epResult GeomNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
 {
   GeomJob &job = spScene->geom.pushBack();

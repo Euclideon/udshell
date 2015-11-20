@@ -3,6 +3,11 @@
 
 #include "ep/cpp/variant.h"
 #include "ep/cpp/component.h"
+#include "ep/cpp/interface/icomponent.h"
+
+namespace kernel {
+struct ComponentDesc;
+}
 
 namespace ep {
 
@@ -16,12 +21,19 @@ public:
   template<typename ComponentType>
   epResult RegisterComponentType();
 
+  virtual const ComponentDesc* GetComponentDesc(String id) = 0;
+
   typedef FastDelegate<void(String sender, String message, const Variant &data)> MessageHandler;
   virtual void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) = 0;
 
   virtual epResult CreateComponent(String typeId, InitParams initParams, ComponentRef *pNewInstance) = 0;
+  template<typename T>
+  SharedPtr<T> CreateComponent(InitParams initParams = nullptr);
 
   virtual ComponentRef FindComponent(String uid) const = 0;
+
+  virtual epResult RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) = 0;
+//  virtual DataSourceRef CreateDataSourceFromExtension(String ext, InitParams initParams) = 0;
 
   // synchronisation
   typedef FastDelegate<void(Kernel*)> MainThreadCallback;
@@ -37,6 +49,12 @@ public:
   template<typename ...Args> void LogInfo(int level, String format, Args... args) const;
   template<typename ...Args> void LogScript(String format, Args... args) const;
   template<typename ...Args> void LogTrace(String format, Args... args) const;
+
+protected:
+  virtual const kernel::ComponentDesc* RegisterComponentType(const ComponentDesc &desc) = 0;
+
+  template<typename ComponentType, bool IsIComponent>
+  struct CreateHelper;
 };
 
 } // namespace ep

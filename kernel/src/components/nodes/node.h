@@ -16,8 +16,8 @@ PROTOTYPE_COMPONENT(Node);
 
 class Node : public Resource
 {
+  EP_DECLARE_COMPONENT(Node, Resource, EPKERNEL_PLUGINVERSION, "Node desc...")
 public:
-  EP_COMPONENT(Node);
 
   virtual void SetMatrix(const Double4x4 &mat) { matrix = mat; }
   const Double4x4& GetMatrix() const { return matrix; }
@@ -51,6 +51,8 @@ protected:
   Double4x4 matrix = Double4x4::identity();
 
   // TODO: enable/visible/etc flags
+
+  static Array<const PropertyInfo> GetProperties();
 };
 
 } // namespace kernel

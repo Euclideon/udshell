@@ -13,8 +13,8 @@ class LuaState;
 
 class Lua : public Component
 {
+  EP_DECLARE_COMPONENT(Lua, Component, EPKERNEL_PLUGINVERSION, "Lua VM")
 public:
-  EP_COMPONENT(Lua);
 
   StreamRef GetOutputStream() const { return outputStream; }
   void SetOutputStream(StreamRef stream);
@@ -36,6 +36,23 @@ private:
 
   StreamRef outputStream;
   StreamRef errorStream;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(OutputStream, "Output stream used by the Lua print functions", nullptr, 0),
+      EP_MAKE_PROPERTY(ErrorStream, "Stream where Lua errors are presented", nullptr, 0),
+    };
+  }
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(GetGlobal, "Get a value from the Lua global table"),
+      EP_MAKE_METHOD(SetGlobal, "Set a value to the Lua global table"),
+      EP_MAKE_METHOD(Execute, "Execute Lua code"),
+      EP_MAKE_METHOD(Print, "Print to lua console"),
+    };
+  }
 };
 
 } // namespace kernel

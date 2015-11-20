@@ -3,35 +3,6 @@
 
 namespace kernel {
 
-/*
-static CMethodDesc methods[] =
-{
-
-};
-static CPropertyDesc props[] =
-{
-
-};
-*/
-
-ComponentDesc PluginManager::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "pluginmanager", // id
-  "Plugin Manager", // displayName
-  "Manages plugins", // description
-
-  //Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-  //Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
-  nullptr, // properties
-  nullptr, // methods
-  nullptr, // events
-};
-
 PluginManager::PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {

@@ -12,8 +12,8 @@ PROTOTYPE_COMPONENT(ShortcutManager);
 
 class ShortcutManager : public Component
 {
+  EP_DECLARE_COMPONENT(ShortcutManager, Component, EPKERNEL_PLUGINVERSION, "Registers keyboard shortcuts and handles shortcut events")
 public:
-  EP_COMPONENT(ShortcutManager);
 
   bool SetShortcutString(String id, String shortcutString);
   SharedString GetShortcutString(String id) const;
@@ -38,6 +38,18 @@ protected:
   };
 
   AVLTree<SharedString, struct Shortcut> shortcutRegistry;
+
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(SetShortcutString, "Set the shortcut string for the given operation id"),
+      EP_MAKE_METHOD(RegisterShortcut, "Register an operation and assign it a shortcut string"),
+      EP_MAKE_METHOD(UnregisterShortcut, "Remove an operation from the shortcut manager"),
+      EP_MAKE_METHOD(HandleShortcutEvent, "Call the function or script attached to the given shortcut string"),
+      EP_MAKE_METHOD(SetShortcutFunction, "Assign a callback function to the given shortcut operation"),
+      EP_MAKE_METHOD(SetShortcutScript, "Assign a script string to the given shortcut operation"),
+    };
+  }
 };
 
 } //namespace kernel

@@ -99,7 +99,7 @@ epResult QtKernel::InitInternal()
   LogTrace("QtKernel::InitInternal()");
   LogInfo(2, "Initialising udShell...");
 
-  if (RegisterComponent<QtComponent>() != epR_Success)
+  if (RegisterComponentType<QtComponent>() != epR_Success)
   {
     LogError("Unable to register QtComponent");
     return epR_Failure;

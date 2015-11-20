@@ -12,8 +12,8 @@ SHARED_CLASS(Metadata);
 
 class Metadata : public KVPStore
 {
+  EP_DECLARE_COMPONENT(Metadata, KVPStore, EPKERNEL_PLUGINVERSION, "Metadata resource")
 public:
-  EP_COMPONENT(Metadata);
 
   size_t NumRecords() const override
   {
@@ -53,6 +53,22 @@ protected:
   };
 
   AVLTree<Variant, Variant, VariantCompare> metadata;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_EXPLICIT("NumRecords", "Number of records in the metadata", EP_MAKE_GETTER(NumRecords), nullptr, nullptr, 0),
+    };
+  }
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD_EXPLICIT("Insert", InsertMethod, "Insert a record"),
+      EP_MAKE_METHOD(Remove, "Remove a record"),
+      EP_MAKE_METHOD(Exists, "Check if a record exists"),
+      EP_MAKE_METHOD(Get, "Get a record"),
+    };
+  }
 };
 
 }

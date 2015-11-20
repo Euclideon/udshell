@@ -38,8 +38,8 @@ PROTOTYPE_COMPONENT(UDModel);
 
 class UDModel : public Resource
 {
+  EP_DECLARE_COMPONENT(UDModel, Resource, EPKERNEL_PLUGINVERSION, "UD model resource")
 public:
-  EP_COMPONENT(UDModel);
 
   uint32_t GetStartingRoot() const { return startingRoot; }
   void SetStartingRoot(uint32_t root) { startingRoot = root; }
@@ -91,6 +91,20 @@ protected:
   uint32_t startingRoot = 0;
   udRenderFlags renderFlags = udRF_None;
   bool rectSet = false;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(StartingRoot, "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", nullptr, 0),
+      EP_MAKE_PROPERTY(RenderClipRect, "Clipping Rect of the Screen", nullptr, 0),
+      EP_MAKE_PROPERTY(RenderFlags, "UD Rendering Flags", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(DataSource, "Data Source for UD Model", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(UDScale, "Internal Scale of the Model", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(BoundingVolume, "The Bouning Volume", nullptr, 0),
+      EP_MAKE_PROPERTY(SimpleVoxelDelegate, "Optional callback to handle it's own internal call to GetNodeColor()", nullptr, 0),
+//      EP_MAKE_PROPERTY(VoxelShader, "Optional callback to handle writing pixels and depth", nullptr, 0),
+    };
+  }
 };
 
 inline void UDModel::SetSimpleVoxelDelegate(Delegate<UDRenderState::SimpleVoxelDlgt> del)

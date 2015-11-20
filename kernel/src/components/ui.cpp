@@ -1,34 +1,6 @@
 #include "ui.h"
 
-namespace kernel
-{
-
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "uihandle",
-      "UIHandle",
-      "Platform specific UI handle"
-    },
-    &UIComponent::GetUIHandle,
-    nullptr
-  }
-};
-
-ComponentDesc UIComponent::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION,     // epVersion
-  EPSHELL_PLUGINVERSION,  // pluginVersion
-
-  "ui",                // id
-  "UI",                // displayName
-  "Is a UI component", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // propeties
-};
+namespace kernel {
 
 UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)

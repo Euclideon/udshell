@@ -534,5 +534,7 @@ void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  l
 #define epFree(pMemory) _epFree(pMemory IF_MEMORY_DEBUG(__FILE__, __LINE__))
 }
 
+// define API version constant (TODO: should this move somewhere else?)
+#define EP_APIVERSION 100
 
 #endif // _EP_PLATFORM_H

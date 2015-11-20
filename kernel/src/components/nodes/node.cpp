@@ -3,58 +3,15 @@
 namespace kernel
 {
 
-static CPropertyDesc props[] =
+Array<const PropertyInfo> Node::GetProperties()
 {
-  {
-    {
-      "matrix", // id
-      "Matrix", // displayName
-      "Local matrix", // description
-    },
-    &Node::GetMatrix, // getter
-    &Node::SetMatrix, // setter
-  },
-  {
-    {
-      "position", // id
-      "Position", // displayName
-      "Local position", // description
-    },
-    &Node::GetPosition, // getter
-    &Node::SetPosition, // setter
-  },
-  {
-    {
-      "parent", // id
-      "Parent", // displayName
-      "Parent node", // description
-    },
-    &Node::GetPosition, // getter
-    &Node::SetPosition, // setter
-  },
-  {
-    {
-      "children", // id
-      "Children", // displayName
-      "Child nodes", // description
-    },
-    &Node::GetPosition, // getter
-    &Node::SetPosition, // setter
-  },
-};
-ComponentDesc Node::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "node",      // id
-  "Node",    // displayName
-  "Is a scene node", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)) // propeties
-};
+  return{
+    EP_MAKE_PROPERTY(Matrix, "Local matrix", nullptr, 0),
+    EP_MAKE_PROPERTY(Position, "Local position", nullptr, 0),
+    EP_MAKE_PROPERTY_EXPLICIT("Parent", "Parent node", EP_MAKE_GETTER(Parent), nullptr, nullptr, 0),
+    EP_MAKE_PROPERTY_EXPLICIT("Children", "Child nodes", EP_MAKE_GETTER(Children), nullptr, nullptr, 0),
+  };
+}
 
 epResult Node::Render(RenderSceneRef &spScene, const Double4x4 &mat)
 {

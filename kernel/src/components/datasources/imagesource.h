@@ -13,8 +13,8 @@ SHARED_CLASS(ImageSource);
 
 class ImageSource : public DataSource
 {
+  EP_DECLARE_COMPONENT(ImageSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides images")
 public:
-  EP_COMPONENT(ImageSource);
 
   Slice<const String> GetFileExtensions() const override
   {
@@ -24,7 +24,7 @@ public:
 protected:
   static const Array<const String> extensions;
 
-  static epResult RegisterExtensions(Kernel *pKernel);
+  static epResult StaticInit(ep::Kernel *pKernel);
 
   ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)

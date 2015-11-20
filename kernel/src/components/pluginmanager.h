@@ -11,8 +11,8 @@ PROTOTYPE_COMPONENT(PluginManager);
 
 class PluginManager : public Component
 {
+  EP_DECLARE_COMPONENT(PluginManager, Component, EPKERNEL_PLUGINVERSION, "PluginManager desc...")
 public:
-  EP_COMPONENT(PluginManager);
 
   void RegisterPluginLoader(PluginLoaderRef spLoader);
   bool LoadPlugin(String filename);

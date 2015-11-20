@@ -21,99 +21,6 @@ static const Slice<const EnumKVP> renderFlags =
   { "udRenderFlags::Transparent", udRF_Transparent }
 };
 
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "startingroot", // id
-      "Starting Root", // displayName
-      "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", // description
-    },
-    &UDModel::GetStartingRoot,
-    &UDModel::SetStartingRoot
-  },
-  {
-    {
-      "rendercliprect", // id
-      "Render Clip Rect", // displayName
-      "Clipping Rect of the Screen", // description
-    },
-    &UDModel::GetRenderClipRect,
-    &UDModel::SetRenderClipRect
-  },
-  {
-    {
-      "renderflags", // id
-      "Render Flags", // displayName
-      "UD Rendering Flags", // description
-    },
-    &UDModel::GetRenderFlags,
-    &UDModel::SetRenderFlags
-  },
-  {
-    {
-      "datasource", // id
-      "udModel Data Source", // displayName
-      "Data Source for UD Model", // description
-    },
-    &UDModel::GetDataSource,
-    nullptr,
-  },
-  {
-    {
-      "udscale", // id
-      "UD Scale", // displayName
-      "Internal Scale of the Model", // description
-    },
-    &UDModel::GetUDScale,
-    nullptr
-  },
-
-  {
-    {
-      "boundingvolume", // id
-      "Bounding Volume", // displayName
-      "The Bouning Volume", // description
-    },
-    &UDModel::GetBoundingVolume,
-    nullptr
-  },
-  {
-    {
-      "voxelshader", // id
-      "Voxel Shader", // displayName
-      "Optional callback to handle it's own internal call to GetNodeColor()", // description
-    },
-    &UDModel::GetSimpleVoxelDelegate,
-    &UDModel::SetSimpleVoxelDelegate
-  },
-#if 0
-  {
-    {
-      "PixelShader", // id
-      "Pixel Shader", // displayName
-      "Optional callback to handle writing pixels and depth", // description
-    },
-    nullptr, //Getter(&UDNode::GetVoxelShader),
-    Setter(&UDModel::SetVoxelShader)
-  }
-#endif
-};
-
-ComponentDesc UDModel::descriptor =
-{
-  &Resource::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "udmodel", // id
-  "UD Model", // displayName
-  "UD model resource", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-};
-
 UDModel::~UDModel()
 {
   if (pOctree)
@@ -178,10 +85,10 @@ int UDModel::Load(String _name, bool useStreamer)
   epResult result = epR_Failure;
   if (!spDataSource)
   {
-    spDataSource = pKernel->CreateComponent<UDDataSource>({ { "src", _name },
-                                                            { "useStreamer", useStreamer },
-                                                            { "existingComponent",  (Component*)this }
-                                                          } );
+    spDataSource = GetKernel().CreateComponent<UDDataSource>({ { "src", _name },
+                                                               { "useStreamer", useStreamer },
+                                                               { "existingComponent",  (Component*)this }
+                                                             } );
   }
   return (int)result;
 }
