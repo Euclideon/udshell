@@ -69,7 +69,7 @@ protected:
   bool FilterLogLine(const LogLine &) const;
 
   void OnLogChanged();
-  void OnStreamOutput();
+  void OnStreamOutput(Slice<const void> buf);
 
   struct ConsoleLine
   {

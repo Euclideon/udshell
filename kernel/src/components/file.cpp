@@ -1,4 +1,5 @@
 #include "components/file.h"
+#include "components/broadcaster.h"
 
 #if defined(EP_WINDOWS)
 #include <io.h>
@@ -118,6 +119,8 @@ size_t File::Write(Slice<const void> data)
   if (written == -1)
     return 0;
 
+  Broadcaster::Write(data);
+
   return (size_t)written;
 }
 
@@ -138,6 +141,9 @@ int64_t File::Seek(SeekOrigin rel, int64_t offset)
         return -1;
       break;
   }
+  
+  PosChanged.Signal();
+
   return pos;
 }
 

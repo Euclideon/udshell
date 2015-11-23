@@ -20,12 +20,12 @@ public:
   int64_t Seek(SeekOrigin rel, int64_t offset) override;
 
   BufferRef GetBuffer() const;
-  void SetBuffer(BufferRef spNewBuffer);
 
-  Event<> Changed;
 protected:
   MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
   ~MemStream();
+
+  void SetBuffer(BufferRef spNewBuffer);
 
   static const size_t DefaultBufferSize = 102400;
 
@@ -36,7 +36,7 @@ protected:
   static Array<const PropertyInfo> GetProperties()
   {
     return{
-      EP_MAKE_PROPERTY(Buffer, "The Buffer component MemStream reads/writes to", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(Buffer, "The Buffer component MemStream reads/writes to", nullptr, 0),
     };
   }
 };

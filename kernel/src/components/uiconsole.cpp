@@ -19,7 +19,7 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   auto spOutBuffer = pKernel->CreateComponent<Buffer>();
   spOutBuffer->Reserve(1024);
   spOutStream = pKernel->CreateComponent<MemStream>({ {"buffer", spOutBuffer}, {"flags", OpenFlags::Write} });
-  spOutStream->Changed.Subscribe(this, &UIConsole::OnStreamOutput);
+  spOutStream->Written.Subscribe(this, &UIConsole::OnStreamOutput);
 
   // Create stream for shell input
   auto spInBuffer = pKernel->CreateComponent<Buffer>();
@@ -154,15 +154,9 @@ void UIConsole::OnLogChanged()
   }
 }
 
-void UIConsole::OnStreamOutput()
+void UIConsole::OnStreamOutput(Slice<const void> buf)
 {
-  int64_t newPos = spOutStream->GetPos();
-  MutableString<0> buf(Reserve, size_t(newPos - pos));
-
-  spOutStream->Seek(SeekOrigin::Begin, 0);
-  Slice<void> readSlice = spOutStream->Read(buf.getBuffer());
-  String readStr = (String &)readSlice;
-  spOutStream->Seek(SeekOrigin::Begin, 0);
+  String readStr = (String &)buf;
 
   while (!readStr.empty())
   {
@@ -185,10 +179,7 @@ void UIConsole::OnStreamOutput()
 
 void UIConsole::RelayInput(String str)
 {
-  auto spInBuffer = GetKernel().CreateComponent<Buffer>();
-  spInBuffer->Reserve(1024);
-  spInBuffer->CopyBuffer(str);
-  spInStream->SetBuffer(spInBuffer);
+  // TODO hook up routing to stdin
 }
 
 UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex)
