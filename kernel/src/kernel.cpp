@@ -44,6 +44,7 @@
 #include "components/plugin/componentplugin.h"
 #include "renderscene.h"
 #include "eplua.h"
+#include "stdcapture.h"
 
 #include "udPlatformUtil.h"
 
@@ -76,6 +77,7 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   // register all the builtin component types
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Component>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<DataSource>());
+  EP_ERROR_CHECK(pKernel->RegisterComponentType<Broadcaster>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Stream>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<File>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Console>());
@@ -154,6 +156,12 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
 
   // shortcut manager
   pKernel->spCommandManager = pKernel->CreateComponent<CommandManager>();
+
+  // Init capture and broadcast of stdout/stderr
+  pKernel->spStdOutBC = pKernel->CreateComponent<Broadcaster>();
+  pKernel->stdOutCapture = new StdCapture(stdout);
+  pKernel->spStdErrBC = pKernel->CreateComponent<Broadcaster>();
+  pKernel->stdErrCapture = new StdCapture(stderr);
 
   // platform init
   EP_ERROR_CHECK(pKernel->InitInternal());
@@ -259,6 +267,17 @@ epResult Kernel::Destroy()
 
   epHAL_Deinit();
 
+  if(stdOutCapture) 
+  {
+    delete stdOutCapture;
+    stdOutCapture = nullptr;
+  }
+  if (stdErrCapture)
+  {
+    delete stdErrCapture;
+    stdErrCapture = nullptr;
+  }
+
   delete this;
 
   if (renderSceneRenderResult != epR_Success)
@@ -276,7 +295,25 @@ void Kernel::Update()
   double sec = (double)udPerfCounterMilliseconds(last, now) / 1000.0;
   last = now;
 
+  RelayStdIO();
+
   UpdatePulse.Signal(sec);
+}
+
+void Kernel::RelayStdIO()
+{
+  if (stdOutCapture)
+  {
+    String str = stdOutCapture->GetCapture();
+    if (!str.empty())
+      spStdOutBC->Write(str);
+  }
+  if (stdErrCapture)
+  {
+    String str = stdErrCapture->GetCapture();
+    if (!str.empty())
+      spStdErrBC->Write(str);
+  }
 }
 
 void Kernel::StreamerUpdate()
@@ -553,4 +590,6 @@ void SynchronisedPtr<T>::destroy()
   pKernel->DispatchToMainThread(MakeDelegate((S*)this, &S::Destroy));
   pInstance = nullptr;
 }
+
+
 

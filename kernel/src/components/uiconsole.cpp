@@ -1,5 +1,6 @@
 #include "components/uiconsole.h"
 #include "components/memstream.h"
+#include "components/broadcaster.h"
 #include "components/logger.h"
 #include "components/resources/buffer.h"
 #include "components/commandmanager.h"
@@ -13,19 +14,17 @@ LoggerRef UIConsole::spLogger;
 UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
-  spLogger = pKernel->GetLogger();
-
-  // Create stream for shell output
-  auto spOutBuffer = pKernel->CreateComponent<Buffer>();
-  spOutBuffer->Reserve(1024);
-  spOutStream = pKernel->CreateComponent<MemStream>({ {"buffer", spOutBuffer}, {"flags", OpenFlags::Write} });
-  spOutStream->Written.Subscribe(this, &UIConsole::OnStreamOutput);
+  spConsoleOut = pKernel->GetStdOutBroadcaster();
+  spConsoleOut->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
+  spConsoleErr = pKernel->GetStdErrBroadcaster();
+  spConsoleErr->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
 
   // Create stream for shell input
   auto spInBuffer = pKernel->CreateComponent<Buffer>();
   spInBuffer->Reserve(1024);
   spInStream = pKernel->CreateComponent<MemStream>({ { "buffer", spInBuffer }, { "flags", OpenFlags::Write } });
 
+  spLogger = pKernel->GetLogger();
   pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
 
   auto spCommandManager = pKernel->GetCommandManager();
@@ -45,7 +44,6 @@ void UIConsole::RebuildOutput()
 
   if (bOutputsMerged)
   {
-
     size_t logIndex = 0, consoleIndex = 0;
     while (logIndex < logLines.length && consoleIndex < consoleLines.length)
     {
@@ -154,7 +152,7 @@ void UIConsole::OnLogChanged()
   }
 }
 
-void UIConsole::OnStreamOutput(Slice<const void> buf)
+void UIConsole::OnConsoleOutput(Slice<const void> buf)
 {
   String readStr = (String &)buf;
 
@@ -179,7 +177,7 @@ void UIConsole::OnStreamOutput(Slice<const void> buf)
 
 void UIConsole::RelayInput(String str)
 {
-  // TODO hook up routing to stdin
+  pKernel->Exec(str);
 }
 
 UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex)
