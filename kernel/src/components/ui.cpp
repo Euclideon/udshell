@@ -1,6 +1,6 @@
 #include "ui.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -42,4 +42,4 @@ UIComponent::~UIComponent()
   DestroyInternal();
 }
 
-} // namespace ep
+} // namespace kernel

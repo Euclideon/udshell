@@ -6,21 +6,31 @@
 
 namespace ep {
 
-class Kernel final
+class Kernel
 {
 public:
   static Kernel* GetInstance();
 
-  epResult SendMessage(String target, String sender, String message, const Variant &data);
+  virtual epResult SendMessage(String target, String sender, String message, const Variant &data) = 0;
 
   template<typename ComponentType>
   epResult RegisterComponentType();
-  epResult CreateComponent(String typeId, Slice<const KeyValuePair> initParams, Component **ppNewInstance);
 
-  epComponent* FindComponent(String uid) const;
+  typedef FastDelegate<void(String sender, String message, const Variant &data)> MessageHandler;
+  virtual void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) = 0;
 
-  void Exec(String code);
+  virtual epResult CreateComponent(String typeId, InitParams initParams, ComponentRef *pNewInstance) = 0;
 
+  virtual ComponentRef FindComponent(String uid) const = 0;
+
+  // synchronisation
+  typedef FastDelegate<void(Kernel*)> MainThreadCallback;
+  virtual void DispatchToMainThread(MainThreadCallback callback) = 0;
+  virtual void DispatchToMainThreadAndWait(MainThreadCallback callback) = 0;
+
+  virtual void Exec(String code) = 0;
+
+  virtual void Log(int kind, int level, String text, String component = nullptr) const = 0;
   template<typename ...Args> void LogError(String format, Args... args) const;
   template<typename ...Args> void LogWarning(int level, String format, Args... args) const;
   template<typename ...Args> void LogDebug(int level, String format, Args... args) const;

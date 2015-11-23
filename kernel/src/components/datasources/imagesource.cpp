@@ -3,7 +3,7 @@
 #include "hal/image.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 const Array<const String> ImageSource::extensions = { ".bmp", ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".tga", ".dds", ".webp" };
 
@@ -66,4 +66,4 @@ epResult ImageSource::RegisterExtensions(Kernel *pKernel)
   return pKernel->RegisterExtensions(&descriptor, extensions);
 }
 
-} // namespace ep
+} // namespace kernel

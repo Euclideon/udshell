@@ -2,7 +2,7 @@
 #include "components/datasource.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -129,7 +129,7 @@ void Timer::SetTimer(uint32_t d, TimerType tt)
 }
 
 
-void Timer::MessageCallback(Kernel*)
+void Timer::MessageCallback(ep::Kernel*)
 {
   Elapsed.Signal();
 }
@@ -141,4 +141,4 @@ void Timer::TimerCallback(HalTimer *pTimer, void *pParam)
   pThis->pKernel->DispatchToMainThread(MakeDelegate(pThis, &Timer::MessageCallback));
 }
 
-} // namespace ep
+} // namespace kernel

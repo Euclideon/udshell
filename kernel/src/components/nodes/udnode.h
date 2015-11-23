@@ -13,7 +13,7 @@
 
 struct udOctree;
 
-namespace ep {
+namespace kernel {
 
 PROTOTYPE_COMPONENT(UDNode);
 
@@ -34,6 +34,6 @@ protected:
   UDModelRef spModel = nullptr;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // EP_UDNODE_H

@@ -47,7 +47,7 @@
 
 #include "udPlatformUtil.h"
 
-namespace ep
+namespace kernel
 {
 epResult udRenderScene_Init(Kernel*);
 epResult udRenderScene_InitRender(Kernel*);
@@ -410,7 +410,7 @@ const ComponentDesc* Kernel::GetComponentDesc(String id)
   return pCT->pDesc;
 }
 
-epResult Kernel::CreateComponent(String typeId, InitParams initParams, ComponentRef *pNewInstance)
+epResult Kernel::CreateComponent(String typeId, InitParams initParams, ep::ComponentRef *pNewInstance)
 {
   ComponentType *pType = componentRegistry.Get(typeId.hash());
   if (!pType)
@@ -465,14 +465,14 @@ epResult Kernel::DestroyComponent(Component *pInstance)
   return epR_Success;
 }
 
-ComponentRef Kernel::FindComponent(String _uid) const
+ep::ComponentRef Kernel::FindComponent(String _uid) const
 {
   if (_uid.empty() || _uid[0] == '$' || _uid[0] == '#')
     return nullptr;
   if (_uid[0] == '@')
     _uid.popFront();
   Component **ppComponent = instanceRegistry.Get(_uid.toStringz());
-  return ppComponent ? ComponentRef(*ppComponent) : nullptr;
+  return ppComponent ? ep::ComponentRef(*ppComponent) : nullptr;
 }
 
 epResult Kernel::InitComponents()
@@ -525,7 +525,7 @@ DataSourceRef Kernel::CreateDataSourceFromExtension(String ext, InitParams initP
   if (!pDesc)
     return nullptr;
 
-  ComponentRef spNewDataSource = nullptr;
+  ep::ComponentRef spNewDataSource = nullptr;
   epResult r = CreateComponent((*pDesc)->id, initParams, &spNewDataSource);
   if (r != epR_Success)
     return nullptr;
@@ -533,7 +533,7 @@ DataSourceRef Kernel::CreateDataSourceFromExtension(String ext, InitParams initP
   return shared_pointer_cast<DataSource>(spNewDataSource);
 }
 
-} // namespace ep
+} // namespace kernel
 
 // synchronised pointer destroy function (it's here because there's no udsharedptr.cpp file)
 template<class T>

@@ -6,7 +6,7 @@
 #include "ep/cpp/delegate.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 static CPropertyDesc props[] =
 {
@@ -141,7 +141,7 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
 
 void UIConsole::ToggleVisible()
 {
-  CallMethod("togglevisible");
+  CallMethod("togglevisible", nullptr);
 }
 
 void UIConsole::RebuildOutput()

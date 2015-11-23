@@ -2,7 +2,7 @@
 #include "metadata.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -38,4 +38,4 @@ MetadataRef Resource::GetMetadata() const
   return metadata;
 }
 
-} // namespace ep
+} // namespace kernel

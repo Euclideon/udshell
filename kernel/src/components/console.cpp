@@ -1,6 +1,6 @@
 #include "components/console.h"
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc Console::descriptor =
@@ -72,4 +72,4 @@ int Console::Flush()
   return 0;
 }
 
-} // namespace ep
+} // namespace kernel

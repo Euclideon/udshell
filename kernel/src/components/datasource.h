@@ -6,7 +6,7 @@
 #include "components/stream.h"
 #include "resources/resource.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(DataSource);

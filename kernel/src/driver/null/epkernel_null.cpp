@@ -4,7 +4,7 @@
 
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 class NullKernel : public Kernel

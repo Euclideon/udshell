@@ -4,7 +4,7 @@
 
 #include "components/resources/resource.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(KVPStore);

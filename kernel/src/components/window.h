@@ -4,7 +4,7 @@
 
 #include "component.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(Window);
@@ -34,6 +34,6 @@ protected:
   void *pInternal = nullptr;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // UD_WINDOW_H

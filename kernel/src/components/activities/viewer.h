@@ -4,7 +4,7 @@
 
 #include "components/activities/activity.h"
 
-namespace ep
+namespace kernel
 {
 PROTOTYPE_COMPONENT(Viewer);
 SHARED_CLASS(UDModel);
@@ -33,5 +33,5 @@ protected:
   SimpleCameraRef spCamera;
 };
 
-} //namespace ep
+} //namespace kernel
 #endif // EP_VIEWER_H

@@ -4,7 +4,7 @@
 
 #include "rapidxml.hpp"
 
-namespace ep
+namespace kernel
 {
 static CMethodDesc methods[] =
 {
@@ -152,4 +152,4 @@ void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
   }
 }
 
-} // namespace ep
+} // namespace kernel

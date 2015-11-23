@@ -560,7 +560,7 @@ String Variant::asString() const
       return String((char*)pBuffer + 1, pBuffer[0] >> 4);
     }
     case Type::Component:
-      return ((Component*)p)->GetUID();
+      return ((Component*)p)->GetUid();
     default:
       EPASSERT(type() == Type::String, "Wrong type!");
       return String();
@@ -594,7 +594,7 @@ SharedString Variant::asSharedString() const
       return SharedString((char*)pBuffer + 1, pBuffer[0] >> 4);
     }
     case Type::Component:
-      return ((Component*)p)->GetUID();
+      return ((Component*)p)->GetUid();
     default:
       EPASSERT(type() == Type::String, "Wrong type!");
       return String();

@@ -4,7 +4,7 @@
 
 #include "ui.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(UIConsole);
@@ -114,7 +114,7 @@ protected:
   bool bOutputsMerged = false;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // UICONSOLE_H
 

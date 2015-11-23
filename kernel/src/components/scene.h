@@ -7,7 +7,7 @@
 #include "component.h"
 #include "nodes/node.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(RenderScene);

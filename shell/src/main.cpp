@@ -11,7 +11,9 @@
 #include "components/activities/viewer.h"
 #include "hal/debugfont.h"
 
-static Kernel *pKernel = nullptr;
+using namespace kernel;
+
+static kernel::Kernel *pKernel = nullptr;
 static WindowRef spMainWindow;
 static ActivityRef spActiveActivity;
 
@@ -168,7 +170,7 @@ int main(int argc, char *argv[])
   qputenv("QSG_RENDER_LOOP", "threaded");
 
   // create a kernel
-  epResult r = Kernel::Create(&pKernel, udParseCommandLine(argc, argv), 8);
+  epResult r = kernel::Kernel::Create(&pKernel, udParseCommandLine(argc, argv), 8);
   if (r == epR_Failure)
   {
     // TODO: improve error handling/reporting

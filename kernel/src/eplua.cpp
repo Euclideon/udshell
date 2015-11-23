@@ -4,7 +4,7 @@
 
 #include "ep/cpp/variant.h"
 
-namespace ep
+namespace kernel
 {
 
 #include "init.inc"
@@ -107,7 +107,7 @@ static int CreateComponent(lua_State *L)
       new(&init) InitParams(args.asAssocArray());
   }
 
-  ComponentRef c = nullptr;
+  ep::ComponentRef c = nullptr;
   epResult r = l.kernel()->CreateComponent(type, init, &c);
   if (r == epR_Failure)
     l.pushNil();
@@ -144,7 +144,7 @@ struct Dispatch
   char buffer[EP_DISPATCH_BUFFER_SIZE];
   String s;
 
-  void Exec(Kernel *pKernel)
+  void Exec(ep::Kernel *pKernel)
   {
     pKernel->Exec(s);
     delete this;
@@ -798,13 +798,13 @@ void LuaState::pushDelegate(const Variant::VarDelegate &d)
   lua_pushcclosure(L, &callDelegate, 1);
 }
 
-class LuaDelegate : public DelegateMemento
+class LuaDelegate : public ep::DelegateMemento
 {
 protected:
   template<typename T>
-  friend class SharedPtr;
+  friend class ep::SharedPtr;
 
-  Variant call(Slice<Variant> args) const
+  Variant call(Slice<const Variant> args) const
   {
     // there may already be elements on the stack
     int top = lua_gettop(L);
@@ -845,7 +845,7 @@ protected:
     lua_settable(L, LUA_REGISTRYINDEX);
 
     // set the memento to the lua call shim
-    FastDelegate<Variant(Slice<Variant>)> shim(this, &LuaDelegate::call);
+    FastDelegate<Variant(Slice<const Variant>)> shim(this, &LuaDelegate::call);
     m = shim.GetMemento();
   }
 
@@ -974,11 +974,11 @@ int LuaState::subscribe(lua_State* L)
   return 0;
 }
 
-} // namespace ep
+} // namespace kernel
 
 
 // HAX: define Variant::Lua functions here to reduce include spam
-void Variant::luaPush(LuaState &l) const
+void Variant::luaPush(kernel::LuaState &l) const
 {
   switch ((Type)t)
   {
@@ -1011,9 +1011,9 @@ void Variant::luaPush(LuaState &l) const
     }
     case Type::Component:
       if (ownsContent)
-        l.pushComponent((ComponentRef&)p);
+        l.pushComponent((kernel::ComponentRef&)p);
       else
-        l.pushComponent((Component*)p);
+        l.pushComponent((kernel::Component*)p);
       break;
     case Type::Delegate:
       l.pushDelegate((VarDelegate&)p);
@@ -1055,26 +1055,26 @@ void Variant::luaPush(LuaState &l) const
   }
 }
 
-Variant Variant::luaGet(LuaState &l, int idx)
+Variant Variant::luaGet(kernel::LuaState &l, int idx)
 {
   switch (l.getType(idx))
   {
-    case LuaType::Nil:
+    case kernel::LuaType::Nil:
       return Variant(nullptr);
-    case LuaType::Boolean:
+    case kernel::LuaType::Boolean:
       return Variant(l.toBool(idx));
-    case LuaType::LightUserData:
+    case kernel::LuaType::LightUserData:
       return Variant((int64_t)(size_t)l.toUserData(idx));
-    case LuaType::Number:
+    case kernel::LuaType::Number:
       if (l.isInteger(idx))
         return Variant((int64_t)l.toInt(idx));
       else
         return Variant(l.toFloat(idx));
-    case LuaType::String:
+    case kernel::LuaType::String:
       return Variant(l.toString(idx));
-    case LuaType::Function:
+    case kernel::LuaType::Function:
       return l.toDelegate(idx);
-    case LuaType::UserData:
+    case kernel::LuaType::UserData:
     {
       lua_State *L = l.state();
       if (lua_getmetatable(L, idx) == 0)
@@ -1093,7 +1093,7 @@ Variant Variant::luaGet(LuaState &l, int idx)
 //        return Variant(l.toEvent(idx));
       return Variant(nullptr);
     }
-    case LuaType::Table:
+    case kernel::LuaType::Table:
     {
       lua_State *L = l.state();
 

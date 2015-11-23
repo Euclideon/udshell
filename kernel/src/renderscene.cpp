@@ -8,7 +8,7 @@
 // TODO: remove when resource cleanup is implemented
 #include "hal/driver.h"
 
-namespace ep
+namespace kernel
 {
 
 // shaders for blitting
@@ -316,7 +316,7 @@ void Renderer::UDThread()
 
     UniquePtr<RenderableView> job;
 
-    void FinishJob(Kernel *_pKernel)
+    void FinishJob(ep::Kernel *_pKernel)
     {
       ViewRef spView = job->spView;
       spView->SetLatestFrame(job);
@@ -348,4 +348,4 @@ void Renderer::UDThread()
   udIncrementSemaphore(pUDTerminateSemaphore);
 }
 
-} // namespace ep
+} // namespace kernel

@@ -4,7 +4,7 @@
 
 #include "ui.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(Viewport);
@@ -22,6 +22,6 @@ protected:
   void DestroyInternal();
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // UD_VIEWPORT_H

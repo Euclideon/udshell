@@ -4,7 +4,7 @@
 
 #include "components/component.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(DataSource);

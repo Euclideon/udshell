@@ -21,23 +21,23 @@ class QtApplication : public QGuiApplication
   Q_OBJECT
 
 public:
-  QtApplication(ep::Kernel *pKern, int &argc, char ** argv) : QGuiApplication(argc, argv), pKernel(pKern) {}
+  QtApplication(kernel::Kernel *pKern, int &argc, char ** argv) : QGuiApplication(argc, argv), pKernel(pKern) {}
 
-  static void SetKernel(ep::Kernel *pKernel) {
+  static void SetKernel(kernel::Kernel *pKernel) {
     EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
     static_cast<QtApplication*>(QtApplication::instance())->pKernel = pKernel;
   }
-  static ep::Kernel *Kernel() {
+  static kernel::Kernel *Kernel() {
     EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
     return static_cast<QtApplication*>(QtApplication::instance())->pKernel;
   }
 
 protected:
-  ep::Kernel *pKernel = nullptr;
+  kernel::Kernel *pKernel = nullptr;
 };
 
 
-class QtKernel : public QObject, public ep::Kernel
+class QtKernel : public QObject, public kernel::Kernel
 {
   Q_OBJECT
 

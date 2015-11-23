@@ -2,7 +2,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc Model::descriptor =
@@ -43,4 +43,4 @@ void Model::SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> 
   a.attributes = attributeNames;
 }
 
-} // namespace ep
+} // namespace kernel

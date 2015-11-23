@@ -5,7 +5,7 @@
 #include "components/resources/resource.h"
 #include "ep/cpp/sharedptr.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(Buffer);
@@ -43,6 +43,6 @@ protected:
   bool readMap;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _EP_BUFFER_H

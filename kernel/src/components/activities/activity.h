@@ -4,7 +4,7 @@
 
 #include "components/component.h"
 
-namespace ep
+namespace kernel
 {
 PROTOTYPE_COMPONENT(Activity);
 SHARED_CLASS(UIComponent);
@@ -27,5 +27,5 @@ protected:
   Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 };
 
-} //namespace ep
+} //namespace kernel
 #endif // EP_ACTIVITY_H

@@ -267,7 +267,7 @@ void QtKernel::DoInit(ep::Kernel *)
   }
 
   // init the HAL's render system
-  if (ep::Kernel::InitRender() != epR_Success)
+  if (kernel::Kernel::InitRender() != epR_Success)
   {
     // TODO: gracefully handle error with InitRender ?
     LogError("Error initialising renderer");
@@ -275,7 +275,7 @@ void QtKernel::DoInit(ep::Kernel *)
   }
 
   // app specific init
-  ep::Kernel::DoInit(this);
+  kernel::Kernel::DoInit(this);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -300,7 +300,7 @@ void QtKernel::customEvent(QEvent *pEvent)
 
 /** Kernel ***********************************************/
 
-namespace ep
+namespace kernel
 {
 
 // ---------------------------------------------------------------------------------------
@@ -362,7 +362,7 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   }
 }
 
-} // namespace ep
+} // namespace kernel
 
 #else
 EPEMPTYFILE

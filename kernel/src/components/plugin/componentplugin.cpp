@@ -1,7 +1,7 @@
 
 #include "components/plugin/componentplugin.h"
 
-namespace ep {
+namespace kernel {
 
 // kernel API definition
 epComponentAPI g_componentAPI =
@@ -82,4 +82,4 @@ ComponentDesc ComponentPlugin::descriptor =
 
 
 
-} // namespace ep
+} // namespace kernel

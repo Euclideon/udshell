@@ -1,7 +1,7 @@
 #include "window.h"
 #include "ui.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc windowProps[] =
@@ -48,4 +48,4 @@ Window::~Window()
   DestroyInternal();
 }
 
-} // namespace ep
+} // namespace kernel

@@ -4,7 +4,7 @@
 
 #include "node.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(Model);
@@ -29,6 +29,6 @@ protected:
   ModelRef spModel = nullptr;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _GEOMNODE_H

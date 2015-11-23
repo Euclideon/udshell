@@ -14,7 +14,7 @@
 
 #include <tuple>
 
-namespace ep
+namespace kernel
 {
 const Array<const String> GeomSource::extensions = {
   // mesh formats
@@ -372,4 +372,4 @@ epResult GeomSource::RegisterExtensions(Kernel *pKernel)
   return pKernel->RegisterExtensions(&descriptor, extensions);
 }
 
-} // namespace ep
+} // namespace kernel

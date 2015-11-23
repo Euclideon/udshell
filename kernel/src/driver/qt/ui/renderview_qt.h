@@ -20,10 +20,10 @@ public:
 
   Renderer *createRenderer() const;
 
-  void AttachView(ep::ViewRef spView);
+  void AttachView(kernel::ViewRef spView);
 
 private:
-  ep::ViewRef spView;
+  kernel::ViewRef spView;
   bool dirty;
 
   // TODO: Avoid this crap

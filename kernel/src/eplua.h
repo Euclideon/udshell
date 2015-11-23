@@ -6,7 +6,7 @@
 
 #include "lua.hpp"
 
-namespace ep
+namespace kernel
 {
 
 enum class ConsoleColor
@@ -196,7 +196,7 @@ public:
   }
 };
 
-} // namespace ep
+} // namespace kernel
 
 #include "eplua.inl"
 

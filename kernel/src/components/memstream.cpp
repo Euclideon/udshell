@@ -1,7 +1,7 @@
 #include "components/memstream.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 static CPropertyDesc props[] =
 {
@@ -167,4 +167,4 @@ int64_t MemStream::Seek(SeekOrigin rel, int64_t offset)
   return pos;
 }
 
-} // namespace ep
+} // namespace kernel

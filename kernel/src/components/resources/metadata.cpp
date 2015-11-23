@@ -1,6 +1,6 @@
 #include "metadata.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -61,4 +61,4 @@ ComponentDesc Metadata::descriptor =
   Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)) // methods
 };
 
-} // namespace ep
+} // namespace kernel

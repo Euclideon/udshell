@@ -9,9 +9,6 @@ using fastdelegate::FastDelegate;
 
 namespace ep {
 
-SHARED_CLASS(Component);
-class Subscriber;
-
 class BaseEvent
 {
 public:
@@ -20,16 +17,15 @@ public:
 protected:
   friend class Subscriber;
 
-  void AddSubscription(const DelegateMementoRef &spM, Subscriber *pSubscriber = nullptr);
-  void RemoveSubscription(const DelegateMementoRef &spM, Subscriber *pSubscriber = nullptr);
+  void AddSubscription(const DelegateMementoRef &spM);
+//  void RemoveSubscription(const DelegateMementoRef &spM);
 
   struct Subscription
   {
-    Subscription(const DelegateMementoRef &spM, Subscriber *pSubscriber = nullptr)
-      : spM(spM), pSubscriber(pSubscriber) {}
+    Subscription(const DelegateMementoRef &spM)
+      : spM(spM) {}
 
     DelegateMementoRef spM;
-    Subscriber *pSubscriber;
   };
   Array<Subscription, 0> subscribers;
 };
@@ -50,28 +46,42 @@ public:
     Subscribe(ev.GetDelegate());
   }
 
-  template <typename X>
-  void Subscribe(Component *pC, void(X::*func)(Args...));
-  template <typename X>
-  void Subscribe(ComponentRef c, void(X::*func)(Args...)) { Subscribe(c.ptr(), func); }
+  template <class X, class Y>
+  void Subscribe(Y *i, void(X::*f)(Args...))        { Subscribe(EvDelegate(i, f)); }
+  template <class X, class Y>
+  void Subscribe(Y *i, void(X::*f)(Args...) const)  { Subscribe(EvDelegate(i, f)); }
+  void Subscribe(void(*f)(Args...))                 { Subscribe(EvDelegate(f)); }
+
+//  template <typename X>
+//  void Subscribe(Component *pC, void(X::*func)(Args...));
+//  template <typename X>
+//  void Subscribe(ComponentRef c, void(X::*func)(Args...)) { Subscribe(c.ptr(), func); }
 
   // unsubscribe
+  // TODO: this should rather take a subscription handle
   void Unsubscribe(EvDelegate callback)
   {
-    RemoveSubscription(callback.GetMemento());
+//    RemoveSubscription(callback.GetMemento());
   }
   void Unsubscribe(const Event<Args...> &ev)
   {
-    Unsubscribe(ev.GetDelegate());
+//    Unsubscribe(ev.GetDelegate());
   }
 
-  template <typename X>
-  void Unsubscribe(Component *pC, void(X::*func)(Args...));
-  template <typename X>
-  void Unsubscribe(ComponentRef c, void(X::*func)(Args...))
-  {
-    Unsubscribe(c.ptr(), func);
-  }
+  template <class X, class Y>
+  void Unsubscribe(Y *i, void(X::*f)(Args...))        { Unsubscribe(EvDelegate(i, f)); }
+  template <class X, class Y>
+  void Unsubscribe(Y *i, void(X::*f)(Args...) const)  { Unsubscribe(EvDelegate(i, f)); }
+  void Unsubscribe(void(*f)(Args...))                 { Unsubscribe(EvDelegate(f)); }
+
+
+//  template <typename X>
+//  void Unsubscribe(Component *pC, void(X::*func)(Args...));
+//  template <typename X>
+//  void Unsubscribe(ComponentRef c, void(X::*func)(Args...))
+//  {
+//    Unsubscribe(c.ptr(), func);
+//  }
 
   // signal
   void Signal(Args... args) const
@@ -92,102 +102,15 @@ public:
 };
 
 
-class Subscriber
-{
-public:
-  ~Subscriber();
-
-  template<typename... Args>
-  void Subscribe(Event<Args...> &ev, typename Event<Args...>::EvDelegate d);
-
-  template<typename... Args>
-  void Unsubscribe(Event<Args...> &ev, typename Event<Args...>::EvDelegate d);
-
-protected:
-  void RemoveSubscription(const DelegateMementoRef &spM, BaseEvent *pEvent);
-
-private:
-  friend class BaseEvent;
-
-  struct Subscription
-  {
-    Subscription(const DelegateMementoRef &spM, BaseEvent *pEvent)
-      : spM(spM), pEvent(pEvent) {}
-
-    DelegateMementoRef spM;
-    BaseEvent *pEvent;
-  };
-
-  Array<Subscription, 4> events;
-};
-
-
-
 /*** implementation ***/
 
 inline BaseEvent::~BaseEvent()
 {
-  for (auto &s : subscribers)
-    s.pSubscriber->RemoveSubscription(s.spM, this);
 }
 
-inline void BaseEvent::AddSubscription(const DelegateMementoRef &spM, Subscriber *pSubscriber)
+inline void BaseEvent::AddSubscription(const DelegateMementoRef &spM)
 {
-  subscribers.pushBack(Subscription(spM, pSubscriber));
-}
-
-inline void BaseEvent::RemoveSubscription(const DelegateMementoRef &spM, Subscriber *pSubscriber)
-{
-  for (size_t i = 0; i < subscribers.length; ++i)
-  {
-    if (subscribers[i].spM == spM && subscribers[i].pSubscriber == pSubscriber)
-    {
-      subscribers.removeSwapLast(i);
-      return;
-    }
-  }
-}
-
-
-inline Subscriber::~Subscriber()
-{
-  for (auto &e : events)
-    e.pEvent->RemoveSubscription(e.spM, this);
-}
-
-template<typename... Args>
-inline void Subscriber::Subscribe(Event<Args...> &ev, typename Event<Args...>::EvDelegate d)
-{
-  DelegateMementoRef spM = d.GetMemento();
-  ev.AddSubscription(spM, this);
-  events.pushBack(Subscription(spM, &ev));
-}
-
-template<typename... Args>
-inline void Subscriber::Unsubscribe(Event<Args...> &ev, typename Event<Args...>::EvDelegate d)
-{
-  DelegateMementoRef spM = d.GetMemento();
-  for (size_t i = 0; i < events.length; ++i)
-  {
-    if (events[i].spM == spM && events[i].pEvent == &ev)
-    {
-      ev.RemoveSubscription(spM, this);
-      events.removeSwapLast(i);
-      return;
-    }
-  }
-}
-
-inline void Subscriber::RemoveSubscription(const DelegateMementoRef &spM, BaseEvent *pEvent)
-{
-  for (size_t i = 0; i < events.length; ++i)
-  {
-    if (events[i].spM == spM && events[i].pEvent == pEvent)
-    {
-      events.removeSwapLast(i);
-      return;
-    }
-  }
+  subscribers.pushBack(Subscription(spM));
 }
 
 } // namespace ep

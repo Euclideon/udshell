@@ -4,7 +4,7 @@
 
 #include "component.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(UIComponent);
@@ -30,6 +30,6 @@ protected:
   void *pInternal = nullptr;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // UI_H

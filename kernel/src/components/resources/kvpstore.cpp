@@ -1,6 +1,6 @@
 #include "kvpstore.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -61,4 +61,4 @@ ComponentDesc KVPStore::descriptor =
   Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)) // methods
 };
 
-} // namespace ep
+} // namespace kernel

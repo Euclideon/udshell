@@ -5,7 +5,7 @@
 #include "components/resources/resource.h"
 #include "ep/cpp/sharedptr.h"
 
-namespace ep
+namespace kernel
 {
 
 SHARED_CLASS(RenderShader);
@@ -39,6 +39,6 @@ protected:
   RenderShaderRef spRenderShader = nullptr;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif // _EP_SHADER_H

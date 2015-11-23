@@ -5,7 +5,7 @@
 #include "../component.h"
 #include "node.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(Camera);
@@ -145,6 +145,6 @@ protected:
   bool Update(double timeStep) override;
 };
 
-} // namespace ep
+} // namespace kernel
 
 #endif

@@ -4,7 +4,7 @@
 #include "components/stream.h"
 #include "kernel.h"
 
-namespace ep
+namespace kernel
 {
 
 static CPropertyDesc props[] =
@@ -123,4 +123,4 @@ DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString
     url = source.asString();
 }
 
-} // namespace ep
+} // namespace kernel

@@ -6,7 +6,7 @@
 
 #include "components/component.h"
 
-namespace ep {
+namespace kernel {
 class Kernel;
 }
 
@@ -15,12 +15,12 @@ namespace qt
 
 PROTOTYPE_COMPONENT(QtComponent);
 
-class QtComponent : public Component
+class QtComponent : public kernel::Component
 {
   EP_COMPONENT(QtComponent);
 
 public:
-  QtComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  QtComponent(const kernel::ComponentDesc *pType, kernel::Kernel *pKernel, SharedString uid, InitParams initParams);
   virtual ~QtComponent();
 
   QObject *GetQObject() const { return pQObject; }

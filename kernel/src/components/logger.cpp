@@ -2,7 +2,7 @@
 #include "ep/cpp/datetime.h"
 #include "hal/haltimer.h"
 
-namespace ep {
+namespace kernel {
 
 static CPropertyDesc props[] =
 {
@@ -405,4 +405,4 @@ SharedString LogLine::ToString(LogFormatSpecs format) const
   return out;
 }
 
-} // namespace ep
+} // namespace kernel

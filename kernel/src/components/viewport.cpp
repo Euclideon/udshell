@@ -1,6 +1,6 @@
 #include "viewport.h"
 
-namespace ep
+namespace kernel
 {
 
 ComponentDesc Viewport::descriptor =
@@ -30,4 +30,4 @@ Viewport::~Viewport()
   DestroyInternal();
 }
 
-} // namespace ep
+} // namespace kernel

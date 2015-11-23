@@ -5,7 +5,7 @@
 #include "component.h"
 #include "ep/cpp/delegate.h"
 
-namespace ep
+namespace kernel
 {
 
 PROTOTYPE_COMPONENT(ShortcutManager);
@@ -40,6 +40,6 @@ protected:
   AVLTree<SharedString, struct Shortcut> shortcutRegistry;
 };
 
-} //namespace ep
+} //namespace kernel
 
 #endif // EP_SHORTCUT_MANAGER_H
