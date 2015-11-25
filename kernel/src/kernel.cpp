@@ -24,7 +24,7 @@
 #include "components/pluginloader.h"
 #include "components/nativepluginloader.h"
 #include "components/resourcemanager.h"
-#include "components/shortcutmanager.h"
+#include "components/commandmanager.h"
 #include "components/project.h"
 #include "components/resources/resource.h"
 #include "components/resources/buffer.h"
@@ -85,7 +85,7 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   EP_ERROR_CHECK(pKernel->RegisterComponentType<PluginLoader>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<NativePluginLoader>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<ResourceManager>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<ShortcutManager>());
+  EP_ERROR_CHECK(pKernel->RegisterComponentType<CommandManager>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Project>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Timer>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Lua>());
@@ -153,7 +153,7 @@ epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderT
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
 
   // shortcut manager
-  pKernel->spShortcutManager = pKernel->CreateComponent<ShortcutManager>();
+  pKernel->spCommandManager = pKernel->CreateComponent<CommandManager>();
 
   // platform init
   EP_ERROR_CHECK(pKernel->InitInternal());

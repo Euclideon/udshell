@@ -2,7 +2,7 @@
 #include "components/memstream.h"
 #include "components/logger.h"
 #include "components/resources/buffer.h"
-#include "components/shortcutmanager.h"
+#include "components/commandmanager.h"
 #include "ep/cpp/delegate.h"
 #include "kernel.h"
 
@@ -28,9 +28,8 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
 
   pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
 
-  auto spShortcutManager = pKernel->GetShortcutManager();
-  spShortcutManager->RegisterShortcut("showhideconsolewindow", "`");
-  spShortcutManager->SetShortcutFunction("showhideconsolewindow", Delegate<void()>(this, &UIConsole::ToggleVisible));
+  auto spCommandManager = pKernel->GetCommandManager();
+  spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void()>(this, &UIConsole::ToggleVisible), nullptr, "`");
 }
 
 void UIConsole::ToggleVisible()

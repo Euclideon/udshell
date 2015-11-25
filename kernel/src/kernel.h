@@ -29,7 +29,7 @@ SHARED_CLASS(Window);
 SHARED_CLASS(Logger);
 SHARED_CLASS(PluginManager);
 SHARED_CLASS(ResourceManager);
-SHARED_CLASS(ShortcutManager);
+SHARED_CLASS(CommandManager);
 
 class Kernel : public ep::Kernel
 {
@@ -92,7 +92,7 @@ public:
   ViewRef SetFocusView(ViewRef spView);
   Event<double> UpdatePulse;
 
-  ShortcutManagerRef GetShortcutManager() const { return spShortcutManager; }
+  CommandManagerRef GetCommandManager() const { return spCommandManager; }
 
   virtual epResult RunMainLoop() { return epR_Success; }
   epResult Terminate();
@@ -137,7 +137,7 @@ protected:
   LoggerRef spLogger = nullptr;
   PluginManagerRef spPluginManager = nullptr;
   ResourceManagerRef spResourceManager = nullptr;
-  ShortcutManagerRef spShortcutManager = nullptr;
+  CommandManagerRef spCommandManager = nullptr;
   ViewRef spFocusView = nullptr;
   TimerRef spStreamerTimer = nullptr;
   TimerRef spUpdateTimer = nullptr;
