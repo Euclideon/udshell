@@ -1,4 +1,5 @@
 #include "components/console.h"
+#include "components/broadcaster.h"
 
 namespace kernel
 {
@@ -37,16 +38,22 @@ Slice<void> Console::Read(Slice<void> buffer)
 
 size_t Console::Write(Slice<const void> data)
 {
+  size_t written;
+
   if (bDbgOutput)
   {
 #if defined(EP_WINDOWS)
     String s((const char*)data.ptr, data.length);
     OutputDebugString((LPCSTR)s.toStringz());
 #endif
-    return data.length;
+    written = data.length;
   }
   else
-    return fwrite(data.ptr, 1, data.length, pOut);
+    written = fwrite(data.ptr, 1, data.length, pOut);
+
+  Broadcaster::Write(data);
+
+  return written;
 }
 
 int Console::Flush()

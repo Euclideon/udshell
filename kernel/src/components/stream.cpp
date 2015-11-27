@@ -17,13 +17,6 @@ BufferRef Stream::ReadBuffer(size_t bytes)
 
   return spBuffer;
 }
-size_t Stream::WriteBuffer(BufferRef spData)
-{
-  Slice<const void> buffer = spData->MapForRead();
-  size_t bytes = Write(buffer);
-  spData->Unmap();
-  return bytes;
-}
 
 BufferRef Stream::Load()
 {
@@ -52,18 +45,6 @@ void Stream::Save(BufferRef spBuffer)
   Write(buffer);
 
   spBuffer->Unmap();
-}
-
-size_t Stream::WriteLn(String str)
-{
-  size_t written;
-
-  MutableString<256> temp;
-  temp = str;
-  temp.append("\n");
-  written = Write(temp);
-
-  return written;
 }
 
 String Stream::ReadLn(Slice<char> buf)

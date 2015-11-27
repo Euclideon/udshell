@@ -2,7 +2,7 @@
 #if !defined(_EP_STREAM_H)
 #define _EP_STREAM_H
 
-#include "component.h"
+#include "broadcaster.h"
 #include "resources/buffer.h"
 
 namespace kernel
@@ -20,9 +20,9 @@ EP_ENUM(SeekOrigin,
   End
 );
 
-class Stream : public Component
+class Stream : public Broadcaster
 {
-  EP_DECLARE_COMPONENT(Stream, Component, EPKERNEL_PLUGINVERSION, "Stream desc...")
+  EP_DECLARE_COMPONENT(Stream, Broadcaster, EPKERNEL_PLUGINVERSION, "Stream desc...")
 public:
 
   int64_t Length() const { return length; }
@@ -31,25 +31,22 @@ public:
   virtual int64_t Seek(SeekOrigin rel, int64_t offset) { return 0; }
 
   virtual Slice<void> Read(Slice<void> buffer) { return 0; }
-  virtual size_t Write(Slice<const void> data) { return 0; }
-
   virtual String ReadLn(Slice<char> buf);
-  virtual size_t WriteLn(String str);
+  BufferRef ReadBuffer(size_t bytes);
 
   virtual int Flush() { return 0; }
 
-  BufferRef ReadBuffer(size_t bytes);
-  size_t WriteBuffer(BufferRef spData);
-
   BufferRef Load();
   void Save(BufferRef spBuffer);
+
+  Event<> PosChanged;
 
   // TODO: support async operations?
   // TODO: remove support for sync operations?
 
 protected:
   Stream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
-    : Component(pType, pKernel, uid, initParams), pos(0)
+    : Broadcaster(pType, pKernel, uid, initParams), pos(0)
   {}
 
   int64_t length, pos;

@@ -9,13 +9,13 @@ namespace kernel
 
 PROTOTYPE_COMPONENT(UIConsole);
 SHARED_CLASS(MemStream);
+SHARED_CLASS(Broadcaster);
 
 class UIConsole : public UIComponent
 {
   EP_DECLARE_COMPONENT(UIConsole, UIComponent, EPKERNEL_PLUGINVERSION, "Is a UI for a Console Panel with input and output text controls")
 public:
 
-  StreamRef GetOutStream() const { return spOutStream; }
   StreamRef GetInStream() const { return spInStream; }
 
   void RelayInput(String str);
@@ -69,7 +69,7 @@ protected:
   bool FilterLogLine(const LogLine &) const;
 
   void OnLogChanged();
-  void OnStreamOutput();
+  void OnConsoleOutput(Slice<const void> buf);
 
   struct ConsoleLine
   {
@@ -89,7 +89,9 @@ protected:
 
   static LoggerRef spLogger;
   MemStreamRef spInStream = nullptr;
-  MemStreamRef spOutStream = nullptr;
+  BroadcasterRef spConsoleOut = nullptr;
+  BroadcasterRef spConsoleErr = nullptr;
+
   int64_t pos = 0;
 
   MutableString<256> textFilter;

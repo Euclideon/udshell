@@ -22,6 +22,7 @@ namespace kernel {
 
 class LuaState;
 class Renderer;
+class StdCapture;
 
 SHARED_CLASS(View);
 SHARED_CLASS(UIComponent);
@@ -30,6 +31,7 @@ SHARED_CLASS(Logger);
 SHARED_CLASS(PluginManager);
 SHARED_CLASS(ResourceManager);
 SHARED_CLASS(CommandManager);
+SHARED_CLASS(Broadcaster);
 
 class Kernel : public ep::Kernel
 {
@@ -87,9 +89,14 @@ public:
   epResult RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) override final;
   DataSourceRef CreateDataSourceFromExtension(String ext, InitParams initParams);
 
+  // stdio relaying functions
+  BroadcasterRef GetStdOutBroadcaster() const { return spStdOutBC; }
+  BroadcasterRef GetStdErrBroadcaster() const { return spStdErrBC; }
+
   // other functions
   ViewRef GetFocusView() const { return spFocusView; }
   ViewRef SetFocusView(ViewRef spView);
+
   Event<double> UpdatePulse;
 
   CommandManagerRef GetCommandManager() const { return spCommandManager; }
@@ -141,6 +148,11 @@ protected:
   ViewRef spFocusView = nullptr;
   TimerRef spStreamerTimer = nullptr;
   TimerRef spUpdateTimer = nullptr;
+  BroadcasterRef spStdOutBC = nullptr;
+  BroadcasterRef spStdErrBC = nullptr;
+
+  StdCapture *stdOutCapture = nullptr;
+  StdCapture *stdErrCapture = nullptr;
 
   epPluginInstance *pPluginInstance = nullptr;
 
@@ -167,6 +179,8 @@ protected:
 
   void Update();
   void StreamerUpdate();
+
+  void RelayStdIO();
 
   template<typename CT>
   static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);

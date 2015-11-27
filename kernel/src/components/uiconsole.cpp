@@ -1,5 +1,6 @@
 #include "components/uiconsole.h"
 #include "components/memstream.h"
+#include "components/broadcaster.h"
 #include "components/logger.h"
 #include "components/resources/buffer.h"
 #include "components/commandmanager.h"
@@ -13,19 +14,17 @@ LoggerRef UIConsole::spLogger;
 UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
-  spLogger = pKernel->GetLogger();
-
-  // Create stream for shell output
-  auto spOutBuffer = pKernel->CreateComponent<Buffer>();
-  spOutBuffer->Reserve(1024);
-  spOutStream = pKernel->CreateComponent<MemStream>({ {"buffer", spOutBuffer}, {"flags", OpenFlags::Write} });
-  spOutStream->Changed.Subscribe(this, &UIConsole::OnStreamOutput);
+  spConsoleOut = pKernel->GetStdOutBroadcaster();
+  spConsoleOut->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
+  spConsoleErr = pKernel->GetStdErrBroadcaster();
+  spConsoleErr->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
 
   // Create stream for shell input
   auto spInBuffer = pKernel->CreateComponent<Buffer>();
   spInBuffer->Reserve(1024);
   spInStream = pKernel->CreateComponent<MemStream>({ { "buffer", spInBuffer }, { "flags", OpenFlags::Write } });
 
+  spLogger = pKernel->GetLogger();
   pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
 
   auto spCommandManager = pKernel->GetCommandManager();
@@ -45,7 +44,6 @@ void UIConsole::RebuildOutput()
 
   if (bOutputsMerged)
   {
-
     size_t logIndex = 0, consoleIndex = 0;
     while (logIndex < logLines.length && consoleIndex < consoleLines.length)
     {
@@ -154,15 +152,9 @@ void UIConsole::OnLogChanged()
   }
 }
 
-void UIConsole::OnStreamOutput()
+void UIConsole::OnConsoleOutput(Slice<const void> buf)
 {
-  int64_t newPos = spOutStream->GetPos();
-  MutableString<0> buf(Reserve, size_t(newPos - pos));
-
-  spOutStream->Seek(SeekOrigin::Begin, 0);
-  Slice<void> readSlice = spOutStream->Read(buf.getBuffer());
-  String readStr = (String &)readSlice;
-  spOutStream->Seek(SeekOrigin::Begin, 0);
+  String readStr = (String &)buf;
 
   while (!readStr.empty())
   {
@@ -185,10 +177,7 @@ void UIConsole::OnStreamOutput()
 
 void UIConsole::RelayInput(String str)
 {
-  auto spInBuffer = GetKernel().CreateComponent<Buffer>();
-  spInBuffer->Reserve(1024);
-  spInBuffer->CopyBuffer(str);
-  spInStream->SetBuffer(spInBuffer);
+  pKernel->Exec(str);
 }
 
 UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex)

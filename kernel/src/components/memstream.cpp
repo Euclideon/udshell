@@ -1,4 +1,5 @@
 #include "components/memstream.h"
+#include "components/broadcaster.h"
 #include "kernel.h"
 
 namespace kernel {
@@ -75,9 +76,6 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
   }
 
   length = bufferSlice.length;
-
-  if (length > 0)
-    Changed.Signal();
 }
 
 Slice<void> MemStream::Read(Slice<void> buf)
@@ -112,7 +110,7 @@ size_t MemStream::Write(Slice<const void> data)
   memcpy((char*)bufferSlice.ptr + pos, data.ptr, data.length);
   pos += data.length;
 
-  Changed.Signal();
+  Broadcaster::Write(data);
 
   return data.length;
 }
@@ -134,6 +132,8 @@ int64_t MemStream::Seek(SeekOrigin rel, int64_t offset)
 
   if (pos > length)
     pos = length;
+
+  PosChanged.Signal();
 
   return pos;
 }
