@@ -156,7 +156,7 @@ epResult SDLKernel::RunMainLoop()
 
 namespace kernel {
 
-Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 {
   return new SDLKernel;
 }

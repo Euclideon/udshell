@@ -77,9 +77,9 @@ struct Kernel::CreateHelper<ComponentType, true>
     static auto overrides = ComponentType::GetOverrides();
 
     // fabricate a CreateInstance function for this type...
-    overrides.pCreateInstance = [](epComponent *pBaseInstance, const epKeyValuePair *pInitParams, size_t numInitParams) -> void*
+    overrides.pCreateInstance = [](epComponent *pBaseInstance, const epVarMap *pInitParams) -> void*
     {
-      return new ComponentType(*(Component*)pBaseInstance, Slice<const KeyValuePair>((const KeyValuePair*)pInitParams, numInitParams));
+      return new ComponentType(*(Component*)pBaseInstance, (Variant::VarMap&)pInitParams);
     };
 
     return (epComponentOverrides*)&overrides;

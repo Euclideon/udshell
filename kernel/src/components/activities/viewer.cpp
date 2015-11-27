@@ -29,7 +29,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, In
   const Variant &cam = initParams["camera"];
   if (cam.is(Variant::Type::AssocArray))
   {
-    Slice<KeyValuePair> cameraParams = cam.asAssocArray();
+    Variant::VarMap cameraParams = cam.asAssocArray();
     spCamera = pKernel->CreateComponent<SimpleCamera>(InitParams(cameraParams));
   }
 

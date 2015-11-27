@@ -12,7 +12,7 @@ template<typename T> T& epMax(T &a, T &b) { return a > b ? a : b; }
 }
 
 template<typename T>
-struct AVLCompare
+struct Compare
 {
   epforceinline ptrdiff_t operator()(const T &a, const T &b)
   {
@@ -21,7 +21,7 @@ struct AVLCompare
 };
 
 template<>
-struct AVLCompare<String>
+struct Compare<String>
 {
   epforceinline ptrdiff_t operator()(String a, String b)
   {
@@ -29,7 +29,7 @@ struct AVLCompare<String>
   }
 };
 template<>
-struct AVLCompare<SharedString>
+struct Compare<SharedString>
 {
   epforceinline ptrdiff_t operator()(String a, String b)
   {
@@ -37,10 +37,13 @@ struct AVLCompare<SharedString>
   }
 };
 
-template<typename K, typename V, typename PredFunctor = AVLCompare<K>>
+template<typename K, typename V, typename PredFunctor = Compare<K>>
 class AVLTree
 {
 public:
+  using KeyType = K;
+  using ValueType = V;
+
   AVLTree() {}
   AVLTree(nullptr_t) {}
   AVLTree(AVLTree &&rval)
@@ -120,7 +123,7 @@ public:
 
   class Iterator;
   Iterator begin() const { return Iterator(root); }
-  Iterator end() const { return Iterator(nullptr); }
+  static Iterator end() { return Iterator(nullptr); }
 
 private:
   struct Node
@@ -401,6 +404,13 @@ public:
   class Iterator
   {
   public:
+    struct KVP
+    {
+      KVP(const K &key, V &value) : key(key), value(value) {}
+      const K &key;
+      V &value;
+    };
+
     Iterator(Node *pRoot) : depth(0), stack(0), pRoot(pRoot)
     {
       Node *pLeftMost = pRoot;
@@ -420,10 +430,17 @@ public:
 
     bool operator!=(Iterator rhs) { return pRoot != rhs.pRoot || data != rhs.data; }
 
-    const V& operator*() const { return GetNode(stack, depth)->v; }
-    V& operator*() { return const_cast<Node*>(GetNode(stack, depth))->v; }
-
-    const K &Key() const { return GetNode(stack, depth)->k; }
+    const KVP operator*() const
+    {
+      auto *node = const_cast<Node*>(GetNode(stack, depth));
+      const KVP r = KVP(node->k, node->v);
+      return r;
+    }
+    KVP operator*()
+    {
+      auto *node = const_cast<Node*>(GetNode(stack, depth));
+      return KVP(node->k, node->v);
+    }
 
     const Node *GetNode(uint64_t s, uint64_t d) const
     {
@@ -439,7 +456,6 @@ public:
     }
 
   private:
-
     bool IterateNext(Node *pNode, Node *pParent, uint64_t d)
     {
       if (d < depth)

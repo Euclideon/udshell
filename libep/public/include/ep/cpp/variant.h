@@ -4,6 +4,7 @@
 
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/delegate.h"
+#include "ep/cpp/map.h"
 
 #include "ep/c/variant.h"
 
@@ -13,14 +14,23 @@ class LuaState;
 
 namespace ep {
 
+struct Variant;
+template<>
+struct Compare<Variant>
+{
+  ptrdiff_t operator()(Variant a, Variant b);
+};
+
 SHARED_CLASS(Component);
 
 struct KeyValuePair;
 
-struct Variant : protected epVariant
+struct Variant : public epVariant
 {
 public:
   typedef Delegate<Variant(Slice<Variant>)> VarDelegate;
+  typedef SharedArray<Variant> VarArray;
+  typedef SharedMapRef<AVLTree<Variant, Variant>> VarMap;
 
   enum class Type
   {
@@ -38,7 +48,22 @@ public:
     Void = epVT_Void,
     SmallString = epVT_SmallString
   };
-
+/*
+  size_t t : 4;
+  size_t ownsContent : 1;
+  size_t length : (sizeof(size_t)*8)-5; // NOTE: if you change this, update the shift's in asEnum()!!!
+  union
+  {
+    char b;
+    int64_t i;
+    double f;
+    const char *s;
+    Component *c;
+    void *p;
+    Variant *a;
+    SharedMap<AVLTree<Variant, Variant>> *aa;
+  };
+*/
   Variant();
   Variant(Variant &&rval);
   Variant(const Variant &val);
@@ -70,15 +95,13 @@ public:
   Variant(Slice<Variant> a, bool unsafeReference = false);
   template<size_t Len> Variant(const Array<Variant, Len> &a);
   template<size_t Len> Variant(Array<Variant, Len> &&a);
-  Variant(const SharedArray<Variant> &a);
-  Variant(SharedArray<Variant> &&a);
+  Variant(const VarArray &a);
+  Variant(VarArray &&a);
 
   // assoc arrays
-  Variant(Slice<KeyValuePair> aa, bool unsafeReference = false);
-  template<size_t Len> Variant(const Array<KeyValuePair, Len> &aa);
-  template<size_t Len> Variant(Array<KeyValuePair, Len> &&aa);
-  Variant(const SharedArray<KeyValuePair> &aa);
-  Variant(SharedArray<KeyValuePair> &&aa);
+  Variant(Slice<KeyValuePair> aa);
+  Variant(const VarMap &aa);
+  Variant(VarMap &&aa);
 
   template<typename T> Variant(T &&rval);
 
@@ -111,8 +134,8 @@ public:
   String asString() const;
   SharedString asSharedString() const;
   Slice<Variant> asArray() const;
-  Slice<KeyValuePair> asAssocArray() const;
-  Slice<KeyValuePair> asAssocArraySeries() const;
+  VarMap asAssocArray() const;
+//  Slice<KeyValuePair> asAssocArraySeries() const;
 
   size_t arrayLen() const;
   size_t assocArraySeriesLen() const;
@@ -140,42 +163,50 @@ struct KeyValuePair
   KeyValuePair(Variant &&key, const Variant &value) : key(std::move(key)), value(value) {}
   KeyValuePair(Variant &&key, Variant &&value) : key(std::move(key)), value(std::move(value)) {}
 
+  KeyValuePair(const Variant::VarMap::Type::Iterator::KVP &kvp) : key(kvp.key), value(kvp.value) {}
+
   Variant key;
   Variant value;
 };
 
+// TODO: abolish InitParams!
 class InitParams
 {
 public:
   InitParams() {}
   InitParams(nullptr_t) {}
   InitParams(const InitParams& rh) : params(rh.params) {}
-  InitParams(Slice<const KeyValuePair> kvp) : params(kvp) {}
-  InitParams(std::initializer_list<const KeyValuePair> list) : InitParams(Slice<const KeyValuePair>(list.begin(), list.size())) {}
-
-  Slice<const KeyValuePair> params;
-
-  const KeyValuePair& operator[](size_t index) const
+  InitParams(InitParams&& rh) : params(std::move(rh.params)) {}
+  InitParams(Variant::VarMap kvp) : params(kvp) {}
+  InitParams(Slice<const KeyValuePair> list)
+    : params(Variant::VarMap::create())
   {
-    return params[index];
+    for (auto &kvp : list)
+      params->Insert(kvp.key, kvp.value);
+  }
+  InitParams(std::initializer_list<const KeyValuePair> list)
+    : InitParams(Slice<const KeyValuePair>(list.begin(), list.size())) {}
+
+  Variant::VarMap params;
+
+  KeyValuePair operator[](size_t index) const
+  {
+    Variant *pV = params ? params->Get(index) : nullptr;
+    return KeyValuePair(index, pV ? *pV : Variant());
   }
   const Variant& operator[](String key) const
   {
-    for (auto &p : params)
-    {
-      if (p.key.is(Variant::Type::String) && p.key.asString().eq(key))
-        return p.value;
-    }
-    return varNone;
+    Variant *pV = params ? params->Get(key) : nullptr;
+    return pV ? *pV : varNone;
   }
 
-  Iterator<const KeyValuePair> begin() const
+  Variant::VarMap::Type::Iterator begin() const
   {
-    return params.begin();
+    return params ? params->begin() : params->end();
   }
-  Iterator<const KeyValuePair> end() const
+  Variant::VarMap::Type::Iterator end() const
   {
-    return params.end();
+    return params->end();
   }
 
 private:

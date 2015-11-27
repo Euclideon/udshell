@@ -38,10 +38,10 @@ public:
   String GetResourceName(size_t index) const
   {
     size_t i = 0;
-    for (auto iter = resources.begin(); iter != resources.end(); ++iter)
+    for (auto iter : resources)
     {
       if (i == index)
-        return iter.Key();
+        return iter.key;
       ++i;
     }
     return nullptr;
@@ -50,10 +50,10 @@ public:
   ResourceRef GetResource(size_t index) const
   {
     size_t i = 0;
-    for (auto &r: resources)
+    for (auto r: resources)
     {
       if (i == index)
-        return r;
+        return r.value;
       ++i;
     }
     return nullptr;

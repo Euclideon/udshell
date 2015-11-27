@@ -67,6 +67,11 @@ struct MethodCallHack<void, Args...>
 
 } // namespace internal
 
+epforceinline ptrdiff_t Compare<Variant>::operator()(Variant a, Variant b)
+{
+  return a.compare(b);
+}
+
 // these perform variadic function calls for different function and arg types
 template<typename R, typename... Args>
 epforceinline R TupleCall(R(*f)(Args...), const std::tuple<Args...> &args)
@@ -255,7 +260,7 @@ inline Variant::Variant(Array<Variant, Len> &&a)
   else
     new(this) Variant((Slice<Variant>)a);
 }
-inline Variant::Variant(const SharedArray<Variant> &a)
+inline Variant::Variant(const VarArray &a)
 {
   t = (size_t)Type::Array;
   ownsContent = a.ptr ? 1 : 0;
@@ -264,7 +269,7 @@ inline Variant::Variant(const SharedArray<Variant> &a)
   if (a.ptr)
     ++internal::GetSliceHeader(a.ptr)->refCount;
 }
-inline Variant::Variant(SharedArray<Variant> &&a)
+inline Variant::Variant(VarArray &&a)
 {
   t = (size_t)Type::Array;
   ownsContent = a.ptr ? 1 : 0;
@@ -274,45 +279,20 @@ inline Variant::Variant(SharedArray<Variant> &&a)
     a.ptr = nullptr;
 }
 
-template<size_t Len>
-inline Variant::Variant(const Array<KeyValuePair, Len> &aa)
-  : Variant(Slice<KeyValuePair>(aa))
-{}
-template<size_t Len>
-inline Variant::Variant(Array<KeyValuePair, Len> &&aa)
-{
-  if (aa.hasAllocation() && aa.length)
-  {
-    // if the rvalue has an allocation, we can just claim it
-    t = (size_t)Type::AssocArray;
-    ownsContent = 1;
-    length = aa.length;
-    this->p = aa.ptr;
-    internal::GetSliceHeader(aa.ptr)->refCount = 1;
-    aa.ptr = nullptr;
-  }
-  else
-    new(this) Variant((Slice<KeyValuePair>)aa);
-}
-inline Variant::Variant(const SharedArray<KeyValuePair> &aa)
+inline Variant::Variant(VarMap &&spC)
 {
   t = (size_t)Type::AssocArray;
-  ownsContent = aa.ptr ? 1 : 0;
-  length = aa.length;
-  this->p = aa.ptr;
-  if (aa.ptr)
-    ++internal::GetSliceHeader(aa.ptr)->refCount;
+  ownsContent = 1;
+  length = 0;
+  new(&p) VarMap(std::move(spC));
 }
-inline Variant::Variant(SharedArray<KeyValuePair> &&aa)
+inline Variant::Variant(const VarMap &spC)
 {
   t = (size_t)Type::AssocArray;
-  ownsContent = aa.ptr ? 1 : 0;
-  length = aa.length;
-  this->p = aa.ptr;
-  if (aa.ptr)
-    aa.ptr = nullptr;
+  ownsContent = 1;
+  length = 0;
+  new(&p) VarMap(spC);
 }
-
 
 inline Variant::~Variant()
 {
@@ -390,8 +370,8 @@ template<size_t Len> struct Variant_Construct<MutableString<Len>>        { epfor
 template<>           struct Variant_Construct<SharedString>              { epforceinline static Variant construct(const SharedString &v) { return Variant(v); } };
 template<size_t Len> struct Variant_Construct<Array<Variant, Len>>       { epforceinline static Variant construct(const Array<Variant, Len> &v) { return Variant(v); } };
 template<>           struct Variant_Construct<SharedArray<Variant>>      { epforceinline static Variant construct(const SharedArray<Variant> &v) { return Variant(v); } };
-template<size_t Len> struct Variant_Construct<Array<KeyValuePair, Len>>  { epforceinline static Variant construct(const Array<KeyValuePair, Len> &v) { return Variant(v); } };
-template<>           struct Variant_Construct<SharedArray<KeyValuePair>> { epforceinline static Variant construct(const SharedArray<KeyValuePair> &v) { return Variant(v); } };
+template<size_t Len> struct Variant_Construct<Array<KeyValuePair, Len>>  { epforceinline static Variant construct(const Array<KeyValuePair, Len> &v) { return Variant(Slice<KeyValuePair>(v)); } };
+template<>           struct Variant_Construct<SharedArray<KeyValuePair>> { epforceinline static Variant construct(const SharedArray<KeyValuePair> &v) { return Variant(Slice<KeyValuePair>(v)); } };
 
 // ** suite of specialisations required to wrangle every conceivable combination of 'const'
 template<typename T>
@@ -684,6 +664,7 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
+/*
   else if (v.is(Variant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
@@ -693,6 +674,7 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
         ((U*)pR)[i] = (U)aa[i].value.asFloat();
     }
   }
+*/
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Vector3<U> *pR)
@@ -707,6 +689,7 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
+/*
   else if (v.is(Variant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
@@ -716,6 +699,7 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
         ((U*)pR)[i] = (U)aa[i].value.asFloat();
     }
   }
+*/
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Vector4<U> *pR)
@@ -730,6 +714,7 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
+/*
   else if (v.is(Variant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
@@ -739,6 +724,7 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
         ((U*)pR)[i] = (U)aa[i].value.asFloat();
     }
   }
+*/
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
@@ -753,6 +739,7 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
         ((U*)pR)[i] = (U)a[i].asFloat();
     }
   }
+/*
   else if (v.is(Variant::Type::AssocArray))
   {
     auto aa = v.asAssocArraySeries();
@@ -762,6 +749,7 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
         ((U*)pR)[i] = (U)aa[i].value.asFloat();
     }
   }
+*/
 }
 
 template<typename R, typename... Args>
@@ -788,10 +776,13 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
   }
   else if (v.is(Variant::Type::AssocArray))
   {
+    EPASSERT(false, "TODO!");
+/*
     auto aa = v.asAssocArraySeries();
     pArr->reserve(aa.length);
     for (size_t i = 0; i < aa.length; ++i)
       pArr->pushBack(aa[i].value.as<U>());
+*/
   }
   else if (v.is(Variant::Type::String))
   {

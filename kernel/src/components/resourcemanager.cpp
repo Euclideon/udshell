@@ -24,15 +24,15 @@ Array<ResourceRef> ResourceManager::GetResourcesByType(const ep::ComponentDesc *
 {
   Array<ResourceRef> outs;
 
-  for (ResourceRef spRes : resources)
+  for (auto spRes : resources)
   {
-    const ep::ComponentDesc *pDesc = spRes->GetDescriptor();
+    const ep::ComponentDesc *pDesc = spRes.value->GetDescriptor();
 
     while (pDesc)
     {
       if (pDesc == pBase)
       {
-        outs.concat(spRes);
+        outs.concat(spRes.value);
         break;
       }
       pDesc = pDesc->pSuperDesc;

@@ -14,7 +14,7 @@ public:
   epResult InitInternal() { return epR_Success; }
 };
 
-Kernel *Kernel::CreateInstanceInternal(InitParams commandLine)
+Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 {
   return new NullKernel;
 }

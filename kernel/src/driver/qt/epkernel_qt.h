@@ -42,7 +42,7 @@ class QtKernel : public QObject, public kernel::Kernel
   Q_OBJECT
 
 public:
-  QtKernel(InitParams commandLine);
+  QtKernel(Slice<const KeyValuePair> commandLine);
   virtual ~QtKernel();
 
   epResult InitInternal() override;

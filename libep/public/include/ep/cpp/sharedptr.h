@@ -56,6 +56,8 @@ template<class T>
 class SharedPtr
 {
 public:
+  using Type = T;
+
   // create a new instance of T
   template<typename... Args>
   static SharedPtr<T> create(Args... args)

@@ -14,7 +14,7 @@ namespace kernel
 
 void Component::Init(InitParams initParams)
 {
-  for (auto &kv : initParams)
+  for (auto kv : initParams)
   {
     const PropertyDesc *pDesc = GetPropertyDesc(kv.key.asString());
     if (pDesc && pDesc->setter)

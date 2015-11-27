@@ -172,8 +172,8 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
     case Variant::Type::AssocArray:
     {
       QVariantMap map;
-      Slice<KeyValuePair> aa = variant.asAssocArray();
-      for (auto &v : aa)
+      Variant::VarMap aa = variant.asAssocArray();
+      for (auto v : *aa)
       {
         if (!v.key.is(Variant::Type::String))
         {

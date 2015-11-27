@@ -21,7 +21,7 @@ private:
     pCallbacks = pType->pOverrides;
     if (pCallbacks->pCreateInstance)
     {
-      pUserData = pCallbacks->pCreateInstance((epComponent*)this, (const epKeyValuePair*)initParams.params.ptr, initParams.params.length);
+      pUserData = pCallbacks->pCreateInstance((epComponent*)this, (const epVarMap*&)initParams.params);
       if (!pUserData)
         throw epR_Failure;
     }

@@ -413,20 +413,20 @@ void LuaState::pushDescriptor(const ComponentDesc &desc)
 
   lua_createtable(L, 0, 0);
   size_t i = 1;
-  for (auto &p : desc.propertyTree)
+  for (auto p : desc.propertyTree)
   {
     lua_createtable(L, 0, 0);
 
-    pushString(p.id);
+    pushString(p.value.id);
     lua_setfield(L, -2, "id");
-    pushString(p.displayName);
+    pushString(p.value.displayName);
     lua_setfield(L, -2, "displayname");
-    pushString(p.description);
+    pushString(p.value.description);
     lua_setfield(L, -2, "description");
 
-    pushInt(p.flags);
+    pushInt(p.value.flags);
     lua_setfield(L, -2, "flags");
-    pushString(p.displayType);
+    pushString(p.value.displayType);
     lua_setfield(L, -2, "displaytype");
 
     lua_seti(L, -2, i++);
@@ -674,14 +674,14 @@ int LuaState::help(lua_State* L)
       l.print("\nProperties:");
 
       SetConsoleColor(ConsoleColor::Green);
-      for (auto &p : c->instanceProperties)
+      for (auto p : c->instanceProperties)
       {
-        buf.sprintf("  %-16s - %s", (const char*)p.id.toStringz(), (const char*)p.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)p.value.id.toStringz(), (const char*)p.value.description.toStringz());
         l.print(buf);
       }
-      for (auto &p : pDesc->propertyTree)
+      for (auto p : pDesc->propertyTree)
       {
-        buf.sprintf("  %-16s - %s", (const char*)p.id.toStringz(), (const char*)p.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)p.value.id.toStringz(), (const char*)p.value.description.toStringz());
         l.print(buf);
       }
     }
@@ -692,7 +692,7 @@ int LuaState::help(lua_State* L)
       l.print("\nMethods:");
 
       SetConsoleColor(ConsoleColor::Magenta);
-      for (auto &m : c->instanceMethods)
+      for (auto m : c->instanceMethods)
       {
 /*
         MutableString64 func = MutableString64::format("%s(", m->id.toStringz());
@@ -707,10 +707,10 @@ int LuaState::help(lua_State* L)
         else
           func.concat(")");
 */
-        buf.sprintf("  %-16s - %s", (const char*)m.id.toStringz(), (const char*)m.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)m.value.id.toStringz(), (const char*)m.value.description.toStringz());
         l.print(buf);
       }
-      for (auto &m : pDesc->methodTree)
+      for (auto m : pDesc->methodTree)
       {
 /*
         MutableString64 func = MutableString64::format("%s(", m->id.toStringz());
@@ -725,7 +725,7 @@ int LuaState::help(lua_State* L)
         else
           func.concat(")");
 */
-        buf.sprintf("  %-16s - %s", (const char*)m.id.toStringz(), (const char*)m.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)m.value.id.toStringz(), (const char*)m.value.description.toStringz());
         l.print(buf);
       }
     }
@@ -736,14 +736,14 @@ int LuaState::help(lua_State* L)
       l.print("\nEvents:");
 
       SetConsoleColor(ConsoleColor::Yellow);
-      for (auto &e : c->instanceEvents)
+      for (auto e : c->instanceEvents)
       {
-        buf.sprintf("  %-16s - %s", (const char*)e.id.toStringz(), (const char*)e.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)e.value.id.toStringz(), (const char*)e.value.description.toStringz());
         l.print(buf);
       }
-      for (auto &e : pDesc->eventTree)
+      for (auto e : pDesc->eventTree)
       {
-        buf.sprintf("  %-16s - %s", (const char*)e.id.toStringz(), (const char*)e.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)e.value.id.toStringz(), (const char*)e.value.description.toStringz());
         l.print(buf);
       }
     }

@@ -189,11 +189,11 @@ bool SimpleCamera::Update(double timeDelta)
 Variant SimpleCamera::Save() const
 {
   Variant var = Camera::Save();
-  Array<KeyValuePair> params = var.asAssocArray();
+  Variant::VarMap params = var.asAssocArray();
 
-  params.pushBack(KeyValuePair("speed", speed));
-  params.pushBack(KeyValuePair("invertyaxis", (yInvert == -1.0 ? true : false)));
-  params.pushBack(KeyValuePair("helicoptermode", bHelicopter));
+  params->Insert("speed", speed);
+  params->Insert("invertyaxis", yInvert == -1.0 ? true : false);
+  params->Insert("helicoptermode", bHelicopter);
 
   return Variant(std::move(params));
 }

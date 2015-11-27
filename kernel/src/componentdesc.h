@@ -8,7 +8,7 @@
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/variant.h"
 #include "ep/cpp/event.h"
-#include "ep/cpp/avltree.h"
+#include "ep/cpp/map.h"
 
 
 #define PROTOTYPE_COMPONENT(Name) \

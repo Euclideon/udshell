@@ -106,14 +106,14 @@ const epVariant* epVariant_AsArray(epVariant v, size_t *pLength)
   *pLength = arr.length;
   return (epVariant*)arr.ptr;
 }
-
+/*
 const epKeyValuePair* epVariant_AsAssocArray(epVariant v, size_t *pNumElements)
 {
-  Slice<KeyValuePair> kvp = ((Variant&)v).asAssocArray();
+  Variant::VarMap map = ((Variant&)v).asAssocArray();
   *pNumElements = kvp.length;
   return (epKeyValuePair*)kvp.ptr;
 }
-
+*/
 } // extern "C"
 
 
@@ -234,25 +234,22 @@ Variant::Variant(Slice<Variant> a, bool unsafeReference)
 }
 
 // KVP constructors
-Variant::Variant(Slice<KeyValuePair> aa, bool unsafeReference)
+Variant::Variant(Slice<KeyValuePair> aa)
 {
-  if (unsafeReference)
+  t = (size_t)Type::AssocArray;
+  if (aa.empty())
   {
-    t = (size_t)Type::AssocArray;
     ownsContent = 0;
-    length = aa.length;
-    this->p = aa.ptr;
+    length = 0;
+    p = 0;
+    return;
   }
-  else
-  {
-    t = (size_t)Type::AssocArray;
-    ownsContent = 1;
-    length = aa.length;
-    KeyValuePair *pAA = internal::SliceAlloc<KeyValuePair>(aa.length, 1);
-    this->p = pAA;
-    for (size_t j = 0; j < length; ++j)
-      new(&pAA[j]) KeyValuePair(aa.ptr[j]);
-  }
+  ownsContent = 1;
+  length = 0;
+  new(&p) Variant::VarMap(Variant::VarMap::create());
+  Variant::VarMap &map = (Variant::VarMap&)p;
+  for (auto &kvp : aa)
+    map->Insert(kvp.key, kvp.value);
 }
 
 void Variant::copyContent(const Variant &val)
@@ -276,21 +273,12 @@ void Variant::copyContent(const Variant &val)
     }
     case Type::Array:
     {
-      Variant *a = (Variant*)epAlloc(sizeof(Variant)*length);
-      for (size_t j = 0; j < length; ++j)
-        new((void*)&a[j]) Variant(((const Variant*)val.p)[j]);
-      p = a;
+      ++internal::GetSliceHeader(p)->refCount;
       break;
     }
     case Type::AssocArray:
     {
-      KeyValuePair *aa = (KeyValuePair*)epAlloc(sizeof(KeyValuePair)*length);
-      for (size_t j = 0; j<length; ++j)
-      {
-        new((void*)&aa[j].key) Variant((const Variant&)((KeyValuePair*)val.p)[j].key);
-        new((void*)&aa[j].value) Variant((const Variant&)((KeyValuePair*)val.p)[j].value);
-      }
-      p = aa;
+      new((void*)&p) VarDelegate((VarMap&)val.p);
       break;
     }
     default:
@@ -363,8 +351,9 @@ bool Variant::isNull() const
       return true;
     case Type::String:
     case Type::Array:
-    case Type::AssocArray:
       return length == 0;
+    case Type::AssocArray:
+      return p == nullptr || ((VarMap&)p)->Empty();
     case Type::Component:
     case Type::Delegate:
       return p == nullptr;
@@ -414,7 +403,7 @@ ptrdiff_t Variant::compare(const Variant &v) const
       return f < v.f ? -1 : (f > v.f ? 1 : 0);
     case Type::String:
     case Type::SmallString:
-      return asString().cmp(asString());
+      return asString().cmp(v.asString());
     case Type::Component:
       return ((String&)((epComponent*)p)->uid).cmp((String&)((epComponent*)v.p)->uid);
     default:
@@ -616,21 +605,22 @@ Slice<Variant> Variant::asArray() const
       return Slice<Variant>();
   }
 }
-Slice<KeyValuePair> Variant::asAssocArray() const
+Variant::VarMap Variant::asAssocArray() const
 {
   switch ((Type)t)
   {
     case Type::Void:
       EPASSERT(false, "Variant is void");
     case Type::Null:
-      return Slice<KeyValuePair>();
+      return VarMap();
     case Type::AssocArray:
-      return Slice<KeyValuePair>((KeyValuePair*)p, length);
+      return (VarMap&)p;
     default:
       EPASSERT(type() == Type::AssocArray, "Wrong type!");
-      return Slice<KeyValuePair>();
+      return VarMap();
   }
 }
+/*
 Slice<KeyValuePair> Variant::asAssocArraySeries() const
 {
   switch ((Type)t)
@@ -646,6 +636,7 @@ Slice<KeyValuePair> Variant::asAssocArraySeries() const
       return Slice<KeyValuePair>();
   }
 }
+*/
 
 size_t Variant::arrayLen() const
 {
