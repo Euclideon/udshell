@@ -4,7 +4,7 @@
 #include <QQuickWindow>
 #include <QQuickItem>
 #include "../epkernel_qt.h"
-#include "components/shortcutmanager.h"
+#include "components/commandmanager.h"
 
 namespace qt
 {
@@ -30,7 +30,7 @@ protected:
     if (!pEv->isAutoRepeat())
     {
       QKeySequence seq(pEv->key() + pEv->modifiers());
-      bool ret = QtApplication::Kernel()->GetShortcutManager()->HandleShortcutEvent(seq.toString().toUtf8().data());
+      bool ret = QtApplication::Kernel()->GetCommandManager()->HandleShortcutEvent(seq.toString().toUtf8().data());
       if (ret)
         return;
     }
