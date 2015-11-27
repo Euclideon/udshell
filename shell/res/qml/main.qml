@@ -12,6 +12,7 @@ Rectangle {
 
   property var uiconsole
   property var menucomp
+  property var toolbarcomp
   property var commandmanager
   property var simplecamera
   property var view
@@ -30,8 +31,13 @@ Rectangle {
     menuBar.menucomp = menucomp;
   }
 
+  onToolbarcompChanged: {
+    toolBar.toolbarcomp = toolbarcomp;
+  }
+
   onCommandmanagerChanged: {
     menuBar.commandmanager = commandmanager;
+    toolBar.commandmanager = commandmanager;
   }
 
   onParentChanged: {
@@ -105,19 +111,15 @@ Rectangle {
     EPMenuBar {
       id: menuBar
       Layout.fillWidth: true
-      window: topLevel.parent;
+      window: topLevel.parent
     }
 
     Loader { sourceComponent: separator; Layout.fillWidth: true }
 
-    ToolBar {
+    EPToolBar {
       id: toolBar
       Layout.fillWidth: true
-      RowLayout {
-        height: 30
-        width: parent.Layout.preferredWidth
-      }
-      style: toolBarStyle
+      //Layout.preferredHeight: 40
     }
 
     Loader { sourceComponent: separator; Layout.fillWidth: true }

@@ -93,10 +93,10 @@ MutableString<0> ReadResourceFile(String src)
   {
     QByteArray qArray = file.readAll();
     file.close();
-    
+
     return String(qArray.constData(), qArray.length());
   }
-  
+
   return String();
 }
 
@@ -160,7 +160,9 @@ void Init(String sender, String message, const Variant &data)
     pKernel->LogError("Error creating Viewer activity\n");
 
   spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
-  
+
+  // Load menus
+
   String menusPath(":/menus.xml");
   MutableString<0> menuStr = ReadResourceFile(menusPath);
   if(menuStr.empty())
@@ -169,6 +171,18 @@ void Init(String sender, String message, const Variant &data)
   MenuRef spMenu = pKernel->CreateComponent<Menu>({ { "src", menuStr } });
   if (spMenu)
     spTopLevelUI->SetProperty("menucomp", spMenu);
+
+
+  // Load toolbar
+
+  String toolBarPath(":/toolbar.xml");
+  MutableString<0> toolBarStr = ReadResourceFile(toolBarPath);
+  if (toolBarStr.empty())
+    pKernel->LogWarning(2, "Toolbar XML file \"{0}\" does not exist.", toolBarPath);
+
+  MenuRef spToolBar = pKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
+  if (spToolBar)
+    spTopLevelUI->SetProperty("toolbarcomp", spToolBar);
 
   spTopLevelUI->SetProperty("commandmanager", pKernel->GetCommandManager());
 
