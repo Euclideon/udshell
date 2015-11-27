@@ -18,8 +18,8 @@ EP_ENUM(ShaderType,
 
 class Shader : public Resource
 {
+  EP_DECLARE_COMPONENT(Shader, Resource, EPKERNEL_PLUGINVERSION, "Shader desc...")
 public:
-  EP_COMPONENT(Shader);
 
   SharedString GetCode() const { return code; }
   void SetCode(SharedString _code) { code = _code; }

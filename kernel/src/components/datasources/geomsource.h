@@ -20,8 +20,8 @@ SHARED_CLASS(Node);
 
 class GeomSource : public DataSource
 {
+  EP_DECLARE_COMPONENT(GeomSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides polygon geometry")
 public:
-  EP_COMPONENT(GeomSource);
 
   Slice<const String> GetFileExtensions() const override
   {
@@ -31,7 +31,7 @@ public:
 protected:
   static const Array<const String> extensions;
 
-  static epResult RegisterExtensions(Kernel *pKernel);
+  static epResult StaticInit(ep::Kernel *pKernel);
 
   GeomSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : DataSource(pType, pKernel, uid, initParams)

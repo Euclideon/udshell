@@ -13,8 +13,8 @@ SHARED_CLASS(Resource);
 
 class Resource : public Component
 {
+  EP_DECLARE_COMPONENT(Resource, Component, EPKERNEL_PLUGINVERSION, "Base resource")
 public:
-  EP_COMPONENT(Resource);
 
   MetadataRef GetMetadata() const;
   DataSourceRef GetDataSource() const { return source; }
@@ -28,6 +28,13 @@ protected:
 
   DataSourceRef source = nullptr;
   MetadataRef metadata = nullptr;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(Metadata, "Number of records in the metadata", nullptr, 0),
+    };
+  }
 };
 
 }

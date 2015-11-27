@@ -15,18 +15,6 @@
 namespace kernel
 {
 
-ComponentDesc File::descriptor =
-{
-  &Stream::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "file", // id
-  "File", // displayName
-  "File object", // description
-};
-
 File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Stream(pType, pKernel, uid, initParams)
 {

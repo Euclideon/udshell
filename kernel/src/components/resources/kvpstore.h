@@ -11,8 +11,8 @@ SHARED_CLASS(KVPStore);
 
 class KVPStore : public Resource
 {
+  EP_DECLARE_COMPONENT(KVPStore, Resource, EPKERNEL_PLUGINVERSION, "Metadata resource")
 public:
-  EP_COMPONENT(KVPStore);
 
   virtual size_t NumRecords() const { return 0; }
 
@@ -38,6 +38,22 @@ public:
 protected:
   KVPStore(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Resource(pType, pKernel, uid, initParams) {}
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_EXPLICIT("NumRecords", "Number of records in the metadata", EP_MAKE_GETTER(NumRecords), nullptr, nullptr, 0),
+    };
+  }
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD_EXPLICIT("Insert", InsertMethod, "Insert a record"),
+      EP_MAKE_METHOD(Remove, "Remove a record"),
+      EP_MAKE_METHOD(Exists, "Check if a record exists"),
+      EP_MAKE_METHOD(Get, "Get a record"),
+    };
+  }
 };
 
 }

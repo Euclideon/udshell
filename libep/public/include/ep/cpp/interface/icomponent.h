@@ -9,7 +9,7 @@ namespace ep {
 
 class IComponent
 {
-  EP_DECLARE_COMPONENT(IComponent, IComponent, 100, "Component Interface")
+  EP_DECLARE_COMPONENT(IComponent, IComponent, EP_APIVERSION, "Component Interface")
 public:
   SharedString GetUid() const                                               { return component.GetUid(); }
   SharedString GetName() const                                              { return component.GetName(); }
@@ -36,21 +36,22 @@ public:
 
   operator ComponentRef() const                                             { return (ComponentRef&)component; }
 
+  // component registration :: TODO: this should be protected, or removed
+  static epComponentOverrides GetOverrides();
+
 protected:
   IComponent(Component &baseComponent, Slice<const KeyValuePair> initParams) : component(baseComponent) {}
   virtual ~IComponent() {}
 
   Component &component;
-
-  // component registration
-  static epComponentOverrides GetOverrides();
-
+/*
 private:
   template<typename T>
   static void* CreateInstance(epComponent *pBaseInstance, const epKeyValuePair *pInitParams, size_t numInitParams)
   {
     return new T((Component*&)pBaseInstance, Slice<KeyValuePair>((KeyValuePair*)pInitParams, numInitParams));
   }
+*/
 };
 
 } // namespace ep

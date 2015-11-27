@@ -69,6 +69,16 @@ struct epVertexDataFormatGL
 
 
 // ***************************************************************************************
+// Author: Manu Evans, Nov 2015
+void epGPU_Clear(double color[4], double depth, int stencil)
+{
+  s_QtGLContext.pFunc->glClearColor(color[0], color[1], color[2], color[3]);
+  s_QtGLContext.pFunc->glClearDepth(depth);
+  s_QtGLContext.pFunc->glClearStencil(stencil);
+  s_QtGLContext.pFunc->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+// ***************************************************************************************
 void epGPU_RenderVertices(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epPrimitiveType primType, size_t vertexCount, size_t firstVertex)
 {
   epVertexRange r;

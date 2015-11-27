@@ -4,7 +4,7 @@ namespace ep {
 
 epComponentOverrides IComponent::GetOverrides()
 {
-  epComponentOverrides s_overrides = {
+  epComponentOverrides overrides = {
     sizeof(epComponentOverrides),
     nullptr,
     [](epComponent *pBaseInstance, void *pDerivedInstance)
@@ -22,7 +22,7 @@ epComponentOverrides IComponent::GetOverrides()
       return pI->ReceiveMessage(message, sender, *(const Variant*)pData);
     }
   };
-  return s_overrides;
+  return overrides;
 }
 
 } // namespace ep

@@ -12,8 +12,8 @@ SHARED_CLASS(DataSource);
 
 class ResourceManager : public Component
 {
+  EP_DECLARE_COMPONENT(ResourceManager, Component, EPKERNEL_PLUGINVERSION, "ResourceManager desc...")
 public:
-  EP_COMPONENT(ResourceManager);
 
   // Resource getter/setters
   size_t NumResources() const { return resources.Size(); }
@@ -25,7 +25,7 @@ public:
   {
     return GetResourcesByType(&CT::descriptor);
   }
-  Array<ResourceRef> GetResourcesByType(const ComponentDesc *pBase) const;
+  Array<ResourceRef> GetResourcesByType(const ep::ComponentDesc *pBase) const;
   // TODO GetResourcesByPrefix with optional Type filter
 
   class Iterator;

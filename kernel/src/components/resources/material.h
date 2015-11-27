@@ -17,8 +17,8 @@ PROTOTYPE_COMPONENT(Material);
 
 class Material : public Resource
 {
+  EP_DECLARE_COMPONENT(Material, Resource, EPKERNEL_PLUGINVERSION, "Material resource")
 public:
-  EP_COMPONENT(Material);
 
   EP_ENUM(BlendMode,
           None,
@@ -77,6 +77,16 @@ protected:
   AVLTree<SharedString, Float4> properties;
 
   RenderShaderProgramRef spRenderProgram = nullptr;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(VertexShader, "Vertex shader for rendering", nullptr, 0),
+      EP_MAKE_PROPERTY(PixelShader, "Pixel shader for rendering", nullptr, 0),
+      EP_MAKE_PROPERTY(BlendMode, "Frame buffer blend mode", nullptr, 0),
+      EP_MAKE_PROPERTY(CullMode, "Back face cull mode", nullptr, 0),
+    };
+  }
 };
 
 } // namespace kernel

@@ -57,6 +57,15 @@ struct epVertexDataFormatGL
   { 1, GL_UNSIGNED_BYTE, GL_FALSE },  // epVDF_UByte
 };
 
+// ***************************************************************************************
+// Author: Manu Evans, Nov 2015
+void epGPU_Clear(double color[4], double depth, int stencil)
+{
+  glClearColor(color[0], color[1], color[2], color[3]);
+  glClearDepth(depth);
+  glClearStencil(stencil);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015

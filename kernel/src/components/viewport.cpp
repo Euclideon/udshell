@@ -3,19 +3,6 @@
 namespace kernel
 {
 
-ComponentDesc Viewport::descriptor =
-{
-  &UIComponent::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION,     // epVersion
-  EPSHELL_PLUGINVERSION,  // pluginVersion
-
-  "viewport",             // id
-  "Viewport",             // displayName
-  "Is a viewport",        // description
-};
-
-
 // ---------------------------------------------------------------------------------------
 Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : UIComponent(pType, pKernel, uid, initParams)

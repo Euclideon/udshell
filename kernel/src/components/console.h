@@ -17,8 +17,8 @@ PROTOTYPE_COMPONENT(Console);
 
 class Console : public Stream
 {
+  EP_DECLARE_COMPONENT(Console, Stream, EPKERNEL_PLUGINVERSION, "Standard in/out console")
 public:
-  EP_COMPONENT(Console);
 
   Slice<void> Read(Slice<void> buffer) override;
   size_t Write(Slice<const void> data) override;

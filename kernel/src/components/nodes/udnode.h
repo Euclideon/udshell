@@ -19,8 +19,8 @@ PROTOTYPE_COMPONENT(UDNode);
 
 class UDNode : public Node
 {
+  EP_DECLARE_COMPONENT(UDNode, Node, EPKERNEL_PLUGINVERSION, "UD model node")
 public:
-  EP_COMPONENT(UDNode);
 
   UDModelRef GetUDModel() const { return spModel; }
   void SetUDModel(UDModelRef _spModel) { spModel = _spModel; }
@@ -32,6 +32,13 @@ protected:
   epResult Render(RenderSceneRef &spScene, const Double4x4 &mat) override;
 
   UDModelRef spModel = nullptr;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(UDModel, "UDModel instance", nullptr, 0),
+    };
+  }
 };
 
 } // namespace kernel

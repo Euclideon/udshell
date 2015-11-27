@@ -6,113 +6,7 @@
 #include "ep/cpp/delegate.h"
 #include "kernel.h"
 
-namespace kernel
-{
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "outputsmerged", // id
-      "OutputsMerged", // displayName
-      "Determines whether the console and log text are output to separate text widgets or interleaved", // description
-    },
-    &UIConsole::GetOutputsMerged, // getter
-    &UIConsole::SetOutputsMerged, // setter
-  },
-  {
-    {
-      "filtercomponents", // id
-      "FilterComponents", // displayName
-      "List of Components to filter the log text by", // description
-    },
-    &UIConsole::GetFilterComponents, // getter
-    &UIConsole::SetFilterComponents, // setter
-  },
-  {
-    {
-      "filtertext", // id
-      "FilterText", // displayName
-      "text string to filter console and log lines by", // description
-    },
-    &UIConsole::GetFilterText, // getter
-    &UIConsole::SetFilterText, // setter
-  },
-  {
-    {
-      "numconsolelines", // id
-      "NumConsoleLines", // displayName
-      "Number of console lines to output", // description
-    },
-    &UIConsole::GetNumConsoleLines, // getter
-    nullptr,
-  },
-  {
-    {
-      "numloglines", // id
-      "NumLogLines", // displayName
-      "Number of log lines to output", // description
-    },
-    &UIConsole::GetNumLogLines, // getter
-    nullptr,
-  },
-  {
-    {
-      "nummergedlines", // id
-      "NumMergedLines", // displayName
-      "Number of merged log + console lines to output", // description
-    },
-    &UIConsole::GetNumMergedLines, // getter
-    nullptr,
-  },
-};
-
-static CMethodDesc methods[] =
-{
-  {
-    {
-      "getfilterlevel", // id
-      "Get the level filter for the given log category", // description
-    },
-    &UIConsole::GetFilterLevel, // method
-  },
-  {
-    {
-      "setfilterlevel", // id
-      "Set the level filter for the given log category", // description
-    },
-    &UIConsole::SetFilterLevel, // method
-  },
-  {
-    {
-      "rebuildoutput", // id
-      "Rebuild output text and send to UI", // description
-    },
-    &UIConsole::RebuildOutput, // method
-  },
-  {
-    {
-      "relayinput", // id
-      "Send input to the Kernel's input stream", // description
-    },
-    &UIConsole::RelayInput, // method
-  },
-};
-
-ComponentDesc UIConsole::descriptor =
-{
-  &UIComponent::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "uiconsole",     // id
-  "UIConsole",     // displayName
-  "Is a UI for a Console Panel with input and output text controls", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)),   // properties
-  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
-  nullptr, // events
-};
+namespace kernel {
 
 LoggerRef UIConsole::spLogger;
 
@@ -239,7 +133,7 @@ void UIConsole::RebuildOutput()
 
 void UIConsole::OnLogChanged()
 {
-  Slice<LogLine> log = pKernel->GetLogger()->GetLog();
+  Slice<LogLine> log = GetKernel().GetLogger()->GetLog();
   LogLine &line = log.back();
 
   logLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1));
@@ -292,7 +186,7 @@ void UIConsole::OnStreamOutput()
 
 void UIConsole::RelayInput(String str)
 {
-  auto spInBuffer = pKernel->CreateComponent<Buffer>();
+  auto spInBuffer = GetKernel().CreateComponent<Buffer>();
   spInBuffer->Reserve(1024);
   spInBuffer->CopyBuffer(str);
   spInStream->SetBuffer(spInBuffer);

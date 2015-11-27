@@ -8,24 +8,6 @@ namespace kernel
 {
 const Array<const String> UDDataSource::extensions = { ".uds", ".ssf", ".upc", ".udi", ".oct3" };
 
-ComponentDesc UDDataSource::descriptor =
-{
-  &DataSource::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION,      // epVersion
-  EPSHELL_PLUGINVERSION,   // pluginVersion
-
-  "uddatasource",     // id
-  "UDDataSource",    // displayName
-  "Provides UD Data", // description
-
-  nullptr,            // properties
-  nullptr,            // methods
-  nullptr,            // events
-  nullptr,            // static functions
-  &RegisterExtensions // init
-};
-
 UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : DataSource(pType, pKernel, uid, initParams)
 {
@@ -76,9 +58,9 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
   }
 }
 
-epResult UDDataSource::RegisterExtensions(Kernel *pKernel)
+epResult UDDataSource::StaticInit(ep::Kernel *pKernel)
 {
-  return pKernel->RegisterExtensions(&descriptor, extensions);
+  return pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
 }
 
 } // namespace kernel

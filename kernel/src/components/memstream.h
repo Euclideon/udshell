@@ -11,8 +11,8 @@ SHARED_CLASS(Buffer);
 
 class MemStream : public Stream
 {
+  EP_DECLARE_COMPONENT(MemStream, Stream, EPKERNEL_PLUGINVERSION, "Memory stream")
 public:
-  EP_COMPONENT(MemStream);
 
   Slice<void> Read(Slice<void> buffer) override;
   size_t Write(Slice<const void> data) override;
@@ -32,6 +32,13 @@ protected:
   BufferRef spBuffer;
   Slice<void> bufferSlice;
   OpenFlags oFlags;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(Buffer, "The Buffer component MemStream reads/writes to", nullptr, 0),
+    };
+  }
 };
 
 }

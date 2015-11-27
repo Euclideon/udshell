@@ -11,8 +11,8 @@ PROTOTYPE_COMPONENT(Viewport);
 
 class Viewport : public UIComponent
 {
+  EP_DECLARE_COMPONENT(Viewport, UIComponent, EPKERNEL_PLUGINVERSION, "Viewport desc...")
 public:
-  EP_COMPONENT(Viewport);
 
 protected:
   Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);

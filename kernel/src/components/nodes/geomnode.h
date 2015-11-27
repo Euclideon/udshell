@@ -13,8 +13,8 @@ PROTOTYPE_COMPONENT(GeomNode);
 
 class GeomNode : public Node
 {
+  EP_DECLARE_COMPONENT(GeomNode, Node, EPKERNEL_PLUGINVERSION, "GeomNode desc...")
 public:
-  EP_COMPONENT(GeomNode);
 
   ModelRef GetModel() const { return spModel; }
   void SetModel(ModelRef _spModel) { spModel = _spModel; }

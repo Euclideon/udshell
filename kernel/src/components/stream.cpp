@@ -4,21 +4,9 @@
 namespace kernel
 {
 
-ComponentDesc Stream::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "stream", // id
-  "Stream", // displayName
-  "Data stream", // description
-};
-
 BufferRef Stream::ReadBuffer(size_t bytes)
 {
-  BufferRef spBuffer = pKernel->CreateComponent<Buffer>();
+  BufferRef spBuffer = GetKernel().CreateComponent<Buffer>();
   spBuffer->Allocate(bytes);
 
   Slice<void> buffer = spBuffer->Map();
@@ -43,7 +31,7 @@ BufferRef Stream::Load()
   if (len < 0)
     return nullptr;
 
-  BufferRef spBuffer = pKernel->CreateComponent<Buffer>();
+  BufferRef spBuffer = GetKernel().CreateComponent<Buffer>();
   spBuffer->Allocate((size_t)len);
 
   Slice<void> buffer = spBuffer->Map();

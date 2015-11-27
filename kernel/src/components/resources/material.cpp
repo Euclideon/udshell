@@ -3,94 +3,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace kernel
-{
-
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "vertexshader", // id
-      "Vertex Shader", // displayName
-      "Vertex shader for rendering", // description
-    },
-    &Material::GetVertexShader,
-    &Material::SetVertexShader,
-  },
-  {
-    {
-      "pixelshader", // id
-      "Pixel Shader", // displayName
-      "Pixel shader for rendering", // description
-    },
-    &Material::GetPixelShader,
-    &Material::SetPixelShader,
-  },
-  {
-    {
-      "blendmode", // id
-      "Blend Mode", // displayName
-      "Frame buffer blend mode", // description
-    },
-    &Material::GetBlendMode,
-    &Material::SetBlendMode,
-  },
-  {
-    {
-      "cullmode", // id
-      "Cull Mode", // displayName
-      "Back face cull mode", // description
-    },
-    &Material::GetCullMode,
-    &Material::SetCullMode,
-  }
-};
-/*
-static CMethodDesc methods[] =
-{
-  {
-    {
-      "getshader",
-      "Get a shader",
-    },
-    &Material::GetShader // method
-  },
-  {
-    {
-      "setshader",
-      "Set a shader",
-    },
-    &Material::SetShader // method
-  },
-  {
-    {
-      "gettexture",
-      "Get a texture",
-    },
-    &Material::GetTexture // method
-  },
-  {
-    {
-      "settexture",
-      "Set a texture",
-    },
-    &Material::SetTexture // method
-  }
-};
-*/
-ComponentDesc Material::descriptor =
-{
-  &Resource::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "material", // id
-  "Material", // displayName
-  "Material resource", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-};
+namespace kernel {
 
 void Material::SetShader(ShaderType type, ShaderRef spShader)
 {
@@ -144,7 +57,7 @@ RenderShaderProgramRef Material::GetRenderProgram()
     {
       // TODO: check if this program already exists in `pRenderer->shaderPrograms`
 
-      RenderShaderProgram *pProgram = new RenderShaderProgram(pKernel->GetRenderer(), spVS, spPS);
+      RenderShaderProgram *pProgram = new RenderShaderProgram(GetKernel().GetRenderer(), spVS, spPS);
       if (!pProgram->pProgram)
       {
         delete pProgram;

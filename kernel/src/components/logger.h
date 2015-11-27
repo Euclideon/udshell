@@ -120,8 +120,8 @@ struct LogStream
 
 class Logger : public Component
 {
+  EP_DECLARE_COMPONENT(Logger, Component, EPKERNEL_PLUGINVERSION, "Logger desc...")
 public:
-  EP_COMPONENT(Logger);
 
   void Log(int level, String text, LogCategories category = LogCategories::Debug, String componentUID = nullptr);
 
@@ -163,6 +163,20 @@ protected:
   LogFilter filter;
   Array<LogLine> internalLog;
   bool bEnabled = true, bLogging = false;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(Enabled, "Is Enabled", nullptr, 0),
+    };
+  }
+  static Array<const MethodInfo> GetMethods();
+  static Array<const EventInfo> GetEvents()
+  {
+    return{
+      EP_MAKE_EVENT(Changed, "Log has been updated with a new entry"),
+    };
+  }
 };
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const epVarArg *pArgs);

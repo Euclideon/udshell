@@ -13,14 +13,11 @@ SHARED_CLASS(UIComponent);
 
 class Window : public Component
 {
+  EP_DECLARE_COMPONENT(Window, Component, EPKERNEL_PLUGINVERSION, "Window desc...")
 public:
-  EP_COMPONENT(Window);
 
   void SetTopLevelUI(UIComponentRef spUIComponent);
   UIComponentRef GetTopLevelUI() const { return spTopLevelUI; }
-
-  void *GetInternalData() { return pInternal; }
-  const void *GetInternalData() const { return pInternal; }
 
 protected:
   Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
@@ -31,7 +28,12 @@ protected:
 
   UIComponentRef spTopLevelUI = nullptr;
 
-  void *pInternal = nullptr;
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_EXPLICIT("UI", "Top level UI for the window", EP_MAKE_GETTER(GetTopLevelUI), EP_MAKE_SETTER(SetTopLevelUI), nullptr, 0),
+    };
+  }
 };
 
 } // namespace kernel

@@ -2,39 +2,12 @@
 #include "metadata.h"
 #include "kernel.h"
 
-namespace kernel
-{
-
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "metadata", // id
-      "Metadata", // displayName
-      "Get the metadata object", // description
-    },
-    &Resource::GetMetadata,
-    nullptr
-  }
-};
-ComponentDesc Resource::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "resource", // id
-  "Resource", // displayName
-  "Base resource", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-};
+namespace kernel {
 
 MetadataRef Resource::GetMetadata() const
 {
   if (!metadata)
-    (MetadataRef&)metadata = pKernel->CreateComponent<Metadata>();
+    (MetadataRef&)metadata = GetKernel().CreateComponent<Metadata>();
   return metadata;
 }
 

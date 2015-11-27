@@ -4,47 +4,14 @@
 #include "nodes/camera.h"
 #include "renderscene.h"
 
-namespace kernel
-{
+namespace kernel {
 
-static CPropertyDesc props[] =
+Array<const PropertyInfo> View::GetProperties()
 {
-  {
-    {
-      "camera", // id
-      "Camera", // displayName
-      "Camera for viewport", // description
-    },
-    &View::GetCamera, // getter
-    &View::SetCamera, // setter
-  }
-};
-static CEventDesc events[] =
-{
-  {
-    {
-      "dirty", // id
-      "Dirty", // displayName
-      "View dirty event", // description
-    },
-    &View::Dirty
-  }
-};
-ComponentDesc View::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "view",      // id
-  "View",    // displayName
-  "Is a view", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-  nullptr,
-  Slice<CEventDesc>(events, EPARRAYSIZE(events)) // events
-};
+  return{
+    EP_MAKE_PROPERTY(Camera, "Camera for viewport", nullptr, 0),
+  };
+}
 
 bool View::InputEvent(const epInputEvent &ev)
 {
@@ -137,11 +104,17 @@ void View::SetLatestFrame(UniquePtr<RenderableView> spFrame)
 
 void View::OnDirty()
 {
+  if (renderWidth == 0 || renderHeight == 0)
+  {
+    pKernel->LogWarning(1, "Render target has zero size! Unable to render...");
+    return;
+  }
+
   if (spScene && spCamera)
   {
     UniquePtr<RenderableView> spRenderView = UniquePtr<RenderableView>(new RenderableView);
 
-    Renderer *pRenderer = pKernel->GetRenderer();
+    Renderer *pRenderer = GetKernel().GetRenderer();
     spRenderView->pRenderEngine = pRenderer->GetRenderEngine();
 
     spRenderView->spView = ViewRef(this);
@@ -179,12 +152,12 @@ void View::Update(double timeStep)
 
 void View::Activate()
 {
-  pKernel->UpdatePulse.Subscribe(updateFunc);
+  GetKernel().UpdatePulse.Subscribe(updateFunc);
 }
 
 void View::Deactivate()
 {
-  pKernel->UpdatePulse.Unsubscribe(updateFunc);
+  GetKernel().UpdatePulse.Unsubscribe(updateFunc);
 }
 
 } // namespace kernel

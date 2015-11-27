@@ -86,7 +86,7 @@ using qt::internal::CleanupInternalData;
 // ---------------------------------------------------------------------------------------
 Variant UIComponent::GetUIHandle() const
 {
-  return pKernel->CreateComponent<qt::QtComponent>({ { "object", (int64_t)(size_t)pInternal } });
+  return GetKernel().CreateComponent<qt::QtComponent>({ { "object", (int64_t)(size_t)pUserData } });
 }
 
 // ---------------------------------------------------------------------------------------
@@ -94,21 +94,21 @@ epResult UIComponent::CreateInternal(InitParams initParams)
 {
   LogTrace("UIComponent::CreateInternal()");
 
-  if (SetupFromQmlFile(initParams, (qt::QtKernel*)pKernel, this, (QObject**)&pInternal) != epR_Success)
+  if (SetupFromQmlFile(initParams, (qt::QtKernel*)pKernel, this, (QObject**)&pUserData) != epR_Success)
     return epR_Failure;
 
-  QObject *pQtObject = (QObject*)pInternal;
+  QObject *pQtObject = (QObject*)pUserData;
 
   // We expect a QQuickItem object
   if (qobject_cast<QQuickItem*>(pQtObject) == nullptr)
   {
     LogError("UIComponent must create a QQuickItem");
-    CleanupInternalData((QObject**)&pInternal);
+    CleanupInternalData((QObject**)&pUserData);
     return epR_Failure;
   }
 
   // Decorate the descriptor with meta object information
-  qt::PopulateComponentDesc<UIComponent>(this, pQtObject);
+  qt::PopulateComponentDesc(this, pQtObject);
 
   return epR_Success;
 }
@@ -117,7 +117,7 @@ epResult UIComponent::CreateInternal(InitParams initParams)
 epResult UIComponent::InitComplete()
 {
   // let qml know that the enclosing object has finished being created
-  QObject *pQtObject = (QObject*)pInternal;
+  QObject *pQtObject = (QObject*)pUserData;
   qt::QtEPComponent *epComponent = pQtObject->findChild<qt::QtEPComponent*>(QString(), Qt::FindDirectChildrenOnly);
   if (epComponent)
     epComponent->Done();
@@ -129,7 +129,7 @@ epResult UIComponent::InitComplete()
 void UIComponent::DestroyInternal()
 {
   LogTrace("UIComponent::DestroyInternal()");
-  CleanupInternalData((QObject**)&pInternal);
+  CleanupInternalData((QObject**)&pUserData);
 }
 
 
@@ -139,7 +139,7 @@ epResult Viewport::CreateInternal(InitParams initParams)
   LogTrace("Viewport::CreateInternal()");
 
   // check that we have a RenderView
-  QQuickItem *pRootItem = (QQuickItem*)pInternal;
+  QQuickItem *pRootItem = (QQuickItem*)pUserData;
   QList<qt::RenderView *> renderViews = pRootItem->findChildren<qt::RenderView *>();
   if (renderViews.size() != 1)
   {
@@ -152,7 +152,7 @@ epResult Viewport::CreateInternal(InitParams initParams)
   if (!spView)
   {
     LogDebug(2, "Creating internal view");
-    spView = pKernel->CreateComponent<View>();
+    spView = GetKernel().CreateComponent<View>();
   }
 
   renderViews.first()->AttachView(spView);
@@ -173,27 +173,27 @@ epResult Window::CreateInternal(InitParams initParams)
   LogTrace("Window::CreateInternal()");
 
   qt::QtKernel *pQtKernel = (qt::QtKernel*)pKernel;
-  if (SetupFromQmlFile(initParams, pQtKernel, this, (QObject**)&pInternal) != epR_Success)
+  if (SetupFromQmlFile(initParams, pQtKernel, this, (QObject**)&pUserData) != epR_Success)
     return epR_Failure;
 
-  QQuickWindow *pQtWindow = qobject_cast<QQuickWindow*>((QObject*)pInternal);
+  QQuickWindow *pQtWindow = qobject_cast<QQuickWindow*>((QObject*)pUserData);
   // We expect a QQuickWindow object
   if (pQtWindow == nullptr)
   {
     LogError("Window must create a QQuickWindow");
-    CleanupInternalData((QObject**)&pInternal);
+    CleanupInternalData((QObject**)&pUserData);
     return epR_Failure;
   }
 
   // Decorate the descriptor with meta object information
-  qt::PopulateComponentDesc<Window>(this, pQtWindow);
+  qt::PopulateComponentDesc(this, pQtWindow);
 
   // register the window with the kernel
   if (pQtKernel->RegisterWindow(pQtWindow) != epR_Success)
   {
     // TODO: error handling
     LogError("Unable to register window");
-    CleanupInternalData((QObject**)&pInternal);
+    CleanupInternalData((QObject**)&pUserData);
     return epR_Failure;
   }
 
@@ -204,7 +204,7 @@ epResult Window::CreateInternal(InitParams initParams)
 void Window::DestroyInternal()
 {
   LogTrace("Window::DestroyInternal()");
-  CleanupInternalData((QObject**)&pInternal);
+  CleanupInternalData((QObject**)&pUserData);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -213,14 +213,14 @@ void Window::SetTopLevelUI(UIComponentRef spUIComponent)
   LogTrace("Window::SetTopLevelUI()");
 
   spTopLevelUI = spUIComponent;
-  QQuickWindow *pQtWindow = (QQuickWindow*)pInternal;
+  QQuickWindow *pQtWindow = (QQuickWindow*)pUserData;
 
   // if there's an existing top level ui, then detach
   foreach(QQuickItem *pChild, pQtWindow->contentItem()->childItems())
     pChild->setParentItem(nullptr);
 
   // set the new one
-  QQuickItem *pQtItem = (QQuickItem*)spUIComponent->GetInternalData();
+  QQuickItem *pQtItem = (QQuickItem*)spUIComponent->GetUserData();
   if (pQtItem)
     pQtItem->setParentItem(pQtWindow->contentItem());
 }

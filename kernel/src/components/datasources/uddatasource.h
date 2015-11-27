@@ -11,8 +11,8 @@ PROTOTYPE_COMPONENT(UDDataSource);
 
 class UDDataSource : public DataSource
 {
+  EP_DECLARE_COMPONENT(UDDataSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides UD Data")
 public:
-  EP_COMPONENT(UDDataSource);
 
   enum class Flags : size_t
   {
@@ -30,7 +30,7 @@ public:
 protected:
   static const Array<const String> extensions;
 
-  static epResult RegisterExtensions(Kernel *pKernel);
+  static epResult StaticInit(ep::Kernel *pKernel);
 
   UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
 };

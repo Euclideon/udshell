@@ -90,29 +90,28 @@ public:
 
   Event<> EvX;
 
-  static Array<epPropertyDesc> GetProperties()
+  static Array<const PropertyInfo> GetProperties()
   {
     return{
       EP_MAKE_PROPERTY(X, "Desc...", "Display", 0),
     };
   }
 
-  static Array<epMethodDesc> GetMethods()
+  static Array<const MethodInfo> GetMethods()
   {
     return{
       EP_MAKE_METHOD(MethodX, "Wow!"),
     };
   }
 
-  static Array<epEventDesc> GetEvents()
+  static Array<const EventInfo> GetEvents()
   {
     return{
-      // TODO: this needs finishing
-//      EP_MAKE_EVENT(EvX, "Wow!"),
+      EP_MAKE_EVENT(EvX, "Wow!"),
     };
   }
 
-  static Array<epStaticFuncDesc> GetStaticFuncs()
+  static Array<const StaticFuncInfo> GetStaticFuncs()
   {
     return{
       EP_MAKE_STATICFUNC(FuncX, "Wow!"),

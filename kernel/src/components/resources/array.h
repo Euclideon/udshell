@@ -17,8 +17,8 @@ PROTOTYPE_COMPONENT(ArrayBuffer);
 
 class ArrayBuffer : public Buffer
 {
+  EP_DECLARE_COMPONENT(ArrayBuffer, Buffer, EPKERNEL_PLUGINVERSION, "ArrayBuffer desc...")
 public:
-  EP_COMPONENT(ArrayBuffer);
 
   // array allocation
   inline void Allocate(SharedString _elementType, size_t _elementSize, size_t length)

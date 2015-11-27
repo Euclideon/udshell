@@ -11,13 +11,10 @@ PROTOTYPE_COMPONENT(UIComponent);
 
 class UIComponent : public Component
 {
+  EP_DECLARE_COMPONENT(UIComponent, Component, EPKERNEL_PLUGINVERSION, "UIComponent desc...")
 public:
-  EP_COMPONENT(UIComponent);
 
   Variant GetUIHandle() const;
-
-  void *GetInternalData() { return pInternal; }
-  const void *GetInternalData() const { return pInternal; }
 
 protected:
   UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
@@ -27,7 +24,12 @@ protected:
   epResult InitComplete() override;
   void DestroyInternal();
 
-  void *pInternal = nullptr;
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(UIHandle, "Platform specific UI handle", nullptr, 0),
+    };
+  }
 };
 
 } // namespace kernel

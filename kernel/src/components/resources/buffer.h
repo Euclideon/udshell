@@ -12,8 +12,8 @@ PROTOTYPE_COMPONENT(Buffer);
 
 class Buffer : public Resource
 {
+  EP_DECLARE_COMPONENT(Buffer, Resource, EPKERNEL_PLUGINVERSION, "Buffer desc...")
 public:
-  EP_COMPONENT(Buffer);
 
   bool Reserve(size_t size);
   bool Allocate(size_t size);

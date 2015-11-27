@@ -7,74 +7,6 @@
 namespace kernel
 {
 
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "resourcecount", // id
-      "Resource Count", // displayName
-      "Number of resources the data source provides", // description
-    },
-    &DataSource::GetNumResources, // getter
-    nullptr  // setter
-  },
-  {
-    {
-      "url", // id
-      "URL", // displayName
-      "the file or location of the DataSource", // description
-    },
-    &DataSource::GetURL, // getter
-    &DataSource::SetURL  // setter
-  }
-};
-
-static CMethodDesc methods[] =
-{
-  {
-    {
-      "getresourcename", // id
-      "Get a resource name by index", // description
-    },
-    &DataSource::GetResourceName  // method
-  },
-  {
-    {
-      "getresource", // id
-      "Get a resource by name or index", // description
-    },
-    &DataSource::GetResourceByVariant  // method
-  },
-  {
-    {
-      "setresource", // id
-      "Set a resource by name", // description
-    },
-    &DataSource::SetResource  // method
-  },
-  {
-    {
-      "countresource", // id
-      "Count resources with a name prefix", // description
-    },
-    &DataSource::CountResources  // method
-  }
-};
-ComponentDesc DataSource::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "datasource", // id
-  "Data Source", // displayName
-  "Provides data", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // propeties
-  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)) // propeties
-};
-
 StreamRef DataSource::OpenStream(const Variant &source)
 {
   ComponentRef spComp = nullptr;
@@ -86,7 +18,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
   if (source.is(Variant::Type::String))
   {
     // path or url?
-    spSource = pKernel->CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
+    spSource = GetKernel().CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
     if (!spSource)
     {
       LogWarning(5, "\"src\" file path not found: {0}", source.asString());
@@ -102,7 +34,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
     else if (spComp->IsType<Buffer>())
     {
       BufferRef spBuffer = shared_pointer_cast<Buffer>(spComp);
-      spSource = pKernel->CreateComponent<MemStream>({ { "buffer", spBuffer }, { "flags", FileOpenFlags::Read } });
+      spSource = GetKernel().CreateComponent<MemStream>({ { "buffer", spBuffer }, { "flags", FileOpenFlags::Read } });
     }
   }
 

@@ -10,8 +10,8 @@ PROTOTYPE_COMPONENT(PluginLoader);
 
 class PluginLoader : public Component
 {
+  EP_DECLARE_COMPONENT(PluginLoader, Component, EPKERNEL_PLUGINVERSION, "PluginLoader desc...")
 public:
-  EP_COMPONENT(PluginLoader);
 
   virtual Slice<const String> GetSupportedExtensions() const { return nullptr; }
   virtual bool LoadPlugin(String filename) { return false; }

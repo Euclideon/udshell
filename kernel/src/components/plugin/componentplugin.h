@@ -10,15 +10,15 @@ namespace kernel {
 
 class ComponentPlugin : public Component
 {
+  EP_DECLARE_COMPONENT(ComponentPlugin, Component, EPKERNEL_PLUGINVERSION, "Component plugin base class")
 public:
-  EP_COMPONENT(ComponentPlugin);
 
 
 private:
   ComponentPlugin(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pCallbacks = pType->pExternalDesc->pOverrides;
+    pCallbacks = pType->pOverrides;
     if (pCallbacks->pCreateInstance)
     {
       pUserData = pCallbacks->pCreateInstance((epComponent*)this, (const epKeyValuePair*)initParams.params.ptr, initParams.params.length);

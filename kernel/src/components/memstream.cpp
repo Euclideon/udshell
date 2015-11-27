@@ -1,36 +1,7 @@
 #include "components/memstream.h"
 #include "kernel.h"
 
-namespace kernel
-{
-static CPropertyDesc props[] =
-{
-  {
-    {
-      "buffer", // id
-      "Buffer", // displayName
-      "The Buffer component MemStream reads/writes to", // description
-    },
-    &MemStream::GetBuffer, // getter
-    &MemStream::SetBuffer, // setter
-  }
-};
-
-ComponentDesc MemStream::descriptor =
-{
-  &Stream::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "memstream", // id
-  "MemStream", // displayName
-  "Memory stream", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-  nullptr, // methods,
-  nullptr
-};
+namespace kernel {
 
 MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Stream(pType, pKernel, uid, initParams)

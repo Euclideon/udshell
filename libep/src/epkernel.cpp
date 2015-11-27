@@ -7,57 +7,69 @@ extern "C" {
 
 epResult epKernel_SendMessage(epString target, epString sender, epString message, const epVariant* pData)
 {
-  return s_pPluginInstance->pKernelAPI->pSendMessage(s_pPluginInstance->pKernelInstance, target, sender, message, pData);
+  return Kernel::GetInstance()->SendMessage(target, sender, message, *(Variant*)pData);
 }
 
 epResult epKernel_RegisterComponentType(const epComponentDesc *pDesc)
 {
-  return s_pPluginInstance->pKernelAPI->pRegisterComponentType(s_pPluginInstance->pKernelInstance, pDesc);
+  EPASSERT(false, "TODO");
+/*
+  class CComponent : public ep::Component
+  {
+  };
+
+  if (!Kernel::GetInstance()->RegisterComponentType<CComponent>())
+    return epR_Failure;
+  return epR_Success;
+*/
+  return epR_Failure;
 }
 
 epResult epKernel_CreateComponent(epString typeId, const epKeyValuePair *pInitParams, size_t numInitParams, epComponent **ppNewInstance)
 {
-  return s_pPluginInstance->pKernelAPI->pCreateComponent(s_pPluginInstance->pKernelInstance, typeId, pInitParams, numInitParams, ppNewInstance);
+  return Kernel::GetInstance()->CreateComponent(typeId, Slice<const KeyValuePair>((const KeyValuePair*)pInitParams, numInitParams), (ComponentRef*)ppNewInstance);
 }
 
 epComponent* epKernel_FindComponent(epString uid)
 {
-  return s_pPluginInstance->pKernelAPI->pFindComponent(s_pPluginInstance->pKernelInstance, uid);
+  epComponent* r;
+  new(&r) ComponentRef(Kernel::GetInstance()->FindComponent(uid));
+  return r;
 }
 
 void epKernel_Exec(epString code)
 {
-  s_pPluginInstance->pKernelAPI->pExec(s_pPluginInstance->pKernelInstance, code);
+  Kernel::GetInstance()->Exec(code);
 }
 
 void epKernel_LogError(const epString text, const epString componentUID)
 {
-  s_pPluginInstance->pKernelAPI->pLogError(s_pPluginInstance->pKernelInstance, text, componentUID);
+  Kernel::GetInstance()->LogError(String(text), String(componentUID));
 }
 
 void epKernel_LogWarning(int level, const epString text, const epString componentUID)
 {
-  s_pPluginInstance->pKernelAPI->pLogWarning(s_pPluginInstance->pKernelInstance, level, text, componentUID);
+  Kernel::GetInstance()->LogWarning(level, String(text), String(componentUID));
 }
 
 void epKernel_LogDebug(int level, const epString text, const epString componentUID)
 {
-  s_pPluginInstance->pKernelAPI->pLogDebug(s_pPluginInstance->pKernelInstance, level, text, componentUID);
+  Kernel::GetInstance()->LogDebug(level, String(text), String(componentUID));
 }
 
 void epKernel_LogInfo(int level, const epString text, const epString componentUID)
 {
-  s_pPluginInstance->pKernelAPI->pLogInfo(s_pPluginInstance->pKernelInstance, level, text, componentUID);
+  Kernel::GetInstance()->LogInfo(level, String(text), String(componentUID));
 }
 
 void epKernel_LogScript(const epString text, const epString componentUID)
 {
-  s_pPluginInstance->pKernelAPI->pLogScript(s_pPluginInstance->pKernelInstance, text, componentUID);
+  Kernel::GetInstance()->LogScript(String(text), String(componentUID));
 }
 
 void epKernel_LogTrace(const epString text, const epString componentUID)
 {
-  s_pPluginInstance->pKernelAPI->pLogTrace(s_pPluginInstance->pKernelInstance, text, componentUID);
+  Kernel::GetInstance()->LogTrace(String(text), String(componentUID));
 }
 
 }

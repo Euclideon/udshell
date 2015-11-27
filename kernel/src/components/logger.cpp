@@ -4,141 +4,24 @@
 
 namespace kernel {
 
-static CPropertyDesc props[] =
+Array<const MethodInfo> Logger::GetMethods()
 {
-  {
-    {
-      "enabled", // id
-      "Enabled", // displayName
-      "Is Enabled", // description
-    },
-    &Logger::GetEnabled, // getter
-    &Logger::SetEnabled, // setter
-  },
-};
-
-static CMethodDesc methods[] =
-{
-  {
-    {
-      "log", // id
-      "Write a line to the log", // description
-    },
-    &Logger::Log, // method
-  },
-  {
-    {
-      "addstream", // id
-      "Add an output stream to the logger", // description
-    },
-    &Logger::AddStream, // method
-  },
-  {
-    {
-      "removestream", // id
-      "Remove an output stream from the logger", // description
-    },
-    &Logger::RemoveStream, // method
-  },
-  {
-    {
-      "resetfilter", // id
-      "Resets log filter to a non-filtering state", // description
-    },
-    &Logger::ResetFilter, // method
-  },
-  {
-    {
-      "getlevel", // id
-      "Get filter level for the specified category", // description
-    },
-    &Logger::GetLevel, // method
-  },
-  {
-    {
-      "setlevel", // id
-      "Filter logging for a bitfield of categories to the specified level", // description
-    },
-    &Logger::SetLevel, // method
-  },
-  {
-    {
-      "getcomponents", // id
-      "Get filtered components uids", // description
-    },
-    &Logger::GetComponents, // method
-  },
-  {
-    {
-      "setcomponents", // id
-      "Filter logging to the specified component UIDs", // description
-    },
-    &Logger::SetComponents_Arr, // method
-  },
-  {
-    {
-      "resetstreamfilter", // id
-      "Resets a stream's log filter to a non-filtering state", // description
-    },
-    &Logger::ResetStreamFilter, // method
-  },
-  {
-    {
-      "getstreamlevel", // id
-      "Get a category's filter level for the given stream", // description
-    },
-    &Logger::GetStreamLevel, // method
-  },
-  {
-    {
-      "setstreamlevel", // id
-      "Filter category levels for the given stream", // description
-    },
-    &Logger::SetStreamLevel, // method
-  },
-  {
-    {
-      "getstreamcomponents", // id
-      "Get the filtered components uids for the given stream", // description
-    },
-    &Logger::GetStreamComponents, // method
-  },
-  {
-    {
-      "setstreamcomponents", // id
-      "Filter logging for the given stream to the specified component UIDs", // description
-    },
-    &Logger::SetStreamComponents_Arr, // method
-  }
-};
-
-static CEventDesc events[] =
-{
-  {
-    {
-      "changed", // id
-      "Changed", // displayName
-      "Log has been updated with a new entry", // description
-    },
-    &Logger::Changed, // event
-  },
-};
-
-ComponentDesc Logger::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "logger", // id
-  "Logger", // displayName
-  "Logger", // description
-
-  Slice<CPropertyDesc>(props, EPARRAYSIZE(props)),   // properties
-  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
-  Slice<CEventDesc>(events, EPARRAYSIZE(events)),    // events
-};
+  return{
+    EP_MAKE_METHOD(Log, "Write a line to the log"),
+    EP_MAKE_METHOD(AddStream, "Add an output stream to the logger"),
+    EP_MAKE_METHOD(RemoveStream, "Remove an output stream from the logger"),
+    EP_MAKE_METHOD(ResetFilter, "Resets log filter to a non-filtering state"),
+    EP_MAKE_METHOD(GetLevel, "Get filter level for the specified category"),
+    EP_MAKE_METHOD(SetLevel, "Filter logging for a bitfield of categories to the specified level"),
+    EP_MAKE_METHOD(GetComponents, "Get filtered components uids"),
+    EP_MAKE_METHOD_EXPLICIT("SetComponents", SetComponents_Arr, "Filter logging to the specified component UIDs"),
+    EP_MAKE_METHOD(ResetStreamFilter, "Resets a stream's log filter to a non-filtering state"),
+    EP_MAKE_METHOD(GetStreamLevel, "Get a category's filter level for the given stream"),
+    EP_MAKE_METHOD(SetStreamLevel, "Filter category levels for the given stream"),
+    EP_MAKE_METHOD(GetStreamComponents, "Get the filtered components uids for the given stream"),
+    EP_MAKE_METHOD_EXPLICIT("SetStreamComponents", SetStreamComponents_Arr, "Filter logging for the given stream to the specified component UIDs"),
+  };
+}
 
 Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)

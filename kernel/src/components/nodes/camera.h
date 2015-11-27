@@ -13,8 +13,8 @@ PROTOTYPE_COMPONENT(SimpleCamera);
 
 class Camera : public Node
 {
+  EP_DECLARE_COMPONENT(Camera, Node, EPKERNEL_PLUGINVERSION, "Camera desc...")
 public:
-  EP_COMPONENT(Camera);
 
   Double4x4 GetCameraMatrix() const { Double4x4 m; CalculateWorldMatrix(&m); return m; }
   Double4x4 GetViewMatrix() const { return GetCameraMatrix().inverse(); }
@@ -59,13 +59,27 @@ protected:
   bool InputEvent(const epInputEvent &ev) override { return false; }
   virtual bool ViewportInputEvent(const epInputEvent &ev) { return false; }
   bool Update(double timeStep) override { return epR_Success; }
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(CameraMatrix, "Position of camera", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(ViewMatrix, "Position of camera", nullptr, 0),
+    };
+  }
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(SetDepthPlanes, "Set the near and far depth planes:\n  setdepthplanes(near, far)"),
+    };
+  }
 };
 
 
 class SimpleCamera : public Camera
 {
+  EP_DECLARE_COMPONENT(SimpleCamera, Camera, EPKERNEL_PLUGINVERSION, "SimpleCamera desc...")
 public:
-  EP_COMPONENT(SimpleCamera);
 
   void SetMatrix(const Double4x4 &_matrix) override { pos = _matrix.axis.t.toVector3(); ypr = _matrix.extractYPR(); Camera::SetMatrix(_matrix); }
   void SetPosition(const Double3 &_pos) override { pos = _pos; Camera::SetPosition(_pos); }
@@ -143,6 +157,16 @@ protected:
 
   bool ViewportInputEvent(const epInputEvent &ev) override;
   bool Update(double timeStep) override;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_WO(Matrix, "Local matrix", nullptr, 0),
+      EP_MAKE_PROPERTY_WO(Position, "Local position", nullptr, 0),
+      EP_MAKE_PROPERTY_WO(Orientation, "Camera orientation (YPR)", nullptr, 0),
+      EP_MAKE_PROPERTY_WO(Speed, "Camera speed", nullptr, 0),
+    };
+  }
 };
 
 } // namespace kernel

@@ -6,35 +6,6 @@
 namespace kernel
 {
 
-/*
-static CMethodDesc methods[] =
-{
-
-};
-static CPropertyDesc props[] =
-{
-
-};
-*/
-
-ComponentDesc ResourceManager::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "resourcemanager", // id
-  "Resource Manager", // displayName
-  "Manages resource components", // description
-
-  //Slice<CPropertyDesc>(props, EPARRAYSIZE(props)), // properties
-  //Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
-  nullptr, // properties
-  nullptr, // methods
-  nullptr, // events
-};
-
 ResourceManager::ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
 {
@@ -49,13 +20,13 @@ ResourceManager::~ResourceManager()
 void ResourceManager::AddResource(ResourceRef res) { resources.Insert(res->uid, res); }
 void ResourceManager::RemoveResource(ResourceRef res) { resources.Remove(res->uid); }
 
-Array<ResourceRef> ResourceManager::GetResourcesByType(const ComponentDesc *pBase) const
+Array<ResourceRef> ResourceManager::GetResourcesByType(const ep::ComponentDesc *pBase) const
 {
   Array<ResourceRef> outs;
 
   for (ResourceRef spRes : resources)
   {
-    const ComponentDesc *pDesc = spRes->GetDescriptor();
+    const ep::ComponentDesc *pDesc = spRes->GetDescriptor();
 
     while (pDesc)
     {
@@ -81,7 +52,7 @@ DataSourceRef ResourceManager::LoadResourcesFromFile(InitParams initParams)
     return nullptr; // TODO Handle error
   }
 
-  DataSourceRef spDS = pKernel->CreateDataSourceFromExtension(ext, initParams);
+  DataSourceRef spDS = GetKernel().CreateDataSourceFromExtension(ext, initParams);
   if (!spDS)
   {
     LogWarning(2, "LoadResourcesFromFile - \"src\" file not found: {0}", src.asString());

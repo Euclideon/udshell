@@ -1,8 +1,13 @@
 namespace ep {
 
-inline Kernel* Component::GetKernel() const
+inline Kernel& Component::GetKernel() const
 {
-  return (Kernel*)pKernel;
+  return *(Kernel*)pKernel;
+}
+
+inline const ComponentDesc* Component::GetDescriptor() const
+{
+  return pType;
 }
 
 inline SharedString Component::GetUid() const
@@ -21,6 +26,11 @@ inline void Component::SetName(SharedString _name)
 inline void* Component::GetUserData() const
 {
   return pUserData;
+}
+
+inline epResult Component::SendMessage(Component *pComponent, String message, const Variant &data) const
+{
+  return SendMessage(MutableString128(Concat, "@", pComponent->uid), message, data);
 }
 
 template<typename ...Args>

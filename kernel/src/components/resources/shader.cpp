@@ -5,23 +5,11 @@
 namespace kernel
 {
 
-ComponentDesc Shader::descriptor =
-{
-  &Resource::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "shader", // id
-  "Shader", // displayName
-  "Shader resource", // description
-};
-
 RenderShaderRef Shader::GetRenderShader(int type)
 {
   if (!spRenderShader)
   {
-    RenderShader *pShader = new RenderShader(pKernel->GetRenderer(), ShaderRef(this), (epShaderType)type);
+    RenderShader *pShader = new RenderShader(GetKernel().GetRenderer(), ShaderRef(this), (epShaderType)type);
     if (!pShader->pShader)
     {
       delete pShader;

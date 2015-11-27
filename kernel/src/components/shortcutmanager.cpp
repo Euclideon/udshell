@@ -1,77 +1,7 @@
 #include "components/shortcutmanager.h"
 #include "kernel.h"
 
-namespace kernel
-{
-static CMethodDesc methods[] =
-{
-  {
-    {
-      "setshortcutstring", // id
-      "Set the shortcut string for the given operation id", // description
-    },
-    &ShortcutManager::SetShortcutString, // method
-  },
-  // TODO - uncomment this once Variant can be constructed from a SharedString
-  /*{
-    {
-      "getshortcutstring", // id
-      "Get the shortcut string for the given operation id", // description
-    },
-    &ShortcutManager::GetShortcutString, // method
-  },*/
-  {
-    {
-      "registershortcut", // id
-      "register an operation and assign it a shortcut string", // description
-    },
-    &ShortcutManager::RegisterShortcut, // method
-  },
-  {
-    {
-      "unregistershortcut", // id
-      "remove an operation from the shortcut manager", // description
-    },
-    &ShortcutManager::UnregisterShortcut, // method
-  },
-  {
-    {
-      "handleshortcutevent", // id
-      "call the function or script attached to the given shortcut string", // description
-    },
-    &ShortcutManager::HandleShortcutEvent, // method
-  },
-  {
-    {
-      "setshortcutfunction", // id
-      "Assign a callback function to the given shortcut operation", // description
-    },
-    &ShortcutManager::SetShortcutFunction, // method
-  },
-  {
-    {
-      "setshortcutscript", // id
-      "Assign a script string to the given shortcut operation", // description
-    },
-    &ShortcutManager::SetShortcutScript, // method
-  },
-};
-
-ComponentDesc ShortcutManager::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "shortcutmanager", // id
-  "Shortcut Manager", // displayName
-  "Registers keyboard shortcuts and handles shortcut events", // description
-
-  nullptr, // properties
-  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
-  nullptr, // events
-};
+namespace kernel {
 
 ShortcutManager::ShortcutManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)

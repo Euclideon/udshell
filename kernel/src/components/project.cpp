@@ -6,34 +6,7 @@
 #include "kernel.h"
 #include "rapidxml.hpp"
 
-namespace kernel
-{
-static CMethodDesc methods[] =
-{
-  {
-    {
-      "saveproject", // id
-      "Save Project to an XML file", // description
-    },
-    &Project::SaveProject, // method
-  }
-};
-
-ComponentDesc Project::descriptor =
-{
-  &Component::descriptor, // pSuperDesc
-
-  EPSHELL_APIVERSION, // epVersion
-  EPSHELL_PLUGINVERSION, // pluginVersion
-
-  "project", // id
-  "Project", // displayName
-  "Contains the state of a project", // description
-
-  nullptr,                                           // properties
-  Slice<CMethodDesc>(methods, EPARRAYSIZE(methods)), // methods
-  nullptr,                                           // events
-};
+namespace kernel {
 
 Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
   : Component(pType, pKernel, uid, initParams)
@@ -91,7 +64,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
 
 void Project::SaveProject()
 {
-  auto spXMLBuffer = pKernel->CreateComponent<Text>();
+  auto spXMLBuffer = GetKernel().CreateComponent<Text>();
   spXMLBuffer->Reserve(10240);
 
   Array<KeyValuePair> projectValues;
@@ -111,7 +84,7 @@ void Project::SaveProject()
   if (srcString.empty())
     srcString = "project0.epproj";
 
-  StreamRef spFile = pKernel->CreateComponent<File>({ { "path", String(srcString) }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+  StreamRef spFile = GetKernel().CreateComponent<File>({ { "path", String(srcString) }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
   if (!spFile)
   {
     LogWarning(1, "Failed to open Project file for writing: \"{0}\"", srcString);

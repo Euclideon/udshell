@@ -22,8 +22,8 @@ EP_ENUM(SeekOrigin,
 
 class Stream : public Component
 {
+  EP_DECLARE_COMPONENT(Stream, Component, EPKERNEL_PLUGINVERSION, "Stream desc...")
 public:
-  EP_COMPONENT(Stream);
 
   int64_t Length() const { return length; }
 

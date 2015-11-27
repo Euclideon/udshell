@@ -342,7 +342,7 @@ void LuaState::setComponent(Variant key, ComponentRef c, LuaLocation loc)
 // *** bind components to Lua ***
 void LuaState::pushComponentMetatable(const ComponentDesc &desc, bool weakPtr)
 {
-  MutableString64 t; t.append("ep::", desc.id, weakPtr ? "*" : "Ref", "\0");
+  MutableString64 t; t.append("ep::", desc.info.id, weakPtr ? "*" : "Ref", "\0");
   if (luaL_newmetatable(L, t.ptr) == 0)
     return;
 
@@ -351,7 +351,7 @@ void LuaState::pushComponentMetatable(const ComponentDesc &desc, bool weakPtr)
   lua_setfield(L, -2, "__udtype");
 
   // record the type
-  pushString(desc.id);
+  pushString(desc.info.id);
   lua_setfield(L, -2, "__type");
 
   if (!weakPtr)
@@ -395,15 +395,15 @@ void LuaState::pushDescriptor(const ComponentDesc &desc)
 {
   lua_createtable(L, 0, 6);
 
-  pushInt(desc.epVersion);
+  pushInt(desc.info.epVersion);
   lua_setfield(L, -2, "apiversion");
-  pushInt(desc.pluginVersion);
+  pushInt(desc.info.pluginVersion);
   lua_setfield(L, -2, "pluginversion");
-  pushString(desc.id);
+  pushString(desc.info.id);
   lua_setfield(L, -2, "id");
-  pushString(desc.displayName);
+  pushString(desc.info.displayName);
   lua_setfield(L, -2, "displayname");
-  pushString(desc.description);
+  pushString(desc.info.description);
   lua_setfield(L, -2, "description");
 
   // TODO: parent descriptor should also be here...
@@ -417,16 +417,16 @@ void LuaState::pushDescriptor(const ComponentDesc &desc)
   {
     lua_createtable(L, 0, 0);
 
-    pushString(p.info.id);
+    pushString(p.id);
     lua_setfield(L, -2, "id");
-    pushString(p.info.displayName);
+    pushString(p.displayName);
     lua_setfield(L, -2, "displayname");
-    pushString(p.info.description);
+    pushString(p.description);
     lua_setfield(L, -2, "description");
 
-    pushInt(p.info.flags);
+    pushInt(p.flags);
     lua_setfield(L, -2, "flags");
-    pushString(p.info.displayType);
+    pushString(p.displayType);
     lua_setfield(L, -2, "displaytype");
 
     lua_seti(L, -2, i++);
@@ -443,7 +443,7 @@ void LuaState::pushComponent(const ComponentRef &c)
   }
 
   new(lua_newuserdata(L, sizeof(ComponentRef))) ComponentRef(c);
-  pushComponentMetatable(*c->pType, false);
+  pushComponentMetatable(*c->GetDescriptor(), false);
   lua_setmetatable(L, -2);
 }
 
@@ -456,7 +456,7 @@ void LuaState::pushComponent(Component *pC)
   }
 
   new(lua_newuserdata(L, sizeof(Component*))) Component*(pC);
-  pushComponentMetatable(*pC->pType, true);
+  pushComponentMetatable(*pC->GetDescriptor(), true);
   lua_setmetatable(L, -2);
 }
 
@@ -520,7 +520,7 @@ int LuaState::componentIndex(lua_State* L)
   {
     if (pProp->getter)
     {
-      Variant result(pProp->getter->get(spC.ptr()));
+      Variant result(pProp->getter.get(spC.ptr()));
       l.push(result);
       return 1;
     }
@@ -536,7 +536,7 @@ int LuaState::componentIndex(lua_State* L)
   const MethodDesc *pMethod = spC->GetMethodDesc(field);
   if (pMethod)
   {
-    lua_pushlightuserdata(L, (void*)pMethod->method);
+    lua_pushlightuserdata(L, (void*)pMethod->pMethod);
     lua_pushcclosure(L, &method, 1);
     return 1;
   }
@@ -589,7 +589,7 @@ int LuaState::componentNewIndex(lua_State* L)
   {
     if (pProp->setter)
     {
-      pProp->setter->set(spC.ptr(), l.get(3));
+      pProp->setter.set(spC.ptr(), l.get(3));
       // TODO: put signal back
 //      spC->SignalPropertyChanged(pProp);
       return 0;
@@ -611,7 +611,7 @@ int LuaState::componentNewIndex(lua_State* L)
 int LuaState::method(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
-  const Method *pM = (const Method*)l.toUserData(lua_upvalueindex(1));
+  const MethodShim *pM = (const MethodShim*)l.toUserData(lua_upvalueindex(1));
 
   ComponentRef c = l.toComponent(1);
 
@@ -647,7 +647,7 @@ int LuaState::help(lua_State* L)
     return 0;
 
   ComponentRef c = l.toComponent(1);
-  const ComponentDesc *pDesc = c->pType;
+  const ComponentDesc *pDesc = c->GetDescriptor();
 
   MutableString256 buffer;
   if (numArgs > 1)
@@ -663,10 +663,10 @@ int LuaState::help(lua_State* L)
   {
     // general help
     SetConsoleColor(ConsoleColor::Cyan);
-    l.print(pDesc->id);
+    l.print(pDesc->info.id);
 
     SetConsoleColor();
-    l.print(pDesc->description);
+    l.print(pDesc->info.description);
 
     MutableString64 buf;
     if (c->NumProperties() > 0)
@@ -676,12 +676,12 @@ int LuaState::help(lua_State* L)
       SetConsoleColor(ConsoleColor::Green);
       for (auto &p : c->instanceProperties)
       {
-        buf.sprintf("  %-16s - %s", (const char*)p.info.id.toStringz(), (const char*)p.info.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)p.id.toStringz(), (const char*)p.description.toStringz());
         l.print(buf);
       }
       for (auto &p : pDesc->propertyTree)
       {
-        buf.sprintf("  %-16s - %s", (const char*)p.info.id.toStringz(), (const char*)p.info.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)p.id.toStringz(), (const char*)p.description.toStringz());
         l.print(buf);
       }
     }
@@ -707,7 +707,7 @@ int LuaState::help(lua_State* L)
         else
           func.concat(")");
 */
-        buf.sprintf("  %-16s - %s", (const char*)m.info.id.toStringz(), (const char*)m.info.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)m.id.toStringz(), (const char*)m.description.toStringz());
         l.print(buf);
       }
       for (auto &m : pDesc->methodTree)
@@ -725,7 +725,7 @@ int LuaState::help(lua_State* L)
         else
           func.concat(")");
 */
-        buf.sprintf("  %-16s - %s", (const char*)m.info.id.toStringz(), (const char*)m.info.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)m.id.toStringz(), (const char*)m.description.toStringz());
         l.print(buf);
       }
     }
@@ -738,12 +738,12 @@ int LuaState::help(lua_State* L)
       SetConsoleColor(ConsoleColor::Yellow);
       for (auto &e : c->instanceEvents)
       {
-        buf.sprintf("  %-16s - %s", (const char*)e.info.id.toStringz(), (const char*)e.info.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)e.id.toStringz(), (const char*)e.description.toStringz());
         l.print(buf);
       }
       for (auto &e : pDesc->eventTree)
       {
-        buf.sprintf("  %-16s - %s", (const char*)e.info.id.toStringz(), (const char*)e.info.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)e.id.toStringz(), (const char*)e.description.toStringz());
         l.print(buf);
       }
     }
@@ -938,7 +938,7 @@ public:
 
   void subscribe(const Variant::VarDelegate &d)
   {
-    desc.ev->subscribe(c, d);
+    desc.ev.subscribe(c.ptr(), d);
   }
 
 private:
