@@ -15,7 +15,7 @@ class CommandManager : public Component
   EP_DECLARE_COMPONENT(CommandManager, Component, EPKERNEL_PLUGINVERSION, "Registers commands accessed by string id and associated with a function or script and an optional shortcut")
 public:
 
-  bool RegisterCommand(String id, Delegate<void()> func, SharedString script, SharedString shortcut = nullptr, bool bFailIfExists = false);
+  bool RegisterCommand(String id, Delegate<void()> func, SharedString script, SharedString shortcut = nullptr);
   void UnregisterCommand(String id);
   bool HandleShortcutEvent(String shortcut);
   bool RunCommand(String id);

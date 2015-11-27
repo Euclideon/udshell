@@ -2,6 +2,7 @@ import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
+import QtQuick.Dialogs 1.1
 import udKernel 0.1
 import "qrc:/qml/epcontrols" 0.1
 
@@ -20,7 +21,14 @@ Rectangle {
   property var activityuilist: []
   property var tablist: [] // Store a strong reference to the tabs to stop TabView from garbage collecting them
 
+  property var fileDialog
+
   signal activitychanged(string uid)
+
+  signal newprojectsignal(string path)
+  signal openprojectsignal(string path)
+  signal saveprojectsignal()
+  signal saveprojectassignal(string path)
 
   onUiconsoleChanged: {
     var uiconsoleqq = uiconsole.get("uihandle");
@@ -36,19 +44,13 @@ Rectangle {
   }
 
   onCommandmanagerChanged: {
+    commandmanager.call("registercommand", "newproject", newproject, "", "Ctrl+N");
+    commandmanager.call("registercommand", "openproject", openproject, "", "Ctrl+O");
+    commandmanager.call("registercommand", "saveproject", saveproject, "", "Ctrl+S");
+    commandmanager.call("registercommand", "saveprojectas", saveprojectas, "", "F12");
+
     menuBar.commandmanager = commandmanager;
     toolBar.commandmanager = commandmanager;
-  }
-
-  onParentChanged: {
-    if(activityTabs.count > 0)
-    {
-      activitychanged(activityidlist[activityTabs.currentIndex]);
-      var activityqq = activityuilist[activityTabs.currentIndex].get("uihandle");
-      activityqq.visible = false; // Trigger an onVisibleChanged signal
-      activityqq.visible = true;
-      activityqq.forceActiveFocus();
-    }
   }
 
   function cameraupdated(pos, ypr)
@@ -96,11 +98,36 @@ Rectangle {
   }
 
   function addactivity(uid, title, ui) {
+    if(activityTabs.count == 0)
+      activityTabs.visible = true;
     var tab = activityTabs.addTab(title);
     tablist.push(tab);
     activityidlist.push(uid);
     activityuilist.push(ui);
+    tablist.push(tab);
     ui.get("uihandle").parent = tab;
+
+    activityTabs.currentIndex = activityTabs.count - 1;
+  }
+
+  function removeactivity(uid) {
+    for(var i = 0; i < activityidlist.length; i++)
+    {
+      if(activityidlist[i] == uid)
+      {
+        activityidlist.splice(i, 1);
+        activityuilist.splice(i, 1);
+        activityTabs.removeTab(i);
+        tablist.splice(i, 1);
+        break;
+      }
+    }
+
+    if(activityTabs.count == 0)
+    {
+      activityTabs.visible = false;
+      activityTabs.currentIndex = -1;
+    }
   }
 
   ColumnLayout {
@@ -119,7 +146,6 @@ Rectangle {
     EPToolBar {
       id: toolBar
       Layout.fillWidth: true
-      //Layout.preferredHeight: 40
     }
 
     Loader { sourceComponent: separator; Layout.fillWidth: true }
@@ -131,10 +157,14 @@ Rectangle {
       TabView {
         id: activityTabs
         objectName: "activityTabs"
+        currentIndex: -1
+        visible: false
         anchors.fill: parent
         anchors.topMargin: 8
         frameVisible: false
         style: tabViewStyle
+
+        property string lastId: ""
 
         Rectangle {
           anchors.fill: parent
@@ -142,11 +172,26 @@ Rectangle {
         }
 
         onCurrentIndexChanged: {
-          activitychanged(activityidlist[currentIndex]);
-          activityuilist[activityTabs.currentIndex].get("uihandle").forceActiveFocus();
+          if(activityidlist[currentIndex] != lastId)
+          {
+            lastId = activityidlist[currentIndex];
+
+            if(count > 0)
+            {
+              activitychanged(activityidlist[currentIndex]);
+              var activityqq = activityuilist[currentIndex].get("uihandle");
+              activityqq.visible = false; // Trigger an onVisibleChanged signal
+              activityqq.visible = true;
+              activityqq.forceActiveFocus();
+            }
+            else
+              activitychanged(null);
+          }
         }
       }
     }
+
+    Loader { sourceComponent: separator; Layout.fillWidth: true }
 
     ToolBar {
       id: bottomBar
@@ -319,5 +364,60 @@ Rectangle {
     anchors.bottom: parent.bottom
     anchors.bottomMargin: bottomBar.height
     anchors.left: parent.left
+  }
+
+  function newproject() {
+    fileDialog = fileDialogComp.createObject(topLevel);
+    fileDialog.title = "Select project location and enter a name for the new project";
+    fileDialog.onAccepted.connect(newProjectAccepted);
+    fileDialog.selectMultiple = false;
+    fileDialog.selectExisting = false;
+    fileDialog.nameFilters = ["*.epproj"];
+    fileDialog.visible = true;
+  }
+
+  function newProjectAccepted() {
+    fileDialog.destroy();
+    newprojectsignal(fileDialog.fileUrl);
+  }
+
+  function openproject() {
+    fileDialog = fileDialogComp.createObject(topLevel);
+    fileDialog.title = "Select a Euclideon Platform Project file to open";
+    fileDialog.onAccepted.connect(openProjectAccepted);
+    fileDialog.selectMultiple = false;
+    fileDialog.selectExisting = true;
+    fileDialog.nameFilters = ["*.epproj"];
+    fileDialog.visible = true;
+  }
+
+  function openProjectAccepted() {
+    fileDialog.destroy();
+    openprojectsignal(fileDialog.fileUrl);
+
+  }
+
+  function saveproject() {
+    saveprojectsignal();
+  }
+
+  function saveprojectas() {
+    fileDialog = fileDialogComp.createObject(topLevel);
+    fileDialog.title = "Select project location and enter a name for the project";
+    fileDialog.onAccepted.connect(saveProjectAsAccepted);
+    fileDialog.selectMultiple = false;
+    fileDialog.selectExisting = false;
+    fileDialog.nameFilters = ["*.epproj"];
+    fileDialog.visible = true;
+  }
+
+  function saveProjectAsAccepted() {
+    fileDialog.destroy();
+    saveprojectassignal(fileDialog.fileUrl);
+  }
+
+  Component {
+    id: fileDialogComp
+    FileDialog {}
   }
 }

@@ -88,9 +88,11 @@ void Project::SaveProject()
     return;
   }
 
-  // TODO One day this will pop up a dialog requesting a name for the project
   if (srcString.empty())
-    srcString = "project0.epproj";
+  {
+    LogWarning(1, "Failed to Save Project. No project open");
+    return;
+  }
 
   StreamRef spFile = GetKernel().CreateComponent<File>({ { "path", String(srcString) }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
   if (!spFile)

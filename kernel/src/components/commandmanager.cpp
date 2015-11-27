@@ -30,9 +30,9 @@ bool CommandManager::SetShortcut(String id, SharedString shortcut)
   return true;
 }
 
-bool CommandManager::RegisterCommand(String id, Delegate<void()> func, SharedString script, SharedString shortcut, bool bFailIfExists)
+bool CommandManager::RegisterCommand(String id, Delegate<void()> func, SharedString script, SharedString shortcut)
 {
-  if (bFailIfExists && commandRegistry.Get(id))
+  if (commandRegistry.Get(id))
   {
     LogWarning(5, "Command registration failed - \"{0}\" already exists", id);
     return false;

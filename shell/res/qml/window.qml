@@ -5,7 +5,7 @@ import udKernel 0.1
 
 UDWindow {
   id: desktopwindow
-  title: "udShell"
+  title: "Euclideon Platform"
   width: 960
   height: 540
 }
