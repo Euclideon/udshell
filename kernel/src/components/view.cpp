@@ -104,6 +104,12 @@ void View::SetLatestFrame(UniquePtr<RenderableView> spFrame)
 
 void View::OnDirty()
 {
+  if (renderWidth == 0 || renderHeight == 0)
+  {
+    pKernel->LogWarning(1, "Render target has zero size! Unable to render...");
+    return;
+  }
+
   if (spScene && spCamera)
   {
     UniquePtr<RenderableView> spRenderView = UniquePtr<RenderableView>(new RenderableView);

@@ -215,43 +215,56 @@ void RenderableView::RenderGPU()
 //  if (spView->pPreRenderCallback)
 //    spView->pPreRenderCallback(spView, spScene);
 
-  if (!pColorTexture)
+  if (pColorBuffer)
   {
-    // copy the data into the texture
-    pColorTexture = epTexture_CreateTexture(epTT_2D, renderWidth, renderHeight, 1, epIF_BGRA8);
-    pDepthTexture = epTexture_CreateTexture(epTT_2D, renderWidth, renderHeight, 1, epIF_R_F32);
+    if (!pColorTexture)
+    {
+      // copy the data into the texture
+      pColorTexture = epTexture_CreateTexture(epTT_2D, renderWidth, renderHeight, 1, epIF_BGRA8);
+      pDepthTexture = epTexture_CreateTexture(epTT_2D, renderWidth, renderHeight, 1, epIF_R_F32);
 
-    // blit the scene to the viewport
-    epTexture_SetImageData(pColorTexture, -1, 0, pColorBuffer);
-    epTexture_SetImageData(pDepthTexture, -1, 0, pDepthBuffer);
+      // blit the scene to the viewport
+      epTexture_SetImageData(pColorTexture, -1, 0, pColorBuffer);
+      epTexture_SetImageData(pDepthTexture, -1, 0, pDepthBuffer);
+    }
+
+    epShader_SetCurrent(s_shader);
+
+    int u_texture = epShader_FindShaderParameter(s_shader, "u_texture");
+    epShader_SetProgramData(0, u_texture, pColorTexture);
+    int u_zbuffer = epShader_FindShaderParameter(s_shader, "u_zbuffer");
+    epShader_SetProgramData(1, u_zbuffer, pDepthTexture);
+
+    int u_rect = epShader_FindShaderParameter(s_shader, "u_rect");
+    epShader_SetProgramData(u_rect, Float4::create(-1, 1, 2, -2));
+    int u_textureScale = epShader_FindShaderParameter(s_shader, "u_textureScale");
+    epShader_SetProgramData(u_textureScale, Float4::create(0, 0, 1, 1));
+
+    epGPU_RenderIndices(s_shader, s_pPosUV, &s_pQuadVB, s_pQuadIB, epPT_TriangleFan, 4);
+
+    // TODO: we need to have some sort of resource cleanup list so this can happen when we're ready/automatically
+#if EPRENDER_DRIVER == EPDRIVER_QT
+    epTexture_DestroyTexture(&pColorTexture);
+    epTexture_DestroyTexture(&pDepthTexture);
+    pColorTexture = nullptr;
+    pDepthTexture = nullptr;
+#endif
+  }
+  else
+  {
+    // clear the backbuffer
+    ep::Double4 color = { 0, 0, 1, 0 };
+    epGPU_Clear(&color.x, -1.0, 0);
   }
 
-  epShader_SetCurrent(s_shader);
+//  // render geometry
+//  for (auto &job : this->spScene->geom)
+//  {
+//    // ...render polygons...
+//  }
 
-  int u_texture = epShader_FindShaderParameter(s_shader, "u_texture");
-  epShader_SetProgramData(0, u_texture, pColorTexture);
-  int u_zbuffer = epShader_FindShaderParameter(s_shader, "u_zbuffer");
-  epShader_SetProgramData(1, u_zbuffer, pDepthTexture);
-
-  int u_rect = epShader_FindShaderParameter(s_shader, "u_rect");
-  epShader_SetProgramData(u_rect, Float4::create(-1, 1, 2, -2));
-  int u_textureScale = epShader_FindShaderParameter(s_shader, "u_textureScale");
-  epShader_SetProgramData(u_textureScale, Float4::create(0, 0, 1, 1));
-
-  epGPU_RenderIndices(s_shader, s_pPosUV, &s_pQuadVB, s_pQuadIB, epPT_TriangleFan, 4);
-
-  // TODO: we need to have some sort of resource cleanup list so this can happen when we're ready/automatically
-#if EPRENDER_DRIVER == EPDRIVER_QT
-  epTexture_DestroyTexture(&pColorTexture);
-  epTexture_DestroyTexture(&pDepthTexture);
-  pColorTexture = nullptr;
-  pDepthTexture = nullptr;
-#endif
-
-/*
-  if (pPostRenderCallback)
-    pPostRenderCallback(ViewRef(this), spScene);
-*/
+//  if (pPostRenderCallback)
+//    pPostRenderCallback(ViewRef(this), spScene);
 }
 
 Renderer::Renderer(Kernel *pKernel, int renderThreadCount)

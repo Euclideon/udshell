@@ -6,6 +6,12 @@
 #include "hal/shader.h"
 
 // ***************************************************************************************
+// Author: Manu Evans, Nov 2015
+void epGPU_Clear(double color[4], double depth, int stencil)
+{
+}
+
+// ***************************************************************************************
 // Author: Manu Evans, May 2015
 void epGPU_RenderVertices(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epPrimitiveType primType, size_t vertexCount, size_t firstVertex)
 {
