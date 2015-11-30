@@ -59,7 +59,9 @@ public:
   uint32_t GetRenderFlags() const { return renderFlags; }
   void SetRenderFlags(uint32_t flags) { renderFlags = (udRenderFlags)flags; }
 
-  double GetUDScale() const { EPASSERT(udMat.a[0] == udMat.a[5] && udMat.a[0] == udMat.a[10], "NonUniform Scale"); return udMat.a[0]; }
+  double GetUDScale() const { EPASSERT(udmatrix.a[0] == udmatrix.a[5] && udmatrix.a[0] == udmatrix.a[10], "NonUniform Scale"); return udmatrix.a[0]; }
+
+  const Double4x4 &GetUDMatrix() const { return udmatrix; }
 
   BoundingVolume GetBoundingVolume() const;
 
@@ -83,7 +85,7 @@ protected:
 
   udRender_PixelShaderFunc *pPixelShader = nullptr;
 
-  Double4x4 udMat;
+  Double4x4 udmatrix;
   Rect rect;
   DataSourceRef spDataSource;
   udOctree *pOctree = nullptr;
@@ -100,6 +102,7 @@ protected:
       EP_MAKE_PROPERTY(RenderFlags, "UD Rendering Flags", nullptr, 0),
       EP_MAKE_PROPERTY_RO(DataSource, "Data Source for UD Model", nullptr, 0),
       EP_MAKE_PROPERTY_RO(UDScale, "Internal Scale of the Model", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(UDMatrix, "UD Matrix", nullptr, 0),
       EP_MAKE_PROPERTY_RO(BoundingVolume, "The Bouning Volume", nullptr, 0),
       EP_MAKE_PROPERTY(SimpleVoxelDelegate, "Optional callback to handle it's own internal call to GetNodeColor()", nullptr, 0),
 //      EP_MAKE_PROPERTY(VoxelShader, "Optional callback to handle writing pixels and depth", nullptr, 0),

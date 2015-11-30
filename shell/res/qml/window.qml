@@ -5,6 +5,6 @@ import udKernel 0.1
 UDWindow {
   id: desktopwindow
   title: "udShell"
-  width: 640
-  height: 480
+  width: 960
+  height: 540
 }

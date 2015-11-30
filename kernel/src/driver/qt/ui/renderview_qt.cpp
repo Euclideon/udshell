@@ -109,7 +109,7 @@ void RenderView::componentComplete()
   // TODO: Focus should be set based on mouse click from main window - possibly handle in QML
   // TODO: Accepted mouse buttons should be item specific
   setFocus(true);
-  setAcceptedMouseButtons(Qt::LeftButton);
+  setAcceptedMouseButtons(Qt::LeftButton | Qt::MiddleButton | Qt::RightButton);
 }
 
 QSGNode *RenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData)

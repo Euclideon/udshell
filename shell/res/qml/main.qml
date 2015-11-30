@@ -10,6 +10,7 @@ Rectangle {
   color: "#444"
 
   property var uiconsole
+  property var simplecamera
   property var activityidlist: []
   property var activityuilist: []
   property var tablist: [] // Store a strong reference to the tabs to stop TabView from garbage collecting them
@@ -30,6 +31,21 @@ Rectangle {
       activityqq.visible = true;
       activityqq.forceActiveFocus();
     }
+  }
+
+  function cameraupdated(x, y, z, pitch, yaw,roll)
+  {
+    cameraPosX.text = x;
+    cameraPosY.text = y;
+    cameraPosZ.text = z;
+
+    cameraYaw.text = yaw;
+    cameraPitch.text = pitch;
+    cameraRoll.text = roll;
+  }
+
+  onSimplecameraChanged: {
+    simplecamera.subscribe("changed", cameraupdated);
   }
 
   function addactivity(uid, title, ui) {
@@ -123,12 +139,29 @@ Rectangle {
       Layout.fillWidth: true
       RowLayout {
         width: parent.Layout.preferredWidth
-
         Button {
           id: consoleButton
           text: "Console"
           onClicked: uiconsole.get("uihandle").togglevisible();
           style: bottomBarButtonStyle
+        }
+        TextField {
+          id: cameraPosX
+        }
+        TextField {
+          id: cameraPosY
+        }
+        TextField {
+          id: cameraPosZ
+        }
+        TextField {
+          id: cameraYaw
+        }
+        TextField {
+          id: cameraPitch
+        }
+        TextField {
+          id: cameraRoll
         }
       }
       style: toolBarStyle

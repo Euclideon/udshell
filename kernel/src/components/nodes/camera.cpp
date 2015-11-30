@@ -1,8 +1,6 @@
 #include "ep/cpp/platform.h"
-
 #include "camera.h"
 #include "kernel.h"
-#include "hal/input.h"
 
 namespace kernel
 {
@@ -31,6 +29,8 @@ Variant Camera::Save() const
   return Variant(std::move(params));
 }
 
+static int mouseRemap[] = { -1, 0, 2, -1, 1 };
+
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 bool SimpleCamera::ViewportInputEvent(const epInputEvent &ev)
@@ -44,40 +44,86 @@ bool SimpleCamera::ViewportInputEvent(const epInputEvent &ev)
         case epKC_W:
         case epKC_Up:
           keyState[(int)Keys::Up] += ev.key.state ? 1 : -1;
-          return true;
+          stateChanged = true;
+          break;
         case epKC_S:
         case epKC_Down:
           keyState[(int)Keys::Down] += ev.key.state ? 1 : -1;
-          return true;
+          stateChanged = true;
+          break;
         case epKC_A:
         case epKC_Left:
           keyState[(int)Keys::Left] += ev.key.state ? 1 : -1;
-          return true;
+          stateChanged = true;
+          break;
         case epKC_D:
         case epKC_Right:
           keyState[(int)Keys::Right] += ev.key.state ? 1 : -1;
-          return true;
+          stateChanged = true;
+          break;
         case epKC_R:
         case epKC_PageUp:
           keyState[(int)Keys::Elevate] += ev.key.state ? 1 : -1;
-          return true;
+          stateChanged = true;
+          break;
         case epKC_F:
         case epKC_PageDown:
           keyState[(int)Keys::Descend] += ev.key.state ? 1 : -1;
-          return true;
+          stateChanged = true;
+          break;
         case epKC_LShift:
         case epKC_RShift:
           keyState[(int)Keys::Boost] += ev.key.state ? 1 : -1;
-          return true;
+          stateChanged = true;
+          break;
+        case epKC_1:
+          keyState[(int)Keys::Key_1] += ev.key.state ? 1 : -1;
+          stateChanged = true;
+          break;
+        case epKC_2:
+          keyState[(int)Keys::Key_2] += ev.key.state ? 1 : -1;
+          stateChanged = true;
+          break;
       }
     }
   }
   else if (ev.deviceType == epID_Mouse)
   {
+    if (ev.eventType == epInputEvent::Move)
+    {
+      if (mouse.buttons[Mouse::Left])
+      {
+        if (mouse.stateChanged[Mouse::Left])
+        {
+          mouse.absolute.x = ev.move.xAbsolute;
+          mouse.absolute.y = ev.move.yAbsolute;
+          mouse.prevAbsolute = mouse.absolute;
+          mouse.stateChanged[Mouse::Left] = 0;
+        }
+        else
+        {
+          mouse.prevAbsolute = mouse.absolute;
+          mouse.absolute.x = ev.move.xAbsolute;
+          mouse.absolute.y = ev.move.yAbsolute;
+        }
+      }
 
+      mouse.delta = mouse.prevAbsolute - mouse.absolute;
+      stateChanged = true;
+    }
+    else if (ev.eventType == epInputEvent::Key)
+    {
+      int button = mouseRemap[ev.key.key];
+
+      if (!mouse.buttons[button])
+        mouse.stateChanged[button] = 1;
+
+      mouse.buttons[button] = (char)ev.key.state;
+      stateChanged = true;
+    }
   }
 
-  return false;
+  return stateChanged;
 }
 
 // ***************************************************************************************
@@ -93,13 +139,19 @@ bool SimpleCamera::Update(double timeDelta)
   // rotations
   double rotSpeed = 3.14159*0.5*timeDelta;
   if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisRY)) > 0.2f)
-    pitch += s*yInvert*rotSpeed;
+    pitch += s*invertedYAxis*rotSpeed;
   if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisRX)) > 0.2f)
     yaw += -s*rotSpeed;
 
+  if (mouse.buttons[Mouse::Left])
+  {
+    pitch += mouse.delta.y * invertedYAxis * 0.005;
+    yaw += mouse.delta.x*0.005;
+  }
+
   if(epInput_State(epID_Mouse, epMC_LeftButton))
   {
-    pitch += epInput_State(epID_Mouse, epMC_YDelta)*yInvert*0.005;
+    pitch += epInput_State(epID_Mouse, epMC_YDelta)*invertedYAxis*0.005;
     yaw += -epInput_State(epID_Mouse, epMC_XDelta)*0.005;
   }
 
@@ -123,12 +175,19 @@ bool SimpleCamera::Update(double timeDelta)
         +epInput_State(epID_Gamepad, epGC_ButtonRT)
         -epInput_State(epID_Gamepad, epGC_ButtonLT);
 
+  ty += mouse.buttons[Mouse::Right];
+
+  if (keyState[(int)Keys::Key_1])
+    SetHelicopterMode(false);
+  else if (keyState[(int)Keys::Key_2])
+    SetHelicopterMode(true);
+
   // mode switch
 #if 0
   bool bToggle = !!epInput_WasPressed(epID_Gamepad, epGC_ButtonY);
-  if(epInput_State(epID_Keyboard, epKC_1) || (bToggle && bHelicopter))
+  if(epInput_State(epID_Keyboard, epKC_1) || (bToggle && helicopterMode))
     helicopterMode(false);
-  else if(epInput_State(epID_Keyboard, epKC_2) || (bToggle && !bHelicopter))
+  else if(epInput_State(epID_Keyboard, epKC_2) || (bToggle && !helicopterMode))
     helicopterMode(true);
 #endif // 0
   double tmpSpeed = 1.0;
@@ -172,7 +231,7 @@ bool SimpleCamera::Update(double timeDelta)
 
   Double3 forward = cam.axis.y.toVector3();
   Double3 xAxis = cam.axis.x.toVector3();
-  if(bHelicopter)
+  if(helicopterMode)
     forward = Cross3(Double3::create(0,0,1), xAxis);
 
   pos += forward*ty*tmpSpeed;
@@ -180,6 +239,14 @@ bool SimpleCamera::Update(double timeDelta)
   pos.z += tz*tmpSpeed;
 
   matrix = Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos);
+
+  mouse.delta = {0 , 0};
+
+  if (stateChanged)
+  {
+    Changed.Signal(pos.x, pos.y, pos.z, ypr.x, ypr.y, ypr.z);
+    stateChanged = false;
+  }
 
   if (ty || tx || tz || pitch || yaw)
     return true;
@@ -192,8 +259,8 @@ Variant SimpleCamera::Save() const
   Variant::VarMap params = var.asAssocArray();
 
   params.Insert("speed", speed);
-  params.Insert("invertyaxis", yInvert == -1.0 ? true : false);
-  params.Insert("helicoptermode", bHelicopter);
+  params.Insert("invertyaxis", (invertedYAxis == -1.0 ? true : false));
+  params.Insert("helicoptermode", helicopterMode);
 
   return Variant(std::move(params));
 }
