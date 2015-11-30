@@ -3,7 +3,7 @@
 #define EP_COMPONENT_QT_H
 
 #include <QVariant>
-#include <QJSValue>
+#include "../util/typeconvert_qt.h"
 
 #include "components/component.h"
 

@@ -3,6 +3,7 @@
 #define TYPECONVERT_H
 
 #include "ep/c/platform.h"
+#include "ep/cpp/delegate.h"
 
 // Disabled Warnings
 #if defined(EP_COMPILER_VISUALC)
@@ -21,6 +22,21 @@
 
 namespace qt {
 MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string);
+
+class JSValueDelegate : public ep::DelegateMemento
+{
+protected:
+  template<typename T>
+  friend class ep::SharedPtr;
+
+  Variant call(Slice<Variant> args);
+  JSValueDelegate(const QJSValue &jsValue);
+  ~JSValueDelegate() {}
+  // TODO this needs to be pinned!!!
+  QJSValue jsVal;
+};
+
+using JSValueDelegateRef = SharedPtr<JSValueDelegate>;
 }
 
 inline Variant epToVariant(const QString &string)
@@ -45,5 +61,30 @@ template<> struct StringifyProxy<QString>       { inline static ptrdiff_t string
 
 } // namespace internal
 } // namespace kernel
+
+
+
+namespace qt {
+
+  inline Variant JSValueDelegate::call(Slice<Variant> args)
+  {
+    QJSValueList jsArgs;
+    jsArgs.reserve(static_cast<int>(args.length));
+
+    for (auto &arg : args)
+      jsArgs.append(arg.as<QJSValue>());
+
+    QJSValue ret = jsVal.call(jsArgs);
+    return epToVariant(ret);
+  }
+
+  inline JSValueDelegate::JSValueDelegate(const QJSValue &jsValue) : jsVal(jsValue)
+  {
+    // set the memento to our call shim
+    FastDelegate<Variant(Slice<Variant>)> shim(this, &JSValueDelegate::call);
+    m = shim.GetMemento();
+  }
+}
+
 
 #endif  // TYPECONVERT_H

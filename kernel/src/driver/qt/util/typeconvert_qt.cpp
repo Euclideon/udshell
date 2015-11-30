@@ -212,9 +212,7 @@ Variant epToVariant(const QJSValue &v)
   else if (v.isQObject())
     return epToVariant(v.toQObject());
   else if (v.isCallable())
-  {
-    EPASSERT(false, "TODO: pinch the code from subscribe...");
-  }
+    return Variant::VarDelegate(qt::JSValueDelegateRef::create(v));
   else if (v.isArray())
   {
     size_t length = (size_t)v.property(QString("length")).toNumber();
@@ -255,6 +253,7 @@ Variant epToVariant(const QJSValue &v)
   }
   else if (v.isUndefined())
   {
+    return Variant(Variant::Type::Void);
   }
 
   udDebugPrintf("epToVariant: Unsupported type!\n");
