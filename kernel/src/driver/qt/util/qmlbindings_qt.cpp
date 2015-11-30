@@ -24,8 +24,9 @@ class QtEventData : public RefCounted
 {
 public:
   QtEventData(QMetaMethod method) : method(method) {}
+  ~QtEventData() { /* free sigToDel... */ }
   QMetaMethod method;
-  mutable Array<QtSignalToDelegate> sigToDel;
+  mutable Array<QtSignalToDelegate*> sigToDel;
 };
 
 class QtShims
@@ -77,7 +78,7 @@ public:
     QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
 
     // TODO: hook up disconnect path
-    data.sigToDel.pushBack(QtSignalToDelegate(pQObject, data.method, d));
+    data.sigToDel.pushBack(new QtSignalToDelegate(pQObject, data.method, d));
   }
 };
 
