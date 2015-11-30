@@ -30,6 +30,7 @@
 #include "components/resources/buffer.h"
 #include "components/resources/array.h"
 #include "components/resources/text.h"
+#include "components/resources/menu.h"
 #include "components/resources/shader.h"
 #include "components/resources/material.h"
 #include "components/resources/model.h"
@@ -107,6 +108,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Material>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Model>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Text>());
+  EP_ERROR_CHECK(pKernel->RegisterComponentType<Menu>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<KVPStore>());
   EP_ERROR_CHECK(pKernel->RegisterComponentType<Metadata>());
 
