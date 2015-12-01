@@ -593,6 +593,8 @@ SharedString Variant::asSharedString() const
       uint8_t *pBuffer = (uint8_t*)this;
       return SharedString((char*)pBuffer + 1, pBuffer[0] >> 4);
     }
+    case Type::Array:
+      return SharedString::format("{0}", asArray());
     case Type::Component:
       return ((Component*)p)->GetUid();
     default:
