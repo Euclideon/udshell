@@ -12,6 +12,7 @@ Rectangle {
   property var uiconsole
   property var activityidlist: []
   property var activityuilist: []
+  property var tablist: [] // Store a strong reference to the tabs to stop TabView from garbage collecting them
 
   signal activitychanged(string uid)
 
@@ -33,6 +34,7 @@ Rectangle {
 
   function addactivity(uid, title, ui) {
     var tab = activityTabs.addTab(title);
+    tablist.push(tab);
     activityidlist.push(uid);
     activityuilist.push(ui);
     ui.get("uihandle").parent = tab;
