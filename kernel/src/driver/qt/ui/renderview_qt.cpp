@@ -32,7 +32,8 @@ public:
     if (spRenderView)
       spRenderView->RenderGPU();
 
-    m_item->window()->resetOpenGLState();
+    if (m_item->window())
+        m_item->window()->resetOpenGLState();
   }
 
   QOpenGLFramebufferObject *createFramebufferObject(const QSize &size)

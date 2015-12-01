@@ -138,42 +138,8 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   return std::move(res);
 }
 
-// Shim class
-class JSValueDelegate : public DelegateMemento
-{
-protected:
-  template<typename T>
-  friend class ep::SharedPtr;
-
-  Variant call(Slice<Variant> args)
-  {
-    QJSValueList jsArgs;
-    jsArgs.reserve(static_cast<int>(args.length));
-
-    for (auto &arg : args)
-      jsArgs.append(arg.as<QJSValue>());
-
-    QJSValue ret = jsVal.call(jsArgs);
-    return epToVariant(ret);
-  }
-
-  JSValueDelegate(const QJSValue &jsValue) : jsVal(jsValue)
-  {
-    // set the memento to our call shim
-    FastDelegate<Variant(Slice<Variant>)> shim(this, &JSValueDelegate::call);
-    m = shim.GetMemento();
-  }
-
-  ~JSValueDelegate() {}
-
-  QJSValue jsVal;
-};
-
-
 void QtEPComponent::subscribe(QString eventName, QJSValue func) const
 {
-  typedef SharedPtr<JSValueDelegate> JSValueDelegateRef;
-
   if (!func.isCallable())
   {
     pComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString());
