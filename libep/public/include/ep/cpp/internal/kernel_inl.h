@@ -167,49 +167,49 @@ template<typename ...Args>
 inline void Kernel::LogError(String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(0, 2, format);
+    Log(1<<0, 2, format);
   else
-    Log(0, 2, MutableString128(Format, format, args...));
+    Log(1<<0, 2, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogWarning(int level, String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(1, level, format);
+    Log(1<<1, level, format);
   else
-    Log(1, level, MutableString128(Format, format, args...));
+    Log(1<<1, level, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogDebug(int level, String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(2, level, format);
+    Log(1<<2, level, format);
   else
-    Log(2, level, MutableString128(Format, format, args...));
+    Log(1<<2, level, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogInfo(int level, String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(3, level, format);
+    Log(1<<3, level, format);
   else
-    Log(3, level, MutableString128(Format, format, args...));
+    Log(1<<3, level, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogScript(String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(4, 2, format);
+    Log(1<<4, 2, format);
   else
-    Log(4, 2, MutableString128(Format, format, args...));
+    Log(1<<4, 2, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
 inline void Kernel::LogTrace(String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(5, 2, format);
+    Log(1<<5, 2, format);
   else
-    Log(5, 2,MutableString128(Format, format, args...));
+    Log(1<<5, 2,MutableString128(Format, format, args...));
 }
 
 } // namespace ep
