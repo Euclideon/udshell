@@ -65,9 +65,9 @@ void Text::FormatXml(Variant root)
 
 void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
 {
-  String _name = element.key.asString();
+  String key = element.key.asString();
   MutableString<1024> str;
-  str.format("{'',*0}<{1}", depth * 2, _name);
+  str.format("{'',*0}<{1}", depth * 2, key);
   spOut->Write(str);
 
   if (element.value.is(Variant::Type::AssocArray))
@@ -102,7 +102,7 @@ void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
         FormatXmlElement(spOut, child, depth + 1);
     }
 
-    str.format("{'',*0}</{1}>\n", depth * 2, name);
+    str.format("{'',*0}</{1}>\n", depth * 2, key);
     spOut->Write(str);
   }
   else
@@ -110,7 +110,7 @@ void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
     SharedString value = element.value.asSharedString();
     if (!value.empty())
     {
-      str.format(">{0}</{1}>\n", value, name);
+      str.format(">{0}</{1}>\n", value, key);
       spOut->Write(str);
     }
     else
