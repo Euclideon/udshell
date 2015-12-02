@@ -100,13 +100,11 @@ bool SimpleCamera::ViewportInputEvent(const epInputEvent &ev)
           mouse.prevAbsolute = mouse.absolute;
           mouse.stateChanged[Mouse::Left] = 0;
         }
-        else
-        {
-          mouse.prevAbsolute = mouse.absolute;
-          mouse.absolute.x = ev.move.xAbsolute;
-          mouse.absolute.y = ev.move.yAbsolute;
-        }
       }
+
+      mouse.prevAbsolute = mouse.absolute;
+      mouse.absolute.x = ev.move.xAbsolute;
+      mouse.absolute.y = ev.move.yAbsolute;
 
       mouse.delta = mouse.prevAbsolute - mouse.absolute;
       stateChanged = true;
@@ -244,7 +242,7 @@ bool SimpleCamera::Update(double timeDelta)
 
   if (stateChanged)
   {
-    Changed.Signal(pos.x, pos.y, pos.z, ypr.x, ypr.y, ypr.z);
+    Changed.Signal(pos, ypr);
     stateChanged = false;
   }
 

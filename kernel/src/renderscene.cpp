@@ -190,12 +190,15 @@ void RenderableView::RenderUD()
     udRender_SetMatrixF64(pRenderView, udRMT_Projection, projection.a);
     udRender_SetMatrixF64(pRenderView, udRMT_Camera, camera.a);
 
+    if (pickingEnabled)
+      options.pick = &udPick;
+
     // allocate render buffers
     uint32_t colorPitch = renderWidth*sizeof(uint32_t);
     uint32_t depthPitch = renderWidth*sizeof(float);
     pColorBuffer = epAlloc(colorPitch * renderHeight);
     pDepthBuffer = epAlloc(depthPitch * renderHeight);
-    udRender_SetTarget(pRenderView, udRTT_Color32, pColorBuffer, colorPitch, 0x80202080);
+    udRender_SetTarget(pRenderView, udRTT_Color32, pColorBuffer, colorPitch, 0xFF202080);
     udRender_SetTarget(pRenderView, udRTT_Depth32, pDepthBuffer, depthPitch, 0x3F800000);
 
     // render UD

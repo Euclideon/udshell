@@ -11,6 +11,7 @@ Rectangle {
 
   property var uiconsole
   property var simplecamera
+  property var view
   property var activityidlist: []
   property var activityuilist: []
   property var tablist: [] // Store a strong reference to the tabs to stop TabView from garbage collecting them
@@ -33,19 +34,48 @@ Rectangle {
     }
   }
 
-  function cameraupdated(x, y, z, pitch, yaw,roll)
+  function cameraupdated(pos, ypr)
   {
-    cameraPosX.text = x;
-    cameraPosY.text = y;
-    cameraPosZ.text = z;
+    cameraPosX.text = pos[0].toFixed(2);
+    cameraPosY.text = pos[1].toFixed(2);
+    cameraPosZ.text = pos[2].toFixed(2);
 
-    cameraYaw.text = yaw;
-    cameraPitch.text = pitch;
-    cameraRoll.text = roll;
+    cameraYaw.text = ypr[0].toFixed(2);
+    cameraPitch.text = ypr[1].toFixed(2);
+    cameraRoll.text = ypr[2].toFixed(2);
+  }
+
+  function viewmouseupdated(pos)
+  {
+    mousePosX.text = pos[0];
+    mousePosY.text = pos[1];
+  }
+
+  function viewpickingenabledchanged(enabled)
+  {
+    if (enabled)
+      pickText.text = "Picking Enabled";
+    else
+      pickText.text = "Picking Disabled";
+  }
+
+  function viewpickfound(pos)
+  {
+    pickPosX.text = pos[0].toFixed(2);
+    pickPosY.text = pos[1].toFixed(2);
+    pickPosZ.text = pos[2].toFixed(2);
   }
 
   onSimplecameraChanged: {
+    // We are using the fact that this "on changed event" fires as during the init phase
     simplecamera.subscribe("changed", cameraupdated);
+  }
+
+  onViewChanged: {
+    // We are using the fact that this "on changed event" fires as during the init phase
+    view.subscribe("mousepositionchanged", viewmouseupdated);
+    view.subscribe("enabledpickingchanged", viewpickingenabledchanged);
+    view.subscribe("pickfound", viewpickfound);
   }
 
   function addactivity(uid, title, ui) {
@@ -145,24 +175,75 @@ Rectangle {
           onClicked: uiconsole.get("uihandle").togglevisible();
           style: bottomBarButtonStyle
         }
-        TextField {
+        Text {
+          id: cameraPosText
+          color: "yellow"
+          text: "Camera Pos"
+        }
+        Text {
           id: cameraPosX
+          color: "white"
         }
-        TextField {
+        Text {
           id: cameraPosY
+          color: "white"
         }
-        TextField {
+        Text {
           id: cameraPosZ
+          color: "white"
         }
-        TextField {
+
+        Text {
+          id: cameraOrientationText
+          color: "yellow"
+          text: "Camera YPR"
+        }
+        Text {
           id: cameraYaw
+          color: "white"
         }
-        TextField {
+        Text {
           id: cameraPitch
+          color: "white"
         }
-        TextField {
+        Text {
           id: cameraRoll
+          color: "white"
+          text: "0.00"
         }
+
+        Text {
+          id: mousePosText
+          color: "yellow"
+          text: "Mouse Pos"
+        }
+        Text {
+          id: mousePosX
+          color: "white"
+        }
+        Text {
+          id: mousePosY
+          color: "white"
+        }
+
+        Text {
+          id: pickText
+          color: "yellow"
+          text: "Picking Disabled"
+        }
+        Text {
+          id: pickPosX
+          color: "white"
+        }
+        Text {
+          id: pickPosY
+          color: "white"
+        }
+        Text {
+          id: pickPosZ
+          color: "white"
+        }
+
       }
       style: toolBarStyle
     }

@@ -40,7 +40,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     {
       // TODO: enable streamer once we have a tick running to update the streamer
       String modelSrc = model->asString();
-      DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", false } });
+      DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", true } });
       if (spModelDS && spModelDS->GetNumResources() > 0)
       {
         spModel = spModelDS->GetResourceAs<UDModel>(0);

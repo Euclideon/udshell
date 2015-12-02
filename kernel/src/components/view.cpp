@@ -10,15 +10,28 @@ Array<const PropertyInfo> View::GetProperties()
 {
   return{
     EP_MAKE_PROPERTY(Camera, "Camera for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY(EnablePicking, "Enable Picking", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(MousePosition, "Mouse Position", nullptr, 0)
   };
 }
 
 bool View::InputEvent(const epInputEvent &ev)
 {
   bool handled = false;
-
-  // if view wants to handle anything personally
-  //...
+  if (ev.deviceType == epID_Mouse)
+  {
+    if (ev.eventType == epInputEvent::Move)
+    {
+      mousePosition.x = (uint32_t)ev.move.xAbsolute;
+      mousePosition.y = (uint32_t)ev.move.yAbsolute;
+      MousePositionChanged.Signal(mousePosition);
+    }
+  }
+  else if (ev.deviceType == epID_Keyboard)
+  {
+    if  (ev.key.key == epKC_P && ev.key.state == 0)
+      SetEnablePicking(!pickingEnabled);
+  }
 
   if (spScene)
     handled = spScene->InputEvent(ev);
@@ -76,7 +89,6 @@ void View::SetScene(SceneRef spNewScene)
 void View::SetCamera(CameraRef _spCamera)
 {
   spCamera = _spCamera;
-
   OnDirty();
 }
 
@@ -99,6 +111,28 @@ void View::GetRenderDimensions(int *pWidth, int *pHeight) const
 void View::SetLatestFrame(UniquePtr<RenderableView> spFrame)
 {
   spLatestFrame = spFrame;
+  if (spLatestFrame->pickingEnabled)
+  {
+    udRenderPick &pick = spLatestFrame->udPick;
+    if (pick.found)
+    {
+      Double4 transPos = {
+                           pick.nodePosMS[0] + pick.childSizeMS,
+                           pick.nodePosMS[1] + pick.childSizeMS,
+                           pick.nodePosMS[2] + pick.childSizeMS,
+                           1.0
+                         };
+
+      pickedPoint = (static_cast<const UDRenderState*>(pick.model)->matrix * transPos).toVector3();
+      pickHighlightData = { pick.model, pick.nodeIndex };
+      PickFound.Signal(pickedPoint);
+    }
+    else
+    {
+      pickedPoint = { 0 , 0, 0 };
+      pickHighlightData = { nullptr, 0, };
+    }
+  }
   FrameReady.Signal();
 }
 
@@ -130,6 +164,16 @@ void View::OnDirty()
     spRenderView->renderWidth = renderWidth;
     spRenderView->renderHeight = renderHeight;
 
+    if (pickingEnabled)
+    {
+      spRenderView->pickingEnabled = true;
+      spRenderView->udPick.x = mousePosition.x;
+      spRenderView->udPick.y = mousePosition.y;
+      spRenderView->udPick.highlightIndex = pickHighlightData.highlightIndex;
+      spRenderView->udPick.highlightModel = pickHighlightData.highlightModel;
+      spRenderView->udPick.highlightColor = 0xFFC0C000;
+    }
+
     // if there are ud jobs, we'll need to send it to the UD render thread
     if (spRenderView->spScene->ud.length > 0)
       pRenderer->AddUDRenderJob(spRenderView);
@@ -143,11 +187,8 @@ void View::OnDirty()
 
 void View::Update(double timeStep)
 {
-  if (spCamera)
-  {
-    if (spCamera->Update(timeStep))
-      ForceDirty();
-  }
+  if ((spCamera && spCamera->Update(timeStep)) || pickingEnabled)
+    ForceDirty();
 }
 
 void View::Activate()
@@ -158,6 +199,14 @@ void View::Activate()
 void View::Deactivate()
 {
   GetKernel().UpdatePulse.Unsubscribe(updateFunc);
+}
+
+// TODO: Implement this
+void View::RequestPick(SharedArray<const ScreenPoint> points, const PickDelegate &del)
+{
+#if 0 // TODO: enable this once picking with an array of points is supported
+  pickRequests.pushBack() = { points, del } ;
+#endif
 }
 
 } // namespace kernel

@@ -39,11 +39,28 @@ public:
   void SetRenderOptions(const udRenderOptions &_options) { this->options = _options; }
   const udRenderOptions& GetRenderOptions() const { return options; }
 
+  void SetEnablePicking(bool enable);
+  bool GetEnablePicking() const { return pickingEnabled; }
+
+  struct PickResult
+  {
+    Double3 position;
+    udNodeIndex nodeIndex;
+  };
+  using PickDelegate = Delegate<void(const SharedArray<PickResult>&)>;
+  using ScreenPoint = Vector2<int>;
+  void RequestPick(SharedArray<const ScreenPoint> points, const PickDelegate &del);
+
+  ScreenPoint GetMousePosition() const { return mousePosition; }
+
   void Activate();
   void Deactivate();
 
   Event<> Dirty;
   Event<> FrameReady;
+  Event<bool> EnabledPickingChanged;
+  Event<Double3> PickFound;
+  Event<ScreenPoint> MousePositionChanged;
 
   // TODO: remove these!
   void RegisterResizeCallback(void (*pCallback)(ViewRef pView, int w, int h)) { pResizeCallback = pCallback; }
@@ -66,6 +83,25 @@ protected:
 
   // --- possibly derived stuff? ---
   udRenderOptions options;
+
+  bool pickingEnabled = false;
+  Double3 pickedPoint = { 0, 0, 0 };
+
+  struct PickHighlightData
+  {
+    const udRenderModel *highlightModel;
+    udNodeIndex highlightIndex;
+  };
+  PickHighlightData pickHighlightData = { nullptr, ~0ULL };
+
+  ScreenPoint mousePosition = { 0, 0 };
+  struct PickRequest
+  {
+    SharedArray<const ScreenPoint> points;
+    PickDelegate pickDelegate;
+  };
+
+  Array<PickRequest> pickRequests;
 
   // TODO: remove these!
   void(*pResizeCallback)(ViewRef, int, int) = nullptr;
@@ -95,9 +131,22 @@ protected:
   {
     return{
       EP_MAKE_EVENT(Dirty, "View dirty event"),
+      EP_MAKE_EVENT(EnabledPickingChanged, "Enable Picking changed"),
+      EP_MAKE_EVENT(PickFound, "Pick found"),
+      EP_MAKE_EVENT(MousePositionChanged, "Mouse Position changed")
     };
   }
 };
+
+
+inline void View::SetEnablePicking(bool enable)
+{
+  if (pickingEnabled != enable)
+  {
+    pickingEnabled = enable;
+    EnabledPickingChanged.Signal(pickingEnabled);
+  }
+}
 
 } // namespace kernel
 

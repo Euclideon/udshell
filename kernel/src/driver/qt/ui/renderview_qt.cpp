@@ -109,6 +109,7 @@ void RenderView::componentComplete()
   // TODO: Focus should be set based on mouse click from main window - possibly handle in QML
   // TODO: Accepted mouse buttons should be item specific
   setFocus(true);
+  setAcceptHoverEvents(true);
   setAcceptedMouseButtons(Qt::LeftButton | Qt::MiddleButton | Qt::RightButton);
 }
 
@@ -164,33 +165,28 @@ void RenderView::mouseDoubleClickEvent(QMouseEvent *pEv)
     pEv->accept();
 }
 
+// TODO: MASSIVE HAX!!! FIX ME!!
+static qreal mouseLastX, mouseLastY;
+
 void RenderView::mouseMoveEvent(QMouseEvent *pEv)
 {
   auto pos = pEv->localPos();
   qreal x = pos.x();
   qreal y = pos.y();
 
-  // TODO: MASSIVE HAX!!! FIX ME!!
-  static qreal lastX = -100000, lastY = -100000;
-  if (lastX == -100000 && lastY == -100000)
-  {
-    lastX = x;
-    lastY = y;
-  }
-
   epInputEvent ev;
   ev.deviceType = epID_Mouse;
   ev.deviceId = 0; // TODO: get mouse id
   ev.eventType = epInputEvent::Move;
-  ev.move.xDelta = (float)(lastX - x); // TODO: MASSIVE HAX!!! FIX ME!!
-  ev.move.yDelta = (float)(lastY - y); // TODO: MASSIVE HAX!!! FIX ME!!
+  ev.move.xDelta = (float)(mouseLastX - x);
+  ev.move.yDelta = (float)(mouseLastY - y);
   ev.move.xAbsolute = (float)x;
   ev.move.yAbsolute = (float)y;
   if (spView && spView->InputEvent(ev))
     pEv->accept();
 
-  lastX = x; // TODO: MASSIVE HAX!!! FIX ME!!
-  lastY = y;
+  mouseLastX = x;
+  mouseLastY = y;
 }
 
 void RenderView::mousePressEvent(QMouseEvent *pEv)
@@ -223,6 +219,29 @@ void RenderView::touchEvent(QTouchEvent *pEv)
   // translate and process
   if (handled)
     pEv->accept();
+}
+
+void RenderView::hoverMoveEvent(QHoverEvent *pEv)
+{
+  auto pos = pEv->pos();
+  qreal x = pos.x();
+  qreal y = pos.y();
+
+  auto oldPos = pEv->oldPos();
+  mouseLastX = oldPos.x();
+  mouseLastY = oldPos.y();
+
+  epInputEvent ev;
+  ev.deviceType = epID_Mouse;
+  ev.deviceId = 0; // TODO: get mouse id
+  ev.eventType = epInputEvent::Move;
+  ev.move.xDelta = (float)(mouseLastX - x);
+  ev.move.yDelta = (float)(mouseLastY - y);
+  ev.move.xAbsolute = (float)x;
+  ev.move.yAbsolute = (float)y;
+
+  if (spView)
+    spView->InputEvent(ev);
 }
 
 } // namespace qt

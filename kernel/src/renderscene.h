@@ -83,6 +83,9 @@ public:
   int displayWidth, displayHeight;
   int renderWidth, renderHeight;
 
+  bool pickingEnabled = false;
+  udRenderPick udPick = { sizeof(udRenderPick) };
+
   RenderSceneRef spScene = nullptr;
 
   ViewRef spView = nullptr;
