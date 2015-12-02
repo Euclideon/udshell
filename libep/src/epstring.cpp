@@ -288,6 +288,36 @@ ptrdiff_t parseFormat(String &format, Slice<char> &buffer, Slice<epVarArg> args)
   return len;
 }
 
+size_t urlDecode(Slice<char> outSlice, String inStr)
+{
+  size_t alloc = inStr.length + 1;
+  const char *string = inStr.ptr;
+
+  size_t strindex = 0;
+  while (--alloc > 0)
+  {
+    unsigned char in = *string;
+    if (in == '+')
+    {
+      in = ' ';
+    }
+    else if ((in == '%') && (alloc > 2) && epIsHex((unsigned char)string[1]) && epIsHex((unsigned char)string[2]))
+    {
+      // this is two hexadecimal digits following a '%'
+      char hexstr[3] = { string[1], string[2], 0 };
+      in = (unsigned char)strtoul(hexstr, nullptr, 16);
+
+      string += 2;
+      alloc -= 2;
+    }
+
+    outSlice[strindex++] = in;
+    string++;
+  }
+
+  return strindex;
+}
+
 } // namespace internal
 
 SharedString SharedString::sprintf(const char *pFormat, ...)
