@@ -191,9 +191,9 @@ Variant SimpleCamera::Save() const
   Variant var = Camera::Save();
   Variant::VarMap params = var.asAssocArray();
 
-  params->Insert("speed", speed);
-  params->Insert("invertyaxis", yInvert == -1.0 ? true : false);
-  params->Insert("helicoptermode", bHelicopter);
+  params.Insert("speed", speed);
+  params.Insert("invertyaxis", yInvert == -1.0 ? true : false);
+  params.Insert("helicoptermode", bHelicopter);
 
   return Variant(std::move(params));
 }

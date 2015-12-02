@@ -30,7 +30,7 @@ struct Variant : public epVariant
 public:
   typedef Delegate<Variant(Slice<Variant>)> VarDelegate;
   typedef SharedArray<Variant> VarArray;
-  typedef SharedMapRef<AVLTree<Variant, Variant>> VarMap;
+  typedef SharedMap<AVLTree<Variant, Variant>> VarMap;
 
   enum class Type
   {
@@ -163,7 +163,7 @@ struct KeyValuePair
   KeyValuePair(Variant &&key, const Variant &value) : key(std::move(key)), value(value) {}
   KeyValuePair(Variant &&key, Variant &&value) : key(std::move(key)), value(std::move(value)) {}
 
-  KeyValuePair(const Variant::VarMap::Type::Iterator::KVP &kvp) : key(kvp.key), value(kvp.value) {}
+  KeyValuePair(const Variant::VarMap::Iterator::KVP &kvp) : key(kvp.key), value(kvp.value) {}
 
   Variant key;
   Variant value;
@@ -179,34 +179,38 @@ public:
   InitParams(InitParams&& rh) : params(std::move(rh.params)) {}
   InitParams(Variant::VarMap kvp) : params(kvp) {}
   InitParams(Slice<const KeyValuePair> list)
-    : params(Variant::VarMap::create())
   {
     for (auto &kvp : list)
-      params->Insert(kvp.key, kvp.value);
+      params.Insert(kvp.key, kvp.value);
   }
   InitParams(std::initializer_list<const KeyValuePair> list)
     : InitParams(Slice<const KeyValuePair>(list.begin(), list.size())) {}
 
   Variant::VarMap params;
 
-  KeyValuePair operator[](size_t index) const
+  const KeyValuePair operator[](size_t index) const
   {
-    Variant *pV = params ? params->Get(index) : nullptr;
+    const Variant *pV = params.Get(index);
+    return KeyValuePair(index, pV ? *pV : Variant());
+  }
+  KeyValuePair operator[](size_t index)
+  {
+    Variant *pV = params.Get(index);
     return KeyValuePair(index, pV ? *pV : Variant());
   }
   const Variant& operator[](String key) const
   {
-    Variant *pV = params ? params->Get(key) : nullptr;
+    const Variant *pV = params.Get(key);
     return pV ? *pV : varNone;
   }
 
-  Variant::VarMap::Type::Iterator begin() const
+  Variant::VarMap::Iterator begin() const
   {
-    return params ? params->begin() : params->end();
+    return params.begin();
   }
-  Variant::VarMap::Type::Iterator end() const
+  Variant::VarMap::Iterator end() const
   {
-    return params->end();
+    return params.end();
   }
 
 private:

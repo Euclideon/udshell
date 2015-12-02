@@ -53,7 +53,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   }
 
   Variant::VarMap kvps = rootElements.asAssocArray();
-  Variant *pProject = kvps->Get("project");
+  Variant *pProject = kvps.Get("project");
   if (pProject)
     ParseProject(*pProject);
   else
@@ -108,10 +108,10 @@ Variant Project::SaveActivities()
 void Project::ParseProject(Variant values)
 {
   Variant::VarMap kvps = values.asAssocArray();
-  if (kvps->Empty())
+  if (kvps.Empty())
     return;
 
-  for (auto kvp : *kvps)
+  for (auto kvp : kvps)
   {
     if (kvp.key.asString().eq("activities"))
       ParseActivities(kvp.value);
@@ -121,10 +121,10 @@ void Project::ParseProject(Variant values)
 void Project::ParseActivities(Variant values)
 {
   Variant::VarMap kvps = values.asAssocArray();
-  if (kvps->Empty())
+  if (kvps.Empty())
     return;
 
-  for (auto kvp : *kvps)
+  for (auto kvp : kvps)
     ParseActivity(kvp.key.asString(), kvp.value);
 }
 

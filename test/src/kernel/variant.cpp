@@ -22,7 +22,7 @@ TEST(EPVariant, EPVariantNull)
   EXPECT_TRUE(var.asString().empty());
 
   EXPECT_TRUE(var.asArray().empty());
-  EXPECT_TRUE(var.asAssocArray() == nullptr);
+  EXPECT_TRUE(var.asAssocArray().Empty());
 //  EXPECT_TRUE(var.asAssocArraySeries().empty());
 
   EXPECT_EQ(0, var.arrayLen());
@@ -60,7 +60,7 @@ TEST(EPVariant, EPVariantBool)
   EXPECT_DEATH_FROM_ASSERT(varTrue.asString().empty(), "Wrong type!");
 
   EXPECT_DEATH_FROM_ASSERT(varTrue.asArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varTrue.asAssocArray()->Empty(), "Wrong type!");
+  EXPECT_DEATH_FROM_ASSERT(varTrue.asAssocArray().Empty(), "Wrong type!");
 //  EXPECT_DEATH_FROM_ASSERT(varTrue.asAssocArraySeries().empty(), "Wrong type!");
 
   EXPECT_EQ(0, varTrue.arrayLen());
@@ -99,7 +99,7 @@ TEST(EPVariant, EPVariantInt)
   EXPECT_DEATH_FROM_ASSERT(varInt.asString().empty(), "Wrong type!");
 
   EXPECT_DEATH_FROM_ASSERT(varInt.asArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varInt.asAssocArray()->Empty(), "Wrong type!");
+  EXPECT_DEATH_FROM_ASSERT(varInt.asAssocArray().Empty(), "Wrong type!");
 //  EXPECT_DEATH_FROM_ASSERT(varInt.asAssocArraySeries().empty(), "Wrong type!");
 
   EXPECT_EQ(0, varInt.arrayLen());
@@ -139,7 +139,7 @@ TEST(EPVariant, EPVariantDbl)
   EXPECT_DEATH_FROM_ASSERT(varDbl.asString().empty(), "Wrong type!");
 
   EXPECT_DEATH_FROM_ASSERT(varDbl.asArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varDbl.asAssocArray()->Empty(), "Wrong type!");
+  EXPECT_DEATH_FROM_ASSERT(varDbl.asAssocArray().Empty(), "Wrong type!");
 //  EXPECT_DEATH_FROM_ASSERT(varDbl.asAssocArraySeries().empty(), "Wrong type!");
 
   EXPECT_EQ(0, varDbl.arrayLen());
@@ -181,7 +181,7 @@ TEST(EPVariant, EPVariantSlice)
   for (size_t i = 0; i < 3; ++i)
     EXPECT_TRUE(testSlice[i].asInt() == varSlice.asArray()[i].asInt());
 
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asAssocArray()->Empty(), "Wrong type!");
+  EXPECT_DEATH_FROM_ASSERT(varSlice.asAssocArray().Empty(), "Wrong type!");
 //  EXPECT_DEATH_FROM_ASSERT(varSlice.asAssocArraySeries().empty(), "Wrong type!");
 
   EXPECT_EQ(varSlice[0].asInt(), 0);

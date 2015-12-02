@@ -246,10 +246,10 @@ Variant::Variant(Slice<KeyValuePair> aa)
   }
   ownsContent = 1;
   length = 0;
-  new(&p) Variant::VarMap(Variant::VarMap::create());
-  Variant::VarMap &map = (Variant::VarMap&)p;
+  new(&p) VarMap;
+  VarMap &map = (VarMap&)p;
   for (auto &kvp : aa)
-    map->Insert(kvp.key, kvp.value);
+    map.Insert(kvp.key, kvp.value);
 }
 
 void Variant::copyContent(const Variant &val)
@@ -278,7 +278,7 @@ void Variant::copyContent(const Variant &val)
     }
     case Type::AssocArray:
     {
-      new((void*)&p) VarDelegate((VarMap&)val.p);
+      new((void*)&p) VarMap((VarMap&)val.p);
       break;
     }
     default:
@@ -320,15 +320,7 @@ void Variant::destroy()
     }
     case Type::AssocArray:
     {
-      internal::SliceHeader *pH = internal::GetSliceHeader(p);
-      if (pH->refCount == 1)
-      {
-        for (size_t j = 0; j < length; ++j)
-          ((KeyValuePair*)p)[j].~KeyValuePair();
-        internal::SliceFree(p);
-      }
-      else
-        --pH->refCount;
+      ((VarMap&)p).~VarMap();
       break;
     }
     case Type::SmallString:
@@ -353,7 +345,7 @@ bool Variant::isNull() const
     case Type::Array:
       return length == 0;
     case Type::AssocArray:
-      return p == nullptr || ((VarMap&)p)->Empty();
+      return ((VarMap&)p).Empty();
     case Type::Component:
     case Type::Delegate:
       return p == nullptr;

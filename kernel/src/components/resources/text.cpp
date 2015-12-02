@@ -57,12 +57,12 @@ Variant Text::ParseXml()
 void Text::FormatXml(Variant root)
 {
   Variant::VarMap rootElements = root.asAssocArray();
-  if (rootElements->Size() == 0)
+  if (rootElements.Size() == 0)
   {
     LogWarning(2, "Tree has no nodes!");
     return;
   }
-  else if (rootElements->Size() > 1)
+  else if (rootElements.Size() > 1)
   {
     LogWarning(2, "XML may only have a single root node!");
     return;
@@ -71,8 +71,8 @@ void Text::FormatXml(Variant root)
   StreamRef spOut = GetKernel().CreateComponent<MemStream>({ { "buffer", ComponentRef(this) }, { "flags", OpenFlags::Write } });
   spOut->WriteLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 
-  auto kvp = *rootElements->begin();
-  FormatXmlElement(spOut, kvp, 0);
+  auto kvp = rootElements.begin();
+  FormatXmlElement(spOut, *kvp, 0);
 }
 
 void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
@@ -86,12 +86,12 @@ void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
   {
     Variant::VarMap children = element.value.asAssocArray();
 
-    for (auto child : *children)
+    for (auto child : children)
     {
       if (!child.key.asString().cmp("_attributes"))
       {
         Variant::VarMap attributes = child.value.asAssocArray();
-        for (auto attr : *attributes)
+        for (auto attr : attributes)
         {
           str.format(" {0}=\"{1}\"", attr.key.asString(), attr.value.asSharedString());
           spOut->Write(str);
@@ -101,13 +101,13 @@ void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
 
     spOut->Write(String(">\n"));
 
-    for (auto child : *children)
+    for (auto child : children)
     {
       if (child.key.asString().eq("_text"))
         str.format("{'',*0}{1}\n", (depth + 1) * 2, child.value.asSharedString());
     }
 
-    for (auto child : *children)
+    for (auto child : children)
     {
       String childName = child.key.asString();
       if (!childName.eq("_attributes") && !childName.eq("_text"))

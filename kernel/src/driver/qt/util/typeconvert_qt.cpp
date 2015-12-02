@@ -173,7 +173,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
     {
       QVariantMap map;
       Variant::VarMap aa = variant.asAssocArray();
-      for (auto v : *aa)
+      for (auto v : aa)
       {
         if (!v.key.is(Variant::Type::String))
         {

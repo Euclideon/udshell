@@ -3,51 +3,91 @@
 #define _EPMAP_HPP
 
 #include "ep/cpp/avltree.h"
-#include "ep/cpp/sharedptr.h"
 
 namespace ep {
 
 template <typename Tree>
-class SharedMap : public RefCounted
+class SharedMap
 {
 public:
   using KeyType = typename Tree::KeyType;
   using ValueType = typename Tree::ValueType;
   using Iterator = typename Tree::Iterator;
 
-  size_t Size() const { return tree.Size(); }
+  SharedMap() : ptr(nullptr) {}
+  SharedMap(const SharedMap &rh)
+    : ptr(rh.ptr)
+  {
+    if (ptr)
+      ++ptr->rc;
+  }
+  SharedMap(SharedMap &&rval)
+    : ptr(rval.ptr)
+  {
+    rval.ptr = nullptr;
+  }
+//  SharedMap(Slice<KeyValuePair> arr)
+//  {
+//    ptr = new(epAlloc(sizeof(Node))) Node;
+//    ptr->rc = 1;
+//    for (auto &kvp : arr)
+//      ptr->tree.Insert(kvp.key, kvp.value);
+//  }
+  ~SharedMap()
+  {
+    if (!ptr)
+      return;
+    if (ptr->rc == 1)
+    {
+      ptr->~Node();
+      epFree(ptr);
+    }
+    else
+      --ptr->rc;
+  }
 
-  bool Empty() const { return tree.Empty(); }
+  size_t Size() const { return ptr ? ptr->tree.Size() : 0; }
+
+  bool Empty() const { return ptr ? ptr->tree.Empty() : true; }
 
   void Insert(KeyType &&key, ValueType &&rval)
   {
-    tree.Insert(std::move(key), std::move(rval));
+    if (!ptr)
+      Alloc();
+    ptr->tree.Insert(std::move(key), std::move(rval));
   }
   void Insert(const KeyType &key, ValueType &&rval)
   {
-    tree.Insert(key, std::move(rval));
+    if (!ptr)
+      Alloc();
+    ptr->tree.Insert(key, std::move(rval));
   }
   void Insert(KeyType &&key, const ValueType &v)
   {
-    tree.Insert(std::move(key), v);
+    if (!ptr)
+      Alloc();
+    ptr->tree.Insert(std::move(key), v);
   }
   void Insert(const KeyType &key, const ValueType &v)
   {
-    tree.Insert(key, v);
+    if (!ptr)
+      Alloc();
+    ptr->tree.Insert(key, v);
   }
 
   void Remove(const KeyType &key)
   {
-    tree.Remove(key);
+    if (ptr)
+      ptr->tree.Remove(key);
   }
 
   const ValueType* Get(const KeyType &key) const
   {
-    return tree.Get(key);
+    return ptr ? ptr->tree.Get(key) : nullptr;
   }
   ValueType* Get(const KeyType &key)
   {
-    return tree.Get(key);
+    return ptr ? ptr->tree.Get(key) : nullptr;
   }
 
   ValueType& operator[](const KeyType &key) const
@@ -57,17 +97,26 @@ public:
     return *(ValueType*)v; // TODO: should we propagate const from Map to element?
   }
 
-  Iterator begin() const { return tree.begin(); }
-  Iterator end() const { return tree.end(); }
+  Iterator begin() const { return ptr ? ptr->tree.begin() : ptr->tree.end(); }
+  Iterator end() const { return ptr->tree.end(); }
 
 private:
   friend struct Variant;
 
-  Tree tree;
-};
+  struct Node
+  {
+    Tree tree;
+    size_t rc;
+  };
 
-template <typename Tree>
-using SharedMapRef = SharedPtr<SharedMap<Tree>>;
+  Node *ptr;
+
+  void Alloc()
+  {
+    ptr = new(epAlloc(sizeof(Node))) Node;
+    ptr->rc = 1;
+  }
+};
 
 } // namespace ep
 
