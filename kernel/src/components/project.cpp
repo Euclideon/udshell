@@ -29,7 +29,10 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     }
   }
   else
-    return; // Create empty project
+  {
+    LogDebug(3, "No \"src\" parameter. Creating empty project");
+    return;
+  }
 
   size_t len = (size_t)spSrc->Length() + 1;
   Array<char> buffer(Reserve, len);

@@ -22,6 +22,9 @@ public:
   void AddActivity(ActivityRef activity) { activities.pushBack(activity); }
   void RemoveActivity(ActivityRef activity) { activities.remove(activities.findFirst(activity)); }
 
+  void SetSrc(String src) { srcString = src; }
+  String GetSrc() const { return srcString; }
+
 protected:
   Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
@@ -34,7 +37,7 @@ protected:
   Array<ActivityRef> activities;
 
   ResourceManagerRef spResourceManager;
-  SharedString srcString;
+  SharedString srcString = nullptr;
 
   static Array<const MethodInfo> GetMethods()
   {
