@@ -22,7 +22,7 @@ public:
   Event<> Changed;
 
 protected:
-  Resource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  Resource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {}
 

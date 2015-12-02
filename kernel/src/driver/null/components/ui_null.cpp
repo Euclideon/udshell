@@ -14,7 +14,7 @@ Variant UIComponent::GetUIHandle() const
   return Variant();
 }
 
-epResult UIComponent::CreateInternal(InitParams epUnusedParam(initParams))
+epResult UIComponent::CreateInternal(Variant::VarMap epUnusedParam(initParams))
 {
   return epR_Success;
 }
@@ -32,7 +32,7 @@ void UIComponent::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Viewport::CreateInternal(InitParams epUnusedParam(initParams))
+epResult Viewport::CreateInternal(Variant::VarMap epUnusedParam(initParams))
 {
   return epR_Success;
 }
@@ -44,7 +44,7 @@ void Viewport::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Window::CreateInternal(InitParams epUnusedParam(initParams))
+epResult Window::CreateInternal(Variant::VarMap epUnusedParam(initParams))
 {
   return epR_Success;
 }

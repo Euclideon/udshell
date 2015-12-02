@@ -4,7 +4,7 @@ namespace kernel
 {
 
 // ---------------------------------------------------------------------------------------
-Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != epR_Success)

@@ -55,7 +55,7 @@ public:
   void* GetUserData() const;
 
 protected:
-  Component(const kernel::ComponentDesc *_pType, ep::Kernel *_pKernel, SharedString _uid, InitParams initParams)
+  Component(const kernel::ComponentDesc *_pType, ep::Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams)
     : uid(_uid), pType((ComponentDesc*)_pType), pKernel(_pKernel) {}
 
   const ComponentDesc *const pType;

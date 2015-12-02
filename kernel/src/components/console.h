@@ -25,7 +25,7 @@ public:
   int Flush() override;
 
 protected:
-  Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
   FILE *pIn, *pOut;
   bool bDbgOutput;

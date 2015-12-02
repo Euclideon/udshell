@@ -27,7 +27,7 @@ public:
   int64_t Seek(SeekOrigin rel, int64_t offset) override;
 
 protected:
-  File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~File();
 
   int GetPosixOpenFlags(FileOpenFlags flags) const;

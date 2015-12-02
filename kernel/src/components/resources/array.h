@@ -133,7 +133,7 @@ public:
 protected:
   friend class GeomNode;
 
-  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Buffer(pType, pKernel, uid, initParams)
   {
     Changed.Subscribe(Delegate<void()>(this, &ArrayBuffer::OnBufferDirty));

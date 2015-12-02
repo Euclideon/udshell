@@ -15,10 +15,10 @@ class Viewport : public UIComponent
 public:
 
 protected:
-  Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~Viewport();
 
-  epResult CreateInternal(InitParams initParams);
+  epResult CreateInternal(Variant::VarMap initParams);
   void DestroyInternal();
 };
 

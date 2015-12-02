@@ -107,7 +107,7 @@ public:
   void SetURL(String _url) { url = _url; }
 
 protected:
-  DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
   StreamRef OpenStream(const Variant &source);
 

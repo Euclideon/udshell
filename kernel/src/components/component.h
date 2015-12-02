@@ -91,7 +91,7 @@ public:
   Variant Save() const override { return Variant(); }
 
 protected:
-  Component(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, InitParams initParams)
+  Component(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams)
     : ep::Component(_pType, (ep::Kernel*)_pKernel, _uid, initParams) {}
   virtual ~Component();
 
@@ -100,7 +100,7 @@ protected:
     ::operator delete(p);
   }
 
-  void Init(InitParams initParams);
+  void Init(Variant::VarMap initParams);
 
   // property access
   size_t NumProperties() const { return instanceProperties.Size() + GetDescriptor()->propertyTree.Size(); }

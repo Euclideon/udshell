@@ -33,7 +33,7 @@ protected:
 
   static epResult StaticInit(ep::Kernel *pKernel);
 
-  GeomSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  GeomSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
     StreamRef ref = OpenStream(initParams["src"]);

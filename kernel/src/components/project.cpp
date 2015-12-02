@@ -8,7 +8,7 @@
 
 namespace kernel {
 
-Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   spResourceManager = pKernel->GetResourceManager();
@@ -133,7 +133,7 @@ void Project::ParseActivity(String type, Variant values)
   Variant::VarMap kvps = values.asAssocArray();
 
   ep::ComponentRef c = nullptr;
-  epResult r = pKernel->CreateComponent(type, InitParams(kvps), &c);
+  epResult r = pKernel->CreateComponent(type, Variant::VarMap(kvps), &c);
   if (r != epR_Success)
   {
     LogWarning(1, "Unable to load Activity from project file \"{0}\" -- Activity component \"{1}\" does not exist", srcString, type);

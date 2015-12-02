@@ -15,6 +15,7 @@ public:
   using Iterator = typename Tree::Iterator;
 
   SharedMap() : ptr(nullptr) {}
+  SharedMap(nullptr_t) : ptr(nullptr) {}
   SharedMap(const SharedMap &rh)
     : ptr(rh.ptr)
   {
@@ -26,13 +27,16 @@ public:
   {
     rval.ptr = nullptr;
   }
-//  SharedMap(Slice<KeyValuePair> arr)
-//  {
-//    ptr = new(epAlloc(sizeof(Node))) Node;
-//    ptr->rc = 1;
-//    for (auto &kvp : arr)
-//      ptr->tree.Insert(kvp.key, kvp.value);
-//  }
+  SharedMap(Slice<const typename Tree::KeyValuePair> arr)
+  {
+    ptr = new(epAlloc(sizeof(Node))) Node;
+    ptr->rc = 1;
+    for (auto &kvp : arr)
+      ptr->tree.Insert(kvp.key, kvp.value);
+  }
+  SharedMap(std::initializer_list<typename Tree::KeyValuePair> init)
+    : SharedMap(Slice<const typename Tree::KeyValuePair>(init.begin(), init.size()))
+  {}
   ~SharedMap()
   {
     if (!ptr)

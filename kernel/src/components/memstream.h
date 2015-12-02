@@ -22,7 +22,7 @@ public:
   BufferRef GetBuffer() const;
 
 protected:
-  MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~MemStream();
 
   void SetBuffer(BufferRef spNewBuffer);

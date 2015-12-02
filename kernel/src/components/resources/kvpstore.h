@@ -36,7 +36,7 @@ public:
   void InsertMethod(const Variant &key, const Variant &value) { Insert(key, value); }
 
 protected:
-  KVPStore(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  KVPStore(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
   static Array<const PropertyInfo> GetProperties()

@@ -42,7 +42,7 @@ public:
   }
 
 protected:
-  Metadata(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  Metadata(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : KVPStore(pType, pKernel, uid, initParams) {}
 
   struct VariantCompare {

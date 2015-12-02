@@ -20,10 +20,10 @@ public:
   UIComponentRef GetTopLevelUI() const { return spTopLevelUI; }
 
 protected:
-  Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~Window();
 
-  epResult CreateInternal(InitParams initParams);
+  epResult CreateInternal(Variant::VarMap initParams);
   void DestroyInternal();
 
   UIComponentRef spTopLevelUI = nullptr;

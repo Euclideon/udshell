@@ -18,7 +18,7 @@ public:
   bool LoadPlugin(String filename);
 
 protected:
-  PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
   Array<PluginLoaderRef> loaders;
 };

@@ -49,7 +49,7 @@ epResult Scene::SetRenderModels(struct udRenderModel models[], size_t numModels)
   return epR_Success;
 }
 
-Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams) :
+Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams) :
   Component(pType, pKernel, uid, initParams)
 {
   timeStep = 1.0 / 30.0;

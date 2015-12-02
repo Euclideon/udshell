@@ -37,12 +37,42 @@ struct Compare<SharedString>
   }
 };
 
+template <typename K, typename V>
+struct KVPRef
+{
+  KVPRef(const K &key, V &value) : key(key), value(value) {}
+
+  const K &key;
+  V &value;
+};
+
+template <typename K, typename V>
+struct KVP
+{
+  KVP() {}
+  KVP(KVP<K, V> &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
+  KVP(const KVP<K, V> &val) : key(val.key), value(val.value) {}
+
+  KVP(const K &key, const V &value) : key(key), value(value) {}
+  KVP(const K &key, V &&value) : key(key), value(std::move(value)) {}
+  KVP(K &&key, const V &value) : key(std::move(key)), value(value) {}
+  KVP(K &&key, V &&value) : key(std::move(key)), value(std::move(value)) {}
+
+  KVP(const KVPRef<K, V> &val) : key(val.key), value(val.value) {}
+
+  // TODO: consider, should value be first? it is more likely to have alignment requirements.
+  //       conversely, key is more frequently accessed, so should be in the first cache line...
+  K key;
+  V value;
+};
+
 template<typename K, typename V, typename PredFunctor = Compare<K>>
 class AVLTree
 {
 public:
   using KeyType = K;
   using ValueType = V;
+  using KeyValuePair = KVP<K, V>;
 
   AVLTree() {}
   AVLTree(nullptr_t) {}
@@ -404,12 +434,7 @@ public:
   class Iterator
   {
   public:
-    struct KVP
-    {
-      KVP(const K &key, V &value) : key(key), value(value) {}
-      const K &key;
-      V &value;
-    };
+    using KVP = KVPRef<K, V>;
 
     Iterator(Node *pRoot) : depth(0), stack(0), pRoot(pRoot)
     {

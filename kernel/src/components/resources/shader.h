@@ -28,7 +28,7 @@ protected:
   friend class Material;
   friend class RenderShader;
 
-  Shader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  Shader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Shader() {}
 

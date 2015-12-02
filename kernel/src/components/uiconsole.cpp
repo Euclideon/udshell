@@ -11,7 +11,7 @@ namespace kernel {
 
 LoggerRef UIConsole::spLogger;
 
-UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
   spConsoleOut = pKernel->GetStdOutBroadcaster();

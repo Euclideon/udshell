@@ -4,7 +4,7 @@
 namespace kernel
 {
 
-Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   bDbgOutput = false;

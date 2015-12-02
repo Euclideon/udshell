@@ -45,7 +45,7 @@ public:
   // TODO: remove support for sync operations?
 
 protected:
-  Stream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  Stream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Broadcaster(pType, pKernel, uid, initParams), pos(0)
   {}
 

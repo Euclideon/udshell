@@ -26,7 +26,7 @@ namespace qt {
 namespace internal {
 
 // Helper function
-epResult SetupFromQmlFile(InitParams initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal)
+epResult SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal)
 {
   String file = initParams["file"].as<String>();
   if (file.empty())
@@ -90,7 +90,7 @@ Variant UIComponent::GetUIHandle() const
 }
 
 // ---------------------------------------------------------------------------------------
-epResult UIComponent::CreateInternal(InitParams initParams)
+epResult UIComponent::CreateInternal(Variant::VarMap initParams)
 {
   LogTrace("UIComponent::CreateInternal()");
 
@@ -134,7 +134,7 @@ void UIComponent::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Viewport::CreateInternal(InitParams initParams)
+epResult Viewport::CreateInternal(Variant::VarMap initParams)
 {
   LogTrace("Viewport::CreateInternal()");
 
@@ -168,7 +168,7 @@ void Viewport::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Window::CreateInternal(InitParams initParams)
+epResult Window::CreateInternal(Variant::VarMap initParams)
 {
   LogTrace("Window::CreateInternal()");
 

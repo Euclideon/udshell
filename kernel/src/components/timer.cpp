@@ -4,7 +4,7 @@
 
 namespace kernel {
 
-Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams), pTimer(nullptr)
 {
   const Variant intervalVar = initParams["duration"];

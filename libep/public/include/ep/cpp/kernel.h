@@ -26,14 +26,14 @@ public:
   typedef FastDelegate<void(String sender, String message, const Variant &data)> MessageHandler;
   virtual void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) = 0;
 
-  virtual epResult CreateComponent(String typeId, InitParams initParams, ComponentRef *pNewInstance) = 0;
+  virtual epResult CreateComponent(String typeId, Variant::VarMap initParams, ComponentRef *pNewInstance) = 0;
   template<typename T>
-  SharedPtr<T> CreateComponent(InitParams initParams = nullptr);
+  SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr);
 
   virtual ComponentRef FindComponent(String uid) const = 0;
 
   virtual epResult RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) = 0;
-//  virtual DataSourceRef CreateDataSourceFromExtension(String ext, InitParams initParams) = 0;
+//  virtual DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) = 0;
 
   // synchronisation
   typedef FastDelegate<void(Kernel*)> MainThreadCallback;

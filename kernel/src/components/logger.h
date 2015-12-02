@@ -156,7 +156,7 @@ public:
 
   Event<> Changed;
 protected:
-  Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   LogStream *FindLogStream(StreamRef spStream) const;
 
   Array<LogStream> streamList;

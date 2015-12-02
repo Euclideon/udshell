@@ -8,7 +8,7 @@ namespace kernel
 {
 const Array<const String> UDDataSource::extensions = { ".uds", ".ssf", ".upc", ".udi", ".oct3" };
 
-UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : DataSource(pType, pKernel, uid, initParams)
 {
   const Variant &source = initParams["src"];

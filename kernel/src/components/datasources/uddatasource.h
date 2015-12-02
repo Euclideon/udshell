@@ -32,7 +32,7 @@ protected:
 
   static epResult StaticInit(ep::Kernel *pKernel);
 
-  UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 };
 
 }

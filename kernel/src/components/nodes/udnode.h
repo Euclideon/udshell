@@ -26,7 +26,7 @@ public:
   void SetUDModel(UDModelRef _spModel) { spModel = _spModel; }
 
 protected:
-  UDNode(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  UDNode(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Node(pType, pKernel, uid, initParams) { }
 
   epResult Render(RenderSceneRef &spScene, const Double4x4 &mat) override;

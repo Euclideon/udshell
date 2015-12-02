@@ -23,7 +23,7 @@ struct Compare<Variant>
 
 SHARED_CLASS(Component);
 
-struct KeyValuePair;
+using KeyValuePair = KVP<Variant, Variant>;
 
 struct Variant
 {
@@ -151,71 +151,6 @@ private:
 
   void copyContent(const Variant &val);
   void destroy();
-};
-
-struct KeyValuePair
-{
-  KeyValuePair() {}
-  KeyValuePair(KeyValuePair &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
-  KeyValuePair(const KeyValuePair &val) : key(val.key), value(val.value) {}
-
-  KeyValuePair(const Variant &key, const Variant &value) : key(key), value(value) {}
-  KeyValuePair(const Variant &key, Variant &&value) : key(key), value(std::move(value)) {}
-  KeyValuePair(Variant &&key, const Variant &value) : key(std::move(key)), value(value) {}
-  KeyValuePair(Variant &&key, Variant &&value) : key(std::move(key)), value(std::move(value)) {}
-
-  KeyValuePair(const Variant::VarMap::Iterator::KVP &kvp) : key(kvp.key), value(kvp.value) {}
-
-  Variant key;
-  Variant value;
-};
-
-// TODO: abolish InitParams!
-class InitParams
-{
-public:
-  InitParams() {}
-  InitParams(nullptr_t) {}
-  InitParams(const InitParams& rh) : params(rh.params) {}
-  InitParams(InitParams&& rh) : params(std::move(rh.params)) {}
-  InitParams(Variant::VarMap kvp) : params(kvp) {}
-  InitParams(Slice<const KeyValuePair> list)
-  {
-    for (auto &kvp : list)
-      params.Insert(kvp.key, kvp.value);
-  }
-  InitParams(std::initializer_list<const KeyValuePair> list)
-    : InitParams(Slice<const KeyValuePair>(list.begin(), list.size())) {}
-
-  Variant::VarMap params;
-
-  const KeyValuePair operator[](size_t index) const
-  {
-    const Variant *pV = params.Get(index);
-    return KeyValuePair(index, pV ? *pV : Variant());
-  }
-  KeyValuePair operator[](size_t index)
-  {
-    Variant *pV = params.Get(index);
-    return KeyValuePair(index, pV ? *pV : Variant());
-  }
-  const Variant& operator[](String key) const
-  {
-    const Variant *pV = params.Get(key);
-    return pV ? *pV : varNone;
-  }
-
-  Variant::VarMap::Iterator begin() const
-  {
-    return params.begin();
-  }
-  Variant::VarMap::Iterator end() const
-  {
-    return params.end();
-  }
-
-private:
-  static const Variant varNone;
 };
 
 namespace internal {

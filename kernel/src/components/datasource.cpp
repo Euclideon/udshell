@@ -47,7 +47,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
   return spSource;
 }
 
-DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   const Variant &source = initParams["src"];

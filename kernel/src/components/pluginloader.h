@@ -17,7 +17,7 @@ public:
   virtual bool LoadPlugin(String filename) { return false; }
 
 protected:
-  PluginLoader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  PluginLoader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {}
 };

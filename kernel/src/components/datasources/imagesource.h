@@ -26,7 +26,7 @@ protected:
 
   static epResult StaticInit(ep::Kernel *pKernel);
 
-  ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
     StreamRef ref = OpenStream(initParams["src"]);

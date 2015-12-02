@@ -30,7 +30,7 @@ public:
   bool CopyBuffer(Slice<const void> buffer);
 
 protected:
-  Buffer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  Buffer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Buffer() { Free(); }
 

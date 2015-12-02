@@ -33,8 +33,8 @@ public:
   Iterator end() const { return Iterator(resources.end()); }
 
   // Resource loading/saving functions
-  DataSourceRef LoadResourcesFromFile(InitParams initParams);
-  void SaveResourcesToFile(Slice<ResourceRef>, InitParams initParams);
+  DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams);
+  void SaveResourcesToFile(Slice<ResourceRef>, Variant::VarMap initParams);
 
   class Iterator
   {
@@ -56,7 +56,7 @@ public:
     AVLTree<String, ResourceRef>::Iterator iter;
   };
 protected:
-  ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~ResourceManager();
 
   AVLTree<String, ResourceRef> resources;
