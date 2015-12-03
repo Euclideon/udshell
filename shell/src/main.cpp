@@ -13,6 +13,7 @@
 #include "components/commandmanager.h"
 #include "components/file.h"
 #include "hal/debugfont.h"
+#include "messagebox.h"
 
 using namespace ep;
 
@@ -22,6 +23,7 @@ static kernel::Kernel *pKernel = nullptr;
 static WindowRef spMainWindow;
 static ActivityRef spActiveActivity;
 static UIComponentRef spTopLevelUI;
+static UIComponentRef spMessageBox;
 static MenuRef spMenu;
 static MenuRef spToolBar;
 static ProjectRef spProject;
@@ -147,6 +149,12 @@ void NewProject(String filePath)
   spMenu->SetItemProperties("File/Save Project As...", { { "enabled", true } });
   spToolBar->SetItemProperties("Save Project", { { "enabled", true } });
   spToolBar->SetItemProperties("Save Project As...", { { "enabled", true } });
+
+  spMessageBox->CallMethod("show", Variant::VarMap{
+    { "title", "Some title" },
+    { "text", "Some text" },
+    { "iconType", Variant(MBIconType::Warning) }
+  });
 }
 
 void OpenProject(String filePath)
@@ -212,6 +220,7 @@ void Deinit(String sender, String message, const Variant &data)
   spTopLevelUI = nullptr;
   spMenu = nullptr;
   spToolBar = nullptr;
+  spMessageBox = nullptr;
 }
 
 void Init(String sender, String message, const Variant &data)
@@ -231,6 +240,14 @@ void Init(String sender, String message, const Variant &data)
     pKernel->LogError("Error creating top Level UI Component\n");
     return;
   }
+
+  spMessageBox = pKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/messagebox.qml" } });
+  if (!spMessageBox)
+  {
+    pKernel->LogError("Error creating MessageBox UI Component\n");
+    return;
+  }
+  spTopLevelUI->SetProperty("messageboxcomp", spMessageBox);
 
   auto spConsole = pKernel->CreateComponent<UIConsole>({ { "file", "qrc:/kernel/console.qml" } });
   if (!spConsole)
