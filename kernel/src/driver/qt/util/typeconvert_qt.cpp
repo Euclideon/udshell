@@ -6,6 +6,7 @@
 
 #include "../components/component_qt.h"
 #include "../components/qtcomponent_qt.h"
+#include "../epkernel_qt.h"
 
 #include <qqmlengine.h>
 #include <QJSValueIterator>
@@ -295,7 +296,22 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
     case Variant::Type::String:
       *pJSValue = QJSValue(variant.asString().toStringz());
 
-    //case Variant::Type::Array:
+    case Variant::Type::Array:
+    {
+      using namespace qt;
+
+      uint length = (uint)variant.arrayLen();
+      QJSValue val = ((QtKernel*)QtApplication::Kernel())->QmlEngine()->newArray(length);
+      Slice<Variant> varr = variant.asArray();
+      for (uint i = 0; i < length; ++i)
+      {
+        QJSValue t;
+        epFromVariant(varr[i], &t);
+        val.setProperty(i, t);
+      }
+      *pJSValue = val;
+      break;
+    }
     //case Variant::Type::AssocArray:
 
     default:
