@@ -25,7 +25,7 @@ static epComponentOverrides s_testComponentVirtuals = {
   sizeof(epComponentOverrides),
 
   // pCreateInstance
-  [](epComponent *pBaseInstance, const epKeyValuePair *epUnusedParam(pInitParams), size_t epUnusedParam(numInitParams)) -> void*
+  [](epComponent *pBaseInstance, const epVarMap *epUnusedParam(pInitParams)) -> void*
   {
     TestComponent *pNew = new TestComponent;
     pNew->pBase = pBaseInstance;
@@ -119,7 +119,7 @@ public:
   }
 
 protected:
-  TestComponent2(Component &baseComponent, Slice<const KeyValuePair> initParams)
+  TestComponent2(Component &baseComponent, Variant::VarMap initParams)
     : IComponent(baseComponent, initParams) {}
 
   int x;

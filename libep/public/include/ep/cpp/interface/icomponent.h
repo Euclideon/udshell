@@ -40,7 +40,7 @@ public:
   static epComponentOverrides GetOverrides();
 
 protected:
-  IComponent(Component &baseComponent, Slice<const KeyValuePair> initParams) : component(baseComponent) {}
+  IComponent(Component &baseComponent, Variant::VarMap initParams) : component(baseComponent) {}
   virtual ~IComponent() {}
 
   Component &component;

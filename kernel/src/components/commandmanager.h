@@ -29,7 +29,7 @@ protected:
 
   struct Command
   {
-    Command(SharedString id, Delegate<void()> func, SharedString script, SharedString shortcut) : id(id), func(func), script(script), shortcut(shortcut) {}
+    Command(SharedString id, Delegate<void()> func, SharedString script, SharedString shortcut) : id(id), shortcut(shortcut), func(func), script(script) {}
 
     SharedString id;
     SharedString shortcut;

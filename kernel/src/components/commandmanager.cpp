@@ -44,11 +44,11 @@ bool CommandManager::RegisterCommand(String id, Delegate<void()> func, String sc
 
   if (!shortcut.empty())
   {
-    for (Command &comm : commandRegistry)
+    for (auto comm : commandRegistry)
     {
-      if (!shortcut.cmpIC(comm.shortcut) && id.cmp(comm.id))
+      if (!shortcut.cmpIC(comm.value.shortcut) && id.cmp(comm.value.id))
       {
-        LogWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\". Already bound to \"{2}\"", shortcut, id, comm.id);
+        LogWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\". Already bound to \"{2}\"", shortcut, id, comm.value.id);
         return false;
       }
     }
@@ -77,14 +77,14 @@ void CommandManager::UnregisterCommand(String id)
 
 bool CommandManager::HandleShortcutEvent(String shortcut)
 {
-  for (Command &comm : commandRegistry)
+  for (auto comm : commandRegistry)
   {
-    if (!shortcut.cmpIC(comm.shortcut))
+    if (!shortcut.cmpIC(comm.value.shortcut))
     {
-      if (comm.func)
-        comm.func();
-      else if (!comm.script.empty())
-        pKernel->Exec(comm.script);
+      if (comm.value.func)
+        comm.value.func();
+      else if (!comm.value.script.empty())
+        pKernel->Exec(comm.value.script);
 
       return true;
     }

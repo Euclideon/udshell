@@ -56,11 +56,23 @@ Variant Text::ParseXml()
 
 void Text::FormatXml(Variant root)
 {
+  Variant::VarMap rootElements = root.asAssocArray();
+  if (rootElements.Size() == 0)
+  {
+    LogWarning(2, "Tree has no nodes!");
+    return;
+  }
+  else if (rootElements.Size() > 1)
+  {
+    LogWarning(2, "XML may only have a single root node!");
+    return;
+  }
+
   StreamRef spOut = GetKernel().CreateComponent<MemStream>({ { "buffer", ComponentRef(this) }, { "flags", OpenFlags::Write } });
   spOut->WriteLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 
-  Slice<KeyValuePair> rootElements = root.asAssocArray();
-  FormatXmlElement(spOut, rootElements[0], 0);
+  auto kvp = rootElements.begin();
+  FormatXmlElement(spOut, *kvp, 0);
 }
 
 void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
@@ -72,14 +84,14 @@ void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
 
   if (element.value.is(Variant::Type::AssocArray))
   {
-    Slice<KeyValuePair> children = element.value.asAssocArray();
+    Variant::VarMap children = element.value.asAssocArray();
 
-    for (KeyValuePair &child : children)
+    for (auto child : children)
     {
       if (!child.key.asString().cmp("_attributes"))
       {
-        Slice<KeyValuePair> attributes = child.value.asAssocArray();
-        for (KeyValuePair attr : attributes)
+        Variant::VarMap attributes = child.value.asAssocArray();
+        for (auto attr : attributes)
         {
           str.format(" {0}=\"{1}\"", attr.key.asString(), attr.value.asSharedString());
           spOut->Write(str);
@@ -89,13 +101,13 @@ void Text::FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth)
 
     spOut->Write(String(">\n"));
 
-    for (KeyValuePair &child : children)
+    for (auto child : children)
     {
       if (child.key.asString().eq("_text"))
         str.format("{'',*0}{1}\n", (depth + 1) * 2, child.value.asSharedString());
     }
 
-    for (KeyValuePair &child : children)
+    for (auto child : children)
     {
       String childName = child.key.asString();
       if (!childName.eq("_attributes") && !childName.eq("_text"))

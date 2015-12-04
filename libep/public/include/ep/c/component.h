@@ -29,7 +29,7 @@ struct epComponentOverrides
 {
   size_t structSize;
 
-  void*(*pCreateInstance)(epComponent *pBaseInstance, const epKeyValuePair *pInitParams, size_t numInitParams);
+  void*(*pCreateInstance)(epComponent *pBaseInstance, const epVarMap *pInitParams);
   void(*pDestroy)(epComponent *pBaseInstance, void *pDerivedInstance);
   epResult(*pInitComplete)(epComponent *pBaseInstance, void *pDerivedInstance);
   epResult(*pReceiveMessage)(epComponent *pBaseInstance, void *pDerivedInstance, epString message, epString sender, const epVariant *pData);

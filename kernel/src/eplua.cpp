@@ -413,20 +413,20 @@ void LuaState::pushDescriptor(const ComponentDesc &desc)
 
   lua_createtable(L, 0, 0);
   size_t i = 1;
-  for (auto &p : desc.propertyTree)
+  for (auto p : desc.propertyTree)
   {
     lua_createtable(L, 0, 0);
 
-    pushString(p.id);
+    pushString(p.value.id);
     lua_setfield(L, -2, "id");
-    pushString(p.displayName);
+    pushString(p.value.displayName);
     lua_setfield(L, -2, "displayname");
-    pushString(p.description);
+    pushString(p.value.description);
     lua_setfield(L, -2, "description");
 
-    pushInt(p.flags);
+    pushInt(p.value.flags);
     lua_setfield(L, -2, "flags");
-    pushString(p.displayType);
+    pushString(p.value.displayType);
     lua_setfield(L, -2, "displaytype");
 
     lua_seti(L, -2, i++);
@@ -674,14 +674,14 @@ int LuaState::help(lua_State* L)
       l.print("\nProperties:");
 
       SetConsoleColor(ConsoleColor::Green);
-      for (auto &p : c->instanceProperties)
+      for (auto p : c->instanceProperties)
       {
-        buf.sprintf("  %-16s - %s", (const char*)p.id.toStringz(), (const char*)p.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)p.value.id.toStringz(), (const char*)p.value.description.toStringz());
         l.print(buf);
       }
-      for (auto &p : pDesc->propertyTree)
+      for (auto p : pDesc->propertyTree)
       {
-        buf.sprintf("  %-16s - %s", (const char*)p.id.toStringz(), (const char*)p.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)p.value.id.toStringz(), (const char*)p.value.description.toStringz());
         l.print(buf);
       }
     }
@@ -692,7 +692,7 @@ int LuaState::help(lua_State* L)
       l.print("\nMethods:");
 
       SetConsoleColor(ConsoleColor::Magenta);
-      for (auto &m : c->instanceMethods)
+      for (auto m : c->instanceMethods)
       {
 /*
         MutableString64 func = MutableString64::format("%s(", m->id.toStringz());
@@ -707,10 +707,10 @@ int LuaState::help(lua_State* L)
         else
           func.concat(")");
 */
-        buf.sprintf("  %-16s - %s", (const char*)m.id.toStringz(), (const char*)m.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)m.value.id.toStringz(), (const char*)m.value.description.toStringz());
         l.print(buf);
       }
-      for (auto &m : pDesc->methodTree)
+      for (auto m : pDesc->methodTree)
       {
 /*
         MutableString64 func = MutableString64::format("%s(", m->id.toStringz());
@@ -725,7 +725,7 @@ int LuaState::help(lua_State* L)
         else
           func.concat(")");
 */
-        buf.sprintf("  %-16s - %s", (const char*)m.id.toStringz(), (const char*)m.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)m.value.id.toStringz(), (const char*)m.value.description.toStringz());
         l.print(buf);
       }
     }
@@ -736,14 +736,14 @@ int LuaState::help(lua_State* L)
       l.print("\nEvents:");
 
       SetConsoleColor(ConsoleColor::Yellow);
-      for (auto &e : c->instanceEvents)
+      for (auto e : c->instanceEvents)
       {
-        buf.sprintf("  %-16s - %s", (const char*)e.id.toStringz(), (const char*)e.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)e.value.id.toStringz(), (const char*)e.value.description.toStringz());
         l.print(buf);
       }
-      for (auto &e : pDesc->eventTree)
+      for (auto e : pDesc->eventTree)
       {
-        buf.sprintf("  %-16s - %s", (const char*)e.id.toStringz(), (const char*)e.description.toStringz());
+        buf.sprintf("  %-16s - %s", (const char*)e.value.id.toStringz(), (const char*)e.value.description.toStringz());
         l.print(buf);
       }
     }
@@ -1003,7 +1003,7 @@ void Variant::luaPush(kernel::LuaState &l) const
     case Type::Bitfield:
     {
       size_t val;
-      const epEnumDesc *pDesc = asEnum(&val);
+      const EnumDesc *pDesc = asEnum(&val);
       MutableString64 str;
       pDesc->stringify(val, str);
       l.pushString(str);
@@ -1033,7 +1033,7 @@ void Variant::luaPush(kernel::LuaState &l) const
       lua_createtable(L, (int)length, 0);
       for (size_t j = 0; j<length; ++j)
       {
-        l.push(((Variant*)p)[j]);
+        l.push(a[j]);
         lua_seti(L, -2, j+1);
       }
       break;
@@ -1042,10 +1042,11 @@ void Variant::luaPush(kernel::LuaState &l) const
     {
       lua_State *L = l.state();
       lua_createtable(L, 0, 0); // TODO: estimate narr and nrec?
-      for (size_t j = 0; j<length; ++j)
+      VarMap &m = (VarMap&)p;
+      for (auto kvp : m)
       {
-        l.push(((KeyValuePair*)p)[j].key);
-        l.push(((KeyValuePair*)p)[j].value);
+        l.push(kvp.key);
+        l.push(kvp.value);
         lua_settable(L, -3);
       }
       break;
@@ -1097,32 +1098,26 @@ Variant Variant::luaGet(kernel::LuaState &l, int idx)
     {
       lua_State *L = l.state();
 
+      lua_len(L, idx);
+      lua_Integer len = l.popInt();
+
       int pos = idx < 0 ? idx-1 : idx;
 
-      // work out how many items are in the table
-      // HACK: we are doing a brute-force count!
-      // TODO: this should be replaced with better stuff
-      size_t numElements = 0;
-      l.pushNil();  // first key
-      while (lua_next(L, pos) != 0)
-      {
-        ++numElements;
-        l.pop();
-      }
-
       // alloc for table
-      Array<KeyValuePair> aa(Reserve, numElements);
+      VarMap m;
 
       // populate the table
       l.pushNil();  // first key
-      int i = 0;
       while (lua_next(L, pos) != 0)
       {
-        aa.pushBack(KeyValuePair(l.get(-2), l.get(-1)));
+        m.Insert(l.get(-2), l.get(-1));
         l.pop();
-        ++i;
       }
-      return std::move(aa);
+
+      // construct a variant
+      Variant v(std::move(m));
+      v.length = len;
+      return std::move(v);
     }
     default:
       // TODO: make a noise of some sort...?

@@ -52,9 +52,10 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     throw epR_Failure;
   }
 
-  Slice<KeyValuePair> kvps = rootElements.asAssocArray();
-  if (kvps[0].key.asString().eq("project"))
-    ParseProject(kvps[0].value);
+  Variant::VarMap kvps = rootElements.asAssocArray();
+  Variant *pProject = kvps.Get("project");
+  if (pProject)
+    ParseProject(*pProject);
   else
   {
     LogError("Invalid project file \"{0}\" -- Missing <project> element", srcString);
@@ -106,11 +107,11 @@ Variant Project::SaveActivities()
 
 void Project::ParseProject(Variant values)
 {
-  Slice<KeyValuePair> kvps = values.asAssocArray();
-  if (kvps.empty())
+  Variant::VarMap kvps = values.asAssocArray();
+  if (kvps.Empty())
     return;
 
-  for (KeyValuePair &kvp : kvps)
+  for (auto kvp : kvps)
   {
     if (kvp.key.asString().eq("activities"))
       ParseActivities(kvp.value);
@@ -119,17 +120,17 @@ void Project::ParseProject(Variant values)
 
 void Project::ParseActivities(Variant values)
 {
-  Slice<KeyValuePair> kvps = values.asAssocArray();
-  if (kvps.empty())
+  Variant::VarMap kvps = values.asAssocArray();
+  if (kvps.Empty())
     return;
 
-  for (KeyValuePair &kvp : kvps)
+  for (auto kvp : kvps)
     ParseActivity(kvp.key.asString(), kvp.value);
 }
 
 void Project::ParseActivity(String type, Variant values)
 {
-  Slice<KeyValuePair> kvps = values.asAssocArray();
+  Variant::VarMap kvps = values.asAssocArray();
 
   ep::ComponentRef c = nullptr;
   epResult r = pKernel->CreateComponent(type, InitParams(kvps), &c);

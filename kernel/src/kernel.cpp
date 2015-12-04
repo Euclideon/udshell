@@ -64,7 +64,7 @@ Kernel::Kernel()
 {
 }
 
-epResult Kernel::Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount)
+epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int renderThreadCount)
 {
   epResult result;
   StreamRef spDebugFile, spConsole;
@@ -267,7 +267,7 @@ epResult Kernel::Destroy()
 
   epHAL_Deinit();
 
-  if(stdOutCapture) 
+  if(stdOutCapture)
   {
     delete stdOutCapture;
     stdOutCapture = nullptr;

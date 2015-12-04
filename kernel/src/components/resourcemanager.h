@@ -51,7 +51,7 @@ public:
 
     bool operator!=(Iterator rhs) { return iter != rhs.iter; }
 
-    ResourceRef operator*() const { return *iter; }
+    ResourceRef operator*() const { return (*iter).value; }
 
     AVLTree<String, ResourceRef>::Iterator iter;
   };

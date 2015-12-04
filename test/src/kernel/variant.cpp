@@ -22,14 +22,14 @@ TEST(EPVariant, EPVariantNull)
   EXPECT_TRUE(var.asString().empty());
 
   EXPECT_TRUE(var.asArray().empty());
-  EXPECT_TRUE(var.asAssocArray().empty());
-  EXPECT_TRUE(var.asAssocArraySeries().empty());
+  EXPECT_TRUE(var.asAssocArray().Empty());
+//  EXPECT_TRUE(var.asAssocArraySeries().empty());
 
   EXPECT_EQ(0, var.arrayLen());
   EXPECT_EQ(0, var.assocArraySeriesLen());
 
-  EXPECT_TRUE(var[0].is(Variant::Type::Null));
-  EXPECT_TRUE(var["dummy"].is(Variant::Type::Null));
+  EXPECT_TRUE(var[0].is(Variant::Type::Void));
+  EXPECT_TRUE(var["dummy"].is(Variant::Type::Void));
 
 }
 
@@ -60,14 +60,14 @@ TEST(EPVariant, EPVariantBool)
   EXPECT_DEATH_FROM_ASSERT(varTrue.asString().empty(), "Wrong type!");
 
   EXPECT_DEATH_FROM_ASSERT(varTrue.asArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varTrue.asAssocArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varTrue.asAssocArraySeries().empty(), "Wrong type!");
+  EXPECT_DEATH_FROM_ASSERT(varTrue.asAssocArray().Empty(), "Wrong type!");
+//  EXPECT_DEATH_FROM_ASSERT(varTrue.asAssocArraySeries().empty(), "Wrong type!");
 
   EXPECT_EQ(0, varTrue.arrayLen());
   EXPECT_EQ(0, varTrue.assocArraySeriesLen());
 
-  EXPECT_TRUE(varTrue[0].is(Variant::Type::Null));
-  EXPECT_TRUE(varTrue["dummy"].is(Variant::Type::Null));
+  EXPECT_TRUE(varTrue[0].is(Variant::Type::Void));
+  EXPECT_TRUE(varTrue["dummy"].is(Variant::Type::Void));
 }
 
 TEST(EPVariant, EPVariantInt)
@@ -99,14 +99,14 @@ TEST(EPVariant, EPVariantInt)
   EXPECT_DEATH_FROM_ASSERT(varInt.asString().empty(), "Wrong type!");
 
   EXPECT_DEATH_FROM_ASSERT(varInt.asArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varInt.asAssocArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varInt.asAssocArraySeries().empty(), "Wrong type!");
+  EXPECT_DEATH_FROM_ASSERT(varInt.asAssocArray().Empty(), "Wrong type!");
+//  EXPECT_DEATH_FROM_ASSERT(varInt.asAssocArraySeries().empty(), "Wrong type!");
 
   EXPECT_EQ(0, varInt.arrayLen());
   EXPECT_EQ(0, varInt.assocArraySeriesLen());
 
-  EXPECT_TRUE(varInt[0].is(Variant::Type::Null));
-  EXPECT_TRUE(varInt["dummy"].is(Variant::Type::Null));
+  EXPECT_TRUE(varInt[0].is(Variant::Type::Void));
+  EXPECT_TRUE(varInt["dummy"].is(Variant::Type::Void));
 }
 
 
@@ -139,14 +139,14 @@ TEST(EPVariant, EPVariantDbl)
   EXPECT_DEATH_FROM_ASSERT(varDbl.asString().empty(), "Wrong type!");
 
   EXPECT_DEATH_FROM_ASSERT(varDbl.asArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varDbl.asAssocArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varDbl.asAssocArraySeries().empty(), "Wrong type!");
+  EXPECT_DEATH_FROM_ASSERT(varDbl.asAssocArray().Empty(), "Wrong type!");
+//  EXPECT_DEATH_FROM_ASSERT(varDbl.asAssocArraySeries().empty(), "Wrong type!");
 
   EXPECT_EQ(0, varDbl.arrayLen());
   EXPECT_EQ(0, varDbl.assocArraySeriesLen());
 
-  EXPECT_TRUE(varDbl[0].is(Variant::Type::Null));
-  EXPECT_TRUE(varDbl["dummy"].is(Variant::Type::Null));
+  EXPECT_TRUE(varDbl[0].is(Variant::Type::Void));
+  EXPECT_TRUE(varDbl["dummy"].is(Variant::Type::Void));
 }
 
 
@@ -181,8 +181,8 @@ TEST(EPVariant, EPVariantSlice)
   for (size_t i = 0; i < 3; ++i)
     EXPECT_TRUE(testSlice[i].asInt() == varSlice.asArray()[i].asInt());
 
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asAssocArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asAssocArraySeries().empty(), "Wrong type!");
+  EXPECT_DEATH_FROM_ASSERT(varSlice.asAssocArray().Empty(), "Wrong type!");
+//  EXPECT_DEATH_FROM_ASSERT(varSlice.asAssocArraySeries().empty(), "Wrong type!");
 
   EXPECT_EQ(varSlice[0].asInt(), 0);
   EXPECT_EQ(varSlice[1].asInt(), 1);

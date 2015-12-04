@@ -4,6 +4,7 @@
 
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/delegate.h"
+#include "ep/cpp/map.h"
 
 #include "ep/c/variant.h"
 
@@ -13,14 +14,23 @@ class LuaState;
 
 namespace ep {
 
+struct Variant;
+template<>
+struct Compare<Variant>
+{
+  ptrdiff_t operator()(Variant a, Variant b);
+};
+
 SHARED_CLASS(Component);
 
 struct KeyValuePair;
 
-struct Variant : protected epVariant
+struct Variant
 {
 public:
   typedef Delegate<Variant(Slice<Variant>)> VarDelegate;
+  typedef SharedArray<Variant> VarArray;
+  typedef SharedMap<AVLTree<Variant, Variant>> VarMap;
 
   enum class Type
   {
@@ -51,7 +61,7 @@ public:
   Variant(bool);
   Variant(int64_t);
   Variant(double);
-  Variant(size_t val, const epEnumDesc *pDesc, bool isBitfield);
+  Variant(size_t val, const EnumDesc *pDesc, bool isBitfield);
 
   Variant(VarDelegate &&d);
   Variant(const VarDelegate &d);
@@ -70,15 +80,13 @@ public:
   Variant(Slice<Variant> a, bool unsafeReference = false);
   template<size_t Len> Variant(const Array<Variant, Len> &a);
   template<size_t Len> Variant(Array<Variant, Len> &&a);
-  Variant(const SharedArray<Variant> &a);
-  Variant(SharedArray<Variant> &&a);
+  Variant(const VarArray &a);
+  Variant(VarArray &&a);
 
   // assoc arrays
-  Variant(Slice<KeyValuePair> aa, bool unsafeReference = false);
-  template<size_t Len> Variant(const Array<KeyValuePair, Len> &aa);
-  template<size_t Len> Variant(Array<KeyValuePair, Len> &&aa);
-  Variant(const SharedArray<KeyValuePair> &aa);
-  Variant(SharedArray<KeyValuePair> &&aa);
+  Variant(Slice<KeyValuePair> aa);
+  Variant(const VarMap &aa);
+  Variant(VarMap &&aa);
 
   template<typename T> Variant(T &&rval);
 
@@ -105,14 +113,14 @@ public:
   bool asBool() const;
   int64_t asInt() const;
   double asFloat() const;
-  const epEnumDesc* asEnum(size_t *pVal) const;
+  const EnumDesc* asEnum(size_t *pVal) const;
   ComponentRef asComponent() const;
   VarDelegate asDelegate() const;
   String asString() const;
   SharedString asSharedString() const;
   Slice<Variant> asArray() const;
-  Slice<KeyValuePair> asAssocArray() const;
-  Slice<KeyValuePair> asAssocArraySeries() const;
+  SharedArray<Variant> asSharedArray() const;
+  VarMap asAssocArray() const;
 
   size_t arrayLen() const;
   size_t assocArraySeriesLen() const;
@@ -125,6 +133,22 @@ public:
   static Variant luaGet(kernel::LuaState &l, int idx = -1);
 
 private:
+  size_t t : 4;
+  size_t ownsContent : 1;
+  size_t length : (sizeof(size_t)*8)-5; // NOTE: if you change this, update the shift's in asEnum()!!!
+  union
+  {
+    char b;
+    int64_t i;
+    double f;
+    const char *s;
+    Component *c;
+    DelegateMemento *d;
+    void *p;
+    Variant *a;
+    AVLTree<Variant, Variant> *aa;
+  };
+
   void copyContent(const Variant &val);
   void destroy();
 };
@@ -140,40 +164,52 @@ struct KeyValuePair
   KeyValuePair(Variant &&key, const Variant &value) : key(std::move(key)), value(value) {}
   KeyValuePair(Variant &&key, Variant &&value) : key(std::move(key)), value(std::move(value)) {}
 
+  KeyValuePair(const Variant::VarMap::Iterator::KVP &kvp) : key(kvp.key), value(kvp.value) {}
+
   Variant key;
   Variant value;
 };
 
+// TODO: abolish InitParams!
 class InitParams
 {
 public:
   InitParams() {}
   InitParams(nullptr_t) {}
   InitParams(const InitParams& rh) : params(rh.params) {}
-  InitParams(Slice<const KeyValuePair> kvp) : params(kvp) {}
-  InitParams(std::initializer_list<const KeyValuePair> list) : InitParams(Slice<const KeyValuePair>(list.begin(), list.size())) {}
-
-  Slice<const KeyValuePair> params;
-
-  const KeyValuePair& operator[](size_t index) const
+  InitParams(InitParams&& rh) : params(std::move(rh.params)) {}
+  InitParams(Variant::VarMap kvp) : params(kvp) {}
+  InitParams(Slice<const KeyValuePair> list)
   {
-    return params[index];
+    for (auto &kvp : list)
+      params.Insert(kvp.key, kvp.value);
+  }
+  InitParams(std::initializer_list<const KeyValuePair> list)
+    : InitParams(Slice<const KeyValuePair>(list.begin(), list.size())) {}
+
+  Variant::VarMap params;
+
+  const KeyValuePair operator[](size_t index) const
+  {
+    const Variant *pV = params.Get(index);
+    return KeyValuePair(index, pV ? *pV : Variant());
+  }
+  KeyValuePair operator[](size_t index)
+  {
+    Variant *pV = params.Get(index);
+    return KeyValuePair(index, pV ? *pV : Variant());
   }
   const Variant& operator[](String key) const
   {
-    for (auto &p : params)
-    {
-      if (p.key.is(Variant::Type::String) && p.key.asString().eq(key))
-        return p.value;
-    }
-    return varNone;
+    const Variant *pV = params.Get(key);
+    return pV ? *pV : varNone;
   }
 
-  Iterator<const KeyValuePair> begin() const
+  Variant::VarMap::Iterator begin() const
   {
     return params.begin();
   }
-  Iterator<const KeyValuePair> end() const
+  Variant::VarMap::Iterator end() const
   {
     return params.end();
   }

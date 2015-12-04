@@ -67,6 +67,11 @@ struct MethodCallHack<void, Args...>
 
 } // namespace internal
 
+epforceinline ptrdiff_t Compare<Variant>::operator()(Variant a, Variant b)
+{
+  return a.compare(b);
+}
+
 // these perform variadic function calls for different function and arg types
 template<typename R, typename... Args>
 epforceinline R TupleCall(R(*f)(Args...), const std::tuple<Args...> &args)
@@ -160,7 +165,7 @@ inline Variant::Variant(double _f)
   length = 0;
   f = _f;
 }
-inline Variant::Variant(size_t val, const epEnumDesc *pDesc, bool isBitfield)
+inline Variant::Variant(size_t val, const EnumDesc *pDesc, bool isBitfield)
 {
   t = isBitfield ? (size_t)Type::Bitfield : (size_t)Type::Enum;
   ownsContent = 0;
@@ -255,7 +260,7 @@ inline Variant::Variant(Array<Variant, Len> &&a)
   else
     new(this) Variant((Slice<Variant>)a);
 }
-inline Variant::Variant(const SharedArray<Variant> &a)
+inline Variant::Variant(const VarArray &a)
 {
   t = (size_t)Type::Array;
   ownsContent = a.ptr ? 1 : 0;
@@ -264,7 +269,7 @@ inline Variant::Variant(const SharedArray<Variant> &a)
   if (a.ptr)
     ++internal::GetSliceHeader(a.ptr)->refCount;
 }
-inline Variant::Variant(SharedArray<Variant> &&a)
+inline Variant::Variant(VarArray &&a)
 {
   t = (size_t)Type::Array;
   ownsContent = a.ptr ? 1 : 0;
@@ -274,45 +279,20 @@ inline Variant::Variant(SharedArray<Variant> &&a)
     a.ptr = nullptr;
 }
 
-template<size_t Len>
-inline Variant::Variant(const Array<KeyValuePair, Len> &aa)
-  : Variant(Slice<KeyValuePair>(aa))
-{}
-template<size_t Len>
-inline Variant::Variant(Array<KeyValuePair, Len> &&aa)
-{
-  if (aa.hasAllocation() && aa.length)
-  {
-    // if the rvalue has an allocation, we can just claim it
-    t = (size_t)Type::AssocArray;
-    ownsContent = 1;
-    length = aa.length;
-    this->p = aa.ptr;
-    internal::GetSliceHeader(aa.ptr)->refCount = 1;
-    aa.ptr = nullptr;
-  }
-  else
-    new(this) Variant((Slice<KeyValuePair>)aa);
-}
-inline Variant::Variant(const SharedArray<KeyValuePair> &aa)
+inline Variant::Variant(VarMap &&spC)
 {
   t = (size_t)Type::AssocArray;
-  ownsContent = aa.ptr ? 1 : 0;
-  length = aa.length;
-  this->p = aa.ptr;
-  if (aa.ptr)
-    ++internal::GetSliceHeader(aa.ptr)->refCount;
+  ownsContent = 1;
+  length = 0;
+  new(&p) VarMap(std::move(spC));
 }
-inline Variant::Variant(SharedArray<KeyValuePair> &&aa)
+inline Variant::Variant(const VarMap &spC)
 {
   t = (size_t)Type::AssocArray;
-  ownsContent = aa.ptr ? 1 : 0;
-  length = aa.length;
-  this->p = aa.ptr;
-  if (aa.ptr)
-    aa.ptr = nullptr;
+  ownsContent = 1;
+  length = 0;
+  new(&p) VarMap(spC);
 }
-
 
 inline Variant::~Variant()
 {
@@ -390,8 +370,8 @@ template<size_t Len> struct Variant_Construct<MutableString<Len>>        { epfor
 template<>           struct Variant_Construct<SharedString>              { epforceinline static Variant construct(const SharedString &v) { return Variant(v); } };
 template<size_t Len> struct Variant_Construct<Array<Variant, Len>>       { epforceinline static Variant construct(const Array<Variant, Len> &v) { return Variant(v); } };
 template<>           struct Variant_Construct<SharedArray<Variant>>      { epforceinline static Variant construct(const SharedArray<Variant> &v) { return Variant(v); } };
-template<size_t Len> struct Variant_Construct<Array<KeyValuePair, Len>>  { epforceinline static Variant construct(const Array<KeyValuePair, Len> &v) { return Variant(v); } };
-template<>           struct Variant_Construct<SharedArray<KeyValuePair>> { epforceinline static Variant construct(const SharedArray<KeyValuePair> &v) { return Variant(v); } };
+template<size_t Len> struct Variant_Construct<Array<KeyValuePair, Len>>  { epforceinline static Variant construct(const Array<KeyValuePair, Len> &v) { return Variant(Slice<KeyValuePair>(v)); } };
+template<>           struct Variant_Construct<SharedArray<KeyValuePair>> { epforceinline static Variant construct(const SharedArray<KeyValuePair> &v) { return Variant(Slice<KeyValuePair>(v)); } };
 
 // ** suite of specialisations required to wrangle every conceivable combination of 'const'
 template<typename T>
@@ -550,9 +530,6 @@ epforceinline void Variant::as<void>() const
 {
 }
 
-} // namespace ep
-
-
 
 // *****************************************************
 // ** Variant construction adapters for complex types **
@@ -568,12 +545,12 @@ inline Variant epToVariant(T e)
 // enums & bitfields
 template<typename T,
   typename std::enable_if<
-  std::is_base_of<epEnum, T>::value ||
-  std::is_base_of<epBitfield, T>::value
+  std::is_base_of<Enum, T>::value ||
+  std::is_base_of<Bitfield, T>::value
 >::type* = nullptr>
 inline Variant epToVariant(T e)
 {
-  return Variant(e.v, e.Desc(), std::is_base_of<epBitfield, T>::value);
+  return Variant(e.v, e.Desc(), std::is_base_of<Bitfield, T>::value);
 }
 
 // for arrays
@@ -648,15 +625,15 @@ inline Variant epToVariant(const Delegate<R(Args...)> &d)
 // enums & bitfields
 template<typename T,
   typename std::enable_if<
-    std::is_base_of<epEnum, T>::value ||
-    std::is_base_of<epBitfield, T>::value
+    std::is_base_of<Enum, T>::value ||
+    std::is_base_of<Bitfield, T>::value
   >::type* = nullptr>
 inline void epFromVariant(const Variant &v, T *pE)
 {
-  if (v.is(std::is_base_of<epBitfield, T>::value ? Variant::Type::Bitfield : Variant::Type::Enum))
+  if (v.is(std::is_base_of<Bitfield, T>::value ? Variant::Type::Bitfield : Variant::Type::Enum))
   {
     size_t val;
-    const epEnumDesc *pDesc = v.asEnum(&val);
+    const EnumDesc *pDesc = v.asEnum(&val);
     if (!pDesc->name.eq(T::Name()))
     {
       // TODO: complain about invalid enum type?! error or something?
@@ -681,16 +658,29 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
     if (a.length >= 2)
     {
       for (size_t i = 0; i < 2; ++i)
-        ((U*)pR)[i] = (U)a[i].asFloat();
+        ((U*)pR)[i] = a[i].as<U>();
     }
   }
   else if (v.is(Variant::Type::AssocArray))
   {
-    auto aa = v.asAssocArraySeries();
-    if (aa.length >= 2)
+    auto aa = v.asAssocArray();
+    size_t len = v.assocArraySeriesLen();
+    if (len >= 2)
     {
+      size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 2; ++i)
-        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+    }
+    else
+    {
+      Variant *pY = aa.Get("y");
+      if (!pY)
+        return;
+      Variant *pX = aa.Get("x");
+      if (!pX)
+        return;
+      pR->x = pX->as<U>();
+      pR->y = pY->as<U>();
     }
   }
 }
@@ -704,16 +694,33 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
     if (a.length >= 3)
     {
       for (size_t i = 0; i < 3; ++i)
-        ((U*)pR)[i] = (U)a[i].asFloat();
+        ((U*)pR)[i] = a[i].as<U>();
     }
   }
   else if (v.is(Variant::Type::AssocArray))
   {
-    auto aa = v.asAssocArraySeries();
-    if (aa.length >= 3)
+    auto aa = v.asAssocArray();
+    size_t len = v.assocArraySeriesLen();
+    if (len >= 3)
     {
+      size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 3; ++i)
-        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+    }
+    else
+    {
+      Variant *pZ = aa.Get("z");
+      if (!pZ)
+        return;
+      Variant *pY = aa.Get("y");
+      if (!pY)
+        return;
+      Variant *pX = aa.Get("x");
+      if (!pX)
+        return;
+      pR->x = pX->as<U>();
+      pR->y = pY->as<U>();
+      pR->z = pZ->as<U>();
     }
   }
 }
@@ -727,16 +734,37 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
     if (a.length >= 4)
     {
       for (size_t i = 0; i < 4; ++i)
-        ((U*)pR)[i] = (U)a[i].asFloat();
+        ((U*)pR)[i] = a[i].as<U>();
     }
   }
   else if (v.is(Variant::Type::AssocArray))
   {
-    auto aa = v.asAssocArraySeries();
-    if (aa.length >= 4)
+    auto aa = v.asAssocArray();
+    size_t len = v.assocArraySeriesLen();
+    if (len >= 4)
     {
+      size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 4; ++i)
-        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+    }
+    else
+    {
+      Variant *pW = aa.Get("w");
+      if (!pW)
+        return;
+      Variant *pZ = aa.Get("z");
+      if (!pZ)
+        return;
+      Variant *pY = aa.Get("y");
+      if (!pY)
+        return;
+      Variant *pX = aa.Get("x");
+      if (!pX)
+        return;
+      pR->x = pX->as<U>();
+      pR->y = pY->as<U>();
+      pR->z = pZ->as<U>();
+      pR->w = pW->as<U>();
     }
   }
 }
@@ -747,19 +775,21 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
   if (v.is(Variant::Type::Array))
   {
     auto a = v.asArray();
-    if (a.length >= 16)
+    if (a.length == 16)
     {
       for (size_t i = 0; i < 16; ++i)
-        ((U*)pR)[i] = (U)a[i].asFloat();
+        ((U*)pR)[i] = a[i].as<U>();
     }
   }
   else if (v.is(Variant::Type::AssocArray))
   {
-    auto aa = v.asAssocArraySeries();
-    if (aa.length >= 16)
+    auto aa = v.asAssocArray();
+    size_t len = v.assocArraySeriesLen();
+    if (len == 16)
     {
+      size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 16; ++i)
-        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
     }
   }
 }
@@ -788,10 +818,15 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
   }
   else if (v.is(Variant::Type::AssocArray))
   {
-    auto aa = v.asAssocArraySeries();
-    pArr->reserve(aa.length);
-    for (size_t i = 0; i < aa.length; ++i)
-      pArr->pushBack(aa[i].value.as<U>());
+    size_t len = v.assocArraySeriesLen();
+    if (len > 0)
+    {
+      Variant::VarMap m = v.asAssocArray();
+      pArr->reserve(len);
+      size_t start = m.Get(0) ? 0 : 1;
+      for (size_t i = 0; i < len; ++i)
+        pArr->pushBack(m.Get(start + i)->as<U>());
+    }
   }
   else if (v.is(Variant::Type::String))
   {
@@ -811,7 +846,6 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
   }
 }
 
-namespace ep {
 namespace internal {
 
 template<typename T>

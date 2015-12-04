@@ -36,7 +36,7 @@ SHARED_CLASS(Broadcaster);
 class Kernel : public ep::Kernel
 {
 public:
-  static epResult Create(Kernel **ppInstance, InitParams commandLine, int renderThreadCount = 0);
+  static epResult Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int renderThreadCount = 0);
   virtual epResult Destroy();
 
   epResult SendMessage(String target, String sender, String message, const Variant &data) override final;
@@ -162,7 +162,7 @@ protected:
 
   void LoadPlugins();
 
-  static Kernel *CreateInstanceInternal(InitParams commandLine);
+  static Kernel *CreateInstanceInternal(Slice<const KeyValuePair> commandLine);
   virtual epResult InitInternal() = 0;
 
   epResult InitComponents();

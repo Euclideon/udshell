@@ -48,6 +48,8 @@ struct epKeyValuePair
   epVariant value;
 };
 
+struct epVarMap;
+
 
 void epVariant_Release(epVariant v);
 
@@ -72,7 +74,7 @@ epComponent* epVariant_AsComponent(epVariant v);
 //char       epVariant_AsDelegate(epVariant v);
 epString     epVariant_AsString(epVariant v);
 const epVariant* epVariant_AsArray(epVariant v, size_t *pLength);
-const epKeyValuePair* epVariant_AsAssocArray(epVariant v, size_t *pNumElements);
+const epVarMap* epVariant_AsAssocArray(epVariant v);
 
 #if defined(__cplusplus)
 }
