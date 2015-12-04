@@ -21,7 +21,22 @@
 // Qt type conversion to/from UD
 
 namespace qt {
+
 MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string);
+
+class QtDelegate : public QObject
+{
+  Q_OBJECT
+
+public:
+  QtDelegate(ep::Variant::VarDelegate d) : QObject(nullptr), d(d) {}
+  Q_INVOKABLE QVariant call(QVariant arg0 = QVariant(), QVariant arg1 = QVariant(), QVariant arg2 = QVariant(), 
+    QVariant arg3 = QVariant(), QVariant arg4 = QVariant(), QVariant arg5 = QVariant(), QVariant arg6 = QVariant(), 
+    QVariant arg7 = QVariant(), QVariant arg8 = QVariant(), QVariant arg9 = QVariant()) const;
+
+private:
+  ep::Variant::VarDelegate d;
+};
 
 class JSValueDelegate : public ep::DelegateMemento
 {
@@ -83,6 +98,21 @@ namespace qt {
     // set the memento to our call shim
     FastDelegate<Variant(Slice<Variant>)> shim(this, &JSValueDelegate::call);
     m = shim.GetMemento();
+  }
+
+  inline QVariant QtDelegate::call(QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const
+  {
+    Variant varArgs[10] = { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 };
+    
+    int numArgs = 0;
+    for (auto &arg : varArgs)
+    {
+      if (!arg.isValid())
+        break;
+      ++numArgs;
+    }
+
+    return d(Slice<Variant>(varArgs, numArgs)).as<QVariant>();
   }
 }
 

@@ -8,7 +8,6 @@
 #include "../components/qtcomponent_qt.h"
 #include "../epkernel_qt.h"
 
-#include <qqmlengine.h>
 #include <QJSValueIterator>
 
 
@@ -145,7 +144,14 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
 
     case Variant::Type::Delegate:
     {
-      EPASSERT(false, "TODO: Support passing delegates...");
+      using namespace qt;
+      qt::QtDelegate *del = new qt::QtDelegate(variant.asDelegate());
+
+      QJSValue jsDel = ((QtKernel*)QtApplication::Kernel())->QmlEngine()->newQObject(del);
+      if (jsDel.hasProperty("call"))
+        pVariant->setValue(jsDel.property("call"));
+      
+      QQmlEngine::setObjectOwnership(del, QQmlEngine::JavaScriptOwnership);
       break;
     }
 
