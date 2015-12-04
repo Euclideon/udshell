@@ -15,7 +15,7 @@
 
 namespace kernel {
 
-Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Activity(pType, pKernel, uid, initParams)
 {
   ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
@@ -30,7 +30,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, In
   if (cam.is(Variant::Type::AssocArray))
   {
     Variant::VarMap cameraParams = cam.asAssocArray();
-    spCamera = pKernel->CreateComponent<SimpleCamera>(InitParams(cameraParams));
+    spCamera = pKernel->CreateComponent<SimpleCamera>(Variant::VarMap(cameraParams));
   }
 
   const Variant &model = initParams["model"];

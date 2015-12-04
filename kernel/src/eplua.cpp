@@ -98,13 +98,13 @@ static int CreateComponent(lua_State *L)
   String type = l.toString(1);
 
   // get the init params
-  InitParams init;
+  Variant::VarMap init;
   Variant args;
   if (numArgs >= 2)
   {
     new(&args) Variant(Variant::luaGet(l, 2));
     if (args.type() == Variant::Type::AssocArray)
-      new(&init) InitParams(args.asAssocArray());
+      new(&init) Variant::VarMap(args.asAssocArray());
   }
 
   ep::ComponentRef c = nullptr;

@@ -38,7 +38,7 @@ public:
 protected:
   friend class Scene;
 
-  Node(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  Node(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
   virtual bool InputEvent(const epInputEvent &ev);

@@ -22,7 +22,7 @@ public:
   Variant Save() const override { return Variant(); }
 
 protected:
-  Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
   UIComponentRef ui = nullptr;
 

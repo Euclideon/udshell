@@ -29,7 +29,7 @@ public:
   void Print(String str) const;
 
 private:
-  Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~Lua() override;
 
   class LuaState *pLua = nullptr;

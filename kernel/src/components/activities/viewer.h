@@ -22,7 +22,7 @@ public:
   Variant Save() const override;
 
 protected:
-  Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~Viewer() { Deactivate(); }
 
   // TODO: Remove this when Unsubscribe can be called with some kind of subscription identifier

@@ -6,7 +6,7 @@
 namespace kernel
 {
 
-Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   pLua = new LuaState(pKernel);

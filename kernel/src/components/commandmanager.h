@@ -24,7 +24,7 @@ public:
   bool SetShortcut(String id, String shortcut);
 
 protected:
-  CommandManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  CommandManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   String StripWhitespace(Slice<char> output, String input);
 
   struct Command

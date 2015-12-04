@@ -15,13 +15,13 @@ public:
 
 
 private:
-  ComponentPlugin(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  ComponentPlugin(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
     pCallbacks = pType->pOverrides;
     if (pCallbacks->pCreateInstance)
     {
-      pUserData = pCallbacks->pCreateInstance((epComponent*)this, (const epVarMap*&)initParams.params);
+      pUserData = pCallbacks->pCreateInstance((epComponent*)this, (const epVarMap*&)initParams);
       if (!pUserData)
         throw epR_Failure;
     }

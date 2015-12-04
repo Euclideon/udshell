@@ -4,7 +4,7 @@
 
 namespace kernel {
 
-MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   BufferRef inBuffer;

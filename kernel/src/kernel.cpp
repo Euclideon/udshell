@@ -448,7 +448,7 @@ const ep::ComponentDesc* Kernel::GetComponentDesc(String id)
   return pCT->pDesc;
 }
 
-epResult Kernel::CreateComponent(String typeId, InitParams initParams, ep::ComponentRef *pNewInstance)
+epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::ComponentRef *pNewInstance)
 {
   ComponentType *pType = componentRegistry.Get(typeId.hash());
   if (!pType)
@@ -559,7 +559,7 @@ epResult Kernel::RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<
   return epR_Success;
 }
 
-DataSourceRef Kernel::CreateDataSourceFromExtension(String ext, InitParams initParams)
+DataSourceRef Kernel::CreateDataSourceFromExtension(String ext, Variant::VarMap initParams)
 {
   const ep::ComponentDesc **pDesc = extensionsRegistry.Get(ext);
   if (!pDesc)

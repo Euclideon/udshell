@@ -73,7 +73,7 @@ public:
 
   friend class UDDataSource;
 protected:
-  UDModel(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  UDModel(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
   virtual ~UDModel();

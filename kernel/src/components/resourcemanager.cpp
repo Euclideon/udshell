@@ -6,7 +6,7 @@
 namespace kernel
 {
 
-ResourceManager::ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+ResourceManager::ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
 
@@ -42,7 +42,7 @@ Array<ResourceRef> ResourceManager::GetResourcesByType(const ep::ComponentDesc *
   return outs;
 }
 
-DataSourceRef ResourceManager::LoadResourcesFromFile(InitParams initParams)
+DataSourceRef ResourceManager::LoadResourcesFromFile(Variant::VarMap initParams)
 {
   Variant src = initParams["src"];
   String ext = src.asString().getRightAtLast('.');
@@ -69,7 +69,7 @@ DataSourceRef ResourceManager::LoadResourcesFromFile(InitParams initParams)
   return spDS;
 }
 
-void ResourceManager::SaveResourcesToFile(Slice<ResourceRef>, InitParams initParams)
+void ResourceManager::SaveResourcesToFile(Slice<ResourceRef>, Variant::VarMap initParams)
 {
 
 }

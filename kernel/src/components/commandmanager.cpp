@@ -3,7 +3,7 @@
 
 namespace kernel {
 
-CommandManager::CommandManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+CommandManager::CommandManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {}
 

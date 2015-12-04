@@ -17,10 +17,10 @@ public:
   Variant GetUIHandle() const;
 
 protected:
-  UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~UIComponent();
 
-  epResult CreateInternal(InitParams initParams);
+  epResult CreateInternal(Variant::VarMap initParams);
   epResult InitComplete() override;
   void DestroyInternal();
 

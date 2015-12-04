@@ -23,7 +23,7 @@ Array<const MethodInfo> Logger::GetMethods()
   };
 }
 
-Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+Logger::Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
 

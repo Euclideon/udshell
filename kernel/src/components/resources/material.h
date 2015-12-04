@@ -52,7 +52,7 @@ public:
 protected:
   friend class GeomNode;
 
-  Material(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  Material(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams) {}
   virtual ~Material()
   {

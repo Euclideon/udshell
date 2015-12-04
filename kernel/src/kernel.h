@@ -61,9 +61,9 @@ public:
   }
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase);
 
-  epResult CreateComponent(String typeId, InitParams initParams, ep::ComponentRef *pNewInstance) override final;
+  epResult CreateComponent(String typeId, Variant::VarMap initParams, ep::ComponentRef *pNewInstance) override final;
   template<typename T>
-  SharedPtr<T> CreateComponent(InitParams initParams = nullptr) { return ep::Kernel::CreateComponent<T>(initParams); }
+  SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr) { return ep::Kernel::CreateComponent<T>(initParams); }
 
   ep::ComponentRef FindComponent(String uid) const override final;
 
@@ -87,7 +87,7 @@ public:
   ResourceManagerRef GetResourceManager() const { return spResourceManager; }
 
   epResult RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) override final;
-  DataSourceRef CreateDataSourceFromExtension(String ext, InitParams initParams);
+  DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams);
 
   // stdio relaying functions
   BroadcasterRef GetStdOutBroadcaster() const { return spStdOutBC; }
@@ -183,7 +183,7 @@ protected:
   void RelayStdIO();
 
   template<typename CT>
-  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 };
 
 

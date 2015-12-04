@@ -16,7 +16,7 @@
 namespace kernel
 {
 
-File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   const Variant &path = initParams["path"];
@@ -141,7 +141,7 @@ int64_t File::Seek(SeekOrigin rel, int64_t offset)
         return -1;
       break;
   }
-  
+
   PosChanged.Signal();
 
   return pos;

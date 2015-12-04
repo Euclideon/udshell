@@ -29,7 +29,7 @@ public:
 protected:
   friend class GeomNode;
 
-  Model(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  Model(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
   void OnArrayChanged()

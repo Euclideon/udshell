@@ -60,7 +60,7 @@ private:
   static auto GetCreateFuncImpl(T* t) -> decltype(T::CreateInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::CreateInstance; }
   static ComponentDesc::CreateInstanceCallback* GetCreateFuncImpl(...)
   {
-    return [](const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams) -> Component* {
+    return [](const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams) -> Component* {
       MutableString128 t(Format, "New: {0} - {1}", pType->info.id, uid);
       pKernel->LogDebug(4, t);
       // TODO: this new can't exist in the wild... need to call back into kernel!!
@@ -101,7 +101,7 @@ private:
   static auto GetCreateFuncImpl(T* t) -> decltype(T::CreateInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::CreateInstance; }
   static ComponentDesc::CreateInstanceCallback* GetCreateFuncImpl(...)
   {
-    return [](const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams) -> Component* {
+    return [](const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams) -> Component* {
       return pType->pSuperDesc->pCreateInstance(pType, pKernel, uid, initParams);
     };
   }
@@ -146,7 +146,7 @@ inline epResult Kernel::RegisterComponentType()
 }
 
 template<typename T>
-SharedPtr<T> Kernel::CreateComponent(InitParams initParams)
+SharedPtr<T> Kernel::CreateComponent(Variant::VarMap initParams)
 {
 	ep::ComponentRef c = nullptr;
 	epResult r = CreateComponent(T::ComponentID(), initParams, &c);

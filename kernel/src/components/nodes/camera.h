@@ -36,7 +36,7 @@ protected:
   double zNear = 0.1;
   double zFar = 1000.0;
 
-  Camera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  Camera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Node(pType, pKernel, uid, initParams)
   {
     const Variant &perspParam = initParams["perspective"];
@@ -107,7 +107,7 @@ protected:
   };
   char keyState[(int)Keys::Max];
 
-  SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Camera(pType, pKernel, uid, initParams)
   {
     memset(keyState, 0, sizeof(keyState));

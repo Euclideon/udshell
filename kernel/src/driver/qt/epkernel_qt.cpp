@@ -62,7 +62,7 @@ QtKernel::QtKernel(Slice<const KeyValuePair> commandLine)
   , mainThreadId(QThread::currentThreadId())
   , renderThreadId(nullptr)
 {
-  // convert InitParams back into a string list for Qt
+  // convert Variant::VarMap back into a string list for Qt
   // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
   // NOTE: the state of our argv may be changed by Qt as it removes args that it recognises
   Array<char *, 1> args(Reserve, commandLine.length);

@@ -20,7 +20,7 @@ class QtComponent : public kernel::Component
   EP_DECLARE_COMPONENT(QtComponent, kernel::Component, EPKERNEL_PLUGINVERSION, "QtComponent desc...")
 public:
 
-  QtComponent(const kernel::ComponentDesc *pType, kernel::Kernel *pKernel, SharedString uid, InitParams initParams);
+  QtComponent(const kernel::ComponentDesc *pType, kernel::Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~QtComponent();
 
   QObject *GetQObject() const { return pQObject; }

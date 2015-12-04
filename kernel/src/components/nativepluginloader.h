@@ -17,7 +17,7 @@ public:
   bool LoadPlugin(String filename) override;
 
 protected:
-  NativePluginLoader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+  NativePluginLoader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : PluginLoader(pType, pKernel, uid, initParams)
   {}
 };

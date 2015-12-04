@@ -150,8 +150,6 @@ ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &v
 
 namespace ep {
 
-const Variant InitParams::varNone;
-
 namespace internal {
 
 const Variant::Type s_typeTranslation[] =
@@ -232,22 +230,8 @@ Variant::Variant(Slice<Variant> a, bool unsafeReference)
 
 // KVP constructors
 Variant::Variant(Slice<KeyValuePair> aa)
-{
-  t = (size_t)Type::AssocArray;
-  if (aa.empty())
-  {
-    ownsContent = 0;
-    length = 0;
-    p = 0;
-    return;
-  }
-  ownsContent = 1;
-  length = 0;
-  new(&p) VarMap;
-  VarMap &map = (VarMap&)p;
-  for (auto &kvp : aa)
-    map.Insert(kvp.key, kvp.value);
-}
+  : Variant(VarMap(aa))
+{}
 
 void Variant::copyContent(const Variant &val)
 {

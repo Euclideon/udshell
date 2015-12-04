@@ -12,7 +12,7 @@
 namespace kernel
 {
 
-void Component::Init(InitParams initParams)
+void Component::Init(Variant::VarMap initParams)
 {
   for (auto kv : initParams)
   {

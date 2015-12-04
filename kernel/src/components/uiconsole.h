@@ -60,7 +60,7 @@ public:
   }
 
 protected:
-  UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~UIConsole() {}
 
   void ToggleVisible();

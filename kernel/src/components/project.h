@@ -23,7 +23,7 @@ public:
   void RemoveActivity(ActivityRef activity) { activities.remove(activities.findFirst(activity)); }
 
 protected:
-  Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
   uint32_t GetLineNumberFromByteIndex(Slice<char> buffer, size_t index) const;
 
