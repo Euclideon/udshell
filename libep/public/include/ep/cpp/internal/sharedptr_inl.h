@@ -20,10 +20,5 @@ inline SharedPtr<T> shared_pointer_cast(const SharedPtr<U> &ptr)
 {
   return SharedPtr<T>((T*)ptr.ptr());
 }
-template<class T, class U>
-inline WeakPtr<T> weak_pointer_cast(const WeakPtr<U> &ptr)
-{
-  return WeakPtr<T>((T*)ptr.ptr());
-}
 
 } // namespace ep
