@@ -119,8 +119,8 @@ public:
   String asString() const;
   SharedString asSharedString() const;
   Slice<Variant> asArray() const;
+  SharedArray<Variant> asSharedArray() const;
   VarMap asAssocArray() const;
-//  Slice<KeyValuePair> asAssocArraySeries() const;
 
   size_t arrayLen() const;
   size_t assocArraySeriesLen() const;
@@ -143,6 +143,7 @@ private:
     double f;
     const char *s;
     Component *c;
+    DelegateMemento *d;
     void *p;
     Variant *a;
     AVLTree<Variant, Variant> *aa;

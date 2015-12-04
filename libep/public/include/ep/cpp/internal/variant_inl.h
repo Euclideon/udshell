@@ -658,20 +658,31 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
     if (a.length >= 2)
     {
       for (size_t i = 0; i < 2; ++i)
-        ((U*)pR)[i] = (U)a[i].asFloat();
+        ((U*)pR)[i] = a[i].as<U>();
     }
   }
-/*
   else if (v.is(Variant::Type::AssocArray))
   {
-    auto aa = v.asAssocArraySeries();
-    if (aa.length >= 2)
+    auto aa = v.asAssocArray();
+    size_t len = v.assocArraySeriesLen();
+    if (len >= 2)
     {
+      size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 2; ++i)
-        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+    }
+    else
+    {
+      Variant *pY = aa.Get("y");
+      if (!pY)
+        return;
+      Variant *pX = aa.Get("x");
+      if (!pX)
+        return;
+      pR->x = pX->as<U>();
+      pR->y = pY->as<U>();
     }
   }
-*/
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Vector3<U> *pR)
@@ -683,20 +694,35 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
     if (a.length >= 3)
     {
       for (size_t i = 0; i < 3; ++i)
-        ((U*)pR)[i] = (U)a[i].asFloat();
+        ((U*)pR)[i] = a[i].as<U>();
     }
   }
-/*
   else if (v.is(Variant::Type::AssocArray))
   {
-    auto aa = v.asAssocArraySeries();
-    if (aa.length >= 3)
+    auto aa = v.asAssocArray();
+    size_t len = v.assocArraySeriesLen();
+    if (len >= 3)
     {
+      size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 3; ++i)
-        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+    }
+    else
+    {
+      Variant *pZ = aa.Get("z");
+      if (!pZ)
+        return;
+      Variant *pY = aa.Get("y");
+      if (!pY)
+        return;
+      Variant *pX = aa.Get("x");
+      if (!pX)
+        return;
+      pR->x = pX->as<U>();
+      pR->y = pY->as<U>();
+      pR->z = pZ->as<U>();
     }
   }
-*/
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Vector4<U> *pR)
@@ -708,20 +734,39 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
     if (a.length >= 4)
     {
       for (size_t i = 0; i < 4; ++i)
-        ((U*)pR)[i] = (U)a[i].asFloat();
+        ((U*)pR)[i] = a[i].as<U>();
     }
   }
-/*
   else if (v.is(Variant::Type::AssocArray))
   {
-    auto aa = v.asAssocArraySeries();
-    if (aa.length >= 4)
+    auto aa = v.asAssocArray();
+    size_t len = v.assocArraySeriesLen();
+    if (len >= 4)
     {
+      size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 4; ++i)
-        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+    }
+    else
+    {
+      Variant *pW = aa.Get("w");
+      if (!pW)
+        return;
+      Variant *pZ = aa.Get("z");
+      if (!pZ)
+        return;
+      Variant *pY = aa.Get("y");
+      if (!pY)
+        return;
+      Variant *pX = aa.Get("x");
+      if (!pX)
+        return;
+      pR->x = pX->as<U>();
+      pR->y = pY->as<U>();
+      pR->z = pZ->as<U>();
+      pR->w = pW->as<U>();
     }
   }
-*/
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
@@ -730,23 +775,23 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
   if (v.is(Variant::Type::Array))
   {
     auto a = v.asArray();
-    if (a.length >= 16)
+    if (a.length == 16)
     {
       for (size_t i = 0; i < 16; ++i)
-        ((U*)pR)[i] = (U)a[i].asFloat();
+        ((U*)pR)[i] = a[i].as<U>();
     }
   }
-/*
   else if (v.is(Variant::Type::AssocArray))
   {
-    auto aa = v.asAssocArraySeries();
-    if (aa.length >= 16)
+    auto aa = v.asAssocArray();
+    size_t len = v.assocArraySeriesLen();
+    if (len == 16)
     {
+      size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 16; ++i)
-        ((U*)pR)[i] = (U)aa[i].value.asFloat();
+        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
     }
   }
-*/
 }
 
 template<typename R, typename... Args>
@@ -773,13 +818,15 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
   }
   else if (v.is(Variant::Type::AssocArray))
   {
-    EPASSERT(false, "TODO!");
-/*
-    auto aa = v.asAssocArraySeries();
-    pArr->reserve(aa.length);
-    for (size_t i = 0; i < aa.length; ++i)
-      pArr->pushBack(aa[i].value.as<U>());
-*/
+    size_t len = v.assocArraySeriesLen();
+    if (len > 0)
+    {
+      Variant::VarMap m = v.asAssocArray();
+      pArr->reserve(len);
+      size_t start = m.Get(0) ? 0 : 1;
+      for (size_t i = 0; i < len; ++i)
+        pArr->pushBack(m.Get(start + i)->as<U>());
+    }
   }
   else if (v.is(Variant::Type::String))
   {

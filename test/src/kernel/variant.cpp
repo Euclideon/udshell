@@ -28,8 +28,8 @@ TEST(EPVariant, EPVariantNull)
   EXPECT_EQ(0, var.arrayLen());
   EXPECT_EQ(0, var.assocArraySeriesLen());
 
-  EXPECT_TRUE(var[0].is(Variant::Type::Null));
-  EXPECT_TRUE(var["dummy"].is(Variant::Type::Null));
+  EXPECT_TRUE(var[0].is(Variant::Type::Void));
+  EXPECT_TRUE(var["dummy"].is(Variant::Type::Void));
 
 }
 
@@ -66,8 +66,8 @@ TEST(EPVariant, EPVariantBool)
   EXPECT_EQ(0, varTrue.arrayLen());
   EXPECT_EQ(0, varTrue.assocArraySeriesLen());
 
-  EXPECT_TRUE(varTrue[0].is(Variant::Type::Null));
-  EXPECT_TRUE(varTrue["dummy"].is(Variant::Type::Null));
+  EXPECT_TRUE(varTrue[0].is(Variant::Type::Void));
+  EXPECT_TRUE(varTrue["dummy"].is(Variant::Type::Void));
 }
 
 TEST(EPVariant, EPVariantInt)
@@ -105,8 +105,8 @@ TEST(EPVariant, EPVariantInt)
   EXPECT_EQ(0, varInt.arrayLen());
   EXPECT_EQ(0, varInt.assocArraySeriesLen());
 
-  EXPECT_TRUE(varInt[0].is(Variant::Type::Null));
-  EXPECT_TRUE(varInt["dummy"].is(Variant::Type::Null));
+  EXPECT_TRUE(varInt[0].is(Variant::Type::Void));
+  EXPECT_TRUE(varInt["dummy"].is(Variant::Type::Void));
 }
 
 
@@ -145,8 +145,8 @@ TEST(EPVariant, EPVariantDbl)
   EXPECT_EQ(0, varDbl.arrayLen());
   EXPECT_EQ(0, varDbl.assocArraySeriesLen());
 
-  EXPECT_TRUE(varDbl[0].is(Variant::Type::Null));
-  EXPECT_TRUE(varDbl["dummy"].is(Variant::Type::Null));
+  EXPECT_TRUE(varDbl[0].is(Variant::Type::Void));
+  EXPECT_TRUE(varDbl["dummy"].is(Variant::Type::Void));
 }
 
 

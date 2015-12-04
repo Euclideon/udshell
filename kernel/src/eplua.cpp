@@ -1033,7 +1033,7 @@ void Variant::luaPush(kernel::LuaState &l) const
       lua_createtable(L, (int)length, 0);
       for (size_t j = 0; j<length; ++j)
       {
-        l.push(((Variant*)p)[j]);
+        l.push(a[j]);
         lua_seti(L, -2, j+1);
       }
       break;
@@ -1042,10 +1042,11 @@ void Variant::luaPush(kernel::LuaState &l) const
     {
       lua_State *L = l.state();
       lua_createtable(L, 0, 0); // TODO: estimate narr and nrec?
-      for (size_t j = 0; j<length; ++j)
+      VarMap &m = (VarMap&)p;
+      for (auto kvp : m)
       {
-        l.push(((KeyValuePair*)p)[j].key);
-        l.push(((KeyValuePair*)p)[j].value);
+        l.push(kvp.key);
+        l.push(kvp.value);
         lua_settable(L, -3);
       }
       break;
@@ -1097,32 +1098,26 @@ Variant Variant::luaGet(kernel::LuaState &l, int idx)
     {
       lua_State *L = l.state();
 
+      lua_len(L, idx);
+      lua_Integer len = l.popInt();
+
       int pos = idx < 0 ? idx-1 : idx;
 
-      // work out how many items are in the table
-      // HACK: we are doing a brute-force count!
-      // TODO: this should be replaced with better stuff
-      size_t numElements = 0;
-      l.pushNil();  // first key
-      while (lua_next(L, pos) != 0)
-      {
-        ++numElements;
-        l.pop();
-      }
-
       // alloc for table
-      Array<KeyValuePair> aa(Reserve, numElements);
+      VarMap m;
 
       // populate the table
       l.pushNil();  // first key
-      int i = 0;
       while (lua_next(L, pos) != 0)
       {
-        aa.pushBack(KeyValuePair(l.get(-2), l.get(-1)));
+        m.Insert(l.get(-2), l.get(-1));
         l.pop();
-        ++i;
       }
-      return std::move(aa);
+
+      // construct a variant
+      Variant v(std::move(m));
+      v.length = len;
+      return std::move(v);
     }
     default:
       // TODO: make a noise of some sort...?

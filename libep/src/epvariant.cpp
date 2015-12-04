@@ -106,14 +106,11 @@ const epVariant* epVariant_AsArray(epVariant v, size_t *pLength)
   *pLength = arr.length;
   return (epVariant*)arr.ptr;
 }
-/*
-const epKeyValuePair* epVariant_AsAssocArray(epVariant v, size_t *pNumElements)
+const epVarMap* epVariant_AsAssocArray(epVariant v)
 {
-  Variant::VarMap map = ((Variant&)v).asAssocArray();
-  *pNumElements = kvp.length;
-  return (epKeyValuePair*)kvp.ptr;
+  return (epVarMap*)v.p;
 }
-*/
+
 } // extern "C"
 
 
@@ -311,7 +308,7 @@ void Variant::destroy()
       if (pH->refCount == 1)
       {
         for (size_t j = 0; j < length; ++j)
-          ((Variant*)p)[j].~Variant();
+          a[j].~Variant();
         internal::SliceFree(p);
       }
       else
@@ -575,7 +572,7 @@ SharedString Variant::asSharedString() const
       return SharedString((char*)pBuffer + 1, pBuffer[0] >> 4);
     }
     case Type::Component:
-      return ((Component*)p)->GetUid();
+      return c->GetUid();
     default:
       EPASSERT(type() == Type::String, "Wrong type!");
       return String();
@@ -591,10 +588,51 @@ Slice<Variant> Variant::asArray() const
     case Type::Null:
       return Slice<Variant>();
     case Type::Array:
-      return Slice<Variant>((Variant*)p, length);
+      return Slice<Variant>(a, length);
     default:
       EPASSERT(type() == Type::Array, "Wrong type!");
       return Slice<Variant>();
+  }
+}
+SharedArray<Variant> Variant::asSharedArray() const
+{
+  switch ((Type)t)
+  {
+    case Type::Void:
+      EPASSERT(false, "Variant is void");
+    case Type::Null:
+      return SharedArray<Variant>();
+    case Type::Array:
+    {
+      Slice<Variant> r(a, length);
+      return (SharedArray<Variant>&)r;
+    }
+    case Type::AssocArray:
+    {
+      // check the AA has a numeric series
+      if(!aa && length == 0)
+        return SharedArray<Variant>();
+
+      Array<Variant, 0> arr(Reserve, length);
+
+      // does the series start at 0 or 1?
+      size_t first = aa->Get(0) ? 0 : 1;
+
+      // append each item in the series to an array
+      for (size_t j = first; j < first + length; ++j)
+      {
+        Variant *pV = aa->Get(j);
+        if (!pV)
+          return SharedArray<Variant>();
+        arr.pushBack(*pV);
+      }
+      return std::move(arr);
+    }
+    case Type::String:
+      // TODO: should we parse strings that look like arrays??
+    default:
+      EPASSERT(type() == Type::Array, "Wrong type!");
+      return SharedArray<Variant>();
   }
 }
 Variant::VarMap Variant::asAssocArray() const
@@ -612,40 +650,18 @@ Variant::VarMap Variant::asAssocArray() const
       return VarMap();
   }
 }
-/*
-Slice<KeyValuePair> Variant::asAssocArraySeries() const
-{
-  switch ((Type)t)
-  {
-    case Type::Void:
-      EPASSERT(false, "Variant is void");
-    case Type::Null:
-      return Slice<KeyValuePair>();
-    case Type::AssocArray:
-      return Slice<KeyValuePair>((KeyValuePair*)p, assocArraySeriesLen());
-    default:
-      EPASSERT(type() == Type::AssocArray, "Wrong type!");
-      return Slice<KeyValuePair>();
-  }
-}
-*/
 
 size_t Variant::arrayLen() const
 {
-  if (is(Type::Array))
+  if (is(Type::Array) || is(Type::AssocArray))
     return length;
-  if (is(Type::AssocArray))
-    return assocArraySeriesLen();
   return 0;
 }
 size_t Variant::assocArraySeriesLen() const
 {
   if (!is(Type::AssocArray))
     return 0;
-  size_t j = 0;
-  while (j < length && ((KeyValuePair*)p)[j].key.is(Type::Int) && ((KeyValuePair*)p)[j].key.i == (int64_t)j + 1)
-    ++j;
-  return j;
+  return length;
 }
 
 Variant Variant::operator[](size_t j) const
@@ -653,30 +669,24 @@ Variant Variant::operator[](size_t j) const
   if (is(Type::Array))
   {
     EPASSERT(j < length, "Index out of range!");
-    return ((Variant*)p)[j];
+    return a[j];
   }
-  if (is(Type::AssocArray))
+  else if (is(Type::AssocArray))
   {
-    EPASSERT(j < assocArraySeriesLen(), "Index out of range!");
-    return ((KeyValuePair*)p)[j].value;
+    EPASSERT(j < length, "Index out of range!");
+    return *((VarMap&)p).Get(j + (aa->Get(0) ? 0 : 1));
   }
-  return Variant(nullptr);
+  return Variant();
 }
 Variant Variant::operator[](String key) const
 {
   if (is(Type::AssocArray))
   {
-    size_t j = assocArraySeriesLen();
-    for (; j<length; ++j)
-    {
-      Variant &k = ((KeyValuePair*)p)[j].key;
-      if (!k.is(Type::String))
-        continue;
-      if (String(k.s, k.length).eq(key))
-        return ((KeyValuePair*)p)[j].value;
-    }
+    Variant *pV = aa->Get(key);
+    if (pV)
+      return *pV;
   }
-  return Variant(nullptr);
+  return Variant();
 }
 
 } // namespace ep
