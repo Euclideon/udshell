@@ -45,9 +45,8 @@ protected:
     return{
       EP_MAKE_METHOD(AddXMLItems, "Add menu items from an XML string"),
       EP_MAKE_METHOD(RemoveItem, "Remove menu item"),
-      // TODO Uncomment this when GetMethods() supports Slice<const KeyValuePair>
-      /*EP_MAKE_METHOD(AddItem, "Add a menu item with the given properties"),
-      EP_MAKE_METHOD(SetItemProperties, "Set properties for the given menu item"),*/
+      EP_MAKE_METHOD(AddItem, "Add a menu item with the given properties"),
+      EP_MAKE_METHOD(SetItemProperties, "Set properties for the given menu item"),
     };
   }
 

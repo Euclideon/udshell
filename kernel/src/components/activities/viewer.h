@@ -10,6 +10,7 @@ SHARED_CLASS(Viewer);
 SHARED_CLASS(UDModel);
 SHARED_CLASS(SimpleCamera);
 SHARED_CLASS(Scene);
+SHARED_CLASS(Menu);
 SHARED_CLASS(View);
 
 class Viewer : public Activity
@@ -30,29 +31,22 @@ protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~Viewer() { Deactivate(); }
 
-  // TODO: Tidy this up once bookmarks ui is created.
-  void BookmarkCurrentCamera();
-  void JumpToBookmark();
-  static void StaticBookmarkCurrentCamera(Variant::VarMap params)
-  {
-    Variant *pActivityVar = params.Get("activity");
-    ViewerRef spViewer = pActivityVar->as<ViewerRef>();
-    spViewer->BookmarkCurrentCamera();
-  }
+  static epResult StaticInit(ep::Kernel *pKernel);
+  void ToggleBookmarksPanel();
+  void CreateBookmark();
 
-  static void StaticJumpToBookmark(Variant::VarMap params)
-  {
-    Variant *pActivityVar = params.Get("activity");
-    ViewerRef spViewer = pActivityVar->as<ViewerRef>();
-    spViewer->JumpToBookmark();
-  }
+  // Static functions for CommandManager callbacks
+  static void StaticToggleBookmarksPanel(Variant::VarMap params);
+  static void StaticCreateBookmark(Variant::VarMap params);
 
   UDModelRef spModel;
   SceneRef spScene;
   SimpleCameraRef spCamera;
   ViewRef spView;
+  UIComponentRef spUIBookmarks;
 };
 
 } //namespace ep
 
 #endif // EP_VIEWER_H
+

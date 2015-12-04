@@ -7,6 +7,16 @@
     <file>consolefilter.qml</file>
     <file>popupokcancel.qml</file>
     <file>popup.qml</file>
-    <file>activities/viewer/viewer.qml</file>
+  </qresource>
+
+  <qresource prefix="/viewer">
+    <file alias="viewer.qml">activities/viewer/viewer.qml</file>
+    <file alias="bookmarks.qml">activities/viewer/bookmarks.qml</file>
+    <file alias="images/icon_save_as_32.png">activities/viewer/images/icon_save_as_32.png</file>
+    <file alias="images/icon_delete.png">activities/viewer/images/icon_delete.png</file>
+    <file alias="images/icon_downArrow_16.png">activities/viewer/images/icon_downArrow_16.png</file>
+    <file alias="images/icon_upArrow_16.png">activities/viewer/images/icon_upArrow_16.png</file>
+    <file alias="images/icon_bookmark_24.png">activities/viewer/images/icon_bookmark_24.png</file>
+    <file alias="images/icon_bookmark_addnew_24.png">activities/viewer/images/icon_bookmark_addnew_24.png</file>
   </qresource>
 </RCC>

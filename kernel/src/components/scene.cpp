@@ -101,6 +101,16 @@ void Scene::RemoveBookMark(String bmName)
   bookmarks.Remove(bmName);
 }
 
+void Scene::RenameBookMark(String oldName, String newName)
+{
+  Bookmark *pBm = bookmarks.Get(oldName);
+  if (pBm)
+  {
+    bookmarks.Remove(oldName);
+    bookmarks.Insert(newName, *pBm);
+  }
+}
+
 Variant Scene::Save() const
 {
   Variant::VarMap map;

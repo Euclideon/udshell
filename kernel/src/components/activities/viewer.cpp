@@ -10,6 +10,7 @@
 #include "components/resources/udmodel.h"
 #include "components/datasource.h"
 #include "components/resourcemanager.h"
+#include "components/resources/menu.h"
 #include "components/commandmanager.h"
 
 #include "kernel.h"
@@ -67,27 +68,67 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   if (!spViewport)
   {
     pKernel->LogError("Error creating Viewport Component\n");
-    return;
+    throw epR_Failure;
   }
 
-  auto spViewerUI = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/kernel/activities/viewer/viewer.qml" } });
+  auto spViewerUI = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/viewer/viewer.qml" } });
   if (!spViewerUI)
   {
     pKernel->LogError("Error creating Viewer UI Component\n");
-    return;
+    throw epR_Failure;
   }
-
   spViewerUI->SetProperty("viewport", spViewport);
 
-  ui = spViewerUI;
-
-  // TODO: Tidy this up once bookmarks ui is created.
-  CommandManagerRef spComMan = component_cast<CommandManager>(GetKernel().FindComponent("commandmanager0"));
-  if (spComMan)
+  spUIBookmarks = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/viewer/bookmarks.qml" } });
+  if (!spUIBookmarks)
   {
-    spComMan->RegisterCommand("CreateBookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticBookmarkCurrentCamera), nullptr, nullptr);
-    spComMan->RegisterCommand("GoToBookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticJumpToBookmark), nullptr, nullptr);
+    pKernel->LogError("Error creating bookmarks UI Component\n");
+    throw epR_Failure;
   }
+  spUIBookmarks->SetProperty("view", spView);
+
+  spViewerUI->SetProperty("bookmarkscomp", spUIBookmarks);
+
+  ui = spViewerUI;
+}
+
+epResult Viewer::StaticInit(ep::Kernel *pKernel)
+{
+  auto spCommandManager = ((kernel::Kernel *)pKernel)->GetCommandManager();
+
+  spCommandManager->RegisterCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", ComponentID(), "Ctrl+Shift+B");
+  spCommandManager->RegisterCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", ComponentID(), "Ctrl+B");
+
+  return epR_Success;
+}
+
+void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)
+{
+  Variant *pActivityVar = params.Get("activity");
+  ViewerRef spViewer = pActivityVar->as<ViewerRef>();
+
+  spViewer->ToggleBookmarksPanel();
+}
+
+void Viewer::ToggleBookmarksPanel()
+{
+  GetUI()->CallMethod("togglebookmarkspanel");
+}
+
+void Viewer::StaticCreateBookmark(Variant::VarMap params)
+{
+  Variant *pActivityVar = params.Get("activity");
+  ViewerRef spViewer = pActivityVar->as<ViewerRef>();
+  spViewer->CreateBookmark();
+}
+
+void Viewer::CreateBookmark()
+{
+  // TODO: Here we have to update the bookmark list separately for the front-end UI and the internal bookmarks list.
+  // It would be nice if the QML could automatically update its bookmarks list from the internal bookmarks
+  // Not sure how to do this currently
+  Variant bookmarkName = spUIBookmarks->CallMethod("createbookmark", "");
+  spScene->AddBookMarkFromCamera(bookmarkName.asString(), spCamera);
 }
 
 void Viewer::Activate()
@@ -111,30 +152,12 @@ Variant Viewer::Save() const
   Variant::VarMap params;
 
   if (spCamera)
-    params.Insert( KeyValuePair("camera", spCamera->Save()) );
+    params.Insert("camera", spCamera->Save());
 
   if (spModel)
-    params.Insert( KeyValuePair("model", spModel->GetDataSource()->GetURL()) );
+    params.Insert("model", spModel->GetDataSource()->GetURL());
 
   return Variant(std::move(params));
-}
-
-// TODO: Tidy this up once bookmarks ui is created.
-void Viewer::BookmarkCurrentCamera()
-{
-  spScene->AddBookMarkFromCamera("Bookmark", spCamera);
-}
-
-// TODO: Tidy this up once bookmarks ui is created.
-void Viewer::JumpToBookmark()
-{
-  const Bookmark *pBM = spScene->FindBookMark("Bookmark");
-  if (pBM)
-  {
-    spCamera->SetPosition(pBM->position);
-    spCamera->SetOrientation(pBM->ypr);
-    spView->ForceDirty();
-  }
 }
 
 } // namespace ep

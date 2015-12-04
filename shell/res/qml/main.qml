@@ -158,14 +158,14 @@ Rectangle {
     Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
-
       TabView {
         id: activityTabs
         objectName: "activityTabs"
         currentIndex: -1
         visible: false
         anchors.fill: parent
-        anchors.topMargin: 8
+        anchors.topMargin: 4
+        anchors.leftMargin: 4
         frameVisible: false
         style: tabViewStyle
 
@@ -348,7 +348,7 @@ Rectangle {
     Component {
       id: separator
       Rectangle {
-        implicitWidth: 100
+        implicitWidth: 1
         implicitHeight: 1
         color: "#555"
       }

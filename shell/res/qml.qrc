@@ -2,6 +2,7 @@
   <qresource prefix="/">
     <file>qml/window.qml</file>
     <file>qml/main.qml</file>
+
     <file>qml/messagebox.qml</file>
 
     <file>qml/epcontrols/epmenubar.qml</file>
@@ -10,7 +11,6 @@
     <file>qml/epcontrols/epsplitbutton.qml</file>
     <file>qml/epcontrols/eptoolbutton.qml</file>
     <file>qml/epcontrols/qmldir</file>
-
     <file>menus.xml</file>
     <file>toolbar.xml</file>
 

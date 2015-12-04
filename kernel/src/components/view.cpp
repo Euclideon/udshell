@@ -10,6 +10,7 @@ Array<const PropertyInfo> View::GetProperties()
 {
   return{
     EP_MAKE_PROPERTY(Camera, "Camera for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY(Scene, "Scene for viewport", nullptr, 0),
     EP_MAKE_PROPERTY(EnablePicking, "Enable Picking", nullptr, 0),
     EP_MAKE_PROPERTY_RO(MousePosition, "Mouse Position", nullptr, 0)
   };
@@ -134,6 +135,19 @@ void View::SetLatestFrame(UniquePtr<RenderableView> spFrame)
     }
   }
   FrameReady.Signal();
+}
+
+void View::GoToBookmark(String bookmarkName)
+{
+  if (spScene && spCamera)
+  {
+    const Bookmark *pBM = spScene->FindBookMark(bookmarkName);
+    if (pBM)
+    {
+      spCamera->SetMatrix(Double4x4::rotationYPR(pBM->ypr, pBM->position));
+      ForceDirty();
+    }
+  }
 }
 
 void View::OnDirty()
