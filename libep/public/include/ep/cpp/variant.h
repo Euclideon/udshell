@@ -25,7 +25,7 @@ SHARED_CLASS(Component);
 
 struct KeyValuePair;
 
-struct Variant : public epVariant
+struct Variant
 {
 public:
   typedef Delegate<Variant(Slice<Variant>)> VarDelegate;
@@ -48,22 +48,7 @@ public:
     Void = epVT_Void,
     SmallString = epVT_SmallString
   };
-/*
-  size_t t : 4;
-  size_t ownsContent : 1;
-  size_t length : (sizeof(size_t)*8)-5; // NOTE: if you change this, update the shift's in asEnum()!!!
-  union
-  {
-    char b;
-    int64_t i;
-    double f;
-    const char *s;
-    Component *c;
-    void *p;
-    Variant *a;
-    SharedMap<AVLTree<Variant, Variant>> *aa;
-  };
-*/
+
   Variant();
   Variant(Variant &&rval);
   Variant(const Variant &val);
@@ -76,7 +61,7 @@ public:
   Variant(bool);
   Variant(int64_t);
   Variant(double);
-  Variant(size_t val, const epEnumDesc *pDesc, bool isBitfield);
+  Variant(size_t val, const EnumDesc *pDesc, bool isBitfield);
 
   Variant(VarDelegate &&d);
   Variant(const VarDelegate &d);
@@ -128,7 +113,7 @@ public:
   bool asBool() const;
   int64_t asInt() const;
   double asFloat() const;
-  const epEnumDesc* asEnum(size_t *pVal) const;
+  const EnumDesc* asEnum(size_t *pVal) const;
   ComponentRef asComponent() const;
   VarDelegate asDelegate() const;
   String asString() const;
@@ -148,6 +133,21 @@ public:
   static Variant luaGet(kernel::LuaState &l, int idx = -1);
 
 private:
+  size_t t : 4;
+  size_t ownsContent : 1;
+  size_t length : (sizeof(size_t)*8)-5; // NOTE: if you change this, update the shift's in asEnum()!!!
+  union
+  {
+    char b;
+    int64_t i;
+    double f;
+    const char *s;
+    Component *c;
+    void *p;
+    Variant *a;
+    AVLTree<Variant, Variant> *aa;
+  };
+
   void copyContent(const Variant &val);
   void destroy();
 };

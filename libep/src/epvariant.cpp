@@ -484,14 +484,14 @@ double Variant::asFloat() const
       return 0.0;
   }
 }
-const epEnumDesc* Variant::asEnum(size_t *pVal) const
+const EnumDesc* Variant::asEnum(size_t *pVal) const
 {
   if ((Type)t == Type::Void)
     EPASSERT(false, "Variant is void");
   else if ((Type)t == Type::Enum || (Type)t == Type::Bitfield)
   {
     *pVal = (ptrdiff_t)(length << 5) >> 5;
-    return (const epEnumDesc*)p;
+    return (const EnumDesc*)p;
   }
   return nullptr;
 }

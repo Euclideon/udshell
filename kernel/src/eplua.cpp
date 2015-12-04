@@ -1003,7 +1003,7 @@ void Variant::luaPush(kernel::LuaState &l) const
     case Type::Bitfield:
     {
       size_t val;
-      const epEnumDesc *pDesc = asEnum(&val);
+      const EnumDesc *pDesc = asEnum(&val);
       MutableString64 str;
       pDesc->stringify(val, str);
       l.pushString(str);

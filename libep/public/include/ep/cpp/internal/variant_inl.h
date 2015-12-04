@@ -165,7 +165,7 @@ inline Variant::Variant(double _f)
   length = 0;
   f = _f;
 }
-inline Variant::Variant(size_t val, const epEnumDesc *pDesc, bool isBitfield)
+inline Variant::Variant(size_t val, const EnumDesc *pDesc, bool isBitfield)
 {
   t = isBitfield ? (size_t)Type::Bitfield : (size_t)Type::Enum;
   ownsContent = 0;
@@ -530,9 +530,6 @@ epforceinline void Variant::as<void>() const
 {
 }
 
-} // namespace ep
-
-
 
 // *****************************************************
 // ** Variant construction adapters for complex types **
@@ -548,12 +545,12 @@ inline Variant epToVariant(T e)
 // enums & bitfields
 template<typename T,
   typename std::enable_if<
-  std::is_base_of<epEnum, T>::value ||
-  std::is_base_of<epBitfield, T>::value
+  std::is_base_of<Enum, T>::value ||
+  std::is_base_of<Bitfield, T>::value
 >::type* = nullptr>
 inline Variant epToVariant(T e)
 {
-  return Variant(e.v, e.Desc(), std::is_base_of<epBitfield, T>::value);
+  return Variant(e.v, e.Desc(), std::is_base_of<Bitfield, T>::value);
 }
 
 // for arrays
@@ -628,15 +625,15 @@ inline Variant epToVariant(const Delegate<R(Args...)> &d)
 // enums & bitfields
 template<typename T,
   typename std::enable_if<
-    std::is_base_of<epEnum, T>::value ||
-    std::is_base_of<epBitfield, T>::value
+    std::is_base_of<Enum, T>::value ||
+    std::is_base_of<Bitfield, T>::value
   >::type* = nullptr>
 inline void epFromVariant(const Variant &v, T *pE)
 {
-  if (v.is(std::is_base_of<epBitfield, T>::value ? Variant::Type::Bitfield : Variant::Type::Enum))
+  if (v.is(std::is_base_of<Bitfield, T>::value ? Variant::Type::Bitfield : Variant::Type::Enum))
   {
     size_t val;
-    const epEnumDesc *pDesc = v.asEnum(&val);
+    const EnumDesc *pDesc = v.asEnum(&val);
     if (!pDesc->name.eq(T::Name()))
     {
       // TODO: complain about invalid enum type?! error or something?
@@ -802,7 +799,6 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
   }
 }
 
-namespace ep {
 namespace internal {
 
 template<typename T>
