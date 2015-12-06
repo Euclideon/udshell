@@ -846,6 +846,23 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
   }
 }
 
+template<typename K, typename V>
+inline void epFromVariant(const Variant &v, AVLTree<K, V> *pTree)
+{
+  if (v.is(Variant::Type::Array))
+  {
+    auto a = v.asArray();
+    for (size_t i = 0; i < a.length; ++i)
+      pTree->insert(Variant(i).as<K>(), a[i].as<V>());
+  }
+  else if (v.is(Variant::Type::AssocArray))
+  {
+    auto aa = v.asAssocArray();
+    for (auto kvp : aa)
+      pTree->insert(kvp.key.as<K>(), kvp.value.as<V>());
+  }
+}
+
 namespace internal {
 
 template<typename T>
