@@ -25,6 +25,9 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
 	  throw epR_InvalidParameter;
 
   const Variant *flags = initParams.Get("flags");
+  if (!flags)
+    throw epR_InvalidParameter;
+
   FileOpenFlags of = flags->as<FileOpenFlags>();
 
   int posixFlags = GetPosixOpenFlags(of);
