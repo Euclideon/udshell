@@ -150,7 +150,9 @@ void Init(String sender, String message, const Variant &data)
 
   spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
   spMainWindow->SetTopLevelUI(spTopLevelUI);
+  // Set ui components
   spTopLevelUI->SetProperty("simplecamera", pKernel->FindComponent("simplecamera0"));
+  spTopLevelUI->SetProperty("view", pKernel->FindComponent("view0"));
 }
 
 // ---------------------------------------------------------------------------------------

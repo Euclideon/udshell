@@ -94,7 +94,7 @@ public:
 
   Variant Save() const override;
 
-  Event<double, double, double, double, double, double> Changed;
+  Event<Double3, Double3> Changed;
 protected:
   Double3 pos = Double3::zero();
   Double3 ypr = Double3::zero();

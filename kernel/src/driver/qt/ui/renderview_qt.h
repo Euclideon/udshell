@@ -40,6 +40,7 @@ private:
   void mousePressEvent(QMouseEvent *) override;
   void mouseReleaseEvent(QMouseEvent *) override;
   void touchEvent(QTouchEvent *) override;
+  void hoverMoveEvent(QHoverEvent *) override;
 //  void inputMethodEvent(QInputMethodEvent *) override;
 
 private slots:
