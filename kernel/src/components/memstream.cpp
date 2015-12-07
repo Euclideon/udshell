@@ -10,12 +10,15 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   BufferRef inBuffer;
 
   const Variant *fl = initParams.Get("flags");
+  if (!fl)
+    throw epR_InvalidParameter;
+
   oFlags = fl->as<OpenFlags>();
   if (!(oFlags & (OpenFlags::Write | OpenFlags::Read)))
     throw epR_InvalidParameter;
 
   const Variant *buf = initParams.Get("buffer");
-  if (!buf->isValid())
+  if (!buf)
   {
     inBuffer = pKernel->CreateComponent<Buffer>();
     inBuffer->Reserve(DefaultBufferSize);

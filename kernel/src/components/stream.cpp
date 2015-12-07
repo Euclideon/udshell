@@ -7,9 +7,15 @@ namespace kernel
 BufferRef Stream::ReadBuffer(size_t bytes)
 {
   BufferRef spBuffer = GetKernel().CreateComponent<Buffer>();
+  if (!spBuffer)
+    return nullptr;
+
   spBuffer->Allocate(bytes);
 
   Slice<void> buffer = spBuffer->Map();
+  if (!buffer)
+    return nullptr;
+
   IF_UDASSERT(Slice<void> read =) Read(buffer);
   spBuffer->Unmap();
 
@@ -25,9 +31,14 @@ BufferRef Stream::Load()
     return nullptr;
 
   BufferRef spBuffer = GetKernel().CreateComponent<Buffer>();
+  if (!spBuffer)
+    return nullptr;
   spBuffer->Allocate((size_t)len);
 
   Slice<void> buffer = spBuffer->Map();
+  if (!buffer)
+    return nullptr;
+
   Seek(SeekOrigin::Begin, 0);
   Read(buffer);
   spBuffer->Unmap();
@@ -40,11 +51,13 @@ void Stream::Save(BufferRef spBuffer)
   // TODO: check and bail if stream is not writable...
 
   Slice<const void> buffer = spBuffer->MapForRead();
+  if (buffer)
+  {
+    Seek(SeekOrigin::Begin, 0);
+    Write(buffer);
 
-  Seek(SeekOrigin::Begin, 0);
-  Write(buffer);
-
-  spBuffer->Unmap();
+    spBuffer->Unmap();
+  }
 }
 
 String Stream::ReadLn(Slice<char> buf)
