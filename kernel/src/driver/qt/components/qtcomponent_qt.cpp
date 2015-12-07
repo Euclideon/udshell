@@ -10,7 +10,7 @@ namespace qt
 QtComponent::QtComponent(const kernel::ComponentDesc *pType, kernel::Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  int64_t ptr = initParams["object"].asInt();
+  int64_t ptr = initParams.Get("object")->asInt();
   pQObject = (QObject*)(size_t)ptr;
 }
 

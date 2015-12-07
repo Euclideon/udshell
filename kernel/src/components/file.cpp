@@ -19,19 +19,19 @@ namespace kernel
 File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
-  const Variant &path = initParams["path"];
+  const Variant *path = initParams.Get("path");
 
-  if (!path.is(Variant::Type::String))
+  if (!path || !path->is(Variant::Type::String))
 	  throw epR_InvalidParameter;
 
-  const Variant &flags = initParams["flags"];
-  FileOpenFlags of = flags.as<FileOpenFlags>();
+  const Variant *flags = initParams.Get("flags");
+  FileOpenFlags of = flags->as<FileOpenFlags>();
 
   int posixFlags = GetPosixOpenFlags(of);
 
 #if defined(EP_WINDOWS)
   // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?
-  String cPath = path.asString();
+  String cPath = path->asString();
   int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cPath.ptr, (int)cPath.length, nullptr, 0);
   wchar_t *widePath = (wchar_t*)alloca(sizeof(wchar_t) * (len + 1));
   if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cPath.ptr, (int)cPath.length, widePath, len) == 0)
@@ -40,7 +40,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
 
   _wsopen_s(&fd, widePath, posixFlags, SH_DENYNO, S_IREAD | S_IWRITE);
 #else
-  fd = open(path.asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
+  fd = open(path->asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
 #endif
   if (fd == -1)
     throw epR_File_OpenFailure;

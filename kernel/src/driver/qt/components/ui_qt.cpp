@@ -28,7 +28,7 @@ namespace internal {
 // Helper function
 epResult SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal)
 {
-  String file = initParams["file"].as<String>();
+  String file = initParams.Get("file")->as<String>();
   if (file.empty())
   {
     pComponent->LogError("Attempted to create ui component without source file");
@@ -148,7 +148,7 @@ epResult Viewport::CreateInternal(Variant::VarMap initParams)
   }
 
   // check if we passed in a view, otherwise create a default one
-  ViewRef spView = initParams["view"].as<ViewRef>();
+  ViewRef spView = initParams.Get("view")->as<ViewRef>();
   if (!spView)
   {
     LogDebug(2, "Creating internal view");

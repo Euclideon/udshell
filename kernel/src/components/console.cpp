@@ -9,7 +9,7 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
 {
   bDbgOutput = false;
 
-  ConsoleOutputs out = initParams["output"].as<ConsoleOutputs>();
+  ConsoleOutputs out = initParams.Get("output")->as<ConsoleOutputs>();
 
   pIn = stdin;
 

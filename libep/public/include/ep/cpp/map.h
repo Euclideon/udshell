@@ -94,13 +94,6 @@ public:
     return ptr ? ptr->tree.Get(key) : nullptr;
   }
 
-  ValueType& operator[](const KeyType &key) const
-  {
-    const ValueType *v = Get(key);
-    EPASSERT(v, "Invalid index");
-    return *(ValueType*)v; // TODO: should we propagate const from Map to element?
-  }
-
   Iterator begin() const { return ptr ? ptr->tree.begin() : ptr->tree.end(); }
   Iterator end() const { return ptr->tree.end(); }
 

@@ -7,7 +7,7 @@ namespace kernel {
 Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams), pTimer(nullptr)
 {
-  const Variant intervalVar = initParams["duration"];
+  const Variant intervalVar = *initParams.Get("duration");
 
   uint32_t duration = intervalVar.as<uint32_t>();
   if (!intervalVar.is(Variant::Type::Int) ||!duration)
@@ -16,7 +16,7 @@ Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Vari
   }
 
   TimerType timerType = TimerType::Interval;
-  const Variant typeVar = initParams["timertype"];
+  const Variant typeVar = *initParams.Get("timertype");
   if (typeVar.is(Variant::Type::String))
   {
     String typeStr = typeVar.as<String>();

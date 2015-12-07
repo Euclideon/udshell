@@ -44,7 +44,7 @@ Array<ResourceRef> ResourceManager::GetResourcesByType(const ep::ComponentDesc *
 
 DataSourceRef ResourceManager::LoadResourcesFromFile(Variant::VarMap initParams)
 {
-  Variant src = initParams["src"];
+  Variant src = *initParams.Get("src");
   String ext = src.asString().getRightAtLast('.');
   if (ext.empty())
   {

@@ -9,20 +9,20 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString u
 {
   BufferRef inBuffer;
 
-  const Variant &fl = initParams["flags"];
-  oFlags = fl.as<OpenFlags>();
+  const Variant *fl = initParams.Get("flags");
+  oFlags = fl->as<OpenFlags>();
   if (!(oFlags & (OpenFlags::Write | OpenFlags::Read)))
     throw epR_InvalidParameter;
 
-  const Variant &buf = initParams["buffer"];
-  if (!buf.isValid())
+  const Variant *buf = initParams.Get("buffer");
+  if (!buf->isValid())
   {
     inBuffer = pKernel->CreateComponent<Buffer>();
     inBuffer->Reserve(DefaultBufferSize);
   }
   else
   {
-    inBuffer = buf.as<BufferRef>();
+    inBuffer = buf->as<BufferRef>();
     if (!inBuffer)
       throw epR_InvalidParameter;
   }

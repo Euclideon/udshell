@@ -144,13 +144,6 @@ public:
     return n ? &n->v : nullptr;
   }
 
-  V& operator[](const K &key) const
-  {
-    V *v = Get(key);
-    EPASSERT(v, "Invalid index");
-    return *v;
-  }
-
   class Iterator;
   Iterator begin() const { return Iterator(root); }
   static Iterator end() { return Iterator(nullptr); }
