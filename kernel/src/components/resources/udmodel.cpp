@@ -33,7 +33,7 @@ UDRenderState UDModel::GetUDRenderState() const
 
   memset(&renderState, 0, sizeof(renderState));
 
-  renderState.matrix = udMat;
+  renderState.matrix = udmatrix;
 
   renderState.pOctree = GetOctreePtr();
   renderState.pVoxelShader = pVoxelShader;
@@ -63,10 +63,10 @@ BoundingVolume UDModel::GetBoundingVolume() const
 {
   BoundingVolume vol;
 
-  EPASSERT(udMat.a[0] == udMat.a[5] && udMat.a[0] == udMat.a[10], "NonUniform Scale");
+  EPASSERT(udmatrix.a[0] == udmatrix.a[5] && udmatrix.a[0] == udmatrix.a[10], "NonUniform Scale");
 
-  Double3 min = -(udMat.axis.t.toVector3());
-  Double3 max = min + Double3::create(udMat.a[0]);
+  Double3 min = -(udmatrix.axis.t.toVector3());
+  Double3 max = min + Double3::create(udmatrix.a[0]);
 
   // Theoretically there could be rotation so redoing min max
   vol.min.x = udMin(min.x, max.x);

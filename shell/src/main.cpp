@@ -134,7 +134,12 @@ void Init(String sender, String message, const Variant &data)
     { "depthplanes", Slice<const double>({ 0.0001, 7500.0 }) }
   };
 
-  auto spExampleActivity = pKernel->CreateComponent<Viewer>({ { "model", "data/DirCube.upc" }, { "camera", cameraParams } });
+#if defined(EP_WINDOWS)
+  auto spExampleActivity = pKernel->CreateComponent<Viewer>({ { "model", "v:/RnD/uds/Peterskirche(SolidScan).uds" },{ "camera", cameraParams } });
+#else
+  auto spExampleActivity = pKernel->CreateComponent<Viewer>({ { "model", "data/DirCube.upc" },{ "camera", cameraParams } });
+#endif // EP_WINDOWS
+
   if (spExampleActivity)
   {
     AddUIActivity(spTopLevelUI, spExampleActivity);
@@ -145,6 +150,7 @@ void Init(String sender, String message, const Variant &data)
 
   spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
   spMainWindow->SetTopLevelUI(spTopLevelUI);
+  spTopLevelUI->SetProperty("simplecamera", pKernel->FindComponent("simplecamera0"));
 }
 
 // ---------------------------------------------------------------------------------------
