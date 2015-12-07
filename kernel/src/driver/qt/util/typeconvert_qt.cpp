@@ -301,6 +301,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
 
     case Variant::Type::String:
       *pJSValue = QJSValue(variant.asString().toStringz());
+      break;
 
     case Variant::Type::Array:
     {
