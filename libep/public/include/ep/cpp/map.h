@@ -79,6 +79,19 @@ public:
     ptr->tree.Insert(key, v);
   }
 
+  void Insert(KVP<KeyType, ValueType> &&kvp)
+  {
+    if (!ptr)
+      Alloc();
+    ptr->tree.Insert(std::move(kvp));
+  }
+  void Insert(const KVP<KeyType, ValueType> &v)
+  {
+    if (!ptr)
+      Alloc();
+    ptr->tree.Insert(v);
+  }
+
   void Remove(const KeyType &key)
   {
     if (ptr)
