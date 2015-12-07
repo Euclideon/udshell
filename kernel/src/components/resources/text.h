@@ -18,6 +18,9 @@ public:
   void FormatXml(Variant root);
   Variant ParseJson() const;
 
+  static Variant XMLNodeToMap(Variant node);
+  static Variant MapToXMLNode(Variant map);
+
   void CopyBuffer(String text) { Buffer::CopyBuffer(text); }
 
 protected:
@@ -25,7 +28,9 @@ protected:
     : Buffer(pType, pKernel, uid, initParams) {}
   virtual ~Text() {}
 
-  void FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth);
+  void FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth);
+
+  static Variant KVPToXMLNode(KeyValuePair kvp);
 
   static Array<const MethodInfo> GetMethods()
   {

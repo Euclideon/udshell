@@ -29,9 +29,9 @@ protected:
 
   Variant SaveActivities();
 
-  void ParseProject(Variant values);
-  void ParseActivities(Variant values);
-  void ParseActivity(String type, Variant values);
+  void ParseProject(Variant node);
+  void ParseActivities(Variant node);
+  void ParseActivity(Variant node);
 
   Array<ActivityRef> activities;
 

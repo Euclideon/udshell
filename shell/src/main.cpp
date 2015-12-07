@@ -127,7 +127,7 @@ void Init(String sender, String message, const Variant &data)
   }
 
   // Hardcode an example Activity in for testing purposes
-  Array<KeyValuePair> cameraParams {
+  Variant::VarMap cameraParams {
     { "speed", 1.0 },
     { "invertyaxis", true },
     { "perspective", 1.0471975512 },
@@ -149,6 +149,7 @@ void Init(String sender, String message, const Variant &data)
     pKernel->LogError("Error creating Viewer activity\n");
 
   spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
+
   spMainWindow->SetTopLevelUI(spTopLevelUI);
   // Set ui components
   spTopLevelUI->SetProperty("simplecamera", pKernel->FindComponent("simplecamera0"));

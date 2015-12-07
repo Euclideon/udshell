@@ -101,13 +101,13 @@ void Viewer::Update(double timeStep)
 
 Variant Viewer::Save() const
 {
-  Array<KeyValuePair> params;
+  Variant::VarMap params;
 
   if (spCamera)
-    params.pushBack( KeyValuePair("camera", spCamera->Save()) );
+    params.Insert( KeyValuePair("camera", spCamera->Save()) );
 
   if (spModel)
-    params.pushBack( KeyValuePair("model", spModel->GetDataSource()->GetURL()) );
+    params.Insert( KeyValuePair("model", spModel->GetDataSource()->GetURL()) );
 
   return Variant(std::move(params));
 }
