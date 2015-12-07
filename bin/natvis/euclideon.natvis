@@ -69,17 +69,18 @@
 </Type>
 
 <Type Name="ep::Variant">
-    <DisplayString Condition="t == 0">Nil</DisplayString>
+    <DisplayString Condition="t == 0">nullptr</DisplayString>
     <DisplayString Condition="t == 1">{b}</DisplayString>
     <DisplayString Condition="t == 2">{i}</DisplayString>
     <DisplayString Condition="t == 3">{f}</DisplayString>
     <DisplayString Condition="t == 4">{length}</DisplayString>
     <DisplayString Condition="t == 5">{length}</DisplayString>
     <DisplayString Condition="t == 6">{c}</DisplayString>
-    <DisplayString Condition="t == 7">{p}</DisplayString>
+    <DisplayString Condition="t == 7">{d}</DisplayString>
     <DisplayString Condition="t == 8">{s,[length]s8}</DisplayString>
     <DisplayString Condition="t == 9">{a,[length]}</DisplayString>
-    <DisplayString Condition="t == 10">{aa,[length]}</DisplayString>
+    <DisplayString Condition="t == 10">{aa}</DisplayString>
+    <DisplayString Condition="t == 11">void</DisplayString>
 
     <StringView Condition="t == 8">s,[length]s8</StringView>
 
@@ -90,11 +91,13 @@
             <ValuePointer>a</ValuePointer>
         </ArrayItems>
 
-        <Item Name="length" Condition="t == 10">length</Item>
-        <ArrayItems Condition="t == 10">
-            <Size>length</Size>
-            <ValuePointer>aa</ValuePointer>
-        </ArrayItems>
+        <TreeItems Condition="t == 10">
+            <Size>aa-&gt;size</Size>
+            <HeadPointer>aa-&gt;root</HeadPointer>
+            <LeftPointer>left</LeftPointer>
+            <RightPointer>right</RightPointer>
+            <ValueNode>this</ValueNode>
+        </TreeItems>
     </Expand>
 </Type>
 

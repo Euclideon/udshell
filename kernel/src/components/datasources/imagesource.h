@@ -29,7 +29,7 @@ protected:
   ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
-    StreamRef ref = OpenStream(initParams["src"]);
+    StreamRef ref = OpenStream(*initParams.Get("src"));
     Create(ref);
   }
 

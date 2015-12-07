@@ -13,18 +13,18 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
 {
   spResourceManager = pKernel->GetResourceManager();
 
-  const Variant &src = initParams["src"];
+  const Variant *pSrc = initParams.Get("src");
   StreamRef spSrc = nullptr;
 
-  if (src.is(Variant::Type::String))
+  if (pSrc && pSrc->is(Variant::Type::String))
   {
-    srcString = src.asString();
+    srcString = pSrc->asString();
 
     // path or url?
-    spSrc = pKernel->CreateComponent<File>({ { "path", src }, { "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+    spSrc = pKernel->CreateComponent<File>({ { "path", *pSrc }, { "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
     if (!spSrc)
     {
-      LogDebug(2, "Project file \"{0}\" does not exist. Creating new project.", src);
+      LogDebug(2, "Project file \"{0}\" does not exist. Creating new project.", *pSrc);
       return;
     }
   }

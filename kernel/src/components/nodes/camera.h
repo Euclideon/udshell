@@ -39,18 +39,18 @@ protected:
   Camera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Node(pType, pKernel, uid, initParams)
   {
-    const Variant &perspParam = initParams["perspective"];
-    if (perspParam.isValid())
-      SetPerspective(perspParam.asFloat());
+    const Variant *perspParam = initParams.Get("perspective");
+    if (perspParam)
+      SetPerspective(perspParam->asFloat());
 
-    const Variant &orthoParam = initParams["ortho"];
-    if (orthoParam.isValid())
-      SetOrtho(orthoParam.asFloat());
+    const Variant *orthoParam = initParams.Get("ortho");
+    if (orthoParam)
+      SetOrtho(orthoParam->asFloat());
 
-    const Variant &paramDepthPlanes = initParams["depthplanes"];
-    if (paramDepthPlanes.isValid())
+    const Variant *paramDepthPlanes = initParams.Get("depthplanes");
+    if (paramDepthPlanes)
     {
-      auto depthPlanesArray = paramDepthPlanes.as<Array<double, 2>>();
+      auto depthPlanesArray = paramDepthPlanes->as<Array<double, 2>>();
       if (depthPlanesArray.length == 2)
         SetDepthPlanes(depthPlanesArray[0], depthPlanesArray[1]);
     }
@@ -112,10 +112,10 @@ protected:
   {
     memset(keyState, 0, sizeof(keyState));
 
-    const Variant &paramPos = initParams["position"];
-    if (paramPos.isValid())
+    const Variant *paramPos = initParams.Get("position");
+    if (paramPos)
     {
-      auto posArray = paramPos.as<Array<double, 3>>();
+      auto posArray = paramPos->as<Array<double, 3>>();
       if (posArray.length == 3)
       {
         Double3 position = Double3::create(posArray[0], posArray[1], posArray[2]);
@@ -123,10 +123,10 @@ protected:
       }
     }
 
-    const Variant &paramOrientation = initParams["orientation"];
-    if (paramOrientation.isValid())
+    const Variant *paramOrientation = initParams.Get("orientation");
+    if (paramOrientation)
     {
-      auto oriArray = paramOrientation.as<Array<double, 3>>();
+      auto oriArray = paramOrientation->as<Array<double, 3>>();
       if (oriArray.length == 3)
       {
         Double3 orientation = Double3::create(oriArray[0], oriArray[1], oriArray[2]);
@@ -134,25 +134,25 @@ protected:
       }
     }
 
-    const Variant &paramMat = initParams["matrix"];
-    if (paramMat.isValid())
+    const Variant *paramMat = initParams.Get("matrix");
+    if (paramMat)
     {
-      Array<double> matArray = paramMat.as<Array<double>>();
+      Array<double> matArray = paramMat->as<Array<double>>();
       if (matArray.length == 16)
         SetMatrix(Double4x4::create(matArray.ptr));
     }
 
-    const Variant &paramSpeed = initParams["speed"];
-    if (paramSpeed.isValid())
-      SetSpeed(paramSpeed.asFloat());
+    const Variant *paramSpeed = initParams.Get("speed");
+    if (paramSpeed)
+      SetSpeed(paramSpeed->asFloat());
 
-    const Variant &paramInvert = initParams["invertyaxis"];
-    if (paramInvert.isValid())
-      InvertYAxis(paramInvert.asBool());
+    const Variant *paramInvert = initParams.Get("invertyaxis");
+    if (paramInvert)
+      InvertYAxis(paramInvert->asBool());
 
-    const Variant &paramHeli = initParams["helicoptermode"];
-    if (paramHeli.isValid())
-      HelicopterMode(paramHeli.asBool());
+    const Variant *paramHeli = initParams.Get("helicoptermode");
+    if (paramHeli)
+      HelicopterMode(paramHeli->asBool());
   }
 
   bool ViewportInputEvent(const epInputEvent &ev) override;

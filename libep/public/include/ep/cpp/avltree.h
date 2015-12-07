@@ -3,6 +3,7 @@
 #define _EPAVLTREE_HPP
 
 #include "ep/cpp/platform.h"
+#include "ep/cpp/keyvaluepair.h"
 
 namespace ep {
 
@@ -35,35 +36,6 @@ struct Compare<SharedString>
   {
     return a.cmp(b);
   }
-};
-
-template <typename K, typename V>
-struct KVPRef
-{
-  KVPRef(const K &key, V &value) : key(key), value(value) {}
-
-  const K &key;
-  V &value;
-};
-
-template <typename K, typename V>
-struct KVP
-{
-  KVP() {}
-  KVP(KVP<K, V> &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
-  KVP(const KVP<K, V> &val) : key(val.key), value(val.value) {}
-
-  KVP(const K &key, const V &value) : key(key), value(value) {}
-  KVP(const K &key, V &&value) : key(key), value(std::move(value)) {}
-  KVP(K &&key, const V &value) : key(std::move(key)), value(value) {}
-  KVP(K &&key, V &&value) : key(std::move(key)), value(std::move(value)) {}
-
-  KVP(const KVPRef<K, V> &val) : key(val.key), value(val.value) {}
-
-  // TODO: consider, should value be first? it is more likely to have alignment requirements.
-  //       conversely, key is more frequently accessed, so should be in the first cache line...
-  K key;
-  V value;
 };
 
 template<typename K, typename V, typename PredFunctor = Compare<K>>
@@ -128,6 +100,25 @@ public:
     root = insert(root, node);
   }
 
+  void Insert(KVP<K, V> &&kvp)
+  {
+    Node* node = (Node*)epAlloc(sizeof(Node));
+    new(&node->k) K(std::move(kvp.key));
+    new(&node->v) V(std::move(kvp.rval));
+    node->left = node->right = nullptr;
+    node->height = 1;
+    root = insert(root, node);
+  }
+  void Insert(const KVP<K, V> &v)
+  {
+    Node* node = (Node*)epAlloc(sizeof(Node));
+    new(&node->k) K(v.key);
+    new(&node->v) V(v.value);
+    node->left = node->right = nullptr;
+    node->height = 1;
+    root = insert(root, node);
+  }
+
   void Remove(const K &key)
   {
     root = deleteNode(root, key);
@@ -142,13 +133,6 @@ public:
   {
     Node *n = const_cast<Node*>(find(root, key));
     return n ? &n->v : nullptr;
-  }
-
-  V& operator[](const K &key) const
-  {
-    V *v = Get(key);
-    EPASSERT(v, "Invalid index");
-    return *v;
   }
 
   class Iterator;

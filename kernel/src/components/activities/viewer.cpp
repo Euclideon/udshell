@@ -26,24 +26,27 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   ViewRef spView = pKernel->CreateComponent<View>();
   spScene = pKernel->CreateComponent<Scene>();
 
-  const Variant &cam = initParams["camera"];
-  if (cam.is(Variant::Type::AssocArray))
+  const Variant *cam = initParams.Get("camera");
+  if (cam && cam->is(Variant::Type::AssocArray))
   {
-    Variant::VarMap cameraParams = cam.asAssocArray();
+    Variant::VarMap cameraParams = cam->asAssocArray();
     spCamera = pKernel->CreateComponent<SimpleCamera>(Variant::VarMap(cameraParams));
   }
 
-  const Variant &model = initParams["model"];
-  if (model.is(Variant::Type::String))
+  const Variant *model = initParams.Get("model");
+  if (model)
   {
-    // TODO: enable streamer once we have a tick running to update the streamer
-    String modelSrc = model.asString();
-    DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", false } });
-    if (spModelDS && spModelDS->GetNumResources() > 0)
-      spModel = spModelDS->GetResourceAs<UDModel>(0);
+    if (model->is(Variant::Type::String))
+    {
+      // TODO: enable streamer once we have a tick running to update the streamer
+      String modelSrc = model->asString();
+      DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", false } });
+      if (spModelDS && spModelDS->GetNumResources() > 0)
+        spModel = spModelDS->GetResourceAs<UDModel>(0);
+    }
+    else if (model->is(Variant::Type::Component))
+      spModel = model->as<UDModelRef>();
   }
-  else if (model.is(Variant::Type::Component))
-    spModel = model.as<UDModelRef>();
 
   if (spModel)
   {

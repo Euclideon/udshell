@@ -11,18 +11,22 @@ const Array<const String> UDDataSource::extensions = { ".uds", ".ssf", ".upc", "
 UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : DataSource(pType, pKernel, uid, initParams)
 {
-  const Variant &source = initParams["src"];
+  const Variant *source = initParams.Get("src");
 
-  if (source.is(Variant::Type::String))
+  if (source && source->is(Variant::Type::String))
   {
-    const Variant &useStreamer = initParams["useStreamer"];
+    const Variant *useStreamer = initParams.Get("useStreamer");
 
     udOctree *pOctree = nullptr;
-    udResult result = udOctree_Create(&pOctree, source.asString().toStringz(), useStreamer.is(Variant::Type::Bool) ? useStreamer.asBool() : true, 0);
+    udResult result = udOctree_Create(&pOctree, source->asString().toStringz(), useStreamer && useStreamer->is(Variant::Type::Bool) ? useStreamer->asBool() : true, 0);
     if (result == udR_Success)
     {
-      const Variant &udModel = initParams["existingComponent"];
-      UDModelRef model = udModel.is(Variant::Type::Component) ? component_cast<UDModel>(udModel.asComponent()) : pKernel->CreateComponent<UDModel>();
+      const Variant *udModel = initParams.Get("existingComponent");
+      UDModelRef model;
+      if (udModel && udModel->is(Variant::Type::Component))
+        model = component_cast<UDModel>(udModel->asComponent());
+      else
+        model = pKernel->CreateComponent<UDModel>();
 
       if (!model)
       {
@@ -53,7 +57,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
 
       result = udOctree_GetLocalMatrixF64(model->GetOctreePtr(), model->udMat.a);
       if (result == udR_Success)
-        resources.Insert(source.asString(), model);
+        resources.Insert(source->asString(), model);
     }
   }
 }

@@ -50,9 +50,9 @@ StreamRef DataSource::OpenStream(const Variant &source)
 DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  const Variant &source = initParams["src"];
-  if (source.is(Variant::Type::String))
-    url = source.asString();
+  const Variant *source = initParams.Get("src");
+  if (source && source->is(Variant::Type::String))
+    url = source->asString();
 }
 
 } // namespace kernel
