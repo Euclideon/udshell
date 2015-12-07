@@ -104,7 +104,7 @@ public:
   {
     Node* node = (Node*)epAlloc(sizeof(Node));
     new(&node->k) K(std::move(kvp.key));
-    new(&node->v) V(std::move(kvp.rval));
+    new(&node->v) V(std::move(kvp.value));
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);

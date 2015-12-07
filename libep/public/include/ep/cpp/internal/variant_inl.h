@@ -370,6 +370,7 @@ template<size_t Len> struct Variant_Construct<MutableString<Len>>        { epfor
 template<>           struct Variant_Construct<SharedString>              { epforceinline static Variant construct(const SharedString &v) { return Variant(v); } };
 template<size_t Len> struct Variant_Construct<Array<Variant, Len>>       { epforceinline static Variant construct(const Array<Variant, Len> &v) { return Variant(v); } };
 template<>           struct Variant_Construct<SharedArray<Variant>>      { epforceinline static Variant construct(const SharedArray<Variant> &v) { return Variant(v); } };
+template<>           struct Variant_Construct<Variant::VarMap>           { epforceinline static Variant construct(const Variant::VarMap &v) { return Variant(v); } };
 template<size_t Len> struct Variant_Construct<Array<KeyValuePair, Len>>  { epforceinline static Variant construct(const Array<KeyValuePair, Len> &v) { return Variant(Slice<KeyValuePair>(v)); } };
 template<>           struct Variant_Construct<SharedArray<KeyValuePair>> { epforceinline static Variant construct(const SharedArray<KeyValuePair> &v) { return Variant(Slice<KeyValuePair>(v)); } };
 
