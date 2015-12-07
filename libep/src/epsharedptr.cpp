@@ -1,30 +1,31 @@
 
 #include "ep/cpp/sharedptr.h"
+#include "ep/cpp/safeptr.h"
 #include "ep/cpp/avltree.h"
 #include "ep/cpp/hashmap.h"
 
 namespace ep {
 namespace internal {
 
-static HashMap<WeakProxy<RefCounted>*> s_weakRefRegistry(65536);
+static HashMap<SafeProxy<void>*> s_weakRefRegistry(65536);
 
-void* GetWeakPtr(void *pAlloc)
+void* GetSafePtr(void *pAlloc)
 {
   size_t hash = HashPointer(pAlloc);
-  WeakProxy<RefCounted> **ppProxy = s_weakRefRegistry.Get(hash);
+  SafeProxy<void> **ppProxy = s_weakRefRegistry.Get(hash);
   if (ppProxy)
     return *ppProxy;
 
-  WeakProxy<RefCounted> *pProxy = new WeakProxy<RefCounted>;
-  pProxy->pInstance = (RefCounted*)pAlloc;
+  SafeProxy<void> *pProxy = new SafeProxy<void>;
+  pProxy->pInstance = pAlloc;
   s_weakRefRegistry.Add(hash, pProxy);
   return pProxy;
 }
 
-void NullifyWeakPtr(void *pAlloc)
+void NullifySafePtr(void *pAlloc)
 {
   size_t hash = HashPointer(pAlloc);
-  WeakProxy<RefCounted> **ppProxy = s_weakRefRegistry.Get(hash);
+  SafeProxy<void> **ppProxy = s_weakRefRegistry.Get(hash);
   if (ppProxy)
   {
     (*ppProxy)->pInstance = nullptr;
@@ -76,7 +77,7 @@ epResult epSharedPtr_Test()
   EPASSERT(!spT2, "!");
   EPASSERT(spT1.count() == 1, "!");
 
-  WeakPtr<Test> wpT1(spT1);
+  SafePtr<Test> wpT1(spT1);
   EPASSERT(wpT1.ptr() == spT1.ptr(), "!");
   EPASSERT(spT1.count() == 1, "!");
 

@@ -20,8 +20,6 @@ class Kernel;
 class RefCounted;
 template<class T>
 class UniquePtr;
-template<class T>
-class WeakPtr;
 
 
 // **HAX** this allows us to delete a RefCounted!
@@ -30,9 +28,6 @@ class WeakPtr;
 // call delete. Thee two specialisations of Destroy facilitate that.
 
 namespace internal {
-
-  template<class T>
-  class WeakProxy;
 
   template<typename T, bool isref>
   struct Destroy;
@@ -45,10 +40,13 @@ namespace internal {
     epforceinline static void destroy(T *ptr);
   };
 
-  void* GetWeakPtr(void *pAlloc);
-  void NullifyWeakPtr(void *pAlloc);
-
 } // namespace internal
+
+class Safe
+{
+protected:
+  virtual ~Safe();
+};
 
 
 // shared pointers are ref counted
@@ -70,8 +68,6 @@ public:
 
   // constructors
   SharedPtr(const SharedPtr<T> &ptr) : pInstance(ptr.pInstance) { acquire(); }
-  template <class U> // the U allows us to accept const
-  SharedPtr(const SharedPtr<U> &ptr) : pInstance(ptr.pInstance) { acquire(); }
   SharedPtr(SharedPtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
@@ -79,12 +75,20 @@ public:
       ptr.pInstance = nullptr;
   }
 
+  // the U allows us to accept const
+  template <class U>
+  SharedPtr(const SharedPtr<U> &ptr) : pInstance(ptr.pInstance) { acquire(); }
+  template <class U>
+  SharedPtr(SharedPtr<U> &&ptr)
+    : pInstance(ptr.pInstance)
+  {
+    if (this != (void*)&ptr)
+      ptr.pInstance = nullptr;
+  }
+
   template <class U> // the U allows us to accept const
   SharedPtr(const UniquePtr<U> &ptr);
   SharedPtr(UniquePtr<T> &&ptr);
-
-  template<typename U>
-  SharedPtr(const WeakPtr<U> &ptr);
 
   explicit SharedPtr(T *p) : pInstance(p) { acquire(); }
 
@@ -148,7 +152,7 @@ public:
 private:
   template<typename U> friend class UniquePtr;
   template<typename U> friend class SharedPtr;
-  template<typename U> friend class WeakPtr;
+  template<typename U> friend class SafePtr;
 
   void acquire();
   void release();
@@ -157,48 +161,6 @@ private:
 };
 
 //------------------------------------------------------------------------------------------
-
-
-template<typename T>
-class WeakPtr
-{
-public:
-  WeakPtr(const WeakPtr<T> &ptr) : spProxy(ptr.spProxy) {}
-  template <class U> // the U allows us to accept const
-  WeakPtr(const WeakPtr<U> &ptr) : spProxy(ptr.spProxy) {}
-  WeakPtr(WeakPtr<T> &&ptr) : spProxy(std::move(ptr.spProxy)) {}
-
-  WeakPtr() {}
-  WeakPtr(nullptr_t) {}
-
-  explicit WeakPtr(T *pInstance) : spProxy((internal::WeakProxy<T>*)internal::GetWeakPtr(pInstance)) {}
-  explicit WeakPtr(const SharedPtr<T> &spInstance) : spProxy((internal::WeakProxy<T>*)internal::GetWeakPtr(spInstance.ptr())) {}
-  explicit WeakPtr(const UniquePtr<T> &upInstance) : spProxy((internal::WeakProxy<T>*)internal::GetWeakPtr(upInstance.ptr())) {}
-
-  WeakPtr& operator=(const WeakPtr<T> &ptr)
-  {
-    spProxy = ptr.spProxy;
-    return *this;
-  }
-  template<typename U>
-  WeakPtr& operator=(const WeakPtr<U> &ptr)
-  {
-    spProxy = ptr.spProxy;
-    return *this;
-  }
-
-  epforceinline explicit operator bool() const { return spProxy.count() > 0 && spProxy->pInstance; }
-
-  epforceinline T& operator*() const { return *(T*)spProxy->pInstance; }
-  epforceinline T* operator->() const { return (T*)spProxy->pInstance; }
-  epforceinline T* ptr() const { return spProxy ? (T*)spProxy->pInstance : (T*)nullptr; }
-
-  static_assert(std::is_base_of<RefCounted, T>::value, "T must inherit from RefCounted");
-
-private:
-  SharedPtr<internal::WeakProxy<T>> spProxy;
-};
-
 
 // unique pointers nullify the source pointer on assignment
 template<class T>
@@ -344,12 +306,10 @@ private:
 
 
 // ref counting base class
-class RefCounted
+class RefCounted : public Safe
 {
   mutable size_t rc = 0;
 
-protected:
-  virtual ~RefCounted();
 public:
   size_t RefCount() { return rc; }
   size_t IncRef() { return ++rc; }
@@ -365,27 +325,6 @@ public:
   template<typename T, bool isrc>
   friend struct internal::Destroy;
 };
-inline RefCounted::~RefCounted()
-{
-  internal::NullifyWeakPtr(this);
-}
-
-
-namespace internal {
-
-template<typename T>
-class WeakProxy : public RefCounted
-{
-public:
-  ~WeakProxy()
-  {
-    if (pInstance)
-      internal::NullifyWeakPtr(pInstance);
-  }
-  T* pInstance;
-};
-
-} // namespace internal
 
 
 // SharedPtr constructors and assignments
@@ -406,12 +345,6 @@ inline SharedPtr<T>::SharedPtr(const UniquePtr<U> &ptr)
     pInstance->rc = 1;
     ptr.pInstance = nullptr;
   }
-}
-template <class T>
-template <class U>
-SharedPtr<T>::SharedPtr(const WeakPtr<U> &ptr)
-  : SharedPtr<T>(ptr.ptr())
-{
 }
 template <class T>
 inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<T> &&ptr)
@@ -479,8 +412,6 @@ template<class T, class U>
 UniquePtr<T> unique_pointer_cast(const UniquePtr<U> &ptr);
 template<class T, class U>
 SharedPtr<T> shared_pointer_cast(const SharedPtr<U> &ptr);
-template<class T, class U>
-WeakPtr<T> weak_pointer_cast(const WeakPtr<U> &ptr);
 
 // comparaison operators
 template<class T, class U> inline bool operator==(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() == r.ptr(); }
@@ -493,17 +424,6 @@ template<class T> inline bool operator==(const SharedPtr<T> &l, nullptr_t) { ret
 template<class T> inline bool operator!=(const SharedPtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
 template<class T> inline bool operator==(nullptr_t, const SharedPtr<T> &r) { return nullptr == r.ptr(); }
 template<class T> inline bool operator!=(nullptr_t, const SharedPtr<T> &r) { return nullptr != r.ptr(); }
-
-template<class T, class U> inline bool operator==(const WeakPtr<T> &l, const WeakPtr<U> &r) { return l.ptr() == r.ptr(); }
-template<class T, class U> inline bool operator!=(const WeakPtr<T> &l, const WeakPtr<U> &r) { return l.ptr() != r.ptr(); }
-template<class T, class U> inline bool operator<=(const WeakPtr<T> &l, const WeakPtr<U> &r) { return l.ptr() <= r.ptr(); }
-template<class T, class U> inline bool operator<(const WeakPtr<T> &l, const WeakPtr<U> &r) { return l.ptr() < r.ptr(); }
-template<class T, class U> inline bool operator>=(const WeakPtr<T> &l, const WeakPtr<U> &r) { return l.ptr() >= r.ptr(); }
-template<class T, class U> inline bool operator>(const WeakPtr<T> &l, const WeakPtr<U> &r) { return l.ptr() > r.ptr(); }
-template<class T> inline bool operator==(const WeakPtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
-template<class T> inline bool operator!=(const WeakPtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
-template<class T> inline bool operator==(nullptr_t, const WeakPtr<T> &r) { return nullptr == r.ptr(); }
-template<class T> inline bool operator!=(nullptr_t, const WeakPtr<T> &r) { return nullptr != r.ptr(); }
 
 template<class T, class U> inline bool operator==(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() == r.ptr(); }
 template<class T, class U> inline bool operator!=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() != r.ptr(); }
