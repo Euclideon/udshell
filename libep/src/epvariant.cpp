@@ -664,6 +664,7 @@ Variant& Variant::operator[](size_t j) const
   }
   return Variant();
 }
+
 Variant& Variant::operator[](String key) const
 {
   if (is(Type::AssocArray))
@@ -673,6 +674,13 @@ Variant& Variant::operator[](String key) const
       return *pV;
   }
   return Variant();
+}
+
+Variant* Variant::getItem(String key) const
+{
+  if (is(Type::AssocArray))
+    return aa->Get(key);
+  return nullptr;
 }
 
 } // namespace ep

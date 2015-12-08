@@ -4,18 +4,18 @@
 #include "components/resources/text.h"
 #include "components/commandmanager.h"
 
-namespace ep
+namespace kernel
 {
 
-Menu::Menu(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams)
+Menu::Menu(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Resource(pType, pKernel, uid, initParams)
 {
   menuData = Array<Variant>();
 
-  const Variant &src = initParams["src"];
-  if (src.is(Variant::Type::String))
+  Variant *pSrc = initParams.Get("src");
+  if (pSrc && pSrc->is(Variant::Type::String))
   {
-    Variant menus = ParseXMLString(src.asString());
+    Variant menus = ParseXMLString(pSrc->asString());
     Slice<Variant> menuArray = menus.asArray();
     for (Variant &menu : menuArray)
       AddItem("", menu.asAssocArray());
@@ -31,11 +31,11 @@ Variant Menu::ParseXMLString(String buffer)
   buf[buffer.length] = '\0';
 
   using namespace rapidxml;
-  Variant rootMenu;
+  Variant rootNode;
 
   try
   {
-    rootMenu = spXMLBuffer->ParseXml();
+    rootNode = spXMLBuffer->ParseXml();
   }
   catch (parse_error e)
   {
@@ -44,36 +44,47 @@ Variant Menu::ParseXMLString(String buffer)
   }
 
   Array<Variant> outMenus;
-  Slice<KeyValuePair> inMenus = rootMenu.asAssocArray()[0].value.asAssocArray();
-  for(KeyValuePair &inMenu : inMenus)
-    outMenus.pushBack(ParseXMLMenu(inMenu));
+  Variant *pInMenus = rootNode.asAssocArray().Get("children");
+  if (pInMenus && pInMenus->is(Variant::Type::Array))
+  {
+    Slice<Variant> inMenus = pInMenus->asArray();
+    for (auto inMenu : inMenus)
+      outMenus.pushBack(ParseXMLMenu(inMenu));
+  }
 
   return outMenus;
 }
 
-Variant Menu::ParseXMLMenu(KeyValuePair inMenu)
+Variant Menu::ParseXMLMenu(Variant inMenu)
 {
-  Array<KeyValuePair> menu;
-  Array<Variant> children;
-  
-  if (!inMenu.value.is(Variant::Type::AssocArray))
+  Variant::VarMap menu;
+  Array<Variant> menuChildren;
+
+  if (!inMenu.is(Variant::Type::AssocArray))
     return menu;
-  Slice<KeyValuePair> kvps = inMenu.value.asAssocArray();
+  Variant::VarMap inMap = inMenu.asAssocArray();
 
-  menu.pushBack(KeyValuePair("type", inMenu.key));
+  Variant *pName = inMap.Get("name");
+  if(pName && pName->is(Variant::Type::String))
+    menu.Insert("type", pName->asString());
 
-  for (KeyValuePair &kvp : kvps)
+  Variant *pAttributes = inMap.Get("attributes");
+  if (pAttributes && pAttributes->is(Variant::Type::AssocArray))
   {
-    if (!kvp.key.asString().cmp("_attributes"))
-    {
-      Slice<KeyValuePair> attributes = kvp.value.asAssocArray();
-      for(KeyValuePair attr : attributes)
-        menu.pushBack(attr);
-    }
-    else
-      children.pushBack(ParseXMLMenu(kvp));
+    Variant::VarMap attributes = pAttributes->asAssocArray();
+    for (auto attr : attributes)
+      menu.Insert(attr);
   }
-  menu.pushBack(KeyValuePair("children", children));
+
+  Variant *pChildren = inMap.Get("children");
+  if (pChildren && pChildren->is(Variant::Type::Array))
+  {
+    Slice<Variant> children = pChildren->asArray();
+    for (auto child : children)
+      menuChildren.pushBack(ParseXMLMenu(child));
+
+    menu.Insert("children", menuChildren);
+  }
 
   return menu;
 }
@@ -86,7 +97,7 @@ void Menu::AddXMLItems(String parentPath, String xmlStr)
     AddItem(parentPath, menu.asAssocArray());
 }
 
-bool Menu::SetItemProperties(String path, Slice<const KeyValuePair> properties)
+bool Menu::SetItemProperties(String path, Variant::VarMap properties)
 {
   Variant *pParent = FindMenuItem(&path);
   if (!pParent)
@@ -101,7 +112,7 @@ bool Menu::SetItemProperties(String path, Slice<const KeyValuePair> properties)
   return true;
 }
 
-void Menu::AddItem(String parentPath, Slice<const KeyValuePair> properties)
+void Menu::AddItem(String parentPath, Variant::VarMap properties)
 {
   Variant *pChildren;
 
@@ -110,10 +121,8 @@ void Menu::AddItem(String parentPath, Slice<const KeyValuePair> properties)
   if (!pParent)
     pChildren = &menuData;
   else
-  {
-    Variant &parent = *pParent;    
-    pChildren = &parent["children"];
-  }
+    pChildren = pParent->getItem("children");
+
   Array<Variant> children = pChildren->asArray();
 
   children.pushBack(subTree);
@@ -136,13 +145,13 @@ Variant *Menu::FindMenuItem(String *parentPath)
     {
       for (Variant &child : children)
       {
-        Variant &param = child["name"];
+        Variant &param = *child.getItem("name");
         if (!param.asString().cmp(token))
         {
           itemFound = true;
           *parentPath = path;
           parent = &child;
-          children = child["children"].asArray();
+          children = child.getItem("children")->asArray();
         }
       }
       if (!itemFound)
@@ -175,16 +184,15 @@ bool Menu::RemoveItem(String path)
       LogDebug(2, "Can't remove non-existent menu item \"{0}\"", path);
       return false;
     }
-    
-    Variant &parent = *pParent;
-    pChildren = &parent["children"];
+
+    pChildren = pParent->getItem("children");
   }
 
   Array<Variant> children = pChildren->asArray();
 
   for (size_t i = 0; i < children.length; i++)
   {
-    Variant &childName = children[i]["name"];
+    Variant &childName = *children[i].getItem("name");
     if (!childName.asString().cmp(removeName))
     {
       children.remove(i);
@@ -198,63 +206,64 @@ bool Menu::RemoveItem(String path)
   return true;
 }
 
-Variant Menu::CreateMenuItem(Slice<const KeyValuePair> properties)
+Variant Menu::CreateMenuItem(Variant::VarMap properties)
 {
-  Array<KeyValuePair> mapArray;
-  mapArray.pushBack(KeyValuePair("type", ""));
-  mapArray.pushBack(KeyValuePair("name", ""));
-  mapArray.pushBack(KeyValuePair("description", ""));
-  mapArray.pushBack(KeyValuePair("image", ""));
-  mapArray.pushBack(KeyValuePair("checkable", false));
-  mapArray.pushBack(KeyValuePair("checked", false));
-  mapArray.pushBack(KeyValuePair("exclusivegroup", false));
-  mapArray.pushBack(KeyValuePair("enabled", true));
-  mapArray.pushBack(KeyValuePair("separator", false));
-  mapArray.pushBack(KeyValuePair("shortcut", ""));
-  mapArray.pushBack(KeyValuePair("command", ""));
-  mapArray.pushBack(KeyValuePair("children", Array<Variant>()));
-  
-  Variant map(mapArray);
-  SetMenuProperties(map, properties);
+  Variant::VarMap map;
+  map.Insert(KeyValuePair("type", ""));
+  map.Insert(KeyValuePair("name", ""));
+  map.Insert(KeyValuePair("description", ""));
+  map.Insert(KeyValuePair("image", ""));
+  map.Insert(KeyValuePair("checkable", false));
+  map.Insert(KeyValuePair("checked", false));
+  map.Insert(KeyValuePair("exclusivegroup", false));
+  map.Insert(KeyValuePair("enabled", true));
+  map.Insert(KeyValuePair("separator", false));
+  map.Insert(KeyValuePair("shortcut", ""));
+  map.Insert(KeyValuePair("command", ""));
+  map.Insert(KeyValuePair("children", Array<Variant>()));
 
-  return map;
+  Variant varMap(map);
+
+  SetMenuProperties(varMap, properties);
+
+  return varMap;
 }
 
-void Menu::SetMenuProperties(Variant &menu, Slice<const KeyValuePair> properties)
+void Menu::SetMenuProperties(Variant &menu, Variant::VarMap properties)
 {
   Array<Variant> menuChildren;
   String command;
 
-  for (const KeyValuePair &item : properties)
+  for (auto item : properties)
   {
     String itemName = item.key.asString();
 
-    if (!itemName.cmp("command"))
-      menu["shortcut"] = GetKernel().GetCommandManager()->GetShortcut(item.value.asString());
+    if (itemName.eq("command"))
+      *menu.getItem("shortcut") = GetKernel().GetCommandManager()->GetShortcut(item.value.asString());
 
-    if (!itemName.cmp("children"))
+    if (itemName.eq("children"))
     {
       Slice<Variant> children = item.value.asArray();
       for (Variant &child : children)
         menuChildren.pushBack(CreateMenuItem(child.asAssocArray()));
 
-      menu["children"] = menuChildren;
+      *menu.getItem("children") = menuChildren;
     }
     else
     {
       if (item.value.is(Variant::Type::String))
       {
-        if (!item.value.asString().cmp("true"))
-          menu[itemName] = Variant(true);
-        else if (!item.value.asString().cmp("false"))
-          menu[itemName] = Variant(false);
+        if (item.value.asString().eq("true"))
+          *menu.getItem(itemName) = Variant(true);
+        else if (item.value.asString().eq("false"))
+          *menu.getItem(itemName) = Variant(false);
         else
-          menu[itemName] = item.value;
+          *menu.getItem(itemName) = item.value;
       }
       else
-        menu[itemName] = item.value;
+        *menu.getItem(itemName) = item.value;
     }
   }
 }
 
-} // namespace ep
+} // namespace kernel

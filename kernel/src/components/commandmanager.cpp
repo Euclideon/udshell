@@ -72,14 +72,14 @@ String CommandManager::StripWhitespace(Slice<char> output, String input)
 
 bool CommandManager::RunCommand(String id)
 {
-  for (Command &comm : commandRegistry)
+  for (auto comm : commandRegistry)
   {
-    if (!id.cmpIC(comm.id))
+    if (!id.cmpIC(comm.key))
     {
-      if (comm.func)
-        comm.func();
-      else if (!comm.script.empty())
-        pKernel->Exec(comm.script);
+      if (comm.value.func)
+        comm.value.func();
+      else if (!comm.value.script.empty())
+        pKernel->Exec(comm.value.script);
 
       return true;
     }

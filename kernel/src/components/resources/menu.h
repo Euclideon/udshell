@@ -4,7 +4,7 @@
 
 #include "components/resources/resource.h"
 
-namespace ep
+namespace kernel
 {
 PROTOTYPE_COMPONENT(Menu);
 
@@ -16,20 +16,20 @@ public:
   Variant GetMenuData() const { return menuData; }
   void SetMenuData(Variant _menuData) { menuData = _menuData; }
 
-  void AddItem(String parentPath, Slice<const KeyValuePair> properties);
+  void AddItem(String parentPath, Variant::VarMap properties);
   void AddXMLItems(String parentPath, String xmlStr);
   bool RemoveItem(String path);
-  bool SetItemProperties(String path, Slice<const KeyValuePair> properties);
+  bool SetItemProperties(String path, Variant::VarMap properties);
 
   Event<> Changed;
 protected:
-  Menu(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, InitParams initParams);
+  Menu(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
   Variant ParseXMLString(String buffer);
-  Variant ParseXMLMenu(KeyValuePair inMenu);
+  Variant ParseXMLMenu(Variant inMenu);
   Variant *FindMenuItem(String *parentPath);
-  Variant CreateMenuItem(Slice<const KeyValuePair> properties);
-  void SetMenuProperties(Variant &menu, Slice<const KeyValuePair> properties);
+  Variant CreateMenuItem(Variant::VarMap properties);
+  void SetMenuProperties(Variant &menu, Variant::VarMap properties);
 
   Variant menuData;
 
@@ -59,6 +59,6 @@ protected:
   }
 };
 
-}
+} // End namespace kernel
 
 #endif // _EP_MENU_H
