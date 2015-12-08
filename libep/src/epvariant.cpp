@@ -4,6 +4,9 @@
 
 extern "C" {
 
+// TODO: remove me!!
+static Variant varNone = Variant();
+
 void epVariant_Release(epVariant v)
 {
   // Note: Variant's destructor will clean our instance up
@@ -662,7 +665,7 @@ Variant& Variant::operator[](size_t j) const
     EPASSERT(j < length, "Index out of range!");
     return *((VarMap&)p).Get(j + (aa->Get(0) ? 0 : 1));
   }
-  return Variant();
+  return varNone;
 }
 
 Variant& Variant::operator[](String key) const
@@ -673,7 +676,7 @@ Variant& Variant::operator[](String key) const
     if (pV)
       return *pV;
   }
-  return Variant();
+  return varNone;
 }
 
 Variant* Variant::getItem(String key) const
