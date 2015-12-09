@@ -618,6 +618,23 @@ inline Variant epToVariant(const Delegate<R(Args...)> &d)
   return Variant::VarDelegate(VarDelegateRef::create(d));
 }
 
+template<typename K, typename V, typename Pred>
+inline Variant epToVariant(const AVLTree<K, V, Pred> &tree)
+{
+  Variant::VarMap m;
+  for (auto item : tree)
+    m.Insert(item.key, item.value);
+  return std::move(m);
+}
+
+template<typename Tree>
+inline Variant epToVariant(const SharedMap<Tree> &map)
+{
+  Variant::VarMap m;
+  for (auto item : map)
+    m.Insert(item.key, item.value);
+  return std::move(m);
+}
 
 // ***************************************************
 // ** Variant conversion adapters for complex types **
@@ -847,8 +864,8 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
   }
 }
 
-template<typename K, typename V>
-inline void epFromVariant(const Variant &v, AVLTree<K, V> *pTree)
+template<typename K, typename V, typename Pred>
+inline void epFromVariant(const Variant &v, AVLTree<K, V, Pred> *pTree)
 {
   if (v.is(Variant::Type::Array))
   {
@@ -861,6 +878,23 @@ inline void epFromVariant(const Variant &v, AVLTree<K, V> *pTree)
     auto aa = v.asAssocArray();
     for (auto kvp : aa)
       pTree->insert(kvp.key.as<K>(), kvp.value.as<V>());
+  }
+}
+
+template<typename Tree>
+inline void epFromVariant(const Variant &v, SharedMap<Tree> *pTree)
+{
+  if (v.is(Variant::Type::Array))
+  {
+    auto a = v.asArray();
+    for (size_t i = 0; i < a.length; ++i)
+      pTree->insert(Variant(i).as<Tree::KeyType>(), a[i].as<Tree::ValueType>());
+  }
+  else if (v.is(Variant::Type::AssocArray))
+  {
+    auto aa = v.asAssocArray();
+    for (auto kvp : aa)
+      pTree->insert(kvp.key.as<Tree::KeyType>(), kvp.value.as<Tree::ValueType>());
   }
 }
 
