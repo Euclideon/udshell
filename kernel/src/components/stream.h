@@ -5,9 +5,9 @@
 #include "broadcaster.h"
 #include "resources/buffer.h"
 
-namespace kernel
+namespace ep
 {
-PROTOTYPE_COMPONENT(Stream);
+SHARED_CLASS(Stream);
 
 EP_BITFIELD(OpenFlags,
   Read,

@@ -5,10 +5,10 @@
 #include "components/resources/resource.h"
 #include "ep/cpp/sharedptr.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(Buffer);
+SHARED_CLASS(Buffer);
 
 class Buffer : public Resource
 {
@@ -43,6 +43,6 @@ protected:
   bool readMap;
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _EP_BUFFER_H

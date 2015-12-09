@@ -10,10 +10,10 @@ EP_ENUM(ConsoleOutputs,
   StdDbg
 );
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(Console);
+SHARED_CLASS(Console);
 
 class Console : public Stream
 {

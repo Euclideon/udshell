@@ -1,7 +1,7 @@
 #include "components/commandmanager.h"
 #include "kernel.h"
 
-namespace kernel {
+namespace ep {
 
 CommandManager::CommandManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
@@ -144,4 +144,4 @@ bool CommandManager::SetScript(String id, String script)
 
 
 
-} // namespace kernel
+} // namespace ep

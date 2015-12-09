@@ -4,23 +4,23 @@
 
 #include <QObject>
 
-#include "components/component.h"
+#include "ep/cpp/component.h"
 
-namespace kernel {
+namespace ep {
 class Kernel;
 }
 
 namespace qt
 {
 
-PROTOTYPE_COMPONENT(QtComponent);
+SHARED_CLASS(QtComponent);
 
-class QtComponent : public kernel::Component
+class QtComponent : public Component
 {
-  EP_DECLARE_COMPONENT(QtComponent, kernel::Component, EPKERNEL_PLUGINVERSION, "QtComponent desc...")
+  EP_DECLARE_COMPONENT(QtComponent, Component, EPKERNEL_PLUGINVERSION, "QtComponent desc...")
 public:
 
-  QtComponent(const kernel::ComponentDesc *pType, kernel::Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+  QtComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~QtComponent();
 
   QObject *GetQObject() const { return pQObject; }

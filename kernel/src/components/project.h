@@ -2,12 +2,12 @@
 #ifndef EP_PROJECT_H
 #define EP_PROJECT_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(Project);
+SHARED_CLASS(Project);
 SHARED_CLASS(Activity);
 SHARED_CLASS(ResourceManager);
 
@@ -47,6 +47,6 @@ protected:
   }
 };
 
-} //namespace kernel
+} //namespace ep
 
 #endif // EP_PROJECT_H

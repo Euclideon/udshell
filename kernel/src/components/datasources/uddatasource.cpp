@@ -4,7 +4,7 @@
 #include "udOctree.h"
 #include "kernel.h"
 
-namespace kernel
+namespace ep
 {
 const Array<const String> UDDataSource::extensions = { ".uds", ".ssf", ".upc", ".udi", ".oct3" };
 
@@ -67,4 +67,4 @@ epResult UDDataSource::StaticInit(ep::Kernel *pKernel)
   return pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
 }
 
-} // namespace kernel
+} // namespace ep

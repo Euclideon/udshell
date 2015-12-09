@@ -2,12 +2,12 @@
 #ifndef UD_WINDOW_H
 #define UD_WINDOW_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(Window);
+SHARED_CLASS(Window);
 
 SHARED_CLASS(UIComponent);
 
@@ -36,6 +36,6 @@ protected:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // UD_WINDOW_H

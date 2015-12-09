@@ -8,12 +8,12 @@
 
 #include <type_traits>
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(RenderResource);
 
-PROTOTYPE_COMPONENT(ArrayBuffer);
+SHARED_CLASS(ArrayBuffer);
 
 class ArrayBuffer : public Buffer
 {
@@ -171,6 +171,6 @@ template<>
 inline Slice<const void> ArrayBuffer::MapForRead<void>() { return Buffer::MapForRead(); }
 
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _EP_ARRAYBUFFER_H

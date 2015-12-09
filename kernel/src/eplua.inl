@@ -1,4 +1,4 @@
-namespace kernel
+namespace ep
 {
 
 inline lua_State *LuaState::state()
@@ -147,4 +147,4 @@ inline void LuaState::push(const Variant &v)
   v.luaPush(*this);
 }
 
-} // namespace kernel
+} // namespace ep

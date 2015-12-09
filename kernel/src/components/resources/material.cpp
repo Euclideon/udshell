@@ -1,9 +1,9 @@
-#include "components/component.h"
+#include "ep/cpp/component.h"
 #include "material.h"
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace kernel {
+namespace ep {
 
 void Material::SetShader(ShaderType type, ShaderRef spShader)
 {
@@ -57,7 +57,7 @@ RenderShaderProgramRef Material::GetRenderProgram()
     {
       // TODO: check if this program already exists in `pRenderer->shaderPrograms`
 
-      RenderShaderProgram *pProgram = new RenderShaderProgram(GetKernel().GetRenderer(), spVS, spPS);
+      RenderShaderProgram *pProgram = new RenderShaderProgram(((kernel::Kernel&)GetKernel()).GetRenderer(), spVS, spPS);
       if (!pProgram->pProgram)
       {
         delete pProgram;
@@ -73,4 +73,4 @@ RenderShaderProgramRef Material::GetRenderProgram()
   return spRenderProgram;
 }
 
-} // namespace kernel
+} // namespace ep

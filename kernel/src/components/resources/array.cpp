@@ -2,8 +2,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace kernel
-{
+namespace ep {
 
 RenderResourceRef ArrayBuffer::GetRenderResource(RenderResourceType type)
 {
@@ -13,16 +12,16 @@ RenderResourceRef ArrayBuffer::GetRenderResource(RenderResourceType type)
     {
       // TODO: we need to find texture type from the dimensions of the array buffer
       //       ... or we need 'type' to ask for the particular texture type that the shader expects
-      RenderTexture *pRenderTexture = new RenderTexture(GetKernel().GetRenderer(), ArrayBufferRef(this), TextureUsage::_2D);
+      RenderTexture *pRenderTexture = new RenderTexture(((kernel::Kernel&)GetKernel()).GetRenderer(), ArrayBufferRef(this), TextureUsage::_2D);
       spRenderData = RenderTextureRef(pRenderTexture);
     }
     else
     {
-      RenderArray *pRenderArray = new RenderArray(GetKernel().GetRenderer(), ArrayBufferRef(this), type == RenderResourceType::IndexArray ? ArrayUsage::IndexData : ArrayUsage::VertexData);
+      RenderArray *pRenderArray = new RenderArray(((kernel::Kernel&)GetKernel()).GetRenderer(), ArrayBufferRef(this), type == RenderResourceType::IndexArray ? ArrayUsage::IndexData : ArrayUsage::VertexData);
       spRenderData = RenderArrayRef(pRenderArray);
     }
   }
   return spRenderData;
 }
 
-} // namespace kernel
+} // namespace ep

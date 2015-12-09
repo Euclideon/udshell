@@ -7,7 +7,7 @@
 #include "ep/cpp/delegate.h"
 #include "kernel.h"
 
-namespace kernel {
+namespace ep {
 
 LoggerRef UIConsole::spLogger;
 
@@ -24,8 +24,8 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   spInBuffer->Reserve(1024);
   spInStream = pKernel->CreateComponent<MemStream>({ { "buffer", spInBuffer }, { "flags", OpenFlags::Write } });
 
-  spLogger = pKernel->GetLogger();
-  pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
+  spLogger = ((kernel::Kernel*)pKernel)->GetLogger();
+  ((kernel::Kernel*)pKernel)->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
 
   auto spCommandManager = pKernel->GetCommandManager();
   spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void()>(this, &UIConsole::ToggleVisible), nullptr, "`");
@@ -130,7 +130,7 @@ void UIConsole::RebuildOutput()
 
 void UIConsole::OnLogChanged()
 {
-  Slice<LogLine> log = GetKernel().GetLogger()->GetLog();
+  Slice<LogLine> log = ((kernel::Kernel*)pKernel)->GetLogger()->GetLog();
   LogLine &line = log.back();
 
   logLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1));

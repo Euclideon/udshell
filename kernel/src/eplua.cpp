@@ -1,10 +1,12 @@
 
 #include "eplua.h"
 #include "kernel.h"
+#include "componentdesc.h"
+#include "components/componentimpl.h"
 
 #include "ep/cpp/variant.h"
 
-namespace kernel
+namespace ep
 {
 
 #include "init.inc"
@@ -340,7 +342,7 @@ void LuaState::setComponent(Variant key, ComponentRef c, LuaLocation loc)
 
 
 // *** bind components to Lua ***
-void LuaState::pushComponentMetatable(const ComponentDesc &desc, bool weakPtr)
+void LuaState::pushComponentMetatable(const kernel::ComponentDesc &desc, bool weakPtr)
 {
   MutableString64 t; t.append("ep::", desc.info.id, weakPtr ? "*" : "Ref", "\0");
   if (luaL_newmetatable(L, t.ptr) == 0)
@@ -391,7 +393,7 @@ void LuaState::pushComponentMetatable(const ComponentDesc &desc, bool weakPtr)
   lua_pushvalue(L, -2);
   lua_rawset(L, -3);
 }
-void LuaState::pushDescriptor(const ComponentDesc &desc)
+void LuaState::pushDescriptor(const kernel::ComponentDesc &desc)
 {
   lua_createtable(L, 0, 6);
 
@@ -508,6 +510,7 @@ int LuaState::componentIndex(lua_State* L)
 
   // get component
   ComponentRef spC = l.toComponent(1);
+  ComponentImpl *pCImpl = (ComponentImpl*)spC->pImpl.ptr();
 
   // get field name
   size_t len;
@@ -515,7 +518,7 @@ int LuaState::componentIndex(lua_State* L)
   String field(pField, len);
 
   // check for getter
-  const PropertyDesc *pProp = spC->GetPropertyDesc(field);
+  const kernel::PropertyDesc *pProp = pCImpl->GetPropertyDesc(field);
   if (pProp)
   {
     if (pProp->getter)
@@ -533,7 +536,7 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // check for method
-  const MethodDesc *pMethod = spC->GetMethodDesc(field);
+  const kernel::MethodDesc *pMethod = pCImpl->GetMethodDesc(field);
   if (pMethod)
   {
     lua_pushlightuserdata(L, (void*)&pMethod->method);
@@ -542,7 +545,7 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // check for events
-  const EventDesc *pEv = spC->GetEventDesc(field);
+  const kernel::EventDesc *pEv = pCImpl->GetEventDesc(field);
   if (pEv)
   {
     l.pushEvent(spC, *pEv);
@@ -577,6 +580,7 @@ int LuaState::componentNewIndex(lua_State* L)
 
   // get component
   ComponentRef spC = l.toComponent(1);
+  ComponentImpl *pCImpl = (ComponentImpl*)spC->pImpl.ptr();
 
   // get field name
   size_t len;
@@ -584,7 +588,7 @@ int LuaState::componentNewIndex(lua_State* L)
   String field(pField, len);
 
   // check for setter
-  const PropertyDesc *pProp = spC->GetPropertyDesc(field);
+  const kernel::PropertyDesc *pProp = pCImpl->GetPropertyDesc(field);
   if (pProp)
   {
     if (pProp->setter)
@@ -611,7 +615,7 @@ int LuaState::componentNewIndex(lua_State* L)
 int LuaState::method(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
-  const MethodShim *pM = (const MethodShim*)l.toUserData(lua_upvalueindex(1));
+  const kernel::MethodShim *pM = (const kernel::MethodShim*)l.toUserData(lua_upvalueindex(1));
 
   ComponentRef c = l.toComponent(1);
 
@@ -647,7 +651,8 @@ int LuaState::help(lua_State* L)
     return 0;
 
   ComponentRef c = l.toComponent(1);
-  const ComponentDesc *pDesc = c->GetDescriptor();
+  ComponentImpl *pCImpl = (ComponentImpl*)c->pImpl.ptr();
+  const kernel::ComponentDesc *pDesc = pCImpl->GetDescriptor();
 
   MutableString256 buffer;
   if (numArgs > 1)
@@ -669,12 +674,12 @@ int LuaState::help(lua_State* L)
     l.print(pDesc->info.description);
 
     MutableString64 buf;
-    if (c->NumProperties() > 0)
+    if (pCImpl->NumProperties() > 0)
     {
       l.print("\nProperties:");
 
       SetConsoleColor(ConsoleColor::Green);
-      for (auto p : c->instanceProperties)
+      for (auto p : pCImpl->instanceProperties)
       {
         buf.sprintf("  %-16s - %s", (const char*)p.value.id.toStringz(), (const char*)p.value.description.toStringz());
         l.print(buf);
@@ -686,13 +691,13 @@ int LuaState::help(lua_State* L)
       }
     }
 
-    if (c->NumMethods() > 0)
+    if (pCImpl->NumMethods() > 0)
     {
       SetConsoleColor();
       l.print("\nMethods:");
 
       SetConsoleColor(ConsoleColor::Magenta);
-      for (auto m : c->instanceMethods)
+      for (auto m : pCImpl->instanceMethods)
       {
 /*
         MutableString64 func = MutableString64::format("%s(", m->id.toStringz());
@@ -730,13 +735,13 @@ int LuaState::help(lua_State* L)
       }
     }
 
-    if (c->NumEvents() > 0)
+    if (pCImpl->NumEvents() > 0)
     {
       SetConsoleColor();
       l.print("\nEvents:");
 
       SetConsoleColor(ConsoleColor::Yellow);
-      for (auto e : c->instanceEvents)
+      for (auto e : pCImpl->instanceEvents)
       {
         buf.sprintf("  %-16s - %s", (const char*)e.value.id.toStringz(), (const char*)e.value.description.toStringz());
         l.print(buf);
@@ -932,7 +937,7 @@ void LuaState::pushEventMembers()
 class LuaEvent
 {
 public:
-  LuaEvent(const ComponentRef &c, const EventDesc &desc)
+  LuaEvent(const ComponentRef &c, const kernel::EventDesc &desc)
     : c(c), desc(desc)
   {}
 
@@ -943,12 +948,12 @@ public:
 
 private:
   ComponentRef c;
-  const EventDesc &desc;
+  const kernel::EventDesc &desc;
 
   LuaEvent& operator=(const LuaEvent &) = delete;
 };
 
-void LuaState::pushEvent(const ComponentRef &c, const EventDesc &desc)
+void LuaState::pushEvent(const ComponentRef &c, const kernel::EventDesc &desc)
 {
   new(lua_newuserdata(L, sizeof(LuaEvent))) LuaEvent(c, desc);
   pushEventMetatable();
@@ -974,11 +979,11 @@ int LuaState::subscribe(lua_State* L)
   return 0;
 }
 
-} // namespace kernel
+} // namespace ep
 
 
 // HAX: define Variant::Lua functions here to reduce include spam
-void Variant::luaPush(kernel::LuaState &l) const
+void Variant::luaPush(LuaState &l) const
 {
   switch ((Type)t)
   {
@@ -1011,9 +1016,9 @@ void Variant::luaPush(kernel::LuaState &l) const
     }
     case Type::Component:
       if (ownsContent)
-        l.pushComponent((kernel::ComponentRef&)p);
+        l.pushComponent((ComponentRef&)p);
       else
-        l.pushComponent((kernel::Component*)p);
+        l.pushComponent((Component*)p);
       break;
     case Type::Delegate:
       l.pushDelegate((VarDelegate&)p);
@@ -1056,26 +1061,26 @@ void Variant::luaPush(kernel::LuaState &l) const
   }
 }
 
-Variant Variant::luaGet(kernel::LuaState &l, int idx)
+Variant Variant::luaGet(LuaState &l, int idx)
 {
   switch (l.getType(idx))
   {
-    case kernel::LuaType::Nil:
+    case LuaType::Nil:
       return Variant(nullptr);
-    case kernel::LuaType::Boolean:
+    case LuaType::Boolean:
       return Variant(l.toBool(idx));
-    case kernel::LuaType::LightUserData:
+    case LuaType::LightUserData:
       return Variant((int64_t)(size_t)l.toUserData(idx));
-    case kernel::LuaType::Number:
+    case LuaType::Number:
       if (l.isInteger(idx))
         return Variant((int64_t)l.toInt(idx));
       else
         return Variant(l.toFloat(idx));
-    case kernel::LuaType::String:
+    case LuaType::String:
       return Variant(l.toString(idx));
-    case kernel::LuaType::Function:
+    case LuaType::Function:
       return l.toDelegate(idx);
-    case kernel::LuaType::UserData:
+    case LuaType::UserData:
     {
       lua_State *L = l.state();
       if (lua_getmetatable(L, idx) == 0)
@@ -1094,7 +1099,7 @@ Variant Variant::luaGet(kernel::LuaState &l, int idx)
 //        return Variant(l.toEvent(idx));
       return Variant(nullptr);
     }
-    case kernel::LuaType::Table:
+    case LuaType::Table:
     {
       lua_State *L = l.state();
 

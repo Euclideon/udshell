@@ -2,11 +2,11 @@
 #ifndef EP_PLUGIN_LOADER_H
 #define EP_PLUGIN_LOADER_H
 
-#include "components/component.h"
+#include "ep/cpp/component.h"
 
-namespace kernel {
+namespace ep {
 
-PROTOTYPE_COMPONENT(PluginLoader);
+SHARED_CLASS(PluginLoader);
 
 class PluginLoader : public Component
 {
@@ -22,6 +22,6 @@ protected:
   {}
 };
 
-} //namespace kernel
+} //namespace ep
 
 #endif // EP_PLUGIN_LOADER_H

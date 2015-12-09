@@ -17,7 +17,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-namespace kernel {
+namespace ep {
 
 class StdCapture
 {
@@ -144,4 +144,4 @@ private:
   MutableString<1024> m_captured;
 };
 
-} // end namespace kernel
+} // end namespace ep

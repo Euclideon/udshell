@@ -2,12 +2,16 @@
 #if !defined(_EPLUA_H)
 #define _EPLUA_H
 
-#include "components/component.h"
+#include "ep/cpp/component.h"
+#include "componentdesc.h"
 
 #include "lua.hpp"
 
-namespace kernel
-{
+namespace kernel {
+struct EventDesc;
+}
+
+namespace ep {
 
 enum class ConsoleColor
 {
@@ -126,8 +130,8 @@ private:
   static int udLuaPanic(lua_State *L);
   static void* udLuaAlloc(void *, void *ptr, size_t, size_t nsize);
 
-  void pushComponentMetatable(const ComponentDesc &desc, bool weakPtr);
-  void pushDescriptor(const ComponentDesc &desc);
+  void pushComponentMetatable(const kernel::ComponentDesc &desc, bool weakPtr);
+  void pushDescriptor(const kernel::ComponentDesc &desc);
   static int componentCleaner(lua_State* L);
   static int componentToString(lua_State* L);
   static int componentCompare(lua_State* L);
@@ -142,7 +146,7 @@ private:
 
   void pushEventMetatable();
   void pushEventMembers();
-  void pushEvent(const ComponentRef &c, const EventDesc &desc);
+  void pushEvent(const ComponentRef &c, const kernel::EventDesc &desc);
   static int eventCleaner(lua_State* L);
   static int subscribe(lua_State* L);
 };
@@ -196,7 +200,7 @@ public:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #include "eplua.inl"
 

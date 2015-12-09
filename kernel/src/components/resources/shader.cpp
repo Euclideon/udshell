@@ -2,14 +2,14 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace kernel
+namespace ep
 {
 
 RenderShaderRef Shader::GetRenderShader(int type)
 {
   if (!spRenderShader)
   {
-    RenderShader *pShader = new RenderShader(GetKernel().GetRenderer(), ShaderRef(this), (epShaderType)type);
+    RenderShader *pShader = new RenderShader(((kernel::Kernel&)GetKernel()).GetRenderer(), ShaderRef(this), (epShaderType)type);
     if (!pShader->pShader)
     {
       delete pShader;
@@ -21,4 +21,4 @@ RenderShaderRef Shader::GetRenderShader(int type)
   return spRenderShader;
 }
 
-} // namespace kernel
+} // namespace ep

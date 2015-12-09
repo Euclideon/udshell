@@ -2,6 +2,7 @@
 #include "kernel.h"
 
 #include "hal/hal.h"
+#include "components/componentimpl.h"
 #include "components/stream.h"
 #include "components/file.h"
 #include "components/console.h"
@@ -42,20 +43,23 @@
 #include "components/datasources/uddatasource.h"
 #include "components/activities/activity.h"
 #include "components/activities/viewer.h"
-#include "components/plugin/componentplugin.h"
 #include "renderscene.h"
 #include "eplua.h"
 #include "stdcapture.h"
 
 #include "udPlatformUtil.h"
 
-namespace kernel
-{
+namespace ep {
+
 epResult udRenderScene_Init(Kernel*);
 epResult udRenderScene_InitRender(Kernel*);
 
 epResult udRenderScene_Deinit(Kernel*);
 epResult udRenderScene_DeinitRender(Kernel*); // Not sure if both Deinit's are necessary
+
+}
+
+namespace kernel {
 
 Kernel::Kernel()
   : componentRegistry(256)
@@ -76,63 +80,60 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->pRenderer = new Renderer(pKernel, renderThreadCount);
 
   // register all the builtin component types
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Component>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<DataSource>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Broadcaster>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Stream>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<File>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Console>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<MemStream>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Logger>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<PluginManager>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<PluginLoader>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<NativePluginLoader>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<ResourceManager>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<CommandManager>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Project>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Timer>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Lua>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<UIComponent>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<UIConsole>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Viewport>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Window>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<View>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Scene>());
+  pKernel->RegisterComponentType<Component, ComponentImpl>();
+  pKernel->RegisterComponentType<DataSource>();
+  pKernel->RegisterComponentType<Broadcaster>();
+  pKernel->RegisterComponentType<Stream>();
+  pKernel->RegisterComponentType<File>();
+  pKernel->RegisterComponentType<Console>();
+  pKernel->RegisterComponentType<MemStream>();
+  pKernel->RegisterComponentType<Logger>();
+  pKernel->RegisterComponentType<PluginManager>();
+  pKernel->RegisterComponentType<PluginLoader>();
+  pKernel->RegisterComponentType<NativePluginLoader>();
+  pKernel->RegisterComponentType<ResourceManager>();
+  pKernel->RegisterComponentType<CommandManager>();
+  pKernel->RegisterComponentType<Project>();
+  pKernel->RegisterComponentType<Timer>();
+  pKernel->RegisterComponentType<Lua>();
+  pKernel->RegisterComponentType<UIComponent>();
+  pKernel->RegisterComponentType<UIConsole>();
+  pKernel->RegisterComponentType<Viewport>();
+  pKernel->RegisterComponentType<Window>();
+  pKernel->RegisterComponentType<View>();
+  pKernel->RegisterComponentType<Scene>();
 
   // resources
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Resource>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Buffer>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<ArrayBuffer>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<UDModel>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Shader>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Material>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Model>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Text>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Menu>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<KVPStore>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Metadata>());
+  pKernel->RegisterComponentType<Resource>();
+  pKernel->RegisterComponentType<Buffer>();
+  pKernel->RegisterComponentType<ArrayBuffer>();
+  pKernel->RegisterComponentType<UDModel>();
+  pKernel->RegisterComponentType<Shader>();
+  pKernel->RegisterComponentType<Material>();
+  pKernel->RegisterComponentType<Model>();
+  pKernel->RegisterComponentType<Text>();
+  pKernel->RegisterComponentType<Menu>();
+  pKernel->RegisterComponentType<KVPStore>();
+  pKernel->RegisterComponentType<Metadata>();
 
   // nodes
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Node>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Camera>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<SimpleCamera>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<GeomNode>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<UDNode>());
+  pKernel->RegisterComponentType<Node>();
+  pKernel->RegisterComponentType<Camera>();
+  pKernel->RegisterComponentType<SimpleCamera>();
+  pKernel->RegisterComponentType<GeomNode>();
+  pKernel->RegisterComponentType<UDNode>();
 
   // data sources
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<ImageSource>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<GeomSource>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<UDDataSource>());
+  pKernel->RegisterComponentType<ImageSource>();
+  pKernel->RegisterComponentType<GeomSource>();
+  pKernel->RegisterComponentType<UDDataSource>();
 
   // activities
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Activity>());
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<Viewer>());
-
-  // plugin interfaces
-  EP_ERROR_CHECK(pKernel->RegisterComponentType<ComponentPlugin>());
+  pKernel->RegisterComponentType<Activity>();
+  pKernel->RegisterComponentType<Viewer>();
 
   // init the HAL
-  EP_ERROR_CHECK(epHAL_Init());
+  epHAL_Init();
 
   // create internal stuff
   pKernel->spLua = pKernel->CreateComponent<Lua>();
@@ -423,7 +424,7 @@ void Kernel::RegisterMessageHandler(SharedString name, MessageHandler messageHan
   messageHandlers.Add(name.hash(), handler);
 }
 
-const ComponentDesc* Kernel::RegisterComponentType(const ep::ComponentDesc &desc)
+const ep::ComponentDesc* Kernel::RegisterComponentType(const ep::ComponentDesc &desc)
 {
   if (desc.info.id.exists('@') || desc.info.id.exists('$') || desc.info.id.exists('#'))
   {
@@ -439,6 +440,14 @@ const ComponentDesc* Kernel::RegisterComponentType(const ep::ComponentDesc &desc
   componentRegistry.Add(desc.info.id.hash(), t);
 
   return pDesc;
+}
+
+void* Kernel::CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams)
+{
+  kernel::ComponentDesc *pDesc = (kernel::ComponentDesc*)GetComponentDesc(componentType);
+  if (pDesc->pCreateImpl)
+    return pDesc->pCreateImpl(pInstance, initParams);
+  return nullptr;
 }
 
 const ep::ComponentDesc* Kernel::GetComponentDesc(String id)

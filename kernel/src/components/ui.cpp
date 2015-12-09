@@ -1,6 +1,6 @@
 #include "ui.h"
 
-namespace kernel {
+namespace ep {
 
 UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
@@ -14,4 +14,4 @@ UIComponent::~UIComponent()
   DestroyInternal();
 }
 
-} // namespace kernel
+} // namespace ep

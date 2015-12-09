@@ -1,7 +1,7 @@
 #include "components/broadcaster.h"
 #include "kernel.h"
 
-namespace kernel {
+namespace ep {
 
 size_t Broadcaster::WriteBuffer(BufferRef spData)
 {
@@ -21,4 +21,4 @@ size_t Broadcaster::WriteLn(String str)
   return written;
 }
 
-} // namespace kernel
+} // namespace ep

@@ -1,6 +1,6 @@
 #include "components/activities/activity.h"
 
-namespace kernel
+namespace ep
 {
 
 Activity::Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -9,4 +9,4 @@ Activity::Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
 
 }
 
-} // namespace kernel
+} // namespace ep

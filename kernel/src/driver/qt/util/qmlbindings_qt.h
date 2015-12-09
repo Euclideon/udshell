@@ -2,13 +2,13 @@
 #ifndef QMLBINDINGS_QT_H
 #define QMLBINDINGS_QT_H
 
-#include "components/component.h"
+#include "ep/cpp/component.h"
 
 #include "qobject.h"
 
 namespace qt {
 
-void PopulateComponentDesc(kernel::Component *pComponent, QObject *pObject);
+void PopulateComponentDesc(Component *pComponent, QObject *pObject);
 
 } // namespace qt
 

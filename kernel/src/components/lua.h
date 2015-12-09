@@ -2,13 +2,13 @@
 #ifndef _LUA_H
 #define _LUA_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 #include "stream.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(Lua);
+SHARED_CLASS(Lua);
 class LuaState;
 
 class Lua : public Component
@@ -55,6 +55,6 @@ private:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _LUA_H

@@ -12,7 +12,7 @@ struct aiNode;
 template<typename T> class aiMatrix4x4t;
 typedef aiMatrix4x4t<float> aiMatrix4x4;
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(GeomSource);
@@ -48,6 +48,6 @@ protected:
   NodeRef ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth = 0);
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _EP_GEOMSOURCE_H

@@ -2,14 +2,14 @@
 #if !defined(_EP_DATASOURCE_H)
 #define _EP_DATASOURCE_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 #include "components/stream.h"
 #include "resources/resource.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(DataSource);
+SHARED_CLASS(DataSource);
 
 class DataSource : public Component
 {

@@ -5,45 +5,58 @@
 #include "ep/c/plugin.h"
 #include "ep/cpp/variant.h"
 #include "ep/cpp/componentdesc.h"
+#include "ep/cpp/interface/icomponent.h"
+#include "ep/cpp/kernel.h"
 #include "ep/c/internal/component_inl.h"
-
-namespace kernel {
-struct ComponentDesc;
-}
 
 namespace ep {
 
+SHARED_CLASS(Component);
+
 // component API
-class Component : public RefCounted
+class Component : public RefCounted, public IComponent
 {
-  EP_DECLARE_COMPONENT(Component, Component, EPKERNEL_PLUGINVERSION, "Base component")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component")
 public:
 
   const SharedString uid;
-  SharedString name;
 
   Kernel& GetKernel() const;
   const ComponentDesc* GetDescriptor() const;
+
+  String GetType() const { return pType->info.id; }
+  String GetDisplayName() const { return pType->info.displayName; }
+  String GetDescription() const { return pType->info.description; }
 
   SharedString GetUid() const;
   SharedString GetName() const;
   void SetName(SharedString _name);
 
+  template<typename T>
+  bool IsType() const { return IsType(T::ComponentID()); }
   bool IsType(String type) const;
 
-  virtual Variant GetProperty(String property) const = 0;
-  virtual void SetProperty(String property, const Variant &value) = 0;
+  Variant GetProperty(String property) const override final;
+  void SetProperty(String property, const Variant &value) override final;
 
-  virtual Variant CallMethod(String method, Slice<const Variant> args) = 0;
+  Variant CallMethod(String method, Slice<const Variant> args) override final;
   template<typename ...Args>
   Variant CallMethod(String method, Args... args);
 
-  virtual void Subscribe(String eventName, const Variant::VarDelegate &delegate) = 0;
+  void Subscribe(String eventName, const Variant::VarDelegate &delegate) override final;
+  template<typename ...Args>
+  void Subscribe(String eventName, const Delegate<void(Args...)> &d);
+  template <class X, class Y, typename ...Args>
+  void Subscribe(String eventName, Y *pThis, void(X::*pMethod)(Args...)) { Subscribe(eventName, Delegate<void(Args...)>(pThis, pMethod)); }
+  template <class X, class Y, typename ...Args>
+  void Subscribe(String eventName, Y *pThis, void(X::*pMethod)(Args...) const) { Subscribe(eventName, Delegate<void(Args...)>(pThis, pMethod)); }
+  template <typename ...Args>
+  void Subscribe(String eventName, void(*pFunc)(Args...)) { Subscribe(eventName, Delegate<void(Args...)>(pFunc)); }
 
-  virtual epResult SendMessage(String target, String message, const Variant &data) const;
-  epResult SendMessage(Component *pComponent, String message, const Variant &data) const;
+  epResult SendMessage(String target, String message, const Variant &data) const;
+  epResult SendMessage(const ComponentRef &target, String message, const Variant &data) const;
 
-  virtual Variant Save() const = 0;
+  Variant Save() const override;
 
   template<typename ...Args> void LogError(String text, Args... args) const;
   template<typename ...Args> void LogWarning(int level, String text, Args... args) const;
@@ -54,20 +67,70 @@ public:
 
   void* GetUserData() const;
 
+  void AddDynamicProperty(const PropertyInfo &property) override final;
+  void AddDynamicMethod(const MethodInfo &method) override final;
+  void AddDynamicEvent(const EventInfo &event) override final;
+  void RemoveDynamicProperty(String name) override final;
+  void RemoveDynamicMethod(String name) override final;
+  void RemoveDynamicEvent(String name) override final;
+
+/*
+  const PropertyInfo *GetPropertyInfo(String propName) const
+  {
+    const PropertyDesc *pDesc = GetPropertyDesc(propName);
+    return pDesc ? &pDesc->info : nullptr;
+  }
+  const FunctionInfo *GetMethodInfo(String methName) const
+  {
+    const MethodDesc *pDesc = GetMethodDesc(methName);
+    return pDesc ? &pDesc->info : nullptr;
+  }
+  const EventInfo *GetEventInfo(String eventName) const
+  {
+    const EventDesc *pDesc = GetEventDesc(eventName);
+    return pDesc ? &pDesc->info : nullptr;
+  }
+  const FunctionInfo *GetStaticFuncInfo(String staticFuncName) const
+  {
+    const StaticFuncDesc *pDesc = GetStaticFuncDesc(staticFuncName);
+    return pDesc ? &pDesc->info : nullptr;
+  }
+*/
+
+
 protected:
-  Component(const kernel::ComponentDesc *_pType, ep::Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams)
-    : uid(_uid), pType((ComponentDesc*)_pType), pKernel(_pKernel) {}
+  friend class LuaState;
+  friend class kernel::Kernel;
+
+  Component(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams);
+  ~Component() {}
+
+  Component(const Component &) = delete;    // Still not sold on this
+  void operator=(const Component &) = delete;
+
+  SharedString name;
 
   const ComponentDesc *const pType;
   class Kernel *const pKernel;
 
   void *pUserData = nullptr;
 
-  virtual epResult InitComplete() { return epR_Success; }
+  void* CreateImplInternal(String ComponentType, Variant::VarMap initParams);
 
-  virtual epResult ReceiveMessage(String message, String sender, const Variant &data);
+  void Init(Variant::VarMap initParams) override final;
+  epResult InitComplete() override;
+  epResult ReceiveMessage(String message, String sender, const Variant &data) override;
 
-  void LogInternal(int category, int level, String text, String componentUID) const;
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(Uid, "Component UID", nullptr, 0),
+      EP_MAKE_PROPERTY(Name, "Component Name", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(Type, "Component Type", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(DisplayName, "Component Display Name", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(Description, "Component Description", nullptr, 0),
+    };
+  }
 };
 
 // component cast
@@ -87,7 +150,25 @@ inline SharedPtr<T> component_cast(ComponentRef pComponent)
 }
 // TODO: cast for IComponent types...
 
-ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs);
+
+inline Variant epToVariant(ep::Component *pC)
+{
+  epVariant v;
+  v.t = (size_t)Variant::Type::Component;
+  v.ownsContent = 0;
+  v.length = 0;
+  v.p = pC;
+  return std::move(v);
+}
+
+// HACK: this is here because forward referencing!
+// SharedPtr<Component> (and derived types)
+template<typename T, typename std::enable_if<std::is_base_of<Component, T>::value>::type* = nullptr> // O_O
+inline void epFromVariant(const Variant &v, SharedPtr<T> *pR)
+{
+  *pR = component_cast<T>(v.asComponent());
+}
 
 } // namespace ep
 

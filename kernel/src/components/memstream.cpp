@@ -2,7 +2,7 @@
 #include "components/broadcaster.h"
 #include "kernel.h"
 
-namespace kernel {
+namespace ep {
 
 MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Stream(pType, pKernel, uid, initParams)
@@ -141,4 +141,4 @@ int64_t MemStream::Seek(SeekOrigin rel, int64_t offset)
   return pos;
 }
 
-} // namespace kernel
+} // namespace ep

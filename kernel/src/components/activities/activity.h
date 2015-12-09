@@ -2,11 +2,11 @@
 #ifndef EP_ACTIVITY_H
 #define EP_ACTIVITY_H
 
-#include "components/component.h"
+#include "ep/cpp/component.h"
 
-namespace kernel {
+namespace ep {
 
-PROTOTYPE_COMPONENT(Activity);
+SHARED_CLASS(Activity);
 SHARED_CLASS(UIComponent);
 
 class Activity : public Component
@@ -41,6 +41,6 @@ protected:
   }
 };
 
-} //namespace kernel
+} //namespace ep
 
 #endif // EP_ACTIVITY_H

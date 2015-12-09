@@ -4,7 +4,7 @@
 #include "nodes/camera.h"
 #include "renderscene.h"
 
-namespace kernel {
+namespace ep {
 
 Array<const PropertyInfo> View::GetProperties()
 {
@@ -148,7 +148,7 @@ void View::OnDirty()
   {
     UniquePtr<RenderableView> spRenderView = UniquePtr<RenderableView>(new RenderableView);
 
-    Renderer *pRenderer = GetKernel().GetRenderer();
+    Renderer *pRenderer = ((kernel::Kernel&)GetKernel()).GetRenderer();
     spRenderView->pRenderEngine = pRenderer->GetRenderEngine();
 
     spRenderView->spView = ViewRef(this);
@@ -209,4 +209,4 @@ void View::RequestPick(SharedArray<const ScreenPoint> points, const PickDelegate
 #endif
 }
 
-} // namespace kernel
+} // namespace ep

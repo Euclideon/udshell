@@ -13,7 +13,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-namespace kernel
+namespace ep
 {
 
 File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -167,4 +167,4 @@ int64_t File::Seek(SeekOrigin rel, int64_t offset)
   return pos;
 }
 
-} // namespace kernel
+} // namespace ep

@@ -1,7 +1,7 @@
 #include "components/console.h"
 #include "components/broadcaster.h"
 
-namespace kernel
+namespace ep
 {
 
 Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -67,4 +67,4 @@ int Console::Flush()
   return 0;
 }
 
-} // namespace kernel
+} // namespace ep

@@ -3,8 +3,9 @@
 #define _EP_TEXT_H
 
 #include "components/resources/buffer.h"
+#include "components/stream.h"
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(Buffer);
@@ -44,6 +45,6 @@ protected:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _EP_TEXT_H

@@ -7,13 +7,13 @@
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/avltree.h"
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(ArrayBuffer);
 SHARED_CLASS(RenderShaderProgram);
 
-PROTOTYPE_COMPONENT(Material);
+SHARED_CLASS(Material);
 
 class Material : public Resource
 {
@@ -89,6 +89,6 @@ protected:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _EP_MATERIAL_H

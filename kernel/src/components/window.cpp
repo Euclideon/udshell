@@ -1,7 +1,7 @@
 #include "window.h"
 #include "ui.h"
 
-namespace kernel {
+namespace ep {
 
 // ---------------------------------------------------------------------------------------
 Window::Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -17,4 +17,4 @@ Window::~Window()
   DestroyInternal();
 }
 
-} // namespace kernel
+} // namespace ep

@@ -4,10 +4,10 @@
 
 #include "ui.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(Viewport);
+SHARED_CLASS(Viewport);
 
 class Viewport : public UIComponent
 {
@@ -22,6 +22,6 @@ protected:
   void DestroyInternal();
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // UD_VIEWPORT_H

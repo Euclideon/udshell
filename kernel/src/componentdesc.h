@@ -11,19 +11,33 @@
 #include "ep/cpp/map.h"
 
 
-#define PROTOTYPE_COMPONENT(Name) \
-  SHARED_CLASS(Name)
-
 struct epComponentDesc;
 
-namespace kernel
+namespace ep {
+
+SHARED_CLASS(Component);
+
+// property description
+enum PropertyFlags : uint32_t
 {
+  epPF_Immutable = 1<<0 // must be initialised during construction
+};
+
+struct EnumKVP
+{
+  EnumKVP(String key, int64_t v) : key(key), value(v) {}
+
+  String key;
+  int64_t value;
+};
+#define EnumKVP(e) EnumKVP( #e, (int64_t)e )
+
+}
+
+namespace kernel {
 
 class Kernel;
 struct ComponentDesc;
-
-PROTOTYPE_COMPONENT(Component);
-
 
 // interface for getters, setters, methods, events
 
@@ -95,22 +109,6 @@ protected:
   void *pSubscribe;
   SharedPtr<const RefCounted> data;
 };
-
-
-// property description
-enum PropertyFlags : uint32_t
-{
-  udPF_Immutable = 1<<0 // must be initialised during construction
-};
-
-struct EnumKVP
-{
-  EnumKVP(String key, int64_t v) : key(key), value(v) {}
-
-  String key;
-  int64_t value;
-};
-#define EnumKVP(e) EnumKVP( #e, (int64_t)e )
 
 
 struct PropertyDesc : public PropertyInfo

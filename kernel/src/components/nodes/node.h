@@ -7,12 +7,12 @@
 #include "../resources/resource.h"
 #include "hal/input.h"
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(RenderScene);
 
-PROTOTYPE_COMPONENT(Node);
+SHARED_CLASS(Node);
 
 class Node : public Resource
 {
@@ -55,6 +55,6 @@ protected:
   static Array<const PropertyInfo> GetProperties();
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // EPNODE_H

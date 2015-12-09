@@ -2,15 +2,14 @@
 #ifndef EPCAMERA_H
 #define EPCAMERA_H
 
-#include "../component.h"
+#include "ep/cpp/component.h"
 #include "node.h"
 #include "hal/input.h"
-#include "ep/cpp/event.h"
-namespace kernel
-{
 
-PROTOTYPE_COMPONENT(Camera);
-PROTOTYPE_COMPONENT(SimpleCamera);
+namespace ep {
+
+SHARED_CLASS(Camera);
+SHARED_CLASS(SimpleCamera);
 
 class Camera : public Node
 {
@@ -195,6 +194,6 @@ protected:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif

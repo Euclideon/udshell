@@ -1,7 +1,6 @@
 #include "componentdesc.h"
 
-namespace kernel
-{
+namespace kernel {
 
 ComponentDesc::ComponentDesc(const ep::ComponentDesc &desc)
   : ep::ComponentDesc(desc)

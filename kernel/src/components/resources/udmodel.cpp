@@ -1,8 +1,7 @@
 #include "udmodel.h"
 #include "components/datasources/uddatasource.h"
 
-namespace kernel
-{
+namespace ep {
 
 static const Slice<const EnumKVP> renderFlags =
 {
@@ -93,4 +92,4 @@ int UDModel::Load(String _name, bool useStreamer)
   return (int)result;
 }
 
-} // namespace kernel
+} // namespace ep

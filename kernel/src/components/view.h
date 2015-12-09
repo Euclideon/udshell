@@ -5,17 +5,16 @@
 #include "udRender.h"
 
 #include "ep/cpp/math.h"
-#include "component.h"
+#include "ep/cpp/component.h"
 #include "hal/input.h"
 
-namespace kernel
-{
+namespace ep {
 
 SHARED_CLASS(RenderableView);
 
-PROTOTYPE_COMPONENT(Scene);
-PROTOTYPE_COMPONENT(Camera);
-PROTOTYPE_COMPONENT(View);
+SHARED_CLASS(Scene);
+SHARED_CLASS(Camera);
+SHARED_CLASS(View);
 
 class View : public Component
 {
@@ -148,6 +147,6 @@ inline void View::SetEnablePicking(bool enable)
   }
 }
 
-} // namespace kernel
+} // namespace ep
 
 #endif // EPVIEW_H

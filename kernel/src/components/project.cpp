@@ -6,7 +6,7 @@
 #include "kernel.h"
 #include "rapidxml.hpp"
 
-namespace kernel {
+namespace ep {
 
 Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
@@ -179,4 +179,4 @@ void Project::ParseActivity(Variant node)
   activities.pushBack(shared_pointer_cast<Activity>(c));
 }
 
-} // namespace kernel
+} // namespace ep

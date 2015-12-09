@@ -4,9 +4,9 @@
 
 #include "stream.h"
 
-namespace kernel
+namespace ep
 {
-PROTOTYPE_COMPONENT(MemStream);
+SHARED_CLASS(MemStream);
 SHARED_CLASS(Buffer);
 
 class MemStream : public Stream

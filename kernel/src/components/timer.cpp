@@ -2,7 +2,7 @@
 #include "components/datasource.h"
 #include "kernel.h"
 
-namespace kernel {
+namespace ep {
 
 Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams), pTimer(nullptr)
@@ -58,4 +58,4 @@ void Timer::TimerCallback(HalTimer *pTimer, void *pParam)
   pThis->pKernel->DispatchToMainThread(MakeDelegate(pThis, &Timer::MessageCallback));
 }
 
-} // namespace kernel
+} // namespace ep

@@ -66,7 +66,7 @@ epResult epComponent_SendMessage(epComponent *pComponent, epString target, epStr
 
 namespace ep {
 
-ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, const epVarArg *pArgs)
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs)
 {
   ptrdiff_t len = pComponent->GetUid().length + 1;
   if (!buffer.ptr)
@@ -77,6 +77,12 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, Component *pComponent, 
   return epStringifyTemplate(buffer, format, MutableString64(Concat, "@", pComponent->GetUid()), pArgs);
 }
 
+
+Component::Component(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams)
+  : uid(_uid), pType(_pType), pKernel(_pKernel)
+{
+  pImpl = CreateImpl(initParams);
+}
 
 bool Component::IsType(String type) const
 {
@@ -90,34 +96,10 @@ bool Component::IsType(String type) const
   return false;
 }
 
-void Component::LogInternal(int category, int level, String text, String componentUID) const
+void* Component::CreateImplInternal(String componentType, Variant::VarMap initParams)
 {
-  GetKernel().Log(category, level, text, componentUID);
+  return pKernel->CreateImpl(componentType, this, initParams);
 }
 
-epResult Component::ReceiveMessage(String message, String sender, const Variant &data)
-{
-  if (message.eqIC("set"))
-  {
-    Slice<Variant> arr = data.asArray();
-    SetProperty(arr[0].asString(), arr[1]);
-  }
-  else if (message.eqIC("get"))
-  {
-    if (!sender.empty())
-    {
-      char mem[1024];
-      Slice<char> buffer(mem, sizeof(mem));
-//      GetProperty(data, &buffer);
-//      SendMessage(sender, "val", buffer);
-    }
-  }
-  return epR_Success;
-}
-
-epResult Component::SendMessage(String target, String message, const Variant &data) const
-{
-  return pKernel->SendMessage(target, uid, message, data);
-}
 
 } // namespace ep

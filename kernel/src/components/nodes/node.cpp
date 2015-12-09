@@ -1,6 +1,6 @@
 #include "node.h"
 
-namespace kernel
+namespace ep
 {
 
 Array<const PropertyInfo> Node::GetProperties()
@@ -74,4 +74,4 @@ void Node::CalculateWorldMatrix(Double4x4 *pMatrix) const
   }
 }
 
-} // namespace kernel
+} // namespace ep

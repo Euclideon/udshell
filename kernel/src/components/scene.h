@@ -4,11 +4,12 @@
 
 #include "udRender.h"
 
-#include "component.h"
+#include "ep/cpp/component.h"
 #include "nodes/node.h"
 
 // TODO: Move this once the Scene Impl refactor is done.
 namespace ep {
+
   struct Bookmark
   {
     Double3 position;
@@ -28,16 +29,13 @@ namespace ep {
     pBM->position = v["position"].as<Double3>();
     pBM->ypr = v["orientation"].as<Double3>();
   }
-}
 
-namespace kernel
-{
 
 SHARED_CLASS(RenderScene);
 
-PROTOTYPE_COMPONENT(View);
-PROTOTYPE_COMPONENT(Scene);
-PROTOTYPE_COMPONENT(Camera);
+SHARED_CLASS(View);
+SHARED_CLASS(Scene);
+SHARED_CLASS(Camera);
 
 class Scene : public Component
 {

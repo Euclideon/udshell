@@ -4,6 +4,13 @@
 #include "ep/c/componentdesc.h"
 #include "ep/cpp/variant.h"
 #include "ep/cpp/delegate.h"
+#include "ep/cpp/event.h"
+
+// HACK: TODO: this shouldn't be here
+namespace kernel {
+  struct ComponentDesc;
+  class Kernel;
+}
 
 namespace ep {
 
@@ -67,14 +74,15 @@ struct ComponentDesc
 {
   typedef epResult(InitComponent)(Kernel*);
   typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+  typedef void *(CreateImplCallback)(Component *pInstance, Variant::VarMap initParams);
 
   ComponentInfo info;
 
   SharedString baseClass;
-  struct epComponentOverrides *pOverrides;
 
   InitComponent *pInit;
   CreateInstanceCallback *pCreateInstance;
+  CreateImplCallback *pCreateImpl;
 
   Array<const PropertyInfo> properties;
   Array<const MethodInfo> methods;
@@ -83,6 +91,30 @@ struct ComponentDesc
 
   // TODO: move this back into kernel, it shouldn't be here...
   const ComponentDesc *pSuperDesc;
+};
+
+
+// base class for pImpl types
+template <typename C, typename I>
+class BaseImpl : public I
+{
+public:
+  using Component = C;
+  using Interface = I;
+  using Super = BaseImpl<C, I>;
+
+  const kernel::ComponentDesc* GetDescriptor() const { return (const kernel::ComponentDesc*)pInstance->GetDescriptor(); }
+  kernel::Kernel* GetKernel() const { return (kernel::Kernel*)&pInstance->GetKernel(); }
+
+protected:
+  template<typename T, bool b> friend struct internal::Destroy;
+
+  BaseImpl(C *pInstance)
+    : pInstance(pInstance)
+  {}
+  virtual ~BaseImpl() {}
+
+  C *pInstance;
 };
 
 
@@ -113,6 +145,7 @@ public:                                                                         
   using Super = SuperType;                                                               \
   using This = Name;                                                                     \
   using Ref = SharedPtr<This>;                                                           \
+  using Impl = void;                                                                     \
   static SharedString ComponentID()                                                      \
   {                                                                                      \
     static SharedString id;                                                              \
@@ -129,6 +162,37 @@ public:                                                                         
     return { EP_APIVERSION, Version, ComponentID(), #Name, Description };                \
   }                                                                                      \
 private:
+
+// declare magic for a C++ component with a pImpl interface
+#define EP_DECLARE_COMPONENT_WITH_IMPL(Name, Interface, SuperType, Version, Description) \
+public:                                                                                  \
+  friend class ::ep::Kernel;                                                             \
+  friend class Name##Impl;                                                               \
+  using Super = SuperType;                                                               \
+  using This = Name;                                                                     \
+  using Ref = SharedPtr<This>;                                                           \
+  using Impl = BaseImpl<Name, Interface>;                                                \
+  static SharedString ComponentID()                                                      \
+  {                                                                                      \
+    static SharedString id;                                                              \
+    if (!id.ptr)                                                                         \
+    {                                                                                    \
+      char buf[sizeof(#Name)];                                                           \
+        for (size_t i = 0; i < sizeof(buf); ++i) buf[i] = (char)tolower(#Name[i]);       \
+      id = SharedString(buf, sizeof(buf)-1);                                             \
+    }                                                                                    \
+    return id;                                                                           \
+  }                                                                                      \
+  static ComponentInfo MakeDescriptor()                                                  \
+  {                                                                                      \
+    return { EP_APIVERSION, Version, ComponentID(), #Name, Description };                \
+  }                                                                                      \
+private:                                                                                 \
+  UniquePtr<Impl> pImpl = nullptr;                                                       \
+  UniquePtr<Impl> CreateImpl(Variant::VarMap initParams)                                 \
+  {                                                                                      \
+    return UniquePtr<Impl>((Impl*)CreateImplInternal(This::ComponentID(), initParams));  \
+  }
 
 
 // emit getter and setter magic

@@ -4,6 +4,7 @@
 
 #include "qmlbindings_qt.h"
 #include "signaltodelegate_qt.h"
+#include "componentdesc.h"
 
 namespace qt
 {
@@ -83,7 +84,7 @@ public:
 };
 
 
-void PopulateComponentDesc(kernel::Component *pComponent, QObject *pObject)
+void PopulateComponentDesc(Component *pComponent, QObject *pObject)
 {
   // TODO: add built-in properties, methods and events
 

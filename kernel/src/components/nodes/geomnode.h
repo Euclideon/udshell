@@ -4,12 +4,12 @@
 
 #include "node.h"
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(Model);
 
-PROTOTYPE_COMPONENT(GeomNode);
+SHARED_CLASS(GeomNode);
 
 class GeomNode : public Node
 {
@@ -29,6 +29,6 @@ protected:
   ModelRef spModel = nullptr;
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _GEOMNODE_H

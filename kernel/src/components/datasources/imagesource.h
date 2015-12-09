@@ -6,7 +6,7 @@
 #include "components/resources/array.h"
 #include "components/stream.h"
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(ImageSource);
@@ -36,6 +36,6 @@ protected:
   void Create(StreamRef spSource);
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _EP_IMAGESOURCE_H

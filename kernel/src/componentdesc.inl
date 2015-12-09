@@ -1,6 +1,5 @@
 
-namespace kernel
-{
+namespace kernel {
 
 inline Variant GetterShim::get(const ep::Component *pThis) const
 {

@@ -14,7 +14,7 @@
 
 #include <tuple>
 
-namespace kernel
+namespace ep
 {
 const Array<const String> GeomSource::extensions = {
   // mesh formats
@@ -329,7 +329,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       // add geom node to world node (we could collapse this if there is only one mesh...)
       spNode->AddChild(spGeomNode);
 
-      LogDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], (*pspMesh)->name);
+      LogDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], (*pspMesh)->GetName());
     }
     else
     {
@@ -354,4 +354,4 @@ epResult GeomSource::StaticInit(ep::Kernel *pKernel)
   return pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
 }
 
-} // namespace kernel
+} // namespace ep

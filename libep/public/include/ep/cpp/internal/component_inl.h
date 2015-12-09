@@ -23,14 +23,89 @@ inline void Component::SetName(SharedString _name)
   name = _name;
 }
 
+inline Variant Component::GetProperty(String property) const
+{
+  return pImpl->GetProperty(property);
+}
+inline void Component::SetProperty(String property, const Variant &value)
+{
+  pImpl->SetProperty(property, value);
+}
+
+inline Variant Component::CallMethod(String method, Slice<const Variant> args)
+{
+  return pImpl->CallMethod(method, args);
+}
+
+inline void Component::Subscribe(String eventName, const Variant::VarDelegate &delegate)
+{
+  pImpl->Subscribe(eventName, delegate);
+}
+template<typename ...Args>
+inline void Component::Subscribe(String eventName, const Delegate<void(Args...)> &d)
+{
+  typedef SharedPtr<internal::VarDelegateMemento<void(Args...)>> VarDelegateMementoRef;
+  Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
+}
+
+inline epResult Component::SendMessage(String target, String message, const Variant &data) const
+{
+  return pKernel->SendMessage(target, uid, message, data);
+}
+
+inline Variant Component::Save() const
+{
+  return pImpl->Save();
+}
+
 inline void* Component::GetUserData() const
 {
   return pUserData;
 }
 
-inline epResult Component::SendMessage(Component *pComponent, String message, const Variant &data) const
+inline void Component::AddDynamicProperty(const PropertyInfo &property)
 {
-  return SendMessage(MutableString128(Concat, "@", pComponent->uid), message, data);
+  pImpl->AddDynamicProperty(property);
+}
+inline void Component::AddDynamicMethod(const MethodInfo &method)
+{
+  pImpl->AddDynamicMethod(method);
+}
+inline void Component::AddDynamicEvent(const EventInfo &event)
+{
+  pImpl->AddDynamicEvent(event);
+}
+inline void Component::RemoveDynamicProperty(String _name)
+{
+  pImpl->RemoveDynamicProperty(_name);
+}
+inline void Component::RemoveDynamicMethod(String _name)
+{
+  pImpl->RemoveDynamicMethod(_name);
+}
+inline void Component::RemoveDynamicEvent(String _name)
+{
+  pImpl->RemoveDynamicEvent(_name);
+}
+
+inline epResult Component::SendMessage(const ComponentRef &target, String message, const Variant &data) const
+{
+  return SendMessage(MutableString128(Concat, "@", target->GetUid()), message, data);
+}
+
+inline void Component::Init(Variant::VarMap initParams)
+{
+  pImpl->Init(initParams);
+}
+
+inline epResult Component::InitComplete()
+{
+  return pImpl->InitComplete();
+}
+
+inline epResult Component::ReceiveMessage(String message, String sender, const Variant &data)
+{
+  return pImpl->ReceiveMessage(message, sender, data);
 }
 
 template<typename ...Args>
@@ -44,49 +119,49 @@ template<typename ...Args>
 inline void Component::LogError(String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    LogInternal(1<<0, 2, text, uid);
+    pKernel->Log(1<<0, 2, text, uid);
   else
-    LogInternal(1<<0, 2, MutableString128(Format, text, args...), uid);
+    pKernel->Log(1<<0, 2, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::LogWarning(int level, String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    LogInternal(1<<1, level, text, uid);
+    pKernel->Log(1<<1, level, text, uid);
   else
-    LogInternal(1<<1, level, MutableString128(Format, text, args...), uid);
+    pKernel->Log(1<<1, level, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::LogDebug(int level, String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    LogInternal(1<<2, level, text, uid);
+    pKernel->Log(1<<2, level, text, uid);
   else
-    LogInternal(1<<2, level, MutableString128(Format, text, args...), uid);
+    pKernel->Log(1<<2, level, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::LogInfo(int level, String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    LogInternal(1<<3, level, text, uid);
+    pKernel->Log(1<<3, level, text, uid);
   else
-    LogInternal(1<<3, level, MutableString128(Format, text, args...), uid);
+    pKernel->Log(1<<3, level, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::LogScript(String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    LogInternal(1<<4, 2, text, uid);
+    pKernel->Log(1<<4, 2, text, uid);
   else
-    LogInternal(1<<4, 2, MutableString128(Format, text, args...), uid);
+    pKernel->Log(1<<4, 2, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::LogTrace(String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    LogInternal(1<<5, 2, text, uid);
+    pKernel->Log(1<<5, 2, text, uid);
   else
-    LogInternal(1<<5, 2, MutableString128(Format, text, args...), uid);
+    pKernel->Log(1<<5, 2, MutableString128(Format, text, args...), uid);
 }
 
 } // namespace ep

@@ -2,11 +2,11 @@
 #ifndef EP_RESOURCE_MANAGER_H
 #define EP_RESOURCE_MANAGER_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 
-namespace kernel
+namespace ep
 {
-PROTOTYPE_COMPONENT(ResourceManager);
+SHARED_CLASS(ResourceManager);
 SHARED_CLASS(Resource);
 SHARED_CLASS(DataSource);
 
@@ -62,5 +62,5 @@ protected:
   AVLTree<String, ResourceRef> resources;
 };
 
-} //namespace kernel
+} //namespace ep
 #endif // EP_RESOURCE_MANAGER_H

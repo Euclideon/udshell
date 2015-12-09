@@ -11,7 +11,7 @@ using namespace ep;
 #define PLUGIN_VER 100
 
 // C component
-
+/* TODO: this has to be reworked since we switched the API to C++...
 static epComponentDesc s_desc;
 
 struct TestComponent
@@ -72,13 +72,13 @@ static epPropertyDesc s_prop = {
     pC->x = (int)epVariant_AsInt(*pValue);
   }
 };
-
+*/
 
 // C++ component
 
-class TestComponent2 : public IComponent
+class TestComponent2 : public Component
 {
-  EP_DECLARE_COMPONENT(TestComponent2, IComponent, 100, "Plugin Test!")
+  EP_DECLARE_COMPONENT(TestComponent2, Component, 100, "Plugin Test!")
 public:
 
   int GetX() const { return x; }
@@ -119,14 +119,15 @@ public:
   }
 
 protected:
-  TestComponent2(Component &baseComponent, Variant::VarMap initParams)
-    : IComponent(baseComponent, initParams) {}
+  TestComponent2(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams)
+    : Component(_pType, _pKernel, _uid, initParams) {}
 
   int x;
 };
 
 extern "C" bool epPluginAttach()
 {
+/*
   // C test
   s_desc.info.pluginVersion = PLUGIN_VER;
   s_desc.info.id = "plugtest";          // an id for this component
@@ -144,7 +145,7 @@ extern "C" bool epPluginAttach()
   s_desc.numStaticFuncs = 0;
 
   epKernel_RegisterComponentType(&s_desc);
-
+*/
   // C++ test
   Kernel::GetInstance()->RegisterComponentType<TestComponent2>();
 

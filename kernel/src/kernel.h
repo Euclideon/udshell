@@ -2,7 +2,7 @@
 #ifndef EPKERNEL_H
 #define EPKERNEL_H
 
-#include "components/component.h"
+#include "components/componentimpl.h"
 #include "components/lua.h"
 #include "components/view.h"
 #include "components/timer.h"
@@ -18,20 +18,21 @@ using namespace fastdelegate;
 struct udRenderEngine;
 struct epPluginInstance;
 
-namespace kernel {
+namespace ep {
 
 class LuaState;
 class Renderer;
 class StdCapture;
 
-SHARED_CLASS(View);
 SHARED_CLASS(UIComponent);
 SHARED_CLASS(Window);
 SHARED_CLASS(Logger);
 SHARED_CLASS(PluginManager);
-SHARED_CLASS(ResourceManager);
-SHARED_CLASS(CommandManager);
-SHARED_CLASS(Broadcaster);
+SHARED_CLASS(NativePluginLoader);
+
+}
+
+namespace kernel {
 
 class Kernel : public ep::Kernel
 {
@@ -48,9 +49,9 @@ public:
   void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
   // component registry
-  const ComponentDesc* RegisterComponentType(const ep::ComponentDesc &desc) override final;
-  template <typename ComponentType>
-  inline epResult RegisterComponentType() { return ep::Kernel::RegisterComponentType<ComponentType>(); }
+  const ep::ComponentDesc* RegisterComponentType(const ep::ComponentDesc &desc) override final;
+  template <typename ComponentType, typename Impl = void>
+  inline const ep::ComponentDesc* RegisterComponentType() { return ep::Kernel::RegisterComponentType<ComponentType, Impl>(); }
 
   const ep::ComponentDesc* GetComponentDesc(String id) override final;
 
@@ -84,29 +85,29 @@ public:
   template<typename ...Args> void LogTrace(String format, Args... args) const;
 
   // Functions for resource management
-  ResourceManagerRef GetResourceManager() const { return spResourceManager; }
+  ResourceManagerRef GetResourceManager() const override final { return spResourceManager; }
 
   epResult RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) override final;
-  DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams);
+  DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) override final;
 
   // stdio relaying functions
-  BroadcasterRef GetStdOutBroadcaster() const { return spStdOutBC; }
-  BroadcasterRef GetStdErrBroadcaster() const { return spStdErrBC; }
+  BroadcasterRef GetStdOutBroadcaster() const override final { return spStdOutBC; }
+  BroadcasterRef GetStdErrBroadcaster() const override final { return spStdErrBC; }
 
   // other functions
-  ViewRef GetFocusView() const { return spFocusView; }
-  ViewRef SetFocusView(ViewRef spView);
+  ViewRef GetFocusView() const override final { return spFocusView; }
+  ViewRef SetFocusView(ViewRef spView) override final;
 
-  Event<double> UpdatePulse;
-
-  CommandManagerRef GetCommandManager() const { return spCommandManager; }
+  CommandManagerRef GetCommandManager() const override final { return spCommandManager; }
 
   virtual epResult RunMainLoop() { return epR_Success; }
   epResult Terminate();
 
+  epPluginInstance *GetPluginInterface();
+
 protected:
   friend class Component;
-  friend class NativePluginLoader;
+  friend class ep::ComponentImpl;
 
   Kernel();
 
@@ -165,6 +166,8 @@ protected:
   static Kernel *CreateInstanceInternal(Slice<const KeyValuePair> commandLine);
   virtual epResult InitInternal() = 0;
 
+  void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) override final;
+
   epResult InitComponents();
   epResult InitRender();
   epResult DeinitRender();
@@ -174,8 +177,6 @@ protected:
   epResult ReceiveMessage(String sender, String message, const Variant &data);
 
   int SendMessage(LuaState L);
-
-  epPluginInstance *GetPluginInterface();
 
   void Update();
   void StreamerUpdate();

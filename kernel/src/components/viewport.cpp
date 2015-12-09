@@ -1,6 +1,6 @@
 #include "viewport.h"
 
-namespace kernel
+namespace ep
 {
 
 // ---------------------------------------------------------------------------------------
@@ -17,4 +17,4 @@ Viewport::~Viewport()
   DestroyInternal();
 }
 
-} // namespace kernel
+} // namespace ep

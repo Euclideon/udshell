@@ -4,9 +4,9 @@
 
 #include "components/resources/resource.h"
 
-namespace kernel
+namespace ep
 {
-PROTOTYPE_COMPONENT(Menu);
+SHARED_CLASS(Menu);
 
 class Menu : public Resource
 {
@@ -59,6 +59,6 @@ protected:
   }
 };
 
-} // End namespace kernel
+} // End namespace ep
 
 #endif // _EP_MENU_H
