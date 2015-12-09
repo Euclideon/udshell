@@ -303,47 +303,71 @@ inline size_t Slice<T>::findLast(Slice<U> s) const
 template<typename T>
 inline Slice<T> Slice<T>::getLeftAtFirst(const typename Slice<T>::ET &c, bool bInclusive) const
 {
-  return slice(0, findFirst(c) + (bInclusive ? 1 : 0));
+  size_t offset = findFirst(c);
+  if (offset != this->length)
+    offset += bInclusive ? 1 : 0;
+  return Slice<T>(this->ptr, offset);
 }
 template<typename T>
 inline Slice<T> Slice<T>::getLeftAtLast(const typename Slice<T>::ET &c, bool bInclusive) const
 {
-  return slice(0, findLast(c) + (bInclusive ? 1 : 0));
+  size_t offset = findLast(c);
+  if (offset != this->length)
+    offset += bInclusive ? 1 : 0;
+  return Slice<T>(this->ptr, offset);
 }
 template<typename T>
 inline Slice<T> Slice<T>::getRightAtFirst(const typename Slice<T>::ET &c, bool bInclusive) const
 {
-  return slice(findFirst(c) + (bInclusive ? 0 : 1), length);
+  size_t offset = findFirst(c);
+  if (offset != this->length)
+    offset += bInclusive ? 0 : 1;
+  return Slice<T>(this->ptr + offset, length - offset);
 }
 template<typename T>
 inline Slice<T> Slice<T>::getRightAtLast(const typename Slice<T>::ET &c, bool bInclusive) const
 {
-  return slice(findLast(c) + (bInclusive ? 0 : 1), length);
+  size_t offset = findLast(c);
+  if (offset != this->length)
+    offset += bInclusive ? 0 : 1;
+  return Slice<T>(this->ptr + offset, length - offset);
 }
 
 template<typename T>
 template<typename U>
 inline Slice<T> Slice<T>::getLeftAtFirst(Slice<U> s, bool bInclusive) const
 {
-  return slice(0, findFirst(s) + (bInclusive ? s.length : 0));
+  size_t offset = findFirst(s);
+  if (offset != this->length)
+    offset += bInclusive ? s.length : 0;
+  return Slice<T>(this->ptr, offset);
 }
 template<typename T>
 template<typename U>
 inline Slice<T> Slice<T>::getLeftAtLast(Slice<U> s, bool bInclusive) const
 {
-  return slice(0, findLast(s) + (bInclusive ? s.length : 0));
+  size_t offset = findLast(s);
+  if (offset != this->length)
+    offset += bInclusive ? s.length : 0;
+  return Slice<T>(this->ptr, offset);
 }
 template<typename T>
 template<typename U>
 inline Slice<T> Slice<T>::getRightAtFirst(Slice<U> s, bool bInclusive) const
 {
-  return slice(findFirst(s) + (bInclusive ? 0 : s.length), length);
+  size_t offset = findFirst(s);
+  if (offset != this->length)
+    offset += bInclusive ? 0 : s.length;
+  return Slice<T>(this->ptr + offset, length - offset);
 }
 template<typename T>
 template<typename U>
 inline Slice<T> Slice<T>::getRightAtLast(Slice<U> s, bool bInclusive) const
 {
-  return slice(findLast(s) + (bInclusive ? 0 : s.length), length);
+  size_t offset = findLast(s);
+  if (offset != this->length)
+    offset += bInclusive ? 0 : s.length;
+  return Slice<T>(this->ptr + offset, length - offset);
 }
 
 template<typename T>

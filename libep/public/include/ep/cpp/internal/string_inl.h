@@ -386,22 +386,34 @@ inline size_t BaseString<C>::findLastIC(BaseString<C> s) const
 template<typename C>
 inline BaseString<C> BaseString<C>::getLeftAtFirstIC(BaseString<C> s, bool bInclusive) const
 {
-  return slice(0, findFirstIC(s) + (bInclusive ? s.length : 0));
+  size_t offset = findFirstIC(s);
+  if (offset != this->length)
+    offset += bInclusive ? s.length : 0;
+  return BaseString<C>(this->ptr, offset);
 }
 template<typename C>
 inline BaseString<C> BaseString<C>::getLeftAtLastIC(BaseString<C> s, bool bInclusive) const
 {
-  return slice(0, findLastIC(s) + (bInclusive ? s.length : 0));
+  size_t offset = findLastIC(s);
+  if (offset != this->length)
+    offset += bInclusive ? s.length : 0;
+  return BaseString<C>(this->ptr, offset);
 }
 template<typename C>
 inline BaseString<C> BaseString<C>::getRightAtFirstIC(BaseString<C> s, bool bInclusive) const
 {
-  return slice(findFirstIC(s) + (bInclusive ? 0 : s.length), this->length);
+  size_t offset = findFirstIC(s);
+  if (offset != this->length)
+    offset += bInclusive ? 0 : s.length;
+  return BaseString<C>(this->ptr + offset, this->length - offset);
 }
 template<typename C>
 inline BaseString<C> BaseString<C>::getRightAtLastIC(BaseString<C> s, bool bInclusive) const
 {
-  return slice(findLastIC(s) + (bInclusive ? 0 : s.length), this->length);
+  size_t offset = findLastIC(s);
+  if (offset != this->length)
+    offset += bInclusive ? 0 : s.length;
+  return BaseString<C>(this->ptr + offset, this->length - offset);
 }
 
 template<typename C>
