@@ -819,6 +819,7 @@ namespace internal {
   size_t getLength(Slice<epVarArg> args);
   Slice<char> concatenate(Slice<char> buffer, Slice<epVarArg> args);
   Slice<char> format(String format, Slice<char> buffer, Slice<epVarArg> args);
+  size_t urlDecode(Slice<char> outSlice, String inStr);
 
 } // namespace internal
 
@@ -877,6 +878,14 @@ inline void MutableString<Size>::formatInternal(String format, Slice<epVarArg> a
   this->ptr[len] = 0;
 }
 
+template<size_t Size>
+inline MutableString<Size>& MutableString<Size>::urlDecode(String s)
+{
+  this->reserve(s.length);
+  this->length = internal::urlDecode(Slice<char>(this->ptr, s.length), s);
+
+  return *this;
+}
 
 // SharedString
 

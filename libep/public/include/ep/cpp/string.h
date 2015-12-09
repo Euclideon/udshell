@@ -189,6 +189,8 @@ struct MutableString : public Array<char, Size>
 
   uint32_t hash(uint32_t hash = 0) const                                              { return ((String*)this)->hash(hash); }
 
+  MutableString& urlDecode(String s);
+
 private:
   void appendInternal(Slice<epVarArg> args);
   void formatInternal(String format, Slice<epVarArg> args);
