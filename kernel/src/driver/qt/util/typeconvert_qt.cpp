@@ -162,17 +162,17 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
 
     case Variant::Type::Array:
     {
-      QVariantList list;
+      QVariantList *list = new QVariantList(); // TODO remove dynamic allocation once we switch to VS2015 Qt libs
       Slice<Variant> arr = variant.asArray();
-      list.reserve((int)arr.length);
+      list->reserve((int)arr.length);
       for (auto &v : arr)
       {
         QVariant t;
         epFromVariant(v, &t);
-        list.push_back(t);
+        list->push_back(t);
       }
       // TODO: what?! no move assignment! look into this...
-      pVariant->setValue(list);
+      pVariant->setValue(*list);
       break;
     }
 

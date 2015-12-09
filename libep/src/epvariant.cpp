@@ -4,6 +4,9 @@
 
 extern "C" {
 
+// TODO: remove me!!
+static Variant varNone = Variant();
+
 void epVariant_Release(epVariant v)
 {
   // Note: Variant's destructor will clean our instance up
@@ -650,7 +653,7 @@ size_t Variant::assocArraySeriesLen() const
   return length;
 }
 
-Variant Variant::operator[](size_t j) const
+Variant& Variant::operator[](size_t j) const
 {
   if (is(Type::Array))
   {
@@ -662,9 +665,9 @@ Variant Variant::operator[](size_t j) const
     EPASSERT(j < length, "Index out of range!");
     return *((VarMap&)p).Get(j + (aa->Get(0) ? 0 : 1));
   }
-  return Variant();
+  return varNone;
 }
-Variant Variant::operator[](String key) const
+Variant& Variant::operator[](String key) const
 {
   if (is(Type::AssocArray))
   {
@@ -672,7 +675,14 @@ Variant Variant::operator[](String key) const
     if (pV)
       return *pV;
   }
-  return Variant();
+  return varNone;
+}
+
+Variant* Variant::getItem(String key) const
+{
+  if (is(Type::AssocArray))
+    return aa->Get(key);
+  return nullptr;
 }
 
 } // namespace ep

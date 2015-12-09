@@ -50,6 +50,22 @@ public:
       --ptr->rc;
   }
 
+  SharedMap& operator =(const SharedMap &rh)
+  {
+    this->~SharedMap();
+    ptr = rh.ptr;
+    if (ptr)
+      ++ptr->rc;
+    return *this;
+  }
+  SharedMap& operator =(SharedMap &&rh)
+  {
+    this->~SharedMap();
+    ptr = rh.ptr;
+    rh.ptr = nullptr;
+    return *this;
+  }
+
   size_t Size() const { return ptr ? ptr->tree.Size() : 0; }
 
   bool Empty() const { return ptr ? ptr->tree.Empty() : true; }

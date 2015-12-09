@@ -3,6 +3,7 @@ import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 import udKernel 0.1
+import "qrc:/qml/epcontrols" 0.1
 
 Rectangle {
   id: topLevel
@@ -10,6 +11,9 @@ Rectangle {
   color: "#444"
 
   property var uiconsole
+  property var menucomp
+  property var toolbarcomp
+  property var commandmanager
   property var simplecamera
   property var view
   property var activityidlist: []
@@ -21,6 +25,19 @@ Rectangle {
   onUiconsoleChanged: {
     var uiconsoleqq = uiconsole.get("uihandle");
     uiconsoleqq.parent = consolePanel;
+  }
+
+  onMenucompChanged: {
+    menuBar.menucomp = menucomp;
+  }
+
+  onToolbarcompChanged: {
+    toolBar.toolbarcomp = toolbarcomp;
+  }
+
+  onCommandmanagerChanged: {
+    menuBar.commandmanager = commandmanager;
+    toolBar.commandmanager = commandmanager;
   }
 
   onParentChanged: {
@@ -86,56 +103,23 @@ Rectangle {
     ui.get("uihandle").parent = tab;
   }
 
-  Binding {
-    property: "parent"
-    target: menuBar ? menuBar.__contentItem : null
-    when: menuBar && !menuBar.__isNative
-    value: menuBarWrapper
-  }
-  Binding { target: menuBar; property: "__parentWindow"; value: topLevel.parent }
-  Keys.forwardTo: menuBar ? [menuBar.__contentItem] : []
-
   ColumnLayout {
     id: topLevelColumn
     anchors.fill: parent
     spacing: 0
 
-    Item {
+    EPMenuBar {
+      id: menuBar
       Layout.fillWidth: true
-      Layout.preferredHeight: menuBar.__contentItem.height
-      id: menuBarWrapper
-      MenuBar {
-        id: menuBar
-        style: menuBarStyle
-
-        Menu {
-          title: "Window"
-          MenuItem {
-            text: "SubMenu3"
-            shortcut: "Ctrl+s"
-          }
-          MenuItem {
-            text: "SubMenu2"
-            shortcut: "Ctrl+p"
-          }
-          MenuItem {
-            text: "Preferences"
-            shortcut: "Ctrl+,"
-          }
-        }
-      }
+      window: topLevel.parent
     }
 
     Loader { sourceComponent: separator; Layout.fillWidth: true }
 
-    ToolBar {
+    EPToolBar {
       id: toolBar
       Layout.fillWidth: true
-      RowLayout {
-        height: 30
-        width: parent.Layout.preferredWidth
-      }
-      style: toolBarStyle
+      //Layout.preferredHeight: 40
     }
 
     Loader { sourceComponent: separator; Layout.fillWidth: true }
@@ -283,28 +267,6 @@ Rectangle {
           }
         }
         padding { left: 7; right: 7; top: 4; bottom: 4 }
-      }
-    }
-
-    Component {
-      id: menuBarStyle
-      MenuBarStyle {
-        background: Rectangle {
-          color: "#444"
-        }
-        itemDelegate: Rectangle {  // the menus
-          implicitWidth: menuBarLabel.contentWidth * 1.4
-          implicitHeight: menuBarLabel.contentHeight * 1.4
-          color: styleData.selected || styleData.open ? "red" : "transparent"
-          Label {
-            id: menuBarLabel
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            color: styleData.selected  || styleData.open ? "white" : "white"
-            font.wordSpacing: 10
-            text: styleData.text
-          }
-        }
       }
     }
 

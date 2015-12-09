@@ -18,14 +18,22 @@ public:
   void FormatXml(Variant root);
   Variant ParseJson() const;
 
+  static Variant XMLNodeToMap(Variant node);
+  static Variant MapToXMLNode(Variant map);
+
   void CopyBuffer(String text) { Buffer::CopyBuffer(text); }
+
+  // TODO: move this somewhere else
+  static uint32_t GetLineNumberFromByteIndex(String buffer, size_t index);
 
 protected:
   Text(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Buffer(pType, pKernel, uid, initParams) {}
   virtual ~Text() {}
 
-  void FormatXmlElement(StreamRef spOut, KeyValuePair element, int depth);
+  void FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth);
+
+  static Variant KVPToXMLNode(KeyValuePair kvp);
 
   static Array<const MethodInfo> GetMethods()
   {

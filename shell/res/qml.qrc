@@ -2,5 +2,16 @@
   <qresource prefix="/">
     <file>qml/window.qml</file>
     <file>qml/main.qml</file>
+    <file>menus.xml</file>
+    <file>toolbar.xml</file>
+    <file>qml/epcontrols/epmenubar.qml</file>
+    <file>qml/epcontrols/epmenu.qml</file>
+    <file>qml/epcontrols/eptoolbar.qml</file>
+    <file>qml/epcontrols/qmldir</file>
+
+    <file>images/icon_new_32.png</file>
+    <file>images/icon_open_32.png</file>
+    <file>images/icon_save_32.png</file>
+    <file>images/icon_save_as_32.png</file>
   </qresource>
 </RCC>

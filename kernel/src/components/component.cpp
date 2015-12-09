@@ -14,12 +14,15 @@ namespace kernel
 
 void Component::Init(Variant::VarMap initParams)
 {
+  // TODO uncomment this when we've thought it through
+  /*
   for (auto kv : initParams)
   {
     const PropertyDesc *pDesc = GetPropertyDesc(kv.key.asString());
     if (pDesc && pDesc->setter)
       pDesc->setter.set(this, kv.value);
   }
+  */
 
 /*
   // TODO: rethink this whole thing!!

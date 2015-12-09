@@ -1,0 +1,12 @@
+<root>
+  <button name="New Project" description="Create a new project file" image="qrc:/images/icon_new_32.png" />
+  <button name="Open Project"  image="qrc:/images/icon_open_32.png" />
+  <button name="Save Project" image="qrc:/images/icon_save_32.png" />
+  <button name="SaveAs Project" image="qrc:/images/icon_save_as_32.png" />
+  <button name="Close Project" image="qrc:/images/icon_open_32.png" />
+  <separator name="separator0" />
+  <button name="Dropdown Button">
+    <item name="SubItem1" command="showhideconsolewindow" image="qrc:/images/icon_new_32.png" />
+    <item name="SubItem2" command="showhideconsolewindow" image="qrc:/images/icon_save_32.png" />
+  </button>
+</root>

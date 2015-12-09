@@ -16,7 +16,7 @@ SharedString CommandManager::GetShortcut(String id) const
     pCommand->shortcut;
 }
 
-bool CommandManager::SetShortcut(String id, String shortcut)
+bool CommandManager::SetShortcut(String id, SharedString shortcut)
 {
   Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)
@@ -30,7 +30,7 @@ bool CommandManager::SetShortcut(String id, String shortcut)
   return true;
 }
 
-bool CommandManager::RegisterCommand(String id, Delegate<void()> func, String script, String shortcut, bool bFailIfExists)
+bool CommandManager::RegisterCommand(String id, Delegate<void()> func, SharedString script, SharedString shortcut, bool bFailIfExists)
 {
   if (bFailIfExists && commandRegistry.Get(id))
   {
@@ -59,6 +59,7 @@ bool CommandManager::RegisterCommand(String id, Delegate<void()> func, String sc
   return true;
 }
 
+// TODO: remove this; slice/array should have filtering functions instead
 String CommandManager::StripWhitespace(Slice<char> output, String input)
 {
   size_t len = 0;
@@ -68,6 +69,24 @@ String CommandManager::StripWhitespace(Slice<char> output, String input)
       output[len++] = input[i];
   }
   return output.slice(0, len);
+}
+
+bool CommandManager::RunCommand(String id)
+{
+  for (auto comm : commandRegistry)
+  {
+    if (!id.cmpIC(comm.key))
+    {
+      if (comm.value.func)
+        comm.value.func();
+      else if (!comm.value.script.empty())
+        pKernel->Exec(comm.value.script);
+
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void CommandManager::UnregisterCommand(String id)
@@ -122,5 +141,7 @@ bool CommandManager::SetScript(String id, String script)
 
   return true;
 }
+
+
 
 } // namespace kernel

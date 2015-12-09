@@ -48,14 +48,14 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   }
   catch (parse_error e)
   {
-    LogError("Unable to parse project file: {0} on line {1} : {2}", srcString, GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
+    LogError("Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
     throw epR_Failure;
   }
 
-  Variant::VarMap kvps = rootElements.asAssocArray();
-  Variant *pProject = kvps.Get("project");
-  if (pProject)
-    ParseProject(*pProject);
+  Variant::VarMap projectNode = rootElements.asAssocArray();
+  Variant *pName = projectNode.Get("name");
+  if (pName && pName->is(Variant::Type::String) && pName->asString().eq("project")) // TODO: I think we can make these comparisons better than this
+    ParseProject(projectNode);
   else
   {
     LogError("Invalid project file \"{0}\" -- Missing <project> element", srcString);
@@ -68,11 +68,15 @@ void Project::SaveProject()
   auto spXMLBuffer = GetKernel().CreateComponent<Text>();
   spXMLBuffer->Reserve(10240);
 
-  Array<KeyValuePair> projectValues;
-  projectValues.pushBack(KeyValuePair(String("activities"), SaveActivities()));
-  Array<KeyValuePair> rootValues;
-  rootValues.pushBack(KeyValuePair(String("project"), projectValues));
-  spXMLBuffer->FormatXml(rootValues);
+  Variant::VarMap projectNode;
+  Array<Variant> children;
+
+  projectNode.Insert("name", "project");
+  children.pushBack(SaveActivities());
+
+  projectNode.Insert("children", children);
+
+  spXMLBuffer->FormatXml(projectNode);
 
   Slice<const void> buffer = spXMLBuffer->MapForRead();
   if (buffer.empty())
@@ -97,63 +101,77 @@ void Project::SaveProject()
 
 Variant Project::SaveActivities()
 {
-  Array<KeyValuePair> values;
+  Variant::VarMap activitiesNode;
+  Array<Variant> children;
 
-  for(ActivityRef activity : activities)
-    values.pushBack(KeyValuePair(activity->GetType(), activity->Save()));
+  for (ActivityRef activity : activities)
+  {
+    Variant::VarMap node = Text::MapToXMLNode(activity->Save()).asAssocArray();
+    node.Insert("name", activity->GetType());
+    children.pushBack(node);
+  }
 
-  return values;
+  activitiesNode.Insert("name", "activities");
+  activitiesNode.Insert("children", children);
+
+  return activitiesNode;
 }
 
-void Project::ParseProject(Variant values)
+void Project::ParseProject(Variant node)
 {
-  Variant::VarMap kvps = values.asAssocArray();
-  if (kvps.Empty())
-    return;
-
-  for (auto kvp : kvps)
+  Variant::VarMap projectNode = node.asAssocArray();
+  Variant *pChildren = projectNode.Get("children");
+  if (pChildren && pChildren->is(Variant::Type::Array))
   {
-    if (kvp.key.asString().eq("activities"))
-      ParseActivities(kvp.value);
+    Array<Variant> children = pChildren->asArray();
+    for (auto child : children)
+    {
+      if (child.is(Variant::Type::AssocArray))
+      {
+        Variant *pName = child.asAssocArray().Get("name");
+        if(pName && pName->is(Variant::Type::String) && pName->asString().eq("activities"))
+          ParseActivities(child);
+      }
+    }
   }
 }
 
-void Project::ParseActivities(Variant values)
+void Project::ParseActivities(Variant node)
 {
-  Variant::VarMap kvps = values.asAssocArray();
-  if (kvps.Empty())
-    return;
-
-  for (auto kvp : kvps)
-    ParseActivity(kvp.key.asString(), kvp.value);
+  Variant::VarMap projectNode = node.asAssocArray();
+  Variant *pChildren = projectNode.Get("children");
+  if (pChildren && pChildren->is(Variant::Type::Array))
+  {
+    Array<Variant> children = pChildren->asArray();
+    for (auto child : children)
+    {
+      if (child.is(Variant::Type::AssocArray))
+        ParseActivity(child);
+    }
+  }
 }
 
-void Project::ParseActivity(String type, Variant values)
+void Project::ParseActivity(Variant node)
 {
-  Variant::VarMap kvps = values.asAssocArray();
+  Variant::VarMap initParams;
+  Variant::VarMap activityNode = node.asAssocArray();
+
+  Variant *pName = activityNode.Get("name");
+  if (!pName || !pName->is(Variant::Type::String))
+    return;
+
+  Variant vParams = Text::XMLNodeToMap(node);
+  if (vParams.is(Variant::Type::AssocArray))
+    initParams = vParams.asAssocArray();
 
   ep::ComponentRef c = nullptr;
-  epResult r = pKernel->CreateComponent(type, Variant::VarMap(kvps), &c);
+  epResult r = pKernel->CreateComponent(pName->asString(), initParams, &c);
   if (r != epR_Success)
   {
-    LogWarning(1, "Unable to load Activity from project file \"{0}\" -- Activity component \"{1}\" does not exist", srcString, type);
+    LogWarning(1, "Unable to load Activity from project file \"{0}\" -- Activity component \"{1}\" does not exist", srcString, pName->asString());
     return;
   }
   activities.pushBack(shared_pointer_cast<Activity>(c));
-}
-
-
-uint32_t Project::GetLineNumberFromByteIndex(Slice<char> buffer, size_t index) const
-{
-  int lineNumber = 0;
-
-  for (size_t i = 0; i < buffer.length && i <= index; i++)
-  {
-    if (buffer[i] == '\n')
-      lineNumber++;
-  }
-
-  return lineNumber;
 }
 
 } // namespace kernel

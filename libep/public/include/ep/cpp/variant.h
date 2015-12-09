@@ -125,8 +125,9 @@ public:
   size_t arrayLen() const;
   size_t assocArraySeriesLen() const;
 
-  Variant operator[](size_t i) const;
-  Variant operator[](String key) const;
+  Variant& operator[](size_t i) const;
+  Variant& operator[](String key) const;
+  Variant* getItem(String key) const;
 
   // TODO: these shouldn't be part of the public API!
   void luaPush(kernel::LuaState &l) const;

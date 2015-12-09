@@ -17,14 +17,14 @@ void Camera::GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const
 
 Variant Camera::Save() const
 {
-  Array<KeyValuePair> params;
+  Variant::VarMap params;
 
-  params.pushBack(KeyValuePair("matrix", matrix));
+  params.Insert(KeyValuePair("matrix", matrix));
   if (bOrtho)
-    params.pushBack(KeyValuePair("ortho", orthoHeight));
+    params.Insert(KeyValuePair("ortho", orthoHeight));
   else
-    params.pushBack(KeyValuePair("perspective", fovY));
-  params.pushBack(KeyValuePair("depthplanes", Array<double, 2>({ zNear, zFar })));
+    params.Insert(KeyValuePair("perspective", fovY));
+  params.Insert(KeyValuePair("depthplanes", Array<double, 2>({ zNear, zFar })));
 
   return Variant(std::move(params));
 }
