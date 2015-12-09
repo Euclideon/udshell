@@ -197,7 +197,7 @@ void SaveProjectAs(String filePath)
 
 void Deinit(String sender, String message, const Variant &data)
 {
-  SaveProject(); // Uncomment this if you want to dump the state of the Activities into a project file on program close
+  //SaveProject(); // Uncomment this if you want to dump the state of the Activities into a project file on program close
 
   spActiveActivity = nullptr;
   spMainWindow = nullptr;
@@ -265,11 +265,15 @@ void Init(String sender, String message, const Variant &data)
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 
   // Set ui components
-  spTopLevelUI->SetProperty("simplecamera", pKernel->FindComponent("simplecamera0"));
-  spTopLevelUI->SetProperty("view", pKernel->FindComponent("view0"));
+  //spTopLevelUI->SetProperty("simplecamera", pKernel->FindComponent("simplecamera0"));
+  //spTopLevelUI->SetProperty("view", pKernel->FindComponent("view0"));
 
   if (!projFilePath.empty())
     OpenProject(projFilePath);
+#ifdef _DEBUG
+  else
+    OpenProject("testproj.epproj");
+#endif
 
   /*
   // Hardcode an example Activity in for testing purposes
