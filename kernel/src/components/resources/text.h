@@ -23,6 +23,7 @@ public:
 
   void CopyBuffer(String text) { Buffer::CopyBuffer(text); }
 
+  // TODO: move this somewhere else
   static uint32_t GetLineNumberFromByteIndex(String buffer, size_t index);
 
 protected:

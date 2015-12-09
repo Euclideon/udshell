@@ -54,7 +54,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
 
   Variant::VarMap projectNode = rootElements.asAssocArray();
   Variant *pName = projectNode.Get("name");
-  if (pName && pName->is(Variant::Type::String) && pName->asString().eq("project"))
+  if (pName && pName->is(Variant::Type::String) && pName->asString().eq("project")) // TODO: I think we can make these comparisons better than this
     ParseProject(projectNode);
   else
   {

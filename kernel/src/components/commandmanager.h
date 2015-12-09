@@ -15,14 +15,14 @@ class CommandManager : public Component
   EP_DECLARE_COMPONENT(CommandManager, Component, EPKERNEL_PLUGINVERSION, "Registers commands accessed by string id and associated with a function or script and an optional shortcut")
 public:
 
-  bool RegisterCommand(String id, Delegate<void()> func, String script, String shortcut = nullptr, bool bFailIfExists = false);
+  bool RegisterCommand(String id, Delegate<void()> func, SharedString script, SharedString shortcut = nullptr, bool bFailIfExists = false);
   void UnregisterCommand(String id);
   bool HandleShortcutEvent(String shortcut);
   bool RunCommand(String id);
   bool SetFunction(String id, Delegate<void()> func);
   bool SetScript(String id, String script);
-  String GetShortcut(String id) const;
-  bool SetShortcut(String id, String shortcut);
+  SharedString GetShortcut(String id) const;
+  bool SetShortcut(String id, SharedString shortcut);
 
 protected:
   CommandManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);

@@ -7,7 +7,7 @@ CommandManager::CommandManager(const ComponentDesc *pType, Kernel *pKernel, Shar
   : Component(pType, pKernel, uid, initParams)
 {}
 
-String CommandManager::GetShortcut(String id) const
+SharedString CommandManager::GetShortcut(String id) const
 {
   const Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)
@@ -16,7 +16,7 @@ String CommandManager::GetShortcut(String id) const
     pCommand->shortcut;
 }
 
-bool CommandManager::SetShortcut(String id, String shortcut)
+bool CommandManager::SetShortcut(String id, SharedString shortcut)
 {
   Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)
@@ -30,7 +30,7 @@ bool CommandManager::SetShortcut(String id, String shortcut)
   return true;
 }
 
-bool CommandManager::RegisterCommand(String id, Delegate<void()> func, String script, String shortcut, bool bFailIfExists)
+bool CommandManager::RegisterCommand(String id, Delegate<void()> func, SharedString script, SharedString shortcut, bool bFailIfExists)
 {
   if (bFailIfExists && commandRegistry.Get(id))
   {
@@ -59,6 +59,7 @@ bool CommandManager::RegisterCommand(String id, Delegate<void()> func, String sc
   return true;
 }
 
+// TODO: remove this; slice/array should have filtering functions instead
 String CommandManager::StripWhitespace(Slice<char> output, String input)
 {
   size_t len = 0;

@@ -667,7 +667,6 @@ Variant& Variant::operator[](size_t j) const
   }
   return varNone;
 }
-
 Variant& Variant::operator[](String key) const
 {
   if (is(Type::AssocArray))
