@@ -536,7 +536,7 @@ int LuaState::componentIndex(lua_State* L)
   const MethodDesc *pMethod = spC->GetMethodDesc(field);
   if (pMethod)
   {
-    lua_pushlightuserdata(L, (void*)pMethod->pMethod);
+    lua_pushlightuserdata(L, (void*)&pMethod->method);
     lua_pushcclosure(L, &method, 1);
     return 1;
   }
