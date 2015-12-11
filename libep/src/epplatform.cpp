@@ -49,7 +49,7 @@ void epDebugPrintf(const char *format, ...)
   char *pBuffer = (char*)alloca(len + 1);
   vsnprintf_s(pBuffer, len, len, format, args);
 #else
-  size_t len = vsprintf(nullptr, format, args) + 1;
+  size_t len = vsnprintf(nullptr, 0, format, args) + 1;
   char *pBuffer = (char*)alloca(len + 1);
   vsnprintf(pBuffer, len, format, args);
 #endif
