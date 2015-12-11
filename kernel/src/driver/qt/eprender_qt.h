@@ -13,7 +13,6 @@
 struct epQtGLContext
 {
   QOpenGLFunctions_2_0 *pFunc;
-  QOpenGLDebugLogger *pDebugger;
 };
 
 extern epQtGLContext s_QtGLContext;

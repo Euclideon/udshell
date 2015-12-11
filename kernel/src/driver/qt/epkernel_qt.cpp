@@ -3,7 +3,6 @@
 #if EPWINDOW_DRIVER == EPDRIVER_QT
 
 #include <QSemaphore>
-#include <QQuickWindow>
 
 #include "epkernel_qt.h"
 
@@ -58,6 +57,7 @@ QtKernel::QtKernel(Slice<const KeyValuePair> commandLine)
   , pApplication(nullptr)
   , pQmlEngine(nullptr)
   , pMainThreadContext(nullptr)
+  , pGLDebugLogger(nullptr)
   , mainSurfaceFormat(QSurfaceFormat::defaultFormat())
   , pTopLevelWindow(nullptr)
   , mainThreadId(QThread::currentThreadId())
@@ -83,6 +83,7 @@ QtKernel::~QtKernel()
     LogError("Error cleaning up renderer");
   }
 
+  delete pGLDebugLogger;
   delete pTopLevelWindow;
   delete pMainThreadContext;
   delete pQmlEngine;
@@ -95,7 +96,7 @@ epResult QtKernel::InitInternal()
 {
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   EPASSERT(argc >= 1, "argc must contain at least 1");
-  EPASSERT(argv.length == argc, "argv length should match argc");
+  EPASSERT(argv.length == (size_t)argc, "argv length should match argc");
 
   LogTrace("QtKernel::InitInternal()");
   LogInfo(2, "Initialising udShell...");
@@ -132,7 +133,7 @@ epResult QtKernel::InitInternal()
   QQmlComponent component(pQmlEngine, QUrl("qrc:/kernel/splashscreen.qml"));
   QObject *object = component.create();
   pTopLevelWindow = qobject_cast<QQuickWindow*>(object);
-  if (!pTopLevelWindow)
+  if (pTopLevelWindow.isNull())
   {
     // TODO: better error information/handling
     LogError("Error creating Splash Screen");
@@ -143,7 +144,7 @@ epResult QtKernel::InitInternal()
 
   // defer the heavier init stuff and app specific init to after Qt hits the event loop
   // we'll hook into the splash screen to do this
-  QObject::connect(pTopLevelWindow, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender, Qt::DirectConnection);
+  QObject::connect(pTopLevelWindow.data(), &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender, Qt::DirectConnection);
 
   return epR_Success;
 }
@@ -176,12 +177,12 @@ epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
 {
   LogTrace("QtKernel::RegisterWindow()");
 
-  // TODO: support adding multiple windows
+  // TODO: support adding multiple windows - calling this twice is currently a really bad idea
 
-  if (pTopLevelWindow)
+  if (!pTopLevelWindow.isNull())
   {
     // unhook the current top level window
-    QObject::disconnect(pTopLevelWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated);
+    QObject::disconnect(pTopLevelWindow.data(), &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated);
     pTopLevelWindow->hide();
     delete pTopLevelWindow;
   }
@@ -191,7 +192,7 @@ epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
   pTopLevelWindow = pWindow;
 
   // Hook up window signals
-  QObject::connect(pTopLevelWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated, Qt::DirectConnection);
+  QObject::connect(pTopLevelWindow.data(), &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated, Qt::DirectConnection);
 
   // install event filter - this will get automatically cleaned up when the top window is destroyed
   pTopLevelWindow->installEventFilter(new QtWindowEventFilter(pTopLevelWindow));
@@ -233,7 +234,7 @@ void QtKernel::OnFirstRender()
 
   // we only want this called on the first render cycle
   // this will be after the qt scenegraph and render thread has been created for the first window (splash screen)
-  QObject::disconnect(pTopLevelWindow, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender);
+  QObject::disconnect(pTopLevelWindow.data(), &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender);
 
   // TODO: hook up render thread id stuff again
   //renderThreadId = QThread::currentThreadId();
@@ -246,7 +247,18 @@ void QtKernel::OnFirstRender()
 void QtKernel::OnAppQuit()
 {
   LogTrace("QtKernel::OnAppQuit()");
+
+  if (pGLDebugLogger)
+    pGLDebugLogger->stopLogging();
+
   Destroy();
+}
+
+// ---------------------------------------------------------------------------------------
+void QtKernel::OnGLMessageLogged(const QOpenGLDebugMessage &debugMessage)
+{
+  // TODO: improve the formatting/verbosity of this
+  LogDebug(2, SharedString::concat("GL Message: ", debugMessage.message().toUtf8().data()));
 }
 
 // ---------------------------------------------------------------------------------------
@@ -268,6 +280,17 @@ void QtKernel::DoInit(ep::Kernel *)
     // TODO: handle error
     LogError("Error making main GL Context current");
     pApplication->quit();
+  }
+
+  // TODO: kill this in release builds?
+  pGLDebugLogger = new QOpenGLDebugLogger();
+  QObject::connect(pGLDebugLogger, &QOpenGLDebugLogger::messageLogged, this, &QtKernel::OnGLMessageLogged);
+
+  if (pGLDebugLogger->initialize())
+  {
+    // TODO: Synchronous Logging has a high overhead but ensures messages are received in order
+    pGLDebugLogger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
+    pGLDebugLogger->enableMessages();
   }
 
   // init the HAL's render system

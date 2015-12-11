@@ -15,8 +15,7 @@
 // for convenience we keep track of Qt GL context info in this struct
 epQtGLContext s_QtGLContext =
 {
-  nullptr,  // pFunc
-  nullptr,  // pDebugger
+  nullptr  // pFunc
 };
 
 static int s_primTypes[] =
@@ -193,13 +192,6 @@ void epGPU_RenderRanges(epShaderProgram *pProgram, epFormatDeclaration *pVertexD
   }
 }
 
-// ---------------------------------------------------------------------------------------
-void onGLMessageLogged(QOpenGLDebugMessage message)
-{
-  // TODO: replace this with something better
-  qDebug() << message;
-}
-
 // ***************************************************************************************
 void epGPU_Init()
 {
@@ -217,32 +209,12 @@ void epGPU_Init()
 
   // TODO: this might be redundant
   s_QtGLContext.pFunc->initializeOpenGLFunctions();
-
-//#if UD_DEBUG
-  // TODO: kill this in release builds?
-  // TODO: make better usage of this debugger - hook into our logging system?
-  s_QtGLContext.pDebugger = new QOpenGLDebugLogger();
-  QObject::connect(s_QtGLContext.pDebugger, &QOpenGLDebugLogger::messageLogged, &onGLMessageLogged);
-
-  if (s_QtGLContext.pDebugger->initialize())
-  {
-    // TODO: Synchronous Logging has a high overhead but ensures messages are received in order
-    s_QtGLContext.pDebugger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
-    s_QtGLContext.pDebugger->enableMessages();
-  }
-//#endif
 }
 
 // ***************************************************************************************
 void epGPU_Deinit()
 {
   // TODO: cleanup all current gl objects?
-
-//#if UD_DEBUG
-  s_QtGLContext.pDebugger->stopLogging();
-  delete s_QtGLContext.pDebugger;
-  s_QtGLContext.pDebugger = nullptr;
-//#endif
 
   s_QtGLContext.pFunc = nullptr;
 }
