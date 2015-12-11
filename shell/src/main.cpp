@@ -111,6 +111,13 @@ void OnActivityChanged(String uid)
     return;
   }
 
+  ViewerRef spViewer = component_cast<Viewer>(spActivity);
+  if (spViewer)
+  {
+    spTopLevelUI->SetProperty("simplecamera", spViewer->GetSimpleCamera());
+    spTopLevelUI->SetProperty("view", spViewer->GetView());
+  }
+
   spActiveActivity = spActivity;
   spActivity->Activate();
 }
@@ -263,10 +270,6 @@ void Init(String sender, String message, const Variant &data)
   spTopLevelUI->SetProperty("commandmanager", spCommandManager);
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
-
-  // Set ui components
-  //spTopLevelUI->SetProperty("simplecamera", pKernel->FindComponent("simplecamera0"));
-  //spTopLevelUI->SetProperty("view", pKernel->FindComponent("view0"));
 
   if (!projFilePath.empty())
     OpenProject(projFilePath);

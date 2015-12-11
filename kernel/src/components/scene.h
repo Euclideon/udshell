@@ -50,7 +50,8 @@ public:
   Variant Save() const override;
 
   // TODO: Consider creating an event for when bookmarks are successfully created
-  void AddBookMark(String bmName, CameraRef camera);
+  void AddBookMarkFromCamera(String bmName, CameraRef camera);
+  void AddBookMark(String bmName, const Bookmark &bm);
   void RemoveBookMark(String bmName);
   const Bookmark *FindBookMark(String bmName) const { return bookmarks.Get(bmName); }
 
@@ -102,6 +103,7 @@ protected:
   {
     return{
       EP_MAKE_METHOD(MakeDirty, "Force a dirty signal"),
+      EP_MAKE_METHOD(AddBookMarkFromCamera, "Add a BookMark from Camera"),
       EP_MAKE_METHOD(AddBookMark, "Add a BookMark"),
       EP_MAKE_METHOD(RemoveBookMark, "Remove a BookMark"),
       EP_MAKE_METHOD_EXPLICIT("FindBookMark", FindBookMark_Internal, "Find a BookMark"),

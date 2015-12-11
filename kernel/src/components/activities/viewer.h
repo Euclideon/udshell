@@ -22,6 +22,10 @@ public:
   void Update(double timeStep);
   Variant Save() const override;
 
+  // TODO: Remove Temp hacks!
+  SimpleCameraRef GetSimpleCamera() const { return spCamera; }
+  ViewRef GetView() const { return spView; }
+
 protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~Viewer() { Deactivate(); }

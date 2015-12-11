@@ -73,13 +73,22 @@ Scene::~Scene()
 
 }
 
-void Scene::AddBookMark(String bmName, CameraRef camera)
+void Scene::AddBookMarkFromCamera(String bmName, CameraRef camera)
 {
   if (!bmName || !camera)
     return;
 
   Double4x4 m = camera->GetCameraMatrix();
   Bookmark bm = { m.axis.t.toVector3(), m.extractYPR() };
+  KVP<SharedString, Bookmark> kvp(bmName, bm);
+  bookmarks.Insert(std::move(kvp));
+}
+
+void Scene::AddBookMark(String bmName, const Bookmark &bm)
+{
+  if (!bmName)
+    return;
+
   KVP<SharedString, Bookmark> kvp(bmName, bm);
   bookmarks.Insert(std::move(kvp));
 }

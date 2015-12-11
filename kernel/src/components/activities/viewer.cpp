@@ -45,8 +45,6 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
       if (spModelDS && spModelDS->GetNumResources() > 0)
       {
         spModel = spModelDS->GetResourceAs<UDModel>(0);
-        if(!spCamera)
-          spCamera->SetPosition(spModel->GetUDMatrix().axis.t.toVector3());
       }
     }
     else if (model->is(Variant::Type::Component))
@@ -58,6 +56,8 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     UDNodeRef spUDNode = pKernel->CreateComponent<UDNode>();
     spUDNode->SetUDModel(spModel);
     spScene->GetRootNode()->AddChild(spUDNode);
+    spView->SetEnablePicking(true);
+    spScene->AddBookMark(MutableString128(Format, "{0}_bookmark", model->asString().getRightAtLast("/", false)), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
@@ -125,7 +125,7 @@ Variant Viewer::Save() const
 // TODO: Tidy this up once bookmarks ui is created.
 void Viewer::BookmarkCurrentCamera()
 {
-  spScene->AddBookMark("Bookmark", spCamera);
+  spScene->AddBookMarkFromCamera("Bookmark", spCamera);
 }
 
 // TODO: Tidy this up once bookmarks ui is created.

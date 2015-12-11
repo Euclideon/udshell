@@ -258,7 +258,7 @@ Rectangle {
         Text {
           id: pickText
           color: "yellow"
-          text: "Picking Disabled"
+          text: "Picking Enabled"
         }
         Text {
           id: pickPosX
