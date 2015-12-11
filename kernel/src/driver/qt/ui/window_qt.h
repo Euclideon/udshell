@@ -1,15 +1,25 @@
 #ifndef WINDOW_QT_H
 #define WINDOW_QT_H
 
-#include <QQuickWindow>
-#include <QQuickItem>
 #include "../epkernel_qt.h"
 #include "components/commandmanager.h"
 
 namespace qt
 {
 
-class QtWindow : public QQuickWindow
+class QtWindowEventFilter : public QObject
+{
+  Q_OBJECT
+
+public:
+  QtWindowEventFilter(QObject *pParent) : QObject(pParent) {}
+
+protected:
+  bool eventFilter(QObject *pObj, QEvent *pEvent);
+};
+
+// TODO: remove this when we know for sure we don't need it
+/*class QtWindow : public QQuickWindow
 {
   Q_OBJECT
 
@@ -37,7 +47,7 @@ protected:
 
     QQuickWindow::keyPressEvent(pEv);
   }
-};
+};*/
 
 } // namespace qt
 

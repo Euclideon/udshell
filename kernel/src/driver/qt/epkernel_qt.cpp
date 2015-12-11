@@ -3,6 +3,7 @@
 #if EPWINDOW_DRIVER == EPDRIVER_QT
 
 #include <QSemaphore>
+#include <QQuickWindow>
 
 #include "epkernel_qt.h"
 
@@ -115,7 +116,6 @@ epResult QtKernel::InitInternal()
 
   // register our internal qml types
   qmlRegisterType<RenderView>("udKernel", 0, 1, "UDRenderView");
-  qmlRegisterType<QtWindow>("udKernel", 0, 1, "UDWindow");
 
   // TODO: expose kernel innards to the qml context?
 
@@ -193,6 +193,9 @@ epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
   // Hook up window signals
   QObject::connect(pTopLevelWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated, Qt::DirectConnection);
 
+  // install event filter - this will get automatically cleaned up when the top window is destroyed
+  pTopLevelWindow->installEventFilter(new QtWindowEventFilter(pTopLevelWindow));
+  
   pTopLevelWindow->show();
   pTopLevelWindow->raise();
 
@@ -207,6 +210,7 @@ epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
 }
 
 // ---------------------------------------------------------------------------------------
+// RENDER THREAD
 void QtKernel::OnGLContextCreated(QOpenGLContext *pContext)
 {
   LogTrace("QtKernel::OnGLContextCreated()");
