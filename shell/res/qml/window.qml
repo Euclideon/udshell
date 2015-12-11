@@ -4,7 +4,7 @@ import QtQuick.Controls 1.3
 
 Window {
   id: desktopwindow
-  title: "udShell"
+  title: "Euclideon Platform"
   width: 960
   height: 540
 }

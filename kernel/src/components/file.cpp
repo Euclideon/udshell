@@ -32,9 +32,17 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
 
   int posixFlags = GetPosixOpenFlags(of);
 
+  String pathStr = path->asString();
+  MutableString256 cPath;
+
+  String noPrefixPath = pathStr.getRightAtFirstIC("file:///", false);
+  if(!noPrefixPath.empty())
+    cPath.urlDecode(noPrefixPath);
+  else
+    cPath = pathStr;
+
 #if defined(EP_WINDOWS)
   // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?
-  String cPath = path->asString();
   int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cPath.ptr, (int)cPath.length, nullptr, 0);
   wchar_t *widePath = (wchar_t*)alloca(sizeof(wchar_t) * (len + 1));
   if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cPath.ptr, (int)cPath.length, widePath, len) == 0)
@@ -43,7 +51,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
 
   _wsopen_s(&fd, widePath, posixFlags, SH_DENYNO, S_IREAD | S_IWRITE);
 #else
-  fd = open(path->asString().toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
+  fd = open(cPath.toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
 #endif
   if (fd == -1)
     throw epR_File_OpenFailure;

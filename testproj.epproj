@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+  <activities>
+    <viewer>
+      <camera>
+        <depthplanes>[0.0001, 7500]</depthplanes>
+        <helicoptermode>false</helicoptermode>
+        <invertyaxis>true</invertyaxis>
+        <matrix>[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0.049500000000000099, -0.1215, -0.0015000000000000568, 1]</matrix>
+        <perspective>1.0471975512</perspective>
+        <speed>1</speed>
+      </camera>
+      <model>data/DirCube.upc</model>
+    </viewer>
+    <viewer>
+      <camera>
+        <depthplanes>[0.0001, 7500]</depthplanes>
+        <helicoptermode>false</helicoptermode>
+        <invertyaxis>true</invertyaxis>
+        <matrix>[1, 0, 0, 0, -0, 1, 0, 0, 0, -0, 1, 0, -2.6230445930957798, -6.4208537733554829, -0.0015000000000000568, 1]</matrix>
+        <perspective>1.0471975512</perspective>
+        <speed>1</speed>
+      </camera>
+      <model>data/DirCube.upc</model>
+    </viewer>
+  </activities>
+</project>

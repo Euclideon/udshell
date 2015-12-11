@@ -44,7 +44,8 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
       if (spModelDS && spModelDS->GetNumResources() > 0)
       {
         spModel = spModelDS->GetResourceAs<UDModel>(0);
-        spCamera->SetPosition(spModel->GetUDMatrix().axis.t.toVector3());
+        if(!spCamera)
+          spCamera->SetPosition(spModel->GetUDMatrix().axis.t.toVector3());
       }
     }
     else if (model->is(Variant::Type::Component))

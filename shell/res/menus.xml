@@ -1,16 +1,8 @@
 <root>
   <menu name="File">
-    <menu name="SubMenu">
-      <item name="CheckBox1" checkable="true" checked="true" exclusivegroup="false" />
-      <item name="CheckBox2" checkable="true" checked="false" exclusivegroup="true" />
-      <item name="CheckBox3" checkable="true" checked="false" exclusivegroup="true" />
-    </menu>
-    <item name="SubItem1" command="showhideconsolewindow" />
-    <separator name="separator0" />
-    <item name="SubItem2" command="showhideconsolewindow" />
-  </menu>
-  <menu name="Edit">
-    <item name="SubItem1" command="showhideconsolewindow" enabled="true" />
-    <item name="SubItem2" command="showhideconsolewindow" enabled="false" />
+    <menuitem name="New Project" command="newproject" />
+    <menuitem name="Open Project" command="openproject" />
+    <menuitem name="Save Project" command="saveproject" enabled="false" />
+    <menuitem name="Save Project As..." command="saveprojectas" enabled="false" />
   </menu>
 </root>
