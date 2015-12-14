@@ -10,6 +10,7 @@
 #include <QtQuick/QQuickFramebufferObject>
 #include <QtGui/QOpenGLFramebufferObject>
 #include <QSGSimpleTextureNode>
+#include <QOpenGLDebugLogger>
 #if defined(_MSC_VER)
 # pragma warning(pop)
 #endif

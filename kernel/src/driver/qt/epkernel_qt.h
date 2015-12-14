@@ -5,9 +5,12 @@
 #include <QGuiApplication>
 #include <QQmlEngine>
 #include <QOpenGLContext>
+#include <QQuickWindow>
+#include <QOpenGLDebugLogger>
 #include <QSurfaceFormat>
 #include <QThread>
 #include <QEvent>
+#include <QPointer>
 
 #include "kernel.h"
 
@@ -61,6 +64,7 @@ private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);
   void OnFirstRender();
   void OnAppQuit();
+  void OnGLMessageLogged(const QOpenGLDebugMessage &debugMessage);
 
 private:
   void DoInit(ep::Kernel *);
@@ -73,9 +77,10 @@ private:
   QtApplication *pApplication;
   QQmlEngine *pQmlEngine;
   QOpenGLContext *pMainThreadContext;
+  QOpenGLDebugLogger *pGLDebugLogger;
 
   QSurfaceFormat mainSurfaceFormat;
-  QQuickWindow *pTopLevelWindow;
+  QPointer<QQuickWindow> pTopLevelWindow;
 
   Qt::HANDLE mainThreadId;
   Qt::HANDLE renderThreadId;
