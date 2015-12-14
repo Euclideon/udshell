@@ -25,6 +25,9 @@ public:
   void SetSrc(String src) { srcString = src; }
   String GetSrc() const { return srcString; }
 
+  ActivityRef GetActiveActivity() const { return spActiveActivity; }
+  void SetActiveActivity(ActivityRef activity) { spActiveActivity = activity; }
+
 protected:
   Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
@@ -38,6 +41,14 @@ protected:
 
   ResourceManagerRef spResourceManager;
   SharedString srcString = nullptr;
+  ActivityRef spActiveActivity = nullptr;
+
+  Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(ActiveActivity, "The currently active activity", nullptr, 0),
+    };
+  }
 
   static Array<const MethodInfo> GetMethods()
   {

@@ -11,6 +11,7 @@ SHARED_CLASS(UIConsole);
 SHARED_CLASS(MemStream);
 SHARED_CLASS(Broadcaster);
 SHARED_CLASS(Stream);
+SHARED_CLASS(Activity);
 
 class UIConsole : public UIComponent
 {
@@ -64,7 +65,7 @@ protected:
   UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~UIConsole() {}
 
-  void ToggleVisible();
+  void ToggleVisible(ActivityRef activity);
 
   LogFilter logFilter;
   bool FilterLogLine(const LogLine &) const;

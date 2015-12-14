@@ -21,7 +21,6 @@ using namespace ep;
 
 static kernel::Kernel *pKernel = nullptr;
 static WindowRef spMainWindow;
-static ActivityRef spActiveActivity;
 static UIComponentRef spTopLevelUI;
 static UIComponentRef spMessageBox;
 static MenuRef spMenu;
@@ -97,10 +96,12 @@ void RemoveUIActivity(ActivityRef spActivity)
 
 void OnActivityChanged(String uid)
 {
+  auto spActiveActivity = spProject->GetActiveActivity();
+
   if (spActiveActivity)
   {
     spActiveActivity->Deactivate();
-    spActiveActivity = nullptr;
+    spProject->SetActiveActivity(nullptr);
   }
 
   if (uid.empty())
@@ -120,7 +121,7 @@ void OnActivityChanged(String uid)
     spTopLevelUI->SetProperty("view", spViewer->GetView());
   }
 
-  spActiveActivity = spActivity;
+  spProject->SetActiveActivity(spActivity);
   spActivity->Activate();
 }
 
@@ -139,7 +140,7 @@ void NewProject(String filePath)
   }
   spProject = nullptr;
 
-  spProject = pKernel->CreateComponent<Project>();
+  spProject = pKernel->CreateComponent<Project>({ { "name", "project" } });
   spProject->SetSrc(filePath);
 
   projectName = GetNameFromFilePath(filePath);
@@ -159,7 +160,7 @@ void NewProject(String filePath)
 
 void OpenProject(String filePath)
 {
-  ProjectRef spNewProject = pKernel->CreateComponent<Project>({ { "src", filePath } });
+  ProjectRef spNewProject = pKernel->CreateComponent<Project>({ { "src", filePath }, { "name", "project" } });
   if (!spNewProject)
   {
     pKernel->LogWarning(1, "Couldn't open project file \"{0}\"", MutableString256().urlDecode(filePath));
@@ -214,7 +215,6 @@ void Deinit(String sender, String message, const Variant &data)
 {
   //SaveProject(); // Uncomment this if you want to dump the state of the Activities into a project file on program close
 
-  spActiveActivity = nullptr;
   spMainWindow = nullptr;
   spProject = nullptr;
   spTopLevelUI = nullptr;

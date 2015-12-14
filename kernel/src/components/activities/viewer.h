@@ -33,6 +33,8 @@ protected:
   // TODO: Tidy this up once bookmarks ui is created.
   void BookmarkCurrentCamera();
   void JumpToBookmark();
+  static void StaticBookmarkCurrentCamera(ActivityRef activity) { ((ViewerRef)activity)->BookmarkCurrentCamera(); }
+  static void StaticJumpToBookmark(ActivityRef activity) { ((ViewerRef)activity)->JumpToBookmark(); }
 
   UDModelRef spModel;
   SceneRef spScene;
