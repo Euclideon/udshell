@@ -10,6 +10,7 @@
 #include "components/resources/udmodel.h"
 #include "components/datasource.h"
 #include "components/resourcemanager.h"
+#include "components/commandmanager.h"
 
 #include "kernel.h"
 
@@ -23,7 +24,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   // TODO: Remove this once Subscribe returns an identifier for using with Unsubscribe
   updateFunc = Delegate<void(double)>(this, &Viewer::Update);
 
-  ViewRef spView = pKernel->CreateComponent<View>();
+  spView = pKernel->CreateComponent<View>();
   spScene = pKernel->CreateComponent<Scene>();
 
   const Variant *cam = initParams.Get("camera");
@@ -44,8 +45,6 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
       if (spModelDS && spModelDS->GetNumResources() > 0)
       {
         spModel = spModelDS->GetResourceAs<UDModel>(0);
-        if(!spCamera)
-          spCamera->SetPosition(spModel->GetUDMatrix().axis.t.toVector3());
       }
     }
     else if (model->is(Variant::Type::Component))
@@ -57,6 +56,8 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     UDNodeRef spUDNode = pKernel->CreateComponent<UDNode>();
     spUDNode->SetUDModel(spModel);
     spScene->GetRootNode()->AddChild(spUDNode);
+    spView->SetEnablePicking(true);
+    spScene->AddBookMark(MutableString128(Format, "{0}_bookmark", model->asString().getRightAtLast("/", false)), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
@@ -82,6 +83,14 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   spViewerUI->SetProperty("viewport", spViewport);
 
   ui = spViewerUI;
+
+  // TODO: Tidy this up once bookmarks ui is created.
+  CommandManagerRef spComMan = component_cast<CommandManager>(GetKernel().FindComponent("commandmanager0"));
+  if (spComMan)
+  {
+    spComMan->RegisterCommand("CreateBookmark", Delegate<void()>(this, &Viewer::BookmarkCurrentCamera), nullptr);
+    spComMan->RegisterCommand("GoToBookmark", Delegate<void()>(this, &Viewer::JumpToBookmark), nullptr);
+  }
 }
 
 void Viewer::Activate()
@@ -111,6 +120,24 @@ Variant Viewer::Save() const
     params.Insert( KeyValuePair("model", spModel->GetDataSource()->GetURL()) );
 
   return Variant(std::move(params));
+}
+
+// TODO: Tidy this up once bookmarks ui is created.
+void Viewer::BookmarkCurrentCamera()
+{
+  spScene->AddBookMarkFromCamera("Bookmark", spCamera);
+}
+
+// TODO: Tidy this up once bookmarks ui is created.
+void Viewer::JumpToBookmark()
+{
+  const Bookmark *pBM = spScene->FindBookMark("Bookmark");
+  if (pBM)
+  {
+    spCamera->SetPosition(pBM->position);
+    spCamera->SetOrientation(pBM->ypr);
+    spView->ForceDirty();
+  }
 }
 
 } // namespace kernel

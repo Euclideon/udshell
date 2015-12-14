@@ -2,6 +2,7 @@
 #include "scene.h"
 #include "view.h"
 #include "kernel.h"
+#include "nodes/camera.h"
 #include "renderscene.h"
 
 namespace kernel {
@@ -55,6 +56,14 @@ Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Vari
   timeStep = 1.0 / 30.0;
   rootNode = pKernel->CreateComponent<Node>();
 
+  Variant *pMap = initParams.Get("Bookmarks");
+  if (pMap)
+  {
+    Variant::VarMap bms = pMap->asAssocArray();
+    for (auto node : bms)
+      bookmarks.Insert(node.key.asSharedString(), node.value.as<Bookmark>());
+  }
+
   memset(&renderModels, 0, sizeof(renderModels));
   numRenderModels = 0;
 }
@@ -63,4 +72,40 @@ Scene::~Scene()
 {
 
 }
+
+void Scene::AddBookMarkFromCamera(String bmName, CameraRef camera)
+{
+  if (!bmName || !camera)
+    return;
+
+  Double4x4 m = camera->GetCameraMatrix();
+  Bookmark bm = { m.axis.t.toVector3(), m.extractYPR() };
+  KVP<SharedString, Bookmark> kvp(bmName, bm);
+  bookmarks.Insert(std::move(kvp));
+}
+
+void Scene::AddBookMark(String bmName, const Bookmark &bm)
+{
+  if (!bmName)
+    return;
+
+  KVP<SharedString, Bookmark> kvp(bmName, bm);
+  bookmarks.Insert(std::move(kvp));
+}
+
+void Scene::RemoveBookMark(String bmName)
+{
+  if (!bmName)
+    return;
+
+  bookmarks.Remove(bmName);
+}
+
+Variant Scene::Save() const
+{
+  Variant::VarMap map;
+  map.Insert("Bookmarks", bookmarks);
+  return map;
+}
+
 }  // namespace kernel

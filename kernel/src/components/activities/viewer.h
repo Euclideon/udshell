@@ -10,6 +10,7 @@ PROTOTYPE_COMPONENT(Viewer);
 SHARED_CLASS(UDModel);
 SHARED_CLASS(SimpleCamera);
 SHARED_CLASS(Scene);
+SHARED_CLASS(View);
 
 class Viewer : public Activity
 {
@@ -21,9 +22,17 @@ public:
   void Update(double timeStep);
   Variant Save() const override;
 
+  // TODO: Remove Temp hacks!
+  SimpleCameraRef GetSimpleCamera() const { return spCamera; }
+  ViewRef GetView() const { return spView; }
+
 protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~Viewer() { Deactivate(); }
+
+  // TODO: Tidy this up once bookmarks ui is created.
+  void BookmarkCurrentCamera();
+  void JumpToBookmark();
 
   // TODO: Remove this when Unsubscribe can be called with some kind of subscription identifier
   Delegate<void(double)> updateFunc;
@@ -31,6 +40,7 @@ protected:
   UDModelRef spModel;
   SceneRef spScene;
   SimpleCameraRef spCamera;
+  ViewRef spView;
 };
 
 } //namespace kernel
