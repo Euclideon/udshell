@@ -39,6 +39,9 @@ protected:
   static void StaticToggleBookmarksPanel(Variant::VarMap params);
   static void StaticCreateBookmark(Variant::VarMap params);
 
+  void LoadBookmarks(Variant::VarMap bookmarks);
+
+
   UDModelRef spModel;
   SceneRef spScene;
   SimpleCameraRef spCamera;

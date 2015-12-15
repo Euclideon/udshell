@@ -23,7 +23,12 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
 
   spView = pKernel->CreateComponent<View>();
-  spScene = pKernel->CreateComponent<Scene>();
+
+  Variant::VarMap sceneParams;
+  const Variant *pSceneParams = initParams.Get("scene");
+  if (pSceneParams && pSceneParams->is(Variant::Type::AssocArray))
+    sceneParams = pSceneParams->asAssocArray();
+  spScene = pKernel->CreateComponent<Scene>(sceneParams);
 
   const Variant *cam = initParams.Get("camera");
   if (cam && cam->is(Variant::Type::AssocArray))
@@ -90,6 +95,11 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   spViewerUI->SetProperty("bookmarkscomp", spUIBookmarks);
 
   ui = spViewerUI;
+
+  // Add bookmarks to UI
+  auto bmMap = spScene->GetBookmarkMap();
+  for (auto bm : bmMap)
+    spUIBookmarks->CallMethod("createbookmark", bm.key);
 }
 
 epResult Viewer::StaticInit(ep::Kernel *pKernel)
@@ -156,6 +166,9 @@ Variant Viewer::Save() const
 
   if (spModel)
     params.Insert("model", spModel->GetDataSource()->GetURL());
+
+  if (spScene)
+    params.Insert("scene", spScene->Save());
 
   return Variant(std::move(params));
 }
