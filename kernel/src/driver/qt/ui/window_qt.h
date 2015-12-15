@@ -12,7 +12,7 @@ class QtWindowEventFilter : public QObject
   Q_OBJECT
 
 public:
-  QtWindowEventFilter(QObject *pParent) : QObject(pParent) {}
+  QtWindowEventFilter(QQuickWindow *pParent) : QObject(pParent) {}
 
 protected:
   bool eventFilter(QObject *pObj, QEvent *pEvent);

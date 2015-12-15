@@ -61,6 +61,7 @@ public:
   QQmlEngine *QmlEngine() { return pQmlEngine; }
 
   epResult RegisterWindow(QQuickWindow *pWindow);
+  void UnregisterWindow(QQuickWindow *pWindow);
 
 private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);
@@ -82,6 +83,7 @@ private:
   QOpenGLDebugLogger *pGLDebugLogger;
 
   QSurfaceFormat mainSurfaceFormat;
+  QQuickWindow *pSplashScreen;
   QPointer<QQuickWindow> pTopLevelWindow;
 
   Qt::HANDLE mainThreadId;
