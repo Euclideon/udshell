@@ -12,7 +12,6 @@
 
 #include <QString>
 #include <QVariant>
-#include <QMetaType>
 #include <QJSValue>
 
 #include "ep/cpp/variant.h"
@@ -65,6 +64,8 @@ void epFromVariant(const Variant &variant, QVariant *pVariant);
 
 Variant epToVariant(const QJSValue &jsValue);
 void epFromVariant(const Variant &variant, QJSValue *pJSValue);
+
+Variant epToVariant(const QVariantMap &varMap);
 
 
 namespace ep {
