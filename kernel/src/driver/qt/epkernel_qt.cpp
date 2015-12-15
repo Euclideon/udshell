@@ -99,7 +99,7 @@ epResult QtKernel::InitInternal()
   EPASSERT(argv.length == (size_t)argc, "argv length should match argc");
 
   LogTrace("QtKernel::InitInternal()");
-  LogInfo(2, "Initialising udShell...");
+  LogInfo(2, "Initialising epShell...");
 
   if (RegisterComponentType<QtComponent>() != epR_Success)
   {
@@ -116,7 +116,7 @@ epResult QtKernel::InitInternal()
   pQmlEngine = new QQmlEngine(this);
 
   // register our internal qml types
-  qmlRegisterType<RenderView>("udKernel", 0, 1, "UDRenderView");
+  qmlRegisterType<RenderView>("epKernel", 0, 1, "EPRenderView");
 
   // TODO: expose kernel innards to the qml context?
 
