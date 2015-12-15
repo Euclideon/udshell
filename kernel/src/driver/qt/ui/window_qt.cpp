@@ -11,27 +11,32 @@ namespace qt {
 
 bool QtWindowEventFilter::eventFilter(QObject *pObj, QEvent *pEvent)
 {
+  EPASSERT(qobject_cast<QQuickWindow*>(pObj), "QtWindowEventFilter must be bound to a QQuickWindow");
+
   switch (pEvent->type())
   {
-  case QEvent::Resize:
-  {
-    QResizeEvent *pResizeEvent = static_cast<QResizeEvent*>(pEvent);
-    QQuickItem *pRoot = static_cast<QQuickWindow*>(pObj)->contentItem();
-    pRoot->setSize(pResizeEvent->size());
-    break;
-  }
-  case QEvent::KeyPress:
-  {
-    QKeyEvent *pKeyEvent = static_cast<QKeyEvent*>(pEvent);
-    if (!pKeyEvent->isAutoRepeat())
+    case QEvent::Resize:
     {
-      QKeySequence seq(pKeyEvent->key() + pKeyEvent->modifiers());
-      return QtApplication::Kernel()->GetCommandManager()->HandleShortcutEvent(seq.toString().toUtf8().data());
+      QResizeEvent *pResizeEvent = static_cast<QResizeEvent*>(pEvent);
+      QQuickItem *pRoot = static_cast<QQuickWindow*>(pObj)->contentItem();
+      pRoot->setSize(pResizeEvent->size());
+      break;
     }
-    break;
-  }
-  default:
-    return QObject::eventFilter(pObj, pEvent);
+    case QEvent::KeyPress:
+    {
+      QKeyEvent *pKeyEvent = static_cast<QKeyEvent*>(pEvent);
+      if (!pKeyEvent->isAutoRepeat())
+      {
+        QKeySequence seq(pKeyEvent->key() + pKeyEvent->modifiers());
+        return QtApplication::Kernel()->GetCommandManager()->HandleShortcutEvent(seq.toString().toUtf8().data());
+      }
+      break;
+    }
+    case QEvent::Close:
+    {
+      QtApplication::Kernel()->UnregisterWindow((QQuickWindow*)pObj);
+      break;
+    }
   }
 
   // Pass the event forward

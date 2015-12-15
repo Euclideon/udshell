@@ -59,6 +59,7 @@ QtKernel::QtKernel(Slice<const KeyValuePair> commandLine)
   , pMainThreadContext(nullptr)
   , pGLDebugLogger(nullptr)
   , mainSurfaceFormat(QSurfaceFormat::defaultFormat())
+  , pSplashScreen(nullptr)
   , pTopLevelWindow(nullptr)
   , mainThreadId(QThread::currentThreadId())
   , renderThreadId(nullptr)
@@ -84,7 +85,7 @@ QtKernel::~QtKernel()
   }
 
   delete pGLDebugLogger;
-  delete pTopLevelWindow;
+  delete pSplashScreen;
   delete pMainThreadContext;
   delete pQmlEngine;
 
@@ -132,8 +133,8 @@ epResult QtKernel::InitInternal()
   // create the splash screen
   QQmlComponent component(pQmlEngine, QUrl("qrc:/kernel/splashscreen.qml"));
   QObject *object = component.create();
-  pTopLevelWindow = qobject_cast<QQuickWindow*>(object);
-  if (pTopLevelWindow.isNull())
+  pSplashScreen = qobject_cast<QQuickWindow*>(object);
+  if (!pSplashScreen)
   {
     // TODO: better error information/handling
     LogError("Error creating Splash Screen");
@@ -144,7 +145,7 @@ epResult QtKernel::InitInternal()
 
   // defer the heavier init stuff and app specific init to after Qt hits the event loop
   // we'll hook into the splash screen to do this
-  QObject::connect(pTopLevelWindow.data(), &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender, Qt::DirectConnection);
+  QObject::connect(pSplashScreen, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender, Qt::DirectConnection);
 
   return epR_Success;
 }
@@ -177,18 +178,20 @@ epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
 {
   LogTrace("QtKernel::RegisterWindow()");
 
-  // TODO: support adding multiple windows - calling this twice is currently a really bad idea
+  // sanity checks
+  EPASSERT(pSplashScreen != nullptr, "No splash screen window set");
+  EPASSERT(pMainThreadContext != nullptr, "No main thread GL context");
+  EPASSERT(pGLDebugLogger != nullptr, "No GL debugger");
 
-  if (!pTopLevelWindow.isNull())
-  {
-    // unhook the current top level window
-    QObject::disconnect(pTopLevelWindow.data(), &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated);
-    pTopLevelWindow->hide();
-    delete pTopLevelWindow;
-  }
+  // TODO: support adding multiple windows?
+  EPASSERT(pTopLevelWindow.isNull(), "Multiple windows not supported - you must unregister your current window first");
 
+  // TODO: maybe destroy this rather than keeping it around - check mem usage
+  if (pSplashScreen->isVisible())
+    pSplashScreen->hide();
+
+  pGLDebugLogger->stopLogging();
   pMainThreadContext->doneCurrent();
-
   pTopLevelWindow = pWindow;
 
   // Hook up window signals
@@ -207,7 +210,35 @@ epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
     return epR_Failure;
   }
 
+  if (pGLDebugLogger->initialize())
+    pGLDebugLogger->startLogging();
+
   return epR_Success;
+}
+
+// ---------------------------------------------------------------------------------------
+void QtKernel::UnregisterWindow(QQuickWindow *pWindow)
+{
+  LogTrace("QtKernel::UnregisterWindow()");
+
+  // if we're unregistering the top level window then stop logging and switch the context
+  // back to the splash screen since this is a surface that we know exists
+  // this means we can log thru to final cleanup
+  if (pTopLevelWindow.data() == pWindow)
+  {
+    // sanity checks
+    EPASSERT(pSplashScreen != nullptr, "No splash screen window set");
+    EPASSERT(pMainThreadContext != nullptr, "No main thread GL context");
+    EPASSERT(pGLDebugLogger != nullptr, "No GL debugger");
+
+    pGLDebugLogger->stopLogging();
+    pMainThreadContext->makeCurrent(pSplashScreen);
+
+    if (pGLDebugLogger->initialize())
+      pGLDebugLogger->startLogging();
+  }
+
+  QObject::disconnect(pWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -234,7 +265,7 @@ void QtKernel::OnFirstRender()
 
   // we only want this called on the first render cycle
   // this will be after the qt scenegraph and render thread has been created for the first window (splash screen)
-  QObject::disconnect(pTopLevelWindow.data(), &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender);
+  QObject::disconnect(pSplashScreen, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender);
 
   // TODO: hook up render thread id stuff again
   //renderThreadId = QThread::currentThreadId();
@@ -247,10 +278,6 @@ void QtKernel::OnFirstRender()
 void QtKernel::OnAppQuit()
 {
   LogTrace("QtKernel::OnAppQuit()");
-
-  if (pGLDebugLogger)
-    pGLDebugLogger->stopLogging();
-
   Destroy();
 }
 
@@ -266,7 +293,7 @@ void QtKernel::DoInit(ep::Kernel *)
 {
   LogTrace("QtKernel::DoInit()");
 
-  EPASSERT(pTopLevelWindow != nullptr, "No active window set");
+  EPASSERT(pSplashScreen != nullptr, "No splash screen window set");
   EPASSERT(pMainThreadContext == nullptr, "Main Thread context already exists");
 
   // create main opengl context
@@ -275,7 +302,7 @@ void QtKernel::DoInit(ep::Kernel *)
   IF_UDASSERT(bool succeed = )pMainThreadContext->create();
   EPASSERT(succeed, "Couldn't create render context!");
 
-  if (!pMainThreadContext->makeCurrent(pTopLevelWindow))
+  if (!pMainThreadContext->makeCurrent(pSplashScreen))
   {
     // TODO: handle error
     LogError("Error making main GL Context current");
@@ -288,9 +315,9 @@ void QtKernel::DoInit(ep::Kernel *)
 
   if (pGLDebugLogger->initialize())
   {
-    // TODO: Synchronous Logging has a high overhead but ensures messages are received in order
-    pGLDebugLogger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
-    pGLDebugLogger->enableMessages();
+    // enable synchronous if we need to preserve the gl debug logging order
+    //pGLDebugLogger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
+    pGLDebugLogger->startLogging();
   }
 
   // init the HAL's render system
