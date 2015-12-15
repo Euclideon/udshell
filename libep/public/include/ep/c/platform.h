@@ -537,4 +537,16 @@ void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  l
 // define API version constant (TODO: should this move somewhere else?)
 #define EP_APIVERSION 100
 
+#if !defined(EP_WINDOWS)
+# if EP_DEBUG
+#   if defined(__cplusplus)
+      extern "C" int IsDebuggerPresent(void);
+#   else // #if defined(__cplusplus)
+      int IsDebuggerPresent(void);
+#   endif // #if defined(__cplusplus)
+# else // EP_DEBUG
+#   define IsDebuggerPresent() 0
+# endif // EP_DEBUG
+#endif // defined(EP_WINDOWS)
+
 #endif // _EP_PLATFORM_H
