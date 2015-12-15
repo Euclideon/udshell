@@ -19,24 +19,26 @@ class QQuickWindow;
 namespace qt
 {
 
+class QtKernel;
+
 class QtApplication : public QGuiApplication
 {
   Q_OBJECT
 
 public:
-  QtApplication(kernel::Kernel *pKern, int &argc, char ** argv) : QGuiApplication(argc, argv), pKernel(pKern) {}
+  QtApplication(QtKernel *pKern, int &argc, char ** argv) : QGuiApplication(argc, argv), pKernel(pKern) {}
 
-  static void SetKernel(kernel::Kernel *pKernel) {
+  static void SetKernel(QtKernel *pKernel) {
     EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
     static_cast<QtApplication*>(QtApplication::instance())->pKernel = pKernel;
   }
-  static kernel::Kernel *Kernel() {
+  static QtKernel *Kernel() {
     EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
     return static_cast<QtApplication*>(QtApplication::instance())->pKernel;
   }
 
 protected:
-  kernel::Kernel *pKernel = nullptr;
+  QtKernel *pKernel = nullptr;
 };
 
 

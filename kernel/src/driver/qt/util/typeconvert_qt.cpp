@@ -147,7 +147,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
       using namespace qt;
       qt::QtDelegate *del = new qt::QtDelegate(variant.asDelegate());
 
-      QJSValue jsDel = ((QtKernel*)QtApplication::Kernel())->QmlEngine()->newQObject(del);
+      QJSValue jsDel = QtApplication::Kernel()->QmlEngine()->newQObject(del);
       if (jsDel.hasProperty("call"))
         pVariant->setValue(jsDel.property("call"));
       
@@ -308,7 +308,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
       using namespace qt;
 
       uint length = (uint)variant.arrayLen();
-      QJSValue val = ((QtKernel*)QtApplication::Kernel())->QmlEngine()->newArray(length);
+      QJSValue val = QtApplication::Kernel()->QmlEngine()->newArray(length);
       Slice<Variant> varr = variant.asArray();
       for (uint i = 0; i < length; ++i)
       {
