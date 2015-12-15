@@ -1,4 +1,4 @@
-module udKernel
+module epKernel
 SplashScreen 0.1 splashscreen.qml
 Viewport 0.1 viewport.qml
 Console 0.1 console.qml
