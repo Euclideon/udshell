@@ -1,6 +1,6 @@
 #include "components/file.h"
 #include "components/broadcaster.h"
-
+#include "kernel.h"
 #if defined(EP_WINDOWS)
 #include <io.h>
 #include <share.h>
@@ -35,7 +35,13 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
   String pathStr = path->asString();
   MutableString256 cPath;
 
-  String noPrefixPath = pathStr.getRightAtFirstIC("file:///", false);
+#if defined(EP_WINDOWS)
+  const char * const pFilePrefix = "file:///";
+#else
+  const char * const pFilePrefix = "file://";
+#endif // defined(EP_WINDOWS)
+ 
+  String noPrefixPath = pathStr.getRightAtFirstIC(pFilePrefix, false);
   if(!noPrefixPath.empty())
     cPath.urlDecode(noPrefixPath);
   else
@@ -54,7 +60,10 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
   fd = open(cPath.toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
 #endif
   if (fd == -1)
+  {
+    pKernel->LogWarning(0, "Failed to open {0}, flags {1}, errno {2}\n", cPath, posixFlags, errno);
     throw epR_File_OpenFailure;
+  }
 
   uint64_t curr = lseek(fd, 0L, SEEK_CUR);
   length = lseek(fd, 0L, SEEK_END);

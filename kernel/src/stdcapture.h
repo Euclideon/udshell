@@ -38,15 +38,29 @@ public:
     EndCapture();
   }
 
-  void BeginCapture()
+  bool BeginCapture()
   {
     if (m_capturing)
-      return;
+      return false;
 
-#ifdef _MSC_VER
-    pipe(m_pipe, 65536, O_BINARY);
+#if defined(_MSC_VER)
+    int result = pipe(m_pipe, 65536, O_BINARY);
 #else
-    pipe(m_pipe);
+    int result = pipe(m_pipe);
+#endif // _MSC_VER
+
+    if (result)
+    {
+      ep::Kernel::GetInstance()->LogWarning(0, "Failed to open pipe {0}\n", errno);
+      return false;
+    }
+
+#if !defined(_MSC_VER)
+   for (int i = 0; i < 2; ++i)
+    {
+      int flags =  fcntl(m_pipe[i], F_GETFL);
+      fcntl(m_pipe[i], F_SETFL, flags | O_NONBLOCK);
+    }
 #endif
 
     m_oldFd = dup(m_fd);
@@ -58,6 +72,7 @@ public:
     close(m_pipe[WRITE]);
     m_pipe[WRITE] = -1;
 #endif
+    return true;
   }
 
   bool IsCapturing()
@@ -89,16 +104,14 @@ public:
   String GetCapture()
   {
     const int bufSize = 1025;
-    char buf[bufSize];
-    int bytesRead = 0;
-    bool fd_blocked(false);
+    char buf[bufSize] = { 0 };
+    int bytesRead;
 
     m_captured.clear();
 
     do
     {
       bytesRead = 0;
-      fd_blocked = false;
 #ifdef _MSC_VER
       if (!eof(m_pipe[READ]))
         bytesRead = read(m_pipe[READ], buf, bufSize - 1);
@@ -112,7 +125,10 @@ public:
       }
     } while (bytesRead == (bufSize - 1));
 
-    write(GetOldFd(), m_captured.ptr, (int)m_captured.length);
+    ptrdiff_t bytesWritten =  (ptrdiff_t)write(GetOldFd(), m_captured.ptr, (int)m_captured.length);
+
+    if (bytesWritten != (ptrdiff_t)m_captured.length)
+      ep::Kernel::GetInstance()->LogWarning(0, "Not all bytes written when capture ended. Attempted {0} Actual {1}\n", m_captured.length, bytesWritten);
 
     return m_captured;
   }
