@@ -103,7 +103,10 @@ protected:
   friend class kernel::Kernel;
 
   Component(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams);
-  ~Component() {}
+  ~Component()
+  {
+    pImpl = nullptr;
+  }
 
   Component(const Component &) = delete;    // Still not sold on this
   void operator=(const Component &) = delete;

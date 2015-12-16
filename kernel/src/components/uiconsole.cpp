@@ -143,12 +143,12 @@ void UIConsole::OnLogChanged()
   if (bOutputsMerged)
   {
     filteredMerged.pushBack(MergedLine(typeLog, (int)logLines.length - 1));
-    CallMethod("appendconsoletext", (String)cLine.text);
+    CallMethod("appendconsoletext", cLine.text);
   }
   else
   {
     filteredLog.pushBack((int)logLines.length - 1);
-    CallMethod("appendlogtext", (String)cLine.text);
+    CallMethod("appendlogtext", cLine.text);
   }
 }
 
