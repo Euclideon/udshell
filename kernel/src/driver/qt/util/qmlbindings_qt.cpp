@@ -110,9 +110,9 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
 
     auto getter = &QtShims::getter;
     auto setter = &QtShims::setter;
-    kernel::PropertyDesc desc = { info, kernel::GetterShim(*(void**)&getter, data), kernel::SetterShim(*(void**)&setter, data) };
-
-    pComponent->AddDynamicProperty(desc);
+    auto getterShim = GetterShim(*(void**)&getter, data);
+    auto setterShim = SetterShim(*(void**)&setter, data);
+    pComponent->AddDynamicProperty(info, &getterShim, &setterShim);
   }
 
   // TODO: Inject the dynamic properties?
@@ -139,9 +139,8 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
       auto data = SharedPtr<QtMethodData>::create(method);
 
       auto call = &QtShims::call;
-      kernel::MethodDesc desc = { info, kernel::MethodShim(*(void**)&call, data) };
-
-      pComponent->AddDynamicMethod(desc);
+      auto shim = MethodShim(*(void**)&call, data);
+      pComponent->AddDynamicMethod(info, &shim);
     }
     else if (method.methodType() == QMetaMethod::Signal)
     {
@@ -156,9 +155,8 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
       auto data = SharedPtr<QtEventData>::create(method);
 
       auto subscribe = &QtShims::subscribe;
-      kernel::EventDesc desc = { info, kernel::EventShim(*(void**)&subscribe, data) };
-
-      pComponent->AddDynamicEvent(desc);
+      auto shim = EventShim(*(void**)&subscribe, data);
+      pComponent->AddDynamicEvent(info, &shim);
     }
   }
 }

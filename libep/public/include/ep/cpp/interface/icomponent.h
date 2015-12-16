@@ -20,9 +20,9 @@ private:
   virtual void Init(Variant::VarMap initParams) = 0;
   virtual epResult InitComplete() = 0;
   virtual epResult ReceiveMessage(String message, String sender, const Variant &data) = 0;
-  virtual void AddDynamicProperty(const PropertyInfo &property) = 0;
-  virtual void AddDynamicMethod(const MethodInfo &method) = 0;
-  virtual void AddDynamicEvent(const EventInfo &event) = 0;
+  virtual void AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter = nullptr, const SetterShim *pSetter = nullptr) = 0;
+  virtual void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod = nullptr) = 0;
+  virtual void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe = nullptr) = 0;
   virtual void RemoveDynamicProperty(String name) = 0;
   virtual void RemoveDynamicMethod(String name) = 0;
   virtual void RemoveDynamicEvent(String name) = 0;

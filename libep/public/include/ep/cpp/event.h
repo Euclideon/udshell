@@ -136,9 +136,10 @@ inline void BaseEvent::RemoveSubscription(const DelegateMementoRef &spDelegate)
     if (subscribers[i].spM->GetFastDelegate() == spDelegate->GetFastDelegate())
     {
       subscribers.removeSwapLast(i);
-      break;
+      return;
     }
   }
+  epDebugWrite("Unsubscribe failed...?\n");
 }
 inline void BaseEvent::RemoveSubscription(const SubscriptionRef &spSubscription)
 {
@@ -147,9 +148,10 @@ inline void BaseEvent::RemoveSubscription(const SubscriptionRef &spSubscription)
     if (subscribers[i].pSubscription == spSubscription.ptr())
     {
       subscribers.removeSwapLast(i);
-      break;
+      return;
     }
   }
+  epDebugWrite("Unsubscribe failed...?\n");
 }
 
 

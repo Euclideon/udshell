@@ -1,6 +1,78 @@
+namespace ep {
 
-namespace kernel {
+// interface for getters, setters, methods, events
 
+// getter glue
+class GetterShim
+{
+public:
+  GetterShim(void *pGetter, SharedPtr<const RefCounted> data = nullptr) : pGetter(pGetter), data(data) {}
+
+  explicit operator bool() const { return pGetter != nullptr; }
+
+  Variant get(const Component *pThis) const;
+
+protected:
+  void *pGetter;
+  SharedPtr<const RefCounted> data;
+};
+
+// setter glue
+class SetterShim
+{
+public:
+  SetterShim(void *pSetter, SharedPtr<const RefCounted> data = nullptr) : pSetter(pSetter), data(data) {}
+
+  explicit operator bool() const { return pSetter != nullptr; }
+
+  void set(Component *pThis, const Variant &value) const;
+
+protected:
+  void *pSetter;
+  SharedPtr<const RefCounted> data;
+};
+
+// method glue
+class MethodShim
+{
+public:
+  MethodShim(void *pMethod, SharedPtr<const RefCounted> data = nullptr) : pMethod(pMethod), data(data) {}
+
+  Variant call(Component *pThis, Slice<const Variant> args) const;
+
+protected:
+  void *pMethod;
+  SharedPtr<const RefCounted> data;
+};
+
+// static funcion glue
+class StaticFuncShim
+{
+public:
+  StaticFuncShim(void *pFunc, SharedPtr<const RefCounted> data = nullptr) : pFunc(pFunc), data(data) {}
+
+  Variant call(Slice<const Variant> args) const;
+
+protected:
+  void *pFunc;
+  SharedPtr<const RefCounted> data;
+};
+
+// event glue
+class EventShim
+{
+public:
+  EventShim(void *pSubscribe, SharedPtr<const RefCounted> data = nullptr) : pSubscribe(pSubscribe), data(data) {}
+
+  void subscribe(Component *pThis, const Variant::VarDelegate &d) const;
+
+protected:
+  void *pSubscribe;
+  SharedPtr<const RefCounted> data;
+};
+
+
+// functions
 inline Variant GetterShim::get(const ep::Component *pThis) const
 {
   // hack to force construct a delegate
@@ -105,4 +177,4 @@ inline void EventShim::subscribe(ep::Component *pThis, const Variant::VarDelegat
   }
 }
 
-}  // namespace kernel
+} // ep

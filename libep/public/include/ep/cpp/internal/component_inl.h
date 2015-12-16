@@ -63,17 +63,17 @@ inline void* Component::GetUserData() const
   return pUserData;
 }
 
-inline void Component::AddDynamicProperty(const PropertyInfo &property)
+inline void Component::AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter, const SetterShim *pSetter)
 {
-  pImpl->AddDynamicProperty(property);
+  pImpl->AddDynamicProperty(property, pGetter, pSetter);
 }
-inline void Component::AddDynamicMethod(const MethodInfo &method)
+inline void Component::AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod)
 {
-  pImpl->AddDynamicMethod(method);
+  pImpl->AddDynamicMethod(method, pMethod);
 }
-inline void Component::AddDynamicEvent(const EventInfo &event)
+inline void Component::AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe)
 {
-  pImpl->AddDynamicEvent(event);
+  pImpl->AddDynamicEvent(event, pSubscribe);
 }
 inline void Component::RemoveDynamicProperty(String _name)
 {

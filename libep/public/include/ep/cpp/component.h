@@ -67,9 +67,9 @@ public:
 
   void* GetUserData() const;
 
-  void AddDynamicProperty(const PropertyInfo &property) override final;
-  void AddDynamicMethod(const MethodInfo &method) override final;
-  void AddDynamicEvent(const EventInfo &event) override final;
+  void AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter = nullptr, const SetterShim *pSetter = nullptr) override final;
+  void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod = nullptr) override final;
+  void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe = nullptr) override final;
   void RemoveDynamicProperty(String name) override final;
   void RemoveDynamicMethod(String name) override final;
   void RemoveDynamicEvent(String name) override final;
