@@ -1,5 +1,6 @@
 
 #include "ep/cpp/platform.h"
+#include "ep/cpp/componentdesc.h"
 
 #include "kernel.h"
 #include "componentdesc.h"
@@ -93,19 +94,19 @@ const kernel::StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name) con
   return GetDescriptor()->staticFuncTree.Get(_name);
 }
 
-void ComponentImpl::AddDynamicProperty(const PropertyInfo &property)
+void ComponentImpl::AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter, const SetterShim *pSetter)
 {
-  kernel::PropertyDesc desc(property, kernel::GetterShim(property.pGetterMethod), kernel::SetterShim(property.pSetterMethod));
+  kernel::PropertyDesc desc(property, pGetter ? *pGetter : GetterShim(property.pGetterMethod), pSetter ? *pSetter : SetterShim(property.pSetterMethod));
   instanceProperties.Insert(desc.id, desc);
 }
-void ComponentImpl::AddDynamicMethod(const MethodInfo &method)
+void ComponentImpl::AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod)
 {
-  kernel::MethodDesc desc(method, kernel::MethodShim(method.pMethod));
+  kernel::MethodDesc desc(method, pMethod ? *pMethod : MethodShim(method.pMethod));
   instanceMethods.Insert(desc.id, desc);
 }
-void ComponentImpl::AddDynamicEvent(const EventInfo &event)
+void ComponentImpl::AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe)
 {
-  kernel::EventDesc desc(event, kernel::EventShim(event.pSubscribe));
+  kernel::EventDesc desc(event, pSubscribe ? *pSubscribe : EventShim(event.pSubscribe));
   instanceEvents.Insert(desc.id, desc);
 }
 

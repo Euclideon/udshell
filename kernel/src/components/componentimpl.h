@@ -32,9 +32,9 @@ public:
 
   Variant Save() const override final { return Variant(Variant::VarMap()); }
 
-  void AddDynamicProperty(const PropertyInfo &property) override final;
-  void AddDynamicMethod(const MethodInfo &method) override final;
-  void AddDynamicEvent(const EventInfo &event) override final;
+  void AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter, const SetterShim *pSetter) override final;
+  void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod) override final;
+  void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe) override final;
   void RemoveDynamicProperty(String name) override final;
   void RemoveDynamicMethod(String name) override final;
   void RemoveDynamicEvent(String name) override final;

@@ -323,4 +323,6 @@ private:                                                                        
 
 } // ep
 
+#include "ep/cpp/internal/componentdesc_inl.h"
+
 #endif

@@ -615,7 +615,7 @@ int LuaState::componentNewIndex(lua_State* L)
 int LuaState::method(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
-  const kernel::MethodShim *pM = (const kernel::MethodShim*)l.toUserData(lua_upvalueindex(1));
+  const MethodShim *pM = (const MethodShim*)l.toUserData(lua_upvalueindex(1));
 
   ComponentRef c = l.toComponent(1);
 
