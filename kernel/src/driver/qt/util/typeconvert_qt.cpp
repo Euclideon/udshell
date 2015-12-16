@@ -9,6 +9,7 @@
 #include "../epkernel_qt.h"
 
 #include <QJSValueIterator>
+#include <QMetaType>
 
 
 // Qt type conversion to/from UD
@@ -237,7 +238,7 @@ Variant epToVariant(const QJSValue &v)
   }
   else if (v.isObject())
   {
-    Array<KeyValuePair> r;
+    Variant::VarMap varMap;
     QJSValueIterator i(v);
     while (i.hasNext())
     {
@@ -245,9 +246,9 @@ Variant epToVariant(const QJSValue &v)
 
       QString name = i.name();
       QJSValue value = i.value();
-      r.pushBack(KeyValuePair(Variant(qt::AllocUDStringFromQString(name)), epToVariant(value)));
+      varMap.Insert(KeyValuePair(Variant(qt::AllocUDStringFromQString(name)), epToVariant(value)));
     }
-    return Variant(std::move(r));
+    return Variant(std::move(varMap));
   }
   else if (v.isDate())
   {
@@ -324,6 +325,18 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
     default:
       udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
   }
+}
+
+Variant epToVariant(const QVariantMap &varMap)
+{
+  Variant::VarMap v;
+  QVariantMap::const_iterator i = varMap.begin();
+  while (i != varMap.end())
+  {
+    v.Insert(KeyValuePair(Variant(qt::AllocUDStringFromQString(i.key())), epToVariant(i.value())));
+    ++i;
+  }
+  return Variant(std::move(v));
 }
 
 #endif

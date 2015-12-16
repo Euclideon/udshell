@@ -11,6 +11,7 @@ namespace qt
 
 QVariant QtEPComponent::get(const QString &name) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String prop(byteArray.data(), byteArray.size());
   QVariant res;
@@ -20,6 +21,7 @@ QVariant QtEPComponent::get(const QString &name) const
 
 void QtEPComponent::set(const QString &name, QVariant val)
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String prop(byteArray.data(), byteArray.size());
   pComponent->SetProperty(prop, epToVariant(val));
@@ -27,6 +29,7 @@ void QtEPComponent::set(const QString &name, QVariant val)
 
 QVariant QtEPComponent::call(const QString &name) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -36,6 +39,7 @@ QVariant QtEPComponent::call(const QString &name) const
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -45,6 +49,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -54,6 +59,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) 
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -63,6 +69,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -72,6 +79,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -83,6 +91,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -95,6 +104,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5, QVariant arg6) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -106,6 +116,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -117,6 +128,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -129,6 +141,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
   QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
@@ -140,6 +153,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
 
 void QtEPComponent::subscribe(QString eventName, QJSValue func) const
 {
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
   if (!func.isCallable())
   {
     pComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString());

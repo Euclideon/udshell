@@ -9,12 +9,23 @@
 #include "ui/renderview_qt.h"
 #include "ui/window_qt.h"
 #include "components/qtcomponent_qt.h"
+#include "util/qmlbindings_qt.h"
+
 
 // Init the kernel's qrc file resources - this has to happen from the global namespace
 inline void InitResources() { Q_INIT_RESOURCE(kernel); }
 
 namespace qt
 {
+
+static QObject *QtKernelQmlSingletonProvider(QQmlEngine *pEngine, QJSEngine *pScriptEngine)
+{
+  Q_UNUSED(pEngine);
+  Q_UNUSED(pScriptEngine);
+
+  // NOTE: QML takes ownership of this object
+  return new QtKernelQml((QtKernel*)QtApplication::Kernel());
+}
 
 // custom kernel event
 class KernelEvent : public QEvent
@@ -118,8 +129,8 @@ epResult QtKernel::InitInternal()
 
   // register our internal qml types
   qmlRegisterType<RenderView>("epKernel", 0, 1, "EPRenderView");
-
-  // TODO: expose kernel innards to the qml context?
+  qmlRegisterType<QtEPComponent>();
+  qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider);
 
   // Load in the qrc file
   InitResources();
@@ -165,8 +176,6 @@ epResult QtKernel::RunMainLoop()
 // ---------------------------------------------------------------------------------------
 void QtKernel::PostEvent(QEvent *pEvent, int priority)
 {
-  LogTrace("QtKernel::PostEvent()");
-
   // TODO: remove these checks once we are confident in Kernel and the Qt driver
   EPASSERT(pApplication != nullptr, "QApplication doesn't exist");
 
@@ -335,8 +344,6 @@ void QtKernel::DoInit(ep::Kernel *)
 // ---------------------------------------------------------------------------------------
 void QtKernel::customEvent(QEvent *pEvent)
 {
-  LogTrace("QtKernel::customEvent()");
-
   if (pEvent->type() == KernelEvent::type())
   {
     MainThreadCallback d;

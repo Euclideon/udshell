@@ -37,6 +37,8 @@ bool QtWindowEventFilter::eventFilter(QObject *pObj, QEvent *pEvent)
       QtApplication::Kernel()->UnregisterWindow((QQuickWindow*)pObj);
       break;
     }
+    default:
+      break;
   }
 
   // Pass the event forward

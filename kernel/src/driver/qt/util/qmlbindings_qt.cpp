@@ -5,6 +5,7 @@
 #include "qmlbindings_qt.h"
 #include "signaltodelegate_qt.h"
 #include "componentdesc.h"
+#include "../epkernel_qt.h"
 
 namespace qt
 {
@@ -159,6 +160,38 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
       pComponent->AddDynamicEvent(info, &shim);
     }
   }
+}
+
+
+// ---------------------------------------------------------------------------------------
+QtEPComponent *QtKernelQml::FindComponent(const QString &uid) const
+{
+  EPASSERT(pKernel, "No active kernel");
+  QByteArray byteArray = uid.toUtf8();
+  String uidString(byteArray.data(), byteArray.size());
+
+  // TODO: this should default to JS ownership but doublecheck!!
+  return new QtEPComponent(pKernel->FindComponent(uidString));
+}
+
+// ---------------------------------------------------------------------------------------
+QtEPComponent *QtKernelQml::CreateComponent(const QString typeId, QVariantMap initParams)
+{
+  EPASSERT(pKernel, "No active kernel");
+  QByteArray byteArray = typeId.toUtf8();
+  String typeString(byteArray.data(), byteArray.size());
+
+  ep::ComponentRef componentRef;
+  pKernel->CreateComponent(typeString, epToVariant(initParams).asAssocArray(), &componentRef);
+  return new QtEPComponent(componentRef);
+}
+
+// ---------------------------------------------------------------------------------------
+QtEPComponent *QtKernelQml::GetCommandManager() const
+{
+  EPASSERT(pKernel, "No active kernel");
+  // TODO: this should default to JS ownership but doublecheck!!
+  return new QtEPComponent(pKernel->GetCommandManager());
 }
 
 } // namespace qt

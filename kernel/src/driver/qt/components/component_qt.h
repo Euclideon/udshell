@@ -23,7 +23,7 @@ class QtEPComponent : public QObject
 public:
   QtEPComponent() : QObject(nullptr), pComponent(nullptr) {}
   QtEPComponent(ep::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) { pComponent = spComponent.ptr(); }
-  QtEPComponent(const QtEPComponent &val) : QObject(nullptr), spComponent(ep::ComponentRef(val.pComponent)), pComponent(val.pComponent) {}
+  QtEPComponent(const QtEPComponent &val) : QObject(val.parent()), spComponent(ep::ComponentRef(val.pComponent)), pComponent(val.pComponent) {}
   ~QtEPComponent() {}
 
   ep::ComponentRef GetComponent() const { return ep::ComponentRef(pComponent); }
@@ -33,6 +33,8 @@ public:
 
 public:
   void Done() { emit completed(); }
+
+  Q_INVOKABLE bool isNull() const { return pComponent == nullptr; }
 
   Q_INVOKABLE QVariant get(const QString &name) const;
   Q_INVOKABLE void set(const QString &name, QVariant val);
