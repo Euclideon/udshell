@@ -888,13 +888,13 @@ inline void epFromVariant(const Variant &v, SharedMap<Tree> *pTree)
   {
     auto a = v.asArray();
     for (size_t i = 0; i < a.length; ++i)
-      pTree->insert(Variant(i).as<Tree::KeyType>(), a[i].as<Tree::ValueType>());
+      pTree->Insert(Variant(i).as<Tree::KeyType>(), a[i].as<Tree::ValueType>());
   }
   else if (v.is(Variant::Type::AssocArray))
   {
     auto aa = v.asAssocArray();
     for (auto kvp : aa)
-      pTree->insert(kvp.key.as<Tree::KeyType>(), kvp.value.as<Tree::ValueType>());
+      pTree->Insert(kvp.key.as<Tree::KeyType>(), kvp.value.as<Tree::ValueType>());
   }
 }
 
