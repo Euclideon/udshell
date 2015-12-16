@@ -252,33 +252,30 @@ epResult Kernel::Destroy()
   // call application deinit
   SendMessage("$deinit", "#", "deinit", nullptr);
 
+  spUpdateTimer = nullptr;
+  spStreamerTimer = nullptr;
+  spPluginManager = nullptr;
+
   epResult result = epR_Success;
   epResult renderSceneRenderResult = udRenderScene_DeinitRender(this);
   epResult renderSceneResult = udRenderScene_Deinit(this);
 
-  // unregister components, free stuff
-  //...
-
-  // TODO: Destroy the streamer timer
-  // pKernel->spStreamerTimer;
-
   udOctree_Shutdown();
 
-  // TODO: fix!
-  //delete pRenderer;
+  delete stdOutCapture;
+  delete stdErrCapture;
 
-  epHAL_Deinit();
+  spStdErrBC = nullptr;
+  spStdOutBC = nullptr;
 
-  if(stdOutCapture)
-  {
-    delete stdOutCapture;
-    stdOutCapture = nullptr;
-  }
-  if (stdErrCapture)
-  {
-    delete stdErrCapture;
-    stdErrCapture = nullptr;
-  }
+  spCommandManager = nullptr;
+  spResourceManager = nullptr;
+  spLogger = nullptr;
+  spLua = nullptr;
+
+  delete pRenderer;
+
+  epResult halResult = epHAL_Deinit();
 
   delete this;
 
@@ -286,6 +283,8 @@ epResult Kernel::Destroy()
     result = renderSceneRenderResult;
   else if (renderSceneResult != epR_Success)
     result = renderSceneResult;
+  else if (halResult != epR_Success)
+    result = halResult;
 
   return result;
 }
@@ -496,7 +495,8 @@ epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::
 
 epResult Kernel::DestroyComponent(Component *pInstance)
 {
-  spLua->SetGlobal(pInstance->uid, nullptr);
+  if (spLua && spLua.ptr() != pInstance)
+    spLua->SetGlobal(pInstance->uid, nullptr);
 
   // TODO: remove from component registry
   instanceRegistry.Destroy(pInstance->uid.hash());
