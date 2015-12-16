@@ -153,6 +153,7 @@ Rectangle {
     EPToolBar {
       id: toolBar
       Layout.fillWidth: true
+      Layout.preferredHeight: 36
     }
 
     Loader { sourceComponent: separator; Layout.fillWidth: true }

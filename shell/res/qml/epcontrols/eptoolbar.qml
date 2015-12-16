@@ -65,8 +65,9 @@ Rectangle {
   }
 
   id: toolBar
-  implicitHeight: vertical ? 1 : toolBarLayout.height
-  implicitWidth: vertical ? toolBarLayout.width : 1
+  implicitHeight: 1
+  implicitWidth: 1
+
   color: "transparent"
 
   Loader {
@@ -92,8 +93,6 @@ Rectangle {
     }
   }
 
-  //style: toolBarStyle
-
   Component {
     id: epSplitButton
 
@@ -117,6 +116,10 @@ Rectangle {
         property string command
         property alias dropdown: dropdown
         property alias menu: menu
+
+        implicitHeight: vertical ? toolBar.width : toolBar.height
+        implicitWidth: vertical ? toolBar.width: toolBar.height
+
         onClicked: {
           if(command)
             commandmanager.call("runcommand", command, null);
@@ -166,12 +169,12 @@ Rectangle {
   Component {
     id: separator
     Item {
-      implicitWidth: 14
+      implicitWidth: vertical ? toolBar.implicitWidth : 14
+      implicitHeight: vertical ? 14 : toolBar.implicitHeight
       Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        implicitWidth: 1
-        implicitHeight: toolBar.implicitHeight - 8
+        anchors.centerIn: parent
+        implicitWidth: vertical ? toolBar.implicitWidth - 8 : 1
+        implicitHeight: vertical ? 1 : toolBar.implicitHeight - 8
         color: "#555"
       }
     }
@@ -219,7 +222,7 @@ Rectangle {
       }
       label: Image {
         source: control.iconSource
-        fillMode: Image.Pad
+        fillMode: Image.PreserveAspectFit
       }
     }
   }
