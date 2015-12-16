@@ -2,14 +2,17 @@
 #define _EP_KERNEL_HPP
 
 #include "ep/cpp/variant.h"
-#include "ep/cpp/component.h"
+#include "ep/cpp/componentdesc.h"
 #include "ep/cpp/interface/icomponent.h"
 
-namespace kernel {
-struct ComponentDesc;
-}
-
 namespace ep {
+
+SHARED_CLASS(Component);
+SHARED_CLASS(View);
+SHARED_CLASS(DataSource);
+SHARED_CLASS(ResourceManager);
+SHARED_CLASS(CommandManager);
+SHARED_CLASS(Broadcaster);
 
 class Kernel
 {
@@ -18,8 +21,8 @@ public:
 
   virtual epResult SendMessage(String target, String sender, String message, const Variant &data) = 0;
 
-  template<typename ComponentType>
-  epResult RegisterComponentType();
+  template<typename ComponentType, typename Impl = void>
+  const ComponentDesc* RegisterComponentType();
 
   virtual const ComponentDesc* GetComponentDesc(String id) = 0;
 
@@ -31,9 +34,6 @@ public:
   SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr);
 
   virtual ComponentRef FindComponent(String uid) const = 0;
-
-  virtual epResult RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) = 0;
-//  virtual DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) = 0;
 
   // synchronisation
   typedef FastDelegate<void(Kernel*)> MainThreadCallback;
@@ -50,10 +50,32 @@ public:
   template<typename ...Args> void LogScript(String format, Args... args) const;
   template<typename ...Args> void LogTrace(String format, Args... args) const;
 
-protected:
-  virtual const kernel::ComponentDesc* RegisterComponentType(const ComponentDesc &desc) = 0;
+  // Functions for resource management
+  virtual ResourceManagerRef GetResourceManager() const = 0;
 
-  template<typename ComponentType, bool IsIComponent>
+  virtual epResult RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts) = 0;
+  virtual DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) = 0;
+
+  // stdio relaying functions
+  virtual BroadcasterRef GetStdOutBroadcaster() const = 0;
+  virtual BroadcasterRef GetStdErrBroadcaster() const = 0;
+
+  // other functions
+  virtual ViewRef GetFocusView() const = 0;
+  virtual ViewRef SetFocusView(ViewRef spView) = 0;
+
+  virtual CommandManagerRef GetCommandManager() const = 0;
+
+  // events
+  Event<double> UpdatePulse;
+
+private:
+  friend class Component;
+
+  virtual const ComponentDesc* RegisterComponentType(const ComponentDesc &desc) = 0;
+  virtual void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) = 0;
+
+  template<typename ComponentType, typename Impl = void>
   struct CreateHelper;
 };
 

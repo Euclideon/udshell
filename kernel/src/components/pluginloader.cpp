@@ -1,5 +1,5 @@
 #include "components/pluginloader.h"
 
-namespace kernel {
+namespace ep {
 
-} // namespace kernel
+} // namespace ep

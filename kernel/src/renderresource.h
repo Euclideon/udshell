@@ -13,7 +13,7 @@ struct epTexture;
 struct epShader;
 struct epShaderProgram;
 
-namespace kernel
+namespace ep
 {
 
 class Renderer;
@@ -111,6 +111,6 @@ public:
 };
 SHARED_CLASS(RenderVertexFormat);
 
-} // namespace kernel
+} // namespace ep
 
 #endif // EPRENDERRESOURCE_H

@@ -1,7 +1,7 @@
 #include "components/pluginmanager.h"
 #include "kernel.h"
 
-namespace kernel {
+namespace ep {
 
 PluginManager::PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
@@ -27,4 +27,4 @@ bool PluginManager::LoadPlugin(String filename)
   return false;
 }
 
-} // namespace kernel
+} // namespace ep

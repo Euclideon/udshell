@@ -2,12 +2,12 @@
 #ifndef EP_PLUGIN_MANAGER_H
 #define EP_PLUGIN_MANAGER_H
 
-#include "components/component.h"
+#include "ep/cpp/component.h"
 #include "components/pluginloader.h"
 
-namespace kernel {
+namespace ep {
 
-PROTOTYPE_COMPONENT(PluginManager);
+SHARED_CLASS(PluginManager);
 
 class PluginManager : public Component
 {
@@ -23,6 +23,6 @@ protected:
   Array<PluginLoaderRef> loaders;
 };
 
-} //namespace kernel
+} //namespace ep
 
 #endif // EP_PLUGIN_MANAGER_H

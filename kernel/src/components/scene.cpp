@@ -5,7 +5,7 @@
 #include "nodes/camera.h"
 #include "renderscene.h"
 
-namespace kernel {
+namespace ep {
 
 bool Scene::InputEvent(const epInputEvent &ev)
 {
@@ -108,4 +108,4 @@ Variant Scene::Save() const
   return map;
 }
 
-}  // namespace kernel
+}  // namespace ep

@@ -4,10 +4,10 @@
 
 #include "stream.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(File);
+SHARED_CLASS(File);
 
 EP_BITFIELD(FileOpenFlags,
   Read,

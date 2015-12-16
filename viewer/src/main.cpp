@@ -202,7 +202,7 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, char *cmdline, int)
 }
 #endif // UDPLATFORM_WINDOWS
 
-void update(kernel::ViewRef spView, kernel::SceneRef spScene)
+void update(ViewRef spView, SceneRef spScene)
 {
   using namespace ep;
   int displayWidth, displayHeight;

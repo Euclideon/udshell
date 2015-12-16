@@ -5,7 +5,7 @@
 #include "components/resources/kvpstore.h"
 #include "ep/cpp/avltree.h"
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(Metadata);

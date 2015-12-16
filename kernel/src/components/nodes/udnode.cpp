@@ -5,7 +5,7 @@
 #include "udRender.h"
 #include "components/datasources/uddatasource.h"
 
-namespace kernel
+namespace ep
 {
 
 epResult UDNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
@@ -20,4 +20,4 @@ epResult UDNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
   return epR_Success;
 }
 
-} // namespace kernel
+} // namespace ep

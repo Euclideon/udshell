@@ -2,12 +2,12 @@
 #ifndef EP_LOGGER_H
 #define EP_LOGGER_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(Logger);
+SHARED_CLASS(Logger);
 SHARED_CLASS(Stream);
 
 /**
@@ -181,6 +181,6 @@ protected:
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const epVarArg *pArgs);
 
-} //namespace kernel
+} //namespace ep
 
 #endif // EPLOGGER_H

@@ -2,13 +2,12 @@
 #ifndef EP_COMMAND_MANAGER_H
 #define EP_COMMAND_MANAGER_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 #include "ep/cpp/delegate.h"
 
-namespace kernel
-{
+namespace ep {
 
-PROTOTYPE_COMPONENT(CommandManager);
+SHARED_CLASS(CommandManager);
 
 class CommandManager : public Component
 {
@@ -55,6 +54,6 @@ protected:
   }
 };
 
-} //namespace kernel
+} //namespace ep
 
 #endif // EP_COMMAND_MANAGER_H

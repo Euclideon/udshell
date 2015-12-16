@@ -3,7 +3,7 @@
 #include "components/datasource.h"
 #include "kernel.h"
 
-namespace kernel
+namespace ep
 {
 
 ResourceManager::ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -74,4 +74,4 @@ void ResourceManager::SaveResourcesToFile(Slice<ResourceRef>, Variant::VarMap in
 
 }
 
-} // namespace kernel
+} // namespace ep

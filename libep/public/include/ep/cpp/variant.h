@@ -8,7 +8,7 @@
 
 #include "ep/c/variant.h"
 
-namespace kernel {
+namespace ep {
 class LuaState;
 }
 
@@ -130,8 +130,8 @@ public:
   Variant* getItem(String key) const;
 
   // TODO: these shouldn't be part of the public API!
-  void luaPush(kernel::LuaState &l) const;
-  static Variant luaGet(kernel::LuaState &l, int idx = -1);
+  void luaPush(LuaState &l) const;
+  static Variant luaGet(LuaState &l, int idx = -1);
 
 private:
   size_t t : 4;

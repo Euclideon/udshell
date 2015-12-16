@@ -7,13 +7,13 @@
 #include "components/resources/material.h"
 #include "ep/cpp/sharedptr.h"
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(RenderShaderProgram);
 SHARED_CLASS(RenderVertexFormat);
 
-PROTOTYPE_COMPONENT(Model);
+SHARED_CLASS(Model);
 
 class Model : public Resource
 {
@@ -52,6 +52,6 @@ protected:
   RenderVertexFormatRef spRenderVertexFormat = nullptr;
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _EP_MODEL_H

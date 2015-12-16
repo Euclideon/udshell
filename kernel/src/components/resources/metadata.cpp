@@ -1,5 +1,5 @@
 #include "metadata.h"
 
-namespace kernel {
+namespace ep {
 
-} // namespace kernel
+} // namespace ep

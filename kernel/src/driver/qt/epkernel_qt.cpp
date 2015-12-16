@@ -102,7 +102,7 @@ epResult QtKernel::InitInternal()
   LogTrace("QtKernel::InitInternal()");
   LogInfo(2, "Initialising epShell...");
 
-  if (RegisterComponentType<QtComponent>() != epR_Success)
+  if (RegisterComponentType<QtComponent>() == nullptr)
   {
     LogError("Unable to register QtComponent");
     return epR_Failure;

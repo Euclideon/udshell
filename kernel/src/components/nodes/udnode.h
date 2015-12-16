@@ -6,16 +6,16 @@
 #include "udRender.h"
 
 #include "ep/cpp/math.h"
-#include "../component.h"
+#include "ep/cpp/component.h"
 #include "node.h"
 #include "components/resources/udmodel.h"
 #include "hal/input.h"
 
 struct udOctree;
 
-namespace kernel {
+namespace ep {
 
-PROTOTYPE_COMPONENT(UDNode);
+SHARED_CLASS(UDNode);
 
 class UDNode : public Node
 {
@@ -41,6 +41,6 @@ protected:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // EP_UDNODE_H

@@ -4,7 +4,7 @@
 
 #include "rapidxml.hpp"
 
-namespace kernel {
+namespace ep {
 
 /*
 Variant Text::MapToXMLNode(Variant map)
@@ -263,4 +263,4 @@ uint32_t Text::GetLineNumberFromByteIndex(String buffer, size_t index)
   return lineNumber;
 }
 
-} // namespace kernel
+} // namespace ep

@@ -4,7 +4,7 @@
 #include "components/resources/text.h"
 #include "components/commandmanager.h"
 
-namespace kernel
+namespace ep
 {
 
 Menu::Menu(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -266,4 +266,4 @@ void Menu::SetMenuProperties(Variant &menu, Variant::VarMap properties)
   }
 }
 
-} // namespace kernel
+} // namespace ep

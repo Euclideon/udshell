@@ -2,14 +2,14 @@
 #if !defined(_EP_TIMER_H)
 #define _EP_TIMER_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 #include "components/stream.h"
 #include "resources/resource.h"
 #include "hal/haltimer.h"
 
-namespace kernel {
+namespace ep {
 
-PROTOTYPE_COMPONENT(Timer);
+SHARED_CLASS(Timer);
 
 class Timer : public Component
 {
@@ -65,6 +65,6 @@ private:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _EP_TIMER_H

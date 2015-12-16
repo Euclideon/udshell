@@ -4,7 +4,7 @@
 #include "components/stream.h"
 #include "kernel.h"
 
-namespace kernel
+namespace ep
 {
 
 StreamRef DataSource::OpenStream(const Variant &source)
@@ -55,4 +55,4 @@ DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString
     url = source->asString();
 }
 
-} // namespace kernel
+} // namespace ep

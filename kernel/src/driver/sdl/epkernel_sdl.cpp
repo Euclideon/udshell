@@ -145,7 +145,7 @@ epResult SDLKernel::RunMainLoop()
     epInput_Update();
 
     // render a frame (this could move to another thread!)
-    kernel::RenderableViewRef spRenderView = spFocusView->GetRenderableView();
+    RenderableViewRef spRenderView = spFocusView->GetRenderableView();
     if (spRenderView)
       spRenderView->RenderGPU();
 
@@ -205,7 +205,7 @@ epResult Kernel::Terminate()
   return epR_Success;
 }
 
-} // namespace ep
+} // namespace kernel
 
 #else
 EPEMPTYFILE

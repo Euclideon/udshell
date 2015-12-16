@@ -7,7 +7,7 @@
 namespace qt
 {
 
-QtComponent::QtComponent(const kernel::ComponentDesc *pType, kernel::Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+QtComponent::QtComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   int64_t ptr = initParams.Get("object")->asInt();

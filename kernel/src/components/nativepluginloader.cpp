@@ -3,8 +3,7 @@
 
 #include "ep/c/plugin.h"
 #include "ep/c/internal/kernel_inl.h"
-#include "ep/c/internal/component_inl.h"
-#include "ep/cpp/componentdesc.h"
+#include "ep/cpp/component.h"
 
 extern "C" {
   typedef bool (epPlugin_InitProc)(epPluginInstance *pPlugin);
@@ -27,23 +26,23 @@ epPluginInstance *Kernel::GetPluginInterface()
     {
       return epAlloc(size);
     },
-    pPluginInstance->AllocAligned = [](size_t size, size_t alignment) -> void*
+      pPluginInstance->AllocAligned = [](size_t size, size_t alignment) -> void*
     {
       return epAllocAligned(size, alignment, epAF_None);
     },
-    pPluginInstance->Free = [](void *pMem) -> void
+      pPluginInstance->Free = [](void *pMem) -> void
     {
       epFree(pMem);
     },
 
-    pPluginInstance->AssertFailed = [](epString condition, epString message, epString file, int line) -> void
+      pPluginInstance->AssertFailed = [](epString condition, epString message, epString file, int line) -> void
     {
 #if EPASSERT_ON
       epAssertFailed(condition, message, file, line);
 #endif
     },
 
-    pPluginInstance->DestroyComponent = [](epComponent *pInstance) -> void
+      pPluginInstance->DestroyComponent = [](epComponent *pInstance) -> void
     {
       // NOTE: this was called when an RC reached zero...
       Component *pC = (Component*)pInstance;
@@ -53,8 +52,11 @@ epPluginInstance *Kernel::GetPluginInterface()
   return pPluginInstance;
 }
 
+} // namespace kernel
+
 // ----- Everything we need! -----
 
+namespace ep {
 
 Slice<const String> NativePluginLoader::GetSupportedExtensions() const
 {
@@ -102,7 +104,7 @@ bool NativePluginLoader::LoadPlugin(String filename)
     return false;
 #endif
 
-  bool bSuccess = pInit(GetKernel().GetPluginInterface());
+  bool bSuccess = pInit(((kernel::Kernel&)GetKernel()).GetPluginInterface());
 
   if (!bSuccess)
   {
@@ -117,4 +119,4 @@ bool NativePluginLoader::LoadPlugin(String filename)
   return bSuccess;
 }
 
-} // namespace kernel
+} // namespace ep

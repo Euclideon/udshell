@@ -4,7 +4,7 @@
 #include "kernel.h"
 #include "components/resources/model.h"
 
-namespace kernel
+namespace ep
 {
 
 epResult GeomNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
@@ -37,4 +37,4 @@ epResult GeomNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
   return epR_Success;
 }
 
-} // namespace kernel
+} // namespace ep

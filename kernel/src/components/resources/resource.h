@@ -2,9 +2,9 @@
 #ifndef _EP_RESOURCE_H
 #define _EP_RESOURCE_H
 
-#include "components/component.h"
+#include "ep/cpp/component.h"
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(DataSource);

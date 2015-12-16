@@ -2,12 +2,12 @@
 #if !defined(_EP_BROADCASTER_H)
 #define _EP_BROADCASTER_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 #include "resources/buffer.h"
 
-namespace kernel
+namespace ep
 {
-PROTOTYPE_COMPONENT(Broadcaster);
+SHARED_CLASS(Broadcaster);
 
 class Broadcaster : public Component
 {

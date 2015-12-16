@@ -4,9 +4,9 @@
 
 #include "components/pluginloader.h"
 
-namespace kernel {
+namespace ep {
 
-PROTOTYPE_COMPONENT(NativePluginLoader);
+SHARED_CLASS(NativePluginLoader);
 
 class NativePluginLoader : public PluginLoader
 {
@@ -22,6 +22,6 @@ protected:
   {}
 };
 
-} //namespace kernel
+} //namespace ep
 
 #endif // EP_NATIVE_PLUGIN_LOADER_H

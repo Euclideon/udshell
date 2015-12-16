@@ -3,13 +3,14 @@
 #define UI_CONSOLE_H
 
 #include "ui.h"
+#include "logger.h"
 
-namespace kernel
-{
+namespace ep {
 
-PROTOTYPE_COMPONENT(UIConsole);
+SHARED_CLASS(UIConsole);
 SHARED_CLASS(MemStream);
 SHARED_CLASS(Broadcaster);
+SHARED_CLASS(Stream);
 
 class UIConsole : public UIComponent
 {
@@ -137,7 +138,7 @@ protected:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // UICONSOLE_H
 

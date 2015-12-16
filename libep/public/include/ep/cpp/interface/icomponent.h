@@ -1,59 +1,33 @@
 #pragma once
-#if !defined(_EP_INTERFACE_ICOMPONENT_HPP)
-#define _EP_INTERFACE_ICOMPONENT_HPP
+#if !defined(_EP_ICOMPONENT_HPP)
+#define _EP_ICOMPONENT_HPP
 
-#include "ep/cpp/component.h"
-#include "ep/cpp/sharedptr.h"
+#include "ep/cpp/variant.h"
 
 namespace ep {
 
 class IComponent
 {
-  EP_DECLARE_COMPONENT(IComponent, IComponent, EP_APIVERSION, "Component Interface")
+  friend class Component;
 public:
-  SharedString GetUid() const                                               { return component.GetUid(); }
-  SharedString GetName() const                                              { return component.GetName(); }
-
-  bool IsType(String type) const                                            { return component.IsType(type); }
-
-  Variant GetProperty(String property) const                                { return component.GetProperty(property); }
-  void SetProperty(String property, const Variant &value)                   { component.SetProperty(property, value); }
-
-  Variant CallMethod(String method, Slice<const Variant> args)              { return component.CallMethod(method, args); }
-  template<typename ...Args>
-  Variant CallMethod(String method, Args... args)
-  {
-    const Variant varargs[sizeof...(Args)+1] = { args... };
-    return component.CallMethod(method, Slice<const Variant>(varargs, sizeof...(Args)));
-  }
-
-  void Subscribe(String eventName, Variant::VarDelegate delegate)           { component.Subscribe(eventName, delegate); }
-
-  epResult SendMessage(String target, String message, const Variant &data)  { return component.SendMessage(target, message, data); }
-
-  virtual epResult InitComplete()                                                     { return epR_Success; }
-  virtual epResult ReceiveMessage(String message, String sender, const Variant &data) { return epR_Success; }
-
-  operator ComponentRef() const                                             { return (ComponentRef&)component; }
-
-  // component registration :: TODO: this should be protected, or removed
-  static epComponentOverrides GetOverrides();
-
-protected:
-  IComponent(Component &baseComponent, Variant::VarMap initParams) : component(baseComponent) {}
-  virtual ~IComponent() {}
-
-  Component &component;
-/*
+  virtual void SetName(SharedString name) = 0;
+  virtual Variant GetProperty(String property) const = 0;
+  virtual void SetProperty(String property, const Variant &value) = 0;
+  virtual Variant CallMethod(String method, Slice<const Variant> args) = 0;
+  virtual void Subscribe(String eventName, const Variant::VarDelegate &delegate) = 0;
+  virtual Variant Save() const = 0;
 private:
-  template<typename T>
-  static void* CreateInstance(epComponent *pBaseInstance, const epKeyValuePair *pInitParams, size_t numInitParams)
-  {
-    return new T((Component*&)pBaseInstance, Slice<KeyValuePair>((KeyValuePair*)pInitParams, numInitParams));
-  }
-*/
+  virtual void Init(Variant::VarMap initParams) = 0;
+  virtual epResult InitComplete() = 0;
+  virtual epResult ReceiveMessage(String message, String sender, const Variant &data) = 0;
+  virtual void AddDynamicProperty(const PropertyInfo &property) = 0;
+  virtual void AddDynamicMethod(const MethodInfo &method) = 0;
+  virtual void AddDynamicEvent(const EventInfo &event) = 0;
+  virtual void RemoveDynamicProperty(String name) = 0;
+  virtual void RemoveDynamicMethod(String name) = 0;
+  virtual void RemoveDynamicEvent(String name) = 0;
 };
 
 } // namespace ep
 
-#endif // _EP_INTERFACE_ICOMPONENT_HPP
+#endif // _EP_ICOMPONENT_HPP

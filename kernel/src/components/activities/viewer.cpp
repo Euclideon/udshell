@@ -14,7 +14,7 @@
 
 #include "kernel.h"
 
-namespace kernel {
+namespace ep {
 
 Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Activity(pType, pKernel, uid, initParams)
@@ -140,4 +140,4 @@ void Viewer::JumpToBookmark()
   }
 }
 
-} // namespace kernel
+} // namespace ep

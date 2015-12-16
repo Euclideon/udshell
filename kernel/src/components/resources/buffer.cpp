@@ -2,7 +2,7 @@
 #include "renderresource.h"
 #include "renderscene.h"
 
-namespace kernel
+namespace ep
 {
 
 bool Buffer::Reserve(size_t size)
@@ -132,4 +132,4 @@ bool Buffer::CopyBuffer(Slice<const void> buf)
   return true; // TODO Error handling
 }
 
-} // namespace kernel
+} // namespace ep

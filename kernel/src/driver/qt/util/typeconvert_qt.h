@@ -75,7 +75,7 @@ template<> struct StringifyProxy<const QChar*>  { inline static ptrdiff_t string
 template<> struct StringifyProxy<QString>       { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { const QString *pS = (QString*)pData;     return ::epStringify(buffer, format, WString((const char16_t*)pS->data(), pS->size()), pArgs); }            static const size_t intify = 0; };
 
 } // namespace internal
-} // namespace kernel
+} // namespace ep
 
 
 

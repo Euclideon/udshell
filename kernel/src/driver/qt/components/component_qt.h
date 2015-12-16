@@ -5,7 +5,7 @@
 #include <QVariant>
 #include "../util/typeconvert_qt.h"
 
-#include "components/component.h"
+#include "components/componentimpl.h"
 
 // forward declare
 namespace qt {

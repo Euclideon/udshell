@@ -2,7 +2,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 
-namespace kernel
+namespace ep
 {
 
 RenderVertexFormatRef Model::GetRenderVertexFormat(RenderShaderProgramRef spShaderProgram)
@@ -31,4 +31,4 @@ void Model::SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> 
   a.attributes = attributeNames;
 }
 
-} // namespace kernel
+} // namespace ep

@@ -1,8 +1,9 @@
+#include "components/logger.h"
 #include "components/stream.h"
 #include "ep/cpp/datetime.h"
 #include "hal/haltimer.h"
 
-namespace kernel {
+namespace ep {
 
 Array<const MethodInfo> Logger::GetMethods()
 {
@@ -288,4 +289,4 @@ SharedString LogLine::ToString(LogFormatSpecs format) const
   return out;
 }
 
-} // namespace kernel
+} // namespace ep

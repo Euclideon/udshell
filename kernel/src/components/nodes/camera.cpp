@@ -2,7 +2,7 @@
 #include "camera.h"
 #include "kernel.h"
 
-namespace kernel
+namespace ep
 {
 
 // ***************************************************************************************
@@ -263,4 +263,4 @@ Variant SimpleCamera::Save() const
   return Variant(std::move(params));
 }
 
-} // namespace kernel
+} // namespace ep

@@ -8,7 +8,7 @@
 // TODO: remove when resource cleanup is implemented
 #include "hal/driver.h"
 
-namespace kernel
+namespace ep
 {
 
 // shaders for blitting
@@ -364,4 +364,4 @@ void Renderer::UDThread()
   udIncrementSemaphore(pUDTerminateSemaphore);
 }
 
-} // namespace kernel
+} // namespace ep

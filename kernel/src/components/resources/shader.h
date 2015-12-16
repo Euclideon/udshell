@@ -5,12 +5,12 @@
 #include "components/resources/resource.h"
 #include "ep/cpp/sharedptr.h"
 
-namespace kernel
+namespace ep
 {
 
 SHARED_CLASS(RenderShader);
 
-PROTOTYPE_COMPONENT(Shader);
+SHARED_CLASS(Shader);
 
 EP_ENUM(ShaderType,
         VertexShader,
@@ -39,6 +39,6 @@ protected:
   RenderShaderRef spRenderShader = nullptr;
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // _EP_SHADER_H

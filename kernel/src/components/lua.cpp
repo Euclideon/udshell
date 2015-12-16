@@ -3,7 +3,7 @@
 
 #include "eplua.h"
 
-namespace kernel
+namespace ep
 {
 
 Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -51,4 +51,4 @@ void Lua::Print(String str) const
   pLua->print(str);
 }
 
-} // namespace kernel
+} // namespace ep

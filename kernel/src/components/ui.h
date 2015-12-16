@@ -2,12 +2,12 @@
 #ifndef UI_H
 #define UI_H
 
-#include "component.h"
+#include "ep/cpp/component.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(UIComponent);
+SHARED_CLASS(UIComponent);
 
 class UIComponent : public Component
 {
@@ -32,6 +32,6 @@ protected:
   }
 };
 
-} // namespace kernel
+} // namespace ep
 
 #endif // UI_H

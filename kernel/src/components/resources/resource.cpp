@@ -2,7 +2,7 @@
 #include "metadata.h"
 #include "kernel.h"
 
-namespace kernel {
+namespace ep {
 
 MetadataRef Resource::GetMetadata() const
 {
@@ -11,4 +11,4 @@ MetadataRef Resource::GetMetadata() const
   return metadata;
 }
 
-} // namespace kernel
+} // namespace ep

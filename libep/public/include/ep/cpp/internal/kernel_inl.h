@@ -1,7 +1,5 @@
 #include "ep/c/internal/kernel_inl.h"
 
-namespace kernel { class Kernel; }
-
 namespace ep {
 
 namespace internal {
@@ -10,9 +8,11 @@ namespace internal {
 }
 
 // TODO: HAX HAX! this whole mess needs to be made private somehow...
-template<typename ComponentType, bool IsIComponent>
+template<typename ComponentType, typename Impl>
 struct Kernel::CreateHelper
 {
+  using CreateFunc = ComponentDesc::CreateImplCallback*;
+
   static constexpr bool HasDescriptor() { return HasDescriptorImpl((ComponentType*)nullptr); }
   static Array<const PropertyInfo> GetProperties() { return GetPropertiesImpl((ComponentType*)nullptr); }
   static Array<const MethodInfo> GetMethods() { return GetMethodsImpl((ComponentType*)nullptr); }
@@ -20,20 +20,11 @@ struct Kernel::CreateHelper
   static Array<const StaticFuncInfo> GetStaticFuncs() { return GetStaticFuncsImpl((ComponentType*)nullptr); }
   static ComponentDesc::InitComponent* GetStaticInit() { return GetStaticInitImpl((ComponentType*)nullptr); }
 
-  static epComponentOverrides* GetOverrides()
-  {
-    return nullptr;
-  }
+  static ComponentDesc::CreateInstanceCallback* GetCreateFunc() { return GetCreateFuncImpl((ComponentType*)nullptr); }
 
-  static ComponentDesc::CreateInstanceCallback* GetCreateFunc()
-  {
-    return GetCreateFuncImpl((ComponentType*)nullptr);
-  }
+  static SharedString GetSuper() { return GetSuperImpl((typename ComponentType::Super*)nullptr); }
 
-  static SharedString GetSuper()
-  {
-    return ComponentType::Super::ComponentID();
-  }
+  static CreateFunc GetCreateImpl() { return GetCreateImplImpl((typename ComponentType::Impl*)nullptr); }
 
 private:
   // TODO: these need to go somewhere else, instantiating this class for these functions instantiates the other functions too that should be specialised for IComponent and friends
@@ -56,6 +47,14 @@ private:
   static auto GetStaticInitImpl(T* t) -> decltype(T::StaticInit(nullptr), internal::ComponentDesc_InitComponentPtr()) { return &T::StaticInit; }
   static ComponentDesc::InitComponent* GetStaticInitImpl(...) { return nullptr; }
 
+  template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
+  static SharedString GetSuperImpl(T* t) { return T::ComponentID(); }
+  static SharedString GetSuperImpl(...) { return nullptr; }
+
+  template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
+  static CreateFunc GetCreateImplImpl(T* t) { return [](Component *pInstance, Variant::VarMap initParams) -> void* { return new Impl(pInstance, initParams); }; }
+  static CreateFunc GetCreateImplImpl(...) { return nullptr; }
+
   template <typename T>
   static auto GetCreateFuncImpl(T* t) -> decltype(T::CreateInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::CreateInstance; }
   static ComponentDesc::CreateInstanceCallback* GetCreateFuncImpl(...)
@@ -64,68 +63,29 @@ private:
       MutableString128 t(Format, "New: {0} - {1}", pType->info.id, uid);
       pKernel->LogDebug(4, t);
       // TODO: this new can't exist in the wild... need to call back into kernel!!
-      return new ComponentType((const kernel::ComponentDesc*)pType, (kernel::Kernel*)pKernel, uid, initParams);
-    };
-  }
-};
-template<typename ComponentType>
-struct Kernel::CreateHelper<ComponentType, true>
-{
-  static epComponentOverrides* GetOverrides()
-  {
-    // keep the data statically, so that the ownership doesn't become a problem...
-    static auto overrides = ComponentType::GetOverrides();
-
-    // fabricate a CreateInstance function for this type...
-    overrides.pCreateInstance = [](epComponent *pBaseInstance, const epVarMap *pInitParams) -> void*
-    {
-      return new ComponentType(*(Component*)pBaseInstance, (Variant::VarMap&)pInitParams);
-    };
-
-    return (epComponentOverrides*)&overrides;
-  }
-
-  static ComponentDesc::CreateInstanceCallback* GetCreateFunc()
-  {
-    return GetCreateFuncImpl((ComponentType*)nullptr);
-  }
-
-  static SharedString GetSuper()
-  {
-    SharedString super = ComponentType::Super::ComponentID();
-    return SharedString::concat(super.slice(1, super.length), "plugin");
-  }
-
-private:
-  template <typename T>
-  static auto GetCreateFuncImpl(T* t) -> decltype(T::CreateInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::CreateInstance; }
-  static ComponentDesc::CreateInstanceCallback* GetCreateFuncImpl(...)
-  {
-    return [](const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams) -> Component* {
-      return pType->pSuperDesc->pCreateInstance(pType, pKernel, uid, initParams);
+      return new ComponentType(pType, pKernel, uid, initParams);
     };
   }
 };
 
-template<typename ComponentType>
-inline epResult Kernel::RegisterComponentType()
+template<typename ComponentType, typename Impl>
+inline const ComponentDesc* Kernel::RegisterComponentType()
 {
   // check the class has a 'super' member
-  static_assert(CreateHelper<ComponentType, false>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Name, SuperType, Version, Description)' declared at the top of ComponentType");
+  static_assert(CreateHelper<ComponentType>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Name, SuperType, Version, Description)' declared at the top of ComponentType");
 
   ComponentDesc desc;
   desc.info = ComponentType::MakeDescriptor();
-  desc.baseClass = CreateHelper<ComponentType, std::is_base_of<IComponent, ComponentType>::value>::GetSuper();
+  desc.baseClass = CreateHelper<ComponentType>::GetSuper();
 
-  desc.pOverrides = CreateHelper<ComponentType, std::is_base_of<IComponent, ComponentType>::value>::GetOverrides();
+  desc.pInit = CreateHelper<ComponentType>::GetStaticInit();
+  desc.pCreateInstance = CreateHelper<ComponentType>::GetCreateFunc();
+  desc.pCreateImpl = CreateHelper<ComponentType, Impl>::GetCreateImpl();
 
-  desc.pInit = CreateHelper<ComponentType, false>::GetStaticInit();
-  desc.pCreateInstance = CreateHelper<ComponentType, std::is_base_of<IComponent, ComponentType>::value>::GetCreateFunc();
-
-  desc.properties = CreateHelper<ComponentType, false>::GetProperties();
-  desc.methods = CreateHelper<ComponentType, false>::GetMethods();
-  desc.events = CreateHelper<ComponentType, false>::GetEvents();
-  desc.staticFuncs = CreateHelper<ComponentType, false>::GetStaticFuncs();
+  desc.properties = CreateHelper<ComponentType>::GetProperties();
+  desc.methods = CreateHelper<ComponentType>::GetMethods();
+  desc.events = CreateHelper<ComponentType>::GetEvents();
+  desc.staticFuncs = CreateHelper<ComponentType>::GetStaticFuncs();
 
   desc.pSuperDesc = nullptr;
 
@@ -135,14 +95,11 @@ inline epResult Kernel::RegisterComponentType()
     if (!desc.pSuperDesc)
     {
       EPASSERT(false, "Base class not registered");
-      return epR_Failure;
+      return nullptr;
     }
   }
 
-  if (!RegisterComponentType(desc))
-    return epR_Failure;
-
-  return epR_Success;
+  return (const ComponentDesc*)RegisterComponentType(desc);
 }
 
 template<typename T>

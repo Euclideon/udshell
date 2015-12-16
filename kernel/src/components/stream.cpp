@@ -1,7 +1,7 @@
 #include "components/stream.h"
 #include "kernel.h"
 
-namespace kernel
+namespace ep
 {
 
 BufferRef Stream::ReadBuffer(size_t bytes)
@@ -67,4 +67,4 @@ String Stream::ReadLn(Slice<char> buf)
   return nullptr;
 }
 
-} // namespace kernel
+} // namespace ep

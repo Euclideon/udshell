@@ -4,10 +4,10 @@
 
 #include "components/datasource.h"
 
-namespace kernel
+namespace ep
 {
 
-PROTOTYPE_COMPONENT(UDDataSource);
+SHARED_CLASS(UDDataSource);
 
 class UDDataSource : public DataSource
 {

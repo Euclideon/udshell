@@ -1,0 +1,180 @@
+
+#include "ep/cpp/platform.h"
+
+#include "kernel.h"
+#include "componentdesc.h"
+#include "components/logger.h"
+
+// TODO: shut up about sprintf! **REMOVE ME**
+#if defined(EP_WINDOWS)
+#pragma warning(disable: 4996)
+#endif // defined(EP_WINDOWS)
+
+namespace ep {
+
+ComponentImpl::~ComponentImpl()
+{
+  pInstance->LogDebug(4, "Destroy component: {0} ({1})", pInstance->uid, pInstance->name);
+  GetKernel()->DestroyComponent(pInstance);
+}
+
+void ComponentImpl::SetName(SharedString name)
+{
+  // TODO: update the component registry; needs to be inserted into search trees for names...
+  pInstance->name = name;
+}
+
+void ComponentImpl::Init(Variant::VarMap initParams)
+{
+  // TODO uncomment this when we've thought it through
+  /*
+  for (auto kv : initParams)
+  {
+    const PropertyDesc *pDesc = GetPropertyDesc(kv.key.asString());
+    if (pDesc && pDesc->setter)
+      pDesc->setter.set(this, kv.value);
+  }
+  */
+
+/*
+  // TODO: rethink this whole thing!!
+
+  // allocate property change events
+  propertyChange.length = pType->propertyTree.Size();
+  propertyChange.ptr = epAllocType(Event<>, propertyChange.length, epAF_None);
+  for (size_t i = 0; i<propertyChange.length; ++i)
+    new(&propertyChange.ptr[i]) Event<>();
+*/
+  pInstance->InitComplete();
+}
+
+epResult ComponentImpl::ReceiveMessage(String message, String sender, const Variant &data)
+{
+  if (message.eqIC("set"))
+  {
+    Slice<Variant> arr = data.asArray();
+    pInstance->SetProperty(arr[0].asString(), arr[1]);
+  }
+  else if (message.eqIC("get"))
+  {
+    if (!sender.empty())
+    {
+      Variant p = pInstance->GetProperty(data.asString());
+      pInstance->SendMessage(sender, "val", p);
+    }
+  }
+  return epR_Success;
+}
+
+const kernel::PropertyDesc *ComponentImpl::GetPropertyDesc(String _name) const
+{
+  const kernel::PropertyDesc *pDesc = instanceProperties.Get(_name);
+  if (!pDesc)
+    pDesc = GetDescriptor()->propertyTree.Get(_name);
+  return pDesc;
+}
+const kernel::MethodDesc *ComponentImpl::GetMethodDesc(String _name) const
+{
+  const kernel::MethodDesc *pDesc = instanceMethods.Get(_name);
+  if (!pDesc)
+    pDesc = GetDescriptor()->methodTree.Get(_name);
+  return pDesc;
+}
+const kernel::EventDesc *ComponentImpl::GetEventDesc(String _name) const
+{
+  const kernel::EventDesc *pDesc = instanceEvents.Get(_name);
+  if (!pDesc)
+    pDesc = GetDescriptor()->eventTree.Get(_name);
+  return pDesc;
+}
+
+const kernel::StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name) const
+{
+  return GetDescriptor()->staticFuncTree.Get(_name);
+}
+
+void ComponentImpl::AddDynamicProperty(const PropertyInfo &property)
+{
+  kernel::PropertyDesc desc(property, kernel::GetterShim(property.pGetterMethod), kernel::SetterShim(property.pSetterMethod));
+  instanceProperties.Insert(desc.id, desc);
+}
+void ComponentImpl::AddDynamicMethod(const MethodInfo &method)
+{
+  kernel::MethodDesc desc(method, kernel::MethodShim(method.pMethod));
+  instanceMethods.Insert(desc.id, desc);
+}
+void ComponentImpl::AddDynamicEvent(const EventInfo &event)
+{
+  kernel::EventDesc desc(event, kernel::EventShim(event.pSubscribe));
+  instanceEvents.Insert(desc.id, desc);
+}
+
+void ComponentImpl::RemoveDynamicProperty(String _name)
+{
+  instanceProperties.Remove(_name);
+}
+void ComponentImpl::RemoveDynamicMethod(String _name)
+{
+  instanceMethods.Remove(_name);
+}
+void ComponentImpl::RemoveDynamicEvent(String _name)
+{
+  instanceEvents.Remove(_name);
+}
+
+void ComponentImpl::SetProperty(String property, const Variant &value)
+{
+  const kernel::PropertyDesc *pDesc = GetPropertyDesc(property);
+  if (!pDesc)
+  {
+    pInstance->LogWarning(2, "No property '{0}' for component '{1}'", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    return;
+  }
+  if (!pDesc->setter || pDesc->flags & epPF_Immutable)
+  {
+    pInstance->LogWarning(2, "Property '{0}' for component '{1}' is read-only", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    return;
+  }
+  pDesc->setter.set(pInstance, value);
+//  propertyChange[pDesc->index].Signal();
+}
+
+Variant ComponentImpl::GetProperty(String property) const
+{
+  const kernel::PropertyDesc *pDesc = GetPropertyDesc(property);
+  if (!pDesc)
+  {
+    pInstance->LogWarning(2, "No property '{0}' for component '{1}'", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    return Variant();
+  }
+  if (!pDesc->getter)
+  {
+    pInstance->LogWarning(2, "Property '{0}' for component '{1}' is write-only", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    return Variant();
+  }
+  return pDesc->getter.get(pInstance);
+}
+
+Variant ComponentImpl::CallMethod(String method, Slice<const Variant> args)
+{
+  const kernel::MethodDesc *pDesc = GetMethodDesc(method);
+  if (!pDesc)
+  {
+    pInstance->LogWarning(1, "Method not found!");
+    return Variant();
+  }
+  return pDesc->method.call(pInstance, args);
+}
+
+void ComponentImpl::Subscribe(String eventName, const Variant::VarDelegate &d)
+{
+  const kernel::EventDesc *pDesc = GetEventDesc(eventName);
+  if (!pDesc)
+  {
+    pInstance->LogWarning(2, "No event '{0}' for component '{1}'", eventName, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    return;
+  }
+  pDesc->ev.subscribe(pInstance, d);
+}
+
+} // namespace ep

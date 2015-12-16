@@ -14,7 +14,7 @@
 #include "components/file.h"
 #include "hal/debugfont.h"
 
-using namespace kernel;
+using namespace ep;
 
 #define APP_TITLE "Euclideon Platform"
 
