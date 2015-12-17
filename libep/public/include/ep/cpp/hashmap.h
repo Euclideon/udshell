@@ -4,6 +4,8 @@
 #include "ep/cpp/keyvaluepair.h"
 #include "ep/cpp/freelist.h"
 
+#include <functional>
+
 namespace ep {
 
 template<typename T>
@@ -42,7 +44,7 @@ public:
   V* Insert(const KVP<K, V> &v);
 
   template <typename Key>
-  V* InsertLazy(Key&& key, std::function<V()> lazy);
+  V* InsertLazy(Key&& key, std::function<V()> lazyValue);
 
   //  template <typename... Args>
   //  V* Replace(Args&&... args)

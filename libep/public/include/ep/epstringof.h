@@ -4,7 +4,7 @@
 
 #include "ep/cpp/platform.h"
 
-#include <type_traits>
+#include <utility>
 #include <tuple>
 
 template<typename T>

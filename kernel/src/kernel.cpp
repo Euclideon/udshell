@@ -487,10 +487,10 @@ epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::
     *pNewInstance = spComponent;
     return epR_Success;
   }
-  catch (epResult r)
+  catch (epErrorState *pError)
   {
-    LogDebug(3, "Create component failed!");
-    return r;
+    LogDebug(3, "Create component failed: {0}", String(pError->message));
+    return pError->error;
   }
   catch (...)
   {

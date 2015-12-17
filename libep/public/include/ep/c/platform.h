@@ -334,7 +334,8 @@ struct epTheTypeIs;
 # define epdepricated_end(message)
 # define epconst
 # define eppure
-# define epnothrow __declspec(nothrow)
+//# define epnothrow declspec(nothrow)
+# define epnothrow noexcept
 # define eppacked
 # define epforceinline __forceinline
 # define epweak
@@ -356,7 +357,8 @@ struct epTheTypeIs;
 # define epdepricated_end(message) __attribute__((deprecated(message)))
 # define epconst __attribute__((const))
 # define eppure __attribute__((pure))
-# define epnothrow __attribute__((nothrow))
+//# define epnothrow __attribute__((nothrow))
+# define epnothrow noexcept
 # define eppacked __attribute__((packed))
 # define epforceinline inline __attribute__((always_inline))
 # define epweak __attribute__((weak))

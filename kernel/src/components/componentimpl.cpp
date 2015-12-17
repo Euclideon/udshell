@@ -137,15 +137,20 @@ void ComponentImpl::SetProperty(String property, const Variant &value)
   const kernel::PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
   {
+    // TODO: throw in this case?
     pInstance->LogWarning(2, "No property '{0}' for component '{1}'", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return;
   }
   if (!pDesc->setter || pDesc->flags & epPF_Immutable)
   {
+    // TODO: throw in this case?
     pInstance->LogWarning(2, "Property '{0}' for component '{1}' is read-only", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return;
   }
   pDesc->setter.set(pInstance, value);
+  if (ErrorRaised())
+    throw GetError();
+  // TODO: should properties have implicit signals?
 //  propertyChange[pDesc->index].Signal();
 }
 
@@ -154,15 +159,19 @@ Variant ComponentImpl::GetProperty(String property) const
   const kernel::PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
   {
+    // TODO: throw in this case?
     pInstance->LogWarning(2, "No property '{0}' for component '{1}'", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return Variant();
   }
   if (!pDesc->getter)
   {
+    // TODO: throw in this case?
     pInstance->LogWarning(2, "Property '{0}' for component '{1}' is write-only", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return Variant();
   }
-  return pDesc->getter.get(pInstance);
+  Variant r = pDesc->getter.get(pInstance);
+  r.throwError();
+  return std::move(r);
 }
 
 Variant ComponentImpl::CallMethod(String method, Slice<const Variant> args)
@@ -170,10 +179,20 @@ Variant ComponentImpl::CallMethod(String method, Slice<const Variant> args)
   const kernel::MethodDesc *pDesc = GetMethodDesc(method);
   if (!pDesc)
   {
-    pInstance->LogWarning(1, "Method not found!");
-    return Variant();
+    const kernel::StaticFuncDesc *pFunc = GetStaticFuncDesc(method);
+    if (!pFunc)
+    {
+      // TODO: throw in this case?
+      pInstance->LogWarning(1, "Method not found!");
+      return Variant();
+    }
+    Variant r2 = pFunc->staticFunc.call(args);
+    r2.throwError();
+    return std::move(r2);
   }
-  return pDesc->method.call(pInstance, args);
+  Variant r = pDesc->method.call(pInstance, args);
+  r.throwError();
+  return std::move(r);
 }
 
 void ComponentImpl::Subscribe(String eventName, const Variant::VarDelegate &d)

@@ -52,7 +52,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   catch (parse_error e)
   {
     LogError("Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
-    throw epR_Failure;
+    EPTHROW(epR_Failure, "Unable to parse project");
   }
 
   Variant::VarMap projectNode = rootElements.asAssocArray();
@@ -62,7 +62,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   else
   {
     LogError("Invalid project file \"{0}\" -- Missing <project> element", srcString);
-    throw epR_Failure;
+    EPTHROW(epR_Failure, "Invalid project file");
   }
 }
 

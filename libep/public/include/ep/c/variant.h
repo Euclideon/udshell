@@ -24,7 +24,8 @@ enum epVariantType
   epVT_Array,
   epVT_AssocArray,
   epVT_Void,
-  epVT_SmallString
+  epVT_Error,
+  epVT_SmallString,
 };
 
 struct epVariant
