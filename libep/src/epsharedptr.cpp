@@ -7,29 +7,26 @@
 namespace ep {
 namespace internal {
 
-static HashMap<SafeProxy<void>*> s_weakRefRegistry(65536);
+struct PointerHash
+{
+  static uint32_t hash(void *pAlloc) { return HashPointer(pAlloc); }
+  static bool eq(const void *a, const void *b) { return a == b; }
+};
+
+static HashMap<SafeProxy<void>*, void*, PointerHash> s_weakRefRegistry(65536);
 
 void* GetSafePtr(void *pAlloc)
 {
-  size_t hash = HashPointer(pAlloc);
-  SafeProxy<void> **ppProxy = s_weakRefRegistry.Get(hash);
-  if (ppProxy)
-    return *ppProxy;
-
-  SafeProxy<void> *pProxy = new SafeProxy<void>;
-  pProxy->pInstance = pAlloc;
-  s_weakRefRegistry.Add(hash, pProxy);
-  return pProxy;
+  return *s_weakRefRegistry.InsertLazy(pAlloc, [&]() { return new SafeProxy<void>(pAlloc); });
 }
 
 void NullifySafePtr(void *pAlloc)
 {
-  size_t hash = HashPointer(pAlloc);
-  SafeProxy<void> **ppProxy = s_weakRefRegistry.Get(hash);
+  SafeProxy<void> **ppProxy = s_weakRefRegistry.Get(pAlloc);
   if (ppProxy)
   {
     (*ppProxy)->pInstance = nullptr;
-    s_weakRefRegistry.Destroy(hash);
+    s_weakRefRegistry.Remove(pAlloc);
   }
 }
 

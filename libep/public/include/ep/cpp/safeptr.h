@@ -84,6 +84,7 @@ template <typename T>
 class SafeProxy : public RefCounted
 {
 public:
+  SafeProxy(T *pInstance) : pInstance(pInstance) {}
   ~SafeProxy()
   {
     if (pInstance)

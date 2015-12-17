@@ -43,7 +43,7 @@ public:
     pFreeList = *(T**)pFreeList;
     ++numAllocated;
 
-    return new(pNew)T(args...);
+    return new(pNew) T(args...);
   }
 
   void Free(T *pItem)

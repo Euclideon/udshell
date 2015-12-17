@@ -337,9 +337,9 @@ Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(const ep::Comp
 {
   Array<const ep::ComponentDesc *> derivedDescs;
 
-  for (ComponentType &ct : componentRegistry)
+  for (auto ct : componentRegistry)
   {
-    const ep::ComponentDesc *pDesc = ct.pDesc;
+    const ep::ComponentDesc *pDesc = ct.value.pDesc;
     if(!bIncludeBase)
       pDesc = pDesc->pSuperDesc;
 
@@ -347,7 +347,7 @@ Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(const ep::Comp
     {
       if (pDesc == pBase)
       {
-        derivedDescs.concat(ct.pDesc);
+        derivedDescs.concat(ct.value.pDesc);
         break;
       }
       pDesc = pDesc->pSuperDesc;
@@ -366,7 +366,7 @@ epResult Kernel::SendMessage(String target, String sender, String message, const
   if (targetType == '@')
   {
     // component message
-    Component **ppComponent = instanceRegistry.Get(target.hash());
+    Component **ppComponent = instanceRegistry.Get(target);
     if (ppComponent)
     {
       ComponentRef spComponent(*ppComponent);
@@ -397,7 +397,7 @@ epResult Kernel::SendMessage(String target, String sender, String message, const
   else if (targetType == '$')
   {
     // registered message
-    MessageCallback *pHandler = messageHandlers.Get(target.hash());
+    MessageCallback *pHandler = messageHandlers.Get(target);
     if (pHandler)
     {
       pHandler->callback(sender, message, data);
@@ -418,10 +418,7 @@ epResult Kernel::ReceiveMessage(String sender, String message, const Variant &da
 
 void Kernel::RegisterMessageHandler(SharedString name, MessageHandler messageHandler)
 {
-  MessageCallback handler;
-  handler.name = name;
-  handler.callback = messageHandler;
-  messageHandlers.Add(name.hash(), handler);
+  messageHandlers.Insert(name, MessageCallback{ name, messageHandler });
 }
 
 const ep::ComponentDesc* Kernel::RegisterComponentType(const ep::ComponentDesc &desc)
@@ -436,8 +433,7 @@ const ep::ComponentDesc* Kernel::RegisterComponentType(const ep::ComponentDesc &
   kernel::ComponentDesc *pDesc = new kernel::ComponentDesc(desc);
 
   // add to registry
-  ComponentType t = { pDesc, 0 };
-  componentRegistry.Add(desc.info.id.hash(), t);
+  componentRegistry.Insert(desc.info.id, ComponentType{ pDesc, 0 });
 
   return pDesc;
 }
@@ -452,7 +448,7 @@ void* Kernel::CreateImpl(String componentType, Component *pInstance, Variant::Va
 
 const ep::ComponentDesc* Kernel::GetComponentDesc(String id)
 {
-  ComponentType *pCT = componentRegistry.Get(id.hash());
+  ComponentType *pCT = componentRegistry.Get(id);
   if (!pCT)
     return nullptr;
   return pCT->pDesc;
@@ -460,7 +456,7 @@ const ep::ComponentDesc* Kernel::GetComponentDesc(String id)
 
 epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::ComponentRef *pNewInstance)
 {
-  ComponentType *pType = componentRegistry.Get(typeId.hash());
+  ComponentType *pType = componentRegistry.Get(typeId);
   if (!pType)
     return epR_Failure;
 
@@ -479,7 +475,7 @@ epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::
 
     spC->Init(initParams);
 
-    instanceRegistry.Add(spComponent->uid.hash(), spC.ptr());
+    instanceRegistry.Insert(spComponent->uid, spC.ptr());
 
     if (spLua)
       spLua->SetGlobal(spComponent->uid, spComponent.ptr());
@@ -508,7 +504,7 @@ epResult Kernel::DestroyComponent(Component *pInstance)
     spLua->SetGlobal(pInstance->uid, nullptr);
 
   // TODO: remove from component registry
-  instanceRegistry.Destroy(pInstance->uid.hash());
+  instanceRegistry.Remove(pInstance->uid);
 
   // TODO: inform partners that I destroyed a component
   //...
@@ -522,7 +518,7 @@ ep::ComponentRef Kernel::FindComponent(String _uid) const
     return nullptr;
   if (_uid[0] == '@')
     _uid.popFront();
-  Component **ppComponent = instanceRegistry.Get(_uid.toStringz());
+  Component * const * ppComponent = instanceRegistry.Get(_uid);
   return ppComponent ? ep::ComponentRef(*ppComponent) : nullptr;
 }
 
@@ -531,9 +527,9 @@ epResult Kernel::InitComponents()
   epResult r = epR_Success;
   for (auto i : componentRegistry)
   {
-    if (i.pDesc->pInit)
+    if (i.value.pDesc->pInit)
     {
-      r = i.pDesc->pInit(this);
+      r = i.value.pDesc->pInit(this);
       if (r != epR_Success)
         break;
     }
