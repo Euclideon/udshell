@@ -14,6 +14,8 @@ Array<const MethodInfo> Logger::GetMethods()
     EP_MAKE_METHOD(ResetFilter, "Resets log filter to a non-filtering state"),
     EP_MAKE_METHOD(GetLevel, "Get filter level for the specified category"),
     EP_MAKE_METHOD(SetLevel, "Filter logging for a bitfield of categories to the specified level"),
+    EP_MAKE_METHOD(EnableCategory, "Removes level filter for the specified category"),
+    EP_MAKE_METHOD(DisableCategory, "Sets the level filter for the specified category to 0"),
     EP_MAKE_METHOD(GetComponents, "Get filtered components uids"),
     EP_MAKE_METHOD_EXPLICIT("SetComponents", SetComponents_Arr, "Filter logging to the specified component UIDs"),
     EP_MAKE_METHOD(ResetStreamFilter, "Resets a stream's log filter to a non-filtering state"),

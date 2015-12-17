@@ -129,6 +129,13 @@ public:
   void SetEnabled(bool bEnable) { this->bEnabled = bEnable; }
 
   const Slice<LogLine> GetLog() const { return internalLog; }
+  LogLine *GetLogLine(int index) const
+  {
+    if (index >= 0 && index < internalLog.length)
+      return &internalLog[index];
+    else
+      return nullptr;
+  }
 
   void AddStream(StreamRef spStream, LogFormatSpecs format = LogDefaults::Format);
   int RemoveStream(StreamRef spStream);
@@ -146,6 +153,8 @@ public:
   LogFilter &GetFilter() { return filter; }
   int GetLevel(LogCategories category) const { return filter.GetLevel(category); }
   void SetLevel(LogCategories categories, int level) { return filter.SetLevel(categories, level); }
+  void EnableCategory(LogCategories categories) { SetLevel(categories, -1); }
+  void DisableCategory(LogCategories categories) { SetLevel(categories, 0); }
   Slice<SharedString> GetComponents() const { return filter.GetComponents(); }
   void SetComponents(Slice<const String> comps) { filter.SetComponents(comps); }
   void ResetFilter() { filter.ResetFilter(); }

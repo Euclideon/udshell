@@ -9,8 +9,6 @@
 
 namespace ep {
 
-LoggerRef UIConsole::spLogger;
-
 UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : UIComponent(pType, pKernel, uid, initParams)
 {
@@ -49,7 +47,7 @@ void UIConsole::RebuildOutput()
     {
       if (logLines[logIndex].ordering < consoleLines[consoleIndex].ordering)
       {
-        if (logFilter.FilterLogLine(*logLines[logIndex].GetLogLine()) && FilterTextLine(logLines[logIndex].text))
+        if (logFilter.FilterLogLine(*spLogger->GetLogLine(logLines[logIndex].logIndex)) && FilterTextLine(logLines[logIndex].text))
           filteredMerged.pushBack(MergedLine(typeLog, (int)logIndex));
         logIndex++;
       }
@@ -62,7 +60,7 @@ void UIConsole::RebuildOutput()
     }
     while (logIndex < logLines.length)
     {
-      if (logFilter.FilterLogLine(*logLines[logIndex].GetLogLine()) && FilterTextLine(logLines[logIndex].text))
+      if (logFilter.FilterLogLine(*spLogger->GetLogLine(logLines[logIndex].logIndex)) && FilterTextLine(logLines[logIndex].text))
         filteredMerged.pushBack(MergedLine(typeLog, (int)logIndex));
       logIndex++;
     }
@@ -100,7 +98,7 @@ void UIConsole::RebuildOutput()
 
     for (size_t i = 0; i < logLines.length; i++)
     {
-      if (logFilter.FilterLogLine(*logLines[i].GetLogLine()) && FilterTextLine(logLines[i].text))
+      if (logFilter.FilterLogLine(*spLogger->GetLogLine(logLines[i].logIndex)) && FilterTextLine(logLines[i].text))
         filteredLog.pushBack((int)i);
     }
 
@@ -133,7 +131,7 @@ void UIConsole::OnLogChanged()
   Slice<LogLine> log = ((kernel::Kernel*)pKernel)->GetLogger()->GetLog();
   LogLine &line = log.back();
 
-  logLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1));
+  logLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1, spLogger->GetLogLine((int)log.length - 1)->ordering));
   ConsoleLine &cLine = logLines.back();
 
   // Do filtering
@@ -180,13 +178,11 @@ void UIConsole::RelayInput(String str)
   pKernel->Exec(str);
 }
 
-UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex)
+UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)
 {
   this->text = text;
   this->logIndex = logIndex;
-  if (logIndex != -1)
-    ordering = spLogger->GetLog()[logIndex].ordering;
-  else
+  if (ordering == 0.0)
     ordering = epPerformanceCounter();
 }
 

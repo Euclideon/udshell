@@ -152,7 +152,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   if (spConsole)
      pKernel->spLogger->AddStream(spConsole);
 
-  pKernel->spLogger->SetLevel(LogCategories::Trace, 0);
+  pKernel->spLogger->DisableCategory(LogCategories::Trace);
 
   // resource manager
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
