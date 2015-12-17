@@ -3,6 +3,10 @@
 dofile "ud/common-proj.lua"
 
 -- override with local settings
+configuration { "Debug" }
+	optimize "Off"
+
+configuration {}
 
 includedirs { "libep/public/include" }
 
