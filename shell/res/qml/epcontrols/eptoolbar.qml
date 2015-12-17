@@ -3,10 +3,12 @@ import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 
-ToolBar {
+Rectangle {
+  property bool vertical
   property var toolbarcomp
   property var commandmanager
   property var toolBarObjects: []
+  property alias toolBarLayout: toolBarLoader.item
 
   onToolbarcompChanged: {
     updatetoolbar();
@@ -63,15 +65,34 @@ ToolBar {
   }
 
   id: toolBar
-  implicitHeight: toolBarLayout.height
-  implicitWidth: 1
-  RowLayout {
-    id: toolBarLayout
-    anchors.verticalCenter: parent.verticalCenter
-    spacing: 0
+  implicitHeight: vertical ? 1 : toolBarLayout.height
+  implicitWidth: vertical ? toolBarLayout.width : 1
+  color: "transparent"
+
+  Loader {
+    id: toolBarLoader
+    sourceComponent: vertical ? verticalLayout : horizontalLayout
   }
 
-  style: toolBarStyle
+  Component
+  {
+    id: horizontalLayout
+    RowLayout {
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 0
+    }
+  }
+
+  Component
+  {
+    id: verticalLayout
+    ColumnLayout {
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 0
+    }
+  }
+
+  //style: toolBarStyle
 
   Component {
     id: epSplitButton
