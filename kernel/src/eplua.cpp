@@ -152,6 +152,11 @@ struct Dispatch
     delete this;
   }
 };
+
+#if defined(EP_WINDOWS)
+volatile bool quitHack = false;
+#endif
+
 static uint32_t StdinThread(void *data)
 {
   Kernel *pKernel = (Kernel*)data;
@@ -161,6 +166,11 @@ static uint32_t StdinThread(void *data)
     putc('>', stdout);
     putc(' ', stdout);
     gets_s(pDispatch->buffer, EP_DISPATCH_BUFFER_SIZE);
+    if (quitHack)
+    {
+      delete pDispatch;
+      return 0;
+    }
     pDispatch->s = pDispatch->buffer;
     pKernel->DispatchToMainThreadAndWait(MakeDelegate(pDispatch, &Dispatch::Exec));
     putc('\n', stdout);
@@ -197,9 +207,15 @@ LuaState::LuaState(Kernel *pKernel)
 #endif
 }
 
-
 LuaState::~LuaState()
 {
+#if defined(EP_WINDOWS)
+  // HAX! debug tool for windows...
+  quitHack = true;
+  fclose(stdin);
+  FreeConsole();
+#endif
+
   lua_close(L);
 }
 
