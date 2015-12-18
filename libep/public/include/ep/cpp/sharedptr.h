@@ -229,7 +229,7 @@ private:
   template<typename U> friend class UniquePtr;
   template<typename U, bool isref> friend struct Destroy;
 
-  mutable T *pInstance = nullptr;
+  mutable T * eprestrict pInstance = nullptr;
 };
 
 //------------------------------------------------------------------------------------------
