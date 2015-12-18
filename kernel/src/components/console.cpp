@@ -16,7 +16,7 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   if (out == ConsoleOutputs::StdDbg)
   {
     pOut = stderr;
-#if UD_DEBUG && defined(EP_WINDOWS)
+#if EP_DEBUG && defined(EP_WINDOWS)
     if (IsDebuggerPresent())
     {
       pOut = nullptr;

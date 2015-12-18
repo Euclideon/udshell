@@ -74,21 +74,14 @@ protected:
 
   struct ConsoleLine
   {
-    ConsoleLine(String text, int logIndex = -1);
-    LogLine *GetLogLine() const
-    {
-      if (logIndex != -1)
-        return &spLogger->GetLog()[logIndex];
-
-      return nullptr;
-    }
+    ConsoleLine(String text, int logIndex = -1, double ordering = 0.0);
 
     SharedString text;
     double ordering;
     int logIndex;
   };
 
-  static LoggerRef spLogger;
+  LoggerRef spLogger;
   MemStreamRef spInStream = nullptr;
   BroadcasterRef spConsoleOut = nullptr;
   BroadcasterRef spConsoleErr = nullptr;
