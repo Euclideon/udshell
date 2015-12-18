@@ -26,7 +26,7 @@ MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(con
 
 void epFromVariant(const Variant &variant, QString *pString)
 {
-  String s = variant.asString();
+  SharedString s = variant.asSharedString();
   if (!s.empty())
     *pString = QString::fromUtf8(s.ptr, static_cast<int>(s.length));
 }
@@ -151,7 +151,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
       QJSValue jsDel = QtApplication::Kernel()->QmlEngine()->newQObject(del);
       if (jsDel.hasProperty("call"))
         pVariant->setValue(jsDel.property("call"));
-      
+
       QQmlEngine::setObjectOwnership(del, QQmlEngine::JavaScriptOwnership);
       break;
     }
@@ -320,7 +320,28 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
       *pJSValue = val;
       break;
     }
-    //case Variant::Type::AssocArray:
+
+    case Variant::Type::AssocArray:
+    {
+      using namespace qt;
+
+      *pJSValue = QtApplication::Kernel()->QmlEngine()->newObject();
+      Variant::VarMap aa = variant.asAssocArray();
+      for (auto v : aa)
+      {
+        if (!v.key.is(Variant::Type::String) && !v.key.is(Variant::Type::Int))
+        {
+          udDebugPrintf("epFromVariant: Key is not string!\n");
+          continue;
+        }
+        QJSValue value;
+        QString key;
+        epFromVariant(v.key, &key);
+        epFromVariant(v.value, &value);
+        pJSValue->setProperty(key, value);
+      }
+      break;
+    }
 
     default:
       udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
