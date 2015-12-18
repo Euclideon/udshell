@@ -1,250 +1,202 @@
 namespace ep {
 
-template <typename T>
-HashMap<T>::HashMap(size_t _tableSize)
-  : itemPool(_tableSize)
+template <typename V, typename K, typename HashPred>
+HashMap<V, K, HashPred>::HashMap(size_t tableSize)
+  : tableSizeMask(tableSize - 1), pool(tableSize)
 {
-#if !defined(SUPPORT_FLEXIBLE_TABLE_SIZE)
-  _tableSize = 256;
-#endif
-  ppItems = (Item**)epAllocFlags(sizeof(Item*)*_tableSize, epAF_Zero);
-  tableSize = _tableSize;
-  itemCount = 0;
+  EPASSERT(tableSize > 0 && (tableSize & (tableSize-1)) == 0, "tableSize must be power-of-2!");
+  ppTable = epAllocType(Node*, tableSize, epAF_Zero);
+}
+template <typename V, typename K, typename HashPred>
+HashMap<V, K, HashPred>::HashMap(HashMap &&rval)
+  : ppTable(rval.ppTable), tableSizeMask(rval.tableSizeMask), pool(std::move(rval.pool))
+{
+  rval.ppTable = nullptr;
 }
 
-template <typename T>
-HashMap<T>::~HashMap()
+template <typename V, typename K, typename HashPred>
+HashMap<V, K, HashPred>::~HashMap()
 {
-  epFree(ppItems);
-  tableSize = 0;
-  itemCount = 0;
-}
-
-template <typename T>
-inline T* HashMap<T>::Get(size_t hash) const
-{
-  size_t i = GetTableIndex(hash);
-  Item *pItem = ppItems[i];
-
-  while (pItem && pItem->hash != hash)
-    pItem = pItem->pNext;
-
-  return pItem ? &pItem->item : nullptr;
-}
-
-template <typename T>
-inline T& HashMap<T>::Create(size_t hash)
-{
-  Item *pNew = (Item*)itemPool.Alloc();
-  new(&pNew->item) T;
-
-  pNew->hash = hash;
-
-  size_t i = GetTableIndex(hash);
-  pNew->pNext = ppItems[i];
-  ppItems[i] = pNew;
-
-  ++itemCount;
-
-  return pNew->item;
-}
-
-template <typename T>
-inline T& HashMap<T>::Add(size_t hash, const T& item)
-{
-  Item *pNew = itemPool.Alloc();
-  new(&pNew->item) T(item);
-
-  pNew->hash = hash;
-
-  size_t i = GetTableIndex(hash);
-  pNew->pNext = ppItems[i];
-  ppItems[i] = pNew;
-
-  ++itemCount;
-
-  return pNew->item;
-}
-
-#if EP_CPP11
-template <typename T>
-inline T& HashMap<T>::Add(size_t hash, T&& item)
-{
-  Item *pNew = itemPool.Alloc();
-  new(&pNew->item) T(std::move(item));
-
-  pNew->hash = hash;
-
-  size_t i = GetTableIndex(hash);
-  pNew->pNext = ppItems[i];
-  ppItems[i] = pNew;
-
-  ++itemCount;
-
-  return pNew->item;
-}
-#endif
-
-template <typename T>
-inline void HashMap<T>::Destroy(size_t hash)
-{
-  size_t i = GetTableIndex(hash);
-
-  Item *pTemp = ppItems[i];
-  if (!pTemp)
-    return;
-
-  Item *pDel = nullptr;
-  if (pTemp->hash == hash)
+  if (ppTable)
   {
-    pDel = pTemp;
-    ppItems[i] = pTemp->pNext;
-  }
-  else
-  {
-    while (pTemp->pNext && pTemp->hash != hash)
-      pTemp = pTemp->pNext;
-    if (pTemp->pNext)
+    size_t tableSize = tableSizeMask + 1;
+    for (size_t i = 0; i < tableSize; ++i)
     {
-      pDel = pTemp->pNext;
-      pTemp->pNext = pTemp->pNext->pNext;
-    }
-  }
-
-  if (pDel)
-  {
-    pDel->item.~T();
-    itemPool.Free(pDel);
-    --itemCount;
-  }
-}
-
-template <typename T>
-inline bool HashMap<T>::DestroyItem(const T& item)
-{
-  if (itemPool.Owns(&item))
-  {
-    Item &i = (Item&)item;
-    Destroy(i.hash);
-    return true;
-  }
-
-  return false;
-}
-
-template <typename T>
-inline bool HashMap<T>::Destroy(const T& item)
-{
-  if (DestroyItem(item))
-    return true;
-
-  Item *pDel = nullptr;
-  for (int a = 0; a<tableSize; ++a)
-  {
-    Item *pTemp = ppItems[a];
-    if (!pTemp)
-      continue;
-
-    if (pTemp->item == item)
-    {
-      pDel = pTemp;
-      ppItems[a] = pTemp->pNext;
-      break;
-    }
-    else
-    {
-      while (pTemp->pNext && pTemp->pNext->item != item)
-        pTemp = pTemp->pNext;
-      if (pTemp->pNext)
+      while (ppTable[i])
       {
-        pDel = pTemp->pNext;
-        pTemp->pNext = pTemp->pNext->pNext;
-        break;
+        Node *pNext = ppTable[i]->pNext;
+        pool.Free(ppTable[i]);
+        ppTable[i] = pNext;
       }
     }
+    epFree(ppTable);
   }
+}
 
-  if (pDel)
+template <typename V, typename K, typename HashPred>
+size_t HashMap<V, K, HashPred>::Size() const
+{
+  return pool.Size();
+}
+template <typename V, typename K, typename HashPred>
+bool HashMap<V, K, HashPred>::Empty() const
+{
+  return pool.Size() == 0;
+}
+
+template <typename V, typename K, typename HashPred>
+template <typename Key, typename Val>
+V* HashMap<V, K, HashPred>::Insert(Key&& key, Val&& val)
+{
+  Node **ppBucket = GetBucket(key);
+  V *pVal = GetValue(*ppBucket, key);
+  if (pVal)
+    return pVal;
+  Node *pNode = pool.Alloc(std::forward<Key>(key), std::forward<Val>(val));
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return &pNode->data.value;
+}
+template <typename V, typename K, typename HashPred>
+V* HashMap<V, K, HashPred>::Insert(KVP<K, V> &&v)
+{
+  return Insert(std::move(v.key), std::move(v.value));
+}
+template <typename V, typename K, typename HashPred>
+V* HashMap<V, K, HashPred>::Insert(const KVP<K, V> &v)
+{
+  return Insert(v.key, v.value);
+}
+
+template <typename V, typename K, typename HashPred>
+template <typename Key>
+V* HashMap<V, K, HashPred>::InsertLazy(Key&& key, std::function<V()> lazy)
+{
+  Node **ppBucket = GetBucket(key);
+  V *pVal = GetValue(*ppBucket, key);
+  if (pVal)
+    return pVal;
+  Node *pNode = pool.Alloc(std::forward<Key>(key), lazy());
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return &pNode->data.value;
+}
+
+//  template <typename... Args>
+//  V* Replace(Args&&... args)
+//  {
+//  }
+
+template <typename V, typename K, typename HashPred>
+void HashMap<V, K, HashPred>::Remove(const K &key)
+{
+  Node **ppBucket = GetBucket(key);
+  while (*ppBucket)
   {
-    pDel->item.~T();
-    itemPool.Free(pDel);
-    --itemCount;
-    return true;
+    if (HashPred::eq((*ppBucket)->data.key, key))
+    {
+      Node *pNext = (*ppBucket)->pNext;
+      pool.Free(*ppBucket);
+      *ppBucket = pNext;
+    }
+    else
+      ppBucket = &(*ppBucket)->pNext;
   }
-
-  return false;
 }
 
-template <typename T>
-inline typename HashMap<T>::Iterator HashMap<T>::First() const
+template <typename V, typename K, typename HashPred>
+const V* HashMap<V, K, HashPred>::Get(const K &key) const
 {
-  if (!itemCount)
-    return Iterator(*this, nullptr);
+  return GetValue(*GetBucket(key), key);
+}
+template <typename V, typename K, typename HashPred>
+V* HashMap<V, K, HashPred>::Get(const K &key)
+{
+  return GetValue(*GetBucket(key), key);
+}
 
-  for (size_t a = 0; a<tableSize; ++a)
+template <typename V, typename K, typename HashPred>
+auto HashMap<V, K, HashPred>::begin() const -> typename HashMap<V, K, HashPred>::Iterator
+{
+  return Iterator(ppTable, ppTable + tableSizeMask + 1);
+}
+template <typename V, typename K, typename HashPred>
+auto HashMap<V, K, HashPred>::end() const -> typename HashMap<V, K, HashPred>::Iterator
+{
+  return Iterator(ppTable + tableSizeMask + 1, ppTable + tableSizeMask + 1);
+}
+
+template <typename V, typename K, typename HashPred>
+auto HashMap<V, K, HashPred>::GetBucket(const K &key) const -> typename HashMap<V, K, HashPred>::Node**
+{
+  auto h = HashPred::hash(key);
+  size_t bucket = h & tableSizeMask;
+  return &ppTable[bucket];
+}
+
+template <typename V, typename K, typename HashPred>
+V* HashMap<V, K, HashPred>::GetValue(Node *pBucket, const K &key) const
+{
+  while (pBucket)
   {
-    if (ppItems[a])
-      return Iterator(*this, ppItems[a]);
+    if (HashPred::eq(pBucket->data.key, key))
+      return &pBucket->data.value;
+    pBucket = pBucket->pNext;
   }
-  return Iterator(*this, nullptr);
+  return nullptr;
 }
 
-template <typename T>
-inline typename HashMap<T>::Iterator HashMap<T>::end() const
+
+// iterator methods
+
+template <typename V, typename K, typename HashPred>
+HashMap<V, K, HashPred>::Iterator::Iterator(Node **ppStart, Node **ppEnd)
+  : ppEnd(ppEnd)
 {
-  return Iterator(*this, nullptr);
-}
-
-template <typename T>
-inline typename HashMap<T>::Iterator HashMap<T>::Next(Iterator item) const
-{
-  Item *pI = item.pItem;
-  size_t i = GetTableIndex(pI->hash);
-  Item *pTemp = ppItems[i];
-
-  while (pTemp && pTemp != item.pItem)
-    pTemp = pTemp->pNext;
-
-  if (!pTemp)
-    return Iterator(*this, nullptr);
-  else if (pTemp->pNext)
-    return Iterator(*this, pTemp->pNext);
+  while (ppStart != ppEnd && !*ppStart)
+    ++ppStart;
+  if (ppStart != ppEnd)
+    pItem = *ppStart;
   else
-  {
-    for (size_t a = i+1; a<tableSize; ++a)
-    {
-      if (ppItems[a])
-        return Iterator(*this, ppItems[a]);
-    }
-  }
-  return Iterator(*this, nullptr);
+    pItem = nullptr;
+  this->ppStart = ppStart;
 }
 
-template <typename T>
-inline typename HashMap<T>::Iterator HashMap<T>::NextMatch(Iterator item) const
+template <typename V, typename K, typename HashPred>
+auto HashMap<V, K, HashPred>::Iterator::operator++() -> typename HashMap<V, K, HashPred>::Iterator&
 {
-  if (item.pItem == nullptr)
-    return Iterator(*this, nullptr);
-
-  Item *pI = item.pItem;
-  size_t i = GetTableIndex(pI->hash);
-  Item *pTemp = ppItems[i];
-
-  while (pTemp && &pTemp->item != item.pItem)
-    pTemp = pTemp->pNext;
-
-  if (pTemp)
+  if (!pItem)
+    return *this;
+  pItem = pItem->pNext;
+  if (!pItem)
   {
-    pTemp = pTemp->pNext;
-    while (pTemp)
-    {
-      if (pTemp->hash == pI->hash)
-        return Iterator(*this, pTemp);
-      pTemp = pTemp->pNext;
-    }
+    do {
+      ++ppStart;
+    } while (ppStart != ppEnd && !*ppStart);
+    if (ppStart != ppEnd)
+      pItem = *ppStart;
+    else
+      pItem = nullptr;
   }
+  return *this;
+}
 
-  return Iterator(*this, nullptr);
+template <typename V, typename K, typename HashPred>
+bool HashMap<V, K, HashPred>::Iterator::operator!=(Iterator rhs)
+{
+  return pItem != rhs.pItem;
+}
+
+template <typename V, typename K, typename HashPred>
+const KVPRef<K, V> HashMap<V, K, HashPred>::Iterator::operator*() const
+{
+  const KVPRef<K, V> r = KVPRef<K, V>(pItem->data.key, pItem->data.value);
+  return std::move(r);
+}
+template <typename V, typename K, typename HashPred>
+KVPRef<K, V> HashMap<V, K, HashPred>::Iterator::operator*()
+{
+  return KVPRef<K, V>(pItem->data.key, pItem->data.value);
 }
 
 } // namespace ep
