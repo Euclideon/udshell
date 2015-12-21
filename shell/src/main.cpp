@@ -225,8 +225,6 @@ void Deinit(String sender, String message, const Variant &data)
 
 void Init(String sender, String message, const Variant &data)
 {
-  CommandManagerRef spCommandManager = pKernel->GetCommandManager();
-
   spMainWindow = pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
   if (!spMainWindow)
   {
@@ -284,7 +282,6 @@ void Init(String sender, String message, const Variant &data)
   spTopLevelUI->Subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
   spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
 
-  spTopLevelUI->SetProperty("commandmanager", spCommandManager);
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 

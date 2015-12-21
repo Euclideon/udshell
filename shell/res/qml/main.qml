@@ -16,7 +16,6 @@ Rectangle {
   property var messagebox
   property var menucomp
   property var toolbarcomp
-  property var commandmanager
   property var simplecamera
   property var view
   property var activityidlist: []
@@ -50,14 +49,12 @@ Rectangle {
     toolBar.toolbarcomp = toolbarcomp;
   }
 
-  onCommandmanagerChanged: {
-    commandmanager.call("registercommand", "newproject", newproject, "", "", "Ctrl+N");
-    commandmanager.call("registercommand", "openproject", openproject, "", "", "Ctrl+O");
-    commandmanager.call("registercommand", "saveproject", saveproject, "", "", "Ctrl+S");
-    commandmanager.call("registercommand", "saveprojectas", saveprojectas, "", "", "F12");
-
-    menuBar.commandmanager = commandmanager;
-    toolBar.commandmanager = commandmanager;
+  Component.onCompleted: {
+    var commandManager = EPKernel.GetCommandManager();
+    commandManager.call("registercommand", "newproject", newproject, "", "", "Ctrl+N");
+    commandManager.call("registercommand", "openproject", openproject, "", "", "Ctrl+O");
+    commandManager.call("registercommand", "saveproject", saveproject, "", "", "Ctrl+S");
+    commandManager.call("registercommand", "saveprojectas", saveprojectas, "", "", "F12");
   }
 
   function cameraupdated(pos, ypr)
