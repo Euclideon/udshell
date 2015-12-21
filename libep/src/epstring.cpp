@@ -489,7 +489,7 @@ double BaseString<C>::parseFloat() const
     frac = -frac;
   }
 
-  return (double)(number + frac / pow(10.0, fracSize)) * pow(10.0, (expSign * exponent));
+  return ((double)number + (double)frac/pow(10.0, (double)fracSize)) * pow(10.0, (double)(expSign * exponent));
 }
 
 template int64_t BaseString<char>::parseInt(bool, int) const;
