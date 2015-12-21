@@ -30,7 +30,7 @@ public:
 
   SharedString GetUid() const;
   SharedString GetName() const;
-  void SetName(SharedString _name);
+  void SetName(SharedString _name) override final;
 
   template<typename T>
   bool IsType() const { return IsType(T::ComponentID()); }

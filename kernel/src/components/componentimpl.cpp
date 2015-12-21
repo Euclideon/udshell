@@ -21,8 +21,12 @@ ComponentImpl::~ComponentImpl()
 
 void ComponentImpl::SetName(SharedString name)
 {
-  // TODO: update the component registry; needs to be inserted into search trees for names...
+  kernel::Kernel *pKernel = (kernel::Kernel*)pInstance->pKernel;
+  if (pInstance->name)
+    pKernel->namedInstanceRegistry.Remove(pInstance->name);
   pInstance->name = name;
+  if (name)
+    pKernel->namedInstanceRegistry.Insert(name, pInstance);
 }
 
 void ComponentImpl::Init(Variant::VarMap initParams)

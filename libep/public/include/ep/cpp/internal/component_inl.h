@@ -20,7 +20,7 @@ inline SharedString Component::GetName() const
 }
 inline void Component::SetName(SharedString _name)
 {
-  name = _name;
+  pImpl->SetName(_name);
 }
 
 inline Variant Component::GetProperty(String property) const

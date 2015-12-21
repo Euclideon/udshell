@@ -66,7 +66,7 @@ public:
   template<typename T>
   SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr) { return ep::Kernel::CreateComponent<T>(initParams); }
 
-  ep::ComponentRef FindComponent(String uid) const override final;
+  ep::ComponentRef FindComponent(String name) const override final;
 
   Renderer *GetRenderer() const { return pRenderer; }
 
@@ -133,6 +133,7 @@ protected:
 
   HashMap<ComponentType> componentRegistry;
   HashMap<Component*> instanceRegistry;
+  HashMap<Component*> namedInstanceRegistry;
   HashMap<ForeignInstance> foreignInstanceRegistry;
   HashMap<MessageCallback> messageHandlers;
 
