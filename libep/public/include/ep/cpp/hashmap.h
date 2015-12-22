@@ -28,7 +28,7 @@ template <typename V, typename K = SharedString, typename HashPred = Hash<K>>
 class HashMap
 {
 public:
-  HashMap(size_t tableSize = 0x10000);
+  HashMap(size_t tableSize = 0x2000, size_t itemBucketSize = 0x100);
   HashMap(HashMap &&rval);
 
   ~HashMap();

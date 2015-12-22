@@ -63,8 +63,9 @@ namespace kernel {
 
 Kernel::Kernel()
   : componentRegistry(256)
-  , instanceRegistry(256)
-  , foreignInstanceRegistry(256)
+  , instanceRegistry(8192)
+  , namedInstanceRegistry(4096)
+  , foreignInstanceRegistry(4096)
   , messageHandlers(64)
 {
 }
@@ -503,7 +504,8 @@ epResult Kernel::DestroyComponent(Component *pInstance)
   if (spLua && spLua.ptr() != pInstance)
     spLua->SetGlobal(pInstance->uid, nullptr);
 
-  // TODO: remove from component registry
+  if (pInstance->name)
+    namedInstanceRegistry.Remove(pInstance->name);
   instanceRegistry.Remove(pInstance->uid);
 
   // TODO: inform partners that I destroyed a component
@@ -512,13 +514,15 @@ epResult Kernel::DestroyComponent(Component *pInstance)
   return epR_Success;
 }
 
-ep::ComponentRef Kernel::FindComponent(String _uid) const
+ep::ComponentRef Kernel::FindComponent(String name) const
 {
-  if (_uid.empty() || _uid[0] == '$' || _uid[0] == '#')
+  if (name.empty() || name[0] == '$' || name[0] == '#')
     return nullptr;
-  if (_uid[0] == '@')
-    _uid.popFront();
-  Component * const * ppComponent = instanceRegistry.Get(_uid);
+  if (name[0] == '@')
+    name.popFront();
+  Component * const * ppComponent = namedInstanceRegistry.Get(name);
+  if (!ppComponent)
+    ppComponent = instanceRegistry.Get(name);
   return ppComponent ? ep::ComponentRef(*ppComponent) : nullptr;
 }
 

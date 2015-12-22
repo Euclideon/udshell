@@ -1,8 +1,8 @@
 namespace ep {
 
 template <typename V, typename K, typename HashPred>
-HashMap<V, K, HashPred>::HashMap(size_t tableSize)
-  : tableSizeMask(tableSize - 1), pool(tableSize)
+HashMap<V, K, HashPred>::HashMap(size_t tableSize, size_t itemBucketSize)
+  : tableSizeMask(tableSize - 1), pool(itemBucketSize)
 {
   EPASSERT(tableSize > 0 && (tableSize & (tableSize-1)) == 0, "tableSize must be power-of-2!");
   ppTable = epAllocType(Node*, tableSize, epAF_Zero);
