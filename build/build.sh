@@ -8,10 +8,10 @@ function execute_build() {
 
     # generate the project files
     if [ $1 == "epshell" ]; then # epshell
-      ud/bin/premake/premake5.exe vs2015
+      bin/premake/premake5.exe vs2015
     elif [ $1 == "epviewer" ]; then # epviewer
       cd viewer
-      ../ud/bin/premake/premake5.exe vs2015
+      ../bin/premake/premake5.exe vs2015
     else
       exit 4;
     fi
@@ -32,10 +32,10 @@ function execute_build() {
 
     # This will need to use the $2 (configuration) and $3 (platform) variables somehow
     if [ $1 == "epshell" ]; then # epshell
-      ud/bin/premake/premake5 gmake
+      bin/premake/premake5 gmake
     elif [ $1 == "epviewer" ]; then # epviewer
       cd viewer
-      ../ud/bin/premake/premake5 gmake
+      ../bin/premake/premake5 gmake
     else
       exit 4;
     fi

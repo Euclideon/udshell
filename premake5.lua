@@ -1,6 +1,8 @@
 require "qt"
 qt = premake.extensions.qt
 
+require "gitlab"
+
 solution "epshell"
 
 	-- This hack just makes the VS project and also the makefile output their configurations in the idiomatic order
