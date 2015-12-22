@@ -193,12 +193,12 @@ void View::Update(double timeStep)
 
 void View::Activate()
 {
-  GetKernel().UpdatePulse.Subscribe(updateFunc);
+  GetKernel().UpdatePulse.Subscribe(Delegate<void(double)>(this, &View::Update));
 }
 
 void View::Deactivate()
 {
-  GetKernel().UpdatePulse.Unsubscribe(updateFunc);
+  GetKernel().UpdatePulse.Unsubscribe(Delegate<void(double)>(this, &View::Update));
 }
 
 // TODO: Implement this

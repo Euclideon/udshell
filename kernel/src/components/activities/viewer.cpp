@@ -21,9 +21,6 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 {
   ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
 
-  // TODO: Remove this once Subscribe returns an identifier for using with Unsubscribe
-  updateFunc = Delegate<void(double)>(this, &Viewer::Update);
-
   spView = pKernel->CreateComponent<View>();
   spScene = pKernel->CreateComponent<Scene>();
 
@@ -95,12 +92,12 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
 void Viewer::Activate()
 {
-  GetKernel().UpdatePulse.Subscribe(updateFunc);
+  GetKernel().UpdatePulse.Subscribe(Delegate<void(double)>(this, &Viewer::Update));
 }
 
 void Viewer::Deactivate()
 {
-  GetKernel().UpdatePulse.Unsubscribe(updateFunc);
+  GetKernel().UpdatePulse.Unsubscribe(Delegate<void(double)>(this, &Viewer::Update));
 }
 
 void Viewer::Update(double timeStep)
