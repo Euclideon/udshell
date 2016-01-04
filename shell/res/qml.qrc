@@ -7,6 +7,7 @@
     <file>qml/epcontrols/epmenubar.qml</file>
     <file>qml/epcontrols/epmenu.qml</file>
     <file>qml/epcontrols/eptoolbar.qml</file>
+    <file>qml/epcontrols/epsplitbutton.qml</file>
     <file>qml/epcontrols/qmldir</file>
 
     <file>menus.xml</file>
