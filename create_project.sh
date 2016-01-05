@@ -13,9 +13,9 @@ else
 fi
 
 if [ $OSTYPE == "msys" ]; then # Windows, MingW
-	PREMAKE=ud/bin/premake/premake5.exe
+	PREMAKE=bin/premake/premake5.exe
 else
-	PREMAKE=ud/bin/premake/premake5
+	PREMAKE=bin/premake/premake5
 fi
 
 # parse string actions into numerics

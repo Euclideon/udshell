@@ -14,15 +14,15 @@ GOTO END
 
 :THREE
  ECHO Creating GNU Makefile...
- ud\bin\premake\premake5.exe gmake
+ bin\premake\premake5.exe gmake
  GOTO END
 :TWO
  ECHO Creating CodeLite Project...
- ud\bin\premake\premake5.exe codelite
+ bin\premake\premake5.exe codelite
  GOTO END
 :ONE
  ECHO Creating VS2015 Project...
- ud\bin\premake\premake5.exe vs2015
+ bin\premake\premake5.exe vs2015
  GOTO END
 
 :END

@@ -3,3 +3,6 @@
 	path = ud
 
 	url = git@bne-fs-git-001:rnd/ud.git
+[submodule "bin/premake"]
+	path = bin/premake
+	url = git@bne-fs-git-001.euclideon.local:external/premake-bin.git

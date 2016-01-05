@@ -173,3 +173,13 @@ rpm_viewer_release_clang:
     - linux
     - rpm
     - newbuild
+
+update_merge_requests:
+  stage: deploy
+  script:
+    - export QTDIR=~/dev/Qt/5.4/gcc_64
+    - export PATH=$QTDIR/bin:$PATH
+    - git submodule update --init --recursive
+    - "bin/premake/premake5 --ci_project_id=$CI_PROJECT_ID --ci_build_ref_name=$CI_BUILD_REF_NAME --trigger_token=7b183a6a00a2405e30f5af529deb82 gitlab"
+  tags:
+    - linux
