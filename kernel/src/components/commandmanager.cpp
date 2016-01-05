@@ -32,7 +32,7 @@ bool CommandManager::SetShortcut(String id, SharedString shortcut)
   return true;
 }
 
-bool CommandManager::RegisterCommand(String id, Delegate<void(ActivityRef)> func, String script, String activityTypeID, String shortcut)
+bool CommandManager::RegisterCommand(String id, Delegate<void(Variant::VarMap)> func, String script, String activityTypeID, String shortcut)
 {
   if (commandRegistry.Get(id))
   {
@@ -76,7 +76,7 @@ String CommandManager::StripWhitespace(Slice<char> output, String input)
   return output.slice(0, len);
 }
 
-bool CommandManager::RunCommand(String id)
+bool CommandManager::RunCommand(String id, Variant::VarMap params)
 {
   ActivityRef spActiveActivity = nullptr;
   ProjectRef spProject = pKernel->FindComponent("project");
@@ -93,8 +93,10 @@ bool CommandManager::RunCommand(String id)
       {
         if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
         {
+          params.Insert("activity", spActiveActivity);
+
           if (comm.func)
-            comm.func(spActiveActivity);
+            comm.func(params);
           else if (!comm.script.empty())
             pKernel->Exec(comm.script);
           return true;
@@ -103,7 +105,7 @@ bool CommandManager::RunCommand(String id)
       else
       {
         if (comm.func)
-          comm.func(nullptr);
+          comm.func(params);
         else if (!comm.script.empty())
           pKernel->Exec(comm.script);
         return true;
@@ -126,6 +128,8 @@ bool CommandManager::HandleShortcutEvent(String shortcut)
   if (spProject)
     spActiveActivity = spProject->GetActiveActivity();
 
+  Variant::VarMap params;
+
   for (auto kvp : commandRegistry)
   {
     Command &comm = kvp.value;
@@ -136,8 +140,10 @@ bool CommandManager::HandleShortcutEvent(String shortcut)
       {
         if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
         {
+          params.Insert("activity", spActiveActivity);
+
           if (comm.func)
-            comm.func(spActiveActivity);
+            comm.func(params);
           else if (!comm.script.empty())
             pKernel->Exec(comm.script);
           return true;
@@ -146,7 +152,7 @@ bool CommandManager::HandleShortcutEvent(String shortcut)
       else
       {
         if (comm.func)
-          comm.func(nullptr);
+          comm.func(params);
         else if (!comm.script.empty())
           pKernel->Exec(comm.script);
         return true;
@@ -157,7 +163,7 @@ bool CommandManager::HandleShortcutEvent(String shortcut)
   return false;
 }
 
-bool CommandManager::SetFunction(String id, Delegate<void(ActivityRef)> func)
+bool CommandManager::SetFunction(String id, Delegate<void(Variant::VarMap)> func)
 {
   Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)

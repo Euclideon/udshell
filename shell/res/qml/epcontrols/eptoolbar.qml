@@ -98,7 +98,7 @@ ToolBar {
         property alias menu: menu
         onClicked: {
           if(command)
-            commandmanager.call("runcommand", command);
+            commandmanager.call("runcommand", command, null);
         }
 
         style: splitButtonStyle

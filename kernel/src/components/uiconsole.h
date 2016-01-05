@@ -65,7 +65,7 @@ protected:
   UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~UIConsole() {}
 
-  void ToggleVisible(ActivityRef activity);
+  void ToggleVisible(Variant::VarMap params);
 
   LogFilter logFilter;
   bool FilterLogLine(const LogLine &) const;

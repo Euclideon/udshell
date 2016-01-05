@@ -33,8 +33,19 @@ protected:
   // TODO: Tidy this up once bookmarks ui is created.
   void BookmarkCurrentCamera();
   void JumpToBookmark();
-  static void StaticBookmarkCurrentCamera(ActivityRef activity) { ((ViewerRef)activity)->BookmarkCurrentCamera(); }
-  static void StaticJumpToBookmark(ActivityRef activity) { ((ViewerRef)activity)->JumpToBookmark(); }
+  static void StaticBookmarkCurrentCamera(Variant::VarMap params)
+  {
+    Variant *pActivityVar = params.Get("activity");
+    ViewerRef spViewer = pActivityVar->as<ViewerRef>();
+    spViewer->BookmarkCurrentCamera();
+  }
+
+  static void StaticJumpToBookmark(Variant::VarMap params)
+  {
+    Variant *pActivityVar = params.Get("activity");
+    ViewerRef spViewer = pActivityVar->as<ViewerRef>();
+    spViewer->JumpToBookmark();
+  }
 
   UDModelRef spModel;
   SceneRef spScene;

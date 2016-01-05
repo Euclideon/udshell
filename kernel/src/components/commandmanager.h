@@ -15,11 +15,11 @@ class CommandManager : public Component
   EP_DECLARE_COMPONENT(CommandManager, Component, EPKERNEL_PLUGINVERSION, "Registers commands accessed by string id and associated with a function or script and an optional shortcut")
 public:
 
-  bool RegisterCommand(String id, Delegate<void(ActivityRef)> func, String script, String activityTypeID, String shortcut = nullptr);
+  bool RegisterCommand(String id, Delegate<void(Variant::VarMap)> func, String script, String activityTypeID, String shortcut = nullptr);
   void UnregisterCommand(String id);
   bool HandleShortcutEvent(String shortcut);
-  bool RunCommand(String id);
-  bool SetFunction(String id, Delegate<void(ActivityRef)> func);
+  bool RunCommand(String id, Variant::VarMap params = nullptr);
+  bool SetFunction(String id, Delegate<void(Variant::VarMap)> func);
   bool SetScript(String id, String script);
   SharedString GetShortcut(String id) const;
   bool SetShortcut(String id, SharedString shortcut);
@@ -32,11 +32,11 @@ protected:
 
   struct Command
   {
-    Command(SharedString id, Delegate<void(ActivityRef)> func, SharedString script, SharedString activityType, SharedString shortcut) : id(id), activityType(activityType), shortcut(shortcut), func(func), script(script) {}
+    Command(SharedString id, Delegate<void(Variant::VarMap)> func, SharedString script, SharedString activityType, SharedString shortcut) : id(id), activityType(activityType), shortcut(shortcut), func(func), script(script) {}
 
     SharedString id;
     SharedString shortcut;
-    Delegate<void(ActivityRef)> func;
+    Delegate<void(Variant::VarMap)> func;
     SharedString script;
     SharedString activityType;
   };
