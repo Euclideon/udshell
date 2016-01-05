@@ -3,10 +3,12 @@ import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 
-ToolBar {
+Rectangle {
+  property bool vertical
   property var toolbarcomp
   property var commandmanager
   property var toolBarObjects: []
+  property alias toolBarLayout: toolBarLoader.item
 
   onToolbarcompChanged: {
     updatetoolbar();
@@ -63,15 +65,33 @@ ToolBar {
   }
 
   id: toolBar
-  implicitHeight: toolBarLayout.height
+  implicitHeight: 1
   implicitWidth: 1
-  RowLayout {
-    id: toolBarLayout
-    anchors.verticalCenter: parent.verticalCenter
-    spacing: 0
+
+  color: "transparent"
+
+  Loader {
+    id: toolBarLoader
+    sourceComponent: vertical ? verticalLayout : horizontalLayout
   }
 
-  style: toolBarStyle
+  Component
+  {
+    id: horizontalLayout
+    RowLayout {
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 0
+    }
+  }
+
+  Component
+  {
+    id: verticalLayout
+    ColumnLayout {
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 0
+    }
+  }
 
   Component {
     id: epSplitButton
@@ -96,6 +116,10 @@ ToolBar {
         property string command
         property alias dropdown: dropdown
         property alias menu: menu
+
+        implicitHeight: vertical ? toolBar.width : toolBar.height
+        implicitWidth: vertical ? toolBar.width: toolBar.height
+
         onClicked: {
           if(command)
             commandmanager.call("runcommand", command, null);
@@ -145,12 +169,12 @@ ToolBar {
   Component {
     id: separator
     Item {
-      implicitWidth: 14
+      implicitWidth: vertical ? toolBar.implicitWidth : 14
+      implicitHeight: vertical ? 14 : toolBar.implicitHeight
       Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        implicitWidth: 1
-        implicitHeight: toolBar.implicitHeight - 8
+        anchors.centerIn: parent
+        implicitWidth: vertical ? toolBar.implicitWidth - 8 : 1
+        implicitHeight: vertical ? 1 : toolBar.implicitHeight - 8
         color: "#555"
       }
     }
@@ -198,7 +222,7 @@ ToolBar {
       }
       label: Image {
         source: control.iconSource
-        fillMode: Image.Pad
+        fillMode: Image.PreserveAspectFit
       }
     }
   }
