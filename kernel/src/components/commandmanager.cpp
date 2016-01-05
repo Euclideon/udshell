@@ -1,4 +1,6 @@
 #include "components/commandmanager.h"
+#include "components/project.h"
+#include "components/activities/activity.h"
 #include "kernel.h"
 
 namespace ep {
@@ -30,7 +32,7 @@ bool CommandManager::SetShortcut(String id, SharedString shortcut)
   return true;
 }
 
-bool CommandManager::RegisterCommand(String id, Delegate<void()> func, SharedString script, SharedString shortcut)
+bool CommandManager::RegisterCommand(String id, Delegate<void(Variant::VarMap)> func, String script, String activityTypeID, String shortcut)
 {
   if (commandRegistry.Get(id))
   {
@@ -44,17 +46,20 @@ bool CommandManager::RegisterCommand(String id, Delegate<void()> func, SharedStr
 
   if (!shortcut.empty())
   {
-    for (auto comm : commandRegistry)
+    for (auto kvp : commandRegistry)
     {
-      if (!shortcut.cmpIC(comm.value.shortcut) && id.cmp(comm.value.id))
+      Command &comm = kvp.value;
+
+      if (!shortcut.cmpIC(comm.shortcut) && id.cmp(comm.id)
+        && (activityTypeID.empty() || comm.activityType.empty() || activityTypeID.eq(comm.activityType)))
       {
-        LogWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\". Already bound to \"{2}\"", shortcut, id, comm.value.id);
+        LogWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\". Already bound to \"{2}\"", shortcut, id, comm.id);
         return false;
       }
     }
   }
 
-  commandRegistry.Insert(id, Command(id, func, script, mShortcut));
+  commandRegistry.Insert(id, Command(id, func, script, activityTypeID, mShortcut));
 
   return true;
 }
@@ -71,18 +76,40 @@ String CommandManager::StripWhitespace(Slice<char> output, String input)
   return output.slice(0, len);
 }
 
-bool CommandManager::RunCommand(String id)
+bool CommandManager::RunCommand(String id, Variant::VarMap params)
 {
-  for (auto comm : commandRegistry)
-  {
-    if (!id.cmpIC(comm.key))
-    {
-      if (comm.value.func)
-        comm.value.func();
-      else if (!comm.value.script.empty())
-        pKernel->Exec(comm.value.script);
+  ActivityRef spActiveActivity = nullptr;
+  ProjectRef spProject = pKernel->FindComponent("project");
+  if (spProject)
+    spActiveActivity = spProject->GetActiveActivity();
 
-      return true;
+  for (auto kvp : commandRegistry)
+  {
+    if (!id.cmpIC(kvp.key))
+    {
+      Command &comm = kvp.value;
+
+      if (!comm.activityType.empty())
+      {
+        if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
+        {
+          params.Insert("activity", spActiveActivity);
+
+          if (comm.func)
+            comm.func(params);
+          else if (!comm.script.empty())
+            pKernel->Exec(comm.script);
+          return true;
+        }
+      }
+      else
+      {
+        if (comm.func)
+          comm.func(params);
+        else if (!comm.script.empty())
+          pKernel->Exec(comm.script);
+        return true;
+      }
     }
   }
 
@@ -96,23 +123,47 @@ void CommandManager::UnregisterCommand(String id)
 
 bool CommandManager::HandleShortcutEvent(String shortcut)
 {
-  for (auto comm : commandRegistry)
-  {
-    if (!shortcut.cmpIC(comm.value.shortcut))
-    {
-      if (comm.value.func)
-        comm.value.func();
-      else if (!comm.value.script.empty())
-        pKernel->Exec(comm.value.script);
+  ActivityRef spActiveActivity = nullptr;
+  ProjectRef spProject = pKernel->FindComponent("project");
+  if (spProject)
+    spActiveActivity = spProject->GetActiveActivity();
 
-      return true;
+  Variant::VarMap params;
+
+  for (auto kvp : commandRegistry)
+  {
+    Command &comm = kvp.value;
+
+    if (!shortcut.cmpIC(comm.shortcut))
+    {
+      if (!comm.activityType.empty())
+      {
+        if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
+        {
+          params.Insert("activity", spActiveActivity);
+
+          if (comm.func)
+            comm.func(params);
+          else if (!comm.script.empty())
+            pKernel->Exec(comm.script);
+          return true;
+        }
+      }
+      else
+      {
+        if (comm.func)
+          comm.func(params);
+        else if (!comm.script.empty())
+          pKernel->Exec(comm.script);
+        return true;
+      }
     }
   }
 
   return false;
 }
 
-bool CommandManager::SetFunction(String id, Delegate<void()> func)
+bool CommandManager::SetFunction(String id, Delegate<void(Variant::VarMap)> func)
 {
   Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)
@@ -142,6 +193,27 @@ bool CommandManager::SetScript(String id, String script)
   return true;
 }
 
+String CommandManager::GetActivityType(String commandID) const
+{
+  const Command *pCommand = commandRegistry.Get(commandID);
+  if (!pCommand)
+    return nullptr;
 
+  return pCommand->activityType;
+}
+
+bool CommandManager::SetActivityType(String commandID, String activityTypeID)
+{
+  Command *pCommand = commandRegistry.Get(commandID);
+  if (!pCommand)
+  {
+    LogWarning(2, "Can't bind activity type to command \"{0}\", command doesn't exist", commandID);
+    return false;
+  }
+
+  pCommand->activityType = activityTypeID;
+
+  return true;
+}
 
 } // namespace ep

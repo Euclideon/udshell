@@ -85,8 +85,8 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   CommandManagerRef spComMan = component_cast<CommandManager>(GetKernel().FindComponent("commandmanager0"));
   if (spComMan)
   {
-    spComMan->RegisterCommand("CreateBookmark", Delegate<void()>(this, &Viewer::BookmarkCurrentCamera), nullptr);
-    spComMan->RegisterCommand("GoToBookmark", Delegate<void()>(this, &Viewer::JumpToBookmark), nullptr);
+    spComMan->RegisterCommand("CreateBookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticBookmarkCurrentCamera), nullptr, nullptr);
+    spComMan->RegisterCommand("GoToBookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticJumpToBookmark), nullptr, nullptr);
   }
 }
 

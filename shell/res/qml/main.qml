@@ -51,10 +51,10 @@ Rectangle {
   }
 
   onCommandmanagerChanged: {
-    commandmanager.call("registercommand", "newproject", newproject, "", "Ctrl+N");
-    commandmanager.call("registercommand", "openproject", openproject, "", "Ctrl+O");
-    commandmanager.call("registercommand", "saveproject", saveproject, "", "Ctrl+S");
-    commandmanager.call("registercommand", "saveprojectas", saveprojectas, "", "F12");
+    commandmanager.call("registercommand", "newproject", newproject, "", "", "Ctrl+N");
+    commandmanager.call("registercommand", "openproject", openproject, "", "", "Ctrl+O");
+    commandmanager.call("registercommand", "saveproject", saveproject, "", "", "Ctrl+S");
+    commandmanager.call("registercommand", "saveprojectas", saveprojectas, "", "", "F12");
 
     menuBar.commandmanager = commandmanager;
     toolBar.commandmanager = commandmanager;

@@ -26,10 +26,10 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   ((kernel::Kernel*)pKernel)->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
 
   auto spCommandManager = pKernel->GetCommandManager();
-  spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void()>(this, &UIConsole::ToggleVisible), nullptr, "`");
+  spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void(Variant::VarMap)>(this, &UIConsole::ToggleVisible), "", "", "`");
 }
 
-void UIConsole::ToggleVisible()
+void UIConsole::ToggleVisible(Variant::VarMap params)
 {
   CallMethod("togglevisible", nullptr);
 }
