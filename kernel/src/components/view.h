@@ -111,9 +111,6 @@ protected:
     : Component(pType, pKernel, uid, initParams)
   {
     memset(&options, 0, sizeof(options));
-
-    // TODO: Remove this when Unsubscribe can be called with some kind of subscription identifier
-    updateFunc = Delegate<void(double)>(this, &View::Update);
   }
 
   ~View() { Deactivate(); }
@@ -121,9 +118,6 @@ protected:
   void SetLatestFrame(UniquePtr<RenderableView> spFrame);
   void Update(double timeStep);
   void OnDirty();
-
-  // TODO: Remove this when Unsubscribe can be called with some kind of subscription identifier
-  Delegate<void(double)> updateFunc;
 
   static Array<const PropertyInfo> GetProperties();
   static Array<const EventInfo> GetEvents()

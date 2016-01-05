@@ -34,9 +34,6 @@ protected:
   void BookmarkCurrentCamera();
   void JumpToBookmark();
 
-  // TODO: Remove this when Unsubscribe can be called with some kind of subscription identifier
-  Delegate<void(double)> updateFunc;
-
   UDModelRef spModel;
   SceneRef spScene;
   SimpleCameraRef spCamera;
