@@ -21,7 +21,7 @@ namespace ep {
     Variant::VarMap map;
     map.Insert("position", bm.position);
     map.Insert("orientation", bm.ypr);
-    return std::move(bm);
+    return std::move(map);
   }
 
   inline void epFromVariant(const Variant &v, Bookmark *pBM)
