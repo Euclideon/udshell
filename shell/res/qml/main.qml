@@ -12,6 +12,8 @@ Rectangle {
   color: "#444"
 
   property var uiconsole
+  property var messageboxcomp
+  property var messagebox
   property var menucomp
   property var toolbarcomp
   property var commandmanager
@@ -29,6 +31,11 @@ Rectangle {
   signal openprojectsignal(string path)
   signal saveprojectsignal()
   signal saveprojectassignal(string path)
+
+  onMessageboxcompChanged: {
+    messagebox = messageboxcomp.get("uihandle");
+    messagebox.parent = topLevel;
+  }
 
   onUiconsoleChanged: {
     var uiconsoleqq = uiconsole.get("uihandle");

@@ -31,6 +31,11 @@ void ComponentImpl::SetName(SharedString name)
 
 void ComponentImpl::Init(Variant::VarMap initParams)
 {
+  // Temporary solution: get 'name' from initParams
+  Variant *pName = initParams.Get("name");
+  if (pName)
+    SetName(pName->asSharedString());
+
   // TODO uncomment this when we've thought it through
   /*
   for (auto kv : initParams)
