@@ -53,11 +53,14 @@ public:
   void RemoveBookMark(String bmName);
   void RenameBookMark(String oldName, String newName);
   const Bookmark *FindBookMark(String bmName) const { return bookmarks.Get(bmName); }
+  void LoadBookMarks(Variant::VarMap bookmarks);
+  Variant SaveBookMarks() const;
 
   using BookmarkMap = SharedMap<AVLTree<SharedString, Bookmark>>;
   const BookmarkMap &GetBookmarkMap() const { return bookmarks; }
 
   NodeRef GetRootNode() const { return rootNode; }
+
 
   RenderSceneRef GetRenderScene();
 
