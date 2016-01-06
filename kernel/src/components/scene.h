@@ -51,6 +51,7 @@ public:
   void AddBookMarkFromCamera(String bmName, CameraRef camera);
   void AddBookMark(String bmName, const Bookmark &bm);
   void RemoveBookMark(String bmName);
+  void RenameBookMark(String oldName, String newName);
   const Bookmark *FindBookMark(String bmName) const { return bookmarks.Get(bmName); }
 
   using BookmarkMap = SharedMap<AVLTree<SharedString, Bookmark>>;
@@ -104,6 +105,7 @@ protected:
       EP_MAKE_METHOD(AddBookMarkFromCamera, "Add a BookMark from Camera"),
       EP_MAKE_METHOD(AddBookMark, "Add a BookMark"),
       EP_MAKE_METHOD(RemoveBookMark, "Remove a BookMark"),
+      EP_MAKE_METHOD(RenameBookMark, "Rename a BookMark"),
       EP_MAKE_METHOD_EXPLICIT("FindBookMark", FindBookMark_Internal, "Find a BookMark"),
     };
   }

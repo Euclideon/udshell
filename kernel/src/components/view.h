@@ -41,6 +41,8 @@ public:
   void SetEnablePicking(bool enable);
   bool GetEnablePicking() const { return pickingEnabled; }
 
+  void GoToBookmark(String bookmarkName);
+
   struct PickResult
   {
     Double3 position;
@@ -120,6 +122,12 @@ protected:
   void OnDirty();
 
   static Array<const PropertyInfo> GetProperties();
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(GoToBookmark, "Move the Camera to the specified Bookmark"),
+    };
+  }
   static Array<const EventInfo> GetEvents()
   {
     return{
