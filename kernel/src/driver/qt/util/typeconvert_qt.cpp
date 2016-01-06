@@ -89,6 +89,15 @@ Variant epToVariant(const QVariant &var)
     case QMetaType::QObjectStar:
       return epToVariant(var.value<QObject*>());
 
+    case QMetaType::VoidStar:
+    {
+      void *pPtr = var.value<void*>();
+      if (pPtr == nullptr)
+        return Variant(nullptr);
+      EPASSERT(false, "TODO: handle raw buffers?");
+      return Variant();
+    }
+
     case QMetaType::User:
     {
       int userType = var.userType();
