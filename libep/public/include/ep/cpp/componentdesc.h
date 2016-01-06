@@ -152,7 +152,7 @@ public:                                                                         
     if (!id.ptr)                                                                         \
     {                                                                                    \
       char buf[sizeof(#Name)];                                                           \
-        for (size_t i = 0; i < sizeof(buf); ++i) buf[i] = (char)tolower(#Name[i]);       \
+        for (size_t i = 0; i < sizeof(buf); ++i) buf[i] = (char)epToLower(#Name[i]);     \
       id = SharedString(buf, sizeof(buf)-1);                                             \
     }                                                                                    \
     return id;                                                                           \
@@ -178,7 +178,7 @@ public:                                                                         
     if (!id.ptr)                                                                         \
     {                                                                                    \
       char buf[sizeof(#Name)];                                                           \
-        for (size_t i = 0; i < sizeof(buf); ++i) buf[i] = (char)tolower(#Name[i]);       \
+        for (size_t i = 0; i < sizeof(buf); ++i) buf[i] = (char)epToLower(#Name[i]);     \
       id = SharedString(buf, sizeof(buf)-1);                                             \
     }                                                                                    \
     return id;                                                                           \
@@ -240,7 +240,7 @@ private:                                                                        
 #define EP_MAKE_PROPERTY_EXPLICIT(Name, Description, Getter, Setter, DisplayType, Flags) \
 ([]() -> PropertyInfo {                                                                  \
   static char id[sizeof(Name)];                                                          \
-  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)tolower(Name[i]);                \
+  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
     id, Name, Description, DisplayType, Flags,                                           \
     Getter,                                                                              \
@@ -257,7 +257,7 @@ private:                                                                        
 #define EP_MAKE_METHOD_EXPLICIT(Name, Method, Description)                               \
 ([]() -> MethodInfo {                                                                    \
   static char id[sizeof(Name)];                                                          \
-  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)tolower(Name[i]);                \
+  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
     id, Description,                                                                     \
     []() -> void* {                                                                      \
@@ -283,7 +283,7 @@ private:                                                                        
 #define EP_MAKE_EVENT_EXPLICIT(Name, Event, Description)                                 \
 ([]() -> EventInfo {                                                                     \
   static char id[sizeof(Name)];                                                          \
-  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)tolower(Name[i]);                \
+  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
     id, Name, Description,                                                               \
     []() -> void* {                                                                      \
@@ -310,7 +310,7 @@ private:                                                                        
 #define EP_MAKE_STATICFUNC_EXPLICIT(Name, Function, Description)                         \
 ([]() -> StaticFuncInfo {                                                                \
   static char id[sizeof(Name)];                                                          \
-  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)tolower(Name[i]);                \
+  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
     id, Description,                                                                     \
     [](Slice<const Variant> args) -> Variant {                                           \

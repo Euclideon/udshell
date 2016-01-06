@@ -2,6 +2,8 @@
 
 #include "udPlatform.h"
 
+#include <stdio.h>
+
 namespace ep {
 namespace internal {
 
@@ -131,7 +133,7 @@ void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile, int line))
       }
       return debugger_present;
     }
-#   else 
+#   else
     int IsDebuggerPresent(void) { return 0; }
 #   endif // defined(EP_COMPILER_GCC)
 

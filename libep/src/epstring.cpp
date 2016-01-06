@@ -65,6 +65,23 @@ const char s_epCharDetails[256] =
 namespace ep {
 namespace internal {
 
+int epvscprintf(const char * format, va_list args)
+{
+#if defined(EP_COMPILER_VISUALC)
+  return _vscprintf(format, args);
+#else
+  return vsprintf(nullptr, format, args);
+#endif
+}
+int epvsnprintf(char * s, size_t count, const char * format, va_list args)
+{
+#if defined(EP_COMPILER_VISUALC)
+  return vsnprintf_s(s, count, count, format, args);
+#else
+  return vsnprintf(s, count, format, args);
+#endif
+}
+
 size_t getLength(Slice<epVarArg> args)
 {
   size_t len = 0;

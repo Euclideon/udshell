@@ -14,8 +14,8 @@ extern const char s_epCharDetails[256];
 #define epIsAlphaNumeric(c) ((c) < 256 && (s_epCharDetails[(size_t)c] & 3))
 #define epIsHex(c) (epIsAlphaNumeric(c) && ((c)|0x20) <= 'f')
 
-#define epToLower(c) (isAlpha(c) ? (c)|0x20 : (c))
-#define epToUpper(c) (isAlpha(c) ? (c)&~0x20 : (c))
+#define epToLower(c) (epIsAlpha(c) ? (c)|0x20 : (c))
+#define epToUpper(c) (epIsAlpha(c) ? (c)&~0x20 : (c))
 
 // C compilers just define epString as a simple struct
 struct epString

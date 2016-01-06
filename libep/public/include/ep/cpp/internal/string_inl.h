@@ -47,6 +47,11 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, Slice<T> arr, const epV
 
 namespace ep {
 
+namespace internal {
+  int epvscprintf(const char * format, va_list args);
+  int epvsnprintf(char * s, size_t count, const char * format, va_list args);
+}
+
 template<typename C>
 class CString
 {
@@ -526,19 +531,11 @@ inline MutableString<Size>::MutableString(Sprintf_T, const char *pFormat, ...)
   va_list args;
   va_start(args, pFormat);
 
-#if defined(EP_COMPILER_VISUALC)
-  size_t len = _vscprintf(pFormat, args) + 1;
-#else
-  size_t len = vsprintf(nullptr, pFormat, args) + 1;
-#endif
+  size_t len = internal::epvscprintf(pFormat, args) + 1;
 
   this->reserve(len + 1);
 
-#if defined(EP_COMPILER_VISUALC)
-  this->length = vsnprintf_s(this->ptr, len, len, pFormat, args);
-#else
-  this->length = vsnprintf(this->ptr, len, pFormat, args);
-#endif
+  this->length = internal::epvsnprintf(this->ptr, len, pFormat, args);
 
   va_end(args);
 }
@@ -582,19 +579,11 @@ inline MutableString<Size>& MutableString<Size>::sprintf(const char *pFormat, ..
   va_list args;
   va_start(args, pFormat);
 
-#if defined(EP_COMPILER_VISUALC)
-  size_t len = _vscprintf(pFormat, args) + 1;
-#else
-  size_t len = vsprintf(nullptr, pFormat, args) + 1;
-#endif
+  size_t len = internal::epvscprintf(pFormat, args) + 1;
 
   this->reserve(len + 1);
 
-#if defined(EP_COMPILER_VISUALC)
-  this->length = vsnprintf_s(this->ptr, len, len, pFormat, args);
-#else
-  this->length = vsnprintf(this->ptr, len, pFormat, args);
-#endif
+  this->length = internal::epvsnprintf(this->ptr, len, pFormat, args);
 
   va_end(args);
 
@@ -684,19 +673,11 @@ inline SharedString::SharedString(Sprintf_T, const char *pFormat, ...)
   va_list args;
   va_start(args, pFormat);
 
-#if defined(EP_NACL)
-  size_t len = vsprintf(nullptr, pFormat, args) + 1;
-#else
-  size_t len = vsnprintf(nullptr, 0, pFormat, args) + 1;
-#endif
+  size_t len = internal::epvscprintf(pFormat, args) + 1;
 
   MutableString<0> s(Reserve, len);
 
-#if defined(EP_NACL)
-  s.length = vsprintf(s.ptr, pFormat, args);
-#else
-  s.length = vsnprintf(s.ptr, len, pFormat, args);
-#endif
+  s.length = internal::epvsnprintf(s.ptr, len, pFormat, args);
 
   va_end(args);
 
