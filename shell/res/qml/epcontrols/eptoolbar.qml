@@ -52,9 +52,12 @@ Rectangle {
     }
     else
     {
-      var item = epSplitButton.createObject(null);
+      var component = Qt.createComponent("epsplitbutton.qml");
+      var item = component.createObject(null);
       toolBarObjects.push(item);
 
+      item.buttonHeight = vertical ? toolBar.width : toolBar.height;
+      item.buttonWidth = vertical ? toolBar.width: toolBar.height;
       item.text = tooldata.name;
       item.iconSource = tooldata.image;
       item.command = tooldata.command;
@@ -98,82 +101,6 @@ Rectangle {
   }
 
   Component {
-    id: epSplitButton
-
-    RowLayout {
-      id: splitButton
-      property alias text: button.text
-      property alias iconSource: button.iconSource
-      property alias command: button.command
-      property alias tooltip: button.tooltip
-      property var commandManager
-      spacing: 1
-
-      Component.onCompleted: {
-        commandManager = EPKernel.GetCommandManager();
-      }
-
-      function addItem(data) {
-        menu.addEPMenuItem(data);
-        if(menu.items.length == 1)
-          menu.__selectedIndex = 0;
-      }
-
-      Button {
-        id: button
-        property string command
-        property alias dropdown: dropdown
-        property alias menu: menu
-
-        implicitHeight: vertical ? toolBar.width : toolBar.height
-        implicitWidth: vertical ? toolBar.width: toolBar.height
-
-        onClicked: {
-          if(command)
-            commandManager.call("runcommand", command, null);
-        }
-
-        style: splitButtonStyle
-      }
-
-      Button {
-        id: dropdown
-        visible: (menu.items.length > 0 ? true : false)
-
-        property alias button: button
-        property alias menu: menu
-        style: splitButtonDropDownStyle
-
-        onClicked: {
-          menu.toggleVisible();
-        }
-      }
-
-      EPMenu
-      {
-        id: menu
-
-        __visualItem: splitButton
-
-        on__SelectedIndexChanged: {
-          var item = items[__selectedIndex];
-          if(item.iconSource)
-            button.iconSource = item.iconSource;
-          if(item.command)
-            button.command = item.command;
-        }
-
-        function toggleVisible() {
-          if(__popupVisible)
-            __dismissMenu()
-          else
-            __popup(Qt.rect(0, splitButton.height, 0, 0), 0);
-        }
-      }
-    }
-  }
-
-  Component {
     id: separator
     Item {
       implicitWidth: vertical ? toolBar.implicitWidth : 14
@@ -183,53 +110,6 @@ Rectangle {
         implicitWidth: vertical ? toolBar.implicitWidth - 8 : 1
         implicitHeight: vertical ? 1 : toolBar.implicitHeight - 8
         color: "#555"
-      }
-    }
-  }
-
-  Component {
-    id: splitButtonDropDownStyle
-    ButtonStyle {
-      label: Item {}
-      background: Rectangle {
-        id: glyph
-        implicitWidth: arrow.implicitWidth + 2
-        implicitHeight: control.button.implicitHeight
-        color: !control.enabled ? "transparent" : (control.hovered || control.button.hovered || control.menu.__popupVisible ? "#555" : "transparent")
-        Rectangle {
-          width: arrow.implicitWidth
-          height: arrow.implicitHeight
-          color: "transparent"
-          anchors.verticalCenter: parent.verticalCenter
-          anchors.horizontalCenter: parent.horizontalCenter
-
-          Text {
-            id: arrow
-            font.pixelSize: 9
-            text: control.menu.__popupVisible ? "\u25b2" : "\u25bc"
-            color: "white"
-          }
-        }
-      }
-    }
-  }
-
-  Component {
-    id: splitButtonStyle
-    ButtonStyle {
-      padding {
-        left: 2
-        right: 2
-        top: 2
-        bottom: 2
-      }
-      background: Rectangle {
-        anchors.fill: parent
-        color: control.pressed ? "#333" : ((control.hovered || control.dropdown.hovered || control.menu.__popupVisible) ? "#555" : "transparent")
-      }
-      label: Image {
-        source: control.iconSource
-        fillMode: Image.PreserveAspectFit
       }
     }
   }
