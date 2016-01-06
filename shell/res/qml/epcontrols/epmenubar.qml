@@ -9,7 +9,6 @@ Item {
 
   property alias menuBar: menuBar
   property var menucomp
-  property var commandmanager
   property var window
   property var style
   property var menuObjects: []
@@ -101,7 +100,6 @@ Item {
         var menu = topMenus[currMenu];
         menu.visible = true;
         menu.title = text;
-        menu.commandmanager = Qt.binding(function() { return commandmanager; })
         currMenu++;
         return menu;
       }

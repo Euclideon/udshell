@@ -2,13 +2,18 @@ import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
+import epKernel 0.1
 
 Rectangle {
   property bool vertical
   property var toolbarcomp
-  property var commandmanager
+  property var commandManager
   property var toolBarObjects: []
   property alias toolBarLayout: toolBarLoader.item
+
+  Component.onCompleted: {
+    commandManager = EPKernel.GetCommandManager();
+  }
 
   onToolbarcompChanged: {
     updatetoolbar();
@@ -55,7 +60,6 @@ Rectangle {
       item.command = tooldata.command;
       item.enabled = tooldata.enabled;
       item.tooltip = tooldata.description;
-      item.commandmanager = Qt.binding(function() { return commandmanager; });
       item.parent = toolBarLayout;
 
       var children = tooldata.children;
@@ -102,8 +106,12 @@ Rectangle {
       property alias iconSource: button.iconSource
       property alias command: button.command
       property alias tooltip: button.tooltip
-      property var commandmanager: null
+      property var commandManager
       spacing: 1
+
+      Component.onCompleted: {
+        commandManager = EPKernel.GetCommandManager();
+      }
 
       function addItem(data) {
         menu.addEPMenuItem(data);
@@ -122,7 +130,7 @@ Rectangle {
 
         onClicked: {
           if(command)
-            commandmanager.call("runcommand", command, null);
+            commandManager.call("runcommand", command, null);
         }
 
         style: splitButtonStyle
@@ -146,7 +154,6 @@ Rectangle {
         id: menu
 
         __visualItem: splitButton
-        commandmanager: splitButton.commandmanager
 
         on__SelectedIndexChanged: {
           var item = items[__selectedIndex];

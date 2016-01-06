@@ -1,13 +1,18 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
+import epKernel 0.1
 
 Menu {
   id: epMenu
   style: menuStyle
 
   property var menuObjects: []
-  property var commandmanager
+  property var commandManager
+
+  Component.onCompleted: {
+    commandManager = EPKernel.GetCommandManager();
+  }
 
   Component {
     id: epExclusiveGroup
@@ -21,7 +26,7 @@ Menu {
       onTriggered: {
         if(command)
         {
-          commandmanager.call("runcommand", command, null);
+          commandManager.call("runcommand", command, null);
         }
       }
     }
@@ -38,7 +43,6 @@ Menu {
       var menu = component.createObject(null);
       menuObjects.push(menu);
       menu.title = menudata.name;
-      menu.commandmanager = Qt.binding(function() { return commandmanager; })
       insertItem(items.length, menu);
 
       for(var i = 0; i < children.length; i++)
