@@ -147,6 +147,9 @@ ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &v
     case Variant::Type::AssocArray:
       EPASSERT(false, "TODO! Please write me!");
       return 0;
+    case Variant::Type::Error:
+      EPASSERT(false, "TODO! Please write me!");
+      return 0;
   }
   return 0;
 }

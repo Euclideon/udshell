@@ -131,7 +131,7 @@ public:
   const Slice<LogLine> GetLog() const { return internalLog; }
   LogLine *GetLogLine(int index) const
   {
-    if (index >= 0 && index < internalLog.length)
+    if (index >= 0 && index < (int)internalLog.length)
       return &internalLog[index];
     else
       return nullptr;

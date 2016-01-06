@@ -32,7 +32,8 @@ protected:
 
   struct Command
   {
-    Command(SharedString id, Delegate<void(Variant::VarMap)> func, SharedString script, SharedString activityType, SharedString shortcut) : id(id), activityType(activityType), shortcut(shortcut), func(func), script(script) {}
+    Command(SharedString id, Delegate<void(Variant::VarMap)> func, SharedString script, SharedString activityType, SharedString shortcut)
+      : id(id), shortcut(shortcut), func(func), script(script), activityType(activityType) {}
 
     SharedString id;
     SharedString shortcut;

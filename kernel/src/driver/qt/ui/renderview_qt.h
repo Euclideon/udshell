@@ -18,7 +18,7 @@ public:
   RenderView(QQuickItem *pParent = 0);
   virtual ~RenderView();
 
-  Renderer *createRenderer() const;
+  Renderer *createRenderer() const override;
 
   void AttachView(ViewRef spView);
 
