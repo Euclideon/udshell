@@ -71,7 +71,7 @@ private slots:
 
 private:
   void DoInit(ep::Kernel *);
-  void customEvent(QEvent *pEvent);
+  void customEvent(QEvent *pEvent) override;
 
   // Members
   int argc;

@@ -43,6 +43,8 @@ public:
 
   // TODO: support async operations?
   // TODO: remove support for sync operations?
+  
+  Variant Save() const override { return Super::Save(); }
 
 protected:
   Stream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

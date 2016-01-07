@@ -11,7 +11,7 @@ namespace ep {
 template<typename T>
 struct Hash
 {
-  static uint32_t hash(const T &v)
+  static uint32_t hash(const T &)
   {
     // TODO: some CRC or something
     return 0;
