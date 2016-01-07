@@ -141,6 +141,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
 
   // create logger and default streams
   pKernel->spLogger = pKernel->CreateComponent<Logger>();
+  pKernel->spLogger->DisableCategory(LogCategories::Trace);
 
   spDebugFile = pKernel->CreateComponent<File>({ { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
   if (spDebugFile)
@@ -152,8 +153,6 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
   if (spConsole)
      pKernel->spLogger->AddStream(spConsole);
-
-  pKernel->spLogger->DisableCategory(LogCategories::Trace);
 
   // resource manager
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();

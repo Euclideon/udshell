@@ -84,9 +84,11 @@ struct LogLine
 class LogFilter
 {
 public:
-  // Log level filtering for streams
   int GetLevel(LogCategories category) const;
   void SetLevel(LogCategories categories, int level);
+  void Enable(LogCategories categories);
+  void Disable(LogCategories categories);
+  bool IsEnabled(LogCategories category) const;
   Slice<SharedString> GetComponents() const;
   void SetComponents(Slice<const String> comps);
   void ResetFilter();
@@ -98,6 +100,7 @@ public:
   }
 protected:
   int levelsFilter[NUM_LOG_CATEGORIES];
+  bool enabledFilter[NUM_LOG_CATEGORIES];
   Array<SharedString> componentsFilter;
 };
 
@@ -152,9 +155,10 @@ public:
   // Logger level filtering
   LogFilter &GetFilter() { return filter; }
   int GetLevel(LogCategories category) const { return filter.GetLevel(category); }
-  void SetLevel(LogCategories categories, int level) { return filter.SetLevel(categories, level); }
-  void EnableCategory(LogCategories categories) { SetLevel(categories, -1); }
-  void DisableCategory(LogCategories categories) { SetLevel(categories, 0); }
+  void SetLevel(LogCategories categories, int level) { filter.SetLevel(categories, level); }
+  void EnableCategory(LogCategories categories) { filter.Enable(categories); }
+  void DisableCategory(LogCategories categories) { filter.Disable(categories); }
+  bool IsCategoryEnabled(LogCategories category) const { return filter.IsEnabled(category); }
   Slice<SharedString> GetComponents() const { return filter.GetComponents(); }
   void SetComponents(Slice<const String> comps) { filter.SetComponents(comps); }
   void ResetFilter() { filter.ResetFilter(); }

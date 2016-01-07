@@ -14,8 +14,9 @@ Array<const MethodInfo> Logger::GetMethods()
     EP_MAKE_METHOD(ResetFilter, "Resets log filter to a non-filtering state"),
     EP_MAKE_METHOD(GetLevel, "Get filter level for the specified category"),
     EP_MAKE_METHOD(SetLevel, "Filter logging for a bitfield of categories to the specified level"),
-    EP_MAKE_METHOD(EnableCategory, "Removes level filter for the specified category"),
-    EP_MAKE_METHOD(DisableCategory, "Sets the level filter for the specified category to 0"),
+    EP_MAKE_METHOD(EnableCategory, "Enables the specified category"),
+    EP_MAKE_METHOD(DisableCategory, "Disables the specified category"),
+    EP_MAKE_METHOD(IsCategoryEnabled, "Get enabled state for the specified category"),
     EP_MAKE_METHOD(GetComponents, "Get filtered components uids"),
     EP_MAKE_METHOD_EXPLICIT("SetComponents", SetComponents_Arr, "Filter logging to the specified component UIDs"),
     EP_MAKE_METHOD(ResetStreamFilter, "Resets a stream's log filter to a non-filtering state"),
@@ -188,6 +189,37 @@ void LogFilter::SetLevel(LogCategories categories, int level)
   }
 }
 
+bool LogFilter::IsEnabled(LogCategories category) const
+{
+  int catIndex;
+  for (catIndex = 0; !(category & 1); catIndex++)
+    category = category >> 1;
+
+  return enabledFilter[catIndex];
+}
+
+void LogFilter::Enable(LogCategories categories)
+{
+  for (int i = 0; categories; i++)
+  {
+    if (categories & 1)
+      enabledFilter[i] = true;
+
+    categories = categories >> 1;
+  }
+}
+
+void LogFilter::Disable(LogCategories categories)
+{
+  for (int i = 0; categories; i++)
+  {
+    if (categories & 1)
+      enabledFilter[i] = false;
+
+    categories = categories >> 1;
+  }
+}
+
 Slice<SharedString> LogFilter::GetComponents() const
 {
   return componentsFilter;
@@ -201,6 +233,7 @@ void LogFilter::SetComponents(Slice<const String> comps)
 void LogFilter::ResetFilter()
 {
   memset(levelsFilter, -1, sizeof(levelsFilter));
+  memset(enabledFilter, true, sizeof(enabledFilter));
   componentsFilter = nullptr;
 }
 
@@ -212,7 +245,7 @@ bool LogFilter::FilterLogLine(LogLine &line) const
   for (catIndex = 0; !(tempCat & 1); catIndex++)
     tempCat = tempCat >> 1;
 
-  if (levelsFilter[catIndex] != -1 && levelsFilter[catIndex] < line.level)
+  if (enabledFilter[catIndex] == false || (levelsFilter[catIndex] != -1 && levelsFilter[catIndex] < line.level))
     return false;
 
   // Check component ids filter
@@ -272,7 +305,7 @@ SharedString LogLine::ToString(LogFormatSpecs format) const
 #else
   tm *pTm = localtime(&timestamp);
 #endif
-  strftime(timeStr, sizeof(timeStr), "[%d/%m/%d %H:%M:%S]", pTm);
+  strftime(timeStr, sizeof(timeStr), "[%d/%m/%y %H:%M:%S]", pTm);
 
   out.format("{0}{1}{2,?10}{3}{4}{5}{6}{7}{8}{9}",
     ((format & LogFormatSpecs::Timestamp) ? (const char*)timeStr : ""),
