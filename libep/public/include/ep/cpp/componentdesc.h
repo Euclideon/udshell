@@ -6,6 +6,8 @@
 #include "ep/cpp/delegate.h"
 #include "ep/cpp/event.h"
 
+#include <tuple>
+
 // HACK: TODO: this shouldn't be here
 namespace kernel {
   struct ComponentDesc;
@@ -207,7 +209,7 @@ private:                                                                        
     };                                                                                   \
     auto d = &Shim::get;                                                                 \
     return *(void**)&d;                                                                  \
-  }()                                                                                    \
+  }()
 
 #define EP_MAKE_SETTER(Setter)                                                           \
   []() -> void* {                                                                        \
@@ -216,12 +218,18 @@ private:                                                                        
       void set(Variant v)                                                                \
       {                                                                                  \
         using PT = function_traits<decltype(&This::Setter)>::template arg<0>::type;      \
-        ((This*)this)->Setter(v.as<std::remove_reference<PT>::type>());                  \
+        try {                                                                            \
+          ((This*)this)->Setter(v.as<std::remove_reference<PT>::type>());                \
+        } catch (epErrorState*) {                                                        \
+          /* it's already on the stack, do nothing... */                                 \
+        } catch (...) {                                                                  \
+          PushError(epR_CppException, "C++ exception");                                  \
+        }                                                                                \
       }                                                                                  \
     };                                                                                   \
     auto d = &Shim::set;                                                                 \
     return *(void**)&d;                                                                  \
-  }()                                                                                    \
+  }()
 
 
 // make property with getter and setter
@@ -314,9 +322,7 @@ private:                                                                        
   return{                                                                                \
     id, Description,                                                                     \
     [](Slice<const Variant> args) -> Variant {                                           \
-      Variant r;                                                                         \
-      new(&r) Variant(ep::VarCall(&This::Function, args));                               \
-      return r;                                                                          \
+      return ep::VarCall(&This::Function, args);                                         \
     }                                                                                    \
   };                                                                                     \
 }())

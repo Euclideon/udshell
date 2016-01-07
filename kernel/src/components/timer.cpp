@@ -10,9 +10,9 @@ Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Vari
   const Variant intervalVar = *initParams.Get("duration");
 
   uint32_t duration = intervalVar.as<uint32_t>();
-  if (!intervalVar.is(Variant::Type::Int) ||!duration)
+  if (!intervalVar.is(Variant::Type::Int) || !duration)
   {
-    throw epR_InvalidParameter;
+    EPTHROW(epR_InvalidParameter, "Invalid 'duration'");
   }
 
   TimerType timerType = TimerType::Interval;
@@ -25,12 +25,12 @@ Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Vari
     else if (typeStr.eqIC("CountDown"))
       timerType = TimerType::CountDown;
     else
-      throw epR_InvalidParameter;
+      EPTHROW(epR_InvalidParameter, "Invalid 'timertype'");
   }
 
   pTimer = HalTimer_Create(HalTimerType(timerType.v), duration, TimerCallback, this);
   if (!pTimer)
-    throw epR_Failure;
+    EPTHROW(epR_Failure, "Failed to create timer");
 }
 
 

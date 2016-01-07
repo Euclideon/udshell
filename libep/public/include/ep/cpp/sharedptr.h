@@ -2,7 +2,7 @@
 #if !defined(_EPSHAREDPTR_HPP)
 #define _EPSHAREDPTR_HPP
 
-#include <type_traits>
+#include <utility>
 
 #include "ep/cpp/platform.h"
 

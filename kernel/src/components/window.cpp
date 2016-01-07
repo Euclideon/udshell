@@ -8,7 +8,7 @@ Window::Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   : Component(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != epR_Success)
-    throw epR_Failure;
+    EPTHROW(epR_Failure, "Failed to create Window");
 }
 
 // ---------------------------------------------------------------------------------------

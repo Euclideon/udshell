@@ -12,6 +12,7 @@ enum epResult
   epR_Success,
   epR_Failure,
 
+  epR_CppException,
   epR_InvalidParameter,
   epR_File_OpenFailure,
   epR_MemoryAllocationFailure,
@@ -25,12 +26,12 @@ struct epErrorState
   epString file;
   int line;
 
-  epErrorState *pPredicate;
+  epErrorState *pPrior;
 };
 
-#define EP_PUSHERROR(error, message) epPushError(error, message, epString_Create(__FILE__), __LINE__)
+#define EPERROR(error, message) epPushError(error, message, epString_Create(__FILE__), __LINE__)
 
-void epPushError(epResult error, epString message, epString file, int line);
+epErrorState* epPushError(epResult error, epString message, epString file, int line);
 epErrorState* epGetError();
 void epClearError();
 

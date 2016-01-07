@@ -10,17 +10,16 @@ thread_local size_t s_errorDepth = 0;
 }
 }
 
-#if defined(__cplusplus)
 extern "C" {
-#endif
 
-void epPushError(epResult error, epString message, epString file, int line)
+epErrorState* epPushError(epResult error, epString message, epString file, int line)
 {
   ep::internal::s_errorStack[ep::internal::s_errorDepth].error = error;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].message = message;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].file = file;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].line = line;
-  ep::internal::s_errorStack[ep::internal::s_errorDepth].pPredicate = ep::internal::s_errorDepth > 0 ? &ep::internal::s_errorStack[ep::internal::s_errorDepth-1] : nullptr;
+  ep::internal::s_errorStack[ep::internal::s_errorDepth].pPrior = ep::internal::s_errorDepth > 0 ? &ep::internal::s_errorStack[ep::internal::s_errorDepth-1] : nullptr;
+  return &ep::internal::s_errorStack[ep::internal::s_errorDepth++];
 }
 
 epErrorState* epGetError()
@@ -51,6 +50,4 @@ epSharedString epDumpError()
   return r;
 }
 
-#if defined(__cplusplus)
 }
-#endif

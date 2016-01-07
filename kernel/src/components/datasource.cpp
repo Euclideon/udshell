@@ -22,7 +22,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
     if (!spSource)
     {
       LogWarning(5, "\"src\" file path not found: {0}", source.asString());
-      throw epR_File_OpenFailure;
+      EPTHROW(epR_File_OpenFailure, "\"src\" file not found");
     }
   }
   else if ((spComp = source.as<ComponentRef>()))
@@ -41,7 +41,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
   if (!spSource)
   {
     LogError("Unknown type for \"src\" init paramater");
-    throw epR_InvalidParameter;
+    EPTHROW(epR_InvalidParameter, "Unknown type for \"src\" init paramater");
   }
 
   return spSource;

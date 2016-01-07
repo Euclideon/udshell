@@ -4,6 +4,8 @@
 
 #include "hal/haltimer.h"
 
+#include <time.h>
+
 double epPerformanceCounter()
 {
   struct timespec ts;

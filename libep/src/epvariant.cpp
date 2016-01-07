@@ -170,6 +170,7 @@ const Variant::Type s_typeTranslation[] =
   Variant::Type::AssocArray,// epVT_AssocArray
 
   Variant::Type::Void,      // epVT_Void
+  Variant::Type::Error,     // epVT_Error
 
   // these get reinterpreted
   Variant::Type::String     // epVT_SmallString

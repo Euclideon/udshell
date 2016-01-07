@@ -1,4 +1,4 @@
-#include <type_traits>
+#include <utility>
 
 #include "ep/cpp/math.h"
 
@@ -31,7 +31,16 @@ struct VarCallHack
   template<size_t... S>
   epforceinline static Variant call(R(*f)(Args...), Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
-    return Variant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+    try {
+      Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+      if (ErrorRaised())
+        return Variant(GetError());
+      return std::move(r);
+    } catch (epErrorState *pError) {
+      return Variant(pError);
+    } catch (...) {
+      return Variant(PushError(epR_CppException, "C++ exception"));
+    }
   }
 };
 template<typename... Args>
@@ -40,8 +49,16 @@ struct VarCallHack<void, Args...>
   template<size_t... S>
   epforceinline static Variant call(void(*f)(Args...), Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
-    f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
-    return Variant();
+    try {
+      f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
+      if (ErrorRaised())
+        return Variant(GetError());
+      return Variant();
+    } catch (epErrorState *pError) {
+      return Variant(pError);
+    } catch (...) {
+      return Variant(PushError(epR_CppException, "C++ exception"));
+    }
   }
 };
 
@@ -51,7 +68,16 @@ struct MethodCallHack
   template<size_t... S>
   epforceinline static Variant call(FastDelegate<R(Args...)> f, Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
-    return Variant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+    try {
+      Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
+      if (ErrorRaised())
+        return Variant(GetError());
+      return std::move(r);
+    } catch (epErrorState *pError) {
+      return Variant(pError);
+    } catch (...) {
+      return Variant(PushError(epR_CppException, "C++ exception"));
+    }
   }
 };
 template<typename... Args>
@@ -60,8 +86,16 @@ struct MethodCallHack<void, Args...>
   template<size_t... S>
   epforceinline static Variant call(FastDelegate<void(Args...)> f, Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
-    f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
-    return Variant();
+    try {
+      f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
+      if (ErrorRaised())
+        return Variant(GetError());
+      return Variant();
+    } catch (epErrorState *pError) {
+      return Variant(pError);
+    } catch (...) {
+      return Variant(PushError(epR_CppException, "C++ exception"));
+    }
   }
 };
 
@@ -144,6 +178,14 @@ inline Variant::Variant(nullptr_t)
   ownsContent = 0;
   length = 0;
 }
+inline Variant::Variant(epErrorState *pErrorState)
+{
+  t = (size_t)Type::Error;
+  ownsContent = 0;
+  length = 0;
+  p = pErrorState;
+}
+
 inline Variant::Variant(bool _b)
 {
   t = (size_t)Type::Bool;
@@ -344,7 +386,13 @@ inline bool Variant::is(Type type) const
 
 inline bool Variant::isValid() const
 {
-  return (Type)t != Type::Void;
+  return (Type)t != Type::Void && (Type)t != Type::Error;
+}
+
+inline void Variant::throwError()
+{
+  if ((Type)t == Type::Error)
+    throw (epErrorState*)p;
 }
 
 
@@ -481,7 +529,9 @@ protected:
     Variant vargs[sizeof...(args)+1] = { Variant(args)... };
     Slice<Variant> sargs(vargs, sizeof...(args));
 
-    return d(sargs).as<R>();
+    Variant r = d(sargs);
+    r.throwError();
+    return r.as<R>();
   }
 
   // *to* Variant::Delegate constructor

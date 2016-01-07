@@ -6,7 +6,7 @@
 #include "ep/cpp/sharedptr.h"
 #include "ep/epstringof.h"
 
-#include <type_traits>
+#include <utility>
 
 namespace ep
 {

@@ -46,6 +46,7 @@ public:
     Array = epVT_Array,
     AssocArray = epVT_AssocArray,
     Void = epVT_Void,
+    Error = epVT_Error,
     SmallString = epVT_SmallString
   };
 
@@ -58,6 +59,8 @@ public:
 
   Variant(Type);
   Variant(nullptr_t);
+  Variant(epErrorState *pErrorState);
+
   Variant(bool);
   Variant(int64_t);
   Variant(double);
@@ -128,6 +131,8 @@ public:
   Variant& operator[](size_t i) const;
   Variant& operator[](String key) const;
   Variant* getItem(String key) const;
+
+  void throwError();
 
   // TODO: these shouldn't be part of the public API!
   void luaPush(LuaState &l) const;
