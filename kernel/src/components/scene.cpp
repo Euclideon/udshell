@@ -139,17 +139,14 @@ Variant Scene::SaveBookMarks() const
 {
   Variant::VarMap bookmarksSave;
 
-  if (!bookmarks.Empty())
+  size_t index = 0;
+  for (auto bm : bookmarks)
   {
-    size_t index = 0;
-    for (auto bm : bookmarks)
-    {
-      Variant bmVar = bm.value;
-      Variant::VarMap bmSave = bmVar.asAssocArray();
-      bmSave.Insert("name", bm.key);
-      bookmarksSave.Insert(MutableString<16>(Format, "bookmark{0}", index), std::move(bmSave));
-      index++;
-    }
+    Variant bmVar = bm.value;
+    Variant::VarMap bmSave = bmVar.asAssocArray();
+    bmSave.Insert("name", bm.key);
+    bookmarksSave.Insert(MutableString<16>(Format, "bookmark{0}", index), std::move(bmSave));
+    index++;
   }
 
   return bookmarksSave;
