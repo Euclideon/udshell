@@ -6,7 +6,7 @@ UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedStri
   : Component(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != epR_Success)
-    EPTHROW(epR_Failure, "Failed to create UIComponent");
+    EPTHROW_ERROR(epR_Failure, "Failed to create UIComponent");
 }
 
 UIComponent::~UIComponent()

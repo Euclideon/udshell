@@ -457,6 +457,9 @@ const ep::ComponentDesc* Kernel::GetComponentDesc(String id)
 
 epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::ComponentRef *pNewInstance)
 {
+  if (!pNewInstance)
+    return epR_Failure;
+
   ComponentType *pType = componentRegistry.Get(typeId);
   if (!pType)
     return epR_Failure;
@@ -468,16 +471,16 @@ epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::
     // TODO: should we have a better uid generator than this?
     MutableString64 newUid(Concat, pDesc->info.id, pType->createCount++);
 
+    // attempt to create an instance
     ep::ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, newUid, initParams));
     if (!spComponent)
-      return epR_MemoryAllocationFailure;
+      return epR_AllocFailure;
 
-    Component::Ref spC = component_cast<Component>(spComponent);
+    // post-create init
+    spComponent->Init(initParams);
 
-    spC->Init(initParams);
-
-    instanceRegistry.Insert(spComponent->uid, spC.ptr());
-
+    // add to the component registry
+    instanceRegistry.Insert(spComponent->uid, spComponent.ptr());
     if (spLua)
       spLua->SetGlobal(spComponent->uid, spComponent.ptr());
 
@@ -487,10 +490,10 @@ epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::
     *pNewInstance = spComponent;
     return epR_Success;
   }
-  catch (epErrorState *pError)
+  catch (EPException &e)
   {
-    LogDebug(3, "Create component failed: {0}", String(pError->message));
-    return pError->error;
+    LogDebug(3, "Create component failed: {0}", String(e.pError->message));
+    return e.pError->error;
   }
   catch (...)
   {

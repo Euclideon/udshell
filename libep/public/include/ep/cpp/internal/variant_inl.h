@@ -33,11 +33,13 @@ struct VarCallHack
   {
     try {
       Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
-      if (ErrorRaised())
+      if (ErrorLevel())
         return Variant(GetError());
       return std::move(r);
-    } catch (epErrorState *pError) {
-      return Variant(pError);
+    } catch (EPException &e) {
+      return Variant(e.pError);
+    } catch (std::exception &e) {
+      return Variant(PushError(epR_CppException, e.what()));
     } catch (...) {
       return Variant(PushError(epR_CppException, "C++ exception"));
     }
@@ -51,11 +53,13 @@ struct VarCallHack<void, Args...>
   {
     try {
       f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
-      if (ErrorRaised())
+      if (ErrorLevel())
         return Variant(GetError());
       return Variant();
-    } catch (epErrorState *pError) {
-      return Variant(pError);
+    } catch (EPException &e) {
+      return Variant(e.pError);
+    } catch (std::exception &e) {
+      return Variant(PushError(epR_CppException, e.what()));
     } catch (...) {
       return Variant(PushError(epR_CppException, "C++ exception"));
     }
@@ -70,11 +74,13 @@ struct MethodCallHack
   {
     try {
       Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
-      if (ErrorRaised())
+      if (ErrorLevel())
         return Variant(GetError());
       return std::move(r);
-    } catch (epErrorState *pError) {
-      return Variant(pError);
+    } catch (EPException &e) {
+      return Variant(e.pError);
+    } catch (std::exception &e) {
+      return Variant(PushError(epR_CppException, e.what()));
     } catch (...) {
       return Variant(PushError(epR_CppException, "C++ exception"));
     }
@@ -88,11 +94,13 @@ struct MethodCallHack<void, Args...>
   {
     try {
       f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
-      if (ErrorRaised())
+      if (ErrorLevel())
         return Variant(GetError());
       return Variant();
-    } catch (epErrorState *pError) {
-      return Variant(pError);
+    } catch (EPException &e) {
+      return Variant(e.pError);
+    } catch (std::exception &e) {
+      return Variant(PushError(epR_CppException, e.what()));
     } catch (...) {
       return Variant(PushError(epR_CppException, "C++ exception"));
     }
@@ -178,7 +186,7 @@ inline Variant::Variant(nullptr_t)
   ownsContent = 0;
   length = 0;
 }
-inline Variant::Variant(epErrorState *pErrorState)
+inline Variant::Variant(ErrorState *pErrorState)
 {
   t = (size_t)Type::Error;
   ownsContent = 0;

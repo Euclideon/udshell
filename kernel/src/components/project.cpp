@@ -49,10 +49,9 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   {
     rootElements = spXMLBuffer->ParseXml();
   }
-  catch (parse_error e)
+  catch (parse_error &e)
   {
-    LogError("Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
-    EPTHROW(epR_Failure, "Unable to parse project");
+    EPTHROW_ERROR(epR_Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
   }
 
   Variant::VarMap projectNode = rootElements.asAssocArray();
@@ -60,10 +59,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   if (pName && pName->is(Variant::Type::String) && pName->asString().eq("project")) // TODO: I think we can make these comparisons better than this
     ParseProject(projectNode);
   else
-  {
-    LogError("Invalid project file \"{0}\" -- Missing <project> element", srcString);
-    EPTHROW(epR_Failure, "Invalid project file");
-  }
+    EPTHROW_ERROR(epR_Failure, "Invalid project file \"{0}\" -- Missing <project> element", srcString);
 }
 
 void Project::SaveProject()

@@ -192,18 +192,14 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
       Variant::VarMap aa = variant.asAssocArray();
       for (auto v : aa)
       {
-        if (!v.key.is(Variant::Type::String))
-        {
-          udDebugPrintf("epFromVariant: Key is not string!\n");
-          continue;
-        }
-        String k = v.key.asString();
+        QString key;
         QVariant value;
+        epFromVariant(v.key, &key);
         epFromVariant(v.value, &value);
-        map.insert(QLatin1String(k.ptr, (int)k.length), value);
+        map.insert(std::move(key), std::move(value));
       }
       // TODO: what?! no move assignment! look into this...
-      pVariant->setValue(map);
+      pVariant->setValue(std::move(map));
       break;
     }
 

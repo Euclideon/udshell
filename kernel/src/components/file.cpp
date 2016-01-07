@@ -22,11 +22,11 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
   const Variant *path = initParams.Get("path");
 
   if (!path || !path->is(Variant::Type::String))
-	  EPTHROW(epR_InvalidParameter, "Missing or invalid 'path'");
+	  EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'path'");
 
   const Variant *flags = initParams.Get("flags");
   if (!flags)
-    EPTHROW(epR_InvalidParameter, "Missing file open 'flags'");
+    EPTHROW_ERROR(epR_InvalidArgument, "Missing file open 'flags'");
 
   FileOpenFlags of = flags->as<FileOpenFlags>();
 
@@ -60,10 +60,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
   fd = open(cPath.toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
 #endif
   if (fd == -1)
-  {
-    pKernel->LogWarning(0, "Failed to open {0}, flags {1}, errno {2}\n", cPath, posixFlags, errno);
-    EPTHROW(epR_File_OpenFailure, "File open failure");
-  }
+    EPTHROW_WARN(epR_File_OpenFailure, 2, "Failed to open {0}, flags {1}, errno {2}\n", cPath, posixFlags, errno);
 
   uint64_t curr = lseek(fd, 0L, SEEK_CUR);
   length = lseek(fd, 0L, SEEK_END);

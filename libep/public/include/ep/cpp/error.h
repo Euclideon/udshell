@@ -7,23 +7,69 @@
 
 #include <utility>
 
+
+#define PushError(error, message, ...) ep::_PushError(error, ep::MutableString<0>(ep::Format, ep::String(message), ##__VA_ARGS__), __FILE__, __LINE__)
+
+
 #ifdef EPERROR
 # undef EPERROR
 #endif
+#define EPERROR(error, message, ...) (ep::LogError(ep::String(message), ##__VA_ARGS__), PushError(error, message, ##__VA_ARGS__))
 
-#define PushError(error, message) epPushError(error, String(message), String(__FILE__), __LINE__)
 
-#define EPERROR(error, message) PushError(error, message)
+#define EPTHROW(error, message, ...) throw EPException(PushError(error, message, ##__VA_ARGS__))
+#define EPTHROW_ERROR(error, message, ...) throw EPException(EPERROR(error, message, ##__VA_ARGS__))
+#define EPTHROW_WARN(error, level, message, ...) throw EPException((ep::LogWarning(level, ep::String(message), ##__VA_ARGS__), PushError(error, message, ##__VA_ARGS__)))
 
-#define EPTHROW(error, message) throw PushError(error, message)
-#define EPTHROW_NULL(condition, error, message) if((condition) == nullptr) { throw PushError(error, message); }
+#define EPTHROW_IF(condition, error, message, ...) if(condition) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); }
+#define EPTHROW_IF_NULL(condition, error, message, ...) if((condition) == nullptr) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); }
+
+#define EPASSERT_THROW(condition, error, message, ...) if(!(condition)) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); }
+
 
 namespace ep {
 
-epErrorState* GetError();
+namespace internal {
+  void Log(int type, int level, String text);
+}
+
+template<typename ...Args> inline void LogError(String text, Args... args);
+template<typename ...Args> inline void LogWarning(int level, String text, Args... args);
+template<typename ...Args> inline void LogDebug(int level, String text, Args... args);
+template<typename ...Args> inline void LogInfo(int level, String text, Args... args);
+template<typename ...Args> inline void LogScript(String text, Args... args);
+template<typename ...Args> inline void LogTrace(String text, Args... args);
+
+struct ErrorState
+{
+  epResult error;
+  SharedString message;
+
+  String file;
+  int line;
+
+  ErrorState *pPrior;
+};
+
+ErrorState* _PushError(epResult error, const SharedString &message, String file, int line);
+
+size_t ErrorLevel();
+ErrorState* GetError();
 void ClearError();
 
 SharedString DumpError();
+
+
+class EPException : public std::exception
+{
+public:
+  EPException(ErrorState *pError);
+  ~EPException();
+  const char* what() const noexcept override;
+
+  ErrorState *pError;
+};
+
 
 // implements ScopeGuard; a helper which calls a function on scope exit
 template <typename Func>

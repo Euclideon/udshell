@@ -21,6 +21,8 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
     udResult result = udOctree_Create(&pOctree, source->asString().toStringz(), useStreamer && useStreamer->is(Variant::Type::Bool) ? useStreamer->asBool() : true, 0);
     if (result == udR_Success)
     {
+      epscope(fail) { udOctree_Destroy(&pOctree); };
+
       const Variant *udModel = initParams.Get("existingComponent");
       UDModelRef model;
       if (udModel && udModel->is(Variant::Type::Component))
@@ -28,11 +30,9 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
       else
         model = pKernel->CreateComponent<UDModel>();
 
+      // TODO: this need not exist if CreateComponent doesn't catch...
       if (!model)
-      {
-        udOctree_Destroy(&pOctree);
-        EPTHROW(epR_Failure, "Failed to create model");
-      }
+        EPTHROW_ERROR(epR_Failure, "Failed to create model");
 
       model->spDataSource = ComponentRef(this);
       model->pOctree = pOctree;

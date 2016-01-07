@@ -4,9 +4,6 @@
 
 extern "C" {
 
-// TODO: remove me!!
-static Variant varNone = Variant();
-
 void epVariant_Release(epVariant v)
 {
   // Note: Variant's destructor will clean our instance up
@@ -184,7 +181,7 @@ const Variant::Type s_typeTranslation[] =
 // string constructors
 Variant::Variant(String s, bool unsafeReference)
 {
-  EP_STATICASSERT(internal::VariantSmallStringSize <= 15, "Only 4 bits for length!");
+  static_assert(internal::VariantSmallStringSize <= 15, "Only 4 bits for length!");
   if (unsafeReference)
   {
     t = (size_t)Type::String;
@@ -325,8 +322,7 @@ bool Variant::isNull() const
   {
     case Type::Void:
       // TODO: consider, is this correct?
-      EPASSERT(false, "Variant is void; has no value");
-      return true;
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void; has no value");
     case Type::Null:
       return true;
     case Type::String:
@@ -396,7 +392,7 @@ bool Variant::asBool() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return false;
     case Type::Bool:
@@ -416,8 +412,7 @@ bool Variant::asBool() const
       return !str.empty();
     }
     default:
-      EPASSERT(type() == Type::Bool, "Wrong type!");
-      return false;
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 int64_t Variant::asInt() const
@@ -425,7 +420,7 @@ int64_t Variant::asInt() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return 0;
     case Type::Bool:
@@ -442,8 +437,7 @@ int64_t Variant::asInt() const
       return String((char*)pBuffer + 1, pBuffer[0] >> 4).parseInt();
     }
     default:
-      EPASSERT(type() == Type::Int, "Wrong type!");
-      return 0;
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 double Variant::asFloat() const
@@ -451,7 +445,7 @@ double Variant::asFloat() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return 0.0;
     case Type::Bool:
@@ -468,14 +462,13 @@ double Variant::asFloat() const
       return String((char*)pBuffer + 1, pBuffer[0] >> 4).parseFloat();
     }
     default:
-      EPASSERT(type() == Type::Float, "Wrong type!");
-      return 0.0;
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 const EnumDesc* Variant::asEnum(size_t *pVal) const
 {
   if ((Type)t == Type::Void)
-    EPASSERT(false, "Variant is void");
+    EPTHROW_ERROR(epR_InvalidType, "Variant is void");
   else if ((Type)t == Type::Enum || (Type)t == Type::Bitfield)
   {
     *pVal = (ptrdiff_t)(length << 5) >> 5;
@@ -488,14 +481,13 @@ ComponentRef Variant::asComponent() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return ComponentRef();
     case Type::Component:
       return (ComponentRef&)p;
     default:
-      EPASSERT(type() == Type::Component, "Wrong type!");
-      return nullptr;
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 Variant::VarDelegate Variant::asDelegate() const
@@ -503,14 +495,13 @@ Variant::VarDelegate Variant::asDelegate() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return VarDelegate();
     case Type::Delegate:
       return (VarDelegate&)p;
     default:
-      EPASSERT(type() == Type::Delegate, "Wrong type!");
-      return VarDelegate();
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 String Variant::asString() const
@@ -518,7 +509,7 @@ String Variant::asString() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return String();
     case Type::String:
@@ -531,8 +522,7 @@ String Variant::asString() const
     case Type::Component:
       return ((Component*)p)->GetUid();
     default:
-      EPASSERT(type() == Type::String, "Wrong type!");
-      return String();
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 SharedString Variant::asSharedString() const
@@ -540,7 +530,7 @@ SharedString Variant::asSharedString() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return String();
     case Type::Bool:
@@ -567,8 +557,7 @@ SharedString Variant::asSharedString() const
     case Type::Component:
       return c->GetUid();
     default:
-      EPASSERT(type() == Type::String, "Wrong type!");
-      return String();
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 
@@ -577,14 +566,13 @@ Slice<Variant> Variant::asArray() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return Slice<Variant>();
     case Type::Array:
       return Slice<Variant>(a, length);
     default:
-      EPASSERT(type() == Type::Array, "Wrong type!");
-      return Slice<Variant>();
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 SharedArray<Variant> Variant::asSharedArray() const
@@ -592,7 +580,7 @@ SharedArray<Variant> Variant::asSharedArray() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return SharedArray<Variant>();
     case Type::Array:
@@ -624,8 +612,7 @@ SharedArray<Variant> Variant::asSharedArray() const
     case Type::String:
       // TODO: should we parse strings that look like arrays??
     default:
-      EPASSERT(type() == Type::Array, "Wrong type!");
-      return SharedArray<Variant>();
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 Variant::VarMap Variant::asAssocArray() const
@@ -633,14 +620,13 @@ Variant::VarMap Variant::asAssocArray() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPASSERT(false, "Variant is void");
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return VarMap();
     case Type::AssocArray:
       return (VarMap&)p;
     default:
-      EPASSERT(type() == Type::AssocArray, "Wrong type!");
-      return VarMap();
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 
@@ -661,25 +647,26 @@ Variant& Variant::operator[](size_t j) const
 {
   if (is(Type::Array))
   {
-    EPASSERT(j < length, "Index out of range!");
+    EPASSERT_THROW(j < length, epR_OutOfBounds, "Index out of range: {0} in [0 .. {1})", j, length);
     return a[j];
   }
   else if (is(Type::AssocArray))
   {
-    EPASSERT(j < length, "Index out of range!");
+    EPASSERT_THROW(j < length, epR_OutOfBounds, "Element not found: {0}", j);
     return *((VarMap&)p).Get(j + (aa->Get(0) ? 0 : 1));
   }
-  return varNone;
+  EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
 }
 Variant& Variant::operator[](String key) const
 {
   if (is(Type::AssocArray))
   {
     Variant *pV = aa->Get(key);
-    if (pV)
-      return *pV;
+    if(!pV)
+      EPTHROW_ERROR(epR_OutOfBounds, "Element not found: {0}", key);
+    return *pV;
   }
-  return varNone;
+  EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
 }
 
 Variant* Variant::getItem(String key) const

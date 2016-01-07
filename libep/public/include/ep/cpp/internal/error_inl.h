@@ -10,34 +10,6 @@
 #endif
 
 
-namespace ep {
-
-namespace internal {
-  extern thread_local epErrorState s_errorStack[256];
-  extern thread_local size_t s_errorDepth;
-}
-
-inline bool ErrorRaised()
-{
-  return internal::s_errorDepth > 0;
-}
-inline epErrorState* GetError()
-{
-  return internal::s_errorDepth ? &internal::s_errorStack[internal::s_errorDepth-1] : nullptr;
-}
-inline void ClearError()
-{
-  epClearError();
-}
-
-inline SharedString DumpError()
-{
-  return epDumpError();
-}
-
-} // namespace ep
-
-
 // HACK: machinery to get information from the runtime about exceptions in flight
 #if defined(__GNUG__) || defined(__CLANG__)
 # define EXCEPTION_COUNT_USE_CXA_GET_GLOBALS
@@ -129,4 +101,67 @@ ScopeGuard<typename std::decay<Func>::type> operator +(ScopeGuardOnExit, Func&& 
 }
 
 } // namespace internal
+
+// global log functions
+template<typename ...Args> inline void LogError(String text, Args... args)
+{
+  if (sizeof...(Args) == 0)
+    internal::Log(1<<0, 2, text);
+  else
+  {
+    MutableString128 tmp(Format, text, args...);
+    internal::Log(1<<0, 2, tmp);
+  }
+}
+template<typename ...Args> inline void LogWarning(int level, String text, Args... args)
+{
+  if (sizeof...(Args) == 0)
+    internal::Log(1<<1, level, text);
+  else
+  {
+    MutableString128 tmp(Format, text, args...);
+    internal::Log(1<<1, level, tmp);
+  }
+}
+template<typename ...Args> inline void LogDebug(int level, String text, Args... args)
+{
+  if (sizeof...(Args) == 0)
+    internal::Log(1<<2, level, text);
+  else
+  {
+    MutableString128 tmp(Format, text, args...);
+    internal::Log(1<<2, level, tmp);
+  }
+}
+template<typename ...Args> inline void LogInfo(int level, String text, Args... args)
+{
+  if (sizeof...(Args) == 0)
+    internal::Log(1<<3, level, text);
+  else
+  {
+    MutableString128 tmp(Format, text, args...);
+    internal::Log(1<<3, level, tmp);
+  }
+}
+template<typename ...Args> inline void LogScript(String text, Args... args)
+{
+  if (sizeof...(Args) == 0)
+    internal::Log(1<<4, 2, text);
+  else
+  {
+    MutableString128 tmp(Format, text, args...);
+    internal::Log(1<<4, 2, tmp);
+  }
+}
+template<typename ...Args> inline void LogTrace(String text, Args... args)
+{
+  if (sizeof...(Args) == 0)
+    internal::Log(1<<5, 2, text);
+  else
+  {
+    MutableString128 tmp(Format, text, args...);
+    internal::Log(1<<5, 2, tmp);
+  }
+}
+
 } // namespace ep

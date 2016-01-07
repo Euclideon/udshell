@@ -57,19 +57,19 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
   //TODO: Error handling for the whole function, perhaps send message with error?
   mData.spView = mData.pKernel->CreateComponent<View>();
-  EPTHROW_NULL(mData.spView, epR_Failure, "!");
+  EPTHROW_IF_NULL(mData.spView, epR_Failure, "!");
   epscope(fail) { mData.spView = nullptr; };
 
   mData.spScene = mData.pKernel->CreateComponent<Scene>();
-  EPTHROW_NULL(mData.spScene, epR_Failure, "!");
+  EPTHROW_IF_NULL(mData.spScene, epR_Failure, "!");
   epscope(fail) { mData.spScene = nullptr; };
 
   mData.spSimpleCamera = mData.pKernel->CreateComponent<SimpleCamera>();
-  EPTHROW_NULL(mData.spSimpleCamera, epR_Failure, "!");
+  EPTHROW_IF_NULL(mData.spSimpleCamera, epR_Failure, "!");
   epscope(fail) { mData.spSimpleCamera = nullptr; };
 
   mData.spUDNode = mData.pKernel->CreateComponent<UDNode>();
-  EPTHROW_NULL(mData.spUDNode, epR_Failure, "!");
+  EPTHROW_IF_NULL(mData.spUDNode, epR_Failure, "!");
   epscope(fail) { mData.spUDNode = nullptr; };
 
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None, nullptr, nullptr, nullptr };

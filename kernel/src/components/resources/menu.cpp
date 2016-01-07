@@ -37,7 +37,7 @@ Variant Menu::ParseXMLString(String buffer)
   {
     rootNode = spXMLBuffer->ParseXml();
   }
-  catch (parse_error e)
+  catch (parse_error &e)
   {
     LogError("Unable to parse menus xml string on line {0} : {1}", Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
     return false;

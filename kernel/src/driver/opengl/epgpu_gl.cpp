@@ -61,7 +61,7 @@ struct epVertexDataFormatGL
 // Author: Manu Evans, Nov 2015
 void epGPU_Clear(double color[4], double depth, int stencil)
 {
-  glClearColor(color[0], color[1], color[2], color[3]);
+  glClearColor((GLclampf)color[0], (GLclampf)color[1], (GLclampf)color[2], (GLclampf)color[3]);
   glClearDepth(depth);
   glClearStencil(stencil);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

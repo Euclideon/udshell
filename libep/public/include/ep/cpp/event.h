@@ -78,7 +78,26 @@ public:
     {
       EvDelegate d;
       d.SetMemento(s.spM);
-      d(args...);
+
+      try
+      {
+        d(args...);
+
+        // stack error...
+        ErrorState *pError = GetError();
+        if (pError)
+        {
+          epDebugFormat("Unhandled exception from event handler: {0}", pError->message);
+          ClearError();
+        }
+      }
+      catch (std::exception &e) {
+        epDebugFormat("Unhandled exception from event handler: {0}", e.what());
+        ClearError();
+      } catch (...) {
+        epDebugFormat("Unhandled C++ exception from event handler!");
+        ClearError();
+      }
     }
   }
 

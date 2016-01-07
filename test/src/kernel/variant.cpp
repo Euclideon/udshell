@@ -28,8 +28,8 @@ TEST(EPVariant, EPVariantNull)
   EXPECT_EQ(0, var.arrayLen());
   EXPECT_EQ(0, var.assocArraySeriesLen());
 
-  EXPECT_TRUE(var[0].is(Variant::Type::Void));
-  EXPECT_TRUE(var["dummy"].is(Variant::Type::Void));
+  EXPECT_THROW(var[0], EPException);
+  EXPECT_THROW(var["dummy"], EPException);
 
 }
 
@@ -55,19 +55,19 @@ TEST(EPVariant, EPVariantBool)
 
   EXPECT_FALSE(varTrue.asEnum(nullptr));
 
-  EXPECT_DEATH_FROM_ASSERT(varTrue.asComponent(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varTrue.asDelegate(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varTrue.asString().empty(), "Wrong type!");
+  EXPECT_THROW(varTrue.asComponent(), EPException);
+  EXPECT_THROW(varTrue.asDelegate(), EPException);
+  EXPECT_THROW(varTrue.asString().empty(), EPException);
 
-  EXPECT_DEATH_FROM_ASSERT(varTrue.asArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varTrue.asAssocArray().Empty(), "Wrong type!");
-//  EXPECT_DEATH_FROM_ASSERT(varTrue.asAssocArraySeries().empty(), "Wrong type!");
+  EXPECT_THROW(varTrue.asArray().empty(), EPException);
+  EXPECT_THROW(varTrue.asAssocArray().Empty(), EPException);
+//  EXPECT_THROW(varTrue.asAssocArraySeries().empty(), EPException);
 
   EXPECT_EQ(0, varTrue.arrayLen());
   EXPECT_EQ(0, varTrue.assocArraySeriesLen());
 
-  EXPECT_TRUE(varTrue[0].is(Variant::Type::Void));
-  EXPECT_TRUE(varTrue["dummy"].is(Variant::Type::Void));
+  EXPECT_THROW(varTrue[0], EPException);
+  EXPECT_THROW(varTrue["dummy"], EPException);
 }
 
 TEST(EPVariant, EPVariantInt)
@@ -94,19 +94,19 @@ TEST(EPVariant, EPVariantInt)
 
   EXPECT_FALSE(varInt.asEnum(nullptr));
 
-  EXPECT_DEATH_FROM_ASSERT(varInt.asComponent(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varInt.asDelegate(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varInt.asString().empty(), "Wrong type!");
+  EXPECT_THROW(varInt.asComponent(), EPException);
+  EXPECT_THROW(varInt.asDelegate(), EPException);
+  EXPECT_THROW(varInt.asString().empty(), EPException);
 
-  EXPECT_DEATH_FROM_ASSERT(varInt.asArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varInt.asAssocArray().Empty(), "Wrong type!");
-//  EXPECT_DEATH_FROM_ASSERT(varInt.asAssocArraySeries().empty(), "Wrong type!");
+  EXPECT_THROW(varInt.asArray().empty(), EPException);
+  EXPECT_THROW(varInt.asAssocArray().Empty(), EPException);
+//  EXPECT_THROW(varInt.asAssocArraySeries().empty(), EPException);
 
   EXPECT_EQ(0, varInt.arrayLen());
   EXPECT_EQ(0, varInt.assocArraySeriesLen());
 
-  EXPECT_TRUE(varInt[0].is(Variant::Type::Void));
-  EXPECT_TRUE(varInt["dummy"].is(Variant::Type::Void));
+  EXPECT_THROW(varInt[0], EPException);
+  EXPECT_THROW(varInt["dummy"], EPException);
 }
 
 
@@ -134,19 +134,19 @@ TEST(EPVariant, EPVariantDbl)
 
   EXPECT_FALSE(varDbl.asEnum(nullptr));
 
-  EXPECT_DEATH_FROM_ASSERT(varDbl.asComponent(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varDbl.asDelegate(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varDbl.asString().empty(), "Wrong type!");
+  EXPECT_THROW(varDbl.asComponent(), EPException);
+  EXPECT_THROW(varDbl.asDelegate(), EPException);
+  EXPECT_THROW(varDbl.asString().empty(), EPException);
 
-  EXPECT_DEATH_FROM_ASSERT(varDbl.asArray().empty(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varDbl.asAssocArray().Empty(), "Wrong type!");
-//  EXPECT_DEATH_FROM_ASSERT(varDbl.asAssocArraySeries().empty(), "Wrong type!");
+  EXPECT_THROW(varDbl.asArray().empty(), EPException);
+  EXPECT_THROW(varDbl.asAssocArray().Empty(), EPException);
+//  EXPECT_THROW(varDbl.asAssocArraySeries().empty(), EPException);
 
   EXPECT_EQ(0, varDbl.arrayLen());
   EXPECT_EQ(0, varDbl.assocArraySeriesLen());
 
-  EXPECT_TRUE(varDbl[0].is(Variant::Type::Void));
-  EXPECT_TRUE(varDbl["dummy"].is(Variant::Type::Void));
+  EXPECT_THROW(varDbl[0], EPException);
+  EXPECT_THROW(varDbl["dummy"], EPException);
 }
 
 
@@ -165,15 +165,15 @@ TEST(EPVariant, EPVariantSlice)
   EXPECT_TRUE(varSlice.is(Variant::Type::Array));
   EXPECT_TRUE(varSlice.stringify().empty());
 
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asBool(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asInt(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asFloat(), "Wrong type!");
+  EXPECT_THROW(varSlice.asBool(), EPException);
+  EXPECT_THROW(varSlice.asInt(), EPException);
+  EXPECT_THROW(varSlice.asFloat(), EPException);
 
   EXPECT_FALSE(varSlice.asEnum(nullptr));
 
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asComponent(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asDelegate(), "Wrong type!");
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asString().empty(), "Wrong type!");
+  EXPECT_THROW(varSlice.asComponent(), EPException);
+  EXPECT_THROW(varSlice.asDelegate(), EPException);
+  EXPECT_THROW(varSlice.asString().empty(), EPException);
 
   EXPECT_TRUE(testSlice == varSliceUnSafe.asArray());
   EXPECT_TRUE(testSlice != varSlice.asArray());
@@ -181,13 +181,13 @@ TEST(EPVariant, EPVariantSlice)
   for (size_t i = 0; i < 3; ++i)
     EXPECT_TRUE(testSlice[i].asInt() == varSlice.asArray()[i].asInt());
 
-  EXPECT_DEATH_FROM_ASSERT(varSlice.asAssocArray().Empty(), "Wrong type!");
-//  EXPECT_DEATH_FROM_ASSERT(varSlice.asAssocArraySeries().empty(), "Wrong type!");
+  EXPECT_THROW(varSlice.asAssocArray().Empty(), EPException);
+//  EXPECT_THROW(varSlice.asAssocArraySeries().empty(), EPException);
 
   EXPECT_EQ(varSlice[0].asInt(), 0);
   EXPECT_EQ(varSlice[1].asInt(), 1);
   EXPECT_EQ(varSlice[2].asInt(), 2);
-  EXPECT_DEATH_FROM_ASSERT(varSlice[3], "Index out of range!");
+  EXPECT_THROW(varSlice[3], EPException);
 }
 
 

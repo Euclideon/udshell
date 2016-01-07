@@ -59,7 +59,7 @@ public:
 
   Variant(Type);
   Variant(nullptr_t);
-  Variant(epErrorState *pErrorState);
+  Variant(ErrorState *pErrorState);
 
   Variant(bool);
   Variant(int64_t);

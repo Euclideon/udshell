@@ -117,7 +117,7 @@ SharedPtr<T> Kernel::CreateComponent(Variant::VarMap initParams)
 
 inline Kernel* Kernel::GetInstance()
 {
-  return (Kernel*)s_pPluginInstance->pKernelInstance;
+  return (Kernel*)(s_pPluginInstance ? s_pPluginInstance->pKernelInstance : nullptr);
 }
 
 template<typename ...Args>
