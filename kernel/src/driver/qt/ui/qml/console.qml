@@ -292,6 +292,7 @@ Item {
             border.width: 1
             TextArea {
               id: consoleInTextArea
+              property int historyIndex: 0
               focus: true
               width: parent.width - parent.border.width * 2
               height: Math.max(minTextArea.contentHeight, Math.min(0.33 * consoleWin.height, contentHeight)) + 2
@@ -307,17 +308,52 @@ Item {
               }
 
               Keys.onPressed: {
-                if(event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
-                {
+                if(event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                   if(event.modifiers === Qt.ShiftModifier)
                     insert(cursorPosition, "\n");
-                  else
-                  {
+                  else {
                     if(length != 0)
                       thisComponent.call("relayinput", text);
 
                     cursorPosition = 0;
                     text = "";
+                    historyIndex = 0;
+                  }
+                  event.accepted = true;
+                }
+                else if(event.key === Qt.Key_Up) {
+                  var historyText = text;
+                  do {
+                    if(Math.abs(historyIndex) >= thisComponent.get("historylength"))
+                      break;
+
+                    historyIndex--;
+                    if(historyIndex < 0)
+                      historyText = thisComponent.call("gethistoryline", historyIndex);
+                  } while(historyText == text);
+
+                  if(historyText != text) {
+                    text = historyText;
+                    cursorPosition = text.length;
+                  }
+
+                  event.accepted = true;
+                }
+                else if(event.key === Qt.Key_Down) {
+                  var historyText = "";
+                  do {
+                    if(historyIndex < 0) {
+                      historyIndex++;
+                      if(historyIndex < 0)
+                        historyText = thisComponent.call("gethistoryline", historyIndex);
+                      else
+                        historyText = "";
+                    }
+                  } while(historyText != "" && historyText == text);
+
+                  if(historyText != text) {
+                    text = historyText;
+                    cursorPosition = text.length;
                   }
                   event.accepted = true;
                 }

@@ -4,6 +4,7 @@
 #include "components/logger.h"
 #include "components/resources/buffer.h"
 #include "components/commandmanager.h"
+#include "components/file.h"
 #include "ep/cpp/delegate.h"
 #include "kernel.h"
 
@@ -27,6 +28,28 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
 
   auto spCommandManager = pKernel->GetCommandManager();
   spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void(Variant::VarMap)>(this, &UIConsole::ToggleVisible), "", "", "`");
+
+  // Console input history file
+  spHistoryFile = pKernel->CreateComponent<File>({ { "path", historyFileName }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
+  if (spHistoryFile)
+  {
+    size_t len = (size_t)spHistoryFile->Length();
+    Array<char> buffer(Reserve, len);
+    buffer.length = spHistoryFile->Read(buffer.getBuffer()).length;
+
+    String str = buffer;
+    while (!str.empty())
+    {
+      String token = str.popToken<true>("\n");
+      if (!token.empty())
+        history.concat(token);
+    }
+  }
+  else
+  {
+    LogError("Console -- Could not open history file \"{0}\"", historyFileName);
+    EPTHROW(epR_File_OpenFailure, "Console history file open failure");
+  }
 }
 
 void UIConsole::ToggleVisible(Variant::VarMap params)
@@ -175,6 +198,7 @@ void UIConsole::OnConsoleOutput(Slice<const void> buf)
 
 void UIConsole::RelayInput(String str)
 {
+  AppendHistory(str);
   pKernel->Exec(str);
 }
 
@@ -234,6 +258,14 @@ bool UIConsole::FilterTextLine(String line) const
     return false;
 
   return true;
+}
+
+// History functions
+
+void UIConsole::AppendHistory(String str)
+{
+  history.concat(str);
+  spHistoryFile->WriteLn(str);
 }
 
 }
