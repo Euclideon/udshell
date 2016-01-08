@@ -233,7 +233,4 @@ protected:
 
 } // namespace ep
 
-// unit tests
-epResult epSlice_Test();
-
 #endif // _EP_SLICE_HPP

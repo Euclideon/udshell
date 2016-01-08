@@ -167,7 +167,4 @@ namespace internal {
 
 #include "ep/cpp/internal/variant_inl.h"
 
-// unit tests
-epResult epVariant_Test();
-
 #endif // EPVARIANT_HPP

@@ -2,6 +2,97 @@
 #include "ep/cpp/platform.h"
 // TODO: fill out these tests
 
+void receivesString(String)
+{
+}
+void receivesCString(const char*)
+{
+}
+
+// TODO: these tests are old and should be deprecated!!
+TEST(EPStringTest, Deprecated)
+{
+  // String
+  char buffer[] = "world";
+
+  String s1 = "hello";        // initialise from string
+  String s2(buffer, 3);       // initialise to sub-string; ie, "wor"
+
+  s1.eq(s2);                    // strcmp() == 0
+  s1.eqIC(s2);                   // case insensitive; stricmp() == 0
+  s1.eq("hello");               // compare with c-string
+
+  SharedArray<char16_t> wcs(s1);   // init wchar string from c-string! yay unicode! (except we probably also want to decode utf-8...)
+
+  wcs.eq(s1);                   // compare wide-char and ascii strings
+
+  auto subStr = s1.slice(1, 4); // string slice; "ell"
+  subStr.ptr = subStr.ptr;      // fixes gcc warnings
+
+  s2.toStringz(buffer, sizeof(buffer)); // write String to c-string
+
+
+                                        // MutableString
+  MutableString<64> s_s1(s1);
+  String s_slice = s_s1.slice(1, 4); // slices of Array are not owned; they die when the parent allocation dies
+  s_slice.ptr = s_slice.ptr;     // fixes gcc warnings
+
+  s_s1.eqIC("HELLO");            // string comparison against string literals
+
+  receivesString(s_s1);         // pass to functions
+
+  s_s1.reserve(100);            // reserve a big buffer
+  EPASSERT(s_s1.eq(s1), "!");   // the existing contents is preserved
+
+  s_s1.concat(s1, "!!", String("world"));
+
+
+  // SharedString
+  SharedString rcs1(s1);          // RC string initialised from some slice
+  SharedString rcs2("string");    // also from literal
+  SharedString rcs3(buffer, 4);   // also from c-string (and optionally a slice thereof)
+
+  receivesString(rcs1);         // pass to functions
+
+  MutableString<64> ss2 = rcs2; // stack string takes copy of a SharedString
+  SharedString rcs4 = ss2;        // rc strings take copy of stack strings too
+
+  rcs1 == s1;                   // compare SharedString and String pointers
+
+  rcs1.eqIC(s1);                 // string comparison works too between SharedString and String
+
+                                 //  SharedString::format("Format: %s", "hello");  // create from format string
+
+                                 //  char temp[256];
+                                 //  fopen(rcs1.toStringz(temp, sizeof(temp)), "ro"); // write SharedString to c-string, for passing to OS functions or C api's
+                                 // unlike c_str(), user supplies buffer (saves allocations)
+
+  SharedString r2 = SharedString::concat(s1, "!!", rcs1, String("world"), s_s1);
+  //  SharedString::format("x{1}_{2}", "10", "200");
+
+  receivesCString(r2.toStringz());
+
+  const char *pName = "manu";
+  SharedString cc = SharedString::concat("hello ", pName, 10);
+  SharedString fmt = SharedString::format("{ 1 }, {2}, { 0 , hello }", "hello ", pName, 10);
+
+  MutableString<0> ms(Concat, "hello ", pName, 10);
+  ms.append("poop!");
+
+  int arr[] = { 1, 2, 30 };
+  ms.format("{1}, {'?',?7}{'!',!7}, {@6} {3}", "hello ", pName, 10, Slice<int>(arr, 3), "*5", 10, "!{0,@4}!", false);
+
+  Slice<const void> poo;
+  //  poo.slice(1, 3);
+  //  poo[2];
+  //  poo.alloc(10);
+
+  WString wstr = (const char16_t*)L"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
+  ms.format("{0}", wstr);
+
+  cc.parseInt();
+}
+
 TEST(EPStringTest, EmptyString) {
   String nullStr;
   EXPECT_TRUE(nullStr.empty());

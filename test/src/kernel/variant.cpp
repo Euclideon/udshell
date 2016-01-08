@@ -2,6 +2,61 @@
 #include "ep/cpp/variant.h"
 #include <random>
 
+// TODO: these tests are old and should be deprecated!!
+TEST(EPVariant, Deprecated)
+{
+  Variant t0;
+  EPASSERT(t0.type() == Variant::Type::Void, "!");
+  Variant t1(true);
+  EPASSERT(t1.type() == Variant::Type::Bool && t1.asBool() == true, "!");
+  Variant t2(10);
+  EPASSERT(t2.type() == Variant::Type::Int && t2.asInt() == 10, "!");
+  Variant t3(10.0);
+  EPASSERT(t3.type() == Variant::Type::Float && t3.asFloat() == 10.0, "!");
+
+  // string constructions
+  Variant t4("hello");
+  EPASSERT(t4.type() == Variant::Type::String, "!");
+  Variant t5(String("hello"));
+  EPASSERT(t5.type() == Variant::Type::String, "!");
+  Variant t6(MutableString<0>("hello"));
+  EPASSERT(t6.type() == Variant::Type::String, "!");
+  Variant t7(MutableString<16>("hello"));
+  EPASSERT(t7.type() == Variant::Type::String, "!");
+  Variant t8(MutableString<0>("really long string that will claim allocation"));
+  EPASSERT(t8.type() == Variant::Type::String, "!");
+  Variant t9(SharedString("test"));
+  EPASSERT(t9.type() == Variant::Type::String, "!");
+
+  MutableString<0> x = "123";
+  MutableString<15> y = "123";
+  SharedString z = "123";
+
+  Variant t10(x);
+  EPASSERT(t10.type() == Variant::Type::String, "!");
+  Variant t11(y);
+  EPASSERT(t11.type() == Variant::Type::String, "!");
+  Variant t12(z);
+  EPASSERT(t12.type() == Variant::Type::String, "!");
+
+  ComponentRef spC;
+  Variant t15(spC);
+  Variant t16(ComponentRef(nullptr));
+
+  Slice<const Variant> arr = { 1, 2, "3" };
+  Variant t17(arr);
+  auto a1 = t17.as<Array<float>>();
+
+  Variant t18("[1,  2  ,  \"3\" ] ");
+  auto a2 = t18.as<Array<SharedString>>();
+
+  Variant t19;
+  EPASSERT(!t19.isValid(), "!");
+
+  SharedString::format("{0} {1} {2}", Variant(true), Variant(10), Variant(20.0));
+}
+
+
 TEST(EPVariant, EPVariantNull)
 {
   Variant var(nullptr);
