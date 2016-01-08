@@ -12,6 +12,7 @@ SHARED_CLASS(MemStream);
 SHARED_CLASS(Broadcaster);
 SHARED_CLASS(Stream);
 SHARED_CLASS(Activity);
+SHARED_CLASS(File);
 
 class UIConsole : public UIComponent
 {
@@ -61,6 +62,11 @@ public:
     RebuildOutput();
   }
 
+  // History
+  String GetHistoryLine(size_t lineNumber) const { return history[lineNumber]; }
+  void AppendHistory(String str);
+  size_t GetHistoryLength() const { return history.length; }
+
 protected:
   UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~UIConsole() {}
@@ -86,6 +92,10 @@ protected:
   MemStreamRef spInStream = nullptr;
   BroadcasterRef spConsoleOut = nullptr;
   BroadcasterRef spConsoleErr = nullptr;
+
+  FileRef spHistoryFile = nullptr;
+  Array<SharedString> history;
+  const String historyFileName = "console.history";
 
   int64_t pos = 0;
 
@@ -119,6 +129,7 @@ protected:
       EP_MAKE_PROPERTY_RO(NumConsoleLines, "Number of console lines to output", nullptr, 0),
       EP_MAKE_PROPERTY_RO(NumLogLines, "Number of log lines to output", nullptr, 0),
       EP_MAKE_PROPERTY_RO(NumMergedLines, "Number of merged log + console lines to output", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(HistoryLength, "Number of lines in the input history", nullptr, 0)
     };
   }
   static Array<const MethodInfo> GetMethods()
@@ -128,6 +139,8 @@ protected:
       EP_MAKE_METHOD(SetFilterLevel, "Set the level filter for the given log category"),
       EP_MAKE_METHOD(RebuildOutput, "Rebuild output text and send to UI"),
       EP_MAKE_METHOD(RelayInput, "Send input to the Kernel's input stream"),
+      EP_MAKE_METHOD(AppendHistory, "Add a line to the end of the input history"),
+      EP_MAKE_METHOD(GetHistoryLine, "Get the line at specified index from the input history. Negative numbers count from end.")
     };
   }
 };
