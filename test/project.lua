@@ -37,6 +37,10 @@ if qt then
 	disablewarnings { "4481", "4127" } -- silence some Qt warnings
  end
 
+	filter { "system:windows" }
+		buildoptions { "/MP" }
+	filter { }
+
 	-- include common stuff
 	dofile "../common-proj.lua"
 

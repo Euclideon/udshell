@@ -18,9 +18,9 @@ function execute_build() {
     if [ $? -ne 0 ]; then exit 4; fi
 
     if [[ $# -eq 4 && $4 == "clean" ]]; then
-      "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3 //t:clean
+      "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3 //v:m //t:clean
     elif [ $# -eq 3 ]; then
-      "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3 //m
+      "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3 //v:m //m
     else
       exit 5
     fi
