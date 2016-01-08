@@ -8,7 +8,7 @@
 #include <utility>
 
 
-#define PushError(error, message, ...) ep::_PushError(error, ep::MutableString<0>(ep::Format, ep::String(message), ##__VA_ARGS__), __FILE__, __LINE__)
+#define PushError(error, message, ...) ep::_PushError(error, ep::MutableString<0>(ep::Format, ep::String(message), ##__VA_ARGS__), __PRETTY_FUNCTION__, __FILE__, __LINE__)
 
 
 #ifdef EPERROR
@@ -45,13 +45,14 @@ struct ErrorState
   epResult error;
   SharedString message;
 
-  String file;
+  const char *function;
+  const char *file;
   int line;
 
   ErrorState *pPrior;
 };
 
-ErrorState* _PushError(epResult error, const SharedString &message, String file, int line);
+ErrorState* _PushError(epResult error, const SharedString &message, const char *function, const char *file, int line);
 
 size_t ErrorLevel();
 ErrorState* GetError();

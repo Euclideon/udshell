@@ -349,6 +349,9 @@ struct epTheTypeIs;
 # define EPFMT_SIZE_T "%Iu"
 # define EPFMT_SSIZE_T "%Id"
 # define EPFMT_PTRDIFF_T "%Id"
+# if !defined(__PRETTY_FUNCTION__)
+#   define __PRETTY_FUNCTION__ __FUNCSIG__
+# endif
 #elif defined(EP_COMPILER_GCC) || defined(EP_COMPILER_CLANG)
   // TODO: use #if __has_builtin()/__has_attribute() to test if these are available?
 # define epalign_begin(n)
