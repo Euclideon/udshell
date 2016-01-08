@@ -31,6 +31,10 @@ project "epkernel"
 		buildoptions { "-std=c++11" }
 	filter {}
 
+	filter { "system:windows" }
+		buildoptions { "/MP" }
+	filter { }
+
 	-- include common stuff
 	dofile "../common-proj.lua"
 

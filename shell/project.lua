@@ -37,6 +37,10 @@ project "epshell"
 
 	configuration { }
 
+	filter { "system:windows" }
+		buildoptions { "/MP" }
+	filter { }
+
 	-- include common stuff
 	dofile "../common-proj.lua"
 

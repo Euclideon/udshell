@@ -10,5 +10,9 @@ project "libep"
 
 	includedirs { "../ud/udPlatform/Include" }
 
+	filter { "system:windows" }
+		buildoptions { "/MP" }
+	filter { }
+
 	-- include common stuff
 	dofile "../common-proj.lua"
