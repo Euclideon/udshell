@@ -18,6 +18,10 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   spConsoleErr = pKernel->GetStdErrBroadcaster();
   spConsoleErr->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
 
+  auto spLua = ((kernel::Kernel *)pKernel)->GetLua();
+  spLuaOut = spLua->GetOutputBroadcaster();
+  spLuaOut->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
+
   // Create stream for shell input
   auto spInBuffer = pKernel->CreateComponent<Buffer>();
   spInBuffer->Reserve(1024);
@@ -157,6 +161,9 @@ void UIConsole::OnLogChanged()
   logLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1, spLogger->GetLogLine((int)log.length - 1)->ordering));
   ConsoleLine &cLine = logLines.back();
 
+  if (bOutputLogToConsole)
+    OnConsoleOutput(line.text);
+
   // Do filtering
   if (!logFilter.FilterLogLine(line) || !FilterTextLine(cLine.text))
     return;
@@ -199,7 +206,9 @@ void UIConsole::OnConsoleOutput(Slice<const void> buf)
 void UIConsole::RelayInput(String str)
 {
   AppendHistory(str);
+  bOutputLogToConsole = true;
   pKernel->Exec(str);
+  bOutputLogToConsole = false;
 }
 
 UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)

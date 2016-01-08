@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include "lua.h"
+#include "components/broadcaster.h"
 
 #include "eplua.h"
 
@@ -9,26 +10,13 @@ namespace ep
 Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
+  spOutputBC = pKernel->CreateComponent<Broadcaster>();
   pLua = new LuaState(pKernel);
 }
 
 Lua::~Lua()
 {
   delete pLua;
-}
-
-void Lua::SetOutputStream(StreamRef stream)
-{
-  outputStream = stream;
-
-  EPASSERT(false, "TODO: work out how to override stdout in lua");
-}
-
-void Lua::SetErrorStream(StreamRef stream)
-{
-  errorStream = stream;
-
-  EPASSERT(false, "TODO: work out how to override stderr in lua");
 }
 
 Variant Lua::GetGlobal(Variant key) const

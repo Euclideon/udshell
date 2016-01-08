@@ -3,6 +3,7 @@
 #include "kernel.h"
 #include "componentdesc.h"
 #include "components/componentimpl.h"
+#include "components/broadcaster.h"
 
 #include "ep/cpp/variant.h"
 
@@ -58,6 +59,47 @@ void SetConsoleColor(ConsoleColor fg, ConsoleColor bg)
 }
 #endif
 
+static MutableString<1024> CreateStringFromArgs(lua_State *L)
+{
+  MutableString<1024> str;
+  LuaState &l = (LuaState&)L;
+
+  int numArgs = l.top();
+  while (numArgs)
+  {
+    size_t len;
+    const char *pS = lua_tolstring(L, -1, &len);
+    str.append(String(pS, len));
+
+    lua_pop(L, 1);
+    numArgs--;
+  }
+  return str;  // number of results
+}
+
+static int PrintOutput(lua_State *L)
+{
+  LuaState &l = (LuaState&)L;
+
+  kernel::Kernel *pKernel = (kernel::Kernel*)l.kernel();
+  auto spLua = pKernel->GetLua();
+
+  spLua->GetOutputBroadcaster()->Write(CreateStringFromArgs(L));
+
+  return 0;
+}
+
+static int PrintError(lua_State *L)
+{
+  LuaState &l = (LuaState&)L;
+
+  kernel::Kernel *pKernel = (kernel::Kernel*)l.kernel();
+  auto spLua = pKernel->GetLua();
+
+  pKernel->LogError(CreateStringFromArgs(L));
+
+  return 0;
+}
 
 static int SendMessage(lua_State *L)
 {
@@ -193,6 +235,8 @@ LuaState::LuaState(Kernel *pKernel)
 
   // TODO: register things
 
+  lua_register(L, "print", (lua_CFunction)PrintOutput);
+  lua_register(L, "printerror", (lua_CFunction)PrintError);
   lua_register(L, "SendMessage", (lua_CFunction)SendMessage);
   lua_register(L, "CreateComponent", (lua_CFunction)CreateComponent);
   lua_register(L, "FindComponent", (lua_CFunction)FindComponent);
@@ -242,8 +286,9 @@ void LuaState::exec(String code)
     fail = lua_pcall(L, 0, LUA_MULTRET, 0);
   if (fail)
   {
-    const char *pS = lua_tolstring(L, -1, nullptr);
-    udDebugPrintf("%s", pS);
+    lua_getglobal(L, "printerror");
+    lua_pushvalue(L, -2);
+    lua_call(L, 1, 0);
     lua_pop(L, 1);
   }
 }

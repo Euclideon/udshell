@@ -9,6 +9,7 @@ namespace ep
 {
 
 SHARED_CLASS(Lua);
+SHARED_CLASS(Broadcaster);
 class LuaState;
 
 class Lua : public Component
@@ -16,11 +17,7 @@ class Lua : public Component
   EP_DECLARE_COMPONENT(Lua, Component, EPKERNEL_PLUGINVERSION, "Lua VM")
 public:
 
-  StreamRef GetOutputStream() const { return outputStream; }
-  void SetOutputStream(StreamRef stream);
-
-  StreamRef GetErrorStream() const { return errorStream; }
-  void SetErrorStream(StreamRef stream);
+  BroadcasterRef GetOutputBroadcaster() const { return spOutputBC; }
 
   Variant GetGlobal(Variant key) const;
   void SetGlobal(Variant key, Variant value);
@@ -34,14 +31,12 @@ private:
 
   class LuaState *pLua = nullptr;
 
-  StreamRef outputStream;
-  StreamRef errorStream;
+  BroadcasterRef spOutputBC = nullptr;
 
   static Array<const PropertyInfo> GetProperties()
   {
     return{
-      EP_MAKE_PROPERTY(OutputStream, "Output stream used by the Lua print functions", nullptr, 0),
-      EP_MAKE_PROPERTY(ErrorStream, "Stream where Lua errors are presented", nullptr, 0),
+       EP_MAKE_PROPERTY_RO(OutputBroadcaster, "Output broadcaster used by the Lua print functions", nullptr, 0),
     };
   }
   static Array<const MethodInfo> GetMethods()

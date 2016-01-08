@@ -76,12 +76,12 @@ protected:
   virtual ~UIConsole() {}
 
   void ToggleVisible(Variant::VarMap params);
-
-  LogFilter logFilter;
-  bool FilterLogLine(const LogLine &) const;
-
   void OnLogChanged();
   void OnConsoleOutput(Slice<const void> buf);
+  bool FilterLogLine(const LogLine &) const;
+
+  LogFilter logFilter;
+  bool bOutputLogToConsole = false;
 
   struct ConsoleLine
   {
@@ -96,6 +96,7 @@ protected:
   MemStreamRef spInStream = nullptr;
   BroadcasterRef spConsoleOut = nullptr;
   BroadcasterRef spConsoleErr = nullptr;
+  BroadcasterRef spLuaOut = nullptr;
 
   FileRef spHistoryFile = nullptr;
   Array<SharedString> history;
