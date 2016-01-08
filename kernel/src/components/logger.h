@@ -86,9 +86,9 @@ class LogFilter
 public:
   int GetLevel(LogCategories category) const;
   void SetLevel(LogCategories categories, int level);
-  void Enable(LogCategories categories);
-  void Disable(LogCategories categories);
-  bool IsEnabled(LogCategories category) const;
+  void EnableCategory(LogCategories categories);
+  void DisableCategory(LogCategories categories);
+  bool IsCategoryEnabled(LogCategories category) const;
   Slice<SharedString> GetComponents() const;
   void SetComponents(Slice<const String> comps);
   void ResetFilter();
@@ -156,9 +156,9 @@ public:
   LogFilter &GetFilter() { return filter; }
   int GetLevel(LogCategories category) const { return filter.GetLevel(category); }
   void SetLevel(LogCategories categories, int level) { filter.SetLevel(categories, level); }
-  void EnableCategory(LogCategories categories) { filter.Enable(categories); }
-  void DisableCategory(LogCategories categories) { filter.Disable(categories); }
-  bool IsCategoryEnabled(LogCategories category) const { return filter.IsEnabled(category); }
+  void EnableCategory(LogCategories categories) { filter.EnableCategory(categories); }
+  void DisableCategory(LogCategories categories) { filter.DisableCategory(categories); }
+  bool IsCategoryEnabled(LogCategories category) const { return filter.IsCategoryEnabled(category); }
   Slice<SharedString> GetComponents() const { return filter.GetComponents(); }
   void SetComponents(Slice<const String> comps) { filter.SetComponents(comps); }
   void ResetFilter() { filter.ResetFilter(); }

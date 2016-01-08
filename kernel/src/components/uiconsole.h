@@ -51,6 +51,10 @@ public:
     RebuildOutput();
   }
 
+  bool IsFilterCategoryEnabled(LogCategories category) const { return logFilter.IsCategoryEnabled(category); }
+  void EnableFilterCategory(LogCategories categories) { logFilter.EnableCategory(categories); RebuildOutput(); }
+  void DisableFilterCategory(LogCategories categories) { logFilter.DisableCategory(categories); RebuildOutput(); }
+
   String GetFilterComponents() const;
   void SetFilterComponents(String str);
 
@@ -135,8 +139,11 @@ protected:
   static Array<const MethodInfo> GetMethods()
   {
     return{
-      EP_MAKE_METHOD(GetFilterLevel, "Get the level filter for the given log category"),
-      EP_MAKE_METHOD(SetFilterLevel, "Set the level filter for the given log category"),
+      EP_MAKE_METHOD(GetFilterLevel, "Get the filter level for the given log category"),
+      EP_MAKE_METHOD(SetFilterLevel, "Set the filter level for the given log category"),
+      EP_MAKE_METHOD(IsFilterCategoryEnabled, "Returns whether the given log category is enabled in the filter"),
+      EP_MAKE_METHOD(EnableFilterCategory, "Enables the given log categories in the log filter"),
+      EP_MAKE_METHOD(DisableFilterCategory, "Disables the given log categories in the log filter"),
       EP_MAKE_METHOD(RebuildOutput, "Rebuild output text and send to UI"),
       EP_MAKE_METHOD(RelayInput, "Send input to the Kernel's input stream"),
       EP_MAKE_METHOD(AppendHistory, "Add a line to the end of the input history"),
