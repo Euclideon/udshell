@@ -135,6 +135,19 @@ public:
     return n ? &n->v : nullptr;
   }
 
+  const V& operator[](const K &key) const
+  {
+    const V *pV = Get(key);
+    EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+    return *pV;
+  }
+  V& operator[](const K &key)
+  {
+    V *pV = Get(key);
+    EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+    return *pV;
+  }
+
   class Iterator;
   Iterator begin() const { return Iterator(root); }
   static Iterator end() { return Iterator(nullptr); }

@@ -653,19 +653,14 @@ Variant& Variant::operator[](size_t j) const
   else if (is(Type::AssocArray))
   {
     EPASSERT_THROW(j < length, epR_OutOfBounds, "Element not found: {0}", j);
-    return *((VarMap&)p).Get(j + (aa->Get(0) ? 0 : 1));
+    return (*aa)[j + (aa->Get(0) ? 0 : 1)];
   }
   EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
 }
 Variant& Variant::operator[](String key) const
 {
   if (is(Type::AssocArray))
-  {
-    Variant *pV = aa->Get(key);
-    if(!pV)
-      EPTHROW_ERROR(epR_OutOfBounds, "Element not found: {0}", key);
-    return *pV;
-  }
+    return (*aa)[key];
   EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
 }
 

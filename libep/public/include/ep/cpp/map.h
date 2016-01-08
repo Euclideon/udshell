@@ -123,6 +123,19 @@ public:
     return ptr ? ptr->tree.Get(key) : nullptr;
   }
 
+  const ValueType& operator[](const KeyType &key) const
+  {
+    const ValueType *pV = Get(key);
+    EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+    return *pV;
+  }
+  ValueType& operator[](const KeyType &key)
+  {
+    ValueType *pV = Get(key);
+    EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+    return *pV;
+  }
+
   Iterator begin() const { return ptr ? ptr->tree.begin() : ptr->tree.end(); }
   Iterator end() const { return ptr->tree.end(); }
 

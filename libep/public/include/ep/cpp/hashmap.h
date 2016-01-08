@@ -56,6 +56,9 @@ public:
   const V* Get(const K &key) const;
   V* Get(const K &key);
 
+  const V& operator[](const K &key) const;
+  V& operator[](const K &key);
+
   class Iterator;
   Iterator begin() const;
   Iterator end() const;
