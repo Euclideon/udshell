@@ -321,12 +321,6 @@ int main(int argc, char *argv[])
 {
   udMemoryDebugTrackingInit();
 
-  // unit test
-  epSlice_Test();
-  epString_Test();
-  epSharedPtr_Test();
-  epVariant_Test();
-
   if (argc > 1)
     projFilePath.append(argv[1]);
 

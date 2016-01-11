@@ -315,7 +315,4 @@ private:
 
 } // namespace ep
 
-// unit tests
-epResult epString_Test();
-
 #endif // _EP_STRING_HPP

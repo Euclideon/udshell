@@ -257,6 +257,7 @@
 # pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 # pragma warning(disable: 4100) // unreferenced formal parameter
 # pragma warning(disable: 4714) // marked as __forceinline not inlined
+# pragma warning(disable: 4592) // symbol will be dynamically initialized (implementation limitation)
 //# pragma warning(disable:4100) // disable 'unreferenced formal parameter'
 //# pragma warning(disable:4996) // disable depreciated warnings
 //# pragma warning(disable:4190) // disable C-linkage returning UDT (user data type)

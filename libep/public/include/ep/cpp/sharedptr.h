@@ -438,9 +438,6 @@ template<class T> inline bool operator!=(nullptr_t, const UniquePtr<T> &r) { ret
 
 } // namespace ep
 
-// unit tests
-epResult epSharedPtr_Test();
-
 #include "ep/cpp/internal/sharedptr_inl.h"
 
 #endif // _EPSHAREDPTR_HPP
