@@ -69,6 +69,9 @@ protected:
       EP_MAKE_METHOD(Get, "Get a record"),
     };
   }
+
+private:
+  void InsertMethod(const Variant &key, const Variant &value) { Metadata::Insert(key, value); }
 };
 
 }

@@ -37,6 +37,13 @@ protected:
   SharedString code;
 
   RenderShaderRef spRenderShader = nullptr;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(Code, "The code string to be compiled", nullptr, 0),
+    };
+  }
 };
 
 } // namespace ep

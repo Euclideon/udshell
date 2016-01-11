@@ -17,10 +17,10 @@ public:
 
   Variant ParseXml();
   void FormatXml(Variant root);
-  Variant ParseJson() const;
+  Variant ParseJson() const; // TODO: Implement this?
 
-  static Variant XMLNodeToMap(Variant node);
-  static Variant MapToXMLNode(Variant map);
+  static Variant XMLMapToComponentParams(Variant node);
+  static Variant ComponentParamsToXMLMap(Variant map);
 
   void CopyBuffer(String text) { Buffer::CopyBuffer(text); }
 
@@ -34,13 +34,18 @@ protected:
 
   void FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth);
 
-  static Variant KVPToXMLNode(KeyValuePair kvp);
-
   static Array<const MethodInfo> GetMethods()
   {
     return{
       EP_MAKE_METHOD(ParseXml, "Parse XML formatted text in buffer into a heirarchical structure of KeyValuePairs"),
       EP_MAKE_METHOD(FormatXml, "Format a heirarchical structure of KeyValuePairs as XML text"),
+    };
+  }
+  static Array<const StaticFuncInfo> GetStaticFuncs()
+  {
+    return{
+      EP_MAKE_STATICFUNC(XMLMapToComponentParams, "Convert a map representing a heirarchy of XML elements into 'Component Params' format, i.e. suitable as InitParams and for returning from Save()"),
+      EP_MAKE_STATICFUNC(ComponentParamsToXMLMap, "Convert a map in 'Component Params' format into a map representing a heirarchy of XML elements"),
     };
   }
 };

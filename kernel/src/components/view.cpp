@@ -12,7 +12,11 @@ Array<const PropertyInfo> View::GetProperties()
     EP_MAKE_PROPERTY(Camera, "Camera for viewport", nullptr, 0),
     EP_MAKE_PROPERTY(Scene, "Scene for viewport", nullptr, 0),
     EP_MAKE_PROPERTY(EnablePicking, "Enable Picking", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(MousePosition, "Mouse Position", nullptr, 0)
+    EP_MAKE_PROPERTY_RO(MousePosition, "Mouse Position", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(AspectRatio, "Aspect ratio", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(RenderableView, "RenderableView Component", nullptr, 0),
+    EP_MAKE_PROPERTY_EXPLICIT("Dimensions", "The height and width of the View", EP_MAKE_GETTER(GetDimensionsProperty), nullptr, nullptr, 0),
+    EP_MAKE_PROPERTY_EXPLICIT("RenderDimensions", "The resolution of the rendered content", EP_MAKE_GETTER(GetRenderDimensionsProperty), nullptr, nullptr, 0),
   };
 }
 
@@ -41,7 +45,7 @@ bool View::InputEvent(const epInputEvent &ev)
   return handled;
 }
 
-epResult View::Resize(int width, int height)
+void View::Resize(int width, int height)
 {
   int oldRenderWidth = renderWidth;
   int oldRenderHeight = renderHeight;
@@ -62,11 +66,9 @@ epResult View::Resize(int width, int height)
 
   if (pResizeCallback)
     pResizeCallback(ViewRef(this), width, height);
-
-  return epR_Success;
 }
 
-RenderableViewRef View::GetRenderableView()
+RenderableViewRef View::GetRenderableView() const
 {
   return spLatestFrame;
 }
@@ -107,6 +109,22 @@ void View::GetRenderDimensions(int *pWidth, int *pHeight) const
     *pWidth = renderWidth;
   if (pHeight)
     *pHeight = renderHeight;
+}
+
+Variant::VarMap View::GetDimensionsProperty() const
+{
+  Variant::VarMap map;
+  map.Insert("width", displayWidth);
+  map.Insert("height", displayHeight);
+  return map;
+}
+
+Variant::VarMap View::GetRenderDimensionsProperty() const
+{
+  Variant::VarMap map;
+  map.Insert("width", renderWidth);
+  map.Insert("height", renderHeight);
+  return map;
 }
 
 void View::SetLatestFrame(UniquePtr<RenderableView> spFrame)

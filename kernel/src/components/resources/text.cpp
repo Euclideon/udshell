@@ -6,30 +6,7 @@
 
 namespace ep {
 
-/*
-Variant Text::MapToXMLNode(Variant map)
-{
-  if (!map.is(Variant::Type::AssocArray))
-    return Variant();
-  Variant::VarMap root = map.asAssocArray();
-
-  if (root.Size() == 0)
-  {
-    //LogWarning(2, "Map has no members!");
-    return Variant();
-  }
-  else if (root.Size() > 1)
-  {
-    //LogWarning(2, "XML may only have a single root node!");
-    return Variant();
-  }
-
-  auto rootElement = *root.begin();
-  return KVPToXMLNode(rootElement);
-}
-*/
-
-Variant Text::MapToXMLNode(Variant map)
+Variant Text::ComponentParamsToXMLMap(Variant map)
 {
   Variant::VarMap node;
   Array<Variant> childNodes;
@@ -45,7 +22,7 @@ Variant Text::MapToXMLNode(Variant map)
         node.Insert("attributes", child.value.asAssocArray());
       else
       {
-        Variant::VarMap childNode = MapToXMLNode(child.value).asAssocArray();
+        Variant::VarMap childNode = ComponentParamsToXMLMap(child.value).asAssocArray();
         childNode.Insert("name", child.key);
         childNodes.pushBack(childNode);
       }
@@ -63,7 +40,7 @@ Variant Text::MapToXMLNode(Variant map)
   return node;
 }
 
-Variant Text::XMLNodeToMap(Variant node)
+Variant Text::XMLMapToComponentParams(Variant node)
 {
   bool hasAttributes = false, hasChildren = false;
   Variant::VarMap map;
@@ -93,7 +70,7 @@ Variant Text::XMLNodeToMap(Variant node)
       if (child.is(Variant::Type::AssocArray))
       {
         Variant::VarMap childMap = child.asAssocArray();
-        map.Insert(*childMap.Get("name"), XMLNodeToMap(child));
+        map.Insert(*childMap.Get("name"), XMLMapToComponentParams(child));
 
         hasChildren = true;
       }

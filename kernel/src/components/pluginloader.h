@@ -20,6 +20,20 @@ protected:
   PluginLoader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {}
+
+  Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(SupportedExtensions, "List of file extension strings handled by this PluginLoader", nullptr, 0),
+    };
+  }
+
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(LoadPlugin, "Load a plugin with the given filename"),
+    };
+  }
 };
 
 } //namespace ep

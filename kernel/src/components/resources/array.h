@@ -160,6 +160,36 @@ protected:
   size_t shape[4];
 
   RenderResourceRef spRenderData = nullptr;
+
+  Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(ElementType, "Element type of the Array as a String", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(ElementSize, "The Array's element size", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(NumDimensions, "Number of dimensions", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(Length, "Number of Array elements", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(Shape, "The sizes of the Array's dimensions", nullptr, 0),
+    };
+  }
+
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD_EXPLICIT("Allocate", AllocateMethod, "Allocates an Array of the given type, size and length. Length may be a single value or a list of dimensions"),
+    };
+  }
+
+private:
+  void AllocateMethod(SharedString _elementType, size_t _elementSize, Variant length)
+  {
+    if (length.is(Variant::Type::Int))
+    {
+      size_t len = length.as<size_t>();
+      Allocate(_elementType, _elementSize, Slice<size_t>(&len, 1));
+    }
+    else
+      Allocate(_elementType, _elementSize, length.as<Array<size_t>>());
+  }
 };
 
 template<>

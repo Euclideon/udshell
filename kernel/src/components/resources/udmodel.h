@@ -105,7 +105,8 @@ protected:
       EP_MAKE_PROPERTY_RO(UDMatrix, "UD Matrix", nullptr, 0),
       EP_MAKE_PROPERTY_RO(BoundingVolume, "The Bouning Volume", nullptr, 0),
       EP_MAKE_PROPERTY(SimpleVoxelDelegate, "Optional callback to handle it's own internal call to GetNodeColor()", nullptr, 0),
-//      EP_MAKE_PROPERTY(VoxelShader, "Optional callback to handle writing pixels and depth", nullptr, 0),
+      // TODO: Can we uncomment this yet?
+      //EP_MAKE_PROPERTY(VoxelShader, "Optional callback to handle writing pixels and depth", nullptr, 0),
     };
   }
 };

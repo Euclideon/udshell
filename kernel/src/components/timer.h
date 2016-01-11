@@ -9,17 +9,17 @@
 
 namespace ep {
 
+EP_ENUM(TimerType,
+  Interval,
+  CountDown
+);
+
 SHARED_CLASS(Timer);
 
 class Timer : public Component
 {
   EP_DECLARE_COMPONENT(Timer, Component, EPKERNEL_PLUGINVERSION, "Timer desc...")
 public:
-
-  EP_ENUM(TimerType,
-    Interval,
-    CountDown
-  );
 
   Event<> Elapsed;
 

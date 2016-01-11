@@ -29,6 +29,13 @@ protected:
   {
     return{
       EP_MAKE_PROPERTY_RO(Metadata, "Number of records in the metadata", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(DataSource, "The DataSource containing this Resource", nullptr, 0),
+    };
+  }
+  static Array<const EventInfo> GetEvents()
+  {
+    return{
+      EP_MAKE_EVENT(Changed, "The Resource has been modified"),
     };
   }
 };

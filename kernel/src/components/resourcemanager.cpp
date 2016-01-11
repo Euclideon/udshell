@@ -17,6 +17,17 @@ ResourceManager::~ResourceManager()
 
 }
 
+Array<const MethodInfo> ResourceManager::GetMethods()
+{
+  return{
+    EP_MAKE_METHOD(AddResource, "Add a Resource to the ResourceManager"),
+    EP_MAKE_METHOD(RemoveResource, "Remove the specified Resource"),
+    EP_MAKE_METHOD(GetResource, "Get Resource by UID"),
+    EP_MAKE_METHOD(LoadResourcesFromFile, "Create a DataSource containing Resources from the file specified by the given File InitParams"),
+    EP_MAKE_METHOD(SaveResourcesToFile, "Save Resources from the given DataSource to a file specified by the given File InitParams"),
+  };
+}
+
 void ResourceManager::AddResource(ResourceRef res) { resources.Insert(res->uid, res); }
 void ResourceManager::RemoveResource(ResourceRef res) { resources.Remove(res->uid); }
 
@@ -69,9 +80,9 @@ DataSourceRef ResourceManager::LoadResourcesFromFile(Variant::VarMap initParams)
   return spDS;
 }
 
-void ResourceManager::SaveResourcesToFile(Slice<ResourceRef>, Variant::VarMap initParams)
+void ResourceManager::SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams)
 {
-
+  // TODO: Implement this function when needed
 }
 
 } // namespace ep

@@ -128,6 +128,7 @@ protected:
     return{
       EP_MAKE_PROPERTY_RO(NumResources, "Number of resources the data source provides", nullptr, 0),
       EP_MAKE_PROPERTY(URL, "The file or location of the DataSource", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(FileExtensions, "The file extensions associated with the DataSource", nullptr, 0),
     };
   }
   static Array<const MethodInfo> GetMethods()

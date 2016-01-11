@@ -21,6 +21,14 @@ protected:
   PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
   Array<PluginLoaderRef> loaders;
+
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(RegisterPluginLoader, "Register a PluginLoader"),
+      EP_MAKE_METHOD(LoadPlugin, "Load a plugin with the given filename"),
+    };
+  }
 };
 
 } //namespace ep

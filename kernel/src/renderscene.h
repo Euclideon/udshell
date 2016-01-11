@@ -40,8 +40,8 @@ struct GeomJob
   RenderShaderProgramRef spProgram;
   RenderVertexFormatRef spVertexFormat;
 
-  Material::BlendMode blendMode;
-  Material::CullMode cullMode;
+  BlendMode blendMode;
+  CullMode cullMode;
 
   // TODO: has stuff
   // constants
