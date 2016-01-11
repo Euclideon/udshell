@@ -30,10 +30,11 @@ const char* EPException::what() const noexcept
   return pError->message.ptr;
 }
 
-ErrorState* _PushError(epResult error, const SharedString &message, String file, int line)
+ErrorState* _PushError(epResult error, const SharedString &message, const char *function, const char *file, int line)
 {
   ep::internal::s_errorStack[ep::internal::s_errorDepth].error = error;
   new(&ep::internal::s_errorStack[ep::internal::s_errorDepth].message) SharedString(message);
+  ep::internal::s_errorStack[ep::internal::s_errorDepth].function = function;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].file = file;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].line = line;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].pPrior = ep::internal::s_errorDepth > 0 ? &ep::internal::s_errorStack[ep::internal::s_errorDepth-1] : nullptr;
@@ -78,9 +79,9 @@ SharedString DumpError()
 // C bindings...
 extern "C" {
 
-epErrorState* epPushError(epResult error, epString message, epString file, int line)
+epErrorState* epPushError(epResult error, epString message, const char *function, const char *file, int line)
 {
-  return (epErrorState*)ep::_PushError(error, String(message), String(file), line);
+  return (epErrorState*)ep::_PushError(error, String(message), function, file, line);
 }
 
 size_t epErrorLevel()

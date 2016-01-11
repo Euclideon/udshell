@@ -33,9 +33,9 @@ struct epErrorState
   epErrorState *pPrior;
 };
 
-#define EPERROR(error, message) epPushError(error, message, epString_Create(__FILE__), __LINE__)
+#define EPERROR(error, message) epPushError(error, message, __PRETTY_FUNCTION__, __FILE__, __LINE__)
 
-epErrorState* epPushError(epResult error, epString message, epString file, int line);
+epErrorState* epPushError(epResult error, epString message, const char *function, const char *file, int line);
 epErrorState* epGetError();
 void epClearError();
 
