@@ -1,38 +1,63 @@
 #include "ep/cpp/platform.h"
 #include "ep/cpp/error.h"
 
+#include "ep/cpp/kernel.h"
+
 namespace ep {
 namespace internal {
 
-thread_local epErrorState s_errorStack[256];
+thread_local ErrorState s_errorStack[256];
 thread_local size_t s_errorDepth = 0;
 
-}
+void Log(int type, int level, String text)
+{
+  Kernel *pK = Kernel::GetInstance();
+  if (pK)
+    pK->Log(type, level, text);
+  else
+    epDebugWrite(text.toStringz());
 }
 
-extern "C" {
+} // namespace internal
 
-epErrorState* epPushError(epResult error, epString message, epString file, int line)
+EPException::EPException(ErrorState *_pError)
+  : pError(_pError)
+{}
+EPException::~EPException()
+{}
+const char* EPException::what() const noexcept
+{
+  return pError->message.ptr;
+}
+
+ErrorState* _PushError(epResult error, const SharedString &message, String file, int line)
 {
   ep::internal::s_errorStack[ep::internal::s_errorDepth].error = error;
-  ep::internal::s_errorStack[ep::internal::s_errorDepth].message = message;
+  new(&ep::internal::s_errorStack[ep::internal::s_errorDepth].message) SharedString(message);
   ep::internal::s_errorStack[ep::internal::s_errorDepth].file = file;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].line = line;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].pPrior = ep::internal::s_errorDepth > 0 ? &ep::internal::s_errorStack[ep::internal::s_errorDepth-1] : nullptr;
   return &ep::internal::s_errorStack[ep::internal::s_errorDepth++];
 }
 
-epErrorState* epGetError()
+size_t ErrorLevel()
+{
+  return ep::internal::s_errorDepth;
+}
+ErrorState* GetError()
 {
   return ep::internal::s_errorDepth ? &ep::internal::s_errorStack[ep::internal::s_errorDepth-1] : nullptr;
 }
-
-void epClearError()
+void ClearError()
 {
-  ep::internal::s_errorDepth = 0;
+  while (ep::internal::s_errorDepth)
+  {
+    ep::internal::s_errorStack[ep::internal::s_errorDepth-1].~ErrorState();
+    --ep::internal::s_errorDepth;
+  }
 }
 
-epSharedString epDumpError()
+SharedString DumpError()
 {
   size_t depth = ep::internal::s_errorDepth;
 
@@ -41,13 +66,41 @@ epSharedString epDumpError()
 
   while (depth-- > 0)
   {
-    epErrorState &e = ep::internal::s_errorStack[depth];
-    s.append((String)e.file, "(", e.line, "): Error ", (int)e.error, ": ", (String)e.message);
+    ErrorState &e = ep::internal::s_errorStack[depth];
+    s.append(e.file, "(", e.line, "): Error ", (int)e.error, ": ", e.message);
   }
 
+  return std::move(s);
+}
+
+} // namespace ep
+
+// C bindings...
+extern "C" {
+
+epErrorState* epPushError(epResult error, epString message, epString file, int line)
+{
+  return (epErrorState*)ep::_PushError(error, String(message), String(file), line);
+}
+
+size_t epErrorLevel()
+{
+  return ep::ErrorLevel();
+}
+epErrorState* epGetError()
+{
+  return (epErrorState*)ep::GetError();
+}
+void epClearError()
+{
+  ep::ClearError();
+}
+
+epSharedString epDumpError()
+{
   epSharedString r;
-  new(&r) SharedString(s);
+  new(&r) SharedString(ep::DumpError());
   return r;
 }
 
-}
+} // extern "C"

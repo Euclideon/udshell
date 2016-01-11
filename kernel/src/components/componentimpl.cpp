@@ -148,7 +148,7 @@ void ComponentImpl::SetProperty(String property, const Variant &value)
     return;
   }
   pDesc->setter.set(pInstance, value);
-  if (ErrorRaised())
+  if (ErrorLevel())
     throw GetError();
   // TODO: should properties have implicit signals?
 //  propertyChange[pDesc->index].Signal();

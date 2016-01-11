@@ -13,9 +13,13 @@ enum epResult
   epR_Failure,
 
   epR_CppException,
-  epR_InvalidParameter,
+  epR_InvalidArgument,
+  epR_InvalidType,
+  epR_OutOfBounds,
+  epR_BadCast,
+  epR_AllocFailure,
+
   epR_File_OpenFailure,
-  epR_MemoryAllocationFailure,
 };
 
 struct epErrorState
@@ -38,8 +42,8 @@ void epClearError();
 epSharedString epDumpError();
 
 
+// TODO: deprecate and remove these...
 #define EP_ERROR_BREAK_ON_ERROR 0  // Set to 1 to have the debugger break on error
-
 #define EP_ERROR_IF(x, code)      do { if (x) { result = code; if (EP_ERROR_BREAK_ON_ERROR && code) { __debugbreak(); } goto epilogue; }                  } while(0)
 #define EP_ERROR_NULL(ptr, code)  do { if (ptr == nullptr) { result = code; if (EP_ERROR_BREAK_ON_ERROR) { __debugbreak(); } goto epilogue; }             } while(0)
 #define EP_ERROR_CHECK(funcCall)  do { result = funcCall; if (result != epR_Success) { if (EP_ERROR_BREAK_ON_ERROR) { __debugbreak(); } goto epilogue; }  } while(0)

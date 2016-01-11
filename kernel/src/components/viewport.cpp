@@ -8,7 +8,7 @@ Viewport::Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
   : UIComponent(pType, pKernel, uid, initParams)
 {
   if (CreateInternal(initParams) != epR_Success)
-    EPTHROW(epR_Failure, "Failed to create Viewport");
+    EPTHROW_ERROR(epR_Failure, "Failed to create Viewport");
 }
 
 // ---------------------------------------------------------------------------------------

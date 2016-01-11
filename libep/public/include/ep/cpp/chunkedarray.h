@@ -72,13 +72,13 @@ inline ChunkedArray<T, chunkElementCount>::ChunkedArray()
 
   ppChunks = epAllocType(chunk_t*, ptrArraySize, epAF_Zero);
   if (!ppChunks)
-    EPTHROW(epR_MemoryAllocationFailure, "Alloc failed");
+    EPTHROW_ERROR(epR_MemoryAllocationFailure, "Alloc failed");
 
   for (; c < chunkCount; ++c)
   {
     ppChunks[c] = epAllocType(chunk_t, 1, epAF_None);
     if (!ppChunks[c])
-      EPTHROW(epR_MemoryAllocationFailure, "Alloc failure");
+      EPTHROW_ERROR(epR_MemoryAllocationFailure, "Alloc failure");
   }
 }
 

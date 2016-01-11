@@ -220,8 +220,10 @@ private:                                                                        
         using PT = function_traits<decltype(&This::Setter)>::template arg<0>::type;      \
         try {                                                                            \
           ((This*)this)->Setter(v.as<std::remove_reference<PT>::type>());                \
-        } catch (epErrorState*) {                                                        \
+        } catch (EPException &) {                                                        \
           /* it's already on the stack, do nothing... */                                 \
+        } catch (std::exception &e) {                                                    \
+          PushError(epR_CppException, e.what());                                         \
         } catch (...) {                                                                  \
           PushError(epR_CppException, "C++ exception");                                  \
         }                                                                                \

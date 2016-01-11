@@ -515,6 +515,8 @@ template<size_t Size>
 template <typename... Args>
 inline MutableString<Size>::MutableString(Concat_T, const Args&... args)
 {
+  if (sizeof...(Args) == 0)
+    return;
   epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
   appendInternal(Slice<epVarArg>(proxies, sizeof...(Args)));
 }
@@ -522,6 +524,8 @@ template<size_t Size>
 template <typename... Args>
 inline MutableString<Size>::MutableString(Format_T, String _format, const Args&... args)
 {
+  if (!_format)
+    return;
   epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
   formatInternal(_format, Slice<epVarArg>(proxies, sizeof...(Args)));
 }
@@ -659,12 +663,16 @@ inline SharedString::SharedString(const char *pString)
 template <typename... Args>
 inline SharedString::SharedString(Concat_T, const Args&... args)
 {
+  if (sizeof...(Args) == 0)
+    return;
   epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
   new(this) SharedString(concatInternal(Slice<epVarArg>(proxies, sizeof...(Args))));
 }
 template <typename... Args>
 inline SharedString::SharedString(Format_T, String _format, const Args&... args)
 {
+  if (!_format)
+    return;
   epVarArg proxies[sizeof...(Args)+1] = { epVarArg(args)... };
   new(this) SharedString(formatInternal(_format, Slice<epVarArg>(proxies, sizeof...(Args))));
 }

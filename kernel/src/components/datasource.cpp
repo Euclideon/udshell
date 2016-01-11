@@ -20,10 +20,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
     // path or url?
     spSource = GetKernel().CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
     if (!spSource)
-    {
-      LogWarning(5, "\"src\" file path not found: {0}", source.asString());
-      EPTHROW(epR_File_OpenFailure, "\"src\" file not found");
-    }
+      EPTHROW_WARN(epR_File_OpenFailure, 2, "\"src\" file path not found: {0}", source.asString());
   }
   else if ((spComp = source.as<ComponentRef>()))
   {
@@ -39,10 +36,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
   }
 
   if (!spSource)
-  {
-    LogError("Unknown type for \"src\" init paramater");
-    EPTHROW(epR_InvalidParameter, "Unknown type for \"src\" init paramater");
-  }
+    EPTHROW_ERROR(epR_InvalidArgument, "Unknown type for \"src\" init paramater");
 
   return spSource;
 }
