@@ -116,6 +116,21 @@ V* HashMap<V, K, HashPred>::Get(const K &key)
 }
 
 template <typename V, typename K, typename HashPred>
+const V& HashMap<V, K, HashPred>::operator[](const K &key) const
+{
+  const V *pV = Get(key);
+  EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+  return *pV;
+}
+template <typename V, typename K, typename HashPred>
+V& HashMap<V, K, HashPred>::operator[](const K &key)
+{
+  V *pV = Get(key);
+  EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+  return *pV;
+}
+
+template <typename V, typename K, typename HashPred>
 auto HashMap<V, K, HashPred>::begin() const -> typename HashMap<V, K, HashPred>::Iterator
 {
   return Iterator(ppTable, ppTable + tableSizeMask + 1);

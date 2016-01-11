@@ -75,7 +75,7 @@ template<typename T>
 inline typename Slice<T>::ET& Slice<T>::operator[](ptrdiff_t i) const
 {
   size_t offset = (size_t)(i < 0 ? i + length : i);
-  EPASSERT(offset < length, "Index out of range!");
+  EPASSERT_THROW(offset < length, epR_OutOfBounds, "Index out of range!");
   return ((ET*)ptr)[offset];
 }
 
@@ -84,7 +84,7 @@ inline Slice<T> Slice<T>::slice(ptrdiff_t first, ptrdiff_t last) const
 {
   size_t start = (size_t)(first < 0 ? first + length : first);
   size_t end = (size_t)(last < 0 ? last + length : last);
-  EPASSERT(end <= length && start <= end, "Index out of range!");
+  EPASSERT_THROW(end <= length && start <= end, epR_OutOfBounds, "Index out of range!");
   return Slice<T>((ET*)ptr + start, end - start);
 }
 
@@ -173,7 +173,7 @@ inline typename Slice<T>::ET& Slice<T>::back() const
 template<typename T>
 inline typename Slice<T>::ET& Slice<T>::popFront()
 {
-  EPASSERT(length > 0, "Empty slice!");
+  EPASSERT_THROW(length > 0, epR_OutOfBounds, "Empty slice!");
   ++ptr;
   --length;
   return ((ET*)ptr)[-1];
@@ -181,7 +181,7 @@ inline typename Slice<T>::ET& Slice<T>::popFront()
 template<typename T>
 inline typename Slice<T>::ET& Slice<T>::popBack()
 {
-  EPASSERT(length > 0, "Empty slice!");
+  EPASSERT_THROW(length > 0, epR_OutOfBounds, "Empty slice!");
   --length;
   return ((ET*)ptr)[length];
 }
@@ -455,7 +455,7 @@ template<typename T>
 template<typename U>
 inline void Slice<T>::copyTo(Slice<U> dest) const
 {
-  EPASSERT(dest.length >= length, "Not enough elements!");
+  EPASSERT_THROW(dest.length >= length, epR_OutOfBounds, "Not enough elements!");
   for (size_t i = 0; i<length; ++i)
     dest.ptr[i] = ptr[i];
 }
