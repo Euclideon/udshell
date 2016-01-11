@@ -27,8 +27,8 @@ public:
   }
   void Allocate(SharedString _elementType, size_t _elementSize, Slice<const size_t> _shape)
   {
-    EPASSERT(_shape.length > 0, "No dimensions given!");
-    EPASSERT(_shape.length <= 4, "More than 4 dimensional matrices is not supported...");
+    EPASSERT_THROW(_shape.length > 0, epR_InvalidArgument, "No dimensions given!");
+    EPASSERT_THROW(_shape.length <= 4, epR_InvalidArgument, "More than 4 dimensional matrices is not supported...");
 
     dimensions = _shape.length;
     elementType = _elementType;
@@ -114,10 +114,8 @@ public:
   template<typename T>
   void SetData(Slice<const T> data)
   {
-    EPASSERT(stringof<T>().eq(elementType), "Incompatible type!");
-
-    size_t numElements = GetLength();
-    EPASSERT(buffer.length == sizeof(T)*numElements, "Incorrect number of elements!");
+    EPASSERT_THROW(stringof<T>().eq(elementType), epR_InvalidType, "Incompatible type!");
+    EPASSERT_THROW(buffer.length == sizeof(T)*data.length, epR_InvalidArgument, "Incorrect number of elements!");
 
     // initialise buffer
     if (std::is_pod<T>::value)
@@ -125,7 +123,7 @@ public:
     else
     {
       T *pBuffer = (T*)buffer.ptr;
-      for (size_t i = 0; i < numElements; ++i)
+      for (size_t i = 0; i < data.length; ++i)
         new(pBuffer + i) T(data[i]);
     }
   }
