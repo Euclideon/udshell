@@ -135,7 +135,16 @@
 #elif defined(ANDROID_NDK) || defined(__ANDROID__) || defined(ANDROID)
 # define EP_ANDROID
 
-# if defined(__arm__)
+# if defined(__x86_64__)
+#   define EP_ARCH_X64
+# elif defined(__mips64)
+#   define EP_ARCH_MIPS
+#   define EP_64BIT
+# elif defined(__aarch64__)
+#   define EP_ARCH_ARM
+#   define EP_64BIT
+#   define EP_ENDIAN_LITTLE
+# elif defined(__arm__)
 #   define EP_ARCH_ARM
 #   define EP_32BIT
 #   define EP_ENDIAN_LITTLE
@@ -145,7 +154,6 @@
 #   define EP_ARCH_MIPS
 #   define EP_32BIT
 # else
-    // TODO: x86_64, AArch64, MIPS64, have all been added in recent NDK's
 #   error "Couldn't detect target architecture"
 # endif
 
