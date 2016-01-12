@@ -100,6 +100,8 @@ struct ComponentDesc
 template <typename C, typename I>
 class BaseImpl : public I
 {
+  friend C;
+
 public:
   using Instance = C;
   using Interface = I;

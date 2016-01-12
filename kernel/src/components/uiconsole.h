@@ -2,7 +2,7 @@
 #ifndef UI_CONSOLE_H
 #define UI_CONSOLE_H
 
-#include "ui.h"
+#include "ep/cpp/component/uicomponent.h"
 #include "logger.h"
 
 namespace ep {

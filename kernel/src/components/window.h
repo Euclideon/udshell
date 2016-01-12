@@ -3,6 +3,7 @@
 #define UD_WINDOW_H
 
 #include "ep/cpp/component/component.h"
+#include "ep/cpp/component/uicomponent.h"
 
 namespace ep
 {

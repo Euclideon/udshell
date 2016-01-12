@@ -5,7 +5,7 @@
 #include "kernel.h"
 #include "components/logger.h"
 #include "components/window.h"
-#include "components/ui.h"
+#include "ep/cpp/component/uicomponent.h"
 #include "components/uiconsole.h"
 #include "components/project.h"
 #include "components/activities/viewer.h"
