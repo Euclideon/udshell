@@ -134,7 +134,7 @@
 
 #elif defined(ANDROID_NDK) || defined(__ANDROID__) || defined(ANDROID)
 # define EP_ANDROID
-
+# pragma message("ANDRIOD defines haven't been tested")
 # if defined(__x86_64__)
 #   define EP_ARCH_X64
 # elif defined(__mips64)
