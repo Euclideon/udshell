@@ -94,7 +94,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
   spViewerUI->SetProperty("bookmarkscomp", spUIBookmarks);
 
-  ui = spViewerUI;
+  SetUI(spViewerUI);
 
   // Add bookmarks to UI
   auto bmMap = spScene->GetBookmarkMap();

@@ -2,10 +2,11 @@
 #ifndef EP_VIEWER_H
 #define EP_VIEWER_H
 
-#include "components/activities/activity.h"
+#include "ep/cpp/activity.h"
 
 namespace ep {
 
+SHARED_CLASS(UIComponent);
 SHARED_CLASS(Viewer);
 SHARED_CLASS(UDModel);
 SHARED_CLASS(SimpleCamera);

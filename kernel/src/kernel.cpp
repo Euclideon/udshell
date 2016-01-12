@@ -41,8 +41,11 @@
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
 #include "components/datasources/uddatasource.h"
-#include "components/activities/activity.h"
 #include "components/activities/viewer.h"
+
+// Components that do the Impl dance
+#include "components/activities/activityimpl.h"
+
 #include "renderscene.h"
 #include "eplua.h"
 #include "stdcapture.h"
@@ -130,7 +133,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<UDDataSource>();
 
   // activities
-  pKernel->RegisterComponentType<Activity>();
+  pKernel->RegisterComponentType<Activity, ActivityImpl>();
   pKernel->RegisterComponentType<Viewer>();
 
   // init the HAL
