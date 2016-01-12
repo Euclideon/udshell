@@ -2,7 +2,7 @@
 #ifndef EP_PLUGIN_MANAGER_H
 #define EP_PLUGIN_MANAGER_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "components/pluginloader.h"
 
 namespace ep {

@@ -4,7 +4,7 @@
 
 #include "udRender.h"
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "nodes/node.h"
 
 // TODO: Move this once the Scene Impl refactor is done.

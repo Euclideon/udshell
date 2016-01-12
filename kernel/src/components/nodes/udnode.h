@@ -6,7 +6,7 @@
 #include "udRender.h"
 
 #include "ep/cpp/math.h"
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "node.h"
 #include "components/resources/udmodel.h"
 #include "hal/input.h"

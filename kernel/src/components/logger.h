@@ -2,7 +2,7 @@
 #ifndef EP_LOGGER_H
 #define EP_LOGGER_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 
 namespace ep
 {

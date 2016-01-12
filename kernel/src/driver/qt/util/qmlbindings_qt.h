@@ -2,7 +2,7 @@
 #ifndef QMLBINDINGS_QT_H
 #define QMLBINDINGS_QT_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "../components/component_qt.h"
 
 #include <QObject>

@@ -3,7 +3,7 @@
 
 #include "ep/c/plugin.h"
 #include "ep/c/internal/kernel_inl.h"
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 
 extern "C" {
   typedef bool (epPlugin_InitProc)(epPluginInstance *pPlugin);

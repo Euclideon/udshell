@@ -2,7 +2,7 @@
 #ifndef EP_PLUGIN_LOADER_H
 #define EP_PLUGIN_LOADER_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 
 namespace ep {
 

@@ -2,7 +2,7 @@
 #if !defined(_EP_BROADCASTER_H)
 #define _EP_BROADCASTER_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "resources/buffer.h"
 
 namespace ep

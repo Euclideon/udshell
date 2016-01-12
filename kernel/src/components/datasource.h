@@ -2,7 +2,7 @@
 #if !defined(_EP_DATASOURCE_H)
 #define _EP_DATASOURCE_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "components/stream.h"
 #include "resources/resource.h"
 

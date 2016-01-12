@@ -2,7 +2,7 @@
 #if !defined(_EP_TIMER_H)
 #define _EP_TIMER_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "components/stream.h"
 #include "resources/resource.h"
 #include "hal/haltimer.h"
