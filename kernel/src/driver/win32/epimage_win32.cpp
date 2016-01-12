@@ -40,21 +40,48 @@ static epImageFormat GUIDToImageFormat(WICPixelFormatGUID format)
 
 epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
 {
+  epImage *pOutput = nullptr;
+
   HGLOBAL hGlobal = GlobalAlloc(0, bufferLen);
+  if (!hGlobal)
+  {
+    epDebugPrintf("Error allocating image buffer");
+    return nullptr;
+  }
   void *pMem = GlobalLock(hGlobal);
   memcpy(pMem, pBuffer, bufferLen);
   GlobalUnlock(hGlobal);
 
   IStream *pStream = nullptr;
-  CreateStreamOnHGlobal(hGlobal, true, &pStream);
+  if (S_OK != CreateStreamOnHGlobal(hGlobal, true, &pStream))
+  {
+    GlobalFree(hGlobal);
+    epDebugPrintf("Error creating stream for image buffer");
+    return nullptr;
+  }
 
   IWICBitmapDecoder *pDecoder;
-  pFactory->CreateDecoderFromStream(pStream, nullptr, WICDecodeMetadataCacheOnLoad, &pDecoder);
+  if (S_OK != pFactory->CreateDecoderFromStream(pStream, nullptr, WICDecodeMetadataCacheOnLoad, &pDecoder))
+  {
+    pStream->Release();
+    epDebugPrintf("Error creating decoder from image data");
+    return nullptr;
+  }
 
   UINT frames;
-  pDecoder->GetFrameCount(&frames);
+  if (S_OK != pDecoder->GetFrameCount(&frames))
+  {
+    epDebugPrintf("Error getting image frame count");
+    goto epilogue;
+  }
 
-  epImage *pOutput = (epImage*)epAlloc(sizeof(epImage) + frames*sizeof(epImageSurface));
+  pOutput = (epImage*)epAllocFlags(sizeof(epImage) + frames*sizeof(epImageSurface), epAF_Zero);
+  if (!pOutput)
+  {
+    epDebugPrintf("Error allocating epImage");
+    goto epilogue;
+  }
+
   pOutput->pSurfaces = (epImageSurface*)&pOutput[1];
   pOutput->elements = frames;
   pOutput->mips = 1;
@@ -67,15 +94,25 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
     epImageSurface &surface = pOutput->pSurfaces[i];
 
     IWICBitmapFrameDecode *pBitmapSource;
-    pDecoder->GetFrame(0, &pBitmapSource);
+    if (S_OK != pDecoder->GetFrame(0, &pBitmapSource))
+    {
+      epDebugPrintf("Error getting image frame");
+      goto freeImage;
+    }
 
     // TODO: ** don't create converter! we should load the image in it's raw format
     // HACK: we convert to BGRA8 for now
     IWICFormatConverter *pConverter;
     pFactory->CreateFormatConverter(&pConverter);
-    pConverter->Initialize(pBitmapSource, GUID_WICPixelFormat32bppBGRA,
-                           WICBitmapDitherTypeNone, nullptr, 0.f,
-                           WICBitmapPaletteTypeMedianCut);
+    if(S_OK != pConverter->Initialize(pBitmapSource, GUID_WICPixelFormat32bppBGRA,
+      WICBitmapDitherTypeNone, nullptr, 0.f,
+      WICBitmapPaletteTypeMedianCut))
+    {
+      epDebugPrintf("Error converting image to BGRA32 format");
+      pConverter->Release();
+      pBitmapSource->Release();
+      goto freeImage;
+    }
 
     UINT w, h;
     pBitmapSource->GetSize(&w, &h);
@@ -88,6 +125,13 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
     surface.format = GUIDToImageFormat(format);
 
     surface.pImage = epAlloc(w*h*4);
+    if (!surface.pImage)
+    {
+      epDebugPrintf("Error allocating epImage frame");
+      pConverter->Release();
+      pBitmapSource->Release();
+      goto freeImage;
+    }
     pBitmapSource->CopyPixels(nullptr, w*4, w*h*4, (BYTE*)surface.pImage);
 
     // this is useful metadata
@@ -98,18 +142,26 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
     pBitmapSource->Release();
   }
 
+  goto epilogue;
+
+freeImage:
+  if (pOutput)
+  {
+    for (UINT i = 0; i < frames; i++)
+      epFree(pOutput->pSurfaces[i].pImage);
+    epFree(pOutput);
+  }
+  pOutput = nullptr;
+
+epilogue:
   pDecoder->Release();
   pStream->Release();
 
   return pOutput;
 }
 
-void* epImage_WriteImage(epImage *pImage, const char *pFileExt, size_t *pOutputSize)
+void* epImage_WriteImage(epImage epUnusedParam(*pImage), const char epUnusedParam(*pFileExt), size_t epUnusedParam(*pOutputSize))
 {
-  pImage;
-  pFileExt;
-
-  *pOutputSize = 0;
   return nullptr;
 }
 
