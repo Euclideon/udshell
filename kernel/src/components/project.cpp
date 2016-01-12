@@ -1,7 +1,7 @@
 #include "components/project.h"
 #include "components/file.h"
 #include "components/resourcemanager.h"
-#include "components/activities/activity.h"
+#include "ep/cpp/activity.h"
 #include "components/resources/text.h"
 #include "kernel.h"
 #include "rapidxml.hpp"

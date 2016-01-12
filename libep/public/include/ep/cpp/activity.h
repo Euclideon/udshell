@@ -3,35 +3,35 @@
 #define EP_ACTIVITY_H
 
 #include "ep/cpp/component.h"
+#include "ep/cpp/interface/iactivity.h"
 
 namespace ep {
 
 SHARED_CLASS(Activity);
-SHARED_CLASS(UIComponent);
 
-class Activity : public Component
+class Activity : public Component, public IActivity
 {
-  EP_DECLARE_COMPONENT(Activity, Component, EPKERNEL_PLUGINVERSION, "Activity desc...")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Activity, IActivity, Component, EPKERNEL_PLUGINVERSION, "Activity desc...")
 public:
 
-  UIComponentRef GetUI() const { return ui; }
+  ComponentRef GetUI() const override final;
+  void SetUI(ComponentRef ui) override final;
 
-  virtual void Activate() {}
-  virtual void Deactivate() {}
+  void Activate() override;
+  void Deactivate() override;
 
-  Variant Save() const override { return Variant(); }
+  Variant Save() const override;
 
 protected:
   Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
-  UIComponentRef ui = nullptr;
-
   static Array<const PropertyInfo> GetProperties()
   {
     return{
-      EP_MAKE_PROPERTY_RO(UI, "The top level UI compoment for this activity", nullptr, 0),
+      EP_MAKE_PROPERTY(UI, "The top level UI compoment for this activity", nullptr, 0),
     };
   }
+
   static Array<const MethodInfo> GetMethods()
   {
     return{

@@ -1,6 +1,6 @@
 #include "components/commandmanager.h"
 #include "components/project.h"
-#include "components/activities/activity.h"
+#include "ep/cpp/activity.h"
 #include "kernel.h"
 
 namespace ep {

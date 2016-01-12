@@ -101,9 +101,10 @@ template <typename C, typename I>
 class BaseImpl : public I
 {
 public:
-  using Component = C;
+  using Instance = C;
   using Interface = I;
   using Super = BaseImpl<C, I>;
+  using InstanceSuper = typename C::Super;
 
   const kernel::ComponentDesc* GetDescriptor() const { return (const kernel::ComponentDesc*)pInstance->GetDescriptor(); }
   kernel::Kernel* GetKernel() const { return (kernel::Kernel*)&pInstance->GetKernel(); }
@@ -111,8 +112,11 @@ public:
 protected:
   template<typename T, bool b> friend struct internal::Destroy;
 
-  BaseImpl(C *pInstance)
-    : pInstance(pInstance)
+  BaseImpl(const BaseImpl &) = delete;
+  void operator=(const BaseImpl &) = delete;
+
+  BaseImpl(Component *pInstance)
+    : pInstance((C*)pInstance)
   {}
   virtual ~BaseImpl() {}
 
