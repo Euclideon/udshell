@@ -2,7 +2,7 @@
 #ifndef EP_COMMAND_MANAGER_H
 #define EP_COMMAND_MANAGER_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "ep/cpp/delegate.h"
 
 namespace ep {

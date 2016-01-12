@@ -2,8 +2,8 @@
 #ifndef EPACTIVITYIMPL_H
 #define EPACTIVITYIMPL_H
 
-#include "ep/cpp/activity.h"
-#include "ep/cpp/interface/iactivity.h"
+#include "ep/cpp/component/activity.h"
+#include "ep/cpp/internal/i/iactivity.h"
 
 namespace ep {
 

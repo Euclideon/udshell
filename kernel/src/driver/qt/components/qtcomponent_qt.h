@@ -4,7 +4,7 @@
 
 #include <QObject>
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 
 namespace ep {
 class Kernel;

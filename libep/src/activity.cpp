@@ -1,4 +1,4 @@
-#include "ep/cpp/activity.h"
+#include "ep/cpp/component/activity.h"
 
 namespace ep
 {

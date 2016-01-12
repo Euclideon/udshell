@@ -2,7 +2,7 @@
 #ifndef EP_RESOURCE_MANAGER_H
 #define EP_RESOURCE_MANAGER_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 
 namespace ep
 {

@@ -2,7 +2,7 @@
 #ifndef EP_VIEWER_H
 #define EP_VIEWER_H
 
-#include "ep/cpp/activity.h"
+#include "ep/cpp/component/activity.h"
 
 namespace ep {
 

@@ -2,7 +2,7 @@
 #ifndef _LUA_H
 #define _LUA_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "stream.h"
 
 namespace ep

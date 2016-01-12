@@ -2,7 +2,7 @@
 #if !defined(_EPLUA_H)
 #define _EPLUA_H
 
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "componentdesc.h"
 
 #include "lua.hpp"

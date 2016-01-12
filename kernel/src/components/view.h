@@ -5,7 +5,7 @@
 #include "udRender.h"
 
 #include "ep/cpp/math.h"
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "hal/input.h"
 
 namespace ep {

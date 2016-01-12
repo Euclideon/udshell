@@ -1,10 +1,10 @@
 #include "ep/c/plugin.h"
 #include "ep/c/componentdesc.h"
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "ep/cpp/kernel.h"
 #include "ep/cpp/event.h"
 
-#include "ep/cpp/interface/icomponent.h"
+#include "ep/cpp/internal/i/icomponent.h"
 
 using namespace ep;
 

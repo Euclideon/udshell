@@ -1,4 +1,4 @@
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 #include "material.h"
 #include "renderresource.h"
 #include "kernel.h"

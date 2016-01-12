@@ -1,6 +1,6 @@
 
 #include "ep/cpp/variant.h"
-#include "ep/cpp/component.h"
+#include "ep/cpp/component/component.h"
 
 extern "C" {
 
