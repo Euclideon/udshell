@@ -1,4 +1,4 @@
-#include "ep/c/internal/kernel_inl.h"
+#include "ep/cpp/plugin.h"
 
 namespace ep {
 
@@ -117,7 +117,7 @@ SharedPtr<T> Kernel::CreateComponent(Variant::VarMap initParams)
 
 inline Kernel* Kernel::GetInstance()
 {
-  return (Kernel*)(s_pPluginInstance ? s_pPluginInstance->pKernelInstance : nullptr);
+  return s_pInstance ? s_pInstance->pKernelInstance : nullptr;
 }
 
 template<typename ...Args>

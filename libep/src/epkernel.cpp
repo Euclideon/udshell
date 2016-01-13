@@ -1,6 +1,4 @@
-#include "ep/c/plugin.h"
-#include "ep/c/internal/kernel_inl.h"
-
+#include "ep/cpp/plugin.h"
 #include "ep/cpp/kernel.h"
 
 extern "C" {
