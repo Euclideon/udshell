@@ -120,7 +120,6 @@ protected:
 
   void* CreateImplInternal(String ComponentType, Variant::VarMap initParams);
 
-  void Init(Variant::VarMap initParams) override final;
   epResult InitComplete() override;
   epResult ReceiveMessage(String message, String sender, const Variant &data) override;
 
@@ -134,6 +133,9 @@ protected:
       EP_MAKE_PROPERTY_RO(Description, "Component Description", nullptr, 0),
     };
   }
+
+private:
+  void Init(Variant::VarMap initParams) override final;
 };
 
 // component cast
