@@ -232,7 +232,7 @@ void* LuaState::udLuaAlloc(void *, void *ptr, size_t, size_t nsize)
     return nullptr;
   }
   else
-    return udRealloc(ptr, nsize);
+    return epRealloc(ptr, nsize);
 }
 
 void LuaState::exec(String code)
