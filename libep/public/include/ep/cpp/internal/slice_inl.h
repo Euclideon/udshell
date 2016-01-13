@@ -571,7 +571,10 @@ inline void Array<T, Count>::reserve(size_t count)
       else
       {
         for (size_t i = 0; i < this->length; ++i)
-          new((void*)&(pNew[i])) T(this->ptr[i]);
+        {
+          new((void*)&(pNew[i])) T(std::move(this->ptr[i]));
+          this->ptr[i].~T();
+        }
       }
       if (hasAlloc)
         internal::SliceFree<T>(this->ptr);
