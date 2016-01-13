@@ -18,8 +18,8 @@ epforceinline float Pow(float f, float n) { return powf(f, n); }
 epforceinline double Pow(double d, double n) { return pow(d, n); }
 epforceinline float LogN(float f) { return logf(f); }
 epforceinline double LogN(double d) { return log(d); }
-epforceinline float Log2(float f) { EPASSERT(false, "TODO!"); return f; }   //Removed compiler warning until implemented
-epforceinline double Log2(double d) { EPASSERT(false, "TODO!"); return d; } //Removed compiler warning until implemented
+epforceinline float Log2(float f) { return log2f(f); }
+epforceinline double Log2(double d) { return log2(d); }
 epforceinline float Log10(float f) { return log10f(f); }
 epforceinline double Log10(double d) { return log10(d); }
 epforceinline float RSqrt(float f) { return 1.f/sqrtf(f); }
