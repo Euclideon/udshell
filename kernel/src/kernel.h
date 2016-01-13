@@ -103,8 +103,6 @@ public:
   virtual epResult RunMainLoop() { return epR_Success; }
   epResult Terminate();
 
-  epPluginInstance *GetPluginInterface();
-
 protected:
   friend class Component;
   friend class ep::ComponentImpl;
@@ -155,8 +153,6 @@ protected:
 
   StdCapture *stdOutCapture = nullptr;
   StdCapture *stdErrCapture = nullptr;
-
-  epPluginInstance *pPluginInstance = nullptr;
 
   virtual ~Kernel() {}
 

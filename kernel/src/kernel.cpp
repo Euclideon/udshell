@@ -1,4 +1,5 @@
 #include "ep/cpp/platform.h"
+#include "ep/cpp/plugin.h"
 #include "kernel.h"
 
 #include "hal/hal.h"
@@ -64,6 +65,44 @@ epResult udRenderScene_DeinitRender(Kernel*); // Not sure if both Deinit's are n
 
 namespace kernel {
 
+static ep::Instance *MakeInterface(Kernel *pKernel)
+{
+  ep::Instance *pInstance = new ep::Instance;
+
+  pInstance->apiVersion = EPKERNEL_APIVERSION;
+
+  pInstance->pKernelInstance = pKernel;
+
+  pInstance->Alloc = [](size_t size) -> void*
+  {
+    return epAlloc(size);
+  },
+  pInstance->AllocAligned = [](size_t size, size_t alignment) -> void*
+  {
+    return epAllocAligned(size, alignment, epAF_None);
+  },
+  pInstance->Free = [](void *pMem) -> void
+  {
+    epFree(pMem);
+  },
+
+  pInstance->AssertFailed = [](String condition, String message, String file, int line) -> void
+  {
+#if EPASSERT_ON
+    epAssertFailed(condition, message, file, line);
+#endif
+  },
+
+  pInstance->DestroyComponent = [](Component *pInstance) -> void
+  {
+    // NOTE: this was called when an RC reached zero...
+    pInstance->DecRef(); // dec it with the internal function which actually performs the cleanup
+  };
+
+  return pInstance;
+}
+
+
 Kernel::Kernel()
   : componentRegistry(256)
   , instanceRegistry(8192)
@@ -71,6 +110,7 @@ Kernel::Kernel()
   , foreignInstanceRegistry(4096)
   , messageHandlers(64)
 {
+  ep::s_pInstance = MakeInterface(this);
 }
 
 epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int renderThreadCount)

@@ -1,58 +1,12 @@
 #include "components/nativepluginloader.h"
 #include "kernel.h"
 
-#include "ep/c/plugin.h"
-#include "ep/c/internal/kernel_inl.h"
+#include "ep/cpp/plugin.h"
 #include "ep/cpp/component/component.h"
 
 extern "C" {
-  typedef bool (epPlugin_InitProc)(epPluginInstance *pPlugin);
+  typedef bool (epPlugin_InitProc)(ep::Instance *pPlugin);
 }
-
-namespace kernel {
-
-// HAX: Kernel::GetPluginInterface() defined here to save a whole bunch of extern's and header pollution
-epPluginInstance *Kernel::GetPluginInterface()
-{
-  if (!pPluginInstance)
-  {
-    pPluginInstance = new epPluginInstance;
-
-    pPluginInstance->apiVersion = EPKERNEL_APIVERSION;
-
-    pPluginInstance->pKernelInstance = (epKernel*)this;
-
-    pPluginInstance->Alloc = [](size_t size) -> void*
-    {
-      return epAlloc(size);
-    },
-      pPluginInstance->AllocAligned = [](size_t size, size_t alignment) -> void*
-    {
-      return epAllocAligned(size, alignment, epAF_None);
-    },
-      pPluginInstance->Free = [](void *pMem) -> void
-    {
-      epFree(pMem);
-    },
-
-      pPluginInstance->AssertFailed = [](epString condition, epString message, epString file, int line) -> void
-    {
-#if EPASSERT_ON
-      epAssertFailed(condition, message, file, line);
-#endif
-    },
-
-      pPluginInstance->DestroyComponent = [](epComponent *pInstance) -> void
-    {
-      // NOTE: this was called when an RC reached zero...
-      Component *pC = (Component*)pInstance;
-      pC->DecRef(); //       and then dec it with the internal function which actually performs the cleanup
-    };
-  }
-  return pPluginInstance;
-}
-
-} // namespace kernel
 
 // ----- Everything we need! -----
 
@@ -104,7 +58,7 @@ bool NativePluginLoader::LoadPlugin(String filename)
     return false;
 #endif
 
-  bool bSuccess = pInit(((kernel::Kernel&)GetKernel()).GetPluginInterface());
+  bool bSuccess = pInit(s_pInstance);
 
   if (!bSuccess)
   {

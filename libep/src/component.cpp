@@ -12,7 +12,7 @@ size_t epComponent_Release(epComponent *pComponent)
 {
   if (pComponent->refCount == 1)
   {
-    s_pPluginInstance->DestroyComponent(pComponent);
+    s_pInstance->DestroyComponent((Component*)pComponent);
     return 0;
   }
   return --pComponent->refCount;

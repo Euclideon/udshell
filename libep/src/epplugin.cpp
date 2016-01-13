@@ -1,8 +1,12 @@
-#include "ep/c/plugin.h"
+#include "ep/cpp/plugin.h"
+
+namespace ep {
+
+Instance *s_pInstance = nullptr;
+
+} // namespace ep
 
 extern "C" {
-
-epPluginInstance *s_pPluginInstance = nullptr;
 
 bool epPluginAttach() epweak;
 
@@ -23,31 +27,30 @@ bool epPluginAttach()
 }
 #endif
 
-EP_EXPORT bool epPlugin_Init(epPluginInstance *pPlugin)
+EP_EXPORT bool epPlugin_Init(ep::Instance *pPlugin)
 {
-  s_pPluginInstance = pPlugin;
+  ep::s_pInstance = pPlugin;
   return epPluginAttach();
 }
 
-
 epKernel *epPlugin_GetKernel()
 {
-  return s_pPluginInstance->pKernelInstance;
+  return (epKernel*)ep::s_pInstance->pKernelInstance;
 }
 
 void* epPlugin_Alloc(size_t size)
 {
-  return s_pPluginInstance->Alloc(size);
+  return ep::s_pInstance->Alloc(size);
 }
 
 void* epPlugin_AllocAligned(size_t size, size_t alignment)
 {
-  return s_pPluginInstance->AllocAligned(size, alignment);
+  return ep::s_pInstance->AllocAligned(size, alignment);
 }
 
 void epPlugin_Free(void *pMem)
 {
-  s_pPluginInstance->Free(pMem);
+  ep::s_pInstance->Free(pMem);
 }
 
 }
