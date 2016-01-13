@@ -189,7 +189,7 @@ void LogFilter::SetLevel(LogCategories categories, int level)
   }
 }
 
-bool LogFilter::IsEnabled(LogCategories category) const
+bool LogFilter::IsCategoryEnabled(LogCategories category) const
 {
   int catIndex;
   for (catIndex = 0; !(category & 1); catIndex++)
@@ -198,7 +198,7 @@ bool LogFilter::IsEnabled(LogCategories category) const
   return enabledFilter[catIndex];
 }
 
-void LogFilter::Enable(LogCategories categories)
+void LogFilter::EnableCategory(LogCategories categories)
 {
   for (int i = 0; categories; i++)
   {
@@ -209,7 +209,7 @@ void LogFilter::Enable(LogCategories categories)
   }
 }
 
-void LogFilter::Disable(LogCategories categories)
+void LogFilter::DisableCategory(LogCategories categories)
 {
   for (int i = 0; categories; i++)
   {
@@ -305,7 +305,7 @@ SharedString LogLine::ToString(LogFormatSpecs format) const
 #else
   tm *pTm = localtime(&timestamp);
 #endif
-  strftime(timeStr, sizeof(timeStr), "[%d/%m/%y %H:%M:%S]", pTm);
+  strftime(timeStr, sizeof(timeStr), "[%Y-%m-%d %H:%M:%S]", pTm);
 
   out.format("{0}{1}{2,?10}{3}{4}{5}{6}{7}{8}{9}",
     ((format & LogFormatSpecs::Timestamp) ? (const char*)timeStr : ""),
