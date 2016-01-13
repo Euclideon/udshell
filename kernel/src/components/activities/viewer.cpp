@@ -165,7 +165,7 @@ Variant Viewer::Save() const
     params.Insert("camera", spCamera->Save());
 
   if (spModel)
-    params.Insert("model", spModel->GetDataSource()->GetURL());
+    params.Insert("model", spModel->GetDataSource()->GetProperty("url")); // TODO Change to GetURL() once DataSource made public
 
   if (spScene)
     params.Insert("scene", spScene->Save());

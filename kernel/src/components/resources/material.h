@@ -2,7 +2,7 @@
 #ifndef _EP_MATERIAL_H
 #define _EP_MATERIAL_H
 
-#include "components/resources/resource.h"
+#include "ep/cpp/component/resource/resource.h"
 #include "components/resources/shader.h"
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/avltree.h"

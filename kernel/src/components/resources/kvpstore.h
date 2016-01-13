@@ -2,7 +2,7 @@
 #ifndef _EP_KVPSTORE_H
 #define _EP_KVPSTORE_H
 
-#include "components/resources/resource.h"
+#include "ep/cpp/component/resource/resource.h"
 
 namespace ep
 {

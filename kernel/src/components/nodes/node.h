@@ -4,7 +4,7 @@
 
 #include "ep/cpp/math.h"
 
-#include "../resources/resource.h"
+#include "ep/cpp/component/resource/resource.h"
 #include "hal/input.h"
 
 namespace ep

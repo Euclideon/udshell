@@ -1,5 +1,5 @@
 #include "components/resourcemanager.h"
-#include "components/resources/resource.h"
+#include "ep/cpp/component/resource/resource.h"
 #include "components/datasource.h"
 #include "kernel.h"
 

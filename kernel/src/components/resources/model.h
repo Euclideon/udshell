@@ -2,7 +2,7 @@
 #ifndef _EP_MODEL_H
 #define _EP_MODEL_H
 
-#include "components/resources/resource.h"
+#include "ep/cpp/component/resource/resource.h"
 #include "components/resources/array.h"
 #include "components/resources/material.h"
 #include "ep/cpp/sharedptr.h"
