@@ -125,6 +125,11 @@ public:
   template<typename U>
   void copyTo(Slice<U> dest) const;
 };
+template<typename T>
+inline bool operator ==(nullptr_t, Slice<T> rh) { return rh == nullptr; }
+template<typename T>
+inline bool operator !=(nullptr_t, Slice<T> rh) { return rh == nullptr; }
+
 
 // Array introduces static-sized and/or stack-based ownership. this is useful anywhere that fixed-length arrays are appropriate
 // Array will fail-over to an allocated buffer if the contents exceed the fixed size

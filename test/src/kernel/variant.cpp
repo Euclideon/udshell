@@ -246,4 +246,84 @@ TEST(EPVariant, EPVariantSlice)
 }
 
 
+TEST(EPVariant, EPVariantAs)
+{
+  Variant v_null(nullptr);
+  Variant v_bool(true);
+  Variant v_int(10);
+  Variant v_float(10.0);
+  Variant v_shortString("false");
+  Variant v_longString("The quick brown fox jumps over the lazy dog");
+  Variant v_array(Variant::VarArray{ 1, 2.0, "3" });
+  Variant v_map(Variant::VarMap{ { "x", 1 }, { "y", 2.0 }, { "z", "3" } });
+
+  EXPECT_EQ(false, v_null.as<bool>());
+  EXPECT_EQ(true, v_bool.as<bool>());
+  EXPECT_EQ(true, v_int.as<bool>());
+  EXPECT_EQ(true, v_float.as<bool>());
+  EXPECT_EQ(false, v_shortString.as<bool>());
+  EXPECT_EQ(true, v_longString.as<bool>());
+  EXPECT_THROW(v_array.as<bool>(), EPException);
+  EXPECT_THROW(v_map.as<bool>(), EPException);
+
+  EXPECT_EQ(0, v_null.as<char>());
+  EXPECT_EQ(1, v_bool.as<int8_t>());
+  EXPECT_EQ(10, v_int.as<uint8_t>());
+  EXPECT_EQ(10, v_float.as<char>());
+  EXPECT_EQ(0, v_shortString.as<char>());
+  EXPECT_EQ(0, v_longString.as<char>());
+  EXPECT_THROW(v_array.as<char>(), EPException);
+  EXPECT_THROW(v_map.as<char>(), EPException);
+
+  EXPECT_EQ(0, v_null.as<int64_t>());
+  EXPECT_EQ(1, v_bool.as<int64_t>());
+  EXPECT_EQ(10, v_int.as<int64_t>());
+  EXPECT_EQ(10, v_float.as<int64_t>());
+  EXPECT_EQ(0, v_shortString.as<int64_t>());
+  EXPECT_EQ(0, v_longString.as<int64_t>());
+  EXPECT_THROW(v_array.as<int64_t>(), EPException);
+  EXPECT_THROW(v_map.as<int64_t>(), EPException);
+
+  EXPECT_EQ(0.0, v_null.as<float>());
+  EXPECT_EQ(1.0, v_bool.as<float>());
+  EXPECT_EQ(10.0, v_int.as<float>());
+  EXPECT_EQ(10.0, v_float.as<float>());
+  EXPECT_EQ(0.0, v_shortString.as<float>());
+  EXPECT_EQ(0.0, v_longString.as<float>());
+  EXPECT_THROW(v_array.as<float>(), EPException);
+  EXPECT_THROW(v_map.as<float>(), EPException);
+
+  EXPECT_EQ(nullptr, v_null.as<String>());
+  EXPECT_THROW(v_bool.as<String>(), EPException);
+  EXPECT_THROW(v_int.as<String>(), EPException);
+  EXPECT_THROW(v_float.as<String>(), EPException);
+  EXPECT_TRUE(v_shortString.as<String>().eq("false"));
+  EXPECT_TRUE(v_longString.as<String>().eq("The quick brown fox jumps over the lazy dog"));
+  EXPECT_THROW(v_array.as<String>(), EPException);
+  EXPECT_THROW(v_map.as<String>(), EPException);
+
+  EXPECT_EQ(nullptr, v_null.as<SharedString>());
+  EXPECT_TRUE(v_bool.as<SharedString>().eq("true"));
+  EXPECT_TRUE(v_int.as<SharedString>().eq("10"));
+  EXPECT_TRUE(v_float.as<SharedString>().eq("10"));
+  EXPECT_TRUE(v_shortString.as<SharedString>().eq("false"));
+  EXPECT_TRUE(v_longString.as<SharedString>().eq("The quick brown fox jumps over the lazy dog"));
+  EXPECT_TRUE(v_array.as<SharedString>().eq("[1, 2, 3]"));
+  EXPECT_THROW(v_map.as<SharedString>(), EPException);
+
+  EXPECT_EQ(nullptr, v_null.as<Array<int>>());
+  EXPECT_THROW(v_bool.as<Array<int>>(), EPException);
+  EXPECT_THROW(v_int.as<Array<int>>(), EPException);
+  EXPECT_THROW(v_float.as<Array<int>>(), EPException);
+  EXPECT_THROW(v_shortString.as<Array<int>>(), EPException);
+  EXPECT_THROW(v_longString.as<Array<int>>(), EPException);
+  EXPECT_TRUE(v_array.as<Array<int>>().eq(Slice<const int>{ 1, 2, 3 }));
+  EXPECT_TRUE(v_map.as<Array<int>>().eq(Slice<const int>{}));
+
+  EXPECT_EQ(Float2::create(1.f, 2.f), v_array.as<Float2>());
+  EXPECT_EQ(Double3::create(1.0, 2.0, 3.0), v_array.as<Double3>());
+  EXPECT_THROW(v_array.as<Double4>(), EPException);
+}
+
+
 // TODO : Implement Enums, ComponentRefs, Delegates, strings and KeyValuePair Arrays

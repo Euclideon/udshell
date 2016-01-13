@@ -166,6 +166,9 @@ struct Vector2
   Vector2<T> operator /(const Vector2<T> &v) const { Vector2<T> r = { x/v.x, y/v.y }; return r; }
   Vector2<T> operator /(T f) const { Vector2<T> r = { x/f,   y/f }; return r; }
 
+  bool       operator ==(const Vector2<T> &v) const { return x==v.x && y==v.y; }
+  bool       operator !=(const Vector2<T> &v) const { return x!=v.x || y!=v.y; }
+
   Vector2<T>& operator +=(const Vector2<T> &v) { x += v.x; y += v.y; return *this; }
   Vector2<T>& operator -=(const Vector2<T> &v) { x -= v.x; y -= v.y; return *this; }
   Vector2<T>& operator *=(const Vector2<T> &v) { x *= v.x; y *= v.y; return *this; }
@@ -204,7 +207,9 @@ struct Vector3
   Vector3<T> operator *(T f) const { Vector3<T> r = { x*f,   y*f,   z*f }; return r; }
   Vector3<T> operator /(const Vector3<T> &v) const { Vector3<T> r = { x/v.x, y/v.y, z/v.z }; return r; }
   Vector3<T> operator /(T f) const { Vector3<T> r = { x/f,   y/f,   z/f }; return r; }
+
   bool       operator ==(const Vector3<T> &v) const { return x==v.x && y==v.y && z==v.z; }
+  bool       operator !=(const Vector3<T> &v) const { return x!=v.x || y!=v.y || z!=v.z; }
 
   Vector3<T>& operator +=(const Vector3<T> &v) { x += v.x; y += v.y; z += v.z; return *this; }
   Vector3<T>& operator -=(const Vector3<T> &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
@@ -244,6 +249,9 @@ struct Vector4
   Vector4<T> operator *(T f) const { Vector4<T> r = { x*f,   y*f,   z*f,   w*f }; return r; }
   Vector4<T> operator /(const Vector4<T> &v) const { Vector4<T> r = { x/v.x, y/v.y, z/v.z, w/v.w }; return r; }
   Vector4<T> operator /(T f) const { Vector4<T> r = { x/f,   y/f,   z/f,   w/f }; return r; }
+
+  bool       operator ==(const Vector4<T> &v) const { return x==v.x && y==v.y && z==v.z && w==v.w; }
+  bool       operator !=(const Vector4<T> &v) const { return x!=v.x || y!=v.y || z!=v.z || w!=v.w; }
 
   Vector4<T>& operator +=(const Vector4<T> &v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
   Vector4<T>& operator -=(const Vector4<T> &v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }

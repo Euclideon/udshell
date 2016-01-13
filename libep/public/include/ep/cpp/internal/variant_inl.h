@@ -488,6 +488,7 @@ struct Variant_Cast < const T >
 template<> struct Variant_Cast < bool     > { inline static bool     as(const Variant &v) { return v.asBool(); } };
 template<> struct Variant_Cast < float    > { inline static float    as(const Variant &v) { return (float)v.asFloat(); } };
 template<> struct Variant_Cast < double   > { inline static double   as(const Variant &v) { return v.asFloat(); } };
+template<> struct Variant_Cast < char     > { inline static char     as(const Variant &v) { return (char)v.asInt(); } };
 template<> struct Variant_Cast < int8_t   > { inline static int8_t   as(const Variant &v) { return (int8_t)v.asInt(); } };
 template<> struct Variant_Cast < uint8_t  > { inline static uint8_t  as(const Variant &v) { return (uint8_t)v.asInt(); } };
 template<> struct Variant_Cast < int16_t  > { inline static int16_t  as(const Variant &v) { return (int16_t)v.asInt(); } };
@@ -497,14 +498,25 @@ template<> struct Variant_Cast < uint32_t > { inline static uint32_t as(const Va
 template<> struct Variant_Cast < int64_t  > { inline static int64_t  as(const Variant &v) { return (int64_t)v.asInt(); } };
 template<> struct Variant_Cast < uint64_t > { inline static uint64_t as(const Variant &v) { return (uint64_t)v.asInt(); } };
 
-template<> struct Variant_Cast < String >   { inline static String             as(const Variant &v) { return v.asString(); } };
-template<size_t Len>
-struct Variant_Cast < MutableString<Len> >  { inline static MutableString<Len> as(const Variant &v) { return MutableString<Len>(v.asString()); } };
+template<> struct Variant_Cast < Variant >              { inline static Variant              as(const Variant &v) { return v; } };
+template<> struct Variant_Cast < Variant::VarDelegate > { inline static Variant::VarDelegate as(const Variant &v) { return v.asDelegate(); } };
+template<> struct Variant_Cast < Variant::VarArray >    { inline static Variant::VarArray    as(const Variant &v) { return v.asArray(); } };
+template<> struct Variant_Cast < Variant::VarMap >      { inline static Variant::VarMap      as(const Variant &v) { return v.asAssocArray(); } };
+
+template<typename T>
+struct Variant_Cast < SharedArray<T> >      { inline static SharedArray<T>     as(const Variant &v) { return v.as<Array<T, 0>>(); } };
+
+template<>
+struct Variant_Cast < String >              { inline static String             as(const Variant &v) { return v.asString(); } };
 template<>
 struct Variant_Cast < SharedString >        { inline static SharedString       as(const Variant &v) { return v.asSharedString(); } };
-
-template<> struct Variant_Cast < Variant >  { inline static Variant  as(const Variant &v) { return v; } };
-
+template<size_t Len>
+struct Variant_Cast < MutableString<Len> >  { inline static MutableString<Len> as(const Variant &v) {
+                                                                                                      if(v.is(Variant::Type::String))
+                                                                                                        return MutableString<Len>(v.asString());
+                                                                                                      else
+                                                                                                        return MutableString<Len>(v.asSharedString()); // TODO: this double-allocation is a shame! >_<
+                                                                                                    } };
 
 // **************************************************************
 // ** Variant delegates; implement typeless calling convention **
@@ -710,17 +722,15 @@ inline void epFromVariant(const Variant &v, T *pE)
   {
     size_t val;
     const EnumDesc *pDesc = v.asEnum(&val);
-    if (!pDesc->name.eq(T::Name()))
-    {
-      // TODO: complain about invalid enum type?! error or something?
-      return;
-    }
+    EPASSERT_THROW(pDesc->name.eq(T::Name()), epR_InvalidType, "Incorrect type: enum type {0} can not convert to {1}", pDesc->name, T::Name());
     *pE = T((typename T::Type)val);
   }
   else if (v.is(Variant::Type::Int))
     *pE = T((typename T::Type)v.asInt());
   else if (v.is(Variant::Type::String))
     *pE = T(v.asString());
+  else
+    EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
 }
 
 // math types
@@ -735,7 +745,9 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
     {
       for (size_t i = 0; i < 2; ++i)
         ((U*)pR)[i] = a[i].as<U>();
+      return;
     }
+    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
   }
   else if (v.is(Variant::Type::AssocArray))
   {
@@ -746,19 +758,12 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
       size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 2; ++i)
         ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+      return;
     }
-    else
-    {
-      Variant *pY = aa.Get("y");
-      if (!pY)
-        return;
-      Variant *pX = aa.Get("x");
-      if (!pX)
-        return;
-      pR->x = pX->as<U>();
-      pR->y = pY->as<U>();
-    }
+    pR->y = aa["y"].as<U>();
+    pR->x = aa["x"].as<U>();
   }
+  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Vector3<U> *pR)
@@ -771,7 +776,9 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
     {
       for (size_t i = 0; i < 3; ++i)
         ((U*)pR)[i] = a[i].as<U>();
+      return;
     }
+    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
   }
   else if (v.is(Variant::Type::AssocArray))
   {
@@ -782,23 +789,13 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
       size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 3; ++i)
         ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+      return;
     }
-    else
-    {
-      Variant *pZ = aa.Get("z");
-      if (!pZ)
-        return;
-      Variant *pY = aa.Get("y");
-      if (!pY)
-        return;
-      Variant *pX = aa.Get("x");
-      if (!pX)
-        return;
-      pR->x = pX->as<U>();
-      pR->y = pY->as<U>();
-      pR->z = pZ->as<U>();
-    }
+    pR->z = aa["z"].as<U>();
+    pR->y = aa["y"].as<U>();
+    pR->x = aa["x"].as<U>();
   }
+  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Vector4<U> *pR)
@@ -811,7 +808,9 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
     {
       for (size_t i = 0; i < 4; ++i)
         ((U*)pR)[i] = a[i].as<U>();
+      return;
     }
+    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
   }
   else if (v.is(Variant::Type::AssocArray))
   {
@@ -822,27 +821,14 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
       size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 4; ++i)
         ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+      return;
     }
-    else
-    {
-      Variant *pW = aa.Get("w");
-      if (!pW)
-        return;
-      Variant *pZ = aa.Get("z");
-      if (!pZ)
-        return;
-      Variant *pY = aa.Get("y");
-      if (!pY)
-        return;
-      Variant *pX = aa.Get("x");
-      if (!pX)
-        return;
-      pR->x = pX->as<U>();
-      pR->y = pY->as<U>();
-      pR->z = pZ->as<U>();
-      pR->w = pW->as<U>();
-    }
+    pR->w = aa["w"].as<U>();
+    pR->z = aa["z"].as<U>();
+    pR->y = aa["y"].as<U>();
+    pR->x = aa["x"].as<U>();
   }
+  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
@@ -855,7 +841,9 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
     {
       for (size_t i = 0; i < 16; ++i)
         ((U*)pR)[i] = a[i].as<U>();
+      return;
     }
+    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
   }
   else if (v.is(Variant::Type::AssocArray))
   {
@@ -866,19 +854,18 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
       size_t start = aa.Get(0) ? 0 : 1;
       for (size_t i = 0; i < 16; ++i)
         ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+      return;
     }
+    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
   }
+  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
 }
 
 template<typename R, typename... Args>
 inline void epFromVariant(const Variant &v, Delegate<R(Args...)> *pD)
 {
   typedef SharedPtr<internal::VarDelegateMemento<R(Args...)>> VarDelegateRef;
-
-  if (v.asDelegate())
-    *pD = Delegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
-  else
-    *pD = nullptr;
+  *pD = Delegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
 }
 
 template<typename U, size_t Len>
@@ -891,6 +878,7 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
     pArr->reserve(a.length);
     for (size_t i = 0; i < a.length; ++i)
       pArr->pushBack(a[i].as<U>());
+    return;
   }
   else if (v.is(Variant::Type::AssocArray))
   {
@@ -903,6 +891,7 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
       for (size_t i = 0; i < len; ++i)
         pArr->pushBack(m.Get(start + i)->as<U>());
     }
+    return;
   }
   else if (v.is(Variant::Type::String))
   {
@@ -918,8 +907,13 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
         pArr->pushBack(Variant(s.slice(0, offset), true).as<U>());
         s.pop(offset < s.length ? offset + 1 : offset);
       } while (s);
+      return;
     }
+    EPTHROW_ERROR(epR_InvalidArgument, "String does not look like an array, ie: \"[x, y, z]\"");
   }
+  else if (v.is(Variant::Type::Null))
+    return;
+  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
 }
 
 template<typename K, typename V, typename Pred>
@@ -930,13 +924,18 @@ inline void epFromVariant(const Variant &v, AVLTree<K, V, Pred> *pTree)
     auto a = v.asArray();
     for (size_t i = 0; i < a.length; ++i)
       pTree->insert(Variant(i).as<K>(), a[i].as<V>());
+    return;
   }
   else if (v.is(Variant::Type::AssocArray))
   {
     auto aa = v.asAssocArray();
     for (auto kvp : aa)
       pTree->insert(kvp.key.as<K>(), kvp.value.as<V>());
+    return;
   }
+  else if (v.is(Variant::Type::Null))
+    return;
+  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
 }
 
 template<typename Tree>
@@ -947,13 +946,18 @@ inline void epFromVariant(const Variant &v, SharedMap<Tree> *pTree)
     auto a = v.asArray();
     for (size_t i = 0; i < a.length; ++i)
       pTree->Insert(Variant(i).as<typename Tree::KeyType>(), a[i].as<typename Tree::ValueType>());
+    return;
   }
   else if (v.is(Variant::Type::AssocArray))
   {
     auto aa = v.asAssocArray();
     for (auto kvp : aa)
       pTree->Insert(kvp.key.as<typename Tree::KeyType>(), kvp.value.as<typename Tree::ValueType>());
+    return;
   }
+  else if (v.is(Variant::Type::Null))
+    return;
+  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
 }
 
 namespace internal {
