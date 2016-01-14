@@ -15,8 +15,8 @@ Array<const PropertyInfo> View::GetProperties()
     EP_MAKE_PROPERTY_RO(MousePosition, "Mouse Position", nullptr, 0),
     EP_MAKE_PROPERTY_RO(AspectRatio, "Aspect ratio", nullptr, 0),
     EP_MAKE_PROPERTY_RO(RenderableView, "RenderableView Component", nullptr, 0),
-    EP_MAKE_PROPERTY_EXPLICIT("Dimensions", "The height and width of the View", EP_MAKE_GETTER(GetDimensionsProperty), nullptr, nullptr, 0),
-    EP_MAKE_PROPERTY_EXPLICIT("RenderDimensions", "The resolution of the rendered content", EP_MAKE_GETTER(GetRenderDimensionsProperty), nullptr, nullptr, 0),
+    EP_MAKE_PROPERTY_RO(Dimensions, "The height and width of the View", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(RenderDimensions, "The resolution of the rendered content", nullptr, 0),
   };
 }
 
@@ -95,36 +95,14 @@ void View::SetCamera(CameraRef _spCamera)
   OnDirty();
 }
 
-void View::GetDimensions(int *pWidth, int *pHeight) const
+Dimensions<int> View::GetDimensions() const
 {
-  if (pWidth)
-    *pWidth = displayWidth;
-  if (pHeight)
-    *pHeight = displayHeight;
+  return { displayWidth, displayHeight };
 }
 
-void View::GetRenderDimensions(int *pWidth, int *pHeight) const
+Dimensions<int> View::GetRenderDimensions() const
 {
-  if (pWidth)
-    *pWidth = renderWidth;
-  if (pHeight)
-    *pHeight = renderHeight;
-}
-
-Variant::VarMap View::GetDimensionsProperty() const
-{
-  Variant::VarMap map;
-  map.Insert("width", displayWidth);
-  map.Insert("height", displayHeight);
-  return map;
-}
-
-Variant::VarMap View::GetRenderDimensionsProperty() const
-{
-  Variant::VarMap map;
-  map.Insert("width", renderWidth);
-  map.Insert("height", renderHeight);
-  return map;
+  return { renderWidth, renderHeight };
 }
 
 void View::SetLatestFrame(UniquePtr<RenderableView> spFrame)

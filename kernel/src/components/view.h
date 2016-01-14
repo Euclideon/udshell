@@ -4,6 +4,7 @@
 
 #include "udRender.h"
 
+#include "ep/cpp/rect.h"
 #include "ep/cpp/math.h"
 #include "ep/cpp/component/component.h"
 #include "hal/input.h"
@@ -32,8 +33,8 @@ public:
   void SetCamera(CameraRef spCamera);
   CameraRef GetCamera() const { return spCamera; }
 
-  void GetDimensions(int *pWidth, int *pHeight) const;
-  void GetRenderDimensions(int *pWidth, int *pHeight) const;
+  Dimensions<int> GetDimensions() const;
+  Dimensions<int> GetRenderDimensions() const;
   float GetAspectRatio() const { return (float)displayWidth / (float)displayHeight; }
 
   void SetRenderOptions(const udRenderOptions &_options) { this->options = _options; } // TODO: Methods for these functions?
@@ -142,10 +143,6 @@ protected:
       EP_MAKE_EVENT(MousePositionChanged, "Mouse Position changed")
     };
   }
-
-private:
-  Variant::VarMap GetDimensionsProperty() const;
-  Variant::VarMap GetRenderDimensionsProperty() const;
 };
 
 
