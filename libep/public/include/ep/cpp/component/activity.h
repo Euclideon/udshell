@@ -2,7 +2,7 @@
 #ifndef EP_ACTIVITY_H
 #define EP_ACTIVITY_H
 
-#include "ep/cpp/component/component.h"
+#include "ep/cpp/component/uicomponent.h"
 #include "ep/cpp/internal/i/iactivity.h"
 
 namespace ep {
@@ -14,16 +14,20 @@ class Activity : public Component, public IActivity
   EP_DECLARE_COMPONENT_WITH_IMPL(Activity, IActivity, Component, EPKERNEL_PLUGINVERSION, "Activity desc...")
 public:
 
-  ComponentRef GetUI() const override final;
-  void SetUI(ComponentRef ui) override final;
+  UIComponentRef GetUI() const override final { return pImpl->GetUI(); }
+  void SetUI(UIComponentRef ui) override final { pImpl->SetUI(ui); }
 
-  void Activate() override;
-  void Deactivate() override;
+  void Activate() override { pImpl->Activate(); }
+  void Deactivate() override { pImpl->Deactivate(); }
 
-  Variant Save() const override;
+  Variant Save() const override { return pImpl->Save(); }
 
 protected:
-  Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+  Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+    : Component(pType, pKernel, uid, initParams)
+  {
+    pImpl = CreateImpl(initParams);
+  }
 
   static Array<const PropertyInfo> GetProperties()
   {
