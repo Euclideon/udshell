@@ -2,7 +2,7 @@
 #ifndef _EP_SHADER_H
 #define _EP_SHADER_H
 
-#include "components/resources/resource.h"
+#include "ep/cpp/component/resource/resource.h"
 #include "ep/cpp/sharedptr.h"
 
 namespace ep

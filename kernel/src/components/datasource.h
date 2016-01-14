@@ -4,7 +4,7 @@
 
 #include "ep/cpp/component/component.h"
 #include "components/stream.h"
-#include "resources/resource.h"
+#include "ep/cpp/component/resource/resource.h"
 
 namespace ep
 {

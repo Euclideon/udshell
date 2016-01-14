@@ -5,7 +5,7 @@
 #include "udPlatform.h"
 #include "udOctree.h"
 
-#include "components/resources/resource.h"
+#include "ep/cpp/component/resource/resource.h"
 #include "ep/cpp/sharedptr.h"
 #include "udRender.h"
 #include "kernel.h"
@@ -69,7 +69,7 @@ public:
 
   UDRenderState GetUDRenderState() const;
 
-  DataSourceRef GetDataSource() const { return spDataSource; }
+  ComponentRef GetDataSource() const { return spDataSource; } // TODO Change ComponentRef to DataSourceRef once DataSource made public
 
   int Load(String name, bool useStreamer);
 

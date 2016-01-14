@@ -28,7 +28,6 @@
 #include "components/resourcemanager.h"
 #include "components/commandmanager.h"
 #include "components/project.h"
-#include "components/resources/resource.h"
 #include "components/resources/buffer.h"
 #include "components/resources/array.h"
 #include "components/resources/text.h"
@@ -46,6 +45,7 @@
 
 // Components that do the Impl dance
 #include "components/activities/activityimpl.h"
+#include "components/resources/resourceimpl.h"
 
 #include "renderscene.h"
 #include "eplua.h"
@@ -148,7 +148,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<Scene>();
 
   // resources
-  pKernel->RegisterComponentType<Resource>();
+  pKernel->RegisterComponentType<Resource, ResourceImpl>();
   pKernel->RegisterComponentType<Buffer>();
   pKernel->RegisterComponentType<ArrayBuffer>();
   pKernel->RegisterComponentType<UDModel>();
