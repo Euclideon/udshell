@@ -43,7 +43,7 @@ protected:
   ~ComponentImpl();
 
   void Init(Variant::VarMap initParams) override final;
-  epResult InitComplete() override final { return epR_Success; }
+  void InitComplete() override final {}
 
   epResult ReceiveMessage(String message, String sender, const Variant &data) override final;
 

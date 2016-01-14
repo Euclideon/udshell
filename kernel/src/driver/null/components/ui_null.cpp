@@ -20,9 +20,8 @@ epResult UIComponentImpl::CreateInternal(Variant::VarMap epUnusedParam(initParam
 }
 
 // ---------------------------------------------------------------------------------------
-epResult UIComponentImpl::InitComplete()
+void UIComponentImpl::InitComplete()
 {
-  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------

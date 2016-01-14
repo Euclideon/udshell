@@ -41,9 +41,8 @@ static epComponentOverrides s_testComponentVirtuals = {
   },
 
   // pInitComplete
-  [](epComponent *epUnusedParam(pBaseInstance), void *epUnusedParam(pDerivedInstance)) -> epResult
+  [](epComponent *epUnusedParam(pBaseInstance), void *epUnusedParam(pDerivedInstance)) -> void
   {
-    return epR_Success;
   },
 
   // pReceiveMessage

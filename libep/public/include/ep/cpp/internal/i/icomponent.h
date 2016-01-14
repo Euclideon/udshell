@@ -25,7 +25,7 @@ public:
   virtual void RemoveDynamicEvent(String name) = 0;
 
 protected:
-  virtual epResult InitComplete() = 0;
+  virtual void InitComplete() = 0;
   virtual epResult ReceiveMessage(String message, String sender, const Variant &data) = 0;
 
 private:

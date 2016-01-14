@@ -19,7 +19,11 @@ protected:
   UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~UIComponent() {}
 
-  epResult InitComplete() override { return pImpl->InitComplete(); }
+  void InitComplete() override
+  {
+    Super::InitComplete();
+    pImpl->InitComplete();
+  }
 
   static Array<const PropertyInfo> GetProperties()
   {
