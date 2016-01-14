@@ -27,37 +27,24 @@ const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
 };
 
 
-#if defined(EP_WINDOWS)
-void SetConsoleColor(ConsoleColor fg, ConsoleColor bg)
-{
-  if (fg == ConsoleColor::Default)
-    fg = ConsoleColor::LightGrey;
-  if (bg == ConsoleColor::Default)
-    bg = ConsoleColor::Black;
-  HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-  SetConsoleTextAttribute(hConsole, (uint8_t)fg | ((uint8_t)bg << 4));
-}
-#else
-void SetConsoleColor(ConsoleColor fg, ConsoleColor bg)
+const char* FgColor(ConsoleColor fg)
 {
   static const char *fg_codes[] = {
     "\x1b[39m", // default
     "\x1b[30m", "\x1b[34m", "\x1b[32m", "\x1b[36m", "\x1b[31m", "\x1b[35m", "\x1b[33m", "\x1b[37m", // colors
     "\x1b[30;1m", "\x1b[34;1m", "\x1b[32;1m", "\x1b[36;1m", "\x1b[31;1m", "\x1b[35;1m", "\x1b[33;1m", "\x1b[37;1m", // 'bold'
   };
+  return fg_codes[(int)fg + 1];
+}
+const char* BgColor(ConsoleColor bg)
+{
   static const char *bg_codes[] = {
     "\x1b[49m", // default
     "\x1b[40m", "\x1b[44m", "\x1b[42m", "\x1b[46m", "\x1b[41m", "\x1b[45m", "\x1b[43m", "\x1b[47m", // colors
     "\x1b[40;1m", "\x1b[44;1m", "\x1b[42;1m", "\x1b[46;1m", "\x1b[41;1m", "\x1b[45;1m", "\x1b[43;1m", "\x1b[47;1m", // 'bold'
   };
-
-  const char *pFG = fg_codes[(int)fg + 1];
-  const char *pBG = bg_codes[(int)bg + 1];
-
-  fwrite(pFG, strlen(pFG), 1, stdout);
-  fwrite(pBG, strlen(pBG), 1, stdout);
+  return bg_codes[(int)bg + 1];
 }
-#endif
 
 static MutableString<1024> CreateStringFromArgs(lua_State *L)
 {
@@ -179,47 +166,6 @@ static int FindComponent(lua_State *L)
   return 1;
 }
 
-#if defined(EP_WINDOWS)
-// HAX! debug tools for windows
-#pragma warning(disable: 4996)
-#define EP_DISPATCH_BUFFER_SIZE   2048
-struct Dispatch
-{
-  char buffer[EP_DISPATCH_BUFFER_SIZE];
-  String s;
-
-  void Exec(ep::Kernel *pKernel)
-  {
-    pKernel->Exec(s);
-    delete this;
-  }
-};
-
-#if defined(EP_WINDOWS)
-volatile bool quitHack = false;
-#endif
-
-static uint32_t StdinThread(void *data)
-{
-  Kernel *pKernel = (Kernel*)data;
-  while (1)
-  {
-    Dispatch *pDispatch = new Dispatch;
-    putc('>', stdout);
-    putc(' ', stdout);
-    gets_s(pDispatch->buffer, EP_DISPATCH_BUFFER_SIZE);
-    if (quitHack)
-    {
-      delete pDispatch;
-      return 0;
-    }
-    pDispatch->s = pDispatch->buffer;
-    pKernel->DispatchToMainThreadAndWait(MakeDelegate(pDispatch, &Dispatch::Exec));
-    putc('\n', stdout);
-  }
-}
-#endif
-
 LuaState::LuaState(Kernel *pKernel)
 {
   L = lua_newstate(udLuaAlloc, pKernel);
@@ -240,26 +186,10 @@ LuaState::LuaState(Kernel *pKernel)
   lua_register(L, "SendMessage", (lua_CFunction)SendMessage);
   lua_register(L, "CreateComponent", (lua_CFunction)CreateComponent);
   lua_register(L, "FindComponent", (lua_CFunction)FindComponent);
-
-#if defined(EP_WINDOWS)
-  // HAX! debug tool for windows...
-  AllocConsole();
-  freopen("CONIN$", "r", stdin);
-  freopen("CONOUT$", "w", stdout);
-  freopen("CONOUT$", "w", stderr);
-  udCreateThread(&StdinThread, pKernel);
-#endif
 }
 
 LuaState::~LuaState()
 {
-#if defined(EP_WINDOWS)
-  // HAX! debug tool for windows...
-  quitHack = true;
-  fclose(stdin);
-  FreeConsole();
-#endif
-
   lua_close(L);
 }
 
@@ -728,10 +658,10 @@ int LuaState::help(lua_State* L)
   else
   {
     // general help
-    SetConsoleColor(ConsoleColor::Cyan);
+    //FgColor(ConsoleColor::Cyan); // TODO: emit ansi color
     l.print(pDesc->info.id);
 
-    SetConsoleColor();
+    //FgColor(); // TODO: emit ansi color
     l.print(pDesc->info.description);
 
     MutableString64 buf;
@@ -739,7 +669,7 @@ int LuaState::help(lua_State* L)
     {
       l.print("\nProperties:");
 
-      SetConsoleColor(ConsoleColor::Green);
+      //FgColor(ConsoleColor::Green); // TODO: emit ansi color
       for (auto p : pCImpl->instanceProperties)
       {
         buf.sprintf("  %-16s - %s", (const char*)p.value.id.toStringz(), (const char*)p.value.description.toStringz());
@@ -754,10 +684,10 @@ int LuaState::help(lua_State* L)
 
     if (pCImpl->NumMethods() > 0)
     {
-      SetConsoleColor();
+      //FgColor(); // TODO: emit ansi color
       l.print("\nMethods:");
 
-      SetConsoleColor(ConsoleColor::Magenta);
+      //FgColor(ConsoleColor::Magenta); // TODO: emit ansi color
       for (auto m : pCImpl->instanceMethods)
       {
 /*
@@ -798,10 +728,10 @@ int LuaState::help(lua_State* L)
 
     if (pCImpl->NumEvents() > 0)
     {
-      SetConsoleColor();
+      //FgColor(); // TODO: emit ansi color
       l.print("\nEvents:");
 
-      SetConsoleColor(ConsoleColor::Yellow);
+      //FgColor(ConsoleColor::Yellow); // TODO: emit ansi color
       for (auto e : pCImpl->instanceEvents)
       {
         buf.sprintf("  %-16s - %s", (const char*)e.value.id.toStringz(), (const char*)e.value.description.toStringz());
@@ -814,7 +744,7 @@ int LuaState::help(lua_State* L)
       }
     }
 
-    SetConsoleColor();
+    //FgColor(); // TODO: emit ansi color
   }
 
   return 0;

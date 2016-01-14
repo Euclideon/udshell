@@ -24,18 +24,26 @@ class StdCapture
 public:
   int GetOldFd() { return m_oldFd; }
 
-  StdCapture(FILE *stdStream)
+  StdCapture(FILE *stdStream) : m_capturing(false)
   {
+#ifdef _MSC_VER
+    FILE *pFile;
+    freopen_s(&pFile, "nul", "w", stdStream);
+#endif
+
     m_stream = stdStream;
     m_fd = fileno(stdStream);
-    m_capturing = false;
     setvbuf(m_stream, NULL, _IONBF, 0);
+
     BeginCapture();
   }
 
   ~StdCapture()
   {
     EndCapture();
+#ifdef _MSC_VER
+    fclose(m_stream);
+#endif
   }
 
   bool BeginCapture()
@@ -125,7 +133,9 @@ public:
       }
     } while (bytesRead == (bufSize - 1));
 
-    ptrdiff_t bytesWritten =  (ptrdiff_t)write(GetOldFd(), m_captured.ptr, (int)m_captured.length);
+    ptrdiff_t bytesWritten = 0;
+    if(m_captured.length)
+      bytesWritten = (ptrdiff_t)write(GetOldFd(), m_captured.ptr, (int)m_captured.length);
 
     if (bytesWritten != (ptrdiff_t)m_captured.length)
       ep::Kernel::GetInstance()->LogWarning(0, "Not all bytes written when capture ended. Attempted {0} Actual {1}\n", m_captured.length, bytesWritten);
