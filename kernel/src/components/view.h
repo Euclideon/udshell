@@ -4,6 +4,7 @@
 
 #include "udRender.h"
 
+#include "ep/cpp/rect.h"
 #include "ep/cpp/math.h"
 #include "ep/cpp/component/component.h"
 #include "hal/input.h"
@@ -21,21 +22,22 @@ class View : public Component
   EP_DECLARE_COMPONENT(View, Component, EPKERNEL_PLUGINVERSION, "View desc...")
 public:
 
-  virtual bool InputEvent(const epInputEvent &ev);
-  virtual epResult Resize(int width, int height);
+  virtual bool InputEvent(const epInputEvent &ev); // TODO: Method for this function?
+  virtual void Resize(int width, int height);
 
-  RenderableViewRef GetRenderableView();
+  RenderableViewRef GetRenderableView() const;
 
   void SetScene(SceneRef spScene);
-  void SetCamera(CameraRef spCamera);
   SceneRef GetScene() const { return spScene; }
+
+  void SetCamera(CameraRef spCamera);
   CameraRef GetCamera() const { return spCamera; }
 
-  void GetDimensions(int *pWidth, int *pHeight) const;
-  void GetRenderDimensions(int *pWidth, int *pHeight) const;
+  Dimensions<int> GetDimensions() const;
+  Dimensions<int> GetRenderDimensions() const;
   float GetAspectRatio() const { return (float)displayWidth / (float)displayHeight; }
 
-  void SetRenderOptions(const udRenderOptions &_options) { this->options = _options; }
+  void SetRenderOptions(const udRenderOptions &_options) { this->options = _options; } // TODO: Methods for these functions?
   const udRenderOptions& GetRenderOptions() const { return options; }
 
   void SetEnablePicking(bool enable);
@@ -50,7 +52,7 @@ public:
   };
   using PickDelegate = Delegate<void(const SharedArray<PickResult>&)>;
   using ScreenPoint = Vector2<int>;
-  void RequestPick(SharedArray<const ScreenPoint> points, const PickDelegate &del);
+  void RequestPick(SharedArray<const ScreenPoint> points, const PickDelegate &del); // TODO: Method for this function?
 
   ScreenPoint GetMousePosition() const { return mousePosition; }
 
@@ -126,12 +128,16 @@ protected:
   {
     return{
       EP_MAKE_METHOD(GoToBookmark, "Move the Camera to the specified Bookmark"),
+      EP_MAKE_METHOD(Activate, "Activate the View, e.g. start rendering"),
+      EP_MAKE_METHOD(Deactivate, "Deactivate the View, e.g. stop rendering"),
+      EP_MAKE_METHOD(Resize, "Resize the View"),
     };
   }
   static Array<const EventInfo> GetEvents()
   {
     return{
       EP_MAKE_EVENT(Dirty, "View dirty event"),
+      EP_MAKE_EVENT(FrameReady, "The next frame has finished rendering"),
       EP_MAKE_EVENT(EnabledPickingChanged, "Enable Picking changed"),
       EP_MAKE_EVENT(PickFound, "Pick found"),
       EP_MAKE_EVENT(MousePositionChanged, "Mouse Position changed")

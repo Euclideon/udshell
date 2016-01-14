@@ -16,7 +16,7 @@ class ResourceManager : public Component
 public:
 
   // Resource getter/setters
-  size_t NumResources() const { return resources.Size(); }
+  size_t GetNumResources() const { return resources.Size(); }
   void AddResource(ResourceRef res);
   void RemoveResource(ResourceRef res);
   ResourceRef GetResource(String key) const { return *resources.Get(key); }
@@ -34,7 +34,7 @@ public:
 
   // Resource loading/saving functions
   DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams);
-  void SaveResourcesToFile(Slice<ResourceRef>, Variant::VarMap initParams);
+  void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams);
 
   class Iterator
   {
@@ -60,6 +60,14 @@ protected:
   ~ResourceManager();
 
   AVLTree<String, ResourceRef> resources;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(NumResources, "The number of Resources in the ResourceManager", nullptr, 0),
+    };
+  }
+  static Array<const MethodInfo> GetMethods();
 };
 
 } //namespace ep

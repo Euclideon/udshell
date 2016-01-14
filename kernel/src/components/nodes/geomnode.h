@@ -27,6 +27,13 @@ protected:
   epResult Render(RenderSceneRef &spScene, const Double4x4 &mat) override;
 
   ModelRef spModel = nullptr;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY(Model, "The Node's Model", nullptr, 0),
+    };
+  }
 };
 
 } // namespace ep

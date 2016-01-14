@@ -7,28 +7,28 @@
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/avltree.h"
 
-namespace ep
-{
+namespace ep {
+
+EP_ENUM(BlendMode,
+  None,
+  Alpha,
+  Additive
+);
+
+EP_ENUM(CullMode,
+  None,
+  CW,
+  CCW
+);
 
 SHARED_CLASS(ArrayBuffer);
 SHARED_CLASS(RenderShaderProgram);
-
 SHARED_CLASS(Material);
 
 class Material : public Resource
 {
   EP_DECLARE_COMPONENT(Material, Resource, EPKERNEL_PLUGINVERSION, "Material resource")
 public:
-
-  EP_ENUM(BlendMode,
-          None,
-          Alpha,
-          Additive);
-
-  EP_ENUM(CullMode,
-          None,
-          CW,
-          CCW);
 
   ShaderRef GetShader(ShaderType type) const { return shaders[(int)type]; }
   void SetShader(ShaderType type, ShaderRef spShader);
@@ -85,6 +85,14 @@ protected:
       EP_MAKE_PROPERTY(PixelShader, "Pixel shader for rendering", nullptr, 0),
       EP_MAKE_PROPERTY(BlendMode, "Frame buffer blend mode", nullptr, 0),
       EP_MAKE_PROPERTY(CullMode, "Back face cull mode", nullptr, 0),
+    };
+  }
+  Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(GetTexture, "Gets the texture ArrayBuffer at the given index"),
+      EP_MAKE_METHOD(SetTexture, "Sets the texture ArrayBuffer at the given index"),
+      EP_MAKE_METHOD(SetMaterialProperty, "Set a Material Property"),
     };
   }
 };

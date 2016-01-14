@@ -216,8 +216,7 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, char *cmdline, int)
 void update(ViewRef spView, SceneRef spScene)
 {
   using namespace ep;
-  int displayWidth, displayHeight;
-  mData.spView->GetDimensions(&displayWidth, &displayHeight);
+  Dimensions<int> displaySize = mData.spView->GetDimensions();
 
 //   mData.spSimpleCamera->ForceDirty();
 //   mData.spScene->ForceDirty();

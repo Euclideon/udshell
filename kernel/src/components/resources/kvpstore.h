@@ -32,9 +32,6 @@ public:
     return Get(key);
   }
 
-  // TODO: THIS IS ONLY HERE BECAUSE DESCRIPTOR CAN'T GET TO PROTECTED
-  void InsertMethod(const Variant &key, const Variant &value) { Insert(key, value); }
-
 protected:
   KVPStore(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams) {}
@@ -54,6 +51,9 @@ protected:
       EP_MAKE_METHOD(Get, "Get a record"),
     };
   }
+
+private:
+  void InsertMethod(const Variant &key, const Variant &value) { KVPStore::Insert(key, value); }
 };
 
 }

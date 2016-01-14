@@ -53,6 +53,23 @@ protected:
   // TODO: enable/visible/etc flags
 
   static Array<const PropertyInfo> GetProperties();
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(AddChild, "Add a child to the Node"),
+      EP_MAKE_METHOD(RemoveChild, "Remove a child from the Node"),
+      EP_MAKE_METHOD(Detach, "Detach the Node from its parent"),
+      EP_MAKE_METHOD_EXPLICIT("CalculateWorldMatrix", CalculateWorldMatrixMethod, "Calculate the World Matrix of the Node"),
+    };
+  }
+
+private:
+  Double4x4 CalculateWorldMatrixMethod() const
+  {
+    Double4x4 _matrix;
+    CalculateWorldMatrix(&_matrix);
+    return _matrix;
+  }
 };
 
 } // namespace ep

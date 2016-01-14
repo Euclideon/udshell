@@ -30,6 +30,8 @@ public:
   int64_t GetPos() const { return pos; }
   virtual int64_t Seek(SeekOrigin rel, int64_t offset) { return 0; }
 
+  // TODO: Add efficient Slice<void> support to Variant, so that this component can be shared property?
+
   virtual Slice<void> Read(Slice<void> buffer) { return 0; }
   virtual String ReadLn(Slice<char> buf);
   BufferRef ReadBuffer(size_t bytes);

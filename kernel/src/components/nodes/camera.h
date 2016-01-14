@@ -19,6 +19,7 @@ public:
   Double4x4 GetCameraMatrix() const { Double4x4 m; CalculateWorldMatrix(&m); return m; }
   Double4x4 GetViewMatrix() const { return GetCameraMatrix().inverse(); }
 
+  // TODO: Implement this?
   void GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const;
 
   void SetPerspective(double _fovY) { bOrtho = false; fovY = _fovY; }
@@ -71,6 +72,8 @@ protected:
   {
     return{
       EP_MAKE_METHOD(SetDepthPlanes, "Set the near and far depth planes:\n  setdepthplanes(near, far)"),
+      EP_MAKE_METHOD(SetOrtho, "Set the projection mode to Orthographic with given ortho height"),
+      EP_MAKE_METHOD(SetPerspective, "Set the projection mode to Perspective with given field of view"),
     };
   }
 };

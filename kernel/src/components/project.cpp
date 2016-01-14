@@ -107,7 +107,7 @@ Variant Project::SaveActivities()
 
   for (ActivityRef activity : activities)
   {
-    Variant::VarMap node = Text::MapToXMLNode(activity->Save()).asAssocArray();
+    Variant::VarMap node = Text::ComponentParamsToXMLMap(activity->Save()).asAssocArray();
     node.Insert("name", activity->GetType());
     children.pushBack(node);
   }
@@ -161,7 +161,7 @@ void Project::ParseActivity(Variant node)
   if (!pName || !pName->is(Variant::Type::String))
     return;
 
-  Variant vParams = Text::XMLNodeToMap(node);
+  Variant vParams = Text::XMLMapToComponentParams(node);
   if (vParams.is(Variant::Type::AssocArray))
     initParams = vParams.asAssocArray();
 

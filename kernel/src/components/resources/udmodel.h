@@ -44,8 +44,8 @@ public:
   uint32_t GetStartingRoot() const { return startingRoot; }
   void SetStartingRoot(uint32_t root) { startingRoot = root; }
 
-  const Rect &GetRenderClipRect() const { return rect; }
-  void SetRenderClipRect(const Rect& _rect) { rectSet = true; rect = _rect; }
+  const Rect<double> &GetRenderClipRect() const { return rect; }
+  void SetRenderClipRect(const Rect<double>& _rect) { rectSet = true; rect = _rect; }
 
   udRender_VoxelShaderFunc *GetVoxelShader() const { return pVoxelShader; }
   void SetVoxelShader(udRender_VoxelShaderFunc *pFunc) { simpleVoxelDel = Delegate<UDRenderState::SimpleVoxelDlgt>();  pVoxelShader = pFunc; }
@@ -86,7 +86,7 @@ protected:
   udRender_PixelShaderFunc *pPixelShader = nullptr;
 
   Double4x4 udmatrix;
-  Rect rect;
+  Rect<double> rect;
   DataSourceRef spDataSource;
   udOctree *pOctree = nullptr;
 
@@ -105,7 +105,8 @@ protected:
       EP_MAKE_PROPERTY_RO(UDMatrix, "UD Matrix", nullptr, 0),
       EP_MAKE_PROPERTY_RO(BoundingVolume, "The Bouning Volume", nullptr, 0),
       EP_MAKE_PROPERTY(SimpleVoxelDelegate, "Optional callback to handle it's own internal call to GetNodeColor()", nullptr, 0),
-//      EP_MAKE_PROPERTY(VoxelShader, "Optional callback to handle writing pixels and depth", nullptr, 0),
+      // TODO: Can we uncomment this yet?
+      //EP_MAKE_PROPERTY(VoxelShader, "Optional callback to handle writing pixels and depth", nullptr, 0),
     };
   }
 };
