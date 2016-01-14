@@ -1,7 +1,7 @@
 #include "components/activities/viewer.h"
 
 #include "renderscene.h"
-#include "components/viewport.h"
+#include "ep/cpp/component/viewport.h"
 #include "components/view.h"
 #include "components/scene.h"
 #include "components/nodes/camera.h"

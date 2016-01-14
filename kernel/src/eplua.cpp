@@ -419,8 +419,8 @@ void LuaState::pushDescriptor(const kernel::ComponentDesc &desc)
 
     pushInt(p.value.flags);
     lua_setfield(L, -2, "flags");
-    pushString(p.value.displayType);
-    lua_setfield(L, -2, "displaytype");
+    pushString(p.value.uiType);
+    lua_setfield(L, -2, "uitype");
 
     lua_seti(L, -2, i++);
   }

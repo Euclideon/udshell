@@ -3,7 +3,6 @@
 #include "kernel.h"
 
 #include "hal/hal.h"
-#include "components/componentimpl.h"
 #include "components/stream.h"
 #include "components/file.h"
 #include "components/console.h"
@@ -13,10 +12,7 @@
 #include "components/timer.h"
 #include "components/scene.h"
 #include "components/view.h"
-#include "components/uicomponentimpl.h"
 #include "components/uiconsole.h"
-#include "components/viewport.h"
-#include "components/window.h"
 #include "components/datasource.h"
 #include "components/nodes/node.h"
 #include "components/nodes/camera.h"
@@ -44,6 +40,10 @@
 #include "components/activities/viewer.h"
 
 // Components that do the Impl dance
+#include "components/componentimpl.h"
+#include "components/uicomponentimpl.h"
+#include "components/viewportimpl.h"
+#include "components/windowimpl.h"
 #include "components/activities/activityimpl.h"
 #include "components/resources/resourceimpl.h"
 
@@ -142,8 +142,8 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<Lua>();
   pKernel->RegisterComponentType<UIComponent, UIComponentImpl>();
   pKernel->RegisterComponentType<UIConsole>();
-  pKernel->RegisterComponentType<Viewport>();
-  pKernel->RegisterComponentType<Window>();
+  pKernel->RegisterComponentType<Viewport, ViewportImpl>();
+  pKernel->RegisterComponentType<Window, WindowImpl>();
   pKernel->RegisterComponentType<View>();
   pKernel->RegisterComponentType<Scene>();
 

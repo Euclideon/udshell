@@ -29,7 +29,7 @@ struct PropertyInfo
   SharedString displayName;
   SharedString description;
 
-  SharedString displayType;
+  SharedString uiType;
   uint32_t flags;
 
   void *pGetterMethod;
@@ -241,24 +241,24 @@ private:                                                                        
 
 
 // make property with getter and setter
-#define EP_MAKE_PROPERTY(Name, Description, DisplayType, Flags) \
-  EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, EP_MAKE_GETTER(Get##Name), EP_MAKE_SETTER(Set##Name), DisplayType, Flags)
+#define EP_MAKE_PROPERTY(Name, Description, UIType, Flags) \
+  EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, EP_MAKE_GETTER(Get##Name), EP_MAKE_SETTER(Set##Name), UIType, Flags)
 
 // make property with getter only (read only)
-#define EP_MAKE_PROPERTY_RO(Name, Description, DisplayType, Flags) \
-  EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, EP_MAKE_GETTER(Get##Name), nullptr, DisplayType, Flags)
+#define EP_MAKE_PROPERTY_RO(Name, Description, UIType, Flags) \
+  EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, EP_MAKE_GETTER(Get##Name), nullptr, UIType, Flags)
 
 // make property with setter only (write only)
-#define EP_MAKE_PROPERTY_WO(Name, Description, DisplayType, Flags) \
-  EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, nullptr, EP_MAKE_SETTER(Set##Name), DisplayType, Flags)
+#define EP_MAKE_PROPERTY_WO(Name, Description, UIType, Flags) \
+  EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, nullptr, EP_MAKE_SETTER(Set##Name), UIType, Flags)
 
 // make property with explicit getter and setter
-#define EP_MAKE_PROPERTY_EXPLICIT(Name, Description, Getter, Setter, DisplayType, Flags) \
+#define EP_MAKE_PROPERTY_EXPLICIT(Name, Description, Getter, Setter, UIType, Flags) \
 ([]() -> PropertyInfo {                                                                  \
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
-    id, Name, Description, DisplayType, Flags,                                           \
+    id, Name, Description, UIType, Flags,                                                \
     Getter,                                                                              \
     Setter                                                                               \
   };                                                                                     \

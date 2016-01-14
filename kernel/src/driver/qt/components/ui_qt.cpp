@@ -17,8 +17,8 @@
 #include "qtcomponent_qt.h"
 
 #include "components/uicomponentimpl.h"
-#include "components/viewport.h"
-#include "components/window.h"
+#include "components/viewportimpl.h"
+#include "components/windowimpl.h"
 
 #include "../ui/renderview_qt.h"
 
@@ -90,27 +90,21 @@ Variant UIComponentImpl::GetUIHandle() const
 }
 
 // ---------------------------------------------------------------------------------------
-epResult UIComponentImpl::CreateInternal(Variant::VarMap initParams)
+void UIComponentImpl::CreateInternal(Variant::VarMap initParams)
 {
   LogTrace("UIComponentImpl::CreateInternal()");
 
   if (SetupFromQmlFile(initParams, (qt::QtKernel*)pInstance->pKernel, pInstance, (QObject**)&pInstance->pUserData) != epR_Success)
-    return epR_Failure;
+    EPTHROW_ERROR(epR_Failure, "Error creating QML based UIComponent");
 
-  QObject *pQtObject = (QObject*)pInstance->pUserData;
+  epscope(fail) { DestroyInternal(); };
 
   // We expect a QQuickItem object
-  if (qobject_cast<QQuickItem*>(pQtObject) == nullptr)
-  {
-    LogError("UIComponent must create a QQuickItem");
-    CleanupInternalData((QObject**)&pInstance->pUserData);
-    return epR_Failure;
-  }
+  QObject *pQtObject = (QObject*)pInstance->pUserData;
+  EPTHROW_IF(qobject_cast<QQuickItem*>(pQtObject) == nullptr, epR_Failure, "UIComponent must create a QQuickItem");
 
   // Decorate the descriptor with meta object information
   qt::PopulateComponentDesc(pInstance, pQtObject);
-
-  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -132,86 +126,65 @@ void UIComponentImpl::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Viewport::CreateInternal(Variant::VarMap initParams)
+void ViewportImpl::CreateInternal(Variant::VarMap initParams)
 {
   LogTrace("Viewport::CreateInternal()");
 
   // check that we have a RenderView
-  QQuickItem *pRootItem = (QQuickItem*)pUserData;
+  QQuickItem *pRootItem = (QQuickItem*)pInstance->pUserData;
   QList<qt::RenderView *> renderViews = pRootItem->findChildren<qt::RenderView *>();
-  if (renderViews.size() != 1)
-  {
-    LogWarning(1, "Viewport component must contain 1 RenderView QML item");
-    return epR_Failure;
-  }
+  EPTHROW_IF(renderViews.size() != 1, epR_Failure, "Viewport component must contain only one RenderView QML item");
 
   // check if we passed in a view, otherwise create a default one
-  ViewRef spView = initParams.Get("view")->as<ViewRef>();
+  spView = initParams.Get("view")->as<ViewRef>();
   if (!spView)
   {
-    LogDebug(2, "Creating internal view");
-    spView = GetKernel().CreateComponent<View>();
+    LogDebug(2, "Creating internal View component");
+    spView = GetKernel()->CreateComponent<View>();
   }
 
+  LogDebug(2, "Attaching View Component '{0}' to Viewport", spView->GetUid());
   renderViews.first()->AttachView(spView);
-
-  return epR_Success;
-}
-
-// ---------------------------------------------------------------------------------------
-void Viewport::DestroyInternal()
-{
-  LogTrace("Viewport::DestroyInternal()");
 }
 
 
 // ---------------------------------------------------------------------------------------
-epResult Window::CreateInternal(Variant::VarMap initParams)
+void WindowImpl::CreateInternal(Variant::VarMap initParams)
 {
-  LogTrace("Window::CreateInternal()");
+  LogTrace("WindowImpl::CreateInternal()");
 
-  qt::QtKernel *pQtKernel = (qt::QtKernel*)pKernel;
-  if (SetupFromQmlFile(initParams, pQtKernel, this, (QObject**)&pUserData) != epR_Success)
-    return epR_Failure;
+  qt::QtKernel *pQtKernel = (qt::QtKernel*)pInstance->pKernel;
+  if (SetupFromQmlFile(initParams, pQtKernel, pInstance, (QObject**)&pInstance->pUserData) != epR_Success)
+    EPTHROW_ERROR(epR_Failure, "Error creating QML based Window Component");
 
-  QQuickWindow *pQtWindow = qobject_cast<QQuickWindow*>((QObject*)pUserData);
-  // We expect a QQuickWindow object
-  if (pQtWindow == nullptr)
-  {
-    LogError("Window must create a QQuickWindow");
-    CleanupInternalData((QObject**)&pUserData);
-    return epR_Failure;
-  }
+  epscope(fail) { DestroyInternal(); };
 
-  // Decorate the descriptor with meta object information
-  qt::PopulateComponentDesc(this, pQtWindow);
+  // we expect a QQuickWindow object
+  QQuickWindow *pQtWindow = qobject_cast<QQuickWindow*>((QObject*)pInstance->pUserData);
+  EPTHROW_IF(pQtWindow == nullptr, epR_Failure, "Window component must create a QQuickWindow");
+
+  // decorate the descriptor with meta object information
+  qt::PopulateComponentDesc(pInstance, pQtWindow);
 
   // register the window with the kernel
   if (pQtKernel->RegisterWindow(pQtWindow) != epR_Success)
-  {
-    // TODO: error handling
-    LogError("Unable to register window");
-    CleanupInternalData((QObject**)&pUserData);
-    return epR_Failure;
-  }
-
-  return epR_Success;
+    EPTHROW_ERROR(epR_Failure, "Unable to register Window component with Kernel");
 }
 
 // ---------------------------------------------------------------------------------------
-void Window::DestroyInternal()
+void WindowImpl::DestroyInternal()
 {
-  LogTrace("Window::DestroyInternal()");
-  CleanupInternalData((QObject**)&pUserData);
+  LogTrace("WindowImpl::DestroyInternal()");
+  CleanupInternalData((QObject**)&pInstance->pUserData);
 }
 
 // ---------------------------------------------------------------------------------------
-void Window::SetTopLevelUI(UIComponentRef spUIComponent)
+void WindowImpl::SetTopLevelUI(UIComponentRef spUIComponent)
 {
-  LogTrace("Window::SetTopLevelUI()");
+  LogTrace("WindowImpl::SetTopLevelUI()");
 
   spTopLevelUI = spUIComponent;
-  QQuickWindow *pQtWindow = (QQuickWindow*)pUserData;
+  QQuickWindow *pQtWindow = (QQuickWindow*)pInstance->pUserData;
 
   // if there's an existing top level ui, then detach
   foreach(QQuickItem *pChild, pQtWindow->contentItem()->childItems())

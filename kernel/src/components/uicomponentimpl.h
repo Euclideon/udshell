@@ -10,16 +10,20 @@ namespace ep {
 class UIComponentImpl : public BaseImpl<UIComponent, IUIComponent>
 {
 public:
-  UIComponentImpl(Component *pInstance, Variant::VarMap initParams);
+  UIComponentImpl(Component *pInstance, Variant::VarMap initParams)
+    : Super(pInstance) 
+  {
+    CreateInternal(initParams);
+  }
 
   Variant GetUIHandle() const override final;
 
-protected:
+private:
   ~UIComponentImpl() { DestroyInternal(); }
 
-  void InitComplete() override;
+  void InitComplete() override final;
 
-  epResult CreateInternal(Variant::VarMap initParams);
+  void CreateInternal(Variant::VarMap initParams);
   void DestroyInternal();
 };
 
