@@ -552,6 +552,9 @@ void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags IF_
 #define epAllocFlags(size, flags) _epAlloc(size, flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
 #define epAllocType(type, count, flags) (type*)_epAlloc(sizeof(type) * (count), flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
 
+void *_epRealloc(void *pMemory, size_t size IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epRealloc(pMemory, size) _udRealloc(pMemory, size IF_MEMORY_DEBUG(__FILE__, __LINE__))
+
 void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
 #define epFree(pMemory) _epFree(pMemory IF_MEMORY_DEBUG(__FILE__, __LINE__))
 }

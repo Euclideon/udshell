@@ -95,6 +95,17 @@ void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags IF_
   return pMemory;
 }
 
+void *_epRealloc(void *pMemory, size_t size IF_MEMORY_DEBUG(const char * pFile, int line))
+{
+#if defined(EP_COMPILER_VISUALC)
+  pMemory = _aligned_realloc(pMemory, size, EP_DEFAULT_ALIGNMENT);
+#else
+  pMemory = realloc(pMemory, size);
+#endif // defined(_MSC_VER)
+
+  return pMemory;
+}
+
 void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile, int line))
 {
   if (pMemory)
