@@ -53,6 +53,8 @@
 # define EPINPUT_DRIVER  EPDRIVER_QT
 # undef  EPUI_DRIVER
 # define EPUI_DRIVER     EPDRIVER_QT
+# undef EPIMAGE_DRIVER
+# define EPIMAGE_DRIVER  EPDRIVER_QT
 #endif
 
 // Suppress no public symbols warnings for the file - works with unity builds
