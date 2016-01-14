@@ -3,7 +3,7 @@
 #define EPCAMERA_H
 
 #include "ep/cpp/component/component.h"
-#include "node.h"
+#include "ep/cpp/component/node/node.h"
 #include "hal/input.h"
 
 namespace ep {
@@ -86,7 +86,7 @@ public:
   void SetMatrix(const Double4x4 &_matrix) override { pos = _matrix.axis.t.toVector3(); ypr = _matrix.extractYPR(); Camera::SetMatrix(_matrix); }
   void SetPosition(const Double3 &_pos) override { pos = _pos; Camera::SetPosition(_pos); }
 
-  void SetOrientation(const Double3 &_ypr) { ypr = _ypr; matrix = Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos); }
+  void SetOrientation(const Double3 &_ypr) { ypr = _ypr; Camera::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos)); }
   void SetSpeed(double _speed) { speed = _speed; }
 
   void SetInvertedYAxis(bool bInvert) { invertedYAxis = bInvert ? -1.0 : 1.0; }

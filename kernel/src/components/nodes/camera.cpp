@@ -19,7 +19,7 @@ Variant Camera::Save() const
 {
   Variant::VarMap params;
 
-  params.Insert(KeyValuePair("matrix", matrix));
+  params.Insert(KeyValuePair("matrix", GetMatrix()));
   if (bOrtho)
     params.Insert(KeyValuePair("ortho", orthoHeight));
   else
@@ -236,7 +236,7 @@ bool SimpleCamera::Update(double timeDelta)
   pos += xAxis*tx*tmpSpeed;
   pos.z += tz*tmpSpeed;
 
-  matrix = Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos);
+  Camera::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
 
   mouse.delta = {0 , 0};
 

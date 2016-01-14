@@ -7,7 +7,7 @@
 
 #include "ep/cpp/math.h"
 #include "ep/cpp/component/component.h"
-#include "node.h"
+#include "ep/cpp/component/node/node.h"
 #include "components/resources/udmodel.h"
 #include "hal/input.h"
 
@@ -16,6 +16,7 @@ struct udOctree;
 namespace ep {
 
 SHARED_CLASS(UDNode);
+SHARED_CLASS(RenderScene);
 
 class UDNode : public Node
 {
