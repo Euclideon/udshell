@@ -120,7 +120,7 @@ protected:
 
   void* CreateImplInternal(String ComponentType, Variant::VarMap initParams);
 
-  epResult InitComplete() override;
+  void InitComplete() override;
   epResult ReceiveMessage(String message, String sender, const Variant &data) override;
 
   static Array<const PropertyInfo> GetProperties()

@@ -12,7 +12,7 @@ public:
   virtual Variant GetUIHandle() const = 0;
 
 protected:
-  virtual epResult InitComplete() = 0;
+  virtual void InitComplete() = 0;
 };
 
 } // namespace ep

@@ -98,9 +98,9 @@ inline void Component::Init(Variant::VarMap initParams)
   pImpl->Init(initParams);
 }
 
-inline epResult Component::InitComplete()
+inline void Component::InitComplete()
 {
-  return pImpl->InitComplete();
+  pImpl->InitComplete();
 }
 
 inline epResult Component::ReceiveMessage(String message, String sender, const Variant &data)

@@ -114,15 +114,13 @@ epResult UIComponentImpl::CreateInternal(Variant::VarMap initParams)
 }
 
 // ---------------------------------------------------------------------------------------
-epResult UIComponentImpl::InitComplete()
+void UIComponentImpl::InitComplete()
 {
   // let qml know that the enclosing object has finished being created
   QObject *pQtObject = (QObject*)pInstance->pUserData;
   qt::QtEPComponent *epComponent = pQtObject->findChild<qt::QtEPComponent*>(QString(), Qt::FindDirectChildrenOnly);
   if (epComponent)
     epComponent->Done();
-
-  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------

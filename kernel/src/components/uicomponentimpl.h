@@ -17,7 +17,7 @@ public:
 protected:
   ~UIComponentImpl() { DestroyInternal(); }
 
-  epResult InitComplete() override;
+  void InitComplete() override;
 
   epResult CreateInternal(Variant::VarMap initParams);
   void DestroyInternal();
