@@ -13,7 +13,7 @@
 #include "components/timer.h"
 #include "components/scene.h"
 #include "components/view.h"
-#include "components/ui.h"
+#include "components/uicomponentimpl.h"
 #include "components/uiconsole.h"
 #include "components/viewport.h"
 #include "components/window.h"
@@ -140,7 +140,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<Project>();
   pKernel->RegisterComponentType<Timer>();
   pKernel->RegisterComponentType<Lua>();
-  pKernel->RegisterComponentType<UIComponent>();
+  pKernel->RegisterComponentType<UIComponent, UIComponentImpl>();
   pKernel->RegisterComponentType<UIConsole>();
   pKernel->RegisterComponentType<Viewport>();
   pKernel->RegisterComponentType<Window>();

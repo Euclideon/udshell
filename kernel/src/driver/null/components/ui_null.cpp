@@ -2,31 +2,31 @@
 
 #if EPUI_DRIVER == EPDRIVER_NULL
 
-#include "components/ui.h"
+#include "components/uicomponentimpl.h"
 #include "components/viewport.h"
 #include "components/window.h"
 
 namespace ep
 {
 
-Variant UIComponent::GetUIHandle() const
+Variant UIComponentImpl::GetUIHandle() const
 {
   return Variant();
 }
 
-epResult UIComponent::CreateInternal(Variant::VarMap epUnusedParam(initParams))
+epResult UIComponentImpl::CreateInternal(Variant::VarMap epUnusedParam(initParams))
 {
   return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-epResult UIComponent::InitComplete()
+epResult UIComponentImpl::InitComplete()
 {
   return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-void UIComponent::DestroyInternal()
+void UIComponentImpl::DestroyInternal()
 {
 }
 

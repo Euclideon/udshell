@@ -1,17 +1,11 @@
-#include "ui.h"
+#include "ep/cpp/component/uicomponent.h"
 
 namespace ep {
 
 UIComponent::UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  if (CreateInternal(initParams) != epR_Success)
-    EPTHROW_ERROR(epR_Failure, "Failed to create UIComponent");
-}
-
-UIComponent::~UIComponent()
-{
-  DestroyInternal();
+  pImpl = CreateImpl(initParams);
 }
 
 } // namespace ep

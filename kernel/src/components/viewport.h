@@ -2,7 +2,7 @@
 #ifndef UD_VIEWPORT_H
 #define UD_VIEWPORT_H
 
-#include "ui.h"
+#include "ep/cpp/component/uicomponent.h"
 
 namespace ep
 {

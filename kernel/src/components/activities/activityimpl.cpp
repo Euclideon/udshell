@@ -1,5 +1,5 @@
 #include "components/activities/activityimpl.h"
-#include "components/ui.h"
+#include "components/uicomponentimpl.h"
 namespace ep
 {
 

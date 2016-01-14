@@ -16,7 +16,7 @@
 #include "component_qt.h"
 #include "qtcomponent_qt.h"
 
-#include "components/ui.h"
+#include "components/uicomponentimpl.h"
 #include "components/viewport.h"
 #include "components/window.h"
 
@@ -84,40 +84,40 @@ using qt::internal::SetupFromQmlFile;
 using qt::internal::CleanupInternalData;
 
 // ---------------------------------------------------------------------------------------
-Variant UIComponent::GetUIHandle() const
+Variant UIComponentImpl::GetUIHandle() const
 {
-  return GetKernel().CreateComponent<qt::QtComponent>({ { "object", (int64_t)(size_t)pUserData } });
+  return GetKernel()->CreateComponent<qt::QtComponent>({ { "object", (int64_t)(size_t)pInstance->pUserData } });
 }
 
 // ---------------------------------------------------------------------------------------
-epResult UIComponent::CreateInternal(Variant::VarMap initParams)
+epResult UIComponentImpl::CreateInternal(Variant::VarMap initParams)
 {
-  LogTrace("UIComponent::CreateInternal()");
+  LogTrace("UIComponentImpl::CreateInternal()");
 
-  if (SetupFromQmlFile(initParams, (qt::QtKernel*)pKernel, this, (QObject**)&pUserData) != epR_Success)
+  if (SetupFromQmlFile(initParams, (qt::QtKernel*)pInstance->pKernel, pInstance, (QObject**)&pInstance->pUserData) != epR_Success)
     return epR_Failure;
 
-  QObject *pQtObject = (QObject*)pUserData;
+  QObject *pQtObject = (QObject*)pInstance->pUserData;
 
   // We expect a QQuickItem object
   if (qobject_cast<QQuickItem*>(pQtObject) == nullptr)
   {
     LogError("UIComponent must create a QQuickItem");
-    CleanupInternalData((QObject**)&pUserData);
+    CleanupInternalData((QObject**)&pInstance->pUserData);
     return epR_Failure;
   }
 
   // Decorate the descriptor with meta object information
-  qt::PopulateComponentDesc(this, pQtObject);
+  qt::PopulateComponentDesc(pInstance, pQtObject);
 
   return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
-epResult UIComponent::InitComplete()
+epResult UIComponentImpl::InitComplete()
 {
   // let qml know that the enclosing object has finished being created
-  QObject *pQtObject = (QObject*)pUserData;
+  QObject *pQtObject = (QObject*)pInstance->pUserData;
   qt::QtEPComponent *epComponent = pQtObject->findChild<qt::QtEPComponent*>(QString(), Qt::FindDirectChildrenOnly);
   if (epComponent)
     epComponent->Done();
@@ -126,10 +126,10 @@ epResult UIComponent::InitComplete()
 }
 
 // ---------------------------------------------------------------------------------------
-void UIComponent::DestroyInternal()
+void UIComponentImpl::DestroyInternal()
 {
-  LogTrace("UIComponent::DestroyInternal()");
-  CleanupInternalData((QObject**)&pUserData);
+  LogTrace("UIComponentImpl::DestroyInternal()");
+  CleanupInternalData((QObject**)&pInstance->pUserData);
 }
 
 
