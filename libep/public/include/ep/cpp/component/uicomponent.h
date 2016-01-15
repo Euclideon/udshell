@@ -16,8 +16,11 @@ public:
   Variant GetUIHandle() const override final { return pImpl->GetUIHandle(); }
 
 protected:
-  UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
-  virtual ~UIComponent() {}
+  UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+    : Component(pType, pKernel, uid, initParams)
+  {
+    pImpl = CreateImpl(initParams);
+  }
 
   void InitComplete() override
   {

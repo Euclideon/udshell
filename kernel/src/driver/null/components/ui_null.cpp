@@ -3,8 +3,8 @@
 #if EPUI_DRIVER == EPDRIVER_NULL
 
 #include "components/uicomponentimpl.h"
-#include "components/viewport.h"
-#include "components/window.h"
+#include "components/viewportimpl.h"
+#include "components/windowimpl.h"
 
 namespace ep
 {
@@ -14,9 +14,8 @@ Variant UIComponentImpl::GetUIHandle() const
   return Variant();
 }
 
-epResult UIComponentImpl::CreateInternal(Variant::VarMap epUnusedParam(initParams))
+void UIComponentImpl::CreateInternal(Variant::VarMap epUnusedParam(initParams))
 {
-  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -31,30 +30,23 @@ void UIComponentImpl::DestroyInternal()
 
 
 // ---------------------------------------------------------------------------------------
-epResult Viewport::CreateInternal(Variant::VarMap epUnusedParam(initParams))
-{
-  return epR_Success;
-}
-
-// ---------------------------------------------------------------------------------------
-void Viewport::DestroyInternal()
+void ViewportImpl::CreateInternal(Variant::VarMap epUnusedParam(initParams))
 {
 }
 
 
 // ---------------------------------------------------------------------------------------
-epResult Window::CreateInternal(Variant::VarMap epUnusedParam(initParams))
-{
-  return epR_Success;
-}
-
-// ---------------------------------------------------------------------------------------
-void Window::DestroyInternal()
+void WindowImpl::CreateInternal(Variant::VarMap epUnusedParam(initParams))
 {
 }
 
 // ---------------------------------------------------------------------------------------
-void Window::SetTopLevelUI(UIComponentRef epUnusedParam(spUIComponent))
+void WindowImpl::DestroyInternal()
+{
+}
+
+// ---------------------------------------------------------------------------------------
+void WindowImpl::SetTopLevelUI(UIComponentRef epUnusedParam(spUIComponent))
 {
 }
 

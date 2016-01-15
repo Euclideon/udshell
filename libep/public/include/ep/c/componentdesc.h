@@ -22,7 +22,7 @@ struct epPropertyDesc
   const char *displayName;
   const char *description;
 
-  const char *displayType;
+  const char *uiType;
   uint32_t flags;
 
   epGetter *pGetter;
