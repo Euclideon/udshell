@@ -3,7 +3,7 @@
 #define _EPENUM_H
 
 #include "ep/cpp/platform.h"
-#include "ep/epforeach.h"
+#include "ep/c/foreach.h"
 #include <utility>
 
 

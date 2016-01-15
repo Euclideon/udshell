@@ -2,7 +2,7 @@
 #define EPVARIANT_H
 
 #include "ep/c/platform.h"
-#include "ep/epenum.h"
+#include "ep/cpp/enum.h"
 
 #if defined(__cplusplus)
 extern "C" {

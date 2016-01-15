@@ -2,9 +2,9 @@
 #ifndef EPCOMPONENTDESC_H
 #define EPCOMPONENTDESC_H
 
+#include "ep/version.h"
 #include "ep/cpp/componentdesc.h"
 #include "ep/cpp/platform.h"
-#include "ep/epversion.h"
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/variant.h"
 #include "ep/cpp/event.h"

@@ -12,7 +12,7 @@
 #include "ep/cpp/hashmap.h"
 #include "ep/cpp/kernel.h"
 
-#include "ep/epfastdelegate.h"
+#include "ep/cpp/internal/fastdelegate.h"
 using namespace fastdelegate;
 
 struct udRenderEngine;

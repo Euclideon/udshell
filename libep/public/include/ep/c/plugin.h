@@ -2,7 +2,7 @@
 #define _EP_PLUGIN_H
 
 #include "ep/c/platform.h"
-#include "ep/epversion.h"
+#include "ep/version.h"
 
 #if EP_SHAREDLIB
 # if defined(EP_COMPILER_VISUALC)

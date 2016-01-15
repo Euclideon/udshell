@@ -3,7 +3,7 @@
 #define _EPDELEGATE_HPP
 
 #include "ep/cpp/sharedptr.h"
-#include "ep/epfastdelegate.h"
+#include "ep/cpp/internal/fastdelegate.h"
 
 using fastdelegate::FastDelegate;
 typedef fastdelegate::DelegateMemento FastDelegateMemento;
