@@ -559,9 +559,6 @@ void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  l
 #define epFree(pMemory) _epFree(pMemory IF_MEMORY_DEBUG(__FILE__, __LINE__))
 }
 
-// define API version constant (TODO: should this move somewhere else?)
-#define EP_APIVERSION 100
-
 #if !defined(EP_WINDOWS)
 # if EP_DEBUG
 #   if defined(__cplusplus)

@@ -1,7 +1,7 @@
 #ifndef MESSAGE_BOX_H
 #define MESSAGE_BOX_H
 
-#include "ep/epenum.h"
+#include "ep/cpp/enum.h"
 
 /** Example Usage
  *

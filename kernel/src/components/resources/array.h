@@ -4,7 +4,7 @@
 
 #include "components/resources/buffer.h"
 #include "ep/cpp/sharedptr.h"
-#include "ep/epstringof.h"
+#include "ep/cpp/stringof.h"
 
 #include <utility>
 

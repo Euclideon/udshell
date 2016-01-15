@@ -69,7 +69,7 @@ static ep::Instance *MakeInterface(Kernel *pKernel)
 {
   ep::Instance *pInstance = new ep::Instance;
 
-  pInstance->apiVersion = EPKERNEL_APIVERSION;
+  pInstance->apiVersion = EP_APIVERSION;
 
   pInstance->pKernelInstance = pKernel;
 
