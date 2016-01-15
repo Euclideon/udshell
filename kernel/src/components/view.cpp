@@ -1,7 +1,7 @@
 #include "view.h"
 #include "kernel.h"
 #include "scene.h"
-#include "nodes/camera.h"
+#include "ep/cpp/component/node/camera.h"
 #include "renderscene.h"
 
 namespace ep {
