@@ -282,7 +282,6 @@ void Init(String sender, String message, const Variant &data)
   spTopLevelUI->Subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
   spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
 
-
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 
   if (!projFilePath.empty())
