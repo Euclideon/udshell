@@ -14,7 +14,6 @@
 #include "components/view.h"
 #include "components/uiconsole.h"
 #include "components/datasource.h"
-#include "components/nodes/node.h"
 #include "components/nodes/camera.h"
 #include "components/nodes/geomnode.h"
 #include "components/nodes/udnode.h"
@@ -46,6 +45,7 @@
 #include "components/windowimpl.h"
 #include "components/activities/activityimpl.h"
 #include "components/resources/resourceimpl.h"
+#include "components/nodes/nodeimpl.h"
 
 #include "renderscene.h"
 #include "eplua.h"
@@ -161,7 +161,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<Metadata>();
 
   // nodes
-  pKernel->RegisterComponentType<Node>();
+  pKernel->RegisterComponentType<Node, NodeImpl>();
   pKernel->RegisterComponentType<Camera>();
   pKernel->RegisterComponentType<SimpleCamera>();
   pKernel->RegisterComponentType<GeomNode>();

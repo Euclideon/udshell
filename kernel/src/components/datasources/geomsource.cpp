@@ -1,5 +1,5 @@
 #include "geomsource.h"
-#include "components/nodes/node.h"
+#include "ep/cpp/component/node/node.h"
 #include "components/nodes/geomnode.h"
 #include "components/resources/array.h"
 #include "components/resources/metadata.h"

@@ -5,7 +5,7 @@
 #include "udRender.h"
 
 #include "ep/cpp/component/component.h"
-#include "nodes/node.h"
+#include "ep/cpp/component/node/node.h"
 
 // TODO: Move this once the Scene Impl refactor is done.
 namespace ep {

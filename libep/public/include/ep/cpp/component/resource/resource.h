@@ -16,6 +16,8 @@ public:
   ComponentRef GetMetadata() const override { return pImpl->GetMetadata(); } // TODO Change ComponentRef to Metadata once Metadata made public
   ComponentRef GetDataSource() const override { return pImpl->GetDataSource(); } // TODO Change ComponentRef to DataSourceRef once DataSource made public
 
+  Variant Save() const override { return pImpl->Save(); }
+
   Event<> Changed;
 
 protected:
@@ -30,6 +32,12 @@ protected:
     return{
       EP_MAKE_PROPERTY_RO(Metadata, "Number of records in the metadata", nullptr, 0),
       EP_MAKE_PROPERTY_RO(DataSource, "The DataSource containing this Resource", nullptr, 0),
+    };
+  }
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(Save, "Save the state of the Resource"),
     };
   }
   static Array<const EventInfo> GetEvents()

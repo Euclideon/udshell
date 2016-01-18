@@ -2,7 +2,7 @@
 #ifndef _GEOMNODE_H
 #define _GEOMNODE_H
 
-#include "node.h"
+#include "ep/cpp/component/node/node.h"
 
 namespace ep
 {
@@ -10,6 +10,7 @@ namespace ep
 SHARED_CLASS(Model);
 
 SHARED_CLASS(GeomNode);
+SHARED_CLASS(RenderScene);
 
 class GeomNode : public Node
 {
