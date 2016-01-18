@@ -76,7 +76,7 @@ public:
 
   // logger functions
   LoggerRef GetLogger() const { return spLogger; }
-  void Log(int kind, int level, String text, String component = nullptr) const override final { spLogger->Log(level, text, (LogCategories)kind, component); }
+  void Log(int kind, int level, String text, String component = nullptr) const override final { if (spLogger) spLogger->Log(level, text, (LogCategories)kind, component); }
   template<typename ...Args> void LogError(String format, Args... args) const;
   template<typename ...Args> void LogWarning(int level, String format, Args... args) const;
   template<typename ...Args> void LogDebug(int level, String format, Args... args) const;
