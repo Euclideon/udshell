@@ -3,6 +3,7 @@
 #include "kernel.h"
 #include "ep/cpp/component/node/camera.h"
 #include "renderscene.h"
+#include "components/resources/udmodelimpl.h"
 
 namespace ep {
 
@@ -25,19 +26,64 @@ void SceneImpl::Update(double timeDelta)
     MakeDirty();
 }
 
-RenderSceneRef SceneImpl::GetRenderScene()
+RenderableSceneRef SceneImpl::GetRenderScene()
 {
   if (!bDirty)
     return spCache;
 
-  spCache = RenderSceneRef::create();
+  RenderScene scene;
+  rootNode->Render(scene, rootNode->GetMatrix());
 
-  // build scene
-  rootNode->Render(spCache, rootNode->GetMatrix());
+  spCache = Convert(scene);
 
   bDirty = false;
-
   return spCache;
+}
+
+RenderableSceneRef SceneImpl::Convert(RenderScene &scene)
+{
+  RenderableSceneRef cache = RenderableSceneRef::create();
+
+  for (const auto &in : scene.ud)
+  {
+    auto &out = cache->ud.pushBack();
+    out.spModel = in.spModel;
+
+    const UDRenderState &iS = in.renderState;
+    UDRenderableState &oS = out.renderState;
+    memset(&oS, 0, sizeof(udRenderModel));
+
+    oS.pOctree = in.spModel->GetImpl<UDModelImpl>()->pOctree;
+
+    if (iS.useClip)
+    {
+      oS.clipArea = udRenderClipArea { iS.rect.x, iS.rect.y, iS.rect.width, iS.rect.height };
+      oS.pClip = &oS.clipArea;
+    }
+
+    oS.matrix = iS.matrix;
+    oS.pWorldMatrixD = &oS.matrix.a[0];
+
+    if (iS.simpleVoxelDel.GetMemento())
+    {
+      oS.pVoxelShader = UDRenderableState::VoxelShaderFunc;
+      oS.simpleVoxelDel = iS.simpleVoxelDel;
+    }
+
+    oS.flags = (udRenderFlags)iS.flags;
+    oS.startingRoot = iS.startingRoot;
+  }
+
+  for (const auto &in : scene.geom)
+  {
+    auto &out = cache->geom.pushBack();
+
+    out.matrix = in.matrix;
+    out.numTextures = in.numTextures;
+    out.numArrays = in.numArrays;
+  }
+
+  return cache;
 }
 
 SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams) : Super(pInstance)

@@ -7,24 +7,45 @@
 
 #include "ep/cpp/math.h"
 #include "ep/cpp/sharedptr.h"
-#include "components/resources/udmodel.h"
-#include "ep/cpp/component/resource/arraybuffer.h"
-#include "components/resources/shader.h"
-#include "components/resources/model.h"
+#include "ep/cpp/component/resource/udmodel.h"
+#include "ep/cpp/component/view.h"
+#include "ep/cpp/render.h"
+
 #include "hal/vertex.h"
 #include "hal/texture.h"
 #include "hal/shader.h"
+
+#include "ep/cpp/component/resource/arraybuffer.h"
+#include "components/resources/shader.h"
+#include "components/resources/model.h"
+
 #include "renderresource.h"
 
 struct epTexture;
 
-namespace ep
+namespace ep {
+
+struct UDRenderableState : public udRenderModel
 {
+  Double4x4 matrix;
+  udRenderClipArea clipArea;
+  UDRenderState::SimpleVoxelDlgt simpleVoxelDel;
+
+  static unsigned VoxelShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex, udRenderNodeInfo *epUnusedParam(pNodeInfo))
+  {
+    UDRenderableState *pUDRenderState = static_cast<UDRenderableState*>(pRenderModel);
+    udOctree *pOctree = pRenderModel->pOctree;
+    uint32_t color = pOctree->pGetNodeColor(pOctree, nodeIndex);
+    // TODO : either wrap this in a critical section or create Lua states for each thread
+    color = pUDRenderState->simpleVoxelDel(color);
+    return color;
+  }
+};
 
 struct UDJob
 {
   UDModelRef spModel = nullptr;
-  UDRenderState renderState;
+  UDRenderableState renderState;
 };
 
 struct GeomJob
@@ -47,21 +68,13 @@ struct GeomJob
   // render states
 };
 
-class RenderScene : public RefCounted
+class RenderableScene : public RefCounted
 {
 public:
-  // ud thread
   Array<UDJob, 4> ud;
-
-  // render thread
   Array<GeomJob, 16> geom;
-
-protected:
-  ~RenderScene()
-  {
-  }
 };
-typedef SharedPtr<RenderScene> RenderSceneRef;
+typedef SharedPtr<RenderableScene> RenderableSceneRef;
 
 
 class RenderableView : public RefCounted
@@ -85,7 +98,7 @@ public:
   bool pickingEnabled = false;
   udRenderPick udPick = { sizeof(udRenderPick) };
 
-  RenderSceneRef spScene = nullptr;
+  RenderableSceneRef spScene = nullptr;
 
   ViewRef spView = nullptr;
 

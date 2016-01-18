@@ -27,7 +27,6 @@
 #include "components/resources/shader.h"
 #include "components/resources/material.h"
 #include "components/resources/model.h"
-#include "components/resources/udmodel.h"
 #include "components/resources/kvpstore.h"
 #include "components/resources/metadata.h"
 #include "components/datasources/imagesource.h"
@@ -43,6 +42,7 @@
 #include "components/windowimpl.h"
 #include "components/activities/activityimpl.h"
 #include "components/resources/resourceimpl.h"
+#include "components/resources/udmodelimpl.h"
 #include "components/resources/bufferimpl.h"
 #include "components/resources/arraybufferimpl.h"
 #include "components/nodes/nodeimpl.h"
@@ -154,7 +154,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<Resource, ResourceImpl>();
   pKernel->RegisterComponentType<Buffer, BufferImpl>();
   pKernel->RegisterComponentType<ArrayBuffer, ArrayBufferImpl>();
-  pKernel->RegisterComponentType<UDModel>();
+  pKernel->RegisterComponentType<UDModel, UDModelImpl>();
   pKernel->RegisterComponentType<Shader>();
   pKernel->RegisterComponentType<Material>();
   pKernel->RegisterComponentType<Model>();

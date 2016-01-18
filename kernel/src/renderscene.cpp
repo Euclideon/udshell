@@ -10,8 +10,7 @@
 // TODO: remove when resource cleanup is implemented
 #include "hal/driver.h"
 
-namespace ep
-{
+namespace ep {
 
 // shaders for blitting
 const char s_vertexShader[] =

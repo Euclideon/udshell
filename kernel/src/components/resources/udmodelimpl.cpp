@@ -1,6 +1,5 @@
-#include "udmodel.h"
+#include "components/resources/udmodelimpl.h"
 #include "components/datasources/uddatasource.h"
-
 namespace ep {
 
 static const Slice<const EnumKVP> renderFlags =
@@ -20,45 +19,33 @@ static const Slice<const EnumKVP> renderFlags =
   { "udRenderFlags::Transparent", udRF_Transparent }
 };
 
-UDModel::~UDModel()
+UDModelImpl::~UDModelImpl()
 {
   if (pOctree)
     pOctree->pDestroy(pOctree);
 }
 
-UDRenderState UDModel::GetUDRenderState() const
+UDRenderState UDModelImpl::GetUDRenderState() const
 {
-  UDRenderState renderState;
+  UDRenderState state;
+  memset(&state, 0, sizeof(state));
 
-  memset(&renderState, 0, sizeof(renderState));
+  state.matrix = udmatrix;
 
-  renderState.matrix = udmatrix;
+  state.simpleVoxelDel = simpleVoxelDel;
 
-  renderState.pOctree = GetOctreePtr();
-  renderState.pVoxelShader = pVoxelShader;
-  renderState.pPixelShader = pPixelShader;
-  renderState.flags = renderFlags;
-  renderState.startingRoot = startingRoot;
-
-  if (pVoxelShader)
-    renderState.pVoxelShader = pVoxelShader;
-  else if (simpleVoxelDel.GetMemento())
-  {
-    renderState.pVoxelShader = UDRenderState::VoxelShaderFunc;
-    renderState.simpleVoxelDel = simpleVoxelDel;
-  }
-
+  state.flags = renderFlags;
+  state.startingRoot = startingRoot;
   if (rectSet)
   {
-    udRenderClipArea area = { (uint32_t)rect.x, (uint32_t)rect.y,  (uint32_t)(rect.x + rect.width), (uint32_t)(rect.y + rect.height) };
-    renderState.clipArea = area;
-    renderState.pClip = &renderState.clipArea;
+    state.rect = rect;
+    state.useClip = rectSet;
   }
 
-  return renderState;
+  return state;
 }
 
-BoundingVolume UDModel::GetBoundingVolume() const
+BoundingVolume UDModelImpl::GetBoundingVolume() const
 {
   BoundingVolume vol;
 
@@ -79,14 +66,14 @@ BoundingVolume UDModel::GetBoundingVolume() const
   return vol;
 }
 
-int UDModel::Load(String _name, bool useStreamer)
+int UDModelImpl::Load(String _name, bool useStreamer)
 {
   epResult result = epR_Failure;
   if (!spDataSource)
   {
-    spDataSource = GetKernel().CreateComponent<UDDataSource>({ { "src", _name },
-                                                               { "useStreamer", useStreamer },
-                                                               { "existingComponent",  (Component*)this }
+    spDataSource = GetKernel()->CreateComponent<UDDataSource>({ { "src", _name },
+                                                              { "useStreamer", useStreamer },
+                                                              { "existingComponent", pInstance }
                                                              } );
   }
   return (int)result;

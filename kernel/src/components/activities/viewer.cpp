@@ -7,7 +7,7 @@
 #include "ep/cpp/component/node/simplecamera.h"
 #include "components/nodes/udnode.h"
 #include "components/timer.h"
-#include "components/resources/udmodel.h"
+#include "ep/cpp/component/resource/udmodel.h"
 #include "components/datasource.h"
 #include "components/resourcemanager.h"
 #include "components/commandmanager.h"

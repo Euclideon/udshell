@@ -1,5 +1,5 @@
 #include "components/datasources/uddatasource.h"
-#include "components/resources/udmodel.h"
+#include "components/resources/udmodelimpl.h"
 #include "components/resources/metadata.h"
 #include "udOctree.h"
 #include "kernel.h"
@@ -34,8 +34,9 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
       if (!model)
         EPTHROW_ERROR(epR_Failure, "Failed to create model");
 
-      model->spDataSource = ComponentRef(this);
-      model->pOctree = pOctree;
+      UDModelImpl *pModelImpl = model->GetImpl<UDModelImpl>();
+      pModelImpl->spDataSource = ComponentRef(this);
+      pModelImpl->pOctree = pOctree;
 
       // Populate meta data
       int32_t count;
@@ -55,7 +56,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
         }
       }
 
-      result = udOctree_GetLocalMatrixF64(model->GetOctreePtr(), model->udmatrix.a);
+      result = udOctree_GetLocalMatrixF64(pModelImpl->pOctree, pModelImpl->udmatrix.a);
       if (result == udR_Success)
         resources.Insert(source->asString(), model);
     }

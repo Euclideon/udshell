@@ -2,7 +2,7 @@
 
 namespace ep {
 
-epResult NodeImpl::Render(RenderSceneRef &spScene, const Double4x4 &mat)
+epResult NodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
 {
   for (NodeRef &n : children)
     n->Render(spScene, mat * n->GetMatrix());

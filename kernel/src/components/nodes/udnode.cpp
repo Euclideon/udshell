@@ -4,18 +4,17 @@
 #include "kernel.h"
 #include "udRender.h"
 #include "components/datasources/uddatasource.h"
+#include "ep/cpp/component/resource/udmodel.h"
 
 namespace ep
 {
 
-epResult UDNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
+epResult UDNode::Render(RenderScene &spScene, const Double4x4 &mat)
 {
-  UDJob &job = spScene->ud.pushBack();
-  memset(&job, 0, sizeof(job));
-
+  UDRenderJob &job = spScene.ud.pushBack();
+  job.spModel = spModel;
   job.renderState = spModel->GetUDRenderState();
   job.renderState.matrix = Mul(mat, job.renderState.matrix);
-  job.renderState.pWorldMatrixD = job.renderState.matrix.a;
 
   return epR_Success;
 }

@@ -9,7 +9,7 @@ namespace ep {
 
 struct Bookmark;
 SHARED_CLASS(Node);
-SHARED_CLASS(RenderScene);
+SHARED_CLASS(RenderableScene);
 SHARED_CLASS(Camera);
 
 class IScene
@@ -33,7 +33,7 @@ public:
 
   virtual NodeRef GetRootNode() const = 0;
 
-  virtual RenderSceneRef GetRenderScene() = 0;
+  virtual RenderableSceneRef GetRenderScene() = 0;
 
   virtual void MakeDirty() = 0;
 
