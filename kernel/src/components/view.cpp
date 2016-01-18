@@ -137,7 +137,7 @@ void View::GoToBookmark(String bookmarkName)
 {
   if (spScene && spCamera)
   {
-    const Bookmark *pBM = spScene->FindBookMark(bookmarkName);
+    const Bookmark *pBM = spScene->FindBookmark(bookmarkName);
     if (pBM)
     {
       spCamera->SetMatrix(Double4x4::rotationYPR(pBM->ypr, pBM->position));

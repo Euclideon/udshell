@@ -52,7 +52,7 @@ public:
   }
 
 protected:
-  Variant FindBookMark_Internal(String bmName) const override final { auto *pBM = bookmarks.Get(bmName); return pBM ? Variant(*pBM) : Variant(nullptr); }
+  Variant FindBookmark_Internal(String bmName) const override final { auto *pBM = bookmarks.Get(bmName); return pBM ? Variant(*pBM) : Variant(nullptr); }
 
   double timeStep = 0.0;
   NodeRef rootNode = nullptr;

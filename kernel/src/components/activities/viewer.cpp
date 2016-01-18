@@ -60,7 +60,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     spUDNode->SetUDModel(spModel);
     spScene->GetRootNode()->AddChild(spUDNode);
     spView->SetEnablePicking(true);
-    spScene->AddBookMark(MutableString128(Format, "{0}_bookmark", model->asString().getRightAtLast("/", false)), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
+    spScene->AddBookmark(MutableString128(Format, "{0}_bookmark", model->asString().getRightAtLast("/", false)), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
@@ -138,7 +138,7 @@ void Viewer::CreateBookmark()
   // It would be nice if the QML could automatically update its bookmarks list from the internal bookmarks
   // Not sure how to do this currently
   Variant bookmarkName = spUIBookmarks->CallMethod("createbookmark", "");
-  spScene->AddBookMarkFromCamera(bookmarkName.asString(), spCamera);
+  spScene->AddBookmarkFromCamera(bookmarkName.asString(), spCamera);
 }
 
 void Viewer::Activate()

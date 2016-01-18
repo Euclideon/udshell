@@ -44,13 +44,13 @@ public:
   Variant Save() const override { return pImpl->Save(); }
 
   // TODO: Consider creating an event for when bookmarks are successfully created
-  void AddBookMarkFromCamera(String bmName, CameraRef camera) override { pImpl->AddBookMarkFromCamera(bmName, camera); }
-  void AddBookMark(String bmName, const Bookmark &bm) override { pImpl->AddBookMark(bmName, bm); }
-  void RemoveBookMark(String bmName) override { pImpl->RemoveBookMark(bmName); }
-  void RenameBookMark(String oldName, String newName) override { pImpl->RenameBookMark(oldName, newName); }
-  const Bookmark *FindBookMark(String bmName) const override { return pImpl->FindBookMark(bmName); }
-  void LoadBookMarks(Variant::VarMap bookmarks) override { pImpl->LoadBookMarks(bookmarks); }
-  Variant SaveBookMarks() const override { return pImpl->SaveBookMarks(); }
+  void AddBookmarkFromCamera(String bmName, CameraRef camera) override { pImpl->AddBookmarkFromCamera(bmName, camera); }
+  void AddBookmark(String bmName, const Bookmark &bm) override { pImpl->AddBookmark(bmName, bm); }
+  void RemoveBookmark(String bmName) override { pImpl->RemoveBookmark(bmName); }
+  void RenameBookmark(String oldName, String newName) override { pImpl->RenameBookmark(oldName, newName); }
+  const Bookmark *FindBookmark(String bmName) const override { return pImpl->FindBookmark(bmName); }
+  void LoadBookmarks(Variant::VarMap bookmarks) override { pImpl->LoadBookmarks(bookmarks); }
+  Variant SaveBookmarks() const override { return pImpl->SaveBookmarks(); }
 
   const BookmarkMap &GetBookmarkMap() const override { return pImpl->GetBookmarkMap(); }
 
@@ -73,7 +73,7 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  Variant FindBookMark_Internal(String bmName) const override { return pImpl->FindBookMark_Internal(bmName); }
+  Variant FindBookmark_Internal(String bmName) const override { return pImpl->FindBookmark_Internal(bmName); }
 
   static Array<const PropertyInfo> GetProperties()
   {
@@ -86,11 +86,11 @@ protected:
   {
     return{
       EP_MAKE_METHOD(MakeDirty, "Force a dirty signal"),
-      EP_MAKE_METHOD(AddBookMarkFromCamera, "Add a BookMark from Camera"),
-      EP_MAKE_METHOD(AddBookMark, "Add a BookMark"),
-      EP_MAKE_METHOD(RemoveBookMark, "Remove a BookMark"),
-      EP_MAKE_METHOD(RenameBookMark, "Rename a BookMark"),
-      EP_MAKE_METHOD_EXPLICIT("FindBookMark", FindBookMark_Internal, "Find a BookMark"),
+      EP_MAKE_METHOD(AddBookmarkFromCamera, "Add a Bookmark from Camera"),
+      EP_MAKE_METHOD(AddBookmark, "Add a Bookmark"),
+      EP_MAKE_METHOD(RemoveBookmark, "Remove a Bookmark"),
+      EP_MAKE_METHOD(RenameBookmark, "Rename a Bookmark"),
+      EP_MAKE_METHOD_EXPLICIT("FindBookmark", FindBookmark_Internal, "Find a Bookmark"),
     };
   }
   static Array<const EventInfo> GetEvents()

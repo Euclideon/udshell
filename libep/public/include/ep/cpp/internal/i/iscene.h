@@ -20,13 +20,13 @@ public:
   virtual Variant Save() const = 0;
 
   // TODO: Consider creating an event for when bookmarks are successfully created
-  virtual void AddBookMarkFromCamera(String bmName, CameraRef camera) = 0;
-  virtual void AddBookMark(String bmName, const Bookmark &bm) = 0;
-  virtual void RemoveBookMark(String bmName) = 0;
-  virtual void RenameBookMark(String oldName, String newName) = 0;
-  virtual const Bookmark *FindBookMark(String bmName) const = 0;
-  virtual void LoadBookMarks(Variant::VarMap bookmarks) = 0;
-  virtual Variant SaveBookMarks() const = 0;
+  virtual void AddBookmarkFromCamera(String bmName, CameraRef camera) = 0;
+  virtual void AddBookmark(String bmName, const Bookmark &bm) = 0;
+  virtual void RemoveBookmark(String bmName) = 0;
+  virtual void RenameBookmark(String oldName, String newName) = 0;
+  virtual const Bookmark *FindBookmark(String bmName) const = 0;
+  virtual void LoadBookmarks(Variant::VarMap bookmarks) = 0;
+  virtual Variant SaveBookmarks() const = 0;
 
   using BookmarkMap = SharedMap<AVLTree<SharedString, Bookmark>>;
   virtual const BookmarkMap &GetBookmarkMap() const = 0;
@@ -42,7 +42,7 @@ public:
   virtual void MakeDirty() = 0;
 
 protected:
-  virtual Variant FindBookMark_Internal(String bmName) const = 0;
+  virtual Variant FindBookmark_Internal(String bmName) const = 0;
 };
 
 };

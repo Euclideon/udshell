@@ -57,13 +57,13 @@ SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams) : Super(p
 
   Variant *pMap = initParams.Get("bookmarks");
   if (pMap && pMap->is(Variant::Type::AssocArray))
-    LoadBookMarks(pMap->asAssocArray());
+    LoadBookmarks(pMap->asAssocArray());
 
   memset(&renderModels, 0, sizeof(renderModels));
   numRenderModels = 0;
 }
 
-void SceneImpl::AddBookMarkFromCamera(String bmName, CameraRef camera)
+void SceneImpl::AddBookmarkFromCamera(String bmName, CameraRef camera)
 {
   if (!bmName || !camera)
     return;
@@ -74,7 +74,7 @@ void SceneImpl::AddBookMarkFromCamera(String bmName, CameraRef camera)
   bookmarks.Insert(std::move(kvp));
 }
 
-void SceneImpl::AddBookMark(String bmName, const Bookmark &bm)
+void SceneImpl::AddBookmark(String bmName, const Bookmark &bm)
 {
   if (!bmName)
     return;
@@ -83,7 +83,7 @@ void SceneImpl::AddBookMark(String bmName, const Bookmark &bm)
   bookmarks.Insert(std::move(kvp));
 }
 
-void SceneImpl::RemoveBookMark(String bmName)
+void SceneImpl::RemoveBookmark(String bmName)
 {
   if (!bmName)
     return;
@@ -91,7 +91,7 @@ void SceneImpl::RemoveBookMark(String bmName)
   bookmarks.Remove(bmName);
 }
 
-void SceneImpl::RenameBookMark(String oldName, String newName)
+void SceneImpl::RenameBookmark(String oldName, String newName)
 {
   Bookmark *pBm = bookmarks.Get(oldName);
   if (pBm)
@@ -101,7 +101,7 @@ void SceneImpl::RenameBookMark(String oldName, String newName)
   }
 }
 
-void SceneImpl::LoadBookMarks(Variant::VarMap bm)
+void SceneImpl::LoadBookmarks(Variant::VarMap bm)
 {
   for (auto kvp : bm)
   {
@@ -124,12 +124,12 @@ void SceneImpl::LoadBookMarks(Variant::VarMap bm)
       Double3 bmPosition = Double3::create(posArray[0], posArray[1], posArray[2]);
       Double3 bmOrientation = Double3::create(oriArray[0], oriArray[1], oriArray[2]);
 
-      AddBookMark(bmName, { bmPosition, bmOrientation });
+      AddBookmark(bmName, { bmPosition, bmOrientation });
     }
   }
 }
 
-Variant SceneImpl::SaveBookMarks() const
+Variant SceneImpl::SaveBookmarks() const
 {
   Variant::VarMap bookmarksSave;
 
@@ -150,7 +150,7 @@ Variant SceneImpl::Save() const
 {
   Variant::VarMap map;
   if(!bookmarks.Empty())
-    map.Insert("bookmarks", SaveBookMarks());
+    map.Insert("bookmarks", SaveBookmarks());
   return map;
 }
 
