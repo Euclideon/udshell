@@ -67,7 +67,8 @@ public:
   SharedPtr(nullptr_t) {}
 
   // constructors
-  SharedPtr(const SharedPtr<T> &ptr) : pInstance(ptr.pInstance) { acquire(); }
+  SharedPtr(const SharedPtr<T> &ptr)
+    : pInstance(acquire(ptr.pInstance)) {}
   SharedPtr(SharedPtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
@@ -77,7 +78,8 @@ public:
 
   // the U allows us to accept const
   template <class U>
-  SharedPtr(const SharedPtr<U> &ptr) : pInstance(ptr.pInstance) { acquire(); }
+  SharedPtr(const SharedPtr<U> &ptr)
+    : pInstance(acquire(ptr.pInstance)) {}
   template <class U>
   SharedPtr(SharedPtr<U> &&ptr)
     : pInstance(ptr.pInstance)
@@ -90,17 +92,19 @@ public:
   SharedPtr(const UniquePtr<U> &ptr);
   SharedPtr(UniquePtr<T> &&ptr);
 
-  explicit SharedPtr(T *p) : pInstance(p) { acquire(); }
+  explicit SharedPtr(T *p)
+    : pInstance(acquire(p)) {}
 
-  ~SharedPtr() { release(); }
+  ~SharedPtr() { release(pInstance); }
 
   SharedPtr& operator=(SharedPtr<T> &&ptr)
   {
     if (pInstance != ptr.pInstance)
     {
-      release();
+      RefCounted *pOld = pInstance;
       pInstance = ptr.pInstance;
       ptr.pInstance = nullptr;
+      release(pOld);
     }
     return *this;
   }
@@ -108,9 +112,9 @@ public:
   {
     if (pInstance != ptr.pInstance)
     {
-      release();
-      pInstance = ptr.pInstance;
-      acquire();
+      RefCounted *pOld = pInstance;
+      pInstance = acquire(ptr.pInstance);
+      release(pOld);
     }
     return *this;
   }
@@ -119,9 +123,9 @@ public:
   {
     if (pInstance != ptr.pInstance)
     {
-      release();
-      pInstance = ptr.pInstance;
-      acquire();
+      RefCounted *pOld = pInstance;
+      pInstance = acquire(ptr.pInstance);
+      release(pOld);
     }
     return *this;
   }
@@ -130,13 +134,17 @@ public:
   SharedPtr& operator=(const UniquePtr<U> &ptr);
   SharedPtr& operator=(nullptr_t)
   {
-    release();
+    RefCounted *pOld = pInstance;
+    pInstance = nullptr;
+    release(pOld);
     return *this;
   }
 
   void reset()
   {
-    release();
+    RefCounted *pOld = pInstance;
+    pInstance = nullptr;
+    release(pOld);
   }
 
   size_t count() const;
@@ -154,8 +162,8 @@ private:
   template<typename U> friend class SharedPtr;
   template<typename U> friend class SafePtr;
 
-  void acquire();
-  void release();
+  static RefCounted* acquire(RefCounted *pI);
+  static void release(RefCounted *pI);
 
   RefCounted *pInstance = nullptr;
 };
@@ -349,20 +357,22 @@ inline SharedPtr<T>::SharedPtr(const UniquePtr<U> &ptr)
 template <class T>
 inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<T> &&ptr)
 {
-  release();
+  RefCounted *pOld = pInstance;
   pInstance = ptr.pInstance;
   pInstance->rc = 1;
   ptr.pInstance = nullptr;
+  release(pOld);
   return *this;
 }
 template <class T>
 template <class U>
 inline SharedPtr<T>& SharedPtr<T>::operator=(const UniquePtr<U> &ptr)
 {
-  release();
+  RefCounted *pOld = pInstance;
   pInstance = ptr.pInstance;
   pInstance->rc = 1;
   ptr.pInstance = nullptr;
+  release(pOld);
   return *this;
 }
 
@@ -373,22 +383,21 @@ epforceinline size_t SharedPtr<T>::count() const
 }
 
 template<class T>
-epforceinline void SharedPtr<T>::acquire()
+epforceinline RefCounted* SharedPtr<T>::acquire(RefCounted *pI)
 {
-  if (pInstance)
-    ++pInstance->rc;
+  if (pI)
+    ++pI->rc;
+  return pI;
 }
 template<class T>
-inline void SharedPtr<T>::release()
+inline void SharedPtr<T>::release(RefCounted *pI)
 {
-  if (pInstance)
-  {
-    if (pInstance->rc == 1)
-      delete pInstance;
-    else
-      --pInstance->rc;
-    pInstance = nullptr;
-  }
+  if (!pI)
+    return;
+  if (pI->rc == 1)
+    delete pI;
+  else
+    --pI->rc;
 }
 
 namespace internal {
