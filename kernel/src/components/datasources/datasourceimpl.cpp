@@ -1,4 +1,4 @@
-#include "components/datasource.h"
+#include "components/datasources/datasourceimpl.h"
 #include "components/file.h"
 #include "components/memstream.h"
 #include "components/stream.h"
@@ -7,7 +7,7 @@
 namespace ep
 {
 
-StreamRef DataSource::OpenStream(const Variant &source)
+StreamRef DataSourceImpl::OpenStream(const Variant &source)
 {
   ComponentRef spComp = nullptr;
   StreamRef spSource = nullptr;
@@ -18,7 +18,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
   if (source.is(Variant::Type::String))
   {
     // path or url?
-    spSource = GetKernel().CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
+    spSource = GetKernel()->CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
     if (!spSource)
       EPTHROW_WARN(epR_File_OpenFailure, 2, "\"src\" file path not found: {0}", source.asString());
   }
@@ -31,7 +31,7 @@ StreamRef DataSource::OpenStream(const Variant &source)
     else if (spComp->IsType<Buffer>())
     {
       BufferRef spBuffer = shared_pointer_cast<Buffer>(spComp);
-      spSource = GetKernel().CreateComponent<MemStream>({ { "buffer", spBuffer }, { "flags", FileOpenFlags::Read } });
+      spSource = GetKernel()->CreateComponent<MemStream>({ { "buffer", spBuffer }, { "flags", FileOpenFlags::Read } });
     }
   }
 
@@ -41,8 +41,8 @@ StreamRef DataSource::OpenStream(const Variant &source)
   return spSource;
 }
 
-DataSource::DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-  : Component(pType, pKernel, uid, initParams)
+DataSourceImpl::DataSourceImpl(Component *pInstance, Variant::VarMap initParams)
+  : Super(pInstance)
 {
   const Variant *source = initParams.Get("src");
   if (source && source->is(Variant::Type::String))

@@ -8,7 +8,7 @@
 #include "components/nodes/udnode.h"
 #include "components/timer.h"
 #include "ep/cpp/component/resource/udmodel.h"
-#include "components/datasource.h"
+#include "ep/cpp/component/datasource/datasource.h"
 #include "components/resourcemanager.h"
 #include "components/commandmanager.h"
 

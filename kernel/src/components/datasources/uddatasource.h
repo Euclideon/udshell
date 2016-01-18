@@ -2,7 +2,7 @@
 #if !defined(_EP_EPSOURCE_H)
 #define _EP_EPSOURCE_H
 
-#include "components/datasource.h"
+#include "ep/cpp/component/datasource/datasource.h"
 
 namespace ep
 {
