@@ -3,7 +3,7 @@
 #include "renderscene.h"
 #include "ep/cpp/component/viewport.h"
 #include "components/view.h"
-#include "components/scene.h"
+#include "ep/cpp/component/scene.h"
 #include "components/nodes/simplecamera.h"
 #include "components/nodes/udnode.h"
 #include "components/timer.h"
