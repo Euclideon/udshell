@@ -44,13 +44,13 @@ public:
   Variant Save() const override { return pImpl->Save(); }
 
   // TODO: Consider creating an event for when bookmarks are successfully created
-  void AddBookmarkFromCamera(String bmName, CameraRef camera) override { pImpl->AddBookmarkFromCamera(bmName, camera); }
-  void AddBookmark(String bmName, const Bookmark &bm) override { pImpl->AddBookmark(bmName, bm); }
-  void RemoveBookmark(String bmName) override { pImpl->RemoveBookmark(bmName); }
-  void RenameBookmark(String oldName, String newName) override { pImpl->RenameBookmark(oldName, newName); }
-  const Bookmark *FindBookmark(String bmName) const override { return pImpl->FindBookmark(bmName); }
-  void LoadBookmarks(Variant::VarMap bookmarks) override { pImpl->LoadBookmarks(bookmarks); }
-  Variant SaveBookmarks() const override { return pImpl->SaveBookmarks(); }
+  void AddBookmarkFromCamera(String bmName, CameraRef camera) override final { pImpl->AddBookmarkFromCamera(bmName, camera); }
+  void AddBookmark(String bmName, const Bookmark &bm) override final { pImpl->AddBookmark(bmName, bm); }
+  void RemoveBookmark(String bmName) override final { pImpl->RemoveBookmark(bmName); }
+  void RenameBookmark(String oldName, String newName) override final { pImpl->RenameBookmark(oldName, newName); }
+  const Bookmark *FindBookmark(String bmName) const override final { return pImpl->FindBookmark(bmName); }
+  void LoadBookmarks(Variant::VarMap bookmarks) override final { pImpl->LoadBookmarks(bookmarks); }
+  Variant SaveBookmarks() const override final { return pImpl->SaveBookmarks(); }
 
   const BookmarkMap &GetBookmarkMap() const override { return pImpl->GetBookmarkMap(); }
 
