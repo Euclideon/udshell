@@ -41,10 +41,6 @@ public:
 
   Event<> Dirty;
 
-  // TODO: HACK: fix this api!
-  epResult SetRenderModels(struct udRenderModel models[], size_t numModels)  override final;
-  const udRenderModel* GetRenderModels(size_t *pNumModels) const override final { if (pNumModels) { *pNumModels = numRenderModels; } return renderModels; }
-
   void MakeDirty()
   {
     bDirty = true;

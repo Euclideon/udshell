@@ -1,6 +1,5 @@
 
 #include "sceneimpl.h"
-#include "view.h"
 #include "kernel.h"
 #include "ep/cpp/component/node/camera.h"
 #include "renderscene.h"
@@ -39,15 +38,6 @@ RenderSceneRef SceneImpl::GetRenderScene()
   bDirty = false;
 
   return spCache;
-}
-
-epResult SceneImpl::SetRenderModels(struct udRenderModel models[], size_t numModels)
-{
-  for (size_t i = 0; i < numModels; ++i)
-    renderModels[i] = models[i];
-  numRenderModels = numModels;
-
-  return epR_Success;
 }
 
 SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams) : Super(pInstance)

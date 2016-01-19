@@ -7,7 +7,6 @@
 
 #include "ep/cpp/math.h"
 #include "ep/cpp/sharedptr.h"
-#include "components/view.h"
 #include "components/resources/udmodel.h"
 #include "components/resources/array.h"
 #include "components/resources/shader.h"

@@ -58,10 +58,6 @@ public:
 
   RenderSceneRef GetRenderScene() override { return pImpl->GetRenderScene(); }
 
-  // TODO: HACK: fix this api!
-  epResult SetRenderModels(struct udRenderModel models[], size_t numModels) override { return pImpl->SetRenderModels(models, numModels); }
-  const udRenderModel* GetRenderModels(size_t *pNumModels) const override { return pImpl->GetRenderModels(pNumModels); }
-
   void MakeDirty() override { pImpl->MakeDirty(); }
 
   Event<> Dirty;

@@ -4,7 +4,8 @@
 
 #include "kernel.h"
 #include "renderscene.h"
-#include "components/view.h"
+#include "hal/input.h"
+#include "components/viewimpl.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -145,7 +146,7 @@ epResult SDLKernel::RunMainLoop()
     epInput_Update();
 
     // render a frame (this could move to another thread!)
-    RenderableViewRef spRenderView = spFocusView->GetRenderableView();
+    RenderableViewRef spRenderView = spFocusView->impl_cast<ViewImpl>()->GetRenderableView();
     if (spRenderView)
       spRenderView->RenderGPU();
 

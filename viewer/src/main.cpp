@@ -3,7 +3,7 @@
 #include "ep/cpp/string.h"
 #include "ep/cpp/error.h"
 #include "kernel.h"
-#include "components/view.h"
+#include "components/viewimpl.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/simplecamera.h"
 #include "components/nodes/udnode.h"
@@ -74,7 +74,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None, nullptr, nullptr, nullptr };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
-  mData.spView->SetRenderOptions(options);
+  mData.spView->impl_cast<ViewImpl>()->SetRenderOptions(options);
 
   mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
 
