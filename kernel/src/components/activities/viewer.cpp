@@ -3,14 +3,13 @@
 #include "renderscene.h"
 #include "ep/cpp/component/viewport.h"
 #include "components/view.h"
-#include "components/scene.h"
-#include "components/nodes/simplecamera.h"
+#include "ep/cpp/component/scene.h"
+#include "ep/cpp/component/node/simplecamera.h"
 #include "components/nodes/udnode.h"
 #include "components/timer.h"
 #include "components/resources/udmodel.h"
 #include "components/datasource.h"
 #include "components/resourcemanager.h"
-#include "components/resources/menu.h"
 #include "components/commandmanager.h"
 
 #include "kernel.h"
@@ -60,7 +59,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     spUDNode->SetUDModel(spModel);
     spScene->GetRootNode()->AddChild(spUDNode);
     spView->SetEnablePicking(true);
-    spScene->AddBookMark(MutableString128(Format, "{0}_bookmark", model->asString().getRightAtLast("/", false)), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
+    spScene->AddBookmark(MutableString128(Format, "{0}_bookmark", model->asString().getRightAtLast("/", false)), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
@@ -138,7 +137,7 @@ void Viewer::CreateBookmark()
   // It would be nice if the QML could automatically update its bookmarks list from the internal bookmarks
   // Not sure how to do this currently
   Variant bookmarkName = spUIBookmarks->CallMethod("createbookmark", "");
-  spScene->AddBookMarkFromCamera(bookmarkName.asString(), spCamera);
+  spScene->AddBookmarkFromCamera(bookmarkName.asString(), spCamera);
 }
 
 void Viewer::Activate()

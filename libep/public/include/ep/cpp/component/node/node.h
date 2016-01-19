@@ -21,6 +21,7 @@ class Node : public Resource, public INode
   EP_DECLARE_COMPONENT_WITH_IMPL(Node, INode, Resource, EPKERNEL_PLUGINVERSION, "Node desc...")
 public:
   friend class Scene;
+  friend class SceneImpl;
 
   void SetMatrix(const Double4x4 &mat) override { pImpl->SetMatrix(mat); }
   const Double4x4& GetMatrix() const override { return pImpl->GetMatrix(); }

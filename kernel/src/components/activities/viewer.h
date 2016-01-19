@@ -11,7 +11,6 @@ SHARED_CLASS(Viewer);
 SHARED_CLASS(UDModel);
 SHARED_CLASS(SimpleCamera);
 SHARED_CLASS(Scene);
-SHARED_CLASS(Menu);
 SHARED_CLASS(View);
 
 class Viewer : public Activity
@@ -39,9 +38,6 @@ protected:
   // Static functions for CommandManager callbacks
   static void StaticToggleBookmarksPanel(Variant::VarMap params);
   static void StaticCreateBookmark(Variant::VarMap params);
-
-  void LoadBookmarks(Variant::VarMap bookmarks);
-
 
   UDModelRef spModel;
   SceneRef spScene;

@@ -1,5 +1,5 @@
 
-#include "scene.h"
+#include "sceneimpl.h"
 #include "view.h"
 #include "kernel.h"
 #include "ep/cpp/component/node/camera.h"
@@ -7,7 +7,7 @@
 
 namespace ep {
 
-bool Scene::InputEvent(const epInputEvent &ev)
+bool SceneImpl::InputEvent(const epInputEvent &ev)
 {
   // do anything here?
   //...
@@ -16,7 +16,7 @@ bool Scene::InputEvent(const epInputEvent &ev)
   return rootNode->InputEvent(ev);
 }
 
-void Scene::Update(double timeDelta)
+void SceneImpl::Update(double timeDelta)
 {
   // do anything here?
   //...
@@ -26,7 +26,7 @@ void Scene::Update(double timeDelta)
     MakeDirty();
 }
 
-RenderSceneRef Scene::GetRenderScene()
+RenderSceneRef SceneImpl::GetRenderScene()
 {
   if (!bDirty)
     return spCache;
@@ -41,7 +41,7 @@ RenderSceneRef Scene::GetRenderScene()
   return spCache;
 }
 
-epResult Scene::SetRenderModels(struct udRenderModel models[], size_t numModels)
+epResult SceneImpl::SetRenderModels(struct udRenderModel models[], size_t numModels)
 {
   for (size_t i = 0; i < numModels; ++i)
     renderModels[i] = models[i];
@@ -50,26 +50,20 @@ epResult Scene::SetRenderModels(struct udRenderModel models[], size_t numModels)
   return epR_Success;
 }
 
-Scene::Scene(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams) :
-  Component(pType, pKernel, uid, initParams)
+SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams) : Super(pInstance)
 {
   timeStep = 1.0 / 30.0;
-  rootNode = pKernel->CreateComponent<Node>();
+  rootNode = GetKernel()->CreateComponent<Node>();
 
   Variant *pMap = initParams.Get("bookmarks");
   if (pMap && pMap->is(Variant::Type::AssocArray))
-    LoadBookMarks(pMap->asAssocArray());
+    LoadBookmarks(pMap->asAssocArray());
 
   memset(&renderModels, 0, sizeof(renderModels));
   numRenderModels = 0;
 }
 
-Scene::~Scene()
-{
-
-}
-
-void Scene::AddBookMarkFromCamera(String bmName, CameraRef camera)
+void SceneImpl::AddBookmarkFromCamera(String bmName, CameraRef camera)
 {
   if (!bmName || !camera)
     return;
@@ -80,7 +74,7 @@ void Scene::AddBookMarkFromCamera(String bmName, CameraRef camera)
   bookmarks.Insert(std::move(kvp));
 }
 
-void Scene::AddBookMark(String bmName, const Bookmark &bm)
+void SceneImpl::AddBookmark(String bmName, const Bookmark &bm)
 {
   if (!bmName)
     return;
@@ -89,7 +83,7 @@ void Scene::AddBookMark(String bmName, const Bookmark &bm)
   bookmarks.Insert(std::move(kvp));
 }
 
-void Scene::RemoveBookMark(String bmName)
+void SceneImpl::RemoveBookmark(String bmName)
 {
   if (!bmName)
     return;
@@ -97,7 +91,7 @@ void Scene::RemoveBookMark(String bmName)
   bookmarks.Remove(bmName);
 }
 
-void Scene::RenameBookMark(String oldName, String newName)
+void SceneImpl::RenameBookmark(String oldName, String newName)
 {
   Bookmark *pBm = bookmarks.Get(oldName);
   if (pBm)
@@ -107,7 +101,7 @@ void Scene::RenameBookMark(String oldName, String newName)
   }
 }
 
-void Scene::LoadBookMarks(Variant::VarMap bm)
+void SceneImpl::LoadBookmarks(Variant::VarMap bm)
 {
   for (auto kvp : bm)
   {
@@ -130,12 +124,12 @@ void Scene::LoadBookMarks(Variant::VarMap bm)
       Double3 bmPosition = Double3::create(posArray[0], posArray[1], posArray[2]);
       Double3 bmOrientation = Double3::create(oriArray[0], oriArray[1], oriArray[2]);
 
-      AddBookMark(bmName, { bmPosition, bmOrientation });
+      AddBookmark(bmName, { bmPosition, bmOrientation });
     }
   }
 }
 
-Variant Scene::SaveBookMarks() const
+Variant SceneImpl::SaveBookmarks() const
 {
   Variant::VarMap bookmarksSave;
 
@@ -152,11 +146,11 @@ Variant Scene::SaveBookMarks() const
   return bookmarksSave;
 }
 
-Variant Scene::Save() const
+Variant SceneImpl::Save() const
 {
   Variant::VarMap map;
   if(!bookmarks.Empty())
-    map.Insert("bookmarks", SaveBookMarks());
+    map.Insert("bookmarks", SaveBookmarks());
   return map;
 }
 

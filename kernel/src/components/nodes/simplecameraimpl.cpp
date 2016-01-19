@@ -1,16 +1,15 @@
 #include "ep/cpp/platform.h"
-#include "simplecamera.h"
+#include "simplecameraimpl.h"
 #include "kernel.h"
 
-namespace ep
-{
+namespace ep {
 
 static int mouseRemap[] = { -1, 0, 2, -1, 1 };
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-SimpleCamera::SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-  : Camera(pType, pKernel, uid, initParams)
+SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initParams)
+  : Super(pInstance)
 {
   memset(keyState, 0, sizeof(keyState));
   const Variant *paramPos = initParams.Get("position");
@@ -56,7 +55,7 @@ SimpleCamera::SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedSt
     SetHelicopterMode(paramHeli->asBool());
 }
 
-bool SimpleCamera::ViewportInputEvent(const epInputEvent &ev)
+bool SimpleCameraImpl::ViewportInputEvent(const epInputEvent &ev)
 {
   if (ev.deviceType == epID_Keyboard)
   {
@@ -149,7 +148,7 @@ bool SimpleCamera::ViewportInputEvent(const epInputEvent &ev)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-bool SimpleCamera::Update(double timeDelta)
+bool SimpleCameraImpl::Update(double timeDelta)
 {
   // update the camera
   double s;
@@ -248,7 +247,7 @@ bool SimpleCamera::Update(double timeDelta)
   while (ypr.x >= UD_2PI)
     ypr.x -= UD_2PI;
 
-  Double4x4 cam = GetCameraMatrix();
+  Double4x4 cam = pInstance->Super::GetCameraMatrix();
 
   Double3 forward = cam.axis.y.toVector3();
   Double3 xAxis = cam.axis.x.toVector3();
@@ -259,13 +258,13 @@ bool SimpleCamera::Update(double timeDelta)
   pos += xAxis*tx*tmpSpeed;
   pos.z += tz*tmpSpeed;
 
-  Camera::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
+  pInstance->Super::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
 
   mouse.delta = {0 , 0};
 
   if (stateChanged)
   {
-    Changed.Signal(pos, ypr);
+    pInstance->Changed.Signal(pos, ypr);
     stateChanged = false;
   }
 
@@ -274,9 +273,9 @@ bool SimpleCamera::Update(double timeDelta)
   return false;
 }
 
-Variant SimpleCamera::Save() const
+Variant SimpleCameraImpl::Save() const
 {
-  Variant var = Camera::Save();
+  Variant var = pInstance->Super::Save();
   Variant::VarMap params = var.asAssocArray();
 
   params.Insert("speed", speed);

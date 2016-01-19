@@ -4,8 +4,8 @@
 #include "ep/cpp/error.h"
 #include "kernel.h"
 #include "components/view.h"
-#include "components/scene.h"
-#include "components/nodes/simplecamera.h"
+#include "ep/cpp/component/scene.h"
+#include "ep/cpp/component/node/simplecamera.h"
 #include "components/nodes/udnode.h"
 #include "components/resources/udmodel.h"
 

@@ -1,0 +1,65 @@
+#pragma once
+#ifndef EPSIMPLECAMERA_H
+#define EPSIMPLECAMERA_H
+
+#include "ep/cpp/component/component.h"
+#include "ep/cpp/component/node/camera.h"
+#include "ep/cpp/component/node/node.h"
+#include "ep/cpp/internal/i/isimplecamera.h"
+#include "ep/c/input.h"
+
+namespace ep {
+
+SHARED_CLASS(SimpleCamera);
+
+class SimpleCamera : public Camera, public ISimpleCamera
+{
+  EP_DECLARE_COMPONENT_WITH_IMPL(SimpleCamera, ISimpleCamera, Camera, EPKERNEL_PLUGINVERSION, "SimpleCamera desc...")
+
+public:
+  void SetMatrix(const Double4x4 &_matrix) override { pImpl->SetMatrix(_matrix); }
+  void SetPosition(const Double3 &_pos) override { pImpl->SetPosition(_pos); }
+
+  void SetOrientation(const Double3 &_ypr) override { pImpl->SetOrientation(_ypr); }
+  void SetSpeed(double _speed) override { pImpl->SetSpeed(_speed); }
+
+  void SetInvertedYAxis(bool bInvert) override { pImpl->SetInvertedYAxis(bInvert); }
+  bool GetInvertedYAxis() const override { return pImpl->GetInvertedYAxis(); }
+  void SetHelicopterMode(bool bEnable) override { pImpl->SetHelicopterMode(bEnable); }
+  bool GetHelicopterMode() const override { return pImpl->GetHelicopterMode(); }
+
+  Variant Save() const override { return pImpl->Save(); }
+
+  Event<Double3, Double3> Changed;
+protected:
+  bool ViewportInputEvent(const epInputEvent &ev) override { return pImpl->ViewportInputEvent(ev); }
+  bool Update(double timeStep) override { return pImpl->Update(timeStep); }
+
+  SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+    : Camera(pType, pKernel, uid, initParams)
+  {
+    pImpl = CreateImpl(initParams);
+  }
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_WO(Matrix, "Local matrix", nullptr, 0),
+      EP_MAKE_PROPERTY_WO(Position, "Local position", nullptr, 0),
+      EP_MAKE_PROPERTY_WO(Orientation, "Camera orientation (YPR)", nullptr, 0),
+      EP_MAKE_PROPERTY_WO(Speed, "Camera speed", nullptr, 0),
+      EP_MAKE_PROPERTY(HelicopterMode, "Helicopter Mode", nullptr, 0),
+      EP_MAKE_PROPERTY(InvertedYAxis, "InvertYAxis", nullptr, 0),
+    };
+  }
+  static Array<const EventInfo> GetEvents()
+  {
+    return {
+      EP_MAKE_EVENT(Changed, "The camera changed")
+    };
+  }
+};
+
+} // namespace ep
+
+#endif
