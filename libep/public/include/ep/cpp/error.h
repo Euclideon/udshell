@@ -78,13 +78,13 @@ class ScopeGuard
 {
 public:
   explicit ScopeGuard(const Func& fn)
-    : dismissed(false), function(fn)
+    : function(fn), dismissed(false)
   {}
   explicit ScopeGuard(Func&& fn)
-    : dismissed(false), function(std::move(fn))
+    : function(std::move(fn)), dismissed(false)
   {}
   ScopeGuard(ScopeGuard&& other)
-    : dismissed(other.dismissed), function(std::move(other.function))
+    : function(std::move(other.function)), dismissed(other.dismissed)
   {
     other.dismissed = true; // inhibit the destructor of original object
   }

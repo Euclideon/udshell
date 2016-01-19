@@ -29,6 +29,7 @@ Variant Menu::ParseXMLString(String buffer)
   spXMLBuffer->CopyBuffer(buffer);
   Slice<void> buf = spXMLBuffer->Map();
   buf[buffer.length] = '\0';
+  spXMLBuffer->Unmap();
 
   using namespace rapidxml;
   Variant rootNode;

@@ -9,7 +9,7 @@
 #include "ep/cpp/sharedptr.h"
 #include "components/view.h"
 #include "components/resources/udmodel.h"
-#include "components/resources/array.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
 #include "components/resources/shader.h"
 #include "components/resources/model.h"
 #include "hal/vertex.h"

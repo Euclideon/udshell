@@ -3,7 +3,7 @@
 #define _EP_MODEL_H
 
 #include "ep/cpp/component/resource/resource.h"
-#include "components/resources/array.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
 #include "components/resources/material.h"
 #include "ep/cpp/sharedptr.h"
 

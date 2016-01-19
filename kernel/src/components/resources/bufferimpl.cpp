@@ -1,11 +1,8 @@
-#include "buffer.h"
-#include "renderresource.h"
-#include "renderscene.h"
+#include "bufferimpl.h"
 
-namespace ep
-{
+namespace ep {
 
-bool Buffer::Reserve(size_t size)
+bool BufferImpl::Reserve(size_t size)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
@@ -19,7 +16,7 @@ bool Buffer::Reserve(size_t size)
   return true;
 }
 
-bool Buffer::Allocate(size_t size)
+bool BufferImpl::Allocate(size_t size)
 {
   if (!Reserve(size))
     return false;
@@ -27,7 +24,7 @@ bool Buffer::Allocate(size_t size)
   return true;
 }
 
-bool Buffer::Free()
+bool BufferImpl::Free()
 {
   if (buffer.ptr && mapDepth == 0)
   {
@@ -41,7 +38,7 @@ bool Buffer::Free()
   return true;
 }
 
-bool Buffer::ResizeInternal(size_t size, bool copy)
+bool BufferImpl::ResizeInternal(size_t size, bool copy)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
@@ -73,12 +70,12 @@ bool Buffer::ResizeInternal(size_t size, bool copy)
   return true; // TODO Error handling
 }
 
-size_t Buffer::GetBufferSize() const
+size_t BufferImpl::GetBufferSize() const
 {
   return logicalSize;
 }
 
-Slice<void> Buffer::Map()
+Slice<void> BufferImpl::Map()
 {
   if (!buffer.ptr || mapDepth > 0)
     return nullptr;
@@ -87,7 +84,7 @@ Slice<void> Buffer::Map()
   return Slice<void>(buffer.ptr, logicalSize);
 }
 
-Slice<const void> Buffer::MapForRead()
+Slice<const void> BufferImpl::MapForRead()
 {
   if (!buffer.ptr || (mapDepth > 0 && !readMap))
     return nullptr;
@@ -96,13 +93,13 @@ Slice<const void> Buffer::MapForRead()
   return Slice<void>(buffer.ptr, logicalSize);
 }
 
-void Buffer::Unmap()
+void BufferImpl::Unmap()
 {
   if (--mapDepth == 0 && !readMap)
-    Changed.Signal();
+    pInstance->Changed.Signal();
 }
 
-bool Buffer::CopyBuffer(BufferRef buf)
+bool BufferImpl::CopyBuffer(BufferRef buf)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
@@ -118,7 +115,7 @@ bool Buffer::CopyBuffer(BufferRef buf)
   return true; // TODO Error handling
 }
 
-bool Buffer::CopyBuffer(Slice<const void> buf)
+bool BufferImpl::CopyBuffer(Slice<const void> buf)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling
@@ -128,7 +125,7 @@ bool Buffer::CopyBuffer(Slice<const void> buf)
 
   memcpy(buffer.ptr, buf.ptr, buf.length);
 
-  Changed.Signal();
+  pInstance->Changed.Signal();
   return true; // TODO Error handling
 }
 

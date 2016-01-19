@@ -281,6 +281,7 @@
 #elif defined(EP_COMPILER_CLANG)
 # pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare" // comparison of constant 128 with expression of type 'const char' is always true
 # pragma clang diagnostic ignored "-Wmissing-field-initializers" // missing field initializer TODO: REMOVE ME!!
+# pragma clang diagnostic ignored "-Woverloaded-virtual" // overloaded virtual TODO: possible to remove this?
 //# pragma clang diagnostic ignored "-Wreturn-type-c-linkage" // disable C-linkage returning UDT (user data type)
 //# pragma clang diagnostic ignored "-Wformat-security"       // stop complaining about variable format strings
 #endif

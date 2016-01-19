@@ -2,7 +2,7 @@
 #ifndef EPRENDERRESOURCE_H
 #define EPRENDERRESOURCE_H
 
-#include "components/resources/array.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
 #include "components/resources/model.h"
 #include "hal/shader.h"
 

@@ -3,10 +3,10 @@
 #define _EP_BROADCASTER_H
 
 #include "ep/cpp/component/component.h"
-#include "resources/buffer.h"
+#include "ep/cpp/component/resource/buffer.h"
 
-namespace ep
-{
+namespace ep {
+
 SHARED_CLASS(Broadcaster);
 
 class Broadcaster : public Component
