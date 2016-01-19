@@ -111,6 +111,8 @@ public:
   const kernel::ComponentDesc* GetDescriptor() const { return (const kernel::ComponentDesc*)pInstance->GetDescriptor(); }
   kernel::Kernel* GetKernel() const { return (kernel::Kernel*)&pInstance->GetKernel(); }
 
+  template <typename T>
+  T* impl_cast() { return static_cast<T*>(this); }
 protected:
   template<typename T, bool b> friend struct internal::Destroy;
 
@@ -334,6 +336,9 @@ private:                                                                        
     }                                                                                    \
   };                                                                                     \
 }())
+
+#define EP_IMPL Impl
+#define EP_FRIENDS_WITH_IMPL(component) friend class component; friend class component##EP_IMPL
 
 } // ep
 
