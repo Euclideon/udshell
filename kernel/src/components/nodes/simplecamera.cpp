@@ -1,38 +1,61 @@
 #include "ep/cpp/platform.h"
-#include "camera.h"
+#include "simplecamera.h"
 #include "kernel.h"
 
 namespace ep
 {
 
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-void Camera::GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const
-{
-  if (!bOrtho)
-    *pMatrix = Double4x4::perspective(fovY, aspectRatio, zNear, zFar);
-  else
-    *pMatrix = Double4x4::ortho(-orthoHeight*aspectRatio*0.5, orthoHeight*aspectRatio*0.5, -orthoHeight*0.5, orthoHeight*0.5, zNear, zFar);
-}
-
-Variant Camera::Save() const
-{
-  Variant::VarMap params;
-
-  params.Insert(KeyValuePair("matrix", GetMatrix()));
-  if (bOrtho)
-    params.Insert(KeyValuePair("ortho", orthoHeight));
-  else
-    params.Insert(KeyValuePair("perspective", fovY));
-  params.Insert(KeyValuePair("depthplanes", Array<double, 2>({ zNear, zFar })));
-
-  return Variant(std::move(params));
-}
-
 static int mouseRemap[] = { -1, 0, 2, -1, 1 };
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
+SimpleCamera::SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+  : Camera(pType, pKernel, uid, initParams)
+{
+  memset(keyState, 0, sizeof(keyState));
+  const Variant *paramPos = initParams.Get("position");
+  if (paramPos)
+  {
+    auto posArray = paramPos->as<Array<double, 3>>();
+    if (posArray.length == 3)
+    {
+      Double3 position = Double3::create(posArray[0], posArray[1], posArray[2]);
+      SetPosition(position);
+    }
+  }
+
+  const Variant *paramOrientation = initParams.Get("orientation");
+  if (paramOrientation)
+  {
+    auto oriArray = paramOrientation->as<Array<double, 3>>();
+    if (oriArray.length == 3)
+    {
+      Double3 orientation = Double3::create(oriArray[0], oriArray[1], oriArray[2]);
+      SetOrientation(orientation);
+    }
+  }
+
+  const Variant *paramMat = initParams.Get("matrix");
+  if (paramMat)
+  {
+    Array<double> matArray = paramMat->as<Array<double>>();
+    if (matArray.length == 16)
+      SetMatrix(Double4x4::create(matArray.ptr));
+  }
+
+  const Variant *paramSpeed = initParams.Get("speed");
+  if (paramSpeed)
+    SetSpeed(paramSpeed->asFloat());
+
+  const Variant *paramInvert = initParams.Get("invertyaxis");
+  if (paramInvert)
+    SetInvertedYAxis(paramInvert->asBool());
+
+  const Variant *paramHeli = initParams.Get("helicoptermode");
+  if (paramHeli)
+    SetHelicopterMode(paramHeli->asBool());
+}
+
 bool SimpleCamera::ViewportInputEvent(const epInputEvent &ev)
 {
   if (ev.deviceType == epID_Keyboard)
