@@ -337,8 +337,7 @@ private:                                                                        
   };                                                                                     \
 }())
 
-#define EP_IMPL Impl
-#define EP_FRIENDS_WITH_IMPL(component) friend class component; friend class component##EP_IMPL
+#define EP_FRIENDS_WITH_IMPL(component) friend class component; friend class component##Impl
 
 } // ep
 
