@@ -39,7 +39,7 @@ public:
   BoundingVolume GetBoundingVolume() const;
   UDRenderState GetUDRenderState() const;
 
-  ComponentRef GetDataSource() const { return spDataSource; } // TODO Change ComponentRef to DataSourceRef once DataSource made public
+  DataSourceRef GetDataSource() const { return spDataSource; }
 
   int Load(String name, bool useStreamer);
 

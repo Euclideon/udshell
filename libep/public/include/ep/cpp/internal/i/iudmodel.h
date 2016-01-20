@@ -4,12 +4,12 @@
 
 #include "ep/cpp/boundingvolume.h"
 #include "ep/cpp/rect.h"
-#include "udOctree.h"
-#include "udRender.h"
 #include "ep/cpp/render.h"
 
 
 namespace ep {
+
+SHARED_CLASS(DataSource);
 
 class IUDModel
 {
@@ -28,7 +28,7 @@ public:
   virtual BoundingVolume GetBoundingVolume() const = 0;
 
   virtual UDRenderState GetUDRenderState() const = 0;
-  virtual ComponentRef GetDataSource() const = 0;
+  virtual DataSourceRef GetDataSource() const = 0;
 
   virtual int Load(String name, bool useStreamer) = 0;
 
