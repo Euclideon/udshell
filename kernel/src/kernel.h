@@ -4,7 +4,6 @@
 
 #include "components/componentimpl.h"
 #include "components/lua.h"
-#include "components/view.h"
 #include "components/timer.h"
 #include "components/logger.h"
 #include "helpers.h"

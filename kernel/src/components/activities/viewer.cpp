@@ -2,7 +2,7 @@
 
 #include "renderscene.h"
 #include "ep/cpp/component/viewport.h"
-#include "components/view.h"
+#include "components/viewimpl.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/simplecamera.h"
 #include "components/nodes/udnode.h"
@@ -63,7 +63,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   }
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
-  spView->SetRenderOptions(options);
+  spView->impl_cast<ViewImpl>()->SetRenderOptions(options);
 
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);

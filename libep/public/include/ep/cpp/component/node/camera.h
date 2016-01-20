@@ -16,8 +16,6 @@ class Camera : public Node, public ICamera
   EP_DECLARE_COMPONENT_WITH_IMPL(Camera, ICamera, Node, EPKERNEL_PLUGINVERSION, "Camera desc...")
 
 public:
-  friend class View;
-
   Double4x4 GetCameraMatrix() const override { return pImpl->GetCameraMatrix(); }
   Double4x4 GetViewMatrix() const override { return pImpl->GetViewMatrix(); }
 
@@ -33,6 +31,8 @@ public:
   Variant Save() const override { return pImpl->Save(); }
 
 protected:
+  EP_FRIENDS_WITH_IMPL(View);
+
   Camera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Node(pType, pKernel, uid, initParams)
   {

@@ -5,13 +5,13 @@
 namespace ep {
 
 // TODO: Add view methods when View is impl'd
-//SHARED_CLASS(View);
+SHARED_CLASS(View);
 
 class IViewport
 {
 public:
-  //virtual ViewRef GetView() const = 0;
-  //virtual void SetView(ViewRef view) = 0;
+  virtual ViewRef GetView() const = 0;
+  virtual void SetView(ViewRef view) = 0;
 
 protected:
   virtual void InitComplete() = 0;

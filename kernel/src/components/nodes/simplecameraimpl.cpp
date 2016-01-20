@@ -1,3 +1,4 @@
+#include "ep/cpp/math.h"
 #include "ep/cpp/platform.h"
 #include "simplecameraimpl.h"
 #include "kernel.h"
@@ -217,7 +218,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
     tmpSpeed = 1.0 + 1.0*timeDelta;
   if(epInput_State(epID_Gamepad, epGC_ButtonB) || epInput_State(epID_Keyboard, epKC_Hyphen) || epInput_State(epID_Keyboard, epKC_NumpadMinus))
     tmpSpeed = 1.0 - 0.5*timeDelta;
-  this->speed = udClamp(speed * tmpSpeed, 0.001, 999.0);
+  this->speed = Clamp(speed * tmpSpeed, 0.001, 999.0);
 
   float multiplier = 1.f;
   if (keyState[(int)Keys::Boost] || epInput_State(epID_Gamepad, epGC_ButtonRB))
@@ -233,19 +234,19 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
   // normalise pitch
   while (ypr.y < 0)
-    ypr.y += UD_2PI;
-  while (ypr.y >= UD_2PI)
-    ypr.y -= UD_2PI;
+    ypr.y += EP_2PI;
+  while (ypr.y >= EP_2PI)
+    ypr.y -= EP_2PI;
 
   // clamp the pitch
-  if (ypr.y > UD_HALF_PI && ypr.y < (UD_2PI - UD_HALF_PI))
-    ypr.y = (ypr.y < UD_PI) ? UD_HALF_PI : (UD_2PI - UD_HALF_PI);
+  if (ypr.y > EP_HALF_PI && ypr.y < (EP_2PI - EP_HALF_PI))
+    ypr.y = (ypr.y < EP_PI) ? EP_HALF_PI : (EP_2PI - EP_HALF_PI);
 
   // normalise yaw
   while (ypr.x < 0)
-    ypr.x += UD_2PI;
-  while (ypr.x >= UD_2PI)
-    ypr.x -= UD_2PI;
+    ypr.x += EP_2PI;
+  while (ypr.x >= EP_2PI)
+    ypr.x -= EP_2PI;
 
   Double4x4 cam = pInstance->Super::GetCameraMatrix();
 

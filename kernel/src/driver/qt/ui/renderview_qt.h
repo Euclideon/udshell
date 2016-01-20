@@ -3,7 +3,7 @@
 
 #include <QtQuick/QQuickFramebufferObject>
 
-#include "components/view.h"
+#include "ep/cpp/component/view.h"
 
 
 namespace qt {

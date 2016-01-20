@@ -5,6 +5,8 @@
 #include "hal/vertex.h"
 #include "hal/shader.h"
 
+#include "components/viewimpl.h"
+
 // TODO: remove when resource cleanup is implemented
 #include "hal/driver.h"
 
@@ -335,7 +337,7 @@ void Renderer::UDThread()
     void FinishJob(ep::Kernel *_pKernel)
     {
       ViewRef spView = job->spView;
-      spView->SetLatestFrame(job);
+      spView->impl_cast<ViewImpl>()->SetLatestFrame(job);
       delete this;
     }
   };

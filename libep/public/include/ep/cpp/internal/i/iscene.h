@@ -35,10 +35,6 @@ public:
 
   virtual RenderSceneRef GetRenderScene() = 0;
 
-  // TODO: HACK: fix this api!
-  virtual epResult SetRenderModels(struct udRenderModel models[], size_t numModels) = 0;
-  virtual const udRenderModel* GetRenderModels(size_t *pNumModels) const = 0;
-
   virtual void MakeDirty() = 0;
 
 protected:

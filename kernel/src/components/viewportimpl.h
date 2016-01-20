@@ -16,6 +16,9 @@ public:
     CreateInternal(initParams);
   }
 
+  ViewRef GetView() const override final { return spView; }
+  void SetView(ViewRef _spView) override final { EPASSERT(false, "TODO: implement this - need to reload the ui!!"); }
+
 private:
   void InitComplete() override final {}
 

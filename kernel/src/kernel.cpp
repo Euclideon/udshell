@@ -10,7 +10,6 @@
 #include "components/lua.h"
 #include "components/logger.h"
 #include "components/timer.h"
-#include "components/view.h"
 #include "components/uiconsole.h"
 #include "components/datasource.h"
 #include "components/nodes/geomnode.h"
@@ -38,6 +37,7 @@
 
 // Components that do the Impl dance
 #include "components/componentimpl.h"
+#include "components/viewimpl.h"
 #include "components/uicomponentimpl.h"
 #include "components/viewportimpl.h"
 #include "components/windowimpl.h"
@@ -145,7 +145,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<UIConsole>();
   pKernel->RegisterComponentType<Viewport, ViewportImpl>();
   pKernel->RegisterComponentType<Window, WindowImpl>();
-  pKernel->RegisterComponentType<View>();
+  pKernel->RegisterComponentType<View, ViewImpl>();
   pKernel->RegisterComponentType<Scene, SceneImpl>();
 
   // resources
