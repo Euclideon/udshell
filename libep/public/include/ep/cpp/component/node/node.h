@@ -49,7 +49,7 @@ protected:
 
   bool InputEvent(const epInputEvent &ev) override { return pImpl->InputEvent(ev); }
   bool Update(double timeStep) override { return pImpl->Update(timeStep); }
-  epResult Render(RenderSceneRef &spScene, const Double4x4 &mat) override { return pImpl->Render(spScene, mat); }
+  epResult Render(RenderScene &spScene, const Double4x4 &mat) override { return pImpl->Render(spScene, mat); }
 
   // TODO: enable/visible/etc flags
 

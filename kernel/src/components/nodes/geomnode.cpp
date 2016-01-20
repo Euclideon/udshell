@@ -7,16 +7,18 @@
 namespace ep
 {
 
-epResult GeomNode::Render(RenderSceneRef &spScene, const Double4x4 &mat)
+epResult GeomNode::Render(RenderScene &spScene, const Double4x4 &mat)
 {
-  GeomJob &job = spScene->geom.pushBack();
+  GeomRenderJob &job = spScene.geom.pushBack();
 
   job.matrix = mat;
 
   MaterialRef spMat = spModel->GetMaterial();
 
+#if 0 // TODO : For Manu
   job.spProgram = spMat->GetRenderProgram();
   job.spVertexFormat = spModel->GetRenderVertexFormat(job.spProgram);
+#endif // 0
 
   // for each shader stream...
 /*

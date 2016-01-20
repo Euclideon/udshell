@@ -43,7 +43,7 @@ protected:
 
   bool InputEvent(const epInputEvent &ev) override final;
   bool Update(double timeStep) override final;
-  epResult Render(RenderSceneRef &spScene, const Double4x4 &mat) override final;
+  epResult Render(RenderScene &spScene, const Double4x4 &mat) override final;
 
   Node *pParent = nullptr;
   Array<NodeRef, 3> children;

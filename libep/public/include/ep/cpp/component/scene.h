@@ -29,7 +29,7 @@ inline void epFromVariant(const Variant &v, Bookmark *pBM)
   pBM->ypr = v["orientation"].as<Double3>();
 }
 
-SHARED_CLASS(RenderScene);
+SHARED_CLASS(RenderableScene);
 SHARED_CLASS(View);
 SHARED_CLASS(Scene);
 SHARED_CLASS(Camera);
@@ -56,7 +56,7 @@ public:
 
   NodeRef GetRootNode() const override { return pImpl->GetRootNode(); }
 
-  RenderSceneRef GetRenderScene() override { return pImpl->GetRenderScene(); }
+  RenderableSceneRef GetRenderScene() override { return pImpl->GetRenderScene(); }
 
   void MakeDirty() override { pImpl->MakeDirty(); }
 

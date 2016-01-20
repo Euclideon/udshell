@@ -12,7 +12,7 @@
 // TODO: Move this once the Scene Impl refactor is done.
 namespace ep {
 
-SHARED_CLASS(RenderScene);
+SHARED_CLASS(RenderableScene);
 SHARED_CLASS(View);
 SHARED_CLASS(Camera);
 
@@ -37,14 +37,14 @@ public:
 
   NodeRef GetRootNode() const override final { return rootNode; }
 
-  RenderSceneRef GetRenderScene() override final;
+  RenderableSceneRef GetRenderScene() override final;
 
-  Event<> Dirty;
+  static RenderableSceneRef Convert(RenderScene &renderScene);
 
   void MakeDirty()
   {
     bDirty = true;
-    Dirty.Signal();
+    pInstance->Dirty.Signal();
   }
 
 protected:
