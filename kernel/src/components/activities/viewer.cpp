@@ -63,7 +63,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   }
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
-  spView->impl_cast<ViewImpl>()->SetRenderOptions(options);
+  spView->GetImpl<ViewImpl>()->SetRenderOptions(options);
 
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);

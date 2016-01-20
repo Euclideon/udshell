@@ -111,8 +111,8 @@ public:
   const kernel::ComponentDesc* GetDescriptor() const { return (const kernel::ComponentDesc*)pInstance->GetDescriptor(); }
   kernel::Kernel* GetKernel() const { return (kernel::Kernel*)&pInstance->GetKernel(); }
 
-  template <typename T>
-  T* impl_cast() { return static_cast<T*>(this); }
+  C *pInstance;
+
 protected:
   template<typename T, bool b> friend struct internal::Destroy;
 
@@ -123,8 +123,6 @@ protected:
     : pInstance((C*)pInstance)
   {}
   virtual ~BaseImpl() {}
-
-  C *pInstance;
 };
 
 
@@ -197,6 +195,8 @@ public:                                                                         
   {                                                                                      \
     return { EP_APIVERSION, Version, ComponentID(), #Name, Description };                \
   }                                                                                      \
+  template <typename T>                                                                  \
+  T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \
 private:                                                                                 \
   UniquePtr<Impl> pImpl = nullptr;                                                       \
   UniquePtr<Impl> CreateImpl(Variant::VarMap initParams)                                 \

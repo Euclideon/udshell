@@ -54,7 +54,7 @@ public:
 
     if (pRenderView->dirty)
     {
-      spRenderView = pRenderView->spView->impl_cast<ViewImpl>()->GetRenderableView();
+      spRenderView = pRenderView->spView->GetImpl<ViewImpl>()->GetRenderableView();
       pRenderView->dirty = false;
     }
   }
@@ -140,7 +140,7 @@ void RenderView::keyPressEvent(QKeyEvent *pEv)
   ev.eventType = epInputEvent::Key;
   ev.key.key = kc;
   ev.key.state = 1;
-  if (spView && spView->impl_cast<ViewImpl>()->InputEvent(ev))
+  if (spView && spView->GetImpl<ViewImpl>()->InputEvent(ev))
     pEv->accept();
 }
 
@@ -155,7 +155,7 @@ void RenderView::keyReleaseEvent(QKeyEvent *pEv)
   ev.eventType = epInputEvent::Key;
   ev.key.key = kc;
   ev.key.state = 0;
-  if (spView && spView->impl_cast<ViewImpl>()->InputEvent(ev))
+  if (spView && spView->GetImpl<ViewImpl>()->InputEvent(ev))
     pEv->accept();
 }
 
@@ -184,7 +184,7 @@ void RenderView::mouseMoveEvent(QMouseEvent *pEv)
   ev.move.yDelta = (float)(mouseLastY - y);
   ev.move.xAbsolute = (float)x;
   ev.move.yAbsolute = (float)y;
-  if (spView && spView->impl_cast<ViewImpl>()->InputEvent(ev))
+  if (spView && spView->GetImpl<ViewImpl>()->InputEvent(ev))
     pEv->accept();
 
   mouseLastX = x;
@@ -199,7 +199,7 @@ void RenderView::mousePressEvent(QMouseEvent *pEv)
   ev.eventType = epInputEvent::Key;
   ev.key.key = pEv->button();
   ev.key.state = 1;
-  if (spView && spView->impl_cast<ViewImpl>()->InputEvent(ev))
+  if (spView && spView->GetImpl<ViewImpl>()->InputEvent(ev))
     pEv->accept();
 }
 
@@ -211,7 +211,7 @@ void RenderView::mouseReleaseEvent(QMouseEvent *pEv)
   ev.eventType = epInputEvent::Key;
   ev.key.key = pEv->button();
   ev.key.state = 0;
-  if (spView && spView->impl_cast<ViewImpl>()->InputEvent(ev))
+  if (spView && spView->GetImpl<ViewImpl>()->InputEvent(ev))
     pEv->accept();
 }
 
@@ -243,7 +243,7 @@ void RenderView::hoverMoveEvent(QHoverEvent *pEv)
   ev.move.yAbsolute = (float)y;
 
   if (spView)
-    spView->impl_cast<ViewImpl>()->InputEvent(ev);
+    spView->GetImpl<ViewImpl>()->InputEvent(ev);
 }
 
 } // namespace qt

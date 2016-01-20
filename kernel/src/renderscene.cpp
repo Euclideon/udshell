@@ -337,7 +337,7 @@ void Renderer::UDThread()
     void FinishJob(ep::Kernel *_pKernel)
     {
       ViewRef spView = job->spView;
-      spView->impl_cast<ViewImpl>()->SetLatestFrame(job);
+      spView->GetImpl<ViewImpl>()->SetLatestFrame(job);
       delete this;
     }
   };
