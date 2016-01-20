@@ -2,11 +2,10 @@
 #ifndef _EP_TEXT_H
 #define _EP_TEXT_H
 
-#include "components/resources/buffer.h"
+#include "ep/cpp/component/resource/buffer.h"
 #include "components/stream.h"
 
-namespace ep
-{
+namespace ep {
 
 SHARED_CLASS(Buffer);
 

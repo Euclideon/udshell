@@ -1,5 +1,5 @@
 #include "imagesource.h"
-#include "components/resources/array.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
 #include "hal/image.h"
 #include "kernel.h"
 

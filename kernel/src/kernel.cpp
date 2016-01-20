@@ -20,8 +20,8 @@
 #include "components/resourcemanager.h"
 #include "components/commandmanager.h"
 #include "components/project.h"
-#include "components/resources/buffer.h"
-#include "components/resources/array.h"
+#include "ep/cpp/component/resource/buffer.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
 #include "components/resources/text.h"
 #include "components/resources/menu.h"
 #include "components/resources/shader.h"
@@ -43,6 +43,8 @@
 #include "components/windowimpl.h"
 #include "components/activities/activityimpl.h"
 #include "components/resources/resourceimpl.h"
+#include "components/resources/bufferimpl.h"
+#include "components/resources/arraybufferimpl.h"
 #include "components/nodes/nodeimpl.h"
 #include "components/nodes/cameraimpl.h"
 #include "components/nodes/simplecameraimpl.h"
@@ -150,8 +152,8 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
 
   // resources
   pKernel->RegisterComponentType<Resource, ResourceImpl>();
-  pKernel->RegisterComponentType<Buffer>();
-  pKernel->RegisterComponentType<ArrayBuffer>();
+  pKernel->RegisterComponentType<Buffer, BufferImpl>();
+  pKernel->RegisterComponentType<ArrayBuffer, ArrayBufferImpl>();
   pKernel->RegisterComponentType<UDModel>();
   pKernel->RegisterComponentType<Shader>();
   pKernel->RegisterComponentType<Material>();

@@ -3,7 +3,7 @@
 #define _EP_IMAGESOURCE_H
 
 #include "components/datasource.h"
-#include "components/resources/array.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
 #include "components/stream.h"
 
 namespace ep

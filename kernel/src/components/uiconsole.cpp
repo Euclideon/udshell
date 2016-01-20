@@ -2,7 +2,7 @@
 #include "components/memstream.h"
 #include "components/broadcaster.h"
 #include "components/logger.h"
-#include "components/resources/buffer.h"
+#include "ep/cpp/component/resource/buffer.h"
 #include "components/commandmanager.h"
 #include "components/file.h"
 #include "ep/cpp/delegate.h"

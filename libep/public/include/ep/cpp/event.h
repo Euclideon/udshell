@@ -87,15 +87,15 @@ public:
         ErrorState *pError = GetError();
         if (pError)
         {
-          epDebugFormat("Unhandled exception from event handler: {0}", pError->message);
+          epDebugFormat("Unhandled exception from event handler: {0}\n", pError->message);
           ClearError();
         }
       }
       catch (std::exception &e) {
-        epDebugFormat("Unhandled exception from event handler: {0}", e.what());
+        epDebugFormat("Unhandled exception from event handler: {0}\n", e.what());
         ClearError();
       } catch (...) {
-        epDebugFormat("Unhandled C++ exception from event handler!");
+        epDebugFormat("Unhandled C++ exception from event handler!\n");
         ClearError();
       }
     }

@@ -3,7 +3,6 @@
 #define _EP_STREAM_H
 
 #include "broadcaster.h"
-#include "resources/buffer.h"
 
 namespace ep
 {
@@ -45,7 +44,7 @@ public:
 
   // TODO: support async operations?
   // TODO: remove support for sync operations?
-  
+
   Variant Save() const override { return Super::Save(); }
 
 protected:

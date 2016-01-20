@@ -126,12 +126,18 @@ static Variant ParseXMLNode(rapidxml::xml_node<> *node)
 
 Variant Text::ParseXml()
 {
+  Slice<const void> buffer = MapForRead();
+
   // RapidXML requires buffer to be null terminated
   if (buffer[buffer.length - 1] != '\0')
   {
+    Unmap();
     Resize(buffer.length + 1);
-    buffer[buffer.length - 1] = '\0';
+    Slice<void> write = Map();
+    write[buffer.length] = '\0';
+    buffer = write;
   }
+  epscope(exit) { Unmap(); };
 
   using namespace rapidxml;
 
