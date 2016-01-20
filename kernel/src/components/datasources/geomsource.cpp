@@ -2,9 +2,9 @@
 #include "ep/cpp/component/node/node.h"
 #include "components/nodes/geomnode.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
+#include "ep/cpp/component/resource/material.h"
 #include "components/resources/metadata.h"
 #include "components/resources/model.h"
-#include "components/resources/material.h"
 #include "hal/image.h"
 #include "kernel.h"
 

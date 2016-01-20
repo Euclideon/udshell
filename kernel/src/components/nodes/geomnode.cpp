@@ -3,6 +3,7 @@
 #include "renderresource.h"
 #include "kernel.h"
 #include "components/resources/model.h"
+#include "components/resources/materialimpl.h"
 
 namespace ep
 {
@@ -16,7 +17,7 @@ epResult GeomNode::Render(RenderScene &spScene, const Double4x4 &mat)
   MaterialRef spMat = spModel->GetMaterial();
 
 #if 0 // TODO : For Manu
-  job.spProgram = spMat->GetRenderProgram();
+  job.spProgram = spMat->GetImpl<MaterialImpl>()->GetRenderProgram();
   job.spVertexFormat = spModel->GetRenderVertexFormat(job.spProgram);
 #endif // 0
 

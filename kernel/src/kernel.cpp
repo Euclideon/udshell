@@ -24,8 +24,6 @@
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "components/resources/text.h"
 #include "components/resources/menu.h"
-#include "components/resources/shader.h"
-#include "components/resources/material.h"
 #include "components/resources/model.h"
 #include "components/resources/kvpstore.h"
 #include "components/resources/metadata.h"
@@ -45,6 +43,8 @@
 #include "components/resources/udmodelimpl.h"
 #include "components/resources/bufferimpl.h"
 #include "components/resources/arraybufferimpl.h"
+#include "components/resources/materialimpl.h"
+#include "components/resources/shaderimpl.h"
 #include "components/nodes/nodeimpl.h"
 #include "components/nodes/cameraimpl.h"
 #include "components/nodes/simplecameraimpl.h"
@@ -155,8 +155,8 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<Buffer, BufferImpl>();
   pKernel->RegisterComponentType<ArrayBuffer, ArrayBufferImpl>();
   pKernel->RegisterComponentType<UDModel, UDModelImpl>();
-  pKernel->RegisterComponentType<Shader>();
-  pKernel->RegisterComponentType<Material>();
+  pKernel->RegisterComponentType<Shader, ShaderImpl>();
+  pKernel->RegisterComponentType<Material, MaterialImpl>();
   pKernel->RegisterComponentType<Model>();
   pKernel->RegisterComponentType<Text>();
   pKernel->RegisterComponentType<Menu>();

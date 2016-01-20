@@ -16,7 +16,7 @@
 #include "hal/shader.h"
 
 #include "ep/cpp/component/resource/arraybuffer.h"
-#include "components/resources/shader.h"
+#include "ep/cpp/component/resource/shader.h"
 #include "components/resources/model.h"
 
 #include "renderresource.h"

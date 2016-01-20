@@ -4,7 +4,7 @@
 
 #include "ep/cpp/component/resource/resource.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
-#include "components/resources/material.h"
+#include "components/resources/materialimpl.h"
 #include "ep/cpp/sharedptr.h"
 
 namespace ep
