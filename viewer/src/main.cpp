@@ -74,7 +74,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
   udRenderOptions options = { sizeof(udRenderOptions), udRF_None, nullptr, nullptr, nullptr };
   options.flags = udRF_PointCubes | udRF_ClearTargets;
-  mData.spView->impl_cast<ViewImpl>()->SetRenderOptions(options);
+  mData.spView->GetImpl<ViewImpl>()->SetRenderOptions(options);
 
   mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
 

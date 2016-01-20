@@ -146,7 +146,7 @@ epResult SDLKernel::RunMainLoop()
     epInput_Update();
 
     // render a frame (this could move to another thread!)
-    RenderableViewRef spRenderView = spFocusView->impl_cast<ViewImpl>()->GetRenderableView();
+    RenderableViewRef spRenderView = spFocusView->GetImpl<ViewImpl>()->GetRenderableView();
     if (spRenderView)
       spRenderView->RenderGPU();
 

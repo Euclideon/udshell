@@ -37,10 +37,6 @@ public:
   void Deactivate() override { pImpl->Deactivate(); }
   void Resize(int width, int height) override { pImpl->Resize(width, height); }
 
-  // TODO: REMOVE THIS HACK
-  template<typename T>
-  T *impl_cast() { return pImpl->impl_cast<T>(); }
-
   Event<> Dirty;
   Event<> FrameReady;
   Event<bool> EnabledPickingChanged;
