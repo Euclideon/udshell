@@ -20,7 +20,7 @@ public:
   }
 
   ComponentRef GetMetadata() const override final;
-  ComponentRef GetDataSource() const override final { return source; }
+  DataSourceRef GetDataSource() const override final { return source; }
 
   Variant Save() const override final { return pInstance->InstanceSuper::Save(); }
 protected:
