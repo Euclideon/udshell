@@ -35,7 +35,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
         EPTHROW_ERROR(epR_Failure, "Failed to create model");
 
       UDModelImpl *pModelImpl = model->GetImpl<UDModelImpl>();
-      pModelImpl->spDataSource = ComponentRef(this);
+      pModelImpl->wpDataSource = SafePtr<DataSource>(this);
       pModelImpl->pOctree = pOctree;
 
       // Populate meta data

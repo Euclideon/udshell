@@ -37,8 +37,6 @@ public:
   UDRenderState GetUDRenderState() const { return pImpl->GetUDRenderState(); }
   DataSourceRef GetDataSource() const { return pImpl->GetDataSource(); }
 
-  int Load(String _name, bool useStreamer) { return pImpl->Load(_name, useStreamer); }
-
   // TODO: Revist the shader system.  Simple voxel shader is inadequate.
   Delegate<SimpleVoxelDlgt> GetSimpleVoxelDelegate() const { return pImpl->GetSimpleVoxelDelegate(); }
   void SetSimpleVoxelDelegate(Delegate<SimpleVoxelDlgt> del) { pImpl->SetSimpleVoxelDelegate(del); }

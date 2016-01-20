@@ -116,6 +116,17 @@ Kernel::Kernel()
   ep::s_pInstance = MakeInterface(this);
 }
 
+Kernel::~Kernel()
+{
+  if (instanceRegistry.begin() != instanceRegistry.end())
+  {
+    epDebugFormat("!!!WARNING: Some Components have not been freed\n");
+
+    for (const auto &c : instanceRegistry)
+      epDebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->GetName(), c.value->RefCount());
+  }
+}
+
 epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int renderThreadCount)
 {
   epResult result;
@@ -315,6 +326,7 @@ epResult Kernel::Destroy()
   spStdErrBC = nullptr;
   spStdOutBC = nullptr;
 
+  SetFocusView(nullptr);
   spCommandManager = nullptr;
   spResourceManager = nullptr;
   spLogger = nullptr;

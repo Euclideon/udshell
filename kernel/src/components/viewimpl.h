@@ -71,11 +71,12 @@ public:
 private:
   // TODO: REMOVE THESE FRIEND HACKS (IF POSSIBLE)
   friend class Renderer;
+  friend class kernel::Kernel;
 
   ~ViewImpl() { Deactivate(); }
 
   void OnDirty();
-  
+
   void SetLatestFrame(UniquePtr<RenderableView> spFrame);
   void Update(double timeStep)
   {

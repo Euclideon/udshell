@@ -137,7 +137,7 @@ void ViewImpl::OnDirty()
 void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
 {
   spLatestFrame = spFrame;
-  if (spLatestFrame->pickingEnabled)
+  if (spLatestFrame && spLatestFrame->pickingEnabled)
   {
     udRenderPick &pick = spLatestFrame->udPick;
     if (pick.found)

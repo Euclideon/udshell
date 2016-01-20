@@ -329,7 +329,7 @@ void Renderer::UDThread()
 {
   struct JobDone
   {
-    JobDone(const UniquePtr<RenderableView> &job) : job(job) {}
+    JobDone(UniquePtr<RenderableView> &job) : job(job) {}
 
     UniquePtr<RenderableView> job;
 

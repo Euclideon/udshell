@@ -1,4 +1,5 @@
 #include "hal/driver.h"
+#include "components/viewimpl.h"
 
 #if EPWINDOW_DRIVER == EPDRIVER_SDL
 
@@ -164,9 +165,14 @@ Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 
 ViewRef Kernel::SetFocusView(ViewRef spView)
 {
+  if (!spView)
+    spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
+
   ViewRef spOld = spFocusView;
   spFocusView = spView;
-  spFocusView->Resize(s_displayWidth, s_displayHeight);
+
+  if (spFocusView)
+    spFocusView->Resize(s_displayWidth, s_displayHeight);
   return spOld;
 }
 

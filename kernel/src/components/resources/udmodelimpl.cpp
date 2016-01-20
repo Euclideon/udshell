@@ -66,17 +66,4 @@ BoundingVolume UDModelImpl::GetBoundingVolume() const
   return vol;
 }
 
-int UDModelImpl::Load(String _name, bool useStreamer)
-{
-  epResult result = epR_Failure;
-  if (!spDataSource)
-  {
-    spDataSource = GetKernel()->CreateComponent<UDDataSource>({ { "src", _name },
-                                                              { "useStreamer", useStreamer },
-                                                              { "existingComponent", pInstance }
-                                                             } );
-  }
-  return (int)result;
-}
-
 } // namespace ep
