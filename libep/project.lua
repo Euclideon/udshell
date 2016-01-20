@@ -8,8 +8,6 @@ project "libep"
 	files { "public/**" }
 	files { "project.lua" }
 
-	includedirs { "../ud/udPlatform/Include" }
-
 	filter { "system:windows" }
 		buildoptions { "/MP" }
 	filter { }

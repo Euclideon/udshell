@@ -9,9 +9,6 @@ project "epviewer"
 	includedirs { "../public/include" }
 	includedirs { "../kernel/src" }
 
-	includedirs { "../ud/udPlatform/Include" }
-	includedirs { "../ud/udPointCloud/Include" }
-
 	links { "GLEW" }
 	links { "SDL2" }
 	links { "udPlatform" }

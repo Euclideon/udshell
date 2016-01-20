@@ -2,15 +2,6 @@
 
 #if EPUI_DRIVER == EPDRIVER_QT
 
-// Disabled Warnings
-#if defined(EP_COMPILER_VISUALC)
-# pragma warning(disable:4512) // assignment operator could not be generated
-#endif //defined(_MSC_VER)
-
-#include <QQuickItem>
-#include <QQuickWindow>
-#include <QQmlContext>
-
 #include "../epkernel_qt.h"
 #include "../util/qmlbindings_qt.h"
 #include "component_qt.h"
@@ -21,6 +12,10 @@
 #include "components/windowimpl.h"
 
 #include "../ui/renderview_qt.h"
+
+#include <QQuickItem>
+#include <QQuickWindow>
+#include <QQmlContext>
 
 namespace qt {
 namespace internal {

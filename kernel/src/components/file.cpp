@@ -2,12 +2,14 @@
 #include "components/broadcaster.h"
 #include "kernel.h"
 #if defined(EP_WINDOWS)
-#include <io.h>
-#include <share.h>
-#define close _close
-#define read _read
-#define write _write
-#define lseek _lseeki64
+# include <io.h>
+# include <share.h>
+# define close _close
+# define read _read
+# define write _write
+# define lseek _lseeki64
+#elif defined(EP_LINUX)
+# include <unistd.h>
 #endif
 
 #include <fcntl.h>

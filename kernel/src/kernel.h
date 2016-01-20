@@ -6,7 +6,6 @@
 #include "components/lua.h"
 #include "components/timer.h"
 #include "components/logger.h"
-#include "helpers.h"
 
 #include "ep/cpp/hashmap.h"
 #include "ep/cpp/kernel.h"

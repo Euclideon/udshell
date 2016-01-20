@@ -37,7 +37,7 @@ Variant epToVariant(QObject *pQObj)
   if (pQC)
     return Variant(pQC->GetComponent());
 
-  udDebugPrintf("TODO: epToVariant: Unsupported QObject conversion '%s'; we need a global pKernel pointer >_<", pQObj->metaObject()->className());
+  epDebugPrintf("TODO: epToVariant: Unsupported QObject conversion '%s'; we need a global pKernel pointer >_<", pQObj->metaObject()->className());
 
   // TODO: create generic QtComponent which thinly wraps a QObject
 //  pKernel->CreateComponent<QtComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
@@ -105,7 +105,7 @@ Variant epToVariant(const QVariant &var)
         return epToVariant(var.value<QJSValue>());
     }
     default:
-      udDebugPrintf("epToVariant: Unsupported type '%s' (support me!)\n", var.typeName());
+      epDebugPrintf("epToVariant: Unsupported type '%s' (support me!)\n", var.typeName());
       return Variant();
   }
 }
@@ -204,7 +204,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
     }
 
     default:
-      udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
+      epDebugPrintf("epFromVariant: Unsupported type '%d'\n", (int)variant.type());
   }
 }
 
@@ -269,7 +269,7 @@ Variant epToVariant(const QJSValue &v)
     return Variant(Variant::Type::Void);
   }
 
-  udDebugPrintf("epToVariant: Unsupported type!\n");
+  epDebugPrintf("epToVariant: Unsupported type!\n");
   return Variant();
 }
 
@@ -336,7 +336,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
       {
         if (!v.key.is(Variant::Type::String) && !v.key.is(Variant::Type::Int))
         {
-          udDebugPrintf("epFromVariant: Key is not string!\n");
+          epDebugPrintf("epFromVariant: Key is not string!\n");
           continue;
         }
         QJSValue value;
@@ -349,7 +349,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
     }
 
     default:
-      udDebugPrintf("epFromVariant: Unsupported type '%d'\n", variant.type());
+      epDebugPrintf("epFromVariant: Unsupported type '%d'\n", (int)variant.type());
   }
 }
 

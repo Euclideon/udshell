@@ -2,10 +2,10 @@
 
 #if EPUI_DRIVER == EPDRIVER_QT
 
+#include "window_qt.h"
+
 #include <QQuickWindow>
 #include <QQuickItem>
-
-#include "window_qt.h"
 
 namespace qt {
 

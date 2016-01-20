@@ -7,8 +7,10 @@
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/camera.h"
 
-#include "udRender.h"
+#include "kernel.h"
 #include "renderscene.h"
+
+#include "udRender.h"
 
 
 namespace ep {

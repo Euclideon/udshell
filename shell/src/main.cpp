@@ -3,6 +3,7 @@
 #include "driver/qt/util/typeconvert_qt.h"
 
 #include "kernel.h"
+#include "helpers.h"
 #include "components/logger.h"
 #include "ep/cpp/component/window.h"
 #include "ep/cpp/component/uicomponent.h"
@@ -50,7 +51,7 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
   else
   {
-    udDebugPrintf("Qt Dbg: %s (%s:%d, %s)\n", msg.toUtf8().data(), context.file, context.line, context.function);
+    epDebugPrintf("Qt Dbg: %s (%s:%d, %s)\n", msg.toUtf8().data(), context.file, context.line, context.function);
   }
 }
 
@@ -318,8 +319,6 @@ void Init(String sender, String message, const Variant &data)
 // ---------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  udMemoryDebugTrackingInit();
-
   if (argc > 1)
     projFilePath.append(argv[1]);
 
@@ -331,27 +330,38 @@ int main(int argc, char *argv[])
   // 5.5 uses this by default
   qputenv("QSG_RENDER_LOOP", "threaded");
 
-  // create a kernel
-  epResult r = kernel::Kernel::Create(&pKernel, udParseCommandLine(argc, argv), 8);
-  if (r == epR_Failure)
+  try
   {
-    // TODO: improve error handling/reporting
-    udDebugPrintf("Error creating Kernel\n");
+    // create a kernel
+    int threadCount = epGetHardwareThreadCount() - 1;
+    epResult r = kernel::Kernel::Create(&pKernel, epParseCommandLine(argc, argv), threadCount);
+    if (r == epR_Failure)
+    {
+      // TODO: improve error handling/reporting
+      epDebugPrintf("Error creating Kernel\n");
+      return 1;
+    }
+
+    pKernel->RegisterMessageHandler("init", &Init);
+    pKernel->RegisterMessageHandler("deinit", &Deinit);
+
+    if (pKernel->RunMainLoop() != epR_Success)
+    {
+      // TODO: improve error handling/reporting
+      epDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
+      return 1;
+    }
+  }
+  catch (std::exception &e)
+  {
+    epDebugFormat("Unhandled exception: {0}\n", e.what());
     return 1;
   }
-
-  pKernel->RegisterMessageHandler("init", &Init);
-  pKernel->RegisterMessageHandler("deinit", &Deinit);
-
-  if (pKernel->RunMainLoop() != epR_Success)
+  catch (...)
   {
-    // TODO: improve error handling/reporting
-    udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
+    epDebugWrite("Unhandled exception!\n");
     return 1;
   }
-
-  udMemoryOutputLeaks();
-  udMemoryDebugTrackingDeinit();
 
   return 0;
 }

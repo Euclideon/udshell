@@ -7,11 +7,11 @@
 
 #include "ep/cpp/component/resource/udmodel.h"
 #include "ep/cpp/component/datasource/datasource.h"
-#include "udRender.h"
-#include "kernel.h"
 #include "ep/cpp/delegate.h"
 #include "ep/cpp/boundingvolume.h"
 #include "ep/cpp/rect.h"
+#include "kernel.h"
+#include "udRender.h"
 
 
 namespace ep {

@@ -6,7 +6,6 @@
 #include "ep/cpp/rect.h"
 #include "ep/cpp/render.h"
 
-
 namespace ep {
 
 SHARED_CLASS(DataSource);
