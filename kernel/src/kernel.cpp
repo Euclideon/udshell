@@ -11,7 +11,6 @@
 #include "components/logger.h"
 #include "components/timer.h"
 #include "components/uiconsole.h"
-#include "components/datasource.h"
 #include "components/nodes/geomnode.h"
 #include "components/nodes/udnode.h"
 #include "components/pluginmanager.h"
@@ -49,6 +48,7 @@
 #include "components/nodes/cameraimpl.h"
 #include "components/nodes/simplecameraimpl.h"
 #include "components/sceneimpl.h"
+#include "components/datasources/datasourceimpl.h"
 
 #include "renderscene.h"
 #include "eplua.h"
@@ -128,7 +128,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
 
   // register all the builtin component types
   pKernel->RegisterComponentType<Component, ComponentImpl>();
-  pKernel->RegisterComponentType<DataSource>();
+  pKernel->RegisterComponentType<DataSource, DataSourceImpl>();
   pKernel->RegisterComponentType<Broadcaster>();
   pKernel->RegisterComponentType<Stream>();
   pKernel->RegisterComponentType<File>();

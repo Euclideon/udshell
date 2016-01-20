@@ -2,7 +2,7 @@
 #if !defined(_EP_IMAGESOURCE_H)
 #define _EP_IMAGESOURCE_H
 
-#include "components/datasource.h"
+#include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "components/stream.h"
 

@@ -58,7 +58,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
 
       result = udOctree_GetLocalMatrixF64(pModelImpl->pOctree, pModelImpl->udmatrix.a);
       if (result == udR_Success)
-        resources.Insert(source->asString(), model);
+        SetResource(source->asString(), model);
     }
   }
 }

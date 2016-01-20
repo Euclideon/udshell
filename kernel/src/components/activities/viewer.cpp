@@ -8,7 +8,7 @@
 #include "components/nodes/udnode.h"
 #include "components/timer.h"
 #include "ep/cpp/component/resource/udmodel.h"
-#include "components/datasource.h"
+#include "ep/cpp/component/datasource/datasource.h"
 #include "components/resourcemanager.h"
 #include "components/commandmanager.h"
 
@@ -164,7 +164,7 @@ Variant Viewer::Save() const
     params.Insert("camera", spCamera->Save());
 
   if (spModel)
-    params.Insert("model", spModel->GetDataSource()->GetProperty("url")); // TODO Change to GetURL() once DataSource made public
+    params.Insert("model", spModel->GetDataSource()->GetURL());
 
   if (spScene)
     params.Insert("scene", spScene->Save());

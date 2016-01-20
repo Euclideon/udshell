@@ -112,7 +112,7 @@ void GeomSource::Create(StreamRef spSource)
     aiMatrix4x4 world;
     size_t numMeshes = 0;
     NodeRef spRoot = ParseNode(pScene, pScene->mRootNode, &world, numMeshes);
-    resources.Insert("scene0", spRoot);
+    SetResource("scene0", spRoot);
   }
 
   epFree(pBuffer);
@@ -160,7 +160,7 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
     }
 
     // add resource
-    resources.Insert(SharedString::concat("material", i), spMat);
+    SetResource(SharedString::concat("material", i), spMat);
   }
 }
 
@@ -177,11 +177,11 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     ModelRef spMesh = GetKernel().CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
 
     // get material
-    ResourceRef *pspMat = resources.Get(SharedString::concat("material", mesh.mMaterialIndex));
-    if (pspMat)
+    ResourceRef spMat = GetResource(SharedString::concat("material", mesh.mMaterialIndex));
+    if (spMat)
     {
-      spMesh->SetMaterial(component_cast<Material>(*pspMat));
-      LogDebug(4, "  Material: {0} ({1})", mesh.mMaterialIndex, (*pspMat)->GetName());
+      spMesh->SetMaterial(component_cast<Material>(spMat));
+      LogDebug(4, "  Material: {0} ({1})", mesh.mMaterialIndex, spMat->GetName());
     }
     else
     {
@@ -196,7 +196,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     ArrayBufferRef spVerts = GetKernel().CreateComponent<ArrayBuffer>();
     spVerts->AllocateFromData<VertPos>(verts);
 
-    resources.Insert(SharedString::concat("positions", i), spVerts);
+    SetResource(SharedString::concat("positions", i), spVerts);
 
     spMesh->SetVertexArray(spVerts, { "a_position" });
 
@@ -209,7 +209,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       ArrayBufferRef spNormals = GetKernel().CreateComponent<ArrayBuffer>();
       spNormals->AllocateFromData<VertNorm>(normals);
 
-      resources.Insert(SharedString::concat("normals", i), spNormals);
+      SetResource(SharedString::concat("normals", i), spNormals);
 
       spMesh->SetVertexArray(spNormals, { "a_normal" });
     }
@@ -234,7 +234,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       }
       spBinTan->Unmap();
 
-      resources.Insert(SharedString::concat("binormalstangents", i), spBinTan);
+      SetResource(SharedString::concat("binormalstangents", i), spBinTan);
 
       spMesh->SetVertexArray(spBinTan, { "a_binormal", "a_tangent" });
     }
@@ -248,7 +248,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       ArrayBufferRef spUVs = GetKernel().CreateComponent<ArrayBuffer>();
       spUVs->AllocateFromData<VertUV>(uvs);
 
-      resources.Insert(SharedString::concat("uvs", i, "_", t), spUVs);
+      SetResource(SharedString::concat("uvs", i, "_", t), spUVs);
 
       spMesh->SetVertexArray(spUVs, { SharedString::concat("a_uv", t) });
     }
@@ -262,7 +262,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       ArrayBufferRef spColors = GetKernel().CreateComponent<ArrayBuffer>();
       spColors->AllocateFromData<VertColor>(colors);
 
-      resources.Insert(SharedString::concat("colors", i, "_", c), spColors);
+      SetResource(SharedString::concat("colors", i, "_", c), spColors);
 
       spMesh->SetVertexArray(spColors, { SharedString::concat("a_color", c) });
     }
@@ -284,12 +284,12 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     EPASSERT(pIndices - indices.ptr == (ptrdiff_t)indices.length, "Wrong number of indices?!");
     spIndices->Unmap();
 
-    resources.Insert(SharedString::concat("indices", i), spIndices);
+    SetResource(SharedString::concat("indices", i), spIndices);
 
     spMesh->SetIndexArray(spIndices);
 
     // add mesh resource
-    resources.Insert(SharedString::concat("mesh", i), spMesh);
+    SetResource(SharedString::concat("mesh", i), spMesh);
   }
 }
 
@@ -319,17 +319,17 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   // parse node mesh
   for (uint32_t i = 0; i<node.mNumMeshes; ++i)
   {
-    ResourceRef *pspMesh = resources.Get(SharedString::concat("mesh", node.mMeshes[i]));
-    if (pspMesh)
+    ResourceRef spMesh = GetResource(SharedString::concat("mesh", node.mMeshes[i]));
+    if (spMesh)
     {
       // create geom node
       GeomNodeRef spGeomNode = GetKernel().CreateComponent<GeomNode>();
-      spGeomNode->SetModel(shared_pointer_cast<Model>(*pspMesh));
+      spGeomNode->SetModel(shared_pointer_cast<Model>(spMesh));
 
       // add geom node to world node (we could collapse this if there is only one mesh...)
       spNode->AddChild(spGeomNode);
 
-      LogDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], (*pspMesh)->GetName());
+      LogDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], spMesh->GetName());
     }
     else
     {

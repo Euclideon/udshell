@@ -8,13 +8,14 @@
 namespace ep {
 
 SHARED_CLASS(Resource);
+SHARED_CLASS(DataSource);
 
 class Resource : public Component, public IResource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Resource, IResource, Component, EPKERNEL_PLUGINVERSION, "Base resource")
 public:
   ComponentRef GetMetadata() const override { return pImpl->GetMetadata(); } // TODO Change ComponentRef to Metadata once Metadata made public
-  ComponentRef GetDataSource() const override { return pImpl->GetDataSource(); } // TODO Change ComponentRef to DataSourceRef once DataSource made public
+  DataSourceRef GetDataSource() const override { return pImpl->GetDataSource(); }
 
   Variant Save() const override { return pImpl->Save(); }
 

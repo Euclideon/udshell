@@ -35,7 +35,7 @@ public:
   BoundingVolume GetBoundingVolume() const { return pImpl->GetBoundingVolume(); }
 
   UDRenderState GetUDRenderState() const { return pImpl->GetUDRenderState(); }
-  ComponentRef GetDataSource() const { return pImpl->GetDataSource(); }
+  DataSourceRef GetDataSource() const { return pImpl->GetDataSource(); }
 
   int Load(String _name, bool useStreamer) { return pImpl->Load(_name, useStreamer); }
 
