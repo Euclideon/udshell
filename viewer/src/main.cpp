@@ -6,7 +6,7 @@
 #include "components/viewimpl.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/simplecamera.h"
-#include "components/nodes/udnode.h"
+#include "ep/cpp/component/node/udnode.h"
 #include "ep/cpp/component/resource/udmodel.h"
 
 using namespace kernel;

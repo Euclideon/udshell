@@ -1,4 +1,4 @@
-#include "udnode.h"
+#include "udnodeimpl.h"
 #include "udOctree.h"
 #include "renderscene.h"
 #include "kernel.h"
@@ -9,7 +9,7 @@
 namespace ep
 {
 
-epResult UDNode::Render(RenderScene &spScene, const Double4x4 &mat)
+epResult UDNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
 {
   UDRenderJob &job = spScene.ud.pushBack();
   job.spModel = spModel;
