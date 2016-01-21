@@ -3,11 +3,11 @@
 #include "ep/cpp/string.h"
 #include "ep/cpp/error.h"
 #include "ep/cpp/component/scene.h"
+#include "ep/cpp/component/view.h"
 #include "ep/cpp/component/node/simplecamera.h"
 #include "ep/cpp/component/resource/udmodel.h"
 #include "kernel.h"
 #include "helpers.h"
-#include "components/viewimpl.h"
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/node/udnode.h"
 #include "components/resourcemanager.h"
@@ -33,7 +33,7 @@ static struct
   SimpleCameraRef spSimpleCamera;
   UDNodeRef spUDNode;
 } mData = {
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
                "/src/data/DirCube.uds", // filename
 #else
                "~/src/udshell/data/DirCube.upc", // filename
@@ -72,9 +72,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
   EPTHROW_IF_NULL(mData.spUDNode, epR_Failure, "!");
   epscope(fail) { mData.spUDNode = nullptr; };
 
-  udRenderOptions options = { sizeof(udRenderOptions), udRF_None, nullptr, nullptr, nullptr };
-  options.flags = udRF_PointCubes | udRF_ClearTargets;
-  mData.spView->GetImpl<ViewImpl>()->SetRenderOptions(options);
+  mData.spView->SetUDRenderFlags(UDRenderFlags::PointCubes | UDRenderFlags::ClearTargets);
 
   mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
 
@@ -130,7 +128,7 @@ int main(int argc, char* argv[])
   epResult result = epR_Failure;
   try
   {
-    result = kernel::Kernel::Create(&mData.pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
+    result = kernel::Kernel::Create(&mData.pKernel, epParseCommandLine(argc, argv), mData.rendererThreadCount);
     if (result != epR_Success)
       return -1;
 

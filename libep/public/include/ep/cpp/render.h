@@ -39,6 +39,22 @@ struct UDRenderJob
   UDRenderState renderState;
 };
 
+EP_BITFIELD(UDRenderFlags,
+  NoOrtho,
+  RenderMask,
+  RenderImmediate,
+  RenderCellBounds,
+  ClearTargets,
+  ForceZCompare,
+  QuickTest,
+  PointCubes,
+  DisablePatch,
+  ForceSingleRoot,
+  Patch2PixelOpt,
+  Transparent,
+  SynchronousStream
+  );
+
 struct GeomRenderJob
 {
   Double4x4 matrix;

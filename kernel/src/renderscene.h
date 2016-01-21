@@ -71,6 +71,7 @@ struct GeomJob
 class RenderableScene : public RefCounted
 {
 public:
+  udRenderFlags renderFlags;
   Array<UDJob, 4> ud;
   Array<GeomJob, 16> geom;
 };

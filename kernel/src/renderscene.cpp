@@ -157,6 +157,7 @@ epResult udRenderScene_DeinitRender(Kernel*)
 RenderableView::RenderableView()
 {
   memset(&options, 0, sizeof(options));
+  options.size = sizeof(udRenderOptions);
 };
 
 RenderableView::~RenderableView()
@@ -190,6 +191,8 @@ void RenderableView::RenderUD()
 
     udRender_SetMatrixF64(pRenderView, udRMT_Projection, projection.a);
     udRender_SetMatrixF64(pRenderView, udRMT_Camera, camera.a);
+
+    options.flags = spScene->renderFlags;
 
     if (pickingEnabled)
       options.pick = &udPick;

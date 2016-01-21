@@ -3,7 +3,6 @@
 #define EPVIEWIMPL_H
 
 #include "ep/cpp/component/view.h"
-#include "ep/cpp/internal/i/iview.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/camera.h"
 
@@ -11,7 +10,6 @@
 #include "renderscene.h"
 
 #include "udRender.h"
-
 
 namespace ep {
 
@@ -47,6 +45,10 @@ public:
   void Activate() override final { GetKernel()->UpdatePulse.Subscribe(Delegate<void(double)>(this, &ViewImpl::Update)); }
   void Deactivate() override final { GetKernel()->UpdatePulse.Unsubscribe(Delegate<void(double)>(this, &ViewImpl::Update)); }
   void GoToBookmark(String bookmarkName) override final;
+
+  // TODO: Move this into the layer system once its implemented.
+  void SetUDRenderFlags(UDRenderFlags flags) { renderFlags = flags; }
+  UDRenderFlags GetUDRenderflags() const { return renderFlags; }
 
   // TODO: Implement this/expose to the public api
   struct PickResult
@@ -108,6 +110,8 @@ private:
   udRenderOptions options;
 
   bool pickingEnabled = false;
+
+  UDRenderFlags renderFlags;
 
   // TODO: RequestPick uses this but needs to be implemented
   /*struct PickRequest
