@@ -222,7 +222,7 @@ private:                                                                        
   []() -> void* {                                                                        \
     struct Shim                                                                          \
     {                                                                                    \
-      void set(Variant v)                                                                \
+      void set(const Variant &v)                                                         \
       {                                                                                  \
         using PT = function_traits<decltype(&This::Setter)>::template arg<0>::type;      \
         try {                                                                            \
