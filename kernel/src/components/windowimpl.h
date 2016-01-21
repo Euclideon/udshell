@@ -11,7 +11,7 @@ class WindowImpl : public BaseImpl<Window, IWindow>
 {
 public:
   WindowImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance)
+    : ImplSuper(pInstance)
   {
     CreateInternal(initParams);
   }

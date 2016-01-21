@@ -14,7 +14,7 @@ class MaterialImpl : public BaseImpl<Material, IMaterial>
 {
 public:
   MaterialImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance)
+    : ImplSuper(pInstance)
   {
   }
 
@@ -31,7 +31,7 @@ public:
   void SetCullMode(CullMode _cullMode) override final { cullMode = _cullMode; }
 
   void SetMaterialProperty(SharedString property, const Float4 &val) { properties.Insert(property, val); }
-  
+
 protected:
   EP_FRIENDS_WITH_IMPL(GeomNode);
 

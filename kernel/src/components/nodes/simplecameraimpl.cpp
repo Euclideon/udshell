@@ -10,7 +10,7 @@ static int mouseRemap[] = { -1, 0, 2, -1, 1 };
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initParams)
-  : Super(pInstance)
+  : ImplSuper(pInstance)
 {
   memset(keyState, 0, sizeof(keyState));
   const Variant *paramPos = initParams.Get("position");
@@ -248,7 +248,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
   while (ypr.x >= EP_2PI)
     ypr.x -= EP_2PI;
 
-  Double4x4 cam = pInstance->InstanceSuper::GetCameraMatrix();
+  Double4x4 cam = pInstance->Super::GetCameraMatrix();
 
   Double3 forward = cam.axis.y.toVector3();
   Double3 xAxis = cam.axis.x.toVector3();
@@ -259,7 +259,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
   pos += xAxis*tx*tmpSpeed;
   pos.z += tz*tmpSpeed;
 
-  pInstance->InstanceSuper::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
+  pInstance->Super::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
 
   mouse.delta = {0 , 0};
 
@@ -276,7 +276,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
 Variant SimpleCameraImpl::Save() const
 {
-  Variant var = pInstance->InstanceSuper::Save();
+  Variant var = pInstance->Super::Save();
   Variant::VarMap params = var.asAssocArray();
 
   params.Insert("speed", speed);

@@ -18,7 +18,7 @@ class NodeImpl : public BaseImpl<Node, INode>
 {
 public:
   NodeImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance)
+    : ImplSuper(pInstance)
   {}
 
   virtual void SetMatrix(const Double4x4 &mat) override final { matrix = mat; }
@@ -37,7 +37,7 @@ public:
 
   void CalculateWorldMatrix(Double4x4 *pMatrix) const override final;
 
-  Variant Save() const override final { return pInstance->InstanceSuper::Save(); }
+  Variant Save() const override final { return pInstance->Super::Save(); }
 protected:
   friend class Scene;
 

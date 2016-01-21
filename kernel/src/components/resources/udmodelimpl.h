@@ -23,7 +23,7 @@ class UDModelImpl : public BaseImpl<UDModel, IUDModel>
 public:
   friend class SceneImpl;
   UDModelImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance) {}
+    : ImplSuper(pInstance) {}
   virtual ~UDModelImpl();
 
   uint32_t GetStartingRoot() const { return startingRoot; }
