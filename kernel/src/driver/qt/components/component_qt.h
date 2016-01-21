@@ -23,7 +23,7 @@ class QtEPComponent : public QObject
 
 public:
   QtEPComponent() : QObject(nullptr), pComponent(nullptr) {}
-  QtEPComponent(ep::ComponentRef spComponent) : QObject(nullptr), spComponent(spComponent) { pComponent = spComponent.ptr(); }
+  QtEPComponent(const ep::ComponentRef &spComponent) : QObject(nullptr), spComponent(spComponent) { pComponent = spComponent.ptr(); }
   QtEPComponent(const QtEPComponent &val) : QObject(val.parent()), spComponent(ep::ComponentRef(val.pComponent)), pComponent(val.pComponent) {}
   ~QtEPComponent() {}
 

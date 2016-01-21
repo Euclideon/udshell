@@ -101,7 +101,7 @@ inline void SetterShim::set(ep::Component *pThis, const Variant &value) const
   if (data)
   {
     // indirect call with metadata
-    FastDelegate<void(const RefCounted &, Variant)> d;
+    FastDelegate<void(const RefCounted &, const Variant &value)> d;
     const void **pD = (const void**)&d;
     pD[0] = pThis;
     pD[1] = pSetter;
@@ -110,7 +110,7 @@ inline void SetterShim::set(ep::Component *pThis, const Variant &value) const
   else
   {
     // hack to force construct a delegate
-    FastDelegate<void(Variant)> d;
+    FastDelegate<void(const Variant &value)> d;
     const void **pD = (const void**)&d;
     pD[0] = pThis;
     pD[1] = pSetter;
