@@ -322,6 +322,9 @@ Item {
                   event.accepted = true;
                 }
                 else if(event.key === Qt.Key_Up) {
+                  if(cursorRectangle.y != positionToRectangle(0).y)
+                    return;
+
                   var historyText = text;
                   do {
                     if(Math.abs(historyIndex) >= thisComponent.get("historylength"))
@@ -333,6 +336,7 @@ Item {
                   } while(historyText == text);
 
                   if(historyText != text) {
+                    cursorPosition = 0;
                     text = historyText;
                     cursorPosition = text.length;
                   }
@@ -340,6 +344,9 @@ Item {
                   event.accepted = true;
                 }
                 else if(event.key === Qt.Key_Down) {
+                  if(cursorRectangle.y != positionToRectangle(length).y)
+                    return;
+
                   var historyText = "";
                   do {
                     if(historyIndex < 0) {
@@ -352,6 +359,7 @@ Item {
                   } while(historyText != "" && historyText == text);
 
                   if(historyText != text) {
+                    cursorPosition = 0;
                     text = historyText;
                     cursorPosition = text.length;
                   }
