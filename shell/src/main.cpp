@@ -9,7 +9,7 @@
 #include "ep/cpp/component/uicomponent.h"
 #include "components/uiconsole.h"
 #include "components/project.h"
-#include "components/activities/viewer.h"
+#include "ep/cpp/component/activity.h"
 #include "ep/cpp/component/resource/menu.h"
 #include "ep/cpp/component/commandmanager.h"
 #include "components/file.h"
@@ -115,11 +115,11 @@ void OnActivityChanged(String uid)
     return;
   }
 
-  ViewerRef spViewer = component_cast<Viewer>(spActivity);
-  if (spViewer)
+  // TODO Remember to move this to the QML
+  if (spActivity->GetType().eq("viewer"))
   {
-    spTopLevelUI->SetProperty("simplecamera", spViewer->GetSimpleCamera());
-    spTopLevelUI->SetProperty("view", spViewer->GetView());
+    spTopLevelUI->SetProperty("simplecamera", spActivity->GetProperty("simplecamera"));
+    spTopLevelUI->SetProperty("view", spActivity->GetProperty("view"));
   }
 
   spProject->SetActiveActivity(spActivity);
@@ -151,12 +151,6 @@ void NewProject(String filePath)
   spMenu->SetItemProperties("File/Save Project As...", { { "enabled", true } });
   spToolBar->SetItemProperties("Save Project", { { "enabled", true } });
   spToolBar->SetItemProperties("Save Project As...", { { "enabled", true } });
-
-  spMessageBox->CallMethod("show", Variant::VarMap{
-    { "title", "Some title" },
-    { "text", "Some text" },
-    { "iconType", Variant(MBIconType::Warning) }
-  });
 }
 
 void OpenProject(String filePath)

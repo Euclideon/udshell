@@ -21,7 +21,7 @@
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
 #include "components/datasources/uddatasource.h"
-#include "components/activities/viewer.h"
+//#include "components/activities/viewer.h"
 
 // Components that do the Impl dance
 #include "components/componentimpl.h"
@@ -183,7 +183,7 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
 
   // activities
   pKernel->RegisterComponentType<Activity, ActivityImpl>();
-  pKernel->RegisterComponentType<Viewer>();
+  //pKernel->RegisterComponentType<Viewer>();
 
   // init the HAL
   EPTHROW_IF(epHAL_Init() != epR_Success, epR_Failure, "epHAL_Init() failed");
@@ -232,6 +232,7 @@ void Kernel::DoInit(Kernel *pKernel)
   pKernel->spRenderer = SharedPtr<Renderer>::create(pKernel, renderThreadCount);
 
   // init the components
+  bInternalInitComplete = true;
   pKernel->InitComponents();
 
   // prepare the plugins
@@ -255,7 +256,9 @@ void Kernel::DoInit(Kernel *pKernel)
 
 void Kernel::LoadPlugins()
 {
-  Slice<String> pluginFilenames;
+  Array<String> pluginFilenames;
+
+  pluginFilenames.pushBack("bin/Debug_x64/vieweractivity.dll");
 
   // TODO: scan nominated plugin folder and build list of all plugins
 
@@ -488,6 +491,9 @@ const ep::ComponentDesc* Kernel::RegisterComponentType(const ep::ComponentDesc &
 
   // add to registry
   componentRegistry.Insert(desc.info.id, ComponentType{ pDesc, 0 });
+
+  if (bInternalInitComplete && pDesc->pInit)
+    pDesc->pInit(this);
 
   return pDesc;
 }
