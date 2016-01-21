@@ -47,27 +47,20 @@ public:
   Variant Save() const override final { return pInstance->Super::Save(); }
 
 protected:
+  friend class Renderer;
   friend class GeomNode;
 
   void OnBufferDirty()
   {
-    spRenderData = nullptr;
+    spCachedRenderData = nullptr;
   }
-
-  enum class RenderResourceType
-  {
-    VertexArray,
-    IndexArray,
-    Texture,
-  };
-  RenderResourceRef GetRenderResource(RenderResourceType type);
 
   SharedString elementType;
   size_t elementSize;
   size_t dimensions;
   size_t shape[4];
 
-  RenderResourceRef spRenderData;
+  SharedPtr<RefCounted> spCachedRenderData;
 };
 
 } // namespace ep

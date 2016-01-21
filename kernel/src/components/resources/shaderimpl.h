@@ -22,12 +22,12 @@ public:
 
 protected:
   EP_FRIENDS_WITH_IMPL(Material);
+  friend class Renderer;
   friend class RenderShader;
 
-  RenderShaderRef GetRenderShader(int type);
-
   SharedString code;
-  RenderShaderRef spRenderShader = nullptr;
+
+  SharedPtr<RefCounted> spCachedShader;
 };
 
 } // namespace ep

@@ -504,15 +504,15 @@ extern "C" void epAssertFailed(epString condition, epString message, epString fi
 #   define EPRELASSERT(condition, message) do { if (!(condition)) { epAssertFailed(#condition, message, __FILE__, __LINE__); DebugBreak(); } } while (0)
 #   define IF_EPRELASSERT(x) x
 # else
-#   define EPRELASSERT(condition, message) // TODO: Make platform-specific __assume(condition)
+#   define EPRELASSERT(condition, message) do {} while(0) // TODO: Make platform-specific __assume(condition)
 #   define IF_EPRELASSERT(x)
 # endif
 
 #else // EPASSERT_ON
 
-# define EPASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
+# define EPASSERT(condition, ...) do {} while(0) // TODO: Make platform-specific __assume(condition)
 # define IF_EPASSERT(x)
-# define EPRELASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
+# define EPRELASSERT(condition, ...) do {} while(0) // TODO: Make platform-specific __assume(condition)
 # define IF_EPRELASSERT(x)
 
 #endif // EPASSERT_ON

@@ -4,10 +4,9 @@ namespace ep {
 
 bool BufferImpl::Reserve(size_t size)
 {
-  if (mapDepth > 0)
-    return false; // TODO Error handling
+  EPTHROW_IF(mapDepth > 0, epR_ResourceInUse, "Buffer is mapped for {0}", readMap ? "reading" : "writing");
 
-  if (size < buffer.length)
+  if (size <= buffer.length)
     return true;
 
   Free();

@@ -11,8 +11,6 @@
 
 namespace ep {
 
-SHARED_CLASS(RenderResource);
-
 SHARED_CLASS(ArrayBuffer);
 
 class ArrayBuffer : public Buffer, public IArrayBuffer
@@ -80,7 +78,7 @@ public:
   Slice<const T> MapForRead()
   {
     EPASSERT(stringof<T>().eq(GetElementType()), "Incompatible type!");
-    Slice<void> buffer = Buffer::MapForRead();
+    Slice<const void> buffer = Buffer::MapForRead();
     return Slice<const T>((const T*)buffer.ptr, buffer.length/sizeof(T));
   }
 

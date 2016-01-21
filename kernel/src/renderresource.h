@@ -3,8 +3,10 @@
 #define EPRENDERRESOURCE_H
 
 #include "ep/cpp/component/resource/arraybuffer.h"
-#include "components/resources/model.h"
+#include "ep/cpp/component/resource/model.h"
+#include "ep/cpp/component/resource/shader.h"
 #include "hal/shader.h"
+#include "hal/texture.h"
 
 struct epFormatDeclaration;
 struct epArrayElement;
@@ -13,8 +15,7 @@ struct epTexture;
 struct epShader;
 struct epShaderProgram;
 
-namespace ep
-{
+namespace ep {
 
 class Renderer;
 
@@ -22,17 +23,6 @@ enum class ArrayUsage
 {
   VertexData,
   IndexData
-};
-
-enum class TextureUsage
-{
-  _1D,
-  _1DArray,
-  _2D,
-  _2DArray,
-  _Cube,
-  _CubeArray,
-  _3D,
 };
 
 // base render resource
@@ -62,10 +52,12 @@ SHARED_CLASS(RenderArray);
 class RenderTexture : public RenderResource
 {
 public:
-  RenderTexture(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, TextureUsage usage);
+  RenderTexture(Renderer *pRenderer, ArrayBufferRef spArrayBuffer);
   virtual ~RenderTexture();
 
   epTexture *pTexture;
+  epTextureType usage;
+  epImageFormat format;
 };
 SHARED_CLASS(RenderTexture);
 

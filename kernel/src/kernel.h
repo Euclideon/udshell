@@ -136,6 +136,7 @@ protected:
   AVLTree<String, const ep::ComponentDesc *> extensionsRegistry;
 
   Renderer *pRenderer = nullptr;
+  int renderThreadCount;
 
   LuaRef spLua = nullptr;
 

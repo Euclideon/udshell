@@ -5,8 +5,7 @@
 #include "hal/shader.h"
 #include "components/resources/shaderimpl.h"
 
-namespace ep
-{
+namespace ep {
 
 static epArrayDataFormat GetElementType(String type)
 {
@@ -80,14 +79,43 @@ RenderArray::~RenderArray()
   epVertex_DestroyArrayBuffer(&pArray);
 }
 
-RenderTexture::RenderTexture(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, TextureUsage usage)
+RenderTexture::RenderTexture(Renderer *pRenderer, ArrayBufferRef spArrayBuffer)
   : RenderResource(pRenderer)
 {
-//  pTexture = epTexture_CreateTexture();
+  auto shape = spArrayBuffer->GetShape();
+
+  // TODO: we need to support cubemap, and array textures here (additional args?)
+  switch (shape.length)
+  {
+    case 1: usage = epTT_1D; break;
+    case 2: usage = epTT_2D; break;
+    case 3: usage = epTT_3D; break;
+    default:
+      EPASSERT(false, "TODO: array, cube textures");
+  }
+
+  // TODO: support texture formats in a better-er way...
+  SharedString type = spArrayBuffer->GetElementType();
+  if (type.eq("u32")) format = epIF_BGRA8; // this makes the assumption that images of type uint32_t are BGRA (ie, as output by UD)
+  else if (type.eq("u8[4]")) format = epIF_RGBA8; // array of bytes is interpreted as {R,G,B,A}, just like arrays of anything
+  else if (type.eq("f32")) format = epIF_R_F32;
+  else EPASSERT(false, "TODO: better system for handling texture formats!");
+
+  // attempt to map the buffer
+  Slice<const void> colorBuffer = spArrayBuffer->MapForRead();
+  epscope(exit) { spArrayBuffer->Unmap(); };
+
+  // copy the data into the texture
+  pTexture = epTexture_CreateTexture(usage, shape[0], shape[1], 1, format);
+  if (pTexture)
+    epTexture_SetImageData(pTexture, -1, 0, colorBuffer.ptr);
+  else
+    EPTHROW_ERROR(epR_Failure, "Failed to create texture!");
 }
 RenderTexture::~RenderTexture()
 {
-  epTexture_DestroyTexture(&pTexture);
+  if(pTexture)
+    epTexture_DestroyTexture(&pTexture);
 }
 
 RenderShader::RenderShader(Renderer *pRenderer, ShaderRef spShader, epShaderType type)

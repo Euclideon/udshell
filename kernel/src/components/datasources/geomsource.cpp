@@ -3,8 +3,8 @@
 #include "components/nodes/geomnode.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/material.h"
+#include "ep/cpp/component/resource/model.h"
 #include "components/resources/metadata.h"
-#include "components/resources/model.h"
 #include "hal/image.h"
 #include "kernel.h"
 

@@ -6,20 +6,9 @@
 #include "ep/cpp/component/resource/resource.h"
 #include "ep/cpp/component/resource/shader.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
+#include "ep/cpp/render.h"
 
 namespace ep {
-
-EP_ENUM(BlendMode,
-  None,
-  Alpha,
-  Additive
-);
-
-EP_ENUM(CullMode,
-  None,
-  CW,
-  CCW
-);
 
 SHARED_CLASS(Material);
 
@@ -45,7 +34,7 @@ public:
   void SetCullMode(CullMode cullMode) override final { pImpl->SetCullMode(cullMode); }
 
   void SetMaterialProperty(SharedString property, const Float4 &val) override final { pImpl->SetMaterialProperty(property, val); }
-  
+
 protected:
   Material(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)

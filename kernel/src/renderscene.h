@@ -7,17 +7,16 @@
 
 #include "ep/cpp/math.h"
 #include "ep/cpp/sharedptr.h"
-#include "ep/cpp/component/resource/udmodel.h"
 #include "ep/cpp/component/view.h"
+#include "ep/cpp/component/resource/udmodel.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
+#include "ep/cpp/component/resource/shader.h"
+#include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/render.h"
 
 #include "hal/vertex.h"
 #include "hal/texture.h"
 #include "hal/shader.h"
-
-#include "ep/cpp/component/resource/arraybuffer.h"
-#include "ep/cpp/component/resource/shader.h"
-#include "components/resources/model.h"
 
 #include "renderresource.h"
 
@@ -52,9 +51,8 @@ struct GeomJob
 {
   Double4x4 matrix;
 
-  uint32_t numTextures, numArrays;
-  RenderTextureRef textures[8];
-  RenderArrayRef arrays[16];
+  Array<RenderTextureRef, 8> textures;
+  Array<RenderArrayRef, 16> arrays;
   RenderArrayRef index;
 
   RenderShaderProgramRef spProgram;
@@ -81,14 +79,14 @@ typedef SharedPtr<RenderableScene> RenderableSceneRef;
 class RenderableView : public RefCounted
 {
 public:
-  RenderableView();
+  RenderableView(Renderer *pRenderer);
 
   void RenderUD();  // ** RUN ON THE UD THREAD!
   void RenderGPU(); // ** RUN ON THE RENDER THREAD!
 
   // TODO: REMOVE ME!
   udRenderView *GetRenderView() const { return pRenderView; }
-  void *GetColorBuffer() const { return pColorBuffer; }
+  ArrayBufferRef GetColorBuffer() const { return spColorBuffer; }
 
   Double4x4 camera;
   Double4x4 projection;
@@ -107,14 +105,16 @@ public:
   udRenderView *pRenderView = nullptr;
   udRenderOptions options;
 
-  void *pColorBuffer = nullptr;
-  void *pDepthBuffer = nullptr;
+  ArrayBufferRef spColorBuffer;
+  ArrayBufferRef spDepthBuffer;
 
-  epTexture *pColorTexture = nullptr;
-  epTexture *pDepthTexture = nullptr;
+  RenderTextureRef spColorTexture;
+  RenderTextureRef spDepthTexture;
 
 protected:
   ~RenderableView() override;
+
+  Renderer *pRenderer;
 };
 typedef SharedPtr<RenderableView> RenderableViewRef;
 
@@ -123,26 +123,23 @@ typedef SharedPtr<RenderableView> RenderableViewRef;
 class Renderer
 {
 public:
-  Renderer(Kernel *pKernel, int renderThreadCount);
+  Renderer(kernel::Kernel *pKernel, int renderThreadCount);
   ~Renderer();
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
 
   void AddUDRenderJob(UniquePtr<RenderableView> job);
 
+  ArrayBufferRef AllocRenderBuffer();
+  void ReleaseRenderBuffer(ArrayBufferRef spBuffer) { renderBufferPool.pushBack(spBuffer); }
+
 protected:
   friend class View;
+  friend class RenderableView;
   friend class RenderShaderProgram;
   friend class RenderVertexFormat;
 
-  static uint32_t UDThreadStart(void *data)
-  {
-    ((Renderer*)data)->UDThread();
-    return 0;
-  }
-  void UDThread();
-
-  Kernel *pKernel;
+  kernel::Kernel *pKernel;
 
   udRenderEngine *pRenderEngine = nullptr;
 
@@ -152,6 +149,41 @@ protected:
 
   AVLTree<uint32_t, RenderShaderProgram*> shaderPrograms;
   AVLTree<uint32_t, RenderVertexFormat*> vertexFormats;
+
+  Array<ArrayBufferRef> renderBufferPool;
+  int numRenderBuffers = 0;
+
+  enum class RenderResourceType
+  {
+    VertexArray,
+    IndexArray,
+    Texture,
+  };
+
+  RenderResourceRef GetRenderBuffer(const ArrayBufferRef &spArrayBuffer, RenderResourceType type);
+  RenderShaderRef GetShader(const ShaderRef &spShader);
+  RenderShaderProgramRef GetShaderProgram(const MaterialRef &spShaderProgram);
+  RenderVertexFormatRef GetVertexFormat(const RenderShaderProgramRef &spShaderProgram, Slice<VertexArray> arrays);
+
+  void SetRenderstates(MaterialRef spMaterial, RenderShaderProgramRef spProgram);
+
+  static uint32_t UDThreadStart(void *data)
+  {
+    ((Renderer*)data)->UDThread();
+    return 0;
+  }
+  void UDThread();
+
+private:
+  ShaderRef spVertexShader;
+  ShaderRef spFragmentShader;
+  ArrayBufferRef spQuadVerts;
+  ArrayBufferRef spQuadIndices;
+
+  epFormatDeclaration *s_pPosUV = nullptr;
+  epArrayBuffer *s_pQuadVB = nullptr;
+  epArrayBuffer *s_pQuadIB = nullptr;
+  epShaderProgram *s_shader = nullptr;
 };
 
 } // namespace ep

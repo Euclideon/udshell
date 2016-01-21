@@ -5,7 +5,13 @@
 #include "hal/vertex.h"
 #include "hal/shader.h"
 
+#include "ep/cpp/component/resource/arraybuffer.h"
+#include "ep/cpp/component/resource/shader.h"
+
 #include "components/viewimpl.h"
+#include "components/resources/arraybufferimpl.h"
+#include "components/resources/shaderimpl.h"
+#include "components/resources/materialimpl.h"
 
 // TODO: remove when resource cleanup is implemented
 #include "hal/driver.h"
@@ -48,113 +54,11 @@ const char s_blitShader[] =
 "  gl_FragColor = texture2D(u_texture, v_texcoord);\n"
 "}\n";
 
-static epFormatDeclaration *s_pPosUV = nullptr;
-static epArrayBuffer *s_pQuadVB = nullptr;
-static epArrayBuffer *s_pQuadIB = nullptr;
-static epShaderProgram *s_shader = nullptr;
-
 #include "kernel.h"
 
-epResult udRenderScene_Init(Kernel*)
-{
-  return epR_Success;
-}
 
-epResult udRenderScene_Deinit(Kernel*)
-{
-  return epR_Success;
-}
-
-epResult udRenderScene_InitRender(Kernel*)
-{
-  // create a vertex buffer to render the quad to the screen
-  epArrayDataFormat format[] = { epVDF_Float2 };
-  s_pQuadVB = epVertex_CreateVertexBuffer(format, 1);
-  if (!s_pQuadVB)
-    return epR_Failure;
-
-  s_pQuadIB = epVertex_CreateIndexBuffer(epVDF_UInt);
-  if (!s_pQuadIB)
-  {
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure;
-  }
-
-  epArrayElement elements[] = {
-//    { udVET_Position, 0, 2, epVDF_Float2 },
-    { "a_position", format[0], 0 },
-  };
-
-  s_pPosUV = epVertex_CreateFormatDeclaration(elements, sizeof(elements)/sizeof(elements[0]));
-  if (!s_pPosUV)
-  {
-    epVertex_DestroyArrayBuffer(&s_pQuadIB);
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure;
-  }
-  struct Vertex
-  {
-    float x, y;
-  } quad[] = {
-      { 0, 0 },
-      { 1, 0 },
-      { 1, 1 },
-      { 0, 1 }
-  };
-
-  epVertex_SetArrayBufferData(s_pQuadVB, quad, sizeof(quad));
-
-  uint32_t indices[] = { 0, 1, 2, 3 };
-  epVertex_SetArrayBufferData(s_pQuadIB, indices, sizeof(indices));
-
-  epShader *pVS = epShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), epST_VertexShader);
-  if (!pVS)
-  {
-    epVertex_DestroyFormatDeclaration(&s_pPosUV);
-    epVertex_DestroyArrayBuffer(&s_pQuadIB);
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure;
-  }
-
-  epShader *pPS = epShader_CreateShader(s_blitShader, sizeof(s_blitShader), epST_PixelShader);
-  if (!pPS)
-  {
-    // TODO: Add in calls to epShader_Destroy when implemented.
-    //epShader_Destroy(&pVS)
-    epVertex_DestroyFormatDeclaration(&s_pPosUV);
-    epVertex_DestroyArrayBuffer(&s_pQuadIB);
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure;
-  }
-
-  s_shader = epShader_CreateShaderProgram(pVS, pPS);
-  if (!s_shader)
-  {
-    // TODO: Add in calls to epShader_Destroy when implemented.
-    //epShader_Destroy(&pPS)
-    //epShader_Destroy(&pVS)
-    epVertex_DestroyFormatDeclaration(&s_pPosUV);
-    epVertex_DestroyArrayBuffer(&s_pQuadIB);
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    return epR_Failure;
-  }
-
-  return epR_Success;
-}
-
-epResult udRenderScene_DeinitRender(Kernel*)
-{
-  // TODO: Add in calls to epShader_Destroy when implemented.
-  //epShader_DestroyShaderProgram(s_shader);
-  //epShader_Destroy(&pPS);
-  //epShader_Destroy(&pVS);
-  epVertex_DestroyFormatDeclaration(&s_pPosUV);
-  epVertex_DestroyArrayBuffer(&s_pQuadIB);
-  epVertex_DestroyArrayBuffer(&s_pQuadVB);
-  return epR_Success;
-}
-
-RenderableView::RenderableView()
+RenderableView::RenderableView(Renderer *pRenderer)
+  : pRenderer(pRenderer)
 {
   memset(&options, 0, sizeof(options));
   options.size = sizeof(udRenderOptions);
@@ -165,19 +69,22 @@ RenderableView::~RenderableView()
   if (pRenderView)
     udRender_DestroyView(&pRenderView);
 
-  if (pColorBuffer)
-    epFree(pColorBuffer);
-  if (pDepthBuffer)
-    epFree(pDepthBuffer);
-
-  if (pColorTexture)
-    epTexture_DestroyTexture(&pColorTexture);
-  if (pDepthTexture)
-    epTexture_DestroyTexture(&pDepthTexture);
+  if(spColorBuffer)
+    pRenderer->ReleaseRenderBuffer(spColorBuffer);
+  if(spDepthBuffer)
+    pRenderer->ReleaseRenderBuffer(spDepthBuffer);
 }
 
 void RenderableView::RenderUD()
 {
+  Slice<uint32_t> colorBuffer = spColorBuffer->Map<uint32_t>();
+  epscope(exit) { spColorBuffer->Unmap(); };
+  Slice<float> depthBuffer = spDepthBuffer->Map<float>();
+  epscope(exit) { spDepthBuffer->Unmap(); };
+
+  uint32_t colorPitch = renderWidth*sizeof(uint32_t);
+  uint32_t depthPitch = renderWidth*sizeof(float);
+
   if (spScene->ud.length)
   {
     size_t size = sizeof(udRenderModel*)*spScene->ud.length;
@@ -198,22 +105,16 @@ void RenderableView::RenderUD()
       options.pick = &udPick;
 
     // allocate render buffers
-    uint32_t colorPitch = renderWidth*sizeof(uint32_t);
-    uint32_t depthPitch = renderWidth*sizeof(float);
-    pColorBuffer = epAlloc(colorPitch * renderHeight);
-    pDepthBuffer = epAlloc(depthPitch * renderHeight);
-    udRender_SetTarget(pRenderView, udRTT_Color32, pColorBuffer, colorPitch, 0xFF202080);
-    udRender_SetTarget(pRenderView, udRTT_Depth32, pDepthBuffer, depthPitch, 0x3F800000);
+    udRender_SetTarget(pRenderView, udRTT_Color32, colorBuffer.ptr, colorPitch, 0xFF202080);
+    udRender_SetTarget(pRenderView, udRTT_Depth32, depthBuffer.ptr, depthPitch, 0x3F800000);
 
     // render UD
     udRender_Render(pRenderView, ppRenderModels, (int)spScene->ud.length, &options);
   }
   else
   {
-    uint32_t colorPitch = renderWidth*sizeof(uint32_t);
-    uint32_t depthPitch = renderWidth*sizeof(float);
-    pColorBuffer = epAllocFlags(colorPitch * renderHeight, epAF_Zero);
-    pDepthBuffer = epAllocFlags(depthPitch * renderHeight, epAF_Zero);
+    memset(colorBuffer.ptr, 0, colorPitch * renderHeight);
+    memset(depthBuffer.ptr, 0, colorPitch * renderHeight);
   }
 }
 
@@ -222,40 +123,27 @@ void RenderableView::RenderGPU()
 //  if (spView->pPreRenderCallback)
 //    spView->pPreRenderCallback(spView, spScene);
 
-  if (pColorBuffer)
+  if (spColorBuffer)
   {
-    if (!pColorTexture)
+    if (!spColorTexture)
     {
-      // copy the data into the texture
-      pColorTexture = epTexture_CreateTexture(epTT_2D, renderWidth, renderHeight, 1, epIF_BGRA8);
-      pDepthTexture = epTexture_CreateTexture(epTT_2D, renderWidth, renderHeight, 1, epIF_R_F32);
-
-      // blit the scene to the viewport
-      epTexture_SetImageData(pColorTexture, -1, 0, pColorBuffer);
-      epTexture_SetImageData(pDepthTexture, -1, 0, pDepthBuffer);
+      spColorTexture = pRenderer->GetRenderBuffer(spColorBuffer, Renderer::RenderResourceType::Texture);
+      spDepthTexture = pRenderer->GetRenderBuffer(spDepthBuffer, Renderer::RenderResourceType::Texture);
     }
 
-    epShader_SetCurrent(s_shader);
+    epShader_SetCurrent(pRenderer->s_shader);
 
-    int u_texture = epShader_FindShaderParameter(s_shader, "u_texture");
-    epShader_SetProgramData(0, u_texture, pColorTexture);
-    int u_zbuffer = epShader_FindShaderParameter(s_shader, "u_zbuffer");
-    epShader_SetProgramData(1, u_zbuffer, pDepthTexture);
+    int u_texture = epShader_FindShaderParameter(pRenderer->s_shader, "u_texture");
+    epShader_SetProgramData(0, u_texture, spColorTexture->pTexture);
+    int u_zbuffer = epShader_FindShaderParameter(pRenderer->s_shader, "u_zbuffer");
+    epShader_SetProgramData(1, u_zbuffer, spDepthTexture->pTexture);
 
-    int u_rect = epShader_FindShaderParameter(s_shader, "u_rect");
+    int u_rect = epShader_FindShaderParameter(pRenderer->s_shader, "u_rect");
     epShader_SetProgramData(u_rect, Float4::create(-1, 1, 2, -2));
-    int u_textureScale = epShader_FindShaderParameter(s_shader, "u_textureScale");
+    int u_textureScale = epShader_FindShaderParameter(pRenderer->s_shader, "u_textureScale");
     epShader_SetProgramData(u_textureScale, Float4::create(0, 0, 1, 1));
 
-    epGPU_RenderIndices(s_shader, s_pPosUV, &s_pQuadVB, s_pQuadIB, epPT_TriangleFan, 4);
-
-    // TODO: we need to have some sort of resource cleanup list so this can happen when we're ready/automatically
-#if EPRENDER_DRIVER == EPDRIVER_QT
-    epTexture_DestroyTexture(&pColorTexture);
-    epTexture_DestroyTexture(&pDepthTexture);
-    pColorTexture = nullptr;
-    pDepthTexture = nullptr;
-#endif
+    epGPU_RenderIndices(pRenderer->s_shader, pRenderer->s_pPosUV, &pRenderer->s_pQuadVB, pRenderer->s_pQuadIB, epPT_TriangleFan, 4);
   }
   else
   {
@@ -274,7 +162,7 @@ void RenderableView::RenderGPU()
 //    pPostRenderCallback(ViewRef(this), spScene);
 }
 
-Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
+Renderer::Renderer(kernel::Kernel *pKernel, int renderThreadCount)
   : pKernel(pKernel)
 {
   // TODO: Remove this once webview is properly integrated
@@ -290,10 +178,110 @@ Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   pUDSemaphore = udCreateSemaphore(65536, 0);
   pUDTerminateSemaphore = udCreateSemaphore(1, 0);
   udCreateThread(UDThreadStart, this);
+
+  // GPU init
+  // create a vertex buffer to render the quad to the screen
+  epArrayDataFormat format[] = { epVDF_Float2 };
+  s_pQuadVB = epVertex_CreateVertexBuffer(format, 1);
+  if (!s_pQuadVB)
+    EPTHROW(epR_Failure, "TODO: better error");
+
+  s_pQuadIB = epVertex_CreateIndexBuffer(epVDF_UInt);
+  if (!s_pQuadIB)
+  {
+    epVertex_DestroyArrayBuffer(&s_pQuadVB);
+    EPTHROW(epR_Failure, "TODO: better error");
+  }
+
+  epArrayElement elements[] = {
+    //    { udVET_Position, 0, 2, epVDF_Float2 },
+    { "a_position", format[0], 0 },
+  };
+
+  s_pPosUV = epVertex_CreateFormatDeclaration(elements, sizeof(elements)/sizeof(elements[0]));
+  if (!s_pPosUV)
+  {
+    epVertex_DestroyArrayBuffer(&s_pQuadIB);
+    epVertex_DestroyArrayBuffer(&s_pQuadVB);
+    EPTHROW(epR_Failure, "TODO: better error");
+  }
+/*
+  using F2 = std::tuple<float, float>;
+  using Vertex = std::tuple<const F2>;
+  const Vertex quad[4] = {
+    { F2{ 0.f, 0.f } },
+    { F2{ 1.f, 0.f } },
+    { F2{ 1.f, 1.f } },
+    { F2{ 0.f, 1.f } }
+  };
+  uint32_t indices[4] = { 0, 1, 2, 3 };
+
+  spQuadVerts = pKernel->CreateComponent<ArrayBuffer>({ { "name", "quad_vb" } });
+  spQuadIndices = pKernel->CreateComponent<ArrayBuffer>({ { "name", "quad_ib" } });
+  spQuadVerts->Allocate<Vertex>(4);
+  auto buffer = spQuadVerts->Map<Vertex>();
+  spQuadVerts->Unmap();
+  spQuadIndices->AllocateFromData(Slice<const uint32_t>(indices, 4));
+*/
+  struct Vertex
+  {
+    float x, y;
+  } quad[] = {
+    { 0, 0 },
+    { 1, 0 },
+    { 1, 1 },
+    { 0, 1 }
+  };
+
+  epVertex_SetArrayBufferData(s_pQuadVB, quad, sizeof(quad));
+
+  uint32_t indices[] = { 0, 1, 2, 3 };
+  epVertex_SetArrayBufferData(s_pQuadIB, indices, sizeof(indices));
+
+  epShader *pVS = epShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), epST_VertexShader);
+  if (!pVS)
+  {
+    epVertex_DestroyFormatDeclaration(&s_pPosUV);
+    epVertex_DestroyArrayBuffer(&s_pQuadIB);
+    epVertex_DestroyArrayBuffer(&s_pQuadVB);
+    EPTHROW(epR_Failure, "TODO: better error");
+  }
+
+  epShader *pPS = epShader_CreateShader(s_blitShader, sizeof(s_blitShader), epST_PixelShader);
+  if (!pPS)
+  {
+    // TODO: Add in calls to epShader_Destroy when implemented.
+    //epShader_Destroy(&pVS)
+    epVertex_DestroyFormatDeclaration(&s_pPosUV);
+    epVertex_DestroyArrayBuffer(&s_pQuadIB);
+    epVertex_DestroyArrayBuffer(&s_pQuadVB);
+    EPTHROW(epR_Failure, "TODO: better error");
+  }
+
+  s_shader = epShader_CreateShaderProgram(pVS, pPS);
+  if (!s_shader)
+  {
+    // TODO: Add in calls to epShader_Destroy when implemented.
+    //epShader_Destroy(&pPS)
+    //epShader_Destroy(&pVS)
+    epVertex_DestroyFormatDeclaration(&s_pPosUV);
+    epVertex_DestroyArrayBuffer(&s_pQuadIB);
+    epVertex_DestroyArrayBuffer(&s_pQuadVB);
+    EPTHROW(epR_Failure, "TODO: better error");
+  }
 }
 
 Renderer::~Renderer()
 {
+  // GPU destruction
+  // TODO: Add in calls to epShader_Destroy when implemented.
+  //epShader_DestroyShaderProgram(s_shader);
+  //epShader_Destroy(&pPS);
+  //epShader_Destroy(&pVS);
+  epVertex_DestroyFormatDeclaration(&s_pPosUV);
+  epVertex_DestroyArrayBuffer(&s_pQuadIB);
+  epVertex_DestroyArrayBuffer(&s_pQuadVB);
+
   // terminate UD thread
   udIncrementSemaphore(pUDSemaphore);
   udWaitSemaphore(pUDTerminateSemaphore);
@@ -303,8 +291,118 @@ Renderer::~Renderer()
   udDestroySemaphore(&pUDSemaphore);
   udDestroySemaphore(&pUDTerminateSemaphore);
 
+  udOctree_Shutdown();
+
   // destroy render engine
   udRender_Destroy(&pRenderEngine);
+}
+
+RenderResourceRef Renderer::GetRenderBuffer(const ArrayBufferRef &spArrayBuffer, RenderResourceType type)
+{
+  ArrayBufferImpl *pArrayBuffer = spArrayBuffer->GetImpl<ArrayBufferImpl>();
+
+  RenderResourceRef spRenderBuffer = shared_pointer_cast<RenderResource>(pArrayBuffer->spCachedRenderData);
+  if (!spRenderBuffer)
+  {
+    if (type == RenderResourceType::Texture)
+    {
+      // TODO: we need to find texture type from the dimensions of the array buffer
+      //       ... or we need 'type' to ask for the particular texture type that the shader expects
+      spRenderBuffer = RenderTextureRef::create(this, spArrayBuffer);
+    }
+    else
+      spRenderBuffer = RenderArrayRef::create(this, spArrayBuffer, type == RenderResourceType::IndexArray ? ArrayUsage::IndexData : ArrayUsage::VertexData);
+
+//    pArrayBuffer->spCachedRenderData = spRenderBuffer; // TODO: if we cache this, it will be destroyed from the main thread, and renderables must destroy from the render thread! >_<
+  }
+  return spRenderBuffer;
+}
+RenderShaderRef Renderer::GetShader(const ShaderRef &spShader)
+{
+  ShaderImpl *pShader = spShader->GetImpl<ShaderImpl>();
+
+  RenderShaderRef spRenderShader = shared_pointer_cast<RenderShader>(pShader->spCachedShader);
+  /*
+  if (!spShader)
+  {
+    RenderShader *pShader = new RenderShader(this, ShaderRef(pInstance), (epShaderType)type);
+    if (!pShader->pShader)
+    {
+      delete pShader;
+      spRenderShader = nullptr;
+    }
+    else
+      spRenderShader = RenderShaderRef(pShader);
+  }
+  */
+  return spRenderShader;
+}
+RenderShaderProgramRef Renderer::GetShaderProgram(const MaterialRef &spShaderProgram)
+{
+//  MaterialImpl *pMaterial = spShaderProgram->GetImpl<MaterialImpl>();
+  /*
+  RenderResourceRef spShaderProgram = shared_pointer_cast<RenderResource>(pMaterial->spCachedShaderProgram);
+  if (!spShaderProgram)
+  {
+    RenderShaderRef spVS = shaders[0] ? shaders[0]->GetImpl<ShaderImpl>()->GetRenderShader(epST_VertexShader) : nullptr;
+    RenderShaderRef spPS = shaders[1] ? shaders[1]->GetImpl<ShaderImpl>()->GetRenderShader(epST_PixelShader) : nullptr;
+    if (spVS && spPS)
+    {
+      // TODO: check if this program already exists in `pRenderer->shaderPrograms`
+
+      RenderShaderProgram *pProgram = new RenderShaderProgram(this, spVS, spPS);
+      if (!pProgram->pProgram)
+      {
+        delete pProgram;
+        spRenderProgram = nullptr;
+      }
+      else
+        spRenderProgram = RenderShaderProgramRef(pProgram);
+
+      // populate the material with properties from the shader...
+      // TODO...
+
+      pMaterial->spCachedShaderProgram = spShaderProgram;
+    }
+  }
+  */
+  return spShaderProgram;
+}
+RenderVertexFormatRef Renderer::GetVertexFormat(const RenderShaderProgramRef &spShaderProgram, Slice<VertexArray> arrays)
+{
+  SharedPtr<RefCounted> spRenderVertexFormat;
+  if (!spRenderVertexFormat)
+  {
+    EPASSERT(false, "TODO");
+
+    // get the attributes from the material
+
+    // create a descriptor that maps vertex arrays to shader attributes
+
+    //    VertexFormatDescriptor *pFormat = new VertexFormatDescriptor(this, spArrays);
+    //    spRenderVertexFormat = VertexFormatDescriptorRef(pFormat);
+  }
+  return spRenderVertexFormat;
+}
+
+void Renderer::SetRenderstates(MaterialRef spMaterial, RenderShaderProgramRef spProgram)
+{
+  MaterialImpl *pMat = spMaterial->GetImpl<MaterialImpl>();
+  auto &properties = pMat->MaterialProperties();
+  size_t numUniforms = spProgram->numUniforms();
+  for (size_t i = 0; i < numUniforms; ++i)
+  {
+    const Float4 *pVal = properties.Get(spProgram->getUniformName(i));
+    if (pVal)
+      spProgram->setUniform((int)i, *pVal);
+  }
+}
+
+ArrayBufferRef Renderer::AllocRenderBuffer()
+{
+  if (renderBufferPool.empty())
+    return pKernel->CreateComponent<ArrayBuffer>({ { "name", SharedString::format("udrenderbuffer{0}", numRenderBuffers++) } });
+  return renderBufferPool.popBack();
 }
 
 void Renderer::AddUDRenderJob(UniquePtr<RenderableView> job)
@@ -359,7 +457,12 @@ void Renderer::UDThread()
     UniquePtr<RenderableView> job = udRenderQueue.popFront();
     udReleaseMutex(pUDMutex);
 
-    job->RenderUD();
+    try {
+      job->RenderUD();
+    } catch(...) {
+      // this frame failed to render...
+      // TODO: message? produce an default/invalid/failed image?
+    }
 
     JobDone *done = new JobDone(job);
     pKernel->DispatchToMainThread(MakeDelegate(done, &JobDone::FinishJob));
