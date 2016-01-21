@@ -3,6 +3,7 @@
 #include "hal/texture.h"
 #include "hal/vertex.h"
 #include "hal/shader.h"
+#include "components/resources/shaderimpl.h"
 
 namespace ep
 {
@@ -92,7 +93,8 @@ RenderTexture::~RenderTexture()
 RenderShader::RenderShader(Renderer *pRenderer, ShaderRef spShader, epShaderType type)
   : RenderResource(pRenderer), type(type)
 {
-  pShader = epShader_CreateShader(spShader->code.toStringz(), spShader->code.length, type);
+  String shaderCode = spShader->GetImpl<ShaderImpl>()->code;
+  pShader = epShader_CreateShader(shaderCode.toStringz(), shaderCode.length, type);
 }
 RenderShader::~RenderShader()
 {
