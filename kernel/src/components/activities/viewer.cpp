@@ -5,7 +5,7 @@
 #include "components/viewimpl.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/simplecamera.h"
-#include "components/nodes/udnode.h"
+#include "ep/cpp/component/node/udnode.h"
 #include "components/timer.h"
 #include "ep/cpp/component/resource/udmodel.h"
 #include "ep/cpp/component/datasource/datasource.h"

@@ -17,10 +17,10 @@ class SimpleCameraImpl : public BaseImpl<SimpleCamera, ISimpleCamera>
 public:
   SimpleCameraImpl(Component *pInstance, Variant::VarMap initParams);
 
-  void SetMatrix(const Double4x4 &_matrix) override final { pos = _matrix.axis.t.toVector3(); ypr = _matrix.extractYPR(); pInstance->Super::SetMatrix(_matrix); }
-  void SetPosition(const Double3 &_pos) override final { pos = _pos; pInstance->Super::SetPosition(_pos); }
+  void SetMatrix(const Double4x4 &_matrix) override final { pos = _matrix.axis.t.toVector3(); ypr = _matrix.extractYPR(); pInstance->InstanceSuper::SetMatrix(_matrix); }
+  void SetPosition(const Double3 &_pos) override final { pos = _pos; pInstance->InstanceSuper::SetPosition(_pos); }
 
-  void SetOrientation(const Double3 &_ypr) override final { ypr = _ypr; pInstance->Super::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos)); }
+  void SetOrientation(const Double3 &_ypr) override final { ypr = _ypr; pInstance->InstanceSuper::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos)); }
   void SetSpeed(double _speed) override final { speed = _speed; }
 
   void SetInvertedYAxis(bool bInvert) override final { invertedYAxis = bInvert ? -1.0 : 1.0; }

@@ -248,7 +248,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
   while (ypr.x >= EP_2PI)
     ypr.x -= EP_2PI;
 
-  Double4x4 cam = pInstance->Super::GetCameraMatrix();
+  Double4x4 cam = pInstance->InstanceSuper::GetCameraMatrix();
 
   Double3 forward = cam.axis.y.toVector3();
   Double3 xAxis = cam.axis.x.toVector3();
@@ -259,7 +259,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
   pos += xAxis*tx*tmpSpeed;
   pos.z += tz*tmpSpeed;
 
-  pInstance->Super::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
+  pInstance->InstanceSuper::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
 
   mouse.delta = {0 , 0};
 
@@ -276,7 +276,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
 Variant SimpleCameraImpl::Save() const
 {
-  Variant var = pInstance->Super::Save();
+  Variant var = pInstance->InstanceSuper::Save();
   Variant::VarMap params = var.asAssocArray();
 
   params.Insert("speed", speed);

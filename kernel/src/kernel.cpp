@@ -12,7 +12,6 @@
 #include "components/timer.h"
 #include "components/uiconsole.h"
 #include "components/nodes/geomnode.h"
-#include "components/nodes/udnode.h"
 #include "components/pluginmanager.h"
 #include "components/pluginloader.h"
 #include "components/nativepluginloader.h"
@@ -45,6 +44,7 @@
 #include "components/resources/materialimpl.h"
 #include "components/resources/shaderimpl.h"
 #include "components/nodes/nodeimpl.h"
+#include "components/nodes/udnodeimpl.h"
 #include "components/nodes/cameraimpl.h"
 #include "components/nodes/simplecameraimpl.h"
 #include "components/sceneimpl.h"
@@ -168,7 +168,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<Camera, CameraImpl>();
   pKernel->RegisterComponentType<SimpleCamera, SimpleCameraImpl>();
   pKernel->RegisterComponentType<GeomNode>();
-  pKernel->RegisterComponentType<UDNode>();
+  pKernel->RegisterComponentType<UDNode, UDNodeImpl>();
 
   // data sources
   pKernel->RegisterComponentType<ImageSource>();
