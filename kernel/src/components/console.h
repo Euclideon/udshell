@@ -2,7 +2,7 @@
 #if !defined(_EP_CONSOLE_H)
 #define _EP_CONSOLE_H
 
-#include "stream.h"
+#include "ep/cpp/component/stream.h"
 
 EP_ENUM(ConsoleOutputs,
   StdOut,

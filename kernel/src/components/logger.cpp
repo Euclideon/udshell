@@ -1,5 +1,5 @@
 #include "components/logger.h"
-#include "components/stream.h"
+#include "ep/cpp/component/stream.h"
 #include "ep/cpp/datetime.h"
 #include "hal/haltimer.h"
 

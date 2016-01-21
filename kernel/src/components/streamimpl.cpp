@@ -1,12 +1,12 @@
-#include "components/stream.h"
+#include "components/streamimpl.h"
 #include "kernel.h"
 
 namespace ep
 {
 
-BufferRef Stream::ReadBuffer(size_t bytes)
+BufferRef StreamImpl::ReadBuffer(size_t bytes)
 {
-  BufferRef spBuffer = GetKernel().CreateComponent<Buffer>();
+  BufferRef spBuffer = GetKernel()->CreateComponent<Buffer>();
   if (!spBuffer)
     return nullptr;
 
@@ -24,13 +24,13 @@ BufferRef Stream::ReadBuffer(size_t bytes)
   return spBuffer;
 }
 
-BufferRef Stream::Load()
+BufferRef StreamImpl::Load()
 {
   int64_t len = Length();
   if (len < 0)
     return nullptr;
 
-  BufferRef spBuffer = GetKernel().CreateComponent<Buffer>();
+  BufferRef spBuffer = GetKernel()->CreateComponent<Buffer>();
   if (!spBuffer)
     return nullptr;
   spBuffer->Allocate((size_t)len);
@@ -46,7 +46,7 @@ BufferRef Stream::Load()
   return spBuffer;
 }
 
-void Stream::Save(BufferRef spBuffer)
+void StreamImpl::Save(BufferRef spBuffer)
 {
   // TODO: check and bail if stream is not writable...
 
@@ -54,13 +54,13 @@ void Stream::Save(BufferRef spBuffer)
   if (buffer)
   {
     Seek(SeekOrigin::Begin, 0);
-    Write(buffer);
+    pInstance->Write(buffer);
 
     spBuffer->Unmap();
   }
 }
 
-String Stream::ReadLn(Slice<char> buf)
+String StreamImpl::ReadLn(Slice<char> buf)
 {
   EPASSERT(false, "TODO");
 

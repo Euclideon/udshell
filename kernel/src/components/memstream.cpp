@@ -49,10 +49,10 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
   if (spBuffer)
   {
     spBuffer->Unmap();
-    pos = 0;
+    SetPos(0);
   }
 
-  length = 0;
+  SetLength(0);
   spBuffer = spNewBuffer;
 
   if (!spBuffer)
@@ -78,7 +78,7 @@ void MemStream::SetBuffer(BufferRef spNewBuffer)
     return; // TODO Error handling
   }
 
-  length = bufferSlice.length;
+  SetLength(bufferSlice.length);
 }
 
 Slice<void> MemStream::Read(Slice<void> buf)
@@ -87,11 +87,14 @@ Slice<void> MemStream::Read(Slice<void> buf)
     return 0;
 
   size_t bytes = buf.length;
+  int64_t pos = GetPos();
+  int64_t length = Length();
+
   if (pos + bytes > (size_t)length)
     bytes = size_t(length - pos);
 
   memcpy(buf.ptr, (const char*)bufferSlice.ptr + pos, bytes);
-  pos += bytes;
+  SetPos(pos + bytes);
 
   return Slice<void>(buf.ptr, bytes);
 }
@@ -101,17 +104,20 @@ size_t MemStream::Write(Slice<const void> data)
   if (!(oFlags & OpenFlags::Write) || !spBuffer)
     return 0;
 
+  int64_t pos = GetPos();
+  int64_t length = Length();
+
   if (pos + data.length > (size_t)length)
   {
     spBuffer->Unmap();
     spBuffer->Resize(size_t(pos + data.length));
 
     bufferSlice = spBuffer->Map();
-    length = bufferSlice.length;
+    SetLength(bufferSlice.length);
   }
 
   memcpy((char*)bufferSlice.ptr + pos, data.ptr, data.length);
-  pos += data.length;
+  SetPos(pos + data.length);
 
   Broadcaster::Write(data);
 
@@ -120,6 +126,9 @@ size_t MemStream::Write(Slice<const void> data)
 
 int64_t MemStream::Seek(SeekOrigin rel, int64_t offset)
 {
+  int64_t pos = GetPos();
+  int64_t length = Length();
+
   switch (rel)
   {
     case SeekOrigin::Begin:
@@ -136,6 +145,7 @@ int64_t MemStream::Seek(SeekOrigin rel, int64_t offset)
   if (pos > length)
     pos = length;
 
+  SetPos(pos);
   PosChanged.Signal();
 
   return pos;

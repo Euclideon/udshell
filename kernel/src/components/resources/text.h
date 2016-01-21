@@ -3,7 +3,7 @@
 #define _EP_TEXT_H
 
 #include "ep/cpp/component/resource/buffer.h"
-#include "components/stream.h"
+#include "ep/cpp/component/stream.h"
 
 namespace ep {
 

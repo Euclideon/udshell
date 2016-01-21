@@ -65,7 +65,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
     EPTHROW_WARN(epR_File_OpenFailure, 2, "Failed to open {0}, flags {1}, errno {2}\n", cPath, posixFlags, errno);
 
   uint64_t curr = lseek(fd, 0L, SEEK_CUR);
-  length = lseek(fd, 0L, SEEK_END);
+  SetLength(lseek(fd, 0L, SEEK_END));
   lseek(fd, curr, SEEK_SET);
 }
 
@@ -119,9 +119,9 @@ Slice<void> File::Read(Slice<void> buffer)
 {
   int nRead;
 
-  lseek(fd, pos, SEEK_SET);
+  lseek(fd, GetPos(), SEEK_SET);
   nRead = read(fd, buffer.ptr, (unsigned int)buffer.length);
-  pos = lseek(fd, 0L, SEEK_CUR);
+  SetPos(lseek(fd, 0L, SEEK_CUR));
 
   if (nRead == -1)
     return nullptr;
@@ -131,10 +131,10 @@ Slice<void> File::Read(Slice<void> buffer)
 
 size_t File::Write(Slice<const void> data)
 {
-  lseek(fd, pos, SEEK_SET);
+  lseek(fd, GetPos(), SEEK_SET);
   int written = write(fd, data.ptr, (unsigned int)data.length);
-  pos = lseek(fd, 0L, SEEK_CUR);
-  length = Max(pos, length);
+  SetPos(lseek(fd, 0L, SEEK_CUR));
+  SetLength(Max(GetPos(), Length()));
   if (written == -1)
     return 0;
 
@@ -145,6 +145,9 @@ size_t File::Write(Slice<const void> data)
 
 int64_t File::Seek(SeekOrigin rel, int64_t offset)
 {
+  int64_t pos = GetPos();
+  int64_t length = Length();
+
   switch (rel)
   {
     case SeekOrigin::Begin:
@@ -161,6 +164,7 @@ int64_t File::Seek(SeekOrigin rel, int64_t offset)
       break;
   }
 
+  SetPos(pos);
   PosChanged.Signal();
 
   return pos;
