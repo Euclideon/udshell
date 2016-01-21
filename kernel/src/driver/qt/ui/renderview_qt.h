@@ -1,9 +1,11 @@
 #ifndef RENDERVIEW_H
 #define RENDERVIEW_H
 
-#include <QtQuick/QQuickFramebufferObject>
+#include "driver/qt/epqt.h"
 
 #include "ep/cpp/component/view.h"
+
+#include <QtQuick/QQuickFramebufferObject>
 
 
 namespace qt {

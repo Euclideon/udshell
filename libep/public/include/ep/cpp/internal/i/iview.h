@@ -3,6 +3,7 @@
 #define _EP_IVIEW_HPP
 
 #include "ep/cpp/rect.h"
+#include "ep/cpp/render.h"
 
 namespace ep {
 
@@ -33,6 +34,11 @@ public:
   virtual void Activate() = 0;
   virtual void Deactivate() = 0;
   virtual void GoToBookmark(String bookmarkName) = 0;
+
+  // TODO: Move this into the layer system once its implemented.
+  virtual void SetUDRenderFlags(UDRenderFlags flags) = 0;
+  virtual UDRenderFlags GetUDRenderflags() const = 0;
+
 };
 
 } // namespace ep

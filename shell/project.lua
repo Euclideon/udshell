@@ -10,9 +10,6 @@ project "epshell"
 	includedirs { "../public/include" }
 	includedirs { "../kernel/src" }
 
-	includedirs { "../ud/udPlatform/Include" }
-	includedirs { "../ud/udPointCloud/Include" }
-
 	links { "udPlatform" }
 	links { "udPointCloud" }
 	links { "libep" }

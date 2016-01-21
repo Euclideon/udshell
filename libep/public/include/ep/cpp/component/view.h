@@ -37,6 +37,10 @@ public:
   void Deactivate() override { pImpl->Deactivate(); }
   void Resize(int width, int height) override { pImpl->Resize(width, height); }
 
+  // TODO: Move this into the layer system once its implemented.
+  void SetUDRenderFlags(UDRenderFlags flags) { pImpl->SetUDRenderFlags(flags); }
+  UDRenderFlags GetUDRenderflags() const { return pImpl->GetUDRenderflags(); }
+
   Event<> Dirty;
   Event<> FrameReady;
   Event<bool> EnabledPickingChanged;

@@ -2,6 +2,8 @@
 #ifndef epkernel_qt_H
 #define epkernel_qt_H
 
+#include "driver/qt/epqt.h"
+
 #include <QGuiApplication>
 #include <QQmlEngine>
 #include <QOpenGLContext>

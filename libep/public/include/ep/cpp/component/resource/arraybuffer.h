@@ -5,7 +5,6 @@
 #include "ep/cpp/component/resource/buffer.h"
 #include "ep/cpp/internal/i/iarraybuffer.h"
 
-//#include "ep/cpp/sharedptr.h"
 #include "ep/cpp/stringof.h"
 
 #include <utility>

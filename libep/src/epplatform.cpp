@@ -1,7 +1,5 @@
 #include "ep/cpp/platform.h"
 
-#include "udPlatform.h"
-
 #include <stdio.h>
 
 namespace ep {
@@ -121,31 +119,32 @@ void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile, int line))
 #if EP_DEBUG
 # if !defined(EP_WINDOWS)
 #   if defined(EP_COMPILER_GCC)
-    #include <sys/stat.h>
-    #include <fcntl.h>
+#     include <sys/stat.h>
+#     include <fcntl.h>
+#     include <unistd.h>
 
-    int IsDebuggerPresent(void)
-    {
-      char buf[1024] = { 0 };
-      int debugger_present = 0;
-
-      int status_fd = open("/proc/self/status", O_RDONLY);
-      if (status_fd == -1)
-          return 0;
-
-      ssize_t num_read = read(status_fd, buf, sizeof(buf) - 1);
-
-      if (num_read > 0)
+      int IsDebuggerPresent(void)
       {
-        const char TracerPid[] = "TracerPid:";
-        char *tracer_pid = strstr(buf, TracerPid);
-        if (tracer_pid)
-            debugger_present = !!atoi(tracer_pid + sizeof(TracerPid) - 1);
+        char buf[1024] = { 0 };
+        int debugger_present = 0;
+
+        int status_fd = open("/proc/self/status", O_RDONLY);
+        if (status_fd == -1)
+            return 0;
+
+        ssize_t num_read = read(status_fd, buf, sizeof(buf) - 1);
+
+        if (num_read > 0)
+        {
+          const char TracerPid[] = "TracerPid:";
+          char *tracer_pid = strstr(buf, TracerPid);
+          if (tracer_pid)
+              debugger_present = !!atoi(tracer_pid + sizeof(TracerPid) - 1);
+        }
+        return debugger_present;
       }
-      return debugger_present;
-    }
 #   else
-    int IsDebuggerPresent(void) { return 0; }
+      int IsDebuggerPresent(void) { return 0; }
 #   endif // defined(EP_COMPILER_GCC)
 
 # endif // !defined(EP_WINDOWS)

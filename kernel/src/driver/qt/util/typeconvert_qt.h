@@ -5,10 +5,7 @@
 #include "ep/c/platform.h"
 #include "ep/cpp/delegate.h"
 
-// Disabled Warnings
-#if defined(EP_COMPILER_VISUALC)
-# pragma warning(disable:4127) // conditional expression is constant
-#endif //defined(_MSC_VER)
+#include "driver/qt/epqt.h"
 
 #include <QString>
 #include <QVariant>

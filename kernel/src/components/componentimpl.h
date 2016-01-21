@@ -7,8 +7,6 @@
 #include "ep/cpp/internal/i/icomponent.h"
 #include "ep/cpp/component/component.h"
 
-#include "udHashMap.h"
-
 #include <stdio.h>
 
 #if defined(SendMessage)

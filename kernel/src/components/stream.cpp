@@ -16,7 +16,7 @@ BufferRef Stream::ReadBuffer(size_t bytes)
   if (!buffer)
     return nullptr;
 
-  IF_UDASSERT(Slice<void> read =) Read(buffer);
+  IF_EPASSERT(Slice<void> read =) Read(buffer);
   spBuffer->Unmap();
 
   EPASSERT(read.length == bytes, "TODO: handle the case where we read less bytes than we expect!");

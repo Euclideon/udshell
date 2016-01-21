@@ -2,9 +2,11 @@
 #ifndef EP_QTCOMPONENT_QT_H
 #define EP_QTCOMPONENT_QT_H
 
-#include <QObject>
-
 #include "ep/cpp/component/component.h"
+
+#include "driver/qt/epqt.h"
+
+#include <QObject>
 
 namespace ep {
 class Kernel;

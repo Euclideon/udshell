@@ -6,6 +6,8 @@
 #include "hal/texture.h"
 #include "hal/vertex.h"
 
+#include "driver/qt/epqt.h"
+
 #include <QOpenGLFunctions_2_0>
 #include <QOpenGLDebugLogger>
 

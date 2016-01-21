@@ -2,10 +2,11 @@
 #ifndef EP_COMPONENT_QT_H
 #define EP_COMPONENT_QT_H
 
-#include <QVariant>
 #include "../util/typeconvert_qt.h"
 
 #include "components/componentimpl.h"
+
+#include <QVariant>
 
 // forward declare
 namespace qt {

@@ -41,7 +41,7 @@ public:
 
   static RenderableSceneRef Convert(RenderScene &renderScene);
 
-  void MakeDirty()
+  void MakeDirty() override final
   {
     bDirty = true;
     pInstance->Dirty.Signal();

@@ -2,8 +2,6 @@
 
 #if EPWINDOW_DRIVER == EPDRIVER_QT
 
-#include <QSemaphore>
-
 #include "epkernel_qt.h"
 
 #include "ui/renderview_qt.h"
@@ -11,6 +9,9 @@
 #include "components/qtcomponent_qt.h"
 #include "util/qmlbindings_qt.h"
 #include "components/viewimpl.h"
+
+#include <QSemaphore>
+
 
 // Init the kernel's qrc file resources - this has to happen from the global namespace
 inline void InitResources() { Q_INIT_RESOURCE(kernel); }
@@ -260,7 +261,7 @@ void QtKernel::OnGLContextCreated(QOpenGLContext *pContext)
 
   // we need to share our context with Qt and recreate
   pContext->setShareContext(pMainThreadContext);
-  IF_UDASSERT(bool succeed =) pContext->create();
+  IF_EPASSERT(bool succeed =) pContext->create();
 
   // TODO: error handle
   EPASSERT(succeed, "Couldn't create shared render context!");
@@ -308,7 +309,7 @@ void QtKernel::DoInit(ep::Kernel *)
   // create main opengl context
   pMainThreadContext = new QOpenGLContext();
   pMainThreadContext->setFormat(mainSurfaceFormat);
-  IF_UDASSERT(bool succeed = )pMainThreadContext->create();
+  IF_EPASSERT(bool succeed = )pMainThreadContext->create();
   EPASSERT(succeed, "Couldn't create render context!");
 
   if (!pMainThreadContext->makeCurrent(pSplashScreen))

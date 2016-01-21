@@ -1,7 +1,10 @@
-
+#include "ep/cpp/platform.h"
 #include "helpers.h"
+#if defined(EP_LINUX)
+# include <unistd.h>
+#endif
 
-Array<const KeyValuePair> udParseCommandLine(const char *pCommandLine)
+Array<const KeyValuePair> epParseCommandLine(const char *pCommandLine)
 {
   Array<const KeyValuePair> output(Concat, KeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
 
@@ -27,7 +30,7 @@ Array<const KeyValuePair> udParseCommandLine(const char *pCommandLine)
   return std::move(output);
 }
 
-Array<const KeyValuePair> udParseCommandLine(int argc, char *argv[])
+Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
 {
   Array<const KeyValuePair> output(Reserve, argc);
 
@@ -39,7 +42,7 @@ Array<const KeyValuePair> udParseCommandLine(int argc, char *argv[])
   return std::move(output);
 }
 
-Array<const KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
+Array<const KeyValuePair> epParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
 {
   Array<const KeyValuePair> output(Reserve, argc);
 
@@ -47,4 +50,27 @@ Array<const KeyValuePair> udParseCommandLine(uint32_t argc, const char* argn[], 
     output.pushBack(KeyValuePair(String(argn[i]), String(argv[i])));
 
   return std::move(output);
+}
+
+int epGetHardwareThreadCount()
+{
+#if defined(EP_WINDOWS)
+  DWORD_PTR processMask;
+  DWORD_PTR systemMask;
+
+  if (::GetProcessAffinityMask(GetCurrentProcess(), &processMask, &systemMask))
+  {
+    int hardwareThreadCount = 0;
+    while (processMask)
+    {
+      ++hardwareThreadCount;
+      processMask &= processMask - 1; // Clear LSB
+    }
+    return hardwareThreadCount;
+  }
+#elif defined(EP_LINUX)
+  return sysconf(_SC_NPROCESSORS_ONLN);
+#endif
+
+  return 1;
 }

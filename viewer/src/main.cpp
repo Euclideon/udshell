@@ -2,19 +2,17 @@
 #include "ep/cpp/platform.h"
 #include "ep/cpp/string.h"
 #include "ep/cpp/error.h"
-#include "kernel.h"
-#include "components/viewimpl.h"
 #include "ep/cpp/component/scene.h"
+#include "ep/cpp/component/view.h"
 #include "ep/cpp/component/node/simplecamera.h"
+#include "ep/cpp/component/resource/udmodel.h"
+#include "kernel.h"
+#include "helpers.h"
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/node/udnode.h"
-#include "ep/cpp/component/resource/udmodel.h"
 #include "components/resourcemanager.h"
 
 using namespace kernel;
-
-// ud includes
-#include "udPlatformUtil.h"
 
 static void ProcessCmdline(int argc, char *argv[]);
 
@@ -35,7 +33,7 @@ static struct
   SimpleCameraRef spSimpleCamera;
   UDNodeRef spUDNode;
 } mData = {
-#if UDPLATFORM_WINDOWS
+#if defined(EP_WINDOWS)
                "/src/data/DirCube.uds", // filename
 #else
                "~/src/udshell/data/DirCube.upc", // filename
@@ -74,15 +72,13 @@ static void ViewerInit(String sender, String message, const Variant &data)
   EPTHROW_IF_NULL(mData.spUDNode, epR_Failure, "!");
   epscope(fail) { mData.spUDNode = nullptr; };
 
-  udRenderOptions options = { sizeof(udRenderOptions), udRF_None, nullptr, nullptr, nullptr };
-  options.flags = udRF_PointCubes | udRF_ClearTargets;
-  mData.spView->GetImpl<ViewImpl>()->SetRenderOptions(options);
+  mData.spView->SetUDRenderFlags(UDRenderFlags::PointCubes | UDRenderFlags::ClearTargets);
 
   mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
 
   mData.spSimpleCamera->SetSpeed(1.0);
   mData.spSimpleCamera->SetInvertedYAxis(true);
-  mData.spSimpleCamera->SetPerspective(UD_PIf / 3.f);
+  mData.spSimpleCamera->SetPerspective(EP_PIf / 3.f);
   mData.spSimpleCamera->SetDepthPlanes(0.0001f, 7500.f);
 
   mData.spView->SetScene(mData.spScene);
@@ -125,16 +121,14 @@ static void ViewerDeinit(String sender, String message, const Variant &data)
 // Author: David Ely, September 2015
 int main(int argc, char* argv[])
 {
-  udMemoryDebugTrackingInit();
-
   using namespace ep;
-  mData.rendererThreadCount = udGetHardwareThreadCount() - 1;
+  mData.rendererThreadCount = epGetHardwareThreadCount() - 1;
   ProcessCmdline(argc, argv);
 
   epResult result = epR_Failure;
   try
   {
-    result = kernel::Kernel::Create(&mData.pKernel, udParseCommandLine(argc, argv), mData.rendererThreadCount);
+    result = kernel::Kernel::Create(&mData.pKernel, epParseCommandLine(argc, argv), mData.rendererThreadCount);
     if (result != epR_Success)
       return -1;
 
@@ -144,26 +138,25 @@ int main(int argc, char* argv[])
     if (mData.pKernel->RunMainLoop() != epR_Success)
     {
       // TODO: improve error handling/reporting
-      udDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
+      epDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
       return 1;
     }
 
     mData.pKernel->Destroy();
     mData.pKernel = nullptr;
   }
+  catch (std::exception &e)
+  {
+    epDebugFormat("Unhandled exception: {0}\n", e.what());
+    result = epR_Failure;
+  }
   catch (...)
   {
-    udDebugPrintf("Unhandled exception!\n");
+    epDebugWrite("Unhandled exception!\n");
     result = epR_Failure;
   }
 
-  udMemoryOutputLeaks();
-  udMemoryDebugTrackingDeinit();
-
-  if (result != epR_Success)
-    return -1;
-
-  return 0;
+  return result != epR_Success ? 1 : 0;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -172,7 +165,7 @@ void ProcessCmdline(int argc, char *argv[])
   // TODO: port all this code to use udString
   for (int i = 1; i < argc; ++i)
   {
-    if (udStrBeginsWith(argv[i], "/threads="))
+    if (String(argv[i]).beginsWith("/threads="))
     {
       int reqThreads = atoi(&argv[i][9]);
       if (reqThreads > 0)
