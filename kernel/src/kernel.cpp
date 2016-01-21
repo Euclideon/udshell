@@ -16,7 +16,6 @@
 #include "components/nativepluginloader.h"
 #include "components/project.h"
 #include "components/resources/text.h"
-#include "components/resources/menu.h"
 #include "components/resources/kvpstore.h"
 #include "components/resources/metadata.h"
 #include "components/datasources/imagesource.h"
@@ -39,6 +38,7 @@
 #include "components/resources/arraybufferimpl.h"
 #include "components/resources/materialimpl.h"
 #include "components/resources/shaderimpl.h"
+#include "components/resources/menuimpl.h"
 #include "components/resources/modelimpl.h"
 #include "components/nodes/nodeimpl.h"
 #include "components/nodes/udnodeimpl.h"
@@ -159,7 +159,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<Material, MaterialImpl>();
   pKernel->RegisterComponentType<Model, ModelImpl>();
   pKernel->RegisterComponentType<Text>();
-  pKernel->RegisterComponentType<Menu>();
+  pKernel->RegisterComponentType<Menu, MenuImpl>();
   pKernel->RegisterComponentType<KVPStore>();
   pKernel->RegisterComponentType<Metadata>();
 
