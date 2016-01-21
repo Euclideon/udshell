@@ -6,8 +6,10 @@
 #include "components/viewimpl.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/simplecamera.h"
+#include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/node/udnode.h"
 #include "ep/cpp/component/resource/udmodel.h"
+#include "components/resourcemanager.h"
 
 using namespace kernel;
 
@@ -87,13 +89,20 @@ static void ViewerInit(String sender, String message, const Variant &data)
   mData.spView->SetCamera(mData.spSimpleCamera);
   mData.pKernel->SetFocusView(mData.spView);
 
-  mData.spUDModel = mData.pKernel->CreateComponent<UDModel>();
-  if (!mData.spUDModel)
-    return;
+  ResourceManagerRef spResourceManager = mData.pKernel->GetResourceManager();
 
-  mData.spUDModel->Load(mData.filename, false);
-  mData.spUDNode->SetUDModel(mData.spUDModel);
-  mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
+  if (spResourceManager)
+  {
+    // TODO: enable streamer once we have a tick running to update the streamer
+    DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", mData.filename },{ "useStreamer", false } });
+    if (spModelDS && spModelDS->GetNumResources() > 0)
+    {
+      mData.spUDModel = spModelDS->GetResourceAs<UDModel>(0);
+    }
+
+    mData.spUDNode->SetUDModel(mData.spUDModel);
+    mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
+  }
 
   mData.spScene->GetRootNode()->AddChild(mData.spUDNode);
   mData.spScene->MakeDirty();
@@ -106,6 +115,7 @@ static void ViewerDeinit(String sender, String message, const Variant &data)
   mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
 
   mData.spUDNode = nullptr;
+  mData.spUDModel = nullptr;
   mData.spView = nullptr;
   mData.spScene = nullptr;
   mData.spSimpleCamera = nullptr;

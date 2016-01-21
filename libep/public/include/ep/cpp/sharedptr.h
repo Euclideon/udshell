@@ -48,6 +48,7 @@ protected:
   virtual ~Safe();
 };
 
+template<typename U> class SafePtr;
 
 // shared pointers are ref counted
 template<class T>
@@ -89,8 +90,14 @@ public:
   }
 
   template <class U> // the U allows us to accept const
-  SharedPtr(const UniquePtr<U> &ptr);
+  SharedPtr(UniquePtr<U> &ptr);
   SharedPtr(UniquePtr<T> &&ptr);
+
+  template <class U>
+  SharedPtr(const SafePtr<U> &ptr)
+    : SharedPtr<T>(ptr.ptr())
+  {
+  }
 
   explicit SharedPtr(T *p)
     : pInstance(acquire(p)) {}
@@ -131,11 +138,20 @@ public:
   }
   SharedPtr& operator=(UniquePtr<T> &&ptr);
   template <class U> // the U allows us to accept const
-  SharedPtr& operator=(const UniquePtr<U> &ptr);
+  SharedPtr& operator=(UniquePtr<U> &ptr);
   SharedPtr& operator=(nullptr_t)
   {
     RefCounted *pOld = pInstance;
     pInstance = nullptr;
+    release(pOld);
+    return *this;
+  }
+
+  template <class U>
+  SharedPtr& operator=(SafePtr<U> &ptr)
+  {
+    RefCounted *pOld = pInstance;
+    pInstance = acquire(ptr.ptr());
     release(pOld);
     return *this;
   }
@@ -171,7 +187,7 @@ private:
 //------------------------------------------------------------------------------------------
 
 // unique pointers nullify the source pointer on assignment
-template<class T>
+template<typename T>
 class UniquePtr
 {
 public:
@@ -180,13 +196,22 @@ public:
 
   explicit UniquePtr(T *p) : pInstance(p) {}
 
-  UniquePtr(const UniquePtr<T> &ptr)
+  UniquePtr(const UniquePtr<T> &ptr) = delete;
+  UniquePtr &operator=(const UniquePtr<T> &ptr) = delete;
+
+  template<typename U>
+  UniquePtr(UniquePtr<U> &ptr)
     : pInstance(ptr.pInstance)
   {
     ptr.pInstance = nullptr;
   }
-  template<class U>
-  UniquePtr(const UniquePtr<U> &ptr)
+  UniquePtr(UniquePtr<T> &&ptr)
+    : pInstance(ptr.pInstance)
+  {
+    ptr.pInstance = nullptr;
+  }
+  template<typename U>
+  UniquePtr(UniquePtr<U> &&ptr)
     : pInstance(ptr.pInstance)
   {
     ptr.pInstance = nullptr;
@@ -197,7 +222,15 @@ public:
     internal::Destroy<T, std::is_base_of<RefCounted, T>::value>::destroy(pInstance);
   }
 
-  UniquePtr &operator=(const UniquePtr<T> &ptr)
+  template<typename U>
+  UniquePtr &operator=(UniquePtr<U> &ptr)
+  {
+    reset();
+    pInstance = ptr.pInstance;
+    ptr.pInstance = nullptr;
+    return *this;
+  }
+  UniquePtr &operator=(UniquePtr<T> &&ptr)
   {
     reset();
     pInstance = ptr.pInstance;
@@ -205,7 +238,7 @@ public:
     return *this;
   }
   template<typename U>
-  UniquePtr &operator=(const UniquePtr<U> &ptr)
+  UniquePtr &operator=(UniquePtr<U> &&ptr)
   {
     reset();
     pInstance = ptr.pInstance;
@@ -237,7 +270,7 @@ private:
   template<typename U> friend class UniquePtr;
   template<typename U, bool isref> friend struct Destroy;
 
-  mutable T * eprestrict pInstance = nullptr;
+  T * eprestrict pInstance = nullptr;
 };
 
 //------------------------------------------------------------------------------------------
@@ -270,6 +303,7 @@ public:
     const_cast<SynchronisedPtr&>(ptr).pInstance = nullptr;
     const_cast<SynchronisedPtr&>(ptr).pKernel = nullptr;
   }
+
   ~SynchronisedPtr()
   {
     destroy();
@@ -343,9 +377,10 @@ inline SharedPtr<T>::SharedPtr(UniquePtr<T> &&ptr)
   pInstance->rc = 1;
   ptr.pInstance = nullptr;
 }
+
 template <class T>
 template <class U>
-inline SharedPtr<T>::SharedPtr(const UniquePtr<U> &ptr)
+inline SharedPtr<T>::SharedPtr(UniquePtr<U> &ptr)
   : pInstance(ptr.pInstance)
 {
   if (pInstance)
@@ -354,24 +389,32 @@ inline SharedPtr<T>::SharedPtr(const UniquePtr<U> &ptr)
     ptr.pInstance = nullptr;
   }
 }
+
 template <class T>
 inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<T> &&ptr)
 {
   RefCounted *pOld = pInstance;
   pInstance = ptr.pInstance;
-  pInstance->rc = 1;
-  ptr.pInstance = nullptr;
+  if (pInstance)
+  {
+    pInstance->rc = 1;
+    ptr.pInstance = nullptr;
+  }
   release(pOld);
   return *this;
 }
+
 template <class T>
 template <class U>
-inline SharedPtr<T>& SharedPtr<T>::operator=(const UniquePtr<U> &ptr)
+inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<U> &ptr)
 {
   RefCounted *pOld = pInstance;
   pInstance = ptr.pInstance;
-  pInstance->rc = 1;
-  ptr.pInstance = nullptr;
+  if (pInstance)
+  {
+    pInstance->rc = 1;
+    ptr.pInstance = nullptr;
+  }
   release(pOld);
   return *this;
 }
@@ -447,6 +490,7 @@ template<class T> inline bool operator!=(nullptr_t, const UniquePtr<T> &r) { ret
 
 } // namespace ep
 
+#include "ep/cpp/safeptr.h"
 #include "ep/cpp/internal/sharedptr_inl.h"
 
 #endif // _EPSHAREDPTR_HPP

@@ -30,8 +30,6 @@ public:
   virtual UDRenderState GetUDRenderState() const = 0;
   virtual DataSourceRef GetDataSource() const = 0;
 
-  virtual int Load(String name, bool useStreamer) = 0;
-
   // TODO: Revist the shader system.  Simple voxel shader is inadequate.
   typedef uint32_t SimpleVoxelDlgt(uint32_t color);
   virtual Delegate<SimpleVoxelDlgt> GetSimpleVoxelDelegate() const = 0;

@@ -6,11 +6,13 @@
 #include "udOctree.h"
 
 #include "ep/cpp/component/resource/udmodel.h"
+#include "ep/cpp/component/datasource/datasource.h"
 #include "udRender.h"
 #include "kernel.h"
 #include "ep/cpp/delegate.h"
 #include "ep/cpp/boundingvolume.h"
 #include "ep/cpp/rect.h"
+
 
 namespace ep {
 
@@ -39,9 +41,7 @@ public:
   BoundingVolume GetBoundingVolume() const;
   UDRenderState GetUDRenderState() const;
 
-  DataSourceRef GetDataSource() const { return spDataSource; }
-
-  int Load(String name, bool useStreamer);
+  DataSourceRef GetDataSource() const { return wpDataSource; }
 
   // TODO: Revist the shader system.  Simple voxel shader is inadequate.
   Delegate<SimpleVoxelDlgt> GetSimpleVoxelDelegate() const { return simpleVoxelDel; }
@@ -63,7 +63,7 @@ private:
 
   Double4x4 udmatrix;
   Rect<uint32_t> rect;
-  DataSourceRef spDataSource;
+  SafePtr<DataSource> wpDataSource;
   udOctree *pOctree = nullptr;
 
   uint32_t startingRoot = 0;

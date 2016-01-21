@@ -10,7 +10,7 @@
 #include "ui/window_qt.h"
 #include "components/qtcomponent_qt.h"
 #include "util/qmlbindings_qt.h"
-
+#include "components/viewimpl.h"
 
 // Init the kernel's qrc file resources - this has to happen from the global namespace
 inline void InitResources() { Q_INIT_RESOURCE(kernel); }
@@ -208,7 +208,7 @@ epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
 
   // install event filter - this will get automatically cleaned up when the top window is destroyed
   pTopLevelWindow->installEventFilter(new QtWindowEventFilter(pTopLevelWindow));
-  
+
   pTopLevelWindow->show();
   pTopLevelWindow->raise();
 
@@ -373,7 +373,9 @@ Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 // ---------------------------------------------------------------------------------------
 ViewRef Kernel::SetFocusView(ViewRef spView)
 {
-  LogTrace("Kernel::SetFocusView()");
+  if (!spView)
+    spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
+
   ViewRef spOld = spFocusView;
   spFocusView = spView;
   return spOld;
