@@ -13,7 +13,7 @@ class ShaderImpl : public BaseImpl<Shader, IShader>
 {
 public:
   ShaderImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance)
+    : ImplSuper(pInstance)
   {
   }
 

@@ -7,7 +7,8 @@ namespace ep
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-CameraImpl::CameraImpl(Component *pInstance, Variant::VarMap initParams) : Super(pInstance)
+CameraImpl::CameraImpl(Component *pInstance, Variant::VarMap initParams)
+  : ImplSuper(pInstance)
 {
   const Variant *perspParam = initParams.Get("perspective");
   if (perspParam)

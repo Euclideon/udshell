@@ -11,7 +11,7 @@ class BufferImpl : public BaseImpl<Buffer, IBuffer>
 {
 public:
   BufferImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance)
+    : ImplSuper(pInstance)
   {
   }
 
@@ -29,7 +29,7 @@ public:
   bool CopyBuffer(BufferRef buffer) override final;
   bool CopyBuffer(Slice<const void> buffer) override final;
 
-  Variant Save() const override final { return pInstance->InstanceSuper::Save(); }
+  Variant Save() const override final { return pInstance->Super::Save(); }
 
   bool ResizeInternal(size_t size, bool copy) override final;
 

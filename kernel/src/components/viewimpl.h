@@ -17,7 +17,7 @@ class ViewImpl : public BaseImpl<View, IView>
 {
 public:
   ViewImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance)
+    : ImplSuper(pInstance)
   {
     memset(&options, 0, sizeof(options));
   }
@@ -75,7 +75,7 @@ private:
   ~ViewImpl() { Deactivate(); }
 
   void OnDirty();
-  
+
   void SetLatestFrame(UniquePtr<RenderableView> spFrame);
   void Update(double timeStep)
   {

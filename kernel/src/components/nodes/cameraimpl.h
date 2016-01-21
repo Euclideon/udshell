@@ -15,7 +15,7 @@ class CameraImpl : public BaseImpl<Camera, ICamera>
 public:
   CameraImpl(Component *pInstance, Variant::VarMap initParams);
 
-  Double4x4 GetCameraMatrix() const override final { Double4x4 m; pInstance->InstanceSuper::CalculateWorldMatrix(&m); return m; }
+  Double4x4 GetCameraMatrix() const override final { Double4x4 m; pInstance->Super::CalculateWorldMatrix(&m); return m; }
   Double4x4 GetViewMatrix() const override final { return GetCameraMatrix().inverse(); }
 
   void GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const override final;

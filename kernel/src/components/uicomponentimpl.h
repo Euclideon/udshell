@@ -11,7 +11,7 @@ class UIComponentImpl : public BaseImpl<UIComponent, IUIComponent>
 {
 public:
   UIComponentImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance) 
+    : ImplSuper(pInstance)
   {
     CreateInternal(initParams);
   }

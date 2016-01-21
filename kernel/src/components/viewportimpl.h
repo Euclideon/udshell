@@ -11,7 +11,7 @@ class ViewportImpl : public BaseImpl<Viewport, IViewport>
 {
 public:
   ViewportImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance)
+    : ImplSuper(pInstance)
   {
     CreateInternal(initParams);
   }

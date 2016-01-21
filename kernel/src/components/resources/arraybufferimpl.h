@@ -17,7 +17,7 @@ class ArrayBufferImpl : public BaseImpl<ArrayBuffer, IArrayBuffer>
 {
 public:
   ArrayBufferImpl(Component *_pInstance, Variant::VarMap initParams)
-    : Super(_pInstance)
+    : ImplSuper(_pInstance)
   {
     pInstance->Changed.Subscribe(Delegate<void()>(this, &ArrayBufferImpl::OnBufferDirty));
   }
@@ -44,7 +44,7 @@ public:
     return Slice<const size_t>(shape, dimensions);
   }
 
-  Variant Save() const override final { return pInstance->InstanceSuper::Save(); }
+  Variant Save() const override final { return pInstance->Super::Save(); }
 
 protected:
   friend class GeomNode;

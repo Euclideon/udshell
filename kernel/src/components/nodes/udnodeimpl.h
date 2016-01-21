@@ -25,13 +25,13 @@ class UDNodeImpl : public BaseImpl<UDNode, IUDNode>
 {
 public:
   UDNodeImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance)
+    : ImplSuper(pInstance)
   {}
 
   UDModelRef GetUDModel() const override final { return spModel; }
   void SetUDModel(UDModelRef _spModel) override final { spModel = _spModel; }
 
-  Variant Save() const override final { return pInstance->InstanceSuper::Save(); }
+  Variant Save() const override final { return pInstance->Super::Save(); }
 
 protected:
   epResult Render(RenderScene &spScene, const Double4x4 &mat) override final;

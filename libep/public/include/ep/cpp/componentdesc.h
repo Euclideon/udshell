@@ -105,8 +105,7 @@ class BaseImpl : public I
 public:
   using Instance = C;
   using Interface = I;
-  using Super = BaseImpl<C, I>;
-  using InstanceSuper = typename C::Super;
+  using ImplSuper = BaseImpl<C, I>;
 
   const kernel::ComponentDesc* GetDescriptor() const { return (const kernel::ComponentDesc*)pInstance->GetDescriptor(); }
   kernel::Kernel* GetKernel() const { return (kernel::Kernel*)&pInstance->GetKernel(); }

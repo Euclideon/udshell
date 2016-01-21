@@ -12,7 +12,7 @@ class ActivityImpl : public BaseImpl<Activity, IActivity>
 {
 public:
   ActivityImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance)
+    : ImplSuper(pInstance)
   {
   }
 
@@ -22,7 +22,7 @@ public:
   void Activate() override final {}
   void Deactivate() override final {}
 
-  Variant Save() const override final { return pInstance->InstanceSuper::Save(); }
+  Variant Save() const override final { return pInstance->Super::Save(); }
 
 protected:
   UIComponentRef ui = nullptr;

@@ -86,7 +86,8 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene)
   return cache;
 }
 
-SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams) : Super(pInstance)
+SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams)
+  : ImplSuper(pInstance)
 {
   timeStep = 1.0 / 30.0;
   rootNode = GetKernel()->CreateComponent<Node>();

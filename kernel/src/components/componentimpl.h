@@ -21,7 +21,7 @@ class ComponentImpl : public BaseImpl<Component, IComponent>
 {
 public:
   ComponentImpl(Component *pInstance, Variant::VarMap initParams)
-    : Super(pInstance) {}
+    : ImplSuper(pInstance) {}
 
   void SetName(SharedString name) override final;
 
