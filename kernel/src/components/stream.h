@@ -2,7 +2,7 @@
 #if !defined(_EP_STREAM_H)
 #define _EP_STREAM_H
 
-#include "broadcaster.h"
+#include "ep/cpp/component/broadcaster.h"
 
 namespace ep
 {

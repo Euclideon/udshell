@@ -1,5 +1,5 @@
 #include "components/console.h"
-#include "components/broadcaster.h"
+#include "ep/cpp/component/broadcaster.h"
 
 namespace ep
 {

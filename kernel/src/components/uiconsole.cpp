@@ -1,6 +1,6 @@
 #include "components/uiconsole.h"
 #include "components/memstream.h"
-#include "components/broadcaster.h"
+#include "ep/cpp/component/broadcaster.h"
 #include "components/logger.h"
 #include "ep/cpp/component/resource/buffer.h"
 #include "components/commandmanager.h"
