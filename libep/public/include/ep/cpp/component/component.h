@@ -159,12 +159,8 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pCompo
 
 inline Variant epToVariant(ep::Component *pC)
 {
-  epVariant v;
-  v.t = (size_t)Variant::Type::Component;
-  v.ownsContent = 0;
-  v.length = 0;
-  v.p = pC;
-  return std::move(v);
+  // Variant does not inc the refcount, effectively a borrow.
+  return Variant((const SharedPtr<RefCounted>&)pC, Variant::SharedPtrType::Component, false);
 }
 
 // HACK: this is here because forward referencing!

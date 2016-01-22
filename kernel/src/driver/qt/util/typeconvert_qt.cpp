@@ -136,34 +136,43 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
       pVariant->setValue(variant.asFloat());
       break;
 
-    case Variant::Type::Component:
-    {
-      ep::ComponentRef spComponent = variant.asComponent();
-      if (spComponent->IsType("qtcomponent"))
-        pVariant->setValue(shared_pointer_cast<qt::QtComponent>(spComponent)->GetQObject());
-      else
+    case Variant::Type::SharedPtr:
+      switch (variant.spType())
       {
-        QObject *pQObject = new qt::QtEPComponent(spComponent);
-        pVariant->setValue(pQObject);
+        case Variant::SharedPtrType::Component:
+        {
+          ep::ComponentRef spComponent = variant.asComponent();
+          if (spComponent->IsType("qtcomponent"))
+            pVariant->setValue(shared_pointer_cast<qt::QtComponent>(spComponent)->GetQObject());
+          else
+          {
+            QObject *pQObject = new qt::QtEPComponent(spComponent);
+            pVariant->setValue(pQObject);
 
-        // since we allocated this QObject, we'll set it to QML ownership so it can be freed
-        QQmlEngine::setObjectOwnership(pQObject, QQmlEngine::JavaScriptOwnership);
+            // since we allocated this QObject, we'll set it to QML ownership so it can be freed
+            QQmlEngine::setObjectOwnership(pQObject, QQmlEngine::JavaScriptOwnership);
+          }
+          break;
+        }
+
+        case Variant::SharedPtrType::Delegate:
+        {
+          using namespace qt;
+          QtDelegate *del = new QtDelegate(variant.asDelegate());
+
+          QJSValue jsDel = QtApplication::Kernel()->QmlEngine()->newQObject(del);
+          if (jsDel.hasProperty("call"))
+            pVariant->setValue(jsDel.property("call"));
+
+          QQmlEngine::setObjectOwnership(del, QQmlEngine::JavaScriptOwnership);
+          break;
+        }
+
+        default:
+          epDebugPrintf("epFromVariant: Unsupported SharedPtr type '%d'\n", (int)variant.spType());
+          break;
       }
       break;
-    }
-
-    case Variant::Type::Delegate:
-    {
-      using namespace qt;
-      qt::QtDelegate *del = new qt::QtDelegate(variant.asDelegate());
-
-      QJSValue jsDel = QtApplication::Kernel()->QmlEngine()->newQObject(del);
-      if (jsDel.hasProperty("call"))
-        pVariant->setValue(jsDel.property("call"));
-
-      QQmlEngine::setObjectOwnership(del, QQmlEngine::JavaScriptOwnership);
-      break;
-    }
 
     // TODO: optimise?
     case Variant::Type::String:

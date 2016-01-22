@@ -49,7 +49,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
         spModel = spModelDS->GetResourceAs<UDModel>(0);
       }
     }
-    else if (model->is(Variant::Type::Component))
+    else if (model->is(Variant::SharedPtrType::Component))
       spModel = model->as<UDModelRef>();
   }
 

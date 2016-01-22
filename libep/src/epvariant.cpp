@@ -72,7 +72,7 @@ int epVariant_IsVoid(epVariant v)
 }
 int epVariant_IsNull(epVariant v)
 {
-  return v.t == epVT_Null || (v.t == epVT_String && v.length == 0) || (v.t == epVT_Component && v.p == NULL);
+  return v.t == epVT_Null || (v.t == epVT_String && v.length == 0) || (v.t == epVT_SharedPtr && v.p == NULL);
 }
 char epVariant_AsBool(epVariant v)
 {
@@ -135,10 +135,17 @@ ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &v
     case Variant::Type::String:
     case Variant::Type::SmallString:
       return epStringifyTemplate(buffer, format, v.asString(), pArgs);
-    case Variant::Type::Component:
-      return epStringifyTemplate(buffer, format, v.asComponent(), pArgs);
-    case Variant::Type::Delegate:
-      return epStringifyTemplate(buffer, format, v.asDelegate(), pArgs);
+    case Variant::Type::SharedPtr:
+      switch (v.spType())
+      {
+        case Variant::SharedPtrType::Component:
+          return epStringifyTemplate(buffer, format, v.asComponent(), pArgs);
+        case Variant::SharedPtrType::Delegate:
+          return epStringifyTemplate(buffer, format, v.asDelegate(), pArgs);
+        default:
+          EPASSERT(false, "TODO! Please write me!");
+          return 0;
+      }
     case Variant::Type::Array:
       return epStringifyTemplate(buffer, format, v.asArray(), pArgs);
     case Variant::Type::AssocArray:
@@ -157,20 +164,19 @@ namespace internal {
 
 const Variant::Type s_typeTranslation[] =
 {
+  Variant::Type::Void,      // epVT_Void
+  Variant::Type::Error,     // epVT_Error
+
   Variant::Type::Null,      // epVT_Null
   Variant::Type::Bool,      // epVT_Bool
   Variant::Type::Int,       // epVT_Int
   Variant::Type::Float,     // epVT_Float
   Variant::Type::Enum,      // epVT_Enum
   Variant::Type::Bitfield,  // epVT_Bitfield
-  Variant::Type::Component, // epVT_Component
-  Variant::Type::Delegate,  // epVT_Delegate
+  Variant::Type::SharedPtr, // epVT_SharedPtr
   Variant::Type::String,    // epVT_String
   Variant::Type::Array,     // epVT_Array
   Variant::Type::AssocArray,// epVT_AssocArray
-
-  Variant::Type::Void,      // epVT_Void
-  Variant::Type::Error,     // epVT_Error
 
   // these get reinterpreted
   Variant::Type::String     // epVT_SmallString
@@ -241,14 +247,9 @@ void Variant::copyContent(const Variant &val)
 {
   switch ((Type)t)
   {
-    case Type::Component:
+    case Type::SharedPtr:
     {
-      new((void*)&p) ComponentRef((ComponentRef&)val.p);
-      break;
-    }
-    case Type::Delegate:
-    {
-      new((void*)&p) VarDelegate((VarDelegate&)val.p);
+      new((void*)&p) SharedPtr<RefCounted>((const SharedPtr<RefCounted>&)val.sp);
       break;
     }
     case Type::String:
@@ -275,11 +276,8 @@ void Variant::destroy()
 {
   switch ((Type)t)
   {
-    case Type::Component:
-      ((ComponentRef&)p).~SharedPtr();
-      break;
-    case Type::Delegate:
-      ((VarDelegate&)p).~VarDelegate();
+    case Type::SharedPtr:
+      ((SharedPtr<RefCounted>&)sp).~SharedPtr();
       break;
     case Type::String:
     {
@@ -330,9 +328,8 @@ bool Variant::isNull() const
       return length == 0;
     case Type::AssocArray:
       return ((VarMap&)p).Empty();
-    case Type::Component:
-    case Type::Delegate:
-      return p == nullptr;
+    case Type::SharedPtr:
+      return sp == nullptr;
     case Type::SmallString:
       return (*(uint8_t*)this >> 4) == 0;
     default:
@@ -380,8 +377,16 @@ ptrdiff_t Variant::compare(const Variant &v) const
     case Type::String:
     case Type::SmallString:
       return asString().cmp(v.asString());
-    case Type::Component:
-      return ((String&)((epComponent*)p)->uid).cmp((String&)((epComponent*)v.p)->uid);
+    case Type::SharedPtr:
+    {
+      switch ((SharedPtrType)length)
+      {
+        case SharedPtrType::Component:
+          return c->uid.cmp(v.c->uid);
+        default:
+          return (char*)p - (char*)v.p;
+      }
+    }
     default:
       return (char*)p - (char*)v.p;
   }
@@ -484,8 +489,9 @@ ComponentRef Variant::asComponent() const
       EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return ComponentRef();
-    case Type::Component:
-      return (ComponentRef&)p;
+    case Type::SharedPtr:
+      if((SharedPtrType)length == SharedPtrType::Component)
+        return (ComponentRef&)c;
     default:
       EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
@@ -498,8 +504,24 @@ Variant::VarDelegate Variant::asDelegate() const
       EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return VarDelegate();
-    case Type::Delegate:
-      return (VarDelegate&)p;
+    case Type::SharedPtr:
+      if ((SharedPtrType)length == SharedPtrType::Delegate)
+        return VarDelegate((DelegateMementoRef&)d);
+    default:
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  }
+}
+SubscriptionRef Variant::asSubscription() const
+{
+  switch ((Type)t)
+  {
+    case Type::Void:
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+    case Type::Null:
+      return SubscriptionRef();
+    case Type::SharedPtr:
+      if ((SharedPtrType)length == SharedPtrType::Subscription)
+        return (SubscriptionRef&)d;
     default:
       EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
@@ -519,8 +541,9 @@ String Variant::asString() const
       uint8_t *pBuffer = (uint8_t*)this;
       return String((char*)pBuffer + 1, pBuffer[0] >> 4);
     }
-    case Type::Component:
-      return ((Component*)p)->GetUid();
+    case Type::SharedPtr:
+      if ((SharedPtrType)length == SharedPtrType::Component)
+        return c->GetUid();
     default:
       EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
@@ -554,8 +577,9 @@ SharedString Variant::asSharedString() const
     }
     case Type::Array:
       return SharedString::format("{0}", asArray());
-    case Type::Component:
-      return c->GetUid();
+    case Type::SharedPtr:
+      if ((SharedPtrType)length == SharedPtrType::Component)
+        return c->GetUid();
     default:
       EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }

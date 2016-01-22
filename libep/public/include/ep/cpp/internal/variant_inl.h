@@ -222,34 +222,41 @@ inline Variant::Variant(size_t val, const EnumDesc *pDesc, bool isBitfield)
   length = val;
   p = (void*)pDesc;
 }
-inline Variant::Variant(ComponentRef &&spC)
+inline Variant::Variant(SharedPtr<RefCounted> &&spC, SharedPtrType type)
 {
-  t = (size_t)Type::Component;
+  t = (size_t)Type::SharedPtr;
   ownsContent = 1;
-  length = 0;
+  length = (size_t)type;
   new(&p) ComponentRef(std::move(spC));
 }
-inline Variant::Variant(const ComponentRef &spC)
+inline Variant::Variant(const SharedPtr<RefCounted> &spRC, SharedPtrType type, bool _ownsContent)
 {
-  t = (size_t)Type::Component;
-  ownsContent = 1;
-  length = 0;
-  new(&p) ComponentRef(spC);
-}
-inline Variant::Variant(const VarDelegate &d)
-{
-  t = (size_t)Type::Delegate;
-  ownsContent = 1;
-  length = 0;
-  new(&p) VarDelegate(d);
+  t = (size_t)Type::SharedPtr;
+  ownsContent = _ownsContent ? 1 : 0;
+  length = (size_t)type;
+  if (ownsContent)
+    new(&p) SharedPtr<RefCounted>(spRC);
+  else
+    sp = spRC.ptr();
 }
 inline Variant::Variant(VarDelegate &&d)
-{
-  t = (size_t)Type::Delegate;
-  ownsContent = 1;
-  length = 0;
-  new(&p) VarDelegate(std::move(d));
-}
+  : Variant(std::move((SharedPtr<RefCounted>&)d.m), SharedPtrType::Delegate)
+{}
+inline Variant::Variant(const VarDelegate &d)
+  : Variant((const SharedPtr<RefCounted>&)d.m, SharedPtrType::Delegate)
+{}
+inline Variant::Variant(ComponentRef &&spC)
+  : Variant(std::move((SharedPtr<RefCounted>&)spC), SharedPtrType::Component)
+{}
+inline Variant::Variant(const ComponentRef &spC)
+  : Variant((const SharedPtr<RefCounted>&)spC, SharedPtrType::Component)
+{}
+inline Variant::Variant(SubscriptionRef &&spS)
+  : Variant(std::move((SharedPtr<RefCounted>&)spS), SharedPtrType::Subscription)
+{}
+inline Variant::Variant(const SubscriptionRef &spS)
+  : Variant((const SharedPtr<RefCounted>&)spS, SharedPtrType::Subscription)
+{}
 
 template<size_t Len>
 inline Variant::Variant(const MutableString<Len> &s)
@@ -386,21 +393,30 @@ inline Variant::Type Variant::type() const
 {
   return internal::s_typeTranslation[t];
 }
+inline Variant::SharedPtrType Variant::spType() const
+{
+  EPASSERT_THROW((Type)t == Type::SharedPtr, epR_InvalidType, "Variant is not a SharedPtr!");
+  return (SharedPtrType)length;
+}
 
 inline bool Variant::is(Type type) const
 {
   return internal::s_typeTranslation[t] == type;
 }
+inline bool Variant::is(SharedPtrType type) const
+{
+  return (Type)t == Type::SharedPtr && (SharedPtrType)length == type;
+}
 
 inline bool Variant::isValid() const
 {
-  return (Type)t != Type::Void && (Type)t != Type::Error;
+  return (Type)t > Type::Error;
 }
 
 inline void Variant::throwError()
 {
   if ((Type)t == Type::Error)
-    throw (epErrorState*)p;
+    throw err;
 }
 
 
