@@ -2,6 +2,8 @@
 #if !defined(_EP_IWINDOW_HPP)
 #define _EP_IWINDOW_HPP
 
+#include "ep/cpp/component/component.h"
+
 namespace ep {
 
 SHARED_CLASS(UIComponent);

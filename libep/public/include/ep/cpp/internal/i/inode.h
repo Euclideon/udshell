@@ -3,9 +3,6 @@
 #define _EP_INODE_HPP
 
 #include "ep/cpp/component/component.h"
-
-#include "ep/cpp/math.h"
-#include "ep/cpp/component/resource/resource.h"
 #include "ep/c/input.h"
 
 namespace ep

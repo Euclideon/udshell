@@ -2,7 +2,11 @@
 #if !defined(_EP_IRESOURCE_HPP)
 #define _EP_IRESOURCE_HPP
 
+#include "ep/cpp/component/component.h"
+
 namespace ep {
+
+SHARED_CLASS(DataSource);
 
 class IResource
 {

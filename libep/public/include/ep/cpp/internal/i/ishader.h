@@ -2,7 +2,7 @@
 #if !defined(_EP_ISHADER_HPP)
 #define _EP_ISHADER_HPP
 
-#include "ep/cpp/string.h"
+#include "ep/cpp/component/component.h"
 
 namespace ep {
 
