@@ -14,7 +14,6 @@
 #include "components/pluginmanager.h"
 #include "components/pluginloader.h"
 #include "components/nativepluginloader.h"
-#include "components/resourcemanager.h"
 #include "components/project.h"
 #include "ep/cpp/component/resource/buffer.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
@@ -35,6 +34,7 @@
 #include "components/viewportimpl.h"
 #include "components/windowimpl.h"
 #include "components/commandmanagerimpl.h"
+#include "components/resourcemanagerimpl.h"
 #include "components/activities/activityimpl.h"
 #include "components/resources/resourceimpl.h"
 #include "components/resources/udmodelimpl.h"
@@ -150,7 +150,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<PluginManager>();
   pKernel->RegisterComponentType<PluginLoader>();
   pKernel->RegisterComponentType<NativePluginLoader>();
-  pKernel->RegisterComponentType<ResourceManager>();
+  pKernel->RegisterComponentType<ResourceManager, ResourceManagerImpl>();
   pKernel->RegisterComponentType<CommandManager, CommandManagerImpl>();
   pKernel->RegisterComponentType<Project>();
   pKernel->RegisterComponentType<Timer>();
