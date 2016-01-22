@@ -48,7 +48,7 @@ inline void Component::Subscribe(String eventName, const Delegate<void(Args...)>
   Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
 }
 
-inline epResult Component::SendMessage(String target, String message, const Variant &data) const
+inline void Component::SendMessage(String target, String message, const Variant &data) const
 {
   return pKernel->SendMessage(target, uid, message, data);
 }
@@ -88,7 +88,7 @@ inline void Component::RemoveDynamicEvent(String _name)
   pImpl->RemoveDynamicEvent(_name);
 }
 
-inline epResult Component::SendMessage(const ComponentRef &target, String message, const Variant &data) const
+inline void Component::SendMessage(const ComponentRef &target, String message, const Variant &data) const
 {
   return SendMessage(MutableString128(Concat, "@", target->GetUid()), message, data);
 }
@@ -103,7 +103,7 @@ inline void Component::InitComplete()
   pImpl->InitComplete();
 }
 
-inline epResult Component::ReceiveMessage(String message, String sender, const Variant &data)
+inline void Component::ReceiveMessage(String message, String sender, const Variant &data)
 {
   return pImpl->ReceiveMessage(message, sender, data);
 }

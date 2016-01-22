@@ -154,25 +154,19 @@ void Project::ParseActivities(Variant node)
 
 void Project::ParseActivity(Variant node)
 {
-  Variant::VarMap initParams;
-  Variant::VarMap activityNode = node.asAssocArray();
-
-  Variant *pName = activityNode.Get("name");
-  if (!pName || !pName->is(Variant::Type::String))
-    return;
-
-  Variant vParams = Text::XMLMapToComponentParams(node);
-  if (vParams.is(Variant::Type::AssocArray))
-    initParams = vParams.asAssocArray();
-
-  ep::ComponentRef c = nullptr;
-  epResult r = pKernel->CreateComponent(pName->asString(), initParams, &c);
-  if (r != epR_Success)
+  try
   {
-    LogWarning(1, "Unable to load Activity from project file \"{0}\" -- Activity component \"{1}\" does not exist", srcString, pName->asString());
-    return;
+    Variant::VarMap initParams;
+    Variant vParams = Text::XMLMapToComponentParams(node);
+    if (vParams.is(Variant::Type::AssocArray))
+      initParams = vParams.asAssocArray();
+
+    activities.pushBack(component_cast<Activity>(pKernel->CreateComponent(node["name"].asString(), initParams)));
   }
-  activities.pushBack(shared_pointer_cast<Activity>(c));
+  catch (...)
+  {
+    EPTHROW(epR_Failure, "Unable to load Activity from project file \"{0}\"", srcString);
+  }
 }
 
 } // namespace ep

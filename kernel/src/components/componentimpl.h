@@ -43,7 +43,7 @@ protected:
   void Init(Variant::VarMap initParams) override final;
   void InitComplete() override final {}
 
-  epResult ReceiveMessage(String message, String sender, const Variant &data) override final;
+  void ReceiveMessage(String message, String sender, const Variant &data) override final;
 
   // property access
   size_t NumProperties() const { return instanceProperties.Size() + GetDescriptor()->propertyTree.Size(); }

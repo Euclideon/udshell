@@ -36,9 +36,9 @@ class Kernel : public ep::Kernel
 {
 public:
   static epResult Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int renderThreadCount = 0);
-  virtual epResult Destroy();
+  virtual void Destroy();
 
-  epResult SendMessage(String target, String sender, String message, const Variant &data) override final;
+  void SendMessage(String target, String sender, String message, const Variant &data) override final;
 
   void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) override final;
 
@@ -60,7 +60,7 @@ public:
   }
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase);
 
-  epResult CreateComponent(String typeId, Variant::VarMap initParams, ep::ComponentRef *pNewInstance) override final;
+  ep::ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) override final;
   template<typename T>
   SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr) { return ep::Kernel::CreateComponent<T>(initParams); }
 
@@ -98,7 +98,7 @@ public:
 
   CommandManagerRef GetCommandManager() const override final { return spCommandManager; }
 
-  virtual epResult RunMainLoop() { return epR_Success; }
+  virtual void RunMainLoop() { }
   epResult Terminate();
 
 protected:
@@ -154,22 +154,22 @@ protected:
 
   virtual ~Kernel();
 
-  epResult DoInit(Kernel *pKernel);
+  void DoInit(Kernel *pKernel);
 
   void LoadPlugins();
 
   static Kernel *CreateInstanceInternal(Slice<const KeyValuePair> commandLine);
-  virtual epResult InitInternal() = 0;
+  virtual void InitInternal() = 0;
 
   void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) override final;
 
-  epResult InitComponents();
-  epResult InitRender();
-  epResult DeinitRender();
+  void InitComponents();
+  void InitRender();
+  void DeinitRender();
 
   epResult DestroyComponent(Component *pInstance);
 
-  epResult ReceiveMessage(String sender, String message, const Variant &data);
+  void ReceiveMessage(String sender, String message, const Variant &data);
 
   int SendMessage(LuaState L);
 

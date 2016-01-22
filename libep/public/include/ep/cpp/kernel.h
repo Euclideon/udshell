@@ -19,7 +19,7 @@ class Kernel
 public:
   static Kernel* GetInstance();
 
-  virtual epResult SendMessage(String target, String sender, String message, const Variant &data) = 0;
+  virtual void SendMessage(String target, String sender, String message, const Variant &data) = 0;
 
   template<typename ComponentType, typename Impl = void>
   const ComponentDesc* RegisterComponentType();
@@ -29,7 +29,7 @@ public:
   typedef FastDelegate<void(String sender, String message, const Variant &data)> MessageHandler;
   virtual void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) = 0;
 
-  virtual epResult CreateComponent(String typeId, Variant::VarMap initParams, ComponentRef *pNewInstance) = 0;
+  virtual ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) = 0;
   template<typename T>
   SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr);
 

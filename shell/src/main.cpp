@@ -345,12 +345,7 @@ int main(int argc, char *argv[])
     pKernel->RegisterMessageHandler("init", &Init);
     pKernel->RegisterMessageHandler("deinit", &Deinit);
 
-    if (pKernel->RunMainLoop() != epR_Success)
-    {
-      // TODO: improve error handling/reporting
-      epDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
-      return 1;
-    }
+    pKernel->RunMainLoop();
   }
   catch (std::exception &e)
   {

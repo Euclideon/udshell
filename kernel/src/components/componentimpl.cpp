@@ -58,7 +58,7 @@ void ComponentImpl::Init(Variant::VarMap initParams)
   pInstance->InitComplete();
 }
 
-epResult ComponentImpl::ReceiveMessage(String message, String sender, const Variant &data)
+void ComponentImpl::ReceiveMessage(String message, String sender, const Variant &data)
 {
   if (message.eqIC("set"))
   {
@@ -73,7 +73,6 @@ epResult ComponentImpl::ReceiveMessage(String message, String sender, const Vari
       pInstance->SendMessage(sender, "val", p);
     }
   }
-  return epR_Success;
 }
 
 const kernel::PropertyDesc *ComponentImpl::GetPropertyDesc(String _name) const

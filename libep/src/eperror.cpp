@@ -49,6 +49,16 @@ ErrorState* GetError()
 {
   return ep::internal::s_errorDepth ? &ep::internal::s_errorStack[ep::internal::s_errorDepth-1] : nullptr;
 }
+
+SharedString GetErrorMessage()
+{
+  ErrorState *pE = GetError();
+  if (pE)
+    return pE->message;
+
+  return nullptr;
+}
+
 void ClearError()
 {
   while (ep::internal::s_errorDepth)

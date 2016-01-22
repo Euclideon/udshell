@@ -53,8 +53,8 @@ public:
   template <typename ...Args>
   void Subscribe(String eventName, void(*pFunc)(Args...)) { Subscribe(eventName, Delegate<void(Args...)>(pFunc)); }
 
-  epResult SendMessage(String target, String message, const Variant &data) const;
-  epResult SendMessage(const ComponentRef &target, String message, const Variant &data) const;
+  void SendMessage(String target, String message, const Variant &data) const;
+  void SendMessage(const ComponentRef &target, String message, const Variant &data) const;
 
   Variant Save() const override;
 
@@ -121,7 +121,7 @@ protected:
   void* CreateImplInternal(String ComponentType, Variant::VarMap initParams);
 
   void InitComplete() override;
-  epResult ReceiveMessage(String message, String sender, const Variant &data) override;
+  void ReceiveMessage(String message, String sender, const Variant &data) override;
 
   static Array<const PropertyInfo> GetProperties()
   {
@@ -140,18 +140,18 @@ private:
 
 // component cast
 template<typename T>
-inline SharedPtr<T> component_cast(ComponentRef pComponent)
+inline SharedPtr<T> component_cast(ComponentRef spComponent)
 {
-  if (!pComponent)
-    return nullptr;
-  const ComponentDesc *pDesc = pComponent->GetDescriptor();
+  EPTHROW_IF(!spComponent, epR_BadCast, "component is null");
+
+  const ComponentDesc *pDesc = spComponent->GetDescriptor();
   while (pDesc)
   {
     if (pDesc->info.id.eq(T::ComponentID()))
-      return shared_pointer_cast<T>(pComponent);
+      return shared_pointer_cast<T>(spComponent);
     pDesc = pDesc->pSuperDesc;
   }
-  return nullptr;
+  EPTHROW(epR_BadCast, "component cast failed");
 }
 // TODO: cast for IComponent types...
 

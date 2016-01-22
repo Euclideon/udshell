@@ -139,11 +139,14 @@ static int CreateComponent(lua_State *L)
   }
 
   ep::ComponentRef c = nullptr;
-  epResult r = l.kernel()->CreateComponent(type, init, &c);
-  if (r == epR_Failure)
+  try
+  {
+    l.pushComponent(l.kernel()->CreateComponent(type, init));
+  }
+  catch (...)
+  {
     l.pushNil();
-  else
-    l.pushComponent(c);
+  }
   return 1;
 }
 

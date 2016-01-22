@@ -130,7 +130,7 @@ Kernel::~Kernel()
 
 epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int renderThreadCount)
 {
-  epResult result;
+  epResult result = epR_Success;
   StreamRef spDebugFile, spConsole;
   Kernel *pKernel = CreateInstanceInternal(commandLine);
 
@@ -225,7 +225,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->stdErrCapture = new StdCapture(stderr);
 
   // platform init
-  EP_ERROR_CHECK(pKernel->InitInternal());
+  pKernel->InitInternal();
 
 epilogue:
   if (result != epR_Success)
@@ -236,45 +236,29 @@ epilogue:
   return result;
 }
 
-epResult Kernel::DoInit(Kernel *pKernel)
+void Kernel::DoInit(Kernel *pKernel)
 {
-  // init the components
-  if (pKernel->InitComponents() != epR_Success)
-  {
-    EPASSERT(false, "Oh no! Can't boot!");
-    return epR_Failure;
-  }
+  pKernel->InitComponents();
 
   epResult result = udRenderScene_Init(pKernel);
-  if (result != epR_Success)
-    return result;
+  EPASSERT_THROW(result == epR_Success, result, "udRenderScene_Init Failed");
 
   result = udRenderScene_InitRender(pKernel);
-
-  if (result != epR_Success)
-    return result;
+  EPASSERT_THROW(result == epR_Success, result, "udRenderScene_InitRender Failed");
 
   // prepare the plugins
   pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>();
-  if (!pKernel->spPluginManager)
-    return epR_Failure;
 
   PluginLoaderRef spNativePluginLoader = pKernel->CreateComponent<NativePluginLoader>();
-  if (!spNativePluginLoader)
-    return epR_Failure;
   pKernel->spPluginManager->RegisterPluginLoader(spNativePluginLoader);
 
   LoadPlugins();
 
   // make the kernel timers
   pKernel->spStreamerTimer = pKernel->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
-  if (!pKernel->spStreamerTimer)
-    return epR_Failure;
   pKernel->spStreamerTimer->Elapsed.Subscribe(FastDelegate<void()>(pKernel, &Kernel::StreamerUpdate));
 
   pKernel->spUpdateTimer = pKernel->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
-  if (!pKernel->spUpdateTimer)
-    return epR_Failure;
   pKernel->spUpdateTimer->Elapsed.Subscribe(FastDelegate<void()>(pKernel, &Kernel::Update));
 
   // call application init
@@ -306,8 +290,10 @@ void Kernel::LoadPlugins()
   } while (numRemaining && numRemaining < lastTry);
 }
 
-epResult Kernel::Destroy()
+void Kernel::Destroy()
 {
+  // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
+
   // call application deinit
   SendMessage("$deinit", "#", "deinit", nullptr);
 
@@ -315,9 +301,8 @@ epResult Kernel::Destroy()
   spStreamerTimer = nullptr;
   spPluginManager = nullptr;
 
-  epResult result = epR_Success;
-  epResult renderSceneRenderResult = udRenderScene_DeinitRender(this);
-  epResult renderSceneResult = udRenderScene_Deinit(this);
+  udRenderScene_DeinitRender(this);
+  udRenderScene_Deinit(this);
 
   udOctree_Shutdown();
 
@@ -335,18 +320,9 @@ epResult Kernel::Destroy()
 
   delete pRenderer;
 
-  epResult halResult = epHAL_Deinit();
+  epHAL_Deinit();
 
   delete this;
-
-  if (renderSceneRenderResult != epR_Success)
-    result = renderSceneRenderResult;
-  else if (renderSceneResult != epR_Success)
-    result = renderSceneResult;
-  else if (halResult != epR_Success)
-    result = halResult;
-
-  return result;
 }
 
 void Kernel::Update()
@@ -416,10 +392,9 @@ Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(const ep::Comp
   return derivedDescs;
 }
 
-epResult Kernel::SendMessage(String target, String sender, String message, const Variant &data)
+void Kernel::SendMessage(String target, String sender, String message, const Variant &data)
 {
-  if (target.empty())
-    return epR_Failure; // TODO: no target!!
+  EPASSERT_THROW(!target.empty(), epR_InvalidArgument, "target was empty");
 
   char targetType = target.popFront();
   if (targetType == '@')
@@ -429,13 +404,19 @@ epResult Kernel::SendMessage(String target, String sender, String message, const
     if (ppComponent)
     {
       ComponentRef spComponent(*ppComponent);
-      return spComponent->ReceiveMessage(message, sender, data);
+      try {
+        return spComponent->ReceiveMessage(message, sender, data);
+      } catch (std::exception &e) {
+        LogError("Message Handler {0} failed: {1}", target, e.what());
+        ClearError();
+      } catch (...) {
+        LogError("Message Handler {0} failed", target);
+      }
     }
     else
     {
       // TODO: check if it's in the foreign component registry and send it there
-
-      return epR_Failure; // TODO: no component!
+      EPTHROW_ERROR(epR_Failure, "Target component not found");
     }
   }
   else if (targetType == '#')
@@ -444,13 +425,19 @@ epResult Kernel::SendMessage(String target, String sender, String message, const
     if (target.eq(uid))
     {
       // it's for me!
-      return ReceiveMessage(sender, message, data);
+      try {
+        return ReceiveMessage(sender, message, data);
+      } catch (std::exception &e) {
+        LogError("Message Handler {0} failed: {1}", target, e.what());
+        ClearError();
+      } catch (...) {
+        LogError("Message Handler {0} failed", target);
+      }
     }
     else
     {
       // TODO: foreign kernels?!
-
-      return epR_Failure; // TODO: invalid kernel!
+      EPTHROW_ERROR(epR_Failure, "Invalid Kernel");
     }
   }
   else if (targetType == '$')
@@ -459,21 +446,36 @@ epResult Kernel::SendMessage(String target, String sender, String message, const
     MessageCallback *pHandler = messageHandlers.Get(target);
     if (pHandler)
     {
-      pHandler->callback(sender, message, data);
-      return epR_Success;
+      try {
+        pHandler->callback(sender, message, data);
+      } catch (std::exception &e) {
+        LogError("Message Handler {0} failed: {1}", target, e.what());
+        ClearError();
+      } catch (...) {
+        LogError("Message Handler {0} failed", target);
+      }
+      return;
     }
     else
-      return epR_Failure; // TODO: no message handler
+    {
+      EPTHROW_ERROR(epR_Failure, "No Message Handler");
+    }
   }
 
-  return epR_Failure; // TODO: error, invalid target!
+  EPTHROW_ERROR(epR_Failure, "Invalid target");
 }
 
-epResult Kernel::ReceiveMessage(String sender, String message, const Variant &data)
+// TODO: Take this hack out once RecieveMessage's body is implemented
+#if defined(EP_COMPILER_VISUALC) && defined(EP_RELEASE)
+#pragma optimize("", off)
+#endif // defined(EP_COMPILER_VISUALC) && defined(EP_RELEASE)
+void Kernel::ReceiveMessage(String sender, String message, const Variant &data)
 {
 
-  return epR_Success;
 }
+#if defined(EP_COMPILER_VISUALC) && defined(EP_RELEASE)
+#pragma optimize("", on)
+#endif // defined(EP_COMPILER_VISUALC) && defined(EP_RELEASE)
 
 void Kernel::RegisterMessageHandler(SharedString name, MessageHandler messageHandler)
 {
@@ -513,14 +515,10 @@ const ep::ComponentDesc* Kernel::GetComponentDesc(String id)
   return pCT->pDesc;
 }
 
-epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::ComponentRef *pNewInstance)
+ep::ComponentRef Kernel::CreateComponent(String typeId, Variant::VarMap initParams)
 {
-  if (!pNewInstance)
-    return epR_Failure;
-
   ComponentType *pType = componentRegistry.Get(typeId);
-  if (!pType)
-    return epR_Failure;
+  EPASSERT_THROW(pType, epR_InvalidArgument, "typeId failed to lookup ComponentType");
 
   try
   {
@@ -531,8 +529,6 @@ epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::
 
     // attempt to create an instance
     ep::ComponentRef spComponent(pDesc->pCreateInstance(pDesc, this, newUid, initParams));
-    if (!spComponent)
-      return epR_AllocFailure;
 
     // post-create init
     spComponent->Init(initParams);
@@ -545,18 +541,17 @@ epResult Kernel::CreateComponent(String typeId, Variant::VarMap initParams, ep::
     // TODO: inform partner kernels that I created a component
     //...
 
-    *pNewInstance = spComponent;
-    return epR_Success;
+    return std::move(spComponent);
   }
-  catch (EPException &e)
+  catch (std::exception &e)
   {
-    LogDebug(3, "Create component failed: {0}", String(e.pError->message));
-    return e.pError->error;
+    LogWarning(3, "Create component failed: {0}", String(e.what()));
+    throw;
   }
   catch (...)
   {
-    LogDebug(3, "Create component failed!");
-    return epR_Failure;
+    LogWarning(3, "Create component failed!");
+    throw;
   }
 }
 
@@ -587,33 +582,24 @@ ep::ComponentRef Kernel::FindComponent(String name) const
   return ppComponent ? ep::ComponentRef(*ppComponent) : nullptr;
 }
 
-epResult Kernel::InitComponents()
+void Kernel::InitComponents()
 {
-  epResult r = epR_Success;
   for (auto i : componentRegistry)
   {
     if (i.value.pDesc->pInit)
-    {
-      r = i.value.pDesc->pInit(this);
-      if (r != epR_Success)
-        break;
-    }
+      i.value.pDesc->pInit(this);
   }
-  return r;
 }
 
-epResult Kernel::InitRender()
+void Kernel::InitRender()
 {
-  epHAL_InitRender();
-
-  return epR_Success;
+  epResult result = epHAL_InitRender();
+  EPASSERT_THROW(result == epR_Success, result, "epHAL_InitRender() Failed");
 }
 
-epResult Kernel::DeinitRender()
+void Kernel::DeinitRender()
 {
   epHAL_DeinitRender();
-
-  return epR_Success;
 }
 
 void Kernel::Exec(String code)
@@ -633,16 +619,10 @@ epResult Kernel::RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<
 
 DataSourceRef Kernel::CreateDataSourceFromExtension(String ext, Variant::VarMap initParams)
 {
-  const ep::ComponentDesc **pDesc = extensionsRegistry.Get(ext);
-  if (!pDesc)
-    return nullptr;
+  const ep::ComponentDesc **ppDesc = extensionsRegistry.Get(ext);
+  EPASSERT_THROW(ppDesc, epR_Failure, "No datasource for extension {0}", ext);
 
-  ep::ComponentRef spNewDataSource = nullptr;
-  epResult r = CreateComponent((*pDesc)->info.id, initParams, &spNewDataSource);
-  if (r != epR_Success)
-    return nullptr;
-
-  return shared_pointer_cast<DataSource>(spNewDataSource);
+  return component_cast<DataSource>(CreateComponent((*ppDesc)->info.id, initParams));
 }
 
 } // namespace kernel

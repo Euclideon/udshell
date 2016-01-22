@@ -181,9 +181,14 @@ QtEPComponent *QtKernelQml::CreateComponent(const QString typeId, QVariantMap in
   QByteArray byteArray = typeId.toUtf8();
   String typeString(byteArray.data(), byteArray.size());
 
-  ep::ComponentRef componentRef;
-  pKernel->CreateComponent(typeString, epToVariant(initParams).asAssocArray(), &componentRef);
-  return new QtEPComponent(componentRef);
+  try
+  {
+    return new QtEPComponent(pKernel->CreateComponent(typeString, epToVariant(initParams).asAssocArray()));
+  }
+  catch (...)
+  {
+    return new QtEPComponent(ComponentRef());
+  }
 }
 
 // ---------------------------------------------------------------------------------------

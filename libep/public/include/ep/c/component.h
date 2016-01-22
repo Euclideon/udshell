@@ -45,7 +45,7 @@ epVariant epComponent_GetProperty(const epComponent *pComponent, epString proper
 void      epComponent_SetProperty(epComponent *pComponent, epString property, const epVariant *pValue);
 epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs);
 void      epComponent_Subscribe(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate);
-epResult  epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData);
+void      epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData);
 
 #if defined(__cplusplus)
 }

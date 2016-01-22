@@ -105,13 +105,8 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
 template<typename T>
 SharedPtr<T> Kernel::CreateComponent(Variant::VarMap initParams)
 {
-	ep::ComponentRef c = nullptr;
-	epResult r = CreateComponent(T::ComponentID(), initParams, &c);
-	if (r != epR_Success)
-		return nullptr;
-	return shared_pointer_cast<T>(c);
+	return shared_pointer_cast<T>(CreateComponent(T::ComponentID(), initParams));
 }
-
 
 // Inlines pipe through C API
 

@@ -28,56 +28,37 @@ class SDLKernel : public kernel::Kernel
 public:
   SDLKernel() {}
 
-  epResult InitInternal() override;
-  epResult Destroy() override;
-  epResult RunMainLoop() override;
+  void InitInternal() override;
+  void Destroy() override;
+  void RunMainLoop() override;
 };
 
-epResult SDLKernel::InitInternal()
+void SDLKernel::InitInternal()
 {
   s_displayWidth = 1280;
   s_displayHeight = 720;
 
   int sdlInit = SDL_Init(SDL_INIT_VIDEO);
-  if (sdlInit < 0)
-    return epR_Failure;
+  EPTHROW_IF(sdlInit < 0, epR_Failure, "Failed to initialise SDL");
+  epscope(fail) { SDL_Quit(); };
 
   s_sdlEvent = SDL_RegisterEvents(1);
-  if (s_sdlEvent == (Uint32)-1)
-  {
-    SDL_Quit();
-    return epR_Failure;
-  }
+  EPTHROW_IF(s_sdlEvent == (Uint32)-1, epR_Failure, "Failed to register SDL events");
 
   s_window = SDL_CreateWindow("udPointCloud Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_displayWidth, s_displayHeight, SDL_WINDOW_OPENGL);
-  if (!s_window)
-  {
-    SDL_Quit();
-    return epR_Failure;
-  }
+  EPTHROW_IF(!s_window, epR_Failure, "Failed to create SDL Window");
+  epscope(fail) { SDL_DestroyWindow(s_window); };
 
   s_context = SDL_GL_CreateContext(s_window);
-  if (!s_context)
-  {
-    SDL_DestroyWindow(s_window);
-    SDL_Quit();
-    return epR_Failure;
-  }
+  EPTHROW_IF(!s_context, epR_Failure, "Failed to create SDL Window");
+  epscope(fail) { SDL_GL_DeleteContext(s_context); };
 
-  epResult result = InitRender();
-  if (result != epR_Success)
-  {
-    SDL_GL_DeleteContext(s_context);
-    SDL_DestroyWindow(s_window);
-    SDL_Quit();
-    return result;
-  }
-
-  return epR_Success;
+  InitRender();
 }
 
-epResult SDLKernel::Destroy()
+void SDLKernel::Destroy()
 {
+  // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
   DeinitRender();
 
   SDL_GL_DeleteContext(s_context);
@@ -86,7 +67,7 @@ epResult SDLKernel::Destroy()
   return Kernel::Destroy();
 }
 
-epResult SDLKernel::RunMainLoop()
+void SDLKernel::RunMainLoop()
 {
   DoInit(this);
 
@@ -153,7 +134,6 @@ epResult SDLKernel::RunMainLoop()
 
     SDL_GL_SwapWindow(s_window);
   }
-  return epR_Success;
 }
 
 namespace kernel {

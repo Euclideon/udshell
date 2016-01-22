@@ -26,7 +26,7 @@ public:
 
 protected:
   virtual void InitComplete() = 0;
-  virtual epResult ReceiveMessage(String message, String sender, const Variant &data) = 0;
+  virtual void ReceiveMessage(String message, String sender, const Variant &data) = 0;
 
 private:
   virtual void Init(Variant::VarMap initParams) = 0;
