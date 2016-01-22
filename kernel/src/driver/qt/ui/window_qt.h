@@ -2,7 +2,7 @@
 #define WINDOW_QT_H
 
 #include "../epkernel_qt.h"
-#include "components/commandmanager.h"
+#include "ep/cpp/component/commandmanager.h"
 
 namespace qt
 {

@@ -10,7 +10,7 @@
 #include "ep/cpp/component/resource/udmodel.h"
 #include "ep/cpp/component/datasource/datasource.h"
 #include "components/resourcemanager.h"
-#include "components/commandmanager.h"
+#include "ep/cpp/component/commandmanager.h"
 
 #include "kernel.h"
 
