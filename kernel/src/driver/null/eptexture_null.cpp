@@ -19,7 +19,7 @@ void epTexture_DestroyTexture(epTexture **ppTex)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void epTexture_SetImageData(epTexture *pTex, int element, int level, void *pImage)
+void epTexture_SetImageData(epTexture *pTex, int element, int level, const void *pImage)
 {
 }
 

@@ -29,6 +29,6 @@ struct epTexture;
 epTexture* epTexture_CreateTexture(epTextureType type, size_t width, size_t height, int levels, epImageFormat format);
 void epTexture_DestroyTexture(epTexture **ppTex);
 
-void epTexture_SetImageData(epTexture *pTex, int element, int level, void *pImage);
+void epTexture_SetImageData(epTexture *pTex, int element, int level, const void *pImage);
 
 #endif // EPTEXTURE_H
