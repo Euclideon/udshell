@@ -678,7 +678,15 @@ T Array<T, Count>::popFront()
     new((void*)&this->ptr[i-1]) T(std::move(this->ptr[i]));
   }
   this->ptr[--this->length].~T();
-  return copy;
+  return std::move(copy);
+}
+template <typename T, size_t Count>
+T Array<T, Count>::popBack()
+{
+  --this->length;
+  T copy(std::move(this->ptr[this->length]));
+  this->ptr[this->length].~T();
+  return std::move(copy);
 }
 
 template <typename T, size_t Count>

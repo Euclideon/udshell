@@ -165,6 +165,7 @@ struct Array : public Slice<T>
 
   T& front() const;
   T popFront();
+  T popBack();
 
   T& pushBack();
   template <typename U> Array<T, Count>& pushBack(U &&item);
