@@ -195,28 +195,28 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->spLogger = pKernel->CreateComponent<Logger>();
   pKernel->spLogger->DisableCategory(LogCategories::Trace);
 
-  spDebugFile = pKernel->CreateComponent<File>({ { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
+  spDebugFile = pKernel->CreateComponent<File>({ { "name", "logfile" }, { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
   if (spDebugFile)
   {
     pKernel->spLogger->AddStream(spDebugFile);
     spDebugFile->WriteLn("\n*** Logging started ***");
   }
 
-  spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
+  spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg }, {"name", "debugout"} });
   if (spConsole)
      pKernel->spLogger->AddStream(spConsole);
 
   // resource manager
-  pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
+  pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>({ {"name", "resourcemanager"} });
 
   // command manager
-  pKernel->spCommandManager = pKernel->CreateComponent<CommandManager>();
+  pKernel->spCommandManager = pKernel->CreateComponent<CommandManager>({ {"name", "commandmanager"} });
 
   // Init capture and broadcast of stdout/stderr
-  pKernel->spStdOutBC = pKernel->CreateComponent<Broadcaster>();
+  pKernel->spStdOutBC = pKernel->CreateComponent<Broadcaster>({ {"name", "stdoutbc"} });
   pKernel->stdOutCapture = new StdCapture(stdout);
   epscope(fail) { delete pKernel->stdOutCapture; };
-  pKernel->spStdErrBC = pKernel->CreateComponent<Broadcaster>();
+  pKernel->spStdErrBC = pKernel->CreateComponent<Broadcaster>({ {"name", "stderrbc"} });
   pKernel->stdErrCapture = new StdCapture(stderr);
   epscope(fail) { delete pKernel->stdErrCapture; };
 
@@ -236,7 +236,7 @@ void Kernel::DoInit(Kernel *pKernel)
   pKernel->InitComponents();
 
   // prepare the plugins
-  pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>();
+  pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>({ {"name", "pluginmanager"} });
 
   PluginLoaderRef spNativePluginLoader = pKernel->CreateComponent<NativePluginLoader>();
   pKernel->spPluginManager->RegisterPluginLoader(spNativePluginLoader);
