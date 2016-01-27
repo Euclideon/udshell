@@ -258,8 +258,6 @@ void Kernel::LoadPlugins()
 {
   Array<String> pluginFilenames;
 
-  pluginFilenames.pushBack("bin/Debug_x64/vieweractivity.dll");
-
   // TODO: scan nominated plugin folder and build list of all plugins
 
   size_t numRemaining = pluginFilenames.length;

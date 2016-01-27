@@ -12,6 +12,7 @@
 #include "ep/cpp/component/activity.h"
 #include "ep/cpp/component/resource/menu.h"
 #include "ep/cpp/component/commandmanager.h"
+#include "components/pluginmanager.h"
 #include "components/file.h"
 #include "hal/debugfont.h"
 #include "messagebox.h"
@@ -279,35 +280,15 @@ void Init(String sender, String message, const Variant &data)
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 
+  PluginManagerRef spPluginManager = pKernel->FindComponent("pluginmanager");
+  spPluginManager->LoadPlugin("bin/Debug_x64/viewer.dll");
+
   if (!projFilePath.empty())
     OpenProject(projFilePath);
 #ifdef _DEBUG
   else
     OpenProject("testproj.epproj");
 #endif
-
-  /*
-  // Hardcode an example Activity in for testing purposes
-  Array<KeyValuePair> cameraParams{
-    { "speed", 1.0 },
-    { "invertyaxis", true },
-    { "perspective", 1.0471975512 },
-    { "depthplanes", Slice<const double>({ 0.0001, 7500.0 }) }
-  };
-
-#if defined(EP_WINDOWS)
-  auto spExampleActivity = pKernel->CreateComponent<Viewer>({ { "model", "v:/RnD/uds/Peterskirche(SolidScan).uds" },{ "camera", cameraParams } });
-#else
-  auto spExampleActivity = pKernel->CreateComponent<Viewer>({ { "model", "data/DirCube.upc" },{ "camera", cameraParams } });
-#endif // EP_WINDOWS
-  if (spExampleActivity)
-  {
-    AddUIActivity(spExampleActivity);
-    spProject->AddActivity(spExampleActivity);
-  }
-  else
-    pKernel->LogError("Error creating Viewer activity\n");
-  */
 }
 
 // ---------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-project "vieweractivity"
+project "viewer"
 	kind "SharedLib"
 	language "C++"
 	flags { "StaticRuntime" }
