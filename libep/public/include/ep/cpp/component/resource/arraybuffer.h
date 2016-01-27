@@ -115,7 +115,7 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  Array<const PropertyInfo> GetProperties()
+  static Array<const PropertyInfo> GetProperties()
   {
     return{
       EP_MAKE_PROPERTY_RO(ElementType, "Element type of the Array as a String", nullptr, 0),

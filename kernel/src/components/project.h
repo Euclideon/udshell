@@ -43,7 +43,7 @@ protected:
   SharedString srcString = nullptr;
   ActivityRef spActiveActivity = nullptr;
 
-  Array<const PropertyInfo> GetProperties()
+  static Array<const PropertyInfo> GetProperties()
   {
     return{
       EP_MAKE_PROPERTY(ActiveActivity, "The currently active activity", nullptr, 0),
