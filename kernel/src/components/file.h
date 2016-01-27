@@ -2,7 +2,7 @@
 #if !defined(_EP_FILE_H)
 #define _EP_FILE_H
 
-#include "stream.h"
+#include "ep/cpp/component/stream.h"
 
 namespace ep
 {

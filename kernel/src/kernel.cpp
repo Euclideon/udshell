@@ -3,7 +3,6 @@
 #include "kernel.h"
 
 #include "hal/hal.h"
-#include "components/stream.h"
 #include "components/file.h"
 #include "components/console.h"
 #include "components/memstream.h"
@@ -49,6 +48,8 @@
 #include "components/nodes/simplecameraimpl.h"
 #include "components/sceneimpl.h"
 #include "components/datasources/datasourceimpl.h"
+#include "components/broadcasterimpl.h"
+#include "components/streamimpl.h"
 
 #include "renderscene.h"
 #include "eplua.h"
@@ -140,8 +141,8 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   // register all the builtin component types
   pKernel->RegisterComponentType<Component, ComponentImpl>();
   pKernel->RegisterComponentType<DataSource, DataSourceImpl>();
-  pKernel->RegisterComponentType<Broadcaster>();
-  pKernel->RegisterComponentType<Stream>();
+  pKernel->RegisterComponentType<Broadcaster, BroadcasterImpl>();
+  pKernel->RegisterComponentType<Stream, StreamImpl>();
   pKernel->RegisterComponentType<File>();
   pKernel->RegisterComponentType<Console>();
   pKernel->RegisterComponentType<MemStream>();

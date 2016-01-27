@@ -3,7 +3,7 @@
 #include "kernel.h"
 #include "componentdesc.h"
 #include "components/componentimpl.h"
-#include "components/broadcaster.h"
+#include "ep/cpp/component/broadcaster.h"
 
 #include "ep/cpp/variant.h"
 

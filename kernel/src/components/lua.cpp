@@ -1,6 +1,6 @@
 #include "kernel.h"
 #include "lua.h"
-#include "components/broadcaster.h"
+#include "ep/cpp/component/broadcaster.h"
 
 #include "eplua.h"
 

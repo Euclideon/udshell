@@ -4,7 +4,7 @@
 
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
-#include "components/stream.h"
+#include "ep/cpp/component/stream.h"
 
 // prototypes to pacify C++
 struct aiScene;

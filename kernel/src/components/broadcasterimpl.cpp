@@ -1,9 +1,9 @@
-#include "components/broadcaster.h"
+#include "components/broadcasterimpl.h"
 #include "kernel.h"
 
 namespace ep {
 
-size_t Broadcaster::WriteBuffer(BufferRef spData)
+size_t BroadcasterImpl::WriteBuffer(BufferRef spData)
 {
   Slice<const void> buffer = spData->MapForRead();
   size_t bytes = Write(buffer);
@@ -11,7 +11,7 @@ size_t Broadcaster::WriteBuffer(BufferRef spData)
   return bytes;
 }
 
-size_t Broadcaster::WriteLn(String str)
+size_t BroadcasterImpl::WriteLn(String str)
 {
   size_t written;
 
