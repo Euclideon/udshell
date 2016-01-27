@@ -31,7 +31,7 @@
 #include "components/windowimpl.h"
 #include "components/commandmanagerimpl.h"
 #include "components/resourcemanagerimpl.h"
-#include "components/activities/activityimpl.h"
+#include "components/activityimpl.h"
 #include "components/resources/resourceimpl.h"
 #include "components/resources/udmodelimpl.h"
 #include "components/resources/bufferimpl.h"
