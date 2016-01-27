@@ -5,6 +5,7 @@
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/delegate.h"
 #include "ep/cpp/map.h"
+#include "ep/cpp/event.h"
 
 #include "ep/c/variant.h"
 
@@ -34,20 +35,29 @@ public:
 
   enum class Type
   {
+    Void = epVT_Void,
+    Error = epVT_Error,
+
     Null = epVT_Null,
     Bool = epVT_Bool,
     Int = epVT_Int,
     Float = epVT_Float,
     Enum = epVT_Enum,
     Bitfield = epVT_Bitfield,
-    Component = epVT_Component,
-    Delegate = epVT_Delegate,
+    SharedPtr = epVT_SharedPtr,
     String = epVT_String,
     Array = epVT_Array,
     AssocArray = epVT_AssocArray,
-    Void = epVT_Void,
-    Error = epVT_Error,
+
     SmallString = epVT_SmallString
+  };
+
+  enum class SharedPtrType
+  {
+    Unknown,
+    Component,
+    Delegate,
+    Subscription
   };
 
   Variant();
@@ -66,11 +76,14 @@ public:
   Variant(double);
   Variant(size_t val, const EnumDesc *pDesc, bool isBitfield);
 
+  Variant(SharedPtr<RefCounted> &&d, SharedPtrType type = SharedPtrType::Unknown);
+  Variant(const SharedPtr<RefCounted> &d, SharedPtrType type = SharedPtrType::Unknown, bool ownsContent = true);
   Variant(VarDelegate &&d);
   Variant(const VarDelegate &d);
-
   Variant(ComponentRef &&spC);
   Variant(const ComponentRef &spC);
+  Variant(SubscriptionRef &&spS);
+  Variant(const SubscriptionRef &spS);
 
   // all the different strings
   Variant(String s, bool unsafeReference = false);
@@ -101,7 +114,9 @@ public:
 
   // actual methods
   Type type() const;
+  SharedPtrType spType() const;
   bool is(Type type) const;
+  bool is(SharedPtrType type) const;
 
   bool isValid() const;
   bool isNull() const;
@@ -119,6 +134,7 @@ public:
   const EnumDesc* asEnum(size_t *pVal) const;
   ComponentRef asComponent() const;
   VarDelegate asDelegate() const;
+  SubscriptionRef asSubscription() const;
   String asString() const;
   SharedString asSharedString() const;
   Slice<Variant> asArray() const;
@@ -148,11 +164,14 @@ private:
     int64_t i;
     double f;
     const char *s;
+    RefCounted *sp;
     Component *c;
     DelegateMemento *d;
+    Subscription *sub;
     void *p;
     Variant *a;
     AVLTree<Variant, Variant> *aa;
+    ErrorState *err;
   };
 
   void copyContent(const Variant &val);

@@ -25,7 +25,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
 
       const Variant *udModel = initParams.Get("existingComponent");
       UDModelRef model;
-      if (udModel && udModel->is(Variant::Type::Component))
+      if (udModel && udModel->is(Variant::SharedPtrType::Component))
         model = component_cast<UDModel>(udModel->asComponent());
       else
         model = pKernel->CreateComponent<UDModel>();

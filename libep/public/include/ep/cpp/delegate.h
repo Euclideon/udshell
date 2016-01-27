@@ -48,7 +48,7 @@ public:
   }
   Delegate(const Delegate<R(Args...)> &d) : m(d.m) {}
 
-  Delegate(SharedPtr<DelegateMemento> m) : m(m) {}
+  Delegate(DelegateMementoRef m) : m(m) {}
 
   Delegate(FastDelegate<R(Args...)> d) : m(DelegateMementoRef::create(d.GetMemento())) {}
   template <class X, class Y>
@@ -90,6 +90,7 @@ public:
   DelegateMementoRef GetMemento() const { return m; }
 
 protected:
+  friend struct Variant;
   typedef FastDelegate<R(Args...)> FD;
 
   DelegateMementoRef m = nullptr;

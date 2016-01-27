@@ -12,19 +12,20 @@ struct epComponent;
 
 enum epVariantType
 {
+  epVT_Void,
+  epVT_Error,
+
   epVT_Null,
   epVT_Bool,
   epVT_Int,
   epVT_Float,
   epVT_Enum,
   epVT_Bitfield,
-  epVT_Component,
-  epVT_Delegate,
+  epVT_SharedPtr,
   epVT_String,
   epVT_Array,
   epVT_AssocArray,
-  epVT_Void,
-  epVT_Error,
+
   epVT_SmallString,
 };
 

@@ -436,7 +436,7 @@ void LuaState::pushComponent(const ComponentRef &c)
   }
 
   new(lua_newuserdata(L, sizeof(ComponentRef))) ComponentRef(c);
-  pushComponentMetatable(*c->GetDescriptor(), false);
+  pushComponentMetatable(*(kernel::ComponentDesc*)c->GetDescriptor(), false);
   lua_setmetatable(L, -2);
 }
 
@@ -449,7 +449,7 @@ void LuaState::pushComponent(Component *pC)
   }
 
   new(lua_newuserdata(L, sizeof(Component*))) Component*(pC);
-  pushComponentMetatable(*pC->GetDescriptor(), true);
+  pushComponentMetatable(*(kernel::ComponentDesc*)pC->GetDescriptor(), true);
   lua_setmetatable(L, -2);
 }
 
@@ -1005,15 +1005,28 @@ void Variant::luaPush(LuaState &l) const
       l.pushString(str);
       break;
     }
-    case Type::Component:
-      if (ownsContent)
-        l.pushComponent((ComponentRef&)p);
-      else
-        l.pushComponent((Component*)p);
+    case Type::SharedPtr:
+    {
+      switch ((SharedPtrType)length)
+      {
+        case SharedPtrType::Unknown:
+          EPASSERT(false, "TODO!");
+          break;
+        case SharedPtrType::Component:
+          if (ownsContent)
+            l.pushComponent((ComponentRef&)c);
+          else
+            l.pushComponent(c);
+          break;
+        case SharedPtrType::Delegate:
+          l.pushDelegate((VarDelegate&)d);
+          break;
+        case SharedPtrType::Subscription:
+          EPASSERT(false, "TODO!");
+          break;
+      }
       break;
-    case Type::Delegate:
-      l.pushDelegate((VarDelegate&)p);
-      break;
+    }
     case Type::String:
       l.pushString(String(s, length));
       break;

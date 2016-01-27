@@ -34,7 +34,7 @@
         </ArrayItems>
     </Expand>
 </Type>
-<Type Name="ep::FixedSlice&lt;*&gt;">
+<Type Name="ep::Array&lt;*&gt;">
     <Expand>
         <Item Name="length">length</Item>
         <Item Name="ptr">ptr,[length]</Item>
@@ -44,11 +44,10 @@
         </ArrayItems>
     </Expand>
 </Type>
-<Type Name="ep::SharedSlice&lt;*&gt;">
+<Type Name="ep::SharedArray&lt;*&gt;">
     <Expand>
         <Item Name="length">length</Item>
         <Item Name="ptr">ptr,[length]</Item>
-        <Item Name="refcount">rc->refCount</Item>
         <ArrayItems>
             <Size>length</Size>
             <ValuePointer>ptr</ValuePointer>
@@ -68,30 +67,49 @@
     </Expand>
 </Type>
 
-<Type Name="ep::Variant">
-    <DisplayString Condition="t == 0">nullptr</DisplayString>
-    <DisplayString Condition="t == 1">{b}</DisplayString>
-    <DisplayString Condition="t == 2">{i}</DisplayString>
-    <DisplayString Condition="t == 3">{f}</DisplayString>
-    <DisplayString Condition="t == 4">{length}</DisplayString>
-    <DisplayString Condition="t == 5">{length}</DisplayString>
-    <DisplayString Condition="t == 6">{c}</DisplayString>
-    <DisplayString Condition="t == 7">{d}</DisplayString>
-    <DisplayString Condition="t == 8">{s,[length]s8}</DisplayString>
-    <DisplayString Condition="t == 9">{a,[length]}</DisplayString>
-    <DisplayString Condition="t == 10">{aa}</DisplayString>
-    <DisplayString Condition="t == 11">void</DisplayString>
+<Type Name="ep::SharedMap&lt;*,*,*&gt;">
+    <Expand>
+        <Item Name="refcount" Condition="ptr != nullptr">ptr-&gt;rc</Item>
+        <Item Name="tree" Condition="ptr == nullptr">"nullptr"</Item>
+        <Item Name="tree" Condition="ptr != nullptr">ptr-&gt;tree</Item>
+    </Expand>
+</Type>
 
-    <StringView Condition="t == 8">s,[length]s8</StringView>
+<Type Name="ep::Variant">
+    <DisplayString Condition="t == 0">void</DisplayString>
+    <DisplayString Condition="t == 1">{err}</DisplayString>
+    <DisplayString Condition="t == 2">nullptr</DisplayString>
+    <DisplayString Condition="t == 3">{b}</DisplayString>
+    <DisplayString Condition="t == 4">{i}</DisplayString>
+    <DisplayString Condition="t == 5">{f}</DisplayString>
+    <DisplayString Condition="t == 6">{length}</DisplayString>
+    <DisplayString Condition="t == 7">{length}</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; length == 0 &amp;&amp; p == nullptr">nullptr</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; length == 1 &amp;&amp; p == nullptr">nullptr</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; length == 2 &amp;&amp; p == nullptr">nullptr</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; length == 0 &amp;&amp; p != nullptr">{sp}</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; length == 1 &amp;&amp; p != nullptr">{c}</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; length == 2 &amp;&amp; p != nullptr">{d}</DisplayString>
+    <DisplayString Condition="t == 9">{s,[length]s8}</DisplayString>
+    <DisplayString Condition="t == 10">{a,[length]}</DisplayString>
+    <DisplayString Condition="t == 11">{aa}</DisplayString>
+    <DisplayString Condition="t == 12">{((char*)this+1),[((unsigned int)*(unsigned char*)this) &gt;&gt; 4]s8}</DisplayString>
+
+    <StringView Condition="t == 9">s,[length]s8</StringView>
+    <StringView Condition="t == 12">((char*)this+1),[((unsigned int)*(unsigned char*)this) &gt;&gt; 4]s8</StringView>
 
     <Expand>
-        <Item Name="length" Condition="t == 9">length</Item>
-        <ArrayItems Condition="t == 9">
+        <Item Name="sharedptr" Condition="t == 8 &amp;&amp; length == 0">sp</Item>
+        <Item Name="component" Condition="t == 8 &amp;&amp; length == 1">c</Item>
+        <Item Name="delegate" Condition="t == 8 &amp;&amp; length == 2">d</Item>
+
+        <Item Name="length" Condition="t == 10">length</Item>
+        <ArrayItems Condition="t == 10">
             <Size>length</Size>
             <ValuePointer>a</ValuePointer>
         </ArrayItems>
 
-        <TreeItems Condition="t == 10">
+        <TreeItems Condition="t == 11">
             <Size>aa-&gt;size</Size>
             <HeadPointer>aa-&gt;root</HeadPointer>
             <LeftPointer>left</LeftPointer>
@@ -99,6 +117,11 @@
             <ValueNode>this</ValueNode>
         </TreeItems>
     </Expand>
+</Type>
+
+<Type Name="ep::Component">
+    <DisplayString Condition="name.length == 0">{uid}</DisplayString>
+    <DisplayString Condition="name.length != 0">{uid} ({name})</DisplayString>
 </Type>
 
 <Type Name="ep::KeyValuePair">
