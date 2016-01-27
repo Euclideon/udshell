@@ -42,11 +42,32 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
     buffer.length = spHistoryFile->Read(buffer.getBuffer()).length;
 
     String str = buffer;
+    MutableString<1024> multiLineString;
     while (!str.empty())
     {
       String token = str.popToken<true>("\n");
+      token = token.trim<false, true>();
       if (!token.empty())
-        history.concat(token);
+      {
+        if (token.endsWith(" \\") || token.endsWith("\t\\"))
+        {
+          token.length -= 2;
+          multiLineString.append(token, "\n");
+        }
+        else if (!multiLineString.empty())
+        {
+          multiLineString.append(token);
+          history.concat(multiLineString);
+          multiLineString = "";
+        }
+        else
+          history.concat(token);
+      }
+    }
+    if (!multiLineString.empty())
+    {
+      multiLineString.length--;
+      history.concat(multiLineString);
     }
   }
   else
@@ -274,7 +295,21 @@ bool UIConsole::FilterTextLine(String line) const
 void UIConsole::AppendHistory(String str)
 {
   history.concat(str);
-  spHistoryFile->WriteLn(str);
+
+  while (!str.empty())
+  {
+    String token = str.popToken("\n");
+    if (!token.empty())
+    {
+      if (str.empty())
+        spHistoryFile->WriteLn(token);
+      else
+      {
+        spHistoryFile->Write(token);
+        spHistoryFile->Write(String(" \\\n"));
+      }
+    }
+  }
 }
 
 }
