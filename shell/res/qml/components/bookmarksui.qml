@@ -89,7 +89,7 @@ Rectangle {
           iconSource: "qrc:/images/icon_delete.png"
           onClicked: {
             var spScene = view.get("scene");
-            spScene.call("removebookmark", bookmarks.get(listView.currentIndex).name);
+            spScene.call("removebookmark", listView.selectedItemData.name);
             bookmarks.remove(listView.currentIndex, 1);
           }
           Layout.preferredHeight: toolBar.height
@@ -102,130 +102,80 @@ Rectangle {
     Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
-      ListView {
+
+      EPListView {
         id: listView
-        clip: true
-        property int rightClickIndex
-        property bool menuShowing: false
-        highlightMoveVelocity: 2000
         anchors.fill: parent
-        anchors.margins: 0
         model: bookmarks
-        delegate: Rectangle {
-          height: text.height
-          width: listView.width
-          color: ((mouseArea.containsMouse && !listView.menuShowing) || (listView.menuShowing && listView.rightClickIndex == index)) && (listView.currentIndex != index) ? "blue" : "transparent"
+        modelDisplayItem: "name"
+        onItemSelected: view.call("gotobookmark", listView.selectedItemData.name);
 
-          MouseArea {
-            id: mouseArea
-            anchors.fill: parent
-            hoverEnabled: true
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
+        function showRenameBookmarkEditBox() {
+          messagebox.call("show", {
+            "title": "Rename Bookmark",
+            "text": "Enter new Bookmark name",
+            "callback": renameBookmarkCallback,
+            "type": "Edit",
+            "initEditText": listView.rightClickItemData.name,
+            "validator": function(text) { if(text == "") return false; return true; }
+          });
+        }
 
-            onContainsPressChanged: {
-              if(pressedButtons == Qt.LeftButton) {
-                listView.currentIndex = index;
-                view.call("gotobookmark", bookmarks.get(listView.currentIndex).name);
-              }
-              else if(pressedButtons == Qt.RightButton) {
-                listView.rightClickIndex = index;
-                menu.popup();
-              }
+        function renameBookmarkCallback(retValues) {
+          if(retValues.buttonLabel == "OK") {
+            if(retValues.editText == "")
+            {
+              showRenameBookmarkEditBox();
+              return;
             }
-          }
-
-          function showRenameBookmarkEditBox() {
-            messagebox.call("show", {
-              "title": "Rename Bookmark",
-              "text": "Enter new Bookmark name",
-              "callback": renameBookmarkCallback,
-              "type": "Edit",
-              "initEditText": bookmarks.get(listView.rightClickIndex).name,
-              "validator": function(text) { if(text == "") return false; return true; }
-            });
-          }
-
-          function renameBookmarkCallback(retValues) {
-            if(retValues.buttonLabel == "OK") {
-              if(retValues.editText == "")
-              {
-                showRenameBookmarkEditBox();
-                return;
-              }
-              else {
-                for(var i = 0; i < bookmarks.count; i++) {
-                  if(bookmarks.get(i).name == retValues.editText && listView.rightClickIndex != i)
-                  {
-                    messagebox.call("show", {
-                      "title": "Error renaming Bookmark",
-                      "text": "A Bookmark with that name already exists",
-                      "callback": showRenameBookmarkEditBox
-                    });
-                    return;
-                  }
+            else {
+              for(var i = 0; i < bookmarks.count; i++) {
+                if(bookmarks.get(i).name == retValues.editText && listView.rightClickIndex != i)
+                {
+                  messagebox.call("show", {
+                    "title": "Error renaming Bookmark",
+                    "text": "A Bookmark with that name already exists",
+                    "callback": showRenameBookmarkEditBox
+                  });
+                  return;
                 }
               }
-
-              var bm = bookmarks.get(listView.rightClickIndex);
-
-              var spScene = view.get("scene");
-              spScene.call("renamebookmark", bm.name, retValues.editText);
-
-              bookmarks.remove(listView.rightClickIndex);
-              var newIndex = bookmarks.insertAlphabetical({"name" : retValues.editText});
-              if(listView.rightClickIndex == listView.currentIndex)
-                listView.currentIndex = newIndex;
-            }
-          }
-
-          EPMenu {
-            id: menu
-
-            on__PopupVisibleChanged: {
-              listView.menuShowing = __popupVisible;
             }
 
-            MenuItem {
-              text: "Save location to Bookmark"
-              onTriggered: {
-                var spScene = view.get("scene");
-                spScene.call("addbookmarkfromcamera", bookmarks.get(listView.rightClickIndex).name, view.get("camera"))
-              }
-            }
-            MenuItem {
-              text: "Rename"
-              onTriggered: {
-                showRenameBookmarkEditBox();
-              }
-            }
-            MenuItem {
-              text: "Delete"
-              onTriggered: {
-                var spScene = view.get("scene");
-                spScene.call("removebookmark", bookmarks.get(listView.rightClickIndex).name);
-                bookmarks.remove(listView.rightClickIndex, 1);
-              }
-            }
-          }
+            var bm = listView.rightClickItemData;
 
-          Text {
-            id: text
-            clip: true
-            anchors.leftMargin: 10
-            anchors.rightMargin: 5
-            anchors.left: parent.left
-            anchors.top: parent.top
-            width: parent.width - anchors.leftMargin - anchors.rightMargin
-            height: contentHeight + 15
-            verticalAlignment: Text.AlignVCenter
-            color: "white"
-            text: name
+            var spScene = view.get("scene");
+            spScene.call("renamebookmark", bm.name, retValues.editText);
+
+            bookmarks.remove(listView.rightClickIndex);
+            var newIndex = bookmarks.insertAlphabetical({"name" : retValues.editText});
+            if(listView.rightClickIndex == listView.currentIndex)
+              listView.currentIndex = newIndex;
           }
         }
-        highlight: Rectangle {
-          color: "#777"
-          height: listView.currentItem.height
-          width: listView.currentItem.width
+
+        menu: EPMenu {
+          MenuItem {
+            text: "Save location to Bookmark"
+            onTriggered: {
+              var spScene = view.get("scene");
+              spScene.call("addbookmarkfromcamera", listView.rightClickItemData.name, view.get("camera"))
+            }
+          }
+          MenuItem {
+            text: "Rename"
+            onTriggered: {
+              listView.showRenameBookmarkEditBox();
+            }
+          }
+          MenuItem {
+            text: "Delete"
+            onTriggered: {
+              var spScene = view.get("scene");
+              spScene.call("removebookmark", listView.rightClickItemData.name);
+              bookmarks.remove(listView.rightClickIndex, 1);
+            }
+          }
         }
       }
     }
