@@ -235,7 +235,7 @@ void Init(String sender, String message, const Variant &data)
     return;
   }
 
-  spMessageBox = pKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/messagebox.qml" } });
+  spMessageBox = pKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/components/messagebox.qml" } });
   if (!spMessageBox)
   {
     pKernel->LogError("Error creating MessageBox UI Component\n");

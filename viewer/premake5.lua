@@ -43,19 +43,19 @@ solution "epviewer"
 		dofile "../libep/project.lua"
 		objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 		targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
-	
+
 		dofile "../kernel/project.lua"
 		objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 		targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
-	
+
 		dofile "../test/project.lua"
 		objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 		targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
-	
+
 		dofile "project.lua"
 
 	group "plugins"
-		dofile "../plugin/vieweractivity/project.lua"
+		-- dofile "../plugin/viewer/project.lua"
 		objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 		targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
-  
+

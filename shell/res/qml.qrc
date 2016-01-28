@@ -4,9 +4,10 @@
     <file>qml/main.qml</file>
 
     <!-- UI Components -->
-    <file>qml/messagebox.qml</file>
-    <file>qml/bookmarksui.qml</file>
+    <file>qml/components/messagebox.qml</file>
+    <file>qml/components/bookmarksui.qml</file>
 
+     <!-- Custom Controls -->
     <file>qml/epcontrols/epmenubar.qml</file>
     <file>qml/epcontrols/epmenu.qml</file>
     <file>qml/epcontrols/eptoolbar.qml</file>
@@ -16,6 +17,7 @@
     <file>menus.xml</file>
     <file>toolbar.xml</file>
 
+    <!-- Images -->
     <file>images/icon_new_32.png</file>
     <file>images/icon_open_32.png</file>
     <file>images/icon_save_32.png</file>
