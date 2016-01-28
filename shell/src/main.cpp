@@ -82,13 +82,7 @@ MutableString256 GetNameFromFilePath(String path)
 
 void AddUIActivity(ActivityRef spActivity)
 {
-  auto spUI = spActivity->GetUI();
-
-  MutableString<128> title;
-  title.append(spActivity->uid);
-  title[0] = toUpper(title[0]);
-
-  spTopLevelUI->CallMethod("addactivity", String(spActivity->uid), String(title), spUI);
+  spTopLevelUI->CallMethod("addactivity", spActivity);
 }
 
 void RemoveUIActivity(ActivityRef spActivity)
@@ -114,13 +108,6 @@ void OnActivityChanged(String uid)
   {
     pKernel->LogError("Unable to activate Activity \"{0}\". Component does not exist", uid);
     return;
-  }
-
-  // TODO Remember to move this to the QML
-  if (spActivity->GetType().eq("viewer"))
-  {
-    spTopLevelUI->SetProperty("simplecamera", spActivity->GetProperty("simplecamera"));
-    spTopLevelUI->SetProperty("view", spActivity->GetProperty("view"));
   }
 
   spProject->SetActiveActivity(spActivity);

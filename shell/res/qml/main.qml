@@ -16,9 +16,9 @@ Rectangle {
   property var messagebox
   property var menucomp
   property var toolbarcomp
-  property var simplecamera
-  property var view
-  property var activityidlist: []
+  property var simplecamera: null
+  property var view: null
+  property var activitylist: []
   property var activityuilist: []
   property var tablist: [] // Store a strong reference to the tabs to stop TabView from garbage collecting them
 
@@ -89,24 +89,48 @@ Rectangle {
     pickPosZ.text = pos[2].toFixed(2);
   }
 
-  onSimplecameraChanged: {
-    // We are using the fact that this "on changed event" fires as during the init phase
-    simplecamera.subscribe("changed", cameraupdated);
-  }
+  function initViewerUI(activity) {
+    // TODO Uncomment this when unsubscribe works
+    /*
+    if(simplecamera)
+      simplecamera.unsubscribe("changed", cameraupdated);
 
-  onViewChanged: {
-    // We are using the fact that this "on changed event" fires as during the init phase
+    if(view)
+    {
+      view.unsubscribe("mousepositionchanged", viewmouseupdated);
+      view.unsubscribe("enabledpickingchanged", viewpickingenabledchanged);
+      view.unsubscribe("pickfound", viewpickfound);
+    }
+    */
+
+    if(!activity)
+    {
+      simplecamera = null;
+      view = null;
+      return;
+    }
+
+    simplecamera = activity.get("simplecamera");
+    simplecamera.subscribe("changed", cameraupdated);
+
+    view = activity.get("view");
     view.subscribe("mousepositionchanged", viewmouseupdated);
     view.subscribe("enabledpickingchanged", viewpickingenabledchanged);
     view.subscribe("pickfound", viewpickfound);
   }
 
-  function addactivity(uid, title, ui) {
+  function addactivity(activity) {
     if(activityTabs.count == 0)
       activityTabs.visible = true;
+
+    var title = activity.get("uid");
+    title = title.charAt(0).toUpperCase() + title.slice(1);
+
+    var ui = activity.get("ui");
+
     var tab = activityTabs.addTab(title);
     tablist.push(tab);
-    activityidlist.push(uid);
+    activitylist.push(activity);
     activityuilist.push(ui);
     tablist.push(tab);
     ui.get("uihandle").parent = tab;
@@ -115,11 +139,11 @@ Rectangle {
   }
 
   function removeactivity(uid) {
-    for(var i = 0; i < activityidlist.length; i++)
+    for(var i = 0; i < activitylist.length; i++)
     {
-      if(activityidlist[i] == uid)
+      if(activitylist[i].get("id") == uid)
       {
-        activityidlist.splice(i, 1);
+        activitylist.splice(i, 1);
         activityuilist.splice(i, 1);
         activityTabs.removeTab(i);
         tablist.splice(i, 1);
@@ -177,19 +201,28 @@ Rectangle {
         }
 
         onCurrentIndexChanged: {
-          if(count > 0 && activityidlist[currentIndex] != lastId)
+          var activityId = activitylist[currentIndex].get("uid");
+          if(count > 0 && activityId != lastId)
           {
-            lastId = activityidlist[currentIndex];
-            activitychanged(activityidlist[currentIndex]);
+            lastId = activityId
+            activitychanged(activityId);
+            var activity = activitylist[currentIndex];
             var activityqq = activityuilist[currentIndex].get("uihandle");
             activityqq.visible = false; // Trigger an onVisibleChanged signal
             activityqq.visible = true;
             activityqq.forceActiveFocus();
+
+            if (activity.get("type") == "viewer")
+              initViewerUI(activity);
+            else
+              initViewerUI(null);
           }
           else
           {
             lastId = "";
             activitychanged(null);
+
+            initViewerUI(null);
           }
         }
       }
