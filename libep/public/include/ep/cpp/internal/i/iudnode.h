@@ -18,7 +18,7 @@ public:
 
   virtual Variant Save() const = 0;
 protected:
-  virtual epResult Render(RenderScene &spScene, const Double4x4 &mat) = 0;
+  virtual void Render(RenderScene &spScene, const Double4x4 &mat) = 0;
 };
 
 } // namespace ep

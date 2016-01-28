@@ -35,7 +35,7 @@ namespace kernel {
 class Kernel : public ep::Kernel
 {
 public:
-  static epResult Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int renderThreadCount = 0);
+  static void Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int renderThreadCount = 0);
   virtual void Destroy();
 
   void SendMessage(String target, String sender, String message, const Variant &data) override final;
@@ -85,7 +85,7 @@ public:
   // Functions for resource management
   ResourceManagerRef GetResourceManager() const override final { return spResourceManager; }
 
-  epResult RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) override final;
+  void RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) override final;
   DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) override final;
 
   // stdio relaying functions
@@ -99,7 +99,7 @@ public:
   CommandManagerRef GetCommandManager() const override final { return spCommandManager; }
 
   virtual void RunMainLoop() { }
-  epResult Terminate();
+  void Terminate();
 
 protected:
   friend class Component;
@@ -168,7 +168,7 @@ protected:
   void InitRender();
   void DeinitRender();
 
-  epResult DestroyComponent(Component *pInstance);
+  void DestroyComponent(Component *pInstance);
 
   void ReceiveMessage(String sender, String message, const Variant &data);
 

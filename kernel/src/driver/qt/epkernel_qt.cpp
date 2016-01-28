@@ -384,10 +384,9 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 }
 
 // ---------------------------------------------------------------------------------------
-epResult Kernel::Terminate()
+void Kernel::Terminate()
 {
   // TODO: wire this up? Is this obsolete?
-  return epR_Success;
 }
 
 // ---------------------------------------------------------------------------------------

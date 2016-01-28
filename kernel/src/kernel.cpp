@@ -121,13 +121,14 @@ Kernel::~Kernel()
   }
 }
 
-epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int _renderThreadCount)
+void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int _renderThreadCount)
 {
-  epResult result = epR_Success;
+  epscope(fail) { epDebugFormat("Error creating Kernel\n"); };
+
   StreamRef spDebugFile, spConsole;
   Kernel *pKernel = CreateInstanceInternal(commandLine);
 
-  EP_ERROR_NULL(pKernel, epR_Failure);
+  EPASSERT_THROW(pKernel, epR_Failure, "CreateInstanceInternal() Failed");
 
   pKernel->renderThreadCount = _renderThreadCount;
 
@@ -185,7 +186,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<Viewer>();
 
   // init the HAL
-  epHAL_Init();
+  EPTHROW_IF(epHAL_Init() != epR_Success, epR_Failure, "epHAL_Init() failed");
 
   // create internal stuff
   pKernel->spLua = pKernel->CreateComponent<Lua>();
@@ -214,19 +215,15 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   // Init capture and broadcast of stdout/stderr
   pKernel->spStdOutBC = pKernel->CreateComponent<Broadcaster>();
   pKernel->stdOutCapture = new StdCapture(stdout);
+  epscope(fail) { delete pKernel->stdOutCapture; };
   pKernel->spStdErrBC = pKernel->CreateComponent<Broadcaster>();
   pKernel->stdErrCapture = new StdCapture(stderr);
+  epscope(fail) { delete pKernel->stdErrCapture; };
 
   // platform init
   pKernel->InitInternal();
 
-epilogue:
-  if (result != epR_Success)
-  {
-    // TODO: clean up code
-  }
   *ppInstance = pKernel;
-  return result;
 }
 
 void Kernel::DoInit(Kernel *pKernel)
@@ -400,7 +397,7 @@ void Kernel::SendMessage(String target, String sender, String message, const Var
     {
       ComponentRef spComponent(*ppComponent);
       try {
-        return spComponent->ReceiveMessage(message, sender, data);
+        spComponent->ReceiveMessage(message, sender, data);
       } catch (std::exception &e) {
         LogError("Message Handler {0} failed: {1}", target, e.what());
         ClearError();
@@ -421,7 +418,7 @@ void Kernel::SendMessage(String target, String sender, String message, const Var
     {
       // it's for me!
       try {
-        return ReceiveMessage(sender, message, data);
+        ReceiveMessage(sender, message, data);
       } catch (std::exception &e) {
         LogError("Message Handler {0} failed: {1}", target, e.what());
         ClearError();
@@ -449,15 +446,16 @@ void Kernel::SendMessage(String target, String sender, String message, const Var
       } catch (...) {
         LogError("Message Handler {0} failed", target);
       }
-      return;
     }
     else
     {
       EPTHROW_ERROR(epR_Failure, "No Message Handler");
     }
   }
-
-  EPTHROW_ERROR(epR_Failure, "Invalid target");
+  else
+  {
+    EPTHROW_ERROR(epR_Failure, "Invalid target");
+  }
 }
 
 // TODO: Take this hack out once RecieveMessage's body is implemented
@@ -550,7 +548,7 @@ ep::ComponentRef Kernel::CreateComponent(String typeId, Variant::VarMap initPara
   }
 }
 
-epResult Kernel::DestroyComponent(Component *pInstance)
+void Kernel::DestroyComponent(Component *pInstance)
 {
   if (spLua && spLua.ptr() != pInstance)
     spLua->SetGlobal(pInstance->uid, nullptr);
@@ -561,8 +559,6 @@ epResult Kernel::DestroyComponent(Component *pInstance)
 
   // TODO: inform partners that I destroyed a component
   //...
-
-  return epR_Success;
 }
 
 ep::ComponentRef Kernel::FindComponent(String name) const
@@ -602,14 +598,10 @@ void Kernel::Exec(String code)
   spLua->Execute(code);
 }
 
-epResult Kernel::RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts)
+void Kernel::RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts)
 {
   for (const String &e : exts)
-  {
     extensionsRegistry.Insert(e, pDesc);
-  }
-
-  return epR_Success;
 }
 
 DataSourceRef Kernel::CreateDataSourceFromExtension(String ext, Variant::VarMap initParams)

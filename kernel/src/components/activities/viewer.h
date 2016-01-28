@@ -31,7 +31,7 @@ protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~Viewer() { Deactivate(); }
 
-  static epResult StaticInit(ep::Kernel *pKernel);
+  static void StaticInit(ep::Kernel *pKernel);
   void ToggleBookmarksPanel();
   void CreateBookmark();
 

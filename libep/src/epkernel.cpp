@@ -14,7 +14,7 @@ void epKernel_SendMessage(epString target, epString sender, epString message, co
   }
 }
 
-epResult epKernel_RegisterComponentType(const epComponentDesc *pDesc)
+void epKernel_RegisterComponentType(const epComponentDesc *pDesc)
 {
   EPASSERT(false, "TODO");
 /*
@@ -26,7 +26,6 @@ epResult epKernel_RegisterComponentType(const epComponentDesc *pDesc)
     return epR_Failure;
   return epR_Success;
 */
-  return epR_Failure;
 }
 
 void epKernel_CreateComponent(epString typeId, const epKeyValuePair *pInitParams, size_t numInitParams, epComponent **ppNewInstance)

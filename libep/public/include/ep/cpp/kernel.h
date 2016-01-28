@@ -53,7 +53,7 @@ public:
   // Functions for resource management
   virtual ResourceManagerRef GetResourceManager() const = 0;
 
-  virtual epResult RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts) = 0;
+  virtual void RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts) = 0;
   virtual DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) = 0;
 
   // stdio relaying functions

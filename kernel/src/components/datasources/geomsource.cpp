@@ -349,9 +349,9 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   return spNode;
 }
 
-epResult GeomSource::StaticInit(ep::Kernel *pKernel)
+void GeomSource::StaticInit(ep::Kernel *pKernel)
 {
-  return pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
+  pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
 }
 
 } // namespace ep

@@ -334,13 +334,7 @@ int main(int argc, char *argv[])
   {
     // create a kernel
     int threadCount = epGetHardwareThreadCount() - 1;
-    epResult r = kernel::Kernel::Create(&pKernel, epParseCommandLine(argc, argv), threadCount);
-    if (r == epR_Failure)
-    {
-      // TODO: improve error handling/reporting
-      epDebugPrintf("Error creating Kernel\n");
-      return 1;
-    }
+    kernel::Kernel::Create(&pKernel, epParseCommandLine(argc, argv), threadCount);
 
     pKernel->RegisterMessageHandler("init", &Init);
     pKernel->RegisterMessageHandler("deinit", &Deinit);

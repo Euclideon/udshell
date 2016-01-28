@@ -100,14 +100,12 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     spUIBookmarks->CallMethod("createbookmark", bm.key);
 }
 
-epResult Viewer::StaticInit(ep::Kernel *pKernel)
+void Viewer::StaticInit(ep::Kernel *pKernel)
 {
   auto spCommandManager = ((kernel::Kernel *)pKernel)->GetCommandManager();
 
   spCommandManager->RegisterCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", ComponentID(), "Ctrl+Shift+B");
   spCommandManager->RegisterCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", ComponentID(), "Ctrl+B");
-
-  return epR_Success;
 }
 
 void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)

@@ -34,7 +34,7 @@ public:
 protected:
   virtual bool InputEvent(const epInputEvent &ev) = 0;
   virtual bool Update(double timeStep) = 0;
-  virtual epResult Render(RenderScene &spScene, const Double4x4 &mat) = 0; // TODO Get rid of epResult
+  virtual void Render(RenderScene &spScene, const Double4x4 &mat) = 0;
 };
 
 } // namespace ep

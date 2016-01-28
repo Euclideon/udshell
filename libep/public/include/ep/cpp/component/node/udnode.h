@@ -33,7 +33,7 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  epResult Render(RenderScene &spScene, const Double4x4 &mat) override { return pImpl->Render(spScene, mat); }
+  void Render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
 
   static Array<const PropertyInfo> GetProperties()
   {

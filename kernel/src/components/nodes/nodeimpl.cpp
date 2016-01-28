@@ -2,11 +2,10 @@
 
 namespace ep {
 
-epResult NodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
+void NodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
 {
   for (NodeRef &n : children)
     n->Render(spScene, mat * n->GetMatrix());
-  return epR_Success;
 }
 
 bool NodeImpl::InputEvent(const epInputEvent &ev)

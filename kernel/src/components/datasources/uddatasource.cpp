@@ -63,9 +63,9 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
   }
 }
 
-epResult UDDataSource::StaticInit(ep::Kernel *pKernel)
+void UDDataSource::StaticInit(ep::Kernel *pKernel)
 {
-  return pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
+  pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
 }
 
 } // namespace ep

@@ -24,7 +24,7 @@ class DataSource : public Component, public IDataSource
 
 public:
   Slice<const String> GetFileExtensions() const override { return pImpl->GetFileExtensions(); }
-  epResult Flush() override { return pImpl->Flush(); } // TODO Get rid of epResult
+  void Flush() override { pImpl->Flush(); }
   size_t GetNumResources() const override { return pImpl->GetNumResources(); }
   String GetResourceName(size_t index) const override { return pImpl->GetResourceName(index); }
   ResourceRef GetResource(size_t index) const override { return pImpl->GetResource(index); }

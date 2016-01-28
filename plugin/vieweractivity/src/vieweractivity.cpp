@@ -46,9 +46,8 @@ static epComponentOverrides s_testComponentVirtuals = {
   },
 
   // pReceiveMessage
-  [](epComponent *epUnusedParam(pBaseInstance), void *epUnusedParam(pDerivedInstance), epString epUnusedParam(message), epString epUnusedParam(sender), const epVariant *epUnusedParam(pData)) -> epResult
+  [](epComponent *epUnusedParam(pBaseInstance), void *epUnusedParam(pDerivedInstance), epString epUnusedParam(message), epString epUnusedParam(sender), const epVariant *epUnusedParam(pData)) -> void
   {
-    return epR_Success;
   }
 };
 
