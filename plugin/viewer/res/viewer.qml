@@ -34,7 +34,7 @@ FocusScope {
       "type" : "button",
       "command" : "togglebookmarkspanel",
       "description" : "Toggles open/closed the Bookmarks panel",
-      "image" : "qrc:/viewer/images/icon_bookmark_24.png",
+      "image" : "qrc:/images/icon_bookmark_24.png",
     };
 
     sidebarcomp.call("additem", "", bookMarksButton);

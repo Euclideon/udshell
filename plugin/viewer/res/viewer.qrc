@@ -1,13 +1,6 @@
 <RCC>
   <qresource prefix="/viewer">
     <file>viewer.qml</file>
-    <file>bookmarks.qml</file>
-    <file>images/icon_save_as_32.png</file>
-    <file>images/icon_delete.png</file>
-    <file>images/icon_downArrow_16.png</file>
-    <file>images/icon_upArrow_16.png</file>
-    <file>images/icon_bookmark_24.png</file>
-    <file>images/icon_bookmark_addnew_24.png</file>
   </qresource>
 </RCC>
 

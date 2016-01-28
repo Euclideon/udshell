@@ -78,7 +78,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   }
   spViewerUI->SetProperty("viewport", spViewport);
 
-  spUIBookmarks = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/viewer/bookmarks.qml" } });
+  spUIBookmarks = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/bookmarksui.qml" } });
   if (!spUIBookmarks)
   {
     pKernel->LogError("Error creating bookmarks UI Component\n");

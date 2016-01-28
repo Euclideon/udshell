@@ -75,7 +75,7 @@ Rectangle {
         spacing: 0
         EPToolButton {
           id: addBookmarkButton
-          iconSource: "qrc:/viewer/images/icon_bookmark_addnew_24.png"
+          iconSource: "qrc:/images/icon_bookmark_addnew_24.png"
           onClicked: {
             var bmName = bookmarksui.createbookmark("");
             var spScene = view.get("scene");
@@ -86,7 +86,7 @@ Rectangle {
         }
         EPToolButton {
           id: deleteBookmarkButton
-          iconSource: "qrc:/viewer/images/icon_delete.png"
+          iconSource: "qrc:/images/icon_delete.png"
           onClicked: {
             var spScene = view.get("scene");
             spScene.call("removebookmark", bookmarks.get(listView.currentIndex).name);

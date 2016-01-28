@@ -3,7 +3,9 @@
     <file>qml/window.qml</file>
     <file>qml/main.qml</file>
 
+    <!-- UI Components -->
     <file>qml/messagebox.qml</file>
+    <file>qml/bookmarksui.qml</file>
 
     <file>qml/epcontrols/epmenubar.qml</file>
     <file>qml/epcontrols/epmenu.qml</file>
@@ -18,8 +20,13 @@
     <file>images/icon_open_32.png</file>
     <file>images/icon_save_32.png</file>
     <file>images/icon_save_as_32.png</file>
+    <file>images/icon_delete.png</file>
     <file>images/icon_about_16.png</file>
     <file>images/icon_error_16.png</file>
     <file>images/icon_warning_16.png</file>
+    <file>images/icon_downArrow_16.png</file>
+    <file>images/icon_upArrow_16.png</file>
+    <file>images/icon_bookmark_24.png</file>
+    <file>images/icon_bookmark_addnew_24.png</file>
   </qresource>
 </RCC>
