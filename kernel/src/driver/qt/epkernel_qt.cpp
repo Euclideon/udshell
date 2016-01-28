@@ -90,6 +90,10 @@ QtKernel::QtKernel(Slice<const KeyValuePair> commandLine)
 // ---------------------------------------------------------------------------------------
 QtKernel::~QtKernel()
 {
+  // pump the message queue - ours and any windows events
+  pApplication->sendPostedEvents();
+  pApplication->processEvents();
+
   try
   {
     DeinitRender();

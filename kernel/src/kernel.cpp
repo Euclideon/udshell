@@ -294,6 +294,9 @@ void Kernel::Destroy()
 {
   // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
 
+  spStreamerTimer->Elapsed.Unsubscribe(FastDelegate<void()>(this, &Kernel::StreamerUpdate));
+  spUpdateTimer->Elapsed.Unsubscribe(FastDelegate<void()>(this, &Kernel::Update));
+
   // call application deinit
   SendMessage("$deinit", "#", "deinit", nullptr);
 
@@ -308,6 +311,8 @@ void Kernel::Destroy()
 
   delete stdOutCapture;
   delete stdErrCapture;
+  stdOutCapture = nullptr;
+  stdErrCapture = nullptr;
 
   spStdErrBC = nullptr;
   spStdOutBC = nullptr;

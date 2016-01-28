@@ -49,12 +49,14 @@ void Timer::SetTimer(uint32_t d, TimerType tt)
 void Timer::MessageCallback(ep::Kernel*)
 {
   Elapsed.Signal();
+  DecRef();
 }
 
 
 void Timer::TimerCallback(HalTimer *pTimer, void *pParam)
 {
   Timer* pThis = (Timer*)pParam;
+  pThis->IncRef();
   pThis->pKernel->DispatchToMainThread(MakeDelegate(pThis, &Timer::MessageCallback));
 }
 
