@@ -54,28 +54,14 @@ static struct
 static void ViewerInit(String sender, String message, const Variant &data)
 {
   using namespace ep;
-
-  //TODO: Error handling for the whole function, perhaps send message with error?
   mData.spView = mData.pKernel->CreateComponent<View>();
-  EPTHROW_IF_NULL(mData.spView, epR_Failure, "!");
-  epscope(fail) { mData.spView = nullptr; };
-
   mData.spScene = mData.pKernel->CreateComponent<Scene>();
-  EPTHROW_IF_NULL(mData.spScene, epR_Failure, "!");
-  epscope(fail) { mData.spScene = nullptr; };
-
   mData.spSimpleCamera = mData.pKernel->CreateComponent<SimpleCamera>();
-  EPTHROW_IF_NULL(mData.spSimpleCamera, epR_Failure, "!");
-  epscope(fail) { mData.spSimpleCamera = nullptr; };
-
   mData.spUDNode = mData.pKernel->CreateComponent<UDNode>();
-  EPTHROW_IF_NULL(mData.spUDNode, epR_Failure, "!");
-  epscope(fail) { mData.spUDNode = nullptr; };
 
   mData.spView->SetUDRenderFlags(UDRenderFlags::PointCubes | UDRenderFlags::ClearTargets);
 
   mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
-
   mData.spSimpleCamera->SetSpeed(1.0);
   mData.spSimpleCamera->SetInvertedYAxis(true);
   mData.spSimpleCamera->SetPerspective(EP_PIf / 3.f);
@@ -135,12 +121,7 @@ int main(int argc, char* argv[])
     mData.pKernel->RegisterMessageHandler("init", &ViewerInit);
     mData.pKernel->RegisterMessageHandler("deinit", &ViewerDeinit);
 
-    if (mData.pKernel->RunMainLoop() != epR_Success)
-    {
-      // TODO: improve error handling/reporting
-      epDebugPrintf("Error encountered in Kernel::RunMainLoop()\n");
-      return 1;
-    }
+    mData.pKernel->RunMainLoop();
 
     mData.pKernel->Destroy();
     mData.pKernel = nullptr;

@@ -52,8 +52,8 @@ public:
   QtKernel(Slice<const KeyValuePair> commandLine);
   virtual ~QtKernel();
 
-  epResult InitInternal() override;
-  epResult RunMainLoop() override;
+  void InitInternal() override;
+  void RunMainLoop() override;
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
   bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }

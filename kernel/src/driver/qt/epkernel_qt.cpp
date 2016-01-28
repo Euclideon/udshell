@@ -90,10 +90,17 @@ QtKernel::QtKernel(Slice<const KeyValuePair> commandLine)
 // ---------------------------------------------------------------------------------------
 QtKernel::~QtKernel()
 {
-  if (DeinitRender() != epR_Success)
+  try
   {
-    // TODO: gracefully handle error with DeinitRender ?
-    LogError("Error cleaning up renderer");
+    DeinitRender();
+  }
+  catch (std::exception &e)
+  {
+    LogError("Error cleaning up renderer, DeinitRender failed: {0}", e.what());
+  }
+  catch (...)
+  {
+    LogError("Error cleaning up renderer, DeinitRender failed");
   }
 
   delete pGLDebugLogger;
@@ -105,33 +112,30 @@ QtKernel::~QtKernel()
 }
 
 // ---------------------------------------------------------------------------------------
-epResult QtKernel::InitInternal()
+void QtKernel::InitInternal()
 {
-  // TODO: remove these checks once we are confident in Kernel and the Qt driver
-  EPASSERT(argc >= 1, "argc must contain at least 1");
-  EPASSERT(argv.length == (size_t)argc, "argv length should match argc");
-
   LogTrace("QtKernel::InitInternal()");
   LogInfo(2, "Initialising epShell...");
 
-  if (RegisterComponentType<QtComponent>() == nullptr)
-  {
-    LogError("Unable to register QtComponent");
-    return epR_Failure;
-  }
+  EPTHROW_IF_NULL(RegisterComponentType<QtComponent>(), epR_Failure, "Unable to register QtComponent");
 
   // create our qapplication
   pApplication = new QtApplication(this, argc, argv.ptr);
+  EPTHROW_IF_NULL(pApplication, epR_Failure, "Unable create QtApplication");
+  epscope(fail) { delete pApplication; };
 
   // make sure we cleanup the kernel when we're about to quit
-  QObject::connect(pApplication, &QCoreApplication::aboutToQuit, this, &QtKernel::OnAppQuit);
+  // TODO: Check this is correct! The call to ~QtApplication() should clean up any connections
+  EPTHROW_IF(!QObject::connect(pApplication, &QCoreApplication::aboutToQuit, this, &QtKernel::OnAppQuit), epR_Failure, "Failed to create Qt connection");
 
   pQmlEngine = new QQmlEngine(this);
+  EPTHROW_IF_NULL(pQmlEngine, epR_Failure, "Unable create QQmlEngine");
+  epscope(fail) { delete pQmlEngine; };
 
   // register our internal qml types
-  qmlRegisterType<RenderView>("epKernel", 0, 1, "EPRenderView");
-  qmlRegisterType<QtEPComponent>();
-  qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider);
+  EPTHROW_IF(qmlRegisterType<RenderView>("epKernel", 0, 1, "EPRenderView") == -1, epR_Failure, "qmlRegisterType<RenderView> Failed");
+  EPTHROW_IF(qmlRegisterType<QtEPComponent>() == -1, epR_Failure, "qmlRegisterType<QtEPComponent> Failed");
+  EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, epR_Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
 
   // Load in the qrc file
   InitResources();
@@ -149,29 +153,25 @@ epResult QtKernel::InitInternal()
   if (!pSplashScreen)
   {
     // TODO: better error information/handling
-    LogError("Error creating Splash Screen");
     foreach(const QQmlError &error, component.errors())
       LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
-    return epR_Failure;
+
+    EPTHROW_ERROR(epR_Failure, "Error creating Splash Screen");
   }
 
   // defer the heavier init stuff and app specific init to after Qt hits the event loop
   // we'll hook into the splash screen to do this
-  QObject::connect(pSplashScreen, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender, Qt::DirectConnection);
-
-  return epR_Success;
+  // TODO: Check this is correct! The call to ~QtApplication() should clean up any connections
+  EPTHROW_IF(!QObject::connect(pSplashScreen, &QQuickWindow::afterRendering, this, &QtKernel::OnFirstRender, Qt::DirectConnection), epR_Failure, "Failed to create Qt connection for Splash Screen");
 }
 
 // ---------------------------------------------------------------------------------------
-epResult QtKernel::RunMainLoop()
+void QtKernel::RunMainLoop()
 {
   LogTrace("QtKernel::RunMainLoop()");
 
-  // TODO: remove these checks once we are confident in Kernel and the Qt driver
-  EPASSERT(pApplication != nullptr, "QApplication doesn't exist");
-
   // run the Qt event loop - this may never return
-  return (pApplication->exec() == 0) ? epR_Success : epR_Failure;
+  EPTHROW_IF(pApplication->exec() != 0, epR_Failure, "Application was not shutdown from a call to quit()");
 }
 
 // ---------------------------------------------------------------------------------------
@@ -303,6 +303,8 @@ void QtKernel::DoInit(ep::Kernel *)
 {
   LogTrace("QtKernel::DoInit()");
 
+  epscope(fail) { LogError("Error initialising renderer");  pApplication->quit(); };
+
   EPASSERT(pSplashScreen != nullptr, "No splash screen window set");
   EPASSERT(pMainThreadContext == nullptr, "Main Thread context already exists");
 
@@ -331,12 +333,7 @@ void QtKernel::DoInit(ep::Kernel *)
   }
 
   // init the HAL's render system
-  if (kernel::Kernel::InitRender() != epR_Success)
-  {
-    // TODO: gracefully handle error with InitRender ?
-    LogError("Error initialising renderer");
-    pApplication->quit();
-  }
+  kernel::Kernel::InitRender();
 
   // app specific init
   kernel::Kernel::DoInit(this);

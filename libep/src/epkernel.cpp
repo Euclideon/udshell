@@ -3,9 +3,15 @@
 
 extern "C" {
 
-epResult epKernel_SendMessage(epString target, epString sender, epString message, const epVariant* pData)
+void epKernel_SendMessage(epString target, epString sender, epString message, const epVariant* pData)
 {
-  return Kernel::GetInstance()->SendMessage(target, sender, message, *(Variant*)pData);
+  try {
+    Kernel::GetInstance()->SendMessage(target, sender, message, *(Variant*)pData);
+  } catch (std::exception &e) {
+    Kernel::GetInstance()->LogError("Message Handler {0} failed: {1}", (ep::String&)target, e.what());
+  } catch (...) {
+    Kernel::GetInstance()->LogError("Message Handler {0} failed", (ep::String&)target);
+  }
 }
 
 epResult epKernel_RegisterComponentType(const epComponentDesc *pDesc)
@@ -23,9 +29,17 @@ epResult epKernel_RegisterComponentType(const epComponentDesc *pDesc)
   return epR_Failure;
 }
 
-epResult epKernel_CreateComponent(epString typeId, const epKeyValuePair *pInitParams, size_t numInitParams, epComponent **ppNewInstance)
+void epKernel_CreateComponent(epString typeId, const epKeyValuePair *pInitParams, size_t numInitParams, epComponent **ppNewInstance)
 {
-  return Kernel::GetInstance()->CreateComponent(typeId, Slice<const KeyValuePair>((const KeyValuePair*)pInitParams, numInitParams), (ComponentRef*)ppNewInstance);
+  try
+  {
+    ComponentRef spCom = Kernel::GetInstance()->CreateComponent(typeId, Slice<const KeyValuePair>((const KeyValuePair*)pInitParams, numInitParams));
+    *ppNewInstance = (epComponent*)spCom.ptr();
+  }
+  catch (...)
+  {
+    *ppNewInstance = nullptr;
+  }
 }
 
 epComponent* epKernel_FindComponent(epString uid)

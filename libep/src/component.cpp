@@ -55,9 +55,9 @@ void epComponent_Subscribe(epComponent *pComponent, epString eventName, const ep
   ((Component*)pComponent)->Subscribe(eventName, (const Variant::VarDelegate&)pDelegate);
 }
 
-epResult epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData)
+void epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData)
 {
-  return ((const Component*)pComponent)->SendMessage(target, message, *(Variant*)pData);
+  try { ((const Component*)pComponent)->SendMessage(target, message, *(Variant*)pData); } catch (...) {}
 }
 
 } // extern "C"

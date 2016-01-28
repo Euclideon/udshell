@@ -56,6 +56,7 @@ ErrorState* _PushError(epResult error, const SharedString &message, const char *
 
 size_t ErrorLevel();
 ErrorState* GetError();
+SharedString GetErrorMessage();
 void ClearError();
 
 SharedString DumpError();
