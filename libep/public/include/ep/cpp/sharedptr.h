@@ -19,7 +19,7 @@ namespace ep {
 class Kernel;
 class RefCounted;
 template<class T>
-class UniquePtr;
+struct UniquePtr;
 
 
 // **HAX** this allows us to delete a RefCounted!
@@ -28,6 +28,17 @@ class UniquePtr;
 // call delete. Thee two specialisations of Destroy facilitate that.
 
 namespace internal {
+
+  template<typename T, bool isref, typename... Args>
+  struct Create;
+  template<typename T, typename... Args>
+  struct Create<T, false, Args...> {
+    epforceinline static UniquePtr<T> create(Args... args);
+  };
+  template<typename T, typename... Args>
+  struct Create<T, true, Args...> {
+    epforceinline static UniquePtr<T> create(Args... args);
+  };
 
   template<typename T, bool isref>
   struct Destroy;
@@ -48,11 +59,11 @@ protected:
   virtual ~Safe();
 };
 
-template<typename U> class SafePtr;
+template<typename U> struct SafePtr;
 
 // shared pointers are ref counted
 template<class T>
-class SharedPtr
+struct SharedPtr
 {
 public:
   using Type = T;
@@ -61,7 +72,9 @@ public:
   template<typename... Args>
   static SharedPtr<T> create(Args... args)
   {
-    return SharedPtr<T>(new T(args...));
+    SharedPtr<T> sp(new(epAlloc(sizeof(T))) T(args...));
+    sp->pFreeFunc = [](void *pMem) { epFree(pMem); };
+    return std::move(sp);
   }
 
   SharedPtr() {}
@@ -174,9 +187,9 @@ public:
   T* ptr() const { return (T*)pInstance; }
 
 private:
-  template<typename U> friend class UniquePtr;
-  template<typename U> friend class SharedPtr;
-  template<typename U> friend class SafePtr;
+  template<typename U> friend struct UniquePtr;
+  template<typename U> friend struct SharedPtr;
+  template<typename U> friend struct SafePtr;
 
   static RefCounted* acquire(RefCounted *pI);
   static void release(RefCounted *pI);
@@ -188,7 +201,7 @@ private:
 
 // unique pointers nullify the source pointer on assignment
 template<typename T>
-class UniquePtr
+struct UniquePtr
 {
 public:
   using Type = T;
@@ -197,7 +210,7 @@ public:
   template<typename... Args>
   static UniquePtr<T> create(Args... args)
   {
-    return UniquePtr<T>(new T(args...));
+    return internal::Create<T, std::is_base_of<RefCounted, T>::value, Args...>::create(args...);
   }
 
   UniquePtr() {}
@@ -275,8 +288,8 @@ public:
   T* ptr() const { return pInstance; }
 
 private:
-  template<typename U> friend class SharedPtr;
-  template<typename U> friend class UniquePtr;
+  template<typename U> friend struct SharedPtr;
+  template<typename U> friend struct UniquePtr;
   template<typename U, bool isref> friend struct Destroy;
 
   T * eprestrict pInstance = nullptr;
@@ -286,7 +299,7 @@ private:
 
 // synchronised pointers that can be passed between threads, destruction is deferred to main thread
 template<class T>
-class SynchronisedPtr
+struct SynchronisedPtr
 {
 public:
   SynchronisedPtr() {}
@@ -347,7 +360,7 @@ public:
   T* ptr() const { return pInstance; }
 
 private:
-  template<typename U> friend class SynchronisedPtr;
+  template<typename U> friend struct SynchronisedPtr;
 
   void destroy();
 
@@ -359,20 +372,34 @@ private:
 // ref counting base class
 class RefCounted : public Safe
 {
-  mutable size_t rc = 0;
-
 public:
   size_t RefCount() { return rc; }
   size_t IncRef() { return ++rc; }
   size_t DecRef()
   {
     if (rc == 1)
-      delete this;
+    {
+      FreeFunc *pFree = pFreeFunc;
+      this->~RefCounted();
+      pFree(this);
+      return 0;
+    }
     return --rc;
   }
 
+private:
+  typedef void (FreeFunc)(void*);
+
+  mutable size_t rc = 1;
+  FreeFunc *pFreeFunc = nullptr;
+
+  // lots of friends!
   template<typename T>
-  friend class SharedPtr;
+  friend struct SharedPtr;
+  template<typename T>
+  friend struct UniquePtr;
+  template<typename T, bool isrc, typename... Args>
+  friend struct internal::Create;
   template<typename T, bool isrc>
   friend struct internal::Destroy;
 };
@@ -383,7 +410,6 @@ template <class T>
 inline SharedPtr<T>::SharedPtr(UniquePtr<T> &&ptr)
   : pInstance(ptr.pInstance)
 {
-  pInstance->rc = 1;
   ptr.pInstance = nullptr;
 }
 
@@ -394,7 +420,6 @@ inline SharedPtr<T>::SharedPtr(UniquePtr<U> &ptr)
 {
   if (pInstance)
   {
-    pInstance->rc = 1;
     ptr.pInstance = nullptr;
   }
 }
@@ -406,7 +431,6 @@ inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<T> &&ptr)
   pInstance = ptr.pInstance;
   if (pInstance)
   {
-    pInstance->rc = 1;
     ptr.pInstance = nullptr;
   }
   release(pOld);
@@ -431,14 +455,14 @@ inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<U> &ptr)
 template<class T>
 epforceinline size_t SharedPtr<T>::count() const
 {
-  return pInstance ? pInstance->rc : 0;
+  return pInstance ? pInstance->RefCount() : 0;
 }
 
 template<class T>
 epforceinline RefCounted* SharedPtr<T>::acquire(RefCounted *pI)
 {
   if (pI)
-    ++pI->rc;
+    pI->IncRef();
   return pI;
 }
 template<class T>
@@ -446,13 +470,23 @@ inline void SharedPtr<T>::release(RefCounted *pI)
 {
   if (!pI)
     return;
-  if (pI->rc == 1)
-    delete pI;
-  else
-    --pI->rc;
+  pI->DecRef();
 }
 
 namespace internal {
+
+  template<class T, typename... Args>
+  epforceinline UniquePtr<T> Create<T, false, Args...>::create(Args... args)
+  {
+    return UniquePtr<T>(new T(args...));
+  }
+  template<class T, typename... Args>
+  epforceinline UniquePtr<T> Create<T, true, Args...>::create(Args... args)
+  {
+    UniquePtr<T> up(new(epAlloc(sizeof(T))) T(args...));
+    up->pFreeFunc = [](void *pMem) { epFree(pMem); };
+    return std::move(up);
+  }
 
   template<class T>
   epforceinline void Destroy<T, false>::destroy(T *ptr)
@@ -462,8 +496,8 @@ namespace internal {
   template<class T>
   epforceinline void Destroy<T, true>::destroy(T *ptr)
   {
-    RefCounted *rc = ptr;
-    delete rc;
+    if (ptr)
+      ((RefCounted*)ptr)->DecRef();
   }
 
 } // namespace internal

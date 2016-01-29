@@ -23,7 +23,7 @@ namespace internal {
 
 
 template <typename T>
-class SafePtr
+struct SafePtr
 {
 public:
   SafePtr(const SafePtr<T> &ptr) : spProxy(ptr.spProxy) {}

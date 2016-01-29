@@ -155,9 +155,9 @@ public:
 private:
   struct Node
   {
-    V v;
     K k;
     Node *left, *right;
+    V v;
     int height;
 
     Node() = delete;

@@ -115,6 +115,8 @@ public:
   void Unsubscribe();
 
 private:
+  template<typename T>
+  friend struct SharedPtr;
   friend class BaseEvent;
 
   Subscription(BaseEvent *pEv)
@@ -143,7 +145,7 @@ inline SubscriptionRef BaseEvent::AddSubscription(const DelegateMementoRef &spM)
       return SubscriptionRef(s.pSubscription);
   }
 
-  SubscriptionRef spS = SubscriptionRef(new Subscription(this));
+  SubscriptionRef spS = SubscriptionRef::create(this);
   subscribers.pushBack(Subscriber(spM, spS.ptr()));
   return std::move(spS);
 }
