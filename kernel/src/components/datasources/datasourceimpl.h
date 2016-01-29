@@ -81,9 +81,9 @@ public:
   ResourceRef GetResourceByVariant(Variant index) const override final
   {
     if (index.is(Variant::Type::String))
-      return GetResource(index.asString());
+      return pInstance->GetResource(index.asString());
     else
-      return GetResource((size_t)index.asInt());
+      return pInstance->GetResource((size_t)index.asInt());
   }
 
   String GetURL() const override final { return url; }

@@ -26,7 +26,7 @@ BufferRef StreamImpl::ReadBuffer(size_t bytes)
 
 BufferRef StreamImpl::Load()
 {
-  int64_t len = Length();
+  int64_t len = pInstance->Length();
   if (len < 0)
     return nullptr;
 
@@ -39,8 +39,8 @@ BufferRef StreamImpl::Load()
   if (!buffer)
     return nullptr;
 
-  Seek(SeekOrigin::Begin, 0);
-  Read(buffer);
+  pInstance->Seek(SeekOrigin::Begin, 0);
+  pInstance->Read(buffer);
   spBuffer->Unmap();
 
   return spBuffer;
@@ -53,7 +53,7 @@ void StreamImpl::Save(BufferRef spBuffer)
   Slice<const void> buffer = spBuffer->MapForRead();
   if (buffer)
   {
-    Seek(SeekOrigin::Begin, 0);
+    pInstance->Seek(SeekOrigin::Begin, 0);
     pInstance->Write(buffer);
 
     spBuffer->Unmap();
