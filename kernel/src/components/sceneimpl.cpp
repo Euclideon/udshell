@@ -131,7 +131,7 @@ SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams)
   rootNode = GetKernel()->CreateComponent<Node>();
 
   Variant *pMap = initParams.Get("bookmarks");
-  if (pMap && pMap->is(Variant::Type::AssocArray))
+  if (pMap && pMap->is(Variant::SharedPtrType::AssocArray))
     LoadBookmarks(pMap->asAssocArray());
 
   memset(&renderModels, 0, sizeof(renderModels));
@@ -180,7 +180,7 @@ void SceneImpl::LoadBookmarks(Variant::VarMap bm)
 {
   for (auto kvp : bm)
   {
-    if (kvp.value.is(Variant::Type::AssocArray))
+    if (kvp.value.is(Variant::SharedPtrType::AssocArray))
     {
       Variant::VarMap bmSaveMap = kvp.value.asAssocArray();
 

@@ -24,7 +24,6 @@ enum epVariantType
   epVT_SharedPtr,
   epVT_String,
   epVT_Array,
-  epVT_AssocArray,
 
   epVT_SmallString,
 };

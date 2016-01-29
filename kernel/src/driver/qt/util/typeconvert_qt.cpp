@@ -168,6 +168,23 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
           break;
         }
 
+        case Variant::SharedPtrType::AssocArray:
+        {
+          QVariantMap map;
+          Variant::VarMap aa = variant.asAssocArray();
+          for (auto v : aa)
+          {
+            QString key;
+            QVariant value;
+            epFromVariant(v.key, &key);
+            epFromVariant(v.value, &value);
+            map.insert(std::move(key), std::move(value));
+          }
+          // TODO: what?! no move assignment! look into this...
+          pVariant->setValue(std::move(map));
+          break;
+        }
+
         default:
           epDebugPrintf("epFromVariant: Unsupported SharedPtr type '%d'\n", (int)variant.spType());
           break;
@@ -192,23 +209,6 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
       }
       // TODO: what?! no move assignment! look into this...
       pVariant->setValue(*list);
-      break;
-    }
-
-    case Variant::Type::AssocArray:
-    {
-      QVariantMap map;
-      Variant::VarMap aa = variant.asAssocArray();
-      for (auto v : aa)
-      {
-        QString key;
-        QVariant value;
-        epFromVariant(v.key, &key);
-        epFromVariant(v.value, &value);
-        map.insert(std::move(key), std::move(value));
-      }
-      // TODO: what?! no move assignment! look into this...
-      pVariant->setValue(std::move(map));
       break;
     }
 
@@ -335,27 +335,34 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
       break;
     }
 
-    case Variant::Type::AssocArray:
-    {
-      using namespace qt;
-
-      *pJSValue = QtApplication::Kernel()->QmlEngine()->newObject();
-      Variant::VarMap aa = variant.asAssocArray();
-      for (auto v : aa)
+    case Variant::Type::SharedPtr:
+      switch (variant.spType())
       {
-        if (!v.key.is(Variant::Type::String) && !v.key.is(Variant::Type::Int))
+        case Variant::SharedPtrType::AssocArray:
         {
-          epDebugPrintf("epFromVariant: Key is not string!\n");
-          continue;
+          using namespace qt;
+
+          *pJSValue = QtApplication::Kernel()->QmlEngine()->newObject();
+          Variant::VarMap aa = variant.asAssocArray();
+          for (auto v : aa)
+          {
+            if (!v.key.is(Variant::Type::String) && !v.key.is(Variant::Type::Int))
+            {
+              epDebugPrintf("epFromVariant: Key is not string!\n");
+              continue;
+            }
+            QJSValue value;
+            QString key;
+            epFromVariant(v.key, &key);
+            epFromVariant(v.value, &value);
+            pJSValue->setProperty(key, value);
+          }
+          break;
         }
-        QJSValue value;
-        QString key;
-        epFromVariant(v.key, &key);
-        epFromVariant(v.value, &value);
-        pJSValue->setProperty(key, value);
+        default:
+          break;
       }
       break;
-    }
 
     default:
       epDebugPrintf("epFromVariant: Unsupported type '%d'\n", (int)variant.type());

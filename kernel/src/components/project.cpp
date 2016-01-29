@@ -127,9 +127,9 @@ void Project::ParseProject(Variant node)
     Array<Variant> children = pChildren->asArray();
     for (auto child : children)
     {
-      if (child.is(Variant::Type::AssocArray))
+      if (child.is(Variant::SharedPtrType::AssocArray))
       {
-        Variant *pName = child.asAssocArray().Get("name");
+        Variant *pName = child.getItem("name");
         if(pName && pName->is(Variant::Type::String) && pName->asString().eq("activities"))
           ParseActivities(child);
       }
@@ -146,7 +146,7 @@ void Project::ParseActivities(Variant node)
     Array<Variant> children = pChildren->asArray();
     for (auto child : children)
     {
-      if (child.is(Variant::Type::AssocArray))
+      if (child.is(Variant::SharedPtrType::AssocArray))
         ParseActivity(child);
     }
   }
@@ -158,7 +158,7 @@ void Project::ParseActivity(Variant node)
   {
     Variant::VarMap initParams;
     Variant vParams = Text::XMLMapToComponentParams(node);
-    if (vParams.is(Variant::Type::AssocArray))
+    if (vParams.is(Variant::SharedPtrType::AssocArray))
       initParams = vParams.asAssocArray();
 
     activities.pushBack(component_cast<Activity>(pKernel->CreateComponent(node["name"].asString(), initParams)));

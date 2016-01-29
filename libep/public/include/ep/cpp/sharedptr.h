@@ -225,18 +225,21 @@ public:
   UniquePtr(UniquePtr<U> &ptr)
     : pInstance(ptr.pInstance)
   {
-    ptr.pInstance = nullptr;
+    if(this != &ptr)
+      ptr.pInstance = nullptr;
   }
   UniquePtr(UniquePtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    ptr.pInstance = nullptr;
+    if (this != &ptr)
+      ptr.pInstance = nullptr;
   }
   template<typename U>
   UniquePtr(UniquePtr<U> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    ptr.pInstance = nullptr;
+    if (this != &ptr)
+      ptr.pInstance = nullptr;
   }
 
   ~UniquePtr()
@@ -247,24 +250,33 @@ public:
   template<typename U>
   UniquePtr &operator=(UniquePtr<U> &ptr)
   {
-    reset();
-    pInstance = ptr.pInstance;
-    ptr.pInstance = nullptr;
+    if (this != &ptr)
+    {
+      reset();
+      pInstance = ptr.pInstance;
+      ptr.pInstance = nullptr;
+    }
     return *this;
   }
   UniquePtr &operator=(UniquePtr<T> &&ptr)
   {
-    reset();
-    pInstance = ptr.pInstance;
-    ptr.pInstance = nullptr;
+    if (this != &ptr)
+    {
+      reset();
+      pInstance = ptr.pInstance;
+      ptr.pInstance = nullptr;
+    }
     return *this;
   }
   template<typename U>
   UniquePtr &operator=(UniquePtr<U> &&ptr)
   {
-    reset();
-    pInstance = ptr.pInstance;
-    ptr.pInstance = nullptr;
+    if (this != &ptr)
+    {
+      reset();
+      pInstance = ptr.pInstance;
+      ptr.pInstance = nullptr;
+    }
     return *this;
   }
 
@@ -418,10 +430,7 @@ template <class U>
 inline SharedPtr<T>::SharedPtr(UniquePtr<U> &ptr)
   : pInstance(ptr.pInstance)
 {
-  if (pInstance)
-  {
-    ptr.pInstance = nullptr;
-  }
+  ptr.pInstance = nullptr;
 }
 
 template <class T>
@@ -429,10 +438,7 @@ inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<T> &&ptr)
 {
   RefCounted *pOld = pInstance;
   pInstance = ptr.pInstance;
-  if (pInstance)
-  {
-    ptr.pInstance = nullptr;
-  }
+  ptr.pInstance = nullptr;
   release(pOld);
   return *this;
 }
@@ -443,11 +449,7 @@ inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<U> &ptr)
 {
   RefCounted *pOld = pInstance;
   pInstance = ptr.pInstance;
-  if (pInstance)
-  {
-    pInstance->rc = 1;
-    ptr.pInstance = nullptr;
-  }
+  ptr.pInstance = nullptr;
   release(pOld);
   return *this;
 }
@@ -468,9 +470,8 @@ epforceinline RefCounted* SharedPtr<T>::acquire(RefCounted *pI)
 template<class T>
 inline void SharedPtr<T>::release(RefCounted *pI)
 {
-  if (!pI)
-    return;
-  pI->DecRef();
+  if (pI)
+    pI->DecRef();
 }
 
 namespace internal {

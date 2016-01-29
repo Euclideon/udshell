@@ -142,15 +142,15 @@ ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &v
           return epStringifyTemplate(buffer, format, v.asComponent(), pArgs);
         case Variant::SharedPtrType::Delegate:
           return epStringifyTemplate(buffer, format, v.asDelegate(), pArgs);
+        case Variant::SharedPtrType::AssocArray:
+          EPASSERT(false, "TODO! Please write me!");
+          return 0;
         default:
           EPASSERT(false, "TODO! Please write me!");
           return 0;
       }
     case Variant::Type::Array:
       return epStringifyTemplate(buffer, format, v.asArray(), pArgs);
-    case Variant::Type::AssocArray:
-      EPASSERT(false, "TODO! Please write me!");
-      return 0;
     case Variant::Type::Error:
       EPASSERT(false, "TODO! Please write me!");
       return 0;
@@ -176,7 +176,6 @@ const Variant::Type s_typeTranslation[] =
   Variant::Type::SharedPtr, // epVT_SharedPtr
   Variant::Type::String,    // epVT_String
   Variant::Type::Array,     // epVT_Array
-  Variant::Type::AssocArray,// epVT_AssocArray
 
   // these get reinterpreted
   Variant::Type::String     // epVT_SmallString
@@ -209,7 +208,7 @@ Variant::Variant(String s, bool unsafeReference)
     t = (size_t)Type::String;
     ownsContent = 1;
     length = s.length;
-    char *pS = internal::SliceAlloc<char>(s.length + 1, 1);
+    char *pS = internal::SliceAlloc<char>(s.length + 1);
     this->s = pS;
     memcpy(pS, s.ptr, s.length);
     pS[s.length] = 0;
@@ -231,7 +230,7 @@ Variant::Variant(Slice<Variant> a, bool unsafeReference)
     t = (size_t)Type::Array;
     ownsContent = 1;
     length = a.length;
-    Variant *pA = internal::SliceAlloc<Variant>(a.length, 1);
+    Variant *pA = internal::SliceAlloc<Variant>(a.length);
     this->p = pA;
     for (size_t j = 0; j < length; ++j)
       new(&pA[j]) Variant(a.ptr[j]);
@@ -260,11 +259,6 @@ void Variant::copyContent(const Variant &val)
     case Type::Array:
     {
       ++internal::GetSliceHeader(p)->refCount;
-      break;
-    }
-    case Type::AssocArray:
-    {
-      new((void*)&p) VarMap((VarMap&)val.p);
       break;
     }
     default:
@@ -301,11 +295,6 @@ void Variant::destroy()
         --pH->refCount;
       break;
     }
-    case Type::AssocArray:
-    {
-      ((VarMap&)p).~VarMap();
-      break;
-    }
     case Type::SmallString:
       // SmallString may appear to have the ownsContent bit set, but it's actually a bit of the length ;)
       break;
@@ -326,10 +315,11 @@ bool Variant::isNull() const
     case Type::String:
     case Type::Array:
       return length == 0;
-    case Type::AssocArray:
-      return ((VarMap&)p).Empty();
     case Type::SharedPtr:
-      return sp == nullptr;
+      if ((SharedPtrType)length == SharedPtrType::AssocArray)
+        return aa ? aa->tree.Empty() : true;
+      else
+        return sp == nullptr;
     case Type::SmallString:
       return (*(uint8_t*)this >> 4) == 0;
     default:
@@ -612,27 +602,28 @@ SharedArray<Variant> Variant::asSharedArray() const
       Slice<Variant> r(a, length);
       return (SharedArray<Variant>&)r;
     }
-    case Type::AssocArray:
-    {
-      // check the AA has a numeric series
-      if(!aa && length == 0)
-        return SharedArray<Variant>();
-
-      Array<Variant, 0> arr(Reserve, length);
-
-      // does the series start at 0 or 1?
-      size_t first = aa->Get(0) ? 0 : 1;
-
-      // append each item in the series to an array
-      for (size_t j = first; j < first + length; ++j)
+    case Type::SharedPtr:
+      if((SharedPtrType)length == SharedPtrType::AssocArray)
       {
-        Variant *pV = aa->Get(j);
-        if (!pV)
+        // check the AA has a numeric series
+        if(!aa)
           return SharedArray<Variant>();
-        arr.pushBack(*pV);
+
+        // does the series start at 0 or 1?
+        size_t j = aa->tree.Get(0) ? 0 : 1;
+
+        // append each item in the series to an array
+        Array<Variant, 0> arr;
+        do
+        {
+          Variant *pV = aa->tree.Get(j++);
+          if (!pV)
+            break;
+          arr.pushBack(*pV);
+        } while (1);
+        return std::move(arr);
       }
-      return std::move(arr);
-    }
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
     case Type::String:
       // TODO: should we parse strings that look like arrays??
     default:
@@ -647,8 +638,9 @@ Variant::VarMap Variant::asAssocArray() const
       EPTHROW_ERROR(epR_InvalidType, "Variant is void");
     case Type::Null:
       return VarMap();
-    case Type::AssocArray:
-      return (VarMap&)p;
+    case Type::SharedPtr:
+      if ((SharedPtrType)length == SharedPtrType::AssocArray)
+        return (VarMap&)aa;
     default:
       EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
@@ -656,15 +648,24 @@ Variant::VarMap Variant::asAssocArray() const
 
 size_t Variant::arrayLen() const
 {
-  if (is(Type::Array) || is(Type::AssocArray))
+  if (is(Type::Array))
     return length;
+  else if (is(SharedPtrType::AssocArray))
+    return assocArraySeriesLen();
   return 0;
 }
 size_t Variant::assocArraySeriesLen() const
 {
-  if (!is(Type::AssocArray))
+  if (!is(SharedPtrType::AssocArray))
     return 0;
-  return length;
+
+  // does the series start at 0 or 1?
+  size_t j = aa->tree.Get(0) ? 0 : 1;
+
+  size_t len = 0;
+  while (aa->tree.Get(j++))
+    ++len;
+  return len;
 }
 
 Variant& Variant::operator[](size_t j) const
@@ -674,24 +675,24 @@ Variant& Variant::operator[](size_t j) const
     EPASSERT_THROW(j < length, epR_OutOfBounds, "Index out of range: {0} in [0 .. {1})", j, length);
     return a[j];
   }
-  else if (is(Type::AssocArray))
+  else if (is(SharedPtrType::AssocArray))
   {
     EPASSERT_THROW(j < length, epR_OutOfBounds, "Element not found: {0}", j);
-    return (*aa)[j + (aa->Get(0) ? 0 : 1)];
+    return aa->tree[j + (aa->tree.Get(0) ? 0 : 1)];
   }
   EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
 }
 Variant& Variant::operator[](String key) const
 {
-  if (is(Type::AssocArray))
-    return (*aa)[key];
+  if (is(SharedPtrType::AssocArray))
+    return aa->tree[key];
   EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
 }
 
 Variant* Variant::getItem(String key) const
 {
-  if (is(Type::AssocArray))
-    return aa->Get(key);
+  if (is(SharedPtrType::AssocArray))
+    return aa->tree.Get(key);
   return nullptr;
 }
 

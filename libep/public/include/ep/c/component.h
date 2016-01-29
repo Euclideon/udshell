@@ -8,11 +8,14 @@
 extern "C" {
 #endif
 
+typedef void (epFreeFunc)(void*);
+
 // component API
 struct epComponent
 {
   const void *_vtbl;
   size_t refCount;
+  epFreeFunc *pFreeFunc;
 
   const epComponentDesc *pType;
   struct epKernel *pKernel;

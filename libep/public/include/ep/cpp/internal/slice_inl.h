@@ -5,12 +5,12 @@ namespace ep {
 namespace internal {
 
 template<typename T>
-inline T* SliceAlloc(size_t elements, size_t initialRC = 0)
+inline T* SliceAlloc(size_t elements)
 {
   SliceHeader *pH = (SliceHeader*)epAlloc(sizeof(SliceHeader) + sizeof(T)*elements);
   pH->pFreeFunc = [](void *pMem) { epFree(pMem); };
   pH->allocatedCount = elements;
-  pH->refCount = initialRC;
+  pH->refCount = 1;
   return (T*)(pH + 1);
 }
 inline SliceHeader* GetSliceHeader(const void *pBuffer)
@@ -781,7 +781,6 @@ inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
     // if the rvalue has an allocation, we can just claim it
     this->ptr = rval.ptr;
     this->length = rval.length;
-    internal::GetSliceHeader(this->ptr)->refCount = 1;
     rval.ptr = nullptr;
   }
   else
@@ -791,7 +790,7 @@ inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
 template <typename T>
 template <typename U>
 inline SharedArray<T>::SharedArray(U *ptr, size_t length)
-  : Slice<T>(length ? internal::SliceAlloc<T>(length, 1) : nullptr, length)
+  : Slice<T>(length ? internal::SliceAlloc<T>(length) : nullptr, length)
 {
   // copy the data
 //  if (std::is_pod<T>::value) // TODO: this is only valid if T and U are the same!
