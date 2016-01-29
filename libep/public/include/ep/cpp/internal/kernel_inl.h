@@ -63,7 +63,9 @@ private:
       MutableString128 t(Format, "New: {0} - {1}", pType->info.id, uid);
       pKernel->LogDebug(4, t);
       // TODO: this new can't exist in the wild... need to call back into kernel!!
-      return new ComponentType(pType, pKernel, uid, initParams);
+      ComponentType *ptr = new(epAlloc(sizeof(ComponentType))) ComponentType(pType, pKernel, uid, initParams);
+      ptr->pFreeFunc = [](void *mem) { epFree(mem); };
+      return ptr;
     };
   }
 };

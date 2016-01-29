@@ -41,14 +41,25 @@ namespace internal {
   };
 
   template<typename T, bool isref>
-  struct Destroy;
+  struct Acquire;
   template<class T>
-  struct Destroy<T, false> {
-    epforceinline static void destroy(T *ptr);
+  struct Acquire<T, false> {
+    epforceinline static void acquire(T *ptr);
   };
   template<class T>
-  struct Destroy<T, true> {
-    epforceinline static void destroy(T *ptr);
+  struct Acquire<T, true> {
+    epforceinline static void acquire(T *ptr);
+  };
+
+  template<typename T, bool isref>
+  struct Release;
+  template<class T>
+  struct Release<T, false> {
+    epforceinline static void release(T *ptr);
+  };
+  template<class T>
+  struct Release<T, true> {
+    epforceinline static void release(T *ptr);
   };
 
 } // namespace internal
@@ -72,9 +83,9 @@ public:
   template<typename... Args>
   static SharedPtr<T> create(Args... args)
   {
-    SharedPtr<T> sp(new(epAlloc(sizeof(T))) T(args...));
-    sp->pFreeFunc = [](void *pMem) { epFree(pMem); };
-    return std::move(sp);
+    T *ptr = new(epAlloc(sizeof(T))) T(args...);
+    ptr->pFreeFunc = [](void *pMem) { epFree(pMem); };
+    return SharedPtr<T>(ptr);
   }
 
   SharedPtr() {}
@@ -113,7 +124,10 @@ public:
   }
 
   explicit SharedPtr(T *p)
-    : pInstance(acquire(p)) {}
+    : pInstance(acquire(p))
+  {
+    EPASSERT(!p || p->pFreeFunc != nullptr, "Object has no 'free' function assigned!");
+  }
 
   ~SharedPtr() { release(pInstance); }
 
@@ -216,7 +230,10 @@ public:
   UniquePtr() {}
   UniquePtr(nullptr_t) {}
 
-  explicit UniquePtr(T *p) : pInstance(p) {}
+  explicit UniquePtr(T *p) : pInstance(p)
+  {
+    internal::Acquire<T, std::is_base_of<RefCounted, T>::value>::acquire(pInstance);
+  }
 
   UniquePtr(const UniquePtr<T> &ptr) = delete;
   UniquePtr &operator=(const UniquePtr<T> &ptr) = delete;
@@ -244,7 +261,7 @@ public:
 
   ~UniquePtr()
   {
-    internal::Destroy<T, std::is_base_of<RefCounted, T>::value>::destroy(pInstance);
+    internal::Release<T, std::is_base_of<RefCounted, T>::value>::release(pInstance);
   }
 
   template<typename U>
@@ -302,7 +319,8 @@ public:
 private:
   template<typename U> friend struct SharedPtr;
   template<typename U> friend struct UniquePtr;
-  template<typename U, bool isref> friend struct Destroy;
+  template<typename U, bool isref> friend struct Acquire;
+  template<typename U, bool isref> friend struct Release;
 
   T * eprestrict pInstance = nullptr;
 };
@@ -399,21 +417,26 @@ public:
     return --rc;
   }
 
+  template<typename T, typename... Args>
+  static T* New(Args... args)
+  {
+    T *ptr = new(epAlloc(sizeof(T))) T(args...);
+    ptr->pFreeFunc = [](void *mem) { epFree(mem); };
+    return ptr;
+  }
+
 private:
   typedef void (FreeFunc)(void*);
 
-  mutable size_t rc = 1;
+  mutable size_t rc = 0;
   FreeFunc *pFreeFunc = nullptr;
 
-  // lots of friends!
+  // friends to init pFreeFunc...
   template<typename T>
   friend struct SharedPtr;
-  template<typename T>
-  friend struct UniquePtr;
   template<typename T, bool isrc, typename... Args>
   friend struct internal::Create;
-  template<typename T, bool isrc>
-  friend struct internal::Destroy;
+  friend class Kernel;
 };
 
 
@@ -490,12 +513,22 @@ namespace internal {
   }
 
   template<class T>
-  epforceinline void Destroy<T, false>::destroy(T *ptr)
+  epforceinline void Acquire<T, false>::acquire(T*)
+  {}
+  template<class T>
+  epforceinline void Acquire<T, true>::acquire(T *ptr)
+  {
+    if (ptr)
+      ((RefCounted*)ptr)->IncRef();
+  }
+
+  template<class T>
+  epforceinline void Release<T, false>::release(T *ptr)
   {
     delete ptr;
   }
   template<class T>
-  epforceinline void Destroy<T, true>::destroy(T *ptr)
+  epforceinline void Release<T, true>::release(T *ptr)
   {
     if (ptr)
       ((RefCounted*)ptr)->DecRef();

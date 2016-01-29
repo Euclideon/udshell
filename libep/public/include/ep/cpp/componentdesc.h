@@ -113,7 +113,7 @@ public:
   C *pInstance;
 
 protected:
-  template<typename T, bool b> friend struct internal::Destroy;
+  template<typename T, bool b> friend struct internal::Release;
 
   BaseImpl(const BaseImpl &) = delete;
   void operator=(const BaseImpl &) = delete;
