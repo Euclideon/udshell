@@ -15,11 +15,8 @@
 #include "components/pluginloader.h"
 #include "components/nativepluginloader.h"
 #include "components/project.h"
-#include "ep/cpp/component/resource/buffer.h"
-#include "ep/cpp/component/resource/arraybuffer.h"
 #include "components/resources/text.h"
 #include "components/resources/menu.h"
-#include "components/resources/model.h"
 #include "components/resources/kvpstore.h"
 #include "components/resources/metadata.h"
 #include "components/datasources/imagesource.h"
@@ -42,6 +39,7 @@
 #include "components/resources/arraybufferimpl.h"
 #include "components/resources/materialimpl.h"
 #include "components/resources/shaderimpl.h"
+#include "components/resources/modelimpl.h"
 #include "components/nodes/nodeimpl.h"
 #include "components/nodes/udnodeimpl.h"
 #include "components/nodes/cameraimpl.h"
@@ -56,16 +54,6 @@
 #include "stdcapture.h"
 
 #include "udPlatformUtil.h"
-
-namespace ep {
-
-epResult udRenderScene_Init(Kernel*);
-epResult udRenderScene_InitRender(Kernel*);
-
-epResult udRenderScene_Deinit(Kernel*);
-epResult udRenderScene_DeinitRender(Kernel*); // Not sure if both Deinit's are necessary
-
-}
 
 namespace kernel {
 
@@ -128,7 +116,7 @@ Kernel::~Kernel()
   }
 }
 
-epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int renderThreadCount)
+epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int _renderThreadCount)
 {
   epResult result = epR_Success;
   StreamRef spDebugFile, spConsole;
@@ -136,7 +124,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
 
   EP_ERROR_NULL(pKernel, epR_Failure);
 
-  pKernel->pRenderer = new Renderer(pKernel, renderThreadCount);
+  pKernel->renderThreadCount = _renderThreadCount;
 
   // register all the builtin component types
   pKernel->RegisterComponentType<Component, ComponentImpl>();
@@ -169,7 +157,7 @@ epResult Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLi
   pKernel->RegisterComponentType<UDModel, UDModelImpl>();
   pKernel->RegisterComponentType<Shader, ShaderImpl>();
   pKernel->RegisterComponentType<Material, MaterialImpl>();
-  pKernel->RegisterComponentType<Model>();
+  pKernel->RegisterComponentType<Model, ModelImpl>();
   pKernel->RegisterComponentType<Text>();
   pKernel->RegisterComponentType<Menu>();
   pKernel->RegisterComponentType<KVPStore>();
@@ -238,13 +226,11 @@ epilogue:
 
 void Kernel::DoInit(Kernel *pKernel)
 {
+  // create the renderer
+  pKernel->spRenderer = SharedPtr<Renderer>::create(pKernel, renderThreadCount);
+
+  // init the components
   pKernel->InitComponents();
-
-  epResult result = udRenderScene_Init(pKernel);
-  EPASSERT_THROW(result == epR_Success, result, "udRenderScene_Init Failed");
-
-  result = udRenderScene_InitRender(pKernel);
-  EPASSERT_THROW(result == epR_Success, result, "udRenderScene_InitRender Failed");
 
   // prepare the plugins
   pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>();
@@ -300,14 +286,14 @@ void Kernel::Destroy()
   // call application deinit
   SendMessage("$deinit", "#", "deinit", nullptr);
 
+  SetFocusView(nullptr);
+
   spUpdateTimer = nullptr;
   spStreamerTimer = nullptr;
   spPluginManager = nullptr;
+  spResourceManager = nullptr;
 
-  udRenderScene_DeinitRender(this);
-  udRenderScene_Deinit(this);
-
-  udOctree_Shutdown();
+  spRenderer = nullptr;
 
   delete stdOutCapture;
   delete stdErrCapture;
@@ -317,17 +303,16 @@ void Kernel::Destroy()
   spStdErrBC = nullptr;
   spStdOutBC = nullptr;
 
-  SetFocusView(nullptr);
   spCommandManager = nullptr;
-  spResourceManager = nullptr;
   spLogger = nullptr;
+
+  // TODO: **this is not okay** the lua VM won't do a final GC until this moment
+  //       Lua may have references to render resources (or other stuff), but the renderer is already destroyed!!
   spLua = nullptr;
 
-  delete pRenderer;
+  delete this;
 
   epHAL_Deinit();
-
-  delete this;
 }
 
 void Kernel::Update()

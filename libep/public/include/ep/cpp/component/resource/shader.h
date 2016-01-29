@@ -20,6 +20,9 @@ public:
   SharedString GetCode() const override final { return pImpl->GetCode(); }
   void SetCode(SharedString code) override final { pImpl->SetCode(code); }
 
+  // TODO: eager compile function, which attempts to compile the shader and produce error messages promptly
+//  void Compile();
+
 protected:
   Shader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)

@@ -61,7 +61,7 @@ namespace internal {
 #   define EPRELASSERT(condition, ...) do { if (!(condition)) { ::ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
 #   define IF_EPRELASSERT(x) x
 # else
-#   define EPRELASSERT(condition, ...) // TODO: Make platform-specific __assume(condition)
+#   define EPRELASSERT(condition, ...) do {} while(0) // TODO: Make platform-specific __assume(condition)
 #   define IF_EPRELASSERT(x)
 # endif
 

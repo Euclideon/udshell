@@ -2,8 +2,8 @@
 #include "renderscene.h"
 #include "renderresource.h"
 #include "kernel.h"
-#include "components/resources/model.h"
-#include "components/resources/materialimpl.h"
+#include "ep/cpp/component/resource/model.h"
+#include "ep/cpp/component/resource/material.h"
 
 namespace ep
 {

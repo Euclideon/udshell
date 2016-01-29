@@ -4,26 +4,6 @@
 
 namespace ep {
 
-RenderResourceRef ArrayBufferImpl::GetRenderResource(RenderResourceType type)
-{
-  if (!spRenderData)
-  {
-    if (type == RenderResourceType::Texture)
-    {
-      // TODO: we need to find texture type from the dimensions of the array buffer
-      //       ... or we need 'type' to ask for the particular texture type that the shader expects
-      RenderTexture *pRenderTexture = new RenderTexture(GetKernel()->GetRenderer(), ArrayBufferRef(pInstance), TextureUsage::_2D);
-      spRenderData = RenderTextureRef(pRenderTexture);
-    }
-    else
-    {
-      RenderArray *pRenderArray = new RenderArray(GetKernel()->GetRenderer(), ArrayBufferRef(pInstance), type == RenderResourceType::IndexArray ? ArrayUsage::IndexData : ArrayUsage::VertexData);
-      spRenderData = RenderArrayRef(pRenderArray);
-    }
-  }
-  return spRenderData;
-}
-
 void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, Slice<const size_t> _shape)
 {
   EPASSERT_THROW(_shape.length > 0, epR_InvalidArgument, "No dimensions given!");

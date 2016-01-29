@@ -191,6 +191,15 @@ template<typename T>
 class UniquePtr
 {
 public:
+  using Type = T;
+
+  // create a new instance of T
+  template<typename... Args>
+  static UniquePtr<T> create(Args... args)
+  {
+    return UniquePtr<T>(new T(args...));
+  }
+
   UniquePtr() {}
   UniquePtr(nullptr_t) {}
 

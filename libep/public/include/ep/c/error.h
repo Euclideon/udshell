@@ -18,6 +18,7 @@ enum epResult
   epR_OutOfBounds,
   epR_BadCast,
   epR_AllocFailure,
+  epR_ResourceInUse,
 
   epR_File_OpenFailure,
 };

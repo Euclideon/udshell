@@ -30,10 +30,13 @@ public:
   CullMode GetCullMode() const override final { return cullMode; }
   void SetCullMode(CullMode _cullMode) override final { cullMode = _cullMode; }
 
+  AVLTree<SharedString, Float4>& MaterialProperties() { return properties; }
+  const AVLTree<SharedString, Float4>& MaterialProperties() const { return properties; }
   void SetMaterialProperty(SharedString property, const Float4 &val) { properties.Insert(property, val); }
 
 protected:
   EP_FRIENDS_WITH_IMPL(GeomNode);
+  friend class Renderer;
 
   ~MaterialImpl()
   {
@@ -45,9 +48,6 @@ protected:
   }
 
   void OnShaderChanged();
-  void SetRenderstate();
-
-  RenderShaderProgramRef GetRenderProgram();
 
   ShaderRef shaders[2];
   ArrayBufferRef textures[8];
@@ -57,7 +57,7 @@ protected:
 
   AVLTree<SharedString, Float4> properties;
 
-  RenderShaderProgramRef spRenderProgram = nullptr;
+  SharedPtr<RefCounted> spCachedShaderProgram;
 };
 
 } // namespace ep

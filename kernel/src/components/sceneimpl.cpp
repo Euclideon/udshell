@@ -78,9 +78,47 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene)
   {
     auto &out = cache->geom.pushBack();
 
+/* in...
+    Double4x4 matrix;
+
+    SharedArray<VertexArray> vertexArrays;
+    ArrayBufferRef spIndices;
+    MaterialRef spMaterial;
+
+    Array<RenderList, 1> renderList;
+
+    Delegate<void(SharedPtr<RefCounted>)> programCacheCallback;
+    Delegate<void(SharedPtr<RefCounted>)> vertexFormatCacheCallback;
+
+
+    // out...
+    Double4x4 matrix;
+
+    uint32_t numTextures, numArrays;
+    RenderTextureRef textures[8];
+    RenderArrayRef arrays[16];
+    RenderArrayRef index;
+
+    RenderShaderProgramRef spProgram;
+    RenderVertexFormatRef spVertexFormat;
+
+    BlendMode blendMode;
+    CullMode cullMode;
+*/
+
     out.matrix = in.matrix;
+
+    out.arrays.resize(in.vertexArrays.length);
+    for (size_t i = 0; i < in.vertexArrays.length; ++i)
+      out.arrays.ptr[i] = in.vertexArrays.ptr[i].spArray;
+/*
+    out.textures.resize(in.vertexArrays.length);
+    for (size_t i = 0; i < invertexArrays.length; ++i)
+      out.textures.ptr[i] = in.vertexArrays.ptr[i].spArray;
+
     out.numTextures = in.numTextures;
     out.numArrays = in.numArrays;
+*/
   }
 
   return cache;

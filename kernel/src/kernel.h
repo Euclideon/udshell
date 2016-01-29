@@ -66,7 +66,7 @@ public:
 
   ep::ComponentRef FindComponent(String name) const override final;
 
-  Renderer *GetRenderer() const { return pRenderer; }
+  SharedPtr<Renderer> GetRenderer() const { return spRenderer; }
 
   // script
   LuaRef GetLua() const { return spLua; }
@@ -135,7 +135,8 @@ protected:
 
   AVLTree<String, const ep::ComponentDesc *> extensionsRegistry;
 
-  Renderer *pRenderer = nullptr;
+  SharedPtr<Renderer> spRenderer = nullptr;
+  int renderThreadCount;
 
   LuaRef spLua = nullptr;
 

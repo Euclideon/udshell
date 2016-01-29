@@ -85,7 +85,7 @@ void epTexture_DestroyTexture(epTexture **ppTex)
 }
 
 // ***************************************************************************************
-void epTexture_SetImageData(epTexture *pTex, int epUnusedParam(element), int level, void *pImage)
+void epTexture_SetImageData(epTexture *pTex, int epUnusedParam(element), int level, const void *pImage)
 {
   // TODO: should we use the function pointer instead? maybe api check?
 
