@@ -77,6 +77,14 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   }
 }
 
+UIConsole::~UIConsole()
+{
+  spConsoleOut->Written.Unsubscribe(this, &UIConsole::OnConsoleOutput);
+  spConsoleErr->Written.Unsubscribe(this, &UIConsole::OnConsoleOutput);
+  spLuaOut->Written.Unsubscribe(this, &UIConsole::OnConsoleOutput);
+  spLogger->Changed.Unsubscribe(this, &UIConsole::OnLogChanged);
+}
+
 void UIConsole::ToggleVisible(Variant::VarMap params)
 {
   CallMethod("togglevisible", nullptr);
