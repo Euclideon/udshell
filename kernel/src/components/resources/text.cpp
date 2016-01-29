@@ -11,7 +11,7 @@ Variant Text::ComponentParamsToXMLMap(Variant map)
   Variant::VarMap node;
   Array<Variant> childNodes;
 
-  if (map.is(Variant::Type::AssocArray))
+  if (map.is(Variant::SharedPtrType::AssocArray))
   {
     auto children = map.asAssocArray();
     for (auto child : children)
@@ -45,13 +45,13 @@ Variant Text::XMLMapToComponentParams(Variant node)
   bool hasAttributes = false, hasChildren = false;
   Variant::VarMap map;
 
-  if (!node.is(Variant::Type::AssocArray))
+  if (!node.is(Variant::SharedPtrType::AssocArray))
     return map;
 
   Variant::VarMap element = node.asAssocArray();
 
   Variant *pAttributes = element.Get("attributes");
-  if (pAttributes && pAttributes->is(Variant::Type::AssocArray))
+  if (pAttributes && pAttributes->is(Variant::SharedPtrType::AssocArray))
   {
     Variant::VarMap attributes = pAttributes->asAssocArray();
     for (auto attr : attributes)
@@ -67,7 +67,7 @@ Variant Text::XMLMapToComponentParams(Variant node)
     Slice<Variant> children = pChildren->asArray();
     for (auto child : children)
     {
-      if (child.is(Variant::Type::AssocArray))
+      if (child.is(Variant::SharedPtrType::AssocArray))
       {
         Variant::VarMap childMap = child.asAssocArray();
         map.Insert(*childMap.Get("name"), XMLMapToComponentParams(child));
@@ -149,7 +149,7 @@ Variant Text::ParseXml()
 
 void Text::FormatXml(Variant root)
 {
-  if (!root.is(Variant::Type::AssocArray))
+  if (!root.is(Variant::SharedPtrType::AssocArray))
   {
     LogWarning(2, "FormatXML -- parameter is not a Map");
     return;
@@ -172,7 +172,7 @@ void Text::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth)
   spOut->Write(str);
 
   Variant *pAttributes = element.Get("attributes");
-  if (pAttributes && pAttributes->is(Variant::Type::AssocArray))
+  if (pAttributes && pAttributes->is(Variant::SharedPtrType::AssocArray))
   {
     Variant::VarMap attributes = pAttributes->asAssocArray();
 
@@ -192,7 +192,7 @@ void Text::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth)
     Slice<Variant> children = pChildren->asArray();
     for (auto child : children)
     {
-      if (child.is(Variant::Type::AssocArray))
+      if (child.is(Variant::SharedPtrType::AssocArray))
       {
         if (!hasChildren)
         {

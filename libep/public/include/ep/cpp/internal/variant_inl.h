@@ -257,6 +257,12 @@ inline Variant::Variant(SubscriptionRef &&spS)
 inline Variant::Variant(const SubscriptionRef &spS)
   : Variant((const SharedPtr<RefCounted>&)spS, SharedPtrType::Subscription)
 {}
+inline Variant::Variant(VarMap &&spS)
+  : Variant(std::move((SharedPtr<RefCounted>&)spS.ptr), SharedPtrType::AssocArray)
+{}
+inline Variant::Variant(const VarMap &spS)
+  : Variant((const SharedPtr<RefCounted>&)spS.ptr, SharedPtrType::AssocArray)
+{}
 
 template<size_t Len>
 inline Variant::Variant(const MutableString<Len> &s)
@@ -272,7 +278,6 @@ inline Variant::Variant(MutableString<Len> &&s)
     ownsContent = 1;
     length = s.length;
     this->s = s.ptr;
-    internal::GetSliceHeader(s.ptr)->refCount = 1;
     s.ptr = nullptr;
   }
   else
@@ -311,7 +316,6 @@ inline Variant::Variant(Array<Variant, Len> &&a)
     ownsContent = 1;
     length = a.length;
     this->p = a.ptr;
-    internal::GetSliceHeader(a.ptr)->refCount = 1;
     a.ptr = nullptr;
   }
   else
@@ -334,21 +338,6 @@ inline Variant::Variant(VarArray &&a)
   this->p = a.ptr;
   if (a.ptr)
     a.ptr = nullptr;
-}
-
-inline Variant::Variant(VarMap &&spC)
-{
-  t = (size_t)Type::AssocArray;
-  ownsContent = 1;
-  length = 0;
-  new(&p) VarMap(std::move(spC));
-}
-inline Variant::Variant(const VarMap &spC)
-{
-  t = (size_t)Type::AssocArray;
-  ownsContent = 1;
-  length = 0;
-  new(&p) VarMap(spC);
 }
 
 inline Variant::~Variant()
@@ -765,7 +754,7 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
     }
     EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
   }
-  else if (v.is(Variant::Type::AssocArray))
+  else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     auto aa = v.asAssocArray();
     size_t len = v.assocArraySeriesLen();
@@ -796,7 +785,7 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
     }
     EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
   }
-  else if (v.is(Variant::Type::AssocArray))
+  else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     auto aa = v.asAssocArray();
     size_t len = v.assocArraySeriesLen();
@@ -828,7 +817,7 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
     }
     EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
   }
-  else if (v.is(Variant::Type::AssocArray))
+  else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     auto aa = v.asAssocArray();
     size_t len = v.assocArraySeriesLen();
@@ -861,7 +850,7 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
     }
     EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
   }
-  else if (v.is(Variant::Type::AssocArray))
+  else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     auto aa = v.asAssocArray();
     size_t len = v.assocArraySeriesLen();
@@ -896,7 +885,7 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
       pArr->pushBack(a[i].as<U>());
     return;
   }
-  else if (v.is(Variant::Type::AssocArray))
+  else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     size_t len = v.assocArraySeriesLen();
     if (len > 0)
@@ -942,7 +931,7 @@ inline void epFromVariant(const Variant &v, AVLTree<K, V, Pred> *pTree)
       pTree->insert(Variant(i).as<K>(), a[i].as<V>());
     return;
   }
-  else if (v.is(Variant::Type::AssocArray))
+  else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     auto aa = v.asAssocArray();
     for (auto kvp : aa)
@@ -964,7 +953,7 @@ inline void epFromVariant(const Variant &v, SharedMap<Tree> *pTree)
       pTree->Insert(Variant(i).as<typename Tree::KeyType>(), a[i].as<typename Tree::ValueType>());
     return;
   }
-  else if (v.is(Variant::Type::AssocArray))
+  else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     auto aa = v.asAssocArray();
     for (auto kvp : aa)

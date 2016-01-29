@@ -12,7 +12,7 @@ size_t epComponent_Release(epComponent *pComponent)
 {
   if (pComponent->refCount == 1)
   {
-    s_pInstance->DestroyComponent((Component*)pComponent);
+    s_pInstance->DestroyComponent((Component*)pComponent); // TODO: this can go, replace with normal DecRef, pFree will take care of it
     return 0;
   }
   return --pComponent->refCount;

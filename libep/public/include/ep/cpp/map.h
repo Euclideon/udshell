@@ -7,62 +7,39 @@
 namespace ep {
 
 template <typename Tree>
-class SharedMap
+struct SharedMap
 {
 public:
   using KeyType = typename Tree::KeyType;
   using ValueType = typename Tree::ValueType;
   using Iterator = typename Tree::Iterator;
 
-  SharedMap() : ptr(nullptr) {}
+  SharedMap() {}
   SharedMap(nullptr_t) : ptr(nullptr) {}
   SharedMap(const SharedMap &rh)
     : ptr(rh.ptr)
-  {
-    if (ptr)
-      ++ptr->rc;
-  }
+  {}
   SharedMap(SharedMap &&rval)
-    : ptr(rval.ptr)
-  {
-    rval.ptr = nullptr;
-  }
+    : ptr(std::move(rval.ptr))
+  {}
   SharedMap(Slice<const typename Tree::KeyValuePair> arr)
   {
-    ptr = new(epAlloc(sizeof(Node))) Node;
-    ptr->rc = 1;
+    Alloc();
     for (auto &kvp : arr)
       ptr->tree.Insert(kvp.key, kvp.value);
   }
   SharedMap(std::initializer_list<typename Tree::KeyValuePair> init)
     : SharedMap(Slice<const typename Tree::KeyValuePair>(init.begin(), init.size()))
   {}
-  ~SharedMap()
-  {
-    if (!ptr)
-      return;
-    if (ptr->rc == 1)
-    {
-      ptr->~Node();
-      epFree(ptr);
-    }
-    else
-      --ptr->rc;
-  }
 
   SharedMap& operator =(const SharedMap &rh)
   {
-    this->~SharedMap();
     ptr = rh.ptr;
-    if (ptr)
-      ++ptr->rc;
     return *this;
   }
   SharedMap& operator =(SharedMap &&rh)
   {
-    this->~SharedMap();
-    ptr = rh.ptr;
-    rh.ptr = nullptr;
+    ptr = std::move(rh.ptr);
     return *this;
   }
 
@@ -142,18 +119,16 @@ public:
 private:
   friend struct Variant;
 
-  struct Node
+  struct Node : public RefCounted
   {
     Tree tree;
-    size_t rc;
   };
 
-  Node *ptr;
+  SharedPtr<Node> ptr;
 
   void Alloc()
   {
-    ptr = new(epAlloc(sizeof(Node))) Node;
-    ptr->rc = 1;
+    ptr = SharedPtr<Node>::create();
   }
 };
 

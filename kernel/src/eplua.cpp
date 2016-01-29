@@ -134,7 +134,7 @@ static int CreateComponent(lua_State *L)
   if (numArgs >= 2)
   {
     new(&args) Variant(Variant::luaGet(l, 2));
-    if (args.type() == Variant::Type::AssocArray)
+    if (args.is(Variant::SharedPtrType::AssocArray))
       new(&init) Variant::VarMap(args.asAssocArray());
   }
 
@@ -1027,6 +1027,19 @@ void Variant::luaPush(LuaState &l) const
         case SharedPtrType::Subscription:
           EPASSERT(false, "TODO!");
           break;
+        case SharedPtrType::AssocArray:
+        {
+          lua_State *L = l.state();
+          lua_createtable(L, 0, 0); // TODO: estimate narr and nrec?
+          VarMap &m = (VarMap&)p;
+          for (auto kvp : m)
+          {
+            l.push(kvp.key);
+            l.push(kvp.value);
+            lua_settable(L, -3);
+          }
+          break;
+        }
       }
       break;
     }
@@ -1047,19 +1060,6 @@ void Variant::luaPush(LuaState &l) const
       {
         l.push(a[j]);
         lua_seti(L, -2, j+1);
-      }
-      break;
-    }
-    case Type::AssocArray:
-    {
-      lua_State *L = l.state();
-      lua_createtable(L, 0, 0); // TODO: estimate narr and nrec?
-      VarMap &m = (VarMap&)p;
-      for (auto kvp : m)
-      {
-        l.push(kvp.key);
-        l.push(kvp.value);
-        lua_settable(L, -3);
       }
       break;
     }

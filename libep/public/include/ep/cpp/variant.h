@@ -47,7 +47,6 @@ public:
     SharedPtr = epVT_SharedPtr,
     String = epVT_String,
     Array = epVT_Array,
-    AssocArray = epVT_AssocArray,
 
     SmallString = epVT_SmallString
   };
@@ -57,7 +56,8 @@ public:
     Unknown,
     Component,
     Delegate,
-    Subscription
+    Subscription,
+    AssocArray
   };
 
   Variant();
@@ -170,7 +170,7 @@ private:
     Subscription *sub;
     void *p;
     Variant *a;
-    AVLTree<Variant, Variant> *aa;
+    VarMap::Node *aa;
     ErrorState *err;
   };
 

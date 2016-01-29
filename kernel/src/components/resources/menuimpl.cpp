@@ -45,7 +45,7 @@ Variant MenuImpl::ParseXMLString(String buffer)
   }
 
   Array<Variant> outMenus;
-  Variant *pInMenus = rootNode.asAssocArray().Get("children");
+  Variant *pInMenus = rootNode.getItem("children");
   if (pInMenus && pInMenus->is(Variant::Type::Array))
   {
     Slice<Variant> inMenus = pInMenus->asArray();
@@ -61,7 +61,7 @@ Variant MenuImpl::ParseXMLMenu(Variant inMenu)
   Variant::VarMap menu;
   Array<Variant> menuChildren;
 
-  if (!inMenu.is(Variant::Type::AssocArray))
+  if (!inMenu.is(Variant::SharedPtrType::AssocArray))
     return menu;
   Variant::VarMap inMap = inMenu.asAssocArray();
 
@@ -70,7 +70,7 @@ Variant MenuImpl::ParseXMLMenu(Variant inMenu)
     menu.Insert("type", pName->asString());
 
   Variant *pAttributes = inMap.Get("attributes");
-  if (pAttributes && pAttributes->is(Variant::Type::AssocArray))
+  if (pAttributes && pAttributes->is(Variant::SharedPtrType::AssocArray))
   {
     Variant::VarMap attributes = pAttributes->asAssocArray();
     for (auto attr : attributes)
