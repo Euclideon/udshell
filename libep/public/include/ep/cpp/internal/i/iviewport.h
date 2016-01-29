@@ -2,6 +2,8 @@
 #if !defined(_EP_IVIEWPORT_HPP)
 #define _EP_IVIEWPORT_HPP
 
+#include "ep/cpp/component/component.h"
+
 namespace ep {
 
 // TODO: Add view methods when View is impl'd

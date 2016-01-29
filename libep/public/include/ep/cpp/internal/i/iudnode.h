@@ -2,7 +2,7 @@
 #if !defined(_EP_IUDNODE_HPP)
 #define _EP_IUDNODE_HPP
 
-#include "ep/cpp/math.h"
+#include "ep/cpp/component/component.h"
 
 namespace ep {
 

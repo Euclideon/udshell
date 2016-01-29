@@ -2,11 +2,9 @@
 #ifndef _EP_IARRAYBUFFER_HPP
 #define _EP_IARRAYBUFFER_HPP
 
-#include "ep/cpp/string.h"
+#include "ep/cpp/component/component.h"
 
 namespace ep {
-
-SHARED_CLASS(ArrayBuffer);
 
 class IArrayBuffer
 {

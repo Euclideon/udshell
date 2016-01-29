@@ -2,6 +2,7 @@
 #if !defined(_EP_IUDMODEL_HPP)
 #define _EP_IUDMODEL_HPP
 
+#include "ep/cpp/component/component.h"
 #include "ep/cpp/boundingvolume.h"
 #include "ep/cpp/rect.h"
 #include "ep/cpp/render.h"

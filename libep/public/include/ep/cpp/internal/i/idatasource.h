@@ -2,6 +2,8 @@
 #if !defined(_EP_IDATASOURCE_HPP)
 #define _EP_IDATASOURCE_HPP
 
+#include "ep/cpp/component/component.h"
+
 namespace ep {
 
 SHARED_CLASS(Resource);

@@ -2,6 +2,7 @@
 #if !defined(_EP_IVIEW_HPP)
 #define _EP_IVIEW_HPP
 
+#include "ep/cpp/component/component.h"
 #include "ep/cpp/rect.h"
 #include "ep/cpp/render.h"
 

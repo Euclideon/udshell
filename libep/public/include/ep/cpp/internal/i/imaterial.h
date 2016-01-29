@@ -2,7 +2,7 @@
 #if !defined(_EP_IMATERIAL_HPP)
 #define _EP_IMATERIAL_HPP
 
-#include "ep/cpp/sharedptr.h"
+#include "ep/cpp/component/component.h"
 
 namespace ep {
 

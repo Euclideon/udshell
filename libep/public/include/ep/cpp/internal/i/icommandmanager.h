@@ -2,7 +2,7 @@
 #if !defined(_EP_ICOMMANDMANAGER_HPP)
 #define _EP_ICOMMANDMANAGER_HPP
 
-#include "ep/cpp/variant.h"
+#include "ep/cpp/component/component.h"
 
 namespace ep {
 

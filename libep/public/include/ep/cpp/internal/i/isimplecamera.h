@@ -2,6 +2,7 @@
 #if !defined(_EP_ISIMPLECAMERA_HPP)
 #define _EP_ISIMPLECAMERA_HPP
 
+#include "ep/cpp/component/component.h"
 #include "ep/c/input.h"
 
 namespace ep {
