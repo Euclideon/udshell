@@ -1,4 +1,4 @@
-#include "menu.h"
+#include "menuimpl.h"
 #include "kernel.h"
 #include "rapidxml.hpp"
 #include "components/resources/text.h"
@@ -7,8 +7,8 @@
 namespace ep
 {
 
-Menu::Menu(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-  : Resource(pType, pKernel, uid, initParams)
+MenuImpl::MenuImpl(Component *pInstance, Variant::VarMap initParams)
+  : ImplSuper(pInstance)
 {
   menuData = Array<Variant>();
 
@@ -22,9 +22,9 @@ Menu::Menu(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
   }
 }
 
-Variant Menu::ParseXMLString(String buffer)
+Variant MenuImpl::ParseXMLString(String buffer)
 {
-  auto spXMLBuffer = pKernel->CreateComponent<Text>();
+  auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
   spXMLBuffer->Allocate(buffer.length + 1);
   spXMLBuffer->CopyBuffer(buffer);
   Slice<void> buf = spXMLBuffer->Map();
@@ -56,7 +56,7 @@ Variant Menu::ParseXMLString(String buffer)
   return outMenus;
 }
 
-Variant Menu::ParseXMLMenu(Variant inMenu)
+Variant MenuImpl::ParseXMLMenu(Variant inMenu)
 {
   Variant::VarMap menu;
   Array<Variant> menuChildren;
@@ -90,7 +90,7 @@ Variant Menu::ParseXMLMenu(Variant inMenu)
   return menu;
 }
 
-void Menu::AddXMLItems(String parentPath, String xmlStr)
+void MenuImpl::AddXMLItems(String parentPath, String xmlStr)
 {
   Variant menus = ParseXMLString(xmlStr);
   Slice<Variant> menuArray = menus.asArray();
@@ -98,22 +98,22 @@ void Menu::AddXMLItems(String parentPath, String xmlStr)
     AddItem(parentPath, menu.asAssocArray());
 }
 
-bool Menu::SetItemProperties(String path, Variant::VarMap properties)
+bool MenuImpl::SetItemProperties(String path, Variant::VarMap properties)
 {
   Variant *pParent = FindMenuItem(&path);
   if (!pParent)
   {
-    pKernel->LogDebug(2, "Can't set properties of non-existent menu item \"{0}\"", path);
+    GetKernel()->LogDebug(2, "Can't set properties of non-existent menu item \"{0}\"", path);
     return false;
   }
 
   SetMenuProperties(*pParent, properties);
-  Changed.Signal();
+  pInstance->Changed.Signal();
 
   return true;
 }
 
-void Menu::AddItem(String parentPath, Variant::VarMap properties)
+void MenuImpl::AddItem(String parentPath, Variant::VarMap properties)
 {
   Variant *pChildren;
 
@@ -129,10 +129,10 @@ void Menu::AddItem(String parentPath, Variant::VarMap properties)
   children.pushBack(subTree);
   *pChildren = Variant(std::move(children));
 
-  Changed.Signal();
+  pInstance->Changed.Signal();
 }
 
-Variant *Menu::FindMenuItem(String *parentPath)
+Variant *MenuImpl::FindMenuItem(String *parentPath)
 {
   bool itemFound = false;
   Slice<Variant> children = menuData.asArray();
@@ -163,7 +163,7 @@ Variant *Menu::FindMenuItem(String *parentPath)
   return parent;
 }
 
-bool Menu::RemoveItem(String path)
+bool MenuImpl::RemoveItem(String path)
 {
   Variant *pParent = nullptr;
   Variant *pChildren = nullptr;
@@ -202,12 +202,12 @@ bool Menu::RemoveItem(String path)
   }
   *pChildren = Variant(std::move(children));
 
-  Changed.Signal();
+  pInstance->Changed.Signal();
 
   return true;
 }
 
-Variant Menu::CreateMenuItem(Variant::VarMap properties)
+Variant MenuImpl::CreateMenuItem(Variant::VarMap properties)
 {
   Variant::VarMap map;
   map.Insert(KeyValuePair("type", ""));
@@ -230,7 +230,7 @@ Variant Menu::CreateMenuItem(Variant::VarMap properties)
   return varMap;
 }
 
-void Menu::SetMenuProperties(Variant &menu, Variant::VarMap properties)
+void MenuImpl::SetMenuProperties(Variant &menu, Variant::VarMap properties)
 {
   Array<Variant> menuChildren;
   String command;
@@ -240,7 +240,7 @@ void Menu::SetMenuProperties(Variant &menu, Variant::VarMap properties)
     String itemName = item.key.asString();
 
     if (itemName.eq("command"))
-      *menu.getItem("shortcut") = GetKernel().GetCommandManager()->GetShortcut(item.value.asString());
+      *menu.getItem("shortcut") = GetKernel()->GetCommandManager()->GetShortcut(item.value.asString());
 
     if (itemName.eq("children"))
     {
