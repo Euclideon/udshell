@@ -24,7 +24,7 @@ int TestClass::test = 0;
 // TODO: these tests are old and should be deprecated!!
 TEST(EPSharedPtrTest, Deprecated)
 {
-  auto upT1 = UniquePtr<TestClass>(new TestClass);
+  auto upT1 = UniquePtr<TestClass>::create();
   EPASSERT(TestClass::test == 10, "!");
 
   UniquePtr<TestClass> upT2 = nullptr;

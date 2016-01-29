@@ -13,8 +13,10 @@ template<> struct ElementType<const void> { typedef const uint8_t Ty; };
 
 struct SliceHeader
 {
-  size_t refCount;
-  size_t allocatedCount;
+  typedef void (FreeFunc)(void *);
+  FreeFunc *pFreeFunc;
+  size_t allocatedCount; // TODO: allocCount and refCount are never used at the same time, make them a union?
+  size_t refCount;       //       Array<> uses allocCount, SharedArray<> uses refCount
 };
 
 } // namespace internal

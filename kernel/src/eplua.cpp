@@ -801,7 +801,7 @@ class LuaDelegate : public ep::DelegateMemento
 {
 protected:
   template<typename T>
-  friend class ep::SharedPtr;
+  friend struct ep::SharedPtr;
 
   Variant call(Slice<const Variant> args) const
   {

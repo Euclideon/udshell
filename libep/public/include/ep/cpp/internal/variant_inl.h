@@ -548,7 +548,7 @@ class VarDelegateMemento<R(Args...)> : public DelegateMemento
 {
 protected:
   template<typename T>
-  friend class ep::SharedPtr;
+  friend struct ep::SharedPtr;
 
   Variant to(Slice<Variant> args) const
   {

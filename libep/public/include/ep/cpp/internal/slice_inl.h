@@ -8,6 +8,7 @@ template<typename T>
 inline T* SliceAlloc(size_t elements, size_t initialRC = 0)
 {
   SliceHeader *pH = (SliceHeader*)epAlloc(sizeof(SliceHeader) + sizeof(T)*elements);
+  pH->pFreeFunc = [](void *pMem) { epFree(pMem); };
   pH->allocatedCount = elements;
   pH->refCount = initialRC;
   return (T*)(pH + 1);
@@ -19,7 +20,8 @@ inline SliceHeader* GetSliceHeader(const void *pBuffer)
 template<typename T>
 inline void SliceFree(T *pArray)
 {
-  epFree(GetSliceHeader(pArray));
+  SliceHeader *pHeader = GetSliceHeader(pArray);
+  pHeader->pFreeFunc(pHeader);
 }
 
 // functions that append inputs (TODO: look into a not-recursive version?)

@@ -19,7 +19,7 @@ protected:
   template<typename Signature>
   friend class Delegate;
   template<typename T>
-  friend class SharedPtr;
+  friend struct SharedPtr;
 
   DelegateMemento() {}
   DelegateMemento(FastDelegateMemento m) : m(m) {}
