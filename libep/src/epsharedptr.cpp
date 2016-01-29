@@ -17,7 +17,7 @@ static HashMap<SafeProxy<void>*, void*, PointerHash> s_weakRefRegistry(65536);
 
 void* GetSafePtr(void *pAlloc)
 {
-  return *s_weakRefRegistry.InsertLazy(pAlloc, [&]() { return new SafeProxy<void>(pAlloc); });
+  return *s_weakRefRegistry.InsertLazy(pAlloc, [&]() { return RefCounted::New<SafeProxy<void>>(pAlloc); });
 }
 
 void NullifySafePtr(void *pAlloc)
