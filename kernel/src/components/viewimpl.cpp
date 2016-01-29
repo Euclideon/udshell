@@ -95,11 +95,11 @@ void ViewImpl::OnDirty()
 
   if (spScene && spCamera)
   {
-    Renderer *pRenderer = GetKernel()->GetRenderer();
+    SharedPtr<Renderer> spRenderer = GetKernel()->GetRenderer();
 
-    UniquePtr<RenderableView> spRenderView = UniquePtr<RenderableView>::create(pRenderer);
+    UniquePtr<RenderableView> spRenderView = UniquePtr<RenderableView>::create(spRenderer);
 
-    spRenderView->pRenderEngine = pRenderer->GetRenderEngine();
+    spRenderView->pRenderEngine = spRenderer->GetRenderEngine();
 
     spRenderView->spView = ViewRef(pInstance);
 
@@ -128,11 +128,11 @@ void ViewImpl::OnDirty()
     // if there are ud jobs, we'll need to send it to the UD render thread
     if (spRenderView->spScene->ud.length > 0)
     {
-      spRenderView->spColorBuffer = pRenderer->AllocRenderBuffer();
+      spRenderView->spColorBuffer = spRenderer->AllocRenderBuffer();
       spRenderView->spColorBuffer->Allocate<uint32_t>({ (size_t)renderWidth, (size_t)renderHeight });
-      spRenderView->spDepthBuffer = pRenderer->AllocRenderBuffer();
+      spRenderView->spDepthBuffer = spRenderer->AllocRenderBuffer();
       spRenderView->spDepthBuffer->Allocate<float>({ (size_t)renderWidth, (size_t)renderHeight });
-      pRenderer->AddUDRenderJob(spRenderView);
+      spRenderer->AddUDRenderJob(spRenderView);
     }
     else
       SetLatestFrame(spRenderView);

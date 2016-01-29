@@ -57,8 +57,8 @@ const char s_blitShader[] =
 #include "kernel.h"
 
 
-RenderableView::RenderableView(Renderer *pRenderer)
-  : pRenderer(pRenderer)
+RenderableView::RenderableView(const SharedPtr<Renderer> &spRenderer)
+  : spRenderer(spRenderer)
 {
   memset(&options, 0, sizeof(options));
   options.size = sizeof(udRenderOptions);
@@ -70,9 +70,9 @@ RenderableView::~RenderableView()
     udRender_DestroyView(&pRenderView);
 
   if(spColorBuffer)
-    pRenderer->ReleaseRenderBuffer(spColorBuffer);
+    spRenderer->ReleaseRenderBuffer(spColorBuffer);
   if(spDepthBuffer)
-    pRenderer->ReleaseRenderBuffer(spDepthBuffer);
+    spRenderer->ReleaseRenderBuffer(spDepthBuffer);
 }
 
 void RenderableView::RenderUD()
@@ -127,23 +127,23 @@ void RenderableView::RenderGPU()
   {
     if (!spColorTexture)
     {
-      spColorTexture = pRenderer->GetRenderBuffer(spColorBuffer, Renderer::RenderResourceType::Texture);
-      spDepthTexture = pRenderer->GetRenderBuffer(spDepthBuffer, Renderer::RenderResourceType::Texture);
+      spColorTexture = spRenderer->GetRenderBuffer(spColorBuffer, Renderer::RenderResourceType::Texture);
+      spDepthTexture = spRenderer->GetRenderBuffer(spDepthBuffer, Renderer::RenderResourceType::Texture);
     }
 
-    epShader_SetCurrent(pRenderer->s_shader);
+    epShader_SetCurrent(spRenderer->s_shader);
 
-    int u_texture = epShader_FindShaderParameter(pRenderer->s_shader, "u_texture");
+    int u_texture = epShader_FindShaderParameter(spRenderer->s_shader, "u_texture");
     epShader_SetProgramData(0, u_texture, spColorTexture->pTexture);
-    int u_zbuffer = epShader_FindShaderParameter(pRenderer->s_shader, "u_zbuffer");
+    int u_zbuffer = epShader_FindShaderParameter(spRenderer->s_shader, "u_zbuffer");
     epShader_SetProgramData(1, u_zbuffer, spDepthTexture->pTexture);
 
-    int u_rect = epShader_FindShaderParameter(pRenderer->s_shader, "u_rect");
+    int u_rect = epShader_FindShaderParameter(spRenderer->s_shader, "u_rect");
     epShader_SetProgramData(u_rect, Float4::create(-1, 1, 2, -2));
-    int u_textureScale = epShader_FindShaderParameter(pRenderer->s_shader, "u_textureScale");
+    int u_textureScale = epShader_FindShaderParameter(spRenderer->s_shader, "u_textureScale");
     epShader_SetProgramData(u_textureScale, Float4::create(0, 0, 1, 1));
 
-    epGPU_RenderIndices(pRenderer->s_shader, pRenderer->s_pPosUV, &pRenderer->s_pQuadVB, pRenderer->s_pQuadIB, epPT_TriangleFan, 4);
+    epGPU_RenderIndices(spRenderer->s_shader, spRenderer->s_pPosUV, &spRenderer->s_pQuadVB, spRenderer->s_pQuadIB, epPT_TriangleFan, 4);
   }
   else
   {

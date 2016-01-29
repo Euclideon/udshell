@@ -227,7 +227,7 @@ epilogue:
 void Kernel::DoInit(Kernel *pKernel)
 {
   // create the renderer
-  pKernel->pRenderer = new Renderer(pKernel, renderThreadCount);
+  pKernel->spRenderer = SharedPtr<Renderer>::create(pKernel, renderThreadCount);
 
   // init the components
   pKernel->InitComponents();
@@ -293,7 +293,7 @@ void Kernel::Destroy()
   spPluginManager = nullptr;
   spResourceManager = nullptr;
 
-  delete pRenderer;
+  spRenderer = nullptr;
 
   delete stdOutCapture;
   delete stdErrCapture;

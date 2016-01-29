@@ -79,7 +79,7 @@ typedef SharedPtr<RenderableScene> RenderableSceneRef;
 class RenderableView : public RefCounted
 {
 public:
-  RenderableView(Renderer *pRenderer);
+  RenderableView(const SharedPtr<Renderer> &spRenderer);
 
   void RenderUD();  // ** RUN ON THE UD THREAD!
   void RenderGPU(); // ** RUN ON THE RENDER THREAD!
@@ -114,13 +114,13 @@ public:
 protected:
   ~RenderableView() override;
 
-  Renderer *pRenderer;
+  SharedPtr<Renderer> spRenderer;
 };
 typedef SharedPtr<RenderableView> RenderableViewRef;
 
 
 // renderer interface
-class Renderer
+class Renderer : public RefCounted
 {
 public:
   Renderer(kernel::Kernel *pKernel, int renderThreadCount);
