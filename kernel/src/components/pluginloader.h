@@ -21,7 +21,7 @@ protected:
     : Component(pType, pKernel, uid, initParams)
   {}
 
-  Array<const PropertyInfo> GetProperties()
+  static Array<const PropertyInfo> GetProperties()
   {
     return{
       EP_MAKE_PROPERTY_RO(SupportedExtensions, "List of file extension strings handled by this PluginLoader", nullptr, 0),

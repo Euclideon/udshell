@@ -54,7 +54,7 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  Array<const PropertyInfo> GetProperties()
+  static Array<const PropertyInfo> GetProperties()
   {
     return{
       EP_MAKE_PROPERTY(Camera, "Camera for viewport", nullptr, 0),
