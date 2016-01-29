@@ -3,7 +3,7 @@
 #include "ep/cpp/component/broadcaster.h"
 #include "components/logger.h"
 #include "ep/cpp/component/resource/buffer.h"
-#include "components/commandmanager.h"
+#include "ep/cpp/component/commandmanager.h"
 #include "components/file.h"
 #include "ep/cpp/delegate.h"
 #include "kernel.h"

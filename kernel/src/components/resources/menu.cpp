@@ -2,7 +2,7 @@
 #include "kernel.h"
 #include "rapidxml.hpp"
 #include "components/resources/text.h"
-#include "components/commandmanager.h"
+#include "ep/cpp/component/commandmanager.h"
 
 namespace ep
 {

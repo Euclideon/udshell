@@ -10,7 +10,7 @@
 #include "helpers.h"
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/node/udnode.h"
-#include "components/resourcemanager.h"
+#include "ep/cpp/component/resourcemanager.h"
 
 using namespace kernel;
 

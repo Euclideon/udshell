@@ -1,15 +1,11 @@
-#include "components/commandmanager.h"
+#include "components/commandmanagerimpl.h"
 #include "components/project.h"
 #include "ep/cpp/component/activity.h"
 #include "kernel.h"
 
 namespace ep {
 
-CommandManager::CommandManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-  : Component(pType, pKernel, uid, initParams)
-{}
-
-SharedString CommandManager::GetShortcut(String id) const
+SharedString CommandManagerImpl::GetShortcut(String id) const
 {
   const Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)
@@ -18,7 +14,7 @@ SharedString CommandManager::GetShortcut(String id) const
     pCommand->shortcut;
 }
 
-bool CommandManager::SetShortcut(String id, SharedString shortcut)
+bool CommandManagerImpl::SetShortcut(String id, SharedString shortcut)
 {
   Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)
@@ -32,7 +28,7 @@ bool CommandManager::SetShortcut(String id, SharedString shortcut)
   return true;
 }
 
-bool CommandManager::RegisterCommand(String id, Delegate<void(Variant::VarMap)> func, String script, String activityTypeID, String shortcut)
+bool CommandManagerImpl::RegisterCommand(String id, Delegate<void(Variant::VarMap)> func, String script, String activityTypeID, String shortcut)
 {
   if (commandRegistry.Get(id))
   {
@@ -65,7 +61,7 @@ bool CommandManager::RegisterCommand(String id, Delegate<void(Variant::VarMap)> 
 }
 
 // TODO: remove this; slice/array should have filtering functions instead
-String CommandManager::StripWhitespace(Slice<char> output, String input)
+String CommandManagerImpl::StripWhitespace(Slice<char> output, String input)
 {
   size_t len = 0;
   for (size_t i = 0; i < input.length; i++)
@@ -76,10 +72,10 @@ String CommandManager::StripWhitespace(Slice<char> output, String input)
   return output.slice(0, len);
 }
 
-bool CommandManager::RunCommand(String id, Variant::VarMap params)
+bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
 {
   ActivityRef spActiveActivity = nullptr;
-  ProjectRef spProject = pKernel->FindComponent("project");
+  ProjectRef spProject = GetKernel()->FindComponent("project");
   if (spProject)
     spActiveActivity = spProject->GetActiveActivity();
 
@@ -98,7 +94,7 @@ bool CommandManager::RunCommand(String id, Variant::VarMap params)
           if (comm.func)
             comm.func(params);
           else if (!comm.script.empty())
-            pKernel->Exec(comm.script);
+            GetKernel()->Exec(comm.script);
           return true;
         }
       }
@@ -107,7 +103,7 @@ bool CommandManager::RunCommand(String id, Variant::VarMap params)
         if (comm.func)
           comm.func(params);
         else if (!comm.script.empty())
-          pKernel->Exec(comm.script);
+          GetKernel()->Exec(comm.script);
         return true;
       }
     }
@@ -116,15 +112,15 @@ bool CommandManager::RunCommand(String id, Variant::VarMap params)
   return false;
 }
 
-void CommandManager::UnregisterCommand(String id)
+void CommandManagerImpl::UnregisterCommand(String id)
 {
   commandRegistry.Remove(id);
 }
 
-bool CommandManager::HandleShortcutEvent(String shortcut)
+bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
 {
   ActivityRef spActiveActivity = nullptr;
-  ProjectRef spProject = pKernel->FindComponent("project");
+  ProjectRef spProject = GetKernel()->FindComponent("project");
   if (spProject)
     spActiveActivity = spProject->GetActiveActivity();
 
@@ -145,7 +141,7 @@ bool CommandManager::HandleShortcutEvent(String shortcut)
           if (comm.func)
             comm.func(params);
           else if (!comm.script.empty())
-            pKernel->Exec(comm.script);
+            GetKernel()->Exec(comm.script);
           return true;
         }
       }
@@ -154,7 +150,7 @@ bool CommandManager::HandleShortcutEvent(String shortcut)
         if (comm.func)
           comm.func(params);
         else if (!comm.script.empty())
-          pKernel->Exec(comm.script);
+          GetKernel()->Exec(comm.script);
         return true;
       }
     }
@@ -163,7 +159,7 @@ bool CommandManager::HandleShortcutEvent(String shortcut)
   return false;
 }
 
-bool CommandManager::SetFunction(String id, Delegate<void(Variant::VarMap)> func)
+bool CommandManagerImpl::SetFunction(String id, Delegate<void(Variant::VarMap)> func)
 {
   Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)
@@ -178,7 +174,7 @@ bool CommandManager::SetFunction(String id, Delegate<void(Variant::VarMap)> func
   return true;
 }
 
-bool CommandManager::SetScript(String id, String script)
+bool CommandManagerImpl::SetScript(String id, String script)
 {
   Command *pCommand = commandRegistry.Get(id);
   if (!pCommand)
@@ -193,7 +189,7 @@ bool CommandManager::SetScript(String id, String script)
   return true;
 }
 
-String CommandManager::GetActivityType(String commandID) const
+String CommandManagerImpl::GetActivityType(String commandID) const
 {
   const Command *pCommand = commandRegistry.Get(commandID);
   if (!pCommand)
@@ -202,7 +198,7 @@ String CommandManager::GetActivityType(String commandID) const
   return pCommand->activityType;
 }
 
-bool CommandManager::SetActivityType(String commandID, String activityTypeID)
+bool CommandManagerImpl::SetActivityType(String commandID, String activityTypeID)
 {
   Command *pCommand = commandRegistry.Get(commandID);
   if (!pCommand)

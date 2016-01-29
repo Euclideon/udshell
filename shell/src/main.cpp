@@ -11,7 +11,7 @@
 #include "components/project.h"
 #include "components/activities/viewer.h"
 #include "components/resources/menu.h"
-#include "components/commandmanager.h"
+#include "ep/cpp/component/commandmanager.h"
 #include "components/file.h"
 #include "hal/debugfont.h"
 #include "messagebox.h"
