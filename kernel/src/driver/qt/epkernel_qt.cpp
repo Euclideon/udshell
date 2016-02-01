@@ -350,7 +350,9 @@ void QtKernel::customEvent(QEvent *pEvent)
   {
     MainThreadCallback d;
     d.SetMemento(static_cast<KernelEvent*>(pEvent)->m);
-    d(this);
+    try { d(this); }
+    catch (std::exception &e) { LogError("Exception occurred in MainThreadCallback : {0}", e.what()); }
+    catch (...) { LogError("Exception occurred in MainThreadCallback : C++ Exception"); }
   }
   else
   {
