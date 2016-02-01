@@ -109,10 +109,15 @@ Kernel::~Kernel()
 {
   if (instanceRegistry.begin() != instanceRegistry.end())
   {
+    int count = 0;
     epDebugFormat("!!!WARNING: Some Components have not been freed\n");
 
     for (const auto &c : instanceRegistry)
+    {
+      ++count;
       epDebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->GetName(), c.value->RefCount());
+    }
+    epDebugFormat("{0} Unfreed Component(s)\n", count);
   }
 }
 
