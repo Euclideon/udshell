@@ -41,9 +41,6 @@ public:
   ~StdCapture()
   {
     EndCapture();
-#ifdef _MSC_VER
-    fclose(m_stream);
-#endif
   }
 
   bool BeginCapture()
