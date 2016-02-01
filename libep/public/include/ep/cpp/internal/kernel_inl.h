@@ -63,7 +63,11 @@ private:
       MutableString128 t(Format, "New: {0} - {1}", pType->info.id, uid);
       pKernel->LogDebug(4, t);
       // TODO: this new can't exist in the wild... need to call back into kernel!!
-      return new ComponentType(pType, pKernel, uid, initParams);
+      void *pMem = epAlloc(sizeof(ComponentType));
+      EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+      ComponentType *ptr = new (pMem) ComponentType(pType, pKernel, uid, initParams);
+      ptr->pFreeFunc = [](void *pMem) { epFree(pMem); };
+      return ptr;
     };
   }
 };
