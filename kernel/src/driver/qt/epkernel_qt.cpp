@@ -375,7 +375,7 @@ Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 // ---------------------------------------------------------------------------------------
 ViewRef Kernel::SetFocusView(ViewRef spView)
 {
-  if (!spView)
+  if (!spView && spFocusView)
     spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
 
   ViewRef spOld = spFocusView;
