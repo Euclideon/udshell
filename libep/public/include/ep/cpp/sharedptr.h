@@ -83,7 +83,9 @@ public:
   template<typename... Args>
   static SharedPtr<T> create(Args... args)
   {
-    T *ptr = new(epAlloc(sizeof(T))) T(args...);
+    void *pMem = epAlloc(sizeof(T));
+    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+    T *ptr = new(pMem) T(args...);
     ptr->pFreeFunc = [](void *pMem) { epFree(pMem); };
     return SharedPtr<T>(ptr);
   }
@@ -420,8 +422,10 @@ public:
   template<typename T, typename... Args>
   static T* New(Args... args)
   {
-    T *ptr = new(epAlloc(sizeof(T))) T(args...);
-    ptr->pFreeFunc = [](void *mem) { epFree(mem); };
+    void *pMem = epAlloc(sizeof(T));
+    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+    T *ptr = new(pMem) T(args...);
+    ptr->pFreeFunc = [](void *pMem) { epFree(pMem); };
     return ptr;
   }
 
@@ -507,7 +511,9 @@ namespace internal {
   template<class T, typename... Args>
   epforceinline UniquePtr<T> Create<T, true, Args...>::create(Args... args)
   {
-    UniquePtr<T> up(new(epAlloc(sizeof(T))) T(args...));
+    void *pMem = epAlloc(sizeof(T));
+    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+    UniquePtr<T> up(new(pMem) T(args...));
     up->pFreeFunc = [](void *pMem) { epFree(pMem); };
     return std::move(up);
   }
@@ -519,7 +525,7 @@ namespace internal {
   epforceinline void Acquire<T, true>::acquire(T *ptr)
   {
     if (ptr)
-      ((RefCounted*)ptr)->IncRef();
+      ptr->IncRef();
   }
 
   template<class T>
@@ -531,7 +537,7 @@ namespace internal {
   epforceinline void Release<T, true>::release(T *ptr)
   {
     if (ptr)
-      ((RefCounted*)ptr)->DecRef();
+      ptr->DecRef();
   }
 
 } // namespace internal
