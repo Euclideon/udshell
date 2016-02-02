@@ -24,12 +24,19 @@ public:
   }
 
   template<typename... Args>
-  T* Alloc(Args... args)
+  T* New(Args... args)
+  {
+    T *pMem = Alloc();
+    return new(pMem) T(args...);
+  }
+
+  T* Alloc()
   {
     T *pNew = pFreeList;
     if (!pNew)
     {
       T *pNewBlock = (T*)epAllocFlags(blockSize * sizeof(T) + sizeof(void*), epAF_None);
+      EPTHROW_IF_NULL(pNewBlock, epR_AllocFailure, "Memory allocation failed");
       *(void**)(pNewBlock + blockSize) = pBlockList;
       pBlockList = pNewBlock;
 
@@ -43,12 +50,17 @@ public:
     pFreeList = *(T**)pFreeList;
     ++numAllocated;
 
-    return new(pNew) T(args...);
+    return pNew;
+  }
+
+  void Delete(T *pItem)
+  {
+    pItem->~T();
+    Free(pItem);
   }
 
   void Free(T *pItem)
   {
-    pItem->~T();
     *(T**)pItem = pFreeList;
     pFreeList = pItem;
     --numAllocated;

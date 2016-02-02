@@ -26,6 +26,11 @@ SHARED_CLASS(Component);
 
 using KeyValuePair = KVP<Variant, Variant>;
 
+using VariantAVLNode = AVLTreeNode<Variant, Variant>;
+
+template<>
+struct AVLTreeAllocator<VariantAVLNode>;
+
 struct Variant
 {
 public:
