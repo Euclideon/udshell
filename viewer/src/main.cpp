@@ -114,9 +114,7 @@ int main(int argc, char* argv[])
   epResult result = epR_Failure;
   try
   {
-    result = kernel::Kernel::Create(&mData.pKernel, epParseCommandLine(argc, argv), mData.rendererThreadCount);
-    if (result != epR_Success)
-      return -1;
+    kernel::Kernel::Create(&mData.pKernel, epParseCommandLine(argc, argv), mData.rendererThreadCount);
 
     mData.pKernel->RegisterMessageHandler("init", &ViewerInit);
     mData.pKernel->RegisterMessageHandler("deinit", &ViewerDeinit);

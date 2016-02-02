@@ -34,7 +34,7 @@ public:
   Variant Save() const override final { return pInstance->Super::Save(); }
 
 protected:
-  epResult Render(RenderScene &spScene, const Double4x4 &mat) override final;
+  void Render(RenderScene &spScene, const Double4x4 &mat) override final;
 
   UDModelRef spModel = nullptr;
 };

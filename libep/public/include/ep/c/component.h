@@ -34,8 +34,8 @@ struct epComponentOverrides
 
   void*(*pCreateInstance)(epComponent *pBaseInstance, const epVarMap *pInitParams);
   void(*pDestroy)(epComponent *pBaseInstance, void *pDerivedInstance);
-  epResult(*pInitComplete)(epComponent *pBaseInstance, void *pDerivedInstance);
-  epResult(*pReceiveMessage)(epComponent *pBaseInstance, void *pDerivedInstance, epString message, epString sender, const epVariant *pData);
+  void(*pInitComplete)(epComponent *pBaseInstance, void *pDerivedInstance);
+  void(*pReceiveMessage)(epComponent *pBaseInstance, void *pDerivedInstance, epString message, epString sender, const epVariant *pData);
 };
 
 size_t epComponent_Acquire(epComponent *pComponent);

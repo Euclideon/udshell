@@ -186,10 +186,9 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   udDestroySemaphore(&dispatch.pSem);
 }
 
-epResult Kernel::Terminate()
+void Kernel::Terminate()
 {
   s_done = true;
-  return epR_Success;
 }
 
 } // namespace kernel

@@ -10,7 +10,7 @@ extern "C" {
 struct epKernel;
 
 void         epKernel_SendMessage(epString target, epString sender, epString message, const epVariant* pData);
-epResult     epKernel_RegisterComponentType(const epComponentDesc *pDesc);
+void         epKernel_RegisterComponentType(const epComponentDesc *pDesc);
 void         epKernel_CreateComponent(epString typeId, const epKeyValuePair *pInitParams, size_t numInitParams, epComponent **ppNewInstance);
 epComponent* epKernel_FindComponent(epString uid);
 void         epKernel_Exec(epString code);

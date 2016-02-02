@@ -24,7 +24,7 @@ public:
 protected:
   static const Array<const String> extensions;
 
-  static epResult StaticInit(ep::Kernel *pKernel);
+  static void StaticInit(ep::Kernel *pKernel);
 
   ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : DataSource(pType, pKernel, uid, initParams)

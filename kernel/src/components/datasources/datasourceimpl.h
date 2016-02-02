@@ -26,9 +26,8 @@ public:
 
   Slice<const String> GetFileExtensions() const override final { return nullptr; }
 
-  epResult Flush() override final
+  void Flush() override final
   {
-    return epR_Success;
   }
 
   size_t GetNumResources() const override final

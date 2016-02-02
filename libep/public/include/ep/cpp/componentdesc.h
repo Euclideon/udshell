@@ -74,7 +74,7 @@ struct ComponentInfo
 
 struct ComponentDesc
 {
-  typedef epResult(InitComponent)(Kernel*);
+  typedef void(InitComponent)(Kernel*);
   typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   typedef void *(CreateImplCallback)(Component *pInstance, Variant::VarMap initParams);
 

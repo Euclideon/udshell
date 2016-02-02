@@ -108,7 +108,7 @@ static int SendMessage(lua_State *L)
   if (numArgs >= 4)
     new(&args) Variant(Variant::luaGet(l, 4));
 
-  /*epResult r = */l.kernel()->SendMessage(target, sender, message, args);
+  l.kernel()->SendMessage(target, sender, message, args);
 
   // TODO: push result and return 1?
   return 0;  // number of results

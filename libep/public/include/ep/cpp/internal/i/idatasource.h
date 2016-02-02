@@ -13,7 +13,7 @@ class IDataSource
 {
 public:
   virtual Slice<const String> GetFileExtensions() const = 0;
-  virtual epResult Flush() = 0; // TODO Get rid of epResult
+  virtual void Flush() = 0;
 
   virtual size_t GetNumResources() const = 0;
   virtual String GetResourceName(size_t index) const = 0;

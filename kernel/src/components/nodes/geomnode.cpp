@@ -8,7 +8,7 @@
 namespace ep
 {
 
-epResult GeomNode::Render(RenderScene &spScene, const Double4x4 &mat)
+void GeomNode::Render(RenderScene &spScene, const Double4x4 &mat)
 {
   GeomRenderJob &job = spScene.geom.pushBack();
 
@@ -36,8 +36,6 @@ epResult GeomNode::Render(RenderScene &spScene, const Double4x4 &mat)
     job.textures[i] = spArray ? spArray->GetRenderResource(ArrayBuffer::RenderResourceType::Texture) : nullptr;
   }
 */
-
-  return epR_Success;
 }
 
 } // namespace ep

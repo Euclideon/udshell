@@ -11,7 +11,8 @@ class NullKernel : public Kernel
 {
 public:
   NullKernel() {}
-  epResult InitInternal() { return epR_Success; }
+
+  void InitInternal() override { }
 };
 
 Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
@@ -21,14 +22,7 @@ Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-epResult Kernel::RunMainLoop()
-{
-  return epR_Success;
-}
-
-// ---------------------------------------------------------------------------------------
-// Author: Manu Evans, May 2015
-epResult Kernel::Terminate()
+void Kernel::Terminate()
 {
   return epR_Success;
 }

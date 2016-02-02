@@ -43,9 +43,9 @@ void ImageSource::Create(StreamRef spSource)
   epFree(pBuffer);
 }
 
-epResult ImageSource::StaticInit(ep::Kernel *pKernel)
+void ImageSource::StaticInit(ep::Kernel *pKernel)
 {
-  return pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
+   pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
 }
 
 } // namespace ep
