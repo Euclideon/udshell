@@ -8,5 +8,6 @@ EPFileDialog 0.1 epfiledialog.qml
 EPToolPanelManager 0.1 eptoolpanelmanager.qml
 EPListModel 0.1 eplistmodel.qml
 EPListView 0.1 eplistview.qml
+EPTableView 0.1 eptableview.qml
 
 

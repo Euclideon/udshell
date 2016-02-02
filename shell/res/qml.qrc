@@ -17,6 +17,7 @@
     <file>qml/epcontrols/eptoolpanelmanager.qml</file>
     <file>qml/epcontrols/eplistmodel.qml</file>
     <file>qml/epcontrols/eplistview.qml</file>
+    <file>qml/epcontrols/eptableview.qml</file>
     <file>qml/epcontrols/qmldir</file>
     <file>menus.xml</file>
     <file>toolbar.xml</file>

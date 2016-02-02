@@ -43,24 +43,15 @@ Rectangle {
       name = "Bookmark " + (highestID + 1);
     }
 
-    listView.currentIndex = bookmarks.insertAlphabetical({"name" : name});
+    listView.currentIndex = bookmarks.insertOrdered({"name" : name});
 
     return name;
   }
 
-  ListModel {
+  EPListModel {
     id: bookmarks
-
-    function insertAlphabetical(item) {
-      var i;
-      for(i = 0; i < bookmarks.count; i++) {
-        if(item.name.toLowerCase() < bookmarks.get(i).name.toLowerCase())
-          break;
-      }
-      bookmarks.insert(i, item);
-
-      return i;
-    }
+    sortColumnName: "name"
+    order: Qt.AscendingOrder
   }
 
   ColumnLayout {
@@ -88,9 +79,11 @@ Rectangle {
           id: deleteBookmarkButton
           iconSource: "qrc:/images/icon_delete.png"
           onClicked: {
-            var spScene = view.get("scene");
-            spScene.call("removebookmark", listView.selectedItemData.name);
-            bookmarks.remove(listView.currentIndex, 1);
+            if(listView.currentIndex != -1) {
+              var spScene = view.get("scene");
+              spScene.call("removebookmark", listView.selectedItemData.name);
+              bookmarks.remove(listView.currentIndex, 1);
+            }
           }
           Layout.preferredHeight: toolBar.height
           Layout.preferredWidth: toolBar.height
@@ -148,7 +141,7 @@ Rectangle {
             spScene.call("renamebookmark", bm.name, retValues.editText);
 
             bookmarks.remove(listView.rightClickIndex);
-            var newIndex = bookmarks.insertAlphabetical({"name" : retValues.editText});
+            var newIndex = bookmarks.insertOrdered({"name" : retValues.editText});
             if(listView.rightClickIndex == listView.currentIndex)
               listView.currentIndex = newIndex;
           }
