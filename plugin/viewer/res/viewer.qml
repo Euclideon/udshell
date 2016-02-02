@@ -16,14 +16,24 @@ FocusScope {
   property var sidebarcomp
   property var bookmarkscomp
   property var bookmarksqq
+  property var resourcespanel
 
   function togglebookmarkspanel() {
-    bookmarksPanel.toggleVisible();
+    toolPanelSlot.toggleVisible(bookmarkscomp.get("uihandle"));
   }
 
   onBookmarkscompChanged: {
-    bookmarksqq = bookmarkscomp.get("uihandle");
-    bookmarksqq.parent = bookmarksPanel;
+    var bookmarksqq = bookmarkscomp.get("uihandle");
+    toolPanelSlot.addPanel(bookmarksqq, 200);
+  }
+
+  function toggleresourcespanel() {
+    toolPanelSlot.toggleVisible(resourcespanel.get("uihandle"));
+  }
+
+  onResourcespanelChanged: {
+    var resourcespanelqq = resourcespanel.get("uihandle");
+    toolPanelSlot.addPanel(resourcespanelqq, 300);
   }
 
   Component.onCompleted: {
@@ -33,6 +43,15 @@ FocusScope {
       return;
     }
 
+    var resourcesPanelButton = {
+      "name" : "Toggle Resources Panel",
+      "type" : "button",
+      "command" : "toggleresourcespanel",
+      "description" : "Toggles open/closed the Resources panel",
+      "image" : "qrc:/images/icon_UDS_48.png",
+    };
+    sidebarcomp.call("additem", "", resourcesPanelButton);
+
     var bookMarksButton = {
       "name" : "Toggle Bookmarks Panel",
       "type" : "button",
@@ -40,8 +59,8 @@ FocusScope {
       "description" : "Toggles open/closed the Bookmarks panel",
       "image" : "qrc:/images/icon_bookmark_24.png",
     };
-
     sidebarcomp.call("additem", "", bookMarksButton);
+
     sideBar.toolbarcomp = sidebarcomp;
   }
 
@@ -67,21 +86,13 @@ FocusScope {
       Layout.fillHeight: true
       Layout.preferredWidth: 44
     }
-    Item {
-      id: bookmarksPanel
-      visible: true
-      Layout.preferredWidth: 200
+
+    EPToolPanelManager {
+      id: toolPanelSlot
       Layout.fillHeight: true
-
-      function toggleVisible() {
-        visible = !visible;
-      }
-
-      // HACK -- bookmarks panel doesn't initialize property when invisible
-      Component.onCompleted: {
-        visible = false
-      }
+      //Layout.preferredWidth: 0
     }
+
     Item {
       Layout.fillHeight: true
       Layout.fillWidth: true
