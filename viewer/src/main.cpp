@@ -20,7 +20,7 @@ static void ProcessCmdline(int argc, char *argv[]);
 // Author: David Ely, September 2015
 static struct
 {
-  MutableString256 filename;          // TODO: make this udString
+  MutableString256 filename;
 
   uint32_t rendererThreadCount;
   uint32_t streamerMemoryLimit;
@@ -36,7 +36,7 @@ static struct
 #if defined(EP_WINDOWS)
                "/src/data/DirCube.uds", // filename
 #else
-               "~/src/udshell/data/DirCube.upc", // filename
+               "~/src/shell/data/DirCube.upc", // filename
 #endif
 
                0,                   // rendererThreadCount
@@ -54,6 +54,10 @@ static struct
 static void ViewerInit(String sender, String message, const Variant &data)
 {
   using namespace ep;
+#if defined(EP_LINUX)
+  if (mData.filename.beginsWithIC("~"))
+    mData.filename = MutableString256(Format, "{0}{1}", getenv("HOME"), mData.filename.slice(1, mData.filename.length));
+#endif // defined(EP_LINUX)
   mData.spView = mData.pKernel->CreateComponent<View>();
   mData.spScene = mData.pKernel->CreateComponent<Scene>();
   mData.spSimpleCamera = mData.pKernel->CreateComponent<SimpleCamera>();
@@ -194,13 +198,4 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, char *cmdline, int)
   return rv;
 }
 #endif // UDPLATFORM_WINDOWS
-
-void update(ViewRef spView, SceneRef spScene)
-{
-  using namespace ep;
-  Dimensions<int> displaySize = mData.spView->GetDimensions();
-
-//   mData.spSimpleCamera->ForceDirty();
-//   mData.spScene->ForceDirty();
-}
 
