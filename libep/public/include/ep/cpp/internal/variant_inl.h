@@ -1,6 +1,7 @@
 #include <utility>
 
 #include "ep/cpp/math.h"
+#include "ep/cpp/freelist.h"
 
 ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &var, const epVarArg*);
 
@@ -964,6 +965,32 @@ inline void epFromVariant(const Variant &v, SharedMap<Tree> *pTree)
     return;
   EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
 }
+
+template<>
+struct AVLTreeAllocator<VariantAVLNode>
+{
+  AVLTreeAllocator() : nodes(1024) {} // TODO: Revisit this to see if 1024 is appropriate.
+  using Node = VariantAVLNode;
+
+  Node *Alloc()
+  {
+    return nodes.Alloc();
+  }
+
+  void Free(Node *pMem)
+  {
+    nodes.Free(pMem);
+  }
+
+  static AVLTreeAllocator *Create()
+  {
+    return &GetAVLTreeAllocator<AVLTreeAllocator>();
+  }
+
+  static void Destroy(AVLTreeAllocator *) { }
+
+  FreeList<Node> nodes;
+};
 
 namespace internal {
 

@@ -6,6 +6,7 @@ HashMap<V, K, HashPred>::HashMap(size_t tableSize, size_t itemBucketSize)
 {
   EPASSERT(tableSize > 0 && (tableSize & (tableSize-1)) == 0, "tableSize must be power-of-2!");
   ppTable = epAllocType(Node*, tableSize, epAF_Zero);
+  EPTHROW_IF_NULL(ppTable, epR_AllocFailure, "Allocation failed");
 }
 template <typename V, typename K, typename HashPred>
 HashMap<V, K, HashPred>::HashMap(HashMap &&rval)
@@ -25,7 +26,7 @@ HashMap<V, K, HashPred>::~HashMap()
       while (ppTable[i])
       {
         Node *pNext = ppTable[i]->pNext;
-        pool.Free(ppTable[i]);
+        pool.Delete(ppTable[i]);
         ppTable[i] = pNext;
       }
     }
@@ -52,7 +53,7 @@ V* HashMap<V, K, HashPred>::Insert(Key&& key, Val&& val)
   V *pVal = GetValue(*ppBucket, key);
   if (pVal)
     return pVal;
-  Node *pNode = pool.Alloc(std::forward<Key>(key), std::forward<Val>(val));
+  Node *pNode = pool.New(std::forward<Key>(key), std::forward<Val>(val));
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
   return &pNode->data.value;
@@ -76,7 +77,7 @@ V* HashMap<V, K, HashPred>::InsertLazy(Key&& key, std::function<V()> lazy)
   V *pVal = GetValue(*ppBucket, key);
   if (pVal)
     return pVal;
-  Node *pNode = pool.Alloc(std::forward<Key>(key), lazy());
+  Node *pNode = pool.New(std::forward<Key>(key), lazy());
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
   return &pNode->data.value;
@@ -96,7 +97,7 @@ void HashMap<V, K, HashPred>::Remove(const K &key)
     if (HashPred::eq((*ppBucket)->data.key, key))
     {
       Node *pNext = (*ppBucket)->pNext;
-      pool.Free(*ppBucket);
+      pool.Delete(*ppBucket);
       *ppBucket = pNext;
     }
     else

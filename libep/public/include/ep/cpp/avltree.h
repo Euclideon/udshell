@@ -38,7 +38,13 @@ struct Compare<SharedString>
   }
 };
 
-template<typename K, typename V, typename PredFunctor = Compare<K>>
+template <typename K, typename V>
+struct AVLTreeNode;
+
+template <typename Node>
+struct AVLTreeAllocator;
+
+template<typename K, typename V, typename PredFunctor = Compare<K>, typename Allocator = AVLTreeAllocator<AVLTreeNode<K, V>>>
 class AVLTree
 {
 public:
@@ -46,18 +52,22 @@ public:
   using ValueType = V;
   using KeyValuePair = KVP<K, V>;
 
-  AVLTree() {}
-  AVLTree(nullptr_t) {}
+  AVLTree() : alloc(Allocator::Create()) {}
+  AVLTree(nullptr_t) : alloc(Allocator::Create()) {}
   AVLTree(AVLTree &&rval)
-    : size(size), root(root)
+    : size(rval.size),
+      root(rval.root),
+      alloc(rval.alloc)
   {
     rval.root = nullptr;
+    rval.alloc = nullptr;
   }
 
   ~AVLTree()
   {
     Destroy(root);
     root = nullptr;
+    Allocator::Destroy(alloc);
   }
 
   size_t Size() const { return size; }
@@ -65,7 +75,7 @@ public:
 
   void Insert(K &&key, V &&rval)
   {
-    Node* node = (Node*)epAlloc(sizeof(Node));
+    Node *node = alloc->Alloc();
     new(&node->k) K(std::move(key));
     new(&node->v) V(std::move(rval));
     node->left = node->right = nullptr;
@@ -74,7 +84,7 @@ public:
   }
   void Insert(const K &key, V &&rval)
   {
-    Node* node = (Node*)epAlloc(sizeof(Node));
+    Node *node = alloc->Alloc();
     new(&node->k) K(key);
     new(&node->v) V(std::move(rval));
     node->left = node->right = nullptr;
@@ -83,7 +93,7 @@ public:
   }
   void Insert(K &&key, const V &v)
   {
-    Node* node = (Node*)epAlloc(sizeof(Node));
+    Node *node = alloc->Alloc();
     new(&node->k) K(std::move(key));
     new(&node->v) V(v);
     node->left = node->right = nullptr;
@@ -92,7 +102,7 @@ public:
   }
   void Insert(const K &key, const V &v)
   {
-    Node* node = (Node*)epAlloc(sizeof(Node));
+    Node *node = alloc->Alloc();
     new(&node->k) K(key);
     new(&node->v) V(v);
     node->left = node->right = nullptr;
@@ -102,7 +112,7 @@ public:
 
   void Insert(KVP<K, V> &&kvp)
   {
-    Node* node = (Node*)epAlloc(sizeof(Node));
+    Node *node = alloc->Alloc();
     new(&node->k) K(std::move(kvp.key));
     new(&node->v) V(std::move(kvp.value));
     node->left = node->right = nullptr;
@@ -111,7 +121,7 @@ public:
   }
   void Insert(const KVP<K, V> &v)
   {
-    Node* node = (Node*)epAlloc(sizeof(Node));
+    Node *node = alloc->Alloc();
     new(&node->k) K(v.key);
     new(&node->v) V(v.value);
     node->left = node->right = nullptr;
@@ -153,18 +163,11 @@ public:
   static Iterator end() { return Iterator(nullptr); }
 
 private:
-  struct Node
-  {
-    K k;
-    Node *left, *right;
-    V v;
-    int height;
-
-    Node() = delete;
-  };
+  using Node = AVLTreeNode<K, V>;
 
   size_t size = 0;
   Node *root = nullptr;
+  Allocator *alloc;
 
   static int height(const Node *n)
   {
@@ -244,7 +247,7 @@ private:
     Destroy(n->right);
 
     n->~Node();
-    epFree(n);
+    alloc->Free(n);
   }
 
   Node* insert(Node *n, Node *newnode)
@@ -268,7 +271,7 @@ private:
       newnode->height = n->height;
 
       n->~Node();
-      epFree(n);
+      alloc->Free(n);
 
       return newnode;
     }
@@ -371,7 +374,7 @@ private:
         }
 
         temp->~Node();
-        epFree(temp);
+        alloc->Free(temp);
 
         --size;
       }
@@ -379,7 +382,7 @@ private:
       {
         // Node with two children: Get the inorder successor (smallest
         // in the right subtree)
-        struct Node *temp = minValueNode(pRoot->right);
+        Node *temp = minValueNode(pRoot->right);
 
         // Copy the inorder successor's data to this Node
         pRoot->k = temp->k;
@@ -528,6 +531,50 @@ public:
     };
     Node *pRoot;
   };
+};
+
+
+template <typename K, typename V>
+struct AVLTreeNode
+{
+  K k;
+  AVLTreeNode *left, *right;
+  V v;
+  int height;
+
+  AVLTreeNode() = delete;
+};
+
+template <typename Allocator>
+inline Allocator &GetAVLTreeAllocator()
+{
+  static Allocator allocator;
+  return allocator;
+}
+
+template <typename Node>
+struct AVLTreeAllocator
+{
+  Node *Alloc()
+  {
+    void *pMem = epAlloc(sizeof(Node));
+    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "AVLTreeAllocator failed");
+    return (Node*)pMem;
+  }
+
+  void Free(Node *pMem)
+  {
+    epFree(pMem);
+  }
+
+  static AVLTreeAllocator *Create()
+  {
+    return &GetAVLTreeAllocator<AVLTreeAllocator>();
+  }
+
+  static void Destroy(AVLTreeAllocator *) { }
+
+  // TODO: Add API for memory usage statistics
 };
 
 } // namespace ep
