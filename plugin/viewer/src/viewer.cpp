@@ -1,18 +1,14 @@
-#include "components/activities/viewer.h"
+#include "viewer.h"
 
-#include "renderscene.h"
 #include "ep/cpp/component/viewport.h"
-#include "components/viewimpl.h"
+#include "ep/cpp/component/view.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/simplecamera.h"
 #include "ep/cpp/component/node/udnode.h"
-#include "components/timer.h"
 #include "ep/cpp/component/resource/udmodel.h"
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/resourcemanager.h"
 #include "ep/cpp/component/commandmanager.h"
-
-#include "kernel.h"
 
 namespace ep {
 
@@ -82,7 +78,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   }
   spViewerUI->SetProperty("viewport", spViewport);
 
-  spUIBookmarks = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/viewer/bookmarks.qml" } });
+  spUIBookmarks = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/bookmarksui.qml" } });
   if (!spUIBookmarks)
   {
     pKernel->LogError("Error creating bookmarks UI Component\n");
@@ -102,7 +98,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
 void Viewer::StaticInit(ep::Kernel *pKernel)
 {
-  auto spCommandManager = ((kernel::Kernel *)pKernel)->GetCommandManager();
+  auto spCommandManager = pKernel->GetCommandManager();
 
   spCommandManager->RegisterCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", ComponentID(), "Ctrl+Shift+B");
   spCommandManager->RegisterCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", ComponentID(), "Ctrl+B");
@@ -167,6 +163,13 @@ Variant Viewer::Save() const
     params.Insert("scene", spScene->Save());
 
   return Variant(std::move(params));
+}
+
+extern "C" bool epPluginAttach()
+{
+  Kernel::GetInstance()->RegisterComponentType<Viewer>();
+
+  return true;
 }
 
 } // namespace ep

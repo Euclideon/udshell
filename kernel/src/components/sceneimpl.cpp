@@ -171,8 +171,8 @@ void SceneImpl::RenameBookmark(String oldName, String newName)
   Bookmark *pBm = bookmarks.Get(oldName);
   if (pBm)
   {
-    bookmarks.Remove(oldName);
     bookmarks.Insert(newName, *pBm);
+    bookmarks.Remove(oldName);
   }
 }
 

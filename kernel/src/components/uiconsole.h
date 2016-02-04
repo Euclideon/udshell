@@ -73,7 +73,7 @@ public:
 
 protected:
   UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
-  virtual ~UIConsole() {}
+  virtual ~UIConsole();
 
   void ToggleVisible(Variant::VarMap params);
   void OnLogChanged();

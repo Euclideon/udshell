@@ -21,7 +21,6 @@
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
 #include "components/datasources/uddatasource.h"
-#include "components/activities/viewer.h"
 
 // Components that do the Impl dance
 #include "components/componentimpl.h"
@@ -31,7 +30,7 @@
 #include "components/windowimpl.h"
 #include "components/commandmanagerimpl.h"
 #include "components/resourcemanagerimpl.h"
-#include "components/activities/activityimpl.h"
+#include "components/activityimpl.h"
 #include "components/resources/resourceimpl.h"
 #include "components/resources/udmodelimpl.h"
 #include "components/resources/bufferimpl.h"
@@ -155,6 +154,7 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->RegisterComponentType<Window, WindowImpl>();
   pKernel->RegisterComponentType<View, ViewImpl>();
   pKernel->RegisterComponentType<Scene, SceneImpl>();
+  pKernel->RegisterComponentType<Activity, ActivityImpl>();
 
   // resources
   pKernel->RegisterComponentType<Resource, ResourceImpl>();
@@ -181,10 +181,6 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->RegisterComponentType<GeomSource>();
   pKernel->RegisterComponentType<UDDataSource>();
 
-  // activities
-  pKernel->RegisterComponentType<Activity, ActivityImpl>();
-  pKernel->RegisterComponentType<Viewer>();
-
   // init the HAL
   EPTHROW_IF(epHAL_Init() != epR_Success, epR_Failure, "epHAL_Init() failed");
 
@@ -195,28 +191,28 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->spLogger = pKernel->CreateComponent<Logger>();
   pKernel->spLogger->DisableCategory(LogCategories::Trace);
 
-  spDebugFile = pKernel->CreateComponent<File>({ { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
+  spDebugFile = pKernel->CreateComponent<File>({ { "name", "logfile" }, { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
   if (spDebugFile)
   {
     pKernel->spLogger->AddStream(spDebugFile);
     spDebugFile->WriteLn("\n*** Logging started ***");
   }
 
-  spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg } });
+  spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg }, {"name", "debugout"} });
   if (spConsole)
      pKernel->spLogger->AddStream(spConsole);
 
   // resource manager
-  pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>();
+  pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>({ {"name", "resourcemanager"} });
 
   // command manager
-  pKernel->spCommandManager = pKernel->CreateComponent<CommandManager>();
+  pKernel->spCommandManager = pKernel->CreateComponent<CommandManager>({ {"name", "commandmanager"} });
 
   // Init capture and broadcast of stdout/stderr
-  pKernel->spStdOutBC = pKernel->CreateComponent<Broadcaster>();
+  pKernel->spStdOutBC = pKernel->CreateComponent<Broadcaster>({ {"name", "stdoutbc"} });
   pKernel->stdOutCapture = new StdCapture(stdout);
   epscope(fail) { delete pKernel->stdOutCapture; };
-  pKernel->spStdErrBC = pKernel->CreateComponent<Broadcaster>();
+  pKernel->spStdErrBC = pKernel->CreateComponent<Broadcaster>({ {"name", "stderrbc"} });
   pKernel->stdErrCapture = new StdCapture(stderr);
   epscope(fail) { delete pKernel->stdErrCapture; };
 
@@ -224,6 +220,8 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->InitInternal();
 
   *ppInstance = pKernel;
+
+  pKernel->bKernelCreated = true;
 }
 
 void Kernel::DoInit(Kernel *pKernel)
@@ -235,7 +233,7 @@ void Kernel::DoInit(Kernel *pKernel)
   pKernel->InitComponents();
 
   // prepare the plugins
-  pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>();
+  pKernel->spPluginManager = pKernel->CreateComponent<PluginManager>({ {"name", "pluginmanager"} });
 
   PluginLoaderRef spNativePluginLoader = pKernel->CreateComponent<NativePluginLoader>();
   pKernel->spPluginManager->RegisterPluginLoader(spNativePluginLoader);
@@ -255,7 +253,7 @@ void Kernel::DoInit(Kernel *pKernel)
 
 void Kernel::LoadPlugins()
 {
-  Slice<String> pluginFilenames;
+  Array<String> pluginFilenames;
 
   // TODO: scan nominated plugin folder and build list of all plugins
 
@@ -488,6 +486,9 @@ const ep::ComponentDesc* Kernel::RegisterComponentType(const ep::ComponentDesc &
 
   // add to registry
   componentRegistry.Insert(desc.info.id, ComponentType{ pDesc, 0 });
+
+  if (bKernelCreated && pDesc->pInit)
+    pDesc->pInit(this);
 
   return pDesc;
 }

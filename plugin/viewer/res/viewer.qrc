@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/viewer">
+    <file>viewer.qml</file>
+  </qresource>
+</RCC>
+
+

@@ -121,31 +121,4 @@ protected:
     : Component(_pType, _pKernel, _uid, initParams) {}
 
   int x;
-};
-
-extern "C" bool epPluginAttach()
-{
-/*
-  // C test
-  s_desc.info.pluginVersion = PLUGIN_VER;
-  s_desc.info.id = "plugtest";          // an id for this component
-  s_desc.info.displayName = "plugin Test"; // display name
-  s_desc.info.description = "Plugin Test!"; // description
-  s_desc.baseClass = "component";
-  s_desc.pOverrides = &s_testComponentVirtuals;
-  s_desc.pProperties = &s_prop;
-  s_desc.numProperties = 1;
-  s_desc.pMethods = nullptr;
-  s_desc.numMethods = 0;
-  s_desc.pEvents = nullptr;
-  s_desc.numEvents = 0;
-  s_desc.pStaticFuncs = nullptr;
-  s_desc.numStaticFuncs = 0;
-
-  epKernel_RegisterComponentType(&s_desc);
-*/
-  // C++ test
-  Kernel::GetInstance()->RegisterComponentType<TestComponent2>();
-
-  return true;
 }

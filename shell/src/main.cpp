@@ -9,9 +9,10 @@
 #include "ep/cpp/component/uicomponent.h"
 #include "components/uiconsole.h"
 #include "components/project.h"
-#include "components/activities/viewer.h"
+#include "ep/cpp/component/activity.h"
 #include "ep/cpp/component/resource/menu.h"
 #include "ep/cpp/component/commandmanager.h"
+#include "components/pluginmanager.h"
 #include "components/file.h"
 #include "hal/debugfont.h"
 #include "messagebox.h"
@@ -115,11 +116,11 @@ void OnActivityChanged(String uid)
     return;
   }
 
-  ViewerRef spViewer = component_cast<Viewer>(spActivity);
-  if (spViewer)
+  // TODO Remember to move this to the QML
+  if (spActivity->GetType().eq("viewer"))
   {
-    spTopLevelUI->SetProperty("simplecamera", spViewer->GetSimpleCamera());
-    spTopLevelUI->SetProperty("view", spViewer->GetView());
+    spTopLevelUI->SetProperty("simplecamera", spActivity->GetProperty("simplecamera"));
+    spTopLevelUI->SetProperty("view", spActivity->GetProperty("view"));
   }
 
   spProject->SetActiveActivity(spActivity);
@@ -151,12 +152,6 @@ void NewProject(String filePath)
   spMenu->SetItemProperties("File/Save Project As...", { { "enabled", true } });
   spToolBar->SetItemProperties("Save Project", { { "enabled", true } });
   spToolBar->SetItemProperties("Save Project As...", { { "enabled", true } });
-
-  spMessageBox->CallMethod("show", Variant::VarMap{
-    { "title", "Some title" },
-    { "text", "Some text" },
-    { "iconType", Variant(MBIconType::Warning) }
-  });
 }
 
 void OpenProject(String filePath)
@@ -240,7 +235,7 @@ void Init(String sender, String message, const Variant &data)
     return;
   }
 
-  spMessageBox = pKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/messagebox.qml" } });
+  spMessageBox = pKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/components/messagebox.qml" } });
   if (!spMessageBox)
   {
     pKernel->LogError("Error creating MessageBox UI Component\n");
@@ -285,35 +280,18 @@ void Init(String sender, String message, const Variant &data)
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 
+// TODO Temporary -- Remove this after code for scanning the plugin folder is written
+#if defined(EP_WINDOWS)
+  PluginManagerRef spPluginManager = pKernel->FindComponent("pluginmanager");
+  spPluginManager->LoadPlugin("bin/plugins/viewer.dll");
+#endif // end EP_WINDOWS
+
   if (!projFilePath.empty())
     OpenProject(projFilePath);
 #ifdef _DEBUG
   else
     OpenProject("testproj.epproj");
 #endif
-
-  /*
-  // Hardcode an example Activity in for testing purposes
-  Array<KeyValuePair> cameraParams{
-    { "speed", 1.0 },
-    { "invertyaxis", true },
-    { "perspective", 1.0471975512 },
-    { "depthplanes", Slice<const double>({ 0.0001, 7500.0 }) }
-  };
-
-#if defined(EP_WINDOWS)
-  auto spExampleActivity = pKernel->CreateComponent<Viewer>({ { "model", "v:/RnD/uds/Peterskirche(SolidScan).uds" },{ "camera", cameraParams } });
-#else
-  auto spExampleActivity = pKernel->CreateComponent<Viewer>({ { "model", "data/DirCube.upc" },{ "camera", cameraParams } });
-#endif // EP_WINDOWS
-  if (spExampleActivity)
-  {
-    AddUIActivity(spExampleActivity);
-    spProject->AddActivity(spExampleActivity);
-  }
-  else
-    pKernel->LogError("Error creating Viewer activity\n");
-  */
 }
 
 // ---------------------------------------------------------------------------------------

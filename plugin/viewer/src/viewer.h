@@ -6,6 +6,8 @@
 
 namespace ep {
 
+#define PLUGIN_VER 100
+
 SHARED_CLASS(UIComponent);
 SHARED_CLASS(Viewer);
 SHARED_CLASS(UDModel);
@@ -44,6 +46,14 @@ protected:
   SimpleCameraRef spCamera;
   ViewRef spView;
   UIComponentRef spUIBookmarks;
+
+  static Array<const PropertyInfo> GetProperties()
+  {
+    return{
+      EP_MAKE_PROPERTY_RO(SimpleCamera, "The Viewer's SimpleCamera Component", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(View, "The Viewer's View Component", nullptr, 0),
+    };
+  }
 };
 
 } //namespace ep

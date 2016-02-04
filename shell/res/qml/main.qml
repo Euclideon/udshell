@@ -177,20 +177,19 @@ Rectangle {
         }
 
         onCurrentIndexChanged: {
-          if(activityidlist[currentIndex] != lastId)
+          if(count > 0 && activityidlist[currentIndex] != lastId)
           {
             lastId = activityidlist[currentIndex];
-
-            if(count > 0)
-            {
-              activitychanged(activityidlist[currentIndex]);
-              var activityqq = activityuilist[currentIndex].get("uihandle");
-              activityqq.visible = false; // Trigger an onVisibleChanged signal
-              activityqq.visible = true;
-              activityqq.forceActiveFocus();
-            }
-            else
-              activitychanged(null);
+            activitychanged(activityidlist[currentIndex]);
+            var activityqq = activityuilist[currentIndex].get("uihandle");
+            activityqq.visible = false; // Trigger an onVisibleChanged signal
+            activityqq.visible = true;
+            activityqq.forceActiveFocus();
+          }
+          else
+          {
+            lastId = "";
+            activitychanged(null);
           }
         }
       }

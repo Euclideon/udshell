@@ -40,4 +40,4 @@ solution "epshell"
 		dofile "test/project.lua"
 
 	group "plugins"
-		dofile "plugin/vieweractivity/project.lua"
+		dofile "plugin/viewer/project.lua"
