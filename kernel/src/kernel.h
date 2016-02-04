@@ -153,7 +153,7 @@ protected:
   StdCapture *stdOutCapture = nullptr;
   StdCapture *stdErrCapture = nullptr;
 
-  bool bInternalInitComplete = false;
+  bool bKernelCreated = false;
 
   virtual ~Kernel();
 

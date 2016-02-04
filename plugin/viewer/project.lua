@@ -19,6 +19,10 @@ project "viewer"
 	configuration { "windows", "Debug or DebugOpt" }
 		qtsuffix "d"
 
+	postbuildcommands {
+		"{COPY} %{cfg.buildtarget.abspath} bin/plugins/*"
+	}
+
 	-- include common stuff
 	dofile "../../common-proj.lua"
 

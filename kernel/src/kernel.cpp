@@ -21,7 +21,6 @@
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
 #include "components/datasources/uddatasource.h"
-//#include "components/activities/viewer.h"
 
 // Components that do the Impl dance
 #include "components/componentimpl.h"
@@ -155,6 +154,7 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->RegisterComponentType<Window, WindowImpl>();
   pKernel->RegisterComponentType<View, ViewImpl>();
   pKernel->RegisterComponentType<Scene, SceneImpl>();
+  pKernel->RegisterComponentType<Activity, ActivityImpl>();
 
   // resources
   pKernel->RegisterComponentType<Resource, ResourceImpl>();
@@ -180,10 +180,6 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->RegisterComponentType<ImageSource>();
   pKernel->RegisterComponentType<GeomSource>();
   pKernel->RegisterComponentType<UDDataSource>();
-
-  // activities
-  pKernel->RegisterComponentType<Activity, ActivityImpl>();
-  //pKernel->RegisterComponentType<Viewer>();
 
   // init the HAL
   EPTHROW_IF(epHAL_Init() != epR_Success, epR_Failure, "epHAL_Init() failed");
@@ -224,6 +220,8 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->InitInternal();
 
   *ppInstance = pKernel;
+
+  pKernel->bKernelCreated = true;
 }
 
 void Kernel::DoInit(Kernel *pKernel)
@@ -232,7 +230,6 @@ void Kernel::DoInit(Kernel *pKernel)
   pKernel->spRenderer = SharedPtr<Renderer>::create(pKernel, renderThreadCount);
 
   // init the components
-  bInternalInitComplete = true;
   pKernel->InitComponents();
 
   // prepare the plugins
@@ -490,7 +487,7 @@ const ep::ComponentDesc* Kernel::RegisterComponentType(const ep::ComponentDesc &
   // add to registry
   componentRegistry.Insert(desc.info.id, ComponentType{ pDesc, 0 });
 
-  if (bInternalInitComplete && pDesc->pInit)
+  if (bKernelCreated && pDesc->pInit)
     pDesc->pInit(this);
 
   return pDesc;

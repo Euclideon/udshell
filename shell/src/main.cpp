@@ -280,8 +280,11 @@ void Init(String sender, String message, const Variant &data)
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 
+// TODO Temporary -- Remove this after code for scanning the plugin folder is written
+#if defined(EP_WINDOWS)
   PluginManagerRef spPluginManager = pKernel->FindComponent("pluginmanager");
-  spPluginManager->LoadPlugin("bin/Debug_x64/viewer.dll");
+  spPluginManager->LoadPlugin("bin/plugins/viewer.dll");
+#endif // end EP_WINDOWS
 
   if (!projFilePath.empty())
     OpenProject(projFilePath);
