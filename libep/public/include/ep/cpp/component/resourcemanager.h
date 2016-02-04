@@ -11,6 +11,22 @@ namespace ep
 SHARED_CLASS(ResourceManager);
 SHARED_CLASS(Resource);
 
+// TODO Temporary: These functions should be removed and replaced with general support for Array<T> in Variant
+inline Variant epToVariant(Slice<ResourceRef> resArray)
+{
+  Array<Variant> outs;
+  for (auto &res : resArray)
+    outs.pushBack(res);
+
+  return outs;
+}
+inline void epFromVariant(const Variant &v, Array<const ResourceRef> *pResArray)
+{
+  Slice<Variant> ins = v.asArray();
+  for (auto &res : ins)
+    pResArray->pushBack(res.as<ResourceRef>());
+}
+
 class ResourceIterator
 {
 public:
@@ -39,8 +55,12 @@ public:
   // Resource getter/setters
   size_t GetNumResources() const override final { return pImpl->GetNumResources(); }
   void AddResource(ResourceRef res) override final { pImpl->AddResource(res); }
+  void AddResourceArray(Slice<const ResourceRef> resArray) override final { pImpl->AddResourceArray(resArray); }
   void RemoveResource(ResourceRef res) override final { return pImpl->RemoveResource(res); }
+  void RemoveResourceArray(Slice<const ResourceRef> resArray) override final { return pImpl->RemoveResourceArray(resArray); }
+
   ResourceRef GetResource(String key) const override final { return pImpl->GetResource(key); }
+  Array<ResourceRef> GetResourceArray() const override final { return pImpl->GetResourceArray(); }
   template<typename CT>
   Array<ResourceRef> GetResourcesByType() const
   {
@@ -57,7 +77,13 @@ public:
 
   Variant Save() const override { return pImpl->Save(); }
 
+  Event<Array<ResourceRef>> Added;
+  Event<Array<ResourceRef>> Removed;
+
 protected:
+  void AddResourceArrayMethod(Array<const ResourceRef> resArray) { AddResourceArray(resArray); }
+  void RemoveResourceArrayMethod(Array<const ResourceRef> resArray) { RemoveResourceArray(resArray); }
+
   ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
@@ -68,16 +94,26 @@ protected:
   {
     return{
       EP_MAKE_PROPERTY_RO(NumResources, "The number of Resources in the ResourceManager", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(ResourceArray, "An array populated with the ResourceManager's resources", nullptr, 0),
     };
   }
   static Array<const MethodInfo> GetMethods()
   {
     return{
       EP_MAKE_METHOD(AddResource, "Add a Resource to the ResourceManager"),
+      EP_MAKE_METHOD_EXPLICIT("AddResourceArray", AddResourceArrayMethod, "Add an Array of Resources to the ResourceManager"),
       EP_MAKE_METHOD(RemoveResource, "Remove the specified Resource"),
+      EP_MAKE_METHOD_EXPLICIT("RemoveResourceArray", RemoveResourceArrayMethod, "Remove an Array Resources from the ResourceManager"),
       EP_MAKE_METHOD(GetResource, "Get Resource by UID"),
       EP_MAKE_METHOD(LoadResourcesFromFile, "Create a DataSource containing Resources from the file specified by the given File InitParams"),
       EP_MAKE_METHOD(SaveResourcesToFile, "Save Resources from the given DataSource to a file specified by the given File InitParams"),
+    };
+  }
+  static Array<const EventInfo> GetEvents()
+  {
+    return{
+      EP_MAKE_EVENT(Added, "Resources were added"),
+      EP_MAKE_EVENT(Removed, "Resources were removed"),
     };
   }
 };

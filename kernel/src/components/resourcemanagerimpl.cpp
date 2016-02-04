@@ -5,27 +5,50 @@
 
 namespace ep {
 
-void ResourceManagerImpl::AddResource(ResourceRef res) { resources.Insert(res->uid, res); }
-void ResourceManagerImpl::RemoveResource(ResourceRef res) { resources.Remove(res->uid); }
+void ResourceManagerImpl::AddResourceArray(Slice<const ResourceRef> resArray)
+{
+  for(auto &res : resArray)
+    resources.Insert(res->uid, res);
+
+  pInstance->Added.Signal(resArray);
+}
+
+void ResourceManagerImpl::RemoveResourceArray(Slice<const ResourceRef> resArray)
+{
+  for (auto &res : resArray)
+    resources.Remove(res->uid);
+
+  pInstance->Removed.Signal(resArray);
+}
 
 Array<ResourceRef> ResourceManagerImpl::GetResourcesByType(const ep::ComponentDesc *pBase) const
 {
   Array<ResourceRef> outs;
 
-  for (auto spRes : resources)
+  for (auto kvp : resources)
   {
-    const ep::ComponentDesc *pDesc = spRes.value->GetDescriptor();
+    const ep::ComponentDesc *pDesc = kvp.value->GetDescriptor();
 
     while (pDesc)
     {
       if (pDesc == pBase)
       {
-        outs.concat(spRes.value);
+        outs.concat(kvp.value);
         break;
       }
       pDesc = pDesc->pSuperDesc;
     }
   }
+
+  return outs;
+}
+
+Array<ResourceRef> ResourceManagerImpl::GetResourceArray() const
+{
+  Array<ResourceRef> outs(Reserve, resources.Size());
+
+  for (auto kvp : resources)
+    outs.pushBack(kvp.value);
 
   return outs;
 }
@@ -42,11 +65,11 @@ DataSourceRef ResourceManagerImpl::LoadResourcesFromFile(Variant::VarMap initPar
   spDS = GetKernel()->CreateDataSourceFromExtension(ext, initParams);
 
   size_t numResources = spDS->GetNumResources();
+  Array<ResourceRef> resArray(Reserve, numResources);
   for (size_t i = 0; i < numResources; i++)
-  {
-    ResourceRef spResource = spDS->GetResource(i);
-    resources.Insert(spResource->uid, spResource);
-  }
+    resArray.pushBack(spDS->GetResource(i));
+
+  AddResourceArray(resArray);
 
   return spDS;
 }
