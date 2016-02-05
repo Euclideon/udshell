@@ -415,7 +415,8 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
 // ---------------------------------------------------------------------------------------
 void Kernel::Terminate()
 {
-  // TODO: wire this up? Is this obsolete?
+  qt::QtKernel *pKernel = static_cast<qt::QtKernel*>(this);
+  pKernel->TopLevelWindow()->close();
 }
 
 // ---------------------------------------------------------------------------------------

@@ -1,6 +1,10 @@
 #include "hal/driver.h"
 
 #if EPUI_DRIVER == EPDRIVER_QT
+#if defined(realloc)
+#undef realloc
+#endif
+#include <QObject>
 
 #include "qobjectcomponent_qt.h"
 

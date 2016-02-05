@@ -17,8 +17,10 @@ enum epShaderType
 
 epShader* epShader_CreateShaderFromFile(const char *pFilename, epShaderType type);
 epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType type);
+void epShader_DestroyShader(epShader **ppShader);
 
 epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader *pPixelShader);
+void epShader_DestroyShaderProgram(epShaderProgram **ppProgram);
 
 size_t epShader_GetNumAttributes(epShaderProgram *pProgram);
 const char *epShader_GetAttributeName(epShaderProgram *pProgram, size_t i);

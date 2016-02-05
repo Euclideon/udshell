@@ -38,6 +38,13 @@ epSyncPoint *epGPU_CreateSyncPoint()
 // ***************************************************************************************
 void epGPU_WaitSync(epSyncPoint **ppSync)
 {
+  epUnused(ppSync);
+}
+
+// ***************************************************************************************
+void epGPU_DestroySyncPoint(epSyncPoint **ppSync)
+{
+  epUnused(ppSync);
 }
 
 // ***************************************************************************************

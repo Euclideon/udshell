@@ -11,6 +11,7 @@
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/node/udnode.h"
 #include "ep/cpp/component/resourcemanager.h"
+#include "components/timer.h"
 
 using namespace kernel;
 
@@ -32,6 +33,10 @@ static struct
   SceneRef spScene;
   SimpleCameraRef spSimpleCamera;
   UDNodeRef spUDNode;
+  TimerRef spCITimer;
+  SubscriptionRef spCITimerSub;
+  bool CITest;
+
 } mData = {
 #if defined(EP_WINDOWS)
                "/src/data/DirCube.uds", // filename
@@ -45,8 +50,13 @@ static struct
                nullptr,             // pKernel
 
                nullptr,             // spView
+               nullptr,             // spUDModel
                nullptr,             // spScene
-               nullptr              // spSimpleCamera
+               nullptr,             // spSimpleCamera
+               nullptr,             // spUDNode
+               nullptr,             // spCITimer
+               nullptr,             // spCITimerSub
+               false                // CITest
               };
 
 // ---------------------------------------------------------------------------------------
@@ -105,12 +115,24 @@ static void ViewerDeinit(String sender, String message, const Variant &data)
   mData.spView = nullptr;
   mData.spScene = nullptr;
   mData.spSimpleCamera = nullptr;
+  mData.spCITimerSub = nullptr;
+  mData.spCITimer = nullptr;
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
 int main(int argc, char* argv[])
 {
+  epInitMemoryTracking();
+  if (argc > 1)
+  {
+    if (String(argv[1]).eqIC("CITest"))
+    {
+      mData.CITest = true;
+      argc = 1;
+    }
+  }
+
   using namespace ep;
   mData.rendererThreadCount = epGetHardwareThreadCount() - 1;
   ProcessCmdline(argc, argv);
@@ -122,6 +144,12 @@ int main(int argc, char* argv[])
 
     mData.pKernel->RegisterMessageHandler("init", &ViewerInit);
     mData.pKernel->RegisterMessageHandler("deinit", &ViewerDeinit);
+
+    if (mData.CITest)
+    {
+      mData.spCITimer = mData.pKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 },{ "timertype", "CountDown" } });
+      mData.spCITimerSub = mData.spCITimer->Elapsed.Subscribe([]() { ((kernel::Kernel*)ep::Kernel::GetInstance())->Terminate(); });
+    }
 
     mData.pKernel->RunMainLoop();
 

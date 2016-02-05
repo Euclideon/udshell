@@ -200,6 +200,13 @@ void epGPU_WaitSync(epSyncPoint **ppSync)
 }
 
 // ***************************************************************************************
+void epGPU_DestroySyncPoint(epSyncPoint **ppSync)
+{
+  epUnused(ppSync);
+  // TODO: Implement this!
+}
+
+// ***************************************************************************************
 // Author: Manu Evans, May 2015
 void epGPU_Init()
 {

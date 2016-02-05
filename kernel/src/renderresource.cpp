@@ -126,7 +126,7 @@ RenderShader::RenderShader(Renderer *pRenderer, ShaderRef spShader, epShaderType
 }
 RenderShader::~RenderShader()
 {
-  // TODO: write the destroy function! ;)
+  epShader_DestroyShader(&pShader);
 }
 
 RenderShaderProgram::RenderShaderProgram(Renderer *pRenderer, RenderShaderRef vs, RenderShaderRef ps)

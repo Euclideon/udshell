@@ -184,7 +184,7 @@ namespace kernel {
 
 Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 {
-  return new SDLKernel;
+  return epNew SDLKernel;
 }
 
 ViewRef Kernel::SetFocusView(ViewRef spView)

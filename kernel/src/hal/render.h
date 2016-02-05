@@ -31,5 +31,6 @@ void epGPU_RenderRanges(struct epShaderProgram *pProgram, struct epFormatDeclara
 // TODO: re-evaluate this
 epSyncPoint *epGPU_CreateSyncPoint();
 void epGPU_WaitSync(epSyncPoint **pSync);
+void epGPU_DestroySyncPoint(epSyncPoint **ppSync);
 
 #endif // EPGPU_H

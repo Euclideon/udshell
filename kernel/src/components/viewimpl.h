@@ -2,6 +2,7 @@
 #ifndef EPVIEWIMPL_H
 #define EPVIEWIMPL_H
 
+#include "ep/cpp/platform.h"
 #include "ep/cpp/component/view.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/camera.h"

@@ -68,6 +68,9 @@ RenderableView::~RenderableView()
     spRenderer->ReleaseRenderBuffer(spColorBuffer);
   if(spDepthBuffer)
     spRenderer->ReleaseRenderBuffer(spDepthBuffer);
+
+  if (pSyncPoint)
+    epGPU_DestroySyncPoint(&pSyncPoint);
 }
 
 void RenderableView::CreateResources()
@@ -241,7 +244,7 @@ Renderer::Renderer(kernel::Kernel *pKernel, int renderThreadCount)
   uint32_t indices[] = { 0, 1, 2, 3 };
   epVertex_SetArrayBufferData(s_pQuadIB, indices, sizeof(indices));
 
-  epShader *pVS = epShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), epST_VertexShader);
+  pVS = epShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), epST_VertexShader);
   if (!pVS)
   {
     epVertex_DestroyFormatDeclaration(&s_pPosUV);
@@ -250,7 +253,7 @@ Renderer::Renderer(kernel::Kernel *pKernel, int renderThreadCount)
     EPTHROW(epR_Failure, "TODO: better error");
   }
 
-  epShader *pPS = epShader_CreateShader(s_blitShader, sizeof(s_blitShader), epST_PixelShader);
+  pPS = epShader_CreateShader(s_blitShader, sizeof(s_blitShader), epST_PixelShader);
   if (!pPS)
   {
     // TODO: Add in calls to epShader_Destroy when implemented.
@@ -278,9 +281,9 @@ Renderer::~Renderer()
 {
   // GPU destruction
   // TODO: Add in calls to epShader_Destroy when implemented.
-  //epShader_DestroyShaderProgram(s_shader);
-  //epShader_Destroy(&pPS);
-  //epShader_Destroy(&pVS);
+  epShader_DestroyShaderProgram(&s_shader);
+  epShader_DestroyShader(&pPS);
+  epShader_DestroyShader(&pVS);
   epVertex_DestroyFormatDeclaration(&s_pPosUV);
   epVertex_DestroyArrayBuffer(&s_pQuadIB);
   epVertex_DestroyArrayBuffer(&s_pQuadVB);
@@ -293,6 +296,12 @@ Renderer::~Renderer()
   udDestroyMutex(&pUDMutex);
   udDestroySemaphore(&pUDSemaphore);
   udDestroySemaphore(&pUDTerminateSemaphore);
+
+  udStreamerStatus streamerStatus = { 0 };
+  do
+  {
+    udOctree_Update(&streamerStatus);
+  } while (streamerStatus.active);
 
   udOctree_Shutdown();
 
@@ -328,7 +337,7 @@ RenderShaderRef Renderer::GetShader(const ShaderRef &spShader)
   /*
   if (!spShader)
   {
-    RenderShader *pShader = new RenderShader(this, ShaderRef(pInstance), (epShaderType)type);
+    RenderShader *pShader = epNew RenderShader(this, ShaderRef(pInstance), (epShaderType)type);
     if (!pShader->pShader)
     {
       delete pShader;
@@ -353,7 +362,7 @@ RenderShaderProgramRef Renderer::GetShaderProgram(const MaterialRef &spShaderPro
     {
       // TODO: check if this program already exists in `pRenderer->shaderPrograms`
 
-      RenderShaderProgram *pProgram = new RenderShaderProgram(this, spVS, spPS);
+      RenderShaderProgram *pProgram = epNew RenderShaderProgram(this, spVS, spPS);
       if (!pProgram->pProgram)
       {
         delete pProgram;
@@ -382,7 +391,7 @@ RenderVertexFormatRef Renderer::GetVertexFormat(const RenderShaderProgramRef &sp
 
     // create a descriptor that maps vertex arrays to shader attributes
 
-    //    VertexFormatDescriptor *pFormat = new VertexFormatDescriptor(this, spArrays);
+    //    VertexFormatDescriptor *pFormat = epNew VertexFormatDescriptor(this, spArrays);
     //    spRenderVertexFormat = VertexFormatDescriptorRef(pFormat);
   }
   return spRenderVertexFormat;
@@ -473,7 +482,7 @@ void Renderer::UDThread()
       // TODO: message? produce an default/invalid/failed image?
     }
 
-    JobDone *done = new JobDone(job);
+    JobDone *done = epNew JobDone(job);
     pKernel->DispatchToMainThread(MakeDelegate(done, &JobDone::FinishJob));
   }
 

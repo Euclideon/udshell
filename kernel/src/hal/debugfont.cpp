@@ -96,7 +96,7 @@ void epDebugFont_Init()
   pVertexFormat = epVertex_CreateFormatDeclaration(vertDesc, sizeof(vertDesc)/sizeof(vertDesc[0]));
 
   // Process the roman simplex font
-  pRomanSimplex = new epDebugFont(96, romanSimplexCharacters, romanVectors);
+  pRomanSimplex = epNew epDebugFont(96, romanSimplexCharacters, romanVectors);
 }
 
 //-------------------------------------------------------------------
@@ -105,6 +105,11 @@ void epDebugFont_Deinit()
   epVertex_DestroyArrayBuffer(&pRomanSimplex->pGeoBuffer);
   delete pRomanSimplex;
   epVertex_DestroyFormatDeclaration(&pVertexFormat);
+
+  epShader_DestroyShader(&pFontShaderV);
+  epShader_DestroyShader(&pFontShaderP);
+  epShader_DestroyShaderProgram(&pShader);
+
 }
 
 //*******************************************************************

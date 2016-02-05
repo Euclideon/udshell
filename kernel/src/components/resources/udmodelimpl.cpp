@@ -21,8 +21,7 @@ static const Slice<const EnumKVP> renderFlags =
 
 UDModelImpl::~UDModelImpl()
 {
-  if (pOctree)
-    pOctree->pDestroy(pOctree);
+  udOctree_Destroy(&pOctree);
 }
 
 UDRenderState UDModelImpl::GetUDRenderState() const

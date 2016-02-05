@@ -62,10 +62,13 @@
 # define EP_CPP11 0
 #endif
 
-
 // detect architecture/platform
 #if defined(_WIN32)
 # define EP_WINDOWS
+
+#if defined(_DEBUG)
+# define _CRTDBG_MAP_ALLOC
+#endif // defined(_DEBUG)
 
 # if _M_IA64 || __IA64__ || __ia64__
 #   define EP_ARCH_ITANIUM
@@ -451,11 +454,15 @@ void epDebugPrintf(const char *format, ...) epprintf_func(1, 2);
 #if defined(__GNUC__)
 # if EP_DEBUG
 #   include <signal.h>
-#   define __debugbreak() raise(SIGTRAP)
-#   define DebugBreak() raise(SIGTRAP)
+#   if !defined(__debugbreak)
+#     define __debugbreak() raise(SIGTRAP)
+#     define DebugBreak() raise(SIGTRAP)
+#   endif //!defined(__debugbreak)
 # else
-#   define __debugbreak()
-#   define DebugBreak()
+#   if !defined(__debugbreak)
+#     define __debugbreak() 
+#     define DebugBreak() 
+#   endif //!defined(__debugbreak)
 # endif
 #endif
 
@@ -490,6 +497,8 @@ void epDebugPrintf(const char *format, ...) epprintf_func(1, 2);
 # define EPTRACE_VARIABLE(var)
 # define EPTRACE_MEMORY(var,length)
 #endif
+
+#define __EP_MEMORY_DEBUG__  EP_DEBUG
 
 // TODO: Make assertion system handle pop-up window where possible
 #if EPASSERT_ON
@@ -528,14 +537,13 @@ extern "C" void epAssertFailed(epString condition, epString message, epString fi
 #endif
 
 
-// HACK: rejig these
-#define __MEMORY_DEBUG__  0
-
-#if __MEMORY_DEBUG__
-# define IF_MEMORY_DEBUG(x,y) ,x,y
+#if __EP_MEMORY_DEBUG__
+# define EP_IF_MEMORY_DEBUG(x,y) ,x,y
+extern "C" void epInitMemoryTracking();
 #else
-# define IF_MEMORY_DEBUG(x,y)
-#endif //  __MEMORY_DEBUG__
+# define EP_IF_MEMORY_DEBUG(x,y)
+#define epInitMemoryTracking()
+#endif //  __EP_MEMORY_DEBUG__
 
 extern "C" {
 enum epAllocationFlags
@@ -544,20 +552,20 @@ enum epAllocationFlags
   epAF_Zero = 1
 };
 
-void *_epAlloc(size_t size, epAllocationFlags flags = epAF_None IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
-#define epAlloc(size) _epAlloc(size, epAF_None IF_MEMORY_DEBUG(__FILE__, __LINE__))
+void *_epAlloc(size_t size, epAllocationFlags flags = epAF_None EP_IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epAlloc(size) _epAlloc(size, epAF_None EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 
-void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
-#define epAllocAligned(size, alignment, flags) _epAllocAligned(size, alignment, flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
+void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags EP_IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epAllocAligned(size, alignment, flags) _epAllocAligned(size, alignment, flags EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 
-#define epAllocFlags(size, flags) _epAlloc(size, flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
-#define epAllocType(type, count, flags) (type*)_epAlloc(sizeof(type) * (count), flags IF_MEMORY_DEBUG(__FILE__, __LINE__))
+#define epAllocFlags(size, flags) _epAlloc(size, flags EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
+#define epAllocType(type, count, flags) (type*)_epAlloc(sizeof(type) * (count), flags EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 
-void *_epRealloc(void *pMemory, size_t size IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
-#define epRealloc(pMemory, size) _epRealloc(pMemory, size IF_MEMORY_DEBUG(__FILE__, __LINE__))
+void *_epRealloc(void *pMemory, size_t size EP_IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epRealloc(pMemory, size) _epRealloc(pMemory, size EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 
-void _epFree(void *pMemory IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
-#define epFree(pMemory) _epFree(pMemory IF_MEMORY_DEBUG(__FILE__, __LINE__))
+void _epFree(void *pMemory EP_IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
+#define epFree(pMemory) _epFree(pMemory EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 }
 
 #if !defined(EP_WINDOWS)

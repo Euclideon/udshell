@@ -2,6 +2,7 @@
 #ifndef EP_UDNODE_H
 #define EP_UDNODE_H
 
+#include "ep/cpp/platform.h"
 #include "ep/cpp/math.h"
 #include "ep/cpp/component/component.h"
 #include "ep/cpp/component/node/node.h"

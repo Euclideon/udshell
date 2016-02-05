@@ -58,7 +58,7 @@ namespace kernel {
 
 static ep::Instance *MakeInterface(Kernel *pKernel)
 {
-  ep::Instance *pInstance = new ep::Instance;
+  ep::Instance *pInstance = epNew ep::Instance;
 
   pInstance->apiVersion = EP_APIVERSION;
 
@@ -106,6 +106,9 @@ Kernel::Kernel()
 
 Kernel::~Kernel()
 {
+  spRenderer = nullptr;
+  epDelete(ep::s_pInstance);
+
   if (instanceRegistry.begin() != instanceRegistry.end())
   {
     int count = 0;
@@ -118,6 +121,9 @@ Kernel::~Kernel()
     }
     epDebugFormat("{0} Unfreed Component(s)\n", count);
   }
+
+  for (const auto &c : componentRegistry)
+    epDelete c.value.pDesc;
 }
 
 void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, int _renderThreadCount)
@@ -206,10 +212,10 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
 
   // Init capture and broadcast of stdout/stderr
   pKernel->spStdOutBC = pKernel->CreateComponent<Broadcaster>({ {"name", "stdoutbc"} });
-  pKernel->stdOutCapture = new StdCapture(stdout);
+  pKernel->stdOutCapture = epNew StdCapture(stdout);
   epscope(fail) { delete pKernel->stdOutCapture; };
   pKernel->spStdErrBC = pKernel->CreateComponent<Broadcaster>({ {"name", "stderrbc"} });
-  pKernel->stdErrCapture = new StdCapture(stderr);
+  pKernel->stdErrCapture = epNew StdCapture(stderr);
   epscope(fail) { delete pKernel->stdErrCapture; };
 
   // platform init
@@ -288,8 +294,6 @@ void Kernel::Destroy()
   spStreamerTimer = nullptr;
   spPluginManager = nullptr;
   spResourceManager = nullptr;
-
-  spRenderer = nullptr;
 
   delete stdOutCapture;
   delete stdErrCapture;
@@ -514,7 +518,7 @@ const ep::ComponentDesc* Kernel::RegisterComponentType(const ep::ComponentDesc &
   }
 
   // create the descriptor
-  kernel::ComponentDesc *pDesc = new kernel::ComponentDesc(desc);
+  kernel::ComponentDesc *pDesc = epNew kernel::ComponentDesc(desc);
 
   // add to registry
   componentRegistry.Insert(desc.info.id, ComponentType{ pDesc, 0 });

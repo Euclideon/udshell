@@ -17,7 +17,7 @@ public:
 
 Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 {
-  return new NullKernel;
+  return epNew NullKernel;
 }
 
 // ---------------------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 -- include common UD stuff
 dofile "ud/common-proj.lua"
 
+flags { "C++11", "NoMinimalRebuild", "NoPCH" }
 -- override with local settings
 configuration { "Debug" }
 	optimize "Off"

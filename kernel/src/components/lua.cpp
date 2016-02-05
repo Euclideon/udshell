@@ -11,7 +11,7 @@ Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant:
   : Component(pType, pKernel, uid, initParams)
 {
   spOutputBC = pKernel->CreateComponent<Broadcaster>();
-  pLua = new LuaState(pKernel);
+  pLua = epNew LuaState(pKernel);
 }
 
 Lua::~Lua()

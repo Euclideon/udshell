@@ -52,7 +52,7 @@ private:
   static SharedString GetSuperImpl(...) { return nullptr; }
 
   template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
-  static CreateFunc GetCreateImplImpl(T* t) { return [](Component *pInstance, Variant::VarMap initParams) -> void* { return new Impl(pInstance, initParams); }; }
+  static CreateFunc GetCreateImplImpl(T* t) { return [](Component *pInstance, Variant::VarMap initParams) -> void* { return epNew Impl(pInstance, initParams); }; }
   static CreateFunc GetCreateImplImpl(...) { return nullptr; }
 
   template <typename T>
@@ -64,6 +64,7 @@ private:
       pKernel->LogDebug(4, t);
       // TODO: this new can't exist in the wild... need to call back into kernel!!
       void *pMem = epAlloc(sizeof(ComponentType));
+      epscope(fail) { if (pMem) epFree(pMem); };
       EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
       ComponentType *ptr = new (pMem) ComponentType(pType, pKernel, uid, initParams);
       ptr->pFreeFunc = [](void *pMem) { epFree(pMem); };

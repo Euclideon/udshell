@@ -1,6 +1,9 @@
 #ifndef WINDOW_QT_H
 #define WINDOW_QT_H
 
+#include "ep/cpp/platform.h"
+#include "driver/qt/epqt.h"
+
 #include "../epkernel_qt.h"
 #include "ep/cpp/component/commandmanager.h"
 

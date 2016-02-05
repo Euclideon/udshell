@@ -43,6 +43,17 @@ epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType
 }
 
 // ***************************************************************************************
+// Author: David Ely, February 2016
+void epShader_DestroyShader(epShader **ppShader)
+{
+  EPASSERT(ppShader && *ppShader, "ppShader is invalid");
+  epShader *pShader = *ppShader;
+  delete pShader->pShader;
+  epFree(pShader);
+  *ppShader = nullptr;
+}
+
+// ***************************************************************************************
 epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader *pPixelShader)
 {
   bool result = true;
@@ -125,6 +136,16 @@ epilogue:
   }
 
   return pProgram;
+}
+
+// ***************************************************************************************
+void epShader_DestroyShaderProgram(epShaderProgram **ppProgram)
+{
+  EPASSERT(ppProgram && *ppProgram, "ppProgram is invalid");
+  epShaderProgram *pProgram = *ppProgram;
+  delete pProgram->pProgram;
+  epFree(pProgram);
+  *ppProgram = nullptr;
 }
 
 // ***************************************************************************************

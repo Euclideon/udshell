@@ -12,6 +12,12 @@ else
 	ACTION=$REPLY
 fi
 
+if [ $OSTYPE == "msys" ]; then # Windows, MingW 
+	PREMAKE=../bin/premake/premake5.exe
+else
+	PREMAKE=../bin/premake/premake5
+fi
+
 # parse string actions into numerics
 if [[ $ACTION == "make" ]] || [[ $ACTION == "gmake" ]] ; then
 	ACTION="1"
@@ -24,13 +30,13 @@ fi
 # perform action
 if [[ $ACTION == "1" ]] ; then
 	echo "Creating GNU Makefile..."
-	../ud/bin/premake/premake5 gmake
+	$PREMAKE gmake
 elif [[ $ACTION == "2" ]] ; then
 	echo "Creating MonoDevelop project..."
-	../ud/bin/premake/premake5 monodevelop
+	$PREMAKE monodevelop
 elif [[ $ACTION == "3" ]] ; then
 	echo "Creating CodeLite project..."
-	../ud/bin/premake/premake5 codelite
+	$PREMAKE codelite
 else
 	echo "Invalid input: "$REPLY
 fi
