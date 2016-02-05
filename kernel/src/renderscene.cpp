@@ -1,10 +1,5 @@
 #include "renderscene.h"
 
-#include "hal/render.h"
-#include "hal/texture.h"
-#include "hal/vertex.h"
-#include "hal/shader.h"
-
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/shader.h"
 
@@ -75,6 +70,17 @@ RenderableView::~RenderableView()
     spRenderer->ReleaseRenderBuffer(spDepthBuffer);
 }
 
+void RenderableView::CreateResources()
+{
+  if (!spColorTexture)
+  {
+    spColorTexture = spRenderer->GetRenderBuffer(spColorBuffer, Renderer::RenderResourceType::Texture);
+    spDepthTexture = spRenderer->GetRenderBuffer(spDepthBuffer, Renderer::RenderResourceType::Texture);
+    // TODO: use this to ensure the resources have been fully uploaded in the GPU before rendering - re-think this whole thing
+    pSyncPoint = epGPU_CreateSyncPoint();
+  }
+}
+
 void RenderableView::RenderUD()
 {
   Slice<uint32_t> colorBuffer = spColorBuffer->Map<uint32_t>();
@@ -123,13 +129,10 @@ void RenderableView::RenderGPU()
 //  if (spView->pPreRenderCallback)
 //    spView->pPreRenderCallback(spView, spScene);
 
-  if (spColorBuffer)
+  if (spColorBuffer && spColorTexture)
   {
-    if (!spColorTexture)
-    {
-      spColorTexture = spRenderer->GetRenderBuffer(spColorBuffer, Renderer::RenderResourceType::Texture);
-      spDepthTexture = spRenderer->GetRenderBuffer(spDepthBuffer, Renderer::RenderResourceType::Texture);
-    }
+    // TODO: wait for the sync point to be processed - re-think this whole thing
+    epGPU_WaitSync(&pSyncPoint);
 
     epShader_SetCurrent(spRenderer->s_shader);
 
@@ -437,7 +440,13 @@ void Renderer::UDThread()
     void FinishJob(ep::Kernel *_pKernel)
     {
       ViewRef spView = job->spView;
-      spView->GetImpl<ViewImpl>()->SetLatestFrame(job);
+      if (spView)
+      {
+        job->CreateResources();
+        // NOTE: we need to clear this pointer here to prevent circular referencing!
+        job->spView = nullptr;
+        spView->GetImpl<ViewImpl>()->SetLatestFrame(job);
+      }
       delete this;
     }
   };

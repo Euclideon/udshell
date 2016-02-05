@@ -50,13 +50,13 @@ public:
 
     if (pQtRenderView->dirty)
     {
-      spRenderableView = SynchronisedPtr<ep::RenderableView>(pQtRenderView->spView->GetImpl<ViewImpl>()->GetRenderableView(), QtApplication::Kernel());
+      spRenderableView = ep::SynchronisedPtr<ep::RenderableView>(pQtRenderView->spView->GetImpl<ViewImpl>()->GetRenderableView(), QtApplication::Kernel());
       pQtRenderView->dirty = false;
     }
   }
 
   const QQuickFramebufferObject *m_item;
-  SynchronisedPtr<ep::RenderableView> spRenderableView;
+  ep::SynchronisedPtr<ep::RenderableView> spRenderableView;
 };
 
 
