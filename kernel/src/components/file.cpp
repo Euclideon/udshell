@@ -59,7 +59,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
 
   _wsopen_s(&fd, widePath, posixFlags, SH_DENYNO, S_IREAD | S_IWRITE);
 #else
-  fd = open(cPath.toStringz(), posixFlags, S_IWUSR | S_IWGRP | S_IWOTH);
+  fd = open(cPath.toStringz(), posixFlags, S_IRUSR | S_IWUSR);
 #endif
   if (fd == -1)
     EPTHROW_WARN(epR_File_OpenFailure, 2, "Failed to open {0}, flags {1}, errno {2}\n", cPath, posixFlags, errno);
