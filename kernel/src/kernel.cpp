@@ -614,22 +614,3 @@ DataSourceRef Kernel::CreateDataSourceFromExtension(String ext, Variant::VarMap 
 }
 
 } // namespace kernel
-
-// synchronised pointer destroy function (it's here because there's no udsharedptr.cpp file)
-template<class T>
-void SynchronisedPtr<T>::destroy()
-{
-  struct S
-  {
-    void Destroy(Kernel *pKernel)
-    {
-      ((SharedPtr<T>&)this)->release();
-    }
-  };
-
-  pKernel->DispatchToMainThread(MakeDelegate((S*)this, &S::Destroy));
-  pInstance = nullptr;
-}
-
-
-

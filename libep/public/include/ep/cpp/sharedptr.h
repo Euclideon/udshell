@@ -16,7 +16,6 @@
 
 namespace ep {
 
-class Kernel;
 class RefCounted;
 template<class T>
 struct UniquePtr;
@@ -70,7 +69,9 @@ protected:
   virtual ~Safe();
 };
 
+// NOTE!! This is necessary because forward declarations from friend statements seem to declare stuff in the global scope with GCC
 template<typename U> struct SafePtr;
+template<typename U> struct SynchronisedPtr;
 
 // shared pointers are ref counted
 template<class T>
@@ -206,6 +207,7 @@ private:
   template<typename U> friend struct UniquePtr;
   template<typename U> friend struct SharedPtr;
   template<typename U> friend struct SafePtr;
+  template<typename U> friend struct SynchronisedPtr;
 
   static RefCounted* acquire(RefCounted *pI);
   static void release(RefCounted *pI);
@@ -325,79 +327,6 @@ private:
   template<typename U, bool isref> friend struct Release;
 
   T * eprestrict pInstance = nullptr;
-};
-
-//------------------------------------------------------------------------------------------
-
-// synchronised pointers that can be passed between threads, destruction is deferred to main thread
-template<class T>
-struct SynchronisedPtr
-{
-public:
-  SynchronisedPtr() {}
-  template <class U>
-  explicit SynchronisedPtr(const SharedPtr<U> &p, Kernel *pKernel)
-    : pInstance(p.ptr())
-    , pKernel(pKernel)
-  {
-    p.acquire();
-  }
-  template <class U>
-  SynchronisedPtr(const SynchronisedPtr<U> &ptr)
-    : pInstance(ptr.pInstance)
-    , pKernel(ptr.pKernel)
-  {
-    const_cast<SynchronisedPtr<U>&>(ptr).pInstance = nullptr;
-    const_cast<SynchronisedPtr<U>&>(ptr).pKernel = nullptr;
-  }
-  SynchronisedPtr(const SynchronisedPtr &ptr)
-    : pInstance(ptr.pInstance)
-    , pKernel(ptr.pKernel)
-  {
-    const_cast<SynchronisedPtr&>(ptr).pInstance = nullptr;
-    const_cast<SynchronisedPtr&>(ptr).pKernel = nullptr;
-  }
-
-  ~SynchronisedPtr()
-  {
-    destroy();
-  }
-
-  SynchronisedPtr &operator=(const SynchronisedPtr &ptr)
-  {
-    destroy();
-    pInstance = ptr.pInstance;
-    pKernel = ptr.pKernel;
-    const_cast<SynchronisedPtr&>(ptr).pInstance = nullptr;
-    const_cast<SynchronisedPtr&>(ptr).pKernel = nullptr;
-    return *this;
-  }
-
-  void reset()
-  {
-    destroy();
-  }
-
-  void release()
-  {
-    pInstance = nullptr;
-  }
-
-  // reference counter operations :
-  explicit operator bool() const { return pInstance != nullptr; }
-
-  // underlying pointer operations :
-  T& operator*() const { return *pInstance; }
-  T* operator->() const { return pInstance; }
-  T* ptr() const { return pInstance; }
-
-private:
-  template<typename U> friend struct SynchronisedPtr;
-
-  void destroy();
-
-  T *pInstance = nullptr;
-  Kernel *pKernel = nullptr;
 };
 
 
