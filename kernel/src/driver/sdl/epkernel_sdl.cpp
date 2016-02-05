@@ -27,11 +27,70 @@ class SDLKernel : public kernel::Kernel
 {
 public:
   SDLKernel() {}
+  ~SDLKernel();
 
   void InitInternal() override;
-  void Destroy() override;
   void RunMainLoop() override;
+  void EventLoop();
 };
+
+void SDLKernel::EventLoop()
+{
+  SDL_Event event;
+  while (SDL_PollEvent(&event))
+  {
+    if (event.type == s_sdlEvent)
+    {
+      if (event.user.code == 0)
+      {
+        FastDelegateMemento m;
+        void **ppPtrs = (void**)&m;
+        ppPtrs[0] = event.user.data1;
+        ppPtrs[1] = event.user.data2;
+
+        MainThreadCallback d;
+        d.SetMemento(m);
+        try { d(this); }
+        catch (std::exception &e) { LogError("Exception occurred in MainThreadCallback : {0}", e.what()); }
+        catch (...) { LogError("Exception occurred in MainThreadCallback : C++ Exception"); }
+      }
+      else if (event.user.code == 1)
+      {
+        DelegateWithSemaphore *pDispatch = (DelegateWithSemaphore*)event.user.data1;
+
+        MainThreadCallback d;
+        d.SetMemento(pDispatch->m);
+        try { d(this); }
+        catch (std::exception &e) { LogError("Exception occurred in MainThreadCallback : {0}", e.what()); }
+        catch (...) { LogError("Exception occurred in MainThreadCallback : C++ Exception"); }
+        udIncrementSemaphore(pDispatch->pSem);
+      }
+    }
+    else
+    {
+      switch (event.type)
+      {
+      case SDL_QUIT:
+        s_done = true;
+        break;
+      case SDL_WINDOWEVENT:
+      {
+        switch (event.window.event)
+        {
+        case SDL_WINDOWEVENT_RESIZED:
+          s_displayWidth = event.window.data1;
+          s_displayHeight = event.window.data2;
+          spFocusView->Resize(s_displayWidth, s_displayHeight);
+          glViewport(0, 0, s_displayWidth, s_displayHeight);
+          break;
+        }
+        break;
+      }
+      }
+    }
+  }
+}
+
 
 void SDLKernel::InitInternal()
 {
@@ -56,81 +115,24 @@ void SDLKernel::InitInternal()
   InitRender();
 }
 
-void SDLKernel::Destroy()
+SDLKernel::~SDLKernel()
 {
   // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
+  EventLoop();
+
   DeinitRender();
 
   SDL_GL_DeleteContext(s_context);
   SDL_Quit();
-
-  return Kernel::Destroy();
 }
 
 void SDLKernel::RunMainLoop()
 {
   DoInit(this);
 
-  auto pEventLoop = [&]() mutable -> void
-  {
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-      if (event.type == s_sdlEvent)
-      {
-        if (event.user.code == 0)
-        {
-          FastDelegateMemento m;
-          void **ppPtrs = (void**)&m;
-          ppPtrs[0] = event.user.data1;
-          ppPtrs[1] = event.user.data2;
-
-          MainThreadCallback d;
-          d.SetMemento(m);
-          try { d(this); }
-          catch (std::exception &e) { LogError("Exception occurred in MainThreadCallback : {0}", e.what()); }
-          catch (...) { LogError("Exception occurred in MainThreadCallback : C++ Exception"); }
-        }
-        else if (event.user.code == 1)
-        {
-          DelegateWithSemaphore *pDispatch = (DelegateWithSemaphore*)event.user.data1;
-
-          MainThreadCallback d;
-          d.SetMemento(pDispatch->m);
-          try { d(this); }
-          catch (std::exception &e) { LogError("Exception occurred in MainThreadCallback : {0}", e.what()); }
-          catch (...) { LogError("Exception occurred in MainThreadCallback : C++ Exception"); }
-          udIncrementSemaphore(pDispatch->pSem);
-        }
-      }
-      else
-      {
-        switch (event.type)
-        {
-        case SDL_QUIT:
-          s_done = true;
-          break;
-        case SDL_WINDOWEVENT:
-        {
-          switch (event.window.event)
-          {
-          case SDL_WINDOWEVENT_RESIZED:
-            s_displayWidth = event.window.data1;
-            s_displayHeight = event.window.data2;
-            spFocusView->Resize(s_displayWidth, s_displayHeight);
-            glViewport(0, 0, s_displayWidth, s_displayHeight);
-            break;
-          }
-          break;
-        }
-        }
-      }
-    }
-  };
-
   while (!s_done)
   {
-    pEventLoop();
+    EventLoop();
 
     // TODO: need to translate input polling into messages...
     epInput_Update();
@@ -142,8 +144,6 @@ void SDLKernel::RunMainLoop()
 
     SDL_GL_SwapWindow(s_window);
   }
-
-  pEventLoop();
 }
 
 namespace kernel {
