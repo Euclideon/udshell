@@ -15,7 +15,8 @@
 // for convenience we keep track of Qt GL context info in this struct
 epQtGLContext s_QtGLContext =
 {
-  nullptr  // pFunc
+  nullptr,  // pFunc
+  nullptr   // pFunc3_2_Core
 };
 
 static int s_primTypes[] =
@@ -66,13 +67,17 @@ struct epVertexDataFormatGL
   { 1, GL_UNSIGNED_BYTE, GL_FALSE },  // epVDF_UByte
 };
 
+struct epSyncPoint
+{
+  GLsync syncId;
+};
 
 // ***************************************************************************************
 // Author: Manu Evans, Nov 2015
 void epGPU_Clear(double color[4], double depth, int stencil)
 {
   s_QtGLContext.pFunc->glClearColor(color[0], color[1], color[2], color[3]);
-  s_QtGLContext.pFunc->glClearDepth(depth);
+  s_QtGLContext.pFunc->glClearDepthf(depth);
   s_QtGLContext.pFunc->glClearStencil(stencil);
   s_QtGLContext.pFunc->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
@@ -193,22 +198,47 @@ void epGPU_RenderRanges(epShaderProgram *pProgram, epFormatDeclaration *pVertexD
 }
 
 // ***************************************************************************************
+epSyncPoint *epGPU_CreateSyncPoint()
+{
+  if (!s_QtGLContext.pFunc3_2_Core)
+  {
+    // if we don't have at least 3.2, then just call glFinish(); this will block
+    s_QtGLContext.pFunc->glFinish();
+    return nullptr;
+  }
+
+  epSyncPoint *pSync = epAllocType(epSyncPoint, 1, epAF_None);
+  pSync->syncId = s_QtGLContext.pFunc3_2_Core->glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+  return pSync;
+}
+
+// ***************************************************************************************
+void epGPU_WaitSync(epSyncPoint **ppSync)
+{
+  if (!s_QtGLContext.pFunc3_2_Core || !(*ppSync))
+    return;
+
+  s_QtGLContext.pFunc->glFlush();
+  s_QtGLContext.pFunc3_2_Core->glWaitSync((*ppSync)->syncId, 0, GL_TIMEOUT_IGNORED);
+  s_QtGLContext.pFunc3_2_Core->glDeleteSync((*ppSync)->syncId);
+  epFree(*ppSync);
+  *ppSync = nullptr;
+}
+
+// ***************************************************************************************
 void epGPU_Init()
 {
   // TODO: gracefully handle this case, maybe try to create a context or postpone init?
   EPASSERT(QOpenGLContext::currentContext(), "QOpenGLContext::currentContext() should not be null when we call epGPU_Init");
 
-  s_QtGLContext.pFunc = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_2_0>();
-  // TODO: we depend on OpenGL 2.0, should we fallback? or gracefully handle
-  EPASSERT(s_QtGLContext.pFunc, "we expect QOpenGLFunctions_2_0 to be available");
+  s_QtGLContext.pFunc = QOpenGLContext::currentContext()->functions();
 
-  // TODO: Override the QML GL version??
-  // TODO: Create a share GL Context that we have control over?
-  epDebugPrintf("GL VERSION: %d.%d\n",
-    QOpenGLContext::currentContext()->format().majorVersion(), QOpenGLContext::currentContext()->format().minorVersion());
+  // NOTE: if we're using an old or incompatible version of GL, this will set our pointer to null.
+  // This should only be used for 3.2+ functionality
+  s_QtGLContext.pFunc3_2_Core = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_2_Core>();
 
-  // TODO: this might be redundant
-  s_QtGLContext.pFunc->initializeOpenGLFunctions();
+  if (s_QtGLContext.pFunc3_2_Core)
+    s_QtGLContext.pFunc3_2_Core->initializeOpenGLFunctions();
 }
 
 // ***************************************************************************************

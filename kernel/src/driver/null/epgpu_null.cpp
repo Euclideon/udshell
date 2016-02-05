@@ -30,6 +30,17 @@ void epGPU_RenderRanges(epShaderProgram *pProgram, epFormatDeclaration *pVertexD
 }
 
 // ***************************************************************************************
+epSyncPoint *epGPU_CreateSyncPoint()
+{
+  return nullptr;
+}
+
+// ***************************************************************************************
+void epGPU_WaitSync(epSyncPoint **ppSync)
+{
+}
+
+// ***************************************************************************************
 // Author: Manu Evans, May 2015
 void epGPU_Init()
 {

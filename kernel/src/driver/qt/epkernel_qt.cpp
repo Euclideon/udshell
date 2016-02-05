@@ -94,6 +94,10 @@ QtKernel::~QtKernel()
   pApplication->sendPostedEvents();
   pApplication->processEvents();
 
+  delete pGLDebugLogger;
+  delete pSplashScreen;
+  delete pQmlEngine;
+
   try
   {
     DeinitRender();
@@ -107,10 +111,7 @@ QtKernel::~QtKernel()
     LogError("Error cleaning up renderer, DeinitRender failed");
   }
 
-  delete pGLDebugLogger;
-  delete pSplashScreen;
   delete pMainThreadContext;
-  delete pQmlEngine;
 
   pApplication->deleteLater();
 }
@@ -317,6 +318,15 @@ void QtKernel::DoInit(ep::Kernel *)
   pMainThreadContext->setFormat(mainSurfaceFormat);
   IF_EPASSERT(bool succeed = )pMainThreadContext->create();
   EPASSERT(succeed, "Couldn't create render context!");
+
+  // update the format based on what we actually got (since it may differ)
+  mainSurfaceFormat = pMainThreadContext->format();
+
+  LogDebug(2, "Created OpenGL context using version: {0}.{1} {2,?3}",
+    mainSurfaceFormat.majorVersion(),
+    mainSurfaceFormat.minorVersion(),
+    (mainSurfaceFormat.profile() == QSurfaceFormat::CoreProfile ? "Core" : "Compatibility"),
+    (mainSurfaceFormat.profile() != QSurfaceFormat::NoProfile));
 
   if (!pMainThreadContext->makeCurrent(pSplashScreen))
   {
