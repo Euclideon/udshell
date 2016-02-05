@@ -138,7 +138,7 @@ void QtKernel::InitInternal()
   epscope(fail) { delete pQmlEngine; };
 
   // register our internal qml types
-  EPTHROW_IF(qmlRegisterType<RenderView>("epKernel", 0, 1, "EPRenderView") == -1, epR_Failure, "qmlRegisterType<RenderView> Failed");
+  EPTHROW_IF(qmlRegisterType<QtRenderView>("epKernel", 0, 1, "EPRenderView") == -1, epR_Failure, "qmlRegisterType<QtRenderView> Failed");
   EPTHROW_IF(qmlRegisterType<QtEPComponent>() == -1, epR_Failure, "qmlRegisterType<QtEPComponent> Failed");
   EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, epR_Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
 

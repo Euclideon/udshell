@@ -10,15 +10,15 @@
 
 namespace qt {
 
-class FboRenderer;
+class QtFboRenderer;
 
-class RenderView : public QQuickFramebufferObject
+class QtRenderView : public QQuickFramebufferObject
 {
   Q_OBJECT
 
 public:
-  RenderView(QQuickItem *pParent = 0);
-  virtual ~RenderView();
+  QtRenderView(QQuickItem *pParent = 0);
+  virtual ~QtRenderView();
 
   Renderer *createRenderer() const override;
 
@@ -29,7 +29,7 @@ private:
   bool dirty;
 
   // TODO: Avoid this crap
-  friend class FboRenderer;
+  friend class QtFboRenderer;
 
   void componentComplete() override;
 
@@ -55,12 +55,6 @@ private slots:
       spView->Resize(w, h);
   }
 
-  void OnFrameReady()
-  {
-    dirty = true;
-    update();
-  }
-
   void OnVisibleChanged()
   {
     if (spView)
@@ -70,6 +64,13 @@ private slots:
       else
         spView->Deactivate();
     }
+  }
+
+private:
+  void OnFrameReady()
+  {
+    dirty = true;
+    update();
   }
 };
 
