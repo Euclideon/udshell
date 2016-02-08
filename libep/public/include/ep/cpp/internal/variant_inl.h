@@ -32,9 +32,10 @@ struct VarCallHack
   template<size_t... S>
   epforceinline static Variant call(R(*f)(Args...), Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
+    size_t errorDepth = ErrorLevel();
     try {
       Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
-      if (ErrorLevel())
+      if (ErrorLevel() > errorDepth)
         return Variant(GetError());
       return std::move(r);
     } catch (EPException &e) {
@@ -52,9 +53,10 @@ struct VarCallHack<void, Args...>
   template<size_t... S>
   epforceinline static Variant call(void(*f)(Args...), Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
+    size_t errorDepth = ErrorLevel();
     try {
       f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
-      if (ErrorLevel())
+      if (ErrorLevel() > errorDepth)
         return Variant(GetError());
       return Variant();
     } catch (EPException &e) {
@@ -73,9 +75,10 @@ struct MethodCallHack
   template<size_t... S>
   epforceinline static Variant call(FastDelegate<R(Args...)> f, Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
+    size_t errorDepth = ErrorLevel();
     try {
       Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
-      if (ErrorLevel())
+      if (ErrorLevel() > errorDepth)
         return Variant(GetError());
       return std::move(r);
     } catch (EPException &e) {
@@ -93,9 +96,10 @@ struct MethodCallHack<void, Args...>
   template<size_t... S>
   epforceinline static Variant call(FastDelegate<void(Args...)> f, Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
+    size_t errorDepth = ErrorLevel();
     try {
       f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
-      if (ErrorLevel())
+      if (ErrorLevel() > errorDepth)
         return Variant(GetError());
       return Variant();
     } catch (EPException &e) {

@@ -53,6 +53,9 @@ struct ErrorState
 };
 
 ErrorState* _PushError(epResult error, const SharedString &message, const char *function, const char *file, int line);
+void PopError();
+
+void PopErrorToLevel(size_t level);
 
 size_t ErrorLevel();
 ErrorState* GetError();
