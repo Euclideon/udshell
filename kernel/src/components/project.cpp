@@ -20,10 +20,10 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   {
     srcString = pSrc->asString();
 
-    // path or url?
-    spSrc = pKernel->CreateComponent<File>({ { "path", *pSrc }, { "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
-    if (!spSrc)
-    {
+    try {
+      spSrc = pKernel->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+    }
+    catch (EPException &) {
       LogDebug(2, "Project file \"{0}\" does not exist. Creating new project.", *pSrc);
       return;
     }
@@ -90,14 +90,17 @@ void Project::SaveProject()
     return;
   }
 
-  StreamRef spFile = GetKernel().CreateComponent<File>({ { "path", String(srcString) }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
-  if (!spFile)
+  try
+  {
+    StreamRef spFile = GetKernel().CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    spFile->Write(buffer);
+  }
+  catch (EPException &)
   {
     LogWarning(1, "Failed to open Project file for writing: \"{0}\"", srcString);
+    ClearError();
     return;
   }
-
-  spFile->Write(buffer);
 }
 
 Variant Project::SaveActivities()
@@ -163,9 +166,10 @@ void Project::ParseActivity(Variant node)
 
     activities.pushBack(component_cast<Activity>(pKernel->CreateComponent(node["name"].asString(), initParams)));
   }
-  catch (...)
+  catch (EPException &)
   {
-    EPTHROW(epR_Failure, "Unable to load Activity from project file \"{0}\"", srcString);
+    ClearError();
+    LogError("Unable to load Activity from project file \"{0}\"", srcString);
   }
 }
 

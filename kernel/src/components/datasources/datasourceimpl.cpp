@@ -19,8 +19,6 @@ StreamRef DataSourceImpl::OpenStream(const Variant &source)
   {
     // path or url?
     spSource = GetKernel()->CreateComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
-    if (!spSource)
-      EPTHROW_WARN(epR_File_OpenFailure, 2, "\"src\" file path not found: {0}", source.asString());
   }
   else if ((spComp = source.as<ComponentRef>()))
   {

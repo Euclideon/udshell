@@ -156,10 +156,16 @@ void NewProject(String filePath)
 
 void OpenProject(String filePath)
 {
-  ProjectRef spNewProject = pKernel->CreateComponent<Project>({ { "src", filePath }, { "name", "project" } });
-  if (!spNewProject)
+  ProjectRef spNewProject;
+
+  try
   {
-    pKernel->LogWarning(1, "Couldn't open project file \"{0}\"", MutableString256().urlDecode(filePath));
+    spNewProject = pKernel->CreateComponent<Project>({ { "src", filePath }, { "name", "project" } });
+  }
+  catch (EPException &)
+  {
+    pKernel->LogWarning(2, "Couldn't open project file \"{0}\"", MutableString256().urlDecode(filePath));
+    ClearError();
     return;
   }
 
@@ -221,34 +227,19 @@ void Deinit(String sender, String message, const Variant &data)
 
 void Init(String sender, String message, const Variant &data)
 {
+  epscope(fail) { if (!spMainWindow) pKernel->LogError("Error creating MainWindow UI Component\n"); };
   spMainWindow = pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
-  if (!spMainWindow)
-  {
-    pKernel->LogError("Error creating MainWindow UI Component\n");
-    return;
-  }
 
+  epscope(fail) { if (!spTopLevelUI) pKernel->LogError("Error creating top Level UI Component\n"); };
   spTopLevelUI = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/main.qml" } });
-  if (!spTopLevelUI)
-  {
-    pKernel->LogError("Error creating top Level UI Component\n");
-    return;
-  }
 
+  epscope(fail) { if (!spMessageBox) pKernel->LogError("Error creating MessageBox UI Component\n"); };
   spMessageBox = pKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/components/messagebox.qml" } });
-  if (!spMessageBox)
-  {
-    pKernel->LogError("Error creating MessageBox UI Component\n");
-    return;
-  }
   spTopLevelUI->SetProperty("messageboxcomp", spMessageBox);
 
-  auto spConsole = pKernel->CreateComponent<UIConsole>({ { "file", "qrc:/kernel/console.qml" } });
-  if (!spConsole)
-  {
-    pKernel->LogError("Error creating top Level UI Component\n");
-    return;
-  }
+  UIConsoleRef spConsole;
+  epscope(fail) { if (!spConsole) pKernel->LogError("Error creating top Level UI Component\n"); };
+  spConsole = pKernel->CreateComponent<UIConsole>({ { "file", "qrc:/kernel/console.qml" } });
   spTopLevelUI->SetProperty("uiconsole", spConsole);
 
   // Load menus
@@ -258,8 +249,7 @@ void Init(String sender, String message, const Variant &data)
     pKernel->LogWarning(2, "Menus XML file \"{0}\" does not exist.", menusPath);
 
   spMenu = pKernel->CreateComponent<Menu>({ { "src", menuStr } });
-  if (spMenu)
-    spTopLevelUI->SetProperty("menucomp", spMenu);
+  spTopLevelUI->SetProperty("menucomp", spMenu);
 
   // Load toolbar
   String toolBarPath(":/toolbar.xml");
@@ -268,8 +258,7 @@ void Init(String sender, String message, const Variant &data)
     pKernel->LogWarning(2, "Toolbar XML file \"{0}\" does not exist.", toolBarPath);
 
   spToolBar = pKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
-  if (spToolBar)
-    spTopLevelUI->SetProperty("toolbarcomp", spToolBar);
+  spTopLevelUI->SetProperty("toolbarcomp", spToolBar);
 
   // Subscribe to UI events
   spTopLevelUI->Subscribe("newprojectsignal", Delegate<void(String)>(&NewProject));

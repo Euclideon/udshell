@@ -7,8 +7,6 @@ namespace ep
 BufferRef StreamImpl::ReadBuffer(size_t bytes)
 {
   BufferRef spBuffer = GetKernel()->CreateComponent<Buffer>();
-  if (!spBuffer)
-    return nullptr;
 
   spBuffer->Allocate(bytes);
 
@@ -31,8 +29,6 @@ BufferRef StreamImpl::Load()
     return nullptr;
 
   BufferRef spBuffer = GetKernel()->CreateComponent<Buffer>();
-  if (!spBuffer)
-    return nullptr;
   spBuffer->Allocate((size_t)len);
 
   Slice<void> buffer = spBuffer->Map();
