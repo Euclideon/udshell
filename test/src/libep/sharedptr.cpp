@@ -415,6 +415,18 @@ TEST(UniquePtr, CreateAndDestroy)
   EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::TestClass::test);
 }
 
+TEST(UniquePtr, CreateAndDestroyConst)
+{
+  {
+    // construct from create
+    UniquePtr<const sharedptr_test::TestClass> upTC = UniquePtr<const sharedptr_test::TestClass>::create();
+    ASSERT_TRUE(upTC.ptr() != nullptr);
+    EXPECT_EQ(1, upTC->RefCount());
+    EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
+  }
+  EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::TestClass::test);
+}
+
 TEST(UniquePtr, CreateAndDestroyFromCopy)
 {
   UniquePtr<sharedptr_test::TestClass> upTC = UniquePtr<sharedptr_test::TestClass>::create();
@@ -426,6 +438,14 @@ TEST(UniquePtr, CreateAndDestroyFromCopy)
     EXPECT_TRUE(upCopy.ptr() != nullptr);
     EXPECT_TRUE(upTC.ptr() == nullptr);
     EXPECT_EQ(1, upCopy->RefCount());
+    EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
+
+    // copy construction to const TestClass
+    UniquePtr<const sharedptr_test::TestClass> upCopyConst = upCopy;
+    EXPECT_TRUE(upCopyConst.ptr() != nullptr);
+    EXPECT_TRUE(upCopy.ptr() == nullptr);
+    EXPECT_EQ(1, upCopyConst->RefCount());
+    EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
   }
   EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::TestClass::test);
 }
@@ -444,6 +464,13 @@ TEST(UniquePtr, CreateAndDestroyFromMove)
     EXPECT_TRUE(upMove.ptr() != nullptr);
     EXPECT_TRUE(upMove.ptr() == pTest);
     EXPECT_EQ(1, upMove->RefCount());
+    EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
+
+    // move construction to const TestClass - this will discard upMove
+    UniquePtr<const sharedptr_test::TestClass> upMoveConst = std::move(upMove);
+    EXPECT_TRUE(upMove.ptr() == nullptr);
+    EXPECT_TRUE(upMoveConst.ptr() == pTest);
+    EXPECT_EQ(1, upMoveConst->RefCount());
     EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
   }
   EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::TestClass::test);
@@ -468,6 +495,15 @@ TEST(UniquePtr, CreateAndDestroyFromRefCountedPointer)
 TEST(UniquePtr, CreateAndDestroyFromNonRefCountedPointer)
 {
   UniquePtr<sharedptr_test::NonRefCountedTestClass> upFromPtr = UniquePtr<sharedptr_test::NonRefCountedTestClass>::create();
+  ASSERT_TRUE(upFromPtr.ptr() != nullptr);
+  EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::NonRefCountedTestClass::test);
+  upFromPtr = nullptr;
+  EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::NonRefCountedTestClass::test);
+}
+
+TEST(UniquePtr, CreateAndDestroyFromNonRefCountedPointerConst)
+{
+  UniquePtr<const sharedptr_test::NonRefCountedTestClass> upFromPtr = UniquePtr<const sharedptr_test::NonRefCountedTestClass>::create();
   ASSERT_TRUE(upFromPtr.ptr() != nullptr);
   EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::NonRefCountedTestClass::test);
   upFromPtr = nullptr;

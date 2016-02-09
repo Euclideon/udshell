@@ -100,8 +100,7 @@ public:
   SharedPtr(SharedPtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    if (this != &ptr)
-      ptr.pInstance = nullptr;
+    ptr.pInstance = nullptr;
   }
 
   // the U allows us to accept const
@@ -112,8 +111,7 @@ public:
   SharedPtr(SharedPtr<U> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    if (this != (void*)&ptr)
-      ptr.pInstance = nullptr;
+    ptr.pInstance = nullptr;
   }
 
   template <class U> // the U allows us to accept const
@@ -246,21 +244,18 @@ public:
   UniquePtr(UniquePtr<U> &ptr)
     : pInstance(ptr.pInstance)
   {
-    if(this != &ptr)
-      ptr.pInstance = nullptr;
+    ptr.pInstance = nullptr;
   }
   UniquePtr(UniquePtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    if (this != &ptr)
-      ptr.pInstance = nullptr;
+    ptr.pInstance = nullptr;
   }
   template<typename U>
   UniquePtr(UniquePtr<U> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    if (this != &ptr)
-      ptr.pInstance = nullptr;
+    ptr.pInstance = nullptr;
   }
 
   ~UniquePtr()
@@ -321,7 +316,7 @@ private:
   template<typename U, bool isref> friend struct Acquire;
   template<typename U, bool isref> friend struct Release;
 
-  T * eprestrict pInstance = nullptr;
+  T *pInstance = nullptr;
 };
 
 
@@ -437,7 +432,8 @@ namespace internal {
   {
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
-    UniquePtr<T> up(new(pMem) T(args...));
+    using U = typename std::remove_const<T>::type;
+    UniquePtr<U> up(new(pMem) U(args...));
     up->pFreeFunc = [](void *pMem) { epFree(pMem); };
     return std::move(up);
   }
@@ -461,7 +457,10 @@ namespace internal {
   epforceinline void Release<T, true>::release(T *ptr)
   {
     if (ptr)
-      ptr->DecRef();
+    {
+      using U = typename std::remove_const<T>::type;
+      const_cast<U*>(ptr)->DecRef();
+    }
   }
 
 } // namespace internal
