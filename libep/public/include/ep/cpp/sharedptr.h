@@ -307,11 +307,6 @@ public:
     pInstance = nullptr;
   }
 
-  void release()
-  {
-    pInstance = nullptr;
-  }
-
   // reference counter operations:
   explicit operator bool() const { return pInstance != nullptr; }
 
@@ -334,7 +329,7 @@ private:
 class RefCounted : public Safe
 {
 public:
-  size_t RefCount() { return rc; }
+  size_t RefCount() const { return rc; }
   size_t IncRef() { return ++rc; }
   size_t DecRef()
   {
