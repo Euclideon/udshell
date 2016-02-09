@@ -8,13 +8,15 @@
 
 #include "driver/qt/epqt.h"
 
-#include <QOpenGLFunctions_2_0>
+#include <QOpenGLFunctions>
+#include <QOpenGLFunctions_3_2_Core>
 #include <QOpenGLDebugLogger>
 
 // internal storage of the Qt GL Context
 struct epQtGLContext
 {
-  QOpenGLFunctions_2_0 *pFunc;
+  QOpenGLFunctions *pFunc;
+  QOpenGLFunctions_3_2_Core *pFunc3_2_Core;
 };
 
 extern epQtGLContext s_QtGLContext;

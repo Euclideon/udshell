@@ -127,7 +127,7 @@ void ViewportImpl::CreateInternal(Variant::VarMap initParams)
 
   // check that we have a RenderView
   QQuickItem *pRootItem = (QQuickItem*)pInstance->pUserData;
-  QList<qt::RenderView *> renderViews = pRootItem->findChildren<qt::RenderView *>();
+  QList<qt::QtRenderView *> renderViews = pRootItem->findChildren<qt::QtRenderView *>();
   EPTHROW_IF(renderViews.size() != 1, epR_Failure, "Viewport component must contain only one RenderView QML item");
 
   // check if we passed in a view, otherwise create a default one

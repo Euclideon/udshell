@@ -72,6 +72,8 @@ struct ComponentInfo
   // TODO: add flags ('Abstract' (can't create) flag)
 };
 
+class Kernel;
+
 struct ComponentDesc
 {
   typedef void(InitComponent)(Kernel*);

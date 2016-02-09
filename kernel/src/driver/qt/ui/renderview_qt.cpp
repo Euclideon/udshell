@@ -10,6 +10,7 @@
 #include <QSGSimpleTextureNode>
 #include <QOpenGLDebugLogger>
 
+#include "synchronisedptr.h"
 #include "../epkernel_qt.h"
 #include "renderview_qt.h"
 #include "components/viewimpl.h"
@@ -19,15 +20,15 @@ epKeyCode qtKeyToEPKey(Qt::Key qk);
 
 namespace qt {
 
-class FboRenderer : public QQuickFramebufferObject::Renderer
+class QtFboRenderer : public QQuickFramebufferObject::Renderer
 {
 public:
-  FboRenderer(const QQuickFramebufferObject *item) : m_item(item) { }
+  QtFboRenderer(const QQuickFramebufferObject *item) : m_item(item) { }
 
   void render()
   {
-    if (spRenderView)
-      spRenderView->RenderGPU();
+    if (spRenderableView)
+      spRenderableView->RenderGPU();
 
     if (m_item->window())
         m_item->window()->resetOpenGLState();
@@ -45,21 +46,21 @@ public:
 
   void synchronize(QQuickFramebufferObject * item)
   {
-    RenderView *pRenderView = (RenderView*)item;
+    QtRenderView *pQtRenderView = (QtRenderView*)item;
 
-    if (pRenderView->dirty)
+    if (pQtRenderView->dirty)
     {
-      spRenderView = pRenderView->spView->GetImpl<ViewImpl>()->GetRenderableView();
-      pRenderView->dirty = false;
+      spRenderableView = ep::SynchronisedPtr<ep::RenderableView>(pQtRenderView->spView->GetImpl<ViewImpl>()->GetRenderableView(), QtApplication::Kernel());
+      pQtRenderView->dirty = false;
     }
   }
 
   const QQuickFramebufferObject *m_item;
-  RenderableViewRef spRenderView = nullptr;
+  ep::SynchronisedPtr<ep::RenderableView> spRenderableView;
 };
 
 
-RenderView::RenderView(QQuickItem *pParent)
+QtRenderView::QtRenderView(QQuickItem *pParent)
   : QQuickFramebufferObject(pParent)
   , spView(nullptr)
   , dirty(false)
@@ -67,38 +68,38 @@ RenderView::RenderView(QQuickItem *pParent)
   QtApplication::Kernel()->LogTrace("Create RenderView Quick Item");
 
   // handle resize
-  QObject::connect(this, &QQuickItem::widthChanged, this, &RenderView::OnResize);
-  QObject::connect(this, &QQuickItem::heightChanged, this, &RenderView::OnResize);
+  QObject::connect(this, &QQuickItem::widthChanged, this, &QtRenderView::OnResize);
+  QObject::connect(this, &QQuickItem::heightChanged, this, &QtRenderView::OnResize);
 
-  QObject::connect(this, &QQuickItem::visibleChanged, this, &RenderView::OnVisibleChanged);
+  QObject::connect(this, &QQuickItem::visibleChanged, this, &QtRenderView::OnVisibleChanged);
 }
 
-RenderView::~RenderView()
+QtRenderView::~QtRenderView()
 {
   QtApplication::Kernel()->LogTrace("Destroy RenderView Quick Item");
 
   if (spView)
-    spView->FrameReady.Unsubscribe(Delegate<void()>(this, &RenderView::OnFrameReady));
+    spView->FrameReady.Unsubscribe(Delegate<void()>(this, &QtRenderView::OnFrameReady));
 }
 
-QQuickFramebufferObject::Renderer *RenderView::createRenderer() const
+QQuickFramebufferObject::Renderer *QtRenderView::createRenderer() const
 {
   QtApplication::Kernel()->LogTrace("Create RenderView Renderer");
-  return new FboRenderer(this);
+  return new QtFboRenderer(this);
 }
 
-void RenderView::AttachView(ViewRef _spView)
+void QtRenderView::AttachView(ViewRef _spView)
 {
   QtApplication::Kernel()->LogTrace("RenderView::AttachView()");
 
   spView = _spView;
-  spView->FrameReady.Subscribe(Delegate<void()>(this, &RenderView::OnFrameReady));
+  spView->FrameReady.Subscribe(Delegate<void()>(this, &QtRenderView::OnFrameReady));
 
   // TEMP HAX:
   QtApplication::Kernel()->SetFocusView(spView);
 }
 
-void RenderView::componentComplete()
+void QtRenderView::componentComplete()
 {
   QtApplication::Kernel()->LogTrace("RenderView::componentComplete()");
   QQuickFramebufferObject::componentComplete();
@@ -110,7 +111,7 @@ void RenderView::componentComplete()
   setAcceptedMouseButtons(Qt::LeftButton | Qt::MiddleButton | Qt::RightButton);
 }
 
-QSGNode *RenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData)
+QSGNode *QtRenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData)
 {
   // MAD HAX: QML flips our framebuffer texture along the y-axis - better fix in 5.6: https://bugreports.qt.io/browse/QTBUG-41073
   if (!node)
@@ -124,7 +125,7 @@ QSGNode *RenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeD
   return QQuickFramebufferObject::updatePaintNode(node, nodeData);
 }
 
-void RenderView::keyPressEvent(QKeyEvent *pEv)
+void QtRenderView::keyPressEvent(QKeyEvent *pEv)
 {
   epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
   if (kc == epKC_Unknown)
@@ -139,7 +140,7 @@ void RenderView::keyPressEvent(QKeyEvent *pEv)
     pEv->accept();
 }
 
-void RenderView::keyReleaseEvent(QKeyEvent *pEv)
+void QtRenderView::keyReleaseEvent(QKeyEvent *pEv)
 {
   epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
   if (kc == epKC_Unknown)
@@ -154,7 +155,7 @@ void RenderView::keyReleaseEvent(QKeyEvent *pEv)
     pEv->accept();
 }
 
-void RenderView::mouseDoubleClickEvent(QMouseEvent *pEv)
+void QtRenderView::mouseDoubleClickEvent(QMouseEvent *pEv)
 {
   bool handled = false;
   // translate and process
@@ -165,7 +166,7 @@ void RenderView::mouseDoubleClickEvent(QMouseEvent *pEv)
 // TODO: MASSIVE HAX!!! FIX ME!!
 static qreal mouseLastX, mouseLastY;
 
-void RenderView::mouseMoveEvent(QMouseEvent *pEv)
+void QtRenderView::mouseMoveEvent(QMouseEvent *pEv)
 {
   auto pos = pEv->localPos();
   qreal x = pos.x();
@@ -186,7 +187,7 @@ void RenderView::mouseMoveEvent(QMouseEvent *pEv)
   mouseLastY = y;
 }
 
-void RenderView::mousePressEvent(QMouseEvent *pEv)
+void QtRenderView::mousePressEvent(QMouseEvent *pEv)
 {
   epInputEvent ev;
   ev.deviceType = epID_Mouse;
@@ -198,7 +199,7 @@ void RenderView::mousePressEvent(QMouseEvent *pEv)
     pEv->accept();
 }
 
-void RenderView::mouseReleaseEvent(QMouseEvent *pEv)
+void QtRenderView::mouseReleaseEvent(QMouseEvent *pEv)
 {
   epInputEvent ev;
   ev.deviceType = epID_Mouse;
@@ -210,7 +211,7 @@ void RenderView::mouseReleaseEvent(QMouseEvent *pEv)
     pEv->accept();
 }
 
-void RenderView::touchEvent(QTouchEvent *pEv)
+void QtRenderView::touchEvent(QTouchEvent *pEv)
 {
   bool handled = false;
   // translate and process
@@ -218,7 +219,7 @@ void RenderView::touchEvent(QTouchEvent *pEv)
     pEv->accept();
 }
 
-void RenderView::hoverMoveEvent(QHoverEvent *pEv)
+void QtRenderView::hoverMoveEvent(QHoverEvent *pEv)
 {
   auto pos = pEv->pos();
   qreal x = pos.x();

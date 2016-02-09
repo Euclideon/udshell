@@ -14,6 +14,7 @@
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/render.h"
 
+#include "hal/render.h"
 #include "hal/vertex.h"
 #include "hal/texture.h"
 #include "hal/shader.h"
@@ -81,8 +82,9 @@ class RenderableView : public RefCounted
 public:
   RenderableView(const SharedPtr<Renderer> &spRenderer);
 
-  void RenderUD();  // ** RUN ON THE UD THREAD!
-  void RenderGPU(); // ** RUN ON THE RENDER THREAD!
+  void CreateResources(); // ** RUN ON THE MAIN THREAD!
+  void RenderUD();        // ** RUN ON THE UD THREAD!
+  void RenderGPU();       // ** RUN ON THE RENDER THREAD!
 
   // TODO: REMOVE ME!
   udRenderView *GetRenderView() const { return pRenderView; }
@@ -115,6 +117,9 @@ protected:
   ~RenderableView() override;
 
   SharedPtr<Renderer> spRenderer;
+
+  // TODO: re-evaluate this
+  epSyncPoint *pSyncPoint = nullptr;
 };
 typedef SharedPtr<RenderableView> RenderableViewRef;
 

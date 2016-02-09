@@ -94,6 +94,10 @@ QtKernel::~QtKernel()
   pApplication->sendPostedEvents();
   pApplication->processEvents();
 
+  delete pGLDebugLogger;
+  delete pSplashScreen;
+  delete pQmlEngine;
+
   try
   {
     DeinitRender();
@@ -107,10 +111,7 @@ QtKernel::~QtKernel()
     LogError("Error cleaning up renderer, DeinitRender failed");
   }
 
-  delete pGLDebugLogger;
-  delete pSplashScreen;
   delete pMainThreadContext;
-  delete pQmlEngine;
 
   pApplication->deleteLater();
 }
@@ -137,7 +138,7 @@ void QtKernel::InitInternal()
   epscope(fail) { delete pQmlEngine; };
 
   // register our internal qml types
-  EPTHROW_IF(qmlRegisterType<RenderView>("epKernel", 0, 1, "EPRenderView") == -1, epR_Failure, "qmlRegisterType<RenderView> Failed");
+  EPTHROW_IF(qmlRegisterType<QtRenderView>("epKernel", 0, 1, "EPRenderView") == -1, epR_Failure, "qmlRegisterType<QtRenderView> Failed");
   EPTHROW_IF(qmlRegisterType<QtEPComponent>() == -1, epR_Failure, "qmlRegisterType<QtEPComponent> Failed");
   EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, epR_Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
 
@@ -317,6 +318,15 @@ void QtKernel::DoInit(ep::Kernel *)
   pMainThreadContext->setFormat(mainSurfaceFormat);
   IF_EPASSERT(bool succeed = )pMainThreadContext->create();
   EPASSERT(succeed, "Couldn't create render context!");
+
+  // update the format based on what we actually got (since it may differ)
+  mainSurfaceFormat = pMainThreadContext->format();
+
+  LogDebug(2, "Created OpenGL context using version: {0}.{1} {2,?3}",
+    mainSurfaceFormat.majorVersion(),
+    mainSurfaceFormat.minorVersion(),
+    (mainSurfaceFormat.profile() == QSurfaceFormat::CoreProfile ? "Core" : "Compatibility"),
+    (mainSurfaceFormat.profile() != QSurfaceFormat::NoProfile));
 
   if (!pMainThreadContext->makeCurrent(pSplashScreen))
   {
