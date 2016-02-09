@@ -191,16 +191,12 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->spLogger = pKernel->CreateComponent<Logger>();
   pKernel->spLogger->DisableCategory(LogCategories::Trace);
 
-  spDebugFile = pKernel->CreateComponent<File>({ { "name", "logfile" }, { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
-  if (spDebugFile)
-  {
-    pKernel->spLogger->AddStream(spDebugFile);
-    spDebugFile->WriteLn("\n*** Logging started ***");
-  }
+  spDebugFile = pKernel->CreateComponent<File>({ { "name", "logfile" },{ "path", "epKernel.log" },{ "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
+  pKernel->spLogger->AddStream(spDebugFile);
+  spDebugFile->WriteLn("\n*** Logging started ***");
 
   spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg }, {"name", "debugout"} });
-  if (spConsole)
-     pKernel->spLogger->AddStream(spConsole);
+  pKernel->spLogger->AddStream(spConsole);
 
   // resource manager
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>({ {"name", "resourcemanager"} });

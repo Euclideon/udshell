@@ -63,29 +63,18 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);
 
-  auto spViewport = pKernel->CreateComponent<Viewport>({ { "file", "qrc:/kernel/viewport.qml" }, { "view", spView } });
-  if (!spViewport)
-  {
-    pKernel->LogError("Error creating Viewport Component\n");
-    throw epR_Failure;
-  }
+  ViewportRef spViewport;
+  epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component\n"); };
+  spViewport = pKernel->CreateComponent<Viewport>({ { "file", "qrc:/kernel/viewport.qml" }, { "view", spView } });
 
-  auto spViewerUI = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/viewer/viewer.qml" } });
-  if (!spViewerUI)
-  {
-    pKernel->LogError("Error creating Viewer UI Component\n");
-    throw epR_Failure;
-  }
+  UIComponentRef spViewerUI;
+  epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
+  spViewerUI = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/viewer/viewer.qml" } });
   spViewerUI->SetProperty("viewport", spViewport);
 
+  epscope(fail) { if(!spUIBookmarks) pKernel->LogError("Error creating bookmarks UI Component\n"); };
   spUIBookmarks = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/bookmarksui.qml" } });
-  if (!spUIBookmarks)
-  {
-    pKernel->LogError("Error creating bookmarks UI Component\n");
-    throw epR_Failure;
-  }
   spUIBookmarks->SetProperty("view", spView);
-
   spViewerUI->SetProperty("bookmarkscomp", spUIBookmarks);
 
   SetUI(spViewerUI);

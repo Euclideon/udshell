@@ -30,10 +30,6 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
       else
         model = pKernel->CreateComponent<UDModel>();
 
-      // TODO: this need not exist if CreateComponent doesn't catch...
-      if (!model)
-        EPTHROW_ERROR(epR_Failure, "Failed to create model");
-
       UDModelImpl *pModelImpl = model->GetImpl<UDModelImpl>();
       pModelImpl->wpDataSource = SafePtr<DataSource>(this);
       pModelImpl->pOctree = pOctree;

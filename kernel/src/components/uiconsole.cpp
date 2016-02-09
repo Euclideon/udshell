@@ -34,46 +34,40 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void(Variant::VarMap)>(this, &UIConsole::ToggleVisible), "", "", "`");
 
   // Console input history file
+  epscope(fail) { if(!spHistoryFile) LogError("Console -- Could not open history file \"{0}\"", historyFileName); };
   spHistoryFile = pKernel->CreateComponent<File>({ { "path", historyFileName }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
-  if (spHistoryFile)
-  {
-    size_t len = (size_t)spHistoryFile->Length();
-    Array<char> buffer(Reserve, len);
-    buffer.length = spHistoryFile->Read(buffer.getBuffer()).length;
 
-    String str = buffer;
-    MutableString<1024> multiLineString;
-    while (!str.empty())
+  size_t len = (size_t)spHistoryFile->Length();
+  Array<char> buffer(Reserve, len);
+  buffer.length = spHistoryFile->Read(buffer.getBuffer()).length;
+
+  String str = buffer;
+  MutableString<1024> multiLineString;
+  while (!str.empty())
+  {
+    String token = str.popToken<true>("\n");
+    token = token.trim<false, true>();
+    if (!token.empty())
     {
-      String token = str.popToken<true>("\n");
-      token = token.trim<false, true>();
-      if (!token.empty())
+      if (token.endsWith(" \\") || token.endsWith("\t\\"))
       {
-        if (token.endsWith(" \\") || token.endsWith("\t\\"))
-        {
-          token.length -= 2;
-          multiLineString.append(token, "\n");
-        }
-        else if (!multiLineString.empty())
-        {
-          multiLineString.append(token);
-          history.concat(multiLineString);
-          multiLineString = "";
-        }
-        else
-          history.concat(token);
+        token.length -= 2;
+        multiLineString.append(token, "\n");
       }
-    }
-    if (!multiLineString.empty())
-    {
-      multiLineString.length--;
-      history.concat(multiLineString);
+      else if (!multiLineString.empty())
+      {
+        multiLineString.append(token);
+        history.concat(multiLineString);
+        multiLineString = "";
+      }
+      else
+        history.concat(token);
     }
   }
-  else
+  if (!multiLineString.empty())
   {
-    LogError("Console -- Could not open history file \"{0}\"", historyFileName);
-    EPTHROW(epR_File_OpenFailure, "Console history file open failure");
+    multiLineString.length--;
+    history.concat(multiLineString);
   }
 }
 
