@@ -4,5 +4,6 @@ EPMenu 0.1 epmenu.qml
 EPToolBar 0.1 eptoolbar.qml
 EPSplitButton 0.1 epsplitbutton.qml
 EPToolButton 0.1 eptoolbutton.qml
+EPFileDialog 0.1 epfiledialog.qml
 
 
