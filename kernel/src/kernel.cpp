@@ -635,6 +635,11 @@ void Kernel::Exec(String code)
   spLua->Execute(code);
 }
 
+const AVLTree<String, const ep::ComponentDesc *> &Kernel::GetExtensionsRegistry() const
+{
+  return extensionsRegistry;
+}
+
 void Kernel::RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts)
 {
   for (const String &e : exts)

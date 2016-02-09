@@ -21,6 +21,27 @@ void ResourceManagerImpl::RemoveResourceArray(Slice<const ResourceRef> resArray)
   pInstance->Removed.Signal(resArray);
 }
 
+Variant::VarMap ResourceManagerImpl::GetExtensions() const
+{
+  const AVLTree<String, const ep::ComponentDesc *> &extensionsRegistry = GetKernel()->GetExtensionsRegistry();
+  AVLTree<SharedString, Array<SharedString>> exts;
+  Variant::VarMap map;
+
+  for (auto kvp : extensionsRegistry)
+  {
+    Array<SharedString> *pCompExts = exts.Get(kvp.value->info.id);
+    if (pCompExts)
+      pCompExts->pushBack(kvp.key);
+    else
+      exts.Insert(kvp.value->info.id, { kvp.key });
+  }
+
+  for (auto item : exts)
+    map.Insert(item.key, item.value);
+
+  return map;
+}
+
 Array<ResourceRef> ResourceManagerImpl::GetResourcesByType(const ep::ComponentDesc *pBase) const
 {
   Array<ResourceRef> outs;

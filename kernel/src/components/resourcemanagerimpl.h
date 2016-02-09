@@ -36,6 +36,7 @@ public:
   ResourceIterator begin() const override final { return ResourceIterator( resources.begin()); }
   ResourceIterator end() const override final { return ResourceIterator( resources.end()); }
 
+  Variant::VarMap GetExtensions() const override final;
   // Resource loading/saving functions
   DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams) override final;
   void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) override final;

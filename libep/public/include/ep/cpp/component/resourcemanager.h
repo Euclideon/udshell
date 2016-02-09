@@ -71,6 +71,7 @@ public:
   ResourceIterator begin() const { return pImpl->begin(); }
   ResourceIterator end() const { return pImpl->end(); }
 
+  Variant::VarMap GetExtensions() const override final { return pImpl->GetExtensions(); }
   // Resource loading/saving functions
   DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams) override final { return pImpl->LoadResourcesFromFile(initParams); }
   void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) override final { pImpl->SaveResourcesToFile(spDataSource, initParams); }
@@ -95,6 +96,7 @@ protected:
     return{
       EP_MAKE_PROPERTY_RO(NumResources, "The number of Resources in the ResourceManager", nullptr, 0),
       EP_MAKE_PROPERTY_RO(ResourceArray, "An array populated with the ResourceManager's resources", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(Extensions, "The file extensions supported by the ResourceManager orgnanised by DataSource type", nullptr, 0),
     };
   }
   static Array<const MethodInfo> GetMethods()

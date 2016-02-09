@@ -29,6 +29,7 @@ public:
   virtual ResourceIterator begin() const = 0;
   virtual ResourceIterator end() const = 0;
 
+  virtual Variant::VarMap GetExtensions() const = 0;
   // Resource loading/saving functions
   virtual DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams) = 0;
   virtual void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) = 0;
