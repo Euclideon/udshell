@@ -55,13 +55,13 @@ function execute_build() {
 }
 
 function merge_master() {
-  git merge master
+  git merge origin/master
   if [ $? -ne 0 ]; then
-    echo "merged with master failed"
+    echo "merged with origin/master failed"
     git merge --abort
     exit 3;
   fi
-  echo "merged successfully with master"
+  echo "merged successfully with origin/master"
 }
 
 function run_testsuite() {
