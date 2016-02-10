@@ -228,18 +228,21 @@ inline Variant::Variant(SharedPtr<RefCounted> &&spC, SharedPtrType type)
   t = (size_t)Type::SharedPtr;
   ownsContent = 1;
   length = (size_t)type;
-  new(&p) ComponentRef(std::move(spC));
+  new(&p) ComponentRef(std::move((SharedPtr<Component>&)spC));
 }
-inline Variant::Variant(const SharedPtr<RefCounted> &spRC, SharedPtrType type, bool _ownsContent)
+inline Variant::Variant(RefCounted *pRef, SharedPtrType type, bool _ownsContent)
 {
   t = (size_t)Type::SharedPtr;
   ownsContent = _ownsContent ? 1 : 0;
   length = (size_t)type;
   if (ownsContent)
-    new(&p) SharedPtr<RefCounted>(spRC);
+    new(&p) SharedPtr<RefCounted>(pRef);
   else
-    sp = spRC.ptr();
+    sp = pRef;
 }
+inline Variant::Variant(const SharedPtr<RefCounted> &spRC, SharedPtrType type, bool _ownsContent) :
+  Variant(spRC.ptr(), type, _ownsContent)
+{}
 inline Variant::Variant(VarDelegate &&d)
   : Variant(std::move((SharedPtr<RefCounted>&)d.m), SharedPtrType::Delegate)
 {}
@@ -250,7 +253,7 @@ inline Variant::Variant(ComponentRef &&spC)
   : Variant(std::move((SharedPtr<RefCounted>&)spC), SharedPtrType::Component)
 {}
 inline Variant::Variant(const ComponentRef &spC)
-  : Variant((const SharedPtr<RefCounted>&)spC, SharedPtrType::Component)
+  : Variant((RefCounted*)spC.ptr(), SharedPtrType::Component)
 {}
 inline Variant::Variant(SubscriptionRef &&spS)
   : Variant(std::move((SharedPtr<RefCounted>&)spS), SharedPtrType::Subscription)

@@ -66,7 +66,7 @@ public:
 
   ep::ComponentRef FindComponent(String name) const override final;
 
-  SharedPtr<Renderer> GetRenderer() const { return spRenderer; }
+  SharedPtr<Renderer> GetRenderer() const;
 
   // script
   LuaRef GetLua() const { return spLua; }
@@ -83,20 +83,20 @@ public:
   template<typename ...Args> void LogTrace(String format, Args... args) const;
 
   // Functions for resource management
-  ResourceManagerRef GetResourceManager() const override final { return spResourceManager; }
+  ResourceManagerRef GetResourceManager() const override final;
 
   void RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) override final;
   DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) override final;
 
   // stdio relaying functions
-  BroadcasterRef GetStdOutBroadcaster() const override final { return spStdOutBC; }
-  BroadcasterRef GetStdErrBroadcaster() const override final { return spStdErrBC; }
+  BroadcasterRef GetStdOutBroadcaster() const override final;
+  BroadcasterRef GetStdErrBroadcaster() const override final;
 
   // other functions
-  ViewRef GetFocusView() const override final { return spFocusView; }
+  ViewRef GetFocusView() const override final;
   ViewRef SetFocusView(ViewRef spView) override final;
 
-  CommandManagerRef GetCommandManager() const override final { return spCommandManager; }
+  CommandManagerRef GetCommandManager() const override final;
 
   virtual void RunMainLoop() { }
   void Terminate();
@@ -135,20 +135,20 @@ protected:
 
   AVLTree<String, const ep::ComponentDesc *> extensionsRegistry;
 
-  SharedPtr<Renderer> spRenderer = nullptr;
+  SharedPtr<Renderer> spRenderer;
   int renderThreadCount;
 
-  LuaRef spLua = nullptr;
+  LuaRef spLua;
 
-  LoggerRef spLogger = nullptr;
-  PluginManagerRef spPluginManager = nullptr;
-  ResourceManagerRef spResourceManager = nullptr;
-  CommandManagerRef spCommandManager = nullptr;
-  ViewRef spFocusView = nullptr;
-  TimerRef spStreamerTimer = nullptr;
-  TimerRef spUpdateTimer = nullptr;
-  BroadcasterRef spStdOutBC = nullptr;
-  BroadcasterRef spStdErrBC = nullptr;
+  LoggerRef spLogger;
+  PluginManagerRef spPluginManager;
+  ResourceManagerRef spResourceManager;
+  CommandManagerRef spCommandManager;
+  ViewRef spFocusView;
+  TimerRef spStreamerTimer;
+  TimerRef spUpdateTimer;
+  BroadcasterRef spStdOutBC;
+  BroadcasterRef spStdErrBC;
 
   StdCapture *stdOutCapture = nullptr;
   StdCapture *stdErrCapture = nullptr;

@@ -108,9 +108,11 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene)
 
     out.matrix = in.matrix;
 
-    out.arrays.resize(in.vertexArrays.length);
-    for (size_t i = 0; i < in.vertexArrays.length; ++i)
-      out.arrays.ptr[i] = in.vertexArrays.ptr[i].spArray;
+    // TODO: Fix this
+    //out.arrays.resize(in.vertexArrays.length);
+    //for (size_t i = 0; i < in.vertexArrays.length; ++i)
+    //  out.arrays.ptr[i] = in.vertexArrays.ptr[i].spArray;
+
 /*
     out.textures.resize(in.vertexArrays.length);
     for (size_t i = 0; i < invertexArrays.length; ++i)

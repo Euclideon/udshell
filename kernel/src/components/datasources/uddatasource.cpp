@@ -50,7 +50,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
           result = udOctree_GetMetadataByIndex(pOctree, i, &pName, &pValue, nullptr, nullptr);
           if (result == udR_Success)
           {
-            MetadataRef meta = model->GetMetadata();
+            MetadataRef meta = shared_pointer_cast<Metadata>(model->GetMetadata());
             meta->Insert(pName, pValue);
           }
         }

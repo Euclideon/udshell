@@ -109,7 +109,7 @@ void OnActivityChanged(String uid)
   if (uid.empty())
     return;
 
-  ActivityRef spActivity = pKernel->FindComponent(uid);
+  ActivityRef spActivity = component_cast<Activity>(pKernel->FindComponent(uid));
   if (!spActivity)
   {
     pKernel->LogError("Unable to activate Activity \"{0}\". Component does not exist", uid);
@@ -282,7 +282,7 @@ void Init(String sender, String message, const Variant &data)
 
 // TODO Temporary -- Remove this after code for scanning the plugin folder is written
 #if defined(EP_WINDOWS)
-  PluginManagerRef spPluginManager = pKernel->FindComponent("pluginmanager");
+  PluginManagerRef spPluginManager = component_cast<PluginManager>(pKernel->FindComponent("pluginmanager"));
   spPluginManager->LoadPlugin("bin/plugins/viewer.dll");
 #endif // end EP_WINDOWS
 

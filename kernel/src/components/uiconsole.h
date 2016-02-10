@@ -3,6 +3,7 @@
 #define UI_CONSOLE_H
 
 #include "ep/cpp/component/uicomponent.h"
+#include "memstream.h"
 #include "logger.h"
 
 namespace ep {
@@ -10,7 +11,6 @@ namespace ep {
 SHARED_CLASS(UIConsole);
 SHARED_CLASS(MemStream);
 SHARED_CLASS(Broadcaster);
-SHARED_CLASS(Stream);
 SHARED_CLASS(Activity);
 SHARED_CLASS(File);
 

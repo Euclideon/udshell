@@ -18,7 +18,7 @@ inline UniquePtr<T> unique_pointer_cast(const UniquePtr<U> &ptr)
 template<class T, class U>
 inline SharedPtr<T> shared_pointer_cast(const SharedPtr<U> &ptr)
 {
-  return SharedPtr<T>((T*)ptr.ptr());
+  return SharedPtr<T>(static_cast<T*>(ptr.ptr()));
 }
 
 } // namespace ep

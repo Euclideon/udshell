@@ -1,5 +1,5 @@
 #include "renderscene.h"
-
+#include "renderresource.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/shader.h"
 
@@ -74,8 +74,8 @@ void RenderableView::CreateResources()
 {
   if (!spColorTexture)
   {
-    spColorTexture = spRenderer->GetRenderBuffer(spColorBuffer, Renderer::RenderResourceType::Texture);
-    spDepthTexture = spRenderer->GetRenderBuffer(spDepthBuffer, Renderer::RenderResourceType::Texture);
+    spColorTexture = shared_pointer_cast<RenderTexture>(spRenderer->GetRenderBuffer(spColorBuffer, Renderer::RenderResourceType::Texture));
+    spDepthTexture = shared_pointer_cast<RenderTexture>(spRenderer->GetRenderBuffer(spDepthBuffer, Renderer::RenderResourceType::Texture));
     // TODO: use this to ensure the resources have been fully uploaded in the GPU before rendering - re-think this whole thing
     pSyncPoint = epGPU_CreateSyncPoint();
   }
@@ -369,11 +369,11 @@ RenderShaderProgramRef Renderer::GetShaderProgram(const MaterialRef &spShaderPro
     }
   }
   */
-  return spShaderProgram;
+  return RenderShaderProgramRef();
 }
 RenderVertexFormatRef Renderer::GetVertexFormat(const RenderShaderProgramRef &spShaderProgram, Slice<VertexArray> arrays)
 {
-  SharedPtr<RefCounted> spRenderVertexFormat;
+  SharedPtr<RenderVertexFormat> spRenderVertexFormat;
   if (!spRenderVertexFormat)
   {
     EPASSERT(false, "TODO");

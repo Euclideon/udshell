@@ -1,5 +1,6 @@
 #include "eptest.h"
 #include "ep/cpp/variant.h"
+#include "ep/cpp/component/component.h"
 #include <random>
 
 // TODO: these tests are old and should be deprecated!!
