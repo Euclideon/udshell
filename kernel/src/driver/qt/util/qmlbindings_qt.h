@@ -21,9 +21,9 @@ class QtKernelQml : public QObject
 public:
   QtKernelQml(QtKernel *_pKernel, QObject *pParent = nullptr) : QObject(pParent), pKernel(_pKernel) {}
 
-  Q_INVOKABLE qt::QtEPComponent *FindComponent(const QString &uid) const;
-  Q_INVOKABLE qt::QtEPComponent *CreateComponent(const QString typeId, QVariantMap initParams);
-  Q_INVOKABLE qt::QtEPComponent *GetCommandManager() const;
+  Q_INVOKABLE qt::QtEPComponent *findComponent(const QString &uid) const;
+  Q_INVOKABLE qt::QtEPComponent *createComponent(const QString typeId, QVariantMap initParams = QVariantMap());
+  Q_INVOKABLE qt::QtEPComponent *getCommandManager() const;
 
 private:
   QtKernel *pKernel;

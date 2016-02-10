@@ -19,8 +19,8 @@ Rectangle {
   property var view
 
   Component.onCompleted: {
-    commandManager = EPKernel.GetCommandManager();
-    messagebox = EPKernel.FindComponent("messagebox");
+    commandManager = EPKernel.getCommandManager();
+    messagebox = EPKernel.findComponent("messagebox");
   }
 
   function createbookmark(name) {

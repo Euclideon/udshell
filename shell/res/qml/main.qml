@@ -50,7 +50,7 @@ Rectangle {
   }
 
   Component.onCompleted: {
-    var commandManager = EPKernel.GetCommandManager();
+    var commandManager = EPKernel.getCommandManager();
     commandManager.call("registercommand", "newproject", newproject, "", "", "Ctrl+N");
     commandManager.call("registercommand", "openproject", openproject, "", "", "Ctrl+O");
     commandManager.call("registercommand", "saveproject", saveproject, "", "", "Ctrl+S");

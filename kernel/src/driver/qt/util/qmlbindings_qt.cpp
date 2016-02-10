@@ -165,7 +165,7 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
 
 
 // ---------------------------------------------------------------------------------------
-QtEPComponent *QtKernelQml::FindComponent(const QString &uid) const
+QtEPComponent *QtKernelQml::findComponent(const QString &uid) const
 {
   EPASSERT(pKernel, "No active kernel");
   QByteArray byteArray = uid.toUtf8();
@@ -176,7 +176,7 @@ QtEPComponent *QtKernelQml::FindComponent(const QString &uid) const
 }
 
 // ---------------------------------------------------------------------------------------
-QtEPComponent *QtKernelQml::CreateComponent(const QString typeId, QVariantMap initParams)
+QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariantMap initParams)
 {
   EPASSERT(pKernel, "No active kernel");
   QByteArray byteArray = typeId.toUtf8();
@@ -186,14 +186,15 @@ QtEPComponent *QtKernelQml::CreateComponent(const QString typeId, QVariantMap in
   {
     return new QtEPComponent(pKernel->CreateComponent(typeString, epToVariant(initParams).asAssocArray()));
   }
-  catch (...)
+  catch (EPException &)
   {
-    return new QtEPComponent(ComponentRef());
+    ClearError();
+    return nullptr;
   }
 }
 
 // ---------------------------------------------------------------------------------------
-QtEPComponent *QtKernelQml::GetCommandManager() const
+QtEPComponent *QtKernelQml::getCommandManager() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
