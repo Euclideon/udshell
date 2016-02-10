@@ -1,12 +1,13 @@
 #include "ep/cpp/platform.h"
 #include "ep/cpp/error.h"
-
+#include "ep/cpp/math.h"
 #include "ep/cpp/kernel.h"
 
 namespace ep {
 namespace internal {
 
-thread_local ErrorState s_errorStack[256];
+enum : size_t { ErrorStackSize = 256 };
+thread_local ErrorState s_errorStack[ErrorStackSize];
 thread_local size_t s_errorDepth = 0;
 
 void Log(int type, int level, String text)
@@ -38,7 +39,13 @@ ErrorState* _PushError(epResult error, const SharedString &message, const char *
   ep::internal::s_errorStack[ep::internal::s_errorDepth].file = file;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].line = line;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].pPrior = ep::internal::s_errorDepth > 0 ? &ep::internal::s_errorStack[ep::internal::s_errorDepth-1] : nullptr;
-  return &ep::internal::s_errorStack[ep::internal::s_errorDepth++];
+
+  ErrorState *pState = &ep::internal::s_errorStack[ep::internal::s_errorDepth];
+  // If the error state will exceeded the stack size just overwrite the last entry.
+  // This is necessary to handle the case where script implements a loop that errors every iteration
+  // and so may exceed the stack.
+  ep::internal::s_errorDepth = ep::Min(internal::ErrorStackSize - 1, ++ep::internal::s_errorDepth);
+  return pState;
 }
 
 size_t ErrorLevel()
@@ -66,6 +73,21 @@ void ClearError()
     ep::internal::s_errorStack[ep::internal::s_errorDepth-1].~ErrorState();
     --ep::internal::s_errorDepth;
   }
+}
+
+void PopError()
+{
+  if (ep::internal::s_errorDepth)
+  {
+    ep::internal::s_errorStack[ep::internal::s_errorDepth - 1].~ErrorState();
+    --ep::internal::s_errorDepth;
+  }
+}
+
+void PopErrorToLevel(size_t level)
+{
+  while (ep::internal::s_errorDepth > level)
+    PopError();
 }
 
 SharedString DumpError()

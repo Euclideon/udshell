@@ -390,13 +390,25 @@ void Kernel::SendMessage(String target, String sender, String message, const Var
     if (ppComponent)
     {
       ComponentRef spComponent(*ppComponent);
-      try {
+      size_t errorDepth = ErrorLevel();
+      try
+      {
         spComponent->ReceiveMessage(message, sender, data);
-      } catch (std::exception &e) {
+        if (ErrorLevel() > errorDepth)
+        {
+          LogError("Message Handler {0} failed {1}", target, GetError()->message);
+          PopErrorToLevel(errorDepth);
+        }
+      }
+      catch (std::exception &e)
+      {
         LogError("Message Handler {0} failed: {1}", target, e.what());
-        ClearError();
-      } catch (...) {
+        PopErrorToLevel(errorDepth);
+      }
+      catch (...)
+      {
         LogError("Message Handler {0} failed", target);
+        PopErrorToLevel(errorDepth);
       }
     }
     else
@@ -411,13 +423,25 @@ void Kernel::SendMessage(String target, String sender, String message, const Var
     if (target.eq(uid))
     {
       // it's for me!
-      try {
+      size_t errorDepth = ErrorLevel();
+      try
+      {
         ReceiveMessage(sender, message, data);
-      } catch (std::exception &e) {
+        if (ErrorLevel() > errorDepth)
+        {
+          LogError("Message Handler {0} failed {1}", target, GetError()->message);
+          PopErrorToLevel(errorDepth);
+        }
+      }
+      catch (std::exception &e)
+      {
         LogError("Message Handler {0} failed: {1}", target, e.what());
-        ClearError();
-      } catch (...) {
+        PopErrorToLevel(errorDepth);
+      }
+      catch (...)
+      {
         LogError("Message Handler {0} failed", target);
+        PopErrorToLevel(errorDepth);
       }
     }
     else
@@ -432,13 +456,25 @@ void Kernel::SendMessage(String target, String sender, String message, const Var
     MessageCallback *pHandler = messageHandlers.Get(target);
     if (pHandler)
     {
-      try {
+      size_t errorDepth = ErrorLevel();
+      try
+      {
         pHandler->callback(sender, message, data);
-      } catch (std::exception &e) {
+        if (ErrorLevel() > errorDepth)
+        {
+          LogError("Message Handler {0} failed {1}", target, GetError()->message);
+          PopErrorToLevel(errorDepth);
+        }
+      }
+      catch (std::exception &e)
+      {
         LogError("Message Handler {0} failed: {1}", target, e.what());
-        ClearError();
-      } catch (...) {
+        PopErrorToLevel(errorDepth);
+      }
+      catch (...)
+      {
         LogError("Message Handler {0} failed", target);
+        PopErrorToLevel(errorDepth);
       }
     }
     else

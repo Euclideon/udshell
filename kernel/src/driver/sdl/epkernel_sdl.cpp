@@ -50,9 +50,26 @@ void SDLKernel::EventLoop()
 
         MainThreadCallback d;
         d.SetMemento(m);
-        try { d(this); }
-        catch (std::exception &e) { LogError("Exception occurred in MainThreadCallback : {0}", e.what()); }
-        catch (...) { LogError("Exception occurred in MainThreadCallback : C++ Exception"); }
+        size_t errorDepth = ErrorLevel();
+        try
+        {
+          d(this);
+          if (ErrorLevel() > errorDepth)
+          {
+            LogError("Exception occurred in MainThreadCallback : {0}", GetError()->message);
+            PopErrorToLevel(errorDepth);
+          }
+        }
+        catch (std::exception &e)
+        {
+          LogError("Exception occurred in MainThreadCallback : {0}", e.what());
+          PopErrorToLevel(errorDepth);
+        }
+        catch (...)
+        {
+          LogError("Exception occurred in MainThreadCallback : C++ Exception");
+          PopErrorToLevel(errorDepth);
+        }
       }
       else if (event.user.code == 1)
       {
@@ -60,9 +77,26 @@ void SDLKernel::EventLoop()
 
         MainThreadCallback d;
         d.SetMemento(pDispatch->m);
-        try { d(this); }
-        catch (std::exception &e) { LogError("Exception occurred in MainThreadCallback : {0}", e.what()); }
-        catch (...) { LogError("Exception occurred in MainThreadCallback : C++ Exception"); }
+        size_t errorDepth = ErrorLevel();
+        try
+        {
+          d(this);
+          if (ErrorLevel() > errorDepth)
+          {
+            LogError("Exception occurred in MainThreadCallback : {0}", GetError()->message);
+            PopErrorToLevel(errorDepth);
+          }
+        }
+        catch (std::exception &e)
+        {
+          LogError("Exception occurred in MainThreadCallback : {0}", e.what());
+          PopErrorToLevel(errorDepth);
+        }
+        catch (...)
+        {
+          LogError("Exception occurred in MainThreadCallback : C++ Exception");
+          PopErrorToLevel(errorDepth);
+        }
         udIncrementSemaphore(pDispatch->pSem);
       }
     }
