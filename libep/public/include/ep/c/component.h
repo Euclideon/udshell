@@ -32,6 +32,7 @@ struct epComponentOverrides
 {
   size_t structSize;
 
+  // TODO: these are probably out of date
   void*(*pCreateInstance)(epComponent *pBaseInstance, const epVarMap *pInitParams);
   void(*pDestroy)(epComponent *pBaseInstance, void *pDerivedInstance);
   void(*pInitComplete)(epComponent *pBaseInstance, void *pDerivedInstance);

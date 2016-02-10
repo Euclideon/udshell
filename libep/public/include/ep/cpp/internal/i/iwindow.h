@@ -13,6 +13,9 @@ class IWindow
 public:
   virtual void SetTopLevelUI(UIComponentRef spUIComponent) = 0;
   virtual UIComponentRef GetTopLevelUI() const = 0;
+
+protected:
+  virtual void InitComplete() = 0;
 };
 
 } // namespace ep

@@ -46,6 +46,11 @@ void WindowImpl::DestroyInternal()
 }
 
 // ---------------------------------------------------------------------------------------
+void WindowImpl::InitComplete()
+{
+}
+
+// ---------------------------------------------------------------------------------------
 void WindowImpl::SetTopLevelUI(UIComponentRef epUnusedParam(spUIComponent))
 {
 }

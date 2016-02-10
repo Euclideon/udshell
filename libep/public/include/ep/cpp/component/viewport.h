@@ -24,12 +24,6 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  void InitComplete() override
-  {
-    Super::InitComplete();
-    pImpl->InitComplete();
-  }
-
   static Array<const PropertyInfo> GetProperties()
   {
     return{

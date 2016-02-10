@@ -62,6 +62,14 @@ epResult SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, Com
   return epR_Success;
 }
 
+// Locates the associated QtEPComponent (QObject based wrapper class for ep::Component's) and fires its done signal
+void SignalQtEPComponentDone(QObject *pQtObject)
+{
+  qt::QtEPComponent *epComponent = pQtObject->findChild<qt::QtEPComponent*>(QString(), Qt::FindDirectChildrenOnly);
+  if (epComponent)
+    epComponent->Done();
+}
+
 // Helper function
 void CleanupInternalData(QObject **ppInternal)
 {
@@ -76,6 +84,7 @@ void CleanupInternalData(QObject **ppInternal)
 namespace ep {
 
 using qt::internal::SetupFromQmlFile;
+using qt::internal::SignalQtEPComponentDone;
 using qt::internal::CleanupInternalData;
 
 // ---------------------------------------------------------------------------------------
@@ -106,10 +115,7 @@ void UIComponentImpl::CreateInternal(Variant::VarMap initParams)
 void UIComponentImpl::InitComplete()
 {
   // let qml know that the enclosing object has finished being created
-  QObject *pQtObject = (QObject*)pInstance->pUserData;
-  qt::QtEPComponent *epComponent = pQtObject->findChild<qt::QtEPComponent*>(QString(), Qt::FindDirectChildrenOnly);
-  if (epComponent)
-    epComponent->Done();
+  SignalQtEPComponentDone((QObject*)pInstance->pUserData);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -171,6 +177,13 @@ void WindowImpl::DestroyInternal()
 {
   LogTrace("WindowImpl::DestroyInternal()");
   CleanupInternalData((QObject**)&pInstance->pUserData);
+}
+
+// ---------------------------------------------------------------------------------------
+void WindowImpl::InitComplete()
+{
+  // let qml know that the enclosing object has finished being created
+  SignalQtEPComponentDone((QObject*)pInstance->pUserData);
 }
 
 // ---------------------------------------------------------------------------------------
