@@ -28,25 +28,9 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY_RO(Metadata, "Number of records in the metadata", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(DataSource, "The DataSource containing this Resource", nullptr, 0),
-    };
-  }
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(Save, "Save the state of the Resource"),
-    };
-  }
-  static Array<const EventInfo> GetEvents()
-  {
-    return{
-      EP_MAKE_EVENT(Changed, "The Resource has been modified"),
-    };
-  }
+  static Array<const PropertyInfo> GetProperties();
+  static Array<const MethodInfo> GetMethods();
+  static Array<const EventInfo> GetEvents();
 };
 
 }

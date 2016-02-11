@@ -13,6 +13,7 @@ SHARED_CLASS(DataSource);
 SHARED_CLASS(ResourceManager);
 SHARED_CLASS(CommandManager);
 SHARED_CLASS(Broadcaster);
+SHARED_CLASS(DataSource);
 
 class Kernel
 {

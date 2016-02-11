@@ -160,6 +160,8 @@ public:
   static Variant luaGet(LuaState &l, int idx = -1);
 
 private:
+  Variant(RefCounted *pRef, SharedPtrType type = SharedPtrType::Unknown, bool ownsContent = true);
+
   size_t t : 4;
   size_t ownsContent : 1;
   size_t length : (sizeof(size_t)*8)-5; // NOTE: if you change this, update the shift's in asEnum()!!!

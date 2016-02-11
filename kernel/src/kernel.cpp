@@ -645,4 +645,36 @@ DataSourceRef Kernel::CreateDataSourceFromExtension(String ext, Variant::VarMap 
   return component_cast<DataSource>(CreateComponent((*ppDesc)->info.id, initParams));
 }
 
+SharedPtr<Renderer> Kernel::GetRenderer() const
+{
+  return spRenderer;
+}
+
+CommandManagerRef Kernel::GetCommandManager() const
+{
+  return spCommandManager;
+}
+
+ResourceManagerRef Kernel::GetResourceManager() const
+{
+  return spResourceManager;
+}
+
+BroadcasterRef Kernel::GetStdOutBroadcaster() const
+{
+  return spStdOutBC;
+}
+
+BroadcasterRef Kernel::GetStdErrBroadcaster() const
+{
+  return spStdErrBC;
+}
+
+ViewRef Kernel::GetFocusView() const
+{
+  return spFocusView;
+}
+
+
+
 } // namespace kernel

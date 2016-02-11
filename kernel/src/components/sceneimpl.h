@@ -52,7 +52,7 @@ protected:
 
   double timeStep = 0.0;
   NodeRef rootNode = nullptr;
-  RenderSceneRef spCache = nullptr;
+  RenderableSceneRef spCache = nullptr;
   bool bDirty = true; // becomes dirty when scene changes
   udRenderModel renderModels[16];
   size_t numRenderModels = 0;

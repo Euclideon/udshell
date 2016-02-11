@@ -4,10 +4,9 @@
 
 #include "ep/cpp/component/resource/resource.h"
 #include "ep/cpp/internal/i/iresource.h"
-
+#include "ep/cpp/component/datasource/datasource.h"
 namespace ep {
 
-SHARED_CLASS(DataSource);
 SHARED_CLASS(Metadata);
 SHARED_CLASS(Resource);
 

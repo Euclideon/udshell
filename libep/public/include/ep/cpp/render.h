@@ -93,7 +93,7 @@ struct UDRenderState
 
 struct UDRenderJob
 {
-  UDModelRef spModel = nullptr;
+  UDModelRef spModel;
   UDRenderState renderState;
 };
 

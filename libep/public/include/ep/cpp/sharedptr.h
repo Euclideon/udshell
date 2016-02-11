@@ -91,29 +91,40 @@ public:
     return SharedPtr<T>(ptr);
   }
 
-  SharedPtr() {}
-  SharedPtr(nullptr_t) {}
+  // This allows SharedPtr<const T>
+  SharedPtr()
+  {
+    // This ensure T is a derived type of RefCounted
+    const RefCounted* pIC = (Type*)nullptr;  // We assign to a const RefCounted because T may be const
+    pInstance = const_cast<RefCounted*>(pIC);
+  }
+  SharedPtr(nullptr_t)
+  {
+    // This ensure T is a derived type of RefCounted
+    const RefCounted* pIC = (Type*)nullptr;  // We assign to a const RefCounted because T may be const
+    pInstance = const_cast<RefCounted*>(pIC);
+  }
 
   // constructors
   SharedPtr(const SharedPtr<T> &ptr)
-    : pInstance(acquire(ptr.pInstance)) {}
+    : pInstance(acquire(ptr.ptr())) {}
   SharedPtr(SharedPtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    if (this != &ptr)
-      ptr.pInstance = nullptr;
+    ptr.pInstance = nullptr;
   }
 
   // the U allows us to accept const
   template <class U>
   SharedPtr(const SharedPtr<U> &ptr)
-    : pInstance(acquire(ptr.pInstance)) {}
+    : pInstance(acquire(ptr.ptr())) {}
   template <class U>
   SharedPtr(SharedPtr<U> &&ptr)
-    : pInstance(ptr.pInstance)
   {
-    if (this != (void*)&ptr)
-      ptr.pInstance = nullptr;
+    T *pT = ptr.ptr(); // This makes sure T is a parent of U
+    const RefCounted *pI = pT; // This is for when T is const
+    pInstance = const_cast<RefCounted*>(pI); // This is required because IncRef() is not a const function
+    ptr.pInstance = nullptr;
   }
 
   template <class U> // the U allows us to accept const
@@ -150,7 +161,7 @@ public:
     if (pInstance != ptr.pInstance)
     {
       RefCounted *pOld = pInstance;
-      pInstance = acquire(ptr.pInstance);
+      pInstance = acquire(ptr.ptr());
       release(pOld);
     }
     return *this;
@@ -161,7 +172,7 @@ public:
     if (pInstance != ptr.pInstance)
     {
       RefCounted *pOld = pInstance;
-      pInstance = acquire(ptr.pInstance);
+      pInstance = acquire(ptr.ptr());
       release(pOld);
     }
     return *this;
@@ -209,7 +220,8 @@ private:
   template<typename U> friend struct SafePtr;
   template<typename U> friend struct SynchronisedPtr;
 
-  static RefCounted* acquire(RefCounted *pI);
+  template <typename U>
+  static RefCounted* acquire(U *pU);
   static void release(RefCounted *pI);
 
   RefCounted *pInstance = nullptr;
@@ -246,21 +258,18 @@ public:
   UniquePtr(UniquePtr<U> &ptr)
     : pInstance(ptr.pInstance)
   {
-    if(this != &ptr)
-      ptr.pInstance = nullptr;
+    ptr.pInstance = nullptr;
   }
   UniquePtr(UniquePtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    if (this != &ptr)
-      ptr.pInstance = nullptr;
+    ptr.pInstance = nullptr;
   }
   template<typename U>
   UniquePtr(UniquePtr<U> &&ptr)
     : pInstance(ptr.pInstance)
   {
-    if (this != &ptr)
-      ptr.pInstance = nullptr;
+    ptr.pInstance = nullptr;
   }
 
   ~UniquePtr()
@@ -321,7 +330,7 @@ private:
   template<typename U, bool isref> friend struct Acquire;
   template<typename U, bool isref> friend struct Release;
 
-  T * eprestrict pInstance = nullptr;
+  T *pInstance = nullptr;
 };
 
 
@@ -379,8 +388,10 @@ inline SharedPtr<T>::SharedPtr(UniquePtr<T> &&ptr)
 template <class T>
 template <class U>
 inline SharedPtr<T>::SharedPtr(UniquePtr<U> &ptr)
-  : pInstance(ptr.pInstance)
 {
+  T *pT = ptr.ptr(); // This makes sure T is a parent of U
+  const RefCounted *pI = pT; // This is for when T is const
+  pInstance = const_cast<RefCounted*>(pI); // This is required because IncRef() is not a const function
   ptr.pInstance = nullptr;
 }
 
@@ -399,7 +410,9 @@ template <class U>
 inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<U> &ptr)
 {
   RefCounted *pOld = pInstance;
-  pInstance = ptr.pInstance;
+  T *pT = ptr.ptr(); // This makes sure T is a parent of U
+  const RefCounted *pI = pT; // This is for when T is const
+  pInstance = const_cast<RefCounted*>(pI); // This is required because IncRef() is not a const function
   ptr.pInstance = nullptr;
   release(pOld);
   return *this;
@@ -412,8 +425,12 @@ epforceinline size_t SharedPtr<T>::count() const
 }
 
 template<class T>
-epforceinline RefCounted* SharedPtr<T>::acquire(RefCounted *pI)
+template<class U>
+epforceinline RefCounted* SharedPtr<T>::acquire(U *pU)
 {
+  T* pT = pU; // This makes sure T is a parent of U
+  const RefCounted* pCI = pT; // This is for when T is const
+  RefCounted* pI = const_cast<RefCounted*>(pCI); // This is required because IncRef() is not a const function
   if (pI)
     pI->IncRef();
   return pI;
@@ -437,7 +454,8 @@ namespace internal {
   {
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
-    UniquePtr<T> up(new(pMem) T(args...));
+    using U = typename std::remove_const<T>::type;
+    UniquePtr<U> up(new(pMem) U(args...));
     up->pFreeFunc = [](void *pMem) { epFree(pMem); };
     return std::move(up);
   }
@@ -461,7 +479,10 @@ namespace internal {
   epforceinline void Release<T, true>::release(T *ptr)
   {
     if (ptr)
-      ptr->DecRef();
+    {
+      using U = typename std::remove_const<T>::type;
+      const_cast<U*>(ptr)->DecRef();
+    }
   }
 
 } // namespace internal

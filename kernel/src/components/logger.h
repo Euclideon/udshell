@@ -3,12 +3,11 @@
 #define EP_LOGGER_H
 
 #include "ep/cpp/component/component.h"
-
+#include "ep/cpp/component/stream.h"
 namespace ep
 {
 
 SHARED_CLASS(Logger);
-SHARED_CLASS(Stream);
 
 /**
 * --- LogCategories ---

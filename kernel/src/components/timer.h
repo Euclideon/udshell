@@ -3,8 +3,6 @@
 #define _EP_TIMER_H
 
 #include "ep/cpp/component/component.h"
-#include "ep/cpp/component/stream.h"
-#include "ep/cpp/component/resource/resource.h"
 #include "hal/haltimer.h"
 
 namespace ep {

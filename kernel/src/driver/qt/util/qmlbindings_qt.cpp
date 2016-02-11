@@ -6,6 +6,7 @@
 #include "signaltodelegate_qt.h"
 #include "componentdesc.h"
 #include "../epkernel_qt.h"
+#include "ep/cpp/component/commandmanager.h"
 
 namespace qt
 {
