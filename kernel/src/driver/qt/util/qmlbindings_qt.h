@@ -29,6 +29,13 @@ private:
   QtKernel *pKernel;
 };
 
+// factory class to build a qml shim component from a component ref
+// performs a lookup, so only use this if the type isn't known at compile time
+struct BuildQtEPComponent
+{
+  static QtEPComponent *Create(const ep::ComponentRef &spComponent);
+};
+
 } // namespace qt
 
 #endif  // QMLBINDINGS_QT_H

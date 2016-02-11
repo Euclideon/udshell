@@ -7,6 +7,7 @@
 #include "componentdesc.h"
 #include "../epkernel_qt.h"
 #include "ep/cpp/component/commandmanager.h"
+#include "../components/ui_qt.h"
 
 namespace qt
 {
@@ -172,7 +173,7 @@ QtEPComponent *QtKernelQml::findComponent(const QString &uid) const
   String uidString(byteArray.data(), byteArray.size());
 
   // TODO: this should default to JS ownership but doublecheck!!
-  return new QtEPComponent(pKernel->FindComponent(uidString));
+  return BuildQtEPComponent::Create(pKernel->FindComponent(uidString));
 }
 
 // ---------------------------------------------------------------------------------------
@@ -184,7 +185,7 @@ QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariantMap in
 
   try
   {
-    return new QtEPComponent(pKernel->CreateComponent(typeString, epToVariant(initParams).asAssocArray()));
+    return BuildQtEPComponent::Create(pKernel->CreateComponent(typeString, epToVariant(initParams).asAssocArray()));
   }
   catch (EPException &)
   {
@@ -198,7 +199,19 @@ QtEPComponent *QtKernelQml::getCommandManager() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
-  return new QtEPComponent(pKernel->GetCommandManager());
+  return BuildQtEPComponent::Create(pKernel->GetCommandManager());
+}
+
+
+// ---------------------------------------------------------------------------------------
+QtEPComponent *BuildQtEPComponent::Create(const ep::ComponentRef &spComponent)
+{
+  if (!spComponent)
+    return nullptr;
+  if (spComponent->IsType("uicomponent"))
+    return new QtEPUIComponent(spComponent);
+
+  return new QtEPComponent(spComponent);
 }
 
 } // namespace qt

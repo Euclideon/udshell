@@ -8,15 +8,27 @@
 
 #include <QVariant>
 
-// forward declare
 namespace qt {
-  class QtKernel;
 
-  namespace internal {
-    epResult SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal);
+// forward declare
+class QtEPComponent;
+
+namespace internal {
+
+// internal helper that creates a QtEPComponent (or derived) shim object containing a weak pointer
+template <typename T>
+struct BuildShimHelper
+{
+  epforceinline static QtEPComponent *Create(ep::Component *pComponent)
+  {
+    return new T(pComponent);
   }
+};
+
+} // namespace internal
 
 
+// This shim class wraps an ep::Component in a QObject that can be accessible from QML
 class QtEPComponent : public QObject
 {
   Q_OBJECT
@@ -33,7 +45,7 @@ public:
   //..
 
 public:
-  void Done() { emit completed(); }
+  virtual void Done() { emit completed(); }
 
   Q_INVOKABLE bool isNull() const { return pComponent == nullptr; }
 
@@ -58,9 +70,12 @@ public:
 signals:
   void completed();
 
-private:
-  friend epResult internal::SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal);
-  QtEPComponent(Component* pComp) : QObject(nullptr), pComponent(pComp) {}
+protected:
+  template <typename T> friend struct internal::BuildShimHelper;
+
+  // this constructor ensures the QtEPComponent only holds a weak pointer to its ep::Component
+  // currently only used to define the QML "thisComponent" since a SharedPtr will result in a circular reference
+  QtEPComponent(ep::Component* pComp) : QObject(nullptr), pComponent(pComp) {}
 
   ep::ComponentRef spComponent;
   Component* pComponent; // used to avoid circular references
