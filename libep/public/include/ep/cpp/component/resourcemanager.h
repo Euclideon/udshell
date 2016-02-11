@@ -59,6 +59,7 @@ public:
   void RemoveResource(ResourceRef res) override final { return pImpl->RemoveResource(res); }
   void RemoveResourceArray(Slice<const ResourceRef> resArray) override final { return pImpl->RemoveResourceArray(resArray); }
 
+  void ClearResources() override final { pImpl->ClearResources(); }
   ResourceRef GetResource(String key) const override final { return pImpl->GetResource(key); }
   Array<ResourceRef> GetResourceArray() const override final { return pImpl->GetResourceArray(); }
   template<typename CT>
@@ -106,6 +107,7 @@ protected:
       EP_MAKE_METHOD_EXPLICIT("AddResourceArray", AddResourceArrayMethod, "Add an Array of Resources to the ResourceManager"),
       EP_MAKE_METHOD(RemoveResource, "Remove the specified Resource"),
       EP_MAKE_METHOD_EXPLICIT("RemoveResourceArray", RemoveResourceArrayMethod, "Remove an Array Resources from the ResourceManager"),
+      EP_MAKE_METHOD(ClearResources, "Remove all resources"),
       EP_MAKE_METHOD(GetResource, "Get Resource by UID"),
       EP_MAKE_METHOD(LoadResourcesFromFile, "Create a DataSource containing Resources from the file specified by the given File InitParams"),
       EP_MAKE_METHOD(SaveResourcesToFile, "Save Resources from the given DataSource to a file specified by the given File InitParams"),

@@ -22,6 +22,7 @@ public:
   virtual void AddResourceArray(Slice<const ResourceRef> resArray) = 0;
   virtual void RemoveResource(ResourceRef res) = 0;
   virtual void RemoveResourceArray(Slice<const ResourceRef> resArray) = 0;
+  virtual void ClearResources() = 0;
   virtual ResourceRef GetResource(String key) const = 0;
   virtual Array<ResourceRef> GetResourceArray() const = 0;
   virtual Array<ResourceRef> GetResourcesByType(const ep::ComponentDesc *pBase) const = 0;

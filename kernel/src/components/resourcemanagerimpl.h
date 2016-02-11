@@ -22,8 +22,10 @@ public:
   void RemoveResource(ResourceRef res) override final { RemoveResourceArray({ res }); }
   void RemoveResourceArray(Slice<const ResourceRef> resArray) override final;
 
+  void ClearResources() override final;
   ResourceRef GetResource(String key) const override final { return *resources.Get(key); }
   Array<ResourceRef> GetResourceArray() const override final;
+
 
   template<typename CT>
   Array<ResourceRef> GetResourcesByType() const

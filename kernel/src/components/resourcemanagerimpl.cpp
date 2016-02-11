@@ -21,6 +21,19 @@ void ResourceManagerImpl::RemoveResourceArray(Slice<const ResourceRef> resArray)
   pInstance->Removed.Signal(resArray);
 }
 
+void ResourceManagerImpl::ClearResources()
+{
+  Array<const ResourceRef> resArray(Reserve, resources.Size());
+
+  for (auto kvp : resources) {
+    resArray.pushBack(kvp.value);
+  }
+
+  pInstance->Removed.Signal(resArray);
+
+  resources = nullptr;
+}
+
 Variant::VarMap ResourceManagerImpl::GetExtensions() const
 {
   const AVLTree<String, const ep::ComponentDesc *> &extensionsRegistry = GetKernel()->GetExtensionsRegistry();
