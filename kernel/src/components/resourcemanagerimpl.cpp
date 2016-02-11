@@ -35,17 +35,11 @@ DataSourceRef ResourceManagerImpl::LoadResourcesFromFile(Variant::VarMap initPar
   Variant src = *initParams.Get("src");
   String ext = src.asString().getRightAtLast('.');
   if (ext.empty())
-  {
-    LogWarning(2, "LoadResourcesFromFile - \"src\" parameter is invalid");
-    return nullptr; // TODO Handle error
-  }
+    EPTHROW_WARN(epR_InvalidArgument, 2, "LoadResourcesFromFile - \"src\" parameter is invalid");
 
-  DataSourceRef spDS = GetKernel()->CreateDataSourceFromExtension(ext, initParams);
-  if (!spDS)
-  {
-    LogWarning(2, "LoadResourcesFromFile - \"src\" file not found: {0}", src.asString());
-    return nullptr; // TODO Fix error returns
-  }
+  DataSourceRef spDS;
+  epscope(fail) { if (!spDS) LogWarning(2, "LoadResourcesFromFile - \"src\" file not found: {0}", src.asString()); };
+  spDS = GetKernel()->CreateDataSourceFromExtension(ext, initParams);
 
   size_t numResources = spDS->GetNumResources();
   for (size_t i = 0; i < numResources; i++)
