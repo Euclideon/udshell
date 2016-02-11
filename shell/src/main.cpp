@@ -151,7 +151,7 @@ void OpenProject(String filePath)
 
   try
   {
-    spNewProject = pKernel->CreateComponent<Project>({ { "src", filePath }, { "name", "project" } });
+    spNewProject = pKernel->CreateComponent<Project>({ { "src", filePath } });
   }
   catch (EPException &)
   {
@@ -171,6 +171,7 @@ void OpenProject(String filePath)
   }
 
   spProject = spNewProject;
+  spProject->SetName("project");
 
   projectName = GetNameFromFilePath(filePath);
   spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, APP_TITLE));

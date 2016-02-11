@@ -86,6 +86,7 @@ private slots:
   QT_SIGNAL_HANDLER_1(double);
   QT_SIGNAL_HANDLER_1(int);
   QT_SIGNAL_HANDLER_2(QVariant, QVariant);
+  QT_SIGNAL_HANDLER_3(QVariant, QVariant, QVariant);
 
 private:
   QMetaObject::Connection connection;

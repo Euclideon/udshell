@@ -141,7 +141,7 @@ Rectangle {
   function removeactivity(uid) {
     for(var i = 0; i < activitylist.length; i++)
     {
-      if(activitylist[i].get("id") == uid)
+      if(activitylist[i].get("uid") == uid)
       {
         activitylist.splice(i, 1);
         activityuilist.splice(i, 1);
@@ -201,9 +201,9 @@ Rectangle {
         }
 
         onCurrentIndexChanged: {
-          var activityId = activitylist[currentIndex].get("uid");
-          if(count > 0 && activityId != lastId)
+          if(count > 0 && activitylist[currentIndex].get("uid") != lastId)
           {
+            var activityId = activitylist[currentIndex].get("uid");
             lastId = activityId
             activitychanged(activityId);
             var activity = activitylist[currentIndex];
