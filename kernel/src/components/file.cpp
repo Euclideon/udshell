@@ -34,20 +34,7 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
 
   int posixFlags = GetPosixOpenFlags(of);
 
-  String pathStr = path->asString();
-  MutableString256 cPath;
-
-#if defined(EP_WINDOWS)
-  const char * const pFilePrefix = "file:///";
-#else
-  const char * const pFilePrefix = "file://";
-#endif // defined(EP_WINDOWS)
-
-  String noPrefixPath = pathStr.getRightAtFirstIC(pFilePrefix, false);
-  if(!noPrefixPath.empty())
-    cPath.urlDecode(noPrefixPath);
-  else
-    cPath = pathStr;
+  MutableString<260> cPath = UrlToNativePath(path->asString());
 
 #if defined(EP_WINDOWS)
   // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?
@@ -67,6 +54,25 @@ File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Varian
   uint64_t curr = lseek(fd, 0L, SEEK_CUR);
   SetLength(lseek(fd, 0L, SEEK_END));
   lseek(fd, curr, SEEK_SET);
+}
+
+MutableString<260> File::UrlToNativePath(String url)
+{
+  MutableString<260> path;
+
+  #if defined(EP_WINDOWS)
+    const char * const pFilePrefix = "file:///";
+  #else
+    const char * const pFilePrefix = "file://";
+  #endif // defined(EP_WINDOWS)
+
+  String noPrefixPath = url.getRightAtFirstIC(pFilePrefix, false);
+  if (!noPrefixPath.empty())
+    path.urlDecode(noPrefixPath);
+  else
+    path = url;
+
+  return path;
 }
 
 int File::GetPosixOpenFlags(FileOpenFlags flags) const

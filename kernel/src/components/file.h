@@ -26,6 +26,8 @@ public:
   size_t Write(Slice<const void> data) override;
   int64_t Seek(SeekOrigin rel, int64_t offset) override;
 
+  static MutableString<260> UrlToNativePath(String url);
+
 protected:
   File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~File();
