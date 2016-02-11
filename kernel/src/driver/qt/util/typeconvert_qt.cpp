@@ -170,18 +170,22 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
 
         case Variant::SharedPtrType::AssocArray:
         {
-          QVariantMap map;
+          QJSValue jsMap = qt::QtApplication::Kernel()->QmlEngine()->newObject();
           Variant::VarMap aa = variant.asAssocArray();
           for (auto v : aa)
           {
+            if (!v.key.is(Variant::Type::String) && !v.key.is(Variant::Type::Int))
+            {
+              epDebugPrintf("epFromVariant: Key is not string!\n");
+              continue;
+            }
+            QJSValue value;
             QString key;
-            QVariant value;
             epFromVariant(v.key, &key);
             epFromVariant(v.value, &value);
-            map.insert(std::move(key), std::move(value));
+            jsMap.setProperty(key, value);
           }
-          // TODO: what?! no move assignment! look into this...
-          pVariant->setValue(std::move(map));
+          pVariant->setValue(jsMap);
           break;
         }
 
@@ -198,17 +202,16 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
 
     case Variant::Type::Array:
     {
-      QVariantList *list = new QVariantList(); // TODO remove dynamic allocation once we switch to VS2015 Qt libs
-      Slice<Variant> arr = variant.asArray();
-      list->reserve((int)arr.length);
-      for (auto &v : arr)
+      uint length = (uint)variant.arrayLen();
+      QJSValue jsArray = qt::QtApplication::Kernel()->QmlEngine()->newArray(length);
+      Slice<Variant> varr = variant.asArray();
+      for (uint i = 0; i < length; ++i)
       {
-        QVariant t;
-        epFromVariant(v, &t);
-        list->push_back(t);
+        QJSValue t;
+        epFromVariant(varr[i], &t);
+        jsArray.setProperty(i, t);
       }
-      // TODO: what?! no move assignment! look into this...
-      pVariant->setValue(*list);
+      pVariant->setValue(jsArray);
       break;
     }
 
