@@ -341,6 +341,34 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
     case Variant::Type::SharedPtr:
       switch (variant.spType())
       {
+        case Variant::SharedPtrType::Component:
+        {
+          ep::ComponentRef spComponent = variant.asComponent();
+          QObject *pQObject = nullptr;
+          QQmlEngine::ObjectOwnership ownership = QQmlEngine::JavaScriptOwnership;
+
+          // if the variant contains a qt::QtComponent then unpack this and give the direct QObject*
+          if (spComponent->IsType("qtcomponent"))
+          {
+            pQObject = shared_pointer_cast<qt::QtComponent>(spComponent)->GetQObject();
+
+            // since QML will steal ownership, we need to restore the prev state (in case it was CppOwnership)
+            // note that this is only important for SharedPtr<QtComponent>'s since we don't know who created
+            // the object we're passing through.
+            ownership = QQmlEngine::objectOwnership(pQObject);
+          }
+          else
+          {
+            pQObject = new qt::QtEPComponent(spComponent);
+          }
+
+          *pJSValue = qt::QtApplication::Kernel()->QmlEngine()->newQObject(pQObject);
+          if (ownership != QQmlEngine::JavaScriptOwnership)
+            QQmlEngine::setObjectOwnership(pQObject, ownership);
+
+          break;
+        }
+
         case Variant::SharedPtrType::AssocArray:
         {
           using namespace qt;
