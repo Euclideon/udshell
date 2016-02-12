@@ -62,6 +62,13 @@ public:
   void ClearResources() override final { pImpl->ClearResources(); }
   ResourceRef GetResource(String key) const override final { return pImpl->GetResource(key); }
   Array<ResourceRef> GetResourceArray() const override final { return pImpl->GetResourceArray(); }
+
+  template<typename CT>
+  SharedPtr<CT> GetResourceAs(String key) const
+  {
+    return component_cast<CT>(GetResource(key));
+  }
+
   template<typename CT>
   Array<ResourceRef> GetResourcesByType() const
   {
