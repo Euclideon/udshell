@@ -20,8 +20,6 @@ public:
   void SetView(ViewRef _spView) override final { EPASSERT(false, "TODO: implement this - need to reload the ui!!"); }
 
 private:
-  void InitComplete() override final {}
-
   void CreateInternal(Variant::VarMap initParams);
 
   ViewRef spView = nullptr;

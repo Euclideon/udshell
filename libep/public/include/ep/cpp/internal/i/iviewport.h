@@ -14,9 +14,6 @@ class IViewport
 public:
   virtual ViewRef GetView() const = 0;
   virtual void SetView(ViewRef view) = 0;
-
-protected:
-  virtual void InitComplete() = 0;
 };
 
 } // namespace ep

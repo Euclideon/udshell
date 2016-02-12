@@ -22,6 +22,8 @@ public:
 private:
   ~WindowImpl() { DestroyInternal(); }
 
+  void InitComplete() override final;
+
   void CreateInternal(Variant::VarMap initParams);
   void DestroyInternal();
 
