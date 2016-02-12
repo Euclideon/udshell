@@ -65,7 +65,8 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
   ViewportRef spViewport;
   epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component\n"); };
-  spViewport = pKernel->CreateComponent<Viewport>({ { "file", "qrc:/kernel/viewport.qml" }, { "view", spView } });
+  spViewport = pKernel->CreateComponent<Viewport>({ { "file", "qrc:/qml/components/viewport.qml" }, { "view", spView } });
+  spViewport->Subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
 
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
@@ -83,6 +84,68 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   auto bmMap = spScene->GetBookmarkMap();
   for (auto bm : bmMap)
     spUIBookmarks->CallMethod("createbookmark", bm.key);
+}
+
+void Viewer::OnResourceDropped(String resourceUID, int x, int y)
+{
+  ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
+  UDModelRef spUDModel = spResourceManager->GetResourceAs<UDModel>(resourceUID);
+
+  UDNodeRef spUDNode = pKernel->CreateComponent<UDNode>();
+  spUDNode->SetUDModel(spUDModel);
+
+  AddSceneNodeAtViewPosition(spUDNode, x, y);
+}
+
+void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
+{
+  const Double4x4 &cameraMatrix = spCamera->GetMatrix();
+
+  BoundingVolume vol = spUDNode->GetUDModel()->GetBoundingVolume();
+  Double3 modelCenter = (vol.max - vol.min) / 2;
+
+  double dist = 2.0;
+
+  // Map mouse coordinates to a point on the plane at y=dist
+  Dimensions<int> displayDims = spView->GetDimensions();
+
+  double distX, distZ;
+
+  if (spCamera->IsOrtho())
+  {
+    distX = spView->GetAspectRatio() * spCamera->GetOrthoHeight() / 2;
+    distZ = spCamera->GetOrthoHeight() / 2;
+  }
+  else
+  {
+    // Perspective projection
+    distX = dist * spView->GetAspectRatio() * Tan(spCamera->GetFovY() / 2);
+    distZ = dist * Tan(spCamera->GetFovY() / 2);
+  }
+
+  double mouseCameraX = x * 2 * distX / (displayDims.width - 1) - distX;
+  double mouseCameraZ = - ( y * 2 * distZ / (displayDims.height - 1) - distZ );
+
+  // Set node's position relative to the camera, so that the model's center is positioned at the current mouse position.
+  Double4 nodeCameraPos = Double4::create(mouseCameraX - modelCenter.x, dist, mouseCameraZ - modelCenter.z, 1.0);
+
+  // Transform node's position from camera to world space
+  Double3 cameraYPR = cameraMatrix.extractYPR();
+  Double3 cameraTranslation = cameraMatrix.axis.t.toVector3();
+
+  Double4x4 transformR = Double4x4::rotationYPR(cameraYPR);
+  Double4x4 transformT = Double4x4::translation(cameraTranslation);
+
+  Double4 nodePos = transformT * transformR * nodeCameraPos;
+
+  // Set node's orientation so it faces towards the camera
+  cameraYPR.y = -cameraYPR.y;
+  Double4x4 nodeMatrix = Double4x4::rotationYPR(cameraYPR, nodePos.toVector3());
+
+  spUDNode->SetMatrix(nodeMatrix);
+
+  spScene->GetRootNode()->AddChild(spUDNode);
+  spScene->MakeDirty();
 }
 
 void Viewer::StaticInit(ep::Kernel *pKernel)

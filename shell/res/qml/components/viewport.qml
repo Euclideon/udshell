@@ -31,10 +31,8 @@ FocusScope {
           }
         }
       }
-      else if(drop.keys.indexOf("RMResource") > -1) {
-        console.log("ITEM TEXT: " + drop.source.text);
+      else if(drop.keys.indexOf("RMResource") > -1)
         resourcedropped(drop.source.text, drop.x, drop.y);
-      }
     }
   }
 
