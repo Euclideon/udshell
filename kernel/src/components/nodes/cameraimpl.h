@@ -23,9 +23,15 @@ public:
   void SetPerspective(double _fovY) override final { bOrtho = false; fovY = _fovY; }
   void SetOrtho(double _orthoHeight) override final { bOrtho = true; orthoHeight = _orthoHeight; }
 
+  double GetFovY() const override final { return fovY; }
+  double GetOrthoHeight() const override final { return orthoHeight; }
+  bool IsOrtho() const override final { return bOrtho; }
+
   void SetDepthPlanes(double _zNear, double _zFar) override final { zNear = _zNear; zFar = _zFar; }
   void SetNearPlane(double _zNear) override final { zNear = _zNear; }
+  double GetNearPlane() const override final { return zNear; }
   void SetFarPlane(double _zFar) override final { zFar = _zFar; }
+  double GetFarPlane() const override final { return zFar; }
 
   Variant Save() const override final;
 
