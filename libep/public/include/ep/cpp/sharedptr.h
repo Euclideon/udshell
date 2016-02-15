@@ -84,6 +84,7 @@ public:
   template<typename... Args>
   static SharedPtr<T> create(Args... args)
   {
+    static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
     T *ptr = new(pMem) T(args...);
@@ -94,12 +95,16 @@ public:
   // This allows SharedPtr<const T>
   SharedPtr()
   {
+    static_assert(std::is_base_of<RefCounted, T>::value, "SharedPtr<T>(), T does not derive from RefCounted");
+    // TODO: Consider simplifying the code below
     // This ensure T is a derived type of RefCounted
     const RefCounted* pIC = (Type*)nullptr;  // We assign to a const RefCounted because T may be const
     pInstance = const_cast<RefCounted*>(pIC);
   }
   SharedPtr(nullptr_t)
   {
+    static_assert(std::is_base_of<RefCounted, T>::value, "SharedPtr<T>(nullptr_t), T does not derive from RefCounted");
+    // TODO: Consider simplifying the code below
     // This ensure T is a derived type of RefCounted
     const RefCounted* pIC = (Type*)nullptr;  // We assign to a const RefCounted because T may be const
     pInstance = const_cast<RefCounted*>(pIC);
@@ -121,6 +126,9 @@ public:
   template <class U>
   SharedPtr(SharedPtr<U> &&ptr)
   {
+    static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
+    static_assert(std::is_base_of<T, U>::value, "U does not derive from T");
+    // TODO: Consider simplifying the code below
     T *pT = ptr.ptr(); // This makes sure T is a parent of U
     const RefCounted *pI = pT; // This is for when T is const
     pInstance = const_cast<RefCounted*>(pI); // This is required because IncRef() is not a const function
@@ -355,6 +363,7 @@ public:
   template<typename T, typename... Args>
   static T* New(Args... args)
   {
+    static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
     T *ptr = new(pMem) T(args...);
@@ -389,6 +398,9 @@ template <class T>
 template <class U>
 inline SharedPtr<T>::SharedPtr(UniquePtr<U> &ptr)
 {
+  static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
+  static_assert(std::is_base_of<T, U>::value, "U does not derive from T");
+  // TODO: Consider simplifying the code below
   T *pT = ptr.ptr(); // This makes sure T is a parent of U
   const RefCounted *pI = pT; // This is for when T is const
   pInstance = const_cast<RefCounted*>(pI); // This is required because IncRef() is not a const function
@@ -409,6 +421,8 @@ template <class T>
 template <class U>
 inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<U> &ptr)
 {
+  static_assert(std::is_base_of<RefCounted, T>::value, "U does not derive from T");
+  // TODO: Consider simplifying the code below
   RefCounted *pOld = pInstance;
   T *pT = ptr.ptr(); // This makes sure T is a parent of U
   const RefCounted *pI = pT; // This is for when T is const
@@ -428,6 +442,9 @@ template<class T>
 template<class U>
 epforceinline RefCounted* SharedPtr<T>::acquire(U *pU)
 {
+  static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
+  static_assert(std::is_base_of<T, U>::value, "U does not derive from T");
+  // TODO: Consider simplifying the code below
   T* pT = pU; // This makes sure T is a parent of U
   const RefCounted* pCI = pT; // This is for when T is const
   RefCounted* pI = const_cast<RefCounted*>(pCI); // This is required because IncRef() is not a const function
