@@ -12,7 +12,7 @@ Rectangle {
   property alias toolBarLayout: toolBarLoader.item
 
   Component.onCompleted: {
-    commandManager = EPKernel.GetCommandManager();
+    commandManager = EPKernel.getCommandManager();
   }
 
   onToolbarcompChanged: {

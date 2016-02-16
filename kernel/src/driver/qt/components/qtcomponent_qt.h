@@ -17,6 +17,7 @@ namespace qt
 
 SHARED_CLASS(QtComponent);
 
+// This shim class wraps a QObject in an ep::Component that is accessible from the EP component system
 class QtComponent : public Component
 {
   EP_DECLARE_COMPONENT(QtComponent, Component, EPKERNEL_PLUGINVERSION, "QtComponent desc...")

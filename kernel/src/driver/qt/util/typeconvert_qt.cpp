@@ -7,6 +7,7 @@
 #include "../components/component_qt.h"
 #include "../components/qtcomponent_qt.h"
 #include "../epkernel_qt.h"
+#include "qmlbindings_qt.h"
 
 #include <QJSValueIterator>
 #include <QMetaType>
@@ -146,7 +147,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
             pVariant->setValue(shared_pointer_cast<qt::QtComponent>(spComponent)->GetQObject());
           else
           {
-            QObject *pQObject = new qt::QtEPComponent(spComponent);
+            QObject *pQObject = qt::BuildQtEPComponent::Create(spComponent);
             pVariant->setValue(pQObject);
 
             // since we allocated this QObject, we'll set it to QML ownership so it can be freed

@@ -11,7 +11,7 @@ Menu {
   property var commandManager
 
   Component.onCompleted: {
-    commandManager = EPKernel.GetCommandManager();
+    commandManager = EPKernel.getCommandManager();
   }
 
   Component {

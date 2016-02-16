@@ -4,8 +4,8 @@
 
 #include "../epkernel_qt.h"
 #include "../util/qmlbindings_qt.h"
-#include "component_qt.h"
 #include "qtcomponent_qt.h"
+#include "ui_qt.h"
 
 #include "components/uicomponentimpl.h"
 #include "components/viewportimpl.h"
@@ -13,15 +13,33 @@
 
 #include "../ui/renderview_qt.h"
 
-#include <QQuickItem>
-#include <QQuickWindow>
 #include <QQmlContext>
 
 namespace qt {
 namespace internal {
 
+// SFINAE fun
+// These can be extended in future, but will result in the correct template being called based on the T type
+// Note: These create a qml shim object containing a weak reference
+
+// Create a QtEPUIComponent shim object for the ep::UIComponent family
+template <class T, typename std::enable_if<std::is_base_of<ep::UIComponent, T>::value>::type* = nullptr>
+QtEPComponent *BuildShimQObject(T *pComponent)
+{
+  return BuildShimHelper<QtEPUIComponent>::Create(pComponent);
+}
+
+// Default is a QtEPComponent for a general ep::Component
+template <class T, typename std::enable_if<!std::is_base_of<ep::UIComponent, T>::value>::type* = nullptr>
+QtEPComponent *BuildShimQObject(T *pComponent)
+{
+  return BuildShimHelper<QtEPComponent>::Create(pComponent);
+}
+
+
 // Helper function
-epResult SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, Component *pComponent, QObject **ppInternal)
+template <class T>
+epResult SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, T *pComponent, QObject **ppInternal)
 {
   String file = initParams.Get("file")->as<String>();
   if (file.empty())
@@ -31,7 +49,7 @@ epResult SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, Com
   }
 
   // create QObject wrapper for this component and expose it to the qml context for this ui component
-  qt::QtEPComponent *pEPComponent = new qt::QtEPComponent(pComponent);
+  qt::QtEPComponent *pEPComponent = BuildShimQObject<T>(pComponent);
   QQmlContext *pContext = new QQmlContext(pKernel->QmlEngine()->rootContext());
   pContext->setContextProperty("thisComponent", pEPComponent);
 

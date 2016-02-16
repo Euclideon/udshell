@@ -27,7 +27,11 @@ FocusScope {
   }
 
   Component.onCompleted: {
-    sidebarcomp = EPKernel.CreateComponent("menu", {"name" : "sidebar"});
+    sidebarcomp = EPKernel.createComponent("menu", {"name" : "sidebar"});
+    if (!sidebarcomp) {
+      console.error("Unable to create Sidebar Component");
+      return;
+    }
 
     var bookMarksButton = {
       "name" : "Toggle Bookmarks Panel",

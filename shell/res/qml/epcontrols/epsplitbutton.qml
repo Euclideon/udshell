@@ -16,7 +16,7 @@ RowLayout {
   spacing: 1
 
   Component.onCompleted: {
-    commandManager = EPKernel.GetCommandManager();
+    commandManager = EPKernel.getCommandManager();
   }
 
   function addItem(data) {
