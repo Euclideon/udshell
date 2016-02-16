@@ -4,8 +4,7 @@
 
 #include "../epkernel_qt.h"
 #include "../util/qmlbindings_qt.h"
-#include "qtcomponent_qt.h"
-#include "ui_qt.h"
+#include "qobjectcomponent_qt.h"
 
 #include "components/uicomponentimpl.h"
 #include "components/viewportimpl.h"
@@ -101,6 +100,7 @@ void CleanupInternalData(QObject **ppInternal)
 
 namespace ep {
 
+using qt::internal::PopulateComponentDesc;
 using qt::internal::SetupFromQmlFile;
 using qt::internal::SignalQtEPComponentDone;
 using qt::internal::CleanupInternalData;
@@ -108,7 +108,7 @@ using qt::internal::CleanupInternalData;
 // ---------------------------------------------------------------------------------------
 Variant UIComponentImpl::GetUIHandle() const
 {
-  return GetKernel()->CreateComponent<qt::QtComponent>({ { "object", (int64_t)(size_t)pInstance->pUserData } });
+  return GetKernel()->CreateComponent<qt::QObjectComponent>({ { "object", (int64_t)(size_t)pInstance->pUserData } });
 }
 
 // ---------------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ void UIComponentImpl::CreateInternal(Variant::VarMap initParams)
   EPTHROW_IF(qobject_cast<QQuickItem*>(pQtObject) == nullptr, epR_Failure, "UIComponent must create a QQuickItem");
 
   // Decorate the descriptor with meta object information
-  qt::PopulateComponentDesc(pInstance, pQtObject);
+  PopulateComponentDesc(pInstance, pQtObject);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ void WindowImpl::CreateInternal(Variant::VarMap initParams)
   EPTHROW_IF(pQtWindow == nullptr, epR_Failure, "Window component must create a QQuickWindow");
 
   // decorate the descriptor with meta object information
-  qt::PopulateComponentDesc(pInstance, pQtWindow);
+  PopulateComponentDesc(pInstance, pQtWindow);
 
   // register the window with the kernel
   if (pQtKernel->RegisterWindow(pQtWindow) != epR_Success)

@@ -7,23 +7,25 @@
 #include "componentdesc.h"
 #include "../epkernel_qt.h"
 #include "ep/cpp/component/commandmanager.h"
-#include "../components/ui_qt.h"
 
-namespace qt
-{
+namespace qt {
 
+// ---------------------------------------------------------------------------------------
+// COMPONENT DESCRIPTOR SHIMS
 class QtPropertyData : public RefCounted
 {
 public:
   QtPropertyData(String propertyId) : propertyId(propertyId) {}
   String propertyId;
 };
+
 class QtMethodData : public RefCounted
 {
 public:
   QtMethodData(QMetaMethod method) : method(method) {}
   QMetaMethod method;
 };
+
 class QtEventData : public RefCounted
 {
 public:
@@ -41,6 +43,7 @@ public:
     const QObject *pQObject = (const QObject*)((ep::Component*)this)->GetUserData();
     return Variant(pQObject->property(data.propertyId.toStringz()));
   }
+
   void setter(const QtPropertyData &data, const Variant &value)
   {
     QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
@@ -86,7 +89,9 @@ public:
   }
 };
 
+namespace internal {
 
+// Helper function to dynamically populate the component descriptor with the QObject's meta data
 void PopulateComponentDesc(Component *pComponent, QObject *pObject)
 {
   // TODO: add built-in properties, methods and events
@@ -164,8 +169,173 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
   }
 }
 
+} // namespace internal
+
 
 // ---------------------------------------------------------------------------------------
+// QtEPComponent - ep::Component shim object into QML
+
+QVariant QtEPComponent::get(const QString &name) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String prop(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->GetProperty(prop), &res);
+  return std::move(res);
+}
+
+void QtEPComponent::set(const QString &name, QVariant val)
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String prop(byteArray.data(), byteArray.size());
+  pComponent->SetProperty(prop, epToVariant(val));
+}
+
+QVariant QtEPComponent::call(const QString &name) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, Slice<Variant>()), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0)), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1)), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4)), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+  QVariant arg4, QVariant arg5) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  Array<Variant, 6> vargs = {};
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5)), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+  QVariant arg4, QVariant arg5, QVariant arg6) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6)), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+  QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6), epToVariant(arg7)), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+  QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6),
+    epToVariant(arg7), epToVariant(arg8)), &res);
+  return std::move(res);
+}
+
+QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
+  QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  QByteArray byteArray = name.toUtf8();
+  String method(byteArray.data(), byteArray.size());
+  QVariant res;
+  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5),
+    epToVariant(arg6), epToVariant(arg7), epToVariant(arg8), epToVariant(arg9)), &res);
+  return std::move(res);
+}
+
+void QtEPComponent::subscribe(QString eventName, QJSValue func) const
+{
+  EPASSERT(pComponent, "QtEPComponent contains a null component");
+  if (!func.isCallable())
+  {
+    pComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString());
+    return;
+  }
+
+  QByteArray byteArray = eventName.toUtf8();
+  String event(byteArray.data(), byteArray.size());
+
+  pComponent->Subscribe(event, Variant::VarDelegate(JSValueDelegateRef::create(func)));
+}
+
+
+// ---------------------------------------------------------------------------------------
+// QtKernelQml - QtKernel shim object into QML
+
 QtEPComponent *QtKernelQml::findComponent(const QString &uid) const
 {
   EPASSERT(pKernel, "No active kernel");
@@ -176,7 +346,6 @@ QtEPComponent *QtKernelQml::findComponent(const QString &uid) const
   return BuildQtEPComponent::Create(pKernel->FindComponent(uidString));
 }
 
-// ---------------------------------------------------------------------------------------
 QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariantMap initParams)
 {
   EPASSERT(pKernel, "No active kernel");
@@ -194,7 +363,6 @@ QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariantMap in
   }
 }
 
-// ---------------------------------------------------------------------------------------
 QtEPComponent *QtKernelQml::getCommandManager() const
 {
   EPASSERT(pKernel, "No active kernel");
@@ -203,7 +371,7 @@ QtEPComponent *QtKernelQml::getCommandManager() const
 }
 
 
-// ---------------------------------------------------------------------------------------
+
 QtEPComponent *BuildQtEPComponent::Create(const ep::ComponentRef &spComponent)
 {
   if (!spComponent)
