@@ -30,7 +30,7 @@ project "epshell"
 		disablewarnings { "4481", "4127" } -- silence some Qt warnings
 
 	configuration { "linux" }
-		links { "assimp" }
+		links { "assimp", "dl" }
 
 	configuration { }
 
