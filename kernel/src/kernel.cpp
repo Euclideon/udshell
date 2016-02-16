@@ -93,7 +93,6 @@ static ep::Instance *MakeInterface(Kernel *pKernel)
   return pInstance;
 }
 
-
 Kernel::Kernel()
   : componentRegistry(256)
   , instanceRegistry(8192)
@@ -356,6 +355,15 @@ void Kernel::StreamerUpdate()
     if (spScene)
       spScene->MakeDirty();
   }
+}
+
+Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(String id, bool bIncludeBase)
+{
+  ComponentType *compType = componentRegistry.Get(id);
+  if (compType)
+    return GetDerivedComponentDescs(compType->pDesc, bIncludeBase);
+  else
+    return nullptr;
 }
 
 Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase)

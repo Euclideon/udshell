@@ -8,6 +8,7 @@
     <file>qml/components/bookmarksui.qml</file>
     <file>qml/components/viewport.qml</file>
     <file>qml/components/resourcespanel.qml</file>
+    <file>qml/components/activityselecter.qml</file>
 
      <!-- Custom Controls -->
     <file>qml/epcontrols/epmenubar.qml</file>

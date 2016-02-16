@@ -18,6 +18,7 @@ Rectangle {
   property var toolbarcomp
   property var simplecamera: null
   property var view: null
+  property var activityselecter
   property var activitylist: []
   property var activityuilist: []
   property var tablist: [] // Store a strong reference to the tabs to stop TabView from garbage collecting them
@@ -30,6 +31,7 @@ Rectangle {
   signal openprojectsignal(string path)
   signal saveprojectsignal()
   signal saveprojectassignal(string path)
+  signal newactivitysignal(string id)
 
   onMessageboxcompChanged: {
     messagebox = messageboxcomp.get("uihandle");
@@ -49,12 +51,23 @@ Rectangle {
     toolBar.toolbarcomp = toolbarcomp;
   }
 
+  onActivityselecterChanged: {
+    activityselecter.get("uihandle").parent = this;
+  }
+
   Component.onCompleted: {
     var commandManager = EPKernel.getCommandManager();
     commandManager.call("registercommand", "newproject", newproject, "", "", "Ctrl+N");
     commandManager.call("registercommand", "openproject", openproject, "", "", "Ctrl+O");
+
     commandManager.call("registercommand", "saveproject", saveproject, "", "", "Ctrl+S");
     commandManager.call("registercommand", "saveprojectas", saveprojectas, "", "", "F12");
+    commandManager.call("registercommand", "newactivity", newactivity, "", "", "Ctrl+A");
+
+    // Disable these shortcuts, they will get enabled when a project is created or opened
+    commandManager.call("disableshortcut", "saveproject");
+    commandManager.call("disableshortcut", "saveprojectas");
+    commandManager.call("disableshortcut", "newactivity");
   }
 
   function cameraupdated(pos, ypr)
@@ -111,12 +124,15 @@ Rectangle {
     }
 
     simplecamera = activity.get("simplecamera");
-    simplecamera.subscribe("changed", cameraupdated);
+    if(simplecamera)
+      simplecamera.subscribe("changed", cameraupdated);
 
     view = activity.get("view");
-    view.subscribe("mousepositionchanged", viewmouseupdated);
-    view.subscribe("enabledpickingchanged", viewpickingenabledchanged);
-    view.subscribe("pickfound", viewpickfound);
+    if(view) {
+      view.subscribe("mousepositionchanged", viewmouseupdated);
+      view.subscribe("enabledpickingchanged", viewpickingenabledchanged);
+      view.subscribe("pickfound", viewpickfound);
+    }
   }
 
   function addactivity(activity) {
@@ -401,6 +417,14 @@ Rectangle {
     anchors.bottom: parent.bottom
     anchors.bottomMargin: bottomBar.height
     anchors.left: parent.left
+  }
+
+  function newactivity() {
+    activityselecter.call("show", newActivitySelected);
+  }
+
+  function newActivitySelected(id) {
+    newactivitysignal(id);
   }
 
   function newproject() {

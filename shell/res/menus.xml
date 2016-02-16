@@ -1,6 +1,9 @@
 <root>
   <menu name="File">
-    <menuitem name="New Project" command="newproject" />
+    <menu name="New...">
+      <menuitem name="New Project" command="newproject" />
+      <menuitem name="New Activity" command="newactivity" enabled="false" />
+    </menu>
     <menuitem name="Open Project" command="openproject" />
     <menuitem name="Save Project" command="saveproject" enabled="false" />
     <menuitem name="Save Project As..." command="saveprojectas" enabled="false" />

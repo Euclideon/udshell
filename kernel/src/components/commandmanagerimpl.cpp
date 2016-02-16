@@ -72,6 +72,19 @@ String CommandManagerImpl::StripWhitespace(Slice<char> output, String input)
   return output.slice(0, len);
 }
 
+void CommandManagerImpl::SetShortcutEnabled(String commandID, bool bEnabled)
+{
+  for (auto kvp : commandRegistry)
+  {
+    if (!commandID.cmpIC(kvp.key))
+    {
+      Command &comm = kvp.value;
+      comm.shortcutEnabled = bEnabled;
+      break;
+    }
+  }
+}
+
 bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
 {
   ActivityRef spActiveActivity = nullptr;
@@ -130,7 +143,7 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
   {
     Command &comm = kvp.value;
 
-    if (!shortcut.cmpIC(comm.shortcut))
+    if (!shortcut.cmpIC(comm.shortcut) && comm.shortcutEnabled)
     {
       if (!comm.activityType.empty())
       {

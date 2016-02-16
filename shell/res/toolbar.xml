@@ -1,5 +1,8 @@
 <root>
-  <button name="New Project" command="newproject" description="Create a new project file" image="qrc:/images/icon_new_32.png" />
+  <button name="New..." split="false">
+    <menuitem name="New Project" command="newproject" description="Create a new project file" image="qrc:/images/icon_new_32.png" />
+    <menuitem name="New Activity" command="newactivity" enabled="false" description="Start a new activity" image="qrc:/images/icon_new_32.png" />
+  </button>
   <button name="Open Project" command="openproject" image="qrc:/images/icon_open_32.png" />
   <button name="Save Project" command="saveproject" enabled="false" image="qrc:/images/icon_save_32.png" />
   <button name="Save Project As..." command="saveprojectas" enabled="false" image="qrc:/images/icon_save_as_32.png" />

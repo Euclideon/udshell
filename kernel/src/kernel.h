@@ -54,10 +54,11 @@ public:
   const ep::ComponentDesc* GetComponentDesc(String id) override final;
 
   template<typename CT>
-  Array<const ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase)
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase)
   {
-    return GetDerivedComponentDescs(&CT::descriptor, bIncludeBase);
+    return GetDerivedComponentDescs(CT::ComponentID(), bIncludeBase);
   }
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase);
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase);
 
   ep::ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) override final;

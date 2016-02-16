@@ -25,12 +25,11 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     sceneParams = pSceneParams->asAssocArray();
   spScene = pKernel->CreateComponent<Scene>(sceneParams);
 
-  const Variant *cam = initParams.Get("camera");
-  if (cam && cam->is(Variant::SharedPtrType::AssocArray))
-  {
-    Variant::VarMap cameraParams = cam->asAssocArray();
-    spCamera = pKernel->CreateComponent<SimpleCamera>(Variant::VarMap(cameraParams));
-  }
+  Variant::VarMap cameraParams;
+  const Variant *pCam = initParams.Get("camera");
+  if (pCam && pCam->is(Variant::SharedPtrType::AssocArray))
+    cameraParams = pCam->asAssocArray();
+  spCamera = pKernel->CreateComponent<SimpleCamera>(Variant::VarMap(cameraParams));
 
   const Variant *model = initParams.Get("model");
   if (model)
