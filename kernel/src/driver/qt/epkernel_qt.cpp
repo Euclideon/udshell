@@ -6,7 +6,7 @@
 
 #include "ui/renderview_qt.h"
 #include "ui/window_qt.h"
-#include "components/qtcomponent_qt.h"
+#include "components/qobjectcomponent_qt.h"
 #include "util/qmlbindings_qt.h"
 #include "components/viewimpl.h"
 
@@ -122,7 +122,7 @@ void QtKernel::InitInternal()
   LogTrace("QtKernel::InitInternal()");
   LogInfo(2, "Initialising epShell...");
 
-  EPTHROW_IF_NULL(RegisterComponentType<QtComponent>(), epR_Failure, "Unable to register QtComponent");
+  EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), epR_Failure, "Unable to register QtComponent");
 
   // create our qapplication
   pApplication = new QtApplication(this, argc, argv.ptr);

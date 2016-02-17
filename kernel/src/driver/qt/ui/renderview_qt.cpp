@@ -4,8 +4,6 @@
 
 #include "driver/qt/epqt.h"
 
-#include <QtQuick/QQuickWindow>
-#include <QtQuick/QQuickFramebufferObject>
 #include <QtGui/QOpenGLFramebufferObject>
 #include <QSGSimpleTextureNode>
 #include <QOpenGLDebugLogger>

@@ -4,8 +4,7 @@
 
 #include "typeconvert_qt.h"
 
-#include "../components/component_qt.h"
-#include "../components/qtcomponent_qt.h"
+#include "../components/qobjectcomponent_qt.h"
 #include "../epkernel_qt.h"
 #include "qmlbindings_qt.h"
 
@@ -40,8 +39,8 @@ Variant epToVariant(QObject *pQObj)
 
   epDebugPrintf("TODO: epToVariant: Unsupported QObject conversion '%s'; we need a global pKernel pointer >_<", pQObj->metaObject()->className());
 
-  // TODO: create generic QtComponent which thinly wraps a QObject
-//  pKernel->CreateComponent<QtComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
+  // TODO: create generic QObjectComponent which thinly wraps a QObject
+//  pKernel->CreateComponent<QObjectComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
   return Variant(nullptr);
 }
 
@@ -143,8 +142,8 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
         case Variant::SharedPtrType::Component:
         {
           ep::ComponentRef spComponent = variant.asComponent();
-          if (spComponent->IsType("qtcomponent"))
-            pVariant->setValue(shared_pointer_cast<qt::QtComponent>(spComponent)->GetQObject());
+          if (spComponent->IsType("qobjectcomponent"))
+            pVariant->setValue(shared_pointer_cast<qt::QObjectComponent>(spComponent)->GetQObject());
           else
           {
             QObject *pQObject = qt::BuildQtEPComponent::Create(spComponent);
@@ -348,13 +347,13 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
           QObject *pQObject = nullptr;
           QQmlEngine::ObjectOwnership ownership = QQmlEngine::JavaScriptOwnership;
 
-          // if the variant contains a qt::QtComponent then unpack this and give the direct QObject*
-          if (spComponent->IsType("qtcomponent"))
+          // if the variant contains a qt::QObjectComponent then unpack this and give the direct QObject*
+          if (spComponent->IsType("qobjectcomponent"))
           {
-            pQObject = shared_pointer_cast<qt::QtComponent>(spComponent)->GetQObject();
+            pQObject = shared_pointer_cast<qt::QObjectComponent>(spComponent)->GetQObject();
 
             // since QML will steal ownership, we need to restore the prev state (in case it was CppOwnership)
-            // note that this is only important for SharedPtr<QtComponent>'s since we don't know who created
+            // note that this is only important for SharedPtr<QObjectComponent>'s since we don't know who created
             // the object we're passing through.
             ownership = QQmlEngine::objectOwnership(pQObject);
           }
