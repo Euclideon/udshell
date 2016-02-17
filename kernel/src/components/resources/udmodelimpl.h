@@ -2,7 +2,7 @@
 #ifndef _EP_EPMODELIMPL_H
 #define _EP_EPMODELIMPL_H
 
-#include "udPlatform.h"
+#include "ep/cpp/platform.h"
 #include "udOctree.h"
 
 #include "ep/cpp/component/resource/udmodel.h"

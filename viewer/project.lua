@@ -1,7 +1,7 @@
 project "epviewer"
 	kind "WindowedApp"
 	language "C++"
-	flags { "StaticRuntime" }
+	flags { "FatalCompileWarnings", "StaticRuntime" }
 
 	files { "src/**.cpp", "src/**.h" }
 	files { "premake5.lua", "project.lua" }
@@ -19,7 +19,6 @@ project "epviewer"
 
 	defines { "GLEW_STATIC" }
 
-
 	configuration { "windows" }
 		links { "ws2_32.lib", "winmm.lib", "opengl32.lib", "glu32.lib", "assimp.lib", "GLEW" }
  		includedirs { "../ud/3rdParty/sdl2/include", "../up/3rdParty/GL/glew/include" }
@@ -34,6 +33,10 @@ project "epviewer"
 		links { "assimp", "GL" }
 
 	configuration { }
+
+	filter { "system:windows" }
+		buildoptions { "/MP" }
+	filter { }
 
 	-- include common stuff
 	dofile "../common-proj.lua"

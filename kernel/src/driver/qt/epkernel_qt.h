@@ -2,6 +2,8 @@
 #ifndef epkernel_qt_H
 #define epkernel_qt_H
 
+#include "ep/cpp/platform.h"
+
 #include "driver/qt/epqt.h"
 
 #include <QGuiApplication>
@@ -64,6 +66,7 @@ public:
 
   epResult RegisterWindow(QQuickWindow *pWindow);
   void UnregisterWindow(QQuickWindow *pWindow);
+  QPointer<QQuickWindow> TopLevelWindow() { return pTopLevelWindow; }
 
 private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);

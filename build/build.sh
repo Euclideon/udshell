@@ -24,6 +24,7 @@ function execute_build() {
     else
       exit 5
     fi
+
     if [ $? -ne 0 ]; then exit 5; fi
   else
     # These must be here until Runner specific variables are implemented
@@ -90,6 +91,32 @@ function run_testsuite() {
   echo "Unit Tests succeeded"
 }
 
+function run_leak_test() {
+  if [ $OSTYPE == "msys" ]; then # Windows, MingW
+    if [ $3 == "win32" ]; then
+      PLAT="x86"
+    else
+      PLAT=$3
+    fi
+  else
+    PLAT=""
+  fi
+  
+  # TODO: Make this run on every config and platform
+  if [[ $OSTYPE == "msys" && $2 == "Debug" && $3 == "x64" ]]; then  	
+    if [ $1 == "epshell" ]; then # epshell
+	  ./public/bin/$2_$PLAT/$1 CITest
+    elif [ $1 == "epviewer" ]; then # epviewer
+	  ./bin/$2_$PLAT/$1 CITest
+	fi
+	grep -i "Detected memory leaks" MemoryReport_$2_$PLAT.txt
+	if [ $? -eq 0 ]; then # epshell leaked memory
+	  grep "normal block" MemoryReport_$2_$PLAT.txt
+	  exit 3
+	fi
+  fi
+}
+
 if [ $# -eq 0 ]; then # if no args just build shell debug x64
   git submodule update --init --recursive
   if [ $? -ne 0 ]; then exit 3; fi
@@ -134,6 +161,7 @@ else
   if [ $# -eq 3 ]; then
     execute_build $1 $2 $3
     run_testsuite $1 $2 $3
+#	run_leak_test $1 $2 $3
   else
     if [ $4 == "merge" ]; then
       merge_master
@@ -142,6 +170,7 @@ else
       execute_build $1 $2 $3 $4
     fi
     run_testsuite $1 $2 $3
+#	run_leak_test $1 $2 $3
   fi
 fi
 

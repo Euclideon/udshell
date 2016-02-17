@@ -67,6 +67,18 @@ namespace internal {
 
 #endif // EPASSERT_ON
 
+#if __EP_MEMORY_DEBUG__ && defined(EP_WINDOWS)
+# define epNew new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+# if defined(realloc)
+#   undef realloc
+# endif // defined(realloc)
+#else // __EP_MEMORY_DEBUG__ && defined(EP_WINDOWS)
+# define epNew new
+#endif  // __EP_MEMORY_DEBUG__ && defined(EP_WINDOWS)
+
+#define epDelete delete
+
+
 
 #include "ep/cpp/internal/slice_inl.h"
 #include "ep/cpp/internal/string_inl.h"

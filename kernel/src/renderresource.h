@@ -1,7 +1,7 @@
 #pragma once
 #ifndef EPRENDERRESOURCE_H
 #define EPRENDERRESOURCE_H
-
+#include "ep/cpp/platform.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/shader.h"

@@ -23,6 +23,8 @@ extern GLenum s_textureType[epTT_Max];
 epShader* epShader_CreateShaderFromFile(const char *pFilename, epShaderType type)
 {
   epUnused(pFilename);
+
+  EPASSERT(false, "Not implemented");
   // load file
   //...
   GLchar *pSource = nullptr;
@@ -50,13 +52,26 @@ epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType
     GLsizei _length;
     glGetShaderInfoLog(shader, sizeof(buffer), &_length, &buffer[0]);
     epDebugPrintf("Shader failed to compile: %s\n", buffer);
-    return 0;
+    glDeleteShader(shader);
+    return nullptr;
   }
 
   epShader *pShader = epAllocType(epShader, 1, epAF_None);
   pShader->shader = shader;
 
   return pShader;
+}
+
+// ***************************************************************************************
+// Author: David Ely, February 2016
+void epShader_DestroyShader(epShader **ppShader)
+{
+  EPASSERT(ppShader && *ppShader, "ppShader is invalid");
+
+  epShader *pShader = *ppShader;
+  glDeleteShader(pShader->shader);
+  epFree(pShader);
+  *ppShader = nullptr;
 }
 
 // ***************************************************************************************
@@ -77,11 +92,13 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader 
     GLsizei length;
     glGetProgramInfoLog(program, sizeof(buffer), &length, &buffer[0]);
     epDebugPrintf("Program failed to link: %s\n", buffer);
-    return 0;
+    glDeleteProgram(program);
+    return nullptr;
   }
 
-  epShaderProgram *pProgram = epAllocType(epShaderProgram, 1, epAF_None);
-  pProgram->program = program;
+  //Always detach shaders after a successful link.
+  glDetachShader(program, pVertexShader->shader);
+  glDetachShader(program, pPixelShader->shader);
 
   size_t extraBytes = 0;
 
@@ -111,7 +128,7 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader 
 
   extraBytes += sizeof(epShaderProgram::Param) * (numAttributes + numUniforms);
 
-  pProgram = (epShaderProgram*)epAlloc(sizeof(epShaderProgram) + extraBytes);
+  epShaderProgram *pProgram = (epShaderProgram*)epAlloc(sizeof(epShaderProgram) + extraBytes);
   pProgram->program = program;
   pProgram->numAttributes = numAttributes;
   pProgram->numUniforms = numUniforms;
@@ -141,8 +158,16 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *pVertexShader, epShader 
     pStrings += length + 1;
   }
 
-
   return pProgram;
+}
+
+void epShader_DestroyShaderProgram(epShaderProgram **ppProgram)
+{
+  EPASSERT(ppProgram && *ppProgram, "ppProgram is invalid");
+  epShaderProgram *pProgram = *ppProgram;
+  glDeleteProgram(pProgram->program);
+  epFree(pProgram);
+  *ppProgram = nullptr;
 }
 
 // ***************************************************************************************

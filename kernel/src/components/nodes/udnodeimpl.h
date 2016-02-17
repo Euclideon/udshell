@@ -2,7 +2,7 @@
 #ifndef EP_UDNODEIMPL_H
 #define EP_UDNODEIMPL_H
 
-#include "udMath.h"
+#include "ep/cpp/platform.h"
 #include "udRender.h"
 
 #include "ep/cpp/math.h"

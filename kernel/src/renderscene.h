@@ -1,6 +1,7 @@
 #pragma once
 #ifndef EPRENDERSCENE_H
 #define EPRENDERSCENE_H
+#include "ep/cpp/platform.h"
 
 #include "udRender.h"
 #include "udChunkedArray.h"
@@ -188,6 +189,9 @@ private:
   epFormatDeclaration *s_pPosUV = nullptr;
   epArrayBuffer *s_pQuadVB = nullptr;
   epArrayBuffer *s_pQuadIB = nullptr;
+
+  epShader *pVS = nullptr;
+  epShader *pPS = nullptr;
   epShaderProgram *s_shader = nullptr;
 };
 

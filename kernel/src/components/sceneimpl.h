@@ -2,6 +2,7 @@
 #ifndef EPSCENEIMPL_H
 #define EPSCENEIMPL_H
 
+#include "ep/cpp/platform.h"
 #include "udRender.h"
 
 #include "ep/cpp/component/component.h"

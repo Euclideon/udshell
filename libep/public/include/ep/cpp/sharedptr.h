@@ -464,7 +464,7 @@ namespace internal {
   template<class T, typename... Args>
   epforceinline UniquePtr<T> Create<T, false, Args...>::create(Args... args)
   {
-    return UniquePtr<T>(new T(args...));
+    return UniquePtr<T>(epNew T(args...));
   }
   template<class T, typename... Args>
   epforceinline UniquePtr<T> Create<T, true, Args...>::create(Args... args)

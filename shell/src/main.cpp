@@ -16,6 +16,7 @@
 #include "components/file.h"
 #include "hal/debugfont.h"
 #include "messagebox.h"
+#include "components/timer.h"
 
 using namespace ep;
 
@@ -28,6 +29,9 @@ static UIComponentRef spMessageBox;
 static MenuRef spMenu;
 static MenuRef spToolBar;
 static ProjectRef spProject;
+static TimerRef spCITimer;
+static SubscriptionRef spCITimerSub;
+static bool CITest = false;
 
 MutableString256 projFilePath;
 MutableString256 projectName;
@@ -210,6 +214,9 @@ void Deinit(String sender, String message, const Variant &data)
   spMenu = nullptr;
   spToolBar = nullptr;
   spMessageBox = nullptr;
+
+  spCITimerSub = nullptr;
+  spCITimer = nullptr;
 }
 
 void Init(String sender, String message, const Variant &data)
@@ -247,13 +254,16 @@ void Init(String sender, String message, const Variant &data)
   spToolBar = pKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
   spTopLevelUI->SetProperty("toolbarcomp", spToolBar);
 
-  // Subscribe to UI events
-  spTopLevelUI->Subscribe("newprojectsignal", Delegate<void(String)>(&NewProject));
-  spTopLevelUI->Subscribe("openprojectsignal", Delegate<void(String)>(&OpenProject));
-  spTopLevelUI->Subscribe("saveprojectsignal", Delegate<void(void)>(&SaveProject));
-  spTopLevelUI->Subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
-  spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
-
+  // TODO: Remove this once UIComponent cleans up its events
+  if (!CITest)
+  {
+    // Subscribe to UI events
+    spTopLevelUI->Subscribe("newprojectsignal", Delegate<void(String)>(&NewProject));
+    spTopLevelUI->Subscribe("openprojectsignal", Delegate<void(String)>(&OpenProject));
+    spTopLevelUI->Subscribe("saveprojectsignal", Delegate<void(void)>(&SaveProject));
+    spTopLevelUI->Subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
+    spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
+  }
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 
 // TODO Temporary -- Remove this after code for scanning the plugin folder is written
@@ -268,13 +278,29 @@ void Init(String sender, String message, const Variant &data)
   else
     OpenProject("testproj.epproj");
 #endif
+
+  if (CITest)
+  {
+    spCITimer = pKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 }, { "timertype", "CountDown" } });
+    spCITimerSub = spCITimer->Elapsed.Subscribe([]() { ((kernel::Kernel*)Kernel::GetInstance())->Terminate(); });
+  }
 }
 
 // ---------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+  epInitMemoryTracking();
   if (argc > 1)
-    projFilePath.append(argv[1]);
+  {
+    if (String(argv[1]).eqIC("CITest"))
+    {
+      CITest = true;
+    }
+    else
+    {
+      projFilePath.append(argv[1]);
+    }
+  }
 
   // install our qt message handler
   qInstallMessageHandler(DbgMessageHandler);

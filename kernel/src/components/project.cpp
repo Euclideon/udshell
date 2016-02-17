@@ -25,6 +25,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     }
     catch (EPException &) {
       LogDebug(2, "Project file \"{0}\" does not exist. Creating new project.", *pSrc);
+      ClearError();
       return;
     }
   }

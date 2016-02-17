@@ -220,6 +220,11 @@ void epGPU_WaitSync(epSyncPoint **ppSync)
 
   s_QtGLContext.pFunc->glFlush();
   s_QtGLContext.pFunc3_2_Core->glWaitSync((*ppSync)->syncId, 0, GL_TIMEOUT_IGNORED);
+  epGPU_DestroySyncPoint(ppSync);
+}
+
+void epGPU_DestroySyncPoint(epSyncPoint **ppSync)
+{
   s_QtGLContext.pFunc3_2_Core->glDeleteSync((*ppSync)->syncId);
   epFree(*ppSync);
   *ppSync = nullptr;
