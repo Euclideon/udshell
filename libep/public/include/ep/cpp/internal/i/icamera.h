@@ -18,9 +18,15 @@ public:
   virtual void SetPerspective(double _fovY) = 0;
   virtual void SetOrtho(double _orthoHeight) = 0;
 
+  virtual double GetFovY() const = 0;
+  virtual double GetOrthoHeight() const = 0;
+  virtual bool IsOrtho() const = 0;
+
   virtual void SetDepthPlanes(double _zNear, double _zFar) = 0;
   virtual void SetNearPlane(double _zNear) = 0;
+  virtual double GetNearPlane() const = 0;
   virtual void SetFarPlane(double _zFar) = 0;
+  virtual double GetFarPlane() const = 0;
 
   virtual Variant Save() const = 0;
 

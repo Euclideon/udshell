@@ -24,9 +24,15 @@ public:
   void SetPerspective(double _fovY) override { pImpl->SetPerspective(_fovY); }
   void SetOrtho(double _orthoHeight) override { pImpl->SetOrtho(_orthoHeight); }
 
+  double GetFovY() const override final { return pImpl->GetFovY(); }
+  double GetOrthoHeight() const override final { return pImpl->GetOrthoHeight(); }
+  bool IsOrtho() const override final { return pImpl->IsOrtho(); }
+
   void SetDepthPlanes(double _zNear, double _zFar) override { pImpl->SetDepthPlanes(_zNear, _zFar); }
   void SetNearPlane(double _zNear) override { pImpl->SetNearPlane(_zNear); }
+  double GetNearPlane() const override final { return pImpl->GetNearPlane(); }
   void SetFarPlane(double _zFar) override { pImpl->SetFarPlane(_zFar); }
+  double GetFarPlane() const override final { return pImpl->GetFarPlane(); }
 
   Variant Save() const override { return pImpl->Save(); }
 
@@ -46,6 +52,10 @@ protected:
   static Array<const PropertyInfo> GetProperties()
   {
     return{
+      EP_MAKE_PROPERTY(NearPlane, "Near depth plane", nullptr, 0),
+      EP_MAKE_PROPERTY(FarPlane, "Far depth plane", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(FovY, "Field of view in the Y direction when in Perspective mode", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(OrthoHeight, "Height of the viewing frustrum in Orthographic mode", nullptr, 0),
       EP_MAKE_PROPERTY_RO(CameraMatrix, "Position of camera", nullptr, 0),
       EP_MAKE_PROPERTY_RO(ViewMatrix, "Position of camera", nullptr, 0),
     };
@@ -55,6 +65,7 @@ protected:
     return{
       EP_MAKE_METHOD(SetDepthPlanes, "Set the near and far depth planes:\n  setdepthplanes(near, far)"),
       EP_MAKE_METHOD(SetOrtho, "Set the projection mode to Orthographic with given ortho height"),
+      EP_MAKE_METHOD(IsOrtho, "Returns true if the camera is in Orthographic mode"),
       EP_MAKE_METHOD(SetPerspective, "Set the projection mode to Perspective with given field of view"),
     };
   }
