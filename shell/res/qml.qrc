@@ -13,7 +13,7 @@
     <file>qml/epcontrols/epmenubar.qml</file>
     <file>qml/epcontrols/epmenu.qml</file>
     <file>qml/epcontrols/eptoolbar.qml</file>
-    <file>qml/epcontrols/epsplitbutton.qml</file>
+    <file>qml/epcontrols/epmenubutton.qml</file>
     <file>qml/epcontrols/eptoolbutton.qml</file>
     <file>qml/epcontrols/epfiledialog.qml</file>
     <file>qml/epcontrols/eptoolpanelmanager.qml</file>

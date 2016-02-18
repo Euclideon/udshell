@@ -5,13 +5,14 @@ import QtQuick.Layouts 1.1
 import epKernel 0.1
 
 RowLayout {
-  id: epSplitButton
+  id: epMenuButton
   property alias text: button.text
   property alias iconSource: button.iconSource
   property alias command: button.command
   property alias tooltip: button.tooltip
   property alias buttonHeight: button.implicitHeight
   property alias buttonWidth: button.implicitWidth
+  property bool split: true
   property var commandManager
   spacing: 1
 
@@ -35,11 +36,16 @@ RowLayout {
     implicitWidth: 40
 
     onClicked: {
-      if(command)
-        commandManager.call("runcommand", command, null);
+      if(split) {
+        if(command)
+          commandManager.call("runcommand", command, null);
+      }
+      else if(dropdown.visible) {
+        menu.toggleVisible();
+      }
     }
 
-    style: splitButtonStyle
+    style: menuButtonStyle
   }
 
   Button {
@@ -48,18 +54,16 @@ RowLayout {
 
     property alias button: button
     property alias menu: menu
-    style: splitButtonDropDownStyle
+    style: menuButtonDropDownStyle
 
-    onClicked: {
-      menu.toggleVisible();
-    }
+    onClicked: menu.toggleVisible();
   }
 
   EPMenu
   {
     id: menu
 
-    __visualItem: epSplitButton
+    __visualItem: epMenuButton
 
     on__SelectedIndexChanged: {
       var item = items[__selectedIndex];
@@ -73,19 +77,19 @@ RowLayout {
       if(__popupVisible)
         __dismissMenu()
       else
-        __popup(Qt.rect(0, splitButton.height, 0, 0), 0);
+        __popup(Qt.rect(0, buttonHeight, 0, 0), 0);
     }
   }
 
   Component {
-    id: splitButtonDropDownStyle
+    id: menuButtonDropDownStyle
     ButtonStyle {
       label: Item {}
       background: Rectangle {
         id: glyph
         implicitWidth: arrow.implicitWidth + 2
         implicitHeight: control.button.implicitHeight
-        color: !control.enabled ? "transparent" : (control.hovered || control.button.hovered || control.menu.__popupVisible ? "#555" : "transparent")
+        color: !control.enabled ? "transparent" : (control.pressed ? "#333" : (control.hovered || control.button.hovered || control.menu.__popupVisible ? "#555" : "transparent"))
         Rectangle {
           width: arrow.implicitWidth
           height: arrow.implicitHeight
@@ -105,7 +109,7 @@ RowLayout {
   }
 
   Component {
-    id: splitButtonStyle
+    id: menuButtonStyle
     ButtonStyle {
       padding {
         left: 2
