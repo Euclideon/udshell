@@ -73,6 +73,7 @@ QtKernel::QtKernel(Slice<const KeyValuePair> commandLine)
   , mainSurfaceFormat(QSurfaceFormat::defaultFormat())
   , pSplashScreen(nullptr)
   , pTopLevelWindow(nullptr)
+  , pFocusManager(nullptr)
   , mainThreadId(QThread::currentThreadId())
   , renderThreadId(nullptr)
 {
@@ -96,6 +97,7 @@ QtKernel::~QtKernel()
 
   delete pGLDebugLogger;
   delete pSplashScreen;
+  delete pFocusManager;
   delete pQmlEngine;
 
   try
@@ -140,6 +142,7 @@ void QtKernel::InitInternal()
   // register our internal qml types
   EPTHROW_IF(qmlRegisterType<QtRenderView>("epKernel", 0, 1, "EPRenderView") == -1, epR_Failure, "qmlRegisterType<QtRenderView> Failed");
   EPTHROW_IF(qmlRegisterType<QtEPComponent>() == -1, epR_Failure, "qmlRegisterType<QtEPComponent> Failed");
+  EPTHROW_IF(qRegisterMetaType<QtFocusManager*>("QtFocusManager*") == -1, epR_Failure, "qRegisterMetaType<QtFocusManager *> Failed");
   EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, epR_Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
 
   // Load in the qrc file
@@ -150,6 +153,9 @@ void QtKernel::InitInternal()
   // TODO: control setting a debug context based on command line switches?
   mainSurfaceFormat.setOption(QSurfaceFormat::DebugContext);
   QSurfaceFormat::setDefaultFormat(mainSurfaceFormat);
+
+  // create focus maanager;
+  pFocusManager = new QtFocusManager();
 
   // create the splash screen
   QQmlComponent component(pQmlEngine, QUrl("qrc:/kernel/splashscreen.qml"));

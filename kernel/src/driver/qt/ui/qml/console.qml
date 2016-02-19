@@ -3,6 +3,7 @@ import QtQuick.Window 2.1
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
+import epKernel 0.1
 
 Item {
   id: consoleWin
@@ -20,7 +21,8 @@ Item {
     if(consoleWin.visible)
     {
       consoleWin.enabled = true;
-      consoleIn.forceActiveFocus();
+      EPKernel.focus.setFocus(consoleIn);
+      //consoleIn.forceActiveFocus();
     }
     else
     {
@@ -231,6 +233,7 @@ Item {
         opacity: 0.9
         TextArea {
           id: textArea
+          activeFocusOnTab: false
           anchors.fill: parent
           frameVisible: false
           wrapMode: TextEdit.NoWrap
@@ -275,6 +278,7 @@ Item {
           text: "foo"
           textMargin: consoleInTextArea.textMargin
           font: consoleInTextArea.font
+          activeFocusOnTab: false
         }
 
         Rectangle {
@@ -294,6 +298,7 @@ Item {
               id: consoleInTextArea
               property int historyIndex: 0
               focus: true
+              activeFocusOnTab: true
               width: parent.width - parent.border.width * 2
               height: Math.max(minTextArea.contentHeight, Math.min(0.33 * consoleWin.height, contentHeight)) + 2
               anchors.verticalCenter: parent.verticalCenter

@@ -9,5 +9,11 @@ FocusScope {
   EPRenderView {
     id: renderview
     anchors.fill: parent
+
+    onActiveFocusChanged: {
+      if(activeFocus) {
+        EPKernel.focus.push(this);
+      }
+    }
   }
 }

@@ -16,6 +16,7 @@
 #include <QEvent>
 #include <QPointer>
 
+#include "ui/focusmanager_qt.h"
 #include "kernel.h"
 
 class QQuickWindow;
@@ -68,6 +69,8 @@ public:
   void UnregisterWindow(QQuickWindow *pWindow);
   QPointer<QQuickWindow> TopLevelWindow() { return pTopLevelWindow; }
 
+  QtFocusManager *GetFocusManager() { return pFocusManager; }
+
 private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);
   void OnFirstRender();
@@ -90,6 +93,8 @@ private:
   QSurfaceFormat mainSurfaceFormat;
   QQuickWindow *pSplashScreen;
   QPointer<QQuickWindow> pTopLevelWindow;
+
+  QtFocusManager *pFocusManager;
 
   Qt::HANDLE mainThreadId;
   Qt::HANDLE renderThreadId;
