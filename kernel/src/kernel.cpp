@@ -213,10 +213,10 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   // Init capture and broadcast of stdout/stderr
   pKernel->spStdOutBC = pKernel->CreateComponent<Broadcaster>({ {"name", "stdoutbc"} });
   pKernel->stdOutCapture = epNew StdCapture(stdout);
-  epscope(fail) { delete pKernel->stdOutCapture; };
+  epscope(fail) { epDelete pKernel->stdOutCapture; };
   pKernel->spStdErrBC = pKernel->CreateComponent<Broadcaster>({ {"name", "stderrbc"} });
   pKernel->stdErrCapture = epNew StdCapture(stderr);
-  epscope(fail) { delete pKernel->stdErrCapture; };
+  epscope(fail) { epDelete pKernel->stdErrCapture; };
 
   // platform init
   pKernel->InitInternal();
@@ -295,8 +295,8 @@ void Kernel::Destroy()
   spPluginManager = nullptr;
   spResourceManager = nullptr;
 
-  delete stdOutCapture;
-  delete stdErrCapture;
+  epDelete stdOutCapture;
+  epDelete stdErrCapture;
   stdOutCapture = nullptr;
   stdErrCapture = nullptr;
 
@@ -310,7 +310,7 @@ void Kernel::Destroy()
   //       Lua may have references to render resources (or other stuff), but the renderer is already destroyed!!
   spLua = nullptr;
 
-  delete this;
+  epDelete this;
 
   epHAL_Deinit();
 }

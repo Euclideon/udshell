@@ -103,7 +103,7 @@ void epDebugFont_Init()
 void epDebugFont_Deinit()
 {
   epVertex_DestroyArrayBuffer(&pRomanSimplex->pGeoBuffer);
-  delete pRomanSimplex;
+  epDelete pRomanSimplex;
   epVertex_DestroyFormatDeclaration(&pVertexFormat);
 
   epShader_DestroyShader(&pFontShaderV);

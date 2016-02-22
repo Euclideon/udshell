@@ -490,7 +490,7 @@ namespace internal {
   template<class T>
   epforceinline void Release<T, false>::release(T *ptr)
   {
-    delete ptr;
+    epDelete ptr;
   }
   template<class T>
   epforceinline void Release<T, true>::release(T *ptr)

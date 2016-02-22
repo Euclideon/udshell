@@ -16,7 +16,7 @@ Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant:
 
 Lua::~Lua()
 {
-  delete pLua;
+  epDelete pLua;
 }
 
 Variant Lua::GetGlobal(Variant key) const
