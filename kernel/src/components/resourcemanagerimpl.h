@@ -17,9 +17,15 @@ public:
 
   // Resource getter/setters
   size_t GetNumResources() const override final { return resources.Size(); }
-  void AddResource(ResourceRef res) override final;
-  void RemoveResource(ResourceRef res) override final;
+  void AddResource(ResourceRef res) override final { AddResourceArray({ res }); }
+  void AddResourceArray(Slice<const ResourceRef> resArray) override final;
+  void RemoveResource(ResourceRef res) override final { RemoveResourceArray({ res }); }
+  void RemoveResourceArray(Slice<const ResourceRef> resArray) override final;
+
+  void ClearResources() override final;
   ResourceRef GetResource(String key) const override final { return *resources.Get(key); }
+  Array<ResourceRef> GetResourceArray() const override final;
+
 
   template<typename CT>
   Array<ResourceRef> GetResourcesByType() const
@@ -32,6 +38,7 @@ public:
   ResourceIterator begin() const override final { return ResourceIterator( resources.begin()); }
   ResourceIterator end() const override final { return ResourceIterator( resources.end()); }
 
+  Variant::VarMap GetExtensions() const override final;
   // Resource loading/saving functions
   DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams) override final;
   void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) override final;

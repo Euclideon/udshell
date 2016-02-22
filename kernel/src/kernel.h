@@ -85,6 +85,7 @@ public:
   // Functions for resource management
   ResourceManagerRef GetResourceManager() const override final;
 
+  const AVLTree<String, const ep::ComponentDesc *> &GetExtensionsRegistry() const;
   void RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts) override final;
   DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) override final;
 

@@ -12,6 +12,7 @@
 #include "ep/cpp/component/activity.h"
 #include "ep/cpp/component/resource/menu.h"
 #include "ep/cpp/component/commandmanager.h"
+#include "ep/cpp/component/resourcemanager.h"
 #include "components/pluginmanager.h"
 #include "components/file.h"
 #include "hal/debugfont.h"
@@ -130,6 +131,8 @@ void NewProject(String filePath)
     Array<ActivityRef> activities = spProject->GetActivities();
     for (size_t i = 0; i < activities.length; i++)
       RemoveUIActivity(activities[i]);
+
+    pKernel->GetResourceManager()->ClearResources();
   }
   spProject = nullptr;
 
@@ -168,6 +171,8 @@ void OpenProject(String filePath)
       RemoveUIActivity(activities[i]);
       spProject->RemoveActivity(activities[i]);
     }
+
+    pKernel->GetResourceManager()->ClearResources();
   }
 
   spProject = spNewProject;

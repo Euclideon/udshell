@@ -158,6 +158,26 @@ public:
     return *pV;
   }
 
+  AVLTree<K, V>& operator =(const AVLTree<K, V> &rh)
+  {
+    if (this != &rh)
+    {
+      this->~AVLTree();
+      new(this) AVLTree<K, V>(rh);
+    }
+    return *this;
+  }
+
+  AVLTree<K, V>& operator =(AVLTree<K, V> &&rval)
+  {
+    if (this != &rval)
+    {
+      this->~AVLTree();
+      new(this) AVLTree<K, V>(std::move(rval));
+    }
+    return *this;
+  }
+
   class Iterator;
   Iterator begin() const { return Iterator(root); }
   static Iterator end() { return Iterator(nullptr); }
