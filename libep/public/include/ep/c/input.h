@@ -210,6 +210,7 @@ struct epInputEvent
   {
     Move,
     Key,
+    Focus,
   };
 
   struct MoveEvent
@@ -233,6 +234,7 @@ struct epInputEvent
   {
     MoveEvent move;
     KeyEvent key;
+    bool hasFocus;
   };
 };
 
