@@ -598,19 +598,18 @@ template<size_t Size>
 inline MutableString<Size>& MutableString<Size>::toUpper()
 {
   for (size_t i = 0; i < this->length; ++i)
-  {
-    if (isAlpha(this->ptr[i]))
-      this->ptr[i] == toUpper(this->ptr[i]);
-  }
+    this->ptr[i] = epToUpper(this->ptr[i]);
+
+  return *this;
 }
+
 template<size_t Size>
 inline MutableString<Size>& MutableString<Size>::toLower()
 {
   for (size_t i = 0; i < this->length; ++i)
-  {
-    if (isAlpha(this->ptr[i]))
-      this->ptr[i] == toLower(this->ptr[i]);
-  }
+    this->ptr[i] = epToLower(this->ptr[i]);
+
+  return *this;
 }
 
 template<size_t Size>
