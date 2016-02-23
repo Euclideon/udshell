@@ -336,6 +336,20 @@ void Init(String sender, String message, const Variant &data)
   }
 }
 
+void RegisterEPControls()
+{
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/epmenubar.qml"), "epControls", 0, 1, "EPMenuBar");
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/epmenu.qml"), "epControls", 0, 1, "EPMenu");
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptoolbar.qml"), "epControls", 0, 1, "EPToolBar");
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/epmenubutton.qml"), "epControls", 0, 1, "EPSplitButton");
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptoolbutton.qml"), "epControls", 0, 1, "EPToolButton");
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/epfiledialog.qml"), "epControls", 0, 1, "EPFileDialog");
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptoolpanelmanager.qml"), "epControls", 0, 1, "EPToolPanelManager");
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/eplistmodel.qml"), "epControls", 0, 1, "EPListModel");
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/eplistview.qml"), "epControls", 0, 1, "EPListView");
+  qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptableview.qml"), "epControls", 0, 1, "EPTableView");
+}
+
 // ---------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
@@ -359,6 +373,8 @@ int main(int argc, char *argv[])
   // TEMP: this is just for testing - force qt to use the threaded renderer on windows
   // 5.5 uses this by default
   qputenv("QSG_RENDER_LOOP", "threaded");
+
+  RegisterEPControls();
 
   try
   {

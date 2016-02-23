@@ -4,7 +4,7 @@ import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.1
 import epKernel 0.1
-import "qrc:/qml/epcontrols" 0.1
+import epControls 0.1
 
 /** To use:
   * After creating this component, you need to pass it a View component, e.g. SetProperty("view", spView);
