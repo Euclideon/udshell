@@ -22,6 +22,11 @@
     <file>qml/epcontrols/eplistview.qml</file>
     <file>qml/epcontrols/eptableview.qml</file>
     <file>qml/epcontrols/qmldir</file>
+
+    <!-- Themes -->
+    <file>qml/themes/shelltheme.qml</file>
+
+    <!-- XML files -->
     <file>menus.xml</file>
     <file>toolbar.xml</file>
 

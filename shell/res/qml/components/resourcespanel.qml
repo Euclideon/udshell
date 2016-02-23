@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.1
 import epKernel 0.1
 import epControls 0.1
+import epThemes 0.1
 
 /** To use:
   * After creating this component, you need to pass it a View component, e.g. SetProperty("view", spView);
@@ -13,7 +14,7 @@ import epControls 0.1
 Rectangle {
   id: resourcesPanel
   anchors.fill: parent
-  color: "#444"
+  color: Theme.toolPanelBgColor
 
   property var commandManager
   property var resourceManager
@@ -124,9 +125,9 @@ Rectangle {
     spacing: 0
 
     Rectangle {
-      color: "#555"
+      color: Theme.toolPanelToolBarBgColor
       Layout.fillWidth: true
-      Layout.preferredHeight: 40
+      Layout.preferredHeight: Theme.toolPanelToolBarSize
       id: toolBar
       RowLayout {
         spacing: 0
@@ -268,13 +269,13 @@ Rectangle {
       Component {
         id: filterTextFieldStyle
         TextFieldStyle {
-          textColor: "white"
+          textColor: Theme.toolPanelTextFieldTextColor
           background: Rectangle {
-            color: "#333"
-            radius: 2
+            color: Theme.toolPanelTextFieldBgColor
+            radius: Theme.toolPanelTextFieldRadius
             implicitWidth: 100
             implicitHeight: 24
-            border.color: "#888"
+            border.color: Theme.toolPanelTextFieldBorderColor
             border.width: 1
           }
         }

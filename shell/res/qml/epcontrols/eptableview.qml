@@ -2,6 +2,7 @@ import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import epControls 0.1
+import epThemes 0.1
 
 TableView {
   property var menu: null
@@ -47,7 +48,7 @@ TableView {
   }
 
   style: TableViewStyle {
-    backgroundColor: "#444"
+    backgroundColor: Theme.tableViewBgColor
     frame: Item {}
   }
 
@@ -70,7 +71,7 @@ TableView {
   rowDelegate: Rectangle {
     height: tableView.textHeight * 1.3
     width: tableView.width
-    color: styleData.selected ? "#777" : ((styleData.row < tableView.rowCount) && ((mouseArea.containsMouse && !tableView.menuShowing) || (tableView.menuShowing && tableView.rightClickIndex == styleData.row)) ? "blue" : (styleData.alternate ? "#383838" : "#444"))
+    color: styleData.selected ? Theme.tableViewItemBgColorSelected : ((styleData.row < tableView.rowCount) && ((mouseArea.containsMouse && !tableView.menuShowing) || (tableView.menuShowing && tableView.rightClickIndex == styleData.row)) ? Theme.tableViewItemBgColorHovered : (styleData.alternate ? Theme.tableViewItemBgColorAlternate : Theme.tableViewItemBgColor))
 
     MouseArea {
       id: mouseArea
@@ -139,9 +140,9 @@ TableView {
   }
 
   headerDelegate: Rectangle {
-    height: textItem.implicitHeight * 1.3
+    height: textItem.implicitHeight * Theme.tableViewHeaderHeightMultiplier
     width: textItem.implicitWidth
-    color: "#666"
+    color: Theme.tableViewHeaderBgColor
     Text {
       id: textItem
       anchors.verticalCenter: parent.verticalCenter
@@ -151,7 +152,7 @@ TableView {
       anchors.leftMargin: 10
       text: styleData.value
       elide: Text.ElideRight
-      color: "black"
+      color: Theme.tableViewHeaderTextColor
       renderType: Text.NativeRendering
     }
 
@@ -159,11 +160,11 @@ TableView {
       id: sortIndicator
       anchors.verticalCenter: parent.verticalCenter
       anchors.right: parent.right
-      font.pixelSize: 9
+      font.pixelSize: Theme.tableViewHeaderSortIndicatorHeight
       anchors.rightMargin: 6
       visible: tableView.sortIndicatorVisible && styleData.column === tableView.sortIndicatorColumn
       text: tableView.sortIndicatorOrder === Qt.AscendingOrder ? "\u25b2" : "\u25bc"
-      color: "black"
+      color: Theme.tableViewHeaderSortIndicatorColor
     }
 
     Rectangle {
@@ -173,7 +174,7 @@ TableView {
       anchors.bottomMargin: 1
       anchors.topMargin: 1
       width: 1
-      color: "#999"
+      color: Theme.tableViewHeaderSeparatorColor
     }
   }
 
@@ -182,16 +183,16 @@ TableView {
     Rectangle {
       property alias text: textItem.text
       id: rect
-      color: "white"
-      border.color: "black"
-      border.width: 1
+      color: Theme.dragTileBgColor
+      border.color: Theme.dragTileBorderColor
+      border.width: Theme.dragTileBorderWidth
       width: textItem.implicitWidth + (height - textItem.implicitHeight)
-      height: textItem.implicitHeight * 1.5
+      height: textItem.implicitHeight * Theme.dragTileHeightMultiplier
 
       Text {
         id: textItem
         anchors.centerIn: parent
-        color: "black"
+        color: Theme.dragTileTextColor
       }
     }
   }

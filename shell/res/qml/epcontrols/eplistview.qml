@@ -1,5 +1,6 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.3
+import epThemes 0.1
 
 ListView {
   property var menu: null
@@ -19,11 +20,11 @@ ListView {
 
   id: listView
   clip: true
-  highlightMoveVelocity: 2000
+  highlightMoveVelocity: Theme.listViewHighlightMoveVelocity
   delegate: Rectangle {
     height: text.height
     width: listView.width
-    color: listView.currentIndex == index ? "transparent" : ((mouseArea.containsMouse && !listView.menuShowing) || (listView.menuShowing && listView.rightClickIndex == index)) ? "blue" : (alternatingRowColors ? (index % 2 == 0 ? "#444" : "#383838") : "#444")
+    color: listView.currentIndex == index ? "transparent" : ((mouseArea.containsMouse && !listView.menuShowing) || (listView.menuShowing && listView.rightClickIndex == index)) ? Theme.listViewItemBgColorHovered : (alternatingRowColors ? (index % 2 == 0 ? Theme.listViewItemBgColor : Theme.listViewItemBgColorAlternate) : Theme.listViewItemBgColor)
 
     MouseArea {
       id: mouseArea
@@ -53,14 +54,14 @@ ListView {
         width: parent.width - anchors.leftMargin - anchors.rightMargin
         height: contentHeight + 15
         verticalAlignment: Text.AlignVCenter
-        color: "white"
+        color: Theme.listViewItemTextColor
         textFormat: Text.RichText
         text: modelDisplayItem != undefined ? model[modelDisplayItem] : ""
       }
     }
   }
   highlight: Rectangle {
-    color: "#777"
+    color: Theme.listViewItemBgColorSelected
     height: listView.currentItem.height
     width: listView.currentItem.width
   }

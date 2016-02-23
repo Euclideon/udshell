@@ -5,11 +5,12 @@ import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.1
 import epKernel 0.1
 import epControls 0.1
+import epThemes 0.1
 
 Rectangle {
   id: topLevel
   anchors.fill: parent
-  color: "#444"
+  color: Theme.windowBgColor
 
   property var uiconsole
   property var messageboxcomp
@@ -190,7 +191,8 @@ Rectangle {
     EPToolBar {
       id: toolBar
       Layout.fillWidth: true
-      Layout.preferredHeight: 36
+      color: Theme.windowToolBarBgColor
+      Layout.preferredHeight: Theme.windowToolBarSize
     }
 
     Loader { sourceComponent: separator; Layout.fillWidth: true }
@@ -213,7 +215,7 @@ Rectangle {
 
         Rectangle {
           anchors.fill: parent
-          color: "#333"
+          color: Theme.tabBgColor
         }
 
         onCurrentIndexChanged: {
@@ -340,7 +342,7 @@ Rectangle {
           bottom: 2
         }
         background: Rectangle {
-          color: "#444"
+          color: Theme.bottomBarBgColor
         }
       }
     }
@@ -349,19 +351,19 @@ Rectangle {
       id: bottomBarButtonStyle
       ButtonStyle {
         label: Text {
-          font.pixelSize: 11
+          font.pixelSize: Theme.bottomBarButtonFontSize
           text: control.text
-          color: "white"
+          color: Theme.bottomBarButtonTextColor
           verticalAlignment: Text.AlignVCenter
           horizontalAlignment: Text.AlignHCenter
         }
         background: Rectangle {
           implicitWidth: 50
           border.width: control.activeFocus ? 2 : 1
-          border.color: "#333"
+          border.color: Theme.bottomBarButtonBorderColor
           gradient: Gradient {
-            GradientStop { position: 0 ; color: control.hovered ? "#333" : "#555" }
-            GradientStop { position: 1 ; color: control.hovered ? "#000" : "#333" }
+            GradientStop { position: 0 ; color: control.hovered ? Theme.bottomBarButtonBgColorHoveredStart : Theme.bottomBarButtonBgColorStart }
+            GradientStop { position: 1 ; color: control.hovered ? Theme.bottomBarButtonBgColorHovereEnd : Theme.bottomBarButtonBgColorEnd }
           }
         }
         padding { left: 7; right: 7; top: 4; bottom: 4 }
@@ -376,17 +378,17 @@ Rectangle {
           implicitHeight: Math.max(text.height + 8, 20)
           Rectangle {
             id: bg
-            color: styleData.selected ? "#333" : "#555"
+            color: styleData.selected ? Theme.tabBarBgColorSelected : Theme.tabBarBgColor
             anchors.bottom: parent.bottom
             anchors.bottomMargin: styleData.selected ? 0 : 2
             implicitWidth: Math.max(text.width + 4, 80)
             implicitHeight: styleData.selected ? Math.max(text.height + 8, 20) : Math.max(text.height + 8, 20) - 4
-            radius: 2
+            radius: Theme.tabBarRadius
             Text {
               id: text
               anchors.centerIn: parent
               text: styleData.title
-              color: styleData.selected ? "white" : "black"
+              color: styleData.selected ? Theme.tabBarTextColorSelected : Theme.tabBarTextColor
             }
           }
         }
@@ -398,14 +400,14 @@ Rectangle {
       Rectangle {
         implicitWidth: 1
         implicitHeight: 1
-        color: "#555"
+        color: Theme.windowSeparatorColor
       }
     }
 
     Component {
       id: activityRect
       Rectangle {
-        color: "#333"
+        color: Theme.tabBgColor
       }
     }
   }
