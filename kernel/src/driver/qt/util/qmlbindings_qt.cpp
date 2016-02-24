@@ -190,7 +190,14 @@ void QtEPComponent::set(const QString &name, QVariant val)
   EPASSERT(pComponent, "QtEPComponent contains a null component");
   QByteArray byteArray = name.toUtf8();
   String prop(byteArray.data(), byteArray.size());
-  pComponent->SetProperty(prop, epToVariant(val));
+  try
+  {
+    pComponent->SetProperty(prop, epToVariant(val));
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
 }
 
 QVariant QtEPComponent::call(const QString &name) const
@@ -199,7 +206,14 @@ QVariant QtEPComponent::call(const QString &name) const
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, Slice<Variant>()), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, Slice<Variant>()), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -209,7 +223,14 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -219,7 +240,14 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) 
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -229,7 +257,14 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -239,7 +274,14 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -249,8 +291,15 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
-    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -261,9 +310,15 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  Array<Variant, 6> vargs = {};
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
-    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -274,8 +329,15 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
-    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -286,8 +348,15 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
-    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6), epToVariant(arg7)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6), epToVariant(arg7)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -298,9 +367,16 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
-    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6),
-    epToVariant(arg7), epToVariant(arg8)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6),
+      epToVariant(arg7), epToVariant(arg8)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
   return std::move(res);
 }
 
@@ -311,9 +387,17 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QByteArray byteArray = name.toUtf8();
   String method(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
-    epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5),
-    epToVariant(arg6), epToVariant(arg7), epToVariant(arg8), epToVariant(arg9)), &res);
+  try
+  {
+    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5),
+      epToVariant(arg6), epToVariant(arg7), epToVariant(arg8), epToVariant(arg9)), &res);
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
+
   return std::move(res);
 }
 
@@ -329,7 +413,14 @@ void QtEPComponent::subscribe(QString eventName, QJSValue func) const
   QByteArray byteArray = eventName.toUtf8();
   String event(byteArray.data(), byteArray.size());
 
-  pComponent->Subscribe(event, Variant::VarDelegate(JSValueDelegateRef::create(func)));
+  try
+  {
+    pComponent->Subscribe(event, Variant::VarDelegate(JSValueDelegateRef::create(func)));
+  }
+  catch (EPException &)
+  {
+    ClearError();
+  }
 }
 
 
