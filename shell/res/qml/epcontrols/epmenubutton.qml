@@ -90,7 +90,7 @@ RowLayout {
         id: glyph
         implicitWidth: arrow.implicitWidth + 2
         implicitHeight: control.button.implicitHeight
-        color: !control.enabled ? "transparent" : (control.pressed ? Theme.toolButtonBgColorPressed : (control.hovered || control.button.hovered || control.menu.__popupVisible ? Theme.toolButtonBgColorHovered : Theme.toolButtonBgColor))
+        color: !control.enabled ? "transparent" : (control.pressed || control.menu.__popupVisible || (!split && control.button.pressed) ? Theme.toolButtonBgColorPressed : (control.hovered || control.button.hovered ? Theme.toolButtonBgColorHovered : Theme.toolButtonBgColor))
         Rectangle {
           width: arrow.implicitWidth
           height: arrow.implicitHeight
@@ -120,7 +120,7 @@ RowLayout {
       }
       background: Rectangle {
         anchors.fill: parent
-        color: control.pressed ? Theme.toolButtonBgColorPressed : ((control.hovered || control.dropdown.hovered || control.menu.__popupVisible) ? Theme.toolButtonBgColorHovered : Theme.toolButtonBgColor)
+        color: control.pressed || (!split && (control.dropdown.pressed || control.menu.__popupVisible)) ? Theme.toolButtonBgColorPressed : ((control.hovered || control.dropdown.hovered) ? Theme.toolButtonBgColorHovered : Theme.toolButtonBgColor)
       }
       label: Image {
         source: control.iconSource
