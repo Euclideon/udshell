@@ -340,7 +340,7 @@ RenderShaderRef Renderer::GetShader(const ShaderRef &spShader)
     RenderShader *pShader = epNew RenderShader(this, ShaderRef(pInstance), (epShaderType)type);
     if (!pShader->pShader)
     {
-      delete pShader;
+      epDelete pShader;
       spRenderShader = nullptr;
     }
     else
@@ -365,7 +365,7 @@ RenderShaderProgramRef Renderer::GetShaderProgram(const MaterialRef &spShaderPro
       RenderShaderProgram *pProgram = epNew RenderShaderProgram(this, spVS, spPS);
       if (!pProgram->pProgram)
       {
-        delete pProgram;
+        epDelete pProgram;
         spRenderProgram = nullptr;
       }
       else
@@ -456,7 +456,7 @@ void Renderer::UDThread()
         job->spView = nullptr;
         spView->GetImpl<ViewImpl>()->SetLatestFrame(job);
       }
-      delete this;
+      epDelete this;
     }
   };
 
