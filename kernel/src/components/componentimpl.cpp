@@ -203,6 +203,8 @@ void ComponentImpl::Subscribe(String eventName, const Variant::VarDelegate &d)
     return;
   }
   pDesc->ev.subscribe(pInstance, d);
+  if (ErrorLevel())
+    throw GetError();
 }
 
 } // namespace ep
