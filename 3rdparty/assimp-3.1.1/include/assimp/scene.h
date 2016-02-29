@@ -106,6 +106,12 @@ struct aiNode
 	/** The child nodes of this node. NULL if mNumChildren is 0. */
 	C_STRUCT aiNode** mChildren;
 
+	/** The number of XRefs of this node. */
+	unsigned int mNumXRefs;
+
+	/** The XRefs of this node. Each entry is an index into the xrefs library */
+	unsigned int* mXRefs;
+
 	/** The number of meshes of this node. */
 	unsigned int mNumMeshes;
 
@@ -127,6 +133,8 @@ struct aiNode
 		, mParent(NULL)
 		, mNumChildren(0)
 		, mChildren(NULL)
+		, mNumXRefs(0)
+		, mXRefs(NULL)
 		, mNumMeshes(0)
 		, mMeshes(NULL)
 		, mMetaData(NULL)
@@ -141,6 +149,8 @@ struct aiNode
 		, mParent(NULL)
 		, mNumChildren(0)
 		, mChildren(NULL)
+		, mNumXRefs(0)
+		, mXRefs(NULL)
 		, mNumMeshes(0)
 		, mMeshes(NULL)
 		, mMetaData(NULL)
@@ -158,6 +168,7 @@ struct aiNode
 				delete mChildren[a];
 		}
 		delete [] mChildren;
+		delete [] mXRefs;
 		delete [] mMeshes;
 		delete mMetaData;
 	}
@@ -295,6 +306,15 @@ struct aiScene
 	C_STRUCT aiNode* mRootNode;
 
 
+	/** The number of xrefs in the scene. */
+	unsigned int mNumXRefs;
+
+	/** The array of xrefs.
+	*
+	* Use the indices given in the aiNode structure to access
+	* this array. The array is mNumXRefs in size.
+	*/
+	C_STRUCT aiXRef** mXRefs;
 
 	/** The number of meshes in the scene. */
 	unsigned int mNumMeshes;
