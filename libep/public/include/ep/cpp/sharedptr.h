@@ -94,20 +94,14 @@ public:
 
   // This allows SharedPtr<const T>
   SharedPtr()
+    : pInstance(nullptr)
   {
     static_assert(std::is_base_of<RefCounted, T>::value, "SharedPtr<T>(), T does not derive from RefCounted");
-    // TODO: Consider simplifying the code below
-    // This ensure T is a derived type of RefCounted
-    const RefCounted* pIC = (Type*)nullptr;  // We assign to a const RefCounted because T may be const
-    pInstance = const_cast<RefCounted*>(pIC);
   }
   SharedPtr(nullptr_t)
+    : pInstance(nullptr)
   {
     static_assert(std::is_base_of<RefCounted, T>::value, "SharedPtr<T>(nullptr_t), T does not derive from RefCounted");
-    // TODO: Consider simplifying the code below
-    // This ensure T is a derived type of RefCounted
-    const RefCounted* pIC = (Type*)nullptr;  // We assign to a const RefCounted because T may be const
-    pInstance = const_cast<RefCounted*>(pIC);
   }
 
   // constructors
@@ -127,11 +121,7 @@ public:
   SharedPtr(SharedPtr<U> &&ptr)
   {
     static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
-    static_assert(std::is_base_of<T, U>::value, "U does not derive from T");
-    // TODO: Consider simplifying the code below
-    T *pT = ptr.ptr(); // This makes sure T is a parent of U
-    const RefCounted *pI = pT; // This is for when T is const
-    pInstance = const_cast<RefCounted*>(pI); // This is required because IncRef() is not a const function
+    pInstance = ptr.pInstance;
     ptr.pInstance = nullptr;
   }
 
@@ -157,7 +147,7 @@ public:
   {
     if (pInstance != ptr.pInstance)
     {
-      RefCounted *pOld = pInstance;
+      T *pOld = pInstance;
       pInstance = ptr.pInstance;
       ptr.pInstance = nullptr;
       release(pOld);
@@ -168,7 +158,7 @@ public:
   {
     if (pInstance != ptr.pInstance)
     {
-      RefCounted *pOld = pInstance;
+      T *pOld = pInstance;
       pInstance = acquire(ptr.ptr());
       release(pOld);
     }
@@ -179,7 +169,7 @@ public:
   {
     if (pInstance != ptr.pInstance)
     {
-      RefCounted *pOld = pInstance;
+      T *pOld = pInstance;
       pInstance = acquire(ptr.ptr());
       release(pOld);
     }
@@ -190,7 +180,7 @@ public:
   SharedPtr& operator=(UniquePtr<U> &ptr);
   SharedPtr& operator=(nullptr_t)
   {
-    RefCounted *pOld = pInstance;
+    T *pOld = pInstance;
     pInstance = nullptr;
     release(pOld);
     return *this;
@@ -199,7 +189,7 @@ public:
   template <class U>
   SharedPtr& operator=(SafePtr<U> &ptr)
   {
-    RefCounted *pOld = pInstance;
+    T *pOld = pInstance;
     pInstance = acquire(ptr.ptr());
     release(pOld);
     return *this;
@@ -207,7 +197,7 @@ public:
 
   void reset()
   {
-    RefCounted *pOld = pInstance;
+    T *pOld = pInstance;
     pInstance = nullptr;
     release(pOld);
   }
@@ -228,11 +218,10 @@ private:
   template<typename U> friend struct SafePtr;
   template<typename U> friend struct SynchronisedPtr;
 
-  template <typename U>
-  static RefCounted* acquire(U *pU);
-  static void release(RefCounted *pI);
+  static T* acquire(T *pI);
+  static void release(T *pI);
 
-  RefCounted *pInstance = nullptr;
+  T *pInstance = nullptr;
 };
 
 //------------------------------------------------------------------------------------------
@@ -399,18 +388,14 @@ template <class U>
 inline SharedPtr<T>::SharedPtr(UniquePtr<U> &ptr)
 {
   static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
-  static_assert(std::is_base_of<T, U>::value, "U does not derive from T");
-  // TODO: Consider simplifying the code below
-  T *pT = ptr.ptr(); // This makes sure T is a parent of U
-  const RefCounted *pI = pT; // This is for when T is const
-  pInstance = const_cast<RefCounted*>(pI); // This is required because IncRef() is not a const function
+  pInstance = ptr.pInstance;
   ptr.pInstance = nullptr;
 }
 
 template <class T>
 inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<T> &&ptr)
 {
-  RefCounted *pOld = pInstance;
+  T *pOld = pInstance;
   pInstance = ptr.pInstance;
   ptr.pInstance = nullptr;
   release(pOld);
@@ -422,11 +407,8 @@ template <class U>
 inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<U> &ptr)
 {
   static_assert(std::is_base_of<RefCounted, T>::value, "U does not derive from T");
-  // TODO: Consider simplifying the code below
-  RefCounted *pOld = pInstance;
-  T *pT = ptr.ptr(); // This makes sure T is a parent of U
-  const RefCounted *pI = pT; // This is for when T is const
-  pInstance = const_cast<RefCounted*>(pI); // This is required because IncRef() is not a const function
+  T *pOld = pInstance;
+  pInstance = ptr.pInstance;
   ptr.pInstance = nullptr;
   release(pOld);
   return *this;
@@ -439,24 +421,19 @@ epforceinline size_t SharedPtr<T>::count() const
 }
 
 template<class T>
-template<class U>
-epforceinline RefCounted* SharedPtr<T>::acquire(U *pU)
+epforceinline T* SharedPtr<T>::acquire(T *pI)
 {
-  static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
-  static_assert(std::is_base_of<T, U>::value, "U does not derive from T");
-  // TODO: Consider simplifying the code below
-  T* pT = pU; // This makes sure T is a parent of U
-  const RefCounted* pCI = pT; // This is for when T is const
-  RefCounted* pI = const_cast<RefCounted*>(pCI); // This is required because IncRef() is not a const function
-  if (pI)
-    pI->IncRef();
+  auto *pRC = (RefCounted*)pI; // we have already validated in constructors that T is RefCounted
+  if (pRC)
+    pRC->IncRef();
   return pI;
 }
 template<class T>
-inline void SharedPtr<T>::release(RefCounted *pI)
+inline void SharedPtr<T>::release(T *pI)
 {
-  if (pI)
-    pI->DecRef();
+  auto *pRC = (RefCounted*)pI;
+  if (pRC)
+    pRC->DecRef();
 }
 
 namespace internal {
