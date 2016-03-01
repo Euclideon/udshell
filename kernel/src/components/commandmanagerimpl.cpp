@@ -75,9 +75,14 @@ String CommandManagerImpl::StripWhitespace(Slice<char> output, String input)
 bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
 {
   ActivityRef spActiveActivity = nullptr;
-  ProjectRef spProject = component_cast<Project>(GetKernel()->FindComponent("project"));
-  if (spProject)
+  ProjectRef spProject;
+
+  ComponentRef spComp = GetKernel()->FindComponent("project");
+  if (spComp)
+  {
+    spProject = component_cast<Project>(spComp);
     spActiveActivity = spProject->GetActiveActivity();
+  }
 
   for (auto kvp : commandRegistry)
   {
@@ -120,9 +125,14 @@ void CommandManagerImpl::UnregisterCommand(String id)
 bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
 {
   ActivityRef spActiveActivity = nullptr;
-  ProjectRef spProject = component_cast<Project>(GetKernel()->FindComponent("project"));
-  if (spProject)
+  ProjectRef spProject;
+
+  ComponentRef spComp = GetKernel()->FindComponent("project");
+  if (spComp)
+  {
+    spProject = component_cast<Project>(spComp);
     spActiveActivity = spProject->GetActiveActivity();
+  }
 
   Variant::VarMap params;
 

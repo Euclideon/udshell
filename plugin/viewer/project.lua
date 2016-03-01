@@ -18,9 +18,11 @@ project "viewer"
 	pic "on"
 	configuration { "windows", "Debug or DebugOpt" }
 		qtsuffix "d"
+	configuration {}
 
 	postbuildcommands {
-		"{COPY} %{cfg.buildtarget.abspath} bin/plugins/*"
+		"{MKDIR} bin/plugins/",
+		"{COPY} %{cfg.buildtarget.abspath} bin/plugins/"
 	}
 
 	-- include common stuff

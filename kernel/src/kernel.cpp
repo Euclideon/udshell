@@ -201,8 +201,13 @@ void Kernel::Create(Kernel **ppInstance, Slice<const KeyValuePair> commandLine, 
   pKernel->spLogger->AddStream(spDebugFile);
   spDebugFile->WriteLn("\n*** Logging started ***");
 
-  spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg }, {"name", "debugout"} });
-  pKernel->spLogger->AddStream(spConsole);
+#if defined(EP_WINDOWS) && defined(EP_DEBUG_OUTPUT)
+  if (IsDebuggerPresent())
+  {
+    spConsole = pKernel->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg }, {"name", "debugout"} });
+    pKernel->spLogger->AddStream(spConsole);
+  }
+#endif
 
   // resource manager
   pKernel->spResourceManager = pKernel->CreateComponent<ResourceManager>({ {"name", "resourcemanager"} });
