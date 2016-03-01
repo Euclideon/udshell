@@ -4,7 +4,8 @@ import QtQuick.Controls.Styles 1.3
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.1
 import epKernel 0.1
-import "qrc:/qml/epcontrols" 0.1
+import epControls 0.1
+import epThemes 0.1
 
 FocusScope {
   id: viewerui
@@ -83,8 +84,9 @@ FocusScope {
       focus: false
       id: sideBar
       vertical: true
+      color: Theme.activitySideBarBgColor
       Layout.fillHeight: true
-      Layout.preferredWidth: 44
+      Layout.preferredWidth: Theme.activitySideBarWidth
     }
 
     EPToolPanelManager {

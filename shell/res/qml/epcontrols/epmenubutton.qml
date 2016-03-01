@@ -3,6 +3,7 @@ import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 import epKernel 0.1
+import epThemes 0.1
 
 RowLayout {
   id: epMenuButton
@@ -94,7 +95,7 @@ RowLayout {
         id: glyph
         implicitWidth: arrow.implicitWidth + 2
         implicitHeight: control.button.implicitHeight
-        color: !control.enabled ? "transparent" : (control.pressed ? "#333" : (control.hovered || control.button.hovered || control.menu.__popupVisible ? "#555" : "transparent"))
+        color: !control.enabled ? "transparent" : (control.pressed || control.menu.__popupVisible || (!split && control.button.pressed) ? Theme.toolButtonBgColorPressed : (control.hovered || control.button.hovered ? Theme.toolButtonBgColorHovered : Theme.toolButtonBgColor))
         Rectangle {
           width: arrow.implicitWidth
           height: arrow.implicitHeight
@@ -104,9 +105,9 @@ RowLayout {
 
           Text {
             id: arrow
-            font.pixelSize: 9
+            font.pixelSize: Theme.menuButtonDropdownIndicatorHeight
             text: control.menu.__popupVisible ? "\u25b2" : "\u25bc"
-            color: "white"
+            color: Theme.menuButtonDropdownIndicatorColor
           }
         }
       }
@@ -117,14 +118,14 @@ RowLayout {
     id: menuButtonStyle
     ButtonStyle {
       padding {
-        left: 2
-        right: 2
-        top: 2
-        bottom: 2
+        left: Theme.toolButtonPadding
+        right: Theme.toolButtonPadding
+        top: Theme.toolButtonPadding
+        bottom: Theme.toolButtonPadding
       }
       background: Rectangle {
         anchors.fill: parent
-        color: control.pressed ? "#333" : ((control.hovered || control.dropdown.hovered || control.menu.__popupVisible) ? "#555" : "transparent")
+        color: control.pressed || (!split && (control.dropdown.pressed || control.menu.__popupVisible)) ? Theme.toolButtonBgColorPressed : ((control.hovered || control.dropdown.hovered) ? Theme.toolButtonBgColorHovered : Theme.toolButtonBgColor)
       }
       label: Image {
         source: control.iconSource

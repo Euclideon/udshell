@@ -3,6 +3,7 @@ import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 import epKernel 0.1
+import epThemes 0.1
 
 Rectangle {
   property bool vertical
@@ -76,7 +77,7 @@ Rectangle {
   implicitHeight: 1
   implicitWidth: 1
 
-  color: "transparent"
+  color: Theme.toolBarBgColor
 
   Loader {
     id: toolBarLoader
@@ -110,16 +111,7 @@ Rectangle {
         anchors.centerIn: parent
         implicitWidth: vertical ? toolBar.implicitWidth - 8 : 1
         implicitHeight: vertical ? 1 : toolBar.implicitHeight - 8
-        color: "#555"
-      }
-    }
-  }
-
-  Component {
-    id: toolBarStyle
-    ToolBarStyle {
-      background: Rectangle {
-        color: "#444"
+        color: Theme.toolBarSeparatorColor
       }
     }
   }

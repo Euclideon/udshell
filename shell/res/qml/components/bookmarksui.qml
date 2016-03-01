@@ -3,7 +3,8 @@ import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 import epKernel 0.1
-import "qrc:/qml/epcontrols" 0.1
+import epControls 0.1
+import epThemes 0.1
 
 /** To use:
   * After creating this component, you need to pass it a View component, e.g. SetProperty("view", spView);
@@ -12,7 +13,7 @@ import "qrc:/qml/epcontrols" 0.1
 Rectangle {
   id: bookmarksui
   anchors.fill: parent
-  color: "#444"
+  color: Theme.toolPanelBgColor
 
   property var commandManager
   property var messagebox
@@ -58,9 +59,9 @@ Rectangle {
     anchors.fill: parent
     spacing: 0
     Rectangle {
-      color: "#555"
+      color: Theme.toolPanelToolBarBgColor
       Layout.fillWidth: true
-      Layout.preferredHeight: 40
+      Layout.preferredHeight: Theme.toolPanelToolBarSize
       id: toolBar
       RowLayout {
         spacing: 0

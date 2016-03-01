@@ -2,6 +2,7 @@ import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import epKernel 0.1
+import epThemes 0.1
 
 Menu {
   id: epMenu
@@ -83,33 +84,31 @@ Menu {
     id: menuStyle
     MenuStyle {               // the menus items
       id: mStyle
-      property color menuBackgroundColor: "#1B1B1B"
-      property color menuBorderColor: "#282828"
 
       frame: Rectangle {
-        color: menuBackgroundColor
+        color: Theme.menuItemBgColor
       }
 
       itemDelegate {
         background: Rectangle {
-          color: styleData.enabled && (styleData.selected || styleData.open) ? "#3C3C3C" : menuBackgroundColor
-          radius: styleData.selected ? 3 : 0
+          color: styleData.enabled && (styleData.selected || styleData.open) ? Theme.menuItemBgColorSelected : Theme.menuItemBgColor
+          radius: styleData.selected ? Theme.menuItemBgRadiusSelected : Theme.menuItemBgRadius
         }
 
         label: Label {
-          color: !styleData.enabled ? "grey" : (styleData.selected ? "white" : "white")
+          color: !styleData.enabled ? Theme.menuItemDisabledColor : (styleData.selected ? Theme.menuItemTextColorSelected : Theme.menuItemTextColorSelected)
           text: styleData.text
         }
 
         submenuIndicator: Text {
           text: "\u25ba"
           font: mStyle.font
-          color: !styleData.enabled ? "grey" : (styleData.selected || styleData.open ? "white" : "white")
+          color: !styleData.enabled ? Theme.menuItemDisabledColor : (styleData.selected || styleData.open ? Theme.menuItemSubmenuIndicatorColorSelected : Theme.menuItemSubmenuIndicatorColor)
           styleColor: Qt.lighter(color, 4)
         }
 
         shortcut: Label {
-          color: !styleData.enabled ? "grey" : (styleData.selected ? "white" : "white")
+          color: !styleData.enabled ? Theme.menuItemDisabledColor : (styleData.selected ? Theme.menuItemShortcutTextColorSelected : Theme.menuItemShortcutTextColor)
           text: styleData.shortcut
         }
 
@@ -121,11 +120,11 @@ Menu {
               implicitHeight: implicitWidth
               radius: 2
               color: menuBackgroundColor
-              border.color: !styleData.enabled ? "grey" : "#555"
+              border.color: !styleData.enabled ? Theme.menuItemDisabledColor : Theme.menuItemCheckboxBorderColor
               border.width: 2
               Rectangle {
                 visible: control.checked
-                color: !styleData.enabled ? "grey" : "white"
+                color: !styleData.enabled ? Theme.menuItemDisabledColor : Theme.menuItemCheckboxCheckColor
                 anchors.margins: 3
                 radius: 2
                 anchors.fill: parent
@@ -145,7 +144,7 @@ Menu {
           anchors.verticalCenter: parent.verticalCenter
           width: parent.width
           implicitHeight: 1
-          color: "#555"
+          color: Theme.menuItemSeparatorColor
         }
       }
     }

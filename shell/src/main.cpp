@@ -21,7 +21,8 @@
 
 using namespace ep;
 
-#define APP_TITLE "Euclideon Platform"
+static String appTitle = "Euclideon Platform";
+static QString defaultTheme = "qrc:/qml/themes/shelltheme.qml";
 
 static kernel::Kernel *pKernel = nullptr;
 static WindowRef spMainWindow;
@@ -59,6 +60,23 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
   {
     epDebugPrintf("Qt Dbg: %s (%s:%d, %s)\n", msg.toUtf8().data(), context.file, context.line, context.function);
   }
+}
+
+void RegisterEPControls()
+{
+  // Register Theme
+  EPTHROW_IF(qmlRegisterSingletonType(QUrl(defaultTheme), "epThemes", 0, 1, "Theme") == -1, epR_Failure, "qmlRegisterSingletonType \"epThemes\" Failed");
+
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/epmenubar.qml"), "epControls", 0, 1, "EPMenuBar") == -1, epR_Failure, "qmlRegisterType \"EPMenuBar\" Failed");
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/epmenu.qml"), "epControls", 0, 1, "EPMenu") == -1, epR_Failure, "qmlRegisterType \"EPMenu\" Failed");
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptoolbar.qml"), "epControls", 0, 1, "EPToolBar") == -1, epR_Failure, "qmlRegisterType \"EPToolBar\" Failed");
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/epmenubutton.qml"), "epControls", 0, 1, "EPMenuButton") == -1, epR_Failure, "qmlRegisterType \"EPMenuButton\" Failed");
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptoolbutton.qml"), "epControls", 0, 1, "EPToolButton") == -1, epR_Failure, "qmlRegisterType \"EPToolButton\" Failed");
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/epfiledialog.qml"), "epControls", 0, 1, "EPFileDialog") == -1, epR_Failure, "qmlRegisterType \"EPFileDialog\" Failed");
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptoolpanelmanager.qml"), "epControls", 0, 1, "EPToolPanelManager") == -1, epR_Failure, "qmlRegisterType \"EPToolPanelManager\" Failed");
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eplistmodel.qml"), "epControls", 0, 1, "EPListModel") == -1, epR_Failure, "qmlRegisterType \"EPListModel\" Failed");
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eplistview.qml"), "epControls", 0, 1, "EPListView") == -1, epR_Failure, "qmlRegisterType \"EPListView\" Failed");
+  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptableview.qml"), "epControls", 0, 1, "EPTableView") == -1, epR_Failure, "qmlRegisterType \"EPTableView\" Failed");
 }
 
 MutableString<0> ReadResourceFile(String src)
@@ -159,7 +177,7 @@ void NewProject(String filePath)
   spProject->SetSrc(filePath);
 
   projectName = GetNameFromFilePath(filePath);
-  spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, APP_TITLE));
+  spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   InitProject();
 }
@@ -195,7 +213,7 @@ void OpenProject(String filePath)
   spProject->SetName("project");
 
   projectName = GetNameFromFilePath(filePath);
-  spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, APP_TITLE));
+  spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   // Load Activities from project file
   if (spProject)
@@ -224,7 +242,7 @@ void NewActivity(String typeID)
 void SaveProjectAs(String filePath)
 {
   projectName = GetNameFromFilePath(filePath);
-  spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, APP_TITLE));
+  spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   spProject->SetSrc(filePath);
   spProject->SaveProject();
@@ -264,6 +282,8 @@ void Deinit(String sender, String message, const Variant &data)
 
 void Init(String sender, String message, const Variant &data)
 {
+  RegisterEPControls();
+
   // TODO Temporary -- Remove this after code for scanning the plugin folder is written
 #if defined(EP_WINDOWS)
   PluginManagerRef spPluginManager = component_cast<PluginManager>(pKernel->FindComponent("pluginmanager"));

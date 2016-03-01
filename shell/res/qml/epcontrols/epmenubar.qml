@@ -1,6 +1,7 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
+import epThemes 0.1
 
 Item {
   id: menuBarWrapper
@@ -110,17 +111,17 @@ Item {
     id: menuBarStyle
     MenuBarStyle {
       background: Rectangle {
-        color: "#444"
+        color: Theme.menuBarBgColor
       }
-      itemDelegate: Rectangle {  // the menus
-        implicitWidth: menuBarLabel.contentWidth * 2.0
-        implicitHeight: menuBarLabel.contentHeight * 1.4
-        color: styleData.selected || styleData.open ? "red" : "transparent"
+      itemDelegate: Rectangle {  // menu header
+        implicitWidth: menuBarLabel.contentWidth * Theme.menuBarButtonWidthMultiplier
+        implicitHeight: menuBarLabel.contentHeight * Theme.menuBarButtonHeightMultiplier
+        color: styleData.selected || styleData.open ? Theme.menuBarButtonBgColorSelected : Theme.menuBarButtonBgColor
         Label {
           id: menuBarLabel
           anchors.horizontalCenter: parent.horizontalCenter
           anchors.verticalCenter: parent.verticalCenter
-          color: styleData.selected  || styleData.open ? "white" : "white"
+          color: styleData.selected || styleData.open ? Theme.menuBarButtonTextColorSelected : Theme.menuBarButtonTextColor
           font.wordSpacing: 10
           text: styleData.text
         }
