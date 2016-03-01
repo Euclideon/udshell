@@ -5,7 +5,13 @@ import QtQuick.Layouts 1.1
 import "qrc:/qml/epcontrols" 0.1
 
 Button {
+  id: button
   style: epToolButtonStyle
+
+  EPToolTip {
+    target: button
+    text: button.tooltip
+  }
 
   Component {
     id: epToolButtonStyle
