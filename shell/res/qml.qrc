@@ -7,6 +7,7 @@
     <file>qml/components/messagebox.qml</file>
     <file>qml/components/bookmarksui.qml</file>
     <file>qml/components/viewport.qml</file>
+    <file>qml/components/resourcespanel.qml</file>
 
      <!-- Custom Controls -->
     <file>qml/epcontrols/epmenubar.qml</file>
@@ -36,5 +37,7 @@
     <file>images/icon_upArrow_16.png</file>
     <file>images/icon_bookmark_24.png</file>
     <file>images/icon_bookmark_addnew_24.png</file>
+    <file>images/icon_UDS_48.png</file>
+    <file>images/icon_UDS_add_24.png</file>
   </qresource>
 </RCC>

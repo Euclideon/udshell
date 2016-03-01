@@ -54,6 +54,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     UDNodeRef spUDNode = pKernel->CreateComponent<UDNode>();
     spUDNode->SetUDModel(spModel);
     spScene->GetRootNode()->AddChild(spUDNode);
+    spScene->MakeDirty();
     spView->SetEnablePicking(true);
     spScene->AddBookmark(MutableString128(Format, "{0}_bookmark", model->asString().getRightAtLast("/", false)), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
@@ -77,6 +78,17 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   spUIBookmarks = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/bookmarksui.qml" } });
   spUIBookmarks->SetProperty("view", spView);
   spViewerUI->SetProperty("bookmarkscomp", spUIBookmarks);
+
+  UIComponentRef spUIResources;
+  ComponentRef spComp = pKernel->FindComponent("resourcespanel");
+  if (spComp)
+    spUIResources = component_cast<UIComponent>(spComp);
+  else
+  {
+    epscope(fail) { if (!spUIResources) pKernel->LogError("Error creating Resource Panel UI Component\n"); };
+    spUIResources = pKernel->CreateComponent<UIComponent>({ { "name", "resourcespanel" },{ "file", "qrc:/qml/components/resourcespanel.qml" } });
+  }
+  spViewerUI->SetProperty("resourcespanel", spUIResources);
 
   SetUI(spViewerUI);
 
@@ -153,6 +165,7 @@ void Viewer::StaticInit(ep::Kernel *pKernel)
   auto spCommandManager = pKernel->GetCommandManager();
 
   spCommandManager->RegisterCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", ComponentID(), "Ctrl+Shift+B");
+  spCommandManager->RegisterCommand("toggleresourcespanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleResourcesPanel), "", ComponentID(), "Ctrl+Shift+R");
   spCommandManager->RegisterCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", ComponentID(), "Ctrl+B");
 }
 
@@ -167,6 +180,19 @@ void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)
 void Viewer::ToggleBookmarksPanel()
 {
   GetUI()->CallMethod("togglebookmarkspanel");
+}
+
+void Viewer::StaticToggleResourcesPanel(Variant::VarMap params)
+{
+  Variant *pActivityVar = params.Get("activity");
+  ViewerRef spViewer = pActivityVar->as<ViewerRef>();
+
+  spViewer->ToggleResourcesPanel();
+}
+
+void Viewer::ToggleResourcesPanel()
+{
+  GetUI()->CallMethod("toggleresourcespanel");
 }
 
 void Viewer::StaticCreateBookmark(Variant::VarMap params)
