@@ -55,9 +55,11 @@ TableView {
     Text {
       id: text
       clip: true
+      width: parent.width
       anchors.leftMargin: 10
-      anchors.rightMargin: 5
+      anchors.rightMargin: 10
       anchors.left: parent.left
+      anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
       verticalAlignment: Text.AlignVCenter
       color: "white"
@@ -90,6 +92,7 @@ TableView {
           bDragging = true;
           dragItem = dragItemComp.createObject(thisComponent.parentWindow());
           dragItem.text = model.get(styleData.row)[dragColumn];
+          dragItem.payload = model.get(styleData.row);
           var winXY = mapToItem(thisComponent.parentWindow().contentItem, mouse.x - dragItem.width / 2, mouse.y - dragItem.height / 2);
           dragItem.x = winXY.x;
           dragItem.y = winXY.y;
@@ -181,6 +184,7 @@ TableView {
     id: dragItemComp
     Rectangle {
       property alias text: textItem.text
+      property var payload
       id: rect
       color: "white"
       border.color: "black"
