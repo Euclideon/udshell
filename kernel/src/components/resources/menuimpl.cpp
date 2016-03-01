@@ -218,9 +218,9 @@ Variant MenuImpl::CreateMenuItem(Variant::VarMap properties)
   map.Insert(KeyValuePair("checked", false));
   map.Insert(KeyValuePair("exclusivegroup", false));
   map.Insert(KeyValuePair("enabled", true));
-  map.Insert(KeyValuePair("separator", false));
   map.Insert(KeyValuePair("shortcut", ""));
   map.Insert(KeyValuePair("command", ""));
+  map.Insert(KeyValuePair("split", true));
   map.Insert(KeyValuePair("children", Array<Variant>()));
 
   Variant varMap(map);

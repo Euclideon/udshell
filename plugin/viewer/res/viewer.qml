@@ -90,7 +90,6 @@ FocusScope {
     EPToolPanelManager {
       id: toolPanelSlot
       Layout.fillHeight: true
-      //Layout.preferredWidth: 0
     }
 
     Item {

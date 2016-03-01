@@ -92,24 +92,24 @@ Menu {
 
       itemDelegate {
         background: Rectangle {
-          color:  styleData.selected || styleData.open ? "#3C3C3C" : menuBackgroundColor
+          color: styleData.enabled && (styleData.selected || styleData.open) ? "#3C3C3C" : menuBackgroundColor
           radius: styleData.selected ? 3 : 0
         }
 
         label: Label {
-          color: styleData.selected ? "white" : "white"
+          color: !styleData.enabled ? "grey" : (styleData.selected ? "white" : "white")
           text: styleData.text
         }
 
         submenuIndicator: Text {
           text: "\u25ba"
           font: mStyle.font
-          color: styleData.selected  || styleData.open ? "white" : "white"
+          color: !styleData.enabled ? "grey" : (styleData.selected || styleData.open ? "white" : "white")
           styleColor: Qt.lighter(color, 4)
         }
 
         shortcut: Label {
-          color: styleData.selected ? "white" : "white"
+          color: !styleData.enabled ? "grey" : (styleData.selected ? "white" : "white")
           text: styleData.shortcut
         }
 
@@ -121,11 +121,11 @@ Menu {
               implicitHeight: implicitWidth
               radius: 2
               color: menuBackgroundColor
-              border.color: "#555"
+              border.color: !styleData.enabled ? "grey" : "#555"
               border.width: 2
               Rectangle {
                 visible: control.checked
-                color: "white"
+                color: !styleData.enabled ? "grey" : "white"
                 anchors.margins: 3
                 radius: 2
                 anchors.fill: parent

@@ -24,12 +24,15 @@ public:
   bool SetScript(String id, String script) override final;
   SharedString GetShortcut(String id) const override final;
   bool SetShortcut(String id, SharedString shortcut) override final;
+  void DisableShortcut(String commandID) override final { SetShortcutEnabled(commandID, false); }
+  void EnableShortcut(String commandID) override final { SetShortcutEnabled(commandID, true); }
   String GetActivityType(String commandID) const override final;
   bool SetActivityType(String commandID, String activityTypeID) override final;
   Variant Save() const override final { return pInstance->Super::Save(); }
 
 protected:
   String StripWhitespace(Slice<char> output, String input);
+  void SetShortcutEnabled(String commandID, bool bEnabled);
 
   struct Command
   {
@@ -38,6 +41,7 @@ protected:
 
     SharedString id;
     SharedString shortcut;
+    bool shortcutEnabled = true;
     Delegate<void(Variant::VarMap)> func;
     SharedString script;
     SharedString activityType;

@@ -119,6 +119,25 @@ void OnActivityChanged(String uid)
   spActivity->Activate();
 }
 
+void InitProject()
+{
+  // Enable menu items
+  spMenu->SetItemProperties("File/Save Project", { { "enabled", true } });
+  spMenu->SetItemProperties("File/Save Project As...", { { "enabled", true } });
+  spMenu->SetItemProperties("File/New.../New Activity", { { "enabled", true } });
+
+  // Enable toolbar buttons
+  spToolBar->SetItemProperties("Save Project", { { "enabled", true } });
+  spToolBar->SetItemProperties("Save Project As...", { { "enabled", true } });
+  spToolBar->SetItemProperties("New.../New Activity", { { "enabled", true } });
+
+  // Enable shortcuts
+  auto spCommandManager = pKernel->GetCommandManager();
+  spCommandManager->EnableShortcut("saveproject");
+  spCommandManager->EnableShortcut("saveprojectas");
+  spCommandManager->EnableShortcut("newactivity");
+}
+
 void NewProject(String filePath)
 {
   MutableString256 sFilePath = filePath;
@@ -142,10 +161,7 @@ void NewProject(String filePath)
   projectName = GetNameFromFilePath(filePath);
   spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, APP_TITLE));
 
-  spMenu->SetItemProperties("File/Save Project", { { "enabled", true } });
-  spMenu->SetItemProperties("File/Save Project As...", { { "enabled", true } });
-  spToolBar->SetItemProperties("Save Project", { { "enabled", true } });
-  spToolBar->SetItemProperties("Save Project As...", { { "enabled", true } });
+  InitProject();
 }
 
 void OpenProject(String filePath)
@@ -181,11 +197,6 @@ void OpenProject(String filePath)
   projectName = GetNameFromFilePath(filePath);
   spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, APP_TITLE));
 
-  spMenu->SetItemProperties("File/Save Project", { { "enabled", true } });
-  spMenu->SetItemProperties("File/Save Project As...", { { "enabled", true } });
-  spToolBar->SetItemProperties("Save Project", { { "enabled", true } });
-  spToolBar->SetItemProperties("Save Project As...", { { "enabled", true } });
-
   // Load Activities from project file
   if (spProject)
   {
@@ -193,12 +204,21 @@ void OpenProject(String filePath)
     for (auto spActivity : spActivities)
       AddUIActivity(spActivity);
   }
+
+  InitProject();
 }
 
 void SaveProject()
 {
   if (spProject)
     spProject->SaveProject();
+}
+
+void NewActivity(String typeID)
+{
+  auto spActivity = component_cast<Activity>(pKernel->CreateComponent(typeID, nullptr));
+  spProject->AddActivity(spActivity);
+  AddUIActivity(spActivity);
 }
 
 void SaveProjectAs(String filePath)
@@ -208,6 +228,23 @@ void SaveProjectAs(String filePath)
 
   spProject->SetSrc(filePath);
   spProject->SaveProject();
+}
+
+Array<Variant::VarMap> GetActivitiesInfo()
+{
+  Array<Variant::VarMap> infoArray;
+
+  Array<const ComponentDesc *> descs = pKernel->GetDerivedComponentDescs<Activity>(false);
+  for (auto desc : descs)
+  {
+    Variant::VarMap activityInfo;
+    activityInfo.Insert("id", desc->info.id);
+    activityInfo.Insert("displayName", desc->info.displayName);
+    activityInfo.Insert("description", desc->info.description);
+    infoArray.pushBack(std::move(activityInfo));
+  }
+
+  return infoArray;
 }
 
 void Deinit(String sender, String message, const Variant &data)
@@ -227,6 +264,12 @@ void Deinit(String sender, String message, const Variant &data)
 
 void Init(String sender, String message, const Variant &data)
 {
+  // TODO Temporary -- Remove this after code for scanning the plugin folder is written
+#if defined(EP_WINDOWS)
+  PluginManagerRef spPluginManager = component_cast<PluginManager>(pKernel->FindComponent("pluginmanager"));
+  spPluginManager->LoadPlugin("bin/plugins/viewer.dll");
+#endif // end EP_WINDOWS
+
   epscope(fail) { if (!spMainWindow) pKernel->LogError("Error creating MainWindow UI Component\n"); };
   spMainWindow = pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
 
@@ -260,6 +303,11 @@ void Init(String sender, String message, const Variant &data)
   spToolBar = pKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
   spTopLevelUI->SetProperty("toolbarcomp", spToolBar);
 
+  // New Activity selecter panel
+  auto spActivitySelecter = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/activityselecter.qml" } });
+  spActivitySelecter->SetProperty("activitiesinfo", GetActivitiesInfo());
+  spTopLevelUI->SetProperty("activityselecter", spActivitySelecter);
+
   // TODO: Remove this once UIComponent cleans up its events
   if (!CITest)
   {
@@ -268,15 +316,11 @@ void Init(String sender, String message, const Variant &data)
     spTopLevelUI->Subscribe("openprojectsignal", Delegate<void(String)>(&OpenProject));
     spTopLevelUI->Subscribe("saveprojectsignal", Delegate<void(void)>(&SaveProject));
     spTopLevelUI->Subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
+    spTopLevelUI->Subscribe("newactivitysignal", Delegate<void(String)>(&NewActivity));
     spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
   }
-  spMainWindow->SetTopLevelUI(spTopLevelUI);
 
-// TODO Temporary -- Remove this after code for scanning the plugin folder is written
-#if defined(EP_WINDOWS)
-  PluginManagerRef spPluginManager = component_cast<PluginManager>(pKernel->FindComponent("pluginmanager"));
-  spPluginManager->LoadPlugin("bin/plugins/viewer.dll");
-#endif // end EP_WINDOWS
+  spMainWindow->SetTopLevelUI(spTopLevelUI);
 
   if (!projFilePath.empty())
     OpenProject(projFilePath);

@@ -19,6 +19,8 @@ public:
   virtual bool SetShortcut(String id, SharedString shortcut) = 0;
   virtual String GetActivityType(String commandID) const = 0;
   virtual bool SetActivityType(String commandID, String activityTypeID) = 0;
+  virtual void DisableShortcut(String commandID) = 0;
+  virtual void EnableShortcut(String commandID) = 0;
   virtual Variant Save() const = 0;
 };
 

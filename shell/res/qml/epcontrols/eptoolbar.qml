@@ -52,7 +52,7 @@ Rectangle {
     }
     else
     {
-      var component = Qt.createComponent("epsplitbutton.qml");
+      var component = Qt.createComponent("epmenubutton.qml");
       var item = component.createObject(null);
       toolBarObjects.push(item);
 
@@ -63,6 +63,7 @@ Rectangle {
       item.command = tooldata.command;
       item.enabled = tooldata.enabled;
       item.tooltip = tooldata.description;
+      item.split = tooldata.split;
       item.parent = toolBarLayout;
 
       var children = tooldata.children;

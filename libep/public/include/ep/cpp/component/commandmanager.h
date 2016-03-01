@@ -20,6 +20,8 @@ public:
   void UnregisterCommand(String id) override final { pImpl->UnregisterCommand(id); }
   bool HandleShortcutEvent(String shortcut) override final { return pImpl->HandleShortcutEvent(shortcut); }
   bool RunCommand(String id, Variant::VarMap params = nullptr) override final { return pImpl->RunCommand(id, params); }
+  void DisableShortcut(String commandID) override final { pImpl->DisableShortcut(commandID); }
+  void EnableShortcut(String commandID) override final { pImpl->EnableShortcut(commandID); }
   bool SetFunction(String id, Delegate<void(Variant::VarMap)> func) override final { return pImpl->SetFunction(id, func); }
   bool SetScript(String id, String script) override final { return pImpl->SetScript(id, script); }
   SharedString GetShortcut(String id) const override final { return pImpl->GetShortcut(id); }
@@ -48,6 +50,8 @@ protected:
       EP_MAKE_METHOD(SetScript, "Assign a script string to the given command"),
       EP_MAKE_METHOD(SetActivityType, "Set the activity type associated with the given command"),
       EP_MAKE_METHOD(GetActivityType, "Get the activity type associated with the given command"),
+      EP_MAKE_METHOD(EnableShortcut, "Enable shortcut for the given command"),
+      EP_MAKE_METHOD(DisableShortcut, "Disable shortcut for the given command"),
     };
   }
 };
