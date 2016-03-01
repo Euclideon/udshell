@@ -32,9 +32,10 @@ Item {
   function appendconsoletext(str)
   {
     var atEnd = consoleOut.flickableItem.atYEnd;
-    consoleOut.text += (consoleOut.text ? "\n" : "") + str;
-    if(atEnd)
-      consoleOut.flickableItem.contentY = Math.max(0, consoleOut.flickableItem.contentHeight - consoleOut.flickableItem.height);
+    var contentY = consoleOut.flickableItem.contentY
+    consoleOut.append(str);
+    if(!atEnd)
+      consoleOut.flickableItem.contentY = contentY;
   }
 
   function setconsoletext(str)
@@ -47,9 +48,10 @@ Item {
   function appendlogtext(str)
   {
     var atEnd = logOut.flickableItem.atYEnd;
-    logOut.text += (logOut.text ? "\n" : "") + str;
-    if(atEnd)
-      logOut.flickableItem.contentY = Math.max(0, logOut.flickableItem.contentHeight - logOut.flickableItem.height);
+    var contentY = logOut.flickableItem.contentY
+    logOut.append(str);
+    if(!atEnd)
+      logOut.flickableItem.contentY = contentY;
   }
 
   function setlogtext(str)
@@ -312,12 +314,13 @@ Item {
                   if(event.modifiers === Qt.ShiftModifier)
                     insert(cursorPosition, "\n");
                   else {
-                    if(length != 0)
+                    if(length != 0) {
                       thisComponent.call("relayinput", text);
 
-                    cursorPosition = 0;
-                    text = "";
-                    historyIndex = 0;
+                      cursorPosition = 0;
+                      text = "";
+                      historyIndex = 0;
+                    }
                   }
                   event.accepted = true;
                 }
