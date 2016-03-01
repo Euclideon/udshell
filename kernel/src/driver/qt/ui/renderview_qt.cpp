@@ -187,6 +187,9 @@ void QtRenderView::mouseMoveEvent(QMouseEvent *pEv)
 
 void QtRenderView::mousePressEvent(QMouseEvent *pEv)
 {
+  if ((pEv->buttons() & Qt::LeftButton) && !hasActiveFocus())
+    forceActiveFocus();
+
   epInputEvent ev;
   ev.deviceType = epID_Mouse;
   ev.deviceId = 0; // TODO: get mouse id

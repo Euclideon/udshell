@@ -12,6 +12,7 @@ namespace qt {
 // forward declare
 class QtEPComponent;
 class QtKernel;
+class QtFocusManager;
 
 namespace internal {
 
@@ -149,11 +150,15 @@ class QtKernelQml : public QObject
 public:
   QtKernelQml(QtKernel *_pKernel, QObject *pParent = nullptr) : QObject(pParent), pKernel(_pKernel) {}
 
+  Q_PROPERTY(QtFocusManager * focus READ getFocusManager)
+
   Q_INVOKABLE qt::QtEPComponent *findComponent(const QString &uid) const;
   Q_INVOKABLE qt::QtEPComponent *createComponent(const QString typeId, QVariantMap initParams = QVariantMap());
   Q_INVOKABLE qt::QtEPComponent *getCommandManager() const;
 
 private:
+  QtFocusManager *getFocusManager() const;
+
   QtKernel *pKernel;
 };
 

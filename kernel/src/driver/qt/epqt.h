@@ -6,6 +6,7 @@
 
 #if defined(EP_COMPILER_VISUALC)
 //# pragma warning(disable:4127) // conditional expression is constant
+# pragma warning(disable:4718) // TODO: this can be removed once we are on Qt 5.6 -- QMap triggers warnings: recursive call has no side effects, deleting
 #elif defined(EP_COMPILER_GCC)
 //# pragma GCC diagnostic ignored "-Wsomewarning"
 #elif defined(EP_COMPILER_CLANG)

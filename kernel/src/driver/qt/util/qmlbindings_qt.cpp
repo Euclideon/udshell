@@ -461,7 +461,10 @@ QtEPComponent *QtKernelQml::getCommandManager() const
   return BuildQtEPComponent::Create(pKernel->GetCommandManager());
 }
 
-
+QtFocusManager *QtKernelQml::getFocusManager() const
+{
+  return pKernel->GetFocusManager();
+}
 
 QtEPComponent *BuildQtEPComponent::Create(const ep::ComponentRef &spComponent)
 {
