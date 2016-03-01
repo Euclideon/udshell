@@ -6,6 +6,7 @@
     <!-- UI Components -->
     <file>qml/components/messagebox.qml</file>
     <file>qml/components/bookmarksui.qml</file>
+    <file>qml/components/viewport.qml</file>
 
      <!-- Custom Controls -->
     <file>qml/epcontrols/epmenubar.qml</file>
