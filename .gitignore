@@ -1,3 +1,16 @@
+# =============
+# MASSIVE data files
+# =============
+
+*.uds
+*.upc
+*.udg
+*.udm
+*.ssf
+*.oct3
+*.oct3s
+*.uds5
+
 
 # =============
 # Visual Studio
