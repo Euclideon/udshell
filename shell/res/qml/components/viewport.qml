@@ -32,7 +32,7 @@ FocusScope {
         }
       }
       else if(drop.keys.indexOf("RMResource") > -1)
-        resourcedropped(drop.source.text, drop.x, drop.y);
+        resourcedropped(drop.source.payload.uid, drop.x, drop.y);
     }
   }
 

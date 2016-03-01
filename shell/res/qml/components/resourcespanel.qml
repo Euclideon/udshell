@@ -28,8 +28,9 @@ Rectangle {
 
     resourceManager = EPKernel.findComponent("resourcemanager");
     var res = resourceManager.get("resourcearray");
-    for(var i = 0; i < res.length; i++)
-      resources.push({ "uid" : res[i].get("uid"), "type" : res[i].get("type") });
+    for(var i = 0; i < res.length; i++) {
+      addResourceHelper(res[i]);
+    }
 
     resourcesLM.buildFromArray(resources);
 
@@ -43,10 +44,57 @@ Rectangle {
       addResource(resArray[i]);
   }
 
-  function addResource(res) {
-    var item = { "uid" : res.get("uid"), "type" : res.get("type") };
+  function createResourceName(res) {
+    var meta = res.get("metadata");
+    var url = meta.call("get", "url");
+
+    if(!url)
+      return res.get("uid");
+
+    var name = url.replace(/^.*[\\\/]/, ''); // get filename from path
+    var name = name.replace(/\.[^/.]+$/, ''); // remove extension from filename
+
+    var dupFound = false;
+    for(var i = 0; i < resources.length; i++) {
+      if(resources[i].name == name) {
+        dupFound = true;
+        break;
+      }
+    }
+
+    if(!dupFound)
+      return name;
+
+    var highestID = 0;
+    var pattern = new RegExp("^" + name + " (\d+)$");
+
+    for(var i = 0; i < resources.length; i++)
+    {
+      var r = resources[i];
+      if(r.name.match(pattern))
+      {
+        var id = parseInt(r.name.split(' ')[1], 10);
+        if(id > highestID)
+          highestID = id;
+      }
+    }
+
+    name = name + " (" + (highestID + 1) + ")";
+
+    return name;
+  }
+
+  function addResourceHelper(res) {
+    var name = createResourceName(res);
+    var item = { "uid" : res.get("uid"), "name" : name, "type" : res.get("type") };
 
     resources.push(item);
+
+    return item;
+  }
+
+  function addResource(res) {
+    var item = addResourceHelper(res);
     resourcesLM.insertOrdered(item);
   }
 
@@ -115,7 +163,7 @@ Rectangle {
 
   EPListModel {
     id: resourcesLM
-    sortColumnName: "uid"
+    sortColumnName: "name"
     order: Qt.AscendingOrder
   }
 
@@ -184,18 +232,18 @@ Rectangle {
         anchors.fill: parent
         model: resourcesLM
         alternatingRowColors: false
-        dragColumn: "uid"
+        dragColumn: "name"
         dragKeys: ["RMResource"]
 
         TableViewColumn {
-          role: "uid"
-          title: "ID"
-          width: (tableView.width - 2) / 2
+          role: "name"
+          title: "Name"
+          width: (tableView.width - 2) * (3/5)
         }
         TableViewColumn {
           role: "type"
           title: "Type"
-          width: (tableView.width - 2) / 2
+          width: (tableView.width - 2) * (2/5)
         }
 
         menu: EPMenu {
@@ -221,22 +269,22 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 8
         RowLayout {
-          id: filterUIDLayout
+          id: filterNameLayout
           Layout.alignment: Qt.AlignRight
           spacing: 6
           Text {
-            id: filterUIDLabel
-            text: "Filter by ID:"
+            id: filterNameLabel
+            text: "Filter by name:"
             color: "white"
             Layout.alignment: Qt.AlignRight
           }
           TextField {
-            id: filterUIDTextField
+            id: filterNameTextField
             style: filterTextFieldStyle
-            Layout.preferredWidth: filterLayout.width - filterTypeLabel.implicitWidth - filterUIDLayout.spacing
+            Layout.preferredWidth: filterLayout.width - filterNameLabel.implicitWidth - filterNameLayout.spacing
 
             onTextChanged: {
-              resourcesLM.setFilter("uid", text);
+              resourcesLM.setFilter("name", text);
               resourcesLM.buildFromArray(resourcesPanel.resources);
             }
           }
@@ -255,7 +303,7 @@ Rectangle {
           TextField {
             id: filterTypeTextField
             style: filterTextFieldStyle
-            Layout.preferredWidth: filterLayout.width - filterTypeLabel.implicitWidth - filterTypeLayout.spacing
+            Layout.preferredWidth: filterLayout.width - filterNameLabel.implicitWidth - filterTypeLayout.spacing
 
             onTextChanged: {
                resourcesLM.setFilter("type", text);

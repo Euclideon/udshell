@@ -8,6 +8,7 @@
 #include "ep/cpp/component/component.h"
 #include "ep/cpp/component/stream.h"
 #include "ep/cpp/component/resource/resource.h"
+#include "components/resources/metadata.h"
 
 namespace ep {
 
@@ -67,6 +68,9 @@ public:
 
   void SetResource(String _name, const ResourceRef &spResource) override final
   {
+    MetadataRef spMeta = component_cast<Metadata>(spResource->GetMetadata());
+    spMeta->Insert("url", GetURL());
+
     resources.Insert(_name, spResource);
   }
 
