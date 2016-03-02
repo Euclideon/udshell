@@ -9,8 +9,6 @@ project "epkernel"
 	files { "project.lua" }
 	files { "text2c.sh" }
 
-	defines { "EP_DEBUG_OUTPUT" }
-
 	includedirs { "src" }
 
 	includedirs { "../ud/udPlatform/Include" }
