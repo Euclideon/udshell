@@ -198,7 +198,7 @@ void epShader_SetCurrent(epShaderProgram *pProgram)
   if (pProgram)
   {
     if (!pProgram->pProgram->bind())
-      epDebugPrintf("Error binding shader program");
+      epDebugPrintf("Error binding shader program\n");
   }
   else
     s_QtGLContext.pFunc->glUseProgram(0);

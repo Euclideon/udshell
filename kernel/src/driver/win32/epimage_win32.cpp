@@ -16,7 +16,7 @@ void epImage_InitInternal()
   HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr,
                                 CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFactory));
   if (FAILED(hr))
-    epDebugPrintf("Failed to create WICImagingFactory");
+    epDebugPrintf("Failed to create WICImagingFactory\n");
 }
 
 void epImage_DeinitInternal()
@@ -45,7 +45,7 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
   HGLOBAL hGlobal = GlobalAlloc(0, bufferLen);
   if (!hGlobal)
   {
-    epDebugPrintf("Error allocating image buffer");
+    epDebugPrintf("Error allocating image buffer\n");
     return nullptr;
   }
   void *pMem = GlobalLock(hGlobal);
@@ -56,7 +56,7 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
   if (S_OK != CreateStreamOnHGlobal(hGlobal, true, &pStream))
   {
     GlobalFree(hGlobal);
-    epDebugPrintf("Error creating stream for image buffer");
+    epDebugPrintf("Error creating stream for image buffer\n");
     return nullptr;
   }
 
@@ -64,21 +64,21 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
   if (S_OK != pFactory->CreateDecoderFromStream(pStream, nullptr, WICDecodeMetadataCacheOnLoad, &pDecoder))
   {
     pStream->Release();
-    epDebugPrintf("Error creating decoder from image data");
+    epDebugPrintf("Error creating decoder from image data\n");
     return nullptr;
   }
 
   UINT frames;
   if (S_OK != pDecoder->GetFrameCount(&frames))
   {
-    epDebugPrintf("Error getting image frame count");
+    epDebugPrintf("Error getting image frame count\n");
     goto epilogue;
   }
 
   pOutput = (epImage*)epAllocFlags(sizeof(epImage) + frames*sizeof(epImageSurface), epAF_Zero);
   if (!pOutput)
   {
-    epDebugPrintf("Error allocating epImage");
+    epDebugPrintf("Error allocating epImage\n");
     goto epilogue;
   }
 
@@ -96,7 +96,7 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
     IWICBitmapFrameDecode *pBitmapSource;
     if (S_OK != pDecoder->GetFrame(0, &pBitmapSource))
     {
-      epDebugPrintf("Error getting image frame");
+      epDebugPrintf("Error getting image frame\n");
       goto freeImage;
     }
 
@@ -108,7 +108,7 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
       WICBitmapDitherTypeNone, nullptr, 0.f,
       WICBitmapPaletteTypeMedianCut))
     {
-      epDebugPrintf("Error converting image to BGRA32 format");
+      epDebugPrintf("Error converting image to BGRA32 format\n");
       pConverter->Release();
       pBitmapSource->Release();
       goto freeImage;
@@ -127,7 +127,7 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
     surface.pImage = epAlloc(w*h*4);
     if (!surface.pImage)
     {
-      epDebugPrintf("Error allocating epImage frame");
+      epDebugPrintf("Error allocating epImage frame\n");
       pConverter->Release();
       pBitmapSource->Release();
       goto freeImage;
