@@ -236,17 +236,11 @@ void epDebugConsole_Printf(const char *pFormat, ...)
   va_list args;
   va_start(args, pFormat);
   size_t len;
-#if defined(EP_NACL)
-  len = vsprintf(nullptr, pFormat, args);
-#else
-  len = vsnprintf(nullptr, 0, pFormat, args);
-#endif
-  char *pBuffer = (char*)alloca(len+1);
-#if defined(EP_NACL)
-  len = vsprintf(pBuffer, pFormat, args);
-#else
-  len = vsnprintf(pBuffer, len+1, pFormat, args);
-#endif
+
+  len = internal::epvscprintf(pFormat, args) + 1;
+  char *pBuffer = (char*)alloca(len + 1);
+  len = internal::epvsnprintf(pBuffer, len, pFormat, args);
+
   epDebugConsole_Print(pBuffer);
   va_end(args);
 }
