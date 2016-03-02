@@ -53,6 +53,7 @@
 #include "renderscene.h"
 #include "eplua.h"
 #include "stdcapture.h"
+#include "hal/haldirectory.h"
 
 #include "udPlatformUtil.h"
 #include "helpers.h"
@@ -358,11 +359,36 @@ void KernelImpl::Shutdown()
   spRenderer = nullptr;
 }
 
+Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath)
+{
+  EPFindData findData;
+  EPFind find;
+  Array<SharedString> pluginFilenames;
+
+  if (!HalDirectory_FindFirst(&find, folderPath.ptr, &findData))
+    return nullptr;
+  do
+  {
+    if (findData.attributes & EPFA_Directory)
+    {
+      MutableString<260> childFolderPath(Format, "{0}/{1}", folderPath, String(findData.pFilename));
+
+      Array<SharedString> childNames = ScanPluginFolder(childFolderPath);
+      for (SharedString &cName : childNames)
+        pluginFilenames.pushBack(std::move(cName));
+    }
+    else
+      pluginFilenames.pushBack(MutableString<260>(Format, "{0}/{1}", folderPath, String(findData.pFilename)));
+  } while (HalDirectory_FindNext(&find, &findData));
+
+  HalDirectory_FindClose(&find);
+
+  return pluginFilenames;
+}
+
 void KernelImpl::LoadPlugins()
 {
-  Array<String> pluginFilenames;
-
-  // TODO: scan nominated plugin folder and build list of all plugins
+  Array<SharedString> pluginFilenames = ScanPluginFolder("bin/plugins");
 
   size_t numRemaining = pluginFilenames.length;
   size_t lastTry;

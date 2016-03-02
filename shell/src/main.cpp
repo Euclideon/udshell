@@ -284,12 +284,6 @@ void Init(String sender, String message, const Variant &data)
 {
   RegisterEPControls();
 
-  // TODO Temporary -- Remove this after code for scanning the plugin folder is written
-#if defined(EP_WINDOWS)
-  PluginManagerRef spPluginManager = component_cast<PluginManager>(spKernel->FindComponent("pluginmanager"));
-  spPluginManager->LoadPlugin("bin/plugins/viewer.dll");
-#endif // end EP_WINDOWS
-
   epscope(fail) { if (!spMainWindow) spKernel->LogError("Error creating MainWindow UI Component\n"); };
   spMainWindow = spKernel->Call("createqmlcomponent", "window", "qrc:/qml/window.qml", nullptr).as<WindowRef>();
 
