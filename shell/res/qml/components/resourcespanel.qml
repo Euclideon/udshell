@@ -215,15 +215,34 @@ Rectangle {
         anchors.fill: parent
         keys: ["text/uri-list"]
 
-        onDropped: {
-          if (drop.hasText) {
-            if (drop.proposedAction == Qt.MoveAction || drop.proposedAction == Qt.CopyAction) {
-              var urls = drop.text.trim().split("\n");
-              for(var i = 0; i < urls.length; i++)
-                resourceManager.call("loadresourcesfromfile", {"src" : urls[i]});
+        onEntered: {
+          if (drag.hasText && (drag.proposedAction == Qt.MoveAction || drag.proposedAction == Qt.CopyAction)) {
+            var resourceManager = EPKernel.findComponent("resourcemanager");
+            var exts = resourceManager.get("extensions");
 
-              drop.acceptProposedAction();
+            var urls = drag.text.trim().split("\n");
+
+            for(var i = 0; i < urls.length; i++) {
+              var dropFileExt = urls[i].substr((~-urls[i].lastIndexOf(".") >>> 0) + 1).toLowerCase();
+
+              for(var i = 0; i < exts.length; i++) {
+                var dsExts = exts[i];
+                if(dsExts.indexOf(dropFileExt) > -1)
+                  return;
+              }
             }
+          }
+
+          //drag.accepted = false; // TODO there is a bug which prevents us from refusing an onEntered event, which has been fixed in Qt 5.6. Uncomment this after switching to 5.6.
+        }
+
+        onDropped: {
+          if (drop.hasText && (drop.proposedAction == Qt.MoveAction || drop.proposedAction == Qt.CopyAction)) {
+            var urls = drop.text.trim().split("\n");
+            for(var i = 0; i < urls.length; i++)
+              resourceManager.call("loadresourcesfromfile", {"src" : urls[i]});
+
+            drop.acceptProposedAction();
           }
         }
       }

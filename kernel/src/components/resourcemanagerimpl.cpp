@@ -125,7 +125,7 @@ DataSourceRef ResourceManagerImpl::LoadResourcesFromFile(Variant::VarMap initPar
     EPTHROW_WARN(epR_InvalidArgument, 2, "LoadResourcesFromFile - \"src\" parameter is invalid");
 
   DataSourceRef spDS;
-  epscope(fail) { if (!spDS) LogWarning(2, "LoadResourcesFromFile - \"src\" file not found: {0}", src.asString()); };
+  epscope(fail) { if (!spDS) LogWarning(2, "LoadResourcesFromFile - \"src\" file not found or not supported: {0}", src.asString()); };
   spDS = GetKernel()->CreateDataSourceFromExtension(ext, initParams);
 
   size_t numResources = spDS->GetNumResources();

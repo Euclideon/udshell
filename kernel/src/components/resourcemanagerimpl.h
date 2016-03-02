@@ -26,7 +26,6 @@ public:
   ResourceRef GetResource(String key) const override final { return *resources.Get(key); }
   Array<ResourceRef> GetResourceArray() const override final;
 
-
   template<typename CT>
   Array<ResourceRef> GetResourcesByType() const
   {

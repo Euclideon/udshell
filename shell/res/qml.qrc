@@ -6,7 +6,6 @@
     <!-- UI Components -->
     <file>qml/components/messagebox.qml</file>
     <file>qml/components/bookmarksui.qml</file>
-    <file>qml/components/viewport.qml</file>
     <file>qml/components/resourcespanel.qml</file>
     <file>qml/components/activityselecter.qml</file>
 
