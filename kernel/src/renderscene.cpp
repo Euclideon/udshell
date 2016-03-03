@@ -49,7 +49,7 @@ const char s_blitShader[] =
 "  gl_FragColor = texture2D(u_texture, v_texcoord);\n"
 "}\n";
 
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 
 RenderableView::RenderableView(const SharedPtr<Renderer> &spRenderer)
@@ -168,7 +168,7 @@ void RenderableView::RenderGPU()
 //    pPostRenderCallback(ViewRef(this), spScene);
 }
 
-Renderer::Renderer(kernel::Kernel *pKernel, int renderThreadCount)
+Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   : pKernel(pKernel)
 {
   // TODO: Remove this once webview is properly integrated
@@ -446,7 +446,7 @@ void Renderer::UDThread()
 
     UniquePtr<RenderableView> job;
 
-    void FinishJob(ep::Kernel *_pKernel)
+    void FinishJob()
     {
       ViewRef spView = job->spView;
       if (spView)

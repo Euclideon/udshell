@@ -1,6 +1,6 @@
 #include "ep/cpp/platform.h"
 #include "cameraimpl.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep
 {

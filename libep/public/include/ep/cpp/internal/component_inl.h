@@ -48,11 +48,6 @@ inline void Component::Subscribe(String eventName, const Delegate<void(Args...)>
   Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
 }
 
-inline void Component::SendMessage(String target, String message, const Variant &data) const
-{
-  return pKernel->SendMessage(target, uid, message, data);
-}
-
 inline Variant Component::Save() const
 {
   return pImpl->Save();

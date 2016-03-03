@@ -11,7 +11,6 @@
 // HACK: TODO: this shouldn't be here
 namespace kernel {
   struct ComponentDesc;
-  class Kernel;
 }
 
 namespace ep {
@@ -110,7 +109,7 @@ public:
   using ImplSuper = BaseImpl<C, I>;
 
   const kernel::ComponentDesc* GetDescriptor() const { return (const kernel::ComponentDesc*)pInstance->GetDescriptor(); }
-  kernel::Kernel* GetKernel() const { return (kernel::Kernel*)&pInstance->GetKernel(); }
+  Kernel* GetKernel() const { return &pInstance->GetKernel(); }
 
   C *pInstance;
 

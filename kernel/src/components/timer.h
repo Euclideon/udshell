@@ -29,7 +29,7 @@ public:
   void SetInterval(uint32_t interval) { SetTimer(interval, TimerType::Interval); }
   void SetCountDown(uint32_t countDown) { SetTimer(countDown, TimerType::CountDown); }
 
-  void MessageCallback(ep::Kernel *pKernel);
+  void MessageCallback();
 
 private:
   Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);

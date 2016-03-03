@@ -10,7 +10,7 @@
 #include "ep/cpp/delegate.h"
 #include "ep/cpp/boundingvolume.h"
 #include "ep/cpp/rect.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "udRender.h"
 
 

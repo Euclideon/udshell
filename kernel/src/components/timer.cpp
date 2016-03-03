@@ -1,5 +1,5 @@
 #include "components/timer.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 
@@ -45,7 +45,7 @@ void Timer::SetTimer(uint32_t d, TimerType tt)
 }
 
 
-void Timer::MessageCallback(ep::Kernel*)
+void Timer::MessageCallback()
 {
   Elapsed.Signal();
   DecRef();

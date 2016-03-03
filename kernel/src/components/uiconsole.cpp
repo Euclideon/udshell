@@ -6,7 +6,9 @@
 #include "ep/cpp/component/commandmanager.h"
 #include "components/file.h"
 #include "ep/cpp/delegate.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
+#include "components/lua.h"
+#include "hal/haltimer.h"
 
 namespace ep {
 
@@ -18,7 +20,7 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   spConsoleErr = pKernel->GetStdErrBroadcaster();
   spConsoleErr->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
 
-  auto spLua = ((kernel::Kernel *)pKernel)->GetLua();
+  auto spLua = pKernel->GetLua();
   spLuaOut = spLua->GetOutputBroadcaster();
   spLuaOut->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
 
@@ -27,8 +29,8 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   spInBuffer->Reserve(1024);
   spInStream = pKernel->CreateComponent<MemStream>({ { "buffer", spInBuffer }, { "flags", OpenFlags::Write } });
 
-  spLogger = ((kernel::Kernel*)pKernel)->GetLogger();
-  ((kernel::Kernel*)pKernel)->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
+  spLogger = pKernel->GetLogger();
+  pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
 
   auto spCommandManager = pKernel->GetCommandManager();
   spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void(Variant::VarMap)>(this, &UIConsole::ToggleVisible), "", "", "`");
@@ -178,7 +180,7 @@ void UIConsole::RebuildOutput()
 
 void UIConsole::OnLogChanged()
 {
-  Slice<LogLine> log = ((kernel::Kernel*)pKernel)->GetLogger()->GetLog();
+  Slice<LogLine> log = pKernel->GetLogger()->GetLog();
   LogLine &line = log.back();
 
   logLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1, spLogger->GetLogLine((int)log.length - 1)->ordering));

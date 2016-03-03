@@ -9,13 +9,13 @@ void DestroyOnMainThread(Kernel *pKernel, RefCounted *pInstance)
 {
   struct S
   {
-    void Destroy(Kernel *pKernel)
+    void Destroy()
     {
       ((RefCounted*)this)->DecRef();
     }
   };
 
-  pKernel->DispatchToMainThread(fastdelegate::MakeDelegate((S*)pInstance, &S::Destroy));
+  pKernel->DispatchToMainThread(MakeDelegate((S*)pInstance, &S::Destroy));
 }
 
 } // namespace internal

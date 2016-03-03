@@ -9,6 +9,8 @@
   <Function><Name>ep::MutableString&lt;.*&gt;::MutableString&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
   <Function><Name>ep::SharedString::SharedString</Name><Action>NoStepInto</Action></Function>
 
+  <Function><Name>ep::SharedMap&lt;.*&gt;::SharedMap&lt;.*&gt;</Name><Action>NoStepInto</Action></Function>
+
   <Function><Name>ep::Variant::Variant</Name><Action>NoStepInto</Action></Function>
   <Function><Name>ep::KeyValuePair::KeyValuePair</Name><Action>NoStepInto</Action></Function>
 

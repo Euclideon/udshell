@@ -1,6 +1,6 @@
 #include "resourceimpl.h"
 #include "metadata.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 

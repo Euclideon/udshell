@@ -129,7 +129,7 @@ typedef SharedPtr<RenderableView> RenderableViewRef;
 class Renderer : public RefCounted
 {
 public:
-  Renderer(kernel::Kernel *pKernel, int renderThreadCount);
+  Renderer(Kernel *pKernel, int renderThreadCount);
   ~Renderer();
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
@@ -145,7 +145,7 @@ protected:
   friend class RenderShaderProgram;
   friend class RenderVertexFormat;
 
-  kernel::Kernel *pKernel;
+  Kernel *pKernel;
 
   udRenderEngine *pRenderEngine = nullptr;
 

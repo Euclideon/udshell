@@ -6,7 +6,7 @@
 #include "ep/cpp/component/resource/model.h"
 #include "components/resources/metadata.h"
 #include "hal/image.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"

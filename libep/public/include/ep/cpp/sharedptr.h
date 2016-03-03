@@ -88,7 +88,7 @@ public:
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
     T *ptr = new(pMem) T(args...);
-    ptr->pFreeFunc = [](void *pMem) { epFree(pMem); };
+    ptr->pFreeFunc = [](RefCounted *pMem) { epFree((T*)pMem); };
     return SharedPtr<T>(ptr);
   }
 
@@ -356,12 +356,12 @@ public:
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
     T *ptr = new(pMem) T(args...);
-    ptr->pFreeFunc = [](void *pMem) { epFree(pMem); };
+    ptr->pFreeFunc = [](RefCounted *pMem) { epFree((T*)pMem); };
     return ptr;
   }
 
 private:
-  typedef void (FreeFunc)(void*);
+  typedef void (FreeFunc)(RefCounted*);
 
   mutable size_t rc = 0;
   FreeFunc *pFreeFunc = nullptr;
@@ -372,6 +372,7 @@ private:
   template<typename T, bool isrc, typename... Args>
   friend struct internal::Create;
   friend class Kernel;
+  friend class KernelImpl;
 };
 
 
@@ -450,7 +451,7 @@ namespace internal {
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
     using U = typename std::remove_const<T>::type;
     UniquePtr<U> up(new(pMem) U(args...));
-    up->pFreeFunc = [](void *pMem) { epFree(pMem); };
+    up->pFreeFunc = [](RefCounted *pMem) { epFree((U*)pMem); };
     return std::move(up);
   }
 

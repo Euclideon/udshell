@@ -6,7 +6,7 @@
 #include "ep/cpp/component/view.h"
 #include "ep/cpp/component/node/simplecamera.h"
 #include "ep/cpp/component/resource/udmodel.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "helpers.h"
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/node/udnode.h"
@@ -26,7 +26,7 @@ static struct
   uint32_t rendererThreadCount;
   uint32_t streamerMemoryLimit;
 
-  kernel::Kernel *pKernel;
+  SharedPtr<Kernel> spKernel;
 
   ViewRef spView;
   UDModelRef spUDModel;
@@ -47,7 +47,7 @@ static struct
                0,                   // rendererThreadCount
                500 * 1048576,       // streamerMemoryLimit
 
-               nullptr,             // pKernel
+               nullptr,             // spKernel
 
                nullptr,             // spView
                nullptr,             // spUDModel
@@ -68,10 +68,10 @@ static void ViewerInit(String sender, String message, const Variant &data)
   if (mData.filename.beginsWithIC("~"))
     mData.filename = MutableString256(Format, "{0}{1}", getenv("HOME"), mData.filename.slice(1, mData.filename.length));
 #endif // defined(EP_LINUX)
-  mData.spView = mData.pKernel->CreateComponent<View>();
-  mData.spScene = mData.pKernel->CreateComponent<Scene>();
-  mData.spSimpleCamera = mData.pKernel->CreateComponent<SimpleCamera>();
-  mData.spUDNode = mData.pKernel->CreateComponent<UDNode>();
+  mData.spView = mData.spKernel->CreateComponent<View>();
+  mData.spScene = mData.spKernel->CreateComponent<Scene>();
+  mData.spSimpleCamera = mData.spKernel->CreateComponent<SimpleCamera>();
+  mData.spUDNode = mData.spKernel->CreateComponent<UDNode>();
 
   mData.spView->SetUDRenderFlags(UDRenderFlags::PointCubes | UDRenderFlags::ClearTargets);
 
@@ -83,9 +83,9 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
   mData.spView->SetScene(mData.spScene);
   mData.spView->SetCamera(mData.spSimpleCamera);
-  mData.pKernel->SetFocusView(mData.spView);
+  mData.spKernel->SetFocusView(mData.spView);
 
-  ResourceManagerRef spResourceManager = mData.pKernel->GetResourceManager();
+  ResourceManagerRef spResourceManager = mData.spKernel->GetResourceManager();
 
   if (spResourceManager)
   {
@@ -140,21 +140,20 @@ int main(int argc, char* argv[])
   epResult result = epR_Failure;
   try
   {
-    kernel::Kernel::Create(&mData.pKernel, epParseCommandLine(argc, argv), mData.rendererThreadCount);
+    mData.spKernel = SharedPtr<Kernel>(Kernel::CreateInstance(epParseCommandLine(argc, argv), mData.rendererThreadCount));
 
-    mData.pKernel->RegisterMessageHandler("init", &ViewerInit);
-    mData.pKernel->RegisterMessageHandler("deinit", &ViewerDeinit);
+    mData.spKernel->RegisterMessageHandler("init", &ViewerInit);
+    mData.spKernel->RegisterMessageHandler("deinit", &ViewerDeinit);
 
     if (mData.CITest)
     {
-      mData.spCITimer = mData.pKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 },{ "timertype", "CountDown" } });
-      mData.spCITimerSub = mData.spCITimer->Elapsed.Subscribe([]() { ((kernel::Kernel*)ep::Kernel::GetInstance())->Terminate(); });
+      mData.spCITimer = mData.spKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 },{ "timertype", "CountDown" } });
+      mData.spCITimerSub = mData.spCITimer->Elapsed.Subscribe([]() { Kernel::GetInstance()->Quit(); });
     }
 
-    mData.pKernel->RunMainLoop();
+    mData.spKernel->RunMainLoop();
 
-    mData.pKernel->Destroy();
-    mData.pKernel = nullptr;
+    mData.spKernel = nullptr;
   }
   catch (std::exception &e)
   {

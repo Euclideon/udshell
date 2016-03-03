@@ -23,6 +23,7 @@
 
 #define EPTHROW_IF(condition, error, message, ...) if(condition) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); }
 #define EPTHROW_IF_NULL(condition, error, message, ...) if((condition) == nullptr) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); }
+#define EPTHROW_EPRESULT(error, message, ...) if(error != epR_Success) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); }
 
 #define EPASSERT_THROW(condition, error, message, ...) if(!(condition)) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); }
 

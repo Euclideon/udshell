@@ -3,7 +3,7 @@
 
 #if EPWINDOW_DRIVER == EPDRIVER_SDL
 
-#include "kernel.h"
+#include "kernelimpl.h"
 #include "renderscene.h"
 #include "hal/input.h"
 #include "components/viewimpl.h"
@@ -23,14 +23,21 @@ struct DelegateWithSemaphore
   udSemaphore *pSem;
 };
 
-class SDLKernel : public kernel::Kernel
+class SDLKernel : public Kernel
 {
+  EP_DECLARE_COMPONENT(SDLKernel, Kernel, EPKERNEL_PLUGINVERSION, "SDL Kernel instance")
 public:
-  SDLKernel() {}
+  SDLKernel(Variant::VarMap commandLine);
   ~SDLKernel();
 
-  void InitInternal() override;
-  void RunMainLoop() override;
+  void RunMainLoop() override final;
+  void Quit() override final;
+
+  ViewRef SetFocusView(ViewRef spView) override final;
+  void DispatchToMainThread(MainThreadCallback callback) override final;
+  void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
+
+private:
   void EventLoop();
 };
 
@@ -53,7 +60,7 @@ void SDLKernel::EventLoop()
         size_t errorDepth = ErrorLevel();
         try
         {
-          d(this);
+          d();
           if (ErrorLevel() > errorDepth)
           {
             LogError("Exception occurred in MainThreadCallback : {0}", GetError()->message);
@@ -80,7 +87,7 @@ void SDLKernel::EventLoop()
         size_t errorDepth = ErrorLevel();
         try
         {
-          d(this);
+          d();
           if (ErrorLevel() > errorDepth)
           {
             LogError("Exception occurred in MainThreadCallback : {0}", GetError()->message);
@@ -114,7 +121,7 @@ void SDLKernel::EventLoop()
         case SDL_WINDOWEVENT_RESIZED:
           s_displayWidth = event.window.data1;
           s_displayHeight = event.window.data2;
-          spFocusView->Resize(s_displayWidth, s_displayHeight);
+          GetImpl()->spFocusView->Resize(s_displayWidth, s_displayHeight);
           glViewport(0, 0, s_displayWidth, s_displayHeight);
           break;
         }
@@ -125,8 +132,23 @@ void SDLKernel::EventLoop()
   }
 }
 
+static ComponentDesc *MakeKernelDescriptor()
+{
+  ComponentDesc *pDesc = epNew ComponentDesc;
+  EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
-void SDLKernel::InitInternal()
+  pDesc->info = SDLKernel::MakeDescriptor();
+  pDesc->baseClass = Kernel::ComponentID();
+
+  pDesc->pInit = nullptr;
+  pDesc->pCreateInstance = nullptr;
+  pDesc->pCreateImpl = nullptr;
+  pDesc->pSuperDesc = nullptr;
+
+  return pDesc;
+}
+SDLKernel::SDLKernel(Variant::VarMap commandLine)
+  : Kernel(MakeKernelDescriptor(), commandLine)
 {
   s_displayWidth = 1280;
   s_displayHeight = 720;
@@ -146,7 +168,7 @@ void SDLKernel::InitInternal()
   EPTHROW_IF(!s_context, epR_Failure, "Failed to create SDL Window");
   epscope(fail) { SDL_GL_DeleteContext(s_context); };
 
-  InitRender();
+  GetImpl()->InitRender();
 }
 
 SDLKernel::~SDLKernel()
@@ -154,15 +176,20 @@ SDLKernel::~SDLKernel()
   // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
   EventLoop();
 
-  DeinitRender();
+  GetImpl()->DeinitRender();
 
   SDL_GL_DeleteContext(s_context);
   SDL_Quit();
+
+  // HACK: destroy the descriptor we fabricated...
+  const ComponentDesc *pKernelDesc = pType;
+  (const ComponentDesc*&)pType = pType->pSuperDesc;
+  epDelete pKernelDesc;
 }
 
 void SDLKernel::RunMainLoop()
 {
-  DoInit(this);
+  FinishInit();
 
   while (!s_done)
   {
@@ -172,7 +199,7 @@ void SDLKernel::RunMainLoop()
     epInput_Update();
 
     // render a frame (this could move to another thread!)
-    RenderableViewRef spRenderView = spFocusView->GetImpl<ViewImpl>()->GetRenderableView();
+    RenderableViewRef spRenderView = GetImpl()->spFocusView->GetImpl<ViewImpl>()->GetRenderableView();
     if (spRenderView)
       spRenderView->RenderGPU();
 
@@ -180,27 +207,22 @@ void SDLKernel::RunMainLoop()
   }
 }
 
-namespace kernel {
-
-Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
+ViewRef SDLKernel::SetFocusView(ViewRef spView)
 {
-  return epNew SDLKernel;
-}
+  KernelImpl *pKernelImpl = GetImpl();
 
-ViewRef Kernel::SetFocusView(ViewRef spView)
-{
   if (!spView)
-    spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
+    pKernelImpl->spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
 
-  ViewRef spOld = spFocusView;
-  spFocusView = spView;
+  ViewRef spOld = pKernelImpl->spFocusView;
+  pKernelImpl->spFocusView = spView;
 
-  if (spFocusView)
-    spFocusView->Resize(s_displayWidth, s_displayHeight);
+  if (pKernelImpl->spFocusView)
+    pKernelImpl->spFocusView->Resize(s_displayWidth, s_displayHeight);
   return spOld;
 }
 
-void Kernel::DispatchToMainThread(MainThreadCallback callback)
+void SDLKernel::DispatchToMainThread(MainThreadCallback callback)
 {
   FastDelegateMemento m = callback.GetMemento();
   void **ppPtrs = (void**)&m;
@@ -213,7 +235,7 @@ void Kernel::DispatchToMainThread(MainThreadCallback callback)
   e.user.data2 = ppPtrs[1];
   SDL_PushEvent(&e);
 }
-void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+void SDLKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   DelegateWithSemaphore dispatch;
   dispatch.m = callback.GetMemento();
@@ -230,12 +252,19 @@ void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   udDestroySemaphore(&dispatch.pSem);
 }
 
-void Kernel::Terminate()
+void SDLKernel::Quit()
 {
   s_done = true;
 }
 
-} // namespace kernel
+namespace ep {
+
+Kernel* Kernel::CreateInstanceInternal(Variant::VarMap commandLine)
+{
+  return KernelImpl::CreateComponentInstance<SDLKernel>(commandLine);
+}
+
+} // namespace ep
 
 #else
 EPEMPTYFILE

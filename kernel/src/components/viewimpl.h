@@ -7,7 +7,7 @@
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/camera.h"
 
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "renderscene.h"
 
 #include "udRender.h"
@@ -73,10 +73,10 @@ public:
   // TODO: Should this go in the public (non-impl) api? ideally should be protected but is used in the driver...
   bool InputEvent(const epInputEvent &ev);
 
-private:
-  // TODO: REMOVE THESE FRIEND HACKS (IF POSSIBLE)
-  friend class Renderer;
-  friend class kernel::Kernel;
+//private:
+//  // TODO: REMOVE THESE FRIEND HACKS (IF POSSIBLE)
+//  friend class Renderer;
+//  friend class KernelImpl;
 
   ~ViewImpl() { Deactivate(); }
 

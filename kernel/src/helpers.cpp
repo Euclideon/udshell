@@ -10,7 +10,7 @@ Array<const KeyValuePair> epParseCommandLine(const char *pCommandLine)
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
-  size_t i = 0, start = 0;
+  size_t i = 0, start = 0, numArgs = 0;
   bool bInQuotes = false;
   while (pCommandLine[i] != 0)
   {
@@ -24,7 +24,7 @@ Array<const KeyValuePair> epParseCommandLine(const char *pCommandLine)
       ++i;
     }
     if (i > start)
-      output.pushBack(KeyValuePair(nullptr, String(pCommandLine + start, i - start)));
+      output.pushBack(KeyValuePair(numArgs++, String(pCommandLine + start, i - start)));
   }
 
   return std::move(output);
@@ -37,7 +37,7 @@ Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
   for (int i = 0; i < argc; ++i)
-    output.pushBack(KeyValuePair(nullptr, String(argv[i])));
+    output.pushBack(KeyValuePair(i, String(argv[i])));
 
   return std::move(output);
 }

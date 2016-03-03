@@ -1,7 +1,7 @@
 #include "ep/cpp/component/resource/model.h"
 #include "modelimpl.h"
 #include "renderresource.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 

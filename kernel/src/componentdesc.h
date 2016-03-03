@@ -36,9 +36,7 @@ struct EnumKVP
 
 namespace kernel {
 
-class Kernel;
 struct ComponentDesc;
-
 
 struct PropertyDesc : public PropertyInfo
 {
