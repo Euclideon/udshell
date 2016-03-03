@@ -52,22 +52,19 @@ public:
   using ValueType = V;
   using KeyValuePair = KVP<K, V>;
 
-  AVLTree() : alloc(Allocator::Create()) {}
-  AVLTree(nullptr_t) : alloc(Allocator::Create()) {}
+  AVLTree() {}
+  AVLTree(nullptr_t) {}
   AVLTree(AVLTree &&rval)
     : size(rval.size),
-      root(rval.root),
-      alloc(rval.alloc)
+      root(rval.root)
   {
     rval.root = nullptr;
-    rval.alloc = nullptr;
   }
 
   ~AVLTree()
   {
     Destroy(root);
     root = nullptr;
-    Allocator::Destroy(alloc);
   }
 
   size_t Size() const { return size; }
@@ -75,7 +72,7 @@ public:
 
   void Insert(K &&key, V &&rval)
   {
-    Node *node = alloc->Alloc();
+    Node *node = Allocator::Get().Alloc();
     new(&node->k) K(std::move(key));
     new(&node->v) V(std::move(rval));
     node->left = node->right = nullptr;
@@ -84,7 +81,7 @@ public:
   }
   void Insert(const K &key, V &&rval)
   {
-    Node *node = alloc->Alloc();
+    Node *node = Allocator::Get().Alloc();
     new(&node->k) K(key);
     new(&node->v) V(std::move(rval));
     node->left = node->right = nullptr;
@@ -93,7 +90,7 @@ public:
   }
   void Insert(K &&key, const V &v)
   {
-    Node *node = alloc->Alloc();
+    Node *node = Allocator::Get().Alloc();
     new(&node->k) K(std::move(key));
     new(&node->v) V(v);
     node->left = node->right = nullptr;
@@ -102,7 +99,7 @@ public:
   }
   void Insert(const K &key, const V &v)
   {
-    Node *node = alloc->Alloc();
+    Node *node = Allocator::Get().Alloc();
     new(&node->k) K(key);
     new(&node->v) V(v);
     node->left = node->right = nullptr;
@@ -112,7 +109,7 @@ public:
 
   void Insert(KVP<K, V> &&kvp)
   {
-    Node *node = alloc->Alloc();
+    Node *node = Allocator::Get().Alloc();
     new(&node->k) K(std::move(kvp.key));
     new(&node->v) V(std::move(kvp.value));
     node->left = node->right = nullptr;
@@ -121,7 +118,7 @@ public:
   }
   void Insert(const KVP<K, V> &v)
   {
-    Node *node = alloc->Alloc();
+    Node *node = Allocator::Get().Alloc();
     new(&node->k) K(v.key);
     new(&node->v) V(v.value);
     node->left = node->right = nullptr;
@@ -187,7 +184,6 @@ private:
 
   size_t size = 0;
   Node *root = nullptr;
-  Allocator *alloc;
 
   static int height(const Node *n)
   {
@@ -267,7 +263,7 @@ private:
     Destroy(n->right);
 
     n->~Node();
-    alloc->Free(n);
+    Allocator::Get().Free(n);
   }
 
   Node* insert(Node *n, Node *newnode)
@@ -291,7 +287,7 @@ private:
       newnode->height = n->height;
 
       n->~Node();
-      alloc->Free(n);
+      Allocator::Get().Free(n);
 
       return newnode;
     }
@@ -394,7 +390,7 @@ private:
         }
 
         temp->~Node();
-        alloc->Free(temp);
+        Allocator::Get().Free(temp);
 
         --size;
       }
@@ -565,13 +561,6 @@ struct AVLTreeNode
   AVLTreeNode() = delete;
 };
 
-template <typename Allocator>
-inline Allocator &GetAVLTreeAllocator()
-{
-  static Allocator allocator;
-  return allocator;
-}
-
 template <typename Node>
 struct AVLTreeAllocator
 {
@@ -587,13 +576,11 @@ struct AVLTreeAllocator
     epFree(pMem);
   }
 
-  static AVLTreeAllocator *Create()
+  static AVLTreeAllocator& Get()
   {
-    return &GetAVLTreeAllocator<AVLTreeAllocator>();
+    static AVLTreeAllocator<Node> allocator;
+    return allocator;
   }
-
-  static void Destroy(AVLTreeAllocator *) { }
-
   // TODO: Add API for memory usage statistics
 };
 

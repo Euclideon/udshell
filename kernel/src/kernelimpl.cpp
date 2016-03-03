@@ -54,45 +54,45 @@
 #include "stdcapture.h"
 
 #include "udPlatformUtil.h"
+#include "helpers.h"
 
 namespace ep {
 
-static ep::Instance *MakeInterface(Kernel *pKernel)
-{
-  ep::Instance *pInstance = epNew ep::Instance;
+namespace internal {
 
-  pInstance->apiVersion = EP_APIVERSION;
-
-  pInstance->pKernelInstance = pKernel;
-
-  pInstance->Alloc = [](size_t size) -> void*
-  {
-    return epAlloc(size);
-  },
-  pInstance->AllocAligned = [](size_t size, size_t alignment) -> void*
-  {
-    return epAllocAligned(size, alignment, epAF_None);
-  },
-  pInstance->Free = [](void *pMem) -> void
-  {
-    epFree(pMem);
-  },
-
-  pInstance->AssertFailed = [](String condition, String message, String file, int line) -> void
-  {
-#if EPASSERT_ON
-    epAssertFailed(condition, message, file, line);
-#endif
-  },
-
-  pInstance->DestroyComponent = [](Component *pInstance) -> void
-  {
-    // NOTE: this was called when an RC reached zero...
-    pInstance->DecRef(); // dec it with the internal function which actually performs the cleanup
-  };
-
-  return pInstance;
+void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line);
+void *_AllocAligned(size_t size, size_t alignment, epAllocationFlags flags, const char * pFile, int line);
+void _Free(void *pMemory);
 }
+
+static Instance s_intance =
+{
+  EP_APIVERSION,  // apiVersion;
+  nullptr,        // pKernelInstance;
+
+  [](size_t size, epAllocationFlags flags, const char *pFile, int line) -> void* { return internal::_Alloc(size, flags, pFile, line); }, //  Alloc
+
+  [](size_t size, size_t alignment, epAllocationFlags flags, const char *pFile, int line) -> void* { return internal::_AllocAligned(size, alignment, flags, pFile, line); }, // AllocAligned
+
+  [](void *pMem) -> void { internal::_Free(pMem); }, // Free
+
+  [](String condition, String message, String file, int line) -> void { IF_EPASSERT(epAssertFailed(condition, message, file, line);) }, // AssertFailed
+
+  // NOTE: this was called when an RC reached zero...
+  [](Component *pInstance) -> void { pInstance->DecRef(); }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
+
+  []() -> void* { return (void*)&KernelImpl::s_varAVLAllocator; }, // TreeAllocator
+};
+
+struct GlobalInstanceInitializer
+{
+  GlobalInstanceInitializer()
+  {
+    ep::s_pInstance = &s_intance;
+  }
+};
+
+GlobalInstanceInitializer globalInstanceInitializer;
 
 static ComponentDesc *MakeKernelDescriptor(ComponentDesc *pType)
 {
@@ -148,6 +148,8 @@ Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCoun
 }
 
 
+AVLTreeAllocator<VariantAVLNode> KernelImpl::s_varAVLAllocator;
+
 KernelImpl::KernelImpl(Kernel *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)
   , componentRegistry(256)
@@ -156,7 +158,7 @@ KernelImpl::KernelImpl(Kernel *pInstance, Variant::VarMap initParams)
   , foreignInstanceRegistry(4096)
   , messageHandlers(64)
 {
-  ep::s_pInstance = MakeInterface(pInstance);
+  ep::s_pInstance->pKernelInstance = pInstance;
 }
 
 void KernelImpl::StartInit(Variant::VarMap initParams)

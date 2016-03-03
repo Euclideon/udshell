@@ -38,14 +38,14 @@ epKernel *epPlugin_GetKernel()
   return (epKernel*)ep::s_pInstance->pKernelInstance;
 }
 
-void* epPlugin_Alloc(size_t size)
+void* epPlugin_Alloc(size_t size, epAllocationFlags flags, const char *pFile, int line)
 {
-  return ep::s_pInstance->Alloc(size);
+  return ep::s_pInstance->Alloc(size, flags, pFile, line);
 }
 
-void* epPlugin_AllocAligned(size_t size, size_t alignment)
+void* epPlugin_AllocAligned(size_t size, size_t alignment, epAllocationFlags flags, const char *pFile, int line)
 {
-  return ep::s_pInstance->AllocAligned(size, alignment);
+  return ep::s_pInstance->AllocAligned(size, alignment, flags, pFile, line);
 }
 
 void epPlugin_Free(void *pMem)

@@ -203,6 +203,10 @@ int LuaState::udLuaPanic(lua_State *L)
   return 0;
 }
 
+namespace internal {
+void *_Realloc(void *pMemory, size_t size, const char *pFile, int line);
+}
+
 void* LuaState::udLuaAlloc(void *, void *ptr, size_t, size_t nsize)
 {
   if (nsize == 0) {
@@ -210,7 +214,7 @@ void* LuaState::udLuaAlloc(void *, void *ptr, size_t, size_t nsize)
     return nullptr;
   }
   else
-    return epRealloc(ptr, nsize);
+    return internal::_Realloc(ptr, nsize, __FILE__, __LINE__);
 }
 
 void LuaState::exec(String code)

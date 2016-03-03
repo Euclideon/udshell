@@ -1,6 +1,8 @@
 #include "ep/cpp/platform.h"
 
 #include <stdio.h>
+#include "ep/cpp/plugin.h"
+#define EP_DEFAULT_ALIGNMENT (8)
 
 namespace ep {
 namespace internal {
@@ -8,6 +10,77 @@ namespace internal {
 bool gUnitTesting = false;
 
 MutableString256 assertBuffer;
+
+void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line)
+{
+#if defined(EP_COMPILER_VISUALC)
+# if __EP_MEMORY_DEBUG__
+  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc_dbg(nullptr, size, 1, EP_DEFAULT_ALIGNMENT, pFile, line) : _aligned_malloc_dbg(size, EP_DEFAULT_ALIGNMENT, pFile, line);
+# else
+  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc(nullptr, size, 1, EP_DEFAULT_ALIGNMENT) : _aligned_malloc(size, EP_DEFAULT_ALIGNMENT);
+# endif // __EP_MEMORY_DEBUG__
+#else // defined(EP_COMPILER_VISUALC)
+  epUnused(pFile);
+  epUnused(line);
+  void *pMemory = (flags & epAF_Zero) ? calloc(size, 1) : malloc(size);
+#endif
+  return pMemory;
+}
+
+void *_AllocAligned(size_t size, size_t alignment, epAllocationFlags flags, const char *pFile, int line)
+{
+#if defined(EP_COMPILER_VISUALC)
+# if __EP_MEMORY_DEBUG__
+  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc_dbg(nullptr, size, 1, alignment, pFile, line) : _aligned_malloc_dbg(size, alignment, pFile, line);
+# else
+  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc(nullptr, size, 1, alignment) : _aligned_malloc(size, alignment);
+# endif /// __EP_MEMORY_DEBUG__
+#elif EP_NACL
+  void *pMemory = (flags & epAF_Zero) ? calloc(size, 1) : malloc(size);
+#elif defined(__GNUC__)
+  epUnused(pFile);
+  epUnused(line);
+  if (alignment < sizeof(size_t))
+    alignment = sizeof(size_t);
+  void *pMemory;
+  int err = posix_memalign(&pMemory, alignment, size + alignment);
+  if (err != 0)
+    return nullptr;
+
+  if (flags & epAF_Zero)
+    memset(pMemory, 0, size);
+#endif
+  return pMemory;
+}
+
+void *_Realloc(void *pMemory, size_t size, const char * pFile, int line)
+{
+#if defined(EP_COMPILER_VISUALC)
+# if __EP_MEMORY_DEBUG__
+  pMemory = _aligned_realloc_dbg(pMemory, size, EP_DEFAULT_ALIGNMENT, pFile, line);
+# else
+  pMemory = _aligned_realloc(pMemory, size, EP_DEFAULT_ALIGNMENT);
+# endif // __EP_MEMORY_DEBUG__
+#else
+  epUnused(pFile);
+  epUnused(line);
+  pMemory = realloc(pMemory, size);
+#endif // defined(_MSC_VER)
+
+  return pMemory;
+}
+
+void _Free(void *pMemory)
+{
+  if (pMemory)
+  {
+#if defined(EP_COMPILER_VISUALC)
+    _aligned_free(pMemory);
+#else
+    free(pMemory);
+#endif
+  }
+}
 
 } // namespace internal
 } // namespace ep
@@ -52,84 +125,45 @@ void epDebugPrintf(const char *format, ...)
   epDebugWrite(pBuffer);
 }
 
-
-// HAX: memory functions from UD
-#define EP_DEFAULT_ALIGNMENT (8)
 void *_epAlloc(size_t size, epAllocationFlags flags EP_IF_MEMORY_DEBUG(const char * pFile, int line))
 {
-#if defined(EP_COMPILER_VISUALC)
-# if __EP_MEMORY_DEBUG__
-  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc_dbg(nullptr, size, 1, EP_DEFAULT_ALIGNMENT, pFile, line) : _aligned_malloc_dbg(size, EP_DEFAULT_ALIGNMENT, pFile, line);
-# else
-  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc(nullptr, size, 1, EP_DEFAULT_ALIGNMENT) : _aligned_malloc(size, EP_DEFAULT_ALIGNMENT);
-# endif // __EP_MEMORY_DEBUG__
-#else // defined(EP_COMPILER_VISUALC)
-# if __EP_MEMORY_DEBUG__
-  epUnused(pFile); epUnused(line);
-# endif // __EP_MEMORY_DEBUG__
-  void *pMemory = (flags & epAF_Zero) ? calloc(size, 1) : malloc(size);
-#endif
-  return pMemory;
+#if __EP_MEMORY_DEBUG__
+  if (s_pInstance)
+    return s_pInstance->Alloc(size, flags, pFile, line);
+
+  return ep::internal::_Alloc(size, flags, pFile, line);
+#else
+  if (s_pInstance)
+    return s_pInstance->Alloc(size, flags, nullptr, 0);
+
+  return ep::internal::_Alloc(size, flags, nullptr, 0);
+#endif // __EP_MEMORY_DEBUG__
 }
 
 void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags EP_IF_MEMORY_DEBUG(const char * pFile, int line))
 {
-#if defined(EP_COMPILER_VISUALC)
-# if __EP_MEMORY_DEBUG__
-  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc_dbg(nullptr, size, 1, alignment, pFile, line) : _aligned_malloc_dbg(size, alignment, pFile, line);
-# else
-  void *pMemory = (flags & epAF_Zero) ? _aligned_recalloc(nullptr, size, 1, alignment) : _aligned_malloc(size, alignment);
-# endif /// __EP_MEMORY_DEBUG__
-#elif EP_NACL
-  void *pMemory = (flags & epAF_Zero) ? calloc(size, 1) : malloc(size);
-#elif defined(__GNUC__)
-# if __EP_MEMORY_DEBUG__
-    epUnused(pFile); epUnused(line);
-# endif // __EP_MEMORY_DEBUG__
-  if (alignment < sizeof(size_t))
-    alignment = sizeof(size_t);
-  void *pMemory;
-  int err = posix_memalign(&pMemory, alignment, size + alignment);
-  if (err != 0)
-    return nullptr;
-
-  if (flags & epAF_Zero)
-    memset(pMemory, 0, size);
-#endif
-  return pMemory;
-}
-
-void *_epRealloc(void *pMemory, size_t size EP_IF_MEMORY_DEBUG(const char * pFile, int line))
-{
-#if defined(EP_COMPILER_VISUALC)
-# if __EP_MEMORY_DEBUG__
-  pMemory = _aligned_realloc_dbg(pMemory, size, EP_DEFAULT_ALIGNMENT, pFile, line);
-# else
-  pMemory = _aligned_realloc(pMemory, size, EP_DEFAULT_ALIGNMENT);
-# endif // __EP_MEMORY_DEBUG__
-#else
-# if __EP_MEMORY_DEBUG__
-  epUnused(pFile); epUnused(line);
-# endif // __EP_MEMORY_DEBUG__
-  pMemory = realloc(pMemory, size);
-#endif // defined(_MSC_VER)
-
-  return pMemory;
-}
-
-void _epFree(void *pMemory EP_IF_MEMORY_DEBUG(const char * pFile, int line))
-{
 #if __EP_MEMORY_DEBUG__
-  epUnused(pFile); epUnused(line);
-#endif // __EP_MEMORY_DEBUG__
-  if (pMemory)
-  {
-#if defined(EP_COMPILER_VISUALC)
-    _aligned_free(pMemory);
+  if (s_pInstance)
+    return s_pInstance->AllocAligned(size, alignment, flags, pFile, line);
+
+  return ep::internal::_AllocAligned(size, alignment, flags, pFile, line);
 #else
-    free(pMemory);
-#endif
+  if (s_pInstance)
+    return s_pInstance->AllocAligned(size, alignment, flags, nullptr, 0);
+
+  return internal::_AllocAligned(size, alignment, flags, nullptr, 0);
+#endif // __EP_MEMORY_DEBUG__
+}
+
+void _epFree(void *pMemory)
+{
+  if (s_pInstance)
+  {
+    s_pInstance->Free(pMemory);
+    return;
   }
+
+  ep::internal::_Free(pMemory);
 }
 
 #if __EP_MEMORY_DEBUG__
