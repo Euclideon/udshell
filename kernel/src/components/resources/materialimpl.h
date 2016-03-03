@@ -32,7 +32,7 @@ public:
 
   AVLTree<SharedString, Float4>& MaterialProperties() { return properties; }
   const AVLTree<SharedString, Float4>& MaterialProperties() const { return properties; }
-  void SetMaterialProperty(SharedString property, const Float4 &val) { properties.Insert(property, val); }
+  void SetMaterialProperty(SharedString property, const Float4 &val) override final { properties.Insert(property, val); }
 
 protected:
   EP_FRIENDS_WITH_IMPL(GeomNode);

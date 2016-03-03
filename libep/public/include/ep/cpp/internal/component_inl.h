@@ -2,7 +2,7 @@ namespace ep {
 
 inline Kernel& Component::GetKernel() const
 {
-  return *(Kernel*)pKernel;
+  return *pKernel;
 }
 
 inline const ComponentDesc* Component::GetDescriptor() const

@@ -7,7 +7,6 @@
 #include "ep/cpp/componentdesc.h"
 #include "ep/cpp/internal/i/icomponent.h"
 #include "ep/c/internal/component_inl.h"
-//#include "ep/cpp/kernel.h"
 
 namespace ep {
 
@@ -174,6 +173,7 @@ inline void epFromVariant(const Variant &v, SharedPtr<T> *pR)
 
 } // namespace ep
 
+#include "ep/cpp/kernel.h"
 #include "ep/cpp/internal/component_inl.h"
 
 #endif

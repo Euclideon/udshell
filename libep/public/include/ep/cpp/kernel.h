@@ -1,8 +1,9 @@
+#include "ep/cpp/component/component.h"
+
 #if !defined(_EP_KERNEL_HPP)
 #define _EP_KERNEL_HPP
 
 #include "ep/cpp/internal/i/ikernel.h"
-#include "ep/cpp/component/component.h"
 
 namespace ep {
 
@@ -26,7 +27,7 @@ public:
   template<typename CT>
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase);
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase) override final { return pImpl->GetDerivedComponentDescs(id, bIncludeBase); }
-  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) { return pImpl->GetDerivedComponentDescs(pBase, bIncludeBase); }
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) override final { return pImpl->GetDerivedComponentDescs(pBase, bIncludeBase); }
 
   void RegisterMessageHandler(SharedString _name, MessageHandler messageHandler) override final { pImpl->RegisterMessageHandler(_name, messageHandler); }
 

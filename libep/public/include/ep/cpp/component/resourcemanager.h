@@ -76,8 +76,8 @@ public:
   }
   Array<ResourceRef> GetResourcesByType(const ep::ComponentDesc *pBase) const override final { return pImpl->GetResourcesByType(pBase); }
 
-  ResourceIterator begin() const { return pImpl->begin(); }
-  ResourceIterator end() const { return pImpl->end(); }
+  ResourceIterator begin() const override final { return pImpl->begin(); }
+  ResourceIterator end() const override final { return pImpl->end(); }
 
   Variant::VarMap GetExtensions() const override final { return pImpl->GetExtensions(); }
   // Resource loading/saving functions

@@ -38,8 +38,8 @@ public:
   void Resize(int width, int height) override { pImpl->Resize(width, height); }
 
   // TODO: Move this into the layer system once its implemented.
-  void SetUDRenderFlags(UDRenderFlags flags) { pImpl->SetUDRenderFlags(flags); }
-  UDRenderFlags GetUDRenderflags() const { return pImpl->GetUDRenderflags(); }
+  void SetUDRenderFlags(UDRenderFlags flags) override final { pImpl->SetUDRenderFlags(flags); }
+  UDRenderFlags GetUDRenderflags() const override final { return pImpl->GetUDRenderflags(); }
 
   Event<> Dirty;
   Event<> FrameReady;

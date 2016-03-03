@@ -48,8 +48,8 @@ public:
   void GoToBookmark(String bookmarkName) override final;
 
   // TODO: Move this into the layer system once its implemented.
-  void SetUDRenderFlags(UDRenderFlags flags) { renderFlags = flags; }
-  UDRenderFlags GetUDRenderflags() const { return renderFlags; }
+  void SetUDRenderFlags(UDRenderFlags flags) override final { renderFlags = flags; }
+  UDRenderFlags GetUDRenderflags() const override final { return renderFlags; }
 
   // TODO: Implement this/expose to the public api
   struct PickResult
