@@ -11,7 +11,7 @@ class KernelImpl;
 
 class Kernel : public Component, public IKernel
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Kernel, IKernel, Component, EPKERNEL_PLUGINVERSION, "Kernel instance")
+  __EP_DECLARE_COMPONENT_IMPL(Kernel, IKernel, Component, EPKERNEL_PLUGINVERSION, "Kernel instance")
 public:
   static Kernel* CreateInstance(Variant::VarMap commandLine, int renderThreadCount);
 

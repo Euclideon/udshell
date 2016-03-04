@@ -173,8 +173,11 @@ private:
 
 // declare magic for a C++ component with a pImpl interface
 #define EP_DECLARE_COMPONENT_WITH_IMPL(Name, Interface, SuperType, Version, Description) \
-public:                                                                                  \
   friend class ::ep::Kernel;                                                             \
+  __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description)
+
+#define __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description)    \
+public:                                                                                  \
   friend class Name##Impl;                                                               \
   using Super = SuperType;                                                               \
   using This = Name;                                                                     \
