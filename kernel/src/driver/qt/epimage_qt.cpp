@@ -29,14 +29,14 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
 
   if (qImage.isNull())
   {
-    epDebugPrintf("Error loading image -- %s", qImageReader.errorString().toUtf8().data());
+    epDebugPrintf("Error loading image -- %s\n", qImageReader.errorString().toUtf8().data());
     return nullptr;
   }
 
   epImage *pOutput = (epImage*)epAlloc(sizeof(epImage) + sizeof(epImageSurface));
   if (!pOutput)
   {
-    epDebugPrintf("Error allocating epImage");
+    epDebugPrintf("Error allocating epImage\n");
     return nullptr;
   }
 
@@ -53,7 +53,7 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
   if (qcImage.isNull())
   {
     epFree(pOutput);
-    epDebugPrintf("Error converting image to BGRA32 format");
+    epDebugPrintf("Error converting image to BGRA32 format\n");
     return nullptr;
   }
 
@@ -69,7 +69,7 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
   if (!surface.pImage)
   {
     epFree(pOutput);
-    epDebugPrintf("Error allocating epImage surface");
+    epDebugPrintf("Error allocating epImage surface\n");
     return nullptr;
   }
 

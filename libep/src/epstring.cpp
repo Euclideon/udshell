@@ -67,15 +67,22 @@ namespace internal {
 
 int epvscprintf(const char * format, va_list args)
 {
-#if defined(EP_COMPILER_VISUALC)
-  return _vscprintf(format, args);
+  va_list argsCopy;
+  va_copy(argsCopy, args);
+
+#if defined(EP_NACL)
+  return vsprintf(nullptr, pFormat, args);
+#elseif defined(EP_COMPILER_VISUALC)
+  return _vscprintf(format, argsCopy);
 #else
-  return vsprintf(nullptr, format, args);
+  return vsnprintf(nullptr, 0, format, argsCopy);
 #endif
 }
 int epvsnprintf(char * s, size_t count, const char * format, va_list args)
 {
-#if defined(EP_COMPILER_VISUALC)
+#if defined(EP_NACL)
+  return vsprintf(s, pFormat, args);
+#elseif defined(EP_COMPILER_VISUALC)
   return vsnprintf_s(s, count, count, format, args);
 #else
   return vsnprintf(s, count, format, args);
@@ -342,19 +349,9 @@ SharedString SharedString::sprintf(const char *pFormat, ...)
   va_list args;
   va_start(args, pFormat);
 
-#if defined(EP_NACL)
-  size_t len = vsprintf(nullptr, pFormat, args) + 1;
-#else
-  size_t len = vsnprintf(nullptr, 0, pFormat, args) + 1;
-#endif
-
+  size_t len = internal::epvscprintf(pFormat, args) + 1;
   MutableString<0> r(Reserve, len);
-
-#if defined(EP_NACL)
-  r.length = vsprintf(r.ptr, pFormat, args);
-#else
-  r.length = vsnprintf(r.ptr, len, pFormat, args);
-#endif
+  r.length = internal::epvsnprintf(r.ptr, len, pFormat, args);
 
   va_end(args);
 
