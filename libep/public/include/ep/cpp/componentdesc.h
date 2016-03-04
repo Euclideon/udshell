@@ -22,6 +22,12 @@ typedef Variant(Subscribe)(const Component *pBaseComponent, const void *pDerived
 
 typedef Variant(StaticCall)(Slice<const Variant> args);
 
+// property description
+enum PropertyFlags : uint32_t
+{
+  epPF_Immutable = 1 << 0 // must be initialised during construction
+};
+
 struct PropertyInfo
 {
   SharedString id;
@@ -71,31 +77,20 @@ struct ComponentInfo
   // TODO: add flags ('Abstract' (can't create) flag)
 };
 
-class Kernel;
-
 struct ComponentDesc
 {
-  typedef void(InitComponent)(Kernel*);
-  typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
-  typedef void *(CreateImplCallback)(Component *pInstance, Variant::VarMap initParams);
+  virtual ~ComponentDesc();
 
   ComponentInfo info;
-
-  SharedString baseClass;
-
-  InitComponent *pInit;
-  CreateInstanceCallback *pCreateInstance;
-  CreateImplCallback *pCreateImpl;
-
-  Array<const PropertyInfo> properties;
-  Array<const MethodInfo> methods;
-  Array<const EventInfo> events;
-  Array<const StaticFuncInfo> staticFuncs;
-
-  // TODO: move this back into kernel, it shouldn't be here...
   const ComponentDesc *pSuperDesc;
 };
 
+// We still need to define the destructor even though it's pure virtual
+inline ComponentDesc::~ComponentDesc()
+{
+}
+
+class Kernel;
 
 // base class for pImpl types
 template <typename C, typename I>
@@ -108,7 +103,7 @@ public:
   using Interface = I;
   using ImplSuper = BaseImpl<C, I>;
 
-  const kernel::ComponentDesc* GetDescriptor() const { return (const kernel::ComponentDesc*)pInstance->GetDescriptor(); }
+  const ComponentDesc* GetDescriptor() const { return pInstance->GetDescriptor(); }
   Kernel* GetKernel() const { return &pInstance->GetKernel(); }
 
   C *pInstance;

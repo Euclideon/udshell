@@ -1,9 +1,7 @@
 
 #include "ep/cpp/platform.h"
-#include "ep/cpp/componentdesc.h"
 
 #include "ep/cpp/kernel.h"
-#include "componentdesc.h"
 #include "componentimpl.h"
 #include "kernelimpl.h"
 #include "components/logger.h"
@@ -81,46 +79,46 @@ void ComponentImpl::ReceiveMessage(String message, String sender, const Variant 
   }
 }
 
-const kernel::PropertyDesc *ComponentImpl::GetPropertyDesc(String _name) const
+const PropertyDesc *ComponentImpl::GetPropertyDesc(String _name) const
 {
-  const kernel::PropertyDesc *pDesc = instanceProperties.Get(_name);
+  const PropertyDesc *pDesc = instanceProperties.Get(_name);
   if (!pDesc)
-    pDesc = GetDescriptor()->propertyTree.Get(_name);
+    pDesc = ((const ComponentDescInl*)GetDescriptor())->propertyTree.Get(_name);
   return pDesc;
 }
-const kernel::MethodDesc *ComponentImpl::GetMethodDesc(String _name) const
+const MethodDesc *ComponentImpl::GetMethodDesc(String _name) const
 {
-  const kernel::MethodDesc *pDesc = instanceMethods.Get(_name);
+  const MethodDesc *pDesc = instanceMethods.Get(_name);
   if (!pDesc)
-    pDesc = GetDescriptor()->methodTree.Get(_name);
+    pDesc = ((const ComponentDescInl*)GetDescriptor())->methodTree.Get(_name);
   return pDesc;
 }
-const kernel::EventDesc *ComponentImpl::GetEventDesc(String _name) const
+const EventDesc *ComponentImpl::GetEventDesc(String _name) const
 {
-  const kernel::EventDesc *pDesc = instanceEvents.Get(_name);
+  const EventDesc *pDesc = instanceEvents.Get(_name);
   if (!pDesc)
-    pDesc = GetDescriptor()->eventTree.Get(_name);
+    pDesc = ((const ComponentDescInl*)GetDescriptor())->eventTree.Get(_name);
   return pDesc;
 }
 
-const kernel::StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name) const
+const StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name) const
 {
-  return GetDescriptor()->staticFuncTree.Get(_name);
+  return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.Get(_name);
 }
 
 void ComponentImpl::AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter, const SetterShim *pSetter)
 {
-  kernel::PropertyDesc desc(property, pGetter ? *pGetter : GetterShim(property.pGetterMethod), pSetter ? *pSetter : SetterShim(property.pSetterMethod));
+  PropertyDesc desc(property, pGetter ? *pGetter : GetterShim(property.pGetterMethod), pSetter ? *pSetter : SetterShim(property.pSetterMethod));
   instanceProperties.Insert(desc.id, desc);
 }
 void ComponentImpl::AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod)
 {
-  kernel::MethodDesc desc(method, pMethod ? *pMethod : MethodShim(method.pMethod));
+  MethodDesc desc(method, pMethod ? *pMethod : MethodShim(method.pMethod));
   instanceMethods.Insert(desc.id, desc);
 }
 void ComponentImpl::AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe)
 {
-  kernel::EventDesc desc(event, pSubscribe ? *pSubscribe : EventShim(event.pSubscribe));
+  EventDesc desc(event, pSubscribe ? *pSubscribe : EventShim(event.pSubscribe));
   instanceEvents.Insert(desc.id, desc);
 }
 
@@ -139,7 +137,7 @@ void ComponentImpl::RemoveDynamicEvent(String _name)
 
 void ComponentImpl::SetProperty(String property, const Variant &value)
 {
-  const kernel::PropertyDesc *pDesc = GetPropertyDesc(property);
+  const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
   {
     // TODO: throw in this case?
@@ -161,7 +159,7 @@ void ComponentImpl::SetProperty(String property, const Variant &value)
 
 Variant ComponentImpl::GetProperty(String property) const
 {
-  const kernel::PropertyDesc *pDesc = GetPropertyDesc(property);
+  const PropertyDesc *pDesc = GetPropertyDesc(property);
   if (!pDesc)
   {
     // TODO: throw in this case?
@@ -181,10 +179,10 @@ Variant ComponentImpl::GetProperty(String property) const
 
 Variant ComponentImpl::CallMethod(String method, Slice<const Variant> args)
 {
-  const kernel::MethodDesc *pDesc = GetMethodDesc(method);
+  const MethodDesc *pDesc = GetMethodDesc(method);
   if (!pDesc)
   {
-    const kernel::StaticFuncDesc *pFunc = GetStaticFuncDesc(method);
+    const StaticFuncDesc *pFunc = GetStaticFuncDesc(method);
     if (!pFunc)
     {
       // TODO: throw in this case?
@@ -202,7 +200,7 @@ Variant ComponentImpl::CallMethod(String method, Slice<const Variant> args)
 
 void ComponentImpl::Subscribe(String eventName, const Variant::VarDelegate &d)
 {
-  const kernel::EventDesc *pDesc = GetEventDesc(eventName);
+  const EventDesc *pDesc = GetEventDesc(eventName);
   if (!pDesc)
   {
     pInstance->LogWarning(2, "No event '{0}' for component '{1}'", eventName, pInstance->name.empty() ? pInstance->uid : pInstance->name);

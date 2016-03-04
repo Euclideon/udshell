@@ -94,9 +94,9 @@ struct GlobalInstanceInitializer
 
 GlobalInstanceInitializer globalInstanceInitializer;
 
-static ComponentDesc *MakeKernelDescriptor(ComponentDesc *pType)
+ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
 {
-  ComponentDesc *pDesc = epNew ComponentDesc;
+  ComponentDescInl *pDesc = epNew ComponentDescInl;
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = Kernel::MakeDescriptor();
@@ -107,20 +107,27 @@ static ComponentDesc *MakeKernelDescriptor(ComponentDesc *pType)
   pDesc->pCreateImpl = nullptr;
   pDesc->pSuperDesc = nullptr;
 
-//  pDesc->properties = CreateHelper<ComponentType>::GetProperties();
-//  pDesc->methods = CreateHelper<ComponentType>::GetMethods();
-//  pDesc->events = CreateHelper<ComponentType>::GetEvents();
-//  pDesc->staticFuncs = CreateHelper<ComponentType>::GetStaticFuncs();
+  // build search trees
+  for (auto &p : CreateHelper<Kernel>::GetProperties())
+    pDesc->propertyTree.Insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
+  for (auto &m : CreateHelper<Kernel>::GetMethods())
+    pDesc->methodTree.Insert(m.id, { m, m.pMethod });
+  for (auto &e : CreateHelper<Kernel>::GetEvents())
+    pDesc->eventTree.Insert(e.id, { e, e.pSubscribe });
+  for (auto &f : CreateHelper<Kernel>::GetStaticFuncs())
+    pDesc->staticFuncTree.Insert(f.id, { f, (void*)f.pCall });
 
   if (pType)
   {
     pType->pSuperDesc = pDesc;
+    // populate the derived kernel from the base
+    pType->PopulateFromDesc(pDesc);
     pDesc = pType;
   }
   return pDesc;
 }
-Kernel::Kernel(ComponentDesc *_pType, Variant::VarMap commandLine)
-  : Component(MakeKernelDescriptor(_pType), nullptr, "kernel0", commandLine)
+Kernel::Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine)
+  : Component(Kernel::MakeKernelDescriptor(_pType), nullptr, "kernel0", commandLine)
 {
   // alloc impl
   pImpl = UniquePtr<Impl>(epNew KernelImpl(this, commandLine));
@@ -172,10 +179,15 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Component, ComponentImpl>();
 
   // HACK: update the descriptor with the base class (bootup chicken/egg)
-  ComponentDesc *pDesc = const_cast<ComponentDesc*>(pInstance->pType);
+  const ComponentDescInl *pComponentBase = componentRegistry.Get(Component::ComponentID())->pDesc;
+  ComponentDescInl *pDesc = (ComponentDescInl*)pInstance->pType;
   while (pDesc->pSuperDesc)
-    pDesc = const_cast<ComponentDesc*>(pDesc->pSuperDesc);
-  pDesc->pSuperDesc = componentRegistry.Get(Component::ComponentID())->pDesc;
+  {
+    // make sure each component in the kernel hierarchy get all the component meta
+    pDesc->PopulateFromDesc(pComponentBase);
+    pDesc = (ComponentDescInl*)pDesc->pSuperDesc;
+  }
+  pDesc->pSuperDesc = pComponentBase;
 
   // HACK: fix up the base class since we have a kernel instance (bootup chicken/egg)
   (Kernel*&)pInstance->pKernel = pInstance;
@@ -326,7 +338,7 @@ KernelImpl::~KernelImpl()
   epHAL_Deinit();
 
   for (const auto &c : componentRegistry)
-    epDelete (kernel::ComponentDesc*)c.value.pDesc;
+    epDelete c.value.pDesc;
 
   epDelete(ep::s_pInstance);
 }
@@ -591,19 +603,17 @@ void KernelImpl::RegisterMessageHandler(SharedString _name, MessageHandler messa
   messageHandlers.Insert(_name, MessageCallback{ _name, messageHandler });
 }
 
-const ep::ComponentDesc* KernelImpl::RegisterComponentType(const ep::ComponentDesc &desc)
+const ComponentDesc* KernelImpl::RegisterComponentType(ComponentDescInl *pDesc)
 {
-  if (desc.info.id.exists('@') || desc.info.id.exists('$') || desc.info.id.exists('#'))
-  {
-    EPASSERT(false, "Invalid component id");
-    return nullptr;
-  }
+  if (pDesc->info.id.exists('@') || pDesc->info.id.exists('$') || pDesc->info.id.exists('#'))
+    EPTHROW_ERROR(epR_InvalidArgument, "Invalid component id");
 
-  // create the descriptor
-  kernel::ComponentDesc *pDesc = epNew kernel::ComponentDesc(desc);
+  // disallow duplicates
+  if (componentRegistry.Get(pDesc->info.id))
+    EPTHROW_ERROR(epR_InvalidArgument, "Component of type id '{0}' has already been registered", pDesc->info.id);
 
   // add to registry
-  componentRegistry.Insert(desc.info.id, ComponentType{ pDesc, 0 });
+  componentRegistry.Insert(pDesc->info.id, ComponentType{ pDesc, 0 });
 
   if (bKernelCreated && pDesc->pInit)
     pDesc->pInit(pInstance);
@@ -613,7 +623,7 @@ const ep::ComponentDesc* KernelImpl::RegisterComponentType(const ep::ComponentDe
 
 void* KernelImpl::CreateImpl(String componentType, Component *_pInstance, Variant::VarMap initParams)
 {
-  kernel::ComponentDesc *pDesc = (kernel::ComponentDesc*)GetComponentDesc(componentType);
+  ComponentDescInl *pDesc = (ComponentDescInl*)GetComponentDesc(componentType);
   if (pDesc->pCreateImpl)
     return pDesc->pCreateImpl(_pInstance, initParams);
   return nullptr;
@@ -634,7 +644,7 @@ ep::ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap init
 
   try
   {
-    const ep::ComponentDesc *pDesc = _pType->pDesc;
+    const ep::ComponentDescInl *pDesc = _pType->pDesc;
 
     // TODO: should we have a better uid generator than this?
     MutableString64 newUid(Concat, pDesc->info.id, _pType->createCount++);

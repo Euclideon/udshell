@@ -38,6 +38,8 @@ public:
   void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
 private:
+  static ComponentDescInl *MakeKernelDescriptor();
+
   void EventLoop();
 };
 
@@ -132,9 +134,9 @@ void SDLKernel::EventLoop()
   }
 }
 
-static ComponentDesc *MakeKernelDescriptor()
+ComponentDescInl *SDLKernel::MakeKernelDescriptor()
 {
-  ComponentDesc *pDesc = epNew ComponentDesc;
+  ComponentDescInl *pDesc = epNew ComponentDescInl;
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = SDLKernel::MakeDescriptor();
@@ -145,10 +147,20 @@ static ComponentDesc *MakeKernelDescriptor()
   pDesc->pCreateImpl = nullptr;
   pDesc->pSuperDesc = nullptr;
 
+  // build search trees
+  for (auto &p : CreateHelper<SDLKernel>::GetProperties())
+    pDesc->propertyTree.Insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
+  for (auto &m : CreateHelper<SDLKernel>::GetMethods())
+    pDesc->methodTree.Insert(m.id, { m, m.pMethod });
+  for (auto &e : CreateHelper<SDLKernel>::GetEvents())
+    pDesc->eventTree.Insert(e.id, { e, e.pSubscribe });
+  for (auto &f : CreateHelper<SDLKernel>::GetStaticFuncs())
+    pDesc->staticFuncTree.Insert(f.id, { f, (void*)f.pCall });
+
   return pDesc;
 }
 SDLKernel::SDLKernel(Variant::VarMap commandLine)
-  : Kernel(MakeKernelDescriptor(), commandLine)
+  : Kernel(SDLKernel::MakeKernelDescriptor(), commandLine)
 {
   s_displayWidth = 1280;
   s_displayHeight = 720;

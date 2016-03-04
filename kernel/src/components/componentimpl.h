@@ -2,7 +2,7 @@
 #ifndef EPCOMPONENT_H
 #define EPCOMPONENT_H
 
-#include "componentdesc.h"
+#include "ep/cpp/componentdesc.h"
 #include "ep/cpp/event.h"
 #include "ep/cpp/internal/i/icomponent.h"
 #include "ep/cpp/component/component.h"
@@ -46,21 +46,21 @@ protected:
   void ReceiveMessage(String message, String sender, const Variant &data) override final;
 
   // property access
-  size_t NumProperties() const { return instanceProperties.Size() + GetDescriptor()->propertyTree.Size(); }
-  size_t NumMethods() const { return instanceMethods.Size() + GetDescriptor()->methodTree.Size(); }
-  size_t NumEvents() const { return instanceEvents.Size() + GetDescriptor()->eventTree.Size(); }
-  size_t NumStaticFuncs() const { return GetDescriptor()->staticFuncTree.Size(); }
+  size_t NumProperties() const { return instanceProperties.Size() + ((const ComponentDescInl*)GetDescriptor())->propertyTree.Size(); }
+  size_t NumMethods() const { return instanceMethods.Size() + ((const ComponentDescInl*)GetDescriptor())->methodTree.Size(); }
+  size_t NumEvents() const { return instanceEvents.Size() + ((const ComponentDescInl*)GetDescriptor())->eventTree.Size(); }
+  size_t NumStaticFuncs() const { return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.Size(); }
 
-  const kernel::PropertyDesc *GetPropertyDesc(String name) const;
-  const kernel::MethodDesc *GetMethodDesc(String name) const;
-  const kernel::EventDesc *GetEventDesc(String name) const;
-  const kernel::StaticFuncDesc *GetStaticFuncDesc(String name) const;
+  const PropertyDesc *GetPropertyDesc(String name) const;
+  const MethodDesc *GetMethodDesc(String name) const;
+  const EventDesc *GetEventDesc(String name) const;
+  const StaticFuncDesc *GetStaticFuncDesc(String name) const;
 
   // TODO: these substantially inflate the size of base Component and are almost always nullptr
   // ...should we move them to a separate allocation?
-  AVLTree<SharedString, kernel::PropertyDesc> instanceProperties;
-  AVLTree<SharedString, kernel::MethodDesc> instanceMethods;
-  AVLTree<SharedString, kernel::EventDesc> instanceEvents;
+  AVLTree<SharedString, PropertyDesc> instanceProperties;
+  AVLTree<SharedString, MethodDesc> instanceMethods;
+  AVLTree<SharedString, EventDesc> instanceEvents;
 
 private:
   friend class Kernel;

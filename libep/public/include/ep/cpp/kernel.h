@@ -81,10 +81,15 @@ public:
   virtual void Quit() {}
 
 protected:
-  Kernel(ComponentDesc *_pType, Variant::VarMap commandLine);
+  Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine);
   ~Kernel();
 
   void FinishInit() override { pImpl->FinishInit(); }
+
+  const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) override final { return pImpl->RegisterComponentType(pDesc); }
+
+  template<typename ComponentType, typename Impl = void>
+  struct CreateHelper;
 
 private:
   friend class Component;
@@ -92,11 +97,9 @@ private:
 
   static Kernel* CreateInstanceInternal(Variant::VarMap commandLine);
 
-  const ComponentDesc* RegisterComponentType(const ComponentDesc &desc) override final { return pImpl->RegisterComponentType(desc); }
   void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) override final { return pImpl->CreateImpl(componentType, pInstance, initParams); }
 
-  template<typename ComponentType, typename Impl = void>
-  struct CreateHelper;
+  static ComponentDescInl *MakeKernelDescriptor(ComponentDescInl *pType);
 };
 
 } // namespace ep

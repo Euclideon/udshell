@@ -71,6 +71,42 @@ protected:
   SharedPtr<const RefCounted> data;
 };
 
+struct PropertyDesc : public PropertyInfo
+{
+  PropertyDesc(const PropertyInfo &info, const GetterShim &getter, const SetterShim &setter)
+    : PropertyInfo(info), getter(getter), setter(setter)
+  {}
+
+  GetterShim getter;
+  SetterShim setter;
+};
+
+struct MethodDesc : public MethodInfo
+{
+  MethodDesc(const MethodInfo &desc, const MethodShim &method)
+    : MethodInfo(desc), method(method)
+  {}
+
+  MethodShim method;
+};
+
+struct StaticFuncDesc : public StaticFuncInfo
+{
+  StaticFuncDesc(const StaticFuncInfo &desc, const StaticFuncShim &staticFunc)
+    : StaticFuncInfo(desc), staticFunc(staticFunc)
+  {}
+
+  StaticFuncShim staticFunc;
+};
+
+struct EventDesc : public EventInfo
+{
+  EventDesc(const EventInfo &desc, const EventShim &ev)
+    : EventInfo(desc), ev(ev)
+  {}
+
+  EventShim ev;
+};
 
 // functions
 inline Variant GetterShim::get(const ep::Component *pThis) const
@@ -176,5 +212,50 @@ inline void EventShim::subscribe(ep::Component *pThis, const Variant::VarDelegat
     return d(handler);
   }
 }
+
+class Kernel;
+
+// Internal Component Descriptor struct
+// This supplies the Kernel with all the internal Component Descriptor meta information and callback magic
+// Language binding specific descriptors should derive from this struct
+struct ComponentDescInl : public ComponentDesc
+{
+  typedef void(InitComponent)(ep::Kernel*);
+  typedef Component *(CreateInstanceCallback)(const ComponentDesc *pType, ep::Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+  typedef void *(CreateImplCallback)(Component *pInstance, Variant::VarMap initParams);
+
+  // Helper function to populate the Component Descriptor from another Descriptor - usually used to populate from a super class
+  void PopulateFromDesc(const ComponentDescInl *pDesc)
+  {
+    for (auto p : pDesc->propertyTree)
+      if (!propertyTree.Get(p.key))
+        propertyTree.Insert(p.key, p.value);
+
+    for (auto m : pDesc->methodTree)
+      if (!methodTree.Get(m.key))
+        methodTree.Insert(m.key, m.value);
+
+    for (auto e : pDesc->eventTree)
+      if (!eventTree.Get(e.key))
+        eventTree.Insert(e.key, e.value);
+
+    for (auto f : pDesc->staticFuncTree)
+      if (!staticFuncTree.Get(f.key))
+        staticFuncTree.Insert(f.key, f.value);
+  }
+
+  SharedString baseClass;   // The base/super class type id
+
+  // Callbacks
+  InitComponent *pInit;
+  CreateInstanceCallback *pCreateInstance;
+  CreateImplCallback *pCreateImpl;
+
+  // Meta data trees
+  AVLTree<String, PropertyDesc> propertyTree;
+  AVLTree<String, MethodDesc> methodTree;
+  AVLTree<String, EventDesc> eventTree;
+  AVLTree<String, StaticFuncDesc> staticFuncTree;
+};
 
 } // ep
