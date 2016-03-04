@@ -6,10 +6,6 @@
 
 #include "driver/qt/epqt.h"
 
-namespace ep {
-class Kernel;
-}
-
 class QObject;
 
 namespace qt
