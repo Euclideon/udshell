@@ -324,7 +324,7 @@ KernelImpl::~KernelImpl()
   epHAL_Deinit();
 
   for (const auto &c : componentRegistry)
-    epDelete c.value.pDesc;
+    epDelete (kernel::ComponentDesc*)c.value.pDesc;
 
   epDelete(ep::s_pInstance);
 }

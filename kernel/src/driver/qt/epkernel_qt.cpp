@@ -300,16 +300,20 @@ void QtKernel::OnAppQuit()
 {
   LogTrace("QtKernel::OnAppQuit()");
 
+  // shutdown the app then pump the message queue to flush jobs from UD render thread completion
   GetImpl()->Shutdown();
-
-  // pump the message queue - ours and any windows events
   pApplication->sendPostedEvents();
   pApplication->processEvents();
 
   delete pGLDebugLogger;
-  delete pSplashScreen;
   delete pFocusManager;
+
+  // delete the QML engine and then pump the message queue to ensure we don't have pending resource destruction
   delete pQmlEngine;
+  pApplication->sendPostedEvents();
+  pApplication->processEvents();
+
+  delete pSplashScreen;
 
   try
   {
