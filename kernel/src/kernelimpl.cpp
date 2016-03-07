@@ -229,7 +229,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<UDDataSource>();
 
   // init the HAL
-  EPTHROW_EPRESULT(epHAL_Init(), "epHAL_Init() failed");
+  EPTHROW_RESULT(epHAL_Init(), "epHAL_Init() failed");
 
   // create logger and default streams
   spLogger = pInstance->CreateComponent<Logger>();
