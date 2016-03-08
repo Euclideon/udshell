@@ -974,6 +974,14 @@ inline void epFromVariant(const Variant &v, SharedMap<Tree> *pTree)
 }
 
 template<>
+struct AVLTreeAllocator<VariantAVLNode>;
+
+namespace internal
+{
+  AVLTreeAllocator<VariantAVLNode> &GetAVLTreeAllocator();
+}
+
+template<>
 struct AVLTreeAllocator<VariantAVLNode>
 {
   AVLTreeAllocator() : nodes(1024) {} // TODO: Revisit this to see if 1024 is appropriate.
@@ -989,12 +997,7 @@ struct AVLTreeAllocator<VariantAVLNode>
     nodes.Free(pMem);
   }
 
-  static AVLTreeAllocator *Create()
-  {
-    return &GetAVLTreeAllocator<AVLTreeAllocator>();
-  }
-
-  static void Destroy(AVLTreeAllocator *) { }
+  static AVLTreeAllocator &Get() { return internal::GetAVLTreeAllocator(); }
 
   FreeList<Node> nodes;
 };

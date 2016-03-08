@@ -460,8 +460,8 @@ void epDebugPrintf(const char *format, ...) epprintf_func(1, 2);
 #   endif //!defined(__debugbreak)
 # else
 #   if !defined(__debugbreak)
-#     define __debugbreak() 
-#     define DebugBreak() 
+#     define __debugbreak()
+#     define DebugBreak()
 #   endif //!defined(__debugbreak)
 # endif
 #endif
@@ -561,11 +561,8 @@ void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags EP_
 #define epAllocFlags(size, flags) _epAlloc(size, flags EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 #define epAllocType(type, count, flags) (type*)_epAlloc(sizeof(type) * (count), flags EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 
-void *_epRealloc(void *pMemory, size_t size EP_IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
-#define epRealloc(pMemory, size) _epRealloc(pMemory, size EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
-
-void _epFree(void *pMemory EP_IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
-#define epFree(pMemory) _epFree(pMemory EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
+void _epFree(void *pMemory);
+#define epFree(pMemory) _epFree(pMemory)
 }
 
 #if !defined(EP_WINDOWS)

@@ -15,13 +15,14 @@ struct Instance
 
   Kernel *pKernelInstance;
 
-  void*(*Alloc)(size_t size);
-  void*(*AllocAligned)(size_t size, size_t alignment);
+  void*(*Alloc)(size_t size, epAllocationFlags flags, const char *pFile, int line);
+  void*(*AllocAligned)(size_t size, size_t alignment, epAllocationFlags flags, const char *pFile, int line);
   void(*Free)(void *pMemory);
 
   void(*AssertFailed)(String condition, String message, String file, int line);
 
   void(*DestroyComponent)(Component *pInstance);
+  void *(*TreeAllocator)();
 };
 
 extern Instance *s_pInstance;

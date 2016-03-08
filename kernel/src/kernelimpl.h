@@ -141,6 +141,8 @@ public:
   StdCapture *stdOutCapture = nullptr;
   StdCapture *stdErrCapture = nullptr;
 
+  static AVLTreeAllocator<VariantAVLNode> s_varAVLAllocator;
+
   bool bKernelCreated = false;
 
   virtual ~KernelImpl();

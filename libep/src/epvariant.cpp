@@ -1,6 +1,6 @@
-
 #include "ep/cpp/variant.h"
 #include "ep/cpp/component/component.h"
+#include "ep/cpp/plugin.h"
 
 extern "C" {
 
@@ -694,6 +694,14 @@ Variant* Variant::getItem(String key) const
   if (is(SharedPtrType::AssocArray))
     return aa->tree.Get(key);
   return nullptr;
+}
+
+namespace internal
+{
+  AVLTreeAllocator<VariantAVLNode> &GetAVLTreeAllocator()
+  {
+    return *(AVLTreeAllocator<VariantAVLNode>*)s_pInstance->TreeAllocator();
+  }
 }
 
 } // namespace ep
