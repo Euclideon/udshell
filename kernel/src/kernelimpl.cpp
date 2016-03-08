@@ -339,8 +339,6 @@ KernelImpl::~KernelImpl()
 
   for (const auto &c : componentRegistry)
     epDelete c.value.pDesc;
-
-  epDelete(ep::s_pInstance);
 }
 
 void KernelImpl::Shutdown()
