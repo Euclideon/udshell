@@ -1,9 +1,10 @@
 
 #include "eplua.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "componentdesc.h"
 #include "components/componentimpl.h"
 #include "ep/cpp/component/broadcaster.h"
+#include "components/lua.h"
 
 #include "ep/cpp/variant.h"
 
@@ -68,7 +69,7 @@ static int PrintOutput(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
 
-  kernel::Kernel *pKernel = (kernel::Kernel*)l.kernel();
+  Kernel *pKernel = l.kernel();
   auto spLua = pKernel->GetLua();
 
   spLua->GetOutputBroadcaster()->Write(CreateStringFromArgs(L));
@@ -80,7 +81,7 @@ static int PrintError(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
 
-  kernel::Kernel *pKernel = (kernel::Kernel*)l.kernel();
+  Kernel *pKernel = l.kernel();
   auto spLua = pKernel->GetLua();
 
   pKernel->LogError(CreateStringFromArgs(L));

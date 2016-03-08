@@ -1,49 +1,51 @@
+#include "ep/cpp/component/component.h"
+
 #if !defined(_EP_KERNEL_HPP)
 #define _EP_KERNEL_HPP
 
-#include "ep/cpp/variant.h"
-#include "ep/cpp/componentdesc.h"
-#include "ep/cpp/internal/i/icomponent.h"
+#include "ep/cpp/internal/i/ikernel.h"
 
 namespace ep {
 
-SHARED_CLASS(Component);
-SHARED_CLASS(View);
-SHARED_CLASS(DataSource);
-SHARED_CLASS(ResourceManager);
-SHARED_CLASS(CommandManager);
-SHARED_CLASS(Broadcaster);
-SHARED_CLASS(DataSource);
+class KernelImpl;
 
-class Kernel
+class Kernel : public Component, public IKernel
 {
+  __EP_DECLARE_COMPONENT_IMPL(Kernel, IKernel, Component, EPKERNEL_PLUGINVERSION, "Kernel instance")
 public:
+  static Kernel* CreateInstance(Variant::VarMap commandLine, int renderThreadCount);
+
   static Kernel* GetInstance();
 
-  virtual void SendMessage(String target, String sender, String message, const Variant &data) = 0;
+  void SendMessage(String target, String sender, String message, const Variant &data) override final { pImpl->SendMessage(target, sender, message, data); }
 
   template<typename ComponentType, typename Impl = void>
   const ComponentDesc* RegisterComponentType();
 
-  virtual const ComponentDesc* GetComponentDesc(String id) = 0;
+  const ComponentDesc* GetComponentDesc(String id) override final { return pImpl->GetComponentDesc(id); }
 
-  typedef FastDelegate<void(String sender, String message, const Variant &data)> MessageHandler;
-  virtual void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) = 0;
+  template<typename CT>
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase);
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase) override final { return pImpl->GetDerivedComponentDescs(id, bIncludeBase); }
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) override final { return pImpl->GetDerivedComponentDescs(pBase, bIncludeBase); }
 
-  virtual ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) = 0;
+  void RegisterMessageHandler(SharedString _name, MessageHandler messageHandler) override final { pImpl->RegisterMessageHandler(_name, messageHandler); }
+
+  ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) override final { return pImpl->CreateComponent(typeId, initParams); }
   template<typename T>
   SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr);
 
-  virtual ComponentRef FindComponent(String uid) const = 0;
+  ComponentRef FindComponent(String _uid) const override final { return pImpl->FindComponent(_uid); }
 
   // synchronisation
-  typedef FastDelegate<void(Kernel*)> MainThreadCallback;
-  virtual void DispatchToMainThread(MainThreadCallback callback) = 0;
-  virtual void DispatchToMainThreadAndWait(MainThreadCallback callback) = 0;
+  void DispatchToMainThread(MainThreadCallback callback) override { pImpl->DispatchToMainThread(callback); }
+  void DispatchToMainThreadAndWait(MainThreadCallback callback) override { pImpl->DispatchToMainThreadAndWait(callback); }
 
-  virtual void Exec(String code) = 0;
+  LuaRef GetLua() const override final { return pImpl->GetLua(); }
+  void Exec(String code) override final { pImpl->Exec(code); }
 
-  virtual void Log(int kind, int level, String text, String component = nullptr) const = 0;
+  LoggerRef GetLogger() const override final { return pImpl->GetLogger(); }
+  void Log(int kind, int level, String text, String component = nullptr) const override final { pImpl->Log(kind, level, text, component); }
   template<typename ...Args> void LogError(String format, Args... args) const;
   template<typename ...Args> void LogWarning(int level, String format, Args... args) const;
   template<typename ...Args> void LogDebug(int level, String format, Args... args) const;
@@ -52,29 +54,46 @@ public:
   template<typename ...Args> void LogTrace(String format, Args... args) const;
 
   // Functions for resource management
-  virtual ResourceManagerRef GetResourceManager() const = 0;
+  ResourceManagerRef GetResourceManager() const override final { return pImpl->GetResourceManager(); }
 
-  virtual void RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts) = 0;
-  virtual DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) = 0;
+  const AVLTree<String, const ComponentDesc *> &GetExtensionsRegistry() const override final { return pImpl->GetExtensionsRegistry(); }
+  void RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts) override final { pImpl->RegisterExtensions(pDesc, exts); }
+  DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) override final { return pImpl->CreateDataSourceFromExtension(ext, initParams); }
 
   // stdio relaying functions
-  virtual BroadcasterRef GetStdOutBroadcaster() const = 0;
-  virtual BroadcasterRef GetStdErrBroadcaster() const = 0;
+  BroadcasterRef GetStdOutBroadcaster() const override final { return pImpl->GetStdOutBroadcaster(); }
+  BroadcasterRef GetStdErrBroadcaster() const override final { return pImpl->GetStdErrBroadcaster(); }
 
   // other functions
-  virtual ViewRef GetFocusView() const = 0;
-  virtual ViewRef SetFocusView(ViewRef spView) = 0;
+  ViewRef GetFocusView() const override final { return pImpl->GetFocusView(); }
+  ViewRef SetFocusView(ViewRef spView) override { return pImpl->SetFocusView(spView); }
 
-  virtual CommandManagerRef GetCommandManager() const = 0;
+  CommandManagerRef GetCommandManager() const override final { return pImpl->GetCommandManager(); }
 
   // events
   Event<double> UpdatePulse;
 
+  // HACK: we might be able to make better paths to this
+  KernelImpl* GetImpl() const { return (KernelImpl*)pImpl.ptr(); }
+
+  // *** these are for internal use ***
+  virtual void RunMainLoop() = 0;
+  virtual void Quit() {}
+
+protected:
+  Kernel(ComponentDesc *_pType, Variant::VarMap commandLine);
+  ~Kernel();
+
+  void FinishInit() override { pImpl->FinishInit(); }
+
 private:
   friend class Component;
+  friend class ComponentImpl;
 
-  virtual const ComponentDesc* RegisterComponentType(const ComponentDesc &desc) = 0;
-  virtual void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) = 0;
+  static Kernel* CreateInstanceInternal(Variant::VarMap commandLine);
+
+  const ComponentDesc* RegisterComponentType(const ComponentDesc &desc) override final { return pImpl->RegisterComponentType(desc); }
+  void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) override final { return pImpl->CreateImpl(componentType, pInstance, initParams); }
 
   template<typename ComponentType, typename Impl = void>
   struct CreateHelper;

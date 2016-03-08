@@ -1,4 +1,5 @@
 #include "viewimpl.h"
+#include "kernelimpl.h"
 
 namespace ep {
 
@@ -95,7 +96,7 @@ void ViewImpl::OnDirty()
 
   if (spScene && spCamera)
   {
-    SharedPtr<Renderer> spRenderer = GetKernel()->GetRenderer();
+    SharedPtr<Renderer> spRenderer = GetKernel()->GetImpl()->GetRenderer();
 
     UniquePtr<RenderableView> spRenderView = UniquePtr<RenderableView>::create(spRenderer);
 

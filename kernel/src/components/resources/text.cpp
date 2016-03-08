@@ -1,5 +1,5 @@
 #include "text.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "components/memstream.h"
 
 #include "rapidxml.hpp"

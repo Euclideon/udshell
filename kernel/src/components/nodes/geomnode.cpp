@@ -1,7 +1,7 @@
 #include "geomnode.h"
 #include "renderscene.h"
 #include "renderresource.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/material.h"
 

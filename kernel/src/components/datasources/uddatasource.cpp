@@ -3,7 +3,7 @@
 #include "components/resources/metadata.h"
 #include "components/file.h"
 #include "udOctree.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep
 {

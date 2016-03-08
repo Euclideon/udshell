@@ -1,6 +1,6 @@
 
 #include "sceneimpl.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "ep/cpp/component/node/camera.h"
 #include "renderscene.h"
 #include "components/resources/udmodelimpl.h"

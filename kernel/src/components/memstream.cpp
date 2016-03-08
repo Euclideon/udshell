@@ -1,6 +1,6 @@
 #include "components/memstream.h"
 #include "ep/cpp/component/broadcaster.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 

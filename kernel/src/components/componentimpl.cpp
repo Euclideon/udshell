@@ -2,8 +2,10 @@
 #include "ep/cpp/platform.h"
 #include "ep/cpp/componentdesc.h"
 
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "componentdesc.h"
+#include "componentimpl.h"
+#include "kernelimpl.h"
 #include "components/logger.h"
 
 // TODO: shut up about sprintf! **REMOVE ME**
@@ -16,17 +18,21 @@ namespace ep {
 ComponentImpl::~ComponentImpl()
 {
   pInstance->LogDebug(4, "Destroy component: {0} ({1})", pInstance->uid, pInstance->name);
-  GetKernel()->DestroyComponent(pInstance);
+
+  // HAX: we take access to KernelImpl; low-level Component stuff
+  KernelImpl *pKernelImpl = GetKernel()->GetImpl();
+  pKernelImpl->DestroyComponent(pInstance);
 }
 
 void ComponentImpl::SetName(SharedString name)
 {
-  kernel::Kernel *pKernel = (kernel::Kernel*)pInstance->pKernel;
+  // HAX: we take access to KernelImpl; low-level Component stuff
+  KernelImpl *pKernelImpl = GetKernel()->GetImpl();
   if (pInstance->name)
-    pKernel->namedInstanceRegistry.Remove(pInstance->name);
+    pKernelImpl->namedInstanceRegistry.Remove(pInstance->name);
   pInstance->name = name;
   if (name)
-    pKernel->namedInstanceRegistry.Insert(name, pInstance);
+    pKernelImpl->namedInstanceRegistry.Insert(name, pInstance);
 }
 
 void ComponentImpl::Init(Variant::VarMap initParams)

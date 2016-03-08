@@ -3,7 +3,7 @@
 #include "ep/cpp/component/resourcemanager.h"
 #include "ep/cpp/component/activity.h"
 #include "components/resources/text.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "rapidxml.hpp"
 
 namespace ep {

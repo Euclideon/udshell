@@ -20,7 +20,7 @@
 
 #include "../OpenGL/udOpenGL_Internal.h"
 
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "components/view.h"
 #include "components/scene.h"
 #include "components/nodes/camera.h"
@@ -115,7 +115,7 @@ epResult Kernel::RunMainLoop()
   return epR_Success;
 }
 
-epResult Kernel::Terminate()
+epResult Kernel::Quit()
 {
 //  epNaClInstance *pInternal = (epNaClInstance*)pInstance;
 //

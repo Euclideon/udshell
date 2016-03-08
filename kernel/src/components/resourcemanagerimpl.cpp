@@ -1,7 +1,7 @@
 #include "components/resourcemanagerimpl.h"
 #include "ep/cpp/component/resource/resource.h"
 #include "ep/cpp/component/datasource/datasource.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 

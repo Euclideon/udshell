@@ -1,7 +1,7 @@
 #include "ep/cpp/math.h"
 #include "ep/cpp/platform.h"
 #include "simplecameraimpl.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 

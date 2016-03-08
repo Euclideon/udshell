@@ -2,7 +2,7 @@
 #include <QQuickItem>
 #include "driver/qt/util/typeconvert_qt.h"
 
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "helpers.h"
 #include "components/logger.h"
 #include "ep/cpp/component/window.h"
@@ -24,7 +24,7 @@ using namespace ep;
 static String appTitle = "Euclideon Platform";
 static QString defaultTheme = "qrc:/qml/themes/shelltheme.qml";
 
-static kernel::Kernel *pKernel = nullptr;
+static SharedPtr<Kernel> spKernel = nullptr;
 static WindowRef spMainWindow;
 static UIComponentRef spTopLevelUI;
 static UIComponentRef spMessageBox;
@@ -41,19 +41,19 @@ MutableString256 projectName;
 // ---------------------------------------------------------------------------------------
 void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-  if (pKernel)
+  if (spKernel)
   {
     // TODO: replace this with something more robust - maybe a full logging system and status console
     switch (type) {
       case QtDebugMsg:
-        pKernel->LogDebug(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        spKernel->LogDebug(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
       case QtWarningMsg:
-        pKernel->LogWarning(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        spKernel->LogWarning(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
       case QtCriticalMsg:
       case QtFatalMsg:
-        pKernel->LogError(SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        spKernel->LogError(SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
     }
   }
   else
@@ -126,10 +126,10 @@ void OnActivityChanged(String uid)
   if (uid.empty())
     return;
 
-  ActivityRef spActivity = component_cast<Activity>(pKernel->FindComponent(uid));
+  ActivityRef spActivity = component_cast<Activity>(spKernel->FindComponent(uid));
   if (!spActivity)
   {
-    pKernel->LogError("Unable to activate Activity \"{0}\". Component does not exist", uid);
+    spKernel->LogError("Unable to activate Activity \"{0}\". Component does not exist", uid);
     return;
   }
 
@@ -150,7 +150,7 @@ void InitProject()
   spToolBar->SetItemProperties("New.../New Activity", { { "enabled", true } });
 
   // Enable shortcuts
-  auto spCommandManager = pKernel->GetCommandManager();
+  auto spCommandManager = spKernel->GetCommandManager();
   spCommandManager->EnableShortcut("saveproject");
   spCommandManager->EnableShortcut("saveprojectas");
   spCommandManager->EnableShortcut("newactivity");
@@ -169,11 +169,11 @@ void NewProject(String filePath)
     for (size_t i = 0; i < activities.length; i++)
       RemoveUIActivity(activities[i]);
 
-    pKernel->GetResourceManager()->ClearResources();
+    spKernel->GetResourceManager()->ClearResources();
   }
   spProject = nullptr;
 
-  spProject = pKernel->CreateComponent<Project>({ { "name", "project" } });
+  spProject = spKernel->CreateComponent<Project>({ { "name", "project" } });
   spProject->SetSrc(filePath);
 
   projectName = GetNameFromFilePath(filePath);
@@ -188,11 +188,11 @@ void OpenProject(String filePath)
 
   try
   {
-    spNewProject = pKernel->CreateComponent<Project>({ { "src", filePath } });
+    spNewProject = spKernel->CreateComponent<Project>({ { "src", filePath } });
   }
   catch (EPException &)
   {
-    pKernel->LogWarning(2, "Couldn't open project file \"{0}\"", MutableString256().urlDecode(filePath));
+    spKernel->LogWarning(2, "Couldn't open project file \"{0}\"", MutableString256().urlDecode(filePath));
     ClearError();
     return;
   }
@@ -206,7 +206,7 @@ void OpenProject(String filePath)
       spProject->RemoveActivity(activities[i]);
     }
 
-    pKernel->GetResourceManager()->ClearResources();
+    spKernel->GetResourceManager()->ClearResources();
   }
 
   spProject = spNewProject;
@@ -234,7 +234,7 @@ void SaveProject()
 
 void NewActivity(String typeID)
 {
-  auto spActivity = component_cast<Activity>(pKernel->CreateComponent(typeID, nullptr));
+  auto spActivity = component_cast<Activity>(spKernel->CreateComponent(typeID, nullptr));
   spProject->AddActivity(spActivity);
   AddUIActivity(spActivity);
 }
@@ -252,7 +252,7 @@ Array<Variant::VarMap> GetActivitiesInfo()
 {
   Array<Variant::VarMap> infoArray;
 
-  Array<const ComponentDesc *> descs = pKernel->GetDerivedComponentDescs<Activity>(false);
+  Array<const ComponentDesc *> descs = spKernel->GetDerivedComponentDescs<Activity>(false);
   for (auto desc : descs)
   {
     Variant::VarMap activityInfo;
@@ -286,45 +286,45 @@ void Init(String sender, String message, const Variant &data)
 
   // TODO Temporary -- Remove this after code for scanning the plugin folder is written
 #if defined(EP_WINDOWS)
-  PluginManagerRef spPluginManager = component_cast<PluginManager>(pKernel->FindComponent("pluginmanager"));
+  PluginManagerRef spPluginManager = component_cast<PluginManager>(spKernel->FindComponent("pluginmanager"));
   spPluginManager->LoadPlugin("bin/plugins/viewer.dll");
 #endif // end EP_WINDOWS
 
-  epscope(fail) { if (!spMainWindow) pKernel->LogError("Error creating MainWindow UI Component\n"); };
-  spMainWindow = pKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
+  epscope(fail) { if (!spMainWindow) spKernel->LogError("Error creating MainWindow UI Component\n"); };
+  spMainWindow = spKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
 
-  epscope(fail) { if (!spTopLevelUI) pKernel->LogError("Error creating top Level UI Component\n"); };
-  spTopLevelUI = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/main.qml" } });
+  epscope(fail) { if (!spTopLevelUI) spKernel->LogError("Error creating top Level UI Component\n"); };
+  spTopLevelUI = spKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/main.qml" } });
 
-  epscope(fail) { if (!spMessageBox) pKernel->LogError("Error creating MessageBox UI Component\n"); };
-  spMessageBox = pKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/components/messagebox.qml" } });
+  epscope(fail) { if (!spMessageBox) spKernel->LogError("Error creating MessageBox UI Component\n"); };
+  spMessageBox = spKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/components/messagebox.qml" } });
   spTopLevelUI->SetProperty("messageboxcomp", spMessageBox);
 
   UIConsoleRef spConsole;
-  epscope(fail) { if (!spConsole) pKernel->LogError("Error creating top Level UI Component\n"); };
-  spConsole = pKernel->CreateComponent<UIConsole>({ { "file", "qrc:/kernel/console.qml" } });
+  epscope(fail) { if (!spConsole) spKernel->LogError("Error creating top Level UI Component\n"); };
+  spConsole = spKernel->CreateComponent<UIConsole>({ { "file", "qrc:/kernel/console.qml" } });
   spTopLevelUI->SetProperty("uiconsole", spConsole);
 
   // Load menus
   String menusPath(":/menus.xml");
   MutableString<0> menuStr = ReadResourceFile(menusPath);
   if(menuStr.empty())
-    pKernel->LogWarning(2, "Menus XML file \"{0}\" does not exist.", menusPath);
+    spKernel->LogWarning(2, "Menus XML file \"{0}\" does not exist.", menusPath);
 
-  spMenu = pKernel->CreateComponent<Menu>({ { "src", menuStr } });
+  spMenu = spKernel->CreateComponent<Menu>({ { "src", menuStr } });
   spTopLevelUI->SetProperty("menucomp", spMenu);
 
   // Load toolbar
   String toolBarPath(":/toolbar.xml");
   MutableString<0> toolBarStr = ReadResourceFile(toolBarPath);
   if (toolBarStr.empty())
-    pKernel->LogWarning(2, "Toolbar XML file \"{0}\" does not exist.", toolBarPath);
+    spKernel->LogWarning(2, "Toolbar XML file \"{0}\" does not exist.", toolBarPath);
 
-  spToolBar = pKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
+  spToolBar = spKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
   spTopLevelUI->SetProperty("toolbarcomp", spToolBar);
 
   // New Activity selecter panel
-  auto spActivitySelecter = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/activityselecter.qml" } });
+  auto spActivitySelecter = spKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/activityselecter.qml" } });
   spActivitySelecter->SetProperty("activitiesinfo", GetActivitiesInfo());
   spTopLevelUI->SetProperty("activityselecter", spActivitySelecter);
 
@@ -351,8 +351,8 @@ void Init(String sender, String message, const Variant &data)
 
   if (CITest)
   {
-    spCITimer = pKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 }, { "timertype", "CountDown" } });
-    spCITimerSub = spCITimer->Elapsed.Subscribe([]() { ((kernel::Kernel*)Kernel::GetInstance())->Terminate(); });
+    spCITimer = spKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 }, { "timertype", "CountDown" } });
+    spCITimerSub = spCITimer->Elapsed.Subscribe([]() { Kernel::GetInstance()->Quit(); });
   }
 }
 
@@ -384,12 +384,14 @@ int main(int argc, char *argv[])
   {
     // create a kernel
     int threadCount = epGetHardwareThreadCount() - 1;
-    kernel::Kernel::Create(&pKernel, epParseCommandLine(argc, argv), threadCount);
+    spKernel = SharedPtr<Kernel>(Kernel::CreateInstance(epParseCommandLine(argc, argv), threadCount));
 
-    pKernel->RegisterMessageHandler("init", &Init);
-    pKernel->RegisterMessageHandler("deinit", &Deinit);
+    spKernel->RegisterMessageHandler("init", &Init);
+    spKernel->RegisterMessageHandler("deinit", &Deinit);
 
-    pKernel->RunMainLoop();
+    spKernel->RunMainLoop();
+
+    spKernel = nullptr;
   }
   catch (std::exception &e)
   {

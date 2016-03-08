@@ -1,6 +1,6 @@
 #include "components/file.h"
 #include "ep/cpp/component/broadcaster.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #if defined(EP_WINDOWS)
 # include <io.h>
 # include <share.h>
@@ -15,8 +15,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-namespace ep
-{
+namespace ep {
 
 File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Stream(pType, pKernel, uid, initParams)

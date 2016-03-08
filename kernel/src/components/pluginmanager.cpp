@@ -1,5 +1,5 @@
 #include "components/pluginmanager.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 

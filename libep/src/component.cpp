@@ -98,8 +98,14 @@ bool Component::IsType(String type) const
 
 void* Component::CreateImplInternal(String componentType, Variant::VarMap initParams)
 {
-  return pKernel->CreateImpl(componentType, this, initParams);
+  if(pKernel)
+    return pKernel->CreateImpl(componentType, this, initParams);
+  return nullptr;
 }
 
+void Component::SendMessage(String target, String message, const Variant &data) const
+{
+  return pKernel->SendMessage(target, uid, message, data);
+}
 
 } // namespace ep

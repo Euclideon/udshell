@@ -8,7 +8,7 @@ namespace internal {
 }
 
 // TODO: HAX HAX! this whole mess needs to be made private somehow...
-template<typename ComponentType, typename Impl>
+template<typename ComponentType, typename ImplType>
 struct Kernel::CreateHelper
 {
   using CreateFunc = ComponentDesc::CreateImplCallback*;
@@ -52,28 +52,28 @@ private:
   static SharedString GetSuperImpl(...) { return nullptr; }
 
   template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
-  static CreateFunc GetCreateImplImpl(T* t) { return [](Component *pInstance, Variant::VarMap initParams) -> void* { return epNew Impl(pInstance, initParams); }; }
+  static CreateFunc GetCreateImplImpl(T* t) { return [](Component *pInstance, Variant::VarMap initParams) -> void* { return epNew ImplType(pInstance, initParams); }; }
   static CreateFunc GetCreateImplImpl(...) { return nullptr; }
 
   template <typename T>
   static auto GetCreateFuncImpl(T* t) -> decltype(T::CreateInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::CreateInstance; }
   static ComponentDesc::CreateInstanceCallback* GetCreateFuncImpl(...)
   {
-    return [](const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams) -> Component* {
-      MutableString128 t(Format, "New: {0} - {1}", pType->info.id, uid);
-      pKernel->LogDebug(4, t);
+    return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> Component* {
+      MutableString128 t(Format, "New: {0} - {1}", _pType->info.id, _uid);
+      _pKernel->LogDebug(4, t);
       // TODO: this new can't exist in the wild... need to call back into kernel!!
       void *pMem = epAlloc(sizeof(ComponentType));
       epscope(fail) { if (pMem) epFree(pMem); };
       EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
-      ComponentType *ptr = new (pMem) ComponentType(pType, pKernel, uid, initParams);
-      ptr->pFreeFunc = [](void *pMem) { epFree(pMem); };
+      ComponentType *ptr = new (pMem) ComponentType(_pType, _pKernel, _uid, initParams);
+      ptr->pFreeFunc = [](RefCounted *pMem) { epFree((ComponentType*)pMem); };
       return ptr;
     };
   }
 };
 
-template<typename ComponentType, typename Impl>
+template<typename ComponentType, typename ImplType>
 inline const ComponentDesc* Kernel::RegisterComponentType()
 {
   // check the class has a 'super' member
@@ -85,7 +85,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
 
   desc.pInit = CreateHelper<ComponentType>::GetStaticInit();
   desc.pCreateInstance = CreateHelper<ComponentType>::GetCreateFunc();
-  desc.pCreateImpl = CreateHelper<ComponentType, Impl>::GetCreateImpl();
+  desc.pCreateImpl = CreateHelper<ComponentType, ImplType>::GetCreateImpl();
 
   desc.properties = CreateHelper<ComponentType>::GetProperties();
   desc.methods = CreateHelper<ComponentType>::GetMethods();
@@ -94,7 +94,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
 
   desc.pSuperDesc = nullptr;
 
-  if (!desc.info.id.eq("component") && !desc.info.id.eq("icomponent"))
+  if (!desc.info.id.eq("component"))
   {
     desc.pSuperDesc = GetComponentDesc(desc.baseClass);
     if (!desc.pSuperDesc)
@@ -105,6 +105,12 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
   }
 
   return (const ComponentDesc*)RegisterComponentType(desc);
+}
+
+template<typename CT>
+Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(bool bIncludeBase)
+{
+  return pImpl->GetDerivedComponentDescs(CT::ComponentID(), bIncludeBase);
 }
 
 template<typename T>

@@ -2,7 +2,7 @@ namespace ep {
 
 inline Kernel& Component::GetKernel() const
 {
-  return *(Kernel*)pKernel;
+  return *pKernel;
 }
 
 inline const ComponentDesc* Component::GetDescriptor() const
@@ -46,11 +46,6 @@ inline void Component::Subscribe(String eventName, const Delegate<void(Args...)>
 {
   typedef SharedPtr<internal::VarDelegateMemento<void(Args...)>> VarDelegateMementoRef;
   Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
-}
-
-inline void Component::SendMessage(String target, String message, const Variant &data) const
-{
-  return pKernel->SendMessage(target, uid, message, data);
 }
 
 inline Variant Component::Save() const

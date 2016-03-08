@@ -1,5 +1,7 @@
 #include "components/resources/udmodelimpl.h"
 #include "components/datasources/uddatasource.h"
+#include "componentdesc.h"
+
 namespace ep {
 
 static const Slice<const EnumKVP> renderFlags =

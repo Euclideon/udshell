@@ -1,5 +1,5 @@
 #include "components/streamimpl.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep
 {

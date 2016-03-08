@@ -1,5 +1,5 @@
 #include "components/nativepluginloader.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 #include "ep/cpp/plugin.h"
 #include "ep/cpp/component/component.h"

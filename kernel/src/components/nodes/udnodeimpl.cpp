@@ -1,7 +1,7 @@
 #include "udnodeimpl.h"
 #include "udOctree.h"
 #include "renderscene.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "udRender.h"
 #include "components/datasources/uddatasource.h"
 #include "ep/cpp/component/resource/udmodel.h"

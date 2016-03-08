@@ -1,5 +1,5 @@
 #include "components/broadcasterimpl.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 

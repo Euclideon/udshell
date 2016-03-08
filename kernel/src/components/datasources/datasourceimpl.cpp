@@ -2,7 +2,7 @@
 #include "components/file.h"
 #include "components/memstream.h"
 #include "ep/cpp/component/stream.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep
 {

@@ -1,4 +1,4 @@
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "lua.h"
 #include "ep/cpp/component/broadcaster.h"
 

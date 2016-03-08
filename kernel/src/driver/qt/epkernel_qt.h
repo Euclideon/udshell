@@ -17,7 +17,7 @@
 #include <QPointer>
 
 #include "ui/focusmanager_qt.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 class QQuickWindow;
 
@@ -47,16 +47,22 @@ protected:
 };
 
 
-class QtKernel : public QObject, public kernel::Kernel
+class QtKernel : public QObject, public Kernel
 {
   Q_OBJECT
 
+  EP_DECLARE_COMPONENT(QtKernel, Kernel, EPKERNEL_PLUGINVERSION, "Qt Kernel instance")
+
 public:
-  QtKernel(Slice<const KeyValuePair> commandLine);
+  QtKernel(Variant::VarMap commandLine);
   virtual ~QtKernel();
 
-  void InitInternal() override;
-  void RunMainLoop() override;
+  void RunMainLoop() override final;
+  void Quit() override final;
+
+  ViewRef SetFocusView(ViewRef spView) override final;
+  void DispatchToMainThread(MainThreadCallback callback) override final;
+  void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
   bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
@@ -77,13 +83,15 @@ private slots:
   void OnAppQuit();
   void OnGLMessageLogged(const QOpenGLDebugMessage &debugMessage);
 
+  void FinishInit();
+
 private:
-  void DoInit(ep::Kernel *);
   void customEvent(QEvent *pEvent) override;
 
   // Members
   int argc;
-  SharedArray<char *> argv;
+  Array<SharedString> args;
+  Array<const char *> argv;
 
   QtApplication *pApplication;
   QQmlEngine *pQmlEngine;

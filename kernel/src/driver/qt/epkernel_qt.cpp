@@ -4,6 +4,7 @@
 
 #include "epkernel_qt.h"
 
+#include "kernelimpl.h"
 #include "ui/renderview_qt.h"
 #include "ui/window_qt.h"
 #include "components/qobjectcomponent_qt.h"
@@ -16,8 +17,7 @@
 // Init the kernel's qrc file resources - this has to happen from the global namespace
 inline void InitResources() { Q_INIT_RESOURCE(kernel); }
 
-namespace qt
-{
+namespace qt {
 
 static QObject *QtKernelQmlSingletonProvider(QQmlEngine *pEngine, QJSEngine *pScriptEngine)
 {
@@ -63,9 +63,26 @@ public:
 
 /** QtKernel *********************************************/
 
+static ComponentDesc *MakeKernelDescriptor()
+{
+  ComponentDesc *pDesc = epNew ComponentDesc;
+  EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
+
+  pDesc->info = QtKernel::MakeDescriptor();
+  pDesc->baseClass = Kernel::ComponentID();
+
+  pDesc->pInit = nullptr;
+  pDesc->pCreateInstance = nullptr;
+  pDesc->pCreateImpl = nullptr;
+  pDesc->pSuperDesc = nullptr;
+
+  return pDesc;
+}
+
 // ---------------------------------------------------------------------------------------
-QtKernel::QtKernel(Slice<const KeyValuePair> commandLine)
+QtKernel::QtKernel(Variant::VarMap commandLine)
   : QObject(0)
+  , Kernel(MakeKernelDescriptor(), commandLine)
   , pApplication(nullptr)
   , pQmlEngine(nullptr)
   , pMainThreadContext(nullptr)
@@ -80,54 +97,20 @@ QtKernel::QtKernel(Slice<const KeyValuePair> commandLine)
   // convert Variant::VarMap back into a string list for Qt
   // NOTE: this assumes that the char* list referred to by commandLine will remain valid for the entire lifetime of the Kernel
   // NOTE: the state of our argv may be changed by Qt as it removes args that it recognises
-  Array<char *, 1> args(Reserve, commandLine.length);
-  argc = static_cast<int>(commandLine.length);
-  for (int i = 0; i < argc; i++)
-    args.pushBack(const_cast<char*>(commandLine[i].value.asString().ptr));
-
-  argv = args.slice(0, argc);
-}
-
-// ---------------------------------------------------------------------------------------
-QtKernel::~QtKernel()
-{
-  // pump the message queue - ours and any windows events
-  pApplication->sendPostedEvents();
-  pApplication->processEvents();
-
-  delete pGLDebugLogger;
-  delete pSplashScreen;
-  delete pFocusManager;
-  delete pQmlEngine;
-
-  try
+  for (auto arg : commandLine)
   {
-    DeinitRender();
+    if(arg.key.is(Variant::Type::Int))
+      args.pushBack(arg.value.asSharedString());
   }
-  catch (std::exception &e)
-  {
-    LogError("Error cleaning up renderer, DeinitRender failed: {0}", e.what());
-  }
-  catch (...)
-  {
-    LogError("Error cleaning up renderer, DeinitRender failed");
-  }
+  for (auto &arg : args)
+    argv.pushBack(arg.ptr);
+  argc = (int)argv.length;
 
-  delete pMainThreadContext;
-
-  pApplication->deleteLater();
-}
-
-// ---------------------------------------------------------------------------------------
-void QtKernel::InitInternal()
-{
-  LogTrace("QtKernel::InitInternal()");
-  LogInfo(2, "Initialising epShell...");
-
+  // init qt kernel
   EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), epR_Failure, "Unable to register QtComponent");
 
   // create our qapplication
-  pApplication = new QtApplication(this, argc, argv.ptr);
+  pApplication = new QtApplication(this, argc, (char**)argv.ptr);
   EPTHROW_IF_NULL(pApplication, epR_Failure, "Unable create QtApplication");
   epscope(fail) { delete pApplication; };
 
@@ -177,12 +160,29 @@ void QtKernel::InitInternal()
 }
 
 // ---------------------------------------------------------------------------------------
+QtKernel::~QtKernel()
+{
+  pApplication->deleteLater();
+
+  // HACK: destroy the descriptor we fabricated...
+  const ComponentDesc *pKernelDesc = pType;
+  (const ComponentDesc*&)pType = pType->pSuperDesc;
+  epDelete pKernelDesc;
+}
+
+// ---------------------------------------------------------------------------------------
 void QtKernel::RunMainLoop()
 {
   LogTrace("QtKernel::RunMainLoop()");
 
   // run the Qt event loop - this may never return
   EPTHROW_IF(pApplication->exec() != 0, epR_Failure, "Application was not shutdown from a call to quit()");
+}
+
+// ---------------------------------------------------------------------------------------
+void QtKernel::Quit()
+{
+  TopLevelWindow()->close();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -292,14 +292,43 @@ void QtKernel::OnFirstRender()
   //renderThreadId = QThread::currentThreadId();
 
   // dispatch init call to create our render context and resources on the main thread
-  DispatchToMainThread(MakeDelegate(this, &QtKernel::DoInit));
+  DispatchToMainThread(MakeDelegate(this, &QtKernel::FinishInit));
 }
 
 // ---------------------------------------------------------------------------------------
 void QtKernel::OnAppQuit()
 {
   LogTrace("QtKernel::OnAppQuit()");
-  Destroy();
+
+  // shutdown the app then pump the message queue to flush jobs from UD render thread completion
+  GetImpl()->Shutdown();
+  pApplication->sendPostedEvents();
+  pApplication->processEvents();
+
+  delete pGLDebugLogger;
+  delete pFocusManager;
+
+  // delete the QML engine and then pump the message queue to ensure we don't have pending resource destruction
+  delete pQmlEngine;
+  pApplication->sendPostedEvents();
+  pApplication->processEvents();
+
+  delete pSplashScreen;
+
+  try
+  {
+    GetImpl()->DeinitRender();
+  }
+  catch (std::exception &e)
+  {
+    LogError("Error cleaning up renderer, DeinitRender failed: {0}", e.what());
+  }
+  catch (...)
+  {
+    LogError("Error cleaning up renderer, DeinitRender failed");
+  }
+
+  delete pMainThreadContext;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -310,9 +339,9 @@ void QtKernel::OnGLMessageLogged(const QOpenGLDebugMessage &debugMessage)
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::DoInit(ep::Kernel *)
+void QtKernel::FinishInit()
 {
-  LogTrace("QtKernel::DoInit()");
+  LogTrace("QtKernel::FinishInit()");
 
   epscope(fail) { LogError("Error initialising renderer");  pApplication->quit(); };
 
@@ -353,10 +382,10 @@ void QtKernel::DoInit(ep::Kernel *)
   }
 
   // init the HAL's render system
-  kernel::Kernel::InitRender();
+  GetImpl()->InitRender();
 
   // app specific init
-  kernel::Kernel::DoInit(this);
+  Kernel::FinishInit();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -369,7 +398,7 @@ void QtKernel::customEvent(QEvent *pEvent)
     size_t errorDepth = ErrorLevel();
     try
     {
-      d(this);
+      d();
       if (ErrorLevel() > errorDepth)
       {
         LogError("Exception occurred in MainThreadCallback : {0}", GetError()->message);
@@ -393,76 +422,61 @@ void QtKernel::customEvent(QEvent *pEvent)
   }
 }
 
-} // namespace qt
-
-
-/** Kernel ***********************************************/
-
-namespace kernel
-{
-
 // ---------------------------------------------------------------------------------------
-Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
+ViewRef QtKernel::SetFocusView(ViewRef spView)
 {
-  return new qt::QtKernel(commandLine);
-}
+  KernelImpl *pKernelImpl = GetImpl();
+  if (!spView && pKernelImpl->spFocusView)
+    pKernelImpl->spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
 
-// ---------------------------------------------------------------------------------------
-ViewRef Kernel::SetFocusView(ViewRef spView)
-{
-  if (!spView && spFocusView)
-    spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
-
-  ViewRef spOld = spFocusView;
-  spFocusView = spView;
+  ViewRef spOld = pKernelImpl->spFocusView;
+  pKernelImpl->spFocusView = spView;
   return spOld;
 }
 
 // ---------------------------------------------------------------------------------------
-void Kernel::Terminate()
+void QtKernel::DispatchToMainThread(MainThreadCallback callback)
 {
-  qt::QtKernel *pKernel = static_cast<qt::QtKernel*>(this);
-  pKernel->TopLevelWindow()->close();
-}
-
-// ---------------------------------------------------------------------------------------
-void Kernel::DispatchToMainThread(MainThreadCallback callback)
-{
-  qt::QtKernel *pKernel = static_cast<qt::QtKernel*>(this);
-
   // if we're on the main thread just execute the callback now
-  if (pKernel->OnMainThread())
-    callback(this);
+  if (OnMainThread())
+    callback();
   // otherwise jam it into the event queue
   else
-    pKernel->PostEvent(new qt::KernelEvent(callback.GetMemento()), Qt::NormalEventPriority);
+    PostEvent(new KernelEvent(callback.GetMemento()), Qt::NormalEventPriority);
 }
 
 // ---------------------------------------------------------------------------------------
-void Kernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+void QtKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   LogTrace("Kernel::DispatchToMainThreadAndWait()");
 
-  qt::QtKernel *pKernel = static_cast<qt::QtKernel*>(this);
-
   // TODO: handle this gracefully? can we detect if the main thread is blocked??
-  EPASSERT(!pKernel->OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
+  EPASSERT(!OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
 
   // if we're on the main thread just execute the callback now
-  if (pKernel->OnMainThread())
+  if (OnMainThread())
   {
-    callback(this);
+    callback();
   }
   // otherwise jam it into the event queue
   else
   {
     QSemaphore sem;
-    pKernel->PostEvent(new qt::KernelSyncEvent(callback.GetMemento(), &sem), Qt::NormalEventPriority);
+    PostEvent(new qt::KernelSyncEvent(callback.GetMemento(), &sem), Qt::NormalEventPriority);
     sem.acquire();
   }
 }
 
-} // namespace kernel
+} // namespace qt
+
+namespace ep {
+
+Kernel* Kernel::CreateInstanceInternal(Variant::VarMap commandLine)
+{
+  return KernelImpl::CreateComponentInstance<qt::QtKernel>(commandLine);
+}
+
+} // namespace ep
 
 #else
 EPEMPTYFILE

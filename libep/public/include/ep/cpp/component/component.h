@@ -6,12 +6,12 @@
 #include "ep/cpp/variant.h"
 #include "ep/cpp/componentdesc.h"
 #include "ep/cpp/internal/i/icomponent.h"
-#include "ep/cpp/kernel.h"
 #include "ep/c/internal/component_inl.h"
 
 namespace ep {
 
 SHARED_CLASS(Component);
+SHARED_CLASS(Kernel);
 
 // component API
 class Component : public RefCounted, public IComponent
@@ -100,7 +100,7 @@ public:
 
 protected:
   friend class LuaState;
-  friend class kernel::Kernel;
+  friend class KernelImpl;
 
   Component(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams);
   ~Component()
@@ -173,6 +173,7 @@ inline void epFromVariant(const Variant &v, SharedPtr<T> *pR)
 
 } // namespace ep
 
+#include "ep/cpp/kernel.h"
 #include "ep/cpp/internal/component_inl.h"
 
 #endif

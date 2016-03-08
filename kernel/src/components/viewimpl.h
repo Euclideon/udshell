@@ -7,7 +7,7 @@
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/camera.h"
 
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 #include "renderscene.h"
 
 #include "udRender.h"
@@ -48,8 +48,8 @@ public:
   void GoToBookmark(String bookmarkName) override final;
 
   // TODO: Move this into the layer system once its implemented.
-  void SetUDRenderFlags(UDRenderFlags flags) { renderFlags = flags; }
-  UDRenderFlags GetUDRenderflags() const { return renderFlags; }
+  void SetUDRenderFlags(UDRenderFlags flags) override final { renderFlags = flags; }
+  UDRenderFlags GetUDRenderflags() const override final { return renderFlags; }
 
   // TODO: Implement this/expose to the public api
   struct PickResult
@@ -73,10 +73,10 @@ public:
   // TODO: Should this go in the public (non-impl) api? ideally should be protected but is used in the driver...
   bool InputEvent(const epInputEvent &ev);
 
-private:
-  // TODO: REMOVE THESE FRIEND HACKS (IF POSSIBLE)
-  friend class Renderer;
-  friend class kernel::Kernel;
+//private:
+//  // TODO: REMOVE THESE FRIEND HACKS (IF POSSIBLE)
+//  friend class Renderer;
+//  friend class KernelImpl;
 
   ~ViewImpl() { Deactivate(); }
 

@@ -9,6 +9,7 @@
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/resourcemanager.h"
 #include "ep/cpp/component/commandmanager.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 

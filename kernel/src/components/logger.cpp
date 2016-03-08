@@ -46,7 +46,7 @@ LogStream *Logger::FindLogStream(StreamRef spStream) const
 
 void Logger::Log(int level, String text, LogCategories category, String componentUID)
 {
-  if (!this || bLogging  || !bEnabled)
+  if (bLogging  || !bEnabled)
     return;
   bLogging = true;
 

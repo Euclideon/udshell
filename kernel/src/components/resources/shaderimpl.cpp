@@ -1,6 +1,6 @@
 #include "shaderimpl.h"
 #include "renderresource.h"
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 

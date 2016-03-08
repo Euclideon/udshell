@@ -2,7 +2,7 @@
 
 #if EPWINDOW_DRIVER == EPDRIVER_NULL
 
-#include "kernel.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep
 {
@@ -22,7 +22,7 @@ Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-void Kernel::Terminate()
+void Kernel::Quit()
 {
   return epR_Success;
 }
