@@ -63,9 +63,9 @@ public:
 
 /** QtKernel *********************************************/
 
-static ComponentDesc *MakeKernelDescriptor()
+ComponentDescInl *QtKernel::MakeKernelDescriptor()
 {
-  ComponentDesc *pDesc = epNew ComponentDesc;
+  ComponentDescInl *pDesc = epNew ComponentDescInl;
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = QtKernel::MakeDescriptor();
@@ -76,13 +76,23 @@ static ComponentDesc *MakeKernelDescriptor()
   pDesc->pCreateImpl = nullptr;
   pDesc->pSuperDesc = nullptr;
 
+  // build search trees
+  for (auto &p : CreateHelper<QtKernel>::GetProperties())
+    pDesc->propertyTree.Insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
+  for (auto &m : CreateHelper<QtKernel>::GetMethods())
+    pDesc->methodTree.Insert(m.id, { m, m.pMethod });
+  for (auto &e : CreateHelper<QtKernel>::GetEvents())
+    pDesc->eventTree.Insert(e.id, { e, e.pSubscribe });
+  for (auto &f : CreateHelper<QtKernel>::GetStaticFuncs())
+    pDesc->staticFuncTree.Insert(f.id, { f, (void*)f.pCall });
+
   return pDesc;
 }
 
 // ---------------------------------------------------------------------------------------
 QtKernel::QtKernel(Variant::VarMap commandLine)
   : QObject(0)
-  , Kernel(MakeKernelDescriptor(), commandLine)
+  , Kernel(QtKernel::MakeKernelDescriptor(), commandLine)
   , pApplication(nullptr)
   , pQmlEngine(nullptr)
   , pMainThreadContext(nullptr)

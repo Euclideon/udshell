@@ -4,7 +4,7 @@
 
 #include "qmlbindings_qt.h"
 #include "signaltodelegate_qt.h"
-#include "componentdesc.h"
+#include "ep/cpp/componentdesc.h"
 #include "../epkernel_qt.h"
 #include "ep/cpp/component/commandmanager.h"
 

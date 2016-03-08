@@ -24,7 +24,7 @@ SHARED_CLASS(Lua);
 class IKernel
 {
 public:
-  virtual const ComponentDesc* RegisterComponentType(const ComponentDesc &desc) = 0;
+  virtual const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) = 0;
   virtual void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) = 0;
 
   virtual void SendMessage(String target, String sender, String message, const Variant &data) = 0;

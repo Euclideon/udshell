@@ -1,6 +1,6 @@
 #include "components/resources/udmodelimpl.h"
 #include "components/datasources/uddatasource.h"
-#include "componentdesc.h"
+#include "enumkvp.h"
 
 namespace ep {
 

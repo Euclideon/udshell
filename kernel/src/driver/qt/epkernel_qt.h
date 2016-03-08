@@ -86,6 +86,8 @@ private slots:
   void FinishInit();
 
 private:
+  static ComponentDescInl *MakeKernelDescriptor();
+
   void customEvent(QEvent *pEvent) override;
 
   // Members

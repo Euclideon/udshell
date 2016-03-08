@@ -62,7 +62,7 @@ void epComponent_SendMessage(epComponent *pComponent, epString target, epString 
 
 } // extern "C"
 
-#include "../../kernel/src/componentdesc.h"
+#include "ep/cpp/componentdesc.h"
 
 namespace ep {
 

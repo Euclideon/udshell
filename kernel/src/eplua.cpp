@@ -1,7 +1,6 @@
 
 #include "eplua.h"
 #include "ep/cpp/kernel.h"
-#include "componentdesc.h"
 #include "components/componentimpl.h"
 #include "ep/cpp/component/broadcaster.h"
 #include "components/lua.h"
@@ -341,7 +340,7 @@ void LuaState::setComponent(Variant key, ComponentRef c, LuaLocation loc)
 
 
 // *** bind components to Lua ***
-void LuaState::pushComponentMetatable(const kernel::ComponentDesc &desc, bool weakPtr)
+void LuaState::pushComponentMetatable(const ComponentDesc &desc, bool weakPtr)
 {
   MutableString64 t; t.append("ep::", desc.info.id, weakPtr ? "*" : "Ref", "\0");
   if (luaL_newmetatable(L, t.ptr) == 0)
@@ -392,7 +391,7 @@ void LuaState::pushComponentMetatable(const kernel::ComponentDesc &desc, bool we
   lua_pushvalue(L, -2);
   lua_rawset(L, -3);
 }
-void LuaState::pushDescriptor(const kernel::ComponentDesc &desc)
+void LuaState::pushDescriptor(const ComponentDescInl &desc)
 {
   lua_createtable(L, 0, 6);
 
@@ -444,7 +443,7 @@ void LuaState::pushComponent(const ComponentRef &c)
   }
 
   new(lua_newuserdata(L, sizeof(ComponentRef))) ComponentRef(c);
-  pushComponentMetatable(*(kernel::ComponentDesc*)c->GetDescriptor(), false);
+  pushComponentMetatable(*c->GetDescriptor(), false);
   lua_setmetatable(L, -2);
 }
 
@@ -457,7 +456,7 @@ void LuaState::pushComponent(Component *pC)
   }
 
   new(lua_newuserdata(L, sizeof(Component*))) Component*(pC);
-  pushComponentMetatable(*(kernel::ComponentDesc*)pC->GetDescriptor(), true);
+  pushComponentMetatable(*pC->GetDescriptor(), true);
   lua_setmetatable(L, -2);
 }
 
@@ -517,7 +516,7 @@ int LuaState::componentIndex(lua_State* L)
   String field(pField, len);
 
   // check for getter
-  const kernel::PropertyDesc *pProp = pCImpl->GetPropertyDesc(field);
+  const PropertyDesc *pProp = pCImpl->GetPropertyDesc(field);
   if (pProp)
   {
     if (pProp->getter)
@@ -535,7 +534,7 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // check for method
-  const kernel::MethodDesc *pMethod = pCImpl->GetMethodDesc(field);
+  const MethodDesc *pMethod = pCImpl->GetMethodDesc(field);
   if (pMethod)
   {
     lua_pushlightuserdata(L, (void*)&pMethod->method);
@@ -544,7 +543,7 @@ int LuaState::componentIndex(lua_State* L)
   }
 
   // check for events
-  const kernel::EventDesc *pEv = pCImpl->GetEventDesc(field);
+  const EventDesc *pEv = pCImpl->GetEventDesc(field);
   if (pEv)
   {
     l.pushEvent(spC, *pEv);
@@ -587,7 +586,7 @@ int LuaState::componentNewIndex(lua_State* L)
   String field(pField, len);
 
   // check for setter
-  const kernel::PropertyDesc *pProp = pCImpl->GetPropertyDesc(field);
+  const PropertyDesc *pProp = pCImpl->GetPropertyDesc(field);
   if (pProp)
   {
     if (pProp->setter)
@@ -651,7 +650,7 @@ int LuaState::help(lua_State* L)
 
   ComponentRef c = l.toComponent(1);
   ComponentImpl *pCImpl = (ComponentImpl*)c->pImpl.ptr();
-  const kernel::ComponentDesc *pDesc = pCImpl->GetDescriptor();
+  const ComponentDescInl *pDesc = (const ComponentDescInl*)pCImpl->GetDescriptor();
 
   MutableString256 buffer;
   if (numArgs > 1)
@@ -936,7 +935,7 @@ void LuaState::pushEventMembers()
 class LuaEvent
 {
 public:
-  LuaEvent(const ComponentRef &c, const kernel::EventDesc &desc)
+  LuaEvent(const ComponentRef &c, const EventDesc &desc)
     : c(c), desc(desc)
   {}
 
@@ -947,12 +946,12 @@ public:
 
 private:
   ComponentRef c;
-  const kernel::EventDesc &desc;
+  const EventDesc &desc;
 
   LuaEvent& operator=(const LuaEvent &) = delete;
 };
 
-void LuaState::pushEvent(const ComponentRef &c, const kernel::EventDesc &desc)
+void LuaState::pushEvent(const ComponentRef &c, const EventDesc &desc)
 {
   new(lua_newuserdata(L, sizeof(LuaEvent))) LuaEvent(c, desc);
   pushEventMetatable();

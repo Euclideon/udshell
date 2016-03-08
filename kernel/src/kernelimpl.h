@@ -47,7 +47,7 @@ public:
   void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
   // component registry
-  const ComponentDesc* RegisterComponentType(const ComponentDesc &desc) override final;
+  const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) override final;
 
   const ComponentDesc* GetComponentDesc(String id) override final;
 
@@ -97,7 +97,7 @@ public:
 
   struct ComponentType
   {
-    const ComponentDesc *pDesc;
+    const ComponentDescInl *pDesc;
     size_t createCount;
   };
   struct MessageCallback
