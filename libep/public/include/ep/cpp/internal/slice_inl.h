@@ -65,6 +65,12 @@ inline Slice<T>::Slice(Slice<U> rh)
 {}
 
 template<typename T>
+template<typename U, size_t N>
+inline Slice<T>::Slice(U(&arr)[N])
+  : length(N), ptr(arr)
+{}
+
+template<typename T>
 template<typename U>
 inline Slice<T>& Slice<T>::operator =(Slice<U> rh)
 {
@@ -542,8 +548,14 @@ template <typename T, size_t Count>
 template <typename U>
 inline Array<T, Count>::Array(Slice<U> slice)
   : Array<T, Count>(slice.ptr, slice.length)
-{
-}
+{}
+
+template <typename T, size_t Count>
+template <typename U, size_t N>
+inline Array<T, Count>::Array(U(&arr)[N])
+  : Array<T, Count>(arr, N)
+{}
+
 
 template <typename T, size_t Count>
 inline Array<T, Count>::~Array()
@@ -806,6 +818,12 @@ template <typename T>
 template <typename U>
 inline SharedArray<T>::SharedArray(Slice<U> slice)
   : SharedArray<T>(slice.ptr, slice.length)
+{}
+
+template <typename T>
+template <typename U, size_t N>
+inline SharedArray<T>::SharedArray(U(&arr)[N])
+  : SharedArray<T>(arr, N)
 {}
 
 template <typename T>

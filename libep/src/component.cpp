@@ -35,18 +35,18 @@ bool epComponent_IsType(const epComponent *pComponent, epString type)
 epVariant epComponent_GetProperty(const epComponent *pComponent, epString property)
 {
   epVariant r;
-  new(&r) Variant(((const Component*)pComponent)->GetProperty(property));
+  new(&r) Variant(((const Component*)pComponent)->Get(property));
   return r;
 }
 void epComponent_SetProperty(epComponent *pComponent, epString property, const epVariant *pValue)
 {
-  ((Component*)pComponent)->SetProperty(property, *(Variant*)pValue);
+  ((Component*)pComponent)->Set(property, *(Variant*)pValue);
 }
 
 epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs)
 {
   epVariant r;
-  new(&r) Variant(((Component*)pComponent)->CallMethod(method, Slice<const Variant>((const Variant*)pArgs, numArgs)));
+  new(&r) Variant(((Component*)pComponent)->Call(method, Slice<const Variant>((const Variant*)pArgs, numArgs)));
   return r;
 }
 

@@ -39,13 +39,7 @@ class Delegate<R(Args...)>
 public:
   Delegate() {}
   Delegate(nullptr_t) {}
-  Delegate(Delegate<R(Args...)> &&rval)
-  {
-    // blind-copy the pointer
-    (void*&)m = (void*&)rval.m;
-    // inhibit the rval destructor
-    (void*&)rval.m = nullptr;
-  }
+  Delegate(Delegate<R(Args...)> &&rval) : m(std::move(rval.m)) {}
   Delegate(const Delegate<R(Args...)> &d) : m(d.m) {}
 
   Delegate(DelegateMementoRef m) : m(m) {}
@@ -57,7 +51,7 @@ public:
   Delegate(Y *i, R(X::*f)(Args...) const) : Delegate(FD(i, f)) {}
   Delegate(R(*f)(Args...)) : Delegate(FD(f)) {}
 
-  explicit operator bool() { return m ? !m->m.empty() : false; }
+  explicit operator bool() const { return m ? !m->m.empty() : false; }
 
   Delegate& operator=(const Delegate &d)
   {

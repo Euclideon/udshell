@@ -7,8 +7,7 @@
 
 #include "ep/cpp/variant.h"
 
-namespace ep
-{
+namespace ep {
 
 #include "init.inc"
 
@@ -138,7 +137,7 @@ static int CreateComponent(lua_State *L)
       new(&init) Variant::VarMap(args.asAssocArray());
   }
 
-  ep::ComponentRef c = nullptr;
+  ComponentRef c = nullptr;
   try
   {
     l.pushComponent(l.kernel()->CreateComponent(type, init));
@@ -801,11 +800,11 @@ void LuaState::pushDelegate(const Variant::VarDelegate &d)
   lua_pushcclosure(L, &callDelegate, 1);
 }
 
-class LuaDelegate : public ep::DelegateMemento
+class LuaDelegate : public DelegateMemento
 {
 protected:
   template<typename T>
-  friend struct ep::SharedPtr;
+  friend struct SharedPtr;
 
   Variant call(Slice<const Variant> args) const
   {
@@ -825,17 +824,17 @@ protected:
 
     // get number of return values
     int numRet = lua_gettop(L) - top;
-
-    Variant v;
     if (numRet)
     {
       // get the first returned valuye (abandon any further return values)
-      v = Variant::luaGet((LuaState&)L, top + 1);
+      Variant v = Variant::luaGet((LuaState&)L, top + 1);
 
       // put the stack back how we got it
       lua_pop(L, numRet);
+
+      return std::move(v);
     }
-    return v;
+    return Variant();
   }
 
   LuaDelegate(lua_State *L, int idx)

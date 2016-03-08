@@ -83,7 +83,7 @@ UIConsole::~UIConsole()
 
 void UIConsole::ToggleVisible(Variant::VarMap params)
 {
-  CallMethod("togglevisible", nullptr);
+  Call("togglevisible", nullptr);
 }
 
 void UIConsole::RebuildOutput()
@@ -138,7 +138,7 @@ void UIConsole::RebuildOutput()
     if (!outText.empty() && outText.back() == '\n')
       outText.length--;
 
-    CallMethod("setconsoletext", (String)outText);
+    Call("setconsoletext", (String)outText);
   }
   else
   {
@@ -164,7 +164,7 @@ void UIConsole::RebuildOutput()
     if (!outText.empty() && outText.back() == '\n')
       outText.length--;
 
-    CallMethod("setconsoletext", (String)outText);
+    Call("setconsoletext", (String)outText);
 
     outText.length = 0;
 
@@ -174,7 +174,7 @@ void UIConsole::RebuildOutput()
     if (!outText.empty() && outText.back() == '\n')
       outText.length--;
 
-    CallMethod("setlogtext", (String)outText);
+    Call("setlogtext", (String)outText);
   }
 }
 
@@ -196,12 +196,12 @@ void UIConsole::OnLogChanged()
   if (bOutputsMerged)
   {
     filteredMerged.pushBack(MergedLine(typeLog, (int)logLines.length - 1));
-    CallMethod("appendconsoletext", cLine.text);
+    Call("appendconsoletext", cLine.text);
   }
   else
   {
     filteredLog.pushBack((int)logLines.length - 1);
-    CallMethod("appendlogtext", cLine.text);
+    Call("appendlogtext", cLine.text);
   }
 }
 
@@ -222,7 +222,7 @@ void UIConsole::OnConsoleOutput(Slice<const void> buf)
         else
           filteredMerged.pushBack(MergedLine(typeConsole, (int)consoleLines.length - 1));
 
-        CallMethod("appendconsoletext", token);
+        Call("appendconsoletext", token);
       }
     }
   }

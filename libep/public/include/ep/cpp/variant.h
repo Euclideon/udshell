@@ -34,7 +34,7 @@ struct AVLTreeAllocator<VariantAVLNode>;
 struct Variant
 {
 public:
-  typedef Delegate<Variant(Slice<Variant>)> VarDelegate;
+  typedef Delegate<Variant(Slice<const Variant>)> VarDelegate;
   typedef SharedArray<Variant> VarArray;
   typedef SharedMap<AVLTree<Variant, Variant>> VarMap;
 

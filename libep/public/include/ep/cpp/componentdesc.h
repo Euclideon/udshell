@@ -8,12 +8,10 @@
 
 #include <tuple>
 
-// HACK: TODO: this shouldn't be here
-namespace kernel {
-  struct ComponentDesc;
-}
-
 namespace ep {
+
+class Kernel;
+struct ComponentDescInl;
 
 typedef Variant(Getter)(const Component *pBaseComponent, const void *pDerivedInstance);
 typedef void(Setter)(Component *pBaseComponent, void *pDerivedInstance, const Variant *pValue);
@@ -90,8 +88,6 @@ inline ComponentDesc::~ComponentDesc()
 {
 }
 
-class Kernel;
-
 // base class for pImpl types
 template <typename C, typename I>
 class BaseImpl : public I
@@ -103,7 +99,7 @@ public:
   using Interface = I;
   using ImplSuper = BaseImpl<C, I>;
 
-  const ComponentDesc* GetDescriptor() const { return pInstance->GetDescriptor(); }
+  const ComponentDescInl* GetDescriptor() const { return (const ComponentDescInl*)pInstance->GetDescriptor(); }
   Kernel* GetKernel() const { return &pInstance->GetKernel(); }
 
   C *pInstance;

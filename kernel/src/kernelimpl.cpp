@@ -49,6 +49,8 @@
 #include "components/broadcasterimpl.h"
 #include "components/streamimpl.h"
 
+#include "components/glue/componentglue.h"
+
 #include "renderscene.h"
 #include "eplua.h"
 #include "stdcapture.h"
@@ -59,13 +61,12 @@
 namespace ep {
 
 namespace internal {
-
-void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line);
-void *_AllocAligned(size_t size, size_t alignment, epAllocationFlags flags, const char * pFile, int line);
-void _Free(void *pMemory);
+  void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line);
+  void *_AllocAligned(size_t size, size_t alignment, epAllocationFlags flags, const char * pFile, int line);
+  void _Free(void *pMemory);
 }
 
-static Instance s_intance =
+static Instance s_instance =
 {
   EP_APIVERSION,  // apiVersion;
   nullptr,        // pKernelInstance;
@@ -88,7 +89,7 @@ struct GlobalInstanceInitializer
 {
   GlobalInstanceInitializer()
   {
-    ep::s_pInstance = &s_intance;
+    ep::s_pInstance = &s_instance;
   }
 };
 
@@ -160,12 +161,13 @@ AVLTreeAllocator<VariantAVLNode> KernelImpl::s_varAVLAllocator;
 KernelImpl::KernelImpl(Kernel *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)
   , componentRegistry(256)
+  , glueRegistry(64)
   , instanceRegistry(8192)
   , namedInstanceRegistry(4096)
   , foreignInstanceRegistry(4096)
   , messageHandlers(64)
 {
-  ep::s_pInstance->pKernelInstance = pInstance;
+  s_pInstance->pKernelInstance = pInstance;
 }
 
 void KernelImpl::StartInit(Variant::VarMap initParams)
@@ -241,6 +243,9 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<ImageSource>();
   pInstance->RegisterComponentType<GeomSource>();
   pInstance->RegisterComponentType<UDDataSource>();
+
+  // register base class 'glue' types
+  pInstance->RegisterGlueType<ComponentGlue>();
 
   // init the HAL
   EPTHROW_RESULT(epHAL_Init(), "epHAL_Init() failed");
@@ -429,7 +434,7 @@ void KernelImpl::StreamerUpdate()
   }
 }
 
-Array<const ep::ComponentDesc *> KernelImpl::GetDerivedComponentDescs(String id, bool bIncludeBase)
+Array<const ComponentDesc *> KernelImpl::GetDerivedComponentDescs(String id, bool bIncludeBase)
 {
   ComponentType *compType = componentRegistry.Get(id);
   if (compType)
@@ -438,13 +443,13 @@ Array<const ep::ComponentDesc *> KernelImpl::GetDerivedComponentDescs(String id,
     return nullptr;
 }
 
-Array<const ep::ComponentDesc *> KernelImpl::GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase)
+Array<const ComponentDesc *> KernelImpl::GetDerivedComponentDescs(const ComponentDesc *pBase, bool bIncludeBase)
 {
-  Array<const ep::ComponentDesc *> derivedDescs;
+  Array<const ComponentDesc *> derivedDescs;
 
   for (auto ct : componentRegistry)
   {
-    const ep::ComponentDesc *pDesc = ct.value.pDesc;
+    const ComponentDesc *pDesc = ct.value.pDesc;
     if(!bIncludeBase)
       pDesc = pDesc->pSuperDesc;
 
@@ -619,6 +624,55 @@ const ComponentDesc* KernelImpl::RegisterComponentType(ComponentDescInl *pDesc)
   return pDesc;
 }
 
+const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
+{
+  DynamicComponentDesc *pDesc = epNew DynamicComponentDesc;
+
+  pDesc->info.id = typeDesc["id"].asSharedString();
+  pDesc->info.displayName = typeDesc["name"].asSharedString();
+  pDesc->info.description = typeDesc["description"].asSharedString();
+  pDesc->info.epVersion = EP_APIVERSION;
+  Variant *pVer = typeDesc.Get("version");
+  pDesc->info.pluginVersion = pVer ? pVer->as<int>() : EPKERNEL_PLUGINVERSION;
+
+  pDesc->baseClass = typeDesc["super"].asSharedString();
+
+  pDesc->pInit = nullptr;
+  pDesc->pCreateImpl = nullptr;
+  pDesc->pCreateInstance = [](const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams) -> ComponentRef {
+    const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)pType;
+    return pKernel->CreateGlue(pDesc->baseClass, pType, uid, initParams);
+  };
+
+  pDesc->newInstance = typeDesc["new"].as<DynamicComponentDesc::NewInstanceFunc>();
+
+  // TODO: populate trees from stuff in dynamic descriptor
+//  pDesc->desc.Get
+/*
+  // build search trees
+  for (auto &p : CreateHelper<_ComponentType>::GetProperties())
+    pDesc->propertyTree.Insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
+  for (auto &m : CreateHelper<_ComponentType>::GetMethods())
+    pDesc->methodTree.Insert(m.id, { m, m.pMethod });
+  for (auto &e : CreateHelper<_ComponentType>::GetEvents())
+    pDesc->eventTree.Insert(e.id, { e, e.pSubscribe });
+  for (auto &f : CreateHelper<_ComponentType>::GetStaticFuncs())
+    pDesc->staticFuncTree.Insert(f.id, { f, (void*)f.pCall });
+*/
+
+  // setup the super class and populate from its meta
+  pDesc->pSuperDesc = GetComponentDesc(pDesc->baseClass);
+  EPTHROW_IF(!pDesc->pSuperDesc, epR_InvalidType, "Base Component '{0}' not registered", pDesc->baseClass);
+  pDesc->PopulateFromDesc((ComponentDescInl*)pDesc->pSuperDesc);
+
+  return RegisterComponentType(pDesc);
+}
+
+void KernelImpl::RegisterGlueType(String name, CreateGlueFunc *pCreateFunc)
+{
+  glueRegistry.Insert(name, pCreateFunc);
+}
+
 void* KernelImpl::CreateImpl(String componentType, Component *_pInstance, Variant::VarMap initParams)
 {
   ComponentDescInl *pDesc = (ComponentDescInl*)GetComponentDesc(componentType);
@@ -627,7 +681,7 @@ void* KernelImpl::CreateImpl(String componentType, Component *_pInstance, Varian
   return nullptr;
 }
 
-const ep::ComponentDesc* KernelImpl::GetComponentDesc(String id)
+const ComponentDesc* KernelImpl::GetComponentDesc(String id)
 {
   ComponentType *pCT = componentRegistry.Get(id);
   if (!pCT)
@@ -635,20 +689,20 @@ const ep::ComponentDesc* KernelImpl::GetComponentDesc(String id)
   return pCT->pDesc;
 }
 
-ep::ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initParams)
+ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initParams)
 {
   ComponentType *_pType = componentRegistry.Get(typeId);
   EPASSERT_THROW(_pType, epR_InvalidArgument, "typeId failed to lookup ComponentType");
 
   try
   {
-    const ep::ComponentDescInl *pDesc = _pType->pDesc;
+    const ComponentDescInl *pDesc = _pType->pDesc;
 
     // TODO: should we have a better uid generator than this?
     MutableString64 newUid(Concat, pDesc->info.id, _pType->createCount++);
 
     // attempt to create an instance
-    ep::ComponentRef spComponent(pDesc->pCreateInstance(pDesc, pInstance, newUid, initParams));
+    ComponentRef spComponent(pDesc->pCreateInstance(pDesc, pInstance, newUid, initParams));
 
     // post-create init
     spComponent->Init(initParams);
@@ -673,6 +727,13 @@ ep::ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap init
   }
 }
 
+ComponentRef KernelImpl::CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams)
+{
+  CreateGlueFunc **ppCreate = glueRegistry.Get(typeId);
+  EPTHROW_IF_NULL(ppCreate, epR_InvalidType, "No glue type {0}", typeId);
+  return (*ppCreate)(pInstance, _pType, _uid, initParams);
+}
+
 void KernelImpl::DestroyComponent(Component *_pInstance)
 {
   if (_pInstance->name)
@@ -683,7 +744,7 @@ void KernelImpl::DestroyComponent(Component *_pInstance)
   //...
 }
 
-ep::ComponentRef KernelImpl::FindComponent(String _name) const
+ComponentRef KernelImpl::FindComponent(String _name) const
 {
   if (_name.empty() || _name[0] == '$' || _name[0] == '#')
     return nullptr;
@@ -692,7 +753,7 @@ ep::ComponentRef KernelImpl::FindComponent(String _name) const
   Component * const * ppComponent = namedInstanceRegistry.Get(_name);
   if (!ppComponent)
     ppComponent = instanceRegistry.Get(_name);
-  return ppComponent ? ep::ComponentRef(*ppComponent) : nullptr;
+  return ppComponent ? ComponentRef(*ppComponent) : nullptr;
 }
 
 void KernelImpl::InitComponents()
@@ -726,12 +787,12 @@ void KernelImpl::Log(int kind, int level, String text, String component) const
     spLogger->Log(level, text, (LogCategories)kind, component);
 }
 
-const AVLTree<String, const ep::ComponentDesc *> &KernelImpl::GetExtensionsRegistry() const
+const AVLTree<String, const ComponentDesc *> &KernelImpl::GetExtensionsRegistry() const
 {
   return extensionsRegistry;
 }
 
-void KernelImpl::RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<const String> exts)
+void KernelImpl::RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts)
 {
   for (const String &e : exts)
     extensionsRegistry.Insert(e, pDesc);
@@ -739,7 +800,7 @@ void KernelImpl::RegisterExtensions(const ep::ComponentDesc *pDesc, const Slice<
 
 DataSourceRef KernelImpl::CreateDataSourceFromExtension(String ext, Variant::VarMap initParams)
 {
-  const ep::ComponentDesc **ppDesc = extensionsRegistry.Get(ext);
+  const ComponentDesc **ppDesc = extensionsRegistry.Get(ext);
   EPASSERT_THROW(ppDesc, epR_Failure, "No datasource for extension {0}", ext);
 
   return component_cast<DataSource>(CreateComponent((*ppDesc)->info.id, initParams));

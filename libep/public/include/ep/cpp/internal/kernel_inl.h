@@ -59,7 +59,7 @@ private:
   static auto GetCreateFuncImpl(T* t) -> decltype(T::CreateInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::CreateInstance; }
   static ComponentDescInl::CreateInstanceCallback* GetCreateFuncImpl(...)
   {
-    return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> Component* {
+    return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
       MutableString128 t(Format, "New: {0} - {1}", _pType->info.id, _uid);
       _pKernel->LogDebug(4, t);
       // TODO: this new can't exist in the wild... need to call back into kernel!!
@@ -69,7 +69,7 @@ private:
       _ComponentType *ptr = new (pMem) _ComponentType(_pType, _pKernel, _uid, initParams);
       // NOTE: we need to cast to ensure we play nice with multi inheritance
       ptr->pFreeFunc = [](RefCounted *pMem) { epFree((_ComponentType*)pMem); };
-      return ptr;
+      return SharedPtr<_ComponentType>(ptr);
     };
   }
 };
@@ -111,6 +111,20 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
   return RegisterComponentType(pDesc);
 }
 
+template<typename GlueType>
+inline void Kernel::RegisterGlueType()
+{
+  RegisterGlueType(GlueType::ComponentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
+    // TODO: this new can't exist in the wild... need to call back into kernel!!
+    void *pMem = epAlloc(sizeof(GlueType));
+    epscope(fail) { if (pMem) epFree(pMem); };
+    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+    GlueType *ptr = new (pMem) GlueType(_pType, _pKernel, _uid, initParams);
+    ptr->pFreeFunc = [](RefCounted *pMem) { epFree((GlueType*)pMem); };
+    return ComponentRef(ptr);
+  });
+}
+
 template<typename _ComponentType>
 Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(bool bIncludeBase)
 {
@@ -121,6 +135,12 @@ template<typename T>
 SharedPtr<T> Kernel::CreateComponent(Variant::VarMap initParams)
 {
 	return shared_pointer_cast<T>(CreateComponent(T::ComponentID(), initParams));
+}
+
+template<typename T>
+SharedPtr<T> Kernel::CreateGlue(const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams)
+{
+  return shared_pointer_cast<T>(CreateGlue(T::ComponentID(), _pType, _uid, initParams));
 }
 
 // Inlines pipe through C API

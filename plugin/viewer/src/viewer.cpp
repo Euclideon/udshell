@@ -72,12 +72,12 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
   spViewerUI = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/viewer/viewer.qml" } });
-  spViewerUI->SetProperty("viewport", spViewport);
+  spViewerUI->Set("viewport", spViewport);
 
   epscope(fail) { if(!spUIBookmarks) pKernel->LogError("Error creating bookmarks UI Component\n"); };
   spUIBookmarks = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/bookmarksui.qml" } });
-  spUIBookmarks->SetProperty("view", spView);
-  spViewerUI->SetProperty("bookmarkscomp", spUIBookmarks);
+  spUIBookmarks->Set("view", spView);
+  spViewerUI->Set("bookmarkscomp", spUIBookmarks);
 
   UIComponentRef spUIResources;
   ComponentRef spComp = pKernel->FindComponent("resourcespanel");
@@ -88,14 +88,14 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     epscope(fail) { if (!spUIResources) pKernel->LogError("Error creating Resource Panel UI Component\n"); };
     spUIResources = pKernel->CreateComponent<UIComponent>({ { "name", "resourcespanel" },{ "file", "qrc:/qml/components/resourcespanel.qml" } });
   }
-  spViewerUI->SetProperty("resourcespanel", spUIResources);
+  spViewerUI->Set("resourcespanel", spUIResources);
 
   SetUI(spViewerUI);
 
   // Add bookmarks to UI
   auto bmMap = spScene->GetBookmarkMap();
   for (auto bm : bmMap)
-    spUIBookmarks->CallMethod("createbookmark", bm.key);
+    spUIBookmarks->Call("createbookmark", bm.key);
 }
 
 void Viewer::OnResourceDropped(String resourceUID, int x, int y)
@@ -179,7 +179,7 @@ void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)
 
 void Viewer::ToggleBookmarksPanel()
 {
-  GetUI()->CallMethod("togglebookmarkspanel");
+  GetUI()->Call("togglebookmarkspanel");
 }
 
 void Viewer::StaticToggleResourcesPanel(Variant::VarMap params)
@@ -192,7 +192,7 @@ void Viewer::StaticToggleResourcesPanel(Variant::VarMap params)
 
 void Viewer::ToggleResourcesPanel()
 {
-  GetUI()->CallMethod("toggleresourcespanel");
+  GetUI()->Call("toggleresourcespanel");
 }
 
 void Viewer::StaticCreateBookmark(Variant::VarMap params)
@@ -207,7 +207,7 @@ void Viewer::CreateBookmark()
   // TODO: Here we have to update the bookmark list separately for the front-end UI and the internal bookmarks list.
   // It would be nice if the QML could automatically update its bookmarks list from the internal bookmarks
   // Not sure how to do this currently
-  Variant bookmarkName = spUIBookmarks->CallMethod("createbookmark", "");
+  Variant bookmarkName = spUIBookmarks->Call("createbookmark", "");
   spScene->AddBookmarkFromCamera(bookmarkName.asString(), spCamera);
 }
 

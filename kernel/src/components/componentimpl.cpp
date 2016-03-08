@@ -67,41 +67,94 @@ void ComponentImpl::ReceiveMessage(String message, String sender, const Variant 
   if (message.eqIC("set"))
   {
     Slice<Variant> arr = data.asArray();
-    pInstance->SetProperty(arr[0].asString(), arr[1]);
+    pInstance->Set(arr[0].asString(), arr[1]);
   }
   else if (message.eqIC("get"))
   {
     if (!sender.empty())
     {
-      Variant p = pInstance->GetProperty(data.asString());
+      Variant p = pInstance->Get(data.asString());
       pInstance->SendMessage(sender, "val", p);
     }
   }
 }
 
-const PropertyDesc *ComponentImpl::GetPropertyDesc(String _name) const
+Array<SharedString> ComponentImpl::EnumerateProperties(EnumerateFlags enumerateFlags) const
 {
-  const PropertyDesc *pDesc = instanceProperties.Get(_name);
-  if (!pDesc)
+  Array<SharedString> props;
+  if (!(enumerateFlags & EnumerateFlags::NoDynamic))
+  {
+    for (auto ip : instanceProperties)
+      props.pushBack(ip.key);
+  }
+  if (!(enumerateFlags & EnumerateFlags::NoStatic))
+  {
+    for (auto p : GetDescriptor()->propertyTree)
+      props.pushBack(p.key);
+  }
+  return std::move(props);
+}
+Array<SharedString> ComponentImpl::EnumerateFunctions(EnumerateFlags enumerateFlags) const
+{
+  Array<SharedString> functions;
+  if (!(enumerateFlags & EnumerateFlags::NoDynamic))
+  {
+    for (auto ifunc : instanceMethods)
+      functions.pushBack(ifunc.key);
+  }
+  if (!(enumerateFlags & EnumerateFlags::NoStatic))
+  {
+    for (auto f : GetDescriptor()->methodTree)
+      functions.pushBack(f.key);
+    for (auto sf : GetDescriptor()->staticFuncTree)
+      functions.pushBack(sf.key);
+  }
+  return std::move(functions);
+}
+Array<SharedString> ComponentImpl::EnumerateEvents(EnumerateFlags enumerateFlags) const
+{
+  Array<SharedString> events;
+  if (!(enumerateFlags & EnumerateFlags::NoDynamic))
+  {
+    for (auto ie : instanceEvents)
+      events.pushBack(ie.key);
+  }
+  if (!(enumerateFlags & EnumerateFlags::NoStatic))
+  {
+    for (auto e : GetDescriptor()->eventTree)
+      events.pushBack(e.key);
+  }
+  return std::move(events);
+}
+
+const PropertyDesc *ComponentImpl::GetPropertyDesc(String _name, EnumerateFlags enumerateFlags) const
+{
+  const PropertyDesc *pDesc = nullptr;
+  if (!(enumerateFlags & EnumerateFlags::NoDynamic))
+    pDesc = instanceProperties.Get(_name);
+  if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
     pDesc = ((const ComponentDescInl*)GetDescriptor())->propertyTree.Get(_name);
   return pDesc;
 }
-const MethodDesc *ComponentImpl::GetMethodDesc(String _name) const
+const MethodDesc *ComponentImpl::GetMethodDesc(String _name, EnumerateFlags enumerateFlags) const
 {
-  const MethodDesc *pDesc = instanceMethods.Get(_name);
-  if (!pDesc)
+  const MethodDesc *pDesc = nullptr;
+  if (!(enumerateFlags & EnumerateFlags::NoDynamic))
+    pDesc = instanceMethods.Get(_name);
+  if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
     pDesc = ((const ComponentDescInl*)GetDescriptor())->methodTree.Get(_name);
   return pDesc;
 }
-const EventDesc *ComponentImpl::GetEventDesc(String _name) const
+const EventDesc *ComponentImpl::GetEventDesc(String _name, EnumerateFlags enumerateFlags) const
 {
-  const EventDesc *pDesc = instanceEvents.Get(_name);
-  if (!pDesc)
+  const EventDesc *pDesc = nullptr;
+  if(!(enumerateFlags & EnumerateFlags::NoDynamic))
+    pDesc = instanceEvents.Get(_name);
+  if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
     pDesc = ((const ComponentDescInl*)GetDescriptor())->eventTree.Get(_name);
   return pDesc;
 }
-
-const StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name) const
+const StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags) const
 {
   return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.Get(_name);
 }
@@ -135,49 +188,38 @@ void ComponentImpl::RemoveDynamicEvent(String _name)
   instanceEvents.Remove(_name);
 }
 
-void ComponentImpl::SetProperty(String property, const Variant &value)
+Variant ComponentImpl::Get(String property) const
 {
   const PropertyDesc *pDesc = GetPropertyDesc(property);
-  if (!pDesc)
+  if (!pDesc || !pDesc->getter)
   {
     // TODO: throw in this case?
-    pInstance->LogWarning(2, "No property '{0}' for component '{1}'", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
-    return;
-  }
-  if (!pDesc->setter || pDesc->flags & epPF_Immutable)
-  {
-    // TODO: throw in this case?
-    pInstance->LogWarning(2, "Property '{0}' for component '{1}' is read-only", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
-    return;
-  }
-  pDesc->setter.set(pInstance, value);
-  if (ErrorLevel())
-    throw GetError();
-  // TODO: should properties have implicit signals?
-//  propertyChange[pDesc->index].Signal();
-}
-
-Variant ComponentImpl::GetProperty(String property) const
-{
-  const PropertyDesc *pDesc = GetPropertyDesc(property);
-  if (!pDesc)
-  {
-    // TODO: throw in this case?
-    pInstance->LogWarning(2, "No property '{0}' for component '{1}'", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
-    return Variant();
-  }
-  if (!pDesc->getter)
-  {
-    // TODO: throw in this case?
-    pInstance->LogWarning(2, "Property '{0}' for component '{1}' is write-only", property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is write-only" : "No property '{0}' for component '{1}'";
+    pInstance->LogWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return Variant();
   }
   Variant r = pDesc->getter.get(pInstance);
   r.throwError();
   return std::move(r);
 }
+void ComponentImpl::Set(String property, const Variant &value)
+{
+  const PropertyDesc *pDesc = GetPropertyDesc(property);
+  if (!pDesc || !pDesc->setter || pDesc->flags & epPF_Immutable)
+  {
+    // TODO: throw in this case?
+    const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is read-only" : "No property '{0}' for component '{1}'";
+    pInstance->LogWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    return;
+  }
+  pDesc->setter.set(pInstance, value);
+  if (ErrorLevel())
+    throw GetError();
+  // TODO: should properties have implicit signals?
+  //  propertyChange[pDesc->index].Signal();
+}
 
-Variant ComponentImpl::CallMethod(String method, Slice<const Variant> args)
+Variant ComponentImpl::Call(String method, Slice<const Variant> args)
 {
   const MethodDesc *pDesc = GetMethodDesc(method);
   if (!pDesc)

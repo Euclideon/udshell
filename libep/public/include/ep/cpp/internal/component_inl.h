@@ -23,18 +23,18 @@ inline void Component::SetName(SharedString _name)
   pImpl->SetName(_name);
 }
 
-inline Variant Component::GetProperty(String property) const
+inline Variant Component::Get(String property) const
 {
-  return pImpl->GetProperty(property);
+  return pImpl->Get(property);
 }
-inline void Component::SetProperty(String property, const Variant &value)
+inline void Component::Set(String property, const Variant &value)
 {
-  pImpl->SetProperty(property, value);
+  pImpl->Set(property, value);
 }
 
-inline Variant Component::CallMethod(String method, Slice<const Variant> args)
+inline Variant Component::Call(String method, Slice<const Variant> args)
 {
-  return pImpl->CallMethod(method, args);
+  return pImpl->Call(method, args);
 }
 
 inline void Component::Subscribe(String eventName, const Variant::VarDelegate &delegate)
@@ -46,6 +46,45 @@ inline void Component::Subscribe(String eventName, const Delegate<void(Args...)>
 {
   typedef SharedPtr<internal::VarDelegateMemento<void(Args...)>> VarDelegateMementoRef;
   Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
+}
+
+inline GetterShim::DelegateType Component::GetGetterDelegate(String _name, EnumerateFlags enumerateFlags) const
+{
+  const PropertyDesc *pDesc = GetPropertyDesc(_name, enumerateFlags);
+  if (!pDesc || !pDesc->getter)
+  {
+    // TODO: throw in this case?
+    const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is write-only" : "No property '{0}' for component '{1}'";
+    LogWarning(2, pMessage, _name, name.empty() ? uid : name);
+    return nullptr;
+  }
+  return pDesc->getter.getDelegate(this);
+}
+inline SetterShim::DelegateType Component::GetSetterDelegate(String _name, EnumerateFlags enumerateFlags)
+{
+  const PropertyDesc *pDesc = GetPropertyDesc(_name, enumerateFlags);
+  if (!pDesc || !pDesc->setter || pDesc->flags & epPF_Immutable)
+  {
+    // TODO: throw in this case?
+    const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is read-only" : "No property '{0}' for component '{1}'";
+    LogWarning(2, pMessage, _name, name.empty() ? uid : name);
+    return nullptr;
+  }
+  return pDesc->setter.getDelegate(this);
+}
+inline MethodShim::DelegateType Component::GetFunctionDelegate(String _name, EnumerateFlags enumerateFlags)
+{
+  const MethodDesc *pDesc = GetMethodDesc(_name, enumerateFlags);
+  if (pDesc)
+    return pDesc->method.getDelegate(this);
+
+  // TODO: should also return static functions...
+//  const StaticFuncDesc *pStaticFuncs = GetStaticFuncDesc(_name);
+//  if (!pStaticFuncs)
+//    return pStaticFuncs->staticFunc.getDelegate(this);
+
+  LogWarning(1, "No function '{0}' for component '{1}'", _name, name.empty() ? uid : name);
+  return nullptr;
 }
 
 inline Variant Component::Save() const
@@ -104,10 +143,10 @@ inline void Component::ReceiveMessage(String message, String sender, const Varia
 }
 
 template<typename ...Args>
-inline Variant Component::CallMethod(String method, Args... args)
+inline Variant Component::Call(String method, Args... args)
 {
   const Variant varargs[sizeof...(Args)+1] = { args... };
-  return CallMethod(method, Slice<const Variant>(varargs, sizeof...(Args)));
+  return Call(method, Slice<const Variant>(varargs, sizeof...(Args)));
 }
 
 template<typename ...Args>

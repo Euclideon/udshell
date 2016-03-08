@@ -181,7 +181,7 @@ QVariant QtEPComponent::get(const QString &name) const
   QByteArray byteArray = name.toUtf8();
   String prop(byteArray.data(), byteArray.size());
   QVariant res;
-  epFromVariant(pComponent->GetProperty(prop), &res);
+  epFromVariant(pComponent->Get(prop), &res);
   return std::move(res);
 }
 
@@ -192,7 +192,7 @@ void QtEPComponent::set(const QString &name, QVariant val)
   String prop(byteArray.data(), byteArray.size());
   try
   {
-    pComponent->SetProperty(prop, epToVariant(val));
+    pComponent->Set(prop, epToVariant(val));
   }
   catch (EPException &)
   {
@@ -208,7 +208,7 @@ QVariant QtEPComponent::call(const QString &name) const
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, Slice<Variant>()), &res);
+    epFromVariant(pComponent->Call(method, Slice<Variant>()), &res);
   }
   catch (EPException &)
   {
@@ -225,7 +225,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0)), &res);
+    epFromVariant(pComponent->Call(method, epToVariant(arg0)), &res);
   }
   catch (EPException &)
   {
@@ -242,7 +242,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) 
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1)), &res);
+    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1)), &res);
   }
   catch (EPException &)
   {
@@ -259,7 +259,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
+    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
   }
   catch (EPException &)
   {
@@ -276,7 +276,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
+    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
   }
   catch (EPException &)
   {
@@ -293,7 +293,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4)), &res);
   }
   catch (EPException &)
@@ -312,7 +312,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5)), &res);
   }
   catch (EPException &)
@@ -331,7 +331,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6)), &res);
   }
   catch (EPException &)
@@ -350,7 +350,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6), epToVariant(arg7)), &res);
   }
   catch (EPException &)
@@ -369,7 +369,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6),
       epToVariant(arg7), epToVariant(arg8)), &res);
   }
@@ -389,7 +389,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   QVariant res;
   try
   {
-    epFromVariant(pComponent->CallMethod(method, epToVariant(arg0), epToVariant(arg1),
+    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5),
       epToVariant(arg6), epToVariant(arg7), epToVariant(arg8), epToVariant(arg9)), &res);
   }
