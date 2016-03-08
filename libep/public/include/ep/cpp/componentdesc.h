@@ -215,7 +215,7 @@ private:                                                                        
     {                                                                                    \
       Variant get()                                                                      \
       {                                                                                  \
-        return Variant(((const This*)this)->Getter());                                   \
+        return Variant(((const This*)(const Component*)this)->Getter());                 \
       }                                                                                  \
     };                                                                                   \
     auto d = &Shim::get;                                                                 \
@@ -230,7 +230,7 @@ private:                                                                        
       {                                                                                  \
         using PT = function_traits<decltype(&This::Setter)>::template arg<0>::type;      \
         try {                                                                            \
-          ((This*)this)->Setter(v.as<std::remove_reference<PT>::type>());                \
+          ((This*)(Component*)this)->Setter(v.as<std::remove_reference<PT>::type>());    \
         } catch (EPException &) {                                                        \
           /* it's already on the stack, do nothing... */                                 \
         } catch (std::exception &e) {                                                    \
@@ -286,7 +286,7 @@ private:                                                                        
       {                                                                                  \
         Variant call(Slice<Variant> args)                                                \
         {                                                                                \
-          return VarCall(fastdelegate::MakeDelegate((This*)this, &This::Method), args);  \
+          return VarCall(fastdelegate::MakeDelegate((This*)(Component*)this, &This::Method), args); \
         }                                                                                \
       };                                                                                 \
       auto d = &Shim::call;                                                              \
@@ -313,7 +313,7 @@ private:                                                                        
         void subscribe(const Variant::VarDelegate &handler)                              \
         {                                                                                \
           Variant v(handler);                                                            \
-          ((This*)this)->Event.Subscribe(v.as<decltype(This::Event)::EvDelegate>());     \
+          ((This*)(Component*)this)->Event.Subscribe(v.as<decltype(This::Event)::EvDelegate>()); \
         }                                                                                \
       };                                                                                 \
       auto d = &Shim::subscribe;                                                         \
