@@ -33,7 +33,7 @@ UDRenderState UDModelImpl::GetUDRenderState() const
 
   state.matrix = udmatrix;
 
-  state.simpleVoxelDel = simpleVoxelDel;
+  state.voxelVarDelegate = voxelVarDelegate;
 
   state.flags = renderFlags;
   state.startingRoot = startingRoot;

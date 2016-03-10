@@ -26,40 +26,30 @@ public:
     : ImplSuper(pInstance) {}
   virtual ~UDModelImpl();
 
-  uint32_t GetStartingRoot() const { return startingRoot; }
-  void SetStartingRoot(uint32_t root) { startingRoot = root; }
+  uint32_t GetStartingRoot() const  override{ return startingRoot; }
+  void SetStartingRoot(uint32_t root) override { startingRoot = root; }
 
-  const Rect<uint32_t> &GetRenderClipRect() const { return rect; }
-  void SetRenderClipRect(const Rect<uint32_t>& _rect) { rectSet = true; rect = _rect; }
+  const Rect<uint32_t> &GetRenderClipRect() const override { return rect; }
+  void SetRenderClipRect(const Rect<uint32_t>& _rect) override { rectSet = true; rect = _rect; }
 
-  uint32_t GetRenderFlags() const { return renderFlags; }
-  void SetRenderFlags(uint32_t flags) { renderFlags = (udRenderFlags)flags; }
+  uint32_t GetRenderFlags() const override { return renderFlags; }
+  void SetRenderFlags(uint32_t flags) override { renderFlags = (udRenderFlags)flags; }
 
-  double GetUDScale() const { EPASSERT(udmatrix.a[0] == udmatrix.a[5] && udmatrix.a[0] == udmatrix.a[10], "NonUniform Scale"); return udmatrix.a[0]; }
-  const Double4x4 &GetUDMatrix() const { return udmatrix; }
+  double GetUDScale() const override { EPASSERT(udmatrix.a[0] == udmatrix.a[5] && udmatrix.a[0] == udmatrix.a[10], "NonUniform Scale"); return udmatrix.a[0]; }
+  const Double4x4 &GetUDMatrix() const override { return udmatrix; }
 
-  BoundingVolume GetBoundingVolume() const;
-  UDRenderState GetUDRenderState() const;
+  BoundingVolume GetBoundingVolume() const override;
+  UDRenderState GetUDRenderState() const override;
 
-  DataSourceRef GetDataSource() const { return wpDataSource; }
+  DataSourceRef GetDataSource() const override { return wpDataSource; }
 
-  // TODO: Revist the shader system.  Simple voxel shader is inadequate.
-  Delegate<SimpleVoxelDlgt> GetSimpleVoxelDelegate() const { return simpleVoxelDel; }
-  void SetSimpleVoxelDelegate(Delegate<SimpleVoxelDlgt> del);
-
-  //udRender_VoxelShaderFunc *GetVoxelShader() const { return pVoxelShader; }
-  //void SetVoxelShader(udRender_VoxelShaderFunc *pFunc) { simpleVoxelDel = Delegate<UDRenderState::SimpleVoxelDlgt>();  pVoxelShader = pFunc; }
-
-  //udRender_PixelShaderFunc *GetPixelShader() const { return pPixelShader; }
-  //void SetPixelShader(udRender_PixelShaderFunc *pFunc) { pPixelShader = pFunc; }
+  VarDelegate GetVoxelVarDelegate() const override { return voxelVarDelegate; }
+  void SetVoxelVarDelegate(VarDelegate delegate);
 
   EP_FRIENDS_WITH_IMPL(UDDataSource);
 private:
 
-  Delegate<SimpleVoxelDlgt> simpleVoxelDel;
-
-  //udRender_VoxelShaderFunc *pVoxelShader = nullptr;
-  //udRender_PixelShaderFunc *pPixelShader = nullptr;
+  VarDelegate voxelVarDelegate;
 
   Double4x4 udmatrix;
   Rect<uint32_t> rect;
@@ -71,13 +61,13 @@ private:
   bool rectSet = false;
 };
 
-inline void UDModelImpl::SetSimpleVoxelDelegate(Delegate<SimpleVoxelDlgt> del)
+inline void UDModelImpl::SetVoxelVarDelegate(VarDelegate delegate)
 {
-  //pVoxelShader = nullptr;
-  if (del.GetMemento())
-    simpleVoxelDel = del;
+  if (delegate.GetMemento())
+    voxelVarDelegate = delegate;
   else
-    simpleVoxelDel = Delegate<SimpleVoxelDlgt>();
+    voxelVarDelegate = VarDelegate();
+
 }
 
 } // namespace ep

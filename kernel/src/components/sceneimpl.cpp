@@ -64,10 +64,10 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene)
     oS.matrix = iS.matrix;
     oS.pWorldMatrixD = &oS.matrix.a[0];
 
-    if (iS.simpleVoxelDel.GetMemento())
+    if (iS.voxelVarDelegate)
     {
-      oS.pVoxelShader = UDRenderableState::VoxelShaderFunc;
-      oS.simpleVoxelDel = iS.simpleVoxelDel;
+      oS.pVoxelShader = UDRenderableState::VoxelVarDelegateShaderFunc;
+      oS.voxelVarDelegate = iS.voxelVarDelegate;
     }
 
     oS.flags = (udRenderFlags)iS.flags;

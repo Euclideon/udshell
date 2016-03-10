@@ -78,11 +78,10 @@ EP_BITFIELD(UDRenderFlags,
 
 struct UDRenderState
 {
-  using SimpleVoxelDlgt = Delegate<uint32_t(uint32_t color)>;
-
   Double4x4 matrix;
 
-  SimpleVoxelDlgt simpleVoxelDel;
+  VarDelegate voxelVarDelegate;
+  void *pVoxelVarDelegateMutex;
 
   uint32_t flags;
   uint32_t startingRoot;

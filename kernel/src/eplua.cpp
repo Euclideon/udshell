@@ -6,6 +6,7 @@
 #include "components/lua.h"
 
 #include "ep/cpp/variant.h"
+#include "udPlatform.h"
 
 namespace ep {
 
@@ -25,6 +26,7 @@ const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
   "thread",
 };
 
+static udMutex *s_pLuaCallMutex = nullptr;
 
 const char* FgColor(ConsoleColor fg)
 {
@@ -170,6 +172,7 @@ static int FindComponent(lua_State *L)
 
 LuaState::LuaState(Kernel *pKernel)
 {
+  s_pLuaCallMutex = udCreateMutex();
   L = lua_newstate(udLuaAlloc, pKernel);
   lua_atpanic(L, udLuaPanic);
 
@@ -192,6 +195,7 @@ LuaState::LuaState(Kernel *pKernel)
 
 LuaState::~LuaState()
 {
+  udDestroyMutex(&s_pLuaCallMutex);
   lua_close(L);
 }
 
@@ -217,6 +221,7 @@ void* LuaState::udLuaAlloc(void *, void *ptr, size_t, size_t nsize)
 
 void LuaState::exec(String code)
 {
+  udScopeLock lock(s_pLuaCallMutex);
   int fail = luaL_loadbufferx(L, code.ptr, code.length, "command", nullptr);
   if (!fail)
     fail = lua_pcall(L, 0, LUA_MULTRET, 0);
@@ -231,6 +236,7 @@ void LuaState::exec(String code)
 
 void LuaState::print(String str)
 {
+  udScopeLock lock(s_pLuaCallMutex);
   lua_getglobal(L, "print");
   lua_pushlstring(L, str.ptr, str.length);
   lua_call(L, 1, 0);
@@ -808,6 +814,8 @@ protected:
 
   Variant call(Slice<const Variant> args) const
   {
+    udScopeLock lock(s_pLuaCallMutex);
+
     // there may already be elements on the stack
     int top = lua_gettop(L);
 
@@ -839,6 +847,8 @@ protected:
 
   LuaDelegate(lua_State *L, int idx)
   {
+    udScopeLock lock(s_pLuaCallMutex);
+
     this->L = L;
 
     // we'll use the delegate pointer as a registry index
@@ -853,6 +863,8 @@ protected:
 
   ~LuaDelegate()
   {
+    udScopeLock lock(s_pLuaCallMutex);
+
     lua_pushlightuserdata(L, this);
     lua_pushnil(L);
     lua_settable(L, LUA_REGISTRYINDEX);
