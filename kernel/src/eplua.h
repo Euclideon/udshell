@@ -93,7 +93,7 @@ public:
 
   void pushComponent(const ComponentRef &c);
   void pushComponent(Component *pC);
-  void pushDelegate(const Variant::VarDelegate &d);
+  void pushDelegate(const VarDelegate &d);
 
   void push(const Variant &v);
 
@@ -115,7 +115,7 @@ public:
   void* toUserData(int idx = -1);
 
   ComponentRef toComponent(int idx = -1);
-  Variant::VarDelegate toDelegate(int idx = -1);
+  VarDelegate toDelegate(int idx = -1);
 
   Variant get(int idx = -1);
 

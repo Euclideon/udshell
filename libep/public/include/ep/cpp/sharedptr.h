@@ -208,9 +208,9 @@ public:
 
   epforceinline explicit operator bool() const { return count() > 0; }
 
-  T& operator*() const { return *(T*)pInstance; }
-  T* operator->() const { return (T*)pInstance; }
-  T* ptr() const { return (T*)pInstance; }
+  T& operator*() const { return *pInstance; }
+  T* operator->() const { return pInstance; }
+  T* ptr() const { return pInstance; }
 
 private:
   template<typename U> friend struct UniquePtr;

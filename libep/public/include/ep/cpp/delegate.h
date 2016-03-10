@@ -10,6 +10,54 @@ typedef fastdelegate::DelegateMemento FastDelegateMemento;
 
 namespace ep {
 
+// helper to handle method pointers
+template<typename Signature>
+struct MethodPointer;
+template <typename R, typename... Args>
+struct MethodPointer<R(Args...)>
+{
+  typedef FastDelegate<R(Args...)> FastDelegateType;
+
+  MethodPointer() : ptr(nullptr) {}
+  MethodPointer(nullptr_t) : ptr(nullptr) {}
+
+  epforceinline MethodPointer(const MethodPointer &rh) : ptr(rh.ptr) {}
+
+  template <typename T>
+  epforceinline MethodPointer(R(T::*method)(Args... args))
+  {
+    DelegateUnion u;
+    u.d = FastDelegateType((T*)nullptr, method);
+    ptr = u.ptrs[1];
+  }
+
+  epforceinline FastDelegateType GetDelegate(void *pThis) const
+  {
+    DelegateUnion u;
+    u.ptrs[0] = pThis;
+    u.ptrs[1] = ptr;
+    return u.d;
+  }
+
+  epforceinline R Call(void *pThis, Args... args) const
+  {
+    return GetDelegate(pThis)(args...);
+  }
+
+  epforceinline explicit operator bool() const { return ptr != nullptr; }
+
+private:
+  union DelegateUnion
+  {
+    DelegateUnion() {}
+    FastDelegateType d;
+    void *ptrs[2];
+  };
+
+  void *ptr;
+};
+
+
 class DelegateMemento : public RefCounted
 {
 public:
@@ -37,6 +85,8 @@ template<typename R, typename... Args>
 class Delegate<R(Args...)>
 {
 public:
+  typedef FastDelegate<R(Args...)> FastDelegateType;
+
   Delegate() {}
   Delegate(nullptr_t) {}
   Delegate(Delegate<R(Args...)> &&rval) : m(std::move(rval.m)) {}
@@ -46,10 +96,10 @@ public:
 
   Delegate(FastDelegate<R(Args...)> d) : m(DelegateMementoRef::create(d.GetMemento())) {}
   template <class X, class Y>
-  Delegate(Y *i, R(X::*f)(Args...)) : Delegate(FD(i, f)) {}
+  Delegate(Y *i, R(X::*f)(Args...)) : Delegate(FastDelegateType(i, f)) {}
   template <class X, class Y>
-  Delegate(Y *i, R(X::*f)(Args...) const) : Delegate(FD(i, f)) {}
-  Delegate(R(*f)(Args...)) : Delegate(FD(f)) {}
+  Delegate(Y *i, R(X::*f)(Args...) const) : Delegate(FastDelegateType(i, f)) {}
+  Delegate(R(*f)(Args...)) : Delegate(FastDelegateType(f)) {}
 
   explicit operator bool() const { return m ? !m->m.empty() : false; }
 
@@ -75,7 +125,7 @@ public:
 
   epforceinline R operator()(Args... args) const
   {
-    FD d;
+    FastDelegateType d;
     d.SetMemento(m->m);
     return d(args...);
   }
@@ -85,7 +135,6 @@ public:
 
 protected:
   friend struct Variant;
-  typedef FastDelegate<R(Args...)> FD;
 
   DelegateMementoRef m = nullptr;
 };

@@ -1,59 +1,41 @@
 namespace ep {
 
+class Kernel;
+
+typedef MethodPointer<Variant(Slice<const Variant>, const RefCounted &)> VarMethodWithData;
+
 // interface for getters, setters, methods, events
-
-// getter glue
-class GetterShim
-{
-public:
-  using DelegateType = Delegate<Variant()>;
-
-  GetterShim(void *pGetter, SharedPtr<const RefCounted> data = nullptr) : pGetter(pGetter), data(data) {}
-
-  explicit operator bool() const { return pGetter != nullptr; }
-
-  Variant get(const Component *pThis) const;
-
-  DelegateType getDelegate(const Component *pThis) const;
-
-protected:
-  void *pGetter;
-  SharedPtr<const RefCounted> data;
-};
-
-// setter glue
-class SetterShim
-{
-public:
-  using DelegateType = Delegate<void(const Variant &)>;
-
-  SetterShim(void *pSetter, SharedPtr<const RefCounted> data = nullptr) : pSetter(pSetter), data(data) {}
-
-  explicit operator bool() const { return pSetter != nullptr; }
-
-  void set(Component *pThis, const Variant &value) const;
-
-  DelegateType getDelegate(Component *pThis) const;
-
-protected:
-  void *pSetter;
-  SharedPtr<const RefCounted> data;
-};
 
 // method glue
 class MethodShim
 {
 public:
-  using DelegateType = Delegate<Variant(Slice<const Variant>)>;
+  MethodShim(const MethodShim &rh) : method(rh.method), data(rh.data) {}
 
-  MethodShim(void *pMethod, SharedPtr<const RefCounted> data = nullptr) : pMethod(pMethod), data(data) {}
+  MethodShim(VarMethod method) : method(method) {}
+  MethodShim(VarMethodWithData method, SharedPtr<const RefCounted> data)
+    : methodWithData(method), data(data)
+  {
+    EPASSERT(data != nullptr, "Invalid; 'data' is nullptr!");
+  }
 
+  explicit operator bool() const { return (bool)method; }
+
+  Variant get(Component *pThis) const;
+  void set(Component *pThis, const Variant &value) const;
   Variant call(Component *pThis, Slice<const Variant> args) const;
 
-  DelegateType getDelegate(Component *pThis) const;
+  VarDelegate getDelegate(Component *pThis) const;
 
 protected:
-  void *pMethod;
+  // HACK: remove this friendship!
+  friend class DynamicComponent;
+
+  union
+  {
+    VarMethod method;
+    VarMethodWithData methodWithData;
+  };
   SharedPtr<const RefCounted> data;
 };
 
@@ -74,23 +56,30 @@ protected:
 class EventShim
 {
 public:
-  EventShim(void *pSubscribe, SharedPtr<const RefCounted> data = nullptr) : pSubscribe(pSubscribe), data(data) {}
+  EventShim(const EventShim &rh) : subscribeFunc(rh.subscribeFunc), data(rh.data) {}
 
-  void subscribe(Component *pThis, const Variant::VarDelegate &d) const;
+  EventShim(VarMethod subscribe) : subscribeFunc(subscribe) {}
+  EventShim(VarMethodWithData subscribe, SharedPtr<const RefCounted> data) : subscribeWithDataFunc(subscribe), data(data) {}
+
+  void subscribe(Component *pThis, const VarDelegate &d) const;
 
 protected:
-  void *pSubscribe;
+  union
+  {
+    VarMethod subscribeFunc;
+    VarMethodWithData subscribeWithDataFunc;
+  };
   SharedPtr<const RefCounted> data;
 };
 
 struct PropertyDesc : public PropertyInfo
 {
-  PropertyDesc(const PropertyInfo &info, const GetterShim &getter, const SetterShim &setter)
+  PropertyDesc(const PropertyInfo &info, const MethodShim &getter, const MethodShim &setter)
     : PropertyInfo(info), getter(getter), setter(setter)
   {}
 
-  GetterShim getter;
-  SetterShim setter;
+  MethodShim getter;
+  MethodShim setter;
 };
 
 struct MethodDesc : public MethodInfo
@@ -121,191 +110,57 @@ struct EventDesc : public EventInfo
 };
 
 // functions
-inline Variant GetterShim::get(const Component *pThis) const
-{
-  // hack to force construct a delegate
-  if (data)
-  {
-    // indirect call with metadata
-    FastDelegate<Variant(const RefCounted &)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pGetter;
-    return d(*data);
-  }
-  else
-  {
-    // direct call
-    FastDelegate<Variant()> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pGetter;
-    return d();
-  }
-}
-inline GetterShim::DelegateType GetterShim::getDelegate(const Component *pThis) const
-{
-  // this pair of pointers matches a FastDelegate<>
-  const void *ptr[2] = { pThis, pGetter };
-
-  if (data)
-  {
-    class GetterDelegate : public DelegateMemento
-    {
-    public:
-      Variant call() const
-      {
-        return getter(*data);
-      }
-      GetterDelegate(FastDelegate<Variant(const RefCounted &)> getter, const SharedPtr<const RefCounted> &data)
-        : getter(getter), data(data)
-      {
-        // set the memento to the lua call shim
-        FastDelegate<Variant()> shim(this, &GetterDelegate::call);
-        m = shim.GetMemento();
-      }
-
-      FastDelegate<Variant(const RefCounted &)> getter;
-      SharedPtr<const RefCounted> data;
-    };
-    typedef SharedPtr<GetterDelegate> GetterDelegateRef;
-
-    // indirect delegate carries metadata
-    auto &d = (FastDelegate<Variant(const RefCounted &)>&)ptr;
-    return DelegateType(GetterDelegateRef::create(d, data));
-  }
-  else
-  {
-    // direct call delegate
-    auto &d = (FastDelegate<Variant()>&)ptr;
-    return DelegateType(d);
-  }
-}
-
-inline void SetterShim::set(Component *pThis, const Variant &value) const
+inline Variant MethodShim::get(Component *pThis) const
 {
   if (data)
-  {
-    // indirect call with metadata
-    FastDelegate<void(const RefCounted &, const Variant &value)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pSetter;
-    d(*data, value);
-  }
+    return methodWithData.Call(pThis, nullptr, *data);
   else
-  {
-    // hack to force construct a delegate
-    FastDelegate<void(const Variant &value)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pSetter;
-    d(value);
-  }
+    return method.Call(pThis, nullptr);
 }
-inline SetterShim::DelegateType SetterShim::getDelegate(Component *pThis) const
+inline void MethodShim::set(Component *pThis, const Variant &value) const
 {
   if (data)
-  {
-    class SetterDelegate : public DelegateMemento
-    {
-    public:
-      void call(const Variant &value) const
-      {
-        setter(*data, value);
-      }
-      SetterDelegate(FastDelegate<void(const RefCounted &, const Variant &)> setter, const SharedPtr<const RefCounted> &data)
-        : setter(setter), data(data)
-      {
-        // set the memento to the lua call shim
-        FastDelegate<void(const Variant &)> shim(this, &SetterDelegate::call);
-        m = shim.GetMemento();
-      }
-
-      FastDelegate<void(const RefCounted &, const Variant &value)> setter;
-      SharedPtr<const RefCounted> data;
-    };
-    typedef SharedPtr<SetterDelegate> SetterDelegateRef;
-
-    // indirect delegate carries metadata
-    FastDelegate<void(const RefCounted &, const Variant &)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pSetter;
-    return DelegateType(SetterDelegateRef::create(d, data));
-  }
+    methodWithData.Call(pThis, Slice<const Variant>(&value, 1), *data);
   else
-  {
-    // direct call delegate
-    FastDelegate<void(const Variant &)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pSetter;
-    return DelegateType(d);
-  }
+    method.Call(pThis, Slice<const Variant>(&value, 1));
 }
-
 inline Variant MethodShim::call(Component *pThis, Slice<const Variant> args) const
 {
   if (data)
-  {
-    // indirect call with metadata
-    FastDelegate<Variant(const RefCounted &, Slice<const Variant>)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pMethod;
-    return d(*data, args);
-  }
+    return methodWithData.Call(pThis, args, *data);
   else
-  {
-    // hack to force construct a delegate
-    FastDelegate<Variant(Slice<const Variant>)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pMethod;
-    return d(args);
-  }
+    return method.Call(pThis, args);
 }
-inline MethodShim::DelegateType MethodShim::getDelegate(Component *pThis) const
+inline VarDelegate MethodShim::getDelegate(Component *pThis) const
 {
   if (data)
   {
+    // we need to allocate a delegate that keeps the metadata
     class MethodDelegate : public DelegateMemento
     {
     public:
       Variant call(Slice<const Variant> args) const
       {
-        return method(*data, args);
+        return method(args, *data);
       }
-      MethodDelegate(FastDelegate<Variant(const RefCounted &, Slice<const Variant>)> method, const SharedPtr<const RefCounted> &data)
+      MethodDelegate(VarMethodWithData::FastDelegateType method, const SharedPtr<const RefCounted> &data)
         : method(method), data(data)
       {
         // set the memento to the lua call shim
-        FastDelegate<Variant(Slice<const Variant>)> shim(this, &MethodDelegate::call);
+        VarDelegate::FastDelegateType shim(this, &MethodDelegate::call);
         m = shim.GetMemento();
       }
 
-      FastDelegate<Variant(const RefCounted &, Slice<const Variant>)> method;
+      VarMethodWithData::FastDelegateType method;
       SharedPtr<const RefCounted> data;
     };
-    typedef SharedPtr<MethodDelegate> MethodDelegateRef;
 
     // indirect delegate carries metadata
-    FastDelegate<Variant(const RefCounted &, Slice<const Variant>)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pMethod;
-    return DelegateType(MethodDelegateRef::create(d, data));
+    auto d = methodWithData.GetDelegate(pThis);
+    return VarDelegate(SharedPtr<MethodDelegate>::create(d, data));
   }
   else
-  {
-    // direct call delegate
-    FastDelegate<Variant(Slice<const Variant>)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pMethod;
-    return DelegateType(d);
-  }
+    return method.GetDelegate(pThis);
 }
 
 inline Variant StaticFuncShim::call(Slice<const Variant> args) const
@@ -323,29 +178,14 @@ inline Variant StaticFuncShim::call(Slice<const Variant> args) const
   }
 }
 
-inline void EventShim::subscribe(Component *pThis, const Variant::VarDelegate &handler) const
+inline void EventShim::subscribe(Component *pThis, const VarDelegate &handler) const
 {
+  Variant v(handler);
   if (data)
-  {
-    // indirect call with metadata
-    FastDelegate<void(const RefCounted &, const Variant::VarDelegate&)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pSubscribe;
-    return d(*data, handler);
-  }
+    subscribeWithDataFunc.Call(pThis, Slice<const Variant>(&v, 1), *data);
   else
-  {
-    // hack to force construct a delegate
-    FastDelegate<void(const Variant::VarDelegate&)> d;
-    const void **pD = (const void**)&d;
-    pD[0] = pThis;
-    pD[1] = pSubscribe;
-    return d(handler);
-  }
+    subscribeFunc.Call(pThis, Slice<const Variant>(&v, 1));
 }
-
-class Kernel;
 
 // Internal Component Descriptor struct
 // This supplies the Kernel with all the internal Component Descriptor meta information and callback magic

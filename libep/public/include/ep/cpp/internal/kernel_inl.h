@@ -74,7 +74,7 @@ private:
   }
 };
 
-template<typename _ComponentType, typename ImplType>
+template<typename _ComponentType, typename ImplType, typename GlueType>
 inline const ComponentDesc* Kernel::RegisterComponentType()
 {
   // check the class has a 'super' member
@@ -108,22 +108,29 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
     pDesc->PopulateFromDesc((const ep::ComponentDescInl*)pDesc->pSuperDesc);
   }
 
+  RegisterGlueType<GlueType>();
+
   return RegisterComponentType(pDesc);
 }
 
 template<typename GlueType>
 inline void Kernel::RegisterGlueType()
 {
-  RegisterGlueType(GlueType::ComponentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
+  RegisterGlueType(GlueType::ComponentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) -> ComponentRef {
     // TODO: this new can't exist in the wild... need to call back into kernel!!
     void *pMem = epAlloc(sizeof(GlueType));
     epscope(fail) { if (pMem) epFree(pMem); };
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
-    GlueType *ptr = new (pMem) GlueType(_pType, _pKernel, _uid, initParams);
+    GlueType *ptr = new (pMem) GlueType(_pType, _pKernel, _uid, spInstance, initParams);
     ptr->pFreeFunc = [](RefCounted *pMem) { epFree((GlueType*)pMem); };
     return ComponentRef(ptr);
   });
 }
+template<>
+inline void Kernel::RegisterGlueType<void>()
+{
+}
+
 
 template<typename _ComponentType>
 Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(bool bIncludeBase)
@@ -138,9 +145,9 @@ SharedPtr<T> Kernel::CreateComponent(Variant::VarMap initParams)
 }
 
 template<typename T>
-SharedPtr<T> Kernel::CreateGlue(const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams)
+SharedPtr<T> Kernel::CreateGlue(const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams)
 {
-  return shared_pointer_cast<T>(CreateGlue(T::ComponentID(), _pType, _uid, initParams));
+  return shared_pointer_cast<T>(CreateGlue(T::ComponentID(), _pType, _uid, spInstance, initParams));
 }
 
 // Inlines pipe through C API

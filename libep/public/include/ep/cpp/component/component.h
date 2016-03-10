@@ -46,9 +46,9 @@ public:
   const EventDesc *GetEventDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetEventDesc(_name, enumerateFlags); }
   const StaticFuncDesc *GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetStaticFuncDesc(_name, enumerateFlags); }
 
-  GetterShim::DelegateType GetGetterDelegate(String name, EnumerateFlags enumerateFlags = 0) const;
-  SetterShim::DelegateType GetSetterDelegate(String name, EnumerateFlags enumerateFlags = 0);
-  MethodShim::DelegateType GetFunctionDelegate(String name, EnumerateFlags enumerateFlags = 0);
+  VarDelegate GetGetterDelegate(String name, EnumerateFlags enumerateFlags = 0);
+  VarDelegate GetSetterDelegate(String name, EnumerateFlags enumerateFlags = 0);
+  VarDelegate GetFunctionDelegate(String name, EnumerateFlags enumerateFlags = 0);
 
   // meta interface
   Variant Get(String property) const override final;
@@ -58,7 +58,7 @@ public:
   template<typename ...Args>
   Variant Call(String method, Args... args);
 
-  void Subscribe(String eventName, const Variant::VarDelegate &delegate) override final;
+  void Subscribe(String eventName, const VarDelegate &delegate) override final;
   template<typename ...Args>
   void Subscribe(String eventName, const Delegate<void(Args...)> &d);
   template <class X, class Y, typename ...Args>
@@ -82,7 +82,7 @@ public:
 
   void* GetUserData() const;
 
-  void AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter = nullptr, const SetterShim *pSetter = nullptr) override final;
+  void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter = nullptr, const MethodShim *pSetter = nullptr) override final;
   void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod = nullptr) override final;
   void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe = nullptr) override final;
   void RemoveDynamicProperty(String name) override final;
@@ -135,7 +135,6 @@ protected:
 
   void* CreateImplInternal(String ComponentType, Variant::VarMap initParams);
 
-  void InitComplete() override;
   void ReceiveMessage(String message, String sender, const Variant &data) override;
 
   static Array<const PropertyInfo> GetProperties()

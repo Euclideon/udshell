@@ -38,25 +38,29 @@ public:
 class QtShims
 {
 public:
-  Variant getter(const QtPropertyData &data)
+  Variant getter(Slice<const Variant>, const RefCounted &_data)
   {
+    const QtPropertyData &data = (const QtPropertyData&)_data;
     const QObject *pQObject = (const QObject*)((ep::Component*)this)->GetUserData();
     return Variant(pQObject->property(data.propertyId.toStringz()));
   }
 
-  void setter(const QtPropertyData &data, const Variant &value)
+  Variant setter(Slice<const Variant> args, const RefCounted &_data)
   {
+    const QtPropertyData &data = (const QtPropertyData&)_data;
     QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
-    pQObject->setProperty(data.propertyId.toStringz(), value.as<QVariant>());
+    pQObject->setProperty(data.propertyId.toStringz(), args[0].as<QVariant>());
+    return Variant();
   }
 
-  Variant call(const QtMethodData &data, Slice<const Variant> value)
+  Variant call(Slice<const Variant> values, const RefCounted &_data)
   {
+    const QtMethodData &data = (const QtMethodData&)_data;
     QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
 
     // TODO: do better runtime handling of this rather than assert since this can come from the user - check against Q_METAMETHOD_INVOKE_MAX_ARGS
     // TODO: error output??
-    EPASSERT(value.length <= 10, "Attempting to call method shim with more than 10 arguments");
+    EPASSERT(values.length <= 10, "Attempting to call method shim with more than 10 arguments");
 
     // TODO: check value length against function arg length minus default args amount - need to parse the signature to get the default arg list?
 
@@ -64,9 +68,9 @@ public:
     QGenericArgument args[10];
     for (size_t i = 0; i<10; ++i)
     {
-      if (i < value.length)
+      if (i < values.length)
       {
-        epFromVariant(value[i], &vargs[i]);
+        epFromVariant(values[i], &vargs[i]);
         args[i] = Q_ARG(QVariant, vargs[i]);
       }
       else
@@ -80,12 +84,15 @@ public:
     return Variant(retVal);
   }
 
-  void subscribe(const QtEventData &data, const Variant::VarDelegate &d)
+  Variant subscribe(Slice<const Variant> values, const RefCounted &_data)
   {
+    const QtEventData &data = (const QtEventData&)_data;
     QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
 
-    // TODO: hook up disconnect path
-    data.sigToDel.pushBack(new QtSignalToDelegate(pQObject, data.method, d));
+    data.sigToDel.pushBack(new QtSignalToDelegate(pQObject, data.method, values[0].asDelegate()));
+
+    // TODO: return subscription handle of some sort
+    return Variant();
   }
 };
 
@@ -116,10 +123,8 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
     // TODO: store list to free getter/setter?
     auto data = SharedPtr<QtPropertyData>::create(propertyName);
 
-    auto getter = &QtShims::getter;
-    auto setter = &QtShims::setter;
-    auto getterShim = GetterShim(*(void**)&getter, data);
-    auto setterShim = SetterShim(*(void**)&setter, data);
+    auto getterShim = MethodShim(&QtShims::getter, data);
+    auto setterShim = MethodShim(&QtShims::setter, data);
     pComponent->AddDynamicProperty(info, &getterShim, &setterShim);
   }
 
@@ -146,8 +151,7 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
 
       auto data = SharedPtr<QtMethodData>::create(method);
 
-      auto call = &QtShims::call;
-      auto shim = MethodShim(*(void**)&call, data);
+      auto shim = MethodShim(&QtShims::call, data);
       pComponent->AddDynamicMethod(info, &shim);
     }
     else if (method.methodType() == QMetaMethod::Signal)
@@ -162,8 +166,7 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
 
       auto data = SharedPtr<QtEventData>::create(method);
 
-      auto subscribe = &QtShims::subscribe;
-      auto shim = EventShim(*(void**)&subscribe, data);
+      auto shim = EventShim(&QtShims::subscribe, data);
       pComponent->AddDynamicEvent(info, &shim);
     }
   }
@@ -415,7 +418,7 @@ void QtEPComponent::subscribe(QString eventName, QJSValue func) const
 
   try
   {
-    pComponent->Subscribe(event, Variant::VarDelegate(JSValueDelegateRef::create(func)));
+    pComponent->Subscribe(event, VarDelegate(JSValueDelegateRef::create(func)));
   }
   catch (EPException &)
   {

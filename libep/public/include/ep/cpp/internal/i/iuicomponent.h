@@ -10,9 +10,6 @@ class IUIComponent
 {
 public:
   virtual Variant GetUIHandle() const = 0;
-
-protected:
-  virtual void InitComplete() = 0;
 };
 
 } // namespace ep

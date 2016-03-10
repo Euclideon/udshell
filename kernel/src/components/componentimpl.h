@@ -35,11 +35,11 @@ public:
   Variant Get(String property) const override final;
   void Set(String property, const Variant &value) override final;
   Variant Call(String method, Slice<const Variant> args) override final;
-  void Subscribe(String eventName, const Variant::VarDelegate &delegate) override final;
+  void Subscribe(String eventName, const VarDelegate &delegate) override final;
 
   Variant Save() const override final { return Variant(Variant::VarMap()); }
 
-  void AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter, const SetterShim *pSetter) override final;
+  void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter, const MethodShim *pSetter) override final;
   void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod) override final;
   void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe) override final;
   void RemoveDynamicProperty(String name) override final;
@@ -50,7 +50,6 @@ protected:
   ~ComponentImpl();
 
   void Init(Variant::VarMap initParams) override final;
-  void InitComplete() override final {}
 
   void ReceiveMessage(String message, String sender, const Variant &data) override final;
 

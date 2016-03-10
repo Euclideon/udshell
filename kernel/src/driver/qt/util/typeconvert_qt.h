@@ -25,13 +25,13 @@ class QtDelegate : public QObject
   Q_OBJECT
 
 public:
-  QtDelegate(ep::Variant::VarDelegate d) : QObject(nullptr), d(d) {}
+  QtDelegate(ep::VarDelegate d) : QObject(nullptr), d(d) {}
   Q_INVOKABLE QVariant call(QVariant arg0 = QVariant(), QVariant arg1 = QVariant(), QVariant arg2 = QVariant(),
     QVariant arg3 = QVariant(), QVariant arg4 = QVariant(), QVariant arg5 = QVariant(), QVariant arg6 = QVariant(),
     QVariant arg7 = QVariant(), QVariant arg8 = QVariant(), QVariant arg9 = QVariant()) const;
 
 private:
-  ep::Variant::VarDelegate d;
+  ep::VarDelegate d;
 };
 
 class JSValueDelegate : public ep::DelegateMemento
@@ -40,7 +40,7 @@ protected:
   template<typename T>
   friend struct ep::SharedPtr;
 
-  Variant call(Slice<Variant> args);
+  Variant call(Slice<const Variant> args);
   JSValueDelegate(const QJSValue &jsValue);
   ~JSValueDelegate() {}
   // TODO this needs to be pinned!!!
@@ -79,7 +79,7 @@ template<> struct StringifyProxy<QString>       { inline static ptrdiff_t string
 
 namespace qt {
 
-  inline Variant JSValueDelegate::call(Slice<Variant> args)
+  inline Variant JSValueDelegate::call(Slice<const Variant> args)
   {
     QJSValueList jsArgs;
     jsArgs.reserve(static_cast<int>(args.length));
@@ -94,7 +94,7 @@ namespace qt {
   inline JSValueDelegate::JSValueDelegate(const QJSValue &jsValue) : jsVal(jsValue)
   {
     // set the memento to our call shim
-    FastDelegate<Variant(Slice<Variant>)> shim(this, &JSValueDelegate::call);
+    VarDelegate::FastDelegateType shim(this, &JSValueDelegate::call);
     m = shim.GetMemento();
   }
 

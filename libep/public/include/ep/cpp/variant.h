@@ -24,17 +24,17 @@ struct Compare<Variant>
 
 SHARED_CLASS(Component);
 
+typedef MethodPointer<Variant(Slice<const Variant>)> VarMethod;
+typedef Delegate<Variant(Slice<const Variant>)> VarDelegate;
+
 using KeyValuePair = KVP<Variant, Variant>;
-
 using VariantAVLNode = AVLTreeNode<Variant, Variant>;
-
 template<>
 struct AVLTreeAllocator<VariantAVLNode>;
 
 struct Variant
 {
 public:
-  typedef Delegate<Variant(Slice<const Variant>)> VarDelegate;
   typedef SharedArray<Variant> VarArray;
   typedef SharedMap<AVLTree<Variant, Variant>> VarMap;
 
@@ -137,6 +137,7 @@ public:
   int64_t asInt() const;
   double asFloat() const;
   const EnumDesc* asEnum(size_t *pVal) const;
+  SharedPtr<RefCounted> asSharedPtr() const;
   ComponentRef asComponent() const;
   VarDelegate asDelegate() const;
   SubscriptionRef asSubscription() const;

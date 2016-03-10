@@ -8,29 +8,29 @@ namespace ep {
 
 struct DynamicComponentDesc : public ComponentDescInl
 {
-  using NewInstanceFunc = Delegate<ComponentRef(ComponentRef instance, Variant::VarMap initParams)>;
+  using NewInstanceFunc = Delegate<DynamicComponentRef(Variant::VarMap initParams)>;
   NewInstanceFunc newInstance;
+  SharedPtr<RefCounted> userData;
 };
 
 // component API
 class ComponentGlue final : public Component
 {
 public:
-  ComponentGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams);
+  ComponentGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams);
 
   Variant Save() const override;
 
 protected:
   ~ComponentGlue();
 
-  void InitComplete() override;
   void ReceiveMessage(String message, String sender, const Variant &data) override;
 
   ComponentRef spInstance;
 
-  MethodShim::DelegateType save;
-  MethodShim::DelegateType initComplete;
-  MethodShim::DelegateType receiveMessage;
+  VarDelegate save;
+  VarDelegate initComplete;
+  VarDelegate receiveMessage;
 };
 
 } // namespace ep

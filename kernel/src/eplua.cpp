@@ -760,7 +760,7 @@ int LuaState::help(lua_State* L)
 // *** bind delegates to Lua ***
 int LuaState::delegateCleaner(lua_State* L)
 {
-  typedef Variant::VarDelegate D;
+  typedef VarDelegate D;
   D *pDelegate = (D*)lua_touserdata(L, 1);
   pDelegate->~D();
   return 0;
@@ -768,7 +768,7 @@ int LuaState::delegateCleaner(lua_State* L)
 
 void LuaState::pushDelegateMetatable()
 {
-  if (luaL_newmetatable(L, "Variant::VarDelegate") == 0)
+  if (luaL_newmetatable(L, "VarDelegate") == 0)
     return;
 
   // record the logical type
@@ -776,7 +776,7 @@ void LuaState::pushDelegateMetatable()
   lua_setfield(L, -2, "__udtype");
 
   // record the type
-  pushString("Variant::VarDelegate");
+  pushString("VarDelegate");
   lua_setfield(L, -2, "__type");
 
   // push a destructor
@@ -789,12 +789,12 @@ void LuaState::pushDelegateMetatable()
   lua_rawset(L, -3);
 }
 
-void LuaState::pushDelegate(const Variant::VarDelegate &d)
+void LuaState::pushDelegate(const VarDelegate &d)
 {
   // TODO: detect if d is a lua function delegate
   //       if it is, push the lua function directly...
 
-  new(lua_newuserdata(L, sizeof(Variant::VarDelegate))) Variant::VarDelegate(d);
+  new(lua_newuserdata(L, sizeof(VarDelegate))) VarDelegate(d);
   pushDelegateMetatable();
   lua_setmetatable(L, -2);
   lua_pushcclosure(L, &callDelegate, 1);
@@ -861,7 +861,7 @@ protected:
   lua_State *L;
 };
 
-Variant::VarDelegate LuaState::toDelegate(int idx)
+VarDelegate LuaState::toDelegate(int idx)
 {
   typedef SharedPtr<LuaDelegate> LuaDelegateRef;
 
@@ -869,14 +869,14 @@ Variant::VarDelegate LuaState::toDelegate(int idx)
   //       if it is, return the Delegate directly
 
   if (lua_isfunction(L, idx))
-    return Variant::VarDelegate(LuaDelegateRef::create(L, idx));
-  return Variant::VarDelegate();
+    return VarDelegate(LuaDelegateRef::create(L, idx));
+  return VarDelegate();
 }
 
 int LuaState::callDelegate(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
-  Variant::VarDelegate &d = *(Variant::VarDelegate*)l.toUserData(lua_upvalueindex(1));
+  VarDelegate &d = *(VarDelegate*)l.toUserData(lua_upvalueindex(1));
 
   int numArgs = l.top();
   Variant *pArgs = numArgs > 0 ? (Variant*)alloca(sizeof(Variant)*numArgs) : nullptr;
@@ -938,7 +938,7 @@ public:
     : c(c), desc(desc)
   {}
 
-  void subscribe(const Variant::VarDelegate &d)
+  void subscribe(const VarDelegate &d)
   {
     desc.ev.subscribe(c.ptr(), d);
   }
@@ -969,7 +969,7 @@ int LuaState::subscribe(lua_State* L)
   LuaState &l = (LuaState&)L;
 
   LuaEvent *pEv = (LuaEvent*)lua_touserdata(L, 1);
-  Variant::VarDelegate d = l.toDelegate(2);
+  VarDelegate d = l.toDelegate(2);
 
   pEv->subscribe(d);
 

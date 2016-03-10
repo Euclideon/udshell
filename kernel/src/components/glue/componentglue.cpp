@@ -2,11 +2,10 @@
 
 namespace ep {
 
-ComponentGlue::ComponentGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams)
+ComponentGlue::ComponentGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef _spInstance, Variant::VarMap initParams)
   : Component(_pType, _pKernel, _uid, initParams)
 {
-  const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)_pType;
-  spInstance = pDesc->newInstance(ComponentRef(this), initParams);
+  spInstance = _spInstance;
 
   // assign delegates from spInstance...
   save = spInstance->GetFunctionDelegate("Save");
@@ -24,15 +23,6 @@ Variant ComponentGlue::Save() const
   if (save)
     return save(nullptr);
   return Variant();
-}
-
-void ComponentGlue::InitComplete()
-{
-  // TODO: are we meant to call this? before or after?
-//  Super::InitComplete();
-
-  if (initComplete)
-    initComplete(nullptr);
 }
 
 void ComponentGlue::ReceiveMessage(String message, String sender, const Variant &data)

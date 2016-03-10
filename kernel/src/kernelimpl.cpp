@@ -49,6 +49,9 @@
 #include "components/broadcasterimpl.h"
 #include "components/streamimpl.h"
 
+#include "components/dynamiccomponent.h"
+#include "components/varcomponent.h"
+
 #include "components/glue/componentglue.h"
 
 #include "renderscene.h"
@@ -178,7 +181,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   renderThreadCount = initParams["renderThreadCount"].as<int>();
 
   // register the base Component type
-  pInstance->RegisterComponentType<Component, ComponentImpl>();
+  pInstance->RegisterComponentType<Component, ComponentImpl, ComponentGlue>();
 
   // HACK: update the descriptor with the base class (bootup chicken/egg)
   const ComponentDescInl *pComponentBase = componentRegistry.Get(Component::ComponentID())->pDesc;
@@ -244,8 +247,9 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<GeomSource>();
   pInstance->RegisterComponentType<UDDataSource>();
 
-  // register base class 'glue' types
-  pInstance->RegisterGlueType<ComponentGlue>();
+  // dynamic components
+  pInstance->RegisterComponentType<DynamicComponent>();
+  pInstance->RegisterComponentType<VarComponent>();
 
   // init the HAL
   EPTHROW_RESULT(epHAL_Init(), "epHAL_Init() failed");
@@ -639,12 +643,16 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
 
   pDesc->pInit = nullptr;
   pDesc->pCreateImpl = nullptr;
-  pDesc->pCreateInstance = [](const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams) -> ComponentRef {
-    const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)pType;
-    return pKernel->CreateGlue(pDesc->baseClass, pType, uid, initParams);
+  pDesc->pCreateInstance = [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
+    const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)_pType;
+    DynamicComponentRef spInstance = pDesc->newInstance(initParams);
+    ComponentRef spC = _pKernel->CreateGlue(pDesc->baseClass, _pType, _uid, spInstance, initParams);
+    spInstance->pThis = spC.ptr();
+    return spC;
   };
 
   pDesc->newInstance = typeDesc["new"].as<DynamicComponentDesc::NewInstanceFunc>();
+  pDesc->userData = typeDesc["userdata"].asSharedPtr();
 
   // TODO: populate trees from stuff in dynamic descriptor
 //  pDesc->desc.Get
@@ -727,11 +735,11 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
   }
 }
 
-ComponentRef KernelImpl::CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams)
+ComponentRef KernelImpl::CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams)
 {
   CreateGlueFunc **ppCreate = glueRegistry.Get(typeId);
   EPTHROW_IF_NULL(ppCreate, epR_InvalidType, "No glue type {0}", typeId);
-  return (*ppCreate)(pInstance, _pType, _uid, initParams);
+  return (*ppCreate)(pInstance, _pType, _uid, spInstance, initParams);
 }
 
 void KernelImpl::DestroyComponent(Component *_pInstance)

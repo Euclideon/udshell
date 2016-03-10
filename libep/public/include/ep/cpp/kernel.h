@@ -8,6 +8,7 @@
 namespace ep {
 
 class KernelImpl;
+SHARED_CLASS(DynamicComponent);
 
 class Kernel : public Component, public IKernel
 {
@@ -19,12 +20,9 @@ public:
 
   void SendMessage(String target, String sender, String message, const Variant &data) override final { pImpl->SendMessage(target, sender, message, data); }
 
-  template<typename ComponentType, typename Impl = void>
+  template<typename ComponentType, typename Impl = void, typename GlueType = void>
   const ComponentDesc* RegisterComponentType();
   const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) override final { return pImpl->RegisterComponentType(typeDesc); }
-
-  template<typename GlueType>
-  void RegisterGlueType();
 
   const ComponentDesc* GetComponentDesc(String id) override final { return pImpl->GetComponentDesc(id); }
 
@@ -39,9 +37,9 @@ public:
   template<typename T>
   SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr);
 
-  ComponentRef CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams) override final { return pImpl->CreateGlue(typeId, _pType, _uid, initParams); }
+  ComponentRef CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) override final { return pImpl->CreateGlue(typeId, _pType, _uid, spInstance, initParams); }
   template<typename T>
-  SharedPtr<T> CreateGlue(const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams);
+  SharedPtr<T> CreateGlue(const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams);
 
   ComponentRef FindComponent(String _uid) const override final { return pImpl->FindComponent(_uid); }
 
@@ -95,7 +93,10 @@ protected:
   void FinishInit() override { pImpl->FinishInit(); }
 
   const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) override final { return pImpl->RegisterComponentType(pDesc); }
+
   void RegisterGlueType(String _name, CreateGlueFunc *pCreateFunc) override final { pImpl->RegisterGlueType(_name, pCreateFunc); }
+  template<typename GlueType>
+  void RegisterGlueType();
 
   template<typename ComponentType, typename Impl = void>
   struct CreateHelper;

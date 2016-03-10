@@ -12,7 +12,7 @@ namespace ep {
 
 typedef FastDelegate<void(String sender, String message, const Variant &data)> MessageHandler;
 typedef FastDelegate<void()> MainThreadCallback;
-typedef ComponentRef(CreateGlueFunc)(Kernel *pKernel, const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams);
+typedef ComponentRef(CreateGlueFunc)(Kernel *pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams);
 
 SHARED_CLASS(ResourceManager);
 SHARED_CLASS(CommandManager);
@@ -46,7 +46,7 @@ public:
 
   virtual ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) = 0;
 
-  virtual ComponentRef CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, Variant::VarMap initParams) = 0;
+  virtual ComponentRef CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) = 0;
 
   virtual ComponentRef FindComponent(String name) const = 0;
 

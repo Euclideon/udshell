@@ -29,11 +29,11 @@ public:
   virtual Variant Get(String property) const = 0;
   virtual void Set(String property, const Variant &value) = 0;
   virtual Variant Call(String function, Slice<const Variant> args) = 0;
-  virtual void Subscribe(String eventName, const Variant::VarDelegate &delegate) = 0;
+  virtual void Subscribe(String eventName, const VarDelegate &delegate) = 0;
 
   virtual Variant Save() const = 0;
 
-  virtual void AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter = nullptr, const SetterShim *pSetter = nullptr) = 0;
+  virtual void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter = nullptr, const MethodShim *pSetter = nullptr) = 0;
   virtual void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod = nullptr) = 0;
   virtual void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe = nullptr) = 0;
   virtual void RemoveDynamicProperty(String name) = 0;
@@ -41,7 +41,6 @@ public:
   virtual void RemoveDynamicEvent(String name) = 0;
 
 protected:
-  virtual void InitComplete() = 0;
   virtual void ReceiveMessage(String message, String sender, const Variant &data) = 0;
 
 private:

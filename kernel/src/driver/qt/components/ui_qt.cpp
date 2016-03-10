@@ -130,13 +130,6 @@ void UIComponentImpl::CreateInternal(Variant::VarMap initParams)
 }
 
 // ---------------------------------------------------------------------------------------
-void UIComponentImpl::InitComplete()
-{
-  // let qml know that the enclosing object has finished being created
-  SignalQtEPComponentDone((QObject*)pInstance->pUserData);
-}
-
-// ---------------------------------------------------------------------------------------
 void UIComponentImpl::DestroyInternal()
 {
   LogTrace("UIComponentImpl::DestroyInternal()");
@@ -195,13 +188,6 @@ void WindowImpl::DestroyInternal()
 {
   LogTrace("WindowImpl::DestroyInternal()");
   CleanupInternalData((QObject**)&pInstance->pUserData);
-}
-
-// ---------------------------------------------------------------------------------------
-void WindowImpl::InitComplete()
-{
-  // let qml know that the enclosing object has finished being created
-  SignalQtEPComponentDone((QObject*)pInstance->pUserData);
 }
 
 // ---------------------------------------------------------------------------------------

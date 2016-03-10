@@ -59,7 +59,6 @@ void ComponentImpl::Init(Variant::VarMap initParams)
   for (size_t i = 0; i<propertyChange.length; ++i)
     new(&propertyChange.ptr[i]) Event<>();
 */
-  pInstance->InitComplete();
 }
 
 void ComponentImpl::ReceiveMessage(String message, String sender, const Variant &data)
@@ -159,9 +158,9 @@ const StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name, EnumerateFl
   return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.Get(_name);
 }
 
-void ComponentImpl::AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter, const SetterShim *pSetter)
+void ComponentImpl::AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter, const MethodShim *pSetter)
 {
-  PropertyDesc desc(property, pGetter ? *pGetter : GetterShim(property.pGetterMethod), pSetter ? *pSetter : SetterShim(property.pSetterMethod));
+  PropertyDesc desc(property, pGetter ? *pGetter : MethodShim(property.pGetterMethod), pSetter ? *pSetter : MethodShim(property.pSetterMethod));
   instanceProperties.Insert(desc.id, desc);
 }
 void ComponentImpl::AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod)
@@ -240,7 +239,7 @@ Variant ComponentImpl::Call(String method, Slice<const Variant> args)
   return std::move(r);
 }
 
-void ComponentImpl::Subscribe(String eventName, const Variant::VarDelegate &d)
+void ComponentImpl::Subscribe(String eventName, const VarDelegate &d)
 {
   const EventDesc *pDesc = GetEventDesc(eventName);
   if (!pDesc)

@@ -52,7 +52,7 @@ epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const
 
 void epComponent_Subscribe(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate)
 {
-  ((Component*)pComponent)->Subscribe(eventName, (const Variant::VarDelegate&)pDelegate);
+  ((Component*)pComponent)->Subscribe(eventName, (const VarDelegate&)pDelegate);
 }
 
 void epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData)

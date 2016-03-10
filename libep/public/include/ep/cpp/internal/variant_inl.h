@@ -512,7 +512,7 @@ template<> struct Variant_Cast < int64_t  > { inline static int64_t  as(const Va
 template<> struct Variant_Cast < uint64_t > { inline static uint64_t as(const Variant &v) { return (uint64_t)v.asInt(); } };
 
 template<> struct Variant_Cast < Variant >              { inline static Variant              as(const Variant &v) { return v; } };
-template<> struct Variant_Cast < Variant::VarDelegate > { inline static Variant::VarDelegate as(const Variant &v) { return v.asDelegate(); } };
+template<> struct Variant_Cast < VarDelegate > { inline static VarDelegate as(const Variant &v) { return v.asDelegate(); } };
 template<> struct Variant_Cast < Variant::VarArray >    { inline static Variant::VarArray    as(const Variant &v) { return v.asArray(); } };
 template<> struct Variant_Cast < Variant::VarMap >      { inline static Variant::VarMap      as(const Variant &v) { return v.asAssocArray(); } };
 
@@ -547,7 +547,7 @@ protected:
   template<typename T>
   friend struct ep::SharedPtr;
 
-  Variant to(Slice<Variant> args) const
+  Variant to(Slice<const Variant> args) const
   {
     fastdelegate::FastDelegate<R(Args...)> d;
     d.SetMemento(target->GetFastDelegate());
@@ -556,7 +556,7 @@ protected:
 
   R from(Args... args) const
   {
-    Variant::VarDelegate d(target);
+    VarDelegate d(target);
 
     // HAX: added 1 to support the case of zero args
     Variant vargs[sizeof...(args)+1] = { Variant(args)... };
@@ -571,12 +571,12 @@ protected:
   VarDelegateMemento(const Delegate<R(Args...)> &d)
     : target(d.GetMemento())
   {
-    FastDelegate<Variant(Slice<Variant>)> shim(this, &VarDelegateMemento::to);
+    VarDelegate::FastDelegateType shim(this, &VarDelegateMemento::to);
     m = shim.GetMemento();
   }
 
   // *from* Variant::Delegate constructor
-  VarDelegateMemento(const Variant::VarDelegate &d)
+  VarDelegateMemento(const VarDelegate &d)
     : target(d.GetMemento())
   {
     FastDelegate<R(Args...)> shim(this, &VarDelegateMemento::from);
@@ -698,7 +698,7 @@ inline Variant epToVariant(const Delegate<R(Args...)> &d)
 {
   typedef SharedPtr<internal::VarDelegateMemento<R(Args...)>> VarDelegateRef;
 
-  return Variant::VarDelegate(VarDelegateRef::create(d));
+  return VarDelegate(VarDelegateRef::create(d));
 }
 
 template<typename K, typename V, typename Pred>

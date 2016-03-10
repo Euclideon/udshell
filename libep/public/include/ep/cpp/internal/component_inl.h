@@ -37,7 +37,7 @@ inline Variant Component::Call(String method, Slice<const Variant> args)
   return pImpl->Call(method, args);
 }
 
-inline void Component::Subscribe(String eventName, const Variant::VarDelegate &delegate)
+inline void Component::Subscribe(String eventName, const VarDelegate &delegate)
 {
   pImpl->Subscribe(eventName, delegate);
 }
@@ -45,45 +45,32 @@ template<typename ...Args>
 inline void Component::Subscribe(String eventName, const Delegate<void(Args...)> &d)
 {
   typedef SharedPtr<internal::VarDelegateMemento<void(Args...)>> VarDelegateMementoRef;
-  Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
+  Subscribe(eventName, VarDelegate(VarDelegateMementoRef::create(d)));
 }
 
-inline GetterShim::DelegateType Component::GetGetterDelegate(String _name, EnumerateFlags enumerateFlags) const
+inline VarDelegate Component::GetGetterDelegate(String _name, EnumerateFlags enumerateFlags)
 {
   const PropertyDesc *pDesc = GetPropertyDesc(_name, enumerateFlags);
   if (!pDesc || !pDesc->getter)
-  {
-    // TODO: throw in this case?
-    const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is write-only" : "No property '{0}' for component '{1}'";
-    LogWarning(2, pMessage, _name, name.empty() ? uid : name);
     return nullptr;
-  }
   return pDesc->getter.getDelegate(this);
 }
-inline SetterShim::DelegateType Component::GetSetterDelegate(String _name, EnumerateFlags enumerateFlags)
+inline VarDelegate Component::GetSetterDelegate(String _name, EnumerateFlags enumerateFlags)
 {
   const PropertyDesc *pDesc = GetPropertyDesc(_name, enumerateFlags);
   if (!pDesc || !pDesc->setter || pDesc->flags & epPF_Immutable)
-  {
-    // TODO: throw in this case?
-    const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is read-only" : "No property '{0}' for component '{1}'";
-    LogWarning(2, pMessage, _name, name.empty() ? uid : name);
     return nullptr;
-  }
   return pDesc->setter.getDelegate(this);
 }
-inline MethodShim::DelegateType Component::GetFunctionDelegate(String _name, EnumerateFlags enumerateFlags)
+inline VarDelegate Component::GetFunctionDelegate(String _name, EnumerateFlags enumerateFlags)
 {
   const MethodDesc *pDesc = GetMethodDesc(_name, enumerateFlags);
   if (pDesc)
     return pDesc->method.getDelegate(this);
-
   // TODO: should also return static functions...
 //  const StaticFuncDesc *pStaticFuncs = GetStaticFuncDesc(_name);
 //  if (!pStaticFuncs)
 //    return pStaticFuncs->staticFunc.getDelegate(this);
-
-  LogWarning(1, "No function '{0}' for component '{1}'", _name, name.empty() ? uid : name);
   return nullptr;
 }
 
@@ -97,7 +84,7 @@ inline void* Component::GetUserData() const
   return pUserData;
 }
 
-inline void Component::AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter, const SetterShim *pSetter)
+inline void Component::AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter, const MethodShim *pSetter)
 {
   pImpl->AddDynamicProperty(property, pGetter, pSetter);
 }
@@ -130,11 +117,6 @@ inline void Component::SendMessage(const ComponentRef &target, String message, c
 inline void Component::Init(Variant::VarMap initParams)
 {
   pImpl->Init(initParams);
-}
-
-inline void Component::InitComplete()
-{
-  pImpl->InitComplete();
 }
 
 inline void Component::ReceiveMessage(String message, String sender, const Variant &data)
