@@ -61,6 +61,12 @@ struct StaticFuncInfo
   StaticCall *pCall;
 };
 
+EP_BITFIELD(ComponentInfoFlags,
+  Unpopulated,
+  Unregistered
+  // TODO: add flags ('Abstract' (can't create) flag)
+);
+
 struct ComponentInfo
 {
   int epVersion;
@@ -72,7 +78,7 @@ struct ComponentInfo
 
   // icon image...?
 
-  // TODO: add flags ('Abstract' (can't create) flag)
+  ComponentInfoFlags flags;
 };
 
 struct ComponentDesc
@@ -158,7 +164,7 @@ public:                                                                         
   }                                                                                      \
   static ComponentInfo MakeDescriptor()                                                  \
   {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description };                \
+    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, 0 };             \
   }                                                                                      \
 private:
 
@@ -187,7 +193,7 @@ public:                                                                         
   }                                                                                      \
   static ComponentInfo MakeDescriptor()                                                  \
   {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description };                \
+    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, 0 };             \
   }                                                                                      \
   template <typename T>                                                                  \
   T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \

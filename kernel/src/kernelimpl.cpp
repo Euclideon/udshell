@@ -104,6 +104,7 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = Kernel::MakeDescriptor();
+  pDesc->info.flags = ComponentInfoFlags::Unregistered;
   pDesc->baseClass = Component::ComponentID();
 
   pDesc->pInit = nullptr;
@@ -143,11 +144,6 @@ Kernel::~Kernel()
   // HACK: undo chicken/egg hacks
   Component::pImpl = nullptr;
   (Kernel*&)pKernel = nullptr;
-
-  // HACK: destroy the descriptor we fabricated...
-  const ComponentDesc *pKernelDesc = pType;
-  (const ComponentDesc*&)pType = pType->pSuperDesc;
-  epDelete pKernelDesc;
 }
 
 Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCount)

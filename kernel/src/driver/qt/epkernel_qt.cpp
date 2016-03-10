@@ -69,6 +69,7 @@ ComponentDescInl *QtKernel::MakeKernelDescriptor()
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = QtKernel::MakeDescriptor();
+  pDesc->info.flags = ComponentInfoFlags::Unregistered;
   pDesc->baseClass = Kernel::ComponentID();
 
   pDesc->pInit = nullptr;
@@ -173,11 +174,6 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
 QtKernel::~QtKernel()
 {
   pApplication->deleteLater();
-
-  // HACK: destroy the descriptor we fabricated...
-  const ComponentDesc *pKernelDesc = pType;
-  (const ComponentDesc*&)pType = pType->pSuperDesc;
-  epDelete pKernelDesc;
 }
 
 // ---------------------------------------------------------------------------------------
