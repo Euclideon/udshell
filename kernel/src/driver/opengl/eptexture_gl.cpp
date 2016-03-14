@@ -2,6 +2,7 @@
 
 #if EPRENDER_DRIVER == EPDRIVER_OPENGL
 
+#include "hal/shader.h"
 #include "hal/texture.h"
 
 #include "ep_opengl.h"

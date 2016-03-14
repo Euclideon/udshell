@@ -50,7 +50,7 @@ struct epDebugFont
 extern Hershey romanVectors[];
 extern VectorCharacter romanSimplexCharacters[96];
 static epDebugFont *pRomanSimplex;
-static epFormatDeclaration *pVertexFormat;
+static epShaderInputConfig *pShaderInputConfig;
 static epShader *pFontShaderV;
 static epShader *pFontShaderP;
 static epShaderProgram *pShader;
@@ -85,15 +85,16 @@ void epDebugFont_Init()
 {
   pFontShaderV = epShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), epST_VertexShader);
   pFontShaderP = epShader_CreateShader(s_pixelShader, sizeof(s_pixelShader), epST_PixelShader);
-  pShader = epShader_CreateShaderProgram(pFontShaderV, pFontShaderP);
+  epShader *shaders[] = { pFontShaderV, pFontShaderP };
+  pShader = epShader_CreateShaderProgram(shaders, 2);
 
   static epArrayElement vertDesc[] =
   {
 //    { udVET_Position, DcVCT_Short2, DcVCU_Position, 0, 0 }
 //    { udVET_Position, 0, 2, epVDF_Float2 }
-    { "a_position", epVDF_Float2, 0 }
+    { "a_position", epVDF_Float2, 0, 0, 8 }
   };
-  pVertexFormat = epVertex_CreateFormatDeclaration(vertDesc, sizeof(vertDesc)/sizeof(vertDesc[0]));
+  pShaderInputConfig = epVertex_CreateShaderInputConfig(vertDesc, sizeof(vertDesc)/sizeof(vertDesc[0]), pShader);
 
   // Process the roman simplex font
   pRomanSimplex = epNew(epDebugFont, 96, romanSimplexCharacters, romanVectors);
@@ -104,7 +105,7 @@ void epDebugFont_Deinit()
 {
   epVertex_DestroyArrayBuffer(&pRomanSimplex->pGeoBuffer);
   epDelete(pRomanSimplex);
-  epVertex_DestroyFormatDeclaration(&pVertexFormat);
+  epVertex_DestroyShaderInputConfig(&pShaderInputConfig);
 
   epShader_DestroyShader(&pFontShaderV);
   epShader_DestroyShader(&pFontShaderP);
@@ -186,7 +187,7 @@ float epDebugFont_RenderString(epDebugFont *pFont, const char *pString, float x,
     }
   }
 
-  epGPU_RenderRanges(pShader, pVertexFormat, &pFont->pGeoBuffer, epPT_Lines, ranges, numRanges, UpdateOffset, &loopData);
+  epGPU_RenderRanges(pShader, pShaderInputConfig, &pFont->pGeoBuffer, epPT_Lines, ranges, numRanges, UpdateOffset, &loopData);
 
   return height;
 }

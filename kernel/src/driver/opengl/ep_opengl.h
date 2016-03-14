@@ -62,11 +62,10 @@ struct epGLTextureFormat
 
 struct epArrayElementData
 {
-  int offset;
-  int stride;
+  int attribLocation;
 };
 
-struct epFormatDeclaration
+struct epShaderInputConfig
 {
   epArrayElement *pElements;
   epArrayElementData *pElementData;
@@ -97,7 +96,7 @@ struct epShaderProgram
   struct Param
   {
     char *pName;
-    size_t type;
+    epShaderElement elementType;
   };
 
   size_t numAttributes;
