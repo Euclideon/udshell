@@ -63,8 +63,8 @@ struct StaticFuncInfo
 
 EP_BITFIELD(ComponentInfoFlags,
   Unpopulated,
-  Unregistered
-  // TODO: add flags ('Abstract' (can't create) flag)
+  Unregistered,
+  Abstract
 );
 
 struct ComponentInfo

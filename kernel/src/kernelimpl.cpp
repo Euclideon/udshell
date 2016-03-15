@@ -693,6 +693,7 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
 {
   ComponentType *_pType = componentRegistry.Get(typeId);
   EPASSERT_THROW(_pType, epR_InvalidArgument, "typeId failed to lookup ComponentType");
+  EPTHROW_IF(_pType->pDesc->info.flags & ComponentInfoFlags::Abstract, epR_InvalidType, "Cannot create component of abstract type '{0}'", typeId);
 
   try
   {
