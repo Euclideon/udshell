@@ -45,6 +45,8 @@ protected:
     return pDesc;
   }
 
+  virtual void AttachToGlue(Component *pGlue) { pThis = pGlue; }
+
   Component *pThis;
 
   mutable AVLTree<SharedString, PropertyDesc> propertyCache;

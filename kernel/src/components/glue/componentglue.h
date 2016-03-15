@@ -8,7 +8,7 @@ namespace ep {
 
 struct DynamicComponentDesc : public ComponentDescInl
 {
-  using NewInstanceFunc = Delegate<DynamicComponentRef(Variant::VarMap initParams)>;
+  using NewInstanceFunc = Delegate<DynamicComponentRef(KernelRef spKernel, Variant::VarMap initParams)>;
   NewInstanceFunc newInstance;
   SharedPtr<RefCounted> userData;
 };

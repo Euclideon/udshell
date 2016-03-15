@@ -83,7 +83,7 @@ struct ComponentInfo
 
 struct ComponentDesc
 {
-  virtual ~ComponentDesc();
+  virtual ~ComponentDesc() = 0;
 
   ComponentInfo info;
   const ComponentDesc *pSuperDesc;
@@ -170,7 +170,7 @@ private:
 
 // declare magic for a C++ component with a pImpl interface
 #define EP_DECLARE_COMPONENT_WITH_IMPL(Name, Interface, SuperType, Version, Description, Flags) \
-  friend class ::ep::Kernel;                                                             \
+  friend class ::ep::Kernel;                                                                    \
   __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)
 
 #define __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)    \

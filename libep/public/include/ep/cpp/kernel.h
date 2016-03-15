@@ -33,7 +33,7 @@ public:
 
   void RegisterMessageHandler(SharedString _name, MessageHandler messageHandler) override final { pImpl->RegisterMessageHandler(_name, messageHandler); }
 
-  ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) override final { return pImpl->CreateComponent(typeId, initParams); }
+  ComponentRef CreateComponent(String typeId, Variant::VarMap initParams = nullptr) override final { return pImpl->CreateComponent(typeId, initParams); }
   template<typename T>
   SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr);
 

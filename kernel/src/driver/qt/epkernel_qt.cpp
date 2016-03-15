@@ -2,14 +2,15 @@
 
 #if EPWINDOW_DRIVER == EPDRIVER_QT
 
-#include "epkernel_qt.h"
-
 #include "kernelimpl.h"
-#include "ui/renderview_qt.h"
-#include "ui/window_qt.h"
-#include "components/qobjectcomponent_qt.h"
-#include "util/qmlbindings_qt.h"
 #include "components/viewimpl.h"
+#include "components/glue/componentglue.h"
+
+#include "driver/qt/epkernel_qt.h"
+#include "driver/qt/ui/renderview_qt.h"
+#include "driver/qt/ui/window_qt.h"
+#include "driver/qt/util/qmlbindings_qt.h"
+#include "driver/qt/components/qobjectcomponent_qt.h"
 
 #include <QSemaphore>
 
@@ -111,17 +112,17 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   for (auto arg : commandLine)
   {
     if(arg.key.is(Variant::Type::Int))
-      args.pushBack(arg.value.asSharedString());
+      cmdArgs.pushBack(arg.value.asSharedString());
   }
-  for (auto &arg : args)
-    argv.pushBack(arg.ptr);
-  argc = (int)argv.length;
+  for (auto &arg : cmdArgs)
+    cmdArgv.pushBack(arg.ptr);
+  argc = (int)cmdArgv.length;
 
   // init qt kernel
   EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), epR_Failure, "Unable to register QtComponent");
 
   // create our qapplication
-  pApplication = new QtApplication(this, argc, (char**)argv.ptr);
+  pApplication = new QtApplication(this, argc, (char**)cmdArgv.ptr);
   EPTHROW_IF_NULL(pApplication, epR_Failure, "Unable create QtApplication");
   epscope(fail) { delete pApplication; };
 
@@ -267,6 +268,65 @@ void QtKernel::UnregisterWindow(QQuickWindow *pWindow)
 
   QObject::disconnect(pWindow, &QQuickWindow::openglContextCreated, this, &QtKernel::OnGLContextCreated);
 }
+
+// ---------------------------------------------------------------------------------------
+void QtKernel::RegisterQmlComponent(String superTypeId, String typeId, String file)
+{
+  EPASSERT_THROW(!superTypeId.empty(), epR_InvalidArgument, "Must supply a valid superTypeId to register a QML Component type");
+  EPASSERT_THROW(!typeId.empty(), epR_InvalidArgument, "Must supply a valid typeId to register a QML Component type");
+  EPASSERT_THROW(!file.empty(), epR_InvalidArgument, "Must supply a valid file to register a QML component type");
+
+  auto data = SharedPtr<QmlComponentData>::create(file, pQmlEngine, QQmlComponent::Asynchronous);
+  Variant::VarMap typeInfo = {
+    { "id", MutableString128(typeId).toLower() },
+    { "name", typeId },
+    { "description", SharedString::format("{0} - {1} qml component", typeId, superTypeId) },
+    { "version", (int)EPKERNEL_PLUGINVERSION },
+    { "super", superTypeId },
+    { "userdata", (const SharedPtr<RefCounted>&)data },
+    { "new", ep::DynamicComponentDesc::NewInstanceFunc(data.ptr(), &QmlComponentData::CreateComponent) }
+  };
+
+  GetImpl()->RegisterComponentType(typeInfo);
+}
+
+// ---------------------------------------------------------------------------------------
+ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file)
+{
+  using namespace ep;
+  const ComponentDescInl *pSuper = (const ComponentDescInl *)GetImpl()->GetComponentDesc(superTypeId);
+  EPTHROW_IF(!pSuper, epR_InvalidType, "Base Component '{0}' not registered", superTypeId);
+
+  // generate unregistered component descriptor
+  DynamicComponentDesc *pDesc = epNew DynamicComponentDesc;
+  epscope(fail) { epDelete pDesc; };
+
+  pDesc->pSuperDesc = pSuper;
+  pDesc->baseClass = pSuper->info.id;
+  pDesc->info.id = pSuper->info.id;
+  pDesc->info.displayName = file;
+  pDesc->info.description = SharedString::format("{0} - {1} QML Component", file, pSuper->info.displayName);
+  pDesc->info.epVersion = pSuper->info.epVersion;
+  pDesc->info.pluginVersion = pSuper->info.pluginVersion;
+  pDesc->info.flags = pSuper->info.flags | ComponentInfoFlags::Unregistered | ComponentInfoFlags::Unpopulated;
+
+  pDesc->pInit = nullptr;
+  pDesc->pCreateInstance = nullptr;
+  pDesc->pCreateImpl = nullptr;
+  pDesc->userData = nullptr;
+  pDesc->newInstance = nullptr;
+
+  // create the new component (glue and instance)
+  MutableString128 t(Format, "New (Unregistered QML Component): {0} - {1}", pDesc->info.id, file);
+  pKernel->LogDebug(4, t);
+  QmlComponentData data(file, pQmlEngine);
+  QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
+  ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, pDesc->info.id, spInstance, nullptr);
+  spInstance->AttachToGlue(spC.ptr());
+
+  return spC;
+}
+
 
 // ---------------------------------------------------------------------------------------
 // RENDER THREAD

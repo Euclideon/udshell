@@ -2,11 +2,15 @@
 
 #if EPUI_DRIVER == EPDRIVER_QT
 
-#include "qmlbindings_qt.h"
-#include "signaltodelegate_qt.h"
 #include "ep/cpp/componentdesc.h"
-#include "../epkernel_qt.h"
 #include "ep/cpp/component/commandmanager.h"
+
+#include "driver/qt/util/qmlbindings_qt.h"
+#include "driver/qt/util/signaltodelegate_qt.h"
+#include "driver/qt/components/qobjectcomponent_qt.h"
+
+#include <QQmlContext>
+
 
 namespace qt {
 
@@ -173,6 +177,67 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
 }
 
 } // namespace internal
+
+
+// Creates a new QObject based ep::DynamicComponent
+DynamicComponentRef QmlComponentData::CreateComponent(KernelRef spKernel, Variant::VarMap initParams)
+{
+  // NOTE: we need to give QObjectComponent our 'this' pointer so it can do deferred QObject creation
+  return spKernel->CreateComponent<QObjectComponent>({ { "qmlcomponentdata", (int64_t)(size_t)this } });
+}
+
+// Creates a QML Item from the stored QQmlComponent
+QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, Component *pGlueComponent)
+{
+  // check that we contain a valid QQmlComponent
+  if (!qmlComponent.isReady())
+  {
+    // if the content was loaded on a different thread, block here until it's good to go
+    while (qmlComponent.isLoading())
+      QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+    EPTHROW_IF(qmlComponent.isNull(), epR_InvalidType, "Attempting to create QML item from an empty QQmlComponent.");
+
+    // error encountered with loading the file
+    if (qmlComponent.isError())
+    {
+      // TODO: better error information/handling
+      foreach(const QQmlError &error, qmlComponent.errors())
+        pGlueComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+      EPTHROW(epR_Failure, "Error compiling QML file");
+    }
+  }
+
+  // create a new qml context specific to the qml item we're attempting to create
+  QQmlContext *pContext = new QQmlContext(pQmlEngine->rootContext());
+  epscope(fail) { delete pContext; };
+
+  // create QObject wrapper for the enclosing EP Component
+  qt::QtEPComponent *pEPComponent = internal::BuildShimHelper<QtEPComponent>::Create(pGlueComponent);
+  epscope(fail) { delete pEPComponent; };
+
+  // then expose it to the qml context
+  pContext->setContextProperty("thisComponent", pEPComponent);
+
+  // now create the actual qml item
+  QObject *pQtObject = qmlComponent.create(pContext);
+  if (!pQtObject)
+  {
+    // TODO: better error information/handling
+    foreach(const QQmlError &error, qmlComponent.errors())
+      pGlueComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+    EPTHROW(epR_Failure, "Error creating QML Item");
+  }
+
+  // transfer ownership of our qt objects to ensure they are cleaned up
+  pContext->setParent(pQtObject);
+  pEPComponent->setParent(pQtObject);
+
+  // TODO: remove this
+  pEPComponent->Done();
+
+  return pQtObject;
+}
 
 
 // ---------------------------------------------------------------------------------------

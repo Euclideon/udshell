@@ -3,6 +3,7 @@
 #define QMLBINDINGS_QT_H
 
 #include "ep/cpp/component/component.h"
+#include "driver/qt/epkernel_qt.h"
 
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -33,6 +34,28 @@ struct BuildShimHelper
 void PopulateComponentDesc(Component *pComponent, QObject *pObject);
 
 } // namespace internal
+
+
+// Helper class that gets stored with the Dynamic Component Descriptor of Qt based components
+// This is responsible for loading the QML file, and creating both the associated dynamic component and qobject instance
+class QmlComponentData : public ep::RefCounted
+{
+public:
+  QmlComponentData(ep::String file, QQmlEngine *pQmlEngine, QQmlComponent::CompilationMode mode = QQmlComponent::PreferSynchronous)
+    : qmlComponent(pQmlEngine)
+  {
+    EPASSERT_THROW(!file.empty(), epR_InvalidArgument, "Must supply file name");
+
+    // create the qml component for the associated script
+    qmlComponent.loadUrl(QUrl(QString::fromUtf8(file.ptr, (int)file.length)), mode);
+  }
+
+  DynamicComponentRef CreateComponent(KernelRef spKernel, Variant::VarMap initParams = nullptr);
+  QObject *CreateInstance(QQmlEngine *pQmlEngine, Component *pGlueComponent);
+
+private:
+  QQmlComponent qmlComponent;
+};
 
 
 // ---------------------------------------------------------------------------------------

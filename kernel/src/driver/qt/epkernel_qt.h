@@ -69,13 +69,16 @@ public:
 
   void PostEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
 
-  QQmlEngine *QmlEngine() { return pQmlEngine; }
+  QQmlEngine *QmlEngine() const { return pQmlEngine; }
 
   epResult RegisterWindow(QQuickWindow *pWindow);
   void UnregisterWindow(QQuickWindow *pWindow);
   QPointer<QQuickWindow> TopLevelWindow() { return pTopLevelWindow; }
 
   QtFocusManager *GetFocusManager() { return pFocusManager; }
+
+  void RegisterQmlComponent(String superTypeId, String typeId, String file);
+  ep::ComponentRef CreateQmlComponent(String superTypeId, String file);
 
 private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);
@@ -90,10 +93,18 @@ private:
 
   void customEvent(QEvent *pEvent) override;
 
+  static Array<const MethodInfo> GetMethods()
+  {
+    return{
+      EP_MAKE_METHOD(RegisterQmlComponent, "Register a new QML Component type"),
+      EP_MAKE_METHOD(CreateQmlComponent, "Creates a new QML Component from file")
+    };
+  }
+
   // Members
   int argc;
-  Array<SharedString> args;
-  Array<const char *> argv;
+  Array<SharedString> cmdArgs;
+  Array<const char *> cmdArgv;
 
   QtApplication *pApplication;
   QQmlEngine *pQmlEngine;

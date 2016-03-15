@@ -634,16 +634,20 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
   pDesc->info.epVersion = EP_APIVERSION;
   Variant *pVer = typeDesc.Get("version");
   pDesc->info.pluginVersion = pVer ? pVer->as<int>() : EPKERNEL_PLUGINVERSION;
+  pDesc->info.flags = ComponentInfoFlags::Unpopulated;
 
   pDesc->baseClass = typeDesc["super"].asSharedString();
 
   pDesc->pInit = nullptr;
   pDesc->pCreateImpl = nullptr;
   pDesc->pCreateInstance = [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
+    MutableString128 t(Format, "New (From VarMap): {0} - {1}", _pType->info.id, _uid);
+    _pKernel->LogDebug(4, t);
     const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)_pType;
-    DynamicComponentRef spInstance = pDesc->newInstance(initParams);
+    DynamicComponentRef spInstance = pDesc->newInstance(KernelRef(_pKernel), initParams);
     ComponentRef spC = _pKernel->CreateGlue(pDesc->baseClass, _pType, _uid, spInstance, initParams);
-    spInstance->pThis = spC.ptr();
+    spInstance->AttachToGlue(spC.ptr());
+    spC->pUserData = spInstance->GetUserData();
     return spC;
   };
 
