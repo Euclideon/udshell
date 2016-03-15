@@ -13,7 +13,7 @@ SHARED_CLASS(ResourceManager);
 
 class Project : public Component
 {
-  EP_DECLARE_COMPONENT(Project, Component, EPKERNEL_PLUGINVERSION, "Contains the state of a project")
+  EP_DECLARE_COMPONENT(Project, Component, EPKERNEL_PLUGINVERSION, "Contains the state of a project", 0)
 public:
 
   void SaveProject();

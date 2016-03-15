@@ -10,7 +10,7 @@ SHARED_CLASS(PluginLoader);
 
 class PluginLoader : public Component
 {
-  EP_DECLARE_COMPONENT(PluginLoader, Component, EPKERNEL_PLUGINVERSION, "PluginLoader desc...")
+  EP_DECLARE_COMPONENT(PluginLoader, Component, EPKERNEL_PLUGINVERSION, "PluginLoader desc...", 0)
 public:
 
   virtual Slice<const String> GetSupportedExtensions() const { return nullptr; }

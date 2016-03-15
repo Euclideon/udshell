@@ -15,7 +15,7 @@ SHARED_CLASS(ArrayBuffer);
 
 class ArrayBuffer : public Buffer, public IArrayBuffer
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(ArrayBuffer, IArrayBuffer, Buffer, EPKERNEL_PLUGINVERSION, "ArrayBuffer desc...")
+  EP_DECLARE_COMPONENT_WITH_IMPL(ArrayBuffer, IArrayBuffer, Buffer, EPKERNEL_PLUGINVERSION, "ArrayBuffer desc...", 0)
 public:
 
   // array allocation

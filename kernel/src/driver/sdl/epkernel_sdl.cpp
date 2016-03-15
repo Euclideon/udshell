@@ -25,7 +25,7 @@ struct DelegateWithSemaphore
 
 class SDLKernel : public Kernel
 {
-  EP_DECLARE_COMPONENT(SDLKernel, Kernel, EPKERNEL_PLUGINVERSION, "SDL Kernel instance")
+  EP_DECLARE_COMPONENT(SDLKernel, Kernel, EPKERNEL_PLUGINVERSION, "SDL Kernel instance", 0)
 public:
   SDLKernel(Variant::VarMap commandLine);
   ~SDLKernel();

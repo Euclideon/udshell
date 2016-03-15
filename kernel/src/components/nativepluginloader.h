@@ -10,7 +10,7 @@ SHARED_CLASS(NativePluginLoader);
 
 class NativePluginLoader : public PluginLoader
 {
-  EP_DECLARE_COMPONENT(NativePluginLoader, PluginLoader, EPKERNEL_PLUGINVERSION, "Loads native plugins")
+  EP_DECLARE_COMPONENT(NativePluginLoader, PluginLoader, EPKERNEL_PLUGINVERSION, "Loads native plugins", 0)
 public:
 
   Slice<const String> GetSupportedExtensions() const override;

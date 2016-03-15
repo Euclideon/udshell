@@ -51,7 +51,7 @@ class QtKernel : public QObject, public Kernel
 {
   Q_OBJECT
 
-  EP_DECLARE_COMPONENT(QtKernel, Kernel, EPKERNEL_PLUGINVERSION, "Qt Kernel instance")
+  EP_DECLARE_COMPONENT(QtKernel, Kernel, EPKERNEL_PLUGINVERSION, "Qt Kernel instance", 0)
 
 public:
   QtKernel(Variant::VarMap commandLine);

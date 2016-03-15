@@ -11,7 +11,7 @@ SHARED_CLASS(UIComponent);
 
 class UIComponent : public Component, public IUIComponent
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(UIComponent, IUIComponent, Component, EPKERNEL_PLUGINVERSION, "Base UI Component")
+  EP_DECLARE_COMPONENT_WITH_IMPL(UIComponent, IUIComponent, Component, EPKERNEL_PLUGINVERSION, "Base UI Component", 0)
 public:
   Variant GetUIHandle() const override final { return pImpl->GetUIHandle(); }
 

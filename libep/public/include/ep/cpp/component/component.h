@@ -16,7 +16,7 @@ SHARED_CLASS(Kernel);
 // component API
 class Component : public RefCounted, public IComponent
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component", 0)
 public:
 
   const SharedString uid;

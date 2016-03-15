@@ -22,7 +22,7 @@ EP_ENUM(SeekOrigin,
 
 class Stream : public Broadcaster, public IStream
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Stream, IStream, Broadcaster, EPKERNEL_PLUGINVERSION, "Stream desc...")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Stream, IStream, Broadcaster, EPKERNEL_PLUGINVERSION, "Stream desc...", 0)
 
 public:
   int64_t Length() const override { return pImpl->Length(); }

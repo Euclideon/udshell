@@ -144,7 +144,7 @@ struct function_traits<R(C::*)(Args...)>
 
 
 // declare magic for a C++ component
-#define EP_DECLARE_COMPONENT(Name, SuperType, Version, Description)                      \
+#define EP_DECLARE_COMPONENT(Name, SuperType, Version, Description, Flags)               \
 public:                                                                                  \
   friend class ::ep::Kernel;                                                             \
   using Super = SuperType;                                                               \
@@ -164,16 +164,16 @@ public:                                                                         
   }                                                                                      \
   static ComponentInfo MakeDescriptor()                                                  \
   {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, 0 };             \
+    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
   }                                                                                      \
 private:
 
 // declare magic for a C++ component with a pImpl interface
-#define EP_DECLARE_COMPONENT_WITH_IMPL(Name, Interface, SuperType, Version, Description) \
+#define EP_DECLARE_COMPONENT_WITH_IMPL(Name, Interface, SuperType, Version, Description, Flags) \
   friend class ::ep::Kernel;                                                             \
-  __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description)
+  __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)
 
-#define __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description)    \
+#define __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)    \
 public:                                                                                  \
   friend class Name##Impl;                                                               \
   using Super = SuperType;                                                               \
@@ -193,7 +193,7 @@ public:                                                                         
   }                                                                                      \
   static ComponentInfo MakeDescriptor()                                                  \
   {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, 0 };             \
+    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
   }                                                                                      \
   template <typename T>                                                                  \
   T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \

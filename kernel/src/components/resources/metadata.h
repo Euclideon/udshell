@@ -12,7 +12,7 @@ SHARED_CLASS(Metadata);
 
 class Metadata : public KVPStore
 {
-  EP_DECLARE_COMPONENT(Metadata, KVPStore, EPKERNEL_PLUGINVERSION, "Metadata resource")
+  EP_DECLARE_COMPONENT(Metadata, KVPStore, EPKERNEL_PLUGINVERSION, "Metadata resource", 0)
 public:
 
   size_t NumRecords() const override

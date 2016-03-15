@@ -19,7 +19,7 @@ EP_BITFIELD(FileOpenFlags,
 
 class File : public Stream
 {
-  EP_DECLARE_COMPONENT(File, Stream, EPKERNEL_PLUGINVERSION, "File desc...")
+  EP_DECLARE_COMPONENT(File, Stream, EPKERNEL_PLUGINVERSION, "File desc...", 0)
 public:
 
   Slice<void> Read(Slice<void> buffer) override;

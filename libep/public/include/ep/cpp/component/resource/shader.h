@@ -15,7 +15,7 @@ EP_ENUM(ShaderType,
 
 class Shader : public Resource, public IShader
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Shader, IShader, Resource, EPKERNEL_PLUGINVERSION, "Shader desc...")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Shader, IShader, Resource, EPKERNEL_PLUGINVERSION, "Shader desc...", 0)
 public:
   SharedString GetCode() const override final { return pImpl->GetCode(); }
   void SetCode(SharedString code) override final { pImpl->SetCode(code); }

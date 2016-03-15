@@ -16,7 +16,7 @@ SHARED_CLASS(File);
 
 class UIConsole : public UIComponent
 {
-  EP_DECLARE_COMPONENT(UIConsole, UIComponent, EPKERNEL_PLUGINVERSION, "Is a UI for a Console Panel with input and output text controls")
+  EP_DECLARE_COMPONENT(UIConsole, UIComponent, EPKERNEL_PLUGINVERSION, "Is a UI for a Console Panel with input and output text controls", 0)
 public:
 
   StreamRef GetInStream() const { return spInStream; }

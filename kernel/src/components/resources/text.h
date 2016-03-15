@@ -11,7 +11,7 @@ SHARED_CLASS(Buffer);
 
 class Text : public Buffer
 {
-  EP_DECLARE_COMPONENT(Text, Buffer, EPKERNEL_PLUGINVERSION, "Text resource")
+  EP_DECLARE_COMPONENT(Text, Buffer, EPKERNEL_PLUGINVERSION, "Text resource", 0)
 public:
 
   Variant ParseXml();

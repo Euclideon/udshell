@@ -122,7 +122,7 @@ struct LogStream
 
 class Logger : public Component
 {
-  EP_DECLARE_COMPONENT(Logger, Component, EPKERNEL_PLUGINVERSION, "Logger desc...")
+  EP_DECLARE_COMPONENT(Logger, Component, EPKERNEL_PLUGINVERSION, "Logger desc...", 0)
 public:
 
   void Log(int level, String text, LogCategories category = LogCategories::Debug, String componentUID = nullptr);

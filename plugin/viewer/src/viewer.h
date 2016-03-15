@@ -18,7 +18,7 @@ SHARED_CLASS(View);
 
 class Viewer : public Activity
 {
-  EP_DECLARE_COMPONENT(Viewer, Activity, EPKERNEL_PLUGINVERSION, "View UD data files")
+  EP_DECLARE_COMPONENT(Viewer, Activity, EPKERNEL_PLUGINVERSION, "View UD data files", 0)
 public:
 
   void Activate() override;
