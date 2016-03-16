@@ -3,6 +3,7 @@
 #define QMLBINDINGS_QT_H
 
 #include "ep/cpp/component/component.h"
+#include "ep/cpp/component/uicomponent.h"
 #include "driver/qt/epkernel_qt.h"
 
 #include <QQuickItem>
@@ -12,23 +13,12 @@ namespace qt {
 
 // forward declare
 class QtEPComponent;
-class QtKernel;
 class QtFocusManager;
 
 namespace internal {
 
 // ---------------------------------------------------------------------------------------
 // INTERNAL
-
-// Internal helper that creates a QtEPComponent (or derived) shim object containing a weak pointer
-template <typename T>
-struct BuildShimHelper
-{
-  epforceinline static QtEPComponent *Create(ep::Component *pComponent)
-  {
-    return new T(pComponent);
-  }
-};
 
 // Helper function to dynamically populate the component descriptor with the QObject's meta data
 void PopulateComponentDesc(Component *pComponent, QObject *pObject);
@@ -60,6 +50,10 @@ private:
 
 // ---------------------------------------------------------------------------------------
 // SHIM OBJECTS
+
+struct BuildQtEPComponent;
+
+enum QtHasWeakRef_t { QtHasWeakRef };
 
 // This shim class wraps an ep::Component in a QObject that can be accessible from QML
 class QtEPComponent : public QObject
@@ -104,11 +98,11 @@ signals:
   void completed();
 
 protected:
-  template <typename T> friend struct internal::BuildShimHelper;
+  friend struct BuildQtEPComponent;
 
   // this constructor ensures the QtEPComponent only holds a weak pointer to its ep::Component
   // currently only used to define the QML "thisComponent" since a SharedPtr will result in a circular reference
-  QtEPComponent(ep::Component* pComp) : QObject(nullptr), pComponent(pComp) {}
+  QtEPComponent(ep::Component *pComp, QtHasWeakRef_t) : QObject(nullptr), pComponent(pComp) {}
 
   ep::ComponentRef spComponent;
   Component* pComponent; // used to avoid circular references
@@ -126,8 +120,8 @@ public:
   QtEPUIComponent(const QtEPComponent &val) : QtEPComponent(val) { InitQuickItem(); }
   ~QtEPUIComponent()
   {
-    if (pQuickItem)
-      QObject::disconnect(pQuickItem, &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
+    if (pComponent)
+      QObject::disconnect((QQuickItem*)pComponent->GetUserData(), &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
   }
 
   virtual void Done() override
@@ -140,28 +134,23 @@ public:
   }
 
   // QML exposed methods
-  Q_INVOKABLE QQuickWindow *parentWindow() const { return pQuickItem->window(); }
+  Q_INVOKABLE QQuickWindow *parentWindow() const { return static_cast<QQuickItem*>(pComponent->GetUserData())->window(); }
 
 signals:
   void parentWindowChanged(QQuickWindow *window);
 
 protected:
-  template <typename T> friend struct internal::BuildShimHelper;
+  friend struct BuildQtEPComponent;
 
   // this constructor ensures the QtEPComponent only holds a weak pointer to its ep::Component
   // currently only used to define the QML "thisComponent" since a SharedPtr will result in a circular reference
-  QtEPUIComponent(ep::Component *pComp) : QtEPComponent(pComp) {}
+  QtEPUIComponent(ep::Component *pComp, QtHasWeakRef_t) : QtEPComponent(pComp, QtHasWeakRef) {}
 
   void InitQuickItem()
   {
     if (pComponent)
-    {
-      pQuickItem = (QQuickItem*)pComponent->GetUserData();
-      QObject::connect(pQuickItem, &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
-    }
+      QObject::connect((QQuickItem*)pComponent->GetUserData(), &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
   }
-
-  QQuickItem *pQuickItem = nullptr;
 };
 
 
@@ -186,11 +175,25 @@ private:
 };
 
 
-// factory class to build a qml shim component from a component ref
-// performs a lookup, so only use this if the type isn't known at compile time
+// factory class to build a qml shim component from a component
 struct BuildQtEPComponent
 {
-  static QtEPComponent *Create(const ep::ComponentRef &spComponent);
+  // create a qml shim component that has a shared ref to the ep::component
+  static QtEPComponent *Create(const ep::ComponentRef &spComponent) { return CreateInternal(spComponent); }
+
+  // create a qml shim component that has a weak ref to the ep::component - used to avoid circular deps
+  static QtEPComponent *CreateWeak(ep::Component *pThis) { return CreateInternal(pThis, QtHasWeakRef); }
+
+private:
+  template <typename Component, typename ...Args>
+  static QtEPComponent *CreateInternal(Component pComponent, Args ...args)
+  {
+    if (!pComponent)
+      return nullptr;
+    if (pComponent->IsType("uicomponent"))
+      return new QtEPUIComponent(pComponent, args...);
+    return new QtEPComponent(pComponent, args...);
+  }
 };
 
 } // namespace qt

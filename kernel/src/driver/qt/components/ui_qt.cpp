@@ -17,25 +17,6 @@
 namespace qt {
 namespace internal {
 
-// SFINAE fun
-// These can be extended in future, but will result in the correct template being called based on the T type
-// Note: These create a qml shim object containing a weak reference
-
-// Create a QtEPUIComponent shim object for the ep::UIComponent family
-template <class T, typename std::enable_if<std::is_base_of<ep::UIComponent, T>::value>::type* = nullptr>
-QtEPComponent *BuildShimQObject(T *pComponent)
-{
-  return BuildShimHelper<QtEPUIComponent>::Create(pComponent);
-}
-
-// Default is a QtEPComponent for a general ep::Component
-template <class T, typename std::enable_if<!std::is_base_of<ep::UIComponent, T>::value>::type* = nullptr>
-QtEPComponent *BuildShimQObject(T *pComponent)
-{
-  return BuildShimHelper<QtEPComponent>::Create(pComponent);
-}
-
-
 // Helper function
 template <class T>
 epResult SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, T *pComponent, QObject **ppInternal)
@@ -48,7 +29,7 @@ epResult SetupFromQmlFile(Variant::VarMap initParams, qt::QtKernel *pKernel, T *
   }
 
   // create QObject wrapper for this component and expose it to the qml context for this ui component
-  qt::QtEPComponent *pEPComponent = BuildShimQObject<T>(pComponent);
+  qt::QtEPComponent *pEPComponent = BuildQtEPComponent::CreateWeak(pComponent);
   QQmlContext *pContext = new QQmlContext(pKernel->QmlEngine()->rootContext());
   pContext->setContextProperty("thisComponent", pEPComponent);
 

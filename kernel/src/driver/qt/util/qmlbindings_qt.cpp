@@ -11,7 +11,6 @@
 
 #include <QQmlContext>
 
-
 namespace qt {
 
 // ---------------------------------------------------------------------------------------
@@ -178,7 +177,6 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
 
 } // namespace internal
 
-
 // Creates a new QObject based ep::DynamicComponent
 DynamicComponentRef QmlComponentData::CreateComponent(KernelRef spKernel, Variant::VarMap initParams)
 {
@@ -213,7 +211,7 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, Component *pGl
   epscope(fail) { delete pContext; };
 
   // create QObject wrapper for the enclosing EP Component
-  qt::QtEPComponent *pEPComponent = internal::BuildShimHelper<QtEPComponent>::Create(pGlueComponent);
+  qt::QtEPComponent *pEPComponent = BuildQtEPComponent::CreateWeak(pGlueComponent);
   epscope(fail) { delete pEPComponent; };
 
   // then expose it to the qml context
@@ -532,16 +530,6 @@ QtEPComponent *QtKernelQml::getCommandManager() const
 QtFocusManager *QtKernelQml::getFocusManager() const
 {
   return pKernel->GetFocusManager();
-}
-
-QtEPComponent *BuildQtEPComponent::Create(const ep::ComponentRef &spComponent)
-{
-  if (!spComponent)
-    return nullptr;
-  if (spComponent->IsType("uicomponent"))
-    return new QtEPUIComponent(spComponent);
-
-  return new QtEPComponent(spComponent);
 }
 
 } // namespace qt
