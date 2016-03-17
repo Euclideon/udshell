@@ -10,7 +10,7 @@
         <perspective>1.0471975512</perspective>
         <speed>1</speed>
       </camera>
-      <model>v:/RnD/uds/Peterskirche(SolidScan).uds</model>
+      <model>R:\ConvertedModels\VR\Peterskirche(SolidScan)_cleaned.ssf</model>
     </viewer>
     <viewer>
       <camera>
