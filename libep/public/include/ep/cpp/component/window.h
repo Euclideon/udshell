@@ -27,7 +27,7 @@ protected:
   static Array<const PropertyInfo> GetProperties()
   {
     return{
-      EP_MAKE_PROPERTY_EXPLICIT("UI", "Top level UI for the window", EP_MAKE_GETTER(GetTopLevelUI), EP_MAKE_SETTER(SetTopLevelUI), nullptr, 0),
+      EP_MAKE_PROPERTY_EXPLICIT("UI", "Top level UI for the window", EP_MAKE_GETTER(GetTopLevelUI), EP_MAKE_SETTER(SetTopLevelUI), nullptr, 0)
     };
   }
 };

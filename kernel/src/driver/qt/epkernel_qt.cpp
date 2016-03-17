@@ -3,6 +3,7 @@
 #if EPWINDOW_DRIVER == EPDRIVER_QT
 
 #include "kernelimpl.h"
+#include "components/uiconsole.h"
 #include "components/viewimpl.h"
 #include "components/glue/componentglue.h"
 
@@ -11,6 +12,9 @@
 #include "driver/qt/ui/window_qt.h"
 #include "driver/qt/util/qmlbindings_qt.h"
 #include "driver/qt/components/qobjectcomponent_qt.h"
+#include "driver/qt/components/windowimpl_qt.h"
+#include "driver/qt/components/uicomponentimpl_qt.h"
+#include "driver/qt/components/viewportimpl_qt.h"
 
 #include <QSemaphore>
 
@@ -118,8 +122,12 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
     cmdArgv.pushBack(arg.ptr);
   argc = (int)cmdArgv.length;
 
-  // init qt kernel
+  // register Qt specific components
   EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), epR_Failure, "Unable to register QtComponent");
+  EPTHROW_IF_NULL((RegisterComponentType<UIComponent, QtUIComponentImpl, UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
+  EPTHROW_IF_NULL((RegisterComponentType<Window, QtWindowImpl, WindowGlue>()), epR_Failure, "Unable to register Window component");
+  EPTHROW_IF_NULL((RegisterComponentType<Viewport, QtViewportImpl, ViewportGlue>()), epR_Failure, "Unable to register UIComponent");
+  EPTHROW_IF_NULL(RegisterComponentType<UIConsole>(), epR_Failure, "Unable to register UIConsole Component");
 
   // create our qapplication
   pApplication = new QtApplication(this, argc, (char**)cmdArgv.ptr);

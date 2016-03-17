@@ -10,7 +10,6 @@
 #include "components/lua.h"
 #include "components/logger.h"
 #include "components/timer.h"
-#include "components/uiconsole.h"
 #include "components/nodes/geomnode.h"
 #include "components/pluginmanager.h"
 #include "components/pluginloader.h"
@@ -26,9 +25,6 @@
 // Components that do the Impl dance
 #include "components/componentimpl.h"
 #include "components/viewimpl.h"
-#include "components/uicomponentimpl.h"
-#include "components/viewportimpl.h"
-#include "components/windowimpl.h"
 #include "components/commandmanagerimpl.h"
 #include "components/resourcemanagerimpl.h"
 #include "components/activityimpl.h"
@@ -210,10 +206,6 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Project>();
   pInstance->RegisterComponentType<Timer>();
   pInstance->RegisterComponentType<Lua>();
-  pInstance->RegisterComponentType<UIComponent, UIComponentImpl>();
-  pInstance->RegisterComponentType<UIConsole>();
-  pInstance->RegisterComponentType<Viewport, ViewportImpl>();
-  pInstance->RegisterComponentType<Window, WindowImpl>();
   pInstance->RegisterComponentType<View, ViewImpl>();
   pInstance->RegisterComponentType<Scene, SceneImpl>();
   pInstance->RegisterComponentType<Activity, ActivityImpl>();

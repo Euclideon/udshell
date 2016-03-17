@@ -25,7 +25,7 @@ protected:
   static Array<const PropertyInfo> GetProperties()
   {
     return{
-      EP_MAKE_PROPERTY_RO(UIHandle, "Platform specific UI handle", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(UIHandle, "Platform specific UI handle", nullptr, 0)
     };
   }
 };

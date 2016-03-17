@@ -227,7 +227,7 @@ Variant ComponentImpl::Call(String method, Slice<const Variant> args)
     if (!pFunc)
     {
       // TODO: throw in this case?
-      pInstance->LogWarning(1, "Method not found!");
+      pInstance->LogWarning(1, "Method '{0}' not found!", method);
       return Variant();
     }
     Variant r2 = pFunc->staticFunc.call(args);

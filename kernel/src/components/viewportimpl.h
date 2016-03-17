@@ -4,6 +4,7 @@
 
 #include "ep/cpp/component/viewport.h"
 #include "ep/cpp/internal/i/iviewport.h"
+#include "components/uicomponentimpl.h"
 
 namespace ep {
 
@@ -13,16 +14,34 @@ public:
   ViewportImpl(Component *pInstance, Variant::VarMap initParams)
     : ImplSuper(pInstance)
   {
-    CreateInternal(initParams);
+    // check if we passed in a view, otherwise create a default one
+    Variant *pVar = initParams.Get("view");
+    if (pVar)
+    {
+      spView = pVar->as<ViewRef>();
+    }
+    else
+    {
+      LogDebug(2, "Creating internal View component");
+      spView = GetKernel()->CreateComponent<View>();
+    }
   }
 
   ViewRef GetView() const override final { return spView; }
-  void SetView(ViewRef _spView) override final { EPASSERT(false, "TODO: implement this - need to reload the ui!!"); }
-
-private:
-  void CreateInternal(Variant::VarMap initParams);
 
   ViewRef spView = nullptr;
+};
+
+class ViewportGlue final : public Viewport
+{
+public:
+  ViewportGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef _spInstance, Variant::VarMap initParams)
+    : Viewport(_pType, _pKernel, _uid, initParams), spInstance(_spInstance)
+  {
+  }
+
+protected:
+  ComponentRef spInstance;
 };
 
 } // namespace ep

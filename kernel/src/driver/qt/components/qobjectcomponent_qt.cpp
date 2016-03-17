@@ -8,6 +8,7 @@
 
 #include "driver/qt/util/qmlbindings_qt.h"
 #include "driver/qt/components/qobjectcomponent_qt.h"
+#include "driver/qt/components/viewportimpl_qt.h"
 
 namespace qt {
 
@@ -39,6 +40,17 @@ QObjectComponent::~QObjectComponent()
     delete pQObject;
 }
 
+const MethodDesc *QObjectComponent::GetMethodDesc(String _name, EnumerateFlags enumerateFlags) const
+{
+  /*  if (!(enumerateFlags & EnumerateFlags::NoDynamic))
+  {
+  const Variant *pVal = qobject.Get(_name);
+  if (pVal)
+  return CacheMethodDesc(_name, pVal->as<Variant::VarDelegate>());
+  }
+  return Super::GetMethodDesc(_name, enumerateFlags);*/
+  return nullptr;
+}
 
 // PRIVATE QOBJECTCOMPONENTS ONLY -----------------------------------------------------------------
 
@@ -70,7 +82,24 @@ void QObjectComponent::SetupQObject()
 {
   EPASSERT(pThis != this, "Attempting to validate an unattached QObjectComponent");
 
-  // TODO...
+  if (pThis->IsType("window"))
+  {
+    // We expect a QQuickWindow object
+    EPTHROW_IF(qobject_cast<QQuickWindow*>(pQObject) == nullptr, epR_Failure, "Window component must create a QQuickWindow");
+
+    // register the window with the kernel
+    if (static_cast<QtKernel*>(pKernel)->RegisterWindow((QQuickWindow*)pQObject) != epR_Success)
+      EPTHROW_ERROR(epR_Failure, "Unable to register Window component with Kernel");
+  }
+  else
+  {
+    // We expect a QQuickItem object
+    EPTHROW_IF(qobject_cast<QQuickItem*>(pQObject) == nullptr, epR_Failure, "UI based components must create a QQuickItem");
+
+    // HAX: we'll have a view but it wont be attached - hence setting it to itself
+    if (pThis->IsType("viewport"))
+      ((Viewport*)pThis)->SetView(((Viewport*)pThis)->GetView());
+  }
 }
 
 } // namespace qt

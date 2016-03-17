@@ -3,9 +3,7 @@
 #define EP_QOBJECTCOMPONENT_QT_H
 
 #include "ep/cpp/component/component.h"
-
 #include "components/dynamiccomponent.h"
-
 #include "driver/qt/epqt.h"
 
 class QObject;
@@ -26,6 +24,8 @@ public:
   QObject *GetQObject() const { return pQObject; }
   template <class T>
   T *GetQObject() const { return qobject_cast<T*>(pQObject); }
+
+  const MethodDesc *GetMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final;
 
 private:
   friend class QtKernel;

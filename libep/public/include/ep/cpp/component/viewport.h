@@ -15,7 +15,7 @@ class Viewport : public UIComponent, public IViewport
   EP_DECLARE_COMPONENT_WITH_IMPL(Viewport, IViewport, UIComponent, EPKERNEL_PLUGINVERSION, "UI Rendering Viewport", 0)
 public:
   ViewRef GetView() const override final { return pImpl->GetView(); }
-  void SetView(ViewRef spView) override final { pImpl->SetView(spView); }
+  void SetView(const ViewRef &spView) override final { pImpl->SetView(spView); }
 
 protected:
   Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

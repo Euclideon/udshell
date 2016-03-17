@@ -5,6 +5,7 @@
 #include "ep/cpp/component/uicomponent.h"
 #include "memstream.h"
 #include "logger.h"
+#include "file.h"
 
 namespace ep {
 

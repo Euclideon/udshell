@@ -13,19 +13,23 @@ public:
   WindowImpl(Component *pInstance, Variant::VarMap initParams)
     : ImplSuper(pInstance)
   {
-    CreateInternal(initParams);
   }
 
-  void SetTopLevelUI(UIComponentRef spUIComponent) override final;
   UIComponentRef GetTopLevelUI() const override final { return spTopLevelUI; }
 
-private:
-  ~WindowImpl() { DestroyInternal(); }
-
-  void CreateInternal(Variant::VarMap initParams);
-  void DestroyInternal();
-
   UIComponentRef spTopLevelUI = nullptr;
+};
+
+class WindowGlue final : public Window
+{
+public:
+  WindowGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef _spInstance, Variant::VarMap initParams)
+    : Window(_pType, _pKernel, _uid, initParams), spInstance(_spInstance)
+  {
+  }
+
+protected:
+  ComponentRef spInstance;
 };
 
 } // namespace ep
