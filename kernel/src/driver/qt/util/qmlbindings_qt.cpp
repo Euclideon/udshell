@@ -232,7 +232,8 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, Component *pGl
   pEPComponent->setParent(pQtObject);
 
   // TODO: remove this
-  pEPComponent->Done();
+  internal::PopulateComponentDesc(pGlueComponent, pQtObject);
+  pEPComponent->Done(pQtObject);
 
   return pQtObject;
 }

@@ -291,18 +291,19 @@ void Init(String sender, String message, const Variant &data)
 #endif // end EP_WINDOWS
 
   epscope(fail) { if (!spMainWindow) spKernel->LogError("Error creating MainWindow UI Component\n"); };
-  spMainWindow = spKernel->CreateComponent<Window>({ { "file", "qrc:/qml/window.qml" } });
+  spMainWindow = spKernel->Call("createqmlcomponent", "window", "qrc:/qml/window.qml", nullptr).as<WindowRef>();
 
   epscope(fail) { if (!spTopLevelUI) spKernel->LogError("Error creating top Level UI Component\n"); };
-  spTopLevelUI = spKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/main.qml" } });
+  spTopLevelUI = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/main.qml", nullptr).as<UIComponentRef>();
+
 
   epscope(fail) { if (!spMessageBox) spKernel->LogError("Error creating MessageBox UI Component\n"); };
-  spMessageBox = spKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/components/messagebox.qml" } });
+  spMessageBox = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/components/messagebox.qml", Variant::VarMap{{ "name", "messagebox" }}).as<UIComponentRef>();
   spTopLevelUI->Set("messageboxcomp", spMessageBox);
 
   UIConsoleRef spConsole;
   epscope(fail) { if (!spConsole) spKernel->LogError("Error creating top Level UI Component\n"); };
-  spConsole = spKernel->CreateComponent<UIConsole>({ { "file", "qrc:/kernel/console.qml" } });
+  spConsole = spKernel->Call("createqmlcomponent", "uiconsole", "qrc:/kernel/console.qml", nullptr).as<UIConsoleRef>();
   spTopLevelUI->Set("uiconsole", spConsole);
 
   // Load menus
@@ -324,7 +325,7 @@ void Init(String sender, String message, const Variant &data)
   spTopLevelUI->Set("toolbarcomp", spToolBar);
 
   // New Activity selecter panel
-  auto spActivitySelecter = spKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/activityselecter.qml" } });
+  auto spActivitySelecter = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/components/activityselecter.qml", nullptr).as<UIComponentRef>();
   spActivitySelecter->Set("activitiesinfo", GetActivitiesInfo());
   spTopLevelUI->Set("activityselecter", spActivitySelecter);
 

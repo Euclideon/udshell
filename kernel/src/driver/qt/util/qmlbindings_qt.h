@@ -72,7 +72,7 @@ public:
   //..
 
 public:
-  virtual void Done() { emit completed(); }
+  virtual void Done(QObject *) { emit completed(); }
 
   Q_INVOKABLE bool isNull() const { return pComponent == nullptr; }
 
@@ -116,25 +116,28 @@ class QtEPUIComponent : public QtEPComponent
 
 public:
   QtEPUIComponent() {}
-  QtEPUIComponent(const ep::ComponentRef &spComponent) : QtEPComponent(spComponent) { InitQuickItem(); }
-  QtEPUIComponent(const QtEPComponent &val) : QtEPComponent(val) { InitQuickItem(); }
+  QtEPUIComponent(const ep::ComponentRef &spComponent) : QtEPComponent(spComponent), pQuickItem((QQuickItem*)spComponent->GetUserData()) { InitQuickItem(); }
+  QtEPUIComponent(const QtEPUIComponent &val) : QtEPComponent(val), pQuickItem(val.pQuickItem) { InitQuickItem(); }
   ~QtEPUIComponent()
   {
     if (pComponent)
-      QObject::disconnect((QQuickItem*)pComponent->GetUserData(), &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
+      QObject::disconnect(pQuickItem, &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
   }
 
-  virtual void Done() override
+  virtual void Done(QObject *pQObject) override
   {
+    // HAX: to get shit working currently
+    pQuickItem = (QQuickItem*)pQObject;
+
     // we need to call InitQuickItem() from here since Done() will only be called on the QML defined "thisComponent"
     // this ensures we've finished loading the UIComponent's qml
     InitQuickItem();
 
-    QtEPComponent::Done();
+    QtEPComponent::Done(pQObject);
   }
 
   // QML exposed methods
-  Q_INVOKABLE QQuickWindow *parentWindow() const { return static_cast<QQuickItem*>(pComponent->GetUserData())->window(); }
+  Q_INVOKABLE QQuickWindow *parentWindow() const { return pQuickItem->window(); }
 
 signals:
   void parentWindowChanged(QQuickWindow *window);
@@ -149,8 +152,10 @@ protected:
   void InitQuickItem()
   {
     if (pComponent)
-      QObject::connect((QQuickItem*)pComponent->GetUserData(), &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
+      QObject::connect(pQuickItem, &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
   }
+
+  QQuickItem *pQuickItem = nullptr;
 };
 
 

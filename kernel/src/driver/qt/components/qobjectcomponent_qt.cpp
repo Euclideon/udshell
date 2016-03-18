@@ -69,7 +69,7 @@ void QObjectComponent::AttachToGlue(Component *pGlue)
   ComponentDescInl *pDesc = (ComponentDescInl*)pThis->GetDescriptor();
   if (pDesc->info.flags & ComponentInfoFlags::Unpopulated)
   {
-    internal::PopulateComponentDesc(pThis, pQObject);
+    //internal::PopulateComponentDesc(pThis, pQObject);
     pDesc->info.flags &= ~ComponentInfoFlags::Unpopulated;
   }
 
@@ -95,11 +95,14 @@ void QObjectComponent::SetupQObject()
   {
     // We expect a QQuickItem object
     EPTHROW_IF(qobject_cast<QQuickItem*>(pQObject) == nullptr, epR_Failure, "UI based components must create a QQuickItem");
-
-    // HAX: we'll have a view but it wont be attached - hence setting it to itself
-    if (pThis->IsType("viewport"))
-      ((Viewport*)pThis)->SetView(((Viewport*)pThis)->GetView());
   }
+}
+
+void QObjectComponent::ChickenMeetEgg()
+{
+  // HAX: we'll have a view but it wont be attached - hence setting it to itself
+  if (pThis->IsType("viewport"))
+    ((Viewport*)pThis)->SetView(((Viewport*)pThis)->GetView());
 }
 
 } // namespace qt

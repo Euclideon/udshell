@@ -66,16 +66,16 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
   ViewportRef spViewport;
   epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component\n"); };
-  spViewport = pKernel->CreateComponent<Viewport>({ { "file", "qrc:/qml/components/viewport.qml" }, { "view", spView } });
+  spViewport = pKernel->Call("createqmlcomponent", "viewport", "qrc:/qml/components/viewport.qml", Variant::VarMap{ { "view", spView } }).as<ViewportRef>();
   spViewport->Subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
 
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
-  spViewerUI = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/viewer/viewer.qml" } });
+  spViewerUI = pKernel->Call("createqmlcomponent", "uicomponent", "qrc:/viewer/viewer.qml", nullptr).as<UIComponentRef>();
   spViewerUI->Set("viewport", spViewport);
 
   epscope(fail) { if(!spUIBookmarks) pKernel->LogError("Error creating bookmarks UI Component\n"); };
-  spUIBookmarks = pKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/bookmarksui.qml" } });
+  spUIBookmarks = pKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/components/bookmarksui.qml", nullptr).as<UIComponentRef>();
   spUIBookmarks->Set("view", spView);
   spViewerUI->Set("bookmarkscomp", spUIBookmarks);
 
@@ -86,7 +86,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   else
   {
     epscope(fail) { if (!spUIResources) pKernel->LogError("Error creating Resource Panel UI Component\n"); };
-    spUIResources = pKernel->CreateComponent<UIComponent>({ { "name", "resourcespanel" },{ "file", "qrc:/qml/components/resourcespanel.qml" } });
+    spUIResources = pKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/components/resourcespanel.qml", Variant::VarMap{ { "name", "resourcespanel" } }).as<UIComponentRef>();
   }
   spViewerUI->Set("resourcespanel", spUIResources);
 

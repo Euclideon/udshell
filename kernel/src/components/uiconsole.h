@@ -154,6 +154,19 @@ protected:
   }
 };
 
+
+class UIConsoleGlue final : public UIConsole
+{
+public:
+  UIConsoleGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef _spInstance, Variant::VarMap initParams)
+    : UIConsole(_pType, _pKernel, _uid, initParams), spInstance(_spInstance)
+  {
+  }
+
+protected:
+  ComponentRef spInstance;
+};
+
 } // namespace ep
 
 #endif // UICONSOLE_H

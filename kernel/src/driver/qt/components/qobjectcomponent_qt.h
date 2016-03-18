@@ -27,6 +27,9 @@ public:
 
   const MethodDesc *GetMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final;
 
+  // TODO: remove this hack
+  void ChickenMeetEgg();
+
 private:
   friend class QtKernel;
 

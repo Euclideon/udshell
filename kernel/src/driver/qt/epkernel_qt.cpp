@@ -127,7 +127,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   EPTHROW_IF_NULL((RegisterComponentType<UIComponent, QtUIComponentImpl, UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
   EPTHROW_IF_NULL((RegisterComponentType<Window, QtWindowImpl, WindowGlue>()), epR_Failure, "Unable to register Window component");
   EPTHROW_IF_NULL((RegisterComponentType<Viewport, QtViewportImpl, ViewportGlue>()), epR_Failure, "Unable to register UIComponent");
-  EPTHROW_IF_NULL(RegisterComponentType<UIConsole>(), epR_Failure, "Unable to register UIConsole Component");
+  EPTHROW_IF_NULL((RegisterComponentType<UIConsole, void, UIConsoleGlue>()), epR_Failure, "Unable to register UIConsole Component");
 
   // create our qapplication
   pApplication = new QtApplication(this, argc, (char**)cmdArgv.ptr);
@@ -299,7 +299,7 @@ void QtKernel::RegisterQmlComponent(String superTypeId, String typeId, String fi
 }
 
 // ---------------------------------------------------------------------------------------
-ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file)
+ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file, Variant::VarMap initParams)
 {
   using namespace ep;
   const ComponentDescInl *pSuper = (const ComponentDescInl *)GetImpl()->GetComponentDesc(superTypeId);
@@ -329,8 +329,16 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file)
   pKernel->LogDebug(4, t);
   QmlComponentData data(file, pQmlEngine);
   QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
-  ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, pDesc->info.id, spInstance, nullptr);
+  ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, pDesc->info.id, spInstance, initParams);
+
+  // populate the descriptor meta from its parent
+  pDesc->PopulateFromDesc(pSuper);
+
   spInstance->AttachToGlue(spC.ptr());
+  GetImpl()->SetComponentUserData(spC, spInstance->GetUserData());
+
+  // HAX HAX:
+  spInstance->ChickenMeetEgg();
 
   return spC;
 }

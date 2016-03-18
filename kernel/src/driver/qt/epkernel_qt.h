@@ -78,7 +78,7 @@ public:
   QtFocusManager *GetFocusManager() { return pFocusManager; }
 
   void RegisterQmlComponent(String superTypeId, String typeId, String file);
-  ep::ComponentRef CreateQmlComponent(String superTypeId, String file);
+  ep::ComponentRef CreateQmlComponent(String superTypeId, String file, Variant::VarMap initParams);
 
 private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);
