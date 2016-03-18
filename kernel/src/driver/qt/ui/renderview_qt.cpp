@@ -70,6 +70,10 @@ QtRenderView::QtRenderView(QQuickItem *pParent)
   QObject::connect(this, &QQuickItem::heightChanged, this, &QtRenderView::OnResize);
 
   QObject::connect(this, &QQuickItem::visibleChanged, this, &QtRenderView::OnVisibleChanged);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
+  setMirrorVertically(true);
+#endif
 }
 
 QtRenderView::~QtRenderView()
@@ -109,6 +113,7 @@ void QtRenderView::componentComplete()
   setAcceptedMouseButtons(Qt::LeftButton | Qt::MiddleButton | Qt::RightButton);
 }
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 6, 0))
 QSGNode *QtRenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData)
 {
   // MAD HAX: QML flips our framebuffer texture along the y-axis - better fix in 5.6: https://bugreports.qt.io/browse/QTBUG-41073
@@ -122,6 +127,7 @@ QSGNode *QtRenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNod
   }
   return QQuickFramebufferObject::updatePaintNode(node, nodeData);
 }
+#endif
 
 void QtRenderView::focusInEvent(QFocusEvent * event)
 {
