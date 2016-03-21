@@ -455,7 +455,7 @@ void epDebugPrintf(const char *format, ...) epprintf_func(1, 2);
 
 
 // debug stuff...
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(EP_WINDOWS)
 # if EP_DEBUG
 #   include <signal.h>
 #   if !defined(__debugbreak)

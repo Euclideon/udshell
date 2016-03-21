@@ -4,6 +4,7 @@
 
 #include "ep/cpp/platform.h"
 #include "ep/cpp/keyvaluepair.h"
+#include "ep/cpp/range.h"
 
 namespace ep {
 
@@ -471,6 +472,13 @@ public:
       }
     }
 
+    Iterator(const Iterator &rh) : data(rh.data), pRoot(rh.pRoot) {}
+    Iterator(Iterator &&rval) : data(rval.data), pRoot(rval.pRoot)
+    {
+      rval.data = 0;
+      rval.pRoot = nullptr;
+    }
+
     Iterator &operator++()
     {
       IterateNext(pRoot, nullptr, 0);
@@ -590,6 +598,56 @@ struct AVLTreeAllocator
     return allocator;
   }
   // TODO: Add API for memory usage statistics
+};
+
+
+template <typename Tree>
+class TreeRange
+{
+public:
+  using TreeType = Tree;
+  using ValueType = typename Tree::ValueType;
+  using Iterator = typename Tree::Iterator;
+
+  TreeRange()
+    : i(nullptr), len(0) {}
+
+  TreeRange(const TreeRange<Tree> &rh)
+    : i(rh.i), len(rh.len)
+  {}
+  TreeRange(TreeRange<Tree> &&rval)
+    : i(std::move(rval.i)), len(rval.len)
+  {
+    rval.len = 0;
+  }
+
+  TreeRange(const Tree &tree)
+    : i(tree.begin()), len(tree.Size())
+  {}
+
+  bool empty() const { return len == 0; }
+  size_t length() const { return len; }
+
+  ValueType& front() const
+  {
+    return (*i).value;
+  }
+
+  ValueType& popFront()
+  {
+    ValueType &t = (*i).value; ++i;
+    // TODO: put this back
+//    EPTHROW_IF(i == Tree::end() && len != 0, epR_OutOfBounds, "AVLTree length ");
+    return t;
+  }
+
+  // iterators
+  Iterator begin() const { return i; }
+  Iterator end() const { return Tree::end(); }
+
+private:
+  Iterator i;
+  size_t len;
 };
 
 } // namespace ep

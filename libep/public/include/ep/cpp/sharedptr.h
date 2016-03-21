@@ -28,19 +28,21 @@ struct UniquePtr;
 
 namespace internal {
 
-  template<typename T, bool isref, typename... Args>
+  template<typename T, bool isref>
   struct Create;
 
-  template<typename T, typename... Args>
-  struct Create<T, false, Args...>
+  template<typename T>
+  struct Create<T, false>
   {
-    epforceinline static UniquePtr<T> create(Args... args);
+    template <typename... Args>
+    epforceinline static UniquePtr<T> create(Args&&... args);
   };
 
-  template<typename T, typename... Args>
-  struct Create<T, true, Args...>
+  template<typename T>
+  struct Create<T, true>
   {
-    epforceinline static UniquePtr<T> create(Args... args);
+    template <typename... Args>
+    epforceinline static UniquePtr<T> create(Args&&... args);
   };
 
   template<typename T, bool isref>
@@ -94,12 +96,12 @@ public:
 
   // create a new instance of T
   template<typename... Args>
-  static SharedPtr<T> create(Args... args)
+  static SharedPtr<T> create(Args&&... args)
   {
     static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
-    T *ptr = epConstruct(pMem) T(args...);
+    T *ptr = epConstruct(pMem) T(std::forward<Args>(args)...);
     ptr->pFreeFunc = [](RefCounted *pMem) { epFree((T*)pMem); };
     return SharedPtr<T>(ptr);
   }
@@ -247,9 +249,9 @@ public:
 
   // create a new instance of T
   template<typename... Args>
-  static UniquePtr<T> create(Args... args)
+  static UniquePtr<T> create(Args&&... args)
   {
-    return internal::Create<T, std::is_base_of<RefCounted, T>::value, Args...>::create(args...);
+    return internal::Create<T, std::is_base_of<RefCounted, T>::value>::create(std::forward<Args>(args)...);
   }
 
   UniquePtr() {}
@@ -382,7 +384,7 @@ private:
   // friends to init pFreeFunc...
   template<typename T>
   friend struct SharedPtr;
-  template<typename T, bool isrc, typename... Args>
+  template<typename T, bool isrc>
   friend struct internal::Create;
   friend class Kernel;
   friend class KernelImpl;
@@ -452,18 +454,20 @@ inline void SharedPtr<T>::release(T *pI)
 
 namespace internal {
 
-  template<class T, typename... Args>
-  epforceinline UniquePtr<T> Create<T, false, Args...>::create(Args... args)
+  template <class T>
+  template <typename... Args>
+  epforceinline UniquePtr<T> Create<T, false>::create(Args&&... args)
   {
-    return UniquePtr<T>(epNew(T,args...));
+    return UniquePtr<T>(epNew(T,std::forward<Args>(args)...));
   }
-  template<class T, typename... Args>
-  epforceinline UniquePtr<T> Create<T, true, Args...>::create(Args... args)
+  template <class T>
+  template <typename... Args>
+  epforceinline UniquePtr<T> Create<T, true>::create(Args&&... args)
   {
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
     using U = typename std::remove_const<T>::type;
-    UniquePtr<U> up(epConstruct(pMem) U(args...));
+    UniquePtr<U> up(epConstruct(pMem) U(std::forward<Args>(args)...));
     up->pFreeFunc = [](RefCounted *pMem) { epFree((U*)pMem); };
     return std::move(up);
   }

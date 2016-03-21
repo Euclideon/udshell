@@ -138,8 +138,8 @@ public:                                                                         
     static const ep::ComponentInfo info                                                  \
     {                                                                                    \
       EP_APIVERSION, Version,                                                            \
-      #Namespace, std::move(ep::MutableString<0>(#Name).toLower()),                      \
-      std::move(ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower())), \
+      #Namespace, ep::MutableString<0>(#Name).toLower(),                                 \
+      ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower()), \
       #Name, Description,                                                                \
       Flags                                                                              \
     };                                                                                   \
