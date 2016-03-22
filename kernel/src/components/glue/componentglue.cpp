@@ -9,7 +9,6 @@ ComponentGlue::ComponentGlue(const ComponentDesc *_pType, Kernel *_pKernel, Shar
 
   // assign delegates from spInstance...
   save = spInstance->GetFunctionDelegate("Save");
-  initComplete = spInstance->GetFunctionDelegate("InitComplete");
   receiveMessage = spInstance->GetFunctionDelegate("ReceiveMessage");
 }
 
