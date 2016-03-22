@@ -23,14 +23,23 @@ public:
 
   void SetName(SharedString name) override final;
 
-  Variant GetProperty(String property) const override final;
-  void SetProperty(String property, const Variant &value) override final;
-  Variant CallMethod(String method, Slice<const Variant> args) override final;
-  void Subscribe(String eventName, const Variant::VarDelegate &delegate) override final;
+  Array<SharedString> EnumerateProperties(EnumerateFlags enumerateFlags) const override final;
+  Array<SharedString> EnumerateFunctions(EnumerateFlags enumerateFlags) const override final;
+  Array<SharedString> EnumerateEvents(EnumerateFlags enumerateFlags) const override final;
+
+  const PropertyDesc *GetPropertyDesc(String name, EnumerateFlags enumerateFlags = 0) const override final;
+  const MethodDesc *GetMethodDesc(String name, EnumerateFlags enumerateFlags = 0) const override final;
+  const EventDesc *GetEventDesc(String name, EnumerateFlags enumerateFlags = 0) const override final;
+  const StaticFuncDesc *GetStaticFuncDesc(String name, EnumerateFlags enumerateFlags = 0) const override final;
+
+  Variant Get(String property) const override final;
+  void Set(String property, const Variant &value) override final;
+  Variant Call(String method, Slice<const Variant> args) override final;
+  void Subscribe(String eventName, const VarDelegate &delegate) override final;
 
   Variant Save() const override final { return Variant(Variant::VarMap()); }
 
-  void AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter, const SetterShim *pSetter) override final;
+  void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter, const MethodShim *pSetter) override final;
   void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod) override final;
   void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe) override final;
   void RemoveDynamicProperty(String name) override final;
@@ -41,7 +50,6 @@ protected:
   ~ComponentImpl();
 
   void Init(Variant::VarMap initParams) override final;
-  void InitComplete() override final {}
 
   void ReceiveMessage(String message, String sender, const Variant &data) override final;
 
@@ -51,12 +59,7 @@ protected:
   size_t NumEvents() const { return instanceEvents.Size() + ((const ComponentDescInl*)GetDescriptor())->eventTree.Size(); }
   size_t NumStaticFuncs() const { return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.Size(); }
 
-  const PropertyDesc *GetPropertyDesc(String name) const;
-  const MethodDesc *GetMethodDesc(String name) const;
-  const EventDesc *GetEventDesc(String name) const;
-  const StaticFuncDesc *GetStaticFuncDesc(String name) const;
-
-  // TODO: these substantially inflate the size of base Component and are almost always nullptr
+  // TODO: these substantially inflate the size of ComponentImpl and are almost always nullptr
   // ...should we move them to a separate allocation?
   AVLTree<SharedString, PropertyDesc> instanceProperties;
   AVLTree<SharedString, MethodDesc> instanceMethods;

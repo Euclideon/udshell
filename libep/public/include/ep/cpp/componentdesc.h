@@ -8,17 +8,15 @@
 
 #include <tuple>
 
-// HACK: TODO: this shouldn't be here
-namespace kernel {
-  struct ComponentDesc;
-}
-
 namespace ep {
+
+class Kernel;
+struct ComponentDescInl;
 
 typedef Variant(Getter)(const Component *pBaseComponent, const void *pDerivedInstance);
 typedef void(Setter)(Component *pBaseComponent, void *pDerivedInstance, const Variant *pValue);
 typedef Variant(MethodCall)(const Component *pBaseComponent, const void *pDerivedInstance, const Variant *pArgs, size_t numArgs);
-typedef Variant(Subscribe)(const Component *pBaseComponent, const void *pDerivedInstance, Variant::VarDelegate *pDelegate);
+typedef Variant(Subscribe)(const Component *pBaseComponent, const void *pDerivedInstance, VarDelegate *pDelegate);
 
 typedef Variant(StaticCall)(Slice<const Variant> args);
 
@@ -37,15 +35,15 @@ struct PropertyInfo
   SharedString uiType;
   uint32_t flags;
 
-  void *pGetterMethod;
-  void *pSetterMethod;
+  VarMethod pGetterMethod;
+  VarMethod pSetterMethod;
 };
 struct MethodInfo
 {
   SharedString id;
   SharedString description;
 
-  void *pMethod;
+  VarMethod pMethod;
 };
 struct EventInfo
 {
@@ -53,7 +51,7 @@ struct EventInfo
   SharedString displayName;
   SharedString description;
 
-  void *pSubscribe;
+  VarMethod pSubscribe;
 };
 struct StaticFuncInfo
 {
@@ -90,8 +88,6 @@ inline ComponentDesc::~ComponentDesc()
 {
 }
 
-class Kernel;
-
 // base class for pImpl types
 template <typename C, typename I>
 class BaseImpl : public I
@@ -103,7 +99,7 @@ public:
   using Interface = I;
   using ImplSuper = BaseImpl<C, I>;
 
-  const ComponentDesc* GetDescriptor() const { return pInstance->GetDescriptor(); }
+  const ComponentDescInl* GetDescriptor() const { return (const ComponentDescInl*)pInstance->GetDescriptor(); }
   Kernel* GetKernel() const { return &pInstance->GetKernel(); }
 
   C *pInstance;
@@ -205,38 +201,37 @@ private:                                                                        
 
 // emit getter and setter magic
 #define EP_MAKE_GETTER(Getter)                                                           \
-  []() -> void* {                                                                        \
+  []() -> VarMethod {                                                                    \
     struct Shim                                                                          \
     {                                                                                    \
-      Variant get()                                                                      \
+      Variant get(Slice<const Variant>)                                                  \
       {                                                                                  \
         return Variant(((const This*)(const Component*)this)->Getter());                 \
       }                                                                                  \
     };                                                                                   \
-    auto d = &Shim::get;                                                                 \
-    return *(void**)&d;                                                                  \
+    return VarMethod(&Shim::get);                                                        \
   }()
 
 #define EP_MAKE_SETTER(Setter)                                                           \
-  []() -> void* {                                                                        \
+  []() -> VarMethod {                                                                    \
     struct Shim                                                                          \
     {                                                                                    \
-      void set(const Variant &v)                                                         \
+      Variant set(Slice<const Variant> args)                                             \
       {                                                                                  \
         using PT = function_traits<decltype(&This::Setter)>::template arg<0>::type;      \
         try {                                                                            \
-          ((This*)(Component*)this)->Setter(v.as<std::remove_reference<PT>::type>());    \
+          ((This*)(Component*)this)->Setter(args[0].as<std::remove_reference<PT>::type>()); \
+          return Variant();                                                              \
         } catch (EPException &) {                                                        \
-          /* it's already on the stack, do nothing... */                                 \
+          return Variant(GetError()); /* it's already on the stack */                    \
         } catch (std::exception &e) {                                                    \
-          PushError(epR_CppException, e.what());                                         \
+          return Variant(PushError(epR_CppException, e.what()));                         \
         } catch (...) {                                                                  \
-          PushError(epR_CppException, "C++ exception");                                  \
+          return Variant(PushError(epR_CppException, "C++ exception"));                  \
         }                                                                                \
       }                                                                                  \
     };                                                                                   \
-    auto d = &Shim::set;                                                                 \
-    return *(void**)&d;                                                                  \
+    return VarMethod(&Shim::set);                                                        \
   }()
 
 
@@ -253,7 +248,7 @@ private:                                                                        
   EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, nullptr, EP_MAKE_SETTER(Set##Name), UIType, Flags)
 
 // make property with explicit getter and setter
-#define EP_MAKE_PROPERTY_EXPLICIT(Name, Description, Getter, Setter, UIType, Flags) \
+#define EP_MAKE_PROPERTY_EXPLICIT(Name, Description, Getter, Setter, UIType, Flags)      \
 ([]() -> PropertyInfo {                                                                  \
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
@@ -276,16 +271,15 @@ private:                                                                        
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
     id, Description,                                                                     \
-    []() -> void* {                                                                      \
+    []() -> VarMethod {                                                                  \
       struct Shim                                                                        \
       {                                                                                  \
-        Variant call(Slice<Variant> args)                                                \
+        Variant call(Slice<const Variant> args)                                          \
         {                                                                                \
           return VarCall(fastdelegate::MakeDelegate((This*)(Component*)this, &This::Method), args); \
         }                                                                                \
       };                                                                                 \
-      auto d = &Shim::call;                                                              \
-      return *(void**)&d;                                                                \
+      return VarMethod(&Shim::call);                                                     \
     }()                                                                                  \
   };                                                                                     \
 }())
@@ -302,17 +296,16 @@ private:                                                                        
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
     id, Name, Description,                                                               \
-    []() -> void* {                                                                      \
+    []() -> VarMethod {                                                                  \
       struct Shim                                                                        \
       {                                                                                  \
-        void subscribe(const Variant::VarDelegate &handler)                              \
+        Variant subscribe(Slice<const Variant> args)                                     \
         {                                                                                \
-          Variant v(handler);                                                            \
-          ((This*)(Component*)this)->Event.Subscribe(v.as<decltype(This::Event)::EvDelegate>()); \
+          auto d = args[0].as<decltype(This::Event)::EvDelegate>();                      \
+          return ((This*)(Component*)this)->Event.Subscribe(d);                          \
         }                                                                                \
       };                                                                                 \
-      auto d = &Shim::subscribe;                                                         \
-      return *(void**)&d;                                                                \
+      return VarMethod(&Shim::subscribe);                                                \
     }()                                                                                  \
   };                                                                                     \
 }())

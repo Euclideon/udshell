@@ -23,21 +23,21 @@ inline void Component::SetName(SharedString _name)
   pImpl->SetName(_name);
 }
 
-inline Variant Component::GetProperty(String property) const
+inline Variant Component::Get(String property) const
 {
-  return pImpl->GetProperty(property);
+  return pImpl->Get(property);
 }
-inline void Component::SetProperty(String property, const Variant &value)
+inline void Component::Set(String property, const Variant &value)
 {
-  pImpl->SetProperty(property, value);
-}
-
-inline Variant Component::CallMethod(String method, Slice<const Variant> args)
-{
-  return pImpl->CallMethod(method, args);
+  pImpl->Set(property, value);
 }
 
-inline void Component::Subscribe(String eventName, const Variant::VarDelegate &delegate)
+inline Variant Component::Call(String method, Slice<const Variant> args)
+{
+  return pImpl->Call(method, args);
+}
+
+inline void Component::Subscribe(String eventName, const VarDelegate &delegate)
 {
   pImpl->Subscribe(eventName, delegate);
 }
@@ -45,7 +45,33 @@ template<typename ...Args>
 inline void Component::Subscribe(String eventName, const Delegate<void(Args...)> &d)
 {
   typedef SharedPtr<internal::VarDelegateMemento<void(Args...)>> VarDelegateMementoRef;
-  Subscribe(eventName, Variant::VarDelegate(VarDelegateMementoRef::create(d)));
+  Subscribe(eventName, VarDelegate(VarDelegateMementoRef::create(d)));
+}
+
+inline VarDelegate Component::GetGetterDelegate(String _name, EnumerateFlags enumerateFlags)
+{
+  const PropertyDesc *pDesc = GetPropertyDesc(_name, enumerateFlags);
+  if (!pDesc || !pDesc->getter)
+    return nullptr;
+  return pDesc->getter.getDelegate(this);
+}
+inline VarDelegate Component::GetSetterDelegate(String _name, EnumerateFlags enumerateFlags)
+{
+  const PropertyDesc *pDesc = GetPropertyDesc(_name, enumerateFlags);
+  if (!pDesc || !pDesc->setter || pDesc->flags & epPF_Immutable)
+    return nullptr;
+  return pDesc->setter.getDelegate(this);
+}
+inline VarDelegate Component::GetFunctionDelegate(String _name, EnumerateFlags enumerateFlags)
+{
+  const MethodDesc *pDesc = GetMethodDesc(_name, enumerateFlags);
+  if (pDesc)
+    return pDesc->method.getDelegate(this);
+  // TODO: should also return static functions...
+//  const StaticFuncDesc *pStaticFuncs = GetStaticFuncDesc(_name);
+//  if (!pStaticFuncs)
+//    return pStaticFuncs->staticFunc.getDelegate(this);
+  return nullptr;
 }
 
 inline Variant Component::Save() const
@@ -58,7 +84,7 @@ inline void* Component::GetUserData() const
   return pUserData;
 }
 
-inline void Component::AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter, const SetterShim *pSetter)
+inline void Component::AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter, const MethodShim *pSetter)
 {
   pImpl->AddDynamicProperty(property, pGetter, pSetter);
 }
@@ -93,21 +119,16 @@ inline void Component::Init(Variant::VarMap initParams)
   pImpl->Init(initParams);
 }
 
-inline void Component::InitComplete()
-{
-  pImpl->InitComplete();
-}
-
 inline void Component::ReceiveMessage(String message, String sender, const Variant &data)
 {
   return pImpl->ReceiveMessage(message, sender, data);
 }
 
 template<typename ...Args>
-inline Variant Component::CallMethod(String method, Args... args)
+inline Variant Component::Call(String method, Args... args)
 {
   const Variant varargs[sizeof...(Args)+1] = { args... };
-  return CallMethod(method, Slice<const Variant>(varargs, sizeof...(Args)));
+  return Call(method, Slice<const Variant>(varargs, sizeof...(Args)));
 }
 
 template<typename ...Args>

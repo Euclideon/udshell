@@ -105,12 +105,12 @@ MutableString256 GetNameFromFilePath(String path)
 
 void AddUIActivity(ActivityRef spActivity)
 {
-  spTopLevelUI->CallMethod("addactivity", spActivity);
+  spTopLevelUI->Call("addactivity", spActivity);
 }
 
 void RemoveUIActivity(ActivityRef spActivity)
 {
-  spTopLevelUI->CallMethod("removeactivity", String(spActivity->uid));
+  spTopLevelUI->Call("removeactivity", String(spActivity->uid));
 }
 
 void OnActivityChanged(String uid)
@@ -177,7 +177,7 @@ void NewProject(String filePath)
   spProject->SetSrc(filePath);
 
   projectName = GetNameFromFilePath(filePath);
-  spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, appTitle));
+  spMainWindow->Set("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   InitProject();
 }
@@ -213,7 +213,7 @@ void OpenProject(String filePath)
   spProject->SetName("project");
 
   projectName = GetNameFromFilePath(filePath);
-  spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, appTitle));
+  spMainWindow->Set("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   // Load Activities from project file
   if (spProject)
@@ -242,7 +242,7 @@ void NewActivity(String typeID)
 void SaveProjectAs(String filePath)
 {
   projectName = GetNameFromFilePath(filePath);
-  spMainWindow->SetProperty("title", SharedString::format("{0} - {1}", projectName, appTitle));
+  spMainWindow->Set("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   spProject->SetSrc(filePath);
   spProject->SaveProject();
@@ -298,12 +298,12 @@ void Init(String sender, String message, const Variant &data)
 
   epscope(fail) { if (!spMessageBox) spKernel->LogError("Error creating MessageBox UI Component\n"); };
   spMessageBox = spKernel->CreateComponent<UIComponent>({ { "name", "messagebox" }, { "file", "qrc:/qml/components/messagebox.qml" } });
-  spTopLevelUI->SetProperty("messageboxcomp", spMessageBox);
+  spTopLevelUI->Set("messageboxcomp", spMessageBox);
 
   UIConsoleRef spConsole;
   epscope(fail) { if (!spConsole) spKernel->LogError("Error creating top Level UI Component\n"); };
   spConsole = spKernel->CreateComponent<UIConsole>({ { "file", "qrc:/kernel/console.qml" } });
-  spTopLevelUI->SetProperty("uiconsole", spConsole);
+  spTopLevelUI->Set("uiconsole", spConsole);
 
   // Load menus
   String menusPath(":/menus.xml");
@@ -312,7 +312,7 @@ void Init(String sender, String message, const Variant &data)
     spKernel->LogWarning(2, "Menus XML file \"{0}\" does not exist.", menusPath);
 
   spMenu = spKernel->CreateComponent<Menu>({ { "src", menuStr } });
-  spTopLevelUI->SetProperty("menucomp", spMenu);
+  spTopLevelUI->Set("menucomp", spMenu);
 
   // Load toolbar
   String toolBarPath(":/toolbar.xml");
@@ -321,12 +321,12 @@ void Init(String sender, String message, const Variant &data)
     spKernel->LogWarning(2, "Toolbar XML file \"{0}\" does not exist.", toolBarPath);
 
   spToolBar = spKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
-  spTopLevelUI->SetProperty("toolbarcomp", spToolBar);
+  spTopLevelUI->Set("toolbarcomp", spToolBar);
 
   // New Activity selecter panel
   auto spActivitySelecter = spKernel->CreateComponent<UIComponent>({ { "file", "qrc:/qml/components/activityselecter.qml" } });
-  spActivitySelecter->SetProperty("activitiesinfo", GetActivitiesInfo());
-  spTopLevelUI->SetProperty("activityselecter", spActivitySelecter);
+  spActivitySelecter->Set("activitiesinfo", GetActivitiesInfo());
+  spTopLevelUI->Set("activityselecter", spActivitySelecter);
 
   // TODO: Remove this once UIComponent cleans up its events
   if (!CITest)

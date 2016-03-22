@@ -19,11 +19,6 @@ void UIComponentImpl::CreateInternal(Variant::VarMap epUnusedParam(initParams))
 }
 
 // ---------------------------------------------------------------------------------------
-void UIComponentImpl::InitComplete()
-{
-}
-
-// ---------------------------------------------------------------------------------------
 void UIComponentImpl::DestroyInternal()
 {
 }
@@ -42,11 +37,6 @@ void WindowImpl::CreateInternal(Variant::VarMap epUnusedParam(initParams))
 
 // ---------------------------------------------------------------------------------------
 void WindowImpl::DestroyInternal()
-{
-}
-
-// ---------------------------------------------------------------------------------------
-void WindowImpl::InitComplete()
 {
 }
 

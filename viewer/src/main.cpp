@@ -13,8 +13,6 @@
 #include "ep/cpp/component/resourcemanager.h"
 #include "components/timer.h"
 
-using namespace kernel;
-
 static void ProcessCmdline(int argc, char *argv[]);
 
 // ---------------------------------------------------------------------------------------

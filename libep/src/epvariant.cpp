@@ -471,6 +471,20 @@ const EnumDesc* Variant::asEnum(size_t *pVal) const
   }
   return nullptr;
 }
+SharedPtr<RefCounted> Variant::asSharedPtr() const
+{
+  switch ((Type)t)
+  {
+    case Type::Void:
+      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+    case Type::Null:
+      return nullptr;
+    case Type::SharedPtr:
+        return (SharedPtr<RefCounted>&)sp;
+    default:
+      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  }
+}
 ComponentRef Variant::asComponent() const
 {
   switch ((Type)t)
@@ -486,7 +500,7 @@ ComponentRef Variant::asComponent() const
       EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
-Variant::VarDelegate Variant::asDelegate() const
+VarDelegate Variant::asDelegate() const
 {
   switch ((Type)t)
   {

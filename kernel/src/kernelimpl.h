@@ -48,6 +48,9 @@ public:
 
   // component registry
   const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) override final;
+  const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) override final;
+
+  void RegisterGlueType(String name, CreateGlueFunc *pCreateFunc) override final;
 
   const ComponentDesc* GetComponentDesc(String id) override final;
 
@@ -55,6 +58,7 @@ public:
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) override final;
 
   ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) override final;
+  ComponentRef CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef, Variant::VarMap initParams) override final;
 
   ComponentRef FindComponent(String name) const override final;
 
@@ -116,6 +120,7 @@ public:
   SharedString uid;
 
   HashMap<ComponentType> componentRegistry;
+  HashMap<CreateGlueFunc*> glueRegistry;
   HashMap<Component*> instanceRegistry;
   HashMap<Component*> namedInstanceRegistry;
   HashMap<ForeignInstance> foreignInstanceRegistry;

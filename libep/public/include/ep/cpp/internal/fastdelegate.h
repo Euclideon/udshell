@@ -661,7 +661,7 @@ protected:
 	}
 };
 
-// TODO: investigate if this condition can be satisfied
+// TODO: investigate if this condition can be satisfied!!
 //static_assert(sizeof(DelegateMemento) == sizeof(void*)*2, "Expect: sizeof(DelegateMemento) is 2 pointers!");
 
 

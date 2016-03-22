@@ -62,6 +62,7 @@ public:
   Slice(std::initializer_list<ET> list);
   Slice(T* ptr, size_t length);
   template<typename U> Slice(Slice<U> rh);
+  template<typename U, size_t N> Slice(U(&arr)[N]);
 
   // assignment
   template<typename U> Slice<T>& operator =(Slice<U> rh);
@@ -150,6 +151,7 @@ struct Array : public Slice<T>
   // TODO: Array copy/move constructors for const promotion?
   template <typename U> Array(U *ptr, size_t length);
   template <typename U> Array(Slice<U> slice);
+  template <typename U, size_t N> Array(U(&arr)[N]);
   ~Array();
 
   void reserve(size_t count);
@@ -223,6 +225,7 @@ struct SharedArray : public Slice<T>
   template <typename U, size_t Len> SharedArray(Array<U, Len> &&rval);
   template <typename U> SharedArray(U *ptr, size_t length);
   template <typename U> SharedArray(Slice<U> slice);
+  template <typename U, size_t N> SharedArray(U(&arr)[N]);
   ~SharedArray();
 
   size_t refcount() const;

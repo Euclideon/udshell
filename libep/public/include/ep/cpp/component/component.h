@@ -36,14 +36,29 @@ public:
   bool IsType() const { return IsType(T::ComponentID()); }
   bool IsType(String type) const;
 
-  Variant GetProperty(String property) const override final;
-  void SetProperty(String property, const Variant &value) override final;
+  // meta access
+  Array<SharedString> EnumerateProperties(EnumerateFlags enumerateFlags = 0) const override { return pImpl->EnumerateProperties(enumerateFlags); }
+  Array<SharedString> EnumerateFunctions(EnumerateFlags enumerateFlags = 0) const override { return pImpl->EnumerateFunctions(enumerateFlags); }
+  Array<SharedString> EnumerateEvents(EnumerateFlags enumerateFlags = 0) const override { return pImpl->EnumerateEvents(enumerateFlags); }
 
-  Variant CallMethod(String method, Slice<const Variant> args) override final;
+  const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetPropertyDesc(_name, enumerateFlags); }
+  const MethodDesc *GetMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetMethodDesc(_name, enumerateFlags); }
+  const EventDesc *GetEventDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetEventDesc(_name, enumerateFlags); }
+  const StaticFuncDesc *GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetStaticFuncDesc(_name, enumerateFlags); }
+
+  VarDelegate GetGetterDelegate(String name, EnumerateFlags enumerateFlags = 0);
+  VarDelegate GetSetterDelegate(String name, EnumerateFlags enumerateFlags = 0);
+  VarDelegate GetFunctionDelegate(String name, EnumerateFlags enumerateFlags = 0);
+
+  // meta interface
+  Variant Get(String property) const override final;
+  void Set(String property, const Variant &value) override final;
+
+  Variant Call(String method, Slice<const Variant> args) override final;
   template<typename ...Args>
-  Variant CallMethod(String method, Args... args);
+  Variant Call(String method, Args... args);
 
-  void Subscribe(String eventName, const Variant::VarDelegate &delegate) override final;
+  void Subscribe(String eventName, const VarDelegate &delegate) override final;
   template<typename ...Args>
   void Subscribe(String eventName, const Delegate<void(Args...)> &d);
   template <class X, class Y, typename ...Args>
@@ -67,7 +82,7 @@ public:
 
   void* GetUserData() const;
 
-  void AddDynamicProperty(const PropertyInfo &property, const GetterShim *pGetter = nullptr, const SetterShim *pSetter = nullptr) override final;
+  void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter = nullptr, const MethodShim *pSetter = nullptr) override final;
   void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod = nullptr) override final;
   void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe = nullptr) override final;
   void RemoveDynamicProperty(String name) override final;
@@ -120,7 +135,6 @@ protected:
 
   void* CreateImplInternal(String ComponentType, Variant::VarMap initParams);
 
-  void InitComplete() override;
   void ReceiveMessage(String message, String sender, const Variant &data) override;
 
   static Array<const PropertyInfo> GetProperties()

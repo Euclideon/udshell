@@ -12,6 +12,7 @@ namespace ep {
 
 typedef FastDelegate<void(String sender, String message, const Variant &data)> MessageHandler;
 typedef FastDelegate<void()> MainThreadCallback;
+typedef ComponentRef(CreateGlueFunc)(Kernel *pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams);
 
 SHARED_CLASS(ResourceManager);
 SHARED_CLASS(CommandManager);
@@ -25,6 +26,10 @@ class IKernel
 {
 public:
   virtual const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) = 0;
+  virtual const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) = 0;
+
+  virtual void RegisterGlueType(String name, CreateGlueFunc *pCreateFunc) = 0;
+
   virtual void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) = 0;
 
   virtual void SendMessage(String target, String sender, String message, const Variant &data) = 0;
@@ -40,6 +45,8 @@ public:
   virtual Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) = 0;
 
   virtual ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) = 0;
+
+  virtual ComponentRef CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) = 0;
 
   virtual ComponentRef FindComponent(String name) const = 0;
 

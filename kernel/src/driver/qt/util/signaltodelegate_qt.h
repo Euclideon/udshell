@@ -61,7 +61,7 @@ public:
   QtSignalToDelegate(QtSignalToDelegate &&rh)
     : QObject(), connection(std::move(rh.connection)), v(std::move(rh.v))
   {}
-  QtSignalToDelegate(const QObject *pSourceObj, const QMetaMethod &m, const Variant::VarDelegate &d) : v(d)
+  QtSignalToDelegate(const QObject *pSourceObj, const QMetaMethod &m, const VarDelegate &d) : v(d)
   {
     QMetaMethod sigHandler = lookupSignalHandler(m);
     if (sigHandler.isValid())

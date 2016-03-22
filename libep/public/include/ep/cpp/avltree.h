@@ -70,7 +70,7 @@ public:
   size_t Size() const { return size; }
   bool Empty() const { return size == 0; }
 
-  void Insert(K &&key, V &&rval)
+  V& Insert(K &&key, V &&rval)
   {
     Node *node = Allocator::Get().Alloc();
     new(&node->k) K(std::move(key));
@@ -78,8 +78,9 @@ public:
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
+    return node->v;
   }
-  void Insert(const K &key, V &&rval)
+  V& Insert(const K &key, V &&rval)
   {
     Node *node = Allocator::Get().Alloc();
     new(&node->k) K(key);
@@ -87,8 +88,9 @@ public:
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
+    return node->v;
   }
-  void Insert(K &&key, const V &v)
+  V& Insert(K &&key, const V &v)
   {
     Node *node = Allocator::Get().Alloc();
     new(&node->k) K(std::move(key));
@@ -96,8 +98,9 @@ public:
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
+    return node->v;
   }
-  void Insert(const K &key, const V &v)
+  V& Insert(const K &key, const V &v)
   {
     Node *node = Allocator::Get().Alloc();
     new(&node->k) K(key);
@@ -105,9 +108,10 @@ public:
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
+    return node->v;
   }
 
-  void Insert(KVP<K, V> &&kvp)
+  V& Insert(KVP<K, V> &&kvp)
   {
     Node *node = Allocator::Get().Alloc();
     new(&node->k) K(std::move(kvp.key));
@@ -115,8 +119,9 @@ public:
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
+    return node->v;
   }
-  void Insert(const KVP<K, V> &v)
+  V& Insert(const KVP<K, V> &v)
   {
     Node *node = Allocator::Get().Alloc();
     new(&node->k) K(v.key);
@@ -124,6 +129,7 @@ public:
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
+    return node->v;
   }
 
   void Remove(const K &key)

@@ -17,7 +17,7 @@ void _Free(void *pMemory);
 
 static AVLTreeAllocator<VariantAVLNode> s_varAVLAllocator;
 
-static Instance s_intance =
+static Instance s_instance =
 {
   EP_APIVERSION,  // apiVersion;
   nullptr,        // pKernelInstance;
@@ -39,7 +39,7 @@ struct GlobalInstanceInitializer
 {
   GlobalInstanceInitializer()
   {
-    ep::s_pInstance = &s_intance;
+    ep::s_pInstance = &s_instance;
   }
 };
 
