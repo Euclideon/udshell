@@ -5,6 +5,8 @@
 #include "renderscene.h"
 #include "components/resources/udmodelimpl.h"
 #include "components/datasources/geomsource.h"
+#include "ep/cpp/component/node/udnode.h"
+#include "ep/cpp/component/resourcemanager.h"
 
 namespace ep {
 
@@ -152,8 +154,8 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene)
   return cache;
 }
 
-SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams)
-  : ImplSuper(pInstance)
+SceneImpl::SceneImpl(Component *_pInstance, Variant::VarMap initParams)
+  : ImplSuper(_pInstance)
 {
   timeStep = 1.0 / 30.0;
   rootNode = GetKernel()->CreateComponent<Node>();
@@ -185,8 +187,39 @@ void SceneImpl::LoadSceneFile(String filePath)
     spNode = spSceneDS->GetResourceAs<Node>(0);
 
     rootNode->AddChild(spNode);
-
+    AddModelsToResourceManager();
     pInstance->GetMetadata()->CallMethod("insert", "url", filePath);
+  }
+}
+
+void SceneImpl::AddModelsToResourceManager()
+{
+  Variant::VarMap modelMap;
+  ResourceManagerRef spRM = GetKernel()->GetResourceManager();
+
+  BuildModelMap(rootNode, modelMap);
+
+  for (auto kvp : modelMap)
+    spRM->AddResource(kvp.value.as<UDModelRef>());
+}
+
+void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)
+{
+  for (NodeRef &spChild : spNode->Children())
+  {
+    BuildModelMap(spChild, modelMap);
+
+    UDNodeRef spUDNode;
+
+    if (!spChild->IsType<UDNode>())
+      continue;
+
+    spUDNode = component_cast<UDNode>(spChild);
+
+    UDModelRef spUDModel = spUDNode->GetUDModel();
+    Variant filePath = spUDModel->GetMetadata()->CallMethod("get", "url");
+    if (filePath.is(Variant::Type::String))
+      modelMap.Insert(filePath, spUDModel);
   }
 }
 
