@@ -61,6 +61,6 @@ project "epkernel"
 		qtmodules { "core", "qml", "quick", "gui" }
 		qtprefix "Qt5"
 		pic "on"
-		configuration { "windows", "Debug or DebugOpt" }
+		configuration { "windows", "Debug* or DebugOpt*" }
 			qtsuffix "d"
 	end

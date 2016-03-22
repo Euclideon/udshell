@@ -21,7 +21,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
     MutableString<260> filePath = File::UrlToNativePath(source->asString());
 
     udOctree *pOctree = nullptr;
-    udResult result = udOctree_Create(&pOctree, filePath.toStringz(), useStreamer && useStreamer->is(Variant::Type::Bool) ? useStreamer->asBool() : true, 0);
+    udResult result = udOctree_Load(&pOctree, filePath.toStringz(), useStreamer && useStreamer->is(Variant::Type::Bool) ? useStreamer->asBool() : true, 0);
     EPTHROW_IF(result != udR_Success, epR_Failure, "Failed to Create UD model");
 
     epscope(fail) { udOctree_Destroy(&pOctree); };
