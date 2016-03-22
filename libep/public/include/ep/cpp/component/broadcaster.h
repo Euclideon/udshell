@@ -10,15 +10,15 @@ namespace ep {
 
 SHARED_CLASS(Broadcaster);
 
-class Broadcaster : public Component, public IBroadcaster
+class Broadcaster : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Broadcaster, IBroadcaster, Component, EPKERNEL_PLUGINVERSION, "Broadcast data written to subscribers", 0)
 
 public:
-  size_t Write(Slice<const void> data) override { return pImpl->Write(data); }
+  virtual size_t Write(Slice<const void> data) { return pImpl->Write(data); }
 
-  size_t WriteLn(String str) override { return pImpl->WriteLn(str); }
-  size_t WriteBuffer(BufferRef spData) override { return pImpl->WriteBuffer(spData); }
+  size_t WriteLn(String str) { return pImpl->WriteLn(str); }
+  size_t WriteBuffer(BufferRef spData) { return pImpl->WriteBuffer(spData); }
 
   Variant Save() const override { return pImpl->Save(); }
 

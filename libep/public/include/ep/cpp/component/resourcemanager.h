@@ -47,21 +47,21 @@ public:
   AVLTree<String, ResourceRef>::Iterator iter;
 };
 
-class ResourceManager : public Component, public IResourceManager
+class ResourceManager : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ResourceManager, IResourceManager, Component, EPKERNEL_PLUGINVERSION, "ResourceManager desc...", 0)
 
 public:
   // Resource getter/setters
-  size_t GetNumResources() const override final { return pImpl->GetNumResources(); }
-  void AddResource(ResourceRef res) override final { pImpl->AddResource(res); }
-  void AddResourceArray(Slice<const ResourceRef> resArray) override final { pImpl->AddResourceArray(resArray); }
-  void RemoveResource(ResourceRef res) override final { return pImpl->RemoveResource(res); }
-  void RemoveResourceArray(Slice<const ResourceRef> resArray) override final { return pImpl->RemoveResourceArray(resArray); }
+  size_t GetNumResources() const { return pImpl->GetNumResources(); }
+  void AddResource(ResourceRef res) { pImpl->AddResource(res); }
+  void AddResourceArray(Slice<const ResourceRef> resArray) { pImpl->AddResourceArray(resArray); }
+  void RemoveResource(ResourceRef res) { return pImpl->RemoveResource(res); }
+  void RemoveResourceArray(Slice<const ResourceRef> resArray) { return pImpl->RemoveResourceArray(resArray); }
 
-  void ClearResources() override final { pImpl->ClearResources(); }
-  ResourceRef GetResource(String key) const override final { return pImpl->GetResource(key); }
-  Array<ResourceRef> GetResourceArray() const override final { return pImpl->GetResourceArray(); }
+  void ClearResources() { pImpl->ClearResources(); }
+  ResourceRef GetResource(String key) const { return pImpl->GetResource(key); }
+  Array<ResourceRef> GetResourceArray() const { return pImpl->GetResourceArray(); }
 
   template<typename CT>
   SharedPtr<CT> GetResourceAs(String key) const
@@ -74,15 +74,15 @@ public:
   {
     return GetResourcesByType(&CT::descriptor);
   }
-  Array<ResourceRef> GetResourcesByType(const ep::ComponentDesc *pBase) const override final { return pImpl->GetResourcesByType(pBase); }
+  Array<ResourceRef> GetResourcesByType(const ep::ComponentDesc *pBase) const { return pImpl->GetResourcesByType(pBase); }
 
-  ResourceIterator begin() const override final { return pImpl->begin(); }
-  ResourceIterator end() const override final { return pImpl->end(); }
+  ResourceIterator begin() const { return pImpl->begin(); }
+  ResourceIterator end() const { return pImpl->end(); }
 
-  Variant::VarMap GetExtensions() const override final { return pImpl->GetExtensions(); }
+  Variant::VarMap GetExtensions() const { return pImpl->GetExtensions(); }
   // Resource loading/saving functions
-  DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams) override final { return pImpl->LoadResourcesFromFile(initParams); }
-  void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) override final { pImpl->SaveResourcesToFile(spDataSource, initParams); }
+  DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams) { return pImpl->LoadResourcesFromFile(initParams); }
+  void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) { pImpl->SaveResourcesToFile(spDataSource, initParams); }
 
   Variant Save() const override { return pImpl->Save(); }
 

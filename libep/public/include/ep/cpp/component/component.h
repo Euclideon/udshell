@@ -14,11 +14,24 @@ SHARED_CLASS(Component);
 SHARED_CLASS(Kernel);
 
 // component API
-class Component : public RefCounted, public IComponent
+class Component : public RefCounted
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component", 0)
-public:
 
+public:
+  // virtual members
+  virtual Variant Save() const;
+
+  virtual Array<SharedString> EnumerateProperties(EnumerateFlags enumerateFlags = 0) const { return pImpl->EnumerateProperties(enumerateFlags); }
+  virtual Array<SharedString> EnumerateFunctions(EnumerateFlags enumerateFlags = 0) const { return pImpl->EnumerateFunctions(enumerateFlags); }
+  virtual Array<SharedString> EnumerateEvents(EnumerateFlags enumerateFlags = 0) const { return pImpl->EnumerateEvents(enumerateFlags); }
+
+  virtual const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const { return pImpl->GetPropertyDesc(_name, enumerateFlags); }
+  virtual const MethodDesc *GetMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const { return pImpl->GetMethodDesc(_name, enumerateFlags); }
+  virtual const EventDesc *GetEventDesc(String _name, EnumerateFlags enumerateFlags = 0) const { return pImpl->GetEventDesc(_name, enumerateFlags); }
+  virtual const StaticFuncDesc *GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags = 0) const { return pImpl->GetStaticFuncDesc(_name, enumerateFlags); }
+
+  // regular members
   const SharedString uid;
 
   Kernel& GetKernel() const;
@@ -30,35 +43,27 @@ public:
 
   SharedString GetUid() const;
   SharedString GetName() const;
-  void SetName(SharedString _name) override final;
+  void SetName(SharedString _name);
 
   template<typename T>
   bool IsType() const { return IsType(T::ComponentID()); }
   bool IsType(String type) const;
 
   // meta access
-  Array<SharedString> EnumerateProperties(EnumerateFlags enumerateFlags = 0) const override { return pImpl->EnumerateProperties(enumerateFlags); }
-  Array<SharedString> EnumerateFunctions(EnumerateFlags enumerateFlags = 0) const override { return pImpl->EnumerateFunctions(enumerateFlags); }
-  Array<SharedString> EnumerateEvents(EnumerateFlags enumerateFlags = 0) const override { return pImpl->EnumerateEvents(enumerateFlags); }
-
-  const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetPropertyDesc(_name, enumerateFlags); }
-  const MethodDesc *GetMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetMethodDesc(_name, enumerateFlags); }
-  const EventDesc *GetEventDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetEventDesc(_name, enumerateFlags); }
-  const StaticFuncDesc *GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetStaticFuncDesc(_name, enumerateFlags); }
 
   VarDelegate GetGetterDelegate(String name, EnumerateFlags enumerateFlags = 0);
   VarDelegate GetSetterDelegate(String name, EnumerateFlags enumerateFlags = 0);
   VarDelegate GetFunctionDelegate(String name, EnumerateFlags enumerateFlags = 0);
 
   // meta interface
-  Variant Get(String property) const override final;
-  void Set(String property, const Variant &value) override final;
+  Variant Get(String property) const;
+  void Set(String property, const Variant &value);
 
-  Variant Call(String method, Slice<const Variant> args) override final;
+  Variant Call(String method, Slice<const Variant> args);
   template<typename ...Args>
   Variant Call(String method, Args... args);
 
-  void Subscribe(String eventName, const VarDelegate &delegate) override final;
+  void Subscribe(String eventName, const VarDelegate &delegate);
   template<typename ...Args>
   void Subscribe(String eventName, const Delegate<void(Args...)> &d);
   template <class X, class Y, typename ...Args>
@@ -71,8 +76,6 @@ public:
   void SendMessage(String target, String message, const Variant &data) const;
   void SendMessage(const ComponentRef &target, String message, const Variant &data) const;
 
-  Variant Save() const override;
-
   template<typename ...Args> void LogError(String text, Args... args) const;
   template<typename ...Args> void LogWarning(int level, String text, Args... args) const;
   template<typename ...Args> void LogDebug(int level, String text, Args... args) const;
@@ -82,12 +85,12 @@ public:
 
   void* GetUserData() const;
 
-  void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter = nullptr, const MethodShim *pSetter = nullptr) override final;
-  void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod = nullptr) override final;
-  void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe = nullptr) override final;
-  void RemoveDynamicProperty(String name) override final;
-  void RemoveDynamicMethod(String name) override final;
-  void RemoveDynamicEvent(String name) override final;
+  void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter = nullptr, const MethodShim *pSetter = nullptr);
+  void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod = nullptr);
+  void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe = nullptr);
+  void RemoveDynamicProperty(String name);
+  void RemoveDynamicMethod(String name);
+  void RemoveDynamicEvent(String name);
 
 /*
   const PropertyInfo *GetPropertyInfo(String propName) const
@@ -112,10 +115,11 @@ public:
   }
 */
 
-
 protected:
   friend class LuaState;
   friend class KernelImpl;
+
+  virtual void ReceiveMessage(String message, String sender, const Variant &data);
 
   Component(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams);
   ~Component()
@@ -142,8 +146,6 @@ protected:
 
   void* CreateImplInternal(String ComponentType, Variant::VarMap initParams);
 
-  void ReceiveMessage(String message, String sender, const Variant &data) override;
-
   static Array<const PropertyInfo> GetProperties()
   {
     return{
@@ -156,7 +158,7 @@ protected:
   }
 
 private:
-  void Init(Variant::VarMap initParams) override final;
+  void Init(Variant::VarMap initParams);
 };
 
 // component cast

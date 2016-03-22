@@ -12,6 +12,8 @@ SHARED_CLASS(Node);
 SHARED_CLASS(RenderableScene);
 SHARED_CLASS(Camera);
 
+using BookmarkMap = SharedMap<AVLTree<SharedString, Bookmark>>;
+
 class IScene
 {
 public:
@@ -28,7 +30,6 @@ public:
   virtual void LoadBookmarks(Variant::VarMap bookmarks) = 0;
   virtual Variant SaveBookmarks() const = 0;
 
-  using BookmarkMap = SharedMap<AVLTree<SharedString, Bookmark>>;
   virtual const BookmarkMap &GetBookmarkMap() const = 0;
 
   virtual NodeRef GetRootNode() const = 0;

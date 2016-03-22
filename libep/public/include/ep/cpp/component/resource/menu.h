@@ -9,20 +9,20 @@ namespace ep
 {
 SHARED_CLASS(Menu);
 
-class Menu : public Resource, public IMenu
+class Menu : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Menu, IMenu, Resource, EPKERNEL_PLUGINVERSION, "Tree model for menus and toolbars", 0)
 
 public:
-  Variant GetMenuData() const override final { return pImpl->GetMenuData(); }
-  void SetMenuData(Variant menuData) override final { pImpl->SetMenuData(menuData); }
+  Variant GetMenuData() const { return pImpl->GetMenuData(); }
+  void SetMenuData(Variant menuData) { pImpl->SetMenuData(menuData); }
 
-  void AddItem(String parentPath, Variant::VarMap properties) override final { pImpl->AddItem(parentPath, properties); }
-  void AddXMLItems(String parentPath, String xmlStr) override final { pImpl->AddXMLItems(parentPath, xmlStr); }
-  bool RemoveItem(String path) override final { return pImpl->RemoveItem(path); }
-  bool SetItemProperties(String path, Variant::VarMap properties) override final { return pImpl->SetItemProperties(path, properties); }
+  void AddItem(String parentPath, Variant::VarMap properties) { pImpl->AddItem(parentPath, properties); }
+  void AddXMLItems(String parentPath, String xmlStr) { pImpl->AddXMLItems(parentPath, xmlStr); }
+  bool RemoveItem(String path) { return pImpl->RemoveItem(path); }
+  bool SetItemProperties(String path, Variant::VarMap properties) { return pImpl->SetItemProperties(path, properties); }
 
-  Variant Save() const override final { return pImpl->Save(); }
+  Variant Save() const { return pImpl->Save(); }
 
   Event<> Changed;
 protected:
@@ -32,11 +32,11 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  Variant ParseXMLString(String buffer) override final { return pImpl->ParseXMLString(buffer); }
-  Variant ParseXMLMenu(Variant inMenu) override final { return pImpl->ParseXMLMenu(inMenu); }
-  Variant *FindMenuItem(String *parentPath) override final { return pImpl->FindMenuItem(parentPath); }
-  Variant CreateMenuItem(Variant::VarMap properties) override { return pImpl->CreateMenuItem(properties); }
-  void SetMenuProperties(Variant &menu, Variant::VarMap properties) override { pImpl->SetMenuProperties(menu, properties); }
+  Variant ParseXMLString(String buffer) { return pImpl->ParseXMLString(buffer); }
+  Variant ParseXMLMenu(Variant inMenu) { return pImpl->ParseXMLMenu(inMenu); }
+  Variant *FindMenuItem(String *parentPath) { return pImpl->FindMenuItem(parentPath); }
+  Variant CreateMenuItem(Variant::VarMap properties) { return pImpl->CreateMenuItem(properties); }
+  void SetMenuProperties(Variant &menu, Variant::VarMap properties) { pImpl->SetMenuProperties(menu, properties); }
 
   static Array<const PropertyInfo> GetProperties()
   {

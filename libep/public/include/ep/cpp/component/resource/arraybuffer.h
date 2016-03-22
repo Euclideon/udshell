@@ -13,36 +13,36 @@ namespace ep {
 
 SHARED_CLASS(ArrayBuffer);
 
-class ArrayBuffer : public Buffer, public IArrayBuffer
+class ArrayBuffer : public Buffer
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ArrayBuffer, IArrayBuffer, Buffer, EPKERNEL_PLUGINVERSION, "ArrayBuffer desc...", 0)
 public:
 
   // array allocation
-  inline void Allocate(SharedString _elementType, size_t _elementSize, size_t length)
+  void Allocate(SharedString _elementType, size_t _elementSize, size_t length)
   {
     Allocate(_elementType, _elementSize, Slice<size_t>(&length, 1));
   }
-  void Allocate(SharedString _elementType, size_t _elementSize, Slice<const size_t> _shape) override final
+  void Allocate(SharedString _elementType, size_t _elementSize, Slice<const size_t> _shape)
   {
     pImpl->Allocate(_elementType, _elementSize, _shape);
   }
 
   // strongly typed array allocation
   template<typename ElementType>
-  inline void Allocate(size_t length)
+  void Allocate(size_t length)
   {
     Allocate<ElementType>(Slice<size_t>(&length, 1));
   }
   template<typename ElementType>
-  inline void Allocate(Slice<const size_t> shape)
+  void Allocate(Slice<const size_t> shape)
   {
     Allocate(stringof<ElementType>(), sizeof(ElementType), shape);
   }
 
   // allocate from existing data
   template<typename ElementType>
-  inline void AllocateFromData(Slice<const ElementType> data)
+  void AllocateFromData(Slice<const ElementType> data)
   {
     Allocate<ElementType>(data.length);
 
@@ -58,12 +58,12 @@ public:
     Unmap();
   }
 
-  SharedString GetElementType() const override final { return pImpl->GetElementType(); }
-  size_t GetElementSize() const override final { return pImpl->GetElementSize(); }
-  size_t GetNumDimensions() const override final { return pImpl->GetNumDimensions(); }
+  SharedString GetElementType() const { return pImpl->GetElementType(); }
+  size_t GetElementSize() const { return pImpl->GetElementSize(); }
+  size_t GetNumDimensions() const { return pImpl->GetNumDimensions(); }
 
-  size_t GetLength() const override final { return pImpl->GetLength(); }
-  Slice<const size_t> GetShape() const override final { return pImpl->GetShape(); }
+  size_t GetLength() const { return pImpl->GetLength(); }
+  Slice<const size_t> GetShape() const { return pImpl->GetShape(); }
 
   // ArrayBuffer overrides the map functions
   template<typename T = void>

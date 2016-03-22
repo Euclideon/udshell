@@ -13,12 +13,12 @@ EP_ENUM(ShaderType,
         VertexShader,
         PixelShader);
 
-class Shader : public Resource, public IShader
+class Shader : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Shader, IShader, Resource, EPKERNEL_PLUGINVERSION, "Shader desc...", 0)
 public:
-  SharedString GetCode() const override final { return pImpl->GetCode(); }
-  void SetCode(SharedString code) override final { pImpl->SetCode(code); }
+  SharedString GetCode() const { return pImpl->GetCode(); }
+  void SetCode(SharedString code) { pImpl->SetCode(code); }
 
   // TODO: eager compile function, which attempts to compile the shader and produce error messages promptly
 //  void Compile();

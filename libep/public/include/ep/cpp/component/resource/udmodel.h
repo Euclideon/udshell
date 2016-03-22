@@ -11,31 +11,31 @@ namespace ep {
 
 SHARED_CLASS(UDModel);
 
-class UDModel : public Resource, public IUDModel
+class UDModel : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(UDModel, IUDModel, Resource, EPKERNEL_PLUGINVERSION, "UD model resource", 0)
 
 public:
-  uint32_t GetStartingRoot() const override final { return pImpl->GetStartingRoot(); }
-  void SetStartingRoot(uint32_t root) override final { return pImpl->SetStartingRoot(root); }
+  uint32_t GetStartingRoot() const { return pImpl->GetStartingRoot(); }
+  void SetStartingRoot(uint32_t root) { return pImpl->SetStartingRoot(root); }
 
-  const Rect<uint32_t> &GetRenderClipRect() const override final { return pImpl->GetRenderClipRect(); }
-  void SetRenderClipRect(const Rect<uint32_t>& _rect) override final { pImpl->SetRenderClipRect(_rect); }
+  const Rect<uint32_t> &GetRenderClipRect() const { return pImpl->GetRenderClipRect(); }
+  void SetRenderClipRect(const Rect<uint32_t>& _rect) { pImpl->SetRenderClipRect(_rect); }
 
-  uint32_t GetRenderFlags() const override final { return pImpl->GetRenderFlags(); }
-  void SetRenderFlags(uint32_t flags) override final { pImpl->SetRenderFlags(flags); }
+  uint32_t GetRenderFlags() const { return pImpl->GetRenderFlags(); }
+  void SetRenderFlags(uint32_t flags) { pImpl->SetRenderFlags(flags); }
 
   // This is temporary the Scale might be non uniform
-  double GetUDScale() const override final { return pImpl->GetUDMatrix().a[0]; }
-  const Double4x4 &GetUDMatrix() const override final { return pImpl->GetUDMatrix(); }
+  double GetUDScale() const { return pImpl->GetUDMatrix().a[0]; }
+  const Double4x4 &GetUDMatrix() const { return pImpl->GetUDMatrix(); }
 
-  BoundingVolume GetBoundingVolume() const override final { return pImpl->GetBoundingVolume(); }
+  BoundingVolume GetBoundingVolume() const { return pImpl->GetBoundingVolume(); }
 
-  UDRenderState GetUDRenderState() const override final { return pImpl->GetUDRenderState(); }
-  DataSourceRef GetDataSource() const override final { return pImpl->GetDataSource(); }
+  UDRenderState GetUDRenderState() const { return pImpl->GetUDRenderState(); }
+  DataSourceRef GetDataSource() const { return pImpl->GetDataSource(); }
 
-  VarDelegate GetVoxelVarDelegate() const override final { return pImpl->GetVoxelVarDelegate(); }
-  void SetVoxelVarDelegate(VarDelegate del) override final { pImpl->SetVoxelVarDelegate(del); }
+  VarDelegate GetVoxelVarDelegate() const { return pImpl->GetVoxelVarDelegate(); }
+  void SetVoxelVarDelegate(VarDelegate del) { pImpl->SetVoxelVarDelegate(del); }
 
   EP_FRIENDS_WITH_IMPL(UDDataSource);
 protected:

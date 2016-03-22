@@ -10,7 +10,7 @@ namespace ep {
 class KernelImpl;
 SHARED_CLASS(DynamicComponent);
 
-class Kernel : public Component, public IKernel
+class Kernel : public Component
 {
   __EP_DECLARE_COMPONENT_IMPL(Kernel, IKernel, Component, EPKERNEL_PLUGINVERSION, "Kernel instance", 0)
 public:
@@ -18,40 +18,40 @@ public:
 
   static Kernel* GetInstance();
 
-  void SendMessage(String target, String sender, String message, const Variant &data) override final { pImpl->SendMessage(target, sender, message, data); }
+  void SendMessage(String target, String sender, String message, const Variant &data) { pImpl->SendMessage(target, sender, message, data); }
 
   template<typename ComponentType, typename Impl = void, typename GlueType = void>
   const ComponentDesc* RegisterComponentType();
-  const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) override final { return pImpl->RegisterComponentType(typeDesc); }
+  const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) { return pImpl->RegisterComponentType(typeDesc); }
 
-  const ComponentDesc* GetComponentDesc(String id) override final { return pImpl->GetComponentDesc(id); }
+  const ComponentDesc* GetComponentDesc(String id) { return pImpl->GetComponentDesc(id); }
 
   template<typename CT>
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase);
-  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase) override final { return pImpl->GetDerivedComponentDescs(id, bIncludeBase); }
-  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) override final { return pImpl->GetDerivedComponentDescs(pBase, bIncludeBase); }
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase) { return pImpl->GetDerivedComponentDescs(id, bIncludeBase); }
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) { return pImpl->GetDerivedComponentDescs(pBase, bIncludeBase); }
 
-  void RegisterMessageHandler(SharedString _name, MessageHandler messageHandler) override final { pImpl->RegisterMessageHandler(_name, messageHandler); }
+  void RegisterMessageHandler(SharedString _name, MessageHandler messageHandler) { pImpl->RegisterMessageHandler(_name, messageHandler); }
 
-  ComponentRef CreateComponent(String typeId, Variant::VarMap initParams = nullptr) override final { return pImpl->CreateComponent(typeId, initParams); }
+  ComponentRef CreateComponent(String typeId, Variant::VarMap initParams = nullptr) { return pImpl->CreateComponent(typeId, initParams); }
   template<typename T>
   SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr);
 
-  ComponentRef CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) override final { return pImpl->CreateGlue(typeId, _pType, _uid, spInstance, initParams); }
+  ComponentRef CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) { return pImpl->CreateGlue(typeId, _pType, _uid, spInstance, initParams); }
   template<typename T>
   SharedPtr<T> CreateGlue(const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams);
 
-  ComponentRef FindComponent(String _uid) const override final { return pImpl->FindComponent(_uid); }
+  ComponentRef FindComponent(String _uid) const { return pImpl->FindComponent(_uid); }
 
   // synchronisation
-  void DispatchToMainThread(MainThreadCallback callback) override { pImpl->DispatchToMainThread(callback); }
-  void DispatchToMainThreadAndWait(MainThreadCallback callback) override { pImpl->DispatchToMainThreadAndWait(callback); }
+  virtual void DispatchToMainThread(MainThreadCallback callback) { pImpl->DispatchToMainThread(callback); }
+  virtual void DispatchToMainThreadAndWait(MainThreadCallback callback) { pImpl->DispatchToMainThreadAndWait(callback); }
 
-  LuaRef GetLua() const override final { return pImpl->GetLua(); }
-  void Exec(String code) override final { pImpl->Exec(code); }
+  LuaRef GetLua() const { return pImpl->GetLua(); }
+  void Exec(String code) { pImpl->Exec(code); }
 
-  LoggerRef GetLogger() const override final { return pImpl->GetLogger(); }
-  void Log(int kind, int level, String text, String component = nullptr) const override final { pImpl->Log(kind, level, text, component); }
+  LoggerRef GetLogger() const { return pImpl->GetLogger(); }
+  void Log(int kind, int level, String text, String component = nullptr) const { pImpl->Log(kind, level, text, component); }
   template<typename ...Args> void LogError(String format, Args... args) const;
   template<typename ...Args> void LogWarning(int level, String format, Args... args) const;
   template<typename ...Args> void LogDebug(int level, String format, Args... args) const;
@@ -60,21 +60,21 @@ public:
   template<typename ...Args> void LogTrace(String format, Args... args) const;
 
   // Functions for resource management
-  ResourceManagerRef GetResourceManager() const override final { return pImpl->GetResourceManager(); }
+  ResourceManagerRef GetResourceManager() const { return pImpl->GetResourceManager(); }
 
-  const AVLTree<String, const ComponentDesc *> &GetExtensionsRegistry() const override final { return pImpl->GetExtensionsRegistry(); }
-  void RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts) override final { pImpl->RegisterExtensions(pDesc, exts); }
-  DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) override final { return pImpl->CreateDataSourceFromExtension(ext, initParams); }
+  const AVLTree<String, const ComponentDesc *> &GetExtensionsRegistry() const { return pImpl->GetExtensionsRegistry(); }
+  void RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts) { pImpl->RegisterExtensions(pDesc, exts); }
+  DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) { return pImpl->CreateDataSourceFromExtension(ext, initParams); }
 
   // stdio relaying functions
-  BroadcasterRef GetStdOutBroadcaster() const override final { return pImpl->GetStdOutBroadcaster(); }
-  BroadcasterRef GetStdErrBroadcaster() const override final { return pImpl->GetStdErrBroadcaster(); }
+  BroadcasterRef GetStdOutBroadcaster() const { return pImpl->GetStdOutBroadcaster(); }
+  BroadcasterRef GetStdErrBroadcaster() const { return pImpl->GetStdErrBroadcaster(); }
 
   // other functions
-  ViewRef GetFocusView() const override final { return pImpl->GetFocusView(); }
-  ViewRef SetFocusView(ViewRef spView) override { return pImpl->SetFocusView(spView); }
+  ViewRef GetFocusView() const { return pImpl->GetFocusView(); }
+  virtual ViewRef SetFocusView(ViewRef spView) { return pImpl->SetFocusView(spView); }
 
-  CommandManagerRef GetCommandManager() const override final { return pImpl->GetCommandManager(); }
+  CommandManagerRef GetCommandManager() const { return pImpl->GetCommandManager(); }
 
   // events
   Event<double> UpdatePulse;
@@ -90,11 +90,11 @@ protected:
   Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine);
   ~Kernel();
 
-  void FinishInit() override { pImpl->FinishInit(); }
+  void FinishInit() { pImpl->FinishInit(); }
 
-  const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) override final { return pImpl->RegisterComponentType(pDesc); }
+  const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) { return pImpl->RegisterComponentType(pDesc); }
 
-  void RegisterGlueType(String _name, CreateGlueFunc *pCreateFunc) override final { pImpl->RegisterGlueType(_name, pCreateFunc); }
+  void RegisterGlueType(String _name, CreateGlueFunc *pCreateFunc) { pImpl->RegisterGlueType(_name, pCreateFunc); }
   template<typename GlueType>
   void RegisterGlueType();
 
@@ -107,7 +107,7 @@ private:
 
   static Kernel* CreateInstanceInternal(Variant::VarMap commandLine);
 
-  void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) override final { return pImpl->CreateImpl(componentType, pInstance, initParams); }
+  void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) { return pImpl->CreateImpl(componentType, pInstance, initParams); }
 
   static ComponentDescInl *MakeKernelDescriptor(ComponentDescInl *pType);
 };

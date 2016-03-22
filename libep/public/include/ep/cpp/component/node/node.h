@@ -9,37 +9,38 @@
 #include "ep/cpp/component/resource/resource.h"
 #include "ep/c/input.h"
 
-namespace ep
-{
+namespace ep {
 
 SHARED_CLASS(Node);
 SHARED_CLASS(Scene);
 SHARED_CLASS(RenderScene); // TODO Move RenderScene to epLib
 
-class Node : public Resource, public INode
+class Node : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Node, INode, Resource, EPKERNEL_PLUGINVERSION, "Node desc...", 0)
 public:
   friend class Scene;
   friend class SceneImpl;
 
-  void SetMatrix(const Double4x4 &mat) override { pImpl->SetMatrix(mat); }
-  const Double4x4& GetMatrix() const override { return pImpl->GetMatrix(); }
+  // TODO: i don't think all these functions should be virtual; consider each one!
+  virtual void SetMatrix(const Double4x4 &mat) { pImpl->SetMatrix(mat); }
+  virtual const Double4x4& GetMatrix() const { return pImpl->GetMatrix(); }
 
-  void SetPosition(const Double3 &pos) override { pImpl->SetPosition(pos); }
-  const Double3& GetPosition() const override { return pImpl->GetPosition(); }
+  virtual void SetPosition(const Double3 &pos) { pImpl->SetPosition(pos); }
+  virtual const Double3& GetPosition() const { return pImpl->GetPosition(); }
 
-  NodeRef Parent() const override { return pImpl->Parent(); }
-  const Slice<NodeRef> Children() const override { return pImpl->Children(); }
+  virtual NodeRef Parent() const { return pImpl->Parent(); }
+  virtual const Slice<NodeRef> Children() const { return pImpl->Children(); }
 
-  void AddChild(NodeRef c) override { pImpl->AddChild(c); }
-  void RemoveChild(NodeRef c) override { pImpl->RemoveChild(c); }
+  virtual void AddChild(NodeRef c) { pImpl->AddChild(c); }
+  virtual void RemoveChild(NodeRef c) { pImpl->RemoveChild(c); }
 
-  void Detach() override { pImpl->Detach(); }
+  virtual void Detach() { pImpl->Detach(); }
 
-  void CalculateWorldMatrix(Double4x4 *pMatrix) const override { pImpl->CalculateWorldMatrix(pMatrix); }
+  void CalculateWorldMatrix(Double4x4 *pMatrix) const { pImpl->CalculateWorldMatrix(pMatrix); }
 
   Variant Save() const override { return pImpl->Save(); }
+
 protected:
   Node(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)
@@ -47,9 +48,9 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  bool InputEvent(const epInputEvent &ev) override { return pImpl->InputEvent(ev); }
-  bool Update(double timeStep) override { return pImpl->Update(timeStep); }
-  void Render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
+  virtual bool InputEvent(const epInputEvent &ev) { return pImpl->InputEvent(ev); }
+  virtual bool Update(double timeStep) { return pImpl->Update(timeStep); }
+  virtual void Render(RenderScene &spScene, const Double4x4 &mat) { pImpl->Render(spScene, mat); }
 
   // TODO: enable/visible/etc flags
 

@@ -34,31 +34,32 @@ SHARED_CLASS(View);
 SHARED_CLASS(Scene);
 SHARED_CLASS(Camera);
 
-class Scene : public Component, public IScene
+class Scene : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Scene, IScene, Component, EPKERNEL_PLUGINVERSION, "Scene desc...", 0)
 
 public:
-  bool InputEvent(const epInputEvent &ev) override { return pImpl->InputEvent(ev); }
-  void Update(double timeDelta) override { pImpl->Update(timeDelta); }
+  virtual bool InputEvent(const epInputEvent &ev) { return pImpl->InputEvent(ev); }
+  virtual void Update(double timeDelta) { pImpl->Update(timeDelta); }
+
   Variant Save() const override { return pImpl->Save(); }
 
   // TODO: Consider creating an event for when bookmarks are successfully created
-  void AddBookmarkFromCamera(String bmName, CameraRef camera) override final { pImpl->AddBookmarkFromCamera(bmName, camera); }
-  void AddBookmark(String bmName, const Bookmark &bm) override final { pImpl->AddBookmark(bmName, bm); }
-  void RemoveBookmark(String bmName) override final { pImpl->RemoveBookmark(bmName); }
-  void RenameBookmark(String oldName, String newName) override final { pImpl->RenameBookmark(oldName, newName); }
-  const Bookmark *FindBookmark(String bmName) const override final { return pImpl->FindBookmark(bmName); }
-  void LoadBookmarks(Variant::VarMap bookmarks) override final { pImpl->LoadBookmarks(bookmarks); }
-  Variant SaveBookmarks() const override final { return pImpl->SaveBookmarks(); }
+  void AddBookmarkFromCamera(String bmName, CameraRef camera) { pImpl->AddBookmarkFromCamera(bmName, camera); }
+  void AddBookmark(String bmName, const Bookmark &bm) { pImpl->AddBookmark(bmName, bm); }
+  void RemoveBookmark(String bmName) { pImpl->RemoveBookmark(bmName); }
+  void RenameBookmark(String oldName, String newName) { pImpl->RenameBookmark(oldName, newName); }
+  const Bookmark *FindBookmark(String bmName) const { return pImpl->FindBookmark(bmName); }
+  void LoadBookmarks(Variant::VarMap bookmarks) { pImpl->LoadBookmarks(bookmarks); }
+  Variant SaveBookmarks() const { return pImpl->SaveBookmarks(); }
 
-  const BookmarkMap &GetBookmarkMap() const override { return pImpl->GetBookmarkMap(); }
+  const BookmarkMap &GetBookmarkMap() const { return pImpl->GetBookmarkMap(); }
 
-  NodeRef GetRootNode() const override { return pImpl->GetRootNode(); }
+  NodeRef GetRootNode() const { return pImpl->GetRootNode(); }
 
-  RenderableSceneRef GetRenderScene() override { return pImpl->GetRenderScene(); }
+  RenderableSceneRef GetRenderScene() { return pImpl->GetRenderScene(); }
 
-  void MakeDirty() override { pImpl->MakeDirty(); }
+  void MakeDirty() { pImpl->MakeDirty(); }
 
   Event<> Dirty;
 
@@ -69,7 +70,7 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  Variant FindBookmark_Internal(String bmName) const override { return pImpl->FindBookmark_Internal(bmName); }
+  Variant FindBookmark_Internal(String bmName) const { return pImpl->FindBookmark_Internal(bmName); }
 
   static Array<const PropertyInfo> GetProperties()
   {
