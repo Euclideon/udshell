@@ -16,7 +16,7 @@ SHARED_CLASS(Kernel);
 // component API
 class Component : public RefCounted, public IComponent
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component", 0)
 public:
 
   const SharedString uid;
@@ -121,6 +121,13 @@ protected:
   ~Component()
   {
     pImpl = nullptr;
+    // unregistered component types aren't in the registry and will be deleted when the component destroys
+    while (pType->info.flags & ComponentInfoFlags::Unregistered)
+    {
+      const ComponentDesc *pDesc = pType;
+      (const ComponentDesc*&)pType = pType->pSuperDesc;
+      epDelete pDesc;
+    }
   }
 
   Component(const Component &) = delete;    // Still not sold on this

@@ -12,7 +12,7 @@ SHARED_CLASS(DynamicComponent);
 
 class Kernel : public Component, public IKernel
 {
-  __EP_DECLARE_COMPONENT_IMPL(Kernel, IKernel, Component, EPKERNEL_PLUGINVERSION, "Kernel instance")
+  __EP_DECLARE_COMPONENT_IMPL(Kernel, IKernel, Component, EPKERNEL_PLUGINVERSION, "Kernel instance", 0)
 public:
   static Kernel* CreateInstance(Variant::VarMap commandLine, int renderThreadCount);
 
@@ -33,7 +33,7 @@ public:
 
   void RegisterMessageHandler(SharedString _name, MessageHandler messageHandler) override final { pImpl->RegisterMessageHandler(_name, messageHandler); }
 
-  ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) override final { return pImpl->CreateComponent(typeId, initParams); }
+  ComponentRef CreateComponent(String typeId, Variant::VarMap initParams = nullptr) override final { return pImpl->CreateComponent(typeId, initParams); }
   template<typename T>
   SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr);
 

@@ -17,7 +17,7 @@ SHARED_CLASS(Console);
 
 class Console : public Stream
 {
-  EP_DECLARE_COMPONENT(Console, Stream, EPKERNEL_PLUGINVERSION, "Standard in/out console")
+  EP_DECLARE_COMPONENT(Console, Stream, EPKERNEL_PLUGINVERSION, "Standard in/out console", 0)
 public:
 
   Slice<void> Read(Slice<void> buffer) override;

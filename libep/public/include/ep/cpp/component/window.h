@@ -12,7 +12,7 @@ SHARED_CLASS(Window);
 
 class Window : public Component, public IWindow
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Window, IWindow, Component, EPKERNEL_PLUGINVERSION, "UI Window")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Window, IWindow, Component, EPKERNEL_PLUGINVERSION, "UI Window", ComponentInfoFlags::Abstract)
 public:
   void SetTopLevelUI(UIComponentRef spUIComponent) override final { pImpl->SetTopLevelUI(spUIComponent); }
   UIComponentRef GetTopLevelUI() const override final { return pImpl->GetTopLevelUI(); }
@@ -27,7 +27,7 @@ protected:
   static Array<const PropertyInfo> GetProperties()
   {
     return{
-      EP_MAKE_PROPERTY_EXPLICIT("UI", "Top level UI for the window", EP_MAKE_GETTER(GetTopLevelUI), EP_MAKE_SETTER(SetTopLevelUI), nullptr, 0),
+      EP_MAKE_PROPERTY_EXPLICIT("UI", "Top level UI for the window", EP_MAKE_GETTER(GetTopLevelUI), EP_MAKE_SETTER(SetTopLevelUI), nullptr, 0)
     };
   }
 };

@@ -13,16 +13,20 @@ public:
   UIComponentImpl(Component *pInstance, Variant::VarMap initParams)
     : ImplSuper(pInstance)
   {
-    CreateInternal(initParams);
+  }
+};
+
+
+class UIComponentGlue final : public UIComponent
+{
+public:
+  UIComponentGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef _spInstance, Variant::VarMap initParams)
+    : UIComponent(_pType, _pKernel, _uid, initParams), spInstance(_spInstance)
+  {
   }
 
-  Variant GetUIHandle() const override final;
-
-private:
-  ~UIComponentImpl() { DestroyInternal(); }
-
-  void CreateInternal(Variant::VarMap initParams);
-  void DestroyInternal();
+protected:
+  ComponentRef spInstance;
 };
 
 } // namespace ep

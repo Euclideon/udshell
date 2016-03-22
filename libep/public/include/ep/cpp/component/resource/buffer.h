@@ -11,7 +11,7 @@ SHARED_CLASS(Buffer);
 
 class Buffer : public Resource, public IBuffer
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Buffer, IBuffer, Resource, EPKERNEL_PLUGINVERSION, "Buffer desc...")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Buffer, IBuffer, Resource, EPKERNEL_PLUGINVERSION, "Buffer desc...", 0)
 public:
 
   bool Reserve(size_t size) override final { return pImpl->Reserve(size); }

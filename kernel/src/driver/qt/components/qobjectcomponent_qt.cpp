@@ -6,19 +6,103 @@
 #endif
 #include <QObject>
 
-#include "qobjectcomponent_qt.h"
+#include "driver/qt/util/qmlbindings_qt.h"
+#include "driver/qt/components/qobjectcomponent_qt.h"
+#include "driver/qt/components/viewportimpl_qt.h"
 
 namespace qt {
 
 QObjectComponent::QObjectComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-  : Component(pType, pKernel, uid, initParams)
+  : ep::DynamicComponent(pType, pKernel, uid, initParams)
 {
-  int64_t ptr = initParams.Get("object")->asInt();
-  pQObject = (QObject*)(size_t)ptr;
+  // NOTE: There are two main types of QObjectComponents that we need to distinguish
+  // 1) Public QObjectComponents that wrap externally created QObjects that we just want to pass through our system
+  // 2) Private QObjectComponents that we create and store internally in glue extensible components
+  // Public components are assumed to have the QObject pointer passed in (as an int) and will not claim ownership
+  // - holding a reference to a public component is *NOT* recommended because the underlying QObject may be deleted
+  // Private components are assumed to have a QmlComponentData pointer passed in and *will* claim ownership of the created QObject
+
+  ep::Variant *pV = initParams.Get("object");
+  if (pV)
+  {
+    pQObject = (QObject*)(size_t)pV->asInt();
+  }
+  else
+  {
+    hasOwnership = true;
+    pQmlComponentData = (QmlComponentData*)(size_t)initParams["qmlcomponentdata"].asInt();
+  }
 }
 
 QObjectComponent::~QObjectComponent()
 {
+  if (hasOwnership)
+    delete pQObject;
+}
+
+const MethodDesc *QObjectComponent::GetMethodDesc(String _name, EnumerateFlags enumerateFlags) const
+{
+  /*  if (!(enumerateFlags & EnumerateFlags::NoDynamic))
+  {
+  const Variant *pVal = qobject.Get(_name);
+  if (pVal)
+  return CacheMethodDesc(_name, pVal->as<Variant::VarDelegate>());
+  }
+  return Super::GetMethodDesc(_name, enumerateFlags);*/
+  return nullptr;
+}
+
+// PRIVATE QOBJECTCOMPONENTS ONLY -----------------------------------------------------------------
+
+// Called by the Kernel following construction of the enclosing Glue Component
+void QObjectComponent::AttachToGlue(Component *pGlue)
+{
+  Super::AttachToGlue(pGlue);
+
+  // Create a new QObject instance from the stored QmlComponentData
+  EPASSERT(pQmlComponentData, "Attempting to attach a public/instantiated QObjectComponent to a Glue Component");
+  pQObject = pQmlComponentData->CreateInstance(static_cast<QtKernel*>(pKernel)->QmlEngine(), pThis);
+  SetupQObject();
+  pUserData = pQObject;
+
+  // Populate the glue's descriptor with the meta from the QObject
+  ComponentDescInl *pDesc = (ComponentDescInl*)pThis->GetDescriptor();
+  if (pDesc->info.flags & ComponentInfoFlags::Unpopulated)
+  {
+    //internal::PopulateComponentDesc(pThis, pQObject);
+    pDesc->info.flags &= ~ComponentInfoFlags::Unpopulated;
+  }
+
+  // Construction is complete, so we don't need this anymore
+  pQmlComponentData = nullptr;
+}
+
+// Sets up the associated QObject (according to type)
+void QObjectComponent::SetupQObject()
+{
+  EPASSERT(pThis != this, "Attempting to validate an unattached QObjectComponent");
+
+  if (pThis->IsType("window"))
+  {
+    // We expect a QQuickWindow object
+    EPTHROW_IF(qobject_cast<QQuickWindow*>(pQObject) == nullptr, epR_Failure, "Window component must create a QQuickWindow");
+
+    // register the window with the kernel
+    if (static_cast<QtKernel*>(pKernel)->RegisterWindow((QQuickWindow*)pQObject) != epR_Success)
+      EPTHROW_ERROR(epR_Failure, "Unable to register Window component with Kernel");
+  }
+  else
+  {
+    // We expect a QQuickItem object
+    EPTHROW_IF(qobject_cast<QQuickItem*>(pQObject) == nullptr, epR_Failure, "UI based components must create a QQuickItem");
+  }
+}
+
+void QObjectComponent::ChickenMeetEgg()
+{
+  // HAX: we'll have a view but it wont be attached - hence setting it to itself
+  if (pThis->IsType("viewport"))
+    ((Viewport*)pThis)->SetView(((Viewport*)pThis)->GetView());
 }
 
 } // namespace qt

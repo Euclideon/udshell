@@ -11,14 +11,15 @@ namespace qt {
 
 bool QtWindowEventFilter::eventFilter(QObject *pObj, QEvent *pEvent)
 {
-  EPASSERT(qobject_cast<QQuickWindow*>(pObj), "QtWindowEventFilter must be bound to a QQuickWindow");
+  QQuickWindow *pWindow = qobject_cast<QQuickWindow*>(pObj);
+  EPASSERT(pWindow != nullptr, "QtWindowEventFilter must be bound to a QQuickWindow");
 
   switch (pEvent->type())
   {
     case QEvent::Resize:
     {
       QResizeEvent *pResizeEvent = static_cast<QResizeEvent*>(pEvent);
-      QQuickItem *pRoot = static_cast<QQuickWindow*>(pObj)->contentItem();
+      QQuickItem *pRoot = pWindow->contentItem();
       pRoot->setSize(pResizeEvent->size());
       break;
     }
@@ -34,7 +35,7 @@ bool QtWindowEventFilter::eventFilter(QObject *pObj, QEvent *pEvent)
     }
     case QEvent::Close:
     {
-      QtApplication::Kernel()->UnregisterWindow((QQuickWindow*)pObj);
+      QtApplication::Kernel()->UnregisterWindow(pWindow);
       break;
     }
     default:

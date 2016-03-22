@@ -13,7 +13,7 @@ SHARED_CLASS(UDModel);
 
 class UDModel : public Resource, public IUDModel
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(UDModel, IUDModel, Resource, EPKERNEL_PLUGINVERSION, "UD model resource")
+  EP_DECLARE_COMPONENT_WITH_IMPL(UDModel, IUDModel, Resource, EPKERNEL_PLUGINVERSION, "UD model resource", 0)
 
 public:
   uint32_t GetStartingRoot() const override final { return pImpl->GetStartingRoot(); }

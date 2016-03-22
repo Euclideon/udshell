@@ -49,7 +49,7 @@ public:
 
 class ResourceManager : public Component, public IResourceManager
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(ResourceManager, IResourceManager, Component, EPKERNEL_PLUGINVERSION, "ResourceManager desc...")
+  EP_DECLARE_COMPONENT_WITH_IMPL(ResourceManager, IResourceManager, Component, EPKERNEL_PLUGINVERSION, "ResourceManager desc...", 0)
 
 public:
   // Resource getter/setters

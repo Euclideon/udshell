@@ -8,7 +8,7 @@ namespace ep {
 
 class VarComponent : public DynamicComponent
 {
-  EP_DECLARE_COMPONENT(VarComponent, DynamicComponent, EPKERNEL_PLUGINVERSION, "Component that wraps a VarMap")
+  EP_DECLARE_COMPONENT(VarComponent, DynamicComponent, EPKERNEL_PLUGINVERSION, "Component that wraps a VarMap", 0)
 public:
 
 //  const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetPropertyDesc(_name, enumerateFlags); }

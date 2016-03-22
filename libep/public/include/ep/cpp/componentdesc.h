@@ -61,6 +61,12 @@ struct StaticFuncInfo
   StaticCall *pCall;
 };
 
+EP_BITFIELD(ComponentInfoFlags,
+  Unpopulated,
+  Unregistered,
+  Abstract
+);
+
 struct ComponentInfo
 {
   int epVersion;
@@ -72,12 +78,12 @@ struct ComponentInfo
 
   // icon image...?
 
-  // TODO: add flags ('Abstract' (can't create) flag)
+  ComponentInfoFlags flags;
 };
 
 struct ComponentDesc
 {
-  virtual ~ComponentDesc();
+  virtual ~ComponentDesc() = 0;
 
   ComponentInfo info;
   const ComponentDesc *pSuperDesc;
@@ -138,7 +144,7 @@ struct function_traits<R(C::*)(Args...)>
 
 
 // declare magic for a C++ component
-#define EP_DECLARE_COMPONENT(Name, SuperType, Version, Description)                      \
+#define EP_DECLARE_COMPONENT(Name, SuperType, Version, Description, Flags)               \
 public:                                                                                  \
   friend class ::ep::Kernel;                                                             \
   using Super = SuperType;                                                               \
@@ -158,16 +164,16 @@ public:                                                                         
   }                                                                                      \
   static ComponentInfo MakeDescriptor()                                                  \
   {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description };                \
+    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
   }                                                                                      \
 private:
 
 // declare magic for a C++ component with a pImpl interface
-#define EP_DECLARE_COMPONENT_WITH_IMPL(Name, Interface, SuperType, Version, Description) \
-  friend class ::ep::Kernel;                                                             \
-  __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description)
+#define EP_DECLARE_COMPONENT_WITH_IMPL(Name, Interface, SuperType, Version, Description, Flags) \
+  friend class ::ep::Kernel;                                                                    \
+  __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)
 
-#define __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description)    \
+#define __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)    \
 public:                                                                                  \
   friend class Name##Impl;                                                               \
   using Super = SuperType;                                                               \
@@ -187,7 +193,7 @@ public:                                                                         
   }                                                                                      \
   static ComponentInfo MakeDescriptor()                                                  \
   {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description };                \
+    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
   }                                                                                      \
   template <typename T>                                                                  \
   T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \

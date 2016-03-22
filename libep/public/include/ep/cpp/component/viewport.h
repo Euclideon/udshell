@@ -12,10 +12,10 @@ SHARED_CLASS(Viewport);
 
 class Viewport : public UIComponent, public IViewport
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Viewport, IViewport, UIComponent, EPKERNEL_PLUGINVERSION, "UI Rendering Viewport")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Viewport, IViewport, UIComponent, EPKERNEL_PLUGINVERSION, "UI Rendering Viewport", ComponentInfoFlags::Abstract)
 public:
   ViewRef GetView() const override final { return pImpl->GetView(); }
-  void SetView(ViewRef spView) override final { pImpl->SetView(spView); }
+  void SetView(const ViewRef &spView) override final { pImpl->SetView(spView); }
 
 protected:
   Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

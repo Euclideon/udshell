@@ -11,7 +11,7 @@ SHARED_CLASS(UDDataSource);
 
 class UDDataSource : public DataSource
 {
-  EP_DECLARE_COMPONENT(UDDataSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides UD Data")
+  EP_DECLARE_COMPONENT(UDDataSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides UD Data", 0)
 public:
 
   enum class Flags : size_t

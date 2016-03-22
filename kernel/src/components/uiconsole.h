@@ -5,6 +5,7 @@
 #include "ep/cpp/component/uicomponent.h"
 #include "memstream.h"
 #include "logger.h"
+#include "file.h"
 
 namespace ep {
 
@@ -16,7 +17,7 @@ SHARED_CLASS(File);
 
 class UIConsole : public UIComponent
 {
-  EP_DECLARE_COMPONENT(UIConsole, UIComponent, EPKERNEL_PLUGINVERSION, "Is a UI for a Console Panel with input and output text controls")
+  EP_DECLARE_COMPONENT(UIConsole, UIComponent, EPKERNEL_PLUGINVERSION, "Is a UI for a Console Panel with input and output text controls", 0)
 public:
 
   StreamRef GetInStream() const { return spInStream; }
@@ -151,6 +152,19 @@ protected:
       EP_MAKE_METHOD(GetHistoryLine, "Get the line at specified index from the input history. Negative numbers count from end.")
     };
   }
+};
+
+
+class UIConsoleGlue final : public UIConsole
+{
+public:
+  UIConsoleGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef _spInstance, Variant::VarMap initParams)
+    : UIConsole(_pType, _pKernel, _uid, initParams), spInstance(_spInstance)
+  {
+  }
+
+protected:
+  ComponentRef spInstance;
 };
 
 } // namespace ep

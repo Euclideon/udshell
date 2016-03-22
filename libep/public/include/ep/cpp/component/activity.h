@@ -11,7 +11,7 @@ SHARED_CLASS(Activity);
 
 class Activity : public Component, public IActivity
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Activity, IActivity, Component, EPKERNEL_PLUGINVERSION, "Activity desc...")
+  EP_DECLARE_COMPONENT_WITH_IMPL(Activity, IActivity, Component, EPKERNEL_PLUGINVERSION, "Activity desc...", 0)
 public:
 
   UIComponentRef GetUI() const override final { return pImpl->GetUI(); }

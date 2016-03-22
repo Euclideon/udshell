@@ -11,7 +11,7 @@ SHARED_CLASS(PluginManager);
 
 class PluginManager : public Component
 {
-  EP_DECLARE_COMPONENT(PluginManager, Component, EPKERNEL_PLUGINVERSION, "PluginManager desc...")
+  EP_DECLARE_COMPONENT(PluginManager, Component, EPKERNEL_PLUGINVERSION, "PluginManager desc...", 0)
 public:
 
   void RegisterPluginLoader(PluginLoaderRef spLoader);

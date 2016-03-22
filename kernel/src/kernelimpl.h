@@ -172,6 +172,9 @@ public:
 
   template<typename CT>
   static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+
+  // TODO: Need this to let derived kernel's have friend access to component - can this be made less awkward?
+  void SetComponentUserData(ComponentRef spComponent, void *pData) { spComponent->pUserData = pData; }
 };
 
 template <typename CT, typename ...Args>

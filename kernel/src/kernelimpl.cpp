@@ -10,7 +10,6 @@
 #include "components/lua.h"
 #include "components/logger.h"
 #include "components/timer.h"
-#include "components/uiconsole.h"
 #include "components/nodes/geomnode.h"
 #include "components/pluginmanager.h"
 #include "components/pluginloader.h"
@@ -26,9 +25,6 @@
 // Components that do the Impl dance
 #include "components/componentimpl.h"
 #include "components/viewimpl.h"
-#include "components/uicomponentimpl.h"
-#include "components/viewportimpl.h"
-#include "components/windowimpl.h"
 #include "components/commandmanagerimpl.h"
 #include "components/resourcemanagerimpl.h"
 #include "components/activityimpl.h"
@@ -104,6 +100,7 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = Kernel::MakeDescriptor();
+  pDesc->info.flags = ComponentInfoFlags::Unregistered;
   pDesc->baseClass = Component::ComponentID();
 
   pDesc->pInit = nullptr;
@@ -143,11 +140,6 @@ Kernel::~Kernel()
   // HACK: undo chicken/egg hacks
   Component::pImpl = nullptr;
   (Kernel*&)pKernel = nullptr;
-
-  // HACK: destroy the descriptor we fabricated...
-  const ComponentDesc *pKernelDesc = pType;
-  (const ComponentDesc*&)pType = pType->pSuperDesc;
-  epDelete pKernelDesc;
 }
 
 Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCount)
@@ -214,10 +206,6 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Project>();
   pInstance->RegisterComponentType<Timer>();
   pInstance->RegisterComponentType<Lua>();
-  pInstance->RegisterComponentType<UIComponent, UIComponentImpl>();
-  pInstance->RegisterComponentType<UIConsole>();
-  pInstance->RegisterComponentType<Viewport, ViewportImpl>();
-  pInstance->RegisterComponentType<Window, WindowImpl>();
   pInstance->RegisterComponentType<View, ViewImpl>();
   pInstance->RegisterComponentType<Scene, SceneImpl>();
   pInstance->RegisterComponentType<Activity, ActivityImpl>();
@@ -638,16 +626,20 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
   pDesc->info.epVersion = EP_APIVERSION;
   Variant *pVer = typeDesc.Get("version");
   pDesc->info.pluginVersion = pVer ? pVer->as<int>() : EPKERNEL_PLUGINVERSION;
+  pDesc->info.flags = ComponentInfoFlags::Unpopulated;
 
   pDesc->baseClass = typeDesc["super"].asSharedString();
 
   pDesc->pInit = nullptr;
   pDesc->pCreateImpl = nullptr;
   pDesc->pCreateInstance = [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
+    MutableString128 t(Format, "New (From VarMap): {0} - {1}", _pType->info.id, _uid);
+    _pKernel->LogDebug(4, t);
     const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)_pType;
-    DynamicComponentRef spInstance = pDesc->newInstance(initParams);
+    DynamicComponentRef spInstance = pDesc->newInstance(KernelRef(_pKernel), initParams);
     ComponentRef spC = _pKernel->CreateGlue(pDesc->baseClass, _pType, _uid, spInstance, initParams);
-    spInstance->pThis = spC.ptr();
+    spInstance->AttachToGlue(spC.ptr());
+    spC->pUserData = spInstance->GetUserData();
     return spC;
   };
 
@@ -701,6 +693,7 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
 {
   ComponentType *_pType = componentRegistry.Get(typeId);
   EPASSERT_THROW(_pType, epR_InvalidArgument, "typeId failed to lookup ComponentType");
+  EPTHROW_IF(_pType->pDesc->info.flags & ComponentInfoFlags::Abstract, epR_InvalidType, "Cannot create component of abstract type '{0}'", typeId);
 
   try
   {

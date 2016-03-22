@@ -11,7 +11,7 @@ SHARED_CLASS(UIComponent);
 
 class UIComponent : public Component, public IUIComponent
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(UIComponent, IUIComponent, Component, EPKERNEL_PLUGINVERSION, "Base UI Component")
+  EP_DECLARE_COMPONENT_WITH_IMPL(UIComponent, IUIComponent, Component, EPKERNEL_PLUGINVERSION, "Base UI Component", ComponentInfoFlags::Abstract)
 public:
   Variant GetUIHandle() const override final { return pImpl->GetUIHandle(); }
 
@@ -25,7 +25,7 @@ protected:
   static Array<const PropertyInfo> GetProperties()
   {
     return{
-      EP_MAKE_PROPERTY_RO(UIHandle, "Platform specific UI handle", nullptr, 0),
+      EP_MAKE_PROPERTY_RO(UIHandle, "Platform specific UI handle", nullptr, 0)
     };
   }
 };
