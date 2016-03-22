@@ -208,7 +208,6 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Timer>();
   pInstance->RegisterComponentType<Lua>();
   pInstance->RegisterComponentType<View, ViewImpl>();
-  pInstance->RegisterComponentType<Scene, SceneImpl>();
   pInstance->RegisterComponentType<Activity, ActivityImpl>();
 
   // resources
@@ -223,6 +222,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Menu, MenuImpl>();
   pInstance->RegisterComponentType<KVPStore>();
   pInstance->RegisterComponentType<Metadata>();
+  pInstance->RegisterComponentType<Scene, SceneImpl>();
 
   // nodes
   pInstance->RegisterComponentType<Node, NodeImpl>();

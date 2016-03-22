@@ -3,21 +3,32 @@
   <activities>
     <viewer>
       <camera>
-        <depthplanes>[0.0001, 7500]</depthplanes>
+        <farplane>7500</farplane>
         <helicoptermode>false</helicoptermode>
         <invertyaxis>true</invertyaxis>
-        <matrix>[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -995.77, -1004.79, -237.18, 1]</matrix>
+        <matrix>[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -995.76999999999998, -1004.79, -237.18000000000001, 1]</matrix>
+        <nearplane>0.0001</nearplane>
         <perspective>1.0471975512</perspective>
         <speed>1</speed>
       </camera>
       <model>R:\ConvertedModels\VR\Peterskirche(SolidScan)_cleaned.ssf</model>
+      <scene>
+        <bookmarks>
+          <bookmark0>
+            <name>_bookmark</name>
+            <orientation>[0, 0, 0]</orientation>
+            <position>[-996.30001831054688, -1004.1000671386719, -237.50003051757813]</position>
+          </bookmark0>
+        </bookmarks>
+      </scene>
     </viewer>
     <viewer>
       <camera>
-        <depthplanes>[0.0001, 7500]</depthplanes>
+        <farplane>7500</farplane>
         <helicoptermode>false</helicoptermode>
         <invertyaxis>true</invertyaxis>
-        <matrix>[1, 0, 0, 0, -0, 1, 0, 0, 0, -0, 1, 0, 0.60, -1.0, 0.51, 1]</matrix>
+        <matrix>[1, 0, 0, 0, -0, 1, 0, 0, 0, -0, 1, 0, 0.59999999999999998, -2.553059046268463, 0.51000000000000001, 1]</matrix>
+        <nearplane>0.0001</nearplane>
         <perspective>1.0471975512</perspective>
         <speed>1</speed>
       </camera>
