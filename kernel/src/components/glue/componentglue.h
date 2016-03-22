@@ -29,7 +29,6 @@ protected:
   ComponentRef spInstance;
 
   VarDelegate save;
-  VarDelegate initComplete;
   VarDelegate receiveMessage;
 };
 
