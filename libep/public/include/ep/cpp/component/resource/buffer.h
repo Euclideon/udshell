@@ -9,26 +9,26 @@ namespace ep {
 
 SHARED_CLASS(Buffer);
 
-class Buffer : public Resource, public IBuffer
+class Buffer : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Buffer, IBuffer, Resource, EPKERNEL_PLUGINVERSION, "Buffer desc...", 0)
 public:
 
-  bool Reserve(size_t size) override final { return pImpl->Reserve(size); }
-  bool Allocate(size_t size) override final { return pImpl->Allocate(size); }
-  bool Free() override final { return pImpl->Free(); }
+  bool Reserve(size_t size) { return pImpl->Reserve(size); }
+  bool Allocate(size_t size) { return pImpl->Allocate(size); }
+  bool Free() { return pImpl->Free(); }
 
   bool Resize(size_t size) { return ResizeInternal(size, true); }
 
-  bool Empty() const override final { return pImpl->Empty(); }
-  size_t GetBufferSize() const override final { return pImpl->GetBufferSize(); }
+  bool Empty() const { return pImpl->Empty(); }
+  size_t GetBufferSize() const { return pImpl->GetBufferSize(); }
 
-  Slice<void> Map() override final { return pImpl->Map(); }
-  Slice<const void> MapForRead() override final { return pImpl->MapForRead(); }
-  void Unmap() override final { pImpl->Unmap(); }
+  Slice<void> Map() { return pImpl->Map(); }
+  Slice<const void> MapForRead() { return pImpl->MapForRead(); }
+  void Unmap() { pImpl->Unmap(); }
 
-  bool CopyBuffer(BufferRef buffer) override final { return pImpl->CopyBuffer(buffer); }
-  bool CopyBuffer(Slice<const void> buffer) override final { return pImpl->CopyBuffer(buffer); }
+  bool CopyBuffer(BufferRef buffer) { return pImpl->CopyBuffer(buffer); }
+  bool CopyBuffer(Slice<const void> buffer) { return pImpl->CopyBuffer(buffer); }
 
   Variant Save() const override { return pImpl->Save(); }
 
@@ -40,7 +40,7 @@ protected:
   }
   virtual ~Buffer() { Free(); }
 
-  bool ResizeInternal(size_t size, bool copy) override final { return pImpl->ResizeInternal(size, copy); }
+  bool ResizeInternal(size_t size, bool copy) { return pImpl->ResizeInternal(size, copy); }
 
   static Array<const PropertyInfo> GetProperties()
   {

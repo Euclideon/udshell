@@ -17,13 +17,13 @@ SHARED_CLASS(UDModel);
 
 class RenderScene;
 
-class UDNode : public Node, public IUDNode
+class UDNode : public Node
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(UDNode, IUDNode, Node, EPKERNEL_PLUGINVERSION, "UD model node", 0)
 
 public:
-  UDModelRef GetUDModel() const override { return pImpl->GetUDModel(); }
-  void SetUDModel(UDModelRef spModel) override { pImpl->SetUDModel(spModel); }
+  UDModelRef GetUDModel() const { return pImpl->GetUDModel(); }
+  void SetUDModel(UDModelRef spModel) { pImpl->SetUDModel(spModel); }
 
   Variant Save() const override { return pImpl->Save(); }
 

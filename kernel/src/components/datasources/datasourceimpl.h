@@ -74,25 +74,17 @@ public:
     resources.Insert(_name, spResource);
   }
 
-  size_t CountResources(String prefix) override final
+  size_t CountResources(String filterPattern) const override final
   {
     // TODO: ...
     return 0;
   }
 
-  // HACK: this should be private!!
-  ResourceRef GetResourceByVariant(Variant index) const override final
-  {
-    if (index.is(Variant::Type::String))
-      return pInstance->GetResource(index.asString());
-    else
-      return pInstance->GetResource((size_t)index.asInt());
-  }
-
   String GetURL() const override final { return url; }
   void SetURL(String _url) override final { url = _url; }
 
-  Variant Save() override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::Save(); }
+
 protected:
   StreamRef OpenStream(const Variant &source) override final;
 

@@ -9,11 +9,11 @@ namespace ep {
 
 SHARED_CLASS(UIComponent);
 
-class UIComponent : public Component, public IUIComponent
+class UIComponent : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(UIComponent, IUIComponent, Component, EPKERNEL_PLUGINVERSION, "Base UI Component", ComponentInfoFlags::Abstract)
 public:
-  Variant GetUIHandle() const override final { return pImpl->GetUIHandle(); }
+  Variant GetUIHandle() const { return pImpl->GetUIHandle(); }
 
 protected:
   UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

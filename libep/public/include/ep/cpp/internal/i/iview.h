@@ -11,11 +11,11 @@ namespace ep {
 SHARED_CLASS(Scene);
 SHARED_CLASS(Camera);
 
+using ScreenPoint = Vector2<int>;
+
 class IView
 {
 public:
-  using ScreenPoint = Vector2<int>;
-
   virtual void SetScene(SceneRef spScene) = 0;
   virtual SceneRef GetScene() const = 0;
 

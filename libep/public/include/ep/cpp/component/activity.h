@@ -9,16 +9,16 @@ namespace ep {
 
 SHARED_CLASS(Activity);
 
-class Activity : public Component, public IActivity
+class Activity : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Activity, IActivity, Component, EPKERNEL_PLUGINVERSION, "Activity desc...", 0)
 public:
 
-  UIComponentRef GetUI() const override final { return pImpl->GetUI(); }
-  void SetUI(UIComponentRef ui) override final { pImpl->SetUI(ui); }
+  virtual void Activate() { pImpl->Activate(); }
+  virtual void Deactivate() { pImpl->Deactivate(); }
 
-  void Activate() override { pImpl->Activate(); }
-  void Deactivate() override { pImpl->Deactivate(); }
+  UIComponentRef GetUI() const { return pImpl->GetUI(); }
+  void SetUI(UIComponentRef ui) { pImpl->SetUI(ui); }
 
   Variant Save() const override { return pImpl->Save(); }
 

@@ -10,18 +10,18 @@ namespace ep {
 
 SHARED_CLASS(Model);
 
-class Model : public Resource, public IModel
+class Model : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Model, IModel, Resource, EPKERNEL_PLUGINVERSION, "Model desc...", 0)
 public:
 
-  MaterialRef GetMaterial() const override { return pImpl->GetMaterial(); }
-  void SetMaterial(MaterialRef spMaterial) override { pImpl->SetMaterial(spMaterial); }
+  MaterialRef GetMaterial() const { return pImpl->GetMaterial(); }
+  void SetMaterial(MaterialRef spMaterial) { pImpl->SetMaterial(spMaterial); }
 
-  void SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> attributeNames) override { pImpl->SetVertexArray(spVertices, attributeNames); }
+  void SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> attributeNames) { pImpl->SetVertexArray(spVertices, attributeNames); }
 
-  ArrayBufferRef GetIndexArray() const override { return pImpl->GetIndexArray(); }
-  void SetIndexArray(ArrayBufferRef spIndices) override { pImpl->SetIndexArray(spIndices); }
+  ArrayBufferRef GetIndexArray() const { return pImpl->GetIndexArray(); }
+  void SetIndexArray(ArrayBufferRef spIndices) { pImpl->SetIndexArray(spIndices); }
 
 protected:
   Model(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

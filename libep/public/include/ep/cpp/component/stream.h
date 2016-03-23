@@ -20,26 +20,27 @@ EP_ENUM(SeekOrigin,
   End
 );
 
-class Stream : public Broadcaster, public IStream
+class Stream : public Broadcaster
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Stream, IStream, Broadcaster, EPKERNEL_PLUGINVERSION, "Stream desc...", 0)
 
 public:
-  int64_t Length() const override { return pImpl->Length(); }
+  virtual int Flush() { return pImpl->Flush(); }
 
-  int64_t GetPos() const override { return pImpl->GetPos(); }
-  int64_t Seek(SeekOrigin rel, int64_t offset) override { return pImpl->Seek(rel, offset); }
+  virtual int64_t Length() const { return pImpl->Length(); }
+
+  virtual int64_t GetPos() const { return pImpl->GetPos(); }
+  virtual int64_t Seek(SeekOrigin rel, int64_t offset) { return pImpl->Seek(rel, offset); }
 
   // TODO: Add efficient Slice<void> support to Variant, so that this component can be shared property?
 
-  Slice<void> Read(Slice<void> buffer) override { return pImpl->Read(buffer); }
-  String ReadLn(Slice<char> buf) override { return pImpl->ReadLn(buf); }
-  BufferRef ReadBuffer(size_t bytes) override { return pImpl->ReadBuffer(bytes); }
+  virtual Slice<void> Read(Slice<void> buffer) { return pImpl->Read(buffer); }
 
-  virtual int Flush() override { return pImpl->Flush(); }
+  String ReadLn(Slice<char> buf) { return pImpl->ReadLn(buf); }
+  BufferRef ReadBuffer(size_t bytes) { return pImpl->ReadBuffer(bytes); }
 
-  BufferRef Load() override { return pImpl->Load(); }
-  void Save(BufferRef spBuffer) override { return pImpl->Save(spBuffer); }
+  BufferRef Load() { return pImpl->Load(); }
+  void Save(BufferRef spBuffer) { return pImpl->Save(spBuffer); }
 
   Event<> PosChanged;
 
@@ -55,8 +56,8 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  void SetPos(int64_t pos) override final { pImpl->SetPos(pos); }
-  void SetLength(int64_t length) override final { pImpl->SetLength(length); }
+  void SetPos(int64_t pos) { pImpl->SetPos(pos); }
+  void SetLength(int64_t length) { pImpl->SetLength(length); }
 };
 
 }

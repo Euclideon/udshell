@@ -10,12 +10,12 @@ namespace ep {
 
 SHARED_CLASS(Window);
 
-class Window : public Component, public IWindow
+class Window : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Window, IWindow, Component, EPKERNEL_PLUGINVERSION, "UI Window", ComponentInfoFlags::Abstract)
 public:
-  void SetTopLevelUI(UIComponentRef spUIComponent) override final { pImpl->SetTopLevelUI(spUIComponent); }
-  UIComponentRef GetTopLevelUI() const override final { return pImpl->GetTopLevelUI(); }
+  void SetTopLevelUI(UIComponentRef spUIComponent) { pImpl->SetTopLevelUI(spUIComponent); }
+  UIComponentRef GetTopLevelUI() const { return pImpl->GetTopLevelUI(); }
 
 protected:
   Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

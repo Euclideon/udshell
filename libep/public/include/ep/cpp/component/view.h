@@ -13,33 +13,33 @@ namespace ep {
 
 SHARED_CLASS(View);
 
-class View : public Component, public IView
+class View : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(View, IView, Component, EPKERNEL_PLUGINVERSION, "View desc...", 0)
 public:
-  void SetScene(SceneRef spScene) override final { pImpl->SetScene(spScene); }
-  SceneRef GetScene() const override final { return pImpl->GetScene(); }
+  void SetScene(SceneRef spScene) { pImpl->SetScene(spScene); }
+  SceneRef GetScene() const { return pImpl->GetScene(); }
 
-  void SetCamera(CameraRef spCamera) override final { pImpl->SetCamera(spCamera); }
-  CameraRef GetCamera() const override final { return pImpl->GetCamera(); }
+  void SetCamera(CameraRef spCamera) { pImpl->SetCamera(spCamera); }
+  CameraRef GetCamera() const { return pImpl->GetCamera(); }
 
-  Dimensions<int> GetDimensions() const override final { return pImpl->GetDimensions(); }
-  Dimensions<int> GetRenderDimensions() const override final { return pImpl->GetRenderDimensions(); }
-  float GetAspectRatio() const override final { return pImpl->GetAspectRatio(); }
+  Dimensions<int> GetDimensions() const { return pImpl->GetDimensions(); }
+  Dimensions<int> GetRenderDimensions() const { return pImpl->GetRenderDimensions(); }
+  float GetAspectRatio() const { return pImpl->GetAspectRatio(); }
 
-  void SetEnablePicking(bool enable) override final { pImpl->SetEnablePicking(enable); }
-  bool GetEnablePicking() const override final { return pImpl->GetEnablePicking(); }
+  void SetEnablePicking(bool enable) { pImpl->SetEnablePicking(enable); }
+  bool GetEnablePicking() const { return pImpl->GetEnablePicking(); }
 
-  ScreenPoint GetMousePosition() const override final { return pImpl->GetMousePosition(); }
+  ScreenPoint GetMousePosition() const { return pImpl->GetMousePosition(); }
 
-  void GoToBookmark(String bookmarkName) override { pImpl->GoToBookmark(bookmarkName); }
-  void Activate() override { pImpl->Activate(); }
-  void Deactivate() override { pImpl->Deactivate(); }
-  void Resize(int width, int height) override { pImpl->Resize(width, height); }
+  void GoToBookmark(String bookmarkName) { pImpl->GoToBookmark(bookmarkName); }
+  void Activate() { pImpl->Activate(); }
+  void Deactivate() { pImpl->Deactivate(); }
+  void Resize(int width, int height) { pImpl->Resize(width, height); }
 
   // TODO: Move this into the layer system once its implemented.
-  void SetUDRenderFlags(UDRenderFlags flags) override final { pImpl->SetUDRenderFlags(flags); }
-  UDRenderFlags GetUDRenderflags() const override final { return pImpl->GetUDRenderflags(); }
+  void SetUDRenderFlags(UDRenderFlags flags) { pImpl->SetUDRenderFlags(flags); }
+  UDRenderFlags GetUDRenderflags() const { return pImpl->GetUDRenderflags(); }
 
   Event<> Dirty;
   Event<> FrameReady;

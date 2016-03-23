@@ -17,20 +17,21 @@ public:
 
   virtual size_t GetNumResources() const = 0;
   virtual String GetResourceName(size_t index) const = 0;
-  virtual ResourceRef GetResource(size_t index) const = 0;
-  virtual ResourceRef GetResource(String name) const = 0;
 
+  virtual ResourceRef GetResource(size_t index) const = 0;
+
+  virtual ResourceRef GetResource(String name) const = 0;
   virtual void SetResource(String name, const ResourceRef &spResource) = 0;
-  virtual size_t CountResources(String prefix) = 0; // TODO
+
+  virtual size_t CountResources(String filterPattern) const = 0; // TODO
 
   virtual String GetURL() const = 0;
   virtual void SetURL(String url) = 0;
 
-  virtual Variant Save() = 0;
+  virtual Variant Save() const = 0;
 
 protected:
   virtual StreamRef OpenStream(const Variant &source) = 0;
-  virtual ResourceRef GetResourceByVariant(Variant index) const = 0;
 };
 
 }
