@@ -34,15 +34,8 @@ public:
   UDRenderState GetUDRenderState() const override final { return pImpl->GetUDRenderState(); }
   DataSourceRef GetDataSource() const override final { return pImpl->GetDataSource(); }
 
-  // TODO: Revist the shader system.  Simple voxel shader is inadequate.
-  Delegate<SimpleVoxelDlgt> GetSimpleVoxelDelegate() const override final { return pImpl->GetSimpleVoxelDelegate(); }
-  void SetSimpleVoxelDelegate(Delegate<SimpleVoxelDlgt> del) override final { pImpl->SetSimpleVoxelDelegate(del); }
-
-  //udRender_VoxelShaderFunc *GetVoxelShader() const override final { return pImpl->GetVoxelShader(); }
-  //void SetVoxelShader(udRender_VoxelShaderFunc *pFunc) override final { pImpl->SetVoxelShader(pFunc); }
-
-  //udRender_PixelShaderFunc *GetPixelShader() const override final { return pImpl->GetPixelShader(); }
-  //void SetPixelShader(udRender_PixelShaderFunc *pFunc) override final { pImpl->SetPixelShader(pFunc); }
+  VarDelegate GetVoxelVarDelegate() const override final { return pImpl->GetVoxelVarDelegate(); }
+  void SetVoxelVarDelegate(VarDelegate del) override final { pImpl->SetVoxelVarDelegate(del); }
 
   EP_FRIENDS_WITH_IMPL(UDDataSource);
 protected:

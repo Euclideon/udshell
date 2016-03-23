@@ -30,15 +30,14 @@ struct UDRenderableState : public udRenderModel
 {
   Double4x4 matrix;
   udRenderClipArea clipArea;
-  UDRenderState::SimpleVoxelDlgt simpleVoxelDel;
+  VarDelegate voxelVarDelegate;
 
-  static unsigned VoxelShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex, udRenderNodeInfo *epUnusedParam(pNodeInfo))
+  static unsigned VoxelVarDelegateShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex, udRenderNodeInfo *epUnusedParam(pNodeInfo))
   {
     UDRenderableState *pUDRenderState = static_cast<UDRenderableState*>(pRenderModel);
     udOctree *pOctree = pRenderModel->pOctree;
     uint32_t color = pOctree->pGetNodeColor(pOctree, nodeIndex);
-    // TODO : either wrap this in a critical section or create Lua states for each thread
-    color = pUDRenderState->simpleVoxelDel(color);
+    color = (uint32_t)pUDRenderState->voxelVarDelegate( { Variant(color) }).asInt();
     return color;
   }
 };

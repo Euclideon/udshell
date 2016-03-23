@@ -30,17 +30,8 @@ public:
   virtual UDRenderState GetUDRenderState() const = 0;
   virtual DataSourceRef GetDataSource() const = 0;
 
-  // TODO: Revist the shader system.  Simple voxel shader is inadequate.
-  typedef uint32_t SimpleVoxelDlgt(uint32_t color);
-  virtual Delegate<SimpleVoxelDlgt> GetSimpleVoxelDelegate() const = 0;
-  virtual void SetSimpleVoxelDelegate(Delegate<SimpleVoxelDlgt> del) = 0;
-
-  //virtual udRender_VoxelShaderFunc *GetVoxelShader() const = 0;
-  //virtual void SetVoxelShader(udRender_VoxelShaderFunc *pFunc) = 0;
-
-  //virtual udRender_PixelShaderFunc *GetPixelShader() const = 0;
-  //virtual void SetPixelShader(udRender_PixelShaderFunc *pFunc) = 0;
-
+  virtual VarDelegate GetVoxelVarDelegate() const = 0;
+  virtual void SetVoxelVarDelegate(VarDelegate del) = 0;
 };
 
 }
