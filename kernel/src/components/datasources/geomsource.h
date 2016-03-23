@@ -43,9 +43,18 @@ protected:
   }
 
   void Create(StreamRef spSource);
+  bool Write(const aiScene *pScene);
 
   void ParseMaterials(const aiScene *pScene);
   void ParseMeshes(const aiScene *pScene);
+  void ParseXRefs(const aiScene *pScene);
+
+  enum class XRefType {
+    Unknown,
+    UDModel,
+  };
+
+  XRefType GetXRefType(String url);
 
   NodeRef ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth = 0);
 };

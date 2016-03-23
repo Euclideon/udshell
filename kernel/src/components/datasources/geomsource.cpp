@@ -1,14 +1,19 @@
 #include "geomsource.h"
 #include "ep/cpp/component/node/node.h"
+#include "ep/cpp/component/node/udnode.h"
 #include "components/nodes/geomnode.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/material.h"
 #include "ep/cpp/component/resource/model.h"
+#include "ep/cpp/component/resource/udmodel.h"
+#include "components/file.h"
+#include "components/datasources/uddatasource.h"
 #include "components/resources/metadata.h"
 #include "hal/image.h"
 #include "ep/cpp/kernel.h"
 
 #include "assimp/Importer.hpp"
+#include "assimp/Exporter.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
@@ -100,22 +105,54 @@ void GeomSource::Create(StreamRef spSource)
   if (!pScene)
     return; // TODO: some sort of error?
 
-  // marse materials
+  // parse materials
   ParseMaterials(pScene);
 
-  // marse meshes
+  // parse meshes
   ParseMeshes(pScene);
+
+  // parse xrefs
+  ParseXRefs(pScene);
 
   // parse the scene
   if (pScene->mRootNode)
   {
     aiMatrix4x4 world;
-    size_t numMeshes = 0;
+    size_t numMeshes = 0; // TODO this is not being used
     NodeRef spRoot = ParseNode(pScene, pScene->mRootNode, &world, numMeshes);
     SetResource("scene0", spRoot);
   }
 
   epFree(pBuffer);
+}
+
+bool GeomSource::Write(const aiScene *pScene)
+{
+  Assimp::Exporter exporter;
+  const aiExportDataBlob *pBlob;
+
+  pBlob = exporter.ExportToBlob(pScene, "collada", aiProcess_ConvertToLeftHanded);
+  if(!pBlob)
+  {
+    LogDebug(1, "Unable to export Assimp scene to collada");
+    return false;
+  }
+
+  try
+  {
+    StreamRef spFile = GetKernel().CreateComponent<File>({ { "path", GetURL() }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    spFile->Write(Slice<void>(pBlob->data, pBlob->size));
+  }
+  catch (EPException &)
+  {
+    LogWarning(1, "Failed to open collada file for writing: \"{0}\"", GetURL());
+    ClearError();
+
+    exporter.FreeBlob();
+    return false;
+  }
+
+  return true;
 }
 
 void GeomSource::ParseMaterials(const aiScene *pScene)
@@ -293,6 +330,50 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
   }
 }
 
+GeomSource::XRefType GeomSource::GetXRefType(String url)
+{
+  String ext = url.getRightAtLast(".", true);
+  Slice<const String> udDSExts = UDDataSource::StaticGetFileExtensions();
+  for (const String &udExt : udDSExts)
+  {
+    if (ext.eqIC(udExt))
+      return XRefType::UDModel;
+  }
+
+  return XRefType::Unknown;
+}
+
+void GeomSource::ParseXRefs(const aiScene *pScene)
+{
+  for (uint32_t i = 0; i<pScene->mNumXRefs; ++i)
+  {
+    aiXRef &xref = *pScene->mXRefs[i];
+    String refName = String(FromAIString(xref.mName));
+    String url = FromAIString(xref.mUrl);
+
+    LogDebug(4, "XRef {0}: {1} - \"{2}\"", i, refName, url);
+
+    XRefType type = GetXRefType(url);
+
+    if (type == XRefType::UDModel)
+    {
+      // Load the UDDataSource
+      UDDataSourceRef spModelDS;
+      epscope(fail) { if (!spModelDS) pKernel->LogError("GeomSource -- Failed to load UDModel \"{0}\"", url); };
+      spModelDS = GetKernel().CreateComponent<UDDataSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
+
+      UDModelRef spUDModel;
+      if (spModelDS->GetNumResources() > 0)
+        spUDModel = spModelDS->GetResourceAs<UDModel>(0);
+
+      // add UDModel resource
+      SetResource(SharedString::concat("udmodel", i), spUDModel);
+    }
+    else
+      LogWarning(2, "GeomSource -- Unsupported XRef type \"{0}\"", url);
+  }
+}
+
 NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth)
 {
   aiNode &node = *pNode;
@@ -336,6 +417,35 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       // unknown mesh!
       LogWarning(2, "{1,*0}  Mesh {2}: {3} Unknown mesh!!", depth, "", i, node.mMeshes[i]);
     }
+  }
+
+  // parse xrefs
+  for (uint32_t i = 0; i<node.mNumXRefs; ++i)
+  {
+    aiXRef &xref = *pScene->mXRefs[node.mXRefs[i]];
+    String url = FromAIString(xref.mUrl);
+
+    XRefType type = GetXRefType(url);
+
+    if (type == XRefType::UDModel)
+    {
+      ResourceRef spUDModel = GetResource(SharedString::concat("udmodel", node.mXRefs[i]));
+      if (spUDModel)
+      {
+        // create UDNode
+        UDNodeRef spUDNode = GetKernel().CreateComponent<UDNode>();
+        spUDNode->SetUDModel(component_cast<UDModel>(spUDModel));
+
+        // add UDNode to world node (we could collapse this if there is only one model...)
+        spNode->AddChild(spUDNode);
+
+        LogDebug(4, "{1,*0}  UDModel {2}: {3} ({4})", depth, "", i, node.mXRefs[i], spUDModel->GetName());
+      }
+      else
+        LogWarning(2, "GeomSource -- Node references UDModel which does not exist");
+    }
+    else
+      LogWarning(2, "GeomSource -- Unsupported XRef type \"{0}\" in node", url);
   }
 
   // recurse children
