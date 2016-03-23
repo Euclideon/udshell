@@ -43,23 +43,8 @@ protected:
   SharedString srcString = nullptr;
   ActivityRef spActiveActivity = nullptr;
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(ActiveActivity, "The currently active activity", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(Activities, "The activities contained in the project", nullptr, 0),
-      EP_MAKE_PROPERTY(Src, "The URL for the Project file", nullptr, 0)
-    };
-  }
-
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(SaveProject, "Save Project to an XML file"),
-      EP_MAKE_METHOD(AddActivity, "Add an Activity to the Project"),
-      EP_MAKE_METHOD(RemoveActivity, "Remove an Activity from the Project"),
-    };
-  }
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
 };
 
 } //namespace ep

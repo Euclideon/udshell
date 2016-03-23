@@ -21,14 +21,14 @@ protected:
     : Component(pType, pKernel, uid, initParams)
   {}
 
-  static Array<const PropertyInfo> GetProperties()
+  Array<const PropertyInfo> GetProperties() const
   {
     return{
       EP_MAKE_PROPERTY_RO(SupportedExtensions, "List of file extension strings handled by this PluginLoader", nullptr, 0),
     };
   }
 
-  static Array<const MethodInfo> GetMethods()
+  Array<const MethodInfo> GetMethods() const
   {
     return{
       EP_MAKE_METHOD(LoadPlugin, "Load a plugin with the given filename"),

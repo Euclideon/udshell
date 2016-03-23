@@ -177,19 +177,9 @@ protected:
   Array<LogLine> internalLog;
   bool bEnabled = true, bLogging = false;
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(Enabled, "Is Enabled", nullptr, 0),
-    };
-  }
-  static Array<const MethodInfo> GetMethods();
-  static Array<const EventInfo> GetEvents()
-  {
-    return{
-      EP_MAKE_EVENT(Changed, "Log has been updated with a new entry"),
-    };
-  }
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
+  Array<const EventInfo> GetEvents() const;
 };
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const VarArg *pArgs);

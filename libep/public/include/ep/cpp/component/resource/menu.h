@@ -38,29 +38,10 @@ protected:
   Variant CreateMenuItem(Variant::VarMap properties) { return pImpl->CreateMenuItem(properties); }
   void SetMenuProperties(Variant &menu, Variant::VarMap properties) { pImpl->SetMenuProperties(menu, properties); }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(MenuData, "Heirarchical structure of menus", nullptr, 0),
-    };
-  }
-
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(AddXMLItems, "Add menu items from an XML string"),
-      EP_MAKE_METHOD(RemoveItem, "Remove menu item"),
-      EP_MAKE_METHOD(AddItem, "Add a menu item with the given properties"),
-      EP_MAKE_METHOD(SetItemProperties, "Set properties for the given menu item"),
-    };
-  }
-
-  static Array<const EventInfo> GetEvents()
-  {
-    return{
-      EP_MAKE_EVENT(Changed, "The menu data has changed"),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
+  Array<const EventInfo> GetEvents() const;
 };
 
 } // End namespace ep

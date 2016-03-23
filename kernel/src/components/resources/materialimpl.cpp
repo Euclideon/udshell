@@ -6,6 +6,24 @@
 
 namespace ep {
 
+Array<const PropertyInfo> Material::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY(VertexShader, "Vertex shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY(PixelShader, "Pixel shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY(BlendMode, "Frame buffer blend mode", nullptr, 0),
+    EP_MAKE_PROPERTY(CullMode, "Back face cull mode", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Material::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(GetTexture, "Gets the texture ArrayBuffer at the given index"),
+    EP_MAKE_METHOD(SetTexture, "Sets the texture ArrayBuffer at the given index"),
+    EP_MAKE_METHOD(SetMaterialProperty, "Set a Material Property"),
+  };
+}
+
 void MaterialImpl::SetShader(ShaderType type, ShaderRef spShader)
 {
   if (shaders[(int)type] == spShader)

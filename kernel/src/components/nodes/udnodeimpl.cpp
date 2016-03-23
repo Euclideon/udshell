@@ -6,8 +6,14 @@
 #include "components/datasources/uddatasource.h"
 #include "ep/cpp/component/resource/udmodel.h"
 
-namespace ep
+namespace ep {
+
+Array<const PropertyInfo> UDNode::GetProperties() const
 {
+  return{
+    EP_MAKE_PROPERTY(UDModel, "UDModel instance", nullptr, 0),
+  };
+}
 
 void UDNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
 {

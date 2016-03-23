@@ -99,35 +99,12 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY_RO(NumResources, "The number of Resources in the ResourceManager", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(ResourceArray, "An array populated with the ResourceManager's resources", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(Extensions, "The file extensions supported by the ResourceManager orgnanised by DataSource type", nullptr, 0),
-    };
-  }
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(AddResource, "Add a Resource to the ResourceManager"),
-      EP_MAKE_METHOD_EXPLICIT("AddResourceArray", AddResourceArrayMethod, "Add an Array of Resources to the ResourceManager"),
-      EP_MAKE_METHOD(RemoveResource, "Remove the specified Resource"),
-      EP_MAKE_METHOD_EXPLICIT("RemoveResourceArray", RemoveResourceArrayMethod, "Remove an Array Resources from the ResourceManager"),
-      EP_MAKE_METHOD(ClearResources, "Remove all resources"),
-      EP_MAKE_METHOD(GetResource, "Get Resource by UID"),
-      EP_MAKE_METHOD(LoadResourcesFromFile, "Create a DataSource containing Resources from the file specified by the given File InitParams"),
-      EP_MAKE_METHOD(SaveResourcesToFile, "Save Resources from the given DataSource to a file specified by the given File InitParams"),
-    };
-  }
-  static Array<const EventInfo> GetEvents()
-  {
-    return{
-      EP_MAKE_EVENT(Added, "Resources were added"),
-      EP_MAKE_EVENT(Removed, "Resources were removed"),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
+  Array<const EventInfo> GetEvents() const;
 };
 
 } //namespace ep
+
 #endif // EP_RESOURCE_MANAGER_H

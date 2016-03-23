@@ -72,30 +72,10 @@ protected:
 
   Variant FindBookmark_Internal(String bmName) const { return pImpl->FindBookmark_Internal(bmName); }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY_RO(RootNode, "Scene root node", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(BookmarkMap, "Bookmark map", nullptr, 0),
-    };
-  }
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(MakeDirty, "Force a dirty signal"),
-      EP_MAKE_METHOD(AddBookmarkFromCamera, "Add a Bookmark from Camera"),
-      EP_MAKE_METHOD(AddBookmark, "Add a Bookmark"),
-      EP_MAKE_METHOD(RemoveBookmark, "Remove a Bookmark"),
-      EP_MAKE_METHOD(RenameBookmark, "Rename a Bookmark"),
-      EP_MAKE_METHOD_EXPLICIT("FindBookmark", FindBookmark_Internal, "Find a Bookmark"),
-    };
-  }
-  static Array<const EventInfo> GetEvents()
-  {
-    return{
-      EP_MAKE_EVENT(Dirty, "Scene dirty event"),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
+  Array<const EventInfo> GetEvents() const;
 };
 
 };

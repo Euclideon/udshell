@@ -4,8 +4,26 @@
 #include "ep/cpp/component/stream.h"
 #include "ep/cpp/kernel.h"
 
-namespace ep
+namespace ep {
+
+Array<const PropertyInfo> DataSource::GetProperties() const
 {
+  return{
+    EP_MAKE_PROPERTY_RO(NumResources, "Number of resources the data source provides", nullptr, 0),
+    EP_MAKE_PROPERTY(URL, "The file or location of the DataSource", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(FileExtensions, "The file extensions associated with the DataSource", nullptr, 0),
+  };
+}
+Array<const MethodInfo> DataSource::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(GetResourceName, "Get a resource name by index"),
+    EP_MAKE_METHOD(GetResourceByVariant, "Get a resource by name or index"),
+    EP_MAKE_METHOD(SetResource, "Set a resource by name"),
+    EP_MAKE_METHOD(CountResources, "Count resources with a name prefix"),
+  };
+}
+
 
 StreamRef DataSourceImpl::OpenStream(const Variant &source)
 {

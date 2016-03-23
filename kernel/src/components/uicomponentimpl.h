@@ -7,6 +7,13 @@
 
 namespace ep {
 
+inline Array<const PropertyInfo> UIComponent::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY_RO(UIHandle, "Platform specific UI handle", nullptr, 0)
+  };
+}
+
 class UIComponentImpl : public BaseImpl<UIComponent, IUIComponent>
 {
 public:

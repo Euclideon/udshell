@@ -4,6 +4,13 @@
 
 namespace ep {
 
+Array<const PropertyInfo> MemStream::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY_RO(Buffer, "The Buffer component MemStream reads/writes to", nullptr, 0),
+  };
+}
+
 MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Stream(pType, pKernel, uid, initParams)
 {

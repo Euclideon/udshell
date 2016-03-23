@@ -3,6 +3,28 @@
 
 namespace ep {
 
+Array<const PropertyInfo> Timer::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY_RO(Duration, "The duration for the timer", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(TimerType, "Gets the Timer Type", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Timer::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(SetInterval, "Sets the Duration and the Timer Type to Interval"),
+    EP_MAKE_METHOD(SetCountDown, "Sets the Duration and the Timer Type to CountDown"),
+    EP_MAKE_METHOD(Reset, "Resets the Timer"),
+  };
+}
+Array<const EventInfo> Timer::GetEvents() const
+{
+  return{
+    EP_MAKE_EVENT(Elapsed, "Timer Event"),
+  };
+}
+
 Timer::Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams), pTimer(nullptr)
 {

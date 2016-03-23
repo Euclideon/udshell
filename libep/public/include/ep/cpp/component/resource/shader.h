@@ -30,12 +30,8 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(Code, "The code string to be compiled", nullptr, 0),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
 };
 
 } // namespace ep

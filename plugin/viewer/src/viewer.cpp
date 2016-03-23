@@ -13,6 +13,14 @@
 
 namespace ep {
 
+Array<const PropertyInfo> Viewer::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY_RO(SimpleCamera, "The Viewer's SimpleCamera Component", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(View, "The Viewer's View Component", nullptr, 0),
+  };
+}
+
 Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Activity(pType, pKernel, uid, initParams)
 {

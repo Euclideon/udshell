@@ -29,20 +29,9 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(UI, "The top level UI compoment for this activity", nullptr, 0),
-    };
-  }
-
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(Activate, "Set as the active activity"),
-      EP_MAKE_METHOD(Deactivate, "Unset as the active activity"),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
 };
 
 } //namespace ep

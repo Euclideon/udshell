@@ -4,8 +4,29 @@
 #include "components/resources/text.h"
 #include "ep/cpp/component/commandmanager.h"
 
-namespace ep
+namespace ep {
+
+Array<const PropertyInfo> Menu::GetProperties() const
 {
+  return{
+    EP_MAKE_PROPERTY(MenuData, "Heirarchical structure of menus", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Menu::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(AddXMLItems, "Add menu items from an XML string"),
+    EP_MAKE_METHOD(RemoveItem, "Remove menu item"),
+    EP_MAKE_METHOD(AddItem, "Add a menu item with the given properties"),
+    EP_MAKE_METHOD(SetItemProperties, "Set properties for the given menu item"),
+  };
+}
+Array<const EventInfo> Menu::GetEvents() const
+{
+  return{
+    EP_MAKE_EVENT(Changed, "The menu data has changed"),
+  };
+}
 
 MenuImpl::MenuImpl(Component *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)

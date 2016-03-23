@@ -33,20 +33,8 @@ protected:
 
   void FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth);
 
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(ParseXml, "Parse XML formatted text in buffer into a heirarchical structure of KeyValuePairs"),
-      EP_MAKE_METHOD(FormatXml, "Format a heirarchical structure of KeyValuePairs as XML text"),
-    };
-  }
-  static Array<const StaticFuncInfo> GetStaticFuncs()
-  {
-    return{
-      EP_MAKE_STATICFUNC(XMLMapToComponentParams, "Convert a map representing a heirarchy of XML elements into 'Component Params' format, i.e. suitable as InitParams and for returning from Save()"),
-      EP_MAKE_STATICFUNC(ComponentParamsToXMLMap, "Convert a map in 'Component Params' format into a map representing a heirarchy of XML elements"),
-    };
-  }
+  Array<const MethodInfo> GetMethods() const;
+  Array<const StaticFuncInfo> GetStaticFuncs() const;
 };
 
 } // namespace ep

@@ -27,21 +27,24 @@ struct Kernel::CreateHelper
   static CreateFunc GetCreateImpl() { return GetCreateImplImpl((typename _ComponentType::Impl*)nullptr); }
 
 private:
+  template <typename Owner, typename C, typename R, typename... Args>
+  static constexpr bool FunctionBelongsTo(R(C::*)(Args...) const) { return std::is_same<C, Owner>::value; }
+
   // TODO: these need to go somewhere else, instantiating this class for these functions instantiates the other functions too that should be specialised for IComponent and friends
   template <typename T>
   static constexpr auto HasDescriptorImpl(T* t) -> decltype(T::MakeDescriptor(), bool()) { return true; }
   static constexpr bool HasDescriptorImpl(...) { return false; }
   template <typename T>
-  static auto GetPropertiesImpl(T* t) -> decltype(T::GetProperties(), Array<const PropertyInfo>()) { return T::GetProperties(); }
+  static auto GetPropertiesImpl(const T* t) -> decltype(std::enable_if<FunctionBelongsTo<T>(&T::GetProperties)>::type(), Array<const PropertyInfo>()) { return t->GetProperties(); }
   static Array<const PropertyInfo> GetPropertiesImpl(...) { return nullptr; }
   template <typename T>
-  static auto GetMethodsImpl(T* t) -> decltype(T::GetMethods(), Array<const MethodInfo>()) { return T::GetMethods(); }
+  static auto GetMethodsImpl(const T* t) -> decltype(std::enable_if<FunctionBelongsTo<T>(&T::GetMethods)>::type(), Array<const MethodInfo>()) { return t->GetMethods(); }
   static Array<const MethodInfo> GetMethodsImpl(...) { return nullptr; }
   template <typename T>
-  static auto GetEventsImpl(T* t) -> decltype(T::GetEvents(), Array<const EventInfo>()) { return T::GetEvents(); }
+  static auto GetEventsImpl(const T* t) -> decltype(std::enable_if<FunctionBelongsTo<T>(&T::GetEvents)>::type(), Array<const EventInfo>()) { return t->GetEvents(); }
   static Array<const EventInfo> GetEventsImpl(...) { return nullptr; }
   template <typename T>
-  static auto GetStaticFuncsImpl(T* t) -> decltype(T::GetStaticFuncs(), Array<const StaticFuncInfo>()) { return T::GetStaticFuncs(); }
+  static auto GetStaticFuncsImpl(const T* t) -> decltype(std::enable_if<FunctionBelongsTo<T>(&T::GetStaticFuncs)>::type(), Array<const StaticFuncInfo>()) { return t->GetStaticFuncs(); }
   static Array<const StaticFuncInfo> GetStaticFuncsImpl(...) { return nullptr; }
   template <typename T>
   static auto GetStaticInitImpl(T* t) -> decltype(T::StaticInit(nullptr), internal::ComponentDesc_InitComponentPtr()) { return &T::StaticInit; }

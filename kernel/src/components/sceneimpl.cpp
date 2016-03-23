@@ -7,6 +7,31 @@
 
 namespace ep {
 
+Array<const PropertyInfo> Scene::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY_RO(RootNode, "Scene root node", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(BookmarkMap, "Bookmark map", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Scene::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(MakeDirty, "Force a dirty signal"),
+    EP_MAKE_METHOD(AddBookmarkFromCamera, "Add a Bookmark from Camera"),
+    EP_MAKE_METHOD(AddBookmark, "Add a Bookmark"),
+    EP_MAKE_METHOD(RemoveBookmark, "Remove a Bookmark"),
+    EP_MAKE_METHOD(RenameBookmark, "Rename a Bookmark"),
+    EP_MAKE_METHOD_EXPLICIT("FindBookmark", FindBookmark_Internal, "Find a Bookmark"),
+  };
+}
+Array<const EventInfo> Scene::GetEvents() const
+{
+  return{
+    EP_MAKE_EVENT(Dirty, "Scene dirty event"),
+  };
+}
+
 bool SceneImpl::InputEvent(const epInputEvent &ev)
 {
   // do anything here?

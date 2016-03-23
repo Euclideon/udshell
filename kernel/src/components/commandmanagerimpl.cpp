@@ -5,6 +5,24 @@
 
 namespace ep {
 
+Array<const MethodInfo> CommandManager::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(SetShortcut, "Set the shortcut for the given command"),
+    EP_MAKE_METHOD(GetShortcut, "Get the shortcut for the given command"),
+    EP_MAKE_METHOD(RegisterCommand, "register a command and assign it a function, script and/or shortcut"),
+    EP_MAKE_METHOD(UnregisterCommand, "remove a command from the command manager"),
+    EP_MAKE_METHOD(HandleShortcutEvent, "execute the command attached to the given shortcut"),
+    EP_MAKE_METHOD(RunCommand, "call the function or script attached to the given command"),
+    EP_MAKE_METHOD(SetFunction, "Assign a callback function to the given command"),
+    EP_MAKE_METHOD(SetScript, "Assign a script string to the given command"),
+    EP_MAKE_METHOD(SetActivityType, "Set the activity type associated with the given command"),
+    EP_MAKE_METHOD(GetActivityType, "Get the activity type associated with the given command"),
+    EP_MAKE_METHOD(EnableShortcut, "Enable shortcut for the given command"),
+    EP_MAKE_METHOD(DisableShortcut, "Disable shortcut for the given command"),
+  };
+}
+
 SharedString CommandManagerImpl::GetShortcut(String id) const
 {
   const Command *pCommand = commandRegistry.Get(id);

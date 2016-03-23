@@ -7,6 +7,24 @@ namespace ep {
 
 static int mouseRemap[] = { -1, 0, 2, -1, 1 };
 
+Array<const PropertyInfo> SimpleCamera::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY_WO(Matrix, "Local matrix", nullptr, 0),
+    EP_MAKE_PROPERTY_WO(Position, "Local position", nullptr, 0),
+    EP_MAKE_PROPERTY_WO(Orientation, "Camera orientation (YPR)", nullptr, 0),
+    EP_MAKE_PROPERTY_WO(Speed, "Camera speed", nullptr, 0),
+    EP_MAKE_PROPERTY(HelicopterMode, "Helicopter Mode", nullptr, 0),
+    EP_MAKE_PROPERTY(InvertedYAxis, "InvertYAxis", nullptr, 0),
+  };
+}
+Array<const EventInfo> SimpleCamera::GetEvents() const
+{
+  return{
+    EP_MAKE_EVENT(Changed, "The camera changed")
+  };
+}
+
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
 SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initParams)

@@ -13,6 +13,23 @@
 
 namespace ep {
 
+Array<const PropertyInfo> Component::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY_RO(Uid, "Component UID", nullptr, 0),
+    EP_MAKE_PROPERTY(Name, "Component Name", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(Type, "Component Type", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(DisplayName, "Component Display Name", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(Description, "Component Description", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Component::GetMethods() const
+{
+  return{
+  };
+}
+
+
 ComponentImpl::~ComponentImpl()
 {
   pInstance->LogDebug(4, "Destroy component: {0} ({1})", pInstance->uid, pInstance->name);

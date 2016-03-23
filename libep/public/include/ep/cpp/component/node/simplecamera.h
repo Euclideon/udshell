@@ -42,23 +42,9 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY_WO(Matrix, "Local matrix", nullptr, 0),
-      EP_MAKE_PROPERTY_WO(Position, "Local position", nullptr, 0),
-      EP_MAKE_PROPERTY_WO(Orientation, "Camera orientation (YPR)", nullptr, 0),
-      EP_MAKE_PROPERTY_WO(Speed, "Camera speed", nullptr, 0),
-      EP_MAKE_PROPERTY(HelicopterMode, "Helicopter Mode", nullptr, 0),
-      EP_MAKE_PROPERTY(InvertedYAxis, "InvertYAxis", nullptr, 0),
-    };
-  }
-  static Array<const EventInfo> GetEvents()
-  {
-    return {
-      EP_MAKE_EVENT(Changed, "The camera changed")
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const EventInfo> GetEvents() const;
 };
 
 } // namespace ep

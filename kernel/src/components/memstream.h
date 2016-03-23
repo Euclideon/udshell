@@ -33,12 +33,7 @@ protected:
   Slice<void> bufferSlice;
   OpenFlags oFlags;
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY_RO(Buffer, "The Buffer component MemStream reads/writes to", nullptr, 0),
-    };
-  }
+  Array<const PropertyInfo> GetProperties() const;
 };
 
 }
