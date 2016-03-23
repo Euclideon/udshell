@@ -47,9 +47,13 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     {
       // TODO: enable streamer once we have a tick running to update the streamer
       String modelSrc = model->asString();
-      DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", true } });
-      if (spModelDS && spModelDS->GetNumResources() > 0)
+
+      DataSourceRef spModelDS;
+      epscope(fail) { if (!spModelDS) pKernel->LogError("Viewer -- Failed to load model\n"); };
+      spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", true } });
+      if (spModelDS->GetNumResources() > 0)
       {
+        epscope(fail) { if (!spModel) pKernel->LogError("Viewer -- Failed to load model. Not a UDModel\n"); };
         spModel = spModelDS->GetResourceAs<UDModel>(0);
       }
     }
@@ -64,7 +68,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     spScene->GetRootNode()->AddChild(spUDNode);
     spScene->MakeDirty();
     spView->SetEnablePicking(true);
-    spScene->AddBookmark(MutableString128(Format, "{0}_bookmark", model->asString().getRightAtLast("/", false)), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
+    spScene->AddBookmark(MutableString128(Format, "{0}_bookmark", Viewer::GetFileNameFromPath(model->asString())), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
 
   spView->SetUDRenderFlags(UDRenderFlags::PointCubes | UDRenderFlags::ClearTargets);
@@ -104,6 +108,20 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   auto bmMap = spScene->GetBookmarkMap();
   for (auto bm : bmMap)
     spUIBookmarks->Call("createbookmark", bm.key);
+}
+
+MutableString<260> Viewer::GetFileNameFromPath(String path) // TODO Move this to File after implising File
+{
+  String fName = path.getRightAtLast("/", false);
+  if (fName.empty())
+  {
+    fName = path.getRightAtLast("\\", false);
+
+    if (fName.empty())
+      return path;
+  }
+
+  return fName;
 }
 
 void Viewer::OnResourceDropped(String resourceUID, int x, int y)
@@ -243,7 +261,16 @@ Variant Viewer::Save() const
     params.Insert("camera", spCamera->Save());
 
   if (spModel)
-    params.Insert("model", spModel->GetDataSource()->GetURL());
+  {
+    Variant src = spModel->GetMetadata()->CallMethod("get", "url");
+    if (src.is(Variant::Type::String))
+    {
+      String srcString = src.asString();
+
+      if (!srcString.empty())
+        params.Insert("model", srcString);
+    }
+  }
 
   if (spScene)
     params.Insert("scene", spScene->Save());

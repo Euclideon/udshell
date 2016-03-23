@@ -34,9 +34,9 @@ SHARED_CLASS(View);
 SHARED_CLASS(Scene);
 SHARED_CLASS(Camera);
 
-class Scene : public Component
+class Scene : public Resource
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Scene, IScene, Component, EPKERNEL_PLUGINVERSION, "Scene desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(Scene, IScene, Resource, EPKERNEL_PLUGINVERSION, "Scene desc...", 0)
 
 public:
   virtual bool InputEvent(const epInputEvent &ev) { return pImpl->InputEvent(ev); }
@@ -65,7 +65,7 @@ public:
 
 protected:
   Scene(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-    : Component(pType, pKernel, uid, initParams)
+    : Resource(pType, pKernel, uid, initParams)
   {
     pImpl = CreateImpl(initParams);
   }

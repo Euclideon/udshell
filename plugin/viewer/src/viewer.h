@@ -30,6 +30,8 @@ public:
   SimpleCameraRef GetSimpleCamera() const { return spCamera; }
   ViewRef GetView() const { return spView; }
 
+  static MutableString<260> GetFileNameFromPath(String path);
+
 protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~Viewer() { Deactivate(); }
