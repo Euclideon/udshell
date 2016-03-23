@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+    <library_cameras>
+    </library_cameras>
+    <library_lights/>
+    <library_materials/>
+    <library_effects/>
+    <library_geometries>
+    </library_geometries>
+    <library_xrefs>
+	<xref id="dircube-lib" name="dircube" url="data/DirCube.upc">
+    </library_xrefs>
+    <library_visual_scenes>
+        <visual_scene id="VisualSceneNode" name="untitled">
+		<node id="DirCube1" name="DirCube1">
+                        <translate sid="translate">-1 0 0</translate>
+                	<rotate sid="rotateZ">0 0 1 0</rotate>
+                	<rotate sid="rotateY">0 1 0 0</rotate>
+                	<rotate sid="rotateX">1 0 0 0</rotate>
+			<instance_xref url="#dircube-lib" />
+		</node>
+		<node id="DirCube2" name="DirCube2">
+			<translate sid="translate">1 0 0</translate>
+                	<rotate sid="rotateZ">0 0 1 0</rotate>
+                	<rotate sid="rotateY">0 1 0 0</rotate>
+                	<rotate sid="rotateX">1 0 0 0</rotate>
+			<instance_xref url="#dircube-lib" />
+		</node>
+	</visual_scene>
+    </library_visual_scenes>
+    <scene>
+        <instance_visual_scene url="#VisualSceneNode"/>
+    </scene>
+</COLLADA>
