@@ -27,6 +27,8 @@ public:
     return extensions;
   }
 
+  static Slice<const String> StaticGetFileExtensions() { return extensions; }
+
 protected:
   static const Array<const String> extensions;
 

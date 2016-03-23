@@ -69,7 +69,10 @@ public:
   void SetResource(String _name, const ResourceRef &spResource) override final
   {
     MetadataRef spMeta = component_cast<Metadata>(spResource->GetMetadata());
-    spMeta->Insert("url", GetURL());
+
+    Variant resUrl = spMeta->Get("url");
+    if(!resUrl.is(Variant::Type::String))
+      spMeta->Insert("url", GetURL());
 
     resources.Insert(_name, spResource);
   }

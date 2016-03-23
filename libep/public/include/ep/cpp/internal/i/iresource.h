@@ -12,7 +12,6 @@ class IResource
 {
 public:
   virtual ComponentRef GetMetadata() const = 0; // TODO Change ComponentRef to Metadata once Metadata made public
-  virtual DataSourceRef GetDataSource() const = 0;
 
   virtual Variant Save() const = 0;
 };
