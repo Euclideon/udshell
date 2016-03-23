@@ -262,7 +262,7 @@ Variant Viewer::Save() const
 
   if (spModel)
   {
-    Variant src = spModel->GetMetadata()->CallMethod("get", "url");
+    Variant src = spModel->GetMetadata()->Call("get", "url");
     if (src.is(Variant::Type::String))
     {
       String srcString = src.asString();
