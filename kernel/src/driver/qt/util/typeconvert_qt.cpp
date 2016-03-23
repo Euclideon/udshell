@@ -16,13 +16,19 @@
 
 namespace qt {
 
-MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string)
+ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string)
 {
   QByteArray byteArray = string.toUtf8();
-  return MutableString<ep::internal::VariantSmallStringSize>(byteArray.data(), byteArray.size());
+  return ep::MutableString<ep::internal::VariantSmallStringSize>(byteArray.data(), byteArray.size());
 }
 
 }
+
+using ep::Variant;
+using ep::SharedString;
+using ep::Slice;
+using ep::Array;
+using ep::shared_pointer_cast;
 
 void epFromVariant(const Variant &variant, QString *pString)
 {
@@ -237,11 +243,11 @@ Variant epToVariant(const QJSValue &v)
   else if (v.isQObject())
     return epToVariant(v.toQObject());
   else if (v.isCallable())
-    return VarDelegate(qt::JSValueDelegateRef::create(v));
+    return ep::VarDelegate(qt::JSValueDelegateRef::create(v));
   else if (v.isArray())
   {
     size_t length = (size_t)v.property(QString("length")).toNumber();
-    Array<Variant> r(Reserve, length);
+    Array<Variant> r(ep::Reserve, length);
 
     QJSValueIterator i(v);
     size_t index = 0;
@@ -263,7 +269,7 @@ Variant epToVariant(const QJSValue &v)
 
       QString name = i.name();
       QJSValue value = i.value();
-      varMap.Insert(KeyValuePair(Variant(qt::AllocUDStringFromQString(name)), epToVariant(value)));
+      varMap.Insert(ep::KeyValuePair(Variant(qt::AllocUDStringFromQString(name)), epToVariant(value)));
     }
     return Variant(std::move(varMap));
   }
@@ -406,7 +412,7 @@ Variant epToVariant(const QVariantMap &varMap)
   QVariantMap::const_iterator i = varMap.begin();
   while (i != varMap.end())
   {
-    v.Insert(KeyValuePair(Variant(qt::AllocUDStringFromQString(i.key())), epToVariant(i.value())));
+    v.Insert(ep::KeyValuePair(Variant(qt::AllocUDStringFromQString(i.key())), epToVariant(i.value())));
     ++i;
   }
   return Variant(std::move(v));

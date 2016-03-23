@@ -4,9 +4,13 @@
 # include <unistd.h>
 #endif
 
+using ep::Array;
+using ep::KeyValuePair;
+using ep::String;
+
 Array<const KeyValuePair> epParseCommandLine(const char *pCommandLine)
 {
-  Array<const KeyValuePair> output(Concat, KeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
+  Array<const KeyValuePair> output(ep::Concat, KeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
@@ -32,7 +36,7 @@ Array<const KeyValuePair> epParseCommandLine(const char *pCommandLine)
 
 Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
 {
-  Array<const KeyValuePair> output(Reserve, argc);
+  Array<const KeyValuePair> output(ep::Reserve, argc);
 
   // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
 
@@ -44,7 +48,7 @@ Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
 
 Array<const KeyValuePair> epParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
 {
-  Array<const KeyValuePair> output(Reserve, argc);
+  Array<const KeyValuePair> output(ep::Reserve, argc);
 
   for (uint32_t i = 0; i < argc; ++i)
     output.pushBack(KeyValuePair(String(argn[i]), String(argv[i])));

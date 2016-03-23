@@ -77,7 +77,7 @@ int16_t DateTime::GetAbsoluteYear() const
   return START_YEAR + (int16_t)year;
 }
 
-inline ptrdiff_t epStringify(Slice<char> buffer, String format, const DateTime &dt, const epVarArg *epUnusedParam(pArgs))
+inline ptrdiff_t epStringify(Slice<char> buffer, String format, const DateTime &dt, const VarArg *epUnusedParam(pArgs))
 {
   SharedString out = dt.ToString(format);
 

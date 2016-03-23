@@ -13,7 +13,7 @@ extern "C" {
 epSharedString epSharedString_Create(const char *pCString)
 {
   epSharedString s;
-  new(&s) SharedString(pCString);
+  new(&s) ep::SharedString(pCString);
   return s;
 }
 
@@ -21,17 +21,17 @@ size_t epSharedString_Acquire(const epSharedString *pSS)
 {
   if (!pSS || !pSS->ptr)
     return 0;
-  internal::SliceHeader *pH = internal::GetSliceHeader(pSS->ptr);
+  ep::internal::SliceHeader *pH = ep::internal::GetSliceHeader(pSS->ptr);
   return ++pH->refCount;
 }
 size_t epSharedString_Release(const epSharedString *pSS)
 {
   if (!pSS || !pSS->ptr)
     return 0;
-  internal::SliceHeader *pH = internal::GetSliceHeader(pSS->ptr);
+  ep::internal::SliceHeader *pH = ep::internal::GetSliceHeader(pSS->ptr);
   if(pH->refCount > 1)
     return --pH->refCount;
-  internal::SliceFree(pSS->ptr);
+  ep::internal::SliceFree(pSS->ptr);
   ((epSharedString*)pSS)->ptr = nullptr;
   ((epSharedString*)pSS)->length = 0;
   return 0;
@@ -89,14 +89,14 @@ int epvsnprintf(char * s, size_t count, const char * format, va_list args)
 #endif
 }
 
-size_t getLength(Slice<epVarArg> args)
+size_t getLength(Slice<VarArg> args)
 {
   size_t len = 0;
   for (auto &a : args)
     len += a.GetStringLength();
   return len;
 }
-Slice<char> concatenate(Slice<char> buffer, Slice<epVarArg> args)
+Slice<char> concatenate(Slice<char> buffer, Slice<VarArg> args)
 {
   size_t len = 0;
   for (auto &a : args)
@@ -104,9 +104,9 @@ Slice<char> concatenate(Slice<char> buffer, Slice<epVarArg> args)
   return buffer.slice(0, len);
 }
 
-ptrdiff_t parseFormat(String &format, Slice<char> &buffer, Slice<epVarArg> args);
+ptrdiff_t parseFormat(String &format, Slice<char> &buffer, Slice<VarArg> args);
 
-int64_t parseInt(String &format, const epVarArg *pArgs)
+int64_t parseInt(String &format, const VarArg *pArgs)
 {
   if (!format)
     return -1; // number expected!
@@ -134,7 +134,7 @@ int64_t parseInt(String &format, const epVarArg *pArgs)
   return i;
 }
 
-Slice<char> format(String format, Slice<char> buffer, Slice<epVarArg> args)
+Slice<char> format(String format, Slice<char> buffer, Slice<VarArg> args)
 {
   char *pBuffer = buffer.ptr;
   size_t length = 0;
@@ -171,7 +171,7 @@ write_char:
   return Slice<char>(pBuffer, length);
 }
 
-ptrdiff_t parseFormat(String &format, Slice<char> &buffer, Slice<epVarArg> args)
+ptrdiff_t parseFormat(String &format, Slice<char> &buffer, Slice<VarArg> args)
 {
   if (format.popFront() != '{')
   {
@@ -358,7 +358,7 @@ SharedString SharedString::sprintf(const char *pFormat, ...)
   return std::move(r);
 }
 
-SharedString SharedString::concatInternal(Slice<epVarArg> args)
+SharedString SharedString::concatInternal(Slice<VarArg> args)
 {
   size_t len = internal::getLength(args);
 
@@ -369,7 +369,7 @@ SharedString SharedString::concatInternal(Slice<epVarArg> args)
 
   return std::move(r);
 }
-SharedString SharedString::formatInternal(String format, Slice<epVarArg> args)
+SharedString SharedString::formatInternal(String format, Slice<VarArg> args)
 {
   size_t len = internal::format(format, nullptr, args).length;
 
@@ -515,15 +515,15 @@ template double BaseString<char>::parseFloat() const;
 
 } // ep
 
-ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), nullptr_t, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String epUnusedParam(format), nullptr_t, const ep::VarArg *epUnusedParam(pArgs))
 {
   if (buffer.ptr)
-    String("null", 4).copyTo(buffer);
+    ep::String("null", 4).copyTo(buffer);
   return 4;
 }
 
 template<typename C>
-ptrdiff_t epStringify(Slice<char> buffer, String format, BaseString<C> s, const epVarArg *pArgs)
+ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, ep::BaseString<C> s, const ep::VarArg *pArgs)
 {
   // parse format string
   bool rightJustify = false;
@@ -604,11 +604,11 @@ ptrdiff_t epStringify(Slice<char> buffer, String format, BaseString<C> s, const 
 
   return length;
 }
-template ptrdiff_t epStringify<char>(Slice<char> buffer, String format, BaseString<char> s, const epVarArg *pArgs);
-template ptrdiff_t epStringify<char16_t>(Slice<char> buffer, String format, BaseString<char16_t> s, const epVarArg *pArgs);
-template ptrdiff_t epStringify<char32_t>(Slice<char> buffer, String format, BaseString<char32_t> s, const epVarArg *pArgs);
+template ptrdiff_t epStringify<char>(ep::Slice<char> buffer, ep::String format, ep::BaseString<char> s, const ep::VarArg *pArgs);
+template ptrdiff_t epStringify<char16_t>(ep::Slice<char> buffer, ep::String format, ep::BaseString<char16_t> s, const ep::VarArg *pArgs);
+template ptrdiff_t epStringify<char32_t>(ep::Slice<char> buffer, ep::String format, ep::BaseString<char32_t> s, const ep::VarArg *pArgs);
 
-ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), bool b, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String epUnusedParam(format), bool b, const ep::VarArg *epUnusedParam(pArgs))
 {
   if (b == true)
   {
@@ -616,7 +616,7 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), bool b, 
     {
       if (buffer.length < 4)
         return buffer.length - 4;
-      String("true", 4).copyTo(buffer);
+      ep::String("true", 4).copyTo(buffer);
     }
     return 4;
   }
@@ -626,13 +626,13 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), bool b, 
     {
       if (buffer.length < 5)
         return buffer.length - 5;
-      String("false", 5).copyTo(buffer);
+      ep::String("false", 5).copyTo(buffer);
     }
     return 5;
   }
 }
 
-ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), int64_t i, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String epUnusedParam(format), int64_t i, const ep::VarArg *epUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for ints?
 
@@ -678,7 +678,7 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), int64_t 
   return len;
 }
 
-ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), uint64_t i, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String epUnusedParam(format), uint64_t i, const ep::VarArg *epUnusedParam(pArgs))
 {
   // TODO: what formats are interesting for ints?
 
@@ -710,7 +710,7 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), uint64_t
   }
   return len;
 }
-ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), double f, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String epUnusedParam(format), double f, const ep::VarArg *epUnusedParam(pArgs))
 {
   const char *defaultFormat = "%.17g";
   const char *pFormat = defaultFormat;

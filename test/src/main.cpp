@@ -15,9 +15,9 @@ void _Free(void *pMemory);
 } // namespace internal
 } // namespace ep
 
-static AVLTreeAllocator<VariantAVLNode> s_varAVLAllocator;
+static ep::AVLTreeAllocator<ep::VariantAVLNode> s_varAVLAllocator;
 
-static Instance s_instance =
+static ep::Instance s_instance =
 {
   EP_APIVERSION,  // apiVersion;
   nullptr,        // pKernelInstance;
@@ -28,9 +28,9 @@ static Instance s_instance =
 
   [](void *pMem) -> void { ep::internal::_Free(pMem); }, // Free
 
-  [](String condition, String message, String file, int line) -> void { IF_EPASSERT(epAssertFailed(condition, message, file, line);) }, // AssertFailed
+  [](ep::String condition, ep::String message, ep::String file, int line) -> void { IF_EPASSERT(epAssertFailed(condition, message, file, line);) }, // AssertFailed
 
-  [](Component *) -> void { }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
+  [](ep::Component *) -> void { }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
 
   []() -> void* { return (void*)&s_varAVLAllocator; }, // TreeAllocator
 };
@@ -47,7 +47,7 @@ GlobalInstanceInitializer globalInstanceInitializer;
 
 int main(int argc, char **argv)
 {
-  internal::gUnitTesting = true;
+  ep::internal::gUnitTesting = true;
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

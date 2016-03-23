@@ -13,6 +13,8 @@
 #include "ep/cpp/component/resourcemanager.h"
 #include "components/timer.h"
 
+using namespace ep;
+
 static void ProcessCmdline(int argc, char *argv[]);
 
 // ---------------------------------------------------------------------------------------

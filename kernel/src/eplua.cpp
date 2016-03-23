@@ -992,7 +992,7 @@ int LuaState::subscribe(lua_State* L)
 
 
 // HAX: define Variant::Lua functions here to reduce include spam
-void Variant::luaPush(LuaState &l) const
+void ep::Variant::luaPush(ep::LuaState &l) const
 {
   switch ((Type)t)
   {
@@ -1083,7 +1083,7 @@ void Variant::luaPush(LuaState &l) const
   }
 }
 
-Variant Variant::luaGet(LuaState &l, int idx)
+ep::Variant ep::Variant::luaGet(LuaState &l, int idx)
 {
   switch (l.getType(idx))
   {

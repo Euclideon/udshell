@@ -10,12 +10,12 @@ namespace qt {
 class QtViewportImpl : public ep::ViewportImpl
 {
 public:
-  QtViewportImpl(Component *pInstance, Variant::VarMap initParams)
+  QtViewportImpl(ep::Component *pInstance, ep::Variant::VarMap initParams)
     : ep::ViewportImpl(pInstance, initParams)
   {
   }
 
-  void SetView(const ViewRef &_spView) override final
+  void SetView(const ep::ViewRef &_spView) override final
   {
     QQuickItem *pRootItem = (QQuickItem*)pInstance->GetUserData();
     QList<qt::QtRenderView *> renderViews = pRootItem->findChildren<qt::QtRenderView *>();

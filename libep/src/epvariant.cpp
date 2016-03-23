@@ -7,57 +7,57 @@ extern "C" {
 void epVariant_Release(epVariant v)
 {
   // Note: Variant's destructor will clean our instance up
-  Variant t;
+  ep::Variant t;
   (epVariant&)t = v;
 }
 
 epVariant epVariant_CreateVoid()
 {
   epVariant v;
-  new(&v) Variant(Variant::Type::Void);
+  new(&v) ep::Variant(ep::Variant::Type::Void);
   return v;
 }
 epVariant epVariant_CreateNull()
 {
   epVariant v;
-  new(&v) Variant(nullptr);
+  new(&v) ep::Variant(nullptr);
   return v;
 }
 epVariant epVariant_CreateBool(char b)
 {
   epVariant v;
-  new(&v) Variant(b ? true : false);
+  new(&v) ep::Variant(b ? true : false);
   return v;
 }
 epVariant epVariant_CreateInt(int64_t i)
 {
   epVariant v;
-  new(&v) Variant(i);
+  new(&v) ep::Variant(i);
   return v;
 }
 epVariant epVariant_CreateFloat(double f)
 {
   epVariant v;
-  new(&v) Variant(f);
+  new(&v) ep::Variant(f);
   return v;
 }
 epVariant epVariant_CreateComponent(epComponent *pComponent)
 {
   epVariant v;
-  new(&v) Variant((ComponentRef&)pComponent);
+  new(&v) ep::Variant((ep::ComponentRef&)pComponent);
   return v;
 }
 //inline epVariant epVariant_CreateDelegate() {}
 epVariant epVariant_CreateCString(const char *pString)
 {
   epVariant v;
-  new(&v) Variant(String(pString));
+  new(&v) ep::Variant(ep::String(pString));
   return v;
 }
 epVariant epVariant_CreateString(epString string)
 {
   epVariant v;
-  new(&v) Variant((String&)string);
+  new(&v) ep::Variant((ep::String&)string);
   return v;
 }
 
@@ -76,33 +76,33 @@ int epVariant_IsNull(epVariant v)
 }
 char epVariant_AsBool(epVariant v)
 {
-  return (char)((Variant&)v).asBool();
+  return (char)((ep::Variant&)v).asBool();
 }
 int64_t epVariant_AsInt(epVariant v)
 {
-  return ((Variant&)v).asInt();
+  return ((ep::Variant&)v).asInt();
 }
 double epVariant_AsFloat(epVariant v)
 {
-  return ((Variant&)v).asFloat();
+  return ((ep::Variant&)v).asFloat();
 }
 epComponent* epVariant_AsComponent(epVariant v)
 {
   epComponent *pC;
-  new(&pC) ComponentRef(((Variant&)v).asComponent());
+  new(&pC) ep::ComponentRef(((ep::Variant&)v).asComponent());
   return pC;
 }
 //char epVariant_GetDelegate(epVariantHandle v) {}
 epString epVariant_AsString(epVariant v)
 {
   epString r;
-  new(&r) String(((Variant&)v).asString());
+  new(&r) ep::String(((ep::Variant&)v).asString());
   return r;
 }
 
 const epVariant* epVariant_AsArray(epVariant v, size_t *pLength)
 {
-  Slice<Variant> arr = ((Variant&)v).asArray();
+  ep::Slice<ep::Variant> arr = ((ep::Variant&)v).asArray();
   *pLength = arr.length;
   return (epVariant*)arr.ptr;
 }
@@ -114,8 +114,9 @@ const epVarMap* epVariant_AsAssocArray(epVariant v)
 } // extern "C"
 
 
-ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &v, const epVarArg *pArgs)
+ptrdiff_t epStringifyVariant(ep::Slice<char> buffer, ep::String format, const ep::Variant &v, const ep::VarArg *pArgs)
 {
+  using namespace ep;
   switch (v.type())
   {
     case Variant::Type::Void:

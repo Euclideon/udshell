@@ -2,6 +2,12 @@
 #include "ep/cpp/platform.h"
 // TODO: fill out these tests
 
+using ep::String;
+using ep::SharedArray;
+using ep::MutableString;
+using ep::SharedString;
+using ep::Slice;
+
 void receivesString(String)
 {
 }
@@ -76,7 +82,7 @@ TEST(EPStringTest, Deprecated)
   SharedString cc = SharedString::concat("hello ", pName, 10);
   SharedString fmt = SharedString::format("{ 1 }, {2}, { 0 , hello }", "hello ", pName, 10);
 
-  MutableString<0> ms(Concat, "hello ", pName, 10);
+  MutableString<0> ms(ep::Concat, "hello ", pName, 10);
   ms.append("poop!");
 
   int arr[] = { 1, 2, 30 };
@@ -87,7 +93,7 @@ TEST(EPStringTest, Deprecated)
   //  poo[2];
   //  poo.alloc(10);
 
-  WString wstr = (const char16_t*)L"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
+  ep::WString wstr = (const char16_t*)L"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
   ms.format("{0}", wstr);
 
   cc.parseInt();

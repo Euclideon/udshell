@@ -18,14 +18,14 @@ class QObjectComponent : public ep::DynamicComponent
 {
   EP_DECLARE_COMPONENT(QObjectComponent, ep::DynamicComponent, EPKERNEL_PLUGINVERSION, "QObjectComponent desc...", 0)
 public:
-  QObjectComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+  QObjectComponent(const ep::ComponentDesc *pType, ep::Kernel *pKernel, ep::SharedString uid, ep::Variant::VarMap initParams);
   virtual ~QObjectComponent();
 
   QObject *GetQObject() const { return pQObject; }
   template <class T>
   T *GetQObject() const { return qobject_cast<T*>(pQObject); }
 
-  const MethodDesc *GetMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final;
+  const ep::MethodDesc *GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final;
 
   // TODO: remove this hack
   void ChickenMeetEgg();

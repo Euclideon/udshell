@@ -12,7 +12,7 @@
 
 namespace qt {
 
-QObjectComponent::QObjectComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+QObjectComponent::QObjectComponent(const ep::ComponentDesc *pType, ep::Kernel *pKernel, ep::SharedString uid, ep::Variant::VarMap initParams)
   : ep::DynamicComponent(pType, pKernel, uid, initParams)
 {
   // NOTE: There are two main types of QObjectComponents that we need to distinguish
@@ -40,7 +40,7 @@ QObjectComponent::~QObjectComponent()
     delete pQObject;
 }
 
-const MethodDesc *QObjectComponent::GetMethodDesc(String _name, EnumerateFlags enumerateFlags) const
+const ep::MethodDesc *QObjectComponent::GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags) const
 {
   /*  if (!(enumerateFlags & EnumerateFlags::NoDynamic))
   {
@@ -57,6 +57,7 @@ const MethodDesc *QObjectComponent::GetMethodDesc(String _name, EnumerateFlags e
 // Called by the Kernel following construction of the enclosing Glue Component
 void QObjectComponent::AttachToGlue(Component *pGlue)
 {
+  using namespace ep;
   Super::AttachToGlue(pGlue);
 
   // Create a new QObject instance from the stored QmlComponentData
@@ -102,7 +103,7 @@ void QObjectComponent::ChickenMeetEgg()
 {
   // HAX: we'll have a view but it wont be attached - hence setting it to itself
   if (pThis->IsType("viewport"))
-    ((Viewport*)pThis)->SetView(((Viewport*)pThis)->GetView());
+    ((ep::Viewport*)pThis)->SetView(((ep::Viewport*)pThis)->GetView());
 }
 
 } // namespace qt

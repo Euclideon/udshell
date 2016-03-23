@@ -66,6 +66,13 @@ public:
 };
 
 
+using ep::ComponentDescInl;
+using ep::Variant;
+using ep::SharedPtr;
+using ep::String;
+using ep::SharedString;
+
+
 /** QtKernel *********************************************/
 
 ComponentDescInl *QtKernel::MakeKernelDescriptor()
@@ -74,7 +81,7 @@ ComponentDescInl *QtKernel::MakeKernelDescriptor()
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = QtKernel::MakeDescriptor();
-  pDesc->info.flags = ComponentInfoFlags::Unregistered;
+  pDesc->info.flags = ep::ComponentInfoFlags::Unregistered;
   pDesc->baseClass = Kernel::ComponentID();
 
   pDesc->pInit = nullptr;
@@ -124,10 +131,10 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
 
   // register Qt specific components
   EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), epR_Failure, "Unable to register QtComponent");
-  EPTHROW_IF_NULL((RegisterComponentType<UIComponent, QtUIComponentImpl, UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
-  EPTHROW_IF_NULL((RegisterComponentType<Window, QtWindowImpl, WindowGlue>()), epR_Failure, "Unable to register Window component");
-  EPTHROW_IF_NULL((RegisterComponentType<Viewport, QtViewportImpl, ViewportGlue>()), epR_Failure, "Unable to register UIComponent");
-  EPTHROW_IF_NULL((RegisterComponentType<UIConsole, void, UIConsoleGlue>()), epR_Failure, "Unable to register UIConsole Component");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, ep::UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, ep::WindowGlue>()), epR_Failure, "Unable to register Window component");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ep::ViewportGlue>()), epR_Failure, "Unable to register UIComponent");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::UIConsole, void, ep::UIConsoleGlue>()), epR_Failure, "Unable to register UIConsole Component");
 
   // create our qapplication
   pApplication = new QtApplication(this, argc, (char**)cmdArgv.ptr);
@@ -286,7 +293,7 @@ void QtKernel::RegisterQmlComponent(String superTypeId, String typeId, String fi
 
   auto data = SharedPtr<QmlComponentData>::create(file, pQmlEngine, QQmlComponent::Asynchronous);
   Variant::VarMap typeInfo = {
-    { "id", MutableString128(typeId).toLower() },
+    { "id", ep::MutableString128(typeId).toLower() },
     { "name", typeId },
     { "description", SharedString::format("{0} - {1} qml component", typeId, superTypeId) },
     { "version", (int)EPKERNEL_PLUGINVERSION },
@@ -473,6 +480,7 @@ void QtKernel::FinishInit()
 // ---------------------------------------------------------------------------------------
 void QtKernel::customEvent(QEvent *pEvent)
 {
+  using namespace ep;
   if (pEvent->type() == KernelEvent::type())
   {
     MainThreadCallback d;
@@ -505,8 +513,9 @@ void QtKernel::customEvent(QEvent *pEvent)
 }
 
 // ---------------------------------------------------------------------------------------
-ViewRef QtKernel::SetFocusView(ViewRef spView)
+ep::ViewRef QtKernel::SetFocusView(ep::ViewRef spView)
 {
+  using namespace ep;
   KernelImpl *pKernelImpl = GetImpl();
   if (!spView && pKernelImpl->spFocusView)
     pKernelImpl->spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
@@ -517,7 +526,7 @@ ViewRef QtKernel::SetFocusView(ViewRef spView)
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::DispatchToMainThread(MainThreadCallback callback)
+void QtKernel::DispatchToMainThread(ep::MainThreadCallback callback)
 {
   // if we're on the main thread just execute the callback now
   if (OnMainThread())
@@ -528,7 +537,7 @@ void QtKernel::DispatchToMainThread(MainThreadCallback callback)
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+void QtKernel::DispatchToMainThreadAndWait(ep::MainThreadCallback callback)
 {
   LogTrace("Kernel::DispatchToMainThreadAndWait()");
 

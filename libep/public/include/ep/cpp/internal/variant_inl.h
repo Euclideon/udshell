@@ -3,14 +3,14 @@
 #include "ep/cpp/math.h"
 #include "ep/cpp/freelist.h"
 
-ptrdiff_t epStringifyVariant(Slice<char> buffer, String format, const Variant &var, const epVarArg*);
+ptrdiff_t epStringifyVariant(ep::Slice<char> buffer, ep::String format, const ep::Variant &var, const ep::VarArg*);
 
 namespace ep {
 namespace internal {
 
 template<> struct StringifyProxy<Variant>
 {
-  inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const epVarArg *pArgs) { return epStringifyVariant(buffer, format, *(Variant*)pData, pArgs); }
+  inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const VarArg *pArgs) { return epStringifyVariant(buffer, format, *(Variant*)pData, pArgs); }
   inline static int64_t intify(const void *pData) { return ((Variant*)pData)->asInt(); }
 };
 
@@ -1007,14 +1007,12 @@ namespace internal {
 template<typename T>
 epforceinline Variant Variant_Construct<T>::construct(T &&rval)
 {
-  using ::epToVariant;
   return epToVariant(std::move(rval));
 }
 
 template<typename T>
 epforceinline Variant Variant_Construct<T>::construct(const T &v)
 {
-  using ::epToVariant;
   return epToVariant(v);
 }
 

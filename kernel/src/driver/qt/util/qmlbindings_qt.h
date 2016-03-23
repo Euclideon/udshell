@@ -21,7 +21,7 @@ namespace internal {
 // INTERNAL
 
 // Helper function to dynamically populate the component descriptor with the QObject's meta data
-void PopulateComponentDesc(Component *pComponent, QObject *pObject);
+void PopulateComponentDesc(ep::Component *pComponent, QObject *pObject);
 
 } // namespace internal
 
@@ -40,8 +40,8 @@ public:
     qmlComponent.loadUrl(QUrl(QString::fromUtf8(file.ptr, (int)file.length)), mode);
   }
 
-  DynamicComponentRef CreateComponent(KernelRef spKernel, Variant::VarMap initParams = nullptr);
-  QObject *CreateInstance(QQmlEngine *pQmlEngine, Component *pGlueComponent);
+  ep::DynamicComponentRef CreateComponent(ep::KernelRef spKernel, ep::Variant::VarMap initParams = nullptr);
+  QObject *CreateInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent);
 
 private:
   QQmlComponent qmlComponent;
@@ -105,7 +105,7 @@ protected:
   QtEPComponent(ep::Component *pComp, QtHasWeakRef_t) : QObject(nullptr), pComponent(pComp) {}
 
   ep::ComponentRef spComponent;
-  Component* pComponent; // used to avoid circular references
+  ep::Component* pComponent; // used to avoid circular references
 };
 
 

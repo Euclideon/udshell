@@ -18,7 +18,7 @@ enum Sprintf_T { Sprintf };
 
 template<typename C>
 class CString;
-struct epVarArg;
+struct VarArg;
 
 
 // BaseString implements an immutable string; a layer above Slice<>, defined for 'const C' (ie, char, char16_t, char32_t) and adds string-specific methods
@@ -192,8 +192,8 @@ struct MutableString : public Array<char, Size>
   MutableString& urlDecode(String s);
 
 private:
-  void appendInternal(Slice<epVarArg> args);
-  void formatInternal(String format, Slice<epVarArg> args);
+  void appendInternal(Slice<VarArg> args);
+  void formatInternal(String format, Slice<VarArg> args);
 };
 
 // we'll typedef these such that the desired size compensates for the other internal members
@@ -286,26 +286,26 @@ struct SharedString : public SharedArray<const char>
   uint32_t hash(uint32_t hash = 0) const                                              { return ((String*)this)->hash(hash); }
 
 private:
-  static SharedString concatInternal(Slice<epVarArg> args);
-  static SharedString formatInternal(String format, Slice<epVarArg> args);
+  static SharedString concatInternal(Slice<VarArg> args);
+  static SharedString formatInternal(String format, Slice<VarArg> args);
 };
 
 
 // vararg for stringification
-struct epVarArg
+struct VarArg
 {
-  epVarArg() {}
+  VarArg() {}
   template<typename T>
-  epVarArg(const T& arg);
+  VarArg(const T& arg);
 
   bool HasIntify() const { return pIntProxy != nullptr; }
 
-  ptrdiff_t GetString(Slice<char> buffer, String format = nullptr, const epVarArg *pArgs = nullptr) const { return pStringProxy(buffer, format, pArg, pArgs); }
-  ptrdiff_t GetStringLength(String format = nullptr, const epVarArg *pArgs = nullptr) const { return pStringProxy(nullptr, format, pArg, pArgs); }
+  ptrdiff_t GetString(Slice<char> buffer, String format = nullptr, const VarArg *pArgs = nullptr) const { return pStringProxy(buffer, format, pArg, pArgs); }
+  ptrdiff_t GetStringLength(String format = nullptr, const VarArg *pArgs = nullptr) const { return pStringProxy(nullptr, format, pArg, pArgs); }
   int64_t GetInt() const { return pIntProxy ? pIntProxy(pArg) : 0; }
 
 private:
-  typedef ptrdiff_t(StringifyFunc)(Slice<char>, String, const void*, const epVarArg*);
+  typedef ptrdiff_t(StringifyFunc)(Slice<char>, String, const void*, const VarArg*);
   typedef int64_t(IntConvFunc)(const void*);
 
   const void *pArg;

@@ -2,6 +2,10 @@
 #include "ep/cpp/platform.h"
 // TODO: fill out these tests
 
+using ep::Slice;
+using ep::Array;
+using ep::SharedArray;
+
 // TODO: these tests are old and should be deprecated!!
 TEST(EPSliceTest, Deprecated)
 {

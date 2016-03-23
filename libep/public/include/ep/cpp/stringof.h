@@ -8,7 +8,7 @@
 #include <tuple>
 
 template<typename T>
-String epStringify();
+ep::String epStringify();
 
 namespace ep {
 
@@ -74,9 +74,9 @@ struct Stringify<std::tuple<T...>>
 } // namespace ep
 
 template<typename... Types>
-SharedString stringof()
+ep::SharedString stringof()
 {
-  return internal::Stringify<typename std::remove_const<typename std::remove_reference<Types>::type>::type...>::stringify();
+  return ep::internal::Stringify<typename std::remove_const<typename std::remove_reference<Types>::type>::type...>::stringify();
 }
 
 #endif // _STRINGOF_H

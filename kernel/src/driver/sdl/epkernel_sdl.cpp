@@ -23,6 +23,8 @@ struct DelegateWithSemaphore
   udSemaphore *pSem;
 };
 
+using namespace ep;
+
 class SDLKernel : public Kernel
 {
   EP_DECLARE_COMPONENT(SDLKernel, Kernel, EPKERNEL_PLUGINVERSION, "SDL Kernel instance", 0)

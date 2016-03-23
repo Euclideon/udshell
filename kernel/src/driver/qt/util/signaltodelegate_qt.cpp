@@ -15,8 +15,8 @@ QMetaMethod QtSignalToDelegate::lookupSignalHandler(const QMetaMethod &m)
   int indexOfOpenBracket = methodSig.indexOf('(');
   if (indexOfOpenBracket != -1)
   {
-    MutableString128 signalHandlerName(Concat, "SignalHandler", methodSig.right(methodSig.size() - indexOfOpenBracket).data());
-    QtApplication::Kernel()->LogDebug(3, SharedString::concat("Checking for signal handler: ", signalHandlerName));
+    ep::MutableString128 signalHandlerName(ep::Concat, "SignalHandler", methodSig.right(methodSig.size() - indexOfOpenBracket).data());
+    QtApplication::Kernel()->LogDebug(3, ep::SharedString::concat("Checking for signal handler: ", signalHandlerName));
     methodIndex = metaObject()->indexOfMethod(signalHandlerName.toStringz());
   }
 

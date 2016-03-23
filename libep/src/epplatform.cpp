@@ -91,14 +91,14 @@ extern "C" {
 void epAssertFailed(epString condition, epString message, epString file, int line)
 {
   // TODO: Agree on formatting of assets
-  if (internal::gUnitTesting)
+  if (ep::internal::gUnitTesting)
   {
     fprintf(stderr, "%.*s", (int)message.length, message.ptr);
     exit(EXIT_FAILURE);
   }
   else
   {
-    MutableString256 t(Format, "ASSERT FAILED : {0}\n{1}\n{2}({3})", (String&)condition, (String&)message, (String&)file, line);
+    ep::MutableString256 t(ep::Format, "ASSERT FAILED : {0}\n{1}\n{2}({3})", (ep::String&)condition, (ep::String&)message, (ep::String&)file, line);
     epDebugWrite(t.ptr);
   }
 }
@@ -117,9 +117,9 @@ void epDebugPrintf(const char *format, ...)
   va_list args;
   va_start(args, format);
 
-  size_t len = internal::epvscprintf(format, args) + 1;
+  size_t len = ep::internal::epvscprintf(format, args) + 1;
   char *pBuffer = (char*)alloca(len + 1);
-  len = internal::epvsnprintf(pBuffer, len, format, args);
+  len = ep::internal::epvsnprintf(pBuffer, len, format, args);
   va_end(args);
 
   epDebugWrite(pBuffer);
@@ -128,13 +128,13 @@ void epDebugPrintf(const char *format, ...)
 void *_epAlloc(size_t size, epAllocationFlags flags EP_IF_MEMORY_DEBUG(const char * pFile, int line))
 {
 #if __EP_MEMORY_DEBUG__
-  if (s_pInstance)
-    return s_pInstance->Alloc(size, flags, pFile, line);
+  if (ep::s_pInstance)
+    return ep::s_pInstance->Alloc(size, flags, pFile, line);
 
   return ep::internal::_Alloc(size, flags, pFile, line);
 #else
-  if (s_pInstance)
-    return s_pInstance->Alloc(size, flags, nullptr, 0);
+  if (ep::s_pInstance)
+    return ep::s_pInstance->Alloc(size, flags, nullptr, 0);
 
   return ep::internal::_Alloc(size, flags, nullptr, 0);
 #endif // __EP_MEMORY_DEBUG__
@@ -143,23 +143,23 @@ void *_epAlloc(size_t size, epAllocationFlags flags EP_IF_MEMORY_DEBUG(const cha
 void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags EP_IF_MEMORY_DEBUG(const char * pFile, int line))
 {
 #if __EP_MEMORY_DEBUG__
-  if (s_pInstance)
-    return s_pInstance->AllocAligned(size, alignment, flags, pFile, line);
+  if (ep::s_pInstance)
+    return ep::s_pInstance->AllocAligned(size, alignment, flags, pFile, line);
 
   return ep::internal::_AllocAligned(size, alignment, flags, pFile, line);
 #else
-  if (s_pInstance)
-    return s_pInstance->AllocAligned(size, alignment, flags, nullptr, 0);
+  if (ep::s_pInstance)
+    return ep::s_pInstance->AllocAligned(size, alignment, flags, nullptr, 0);
 
-  return internal::_AllocAligned(size, alignment, flags, nullptr, 0);
+  return ep::internal::_AllocAligned(size, alignment, flags, nullptr, 0);
 #endif // __EP_MEMORY_DEBUG__
 }
 
 void _epFree(void *pMemory)
 {
-  if (s_pInstance)
+  if (ep::s_pInstance)
   {
-    s_pInstance->Free(pMemory);
+    ep::s_pInstance->Free(pMemory);
     return;
   }
 

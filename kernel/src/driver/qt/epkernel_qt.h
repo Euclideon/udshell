@@ -47,22 +47,22 @@ protected:
 };
 
 
-class QtKernel : public QObject, public Kernel
+class QtKernel : public QObject, public ep::Kernel
 {
   Q_OBJECT
 
-  EP_DECLARE_COMPONENT(QtKernel, Kernel, EPKERNEL_PLUGINVERSION, "Qt Kernel instance", 0)
+  EP_DECLARE_COMPONENT(QtKernel, ep::Kernel, EPKERNEL_PLUGINVERSION, "Qt Kernel instance", 0)
 
 public:
-  QtKernel(Variant::VarMap commandLine);
+  QtKernel(ep::Variant::VarMap commandLine);
   virtual ~QtKernel();
 
   void RunMainLoop() override final;
   void Quit() override final;
 
-  ViewRef SetFocusView(ViewRef spView) override final;
-  void DispatchToMainThread(MainThreadCallback callback) override final;
-  void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
+  ep::ViewRef SetFocusView(ep::ViewRef spView) override final;
+  void DispatchToMainThread(ep::MainThreadCallback callback) override final;
+  void DispatchToMainThreadAndWait(ep::MainThreadCallback callback) override final;
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
   bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
@@ -77,8 +77,8 @@ public:
 
   QtFocusManager *GetFocusManager() { return pFocusManager; }
 
-  void RegisterQmlComponent(String superTypeId, String typeId, String file);
-  ep::ComponentRef CreateQmlComponent(String superTypeId, String file, Variant::VarMap initParams);
+  void RegisterQmlComponent(ep::String superTypeId, ep::String typeId, ep::String file);
+  ep::ComponentRef CreateQmlComponent(ep::String superTypeId, ep::String file, ep::Variant::VarMap initParams);
 
 private slots:
   void OnGLContextCreated(QOpenGLContext *pContext);
@@ -89,11 +89,11 @@ private slots:
   void FinishInit();
 
 private:
-  static ComponentDescInl *MakeKernelDescriptor();
+  static ep::ComponentDescInl *MakeKernelDescriptor();
 
   void customEvent(QEvent *pEvent) override;
 
-  static Array<const MethodInfo> GetMethods()
+  static ep::Array<const ep::MethodInfo> GetMethods()
   {
     return{
       EP_MAKE_METHOD(RegisterQmlComponent, "Register a new QML Component type"),
@@ -103,8 +103,8 @@ private:
 
   // Members
   int argc;
-  Array<SharedString> cmdArgs;
-  Array<const char *> cmdArgv;
+  ep::Array<ep::SharedString> cmdArgs;
+  ep::Array<const char *> cmdArgv;
 
   QtApplication *pApplication;
   QQmlEngine *pQmlEngine;

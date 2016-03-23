@@ -17,9 +17,9 @@
 #define EPERROR(error, message, ...) (ep::LogError(ep::String(message), ##__VA_ARGS__), PushError(error, message, ##__VA_ARGS__))
 
 
-#define EPTHROW(error, message, ...) throw EPException(PushError(error, message, ##__VA_ARGS__))
-#define EPTHROW_ERROR(error, message, ...) throw EPException(EPERROR(error, message, ##__VA_ARGS__))
-#define EPTHROW_WARN(error, level, message, ...) throw EPException((ep::LogWarning(level, ep::String(message), ##__VA_ARGS__), PushError(error, message, ##__VA_ARGS__)))
+#define EPTHROW(error, message, ...) throw ep::EPException(PushError(error, message, ##__VA_ARGS__))
+#define EPTHROW_ERROR(error, message, ...) throw ep::EPException(EPERROR(error, message, ##__VA_ARGS__))
+#define EPTHROW_WARN(error, level, message, ...) throw ep::EPException((ep::LogWarning(level, ep::String(message), ##__VA_ARGS__), PushError(error, message, ##__VA_ARGS__)))
 
 #define EPTHROW_IF(condition, error, message, ...) { if(condition) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }
 #define EPTHROW_IF_NULL(condition, error, message, ...) { if((condition) == nullptr) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }

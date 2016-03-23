@@ -3,6 +3,8 @@
 #include "ep/cpp/component/component.h"
 #include <random>
 
+using namespace ep;
+
 // TODO: these tests are old and should be deprecated!!
 TEST(EPVariant, Deprecated)
 {
