@@ -15,6 +15,8 @@ class UIComponent : public Component
 public:
   Variant GetUIHandle() const { return pImpl->GetUIHandle(); }
 
+  virtual void PostInit(void *pData) { pImpl->PostInit(pData); }
+
 protected:
   UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)

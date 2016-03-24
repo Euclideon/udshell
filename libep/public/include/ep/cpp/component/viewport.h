@@ -17,6 +17,8 @@ public:
   ViewRef GetView() const { return pImpl->GetView(); }
   void SetView(const ViewRef &spView) { pImpl->SetView(spView); }
 
+  void PostInit(void *pData) override { pImpl->PostInit(pData); }
+
 protected:
   Viewport(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : UIComponent(pType, pKernel, uid, initParams)

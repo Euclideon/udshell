@@ -18,6 +18,15 @@ public:
   {
   }
 
+  void PostInit(void *pData) override final
+  {
+    pInstance->ep::Component::GetImpl<ep::ComponentImpl>()->SetUserData(pData);
+
+    // register the window with the kernel
+    if (static_cast<QtKernel*>(GetKernel())->RegisterWindow((QQuickWindow*)pInstance->GetUserData()) != epR_Success)
+      EPTHROW_ERROR(epR_Failure, "Unable to register Window component with Kernel");
+  }
+
   void SetTopLevelUI(ep::UIComponentRef spUIComponent) override final
   {
     QQuickWindow *pQtWindow = (QQuickWindow*)pInstance->GetUserData();
@@ -38,6 +47,18 @@ public:
       pUI->setParentItem(pQtWindow->contentItem());
       spTopLevelUI = spUIComponent;
     }
+  }
+
+  QObjectComponentRef spQObject = nullptr;
+};
+
+class WindowGlue final : public ep::Window
+{
+public:
+  WindowGlue(const ep::ComponentDesc *_pType, ep::Kernel *_pKernel, ep::SharedString _uid, ep::ComponentRef _spInstance, ep::Variant::VarMap initParams)
+    : Window(_pType, _pKernel, _uid, initParams)
+  {
+    GetImpl<QtWindowImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
   }
 };
 

@@ -650,9 +650,10 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
   pDesc->info.displayName = typeDesc["name"].asSharedString();
   pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = EP_APIVERSION;
-  Variant *pVer = typeDesc.Get("version");
-  pDesc->info.pluginVersion = pVer ? pVer->as<int>() : EPKERNEL_PLUGINVERSION;
-  pDesc->info.flags = ComponentInfoFlags::Unpopulated;
+  Variant *pVar = typeDesc.Get("version");
+  pDesc->info.pluginVersion = pVar ? pVar->as<int>() : EPKERNEL_PLUGINVERSION;
+  pVar = typeDesc.Get("flags");
+  pDesc->info.flags = pVar ? pVar->as<ComponentInfoFlags>() : ComponentInfoFlags();
 
   pDesc->baseClass = typeDesc["super"].asSharedString();
 

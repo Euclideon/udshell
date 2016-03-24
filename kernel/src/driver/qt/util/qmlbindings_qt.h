@@ -68,12 +68,6 @@ public:
 
   ep::ComponentRef GetComponent() const { return ep::ComponentRef(pComponent); }
 
-  // methods to inspect internals
-  //..
-
-public:
-  virtual void Done(QObject *) { emit completed(); }
-
   Q_INVOKABLE bool isNull() const { return pComponent == nullptr; }
 
   Q_INVOKABLE QVariant get(const QString &name) const;
@@ -94,9 +88,6 @@ public:
 
   Q_INVOKABLE void subscribe(QString eventName, QJSValue func) const;
 
-signals:
-  void completed();
-
 protected:
   friend struct BuildQtEPComponent;
 
@@ -116,31 +107,13 @@ class QtEPUIComponent : public QtEPComponent
 
 public:
   QtEPUIComponent() {}
-  QtEPUIComponent(const ep::ComponentRef &spComponent) : QtEPComponent(spComponent), pQuickItem((QQuickItem*)spComponent->GetUserData()) { InitQuickItem(); }
-  QtEPUIComponent(const QtEPUIComponent &val) : QtEPComponent(val), pQuickItem(val.pQuickItem) { InitQuickItem(); }
-  ~QtEPUIComponent()
-  {
-    if (pComponent)
-      QObject::disconnect(pQuickItem, &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
-  }
-
-  virtual void Done(QObject *pQObject) override
-  {
-    // HAX: to get shit working currently
-    pQuickItem = (QQuickItem*)pQObject;
-
-    // we need to call InitQuickItem() from here since Done() will only be called on the QML defined "thisComponent"
-    // this ensures we've finished loading the UIComponent's qml
-    InitQuickItem();
-
-    QtEPComponent::Done(pQObject);
-  }
+  QtEPUIComponent(const ep::ComponentRef &spComponent) : QtEPComponent(spComponent) {}
+  QtEPUIComponent(const QtEPUIComponent &val) : QtEPComponent(val) {}
+  ~QtEPUIComponent() {}
 
   // QML exposed methods
-  Q_INVOKABLE QQuickWindow *parentWindow() const { return pQuickItem->window(); }
-
-signals:
-  void parentWindowChanged(QQuickWindow *window);
+  Q_INVOKABLE QQuickWindow *parentWindow() const { return static_cast<QQuickItem*>(pComponent->GetUserData())->window(); }
+  Q_INVOKABLE QQuickItem *item() const { return static_cast<QQuickItem*>(pComponent->GetUserData()); }
 
 protected:
   friend struct BuildQtEPComponent;
@@ -148,14 +121,6 @@ protected:
   // this constructor ensures the QtEPComponent only holds a weak pointer to its ep::Component
   // currently only used to define the QML "thisComponent" since a SharedPtr will result in a circular reference
   QtEPUIComponent(ep::Component *pComp, QtHasWeakRef_t) : QtEPComponent(pComp, QtHasWeakRef) {}
-
-  void InitQuickItem()
-  {
-    if (pComponent)
-      QObject::connect(pQuickItem, &QQuickItem::windowChanged, this, &QtEPUIComponent::parentWindowChanged);
-  }
-
-  QQuickItem *pQuickItem = nullptr;
 };
 
 
