@@ -18,12 +18,14 @@ struct Hash
   }
   static bool eq(const T &a, const T &b) { return a == b; }
 };
+/// \cond
 template<>
 struct Hash<SharedString>
 {
   static uint32_t hash(const SharedString &v) { return v.hash(); }
   static bool eq(const SharedString &a, const SharedString &b) { return a.eq(b); }
 };
+/// \endcond
 
 
 template <typename V, typename K = SharedString, typename HashPred = Hash<K>>

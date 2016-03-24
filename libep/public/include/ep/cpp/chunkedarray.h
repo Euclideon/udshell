@@ -35,6 +35,7 @@ struct ChunkedArray
 
   size_t GetElementIndex(T *pEl);
 
+private:
   struct chunk_t
   {
     T data[chunkElementCount];

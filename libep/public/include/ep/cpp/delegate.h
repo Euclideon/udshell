@@ -10,9 +10,14 @@ typedef fastdelegate::DelegateMemento FastDelegateMemento;
 
 namespace ep {
 
-// helper to handle method pointers
+/// \cond
 template<typename Signature>
 struct MethodPointer;
+template<typename Signature>
+class Delegate;
+/// \endcond
+
+// helper to handle method pointers
 template <typename R, typename... Args>
 struct MethodPointer<R(Args...)>
 {
@@ -76,11 +81,7 @@ protected:
 };
 typedef SharedPtr<DelegateMemento> DelegateMementoRef;
 
-
 // facilitate using the function template syntax
-template<typename Signature>
-class Delegate;
-
 template<typename R, typename... Args>
 class Delegate<R(Args...)>
 {

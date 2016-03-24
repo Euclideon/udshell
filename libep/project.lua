@@ -6,6 +6,7 @@ project "libep"
 
 	files { "src/**" }
 	files { "public/**" }
+	files { "doc/**" }
 	files { "project.lua" }
 
 	filter { "system:windows" }

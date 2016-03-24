@@ -1,3 +1,9 @@
+///
+/// @file component.h
+/// @brief Base class for Euclideon Platform Components
+/// @author Manu Evans
+///
+
 #pragma once
 #if !defined(_EP_COMPONENT_HPP)
 #define _EP_COMPONENT_HPP
