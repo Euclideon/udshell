@@ -26,6 +26,8 @@ namespace qt
 
 class QtKernel;
 
+// Qt's QCoreApplication based classes are treated by Qt as a singleton
+// We specialise our own version to store our Kernel pointer and provide global access around the Qt set of classes
 class QtApplication : public QGuiApplication
 {
   Q_OBJECT
@@ -33,10 +35,6 @@ class QtApplication : public QGuiApplication
 public:
   QtApplication(QtKernel *pKern, int &argc, char ** argv) : QGuiApplication(argc, argv), pKernel(pKern) {}
 
-  static void SetKernel(QtKernel *pKernel) {
-    EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
-    static_cast<QtApplication*>(QtApplication::instance())->pKernel = pKernel;
-  }
   static QtKernel *Kernel() {
     EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
     return static_cast<QtApplication*>(QtApplication::instance())->pKernel;
@@ -47,10 +45,31 @@ protected:
 };
 
 
-class QtKernel : public QObject, public ep::Kernel
+class QtKernelMediator : public QObject
 {
   Q_OBJECT
 
+public:
+  QtKernelMediator(QtKernel *pKernel) : QObject(nullptr), pQtKernel(pKernel) {}
+  ~QtKernelMediator() {}
+
+  void PostEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
+
+public slots:
+  void OnGLContextCreated(QOpenGLContext *pContext);
+  void OnAppQuit();
+  void OnFirstRender();
+  void OnGLMessageLogged(const QOpenGLDebugMessage &debugMessage);
+
+private:
+  void customEvent(QEvent *pEvent) override;
+
+  QtKernel *pQtKernel;
+};
+
+
+class QtKernel : public ep::Kernel
+{
   EP_DECLARE_COMPONENT(QtKernel, ep::Kernel, EPKERNEL_PLUGINVERSION, "Qt Kernel instance", 0)
 
 public:
@@ -67,8 +86,6 @@ public:
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
   bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
 
-  void PostEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
-
   QQmlEngine *QmlEngine() const { return pQmlEngine; }
 
   epResult RegisterWindow(QQuickWindow *pWindow);
@@ -80,18 +97,13 @@ public:
   void RegisterQmlComponent(ep::String superTypeId, ep::String typeId, ep::String file);
   ep::ComponentRef CreateQmlComponent(ep::String superTypeId, ep::String file, ep::Variant::VarMap initParams);
 
-private slots:
-  void OnGLContextCreated(QOpenGLContext *pContext);
-  void OnFirstRender();
-  void OnAppQuit();
-  void OnGLMessageLogged(const QOpenGLDebugMessage &debugMessage);
-
-  void FinishInit();
-
 private:
+  friend class QtKernelMediator;
+
   static ep::ComponentDescInl *MakeKernelDescriptor();
 
-  void customEvent(QEvent *pEvent) override;
+  void FinishInit();
+  void Shutdown();
 
   static ep::Array<const ep::MethodInfo> GetMethods()
   {
@@ -102,23 +114,25 @@ private:
   }
 
   // Members
-  int argc;
+  int cmdArgc;
   ep::Array<ep::SharedString> cmdArgs;
   ep::Array<const char *> cmdArgv;
 
-  QtApplication *pApplication;
-  QQmlEngine *pQmlEngine;
-  QOpenGLContext *pMainThreadContext;
-  QOpenGLDebugLogger *pGLDebugLogger;
+  QtKernelMediator *pMediator = nullptr;
 
-  QSurfaceFormat mainSurfaceFormat;
-  QQuickWindow *pSplashScreen;
-  QPointer<QQuickWindow> pTopLevelWindow;
+  QtApplication *pApplication = nullptr;
+  QQmlEngine *pQmlEngine = nullptr;
+  QOpenGLContext *pMainThreadContext = nullptr;
+  QOpenGLDebugLogger *pGLDebugLogger = nullptr;
 
-  QtFocusManager *pFocusManager;
+  QSurfaceFormat mainSurfaceFormat = QSurfaceFormat::defaultFormat();
+  QQuickWindow *pSplashScreen = nullptr;
+  QPointer<QQuickWindow> pTopLevelWindow = nullptr;
 
-  Qt::HANDLE mainThreadId;
-  Qt::HANDLE renderThreadId;
+  QtFocusManager *pFocusManager = nullptr;
+
+  Qt::HANDLE mainThreadId = QThread::currentThreadId();
+  Qt::HANDLE renderThreadId = nullptr;
 };
 
 } // namespace qt
