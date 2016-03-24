@@ -113,7 +113,7 @@ extern "C" {
 
 epErrorState* epPushError(epResult error, epString message, const char *function, const char *file, int line)
 {
-  return (epErrorState*)ep::_PushError(error, String(message), function, file, line);
+  return (epErrorState*)ep::_PushError(error, ep::String(message), function, file, line);
 }
 
 size_t epErrorLevel()
@@ -132,7 +132,7 @@ void epClearError()
 epSharedString epDumpError()
 {
   epSharedString r;
-  new(&r) SharedString(ep::DumpError());
+  new(&r) ep::SharedString(ep::DumpError());
   return r;
 }
 

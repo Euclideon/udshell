@@ -4,9 +4,9 @@
 
 #include "ep/cpp/variant.h"
 
-Array<const KeyValuePair> epParseCommandLine(const char *pCommandLine);
-Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[]);
-Array<const KeyValuePair> epParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
+ep::Array<const ep::KeyValuePair> epParseCommandLine(const char *pCommandLine);
+ep::Array<const ep::KeyValuePair> epParseCommandLine(int argc, char *argv[]);
+ep::Array<const ep::KeyValuePair> epParseCommandLine(uint32_t argc, const char* argn[], const char* argv[]);
 
 int epGetHardwareThreadCount();
 

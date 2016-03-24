@@ -4,15 +4,15 @@
 namespace ep {
 
 template<typename F>
-ptrdiff_t epStringify(Slice<char> buffer, String format, const Vector2<F> &v, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Vector2<F> &v, const VarArg *pArgs);
 template<typename F>
-ptrdiff_t epStringify(Slice<char> buffer, String format, const Vector3<F> &v, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Vector3<F> &v, const VarArg *pArgs);
 template<typename F>
-ptrdiff_t epStringify(Slice<char> buffer, String format, const Vector4<F> &v, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Vector4<F> &v, const VarArg *pArgs);
 template<typename F>
-ptrdiff_t epStringify(Slice<char> buffer, String format, const Quaternion<F> &q, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Quaternion<F> &q, const VarArg *pArgs);
 template<typename F>
-ptrdiff_t epStringify(Slice<char> buffer, String format, const Matrix4x4<F> &m, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Matrix4x4<F> &m, const VarArg *pArgs);
 
 epforceinline float Pow(float f, float n) { return powf(f, n); }
 epforceinline double Pow(double d, double n) { return pow(d, n); }

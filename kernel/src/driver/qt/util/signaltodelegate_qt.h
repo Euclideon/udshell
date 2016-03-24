@@ -21,30 +21,35 @@ namespace qt
 // Ugly macros to simplify creation of new slots
 #define QT_SIGNAL_HANDLER_0() \
   void SignalHandler() { \
+    using namespace ep; \
     Delegate<void()> del = v.as<Delegate<void()>>(); \
     del(); \
   }
 
 #define QT_SIGNAL_HANDLER_1(TYPE1) \
   void SignalHandler(TYPE1 arg1) { \
+    using namespace ep; \
     Delegate<void(Variant)> del = v.as<Delegate<void(Variant)>>(); \
     del(Variant(arg1)); \
   }
 
 #define QT_SIGNAL_HANDLER_2(TYPE1, TYPE2) \
   void SignalHandler(TYPE1 arg1, TYPE2 arg2) { \
+    using namespace ep; \
     Delegate<void(Variant, Variant)> del = v.as<Delegate<void(Variant,Variant)>>(); \
     del(Variant(arg1), Variant(arg2)); \
   }
 
 #define QT_SIGNAL_HANDLER_3(TYPE1, TYPE2, TYPE3) \
   void SignalHandler(TYPE1 arg1, TYPE2 arg2, TYPE3 arg3) { \
+    using namespace ep; \
     Delegate<void(Variant,Variant,Variant)> del = v.as<Delegate<void(Variant,Variant,Variant)>>(); \
     del(Variant(arg1), Variant(arg2), Variant(arg3)); \
   }
 
 #define QT_SIGNAL_HANDLER_4(TYPE1, TYPE2, TYPE3, TYPE4) \
   void SignalHandler(TYPE1 arg1, TYPE2 arg2, TYPE3 arg3, TYPE4 arg4) { \
+    using namespace ep; \
     Delegate<void(Variant,Variant,Variant,Variant)> del = v.as<Delegate<void(Variant,Variant,Variant,Variant)>>(); \
     del(Variant(arg1), Variant(arg2), Variant(arg3), Variant(arg4)); \
   }
@@ -61,7 +66,7 @@ public:
   QtSignalToDelegate(QtSignalToDelegate &&rh)
     : QObject(), connection(std::move(rh.connection)), v(std::move(rh.v))
   {}
-  QtSignalToDelegate(const QObject *pSourceObj, const QMetaMethod &m, const VarDelegate &d) : v(d)
+  QtSignalToDelegate(const QObject *pSourceObj, const QMetaMethod &m, const ep::VarDelegate &d) : v(d)
   {
     QMetaMethod sigHandler = lookupSignalHandler(m);
     if (sigHandler.isValid())
@@ -90,7 +95,7 @@ private slots:
 
 private:
   QMetaObject::Connection connection;
-  Variant v;
+  ep::Variant v;
 };
 
 } // namespace qt

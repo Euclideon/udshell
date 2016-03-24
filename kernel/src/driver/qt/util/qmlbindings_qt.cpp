@@ -13,6 +13,12 @@
 
 namespace qt {
 
+using ep::RefCounted;
+using ep::Variant;
+using ep::String;
+using ep::Array;
+using ep::Slice;
+
 // ---------------------------------------------------------------------------------------
 // COMPONENT DESCRIPTOR SHIMS
 class QtPropertyData : public RefCounted
@@ -102,8 +108,10 @@ public:
 namespace internal {
 
 // Helper function to dynamically populate the component descriptor with the QObject's meta data
-void PopulateComponentDesc(Component *pComponent, QObject *pObject)
+void PopulateComponentDesc(ep::Component *pComponent, QObject *pObject)
 {
+  using namespace ep;
+
   // TODO: add built-in properties, methods and events
 
   const QMetaObject *pMetaObject = pObject->metaObject();
@@ -178,15 +186,17 @@ void PopulateComponentDesc(Component *pComponent, QObject *pObject)
 } // namespace internal
 
 // Creates a new QObject based ep::DynamicComponent
-DynamicComponentRef QmlComponentData::CreateComponent(KernelRef spKernel, Variant::VarMap initParams)
+ep::DynamicComponentRef QmlComponentData::CreateComponent(ep::KernelRef spKernel, Variant::VarMap initParams)
 {
   // NOTE: we need to give QObjectComponent our 'this' pointer so it can do deferred QObject creation
   return spKernel->CreateComponent<QObjectComponent>({ { "qmlcomponentdata", (int64_t)(size_t)this } });
 }
 
 // Creates a QML Item from the stored QQmlComponent
-QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, Component *pGlueComponent)
+QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent)
 {
+  using namespace ep;
+
   // check that we contain a valid QQmlComponent
   if (!qmlComponent.isReady())
   {
@@ -261,9 +271,9 @@ void QtEPComponent::set(const QString &name, QVariant val)
   {
     pComponent->Set(prop, epToVariant(val));
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
 }
 
@@ -277,9 +287,9 @@ QVariant QtEPComponent::call(const QString &name) const
   {
     epFromVariant(pComponent->Call(method, Slice<Variant>()), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -294,9 +304,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
   {
     epFromVariant(pComponent->Call(method, epToVariant(arg0)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -311,9 +321,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) 
   {
     epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -328,9 +338,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -345,9 +355,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -363,9 +373,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
     epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -382,9 +392,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
     epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -401,9 +411,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
     epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -420,9 +430,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
     epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6), epToVariant(arg7)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -440,9 +450,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6),
       epToVariant(arg7), epToVariant(arg8)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
   return std::move(res);
 }
@@ -460,9 +470,9 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
       epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5),
       epToVariant(arg6), epToVariant(arg7), epToVariant(arg8), epToVariant(arg9)), &res);
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
 
   return std::move(res);
@@ -482,11 +492,11 @@ void QtEPComponent::subscribe(QString eventName, QJSValue func) const
 
   try
   {
-    pComponent->Subscribe(event, VarDelegate(JSValueDelegateRef::create(func)));
+    pComponent->Subscribe(event, ep::VarDelegate(JSValueDelegateRef::create(func)));
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
   }
 }
 
@@ -514,9 +524,9 @@ QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariantMap in
   {
     return BuildQtEPComponent::Create(pKernel->CreateComponent(typeString, epToVariant(initParams).asAssocArray()));
   }
-  catch (EPException &)
+  catch (ep::EPException &)
   {
-    ClearError();
+    ep::ClearError();
     return nullptr;
   }
 }

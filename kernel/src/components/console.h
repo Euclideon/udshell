@@ -4,14 +4,13 @@
 
 #include "ep/cpp/component/stream.h"
 
+namespace ep {
+
 EP_ENUM(ConsoleOutputs,
   StdOut,
   StdErr,
   StdDbg
 );
-
-namespace ep
-{
 
 SHARED_CLASS(Console);
 

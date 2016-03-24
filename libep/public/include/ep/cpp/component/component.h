@@ -178,7 +178,7 @@ inline SharedPtr<T> component_cast(ComponentRef spComponent)
 }
 // TODO: cast for IComponent types...
 
-ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, const Component *pComponent, const VarArg *pArgs);
 
 inline Variant epToVariant(ep::Component *pC)
 {

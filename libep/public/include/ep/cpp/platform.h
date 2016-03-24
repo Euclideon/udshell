@@ -5,22 +5,19 @@
 #include "ep/c/platform.h"
 #include <new>
 
-namespace ep {}
-using namespace ep;
-
 #include "ep/cpp/error.h"
 #include "ep/cpp/string.h"
 
 template<typename ...Args>
-inline void epDebugFormat(String format, Args... args)
+inline void epDebugFormat(ep::String format, Args... args)
 {
-  MutableString64 t(Format, format, args...);
+  ep::MutableString64 t(ep::Format, format, args...);
   epDebugWrite(t.ptr);
 }
 
 #if EPASSERT_ON
 
-inline void epAssertFailed(String condition, String message, String file, int line)
+inline void epAssertFailed(ep::String condition, ep::String message, ep::String file, int line)
 {
   epAssertFailed((epString&)condition, (epString&)message, (epString&)file, line);
 }

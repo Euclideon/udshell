@@ -56,7 +56,7 @@ static epShader *pFontShaderP;
 static epShaderProgram *pShader;
 
 float s_consoleX, s_consoleY, s_consoleSize;
-Float4 s_consoleColor = Float4::one();
+ep::Float4 s_consoleColor = ep::Float4::one();
 
 static int s_colorConstant;
 
@@ -113,7 +113,7 @@ void epDebugFont_Deinit()
 }
 
 //*******************************************************************
-void epDebugFont_BeginRender(const Float4x4 *pWVP)
+void epDebugFont_BeginRender(const ep::Float4x4 *pWVP)
 {
   int wvp = epShader_FindShaderParameter(pShader, "u_wvp");
   s_colorConstant = epShader_FindShaderParameter(pShader, "u_color");
@@ -122,7 +122,7 @@ void epDebugFont_BeginRender(const Float4x4 *pWVP)
 
   if(!pWVP)
   {
-    Float4x4 wvpMat = Float4x4::orthoForScreeen(1280, 720, 0, 1);
+    ep::Float4x4 wvpMat = ep::Float4x4::orthoForScreeen(1280, 720, 0, 1);
     epShader_SetProgramData(wvp, wvpMat);
   }
   else
@@ -134,7 +134,7 @@ void epDebugFont_BeginRender(const Float4x4 *pWVP)
 struct CharOffset
 {
   int constantSlot;
-  Float4 *pOffsets;
+  ep::Float4 *pOffsets;
 };
 void UpdateOffset(size_t i, void *pUserData)
 {
@@ -143,13 +143,13 @@ void UpdateOffset(size_t i, void *pUserData)
 }
 
 //*******************************************************************
-float epDebugFont_RenderString(epDebugFont *pFont, const char *pString, float x, float y, float scale, const Float4 &color)
+float epDebugFont_RenderString(epDebugFont *pFont, const char *pString, float x, float y, float scale, const ep::Float4 &color)
 {
   if (!pFont)
     pFont = pRomanSimplex;
 
   size_t len = strlen(pString);
-  Float4 *offsets = (Float4*)alloca(sizeof(Float4) * len);
+  ep::Float4 *offsets = (ep::Float4*)alloca(sizeof(ep::Float4) * len);
   epVertexRange *ranges = (epVertexRange*)alloca(sizeof(epVertexRange) * len);
   size_t numRanges = 0;
 
@@ -159,7 +159,7 @@ float epDebugFont_RenderString(epDebugFont *pFont, const char *pString, float x,
 
   epShader_SetProgramData(s_colorConstant, color);
 
-  Float4 offset = { x, y, scale, scale };
+  ep::Float4 offset = { x, y, scale, scale };
   float h = (float)pFont->height * scale;
   float height = h;
 
@@ -219,7 +219,7 @@ void epDebugConsole_SetTextScale(float scale)
 }
 
 //*******************************************************************
-void epDebugConsole_SetTextColor(const Float4 &color)
+void epDebugConsole_SetTextColor(const ep::Float4 &color)
 {
   s_consoleColor = color;
 }
@@ -237,9 +237,9 @@ void epDebugConsole_Printf(const char *pFormat, ...)
   va_start(args, pFormat);
   size_t len;
 
-  len = internal::epvscprintf(pFormat, args) + 1;
+  len = ep::internal::epvscprintf(pFormat, args) + 1;
   char *pBuffer = (char*)alloca(len + 1);
-  len = internal::epvsnprintf(pBuffer, len, pFormat, args);
+  len = ep::internal::epvsnprintf(pBuffer, len, pFormat, args);
 
   epDebugConsole_Print(pBuffer);
   va_end(args);
@@ -307,14 +307,14 @@ epDebugFont::epDebugFont(int _nCharacters, VectorCharacter *_pCharacters, Hershe
       int y = (p[1] - 'R');
       pBuffer[vertexIndex].x = float((p[0] - 'R') + xOffset);
       pBuffer[vertexIndex].y = float(y);
-      minY = Min(minY, y);
-      maxY = Max(maxY, y);
+      minY = ep::Min(minY, y);
+      maxY = ep::Max(maxY, y);
       ++vertexIndex;
       y = (p[3] - 'R');
       pBuffer[vertexIndex].x = float((p[2] - 'R') + xOffset);
       pBuffer[vertexIndex].y = float(y);
-      minY = Min(minY, y);
-      maxY = Max(maxY, y);
+      minY = ep::Min(minY, y);
+      maxY = ep::Max(maxY, y);
       ++vertexIndex;
     }
     height = maxY - minY + 1;

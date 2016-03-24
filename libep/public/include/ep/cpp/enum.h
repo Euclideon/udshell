@@ -40,9 +40,9 @@ struct EnumDesc
     NAME() : v(Invalid) {}                                                        \
     NAME(const NAME &e) : v(e.v) {}                                               \
     NAME(Type _v) : v(_v) {}                                                      \
-    NAME(String s)                                                                \
+    NAME(ep::String s)                                                            \
     {                                                                             \
-      Slice<const String> keys = Keys();                                          \
+      ep::Slice<const ep::String> keys = Keys();                                  \
       for(size_t i = 0; i < keys.length; ++i)                                     \
       {                                                                           \
         if (keys.ptr[i].eq(s))                                                    \
@@ -55,24 +55,26 @@ struct EnumDesc
                                                                                   \
     operator Type() const { return v; }                                           \
                                                                                   \
-    String StringOf() const                                                       \
+    ep::String StringOf() const                                                   \
     {                                                                             \
       return v == -1 ? "Invalid" : Keys()[v];                                     \
     }                                                                             \
                                                                                   \
-    static String Name()                                                          \
+    static ep::String Name()                                                      \
     {                                                                             \
-      static String name(#NAME);                                                  \
+      static ep::String name(#NAME);                                              \
       return name;                                                                \
     }                                                                             \
-    static Slice<const String> Keys()                                             \
+    static ep::Slice<const ep::String> Keys()                                     \
     {                                                                             \
+      using namespace ep;                                                         \
       static Array<const String> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) };     \
       return keys;                                                                \
     }                                                                             \
     static const ep::EnumDesc* Desc()                                             \
     {                                                                             \
-      static const ep::EnumDesc desc = { Name(), Keys(),                          \
+      using namespace ep;                                                         \
+      static const EnumDesc desc = { Name(), Keys(),                              \
         [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \
@@ -96,9 +98,9 @@ struct EnumDesc
     NAME() : v(0) {}                                                              \
     NAME(const NAME &e) : v(e.v) {}                                               \
     NAME(Type _v) : v(_v) {}                                                      \
-    NAME(String s)                                                                \
+    NAME(ep::String s)                                                            \
     {                                                                             \
-      Slice<const String> keys = Keys();                                          \
+      ep::Slice<const ep::String> keys = Keys();                                  \
       for(size_t i = 0; i < keys.length; ++i)                                     \
       {                                                                           \
         if (keys.ptr[i].eq(s))                                                    \
@@ -115,9 +117,9 @@ struct EnumDesc
     NAME& operator &=(NAME rh) { v = v & rh.v; return *this; }                    \
     NAME& operator ^=(NAME rh) { v = v ^ rh.v; return *this; }                    \
                                                                                   \
-    MutableString64 StringOf() const                                              \
+    ep::MutableString64 StringOf() const                                          \
     {                                                                             \
-      MutableString64 r;                                                          \
+      ep::MutableString64 r;                                                      \
       for(size_t i = 0; i < 32; ++i)                                              \
       {                                                                           \
         if (v & (1<<i))                                                           \
@@ -130,19 +132,21 @@ struct EnumDesc
       return r;                                                                   \
     }                                                                             \
                                                                                   \
-    static String Name()                                                          \
+    static ep::String Name()                                                      \
     {                                                                             \
-      static String name = #NAME;                                                 \
+      static ep::String name = #NAME;                                             \
       return name;                                                                \
     }                                                                             \
-    static Slice<const String> Keys()                                             \
+    static ep::Slice<const ep::String> Keys()                                     \
     {                                                                             \
+      using namespace ep;                                                         \
       static Array<const String> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) };     \
       return keys;                                                                \
     }                                                                             \
     static const ep::EnumDesc* Desc()                                             \
     {                                                                             \
-      static const ep::EnumDesc desc = { Name(), Keys(),                          \
+      using namespace ep;                                                         \
+      static const EnumDesc desc = { Name(), Keys(),                              \
         [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.StringOf(); } };\
       return &desc;                                                               \
     }                                                                             \

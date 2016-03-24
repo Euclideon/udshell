@@ -22,10 +22,10 @@ public:
 
   Renderer *createRenderer() const override;
 
-  void AttachView(ViewRef spView);
+  void AttachView(ep::ViewRef spView);
 
 private:
-  ViewRef spView;
+  ep::ViewRef spView;
   bool dirty;
 
   // TODO: Avoid this crap

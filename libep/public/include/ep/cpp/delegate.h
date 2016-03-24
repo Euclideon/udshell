@@ -140,7 +140,7 @@ protected:
 };
 
 template<typename R, typename... Args>
-inline ptrdiff_t epStringify(Slice<char> epUnusedParam(buffer), String epUnusedParam(format), Delegate<R(Args...)> epUnusedParam(d), const epVarArg *epUnusedParam(pArgs))
+inline ptrdiff_t epStringify(Slice<char> epUnusedParam(buffer), String epUnusedParam(format), Delegate<R(Args...)> epUnusedParam(d), const VarArg *epUnusedParam(pArgs))
 {
   EPASSERT(false, "TODO! Write me!");
   return 0;

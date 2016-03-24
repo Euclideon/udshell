@@ -10,12 +10,12 @@ namespace qt {
 class QtUIComponentImpl : public ep::UIComponentImpl
 {
 public:
-  QtUIComponentImpl(Component *pInstance, Variant::VarMap initParams)
+  QtUIComponentImpl(ep::Component *pInstance, ep::Variant::VarMap initParams)
     : ep::UIComponentImpl(pInstance, initParams)
   {
   }
 
-  Variant GetUIHandle() const override final {
+  ep::Variant GetUIHandle() const override final {
     return GetKernel()->CreateComponent<qt::QObjectComponent>({ { "object", (int64_t)(size_t)pInstance->GetUserData() } });
   }
 };

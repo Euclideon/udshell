@@ -13,12 +13,12 @@ namespace qt {
 class QtWindowImpl : public ep::WindowImpl
 {
 public:
-  QtWindowImpl(Component *pInstance, Variant::VarMap initParams)
+  QtWindowImpl(ep::Component *pInstance, ep::Variant::VarMap initParams)
     : ep::WindowImpl(pInstance, initParams)
   {
   }
 
-  void SetTopLevelUI(UIComponentRef spUIComponent) override final
+  void SetTopLevelUI(ep::UIComponentRef spUIComponent) override final
   {
     QQuickWindow *pQtWindow = (QQuickWindow*)pInstance->GetUserData();
 

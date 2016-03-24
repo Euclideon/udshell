@@ -192,7 +192,7 @@ protected:
   }
 };
 
-ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const epVarArg *pArgs);
+ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const VarArg *pArgs);
 
 } //namespace ep
 

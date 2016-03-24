@@ -1,6 +1,10 @@
 #include "gtest/gtest.h"
 #include "ep/cpp/sharedptr.h"
 
+using ep::RefCounted;
+using ep::SharedPtr;
+using ep::SafePtr;
+using ep::UniquePtr;
 
 namespace sharedptr_test {
 

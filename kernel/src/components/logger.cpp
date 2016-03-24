@@ -277,7 +277,7 @@ LogLine::LogLine(int level, SharedString text, LogCategories category, SharedStr
   this->componentUID = componentUID;
 }
 
-ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const LogLine &line, const epVarArg *epUnusedParam(pArgs))
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const LogLine &line, const VarArg *epUnusedParam(pArgs))
 {
   SharedString out = line.ToString(LogDefaults::Format);
 

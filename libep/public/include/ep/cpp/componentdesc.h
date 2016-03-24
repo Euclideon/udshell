@@ -149,10 +149,11 @@ public:                                                                         
   friend class ::ep::Kernel;                                                             \
   using Super = SuperType;                                                               \
   using This = Name;                                                                     \
-  using Ref = SharedPtr<This>;                                                           \
+  using Ref = ep::SharedPtr<This>;                                                       \
   using Impl = void;                                                                     \
-  static SharedString ComponentID()                                                      \
+  static ep::SharedString ComponentID()                                                  \
   {                                                                                      \
+    using namespace ep;                                                                  \
     static SharedString id;                                                              \
     if (!id.ptr)                                                                         \
     {                                                                                    \
@@ -162,7 +163,7 @@ public:                                                                         
     }                                                                                    \
     return id;                                                                           \
   }                                                                                      \
-  static ComponentInfo MakeDescriptor()                                                  \
+  static ep::ComponentInfo MakeDescriptor()                                              \
   {                                                                                      \
     return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
   }                                                                                      \
@@ -178,10 +179,11 @@ public:                                                                         
   friend class Name##Impl;                                                               \
   using Super = SuperType;                                                               \
   using This = Name;                                                                     \
-  using Ref = SharedPtr<This>;                                                           \
-  using Impl = BaseImpl<Name, Interface>;                                                \
-  static SharedString ComponentID()                                                      \
+  using Ref = ep::SharedPtr<This>;                                                       \
+  using Impl = ep::BaseImpl<Name, Interface>;                                            \
+  static ep::SharedString ComponentID()                                                  \
   {                                                                                      \
+    using namespace ep;                                                                  \
     static SharedString id;                                                              \
     if (!id.ptr)                                                                         \
     {                                                                                    \
@@ -191,23 +193,25 @@ public:                                                                         
     }                                                                                    \
     return id;                                                                           \
   }                                                                                      \
-  static ComponentInfo MakeDescriptor()                                                  \
+  static ep::ComponentInfo MakeDescriptor()                                              \
   {                                                                                      \
     return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
   }                                                                                      \
   template <typename T>                                                                  \
   T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \
 private:                                                                                 \
-  UniquePtr<Impl> pImpl = nullptr;                                                       \
-  UniquePtr<Impl> CreateImpl(Variant::VarMap initParams)                                 \
+  ep::UniquePtr<Impl> pImpl = nullptr;                                                   \
+  ep::UniquePtr<Impl> CreateImpl(ep::Variant::VarMap initParams)                         \
   {                                                                                      \
+    using namespace ep;                                                                  \
     return UniquePtr<Impl>((Impl*)CreateImplInternal(This::ComponentID(), initParams));  \
   }
 
 
 // emit getter and setter magic
 #define EP_MAKE_GETTER(Getter)                                                           \
-  []() -> VarMethod {                                                                    \
+  []() -> ep::VarMethod {                                                                \
+    using namespace ep;                                                                  \
     struct Shim                                                                          \
     {                                                                                    \
       Variant get(Slice<const Variant>)                                                  \
@@ -219,7 +223,8 @@ private:                                                                        
   }()
 
 #define EP_MAKE_SETTER(Setter)                                                           \
-  []() -> VarMethod {                                                                    \
+  []() -> ep::VarMethod {                                                                \
+    using namespace ep;                                                                  \
     struct Shim                                                                          \
     {                                                                                    \
       Variant set(Slice<const Variant> args)                                             \
@@ -255,7 +260,8 @@ private:                                                                        
 
 // make property with explicit getter and setter
 #define EP_MAKE_PROPERTY_EXPLICIT(Name, Description, Getter, Setter, UIType, Flags)      \
-([]() -> PropertyInfo {                                                                  \
+([]() -> ep::PropertyInfo {                                                              \
+  using namespace ep;                                                                    \
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
@@ -272,7 +278,8 @@ private:                                                                        
 
 // make method explicit
 #define EP_MAKE_METHOD_EXPLICIT(Name, Method, Description)                               \
-([]() -> MethodInfo {                                                                    \
+([]() -> ep::MethodInfo {                                                                \
+  using namespace ep;                                                                    \
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
@@ -297,7 +304,8 @@ private:                                                                        
 
 // make event explicit
 #define EP_MAKE_EVENT_EXPLICIT(Name, Event, Description)                                 \
-([]() -> EventInfo {                                                                     \
+([]() -> ep::EventInfo {                                                                 \
+  using namespace ep;                                                                    \
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
@@ -323,13 +331,14 @@ private:                                                                        
 
 // make static function explicit
 #define EP_MAKE_STATICFUNC_EXPLICIT(Name, Function, Description)                         \
-([]() -> StaticFuncInfo {                                                                \
+([]() -> ep::StaticFuncInfo {                                                            \
+  using namespace ep;                                                                    \
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
     id, Description,                                                                     \
     [](Slice<const Variant> args) -> Variant {                                           \
-      return ep::VarCall(&This::Function, args);                                         \
+      return VarCall(&This::Function, args);                                             \
     }                                                                                    \
   };                                                                                     \
 }())
