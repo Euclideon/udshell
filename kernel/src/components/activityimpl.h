@@ -8,6 +8,20 @@
 
 namespace ep {
 
+inline Array<const PropertyInfo> Activity::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY(UI, "The top level UI compoment for this activity", nullptr, 0),
+  };
+}
+inline Array<const MethodInfo> Activity::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(Activate, "Set as the active activity"),
+    EP_MAKE_METHOD(Deactivate, "Unset as the active activity"),
+  };
+}
+
 class ActivityImpl : public BaseImpl<Activity, IActivity>
 {
 public:

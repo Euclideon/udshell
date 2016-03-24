@@ -33,21 +33,8 @@ private:
 
   BroadcasterRef spOutputBC = nullptr;
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-       EP_MAKE_PROPERTY_RO(OutputBroadcaster, "Output broadcaster used by the Lua print functions", nullptr, 0),
-    };
-  }
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(GetGlobal, "Get a value from the Lua global table"),
-      EP_MAKE_METHOD(SetGlobal, "Set a value to the Lua global table"),
-      EP_MAKE_METHOD(Execute, "Execute Lua code"),
-      EP_MAKE_METHOD(Print, "Print to lua console"),
-    };
-  }
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
 };
 
 } // namespace ep

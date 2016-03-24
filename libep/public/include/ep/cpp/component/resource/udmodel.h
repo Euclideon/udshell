@@ -45,7 +45,8 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties();
+private:
+  Array<const PropertyInfo> GetProperties() const;
 };
 
 } // namespace ep

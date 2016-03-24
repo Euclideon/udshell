@@ -24,12 +24,8 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(View, "The view component used for rendering", nullptr, 0),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
 };
 
 } // namespace ep

@@ -50,26 +50,9 @@ protected:
   bool InputEvent(const epInputEvent &ev) override { return pImpl->InputEvent(ev); }
   bool Update(double timeStep) override { return pImpl->Update(timeStep); }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(NearPlane, "Near depth plane", nullptr, 0),
-      EP_MAKE_PROPERTY(FarPlane, "Far depth plane", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(FovY, "Field of view in the Y direction when in Perspective mode", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(OrthoHeight, "Height of the viewing frustrum in Orthographic mode", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(CameraMatrix, "Position of camera", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(ViewMatrix, "Position of camera", nullptr, 0),
-    };
-  }
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(SetDepthPlanes, "Set the near and far depth planes:\n  setdepthplanes(near, far)"),
-      EP_MAKE_METHOD(SetOrtho, "Set the projection mode to Orthographic with given ortho height"),
-      EP_MAKE_METHOD(IsOrtho, "Returns true if the camera is in Orthographic mode"),
-      EP_MAKE_METHOD(SetPerspective, "Set the projection mode to Perspective with given field of view"),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
 };
 
 } // namespace ep

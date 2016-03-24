@@ -36,13 +36,13 @@ protected:
   KVPStore(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams) {}
 
-  static Array<const PropertyInfo> GetProperties()
+  Array<const PropertyInfo> GetProperties() const
   {
     return{
       EP_MAKE_PROPERTY_EXPLICIT("NumRecords", "Number of records in the metadata", EP_MAKE_GETTER(NumRecords), nullptr, nullptr, 0),
     };
   }
-  static Array<const MethodInfo> GetMethods()
+  Array<const MethodInfo> GetMethods() const
   {
     return{
       EP_MAKE_METHOD_EXPLICIT("Insert", InsertMethod, "Insert a record"),

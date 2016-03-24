@@ -5,8 +5,14 @@
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/material.h"
 
-namespace ep
+namespace ep {
+
+Array<const PropertyInfo> GeomNode::GetProperties() const
 {
+  return{
+    EP_MAKE_PROPERTY(Model, "The Node's Model", nullptr, 0),
+  };
+}
 
 void GeomNode::Render(RenderScene &spScene, const Double4x4 &mat)
 {

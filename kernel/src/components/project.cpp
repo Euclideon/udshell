@@ -8,6 +8,24 @@
 
 namespace ep {
 
+Array<const PropertyInfo> Project::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY(ActiveActivity, "The currently active activity", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(Activities, "The activities contained in the project", nullptr, 0),
+    EP_MAKE_PROPERTY(Src, "The URL for the Project file", nullptr, 0)
+  };
+}
+
+Array<const MethodInfo> Project::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(SaveProject, "Save Project to an XML file"),
+    EP_MAKE_METHOD(AddActivity, "Add an Activity to the Project"),
+    EP_MAKE_METHOD(RemoveActivity, "Remove an Activity from the Project"),
+  };
+}
+
 Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {

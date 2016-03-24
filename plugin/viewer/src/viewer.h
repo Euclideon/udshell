@@ -53,16 +53,10 @@ protected:
   ViewRef spView;
   UIComponentRef spUIBookmarks;
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY_RO(SimpleCamera, "The Viewer's SimpleCamera Component", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(View, "The Viewer's View Component", nullptr, 0),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
 };
 
 } //namespace ep
 
 #endif // EP_VIEWER_H
-

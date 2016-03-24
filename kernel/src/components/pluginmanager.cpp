@@ -3,6 +3,14 @@
 
 namespace ep {
 
+Array<const MethodInfo> PluginManager::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(RegisterPluginLoader, "Register a PluginLoader"),
+    EP_MAKE_METHOD(LoadPlugin, "Load a plugin with the given filename"),
+  };
+}
+
 PluginManager::PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {

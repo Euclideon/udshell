@@ -2,6 +2,23 @@
 
 namespace ep {
 
+Array<const PropertyInfo> Buffer::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY_RO(BufferSize, "The buffer's size", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Buffer::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD_EXPLICIT("CopyBuffer", CopyBufferMethod, "Copy the given Buffer to this Buffer"),
+    EP_MAKE_METHOD(Reserve, "Reserves the specified bytes of memory for the internal buffer"),
+    EP_MAKE_METHOD(Allocate, "Reserves the specified bytes of memory and sets BufferSize to the number of bytes allocated"),
+    EP_MAKE_METHOD(Resize, "Increase the logical size of the buffer, more memory will be allocated if necessary"),
+    EP_MAKE_METHOD(Free, "Free the internal buffer"),
+  };
+}
+
 bool BufferImpl::Reserve(size_t size)
 {
   EPTHROW_IF(mapDepth > 0, epR_ResourceInUse, "Buffer is mapped for {0}", readMap ? "reading" : "writing");

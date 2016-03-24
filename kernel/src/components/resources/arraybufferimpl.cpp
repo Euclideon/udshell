@@ -4,6 +4,23 @@
 
 namespace ep {
 
+Array<const PropertyInfo> ArrayBuffer::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY_RO(ElementType, "Element type of the Array as a String", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(ElementSize, "The Array's element size", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(NumDimensions, "Number of dimensions", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(Length, "Number of Array elements", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(Shape, "The sizes of the Array's dimensions", nullptr, 0),
+  };
+}
+Array<const MethodInfo> ArrayBuffer::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD_EXPLICIT("Allocate", AllocateMethod, "Allocates an Array of the given type, size and length. Length may be a single value or a list of dimensions"),
+  };
+}
+
 void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, Slice<const size_t> _shape)
 {
   EPASSERT_THROW(_shape.length > 0, epR_InvalidArgument, "No dimensions given!");

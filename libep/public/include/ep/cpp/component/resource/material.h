@@ -42,23 +42,9 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(VertexShader, "Vertex shader for rendering", nullptr, 0),
-      EP_MAKE_PROPERTY(PixelShader, "Pixel shader for rendering", nullptr, 0),
-      EP_MAKE_PROPERTY(BlendMode, "Frame buffer blend mode", nullptr, 0),
-      EP_MAKE_PROPERTY(CullMode, "Back face cull mode", nullptr, 0),
-    };
-  }
-  Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(GetTexture, "Gets the texture ArrayBuffer at the given index"),
-      EP_MAKE_METHOD(SetTexture, "Sets the texture ArrayBuffer at the given index"),
-      EP_MAKE_METHOD(SetMaterialProperty, "Set a Material Property"),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
 };
 
 } // namespace ep

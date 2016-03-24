@@ -3,6 +3,40 @@
 
 namespace ep {
 
+Array<const PropertyInfo> View::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY(Camera, "Camera for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY(Scene, "Scene for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY(EnablePicking, "Enable Picking", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(MousePosition, "Mouse Position", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(AspectRatio, "Aspect ratio", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(Dimensions, "The height and width of the View", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(RenderDimensions, "The resolution of the rendered content", nullptr, 0),
+  };
+}
+
+Array<const MethodInfo> View::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(GoToBookmark, "Move the Camera to the specified Bookmark"),
+    EP_MAKE_METHOD(Activate, "Activate the View, e.g. start rendering"),
+    EP_MAKE_METHOD(Deactivate, "Deactivate the View, e.g. stop rendering"),
+    EP_MAKE_METHOD(Resize, "Resize the View"),
+  };
+}
+
+Array<const EventInfo> View::GetEvents() const
+{
+  return{
+    EP_MAKE_EVENT(Dirty, "View dirty event"),
+    EP_MAKE_EVENT(FrameReady, "The next frame has finished rendering"),
+    EP_MAKE_EVENT(EnabledPickingChanged, "Enable Picking changed"),
+    EP_MAKE_EVENT(PickFound, "Pick found"),
+    EP_MAKE_EVENT(MousePositionChanged, "Mouse Position changed")
+  };
+}
+
 void ViewImpl::SetScene(SceneRef spNewScene)
 {
   if (spScene == spNewScene)

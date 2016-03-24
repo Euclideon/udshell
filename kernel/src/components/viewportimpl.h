@@ -8,6 +8,13 @@
 
 namespace ep {
 
+inline Array<const PropertyInfo> Viewport::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY(View, "The view component used for rendering", nullptr, 0),
+  };
+}
+
 class ViewportImpl : public BaseImpl<Viewport, IViewport>
 {
 public:

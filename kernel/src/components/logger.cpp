@@ -5,7 +5,13 @@
 
 namespace ep {
 
-Array<const MethodInfo> Logger::GetMethods()
+Array<const PropertyInfo> Logger::GetProperties() const
+{
+  return{
+    EP_MAKE_PROPERTY(Enabled, "Is Enabled", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Logger::GetMethods() const
 {
   return{
     EP_MAKE_METHOD(Log, "Write a line to the log"),
@@ -24,6 +30,12 @@ Array<const MethodInfo> Logger::GetMethods()
     EP_MAKE_METHOD(SetStreamLevel, "Filter category levels for the given stream"),
     EP_MAKE_METHOD(GetStreamComponents, "Get the filtered components uids for the given stream"),
     EP_MAKE_METHOD_EXPLICIT("SetStreamComponents", SetStreamComponents_Arr, "Filter logging for the given stream to the specified component UIDs"),
+  };
+}
+Array<const EventInfo> Logger::GetEvents() const
+{
+  return{
+    EP_MAKE_EVENT(Changed, "Log has been updated with a new entry"),
   };
 }
 

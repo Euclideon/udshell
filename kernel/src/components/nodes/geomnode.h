@@ -29,12 +29,7 @@ protected:
 
   ModelRef spModel = nullptr;
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(Model, "The Node's Model", nullptr, 0),
-    };
-  }
+  Array<const PropertyInfo> GetProperties() const;
 };
 
 } // namespace ep

@@ -28,9 +28,10 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties();
-  static Array<const MethodInfo> GetMethods();
-  static Array<const EventInfo> GetEvents();
+private:
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
+  Array<const EventInfo> GetEvents() const;
 };
 
 }

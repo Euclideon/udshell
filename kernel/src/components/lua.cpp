@@ -4,8 +4,23 @@
 
 #include "eplua.h"
 
-namespace ep
+namespace ep {
+
+Array<const PropertyInfo> Lua::GetProperties() const
 {
+  return{
+    EP_MAKE_PROPERTY_RO(OutputBroadcaster, "Output broadcaster used by the Lua print functions", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Lua::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(GetGlobal, "Get a value from the Lua global table"),
+    EP_MAKE_METHOD(SetGlobal, "Set a value to the Lua global table"),
+    EP_MAKE_METHOD(Execute, "Execute Lua code"),
+    EP_MAKE_METHOD(Print, "Print to lua console"),
+  };
+}
 
 Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)

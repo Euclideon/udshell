@@ -105,7 +105,7 @@ private:
   void FinishInit();
   void Shutdown();
 
-  static ep::Array<const ep::MethodInfo> GetMethods()
+  ep::Array<const ep::MethodInfo> GetMethods() const
   {
     return{
       EP_MAKE_METHOD(RegisterQmlComponent, "Register a new QML Component type"),

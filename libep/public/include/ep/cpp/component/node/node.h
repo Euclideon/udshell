@@ -54,26 +54,6 @@ protected:
 
   // TODO: enable/visible/etc flags
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(Matrix, "Local matrix", nullptr, 0),
-      EP_MAKE_PROPERTY(Position, "Local position", nullptr, 0),
-      EP_MAKE_PROPERTY_EXPLICIT("Parent", "Parent node", EP_MAKE_GETTER(Parent), nullptr, nullptr, 0),
-      EP_MAKE_PROPERTY_EXPLICIT("Children", "Child nodes", EP_MAKE_GETTER(Children), nullptr, nullptr, 0),
-    };
-  }
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD(AddChild, "Add a child to the Node"),
-      EP_MAKE_METHOD(RemoveChild, "Remove a child from the Node"),
-      EP_MAKE_METHOD(Detach, "Detach the Node from its parent"),
-      EP_MAKE_METHOD_EXPLICIT("CalculateWorldMatrix", CalculateWorldMatrixMethod, "Calculate the World Matrix of the Node"),
-      EP_MAKE_METHOD(Save, "Save the state of the Node"),
-    };
-  }
-
 private:
   Double4x4 CalculateWorldMatrixMethod() const
   {
@@ -81,6 +61,9 @@ private:
     CalculateWorldMatrix(&_matrix);
     return _matrix;
   }
+
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
 };
 
 } // namespace ep

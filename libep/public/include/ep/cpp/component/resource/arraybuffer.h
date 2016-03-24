@@ -113,24 +113,6 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY_RO(ElementType, "Element type of the Array as a String", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(ElementSize, "The Array's element size", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(NumDimensions, "Number of dimensions", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(Length, "Number of Array elements", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(Shape, "The sizes of the Array's dimensions", nullptr, 0),
-    };
-  }
-
-  static Array<const MethodInfo> GetMethods()
-  {
-    return{
-      EP_MAKE_METHOD_EXPLICIT("Allocate", AllocateMethod, "Allocates an Array of the given type, size and length. Length may be a single value or a list of dimensions"),
-    };
-  }
-
 private:
   void AllocateMethod(SharedString _elementType, size_t _elementSize, Variant length)
   {
@@ -142,6 +124,9 @@ private:
     else
       Allocate(_elementType, _elementSize, length.as<Array<size_t>>());
   }
+
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
 };
 
 template<>

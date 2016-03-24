@@ -36,12 +36,8 @@ protected:
 
   void Render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY(UDModel, "UDModel instance", nullptr, 0),
-    };
-  }
+private:
+  Array<const PropertyInfo> GetProperties() const;
 };
 
 } // namespace ep

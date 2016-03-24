@@ -146,19 +146,11 @@ protected:
 
   void* CreateImplInternal(String ComponentType, Variant::VarMap initParams);
 
-  static Array<const PropertyInfo> GetProperties()
-  {
-    return{
-      EP_MAKE_PROPERTY_RO(Uid, "Component UID", nullptr, 0),
-      EP_MAKE_PROPERTY(Name, "Component Name", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(Type, "Component Type", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(DisplayName, "Component Display Name", nullptr, 0),
-      EP_MAKE_PROPERTY_RO(Description, "Component Description", nullptr, 0),
-    };
-  }
-
 private:
   void Init(Variant::VarMap initParams);
+
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
 };
 
 // component cast
