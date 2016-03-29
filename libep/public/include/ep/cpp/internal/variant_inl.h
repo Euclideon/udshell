@@ -413,7 +413,7 @@ inline bool Variant::isValid() const
 inline void Variant::throwError()
 {
   if ((Type)t == Type::Error)
-    throw err;
+    throw EPException(err);
 }
 
 
