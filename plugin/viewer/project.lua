@@ -18,12 +18,19 @@ project "viewer"
 	pic "on"
 	configuration { "windows", "Debug* or DebugOpt*" }
 		qtsuffix "d"
-	configuration {}
 
-	postbuildcommands {
-		"{MKDIR} bin/plugins/",
-		"{COPY} %{cfg.buildtarget.abspath} bin/plugins/"
-	}
+	configuration { "windows" }
+		postbuildcommands {
+			"IF NOT EXIST bin/plugins/ ( {MKDIR} bin/plugins/ )",
+			"{COPY} %{cfg.buildtarget.abspath} bin/plugins/"
+		}
+	configuration { "not windows" }
+		postbuildcommands {
+			"{MKDIR} bin/plugins/",
+			"{COPY} %{cfg.buildtarget.abspath} bin/plugins/"
+		}
+
+	configuration {}
 
 	-- include common stuff
 	dofile "../../common-proj.lua"

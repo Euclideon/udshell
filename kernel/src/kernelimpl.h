@@ -158,6 +158,7 @@ public:
   void FinishInit() override final;
   void InitComponents();
   void LoadPlugins();
+  Array<SharedString> ScanPluginFolder(String folderPath);
 
   void DestroyComponent(Component *pInstance);
 
