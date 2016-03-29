@@ -1,5 +1,5 @@
 #include "resourceimpl.h"
-#include "metadata.h"
+#include "ep/cpp/component/resource/metadata.h"
 #include "ep/cpp/kernel.h"
 
 namespace ep {
@@ -23,8 +23,7 @@ Array<const EventInfo> Resource::GetEvents() const
   };
 }
 
-// TODO Change ComponentRef to Metadata once Metadata made public
-ComponentRef ResourceImpl::GetMetadata() const
+MetadataRef ResourceImpl::GetMetadata() const
 {
   if (!metadata)
     (MetadataRef&)metadata = GetKernel()->CreateComponent<Metadata>();

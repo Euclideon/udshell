@@ -14,7 +14,7 @@ class Resource : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(Resource, IResource, Component, EPKERNEL_PLUGINVERSION, "Base resource", 0)
 public:
-  ComponentRef GetMetadata() const { return pImpl->GetMetadata(); } // TODO Change ComponentRef to Metadata once Metadata made public
+  MetadataRef GetMetadata() const { return pImpl->GetMetadata(); }
 
   Variant Save() const override { return pImpl->Save(); }
 

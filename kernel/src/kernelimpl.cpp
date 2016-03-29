@@ -15,9 +15,8 @@
 #include "components/pluginloader.h"
 #include "components/nativepluginloader.h"
 #include "components/project.h"
+#include "ep/cpp/component/resource/kvpstore.h"
 #include "components/resources/text.h"
-#include "components/resources/kvpstore.h"
-#include "components/resources/metadata.h"
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
 #include "components/datasources/uddatasource.h"
@@ -28,6 +27,7 @@
 #include "components/commandmanagerimpl.h"
 #include "components/resourcemanagerimpl.h"
 #include "components/activityimpl.h"
+#include "components/resources/metadataimpl.h"
 #include "components/resources/resourceimpl.h"
 #include "components/resources/udmodelimpl.h"
 #include "components/resources/bufferimpl.h"
@@ -221,7 +221,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Text>();
   pInstance->RegisterComponentType<Menu, MenuImpl>();
   pInstance->RegisterComponentType<KVPStore>();
-  pInstance->RegisterComponentType<Metadata>();
+  pInstance->RegisterComponentType<Metadata, MetadataImpl>();
   pInstance->RegisterComponentType<Scene, SceneImpl>();
 
   // nodes

@@ -5,10 +5,10 @@
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/material.h"
 #include "ep/cpp/component/resource/model.h"
+#include "ep/cpp/component/resource/metadata.h"
 #include "ep/cpp/component/resource/udmodel.h"
 #include "components/file.h"
 #include "components/datasources/uddatasource.h"
-#include "components/resources/metadata.h"
 #include "hal/image.h"
 #include "ep/cpp/kernel.h"
 

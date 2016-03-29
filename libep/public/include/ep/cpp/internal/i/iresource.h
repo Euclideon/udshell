@@ -7,11 +7,12 @@
 namespace ep {
 
 SHARED_CLASS(DataSource);
+SHARED_CLASS(Metadata);
 
 class IResource
 {
 public:
-  virtual ComponentRef GetMetadata() const = 0; // TODO Change ComponentRef to Metadata once Metadata made public
+  virtual MetadataRef GetMetadata() const = 0;
 
   virtual Variant Save() const = 0;
 };

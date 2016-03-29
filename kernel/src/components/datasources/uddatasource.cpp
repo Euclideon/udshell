@@ -1,6 +1,6 @@
 #include "components/datasources/uddatasource.h"
 #include "components/resources/udmodelimpl.h"
-#include "components/resources/metadata.h"
+#include "ep/cpp/component/resource/metadata.h"
 #include "components/file.h"
 #include "udOctree.h"
 #include "ep/cpp/kernel.h"
@@ -48,7 +48,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
         result = udOctree_GetMetadataByIndex(pOctree, i, &pName, &pValue, nullptr, nullptr);
         if (result == udR_Success)
         {
-          MetadataRef meta = shared_pointer_cast<Metadata>(model->GetMetadata());
+          MetadataRef meta = model->GetMetadata();
           meta->Insert(pName, pValue);
         }
       }
