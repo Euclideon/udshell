@@ -46,6 +46,8 @@ public:
   void RemoveDynamicMethod(String name) override final;
   void RemoveDynamicEvent(String name) override final;
 
+  void SetUserData(void *pData) { pInstance->pUserData = pData; }
+
 protected:
   ~ComponentImpl();
 

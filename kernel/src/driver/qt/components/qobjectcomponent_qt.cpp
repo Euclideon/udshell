@@ -6,6 +6,8 @@
 #endif
 #include <QObject>
 
+#include "ep/cpp/component/window.h"
+
 #include "driver/qt/util/qmlbindings_qt.h"
 #include "driver/qt/components/qobjectcomponent_qt.h"
 #include "driver/qt/components/viewportimpl_qt.h"
@@ -63,47 +65,29 @@ void QObjectComponent::AttachToGlue(Component *pGlue)
   // Create a new QObject instance from the stored QmlComponentData
   EPASSERT(pQmlComponentData, "Attempting to attach a public/instantiated QObjectComponent to a Glue Component");
   pQObject = pQmlComponentData->CreateInstance(static_cast<QtKernel*>(pKernel)->QmlEngine(), pThis);
-  SetupQObject();
   pUserData = pQObject;
 
   // Populate the glue's descriptor with the meta from the QObject
   ComponentDescInl *pDesc = (ComponentDescInl*)pThis->GetDescriptor();
   if (pDesc->info.flags & ComponentInfoFlags::Unpopulated)
   {
-    //internal::PopulateComponentDesc(pThis, pQObject);
+    internal::PopulateComponentDesc(pThis, pQObject);
     pDesc->info.flags &= ~ComponentInfoFlags::Unpopulated;
+  }
+
+  if (pThis->IsType("window"))
+  {
+    EPTHROW_IF(!pQObject->isWindowType(), epR_Failure, "Window component must create a QWindow based object");
+    static_cast<ep::Window*>(pThis)->PostInit(pQObject);
+  }
+  else
+  {
+    EPTHROW_IF(qobject_cast<QQuickItem*>(pQObject) == nullptr, epR_Failure, "UI based components must create a QQuickItem");
+    static_cast<ep::UIComponent*>(pThis)->PostInit(pQObject);
   }
 
   // Construction is complete, so we don't need this anymore
   pQmlComponentData = nullptr;
-}
-
-// Sets up the associated QObject (according to type)
-void QObjectComponent::SetupQObject()
-{
-  EPASSERT(pThis != this, "Attempting to validate an unattached QObjectComponent");
-
-  if (pThis->IsType("window"))
-  {
-    // We expect a QQuickWindow object
-    EPTHROW_IF(qobject_cast<QQuickWindow*>(pQObject) == nullptr, epR_Failure, "Window component must create a QQuickWindow");
-
-    // register the window with the kernel
-    if (static_cast<QtKernel*>(pKernel)->RegisterWindow((QQuickWindow*)pQObject) != epR_Success)
-      EPTHROW_ERROR(epR_Failure, "Unable to register Window component with Kernel");
-  }
-  else
-  {
-    // We expect a QQuickItem object
-    EPTHROW_IF(qobject_cast<QQuickItem*>(pQObject) == nullptr, epR_Failure, "UI based components must create a QQuickItem");
-  }
-}
-
-void QObjectComponent::ChickenMeetEgg()
-{
-  // HAX: we'll have a view but it wont be attached - hence setting it to itself
-  if (pThis->IsType("viewport"))
-    ((ep::Viewport*)pThis)->SetView(((ep::Viewport*)pThis)->GetView());
 }
 
 } // namespace qt

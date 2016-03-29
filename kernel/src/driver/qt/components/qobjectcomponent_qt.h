@@ -27,14 +27,10 @@ public:
 
   const ep::MethodDesc *GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final;
 
-  // TODO: remove this hack
-  void ChickenMeetEgg();
-
 private:
   friend class QtKernel;
 
   void AttachToGlue(Component *pGlue) override final;
-  void SetupQObject();
 
   QObject *pQObject = nullptr;
   bool hasOwnership = false;

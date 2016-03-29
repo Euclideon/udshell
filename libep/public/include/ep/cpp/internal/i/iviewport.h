@@ -13,6 +13,7 @@ class IViewport
 public:
   virtual ViewRef GetView() const = 0;
   virtual void SetView(const ViewRef &spView) = 0;
+  virtual void PostInit(void *pData) = 0;
 };
 
 } // namespace ep

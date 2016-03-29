@@ -17,6 +17,8 @@ public:
   void SetTopLevelUI(UIComponentRef spUIComponent) { pImpl->SetTopLevelUI(spUIComponent); }
   UIComponentRef GetTopLevelUI() const { return pImpl->GetTopLevelUI(); }
 
+  void PostInit(void *pData) { pImpl->PostInit(pData); }
+
 protected:
   Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)

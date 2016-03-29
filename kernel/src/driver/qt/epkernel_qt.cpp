@@ -120,10 +120,10 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
 
   // register Qt specific components
   EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), epR_Failure, "Unable to register QtComponent");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, ep::UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, ep::WindowGlue>()), epR_Failure, "Unable to register Window component");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ep::ViewportGlue>()), epR_Failure, "Unable to register UIComponent");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::UIConsole, void, ep::UIConsoleGlue>()), epR_Failure, "Unable to register UIConsole Component");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, WindowGlue>()), epR_Failure, "Unable to register Window component");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ViewportGlue>()), epR_Failure, "Unable to register UIComponent");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::UIConsole, void, UIConsoleGlue>()), epR_Failure, "Unable to register UIConsole Component");
 
   // create our QApplication
   pApplication = new QtApplication(this, cmdArgc, (char**)cmdArgv.ptr);
@@ -273,6 +273,7 @@ void QtKernel::RegisterQmlComponent(String superTypeId, String typeId, String fi
     { "name", typeId },
     { "description", SharedString::format("{0} - {1} qml component", typeId, superTypeId) },
     { "version", (int)EPKERNEL_PLUGINVERSION },
+    { "flags", ep::ComponentInfoFlags::Unpopulated },
     { "super", superTypeId },
     { "userdata", (const SharedPtr<RefCounted>&)data },
     { "new", ep::DynamicComponentDesc::NewInstanceFunc(data.ptr(), &QmlComponentData::CreateComponent) }
@@ -308,20 +309,12 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file, V
   pDesc->newInstance = nullptr;
 
   // create the new component (glue and instance)
-  MutableString128 t(Format, "New (Unregistered QML Component): {0} - {1}", pDesc->info.id, file);
-  pKernel->LogDebug(4, t);
+  pKernel->LogDebug(4, "New (Unregistered QML Component): {0} - {1}", pDesc->info.id, file);
   QmlComponentData data(file, pQmlEngine);
   QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
   ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, pDesc->info.id, spInstance, initParams);
-
-  // populate the descriptor meta from its parent
   pDesc->PopulateFromDesc(pSuper);
-
   spInstance->AttachToGlue(spC.ptr());
-  GetImpl()->SetComponentUserData(spC, spInstance->GetUserData());
-
-  // HAX HAX:
-  spInstance->ChickenMeetEgg();
 
   return spC;
 }
@@ -436,7 +429,7 @@ void QtKernel::DispatchToMainThread(ep::MainThreadCallback callback)
 void QtKernel::DispatchToMainThreadAndWait(ep::MainThreadCallback callback)
 {
   // TODO: handle this gracefully? can we detect if the main thread is blocked??
-  //EPASSERT(!OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
+  EPASSERT(!OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
 
   // if we're on the main thread just execute the callback now
   if (OnMainThread())

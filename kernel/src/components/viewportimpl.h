@@ -39,18 +39,6 @@ public:
   ViewRef spView = nullptr;
 };
 
-class ViewportGlue final : public Viewport
-{
-public:
-  ViewportGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef _spInstance, Variant::VarMap initParams)
-    : Viewport(_pType, _pKernel, _uid, initParams), spInstance(_spInstance)
-  {
-  }
-
-protected:
-  ComponentRef spInstance;
-};
-
 } // namespace ep
 
 #endif // EPVIEWPORTIMPL_H

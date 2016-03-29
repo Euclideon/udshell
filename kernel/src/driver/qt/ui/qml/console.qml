@@ -67,11 +67,7 @@ Item {
     logOut = Qt.binding(function() { return logTab.item.textArea; });
     consoleOut = Qt.binding(function() { return consoleTab.item.consoleOutLoader.item.textArea; });
     consoleIn = Qt.binding(function() { return consoleTab.item.consoleInTextArea; });
-  }
-
-  Connections {
-    target: thisComponent
-    onCompleted: tv.splitTabs()
+    tv.splitTabs();
   }
 
   FontLoader { id: fixedFont; name: "Courier" }

@@ -4,6 +4,7 @@
 
 #include "ep/cpp/component/uicomponent.h"
 #include "ep/cpp/internal/i/iuicomponent.h"
+#include "components/componentimpl.h"
 
 namespace ep {
 
@@ -21,19 +22,11 @@ public:
     : ImplSuper(pInstance)
   {
   }
-};
 
-
-class UIComponentGlue final : public UIComponent
-{
-public:
-  UIComponentGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef _spInstance, Variant::VarMap initParams)
-    : UIComponent(_pType, _pKernel, _uid, initParams), spInstance(_spInstance)
+  void PostInit(void *pData) override final
   {
+    pInstance->ep::Component::GetImpl<ep::ComponentImpl>()->SetUserData(pData);
   }
-
-protected:
-  ComponentRef spInstance;
 };
 
 } // namespace ep

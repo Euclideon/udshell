@@ -16,7 +16,20 @@ public:
   }
 
   ep::Variant GetUIHandle() const override final {
-    return GetKernel()->CreateComponent<qt::QObjectComponent>({ { "object", (int64_t)(size_t)pInstance->GetUserData() } });
+    return spQObject;
+  }
+
+  QObjectComponentRef spQObject = nullptr;
+};
+
+
+class UIComponentGlue final : public ep::UIComponent
+{
+public:
+  UIComponentGlue(const ep::ComponentDesc *_pType, ep::Kernel *_pKernel, ep::SharedString _uid, ep::ComponentRef _spInstance, ep::Variant::VarMap initParams)
+    : UIComponent(_pType, _pKernel, _uid, initParams)
+  {
+    GetImpl<QtUIComponentImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
   }
 };
 

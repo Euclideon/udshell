@@ -27,18 +27,6 @@ public:
   UIComponentRef spTopLevelUI = nullptr;
 };
 
-class WindowGlue final : public Window
-{
-public:
-  WindowGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef _spInstance, Variant::VarMap initParams)
-    : Window(_pType, _pKernel, _uid, initParams), spInstance(_spInstance)
-  {
-  }
-
-protected:
-  ComponentRef spInstance;
-};
-
 } // namespace ep
 
 #endif // EPWINDOWIMPL_H

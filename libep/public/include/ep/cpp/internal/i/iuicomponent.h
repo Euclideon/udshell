@@ -10,6 +10,7 @@ class IUIComponent
 {
 public:
   virtual Variant GetUIHandle() const = 0;
+  virtual void PostInit(void *pData) = 0;
 };
 
 } // namespace ep
