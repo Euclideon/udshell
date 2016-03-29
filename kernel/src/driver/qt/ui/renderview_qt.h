@@ -43,7 +43,9 @@ private:
   void mouseReleaseEvent(QMouseEvent *) override;
   void touchEvent(QTouchEvent *) override;
   void hoverMoveEvent(QHoverEvent *) override;
-//  void inputMethodEvent(QInputMethodEvent *) override;
+  void focusInEvent(QFocusEvent * event);
+  void focusOutEvent(QFocusEvent * event);
+  // void inputMethodEvent(QInputMethodEvent *) override;
 
 private slots:
   void OnResize()

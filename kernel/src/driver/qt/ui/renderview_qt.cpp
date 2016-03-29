@@ -123,6 +123,34 @@ QSGNode *QtRenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNod
   return QQuickFramebufferObject::updatePaintNode(node, nodeData);
 }
 
+void QtRenderView::focusInEvent(QFocusEvent * event)
+{
+  epInputEvent ev;
+  ev.deviceType = epID_Keyboard;
+  ev.deviceId = 0;
+  ev.eventType = epInputEvent::Focus;
+  ev.hasFocus = true;
+
+  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+    event->accept();
+  else
+    event->ignore();
+}
+
+void QtRenderView::focusOutEvent(QFocusEvent * event)
+{
+  epInputEvent ev;
+  ev.deviceType = epID_Keyboard;
+  ev.deviceId = 0;
+  ev.eventType = epInputEvent::Focus;
+  ev.hasFocus = false;
+
+  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+    event->accept();
+  else
+    event->ignore();
+}
+
 void QtRenderView::keyPressEvent(QKeyEvent *pEv)
 {
   epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());

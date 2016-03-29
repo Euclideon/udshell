@@ -76,7 +76,15 @@ SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initPar
 
 bool SimpleCameraImpl::ViewportInputEvent(const epInputEvent &ev)
 {
-  if (ev.deviceType == epID_Keyboard)
+  if (ev.eventType == epInputEvent::EventType::Focus)
+  {
+    if (!ev.hasFocus)
+    {
+      memset(keyState, 0, sizeof(keyState));
+      stateChanged = true;
+    }
+  }
+  else if (ev.deviceType == epID_Keyboard)
   {
     if (ev.eventType == epInputEvent::EventType::Key)
     {
@@ -84,45 +92,45 @@ bool SimpleCameraImpl::ViewportInputEvent(const epInputEvent &ev)
       {
         case epKC_W:
         case epKC_Up:
-          keyState[(int)Keys::Up] += ev.key.state ? 1 : -1;
+          keyState[(int)Keys::Up] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
         case epKC_S:
         case epKC_Down:
-          keyState[(int)Keys::Down] += ev.key.state ? 1 : -1;
+          keyState[(int)Keys::Down] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
         case epKC_A:
         case epKC_Left:
-          keyState[(int)Keys::Left] += ev.key.state ? 1 : -1;
+          keyState[(int)Keys::Left] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
         case epKC_D:
         case epKC_Right:
-          keyState[(int)Keys::Right] += ev.key.state ? 1 : -1;
+          keyState[(int)Keys::Right] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
         case epKC_R:
         case epKC_PageUp:
-          keyState[(int)Keys::Elevate] += ev.key.state ? 1 : -1;
+          keyState[(int)Keys::Elevate] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
         case epKC_F:
         case epKC_PageDown:
-          keyState[(int)Keys::Descend] += ev.key.state ? 1 : -1;
+          keyState[(int)Keys::Descend] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
         case epKC_LShift:
         case epKC_RShift:
-          keyState[(int)Keys::Boost] += ev.key.state ? 1 : -1;
+          keyState[(int)Keys::Boost] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
         case epKC_1:
-          keyState[(int)Keys::Key_1] += ev.key.state ? 1 : -1;
+          keyState[(int)Keys::Key_1] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
         case epKC_2:
-          keyState[(int)Keys::Key_2] += ev.key.state ? 1 : -1;
+          keyState[(int)Keys::Key_2] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
       }
