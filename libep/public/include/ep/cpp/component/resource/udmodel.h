@@ -32,7 +32,6 @@ public:
   BoundingVolume GetBoundingVolume() const { return pImpl->GetBoundingVolume(); }
 
   UDRenderState GetUDRenderState() const { return pImpl->GetUDRenderState(); }
-  DataSourceRef GetDataSource() const { return pImpl->GetDataSource(); }
 
   VarDelegate GetVoxelVarDelegate() const { return pImpl->GetVoxelVarDelegate(); }
   void SetVoxelVarDelegate(VarDelegate del) { pImpl->SetVoxelVarDelegate(del); }

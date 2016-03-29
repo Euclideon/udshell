@@ -363,7 +363,7 @@ Rectangle {
           border.color: Theme.bottomBarButtonBorderColor
           gradient: Gradient {
             GradientStop { position: 0 ; color: control.hovered ? Theme.bottomBarButtonBgColorHoveredStart : Theme.bottomBarButtonBgColorStart }
-            GradientStop { position: 1 ; color: control.hovered ? Theme.bottomBarButtonBgColorHovereEnd : Theme.bottomBarButtonBgColorEnd }
+            GradientStop { position: 1 ; color: control.hovered ? Theme.bottomBarButtonBgColorHoveredEnd : Theme.bottomBarButtonBgColorEnd }
           }
         }
         padding { left: 7; right: 7; top: 4; bottom: 4 }

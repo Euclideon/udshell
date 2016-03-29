@@ -51,6 +51,10 @@ public:
 protected:
   Variant FindBookmark_Internal(String bmName) const override final { auto *pBM = bookmarks.Get(bmName); return pBM ? Variant(*pBM) : Variant(nullptr); }
 
+  void LoadSceneFile(String filePath);
+  void AddModelsToResourceManager();
+  void BuildModelMap(NodeRef node, Variant::VarMap &modelMap);
+
   double timeStep = 0.0;
   NodeRef rootNode = nullptr;
   RenderableSceneRef spCache = nullptr;

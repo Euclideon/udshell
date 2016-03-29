@@ -4,6 +4,9 @@
 #include "ep/cpp/component/node/camera.h"
 #include "renderscene.h"
 #include "components/resources/udmodelimpl.h"
+#include "components/datasources/geomsource.h"
+#include "ep/cpp/component/node/udnode.h"
+#include "ep/cpp/component/resourcemanager.h"
 
 namespace ep {
 
@@ -151,11 +154,15 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene)
   return cache;
 }
 
-SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams)
-  : ImplSuper(pInstance)
+SceneImpl::SceneImpl(Component *_pInstance, Variant::VarMap initParams)
+  : ImplSuper(_pInstance)
 {
   timeStep = 1.0 / 30.0;
   rootNode = GetKernel()->CreateComponent<Node>();
+
+  Variant *pSrc = initParams.Get("url");
+  if (pSrc && pSrc->is(Variant::Type::String))
+    LoadSceneFile(pSrc->asString());
 
   Variant *pMap = initParams.Get("bookmarks");
   if (pMap && pMap->is(Variant::SharedPtrType::AssocArray))
@@ -163,6 +170,57 @@ SceneImpl::SceneImpl(Component *pInstance, Variant::VarMap initParams)
 
   memset(&renderModels, 0, sizeof(renderModels));
   numRenderModels = 0;
+}
+
+void SceneImpl::LoadSceneFile(String filePath)
+{
+  GeomSourceRef spSceneDS;
+  epscope(fail) { if (!spSceneDS) GetKernel()->LogError("Failed to load scene file \"{0}\"", filePath); };
+  spSceneDS = GetKernel()->CreateComponent<GeomSource>({ { "src", filePath } });
+
+  NodeRef spNode;
+  if (spSceneDS->GetNumResources() > 0)
+  {
+    for (NodeRef &child : rootNode->Children())
+      child->Detach();
+
+    spNode = spSceneDS->GetResourceAs<Node>(0);
+
+    rootNode->AddChild(spNode);
+    AddModelsToResourceManager();
+    pInstance->GetMetadata()->Call("insert", "url", filePath);
+  }
+}
+
+void SceneImpl::AddModelsToResourceManager()
+{
+  Variant::VarMap modelMap;
+  ResourceManagerRef spRM = GetKernel()->GetResourceManager();
+
+  BuildModelMap(rootNode, modelMap);
+
+  for (auto kvp : modelMap)
+    spRM->AddResource(kvp.value.as<UDModelRef>());
+}
+
+void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)
+{
+  for (NodeRef &spChild : spNode->Children())
+  {
+    BuildModelMap(spChild, modelMap);
+
+    UDNodeRef spUDNode;
+
+    if (!spChild->IsType<UDNode>())
+      continue;
+
+    spUDNode = component_cast<UDNode>(spChild);
+
+    UDModelRef spUDModel = spUDNode->GetUDModel();
+    Variant filePath = spUDModel->GetMetadata()->Call("get", "url");
+    if (filePath.is(Variant::Type::String))
+      modelMap.Insert(filePath, spUDModel);
+  }
 }
 
 void SceneImpl::AddBookmarkFromCamera(String bmName, CameraRef camera)
@@ -251,8 +309,18 @@ Variant SceneImpl::SaveBookmarks() const
 Variant SceneImpl::Save() const
 {
   Variant::VarMap map;
+
+  Variant url = pInstance->GetMetadata()->Call("get", "url");
+  if (url.is(Variant::Type::String))
+  {
+    String urlString = url.asString();
+    if (!urlString.empty())
+      map.Insert("url", urlString);
+  }
+
   if(!bookmarks.Empty())
     map.Insert("bookmarks", SaveBookmarks());
+
   return map;
 }
 

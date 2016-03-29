@@ -34,7 +34,6 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
       model = pKernel->CreateComponent<UDModel>();
 
     UDModelImpl *pModelImpl = model->GetImpl<UDModelImpl>();
-    pModelImpl->wpDataSource = SafePtr<DataSource>(this);
     pModelImpl->pOctree = pOctree;
 
     // Populate meta data

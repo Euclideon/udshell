@@ -19,12 +19,10 @@ public:
   }
 
   ComponentRef GetMetadata() const override final;
-  DataSourceRef GetDataSource() const override final { return source; }
 
   Variant Save() const override final { return pInstance->Super::Save(); }
 
 protected:
-  DataSourceRef source = nullptr;
   MetadataRef metadata = nullptr;
 };
 

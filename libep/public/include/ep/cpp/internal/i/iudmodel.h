@@ -28,7 +28,6 @@ public:
   virtual BoundingVolume GetBoundingVolume() const = 0;
 
   virtual UDRenderState GetUDRenderState() const = 0;
-  virtual DataSourceRef GetDataSource() const = 0;
 
   virtual VarDelegate GetVoxelVarDelegate() const = 0;
   virtual void SetVoxelVarDelegate(VarDelegate del) = 0;

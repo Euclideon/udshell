@@ -73,7 +73,7 @@ Variant CameraImpl::Save() const
   else
     params.Insert(KeyValuePair("perspective", fovY));
   params.Insert(KeyValuePair("nearplane", zNear));
-  params.Insert(KeyValuePair("nearplane", zFar));
+  params.Insert(KeyValuePair("farplane", zFar));
 
   return Variant(std::move(params));
 }

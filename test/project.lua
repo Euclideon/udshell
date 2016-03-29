@@ -23,8 +23,21 @@ project "eptest"
 	links { googletestPath }
 
 	configuration { "windows" }
-		links { "ws2_32.lib", "winmm.lib", "assimp.lib" }
-		libdirs { "../3rdparty/assimp-3.1.1/lib64" }
+		links { "ws2_32.lib", "winmm.lib" }
+
+	configuration { "windows", "x64" }
+		links { "assimp-ep64.lib" }
+		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64" }
+	configuration { "windows", "x86" }
+		links { "assimp-ep32.lib" }
+		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32" }
+
+	configuration { "linux" }
+		libdirs { "../bin/amd64" }
+		links { "assimp-ep" }
+		linkoptions { "-Wl,-rpath=../bin/amd64,-rpath=bin/amd64" }
+
+	configuration {}
 
 if qt then
 	qt.enable()

@@ -444,6 +444,11 @@ struct aiAnimMesh
 #endif
 };
 
+struct aiXRef
+{
+	C_STRUCT aiString mName;
+	C_STRUCT aiString mUrl;
+};
 
 // ---------------------------------------------------------------------------
 /** @brief A mesh represents a geometry or model with a single material. 

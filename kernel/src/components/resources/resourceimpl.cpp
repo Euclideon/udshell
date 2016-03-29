@@ -8,7 +8,6 @@ Array<const PropertyInfo> Resource::GetProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO(Metadata, "Number of records in the metadata", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(DataSource, "The DataSource containing this Resource", nullptr, 0),
   };
 }
 Array<const MethodInfo> Resource::GetMethods() const

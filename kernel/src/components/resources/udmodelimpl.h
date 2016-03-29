@@ -41,8 +41,6 @@ public:
   BoundingVolume GetBoundingVolume() const override;
   UDRenderState GetUDRenderState() const override;
 
-  DataSourceRef GetDataSource() const override { return wpDataSource; }
-
   VarDelegate GetVoxelVarDelegate() const override { return voxelVarDelegate; }
   void SetVoxelVarDelegate(VarDelegate delegate);
 
@@ -53,7 +51,6 @@ private:
 
   Double4x4 udmatrix;
   Rect<uint32_t> rect;
-  SafePtr<DataSource> wpDataSource;
   udOctree *pOctree = nullptr;
 
   uint32_t startingRoot = 0;
