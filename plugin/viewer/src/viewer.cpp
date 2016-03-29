@@ -78,13 +78,13 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
   ViewportRef spViewport;
   epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component\n"); };
-  spViewport = pKernel->Call("createqmlcomponent", "viewport", "qrc:/qml/components/viewport.qml", Variant::VarMap{ { "view", spView } }).as<ViewportRef>();
-  spViewport->Subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
+  spViewport = pKernel->Call("createqmlcomponent", "viewport", "qrc:/kernel/viewport.qml", Variant::VarMap{ { "view", spView } }).as<ViewportRef>();
 
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
   spViewerUI = pKernel->Call("createqmlcomponent", "uicomponent", "qrc:/viewer/viewer.qml", nullptr).as<UIComponentRef>();
   spViewerUI->Set("viewport", spViewport);
+  spViewerUI->Subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
 
   epscope(fail) { if(!spUIBookmarks) pKernel->LogError("Error creating bookmarks UI Component\n"); };
   spUIBookmarks = pKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/components/bookmarksui.qml", nullptr).as<UIComponentRef>();
@@ -127,7 +127,16 @@ MutableString<260> Viewer::GetFileNameFromPath(String path) // TODO Move this to
 void Viewer::OnResourceDropped(String resourceUID, int x, int y)
 {
   ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
-  UDModelRef spUDModel = spResourceManager->GetResourceAs<UDModel>(resourceUID);
+  UDModelRef spUDModel;
+
+  try {
+    spUDModel = spResourceManager->GetResourceAs<UDModel>(resourceUID);
+  }
+  catch(EPException &) {
+    LogDebug(2, "Can't drop \"{0}\" into viewport -- Component type is not supported", resourceUID);
+    ClearError();
+    return;
+  }
 
   UDNodeRef spUDNode = pKernel->CreateComponent<UDNode>();
   spUDNode->SetUDModel(spUDModel);

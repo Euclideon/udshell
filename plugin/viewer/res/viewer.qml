@@ -19,6 +19,8 @@ FocusScope {
   property var bookmarksqq
   property var resourcespanel
 
+  signal resourcedropped(var uid, var x, var y)
+
   function togglebookmarkspanel() {
     toolPanelSlot.toggleVisible(bookmarkscomp.get("uihandle"));
   }
@@ -101,6 +103,57 @@ FocusScope {
         id: viewPanel
         anchors.fill: parent
         anchors.rightMargin: 8
+
+        DropArea {
+          anchors.fill: parent
+          keys: ["text/uri-list", "RMResource"]
+
+          onEntered: {
+            if (drag.keys.indexOf("text/uri-list") > -1) {
+              if (drag.hasText && (drag.proposedAction == Qt.MoveAction || drag.proposedAction == Qt.CopyAction)) {
+                var resourceManager = EPKernel.findComponent("resourcemanager");
+                var exts = resourceManager.get("extensions");
+                var udDSExts = exts.uddatasource; // TODO Currently the scene only supports UDDataSources. Add GeomSource extensions, when they become available. Also ImageSource and maybe others?
+
+                var urls = drag.text.trim().split("\n");
+
+                for(var i = 0; i < urls.length; i++) {
+                  var dropFileExt = urls[i].substr((~-urls[i].lastIndexOf(".") >>> 0) + 1).toLowerCase();
+
+                  if(udDSExts.indexOf(dropFileExt) > -1)
+                    return;
+                }
+              }
+            }
+
+            drag.accepted = false;
+          }
+
+          onDropped: {
+            if (drop.keys.indexOf("text/uri-list") > -1) {
+              if (drop.hasText) {
+                if (drop.proposedAction == Qt.MoveAction || drop.proposedAction == Qt.CopyAction) {
+                  var urls = drop.text.trim().split("\n");
+
+                  var resourceManager = EPKernel.findComponent("resourcemanager");
+
+                  for(var i = 0; i < urls.length; i++) {
+                    var dataSource = resourceManager.call("loadresourcesfromfile", {"src" : urls[i], "useStreamer" : true });
+
+                    if(dataSource) {
+                      var resource = dataSource.call("getresourcebyvariant", 0);
+                      resourcedropped(resource.get("uid"), drop.x, drop.y);
+                    }
+                  }
+
+                  drop.accept();
+                }
+              }
+            }
+            else if(drop.keys.indexOf("RMResource") > -1)
+              resourcedropped(drop.source.payload.uid, drop.x, drop.y);
+          }
+        }
       }
     }
   }
