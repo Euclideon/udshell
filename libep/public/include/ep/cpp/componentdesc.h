@@ -94,55 +94,6 @@ inline ComponentDesc::~ComponentDesc()
 {
 }
 
-// base class for pImpl types
-template <typename C, typename I>
-class BaseImpl : public I
-{
-  friend C;
-
-public:
-  using Instance = C;
-  using Interface = I;
-  using ImplSuper = BaseImpl<C, I>;
-
-  const ComponentDescInl* GetDescriptor() const { return (const ComponentDescInl*)pInstance->GetDescriptor(); }
-  Kernel* GetKernel() const { return &pInstance->GetKernel(); }
-
-  C *pInstance;
-
-protected:
-  template<typename T, bool b> friend struct internal::Release;
-
-  BaseImpl(const BaseImpl &) = delete;
-  void operator=(const BaseImpl &) = delete;
-
-  BaseImpl(Component *pInstance)
-    : pInstance((C*)pInstance)
-  {}
-  virtual ~BaseImpl() {}
-};
-
-
-// helper to get
-template<typename T>
-struct function_traits;
-template<typename C, typename R, typename ...Args>
-struct function_traits<R(C::*)(Args...)>
-{
-  static const size_t num_args = sizeof...(Args);
-
-  using result_type = R;
-
-  using args = std::tuple<Args...>;
-
-  template <size_t i>
-  struct arg
-  {
-    using type = typename std::tuple_element<i, args>::type;
-  };
-};
-
-
 // declare magic for a C++ component
 #define EP_DECLARE_COMPONENT(Name, SuperType, Version, Description, Flags)               \
 public:                                                                                  \

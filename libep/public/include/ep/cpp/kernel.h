@@ -90,20 +90,21 @@ protected:
   Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine);
   ~Kernel();
 
-  void FinishInit() { pImpl->FinishInit(); }
-
-  const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) { return pImpl->RegisterComponentType(pDesc); }
-
-  void RegisterGlueType(String _name, CreateGlueFunc *pCreateFunc) { pImpl->RegisterGlueType(_name, pCreateFunc); }
-  template<typename GlueType>
-  void RegisterGlueType();
-
+  /// \cond
   template<typename ComponentType, typename Impl = void>
   struct CreateHelper;
+
+  void FinishInit() { pImpl->FinishInit(); }
+  /// \endcond
 
 private:
   friend class Component;
   friend class ComponentImpl;
+
+  const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) { return pImpl->RegisterComponentType(pDesc); }
+
+  template<typename GlueType>
+  void RegisterGlueType();
 
   static Kernel* CreateInstanceInternal(Variant::VarMap commandLine);
 

@@ -119,7 +119,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
 template<typename GlueType>
 inline void Kernel::RegisterGlueType()
 {
-  RegisterGlueType(GlueType::ComponentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) -> ComponentRef {
+  pImpl->RegisterGlueType(GlueType::ComponentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) -> ComponentRef {
     // TODO: this new can't exist in the wild... need to call back into kernel!!
     void *pMem = epAlloc(sizeof(GlueType));
     epscope(fail) { if (pMem) epFree(pMem); };

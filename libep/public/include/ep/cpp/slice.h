@@ -49,7 +49,6 @@ public:
 template<typename T>
 struct Slice
 {
-private:
 public:
   typedef typename internal::ElementType<T>::Ty ET;
 
@@ -184,7 +183,7 @@ struct Array : public Slice<T>
 
   Slice<T> getBuffer() const;
 
-protected:
+private:
   friend struct Variant;
   template<typename U> friend struct SharedArray;
 
@@ -238,7 +237,7 @@ struct SharedArray : public Slice<T>
   SharedArray<T>& operator =(SharedArray<T> &&rval);
   template <typename U> SharedArray<T>& operator =(Slice<U> rh);
 
-protected:
+private:
   void destroy();
 };
 
