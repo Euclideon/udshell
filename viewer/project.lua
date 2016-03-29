@@ -30,7 +30,7 @@ project "epviewer"
 		postbuildcommands { "postbuild.sh x86" }
 
 	configuration { "linux" }
-		links { "assimp", "GL" }
+		links { "assimp", "GL", "dl" }
 
 	configuration { }
 

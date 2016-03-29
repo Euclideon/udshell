@@ -4,6 +4,10 @@
 #include "ep/cpp/plugin.h"
 #include "ep/cpp/component/component.h"
 
+#if !defined(EP_WINDOWS)
+#include <dlfcn.h>
+#endif
+
 extern "C" {
   typedef bool (epPlugin_InitProc)(ep::Instance *pPlugin);
 }
@@ -26,6 +30,12 @@ Slice<const String> NativePluginLoader::GetSupportedExtensions() const
 
 bool NativePluginLoader::LoadPlugin(String filename)
 {
+#if defined(EP_ARCH_X86)
+  const char *pFuncName = "_epPlugin_Init";
+#else
+  const char *pFuncName = "epPlugin_Init";
+#endif
+
 #if defined(EP_WINDOWS)
   // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?
   int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, filename.ptr, (int)filename.length, nullptr, 0);
@@ -38,11 +48,7 @@ bool NativePluginLoader::LoadPlugin(String filename)
   HMODULE hDll = LoadLibraryW(widePath);
   if (hDll == NULL)
     return false;
-#if defined(EP_ARCH_X86)
-  const char *pFuncName = "_epPlugin_Init";
-#else
-  const char *pFuncName = "epPlugin_Init";
-#endif
+
   epPlugin_InitProc *pInit = (epPlugin_InitProc*)GetProcAddress(hDll, pFuncName);
   if (!pInit)
   {
@@ -50,12 +56,16 @@ bool NativePluginLoader::LoadPlugin(String filename)
     return false;
   }
 #else
-  epPlugin_InitProc *pInit = nullptr;
-
-  EPASSERT(false, "Not yet supported!");
-
-  if (!pInit)
+  void *hSo = dlopen(filename.toStringz(), RTLD_NOW);
+  if (hSo == NULL)
     return false;
+
+  epPlugin_InitProc *pInit = (epPlugin_InitProc*)dlsym(hSo, pFuncName);
+  if (!pInit)
+  {
+    dlclose(hSo);
+    return false;
+  }
 #endif
 
   bool bSuccess = pInit(s_pInstance);
@@ -64,6 +74,8 @@ bool NativePluginLoader::LoadPlugin(String filename)
   {
 #if defined(EP_WINDOWS)
     FreeLibrary(hDll);
+#else
+    dlclose(hSo);
 #endif
   }
 
