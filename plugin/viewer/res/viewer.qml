@@ -126,7 +126,7 @@ FocusScope {
               }
             }
 
-            //drag.accepted = false; // TODO there is a bug which prevents us from refusing an onEntered event, which has been fixed in Qt 5.6. Uncomment this after switching to 5.6.
+            drag.accepted = false;
           }
 
           onDropped: {
