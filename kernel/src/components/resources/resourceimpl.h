@@ -18,7 +18,7 @@ public:
   {
   }
 
-  ComponentRef GetMetadata() const override final;
+  MetadataRef GetMetadata() const override final;
 
   Variant Save() const override final { return pInstance->Super::Save(); }
 

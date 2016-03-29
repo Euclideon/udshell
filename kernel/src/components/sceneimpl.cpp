@@ -7,6 +7,7 @@
 #include "components/datasources/geomsource.h"
 #include "ep/cpp/component/node/udnode.h"
 #include "ep/cpp/component/resourcemanager.h"
+#include "ep/cpp/component/resource/metadata.h"
 
 namespace ep {
 
@@ -188,7 +189,7 @@ void SceneImpl::LoadSceneFile(String filePath)
 
     rootNode->AddChild(spNode);
     AddModelsToResourceManager();
-    pInstance->GetMetadata()->Call("insert", "url", filePath);
+    pInstance->GetMetadata()->Insert("url", filePath);
   }
 }
 
@@ -310,7 +311,7 @@ Variant SceneImpl::Save() const
 {
   Variant::VarMap map;
 
-  Variant url = pInstance->GetMetadata()->Call("get", "url");
+  Variant url = pInstance->GetMetadata()->Get("url");
   if (url.is(Variant::Type::String))
   {
     String urlString = url.asString();

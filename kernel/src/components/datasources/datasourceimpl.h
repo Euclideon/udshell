@@ -8,7 +8,7 @@
 #include "ep/cpp/component/component.h"
 #include "ep/cpp/component/stream.h"
 #include "ep/cpp/component/resource/resource.h"
-#include "components/resources/metadata.h"
+#include "ep/cpp/component/resource/metadata.h"
 
 namespace ep {
 
@@ -68,7 +68,7 @@ public:
 
   void SetResource(String _name, const ResourceRef &spResource) override final
   {
-    MetadataRef spMeta = component_cast<Metadata>(spResource->GetMetadata());
+    MetadataRef spMeta = spResource->GetMetadata();
 
     Variant resUrl = spMeta->Get("url");
     if(!resUrl.is(Variant::Type::String))

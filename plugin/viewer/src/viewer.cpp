@@ -6,6 +6,7 @@
 #include "ep/cpp/component/node/simplecamera.h"
 #include "ep/cpp/component/node/udnode.h"
 #include "ep/cpp/component/resource/udmodel.h"
+#include "ep/cpp/component/resource/metadata.h"
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/resourcemanager.h"
 #include "ep/cpp/component/commandmanager.h"
@@ -262,7 +263,7 @@ Variant Viewer::Save() const
 
   if (spModel)
   {
-    Variant src = spModel->GetMetadata()->Call("get", "url");
+    Variant src = spModel->GetMetadata()->Get("url");
     if (src.is(Variant::Type::String))
     {
       String srcString = src.asString();
