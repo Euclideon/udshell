@@ -16,6 +16,10 @@ Rectangle {
     commandManager = EPKernel.getCommandManager();
   }
 
+  Component.onDestruction: {
+    clearAll();
+  }
+
   onToolbarcompChanged: {
     updatetoolbar();
     toolbarcomp.subscribe("changed", updatetoolbar);
