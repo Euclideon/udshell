@@ -20,8 +20,6 @@ class UIConsole : public UIComponent
   EP_DECLARE_COMPONENT(UIConsole, UIComponent, EPKERNEL_PLUGINVERSION, "Is a UI for a Console Panel with input and output text controls", 0)
 public:
 
-  StreamRef GetInStream() const { return spInStream; }
-
   void RelayInput(String str);
 
   int GetNumConsoleLines() const { return (int)filteredConsole.length; }
@@ -94,7 +92,6 @@ protected:
   };
 
   LoggerRef spLogger;
-  MemStreamRef spInStream = nullptr;
   BroadcasterRef spConsoleOut = nullptr;
   BroadcasterRef spConsoleErr = nullptr;
   BroadcasterRef spLuaOut = nullptr;

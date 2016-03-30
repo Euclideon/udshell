@@ -15,12 +15,10 @@ namespace ep {
 Array<const PropertyInfo> UIConsole::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(OutputsMerged, "Determines whether the console and log text are output to separate text widgets or interleaved", nullptr, 0),
     EP_MAKE_PROPERTY(FilterComponents, "List of Components to filter the log text by", nullptr, 0),
     EP_MAKE_PROPERTY(FilterText, "Text string to filter console and log lines by", nullptr, 0),
     EP_MAKE_PROPERTY_RO(NumConsoleLines, "Number of console lines to output", nullptr, 0),
     EP_MAKE_PROPERTY_RO(NumLogLines, "Number of log lines to output", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(NumMergedLines, "Number of merged log + console lines to output", nullptr, 0),
     EP_MAKE_PROPERTY_RO(HistoryLength, "Number of lines in the input history", nullptr, 0)
   };
 }
@@ -50,11 +48,6 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   auto spLua = pKernel->GetLua();
   spLuaOut = spLua->GetOutputBroadcaster();
   spLuaOut->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
-
-  // Create stream for shell input
-  auto spInBuffer = pKernel->CreateComponent<Buffer>();
-  spInBuffer->Reserve(1024);
-  spInStream = pKernel->CreateComponent<MemStream>({ { "buffer", spInBuffer }, { "flags", OpenFlags::Write } });
 
   spLogger = pKernel->GetLogger();
   pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
@@ -117,92 +110,40 @@ void UIConsole::RebuildOutput()
 {
   filteredConsole = nullptr;
   filteredLog = nullptr;
-  filteredMerged = nullptr;
 
-  if (bOutputsMerged)
+  for (size_t i = 0; i < consoleLines.length; i++)
   {
-    size_t logIndex = 0, consoleIndex = 0;
-    while (logIndex < logLines.length && consoleIndex < consoleLines.length)
-    {
-      if (logLines[logIndex].ordering < consoleLines[consoleIndex].ordering)
-      {
-        if (logFilter.FilterLogLine(*spLogger->GetLogLine(logLines[logIndex].logIndex)) && FilterTextLine(logLines[logIndex].text))
-          filteredMerged.pushBack(MergedLine(typeLog, (int)logIndex));
-        logIndex++;
-      }
-      else
-      {
-        if(FilterTextLine(consoleLines[consoleIndex].text))
-          filteredMerged.pushBack(MergedLine(typeConsole, (int)consoleIndex));
-        consoleIndex++;
-      }
-    }
-    while (logIndex < logLines.length)
-    {
-      if (logFilter.FilterLogLine(*spLogger->GetLogLine(logLines[logIndex].logIndex)) && FilterTextLine(logLines[logIndex].text))
-        filteredMerged.pushBack(MergedLine(typeLog, (int)logIndex));
-      logIndex++;
-    }
-    while (consoleIndex < consoleLines.length)
-    {
-      if (FilterTextLine(consoleLines[consoleIndex].text))
-        filteredMerged.pushBack(MergedLine(typeConsole, (int)consoleIndex));
-      consoleIndex++;
-    }
-
-    // TODO Change below when adding virtual scrollbar support
-
-    MutableString<0> outText(Reserve, 256 * filteredMerged.length);
-
-    for (MergedLine &m : filteredMerged)
-    {
-      if (m.type == typeConsole)
-        outText.append(consoleLines[m.index].text, "\n");
-      else
-        outText.append(logLines[m.index].text, "\n");
-    }
-
-    if (!outText.empty() && outText.back() == '\n')
-      outText.length--;
-
-    Call("setconsoletext", (String)outText);
+    if (FilterTextLine(consoleLines[i].text))
+      filteredConsole.pushBack((int)i);
   }
-  else
+
+  for (size_t i = 0; i < logLines.length; i++)
   {
-    for (size_t i = 0; i < consoleLines.length; i++)
-    {
-      if (FilterTextLine(consoleLines[i].text))
-        filteredConsole.pushBack((int)i);
-    }
-
-    for (size_t i = 0; i < logLines.length; i++)
-    {
-      if (logFilter.FilterLogLine(*spLogger->GetLogLine(logLines[i].logIndex)) && FilterTextLine(logLines[i].text))
-        filteredLog.pushBack((int)i);
-    }
-
-    // TODO Change below when adding virtual scrollbar support
-
-    MutableString<0> outText(Reserve, 256 * (filteredConsole.length > filteredLog.length ? filteredConsole.length : filteredLog.length));
-
-    for (int i : filteredConsole)
-      outText.append(consoleLines[i].text, "\n");
-
-    if (!outText.empty() && outText.back() == '\n')
-      outText.length--;
-
-    Call("setconsoletext", (String)outText);
-
-    outText.length = 0;
-
-    for (int i : filteredLog)
-      outText.append(logLines[i].text, "\n");
-
-    if (!outText.empty() && outText.back() == '\n')
-      outText.length--;
-
-    Call("setlogtext", (String)outText);
+    if (logFilter.FilterLogLine(*spLogger->GetLogLine(logLines[i].logIndex)) && FilterTextLine(logLines[i].text))
+      filteredLog.pushBack((int)i);
   }
+
+  // TODO Change below when adding virtual scrollbar support
+
+  MutableString<0> outText(Reserve, 256 * (filteredConsole.length > filteredLog.length ? filteredConsole.length : filteredLog.length));
+
+  for (int i : filteredConsole)
+    outText.append(consoleLines[i].text, "\n");
+
+  if (!outText.empty() && outText.back() == '\n')
+    outText.length--;
+
+  Call("setconsoletext", (String)outText);
+
+  outText.length = 0;
+
+  for (int i : filteredLog)
+    outText.append(logLines[i].text, "\n");
+
+  if (!outText.empty() && outText.back() == '\n')
+    outText.length--;
+
+  Call("setlogtext", (String)outText);
 }
 
 void UIConsole::OnLogChanged()
@@ -220,16 +161,8 @@ void UIConsole::OnLogChanged()
   if (!logFilter.FilterLogLine(line) || !FilterTextLine(cLine.text))
     return;
 
-  if (bOutputsMerged)
-  {
-    filteredMerged.pushBack(MergedLine(typeLog, (int)logLines.length - 1));
-    Call("appendconsoletext", cLine.text);
-  }
-  else
-  {
-    filteredLog.pushBack((int)logLines.length - 1);
-    Call("appendlogtext", cLine.text);
-  }
+  filteredLog.pushBack((int)logLines.length - 1);
+  Call("appendlogtext", cLine.text);
 }
 
 void UIConsole::OnConsoleOutput(Slice<const void> buf)
@@ -244,10 +177,7 @@ void UIConsole::OnConsoleOutput(Slice<const void> buf)
       consoleLines.pushBack(ConsoleLine(token));
       if (FilterTextLine(token))
       {
-        if (bOutputsMerged)
-          filteredConsole.pushBack((int)consoleLines.length - 1);
-        else
-          filteredMerged.pushBack(MergedLine(typeConsole, (int)consoleLines.length - 1));
+        filteredConsole.pushBack((int)consoleLines.length - 1);
 
         Call("appendconsoletext", token);
       }

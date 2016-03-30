@@ -22,7 +22,6 @@ Item {
     {
       consoleWin.enabled = true;
       EPKernel.focus.setFocus(consoleIn);
-      //consoleIn.forceActiveFocus();
     }
     else
     {
@@ -67,7 +66,6 @@ Item {
     logOut = Qt.binding(function() { return logTab.item.textArea; });
     consoleOut = Qt.binding(function() { return consoleTab.item.consoleOutLoader.item.textArea; });
     consoleIn = Qt.binding(function() { return consoleTab.item.consoleInTextArea; });
-    tv.splitTabs();
   }
 
   FontLoader { id: fixedFont; name: "Courier" }
@@ -140,24 +138,6 @@ Item {
         }
 
         Button {
-          id: splitButton
-          text: "< >"
-          style: consoleButtonStyle
-          onClicked: {
-            if(tv.bMerged)
-            {
-              tv.splitTabs();
-              text = "> <";
-            }
-            else
-            {
-              tv.mergeTabs();
-              text = "< >";
-            }
-          }
-        }
-
-        Button {
           id: closeButton
           text: "X"
           style: consoleButtonStyle
@@ -178,30 +158,14 @@ Item {
   }
 
   TabView {
+    id: tv
+
     property int overlap: 1
     property int tabHeight: 20
-    property bool bMerged: true
-    property bool bFirstTimeShown: false // This is a hack to correct scrollbars
 
-    function mergeTabs() {
-      bMerged = true;
-      currentIndex = 0;
-      tabsVisible = false;
-      y += tabHeight - overlap;
-      thisComponent.set("outputsmerged", true);
-    }
-
-    function splitTabs() {
-      bMerged = false;
-      tabsVisible = true;
-      y -= tabHeight - overlap;
-      thisComponent.set("outputsmerged", false);
-    }
-
-    id: tv
-    tabsVisible: false
+    tabsVisible: true
     frameVisible: false
-    y: consoleHeader.y + consoleHeader.height
+    y: consoleHeader.y + consoleHeader.height - tabHeight - overlap
 
     width: parent.width
     height: parent.height - y
