@@ -381,14 +381,45 @@ Rectangle {
             color: styleData.selected ? Theme.tabBarBgColorSelected : Theme.tabBarBgColor
             anchors.bottom: parent.bottom
             anchors.bottomMargin: styleData.selected ? 0 : 2
-            implicitWidth: Math.max(text.width + 4, 80)
+            implicitWidth: text.width + closeButton.width + 16
             implicitHeight: styleData.selected ? Math.max(text.height + 8, 20) : Math.max(text.height + 8, 20) - 4
             radius: Theme.tabBarRadius
             Text {
               id: text
-              anchors.centerIn: parent
+              anchors.verticalCenter: parent.verticalCenter
+              anchors.left: parent.left
+              anchors.leftMargin: 8
               text: styleData.title
               color: styleData.selected ? Theme.tabBarTextColorSelected : Theme.tabBarTextColor
+            }
+
+            Button {
+              id: closeButton
+              anchors.right: parent.right
+              anchors.verticalCenter: parent.verticalCenter
+              anchors.rightMargin: 4
+              height: 16
+              width: 16
+              iconSource: "qrc:/images/icon_delete.png"
+
+              style: ButtonStyle {
+                padding {
+                  left: 2
+                  right: 2
+                  top: 2
+                  bottom: 2
+                }
+                background: Rectangle {
+                  anchors.fill: parent
+                  radius: width/2
+                  color: control.pressed ? "#777" : (control.hovered ? "#777" : "transparent")
+                }
+                label: Image {
+                  source: control.iconSource
+                  fillMode: Image.PreserveAspectFit
+                }
+              }
+              onClicked: removeactivity(activitylist[styleData.index].get("uid"))
             }
           }
         }
