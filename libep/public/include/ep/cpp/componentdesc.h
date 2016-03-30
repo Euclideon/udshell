@@ -73,6 +73,7 @@ struct ComponentInfo
   int pluginVersion;
 
   SharedString id;          // an id for this component
+  SharedString nameSpace;   // namespace
   SharedString displayName; // display name
   SharedString description; // description
 
@@ -95,7 +96,7 @@ inline ComponentDesc::~ComponentDesc()
 }
 
 // declare magic for a C++ component
-#define EP_DECLARE_COMPONENT(Name, SuperType, Version, Description, Flags)               \
+#define EP_DECLARE_COMPONENT(Namespace, Name, SuperType, Version, Description, Flags)    \
 public:                                                                                  \
   friend class ::ep::Kernel;                                                             \
   using Super = SuperType;                                                               \
@@ -116,16 +117,16 @@ public:                                                                         
   }                                                                                      \
   static ep::ComponentInfo MakeDescriptor()                                              \
   {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
+    return { EP_APIVERSION, Version, ComponentID(), #Namespace, #Name, Description, Flags }; \
   }                                                                                      \
 private:
 
 // declare magic for a C++ component with a pImpl interface
-#define EP_DECLARE_COMPONENT_WITH_IMPL(Name, Interface, SuperType, Version, Description, Flags) \
-  friend class ::ep::Kernel;                                                                    \
-  __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)
+#define EP_DECLARE_COMPONENT_WITH_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags) \
+  friend class ::ep::Kernel;                                                                               \
+  __EP_DECLARE_COMPONENT_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)
 
-#define __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)    \
+#define __EP_DECLARE_COMPONENT_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)    \
 public:                                                                                  \
   friend class Name##Impl;                                                               \
   using Super = SuperType;                                                               \
@@ -146,7 +147,7 @@ public:                                                                         
   }                                                                                      \
   static ep::ComponentInfo MakeDescriptor()                                              \
   {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
+    return { EP_APIVERSION, Version, ComponentID(), #Namespace, #Name, Description, Flags }; \
   }                                                                                      \
   template <typename T>                                                                  \
   T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \

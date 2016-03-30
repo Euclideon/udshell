@@ -11,7 +11,7 @@ SHARED_CLASS(UIComponent);
 
 class UIComponent : public Component
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(UIComponent, IUIComponent, Component, EPKERNEL_PLUGINVERSION, "Base UI Component", ComponentInfoFlags::Abstract)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, UIComponent, IUIComponent, Component, EPKERNEL_PLUGINVERSION, "Base UI Component", ComponentInfoFlags::Abstract)
 public:
   Variant GetUIHandle() const { return pImpl->GetUIHandle(); }
 

@@ -12,7 +12,7 @@ SHARED_CLASS(Model);
 
 class Model : public Resource
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Model, IModel, Resource, EPKERNEL_PLUGINVERSION, "Model desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Model, IModel, Resource, EPKERNEL_PLUGINVERSION, "Model desc...", 0)
 public:
 
   MaterialRef GetMaterial() const { return pImpl->GetMaterial(); }

@@ -81,7 +81,7 @@ template<typename _ComponentType, typename ImplType, typename GlueType>
 inline const ComponentDesc* Kernel::RegisterComponentType()
 {
   // check the class has a 'super' member
-  static_assert(CreateHelper<_ComponentType>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Name, SuperType, Version, Description)' declared at the top of _ComponentType");
+  static_assert(CreateHelper<_ComponentType>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Namespace, Name, SuperType, Version, Description)' declared at the top of _ComponentType");
 
   ComponentDescInl *pDesc = epNew ComponentDescInl;
 

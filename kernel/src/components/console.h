@@ -16,7 +16,7 @@ SHARED_CLASS(File);
 
 class Console : public Component
 {
-  EP_DECLARE_COMPONENT(Console, Component, EPKERNEL_PLUGINVERSION, "Console logging data component", 0)
+  EP_DECLARE_COMPONENT(ep, Console, Component, EPKERNEL_PLUGINVERSION, "Console logging data component", 0)
 public:
 
   void AddBroadcaster(BroadcasterRef spBC);

@@ -14,7 +14,7 @@ class LuaState;
 
 class Lua : public Component
 {
-  EP_DECLARE_COMPONENT(Lua, Component, EPKERNEL_PLUGINVERSION, "Lua VM", 0)
+  EP_DECLARE_COMPONENT(ep, Lua, Component, EPKERNEL_PLUGINVERSION, "Lua VM", 0)
 public:
 
   BroadcasterRef GetOutputBroadcaster() const { return spOutputBC; }

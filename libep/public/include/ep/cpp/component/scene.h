@@ -36,7 +36,7 @@ SHARED_CLASS(Camera);
 
 class Scene : public Resource
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Scene, IScene, Resource, EPKERNEL_PLUGINVERSION, "Scene desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Scene, IScene, Resource, EPKERNEL_PLUGINVERSION, "Scene desc...", 0)
 
 public:
   virtual bool InputEvent(const epInputEvent &ev) { return pImpl->InputEvent(ev); }

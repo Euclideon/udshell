@@ -12,7 +12,7 @@ SHARED_CLASS(DynamicComponent);
 
 class Kernel : public Component
 {
-  __EP_DECLARE_COMPONENT_IMPL(Kernel, IKernel, Component, EPKERNEL_PLUGINVERSION, "Kernel instance", 0)
+  __EP_DECLARE_COMPONENT_IMPL(ep, Kernel, IKernel, Component, EPKERNEL_PLUGINVERSION, "Kernel instance", 0)
 public:
   static Kernel* CreateInstance(Variant::VarMap commandLine, int renderThreadCount);
 

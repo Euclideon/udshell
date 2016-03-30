@@ -70,7 +70,7 @@ private:
 
 class QtKernel : public ep::Kernel
 {
-  EP_DECLARE_COMPONENT(QtKernel, ep::Kernel, EPKERNEL_PLUGINVERSION, "Qt Kernel instance", 0)
+  EP_DECLARE_COMPONENT(ep, QtKernel, ep::Kernel, EPKERNEL_PLUGINVERSION, "Qt Kernel instance", 0)
 
 public:
   QtKernel(ep::Variant::VarMap commandLine);

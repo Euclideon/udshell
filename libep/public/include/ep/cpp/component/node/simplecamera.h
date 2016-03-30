@@ -14,7 +14,7 @@ SHARED_CLASS(SimpleCamera);
 
 class SimpleCamera : public Camera
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(SimpleCamera, ISimpleCamera, Camera, EPKERNEL_PLUGINVERSION, "SimpleCamera desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, SimpleCamera, ISimpleCamera, Camera, EPKERNEL_PLUGINVERSION, "SimpleCamera desc...", 0)
 
 public:
   void SetMatrix(const Double4x4 &_matrix) override { pImpl->SetMatrix(_matrix); }

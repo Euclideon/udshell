@@ -11,7 +11,7 @@ SHARED_CLASS(Activity);
 
 class Activity : public Component
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Activity, IActivity, Component, EPKERNEL_PLUGINVERSION, "Activity desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Activity, IActivity, Component, EPKERNEL_PLUGINVERSION, "Activity desc...", 0)
 public:
 
   virtual void Activate() { pImpl->Activate(); }

@@ -8,7 +8,7 @@ namespace ep {
 
 class DynamicComponent : public Component
 {
-  EP_DECLARE_COMPONENT(DynamicComponent, Component, EPKERNEL_PLUGINVERSION, "Base class for dynamic components", 0)
+  EP_DECLARE_COMPONENT(ep, DynamicComponent, Component, EPKERNEL_PLUGINVERSION, "Base class for dynamic components", 0)
 
 protected:
   friend class KernelImpl;

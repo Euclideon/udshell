@@ -22,7 +22,7 @@ SHARED_CLASS(Kernel);
 // component API
 class Component : public RefCounted
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component", 0)
 
 public:
   // virtual members

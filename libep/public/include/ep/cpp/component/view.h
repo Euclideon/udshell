@@ -15,7 +15,7 @@ SHARED_CLASS(View);
 
 class View : public Component
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(View, IView, Component, EPKERNEL_PLUGINVERSION, "View desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, View, IView, Component, EPKERNEL_PLUGINVERSION, "View desc...", 0)
 public:
   void SetScene(SceneRef spScene) { pImpl->SetScene(spScene); }
   SceneRef GetScene() const { return pImpl->GetScene(); }

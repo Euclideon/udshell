@@ -16,7 +16,7 @@ SHARED_CLASS(Timer);
 
 class Timer : public Component
 {
-  EP_DECLARE_COMPONENT(Timer, Component, EPKERNEL_PLUGINVERSION, "Timer desc...", 0)
+  EP_DECLARE_COMPONENT(ep, Timer, Component, EPKERNEL_PLUGINVERSION, "Timer desc...", 0)
 public:
 
   Event<> Elapsed;

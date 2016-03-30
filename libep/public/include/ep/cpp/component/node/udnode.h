@@ -19,7 +19,7 @@ class RenderScene;
 
 class UDNode : public Node
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(UDNode, IUDNode, Node, EPKERNEL_PLUGINVERSION, "UD model node", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, UDNode, IUDNode, Node, EPKERNEL_PLUGINVERSION, "UD model node", 0)
 
 public:
   UDModelRef GetUDModel() const { return pImpl->GetUDModel(); }

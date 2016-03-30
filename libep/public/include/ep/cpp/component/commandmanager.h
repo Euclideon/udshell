@@ -13,7 +13,7 @@ SHARED_CLASS(Activity);
 
 class CommandManager : public Component
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(CommandManager, ICommandManager, Component, EPKERNEL_PLUGINVERSION, "Registers commands accessed by string id and associated with a function or script and an optional shortcut", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, CommandManager, ICommandManager, Component, EPKERNEL_PLUGINVERSION, "Registers commands accessed by string id and associated with a function or script and an optional shortcut", 0)
 
 public:
   bool RegisterCommand(String id, Delegate<void(Variant::VarMap)> func, String script, String activityTypeID, String shortcut = nullptr) { return pImpl->RegisterCommand(id, func, script, activityTypeID, shortcut); }

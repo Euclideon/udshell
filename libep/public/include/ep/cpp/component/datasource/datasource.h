@@ -20,7 +20,7 @@ SHARED_CLASS(Stream);
 
 class DataSource : public Component
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(DataSource, IDataSource, Component, EPKERNEL_PLUGINVERSION, "DataSource desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, DataSource, IDataSource, Component, EPKERNEL_PLUGINVERSION, "DataSource desc...", 0)
 
 public:
   virtual Slice<const String> GetFileExtensions() const { return pImpl->GetFileExtensions(); }
