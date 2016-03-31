@@ -741,9 +741,6 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
     // attempt to create an instance
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, pInstance, newUid, initParams));
 
-    // post-create init
-    spComponent->Init(initParams);
-
     // add to the component registry
     instanceRegistry.Insert(spComponent->uid, spComponent.ptr());
 

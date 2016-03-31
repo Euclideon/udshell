@@ -308,13 +308,20 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file, V
   pDesc->userData = nullptr;
   pDesc->newInstance = nullptr;
 
+  // TODO: should we have a better uid generator than this?
+  static int serialNumber = 0;
+  MutableString64 newUid(Concat, pDesc->info.identifier, "_", serialNumber++);
+
   // create the new component (glue and instance)
   pKernel->LogDebug(4, "New (Unregistered QML Component): {0} - {1}", pDesc->info.identifier, file);
   QmlComponentData data(file, pQmlEngine);
   QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
-  ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, pDesc->info.identifier, spInstance, initParams);
+  ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, newUid, spInstance, initParams);
   pDesc->PopulateFromDesc(pSuper);
   spInstance->AttachToGlue(spC.ptr());
+
+  // add to the component registry
+  GetImpl<KernelImpl>()->instanceRegistry.Insert(spC->uid, spC.ptr());
 
   return spC;
 }

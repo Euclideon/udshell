@@ -42,9 +42,6 @@ public:
 
 protected:
   virtual void ReceiveMessage(String message, String sender, const Variant &data) = 0;
-
-private:
-  virtual void Init(Variant::VarMap initParams) = 0;
 };
 
 } // namespace ep

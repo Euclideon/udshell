@@ -153,8 +153,6 @@ protected:
   void* CreateImplInternal(String ComponentType, Variant::VarMap initParams);
 
 private:
-  void Init(Variant::VarMap initParams);
-
   Array<const PropertyInfo> GetProperties() const;
   Array<const MethodInfo> GetMethods() const;
 };
