@@ -123,7 +123,6 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
   EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, WindowGlue>()), epR_Failure, "Unable to register Window component");
   EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ViewportGlue>()), epR_Failure, "Unable to register UIComponent");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::UIConsole, void, UIConsoleGlue>()), epR_Failure, "Unable to register UIConsole Component");
 
   // create our QApplication
   pApplication = new QtApplication(this, cmdArgc, (char**)cmdArgv.ptr);

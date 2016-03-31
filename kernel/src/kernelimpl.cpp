@@ -20,6 +20,7 @@
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
 #include "components/datasources/uddatasource.h"
+#include "components/uiconsole.h"
 
 // Components that do the Impl dance
 #include "components/componentimpl.h"
@@ -209,6 +210,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Lua>();
   pInstance->RegisterComponentType<View, ViewImpl>();
   pInstance->RegisterComponentType<Activity, ActivityImpl>();
+  pInstance->RegisterComponentType<UIConsole>();
 
   // resources
   pInstance->RegisterComponentType<Resource, ResourceImpl>();

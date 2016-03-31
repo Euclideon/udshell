@@ -34,16 +34,6 @@ public:
   }
 };
 
-class UIConsoleGlue final : public ep::UIConsole
-{
-public:
-  UIConsoleGlue(const ep::ComponentDesc *_pType, ep::Kernel *_pKernel, ep::SharedString _uid, ep::ComponentRef _spInstance, ep::Variant::VarMap initParams)
-    : UIConsole(_pType, _pKernel, _uid, initParams)
-  {
-    ep::UIComponent::GetImpl<QtUIComponentImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
-  }
-};
-
 class ViewportGlue final : public ep::Viewport
 {
 public:

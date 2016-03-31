@@ -3,11 +3,9 @@
 #include "ep/cpp/component/broadcaster.h"
 #include "components/logger.h"
 #include "ep/cpp/component/resource/buffer.h"
-#include "ep/cpp/component/commandmanager.h"
 #include "components/file.h"
 #include "ep/cpp/delegate.h"
 #include "ep/cpp/kernel.h"
-#include "components/lua.h"
 #include "hal/haltimer.h"
 
 namespace ep {
@@ -18,8 +16,10 @@ Array<const PropertyInfo> UIConsole::GetProperties() const
     EP_MAKE_PROPERTY(FilterComponents, "List of Components to filter the log text by", nullptr, 0),
     EP_MAKE_PROPERTY(FilterText, "Text string to filter console and log lines by", nullptr, 0),
     EP_MAKE_PROPERTY_RO(NumConsoleLines, "Number of console lines to output", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(NumLogLines, "Number of log lines to output", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(HistoryLength, "Number of lines in the input history", nullptr, 0)
+    EP_MAKE_PROPERTY_RO(HistoryLength, "Number of lines in the input history", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(Title, "The console page's title", nullptr, 0),
+    EP_MAKE_PROPERTY_EXPLICIT("HasInput", "Bool specifies whether this console accepts input", EP_MAKE_GETTER(HasInput), nullptr, nullptr, 0),
+    EP_MAKE_PROPERTY_EXPLICIT("OutputLog", "Bool specifies whether this console outputs the application log", EP_MAKE_GETTER(OutputLog), nullptr, nullptr, 0),
   };
 }
 Array<const MethodInfo> UIConsole::GetMethods() const
@@ -33,99 +33,139 @@ Array<const MethodInfo> UIConsole::GetMethods() const
     EP_MAKE_METHOD(RebuildOutput, "Rebuild output text and send to UI"),
     EP_MAKE_METHOD(RelayInput, "Send input to the Kernel's input stream"),
     EP_MAKE_METHOD(AppendHistory, "Add a line to the end of the input history"),
-    EP_MAKE_METHOD(GetHistoryLine, "Get the line at specified index from the input history. Negative numbers count from end.")
+    EP_MAKE_METHOD(GetHistoryLine, "Get the line at specified index from the input history. Negative numbers count from end."),
+    EP_MAKE_METHOD(AddBroadcaster, "Output the given broadcaster's text to the console"),
+    EP_MAKE_METHOD(RemoveBroadcaster, "Stop outputting the given broadcaster's text to the console"),
   };
 }
 
 UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-  : UIComponent(pType, pKernel, uid, initParams)
+  : Component(pType, pKernel, uid, initParams)
 {
-  spConsoleOut = pKernel->GetStdOutBroadcaster();
-  spConsoleOut->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
-  spConsoleErr = pKernel->GetStdErrBroadcaster();
-  spConsoleErr->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
+  const Variant *vTitle = initParams.Get("title");
+  if (!vTitle || !vTitle->is(Variant::Type::String))
+    EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'title'");
+  title = vTitle->asString();
 
-  auto spLua = pKernel->GetLua();
-  spLuaOut = spLua->GetOutputBroadcaster();
-  spLuaOut->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
+  const Variant *vSetOutputFunc = initParams.Get("setOutputFunc");
+  if (!vSetOutputFunc || !vSetOutputFunc->is(Variant::SharedPtrType::Delegate))
+    EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'setOutputFunc'");
+  setOutputFunc = vSetOutputFunc->as<Delegate<void(String)>>();
 
-  spLogger = pKernel->GetLogger();
-  pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
+  const Variant *vAppendOutputFunc = initParams.Get("appendOutputFunc");
+  if (!vAppendOutputFunc || !vAppendOutputFunc->is(Variant::SharedPtrType::Delegate))
+    EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'appendOutputFunc'");
+  appendOutputFunc = vAppendOutputFunc->as<Delegate<void(String)>>();
 
-  auto spCommandManager = pKernel->GetCommandManager();
-  spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void(Variant::VarMap)>(this, &UIConsole::ToggleVisible), "", "", "`");
+  const Variant *vBHasInput = initParams.Get("hasInput");
+  if (!vBHasInput || !vBHasInput->is(Variant::Type::Bool))
+    EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'hasInput'");
+  bHasInput = vBHasInput->asBool();
 
-  // Console input history file
-  epscope(fail) { if(!spHistoryFile) LogError("Console -- Could not open history file \"{0}\"", historyFileName); };
-  spHistoryFile = pKernel->CreateComponent<File>({ { "path", historyFileName }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
-
-  size_t len = (size_t)spHistoryFile->Length();
-  Array<char> buffer(Reserve, len);
-  buffer.length = spHistoryFile->Read(buffer.getBuffer()).length;
-
-  String str = buffer;
-  MutableString<1024> multiLineString;
-  while (!str.empty())
+  if (bHasInput)
   {
-    String token = str.popToken<true>("\n");
-    token = token.trim<false, true>();
-    if (!token.empty())
+    const Variant *vInputFunc = initParams.Get("inputFunc");
+    if (!vInputFunc || !vInputFunc->is(Variant::SharedPtrType::Delegate))
+      EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'inputFunc'");
+    inputFunc = vInputFunc->as<Delegate<void(String)>>();
+
+    const Variant *vHistoryFileName = initParams.Get("historyFileName");
+    if (!vHistoryFileName || !vHistoryFileName->is(Variant::Type::String))
+      EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'historyFileName'");
+    historyFileName = vHistoryFileName->asString();
+
+    // Console input history file
+    epscope(fail) { if (!spHistoryFile) LogError("Console -- Could not open history file \"{0}\"", historyFileName); };
+    spHistoryFile = pKernel->CreateComponent<File>({ { "path", historyFileName },{ "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
+
+    size_t len = (size_t)spHistoryFile->Length();
+    Array<char> buffer(Reserve, len);
+    buffer.length = spHistoryFile->Read(buffer.getBuffer()).length;
+
+    String str = buffer;
+    MutableString<1024> multiLineString;
+    while (!str.empty())
     {
-      if (token.endsWith(" \\") || token.endsWith("\t\\"))
+      String token = str.popToken<true>("\n");
+      token = token.trim<false, true>();
+      if (!token.empty())
       {
-        token.length -= 2;
-        multiLineString.append(token, "\n");
+        if (token.endsWith(" \\") || token.endsWith("\t\\"))
+        {
+          token.length -= 2;
+          multiLineString.append(token, "\n");
+        }
+        else if (!multiLineString.empty())
+        {
+          multiLineString.append(token);
+          history.concat(multiLineString);
+          multiLineString = "";
+        }
+        else
+          history.concat(token);
       }
-      else if (!multiLineString.empty())
-      {
-        multiLineString.append(token);
-        history.concat(multiLineString);
-        multiLineString = "";
-      }
-      else
-        history.concat(token);
+    }
+    if (!multiLineString.empty())
+    {
+      multiLineString.length--;
+      history.concat(multiLineString);
     }
   }
-  if (!multiLineString.empty())
-  {
-    multiLineString.length--;
-    history.concat(multiLineString);
-  }
+
+  const Variant *vBOutputLog = initParams.Get("outputLog");
+  if (!vBOutputLog || !vBOutputLog->is(Variant::Type::Bool))
+    EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'bOutputLog'");
+  bOutputLog = vBOutputLog->asBool();
+
+  spLogger = pKernel->GetLogger();
+  if (bOutputLog)
+    pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
+
+  //auto spCommandManager = pKernel->GetCommandManager();
+  //spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void(Variant::VarMap)>(this, &UIConsole::ToggleVisible), "", "", "`");
 }
 
-UIConsole::~UIConsole()
-{
-  spConsoleOut->Written.Unsubscribe(this, &UIConsole::OnConsoleOutput);
-  spConsoleErr->Written.Unsubscribe(this, &UIConsole::OnConsoleOutput);
-  spLuaOut->Written.Unsubscribe(this, &UIConsole::OnConsoleOutput);
-  spLogger->Changed.Unsubscribe(this, &UIConsole::OnLogChanged);
-}
-
+/*
 void UIConsole::ToggleVisible(Variant::VarMap params)
 {
   Call("togglevisible", nullptr);
+}
+*/
+
+UIConsole::~UIConsole()
+{
+  for (BroadcasterRef spBC : outputBCArray)
+    spBC->Written.Unsubscribe(this, &UIConsole::OnConsoleOutput);
+
+  if(bOutputLog)
+    spLogger->Changed.Unsubscribe(this, &UIConsole::OnLogChanged);
+}
+
+void UIConsole::AddBroadcaster(BroadcasterRef spBC)
+{
+  outputBCArray.pushBack(spBC);
+  spBC->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
+}
+
+void UIConsole::RemoveBroadcaster(BroadcasterRef spBC)
+{
+  outputBCArray.removeFirstSwapLast(spBC);
 }
 
 void UIConsole::RebuildOutput()
 {
   filteredConsole = nullptr;
-  filteredLog = nullptr;
 
   for (size_t i = 0; i < consoleLines.length; i++)
   {
-    if (FilterTextLine(consoleLines[i].text))
+    if (FilterTextLine(consoleLines[i].text)
+        && (consoleLines[i].logIndex == -1 || logFilter.FilterLogLine(*spLogger->GetLogLine(consoleLines[i].logIndex))))
       filteredConsole.pushBack((int)i);
-  }
-
-  for (size_t i = 0; i < logLines.length; i++)
-  {
-    if (logFilter.FilterLogLine(*spLogger->GetLogLine(logLines[i].logIndex)) && FilterTextLine(logLines[i].text))
-      filteredLog.pushBack((int)i);
   }
 
   // TODO Change below when adding virtual scrollbar support
 
-  MutableString<0> outText(Reserve, 256 * (filteredConsole.length > filteredLog.length ? filteredConsole.length : filteredLog.length));
+  MutableString<0> outText(Reserve, 256 * filteredConsole.length);
 
   for (int i : filteredConsole)
     outText.append(consoleLines[i].text, "\n");
@@ -133,17 +173,7 @@ void UIConsole::RebuildOutput()
   if (!outText.empty() && outText.back() == '\n')
     outText.length--;
 
-  Call("setconsoletext", (String)outText);
-
-  outText.length = 0;
-
-  for (int i : filteredLog)
-    outText.append(logLines[i].text, "\n");
-
-  if (!outText.empty() && outText.back() == '\n')
-    outText.length--;
-
-  Call("setlogtext", (String)outText);
+  setOutputFunc((String)outText);
 }
 
 void UIConsole::OnLogChanged()
@@ -151,18 +181,15 @@ void UIConsole::OnLogChanged()
   Slice<LogLine> log = pKernel->GetLogger()->GetLog();
   LogLine &line = log.back();
 
-  logLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1, spLogger->GetLogLine((int)log.length - 1)->ordering));
-  ConsoleLine &cLine = logLines.back();
-
-  if (bOutputLogToConsole)
-    OnConsoleOutput(line.text);
+  consoleLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1, spLogger->GetLogLine((int)log.length - 1)->ordering));
+  ConsoleLine &cLine = consoleLines.back();
 
   // Do filtering
   if (!logFilter.FilterLogLine(line) || !FilterTextLine(cLine.text))
     return;
 
-  filteredLog.pushBack((int)logLines.length - 1);
-  Call("appendlogtext", cLine.text);
+  filteredConsole.pushBack((int)consoleLines.length - 1);
+  appendOutputFunc(cLine.text);
 }
 
 void UIConsole::OnConsoleOutput(Slice<const void> buf)
@@ -179,7 +206,7 @@ void UIConsole::OnConsoleOutput(Slice<const void> buf)
       {
         filteredConsole.pushBack((int)consoleLines.length - 1);
 
-        Call("appendconsoletext", token);
+        appendOutputFunc(token);
       }
     }
   }
@@ -188,9 +215,9 @@ void UIConsole::OnConsoleOutput(Slice<const void> buf)
 void UIConsole::RelayInput(String str)
 {
   AppendHistory(str);
-  bOutputLogToConsole = true;
-  pKernel->Exec(str);
-  bOutputLogToConsole = false;
+  pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
+  inputFunc(str);
+  pKernel->GetLogger()->Changed.Unsubscribe(this, &UIConsole::OnLogChanged);
 }
 
 UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)

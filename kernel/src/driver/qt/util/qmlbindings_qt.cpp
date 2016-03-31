@@ -4,6 +4,8 @@
 
 #include "ep/cpp/componentdesc.h"
 #include "ep/cpp/component/commandmanager.h"
+#include "ep/cpp/component/broadcaster.h"
+#include "components/lua.h"
 
 #include "driver/qt/util/qmlbindings_qt.h"
 #include "driver/qt/util/signaltodelegate_qt.h"
@@ -16,6 +18,7 @@ namespace qt {
 using ep::RefCounted;
 using ep::Variant;
 using ep::String;
+using ep::SharedString;
 using ep::Array;
 using ep::Slice;
 
@@ -510,7 +513,7 @@ QtEPComponent *QtKernelQml::findComponent(const QString &uid) const
   return BuildQtEPComponent::Create(pKernel->FindComponent(uidString));
 }
 
-QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariantMap initParams)
+QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariant initParams)
 {
   EPASSERT(pKernel, "No active kernel");
   QByteArray byteArray = typeId.toUtf8();
@@ -532,6 +535,32 @@ QtEPComponent *QtKernelQml::getCommandManager() const
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
   return BuildQtEPComponent::Create(pKernel->GetCommandManager());
+}
+
+QtEPComponent *QtKernelQml::getLua() const
+{
+  EPASSERT(pKernel, "No active kernel");
+  // TODO: this should default to JS ownership but doublecheck!!
+  return BuildQtEPComponent::Create(pKernel->GetLua());
+}
+
+QtEPComponent *QtKernelQml::getStdOutBroadcaster() const
+{
+  EPASSERT(pKernel, "No active kernel");
+  // TODO: this should default to JS ownership but doublecheck!!
+  return BuildQtEPComponent::Create(pKernel->GetStdOutBroadcaster());
+}
+
+QtEPComponent *QtKernelQml::getStdErrBroadcaster() const
+{
+  EPASSERT(pKernel, "No active kernel");
+  // TODO: this should default to JS ownership but doublecheck!!
+  return BuildQtEPComponent::Create(pKernel->GetStdErrBroadcaster());
+}
+
+void QtKernelQml::exec(QString str)
+{
+  pKernel->Exec(String(str.toUtf8().data()));
 }
 
 QtFocusManager *QtKernelQml::getFocusManager() const

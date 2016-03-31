@@ -7,6 +7,7 @@ Rectangle {
   id: popup
   property alias source: content.source
   property alias sourceComponent: content.sourceComponent
+  property alias contentItem: content.item
 
   visible: false
   enabled: false
@@ -78,8 +79,8 @@ Rectangle {
   }
 
   Component.onCompleted: {
-    height = content.item.height + content.item.anchors.topMargin + content.item.anchors.bottomMargin + border.width * 2 + closeButton.implicitHeight + closeButton.anchors.topMargin + closeButton.anchors.bottomMargin;
-    width = content.item.width + content.item.anchors.leftMargin + content.item.anchors.rightMargin + border.width * 2;
+    height = Qt.binding( function() { return content.item.height + content.item.anchors.topMargin + content.item.anchors.bottomMargin + border.width * 2 + closeButton.implicitHeight + closeButton.anchors.topMargin + closeButton.anchors.bottomMargin; } );
+    width = Qt.binding( function() { return content.item.width + content.item.anchors.leftMargin + content.item.anchors.rightMargin + border.width * 2; } );
   }
 }
 

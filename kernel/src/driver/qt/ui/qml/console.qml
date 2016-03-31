@@ -1,71 +1,62 @@
 import QtQuick 2.4
 import QtQuick.Window 2.1
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.5
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 import epKernel 0.1
 
 Item {
   id: consoleWin
+
+  property var tabs: []
+
   visible: false
   enabled: false
   anchors.fill: parent
 
-  property var consoleOut
-  property var consoleIn
-  property var logOut
-
   function togglevisible()
   {
-    consoleWin.visible = !consoleWin.visible;
-    if(consoleWin.visible)
+    if(!consoleWin.visible)
     {
       consoleWin.enabled = true;
-      EPKernel.focus.setFocus(consoleIn);
+
+      var tab = tv.getTab(tv.currentIndex);
+      EPKernel.focus.pushActiveFocusItem();
+      if(tab.item.uiconsole.get("hasinput"))
+        tab.item.consoleIn.forceActiveFocus();
     }
     else
     {
       filterWin.close();
       consoleWin.enabled = false;
+      EPKernel.focus.restoreFocus();
     }
-  }
 
-  function appendconsoletext(str)
-  {
-    var atEnd = consoleOut.flickableItem.atYEnd;
-    var contentY = consoleOut.flickableItem.contentY
-    consoleOut.append(str);
-    if(!atEnd)
-      consoleOut.flickableItem.contentY = contentY;
-  }
-
-  function setconsoletext(str)
-  {
-    consoleOut.cursorPosition = 0;
-    consoleOut.text = str;
-    consoleOut.flickableItem.contentY = Math.max(0, consoleOut.flickableItem.contentHeight - consoleOut.flickableItem.height);
-  }
-
-  function appendlogtext(str)
-  {
-    var atEnd = logOut.flickableItem.atYEnd;
-    var contentY = logOut.flickableItem.contentY
-    logOut.append(str);
-    if(!atEnd)
-      logOut.flickableItem.contentY = contentY;
-  }
-
-  function setlogtext(str)
-  {
-    logOut.cursorPosition = 0;
-    logOut.text = str;
-    logOut.flickableItem.contentY = Math.max(0, logOut.flickableItem.contentHeight - logOut.flickableItem.height);
+    consoleWin.visible = !consoleWin.visible;
   }
 
   Component.onCompleted: {
-    logOut = Qt.binding(function() { return logTab.item.textArea; });
-    consoleOut = Qt.binding(function() { return consoleTab.item.consoleOutLoader.item.textArea; });
-    consoleIn = Qt.binding(function() { return consoleTab.item.consoleInTextArea; });
+    // Console Tab
+    var tab1 = tv.addTab("Shell", consoleTab);
+    tab1.active = true;
+    tab1.item.uiconsole = EPKernel.createComponent("uiconsole", {"title" : "Shell", "setOutputFunc" : tab1.item.setOutText, "appendOutputFunc" : tab1.item.appendOutText, "hasInput" : true, "inputFunc" : function(str) { EPKernel.exec(str); }, "historyFileName" : "console.history", "outputLog" : false});
+    var lua = EPKernel.getLua();
+    tab1.item.uiconsole.call("addbroadcaster", lua.get("outputbroadcaster"));
+    tabs.push(tab1);
+
+    // Log Tab
+    var tab2 = tv.addTab("Log", consoleTab);
+    tab2.active = true;
+    tab2.item.uiconsole = EPKernel.createComponent("uiconsole", {"title" : "Log", "setOutputFunc" : tab2.item.setOutText, "appendOutputFunc" : tab2.item.appendOutText, "hasInput" : false, "outputLog" : true});
+    tabs.push(tab2);
+
+    // StdOut/StdErr Tab
+    var tab3 = tv.addTab("StdOut/StdErr", consoleTab);
+    tab3.active = true;
+    tab3.item.uiconsole = EPKernel.createComponent("uiconsole", {"title" : "StdOut/StdErr", "setOutputFunc" : tab3.item.setOutText, "appendOutputFunc" : tab3.item.appendOutText, "hasInput" : false, "outputLog" : false});
+    tab3.item.uiconsole.call("addbroadcaster", EPKernel.getStdOutBroadcaster());
+    tab3.item.uiconsole.call("addbroadcaster", EPKernel.getStdErrBroadcaster());
+    tabs.push(tab3);
   }
 
   FontLoader { id: fixedFont; name: "Courier" }
@@ -133,7 +124,14 @@ Item {
             anchors.bottomMargin: 5
             focus: true
             source: "consolefilter.qml"
-            onClosed: consoleIn.forceActiveFocus();
+            onOpened: {
+              contentItem.uiconsole = tv.getTab(tv.currentIndex).item.uiconsole;
+            }
+            onClosed: {
+              var tab = tv.getTab(tv.currentIndex);
+              if(tab.item.uiconsole.get("hasinput"))
+                tab.item.consoleIn.forceActiveFocus();
+            }
           }
         }
 
@@ -188,76 +186,109 @@ Item {
     }
 
     Component {
-      id: textOut
-      Rectangle {
-        property alias textArea: textArea
-        color: "black"
-        opacity: 0.9
-        TextArea {
-          id: textArea
-          activeFocusOnTab: false
-          anchors.fill: parent
-          frameVisible: false
-          wrapMode: TextEdit.NoWrap
-
-          style: TextAreaStyle {
-            textMargin: 4
-            backgroundColor: "transparent"
-            textColor: "white"
-            selectionColor: "darkblue"
-            font: fixedFont.name
-          }
-          readOnly: true
-          selectByMouse: true
-          onActiveFocusChanged: {
-            if(!activeFocus)
-              deselect();
-          }
-        }
-      }
-    }
-
-    Tab {
       id: consoleTab
-      title: "Shell"
-      active: true
 
       ColumnLayout {
-        property alias consoleInTextArea: consoleInTextArea
-        property alias consoleOutLoader: consoleOutLoader
+        onUiconsoleChanged: {
+          consoleInRect.visible = uiconsole.get("hasinput");
+          uiconsole.call("rebuildoutput");
+
+          if(!visible)
+            bFirstTimeVisible = true;
+        }
+
+        onVisibleChanged: {
+          if(visible) {
+            if(filterWin.visible) {
+              filterWin.contentItem.uiconsole = uiconsole;
+            }
+
+            if(bFirstTimeVisible) {
+              consoleOut.flickableItem.contentY = Math.max(0, consoleOut.flickableItem.contentHeight - consoleOut.flickableItem.height);
+              consoleOut.flickableItem.contentX = consoleOut.flickableItem.originX;
+              bFirstTimeVisible = false;
+            }
+          }
+        }
+
+        function appendOutText(str)
+        {
+          var atXBeginning = consoleOut.flickableItem.atXBeginning;
+
+          consoleOut.append(str);
+
+          if(atXBeginning)
+            consoleOut.flickableItem.contentX = consoleOut.flickableItem.originX;
+        }
+
+        function setOutText(str)
+        {
+          consoleOut.cursorPosition = 0;
+          consoleOut.text = str;
+          consoleOut.flickableItem.contentY = Math.max(0, consoleOut.flickableItem.contentHeight - consoleOut.flickableItem.height);
+          consoleOut.flickableItem.contentX = consoleOut.flickableItem.originX;
+        }
+
+        property var uiconsole
+        property bool bFirstTimeVisible: false
+        property alias consoleIn: consoleIn
+        property alias consoleOut: consoleOut
         spacing: 0
 
-        Loader {
-          id: consoleOutLoader
+        Rectangle {
           Layout.fillHeight: true
           Layout.fillWidth: true
-          sourceComponent: textOut
+          color: "black"
+          opacity: 0.9
+          TextArea {
+            id: consoleOut
+            activeFocusOnTab: false
+            anchors.fill: parent
+            frameVisible: false
+            wrapMode: TextEdit.NoWrap
+
+            style: TextAreaStyle {
+              textMargin: 4
+              backgroundColor: "transparent"
+              textColor: "white"
+              selectionColor: "darkblue"
+              font: fixedFont.name
+            }
+            readOnly: true
+            selectByMouse: true
+            onActiveFocusChanged: {
+              if(!activeFocus)
+                deselect();
+            }
+          }
         }
 
         TextArea {
           id: minTextArea
           visible: false
           text: "foo"
-          textMargin: consoleInTextArea.textMargin
-          font: consoleInTextArea.font
+          textMargin: consoleIn.textMargin
+          font: consoleIn.font
           activeFocusOnTab: false
         }
 
         Rectangle {
+          id: consoleInRect
           color: "black"
+          visible: false
           opacity: 0.9
           Layout.preferredHeight: innerRect.height + 2
           Layout.fillWidth: true
           Rectangle {
             id: innerRect
-            height: consoleInTextArea.height + border.width * 2
+            height: consoleIn.height + border.width * 2
             width: parent.width
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             border.color: "white"
             border.width: 1
             TextArea {
-              id: consoleInTextArea
+              id: consoleIn
               property int historyIndex: 0
               focus: true
               activeFocusOnTab: true
@@ -280,7 +311,7 @@ Item {
                     insert(cursorPosition, "\n");
                   else {
                     if(length != 0) {
-                      thisComponent.call("relayinput", text);
+                      uiconsole.call("relayinput", text);
 
                       cursorPosition = 0;
                       text = "";
@@ -295,12 +326,12 @@ Item {
 
                   var historyText = text;
                   do {
-                    if(Math.abs(historyIndex) >= thisComponent.get("historylength"))
+                    if(Math.abs(historyIndex) >= uiconsole.get("historylength"))
                       break;
 
                     historyIndex--;
                     if(historyIndex < 0)
-                      historyText = thisComponent.call("gethistoryline", historyIndex);
+                      historyText = uiconsole.call("gethistoryline", historyIndex);
                   } while(historyText == text);
 
                   if(historyText != text) {
@@ -320,7 +351,7 @@ Item {
                     if(historyIndex < 0) {
                       historyIndex++;
                       if(historyIndex < 0)
-                        historyText = thisComponent.call("gethistoryline", historyIndex);
+                        historyText = uiconsole.call("gethistoryline", historyIndex);
                       else
                         historyText = "";
                     }
@@ -338,13 +369,6 @@ Item {
           }
         }
       }
-    }
-
-    Tab {
-      id: logTab
-      title: "Log"
-      active: true
-      sourceComponent: textOut
     }
   }
 }
