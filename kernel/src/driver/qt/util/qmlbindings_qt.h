@@ -165,7 +165,7 @@ private:
   {
     if (!pComponent)
       return nullptr;
-    if (pComponent->IsType("uicomponent"))
+    if (pComponent->IsType("ep.uicomponent"))
       return new QtEPUIComponent(pComponent, args...);
     return new QtEPComponent(pComponent, args...);
   }

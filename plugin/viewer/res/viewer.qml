@@ -40,7 +40,7 @@ FocusScope {
   }
 
   Component.onCompleted: {
-    sidebarcomp = EPKernel.createComponent("menu", {"name" : "sidebar"});
+    sidebarcomp = EPKernel.createComponent("ep.menu", {"name" : "sidebar"});
     if (!sidebarcomp) {
       console.error("Unable to create Sidebar Component");
       return;

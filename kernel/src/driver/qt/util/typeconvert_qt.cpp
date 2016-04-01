@@ -148,7 +148,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
         case Variant::SharedPtrType::Component:
         {
           ep::ComponentRef spComponent = variant.asComponent();
-          if (spComponent->IsType("qobjectcomponent"))
+          if (spComponent->IsType("ep.qobjectcomponent"))
             pVariant->setValue(shared_pointer_cast<qt::QObjectComponent>(spComponent)->GetQObject());
           else
           {
@@ -354,7 +354,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
           QQmlEngine::ObjectOwnership ownership = QQmlEngine::JavaScriptOwnership;
 
           // if the variant contains a qt::QObjectComponent then unpack this and give the direct QObject*
-          if (spComponent->IsType("qobjectcomponent"))
+          if (spComponent->IsType("ep.qobjectcomponent"))
           {
             pQObject = shared_pointer_cast<qt::QObjectComponent>(spComponent)->GetQObject();
 

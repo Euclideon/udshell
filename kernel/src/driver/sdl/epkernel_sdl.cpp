@@ -141,7 +141,7 @@ ComponentDescInl *SDLKernel::MakeKernelDescriptor()
   ComponentDescInl *pDesc = epNew ComponentDescInl;
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
-  pDesc->info = SDLKernel::MakeDescriptor();
+  pDesc->info = SDLKernel::ComponentInfo();
   pDesc->info.flags = ComponentInfoFlags::Unregistered;
   pDesc->baseClass = Kernel::ComponentID();
 

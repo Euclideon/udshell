@@ -239,7 +239,7 @@ Rectangle {
             activityqq.visible = true;
             activityqq.forceActiveFocus();
 
-            if (activity.get("type") == "viewer")
+            if (activity.get("type") == "ep.viewer")
               initViewerUI(activity);
             else
               initViewerUI(null);

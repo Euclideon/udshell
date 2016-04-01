@@ -75,7 +75,7 @@ void QObjectComponent::AttachToGlue(Component *pGlue)
     pDesc->info.flags &= ~ComponentInfoFlags::Unpopulated;
   }
 
-  if (pThis->IsType("window"))
+  if (pThis->IsType("ep.window"))
   {
     EPTHROW_IF(!pQObject->isWindowType(), epR_Failure, "Window component must create a QWindow based object");
     static_cast<ep::Window*>(pThis)->PostInit(pQObject);

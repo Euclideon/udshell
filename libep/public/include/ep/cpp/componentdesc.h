@@ -72,8 +72,10 @@ struct ComponentInfo
   int epVersion;
   int pluginVersion;
 
-  SharedString id;          // an id for this component
   SharedString nameSpace;   // namespace
+  SharedString name;        // name
+  SharedString identifier;  // identifier
+
   SharedString displayName; // display name
   SharedString description; // description
 
@@ -103,21 +105,18 @@ public:                                                                         
   using This = Name;                                                                     \
   using Ref = ep::SharedPtr<This>;                                                       \
   using Impl = void;                                                                     \
-  static ep::SharedString ComponentID()                                                  \
+  static ep::SharedString ComponentID() { return ComponentInfo().identifier; }           \
+  static const ep::ComponentInfo& ComponentInfo()                                        \
   {                                                                                      \
-    using namespace ep;                                                                  \
-    static SharedString id;                                                              \
-    if (!id.ptr)                                                                         \
+    static const ep::ComponentInfo info                                                  \
     {                                                                                    \
-      char buf[sizeof(#Name)];                                                           \
-        for (size_t i = 0; i < sizeof(buf); ++i) buf[i] = (char)epToLower(#Name[i]);     \
-      id = SharedString(buf, sizeof(buf)-1);                                             \
-    }                                                                                    \
-    return id;                                                                           \
-  }                                                                                      \
-  static ep::ComponentInfo MakeDescriptor()                                              \
-  {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Namespace, #Name, Description, Flags }; \
+      EP_APIVERSION, Version,                                                            \
+      #Namespace, std::move(ep::MutableString<0>(#Name).toLower()),                      \
+      std::move(ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower())), \
+      #Name, Description,                                                                \
+      Flags                                                                              \
+    };                                                                                   \
+    return info;                                                                         \
   }                                                                                      \
 private:
 
@@ -133,21 +132,18 @@ public:                                                                         
   using This = Name;                                                                     \
   using Ref = ep::SharedPtr<This>;                                                       \
   using Impl = ep::BaseImpl<Name, Interface>;                                            \
-  static ep::SharedString ComponentID()                                                  \
+  static ep::SharedString ComponentID() { return ComponentInfo().identifier; }           \
+  static const ep::ComponentInfo& ComponentInfo()                                        \
   {                                                                                      \
-    using namespace ep;                                                                  \
-    static SharedString id;                                                              \
-    if (!id.ptr)                                                                         \
+    static const ep::ComponentInfo info                                                  \
     {                                                                                    \
-      char buf[sizeof(#Name)];                                                           \
-        for (size_t i = 0; i < sizeof(buf); ++i) buf[i] = (char)epToLower(#Name[i]);     \
-      id = SharedString(buf, sizeof(buf)-1);                                             \
-    }                                                                                    \
-    return id;                                                                           \
-  }                                                                                      \
-  static ep::ComponentInfo MakeDescriptor()                                              \
-  {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Namespace, #Name, Description, Flags }; \
+      EP_APIVERSION, Version,                                                            \
+      #Namespace, std::move(ep::MutableString<0>(#Name).toLower()),                      \
+      std::move(ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower())), \
+      #Name, Description,                                                                \
+      Flags                                                                              \
+    };                                                                                   \
+    return info;                                                                         \
   }                                                                                      \
   template <typename T>                                                                  \
   T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \
