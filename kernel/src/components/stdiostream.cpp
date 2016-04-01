@@ -1,19 +1,19 @@
-#include "components/console.h"
+#include "components/stdiostream.h"
 #include "ep/cpp/component/broadcaster.h"
 
 namespace ep
 {
 
-Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+StdIOStream::StdIOStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
   bDbgOutput = false;
 
-  ConsoleOutputs out = initParams.Get("output")->as<ConsoleOutputs>();
+  StdIOStreamOutputs out = initParams.Get("output")->as<StdIOStreamOutputs>();
 
   pIn = stdin;
 
-  if (out == ConsoleOutputs::StdDbg)
+  if (out == StdIOStreamOutputs::StdDbg)
   {
     pOut = stderr;
 #if defined(EP_WINDOWS)
@@ -24,19 +24,19 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     }
 #endif
   }
-  else if (out == ConsoleOutputs::StdErr)
+  else if (out == StdIOStreamOutputs::StdErr)
     pOut = stderr;
   else
     pOut = stdout;
 }
 
-Slice<void> Console::Read(Slice<void> buffer)
+Slice<void> StdIOStream::Read(Slice<void> buffer)
 {
   size_t read = fread(buffer.ptr, 1, buffer.length, pIn);
   return buffer.slice(0, read);
 }
 
-size_t Console::Write(Slice<const void> data)
+size_t StdIOStream::Write(Slice<const void> data)
 {
   size_t written;
 
@@ -56,7 +56,7 @@ size_t Console::Write(Slice<const void> data)
   return written;
 }
 
-int Console::Flush()
+int StdIOStream::Flush()
 {
   if (pOut)
   {

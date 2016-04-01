@@ -5,7 +5,7 @@
 
 #include "hal/hal.h"
 #include "components/file.h"
-#include "components/console.h"
+#include "components/stdiostream.h"
 #include "components/memstream.h"
 #include "components/lua.h"
 #include "components/logger.h"
@@ -197,7 +197,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Broadcaster, BroadcasterImpl>();
   pInstance->RegisterComponentType<Stream, StreamImpl>();
   pInstance->RegisterComponentType<File>();
-  pInstance->RegisterComponentType<Console>();
+  pInstance->RegisterComponentType<StdIOStream>();
   pInstance->RegisterComponentType<MemStream>();
   pInstance->RegisterComponentType<Logger>();
   pInstance->RegisterComponentType<PluginManager>();
@@ -254,8 +254,8 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   spDebugFile->WriteLn("\n*** Logging started ***");
 
 #if EP_DEBUG
-  StreamRef spConsole = pInstance->CreateComponent<Console>({ { "output", ConsoleOutputs::StdDbg }, {"name", "debugout"} });
-  spLogger->AddStream(spConsole);
+  StreamRef spStdIOStream = pInstance->CreateComponent<StdIOStream>({ { "output", StdIOStreamOutputs::StdDbg }, {"name", "debugout"} });
+  spLogger->AddStream(spStdIOStream);
 #endif
 
   // resource manager
