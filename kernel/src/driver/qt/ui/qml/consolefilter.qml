@@ -8,16 +8,11 @@ ColumnLayout {
   id: filterWindow
 
   property var consolecomp
-  signal consoleChanged()
 
   spacing: 10
   anchors.top: parent.top
   anchors.left: parent.left
   anchors.margins: 12
-
-  onConsolecompChanged: {
-    consoleChanged();
-  }
 
   RowLayout {
     id: filterText
@@ -36,7 +31,7 @@ ColumnLayout {
       onTextChanged: consolecomp.set("filtertext", ftTextField.text);
 
       Component.onCompleted: {
-        filterWindow.consoleChanged.connect(onConsoleChanged);
+        filterWindow.consolecompChanged.connect(onConsoleChanged);
       }
       function onConsoleChanged() { ftTextField.text = consolecomp.get("filtertext"); }
     }
@@ -44,7 +39,7 @@ ColumnLayout {
 
   ColumnLayout {
     Component.onCompleted: {
-      filterWindow.consoleChanged.connect(onConsoleChanged);
+      filterWindow.consolecompChanged.connect(onConsoleChanged);
     }
     function onConsoleChanged() {
       visible = consolecomp.get("outputlog");
@@ -67,7 +62,7 @@ ColumnLayout {
         onTextChanged: consolecomp.set("filtercomponents", fcTextField.text);
 
         Component.onCompleted: {
-          filterWindow.consoleChanged.connect(onConsoleChanged);
+          filterWindow.consolecompChanged.connect(onConsoleChanged);
         }
         function onConsoleChanged() { fcTextField.text = consolecomp.get("filtercomponents"); }
       }
@@ -106,7 +101,7 @@ ColumnLayout {
               }
 
               Component.onCompleted: {
-                filterWindow.consoleChanged.connect(onConsoleChanged);
+                filterWindow.consolecompChanged.connect(onConsoleChanged);
               }
               function onConsoleChanged() { updateCategoryFiltersUI(); }
 
@@ -163,7 +158,7 @@ ColumnLayout {
               }
 
               Component.onCompleted: {
-                filterWindow.consoleChanged.connect(onConsoleChanged);
+                filterWindow.consolecompChanged.connect(onConsoleChanged);
               }
               function onConsoleChanged() { updateLevelFiltersUI(); }
 

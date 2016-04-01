@@ -203,7 +203,7 @@ Item {
               filterWin.contentItem.consolecomp = consolecomp;
             }
 
-            if(bFirstTimeVisible) {
+            if(bFirstTimeVisible) { // Some glitch causes the scrollbars to move between when the tab is created and when it first becomes visible. This corrects it when the tab first becomes visible
               consoleOut.flickableItem.contentY = Math.max(0, consoleOut.flickableItem.contentHeight - consoleOut.flickableItem.height);
               consoleOut.flickableItem.contentX = consoleOut.flickableItem.originX;
               bFirstTimeVisible = false;

@@ -120,17 +120,7 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   spLogger = pKernel->GetLogger();
   if (bOutputLog)
     pKernel->GetLogger()->Changed.Subscribe(this, &Console::OnLogChanged);
-
-  //auto spCommandManager = pKernel->GetCommandManager();
-  //spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void(Variant::VarMap)>(this, &Console::ToggleVisible), "", "", "`");
 }
-
-/*
-void Console::ToggleVisible(Variant::VarMap params)
-{
-  Call("togglevisible", nullptr);
-}
-*/
 
 Console::~Console()
 {
