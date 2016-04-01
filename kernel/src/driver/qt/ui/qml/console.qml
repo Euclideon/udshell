@@ -22,7 +22,7 @@ Item {
 
       var tab = tv.getTab(tv.currentIndex);
       EPKernel.focus.pushActiveFocusItem();
-      if(tab.item.uiconsole.get("hasinput"))
+      if(tab.item.consolecomp.get("hasinput"))
         tab.item.consoleIn.forceActiveFocus();
     }
     else
@@ -39,23 +39,23 @@ Item {
     // Console Tab
     var tab1 = tv.addTab("Shell", consoleTab);
     tab1.active = true;
-    tab1.item.uiconsole = EPKernel.createComponent("uiconsole", {"title" : "Shell", "setOutputFunc" : tab1.item.setOutText, "appendOutputFunc" : tab1.item.appendOutText, "hasInput" : true, "inputFunc" : function(str) { EPKernel.exec(str); }, "historyFileName" : "console.history", "outputLog" : false});
+    tab1.item.consolecomp = EPKernel.createComponent("console", {"title" : "Shell", "setOutputFunc" : tab1.item.setOutText, "appendOutputFunc" : tab1.item.appendOutText, "hasInput" : true, "inputFunc" : function(str) { EPKernel.exec(str); }, "historyFileName" : "console.history", "outputLog" : false});
     var lua = EPKernel.getLua();
-    tab1.item.uiconsole.call("addbroadcaster", lua.get("outputbroadcaster"));
+    tab1.item.consolecomp.call("addbroadcaster", lua.get("outputbroadcaster"));
     tabs.push(tab1);
 
     // Log Tab
     var tab2 = tv.addTab("Log", consoleTab);
     tab2.active = true;
-    tab2.item.uiconsole = EPKernel.createComponent("uiconsole", {"title" : "Log", "setOutputFunc" : tab2.item.setOutText, "appendOutputFunc" : tab2.item.appendOutText, "hasInput" : false, "outputLog" : true});
+    tab2.item.consolecomp = EPKernel.createComponent("console", {"title" : "Log", "setOutputFunc" : tab2.item.setOutText, "appendOutputFunc" : tab2.item.appendOutText, "hasInput" : false, "outputLog" : true});
     tabs.push(tab2);
 
     // StdOut/StdErr Tab
     var tab3 = tv.addTab("StdOut/StdErr", consoleTab);
     tab3.active = true;
-    tab3.item.uiconsole = EPKernel.createComponent("uiconsole", {"title" : "StdOut/StdErr", "setOutputFunc" : tab3.item.setOutText, "appendOutputFunc" : tab3.item.appendOutText, "hasInput" : false, "outputLog" : false});
-    tab3.item.uiconsole.call("addbroadcaster", EPKernel.getStdOutBroadcaster());
-    tab3.item.uiconsole.call("addbroadcaster", EPKernel.getStdErrBroadcaster());
+    tab3.item.consolecomp = EPKernel.createComponent("console", {"title" : "StdOut/StdErr", "setOutputFunc" : tab3.item.setOutText, "appendOutputFunc" : tab3.item.appendOutText, "hasInput" : false, "outputLog" : false});
+    tab3.item.consolecomp.call("addbroadcaster", EPKernel.getStdOutBroadcaster());
+    tab3.item.consolecomp.call("addbroadcaster", EPKernel.getStdErrBroadcaster());
     tabs.push(tab3);
   }
 
@@ -125,11 +125,11 @@ Item {
             focus: true
             source: "consolefilter.qml"
             onOpened: {
-              contentItem.uiconsole = tv.getTab(tv.currentIndex).item.uiconsole;
+              contentItem.consolecomp = tv.getTab(tv.currentIndex).item.consolecomp;
             }
             onClosed: {
               var tab = tv.getTab(tv.currentIndex);
-              if(tab.item.uiconsole.get("hasinput"))
+              if(tab.item.consolecomp.get("hasinput"))
                 tab.item.consoleIn.forceActiveFocus();
             }
           }
@@ -189,9 +189,9 @@ Item {
       id: consoleTab
 
       ColumnLayout {
-        onUiconsoleChanged: {
-          consoleInRect.visible = uiconsole.get("hasinput");
-          uiconsole.call("rebuildoutput");
+        onConsolecompChanged: {
+          consoleInRect.visible = consolecomp.get("hasinput");
+          consolecomp.call("rebuildoutput");
 
           if(!visible)
             bFirstTimeVisible = true;
@@ -200,7 +200,7 @@ Item {
         onVisibleChanged: {
           if(visible) {
             if(filterWin.visible) {
-              filterWin.contentItem.uiconsole = uiconsole;
+              filterWin.contentItem.consolecomp = consolecomp;
             }
 
             if(bFirstTimeVisible) {
@@ -229,7 +229,7 @@ Item {
           consoleOut.flickableItem.contentX = consoleOut.flickableItem.originX;
         }
 
-        property var uiconsole
+        property var consolecomp
         property bool bFirstTimeVisible: false
         property alias consoleIn: consoleIn
         property alias consoleOut: consoleOut
@@ -311,7 +311,7 @@ Item {
                     insert(cursorPosition, "\n");
                   else {
                     if(length != 0) {
-                      uiconsole.call("relayinput", text);
+                      consolecomp.call("relayinput", text);
 
                       cursorPosition = 0;
                       text = "";
@@ -326,12 +326,12 @@ Item {
 
                   var historyText = text;
                   do {
-                    if(Math.abs(historyIndex) >= uiconsole.get("historylength"))
+                    if(Math.abs(historyIndex) >= consolecomp.get("historylength"))
                       break;
 
                     historyIndex--;
                     if(historyIndex < 0)
-                      historyText = uiconsole.call("gethistoryline", historyIndex);
+                      historyText = consolecomp.call("gethistoryline", historyIndex);
                   } while(historyText == text);
 
                   if(historyText != text) {
@@ -351,7 +351,7 @@ Item {
                     if(historyIndex < 0) {
                       historyIndex++;
                       if(historyIndex < 0)
-                        historyText = uiconsole.call("gethistoryline", historyIndex);
+                        historyText = consolecomp.call("gethistoryline", historyIndex);
                       else
                         historyText = "";
                     }

@@ -7,7 +7,7 @@ import QtQuick.Layouts 1.1
 ColumnLayout {
   id: filterWindow
 
-  property var uiconsole
+  property var consolecomp
   signal consoleChanged()
 
   spacing: 10
@@ -15,7 +15,7 @@ ColumnLayout {
   anchors.left: parent.left
   anchors.margins: 12
 
-  onUiconsoleChanged: {
+  onConsolecompChanged: {
     consoleChanged();
   }
 
@@ -33,12 +33,12 @@ ColumnLayout {
       id: ftTextField
       Layout.preferredWidth: catLayout.implicitWidth - fcLabel.implicitWidth - filterText.spacing
 
-      onTextChanged: uiconsole.set("filtertext", ftTextField.text);
+      onTextChanged: consolecomp.set("filtertext", ftTextField.text);
 
       Component.onCompleted: {
         filterWindow.consoleChanged.connect(onConsoleChanged);
       }
-      function onConsoleChanged() { ftTextField.text = uiconsole.get("filtertext"); }
+      function onConsoleChanged() { ftTextField.text = consolecomp.get("filtertext"); }
     }
   }
 
@@ -47,7 +47,7 @@ ColumnLayout {
       filterWindow.consoleChanged.connect(onConsoleChanged);
     }
     function onConsoleChanged() {
-      visible = uiconsole.get("outputlog");
+      visible = consolecomp.get("outputlog");
     }
 
     RowLayout {
@@ -64,12 +64,12 @@ ColumnLayout {
         id: fcTextField
         Layout.preferredWidth: catLayout.implicitWidth - fcLabel.implicitWidth - filterComponents.spacing
 
-        onTextChanged: uiconsole.set("filtercomponents", fcTextField.text);
+        onTextChanged: consolecomp.set("filtercomponents", fcTextField.text);
 
         Component.onCompleted: {
           filterWindow.consoleChanged.connect(onConsoleChanged);
         }
-        function onConsoleChanged() { fcTextField.text = uiconsole.get("filtercomponents"); }
+        function onConsoleChanged() { fcTextField.text = consolecomp.get("filtercomponents"); }
       }
     }
 
@@ -94,15 +94,15 @@ ColumnLayout {
 
               function updateCategoryFiltersUI()
               {
-                filterCatCB.checked = uiconsole.call("isfiltercategoryenabled", modelData);
+                filterCatCB.checked = consolecomp.call("isfiltercategoryenabled", modelData);
               }
 
               function updateCategoryFilters()
               {
                 if(filterCatCB.checked)
-                  uiconsole.call("enablefiltercategory", modelData);
+                  consolecomp.call("enablefiltercategory", modelData);
                 else
-                  uiconsole.call("disablefiltercategory", modelData);
+                  consolecomp.call("disablefiltercategory", modelData);
               }
 
               Component.onCompleted: {
@@ -142,7 +142,7 @@ ColumnLayout {
 
               function updateLevelFiltersUI()
               {
-                var level = uiconsole.call("getfilterlevel", modelData);
+                var level = consolecomp.call("getfilterlevel", modelData);
                 if(level != -1)
                 {
                   filterLevelCB.checked = true;
@@ -159,7 +159,7 @@ ColumnLayout {
                   level = parseInt(filterLevelField.text);
                 else
                   level = -1;
-                uiconsole.call("setfilterlevel", modelData, level);
+                consolecomp.call("setfilterlevel", modelData, level);
               }
 
               Component.onCompleted: {

@@ -1,4 +1,4 @@
-#include "components/uiconsole.h"
+#include "components/console.h"
 #include "components/memstream.h"
 #include "ep/cpp/component/broadcaster.h"
 #include "components/logger.h"
@@ -10,7 +10,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> UIConsole::GetProperties() const
+Array<const PropertyInfo> Console::GetProperties() const
 {
   return{
     EP_MAKE_PROPERTY(FilterComponents, "List of Components to filter the log text by", nullptr, 0),
@@ -22,7 +22,7 @@ Array<const PropertyInfo> UIConsole::GetProperties() const
     EP_MAKE_PROPERTY_EXPLICIT("OutputLog", "Bool specifies whether this console outputs the application log", EP_MAKE_GETTER(OutputLog), nullptr, nullptr, 0),
   };
 }
-Array<const MethodInfo> UIConsole::GetMethods() const
+Array<const MethodInfo> Console::GetMethods() const
 {
   return{
     EP_MAKE_METHOD(GetFilterLevel, "Get the filter level for the given log category"),
@@ -39,7 +39,7 @@ Array<const MethodInfo> UIConsole::GetMethods() const
   };
 }
 
-UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
   const Variant *vTitle = initParams.Get("title");
@@ -119,40 +119,40 @@ UIConsole::UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString u
 
   spLogger = pKernel->GetLogger();
   if (bOutputLog)
-    pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
+    pKernel->GetLogger()->Changed.Subscribe(this, &Console::OnLogChanged);
 
   //auto spCommandManager = pKernel->GetCommandManager();
-  //spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void(Variant::VarMap)>(this, &UIConsole::ToggleVisible), "", "", "`");
+  //spCommandManager->RegisterCommand("showhideconsolewindow", Delegate<void(Variant::VarMap)>(this, &Console::ToggleVisible), "", "", "`");
 }
 
 /*
-void UIConsole::ToggleVisible(Variant::VarMap params)
+void Console::ToggleVisible(Variant::VarMap params)
 {
   Call("togglevisible", nullptr);
 }
 */
 
-UIConsole::~UIConsole()
+Console::~Console()
 {
   for (BroadcasterRef spBC : outputBCArray)
-    spBC->Written.Unsubscribe(this, &UIConsole::OnConsoleOutput);
+    spBC->Written.Unsubscribe(this, &Console::OnConsoleOutput);
 
   if(bOutputLog)
-    spLogger->Changed.Unsubscribe(this, &UIConsole::OnLogChanged);
+    spLogger->Changed.Unsubscribe(this, &Console::OnLogChanged);
 }
 
-void UIConsole::AddBroadcaster(BroadcasterRef spBC)
+void Console::AddBroadcaster(BroadcasterRef spBC)
 {
   outputBCArray.pushBack(spBC);
-  spBC->Written.Subscribe(this, &UIConsole::OnConsoleOutput);
+  spBC->Written.Subscribe(this, &Console::OnConsoleOutput);
 }
 
-void UIConsole::RemoveBroadcaster(BroadcasterRef spBC)
+void Console::RemoveBroadcaster(BroadcasterRef spBC)
 {
   outputBCArray.removeFirstSwapLast(spBC);
 }
 
-void UIConsole::RebuildOutput()
+void Console::RebuildOutput()
 {
   filteredConsole = nullptr;
 
@@ -176,7 +176,7 @@ void UIConsole::RebuildOutput()
   setOutputFunc((String)outText);
 }
 
-void UIConsole::OnLogChanged()
+void Console::OnLogChanged()
 {
   Slice<LogLine> log = pKernel->GetLogger()->GetLog();
   LogLine &line = log.back();
@@ -192,7 +192,7 @@ void UIConsole::OnLogChanged()
   appendOutputFunc(cLine.text);
 }
 
-void UIConsole::OnConsoleOutput(Slice<const void> buf)
+void Console::OnConsoleOutput(Slice<const void> buf)
 {
   String readStr = (String &)buf;
 
@@ -212,15 +212,15 @@ void UIConsole::OnConsoleOutput(Slice<const void> buf)
   }
 }
 
-void UIConsole::RelayInput(String str)
+void Console::RelayInput(String str)
 {
   AppendHistory(str);
-  pKernel->GetLogger()->Changed.Subscribe(this, &UIConsole::OnLogChanged);
+  pKernel->GetLogger()->Changed.Subscribe(this, &Console::OnLogChanged);
   inputFunc(str);
-  pKernel->GetLogger()->Changed.Unsubscribe(this, &UIConsole::OnLogChanged);
+  pKernel->GetLogger()->Changed.Unsubscribe(this, &Console::OnLogChanged);
 }
 
-UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)
+Console::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)
 {
   this->text = text;
   this->logIndex = logIndex;
@@ -230,7 +230,7 @@ UIConsole::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)
 
 // Filter getter/setter helper functions
 
-String UIConsole::GetFilterComponents() const
+String Console::GetFilterComponents() const
 {
   MutableString<1024> str;
 
@@ -249,7 +249,7 @@ String UIConsole::GetFilterComponents() const
   return str;
 }
 
-void UIConsole::SetFilterComponents(String str)
+void Console::SetFilterComponents(String str)
 {
   String token;
   Array<String> comps;
@@ -270,7 +270,7 @@ void UIConsole::SetFilterComponents(String str)
   RebuildOutput();
 }
 
-bool UIConsole::FilterTextLine(String line) const
+bool Console::FilterTextLine(String line) const
 {
   if (!textFilter.empty() && line.findFirstIC(textFilter) == line.length)
     return false;
@@ -280,7 +280,7 @@ bool UIConsole::FilterTextLine(String line) const
 
 // History functions
 
-void UIConsole::AppendHistory(String str)
+void Console::AppendHistory(String str)
 {
   history.concat(str);
 

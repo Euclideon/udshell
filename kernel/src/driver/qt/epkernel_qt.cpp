@@ -3,7 +3,6 @@
 #if EPWINDOW_DRIVER == EPDRIVER_QT
 
 #include "kernelimpl.h"
-#include "components/uiconsole.h"
 #include "components/viewimpl.h"
 #include "components/glue/componentglue.h"
 

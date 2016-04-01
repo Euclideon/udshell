@@ -4,7 +4,6 @@
 
 #include "components/viewportimpl.h"
 #include "driver/qt/ui/renderview_qt.h"
-#include "components/uiconsole.h"
 #include "driver/qt/components/uicomponentimpl_qt.h"
 
 namespace qt {

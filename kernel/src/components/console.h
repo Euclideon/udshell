@@ -9,15 +9,15 @@
 
 namespace ep {
 
-SHARED_CLASS(UIConsole);
+SHARED_CLASS(Console);
 SHARED_CLASS(MemStream);
 SHARED_CLASS(Broadcaster);
 SHARED_CLASS(Activity);
 SHARED_CLASS(File);
 
-class UIConsole : public Component
+class Console : public Component
 {
-  EP_DECLARE_COMPONENT(UIConsole, Component, EPKERNEL_PLUGINVERSION, "Is a UI for a Console Panel Tab with input and output text controls", 0)
+  EP_DECLARE_COMPONENT(Console, Component, EPKERNEL_PLUGINVERSION, "Is a UI for a Console Panel Tab with input and output text controls", 0)
 public:
 
   void AddBroadcaster(BroadcasterRef spBC);
@@ -70,8 +70,8 @@ public:
   String GetTitle() const { return title; }
 
 protected:
-  UIConsole(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
-  virtual ~UIConsole();
+  Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+  virtual ~Console();
 
   //void ToggleVisible(Variant::VarMap params);
   void OnLogChanged();
