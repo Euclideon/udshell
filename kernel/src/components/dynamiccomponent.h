@@ -22,6 +22,32 @@ protected:
   {
   }
 
+  PropertyDesc* CachePropertyDesc(String _name, String description, const VarDelegate &getter, const VarDelegate &setter) const
+  {
+    PropertyDesc *pDesc = propertyCache.Get(_name);
+    if (pDesc)
+    {
+      // update the delegates to the one we just got
+      pDesc->setter.data = setter.GetMemento();
+      pDesc->getter.data = getter.GetMemento();
+    }
+    else
+    {
+      // build a property descriptor
+      struct Shim
+      {
+        Variant call(Slice<const Variant> args, const RefCounted &data)
+        {
+          return ((VarDelegate&)data)(args);
+        }
+      };
+
+      pDesc = &propertyCache.Insert(_name, PropertyDesc({ _name, _name, description },
+        MethodShim(&Shim::call, getter.GetMemento()), MethodShim(&Shim::call, setter.GetMemento())));
+    }
+    return pDesc;
+  }
+
   MethodDesc* CacheMethodDesc(String _name, String description, const VarDelegate &method) const
   {
     MethodDesc *pDesc = methodCache.Get(_name);

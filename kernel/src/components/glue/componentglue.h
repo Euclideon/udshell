@@ -26,6 +26,11 @@ protected:
 
   void ReceiveMessage(String message, String sender, const Variant &data) override;
 
+  const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->GetPropertyDesc(_name, enumerateFlags); }
+  const MethodDesc *GetMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->GetMethodDesc(_name, enumerateFlags); }
+  const EventDesc *GetEventDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final  { return spInstance->GetEventDesc(_name, enumerateFlags); }
+  const StaticFuncDesc *GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final  { return spInstance->GetStaticFuncDesc(_name, enumerateFlags); }
+
   ComponentRef spInstance;
 
   VarDelegate save;

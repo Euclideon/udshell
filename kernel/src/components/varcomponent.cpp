@@ -18,7 +18,8 @@ const MethodDesc *VarComponent::GetMethodDesc(String _name, EnumerateFlags enume
     if (pVal)
       return CacheMethodDesc(_name, _name, pVal->as<VarDelegate>());
   }
-  return Super::GetMethodDesc(_name, enumerateFlags);
+  // TODO: this assumes that GetMethodDesc will *never* be overridden somewhere above the glue's hierarchy
+  return pThis->Component::GetMethodDesc(_name, enumerateFlags);
 }
 
 } // namespace ep
