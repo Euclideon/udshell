@@ -31,6 +31,11 @@ public:
   {
     GetImpl<QtUIComponentImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
   }
+
+  /*const ep::PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->GetPropertyDesc(_name, enumerateFlags); }
+  const ep::MethodDesc *GetMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->GetMethodDesc(_name, enumerateFlags); }
+  const ep::EventDesc *GetEventDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->GetEventDesc(_name, enumerateFlags); }
+  const ep::StaticFuncDesc *GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->GetStaticFuncDesc(_name, enumerateFlags); }*/
 };
 
 } // namespace qt

@@ -7,4 +7,6 @@ Window {
   title: "Euclideon Platform"
   width: 960
   height: 540
+
+  property alias title: desktopwindow.title
 }

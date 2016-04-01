@@ -317,8 +317,8 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file, V
   QmlComponentData data(file, pQmlEngine);
   QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
   ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, newUid, spInstance, initParams);
-  pDesc->PopulateFromDesc(pSuper);
   spInstance->AttachToGlue(spC.ptr());
+  pDesc->PopulateFromDesc(pSuper);
 
   // add to the component registry
   GetImpl<KernelImpl>()->instanceRegistry.Insert(spC->uid, spC.ptr());

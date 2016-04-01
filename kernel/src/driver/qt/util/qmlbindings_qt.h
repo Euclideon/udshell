@@ -21,7 +21,7 @@ namespace internal {
 // INTERNAL
 
 // Helper function to dynamically populate the component descriptor with the QObject's meta data
-void PopulateComponentDesc(ep::Component *pComponent, QObject *pObject);
+void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject);
 
 } // namespace internal
 

@@ -25,7 +25,10 @@ public:
   template <class T>
   T *GetQObject() const { return qobject_cast<T*>(pQObject); }
 
-  const ep::MethodDesc *GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final;
+  const ep::PropertyDesc *GetPropertyDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::GetPropertyDesc(_name, enumerateFlags); }
+  const ep::MethodDesc *GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::GetMethodDesc(_name, enumerateFlags); }
+  const ep::EventDesc *GetEventDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::GetEventDesc(_name, enumerateFlags); }
+  const ep::StaticFuncDesc *GetStaticFuncDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::GetStaticFuncDesc(_name, enumerateFlags); }
 
 private:
   friend class QtKernel;
