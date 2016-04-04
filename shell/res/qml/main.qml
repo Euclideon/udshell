@@ -56,6 +56,13 @@ Rectangle {
     activityselecter.get("uihandle").parent = this;
   }
 
+  function showhideconsolepanel() {
+    if(uiconsole) {
+       var uiconsoleqq = uiconsole.get("uihandle");
+       uiconsoleqq.togglevisible();
+    }
+  }
+
   Component.onCompleted: {
     var commandManager = EPKernel.getCommandManager();
     commandManager.call("registercommand", "newproject", newproject, "", "", "Ctrl+N");
@@ -64,6 +71,8 @@ Rectangle {
     commandManager.call("registercommand", "saveproject", saveproject, "", "", "Ctrl+S");
     commandManager.call("registercommand", "saveprojectas", saveprojectas, "", "", "F12");
     commandManager.call("registercommand", "newactivity", newactivity, "", "", "Ctrl+A");
+
+    commandManager.call("registercommand", "showhideconsolepanel", showhideconsolepanel, "", "", "`");
 
     // Disable these shortcuts, they will get enabled when a project is created or opened
     commandManager.call("disableshortcut", "saveproject");

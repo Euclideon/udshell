@@ -135,8 +135,13 @@ public:
   Q_PROPERTY(QtFocusManager * focus READ getFocusManager)
 
   Q_INVOKABLE qt::QtEPComponent *findComponent(const QString &uid) const;
-  Q_INVOKABLE qt::QtEPComponent *createComponent(const QString typeId, QVariantMap initParams = QVariantMap());
+  Q_INVOKABLE qt::QtEPComponent *createComponent(const QString typeId, QVariant initParams = QVariant());
   Q_INVOKABLE qt::QtEPComponent *getCommandManager() const;
+
+  Q_INVOKABLE qt::QtEPComponent *getLua() const;
+  Q_INVOKABLE qt::QtEPComponent *getStdOutBroadcaster() const;
+  Q_INVOKABLE qt::QtEPComponent *getStdErrBroadcaster() const;
+  Q_INVOKABLE void exec(QString str);
 
 private:
   QtFocusManager *getFocusManager() const;

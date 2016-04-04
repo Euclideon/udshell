@@ -4,7 +4,6 @@
 
 #include "components/viewportimpl.h"
 #include "driver/qt/ui/renderview_qt.h"
-#include "components/uiconsole.h"
 #include "driver/qt/components/uicomponentimpl_qt.h"
 
 namespace qt {
@@ -31,16 +30,6 @@ public:
   {
     pInstance->Super::PostInit(pData);
     SetView(spView);
-  }
-};
-
-class UIConsoleGlue final : public ep::UIConsole
-{
-public:
-  UIConsoleGlue(const ep::ComponentDesc *_pType, ep::Kernel *_pKernel, ep::SharedString _uid, ep::ComponentRef _spInstance, ep::Variant::VarMap initParams)
-    : UIConsole(_pType, _pKernel, _uid, initParams)
-  {
-    ep::UIComponent::GetImpl<QtUIComponentImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
   }
 };
 

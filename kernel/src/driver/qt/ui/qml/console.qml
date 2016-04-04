@@ -1,73 +1,62 @@
 import QtQuick 2.4
 import QtQuick.Window 2.1
-import QtQuick.Controls 1.3
+import QtQuick.Controls 1.5
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 import epKernel 0.1
 
 Item {
   id: consoleWin
+
+  property var tabs: []
+
   visible: false
   enabled: false
   anchors.fill: parent
 
-  property var consoleOut
-  property var consoleIn
-  property var logOut
-
   function togglevisible()
   {
-    consoleWin.visible = !consoleWin.visible;
-    if(consoleWin.visible)
+    if(!consoleWin.visible)
     {
       consoleWin.enabled = true;
-      EPKernel.focus.setFocus(consoleIn);
-      //consoleIn.forceActiveFocus();
+
+      var tab = tv.getTab(tv.currentIndex);
+      EPKernel.focus.pushActiveFocusItem();
+      if(tab.item.consolecomp.get("hasinput"))
+        tab.item.consoleIn.forceActiveFocus();
     }
     else
     {
       filterWin.close();
       consoleWin.enabled = false;
+      EPKernel.focus.restoreFocus();
     }
-  }
 
-  function appendconsoletext(str)
-  {
-    var atEnd = consoleOut.flickableItem.atYEnd;
-    var contentY = consoleOut.flickableItem.contentY
-    consoleOut.append(str);
-    if(!atEnd)
-      consoleOut.flickableItem.contentY = contentY;
-  }
-
-  function setconsoletext(str)
-  {
-    consoleOut.cursorPosition = 0;
-    consoleOut.text = str;
-    consoleOut.flickableItem.contentY = Math.max(0, consoleOut.flickableItem.contentHeight - consoleOut.flickableItem.height);
-  }
-
-  function appendlogtext(str)
-  {
-    var atEnd = logOut.flickableItem.atYEnd;
-    var contentY = logOut.flickableItem.contentY
-    logOut.append(str);
-    if(!atEnd)
-      logOut.flickableItem.contentY = contentY;
-  }
-
-  function setlogtext(str)
-  {
-    logOut.cursorPosition = 0;
-    logOut.text = str;
-    logOut.flickableItem.contentY = Math.max(0, logOut.flickableItem.contentHeight - logOut.flickableItem.height);
+    consoleWin.visible = !consoleWin.visible;
   }
 
   Component.onCompleted: {
-    logOut = Qt.binding(function() { return logTab.item.textArea; });
-    consoleOut = Qt.binding(function() { return consoleTab.item.consoleOutLoader.item.textArea; });
-    consoleIn = Qt.binding(function() { return consoleTab.item.consoleInTextArea; });
-    tv.splitTabs();
+    // Console Tab
+    var tab1 = tv.addTab("Shell", consoleTab);
+    tab1.active = true;
+    tab1.item.consolecomp = EPKernel.createComponent("console", {"title" : "Shell", "setOutputFunc" : tab1.item.setOutText, "appendOutputFunc" : tab1.item.appendOutText, "hasInput" : true, "inputFunc" : function(str) { EPKernel.exec(str); }, "historyFileName" : "console.history", "outputLog" : false});
+    var lua = EPKernel.getLua();
+    tab1.item.consolecomp.call("addbroadcaster", lua.get("outputbroadcaster"));
+    tabs.push(tab1);
+
+    // Log Tab
+    var tab2 = tv.addTab("Log", consoleTab);
+    tab2.active = true;
+    tab2.item.consolecomp = EPKernel.createComponent("console", {"title" : "Log", "setOutputFunc" : tab2.item.setOutText, "appendOutputFunc" : tab2.item.appendOutText, "hasInput" : false, "outputLog" : true});
+    tabs.push(tab2);
+
+    // StdOut/StdErr Tab
+    var tab3 = tv.addTab("StdOut/StdErr", consoleTab);
+    tab3.active = true;
+    tab3.item.consolecomp = EPKernel.createComponent("console", {"title" : "StdOut/StdErr", "setOutputFunc" : tab3.item.setOutText, "appendOutputFunc" : tab3.item.appendOutText, "hasInput" : false, "outputLog" : false});
+    tab3.item.consolecomp.call("addbroadcaster", EPKernel.getStdOutBroadcaster());
+    tab3.item.consolecomp.call("addbroadcaster", EPKernel.getStdErrBroadcaster());
+    tabs.push(tab3);
   }
 
   FontLoader { id: fixedFont; name: "Courier" }
@@ -135,24 +124,13 @@ Item {
             anchors.bottomMargin: 5
             focus: true
             source: "consolefilter.qml"
-            onClosed: consoleIn.forceActiveFocus();
-          }
-        }
-
-        Button {
-          id: splitButton
-          text: "< >"
-          style: consoleButtonStyle
-          onClicked: {
-            if(tv.bMerged)
-            {
-              tv.splitTabs();
-              text = "> <";
+            onOpened: {
+              contentItem.consolecomp = tv.getTab(tv.currentIndex).item.consolecomp;
             }
-            else
-            {
-              tv.mergeTabs();
-              text = "< >";
+            onClosed: {
+              var tab = tv.getTab(tv.currentIndex);
+              if(tab.item.consolecomp.get("hasinput"))
+                tab.item.consoleIn.forceActiveFocus();
             }
           }
         }
@@ -178,30 +156,14 @@ Item {
   }
 
   TabView {
+    id: tv
+
     property int overlap: 1
     property int tabHeight: 20
-    property bool bMerged: true
-    property bool bFirstTimeShown: false // This is a hack to correct scrollbars
 
-    function mergeTabs() {
-      bMerged = true;
-      currentIndex = 0;
-      tabsVisible = false;
-      y += tabHeight - overlap;
-      thisComponent.set("outputsmerged", true);
-    }
-
-    function splitTabs() {
-      bMerged = false;
-      tabsVisible = true;
-      y -= tabHeight - overlap;
-      thisComponent.set("outputsmerged", false);
-    }
-
-    id: tv
-    tabsVisible: false
+    tabsVisible: true
     frameVisible: false
-    y: consoleHeader.y + consoleHeader.height
+    y: consoleHeader.y + consoleHeader.height - tabHeight - overlap
 
     width: parent.width
     height: parent.height - y
@@ -224,76 +186,109 @@ Item {
     }
 
     Component {
-      id: textOut
-      Rectangle {
-        property alias textArea: textArea
-        color: "black"
-        opacity: 0.9
-        TextArea {
-          id: textArea
-          activeFocusOnTab: false
-          anchors.fill: parent
-          frameVisible: false
-          wrapMode: TextEdit.NoWrap
-
-          style: TextAreaStyle {
-            textMargin: 4
-            backgroundColor: "transparent"
-            textColor: "white"
-            selectionColor: "darkblue"
-            font: fixedFont.name
-          }
-          readOnly: true
-          selectByMouse: true
-          onActiveFocusChanged: {
-            if(!activeFocus)
-              deselect();
-          }
-        }
-      }
-    }
-
-    Tab {
       id: consoleTab
-      title: "Shell"
-      active: true
 
       ColumnLayout {
-        property alias consoleInTextArea: consoleInTextArea
-        property alias consoleOutLoader: consoleOutLoader
+        onConsolecompChanged: {
+          consoleInRect.visible = consolecomp.get("hasinput");
+          consolecomp.call("rebuildoutput");
+
+          if(!visible)
+            bFirstTimeVisible = true;
+        }
+
+        onVisibleChanged: {
+          if(visible) {
+            if(filterWin.visible) {
+              filterWin.contentItem.consolecomp = consolecomp;
+            }
+
+            if(bFirstTimeVisible) { // Some glitch causes the scrollbars to move between when the tab is created and when it first becomes visible. This corrects it when the tab first becomes visible
+              consoleOut.flickableItem.contentY = Math.max(0, consoleOut.flickableItem.contentHeight - consoleOut.flickableItem.height);
+              consoleOut.flickableItem.contentX = consoleOut.flickableItem.originX;
+              bFirstTimeVisible = false;
+            }
+          }
+        }
+
+        function appendOutText(str)
+        {
+          var atXBeginning = consoleOut.flickableItem.atXBeginning;
+
+          consoleOut.append(str);
+
+          if(atXBeginning)
+            consoleOut.flickableItem.contentX = consoleOut.flickableItem.originX;
+        }
+
+        function setOutText(str)
+        {
+          consoleOut.cursorPosition = 0;
+          consoleOut.text = str;
+          consoleOut.flickableItem.contentY = Math.max(0, consoleOut.flickableItem.contentHeight - consoleOut.flickableItem.height);
+          consoleOut.flickableItem.contentX = consoleOut.flickableItem.originX;
+        }
+
+        property var consolecomp
+        property bool bFirstTimeVisible: false
+        property alias consoleIn: consoleIn
+        property alias consoleOut: consoleOut
         spacing: 0
 
-        Loader {
-          id: consoleOutLoader
+        Rectangle {
           Layout.fillHeight: true
           Layout.fillWidth: true
-          sourceComponent: textOut
+          color: "black"
+          opacity: 0.9
+          TextArea {
+            id: consoleOut
+            activeFocusOnTab: false
+            anchors.fill: parent
+            frameVisible: false
+            wrapMode: TextEdit.NoWrap
+
+            style: TextAreaStyle {
+              textMargin: 4
+              backgroundColor: "transparent"
+              textColor: "white"
+              selectionColor: "darkblue"
+              font: fixedFont.name
+            }
+            readOnly: true
+            selectByMouse: true
+            onActiveFocusChanged: {
+              if(!activeFocus)
+                deselect();
+            }
+          }
         }
 
         TextArea {
           id: minTextArea
           visible: false
           text: "foo"
-          textMargin: consoleInTextArea.textMargin
-          font: consoleInTextArea.font
+          textMargin: consoleIn.textMargin
+          font: consoleIn.font
           activeFocusOnTab: false
         }
 
         Rectangle {
+          id: consoleInRect
           color: "black"
+          visible: false
           opacity: 0.9
           Layout.preferredHeight: innerRect.height + 2
           Layout.fillWidth: true
           Rectangle {
             id: innerRect
-            height: consoleInTextArea.height + border.width * 2
+            height: consoleIn.height + border.width * 2
             width: parent.width
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             border.color: "white"
             border.width: 1
             TextArea {
-              id: consoleInTextArea
+              id: consoleIn
               property int historyIndex: 0
               focus: true
               activeFocusOnTab: true
@@ -316,7 +311,7 @@ Item {
                     insert(cursorPosition, "\n");
                   else {
                     if(length != 0) {
-                      thisComponent.call("relayinput", text);
+                      consolecomp.call("relayinput", text);
 
                       cursorPosition = 0;
                       text = "";
@@ -331,12 +326,12 @@ Item {
 
                   var historyText = text;
                   do {
-                    if(Math.abs(historyIndex) >= thisComponent.get("historylength"))
+                    if(Math.abs(historyIndex) >= consolecomp.get("historylength"))
                       break;
 
                     historyIndex--;
                     if(historyIndex < 0)
-                      historyText = thisComponent.call("gethistoryline", historyIndex);
+                      historyText = consolecomp.call("gethistoryline", historyIndex);
                   } while(historyText == text);
 
                   if(historyText != text) {
@@ -356,7 +351,7 @@ Item {
                     if(historyIndex < 0) {
                       historyIndex++;
                       if(historyIndex < 0)
-                        historyText = thisComponent.call("gethistoryline", historyIndex);
+                        historyText = consolecomp.call("gethistoryline", historyIndex);
                       else
                         historyText = "";
                     }
@@ -374,13 +369,6 @@ Item {
           }
         }
       }
-    }
-
-    Tab {
-      id: logTab
-      title: "Log"
-      active: true
-      sourceComponent: textOut
     }
   }
 }

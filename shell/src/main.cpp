@@ -7,7 +7,6 @@
 #include "components/logger.h"
 #include "ep/cpp/component/window.h"
 #include "ep/cpp/component/uicomponent.h"
-#include "components/uiconsole.h"
 #include "components/project.h"
 #include "ep/cpp/component/activity.h"
 #include "ep/cpp/component/resource/menu.h"
@@ -290,14 +289,13 @@ void Init(String sender, String message, const Variant &data)
   epscope(fail) { if (!spTopLevelUI) spKernel->LogError("Error creating top Level UI Component\n"); };
   spTopLevelUI = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/main.qml", nullptr).as<UIComponentRef>();
 
-
   epscope(fail) { if (!spMessageBox) spKernel->LogError("Error creating MessageBox UI Component\n"); };
   spMessageBox = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/components/messagebox.qml", Variant::VarMap{{ "name", "messagebox" }}).as<UIComponentRef>();
   spTopLevelUI->Set("messageboxcomp", spMessageBox);
 
-  UIConsoleRef spConsole;
-  epscope(fail) { if (!spConsole) spKernel->LogError("Error creating top Level UI Component\n"); };
-  spConsole = spKernel->Call("createqmlcomponent", "uiconsole", "qrc:/kernel/console.qml", nullptr).as<UIConsoleRef>();
+  UIComponentRef spConsole;
+  epscope(fail) { if (!spConsole) spKernel->LogError("Error creating Console UI Component\n"); };
+  spConsole = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/kernel/console.qml", nullptr).as<UIComponentRef>();
   spTopLevelUI->Set("uiconsole", spConsole);
 
   // Load menus
