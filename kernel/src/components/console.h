@@ -1,8 +1,7 @@
 #pragma once
-#ifndef UI_CONSOLE_H
-#define UI_CONSOLE_H
+#ifndef EP_CONSOLE_H
+#define EP_CONSOLE_H
 
-#include "ep/cpp/component/uicomponent.h"
 #include "memstream.h"
 #include "logger.h"
 #include "file.h"
@@ -17,7 +16,7 @@ SHARED_CLASS(File);
 
 class Console : public Component
 {
-  EP_DECLARE_COMPONENT(Console, Component, EPKERNEL_PLUGINVERSION, "Is a UI for a Console Panel Tab with input and output text controls", 0)
+  EP_DECLARE_COMPONENT(Console, Component, EPKERNEL_PLUGINVERSION, "Console logging data component", 0)
 public:
 
   void AddBroadcaster(BroadcasterRef spBC);
@@ -114,5 +113,5 @@ protected:
 
 } // namespace ep
 
-#endif // UICONSOLE_H
+#endif // EP_CONSOLE_H
 

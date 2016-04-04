@@ -560,7 +560,7 @@ QtEPComponent *QtKernelQml::getStdErrBroadcaster() const
 
 void QtKernelQml::exec(QString str)
 {
-  pKernel->Exec(String(str.toUtf8().data()));
+  pKernel->Exec(String(str.toUtf8().data(), str.length()));
 }
 
 QtFocusManager *QtKernelQml::getFocusManager() const
