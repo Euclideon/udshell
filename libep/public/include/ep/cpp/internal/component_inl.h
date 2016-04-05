@@ -114,11 +114,6 @@ inline void Component::SendMessage(const ComponentRef &target, String message, c
   return SendMessage(MutableString128(Concat, "@", target->GetUid()), message, data);
 }
 
-inline void Component::Init(Variant::VarMap initParams)
-{
-  pImpl->Init(initParams);
-}
-
 inline void Component::ReceiveMessage(String message, String sender, const Variant &data)
 {
   return pImpl->ReceiveMessage(message, sender, data);

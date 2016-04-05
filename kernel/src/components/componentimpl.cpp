@@ -50,34 +50,6 @@ void ComponentImpl::SetName(SharedString name)
     pKernelImpl->namedInstanceRegistry.Insert(name, pInstance);
 }
 
-void ComponentImpl::Init(Variant::VarMap initParams)
-{
-  // Temporary solution: get 'name' from initParams
-  Variant *pName = initParams.Get("name");
-  if (pName)
-    SetName(pName->asSharedString());
-
-  // TODO uncomment this when we've thought it through
-  /*
-  for (auto kv : initParams)
-  {
-    const PropertyDesc *pDesc = GetPropertyDesc(kv.key.asString());
-    if (pDesc && pDesc->setter)
-      pDesc->setter.set(this, kv.value);
-  }
-  */
-
-/*
-  // TODO: rethink this whole thing!!
-
-  // allocate property change events
-  propertyChange.length = pType->propertyTree.Size();
-  propertyChange.ptr = epAllocType(Event<>, propertyChange.length, epAF_None);
-  for (size_t i = 0; i<propertyChange.length; ++i)
-    new(&propertyChange.ptr[i]) Event<>();
-*/
-}
-
 void ComponentImpl::ReceiveMessage(String message, String sender, const Variant &data)
 {
   if (message.eqIC("set"))

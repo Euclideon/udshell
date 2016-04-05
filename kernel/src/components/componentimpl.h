@@ -19,7 +19,13 @@ class ComponentImpl : public BaseImpl<Component, IComponent>
 {
 public:
   ComponentImpl(Component *pInstance, Variant::VarMap initParams)
-    : ImplSuper(pInstance) {}
+    : ImplSuper(pInstance)
+  {
+    // Temporary solution: get 'name' from initParams
+    Variant *pName = initParams.Get("name");
+    if (pName)
+      SetName(pName->asSharedString());
+  }
 
   void SetName(SharedString name) override final;
 
@@ -50,8 +56,6 @@ public:
 
 protected:
   ~ComponentImpl();
-
-  void Init(Variant::VarMap initParams) override final;
 
   void ReceiveMessage(String message, String sender, const Variant &data) override final;
 
