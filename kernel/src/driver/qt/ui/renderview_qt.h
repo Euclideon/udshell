@@ -33,7 +33,9 @@ private:
 
   void componentComplete() override;
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 6, 0))
   QSGNode *updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData) override;
+#endif
 
   void keyPressEvent(QKeyEvent * event) override;
   void keyReleaseEvent(QKeyEvent * event) override;
