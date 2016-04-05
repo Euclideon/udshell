@@ -72,7 +72,10 @@ struct ComponentInfo
   int epVersion;
   int pluginVersion;
 
-  SharedString id;          // an id for this component
+  SharedString nameSpace;   // namespace
+  SharedString name;        // name
+  SharedString identifier;  // identifier
+
   SharedString displayName; // display name
   SharedString description; // description
 
@@ -95,58 +98,52 @@ inline ComponentDesc::~ComponentDesc()
 }
 
 // declare magic for a C++ component
-#define EP_DECLARE_COMPONENT(Name, SuperType, Version, Description, Flags)               \
+#define EP_DECLARE_COMPONENT(Namespace, Name, SuperType, Version, Description, Flags)    \
 public:                                                                                  \
   friend class ::ep::Kernel;                                                             \
   using Super = SuperType;                                                               \
   using This = Name;                                                                     \
   using Ref = ep::SharedPtr<This>;                                                       \
   using Impl = void;                                                                     \
-  static ep::SharedString ComponentID()                                                  \
+  static ep::SharedString ComponentID() { return ComponentInfo().identifier; }           \
+  static const ep::ComponentInfo& ComponentInfo()                                        \
   {                                                                                      \
-    using namespace ep;                                                                  \
-    static SharedString id;                                                              \
-    if (!id.ptr)                                                                         \
+    static const ep::ComponentInfo info                                                  \
     {                                                                                    \
-      char buf[sizeof(#Name)];                                                           \
-        for (size_t i = 0; i < sizeof(buf); ++i) buf[i] = (char)epToLower(#Name[i]);     \
-      id = SharedString(buf, sizeof(buf)-1);                                             \
-    }                                                                                    \
-    return id;                                                                           \
-  }                                                                                      \
-  static ep::ComponentInfo MakeDescriptor()                                              \
-  {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
+      EP_APIVERSION, Version,                                                            \
+      #Namespace, std::move(ep::MutableString<0>(#Name).toLower()),                      \
+      std::move(ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower())), \
+      #Name, Description,                                                                \
+      Flags                                                                              \
+    };                                                                                   \
+    return info;                                                                         \
   }                                                                                      \
 private:
 
 // declare magic for a C++ component with a pImpl interface
-#define EP_DECLARE_COMPONENT_WITH_IMPL(Name, Interface, SuperType, Version, Description, Flags) \
-  friend class ::ep::Kernel;                                                                    \
-  __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)
+#define EP_DECLARE_COMPONENT_WITH_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags) \
+  friend class ::ep::Kernel;                                                                               \
+  __EP_DECLARE_COMPONENT_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)
 
-#define __EP_DECLARE_COMPONENT_IMPL(Name, Interface, SuperType, Version, Description, Flags)    \
+#define __EP_DECLARE_COMPONENT_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)    \
 public:                                                                                  \
   friend class Name##Impl;                                                               \
   using Super = SuperType;                                                               \
   using This = Name;                                                                     \
   using Ref = ep::SharedPtr<This>;                                                       \
   using Impl = ep::BaseImpl<Name, Interface>;                                            \
-  static ep::SharedString ComponentID()                                                  \
+  static ep::SharedString ComponentID() { return ComponentInfo().identifier; }           \
+  static const ep::ComponentInfo& ComponentInfo()                                        \
   {                                                                                      \
-    using namespace ep;                                                                  \
-    static SharedString id;                                                              \
-    if (!id.ptr)                                                                         \
+    static const ep::ComponentInfo info                                                  \
     {                                                                                    \
-      char buf[sizeof(#Name)];                                                           \
-        for (size_t i = 0; i < sizeof(buf); ++i) buf[i] = (char)epToLower(#Name[i]);     \
-      id = SharedString(buf, sizeof(buf)-1);                                             \
-    }                                                                                    \
-    return id;                                                                           \
-  }                                                                                      \
-  static ep::ComponentInfo MakeDescriptor()                                              \
-  {                                                                                      \
-    return { EP_APIVERSION, Version, ComponentID(), #Name, Description, Flags };         \
+      EP_APIVERSION, Version,                                                            \
+      #Namespace, std::move(ep::MutableString<0>(#Name).toLower()),                      \
+      std::move(ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower())), \
+      #Name, Description,                                                                \
+      Flags                                                                              \
+    };                                                                                   \
+    return info;                                                                         \
   }                                                                                      \
   template <typename T>                                                                  \
   T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \

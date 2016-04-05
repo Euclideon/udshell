@@ -89,7 +89,7 @@ bool Component::IsType(String type) const
   const ComponentDesc *pDesc = pType;
   while (pDesc)
   {
-    if (pDesc->info.id.eq(type))
+    if (pDesc->info.identifier.eq(type))
       return true;
     pDesc = pDesc->pSuperDesc;
   }

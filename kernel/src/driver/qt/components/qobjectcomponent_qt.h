@@ -16,7 +16,7 @@ SHARED_CLASS(QObjectComponent);
 // This shim class wraps a QObject in an ep::Component that is accessible from the EP component system
 class QObjectComponent : public ep::DynamicComponent
 {
-  EP_DECLARE_COMPONENT(QObjectComponent, ep::DynamicComponent, EPKERNEL_PLUGINVERSION, "QObjectComponent desc...", 0)
+  EP_DECLARE_COMPONENT(ep, QObjectComponent, ep::DynamicComponent, EPKERNEL_PLUGINVERSION, "QObjectComponent desc...", 0)
 public:
   QObjectComponent(const ep::ComponentDesc *pType, ep::Kernel *pKernel, ep::SharedString uid, ep::Variant::VarMap initParams);
   virtual ~QObjectComponent();

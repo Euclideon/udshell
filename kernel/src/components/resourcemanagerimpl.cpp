@@ -72,11 +72,11 @@ Variant::VarMap ResourceManagerImpl::GetExtensions() const
 
   for (auto kvp : extensionsRegistry)
   {
-    Array<SharedString> *pCompExts = exts.Get(kvp.value->info.id);
+    Array<SharedString> *pCompExts = exts.Get(kvp.value->info.identifier);
     if (pCompExts)
       pCompExts->pushBack(kvp.key);
     else
-      exts.Insert(kvp.value->info.id, { kvp.key });
+      exts.Insert(kvp.value->info.identifier, { kvp.key });
   }
 
   for (auto item : exts)

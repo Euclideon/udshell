@@ -11,7 +11,7 @@ SHARED_CLASS(Metadata);
 
 class Metadata : public KVPStore
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Metadata, IMetadata, KVPStore, EPKERNEL_PLUGINVERSION, "Metadata resource", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Metadata, IMetadata, KVPStore, EPKERNEL_PLUGINVERSION, "Metadata resource", 0)
 
 public:
   virtual size_t NumRecords() const { return pImpl->NumRecords(); }

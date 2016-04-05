@@ -32,7 +32,7 @@ private:
 
   // TODO: these need to go somewhere else, instantiating this class for these functions instantiates the other functions too that should be specialised for IComponent and friends
   template <typename T>
-  static constexpr auto HasDescriptorImpl(T* t) -> decltype(T::MakeDescriptor(), bool()) { return true; }
+  static constexpr auto HasDescriptorImpl(T* t) -> decltype(T::ComponentInfo(), bool()) { return true; }
   static constexpr bool HasDescriptorImpl(...) { return false; }
   template <typename T>
   static auto GetPropertiesImpl(const T* t) -> decltype(std::enable_if<FunctionBelongsTo<T>(&T::GetProperties)>::type(), Array<const PropertyInfo>()) { return t->GetProperties(); }
@@ -63,7 +63,7 @@ private:
   static ComponentDescInl::CreateInstanceCallback* GetCreateFuncImpl(...)
   {
     return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
-      MutableString128 t(Format, "New: {0} - {1}", _pType->info.id, _uid);
+      MutableString128 t(Format, "New: {0} - {1}", _pType->info.identifier, _uid);
       _pKernel->LogDebug(4, t);
       // TODO: this new can't exist in the wild... need to call back into kernel!!
       void *pMem = epAlloc(sizeof(_ComponentType));
@@ -81,11 +81,11 @@ template<typename _ComponentType, typename ImplType, typename GlueType>
 inline const ComponentDesc* Kernel::RegisterComponentType()
 {
   // check the class has a 'super' member
-  static_assert(CreateHelper<_ComponentType>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Name, SuperType, Version, Description)' declared at the top of _ComponentType");
+  static_assert(CreateHelper<_ComponentType>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Namespace, Name, SuperType, Version, Description)' declared at the top of _ComponentType");
 
   ComponentDescInl *pDesc = epNew ComponentDescInl;
 
-  pDesc->info = _ComponentType::MakeDescriptor();
+  pDesc->info = _ComponentType::ComponentInfo();
   pDesc->baseClass = CreateHelper<_ComponentType>::GetSuper();
 
   pDesc->pInit = CreateHelper<_ComponentType>::GetStaticInit();
@@ -104,7 +104,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
 
   // setup the super class and populate from its meta
   pDesc->pSuperDesc = nullptr;
-  if (!pDesc->info.id.eq("component"))
+  if (!pDesc->info.identifier.eq("ep.component"))
   {
     pDesc->pSuperDesc = GetComponentDesc(pDesc->baseClass);
     EPTHROW_IF(!pDesc->pSuperDesc, epR_InvalidType, "Base Component '{0}' not registered", pDesc->baseClass);

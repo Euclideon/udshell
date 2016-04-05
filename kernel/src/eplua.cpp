@@ -347,7 +347,7 @@ void LuaState::setComponent(Variant key, ComponentRef c, LuaLocation loc)
 // *** bind components to Lua ***
 void LuaState::pushComponentMetatable(const ComponentDesc &desc, bool weakPtr)
 {
-  MutableString64 t; t.append("ep::", desc.info.id, weakPtr ? "*" : "Ref", "\0");
+  MutableString64 t; t.append("ep::", desc.info.identifier, weakPtr ? "*" : "Ref", "\0");
   if (luaL_newmetatable(L, t.ptr) == 0)
     return;
 
@@ -356,7 +356,7 @@ void LuaState::pushComponentMetatable(const ComponentDesc &desc, bool weakPtr)
   lua_setfield(L, -2, "__udtype");
 
   // record the type
-  pushString(desc.info.id);
+  pushString(desc.info.identifier);
   lua_setfield(L, -2, "__type");
 
   if (!weakPtr)
@@ -404,8 +404,12 @@ void LuaState::pushDescriptor(const ComponentDescInl &desc)
   lua_setfield(L, -2, "apiversion");
   pushInt(desc.info.pluginVersion);
   lua_setfield(L, -2, "pluginversion");
-  pushString(desc.info.id);
-  lua_setfield(L, -2, "id");
+  pushString(desc.info.nameSpace);
+  lua_setfield(L, -2, "namespace");
+  pushString(desc.info.name);
+  lua_setfield(L, -2, "name");
+  pushString(desc.info.identifier);
+  lua_setfield(L, -2, "identifier");
   pushString(desc.info.displayName);
   lua_setfield(L, -2, "displayname");
   pushString(desc.info.description);
@@ -671,7 +675,7 @@ int LuaState::help(lua_State* L)
   {
     // general help
     //FgColor(ConsoleColor::Cyan); // TODO: emit ansi color
-    l.print(pDesc->info.id);
+    l.print(pDesc->info.identifier);
 
     //FgColor(); // TODO: emit ansi color
     l.print(pDesc->info.description);

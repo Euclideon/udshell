@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
   <activities>
-    <viewer>
+    <ep.viewer>
       <camera>
         <farplane>7500</farplane>
         <helicoptermode>false</helicoptermode>
@@ -21,8 +21,8 @@
           </bookmark0>
         </bookmarks>
       </scene>
-    </viewer>
-    <viewer>
+    </ep.viewer>
+    <ep.viewer>
       <camera>
         <farplane>7500</farplane>
         <helicoptermode>false</helicoptermode>
@@ -35,6 +35,6 @@
       <scene>
         <url>data/udscene.dae</url>
       </scene>
-    </viewer>
+    </ep.viewer>
   </activities>
 </project>

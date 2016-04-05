@@ -12,7 +12,7 @@ SHARED_CLASS(Broadcaster);
 
 class Broadcaster : public Component
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Broadcaster, IBroadcaster, Component, EPKERNEL_PLUGINVERSION, "Broadcast data written to subscribers", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Broadcaster, IBroadcaster, Component, EPKERNEL_PLUGINVERSION, "Broadcast data written to subscribers", 0)
 
 public:
   virtual size_t Write(Slice<const void> data) { return pImpl->Write(data); }

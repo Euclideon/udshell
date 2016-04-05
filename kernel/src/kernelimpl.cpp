@@ -101,7 +101,7 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   ComponentDescInl *pDesc = epNew ComponentDescInl;
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
-  pDesc->info = Kernel::MakeDescriptor();
+  pDesc->info = Kernel::ComponentInfo();
   pDesc->info.flags = ComponentInfoFlags::Unregistered;
   pDesc->baseClass = Component::ComponentID();
 
@@ -130,7 +130,7 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   return pDesc;
 }
 Kernel::Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine)
-  : Component(Kernel::MakeKernelDescriptor(_pType), nullptr, "kernel0", commandLine)
+  : Component(Kernel::MakeKernelDescriptor(_pType), nullptr, "ep.kernel0", commandLine)
 {
   // alloc impl
   pImpl = UniquePtr<Impl>(epNew KernelImpl(this, commandLine));
@@ -628,15 +628,15 @@ void KernelImpl::RegisterMessageHandler(SharedString _name, MessageHandler messa
 
 const ComponentDesc* KernelImpl::RegisterComponentType(ComponentDescInl *pDesc)
 {
-  if (pDesc->info.id.exists('@') || pDesc->info.id.exists('$') || pDesc->info.id.exists('#'))
+  if (pDesc->info.identifier.exists('@') || pDesc->info.identifier.exists('$') || pDesc->info.identifier.exists('#'))
     EPTHROW_ERROR(epR_InvalidArgument, "Invalid component id");
 
   // disallow duplicates
-  if (componentRegistry.Get(pDesc->info.id))
-    EPTHROW_ERROR(epR_InvalidArgument, "Component of type id '{0}' has already been registered", pDesc->info.id);
+  if (componentRegistry.Get(pDesc->info.identifier))
+    EPTHROW_ERROR(epR_InvalidArgument, "Component of type id '{0}' has already been registered", pDesc->info.identifier);
 
   // add to registry
-  componentRegistry.Insert(pDesc->info.id, ComponentType{ pDesc, 0 });
+  componentRegistry.Insert(pDesc->info.identifier, ComponentType{ pDesc, 0 });
 
   if (bKernelCreated && pDesc->pInit)
     pDesc->pInit(pInstance);
@@ -648,7 +648,14 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
 {
   DynamicComponentDesc *pDesc = epNew DynamicComponentDesc;
 
-  pDesc->info.id = typeDesc["id"].asSharedString();
+  pDesc->info.identifier = typeDesc["identifier"].asSharedString();
+
+  size_t offset = pDesc->info.identifier.findLast('.');
+  EPTHROW_IF(offset == (size_t)-1, epR_InvalidArgument, "Component identifier {0} has no namespace. Use form: namespace.componentname", pDesc->info.identifier);
+
+  pDesc->info.nameSpace = pDesc->info.identifier.slice(0, offset);
+  pDesc->info.name = pDesc->info.identifier.slice(offset+1, pDesc->info.identifier.length);
+
   pDesc->info.displayName = typeDesc["name"].asSharedString();
   pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = EP_APIVERSION;
@@ -662,7 +669,7 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
   pDesc->pInit = nullptr;
   pDesc->pCreateImpl = nullptr;
   pDesc->pCreateInstance = [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
-    MutableString128 t(Format, "New (From VarMap): {0} - {1}", _pType->info.id, _uid);
+    MutableString128 t(Format, "New (From VarMap): {0} - {1}", _pType->info.identifier, _uid);
     _pKernel->LogDebug(4, t);
     const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)_pType;
     DynamicComponentRef spInstance = pDesc->newInstance(KernelRef(_pKernel), initParams);
@@ -721,7 +728,7 @@ const ComponentDesc* KernelImpl::GetComponentDesc(String id)
 ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initParams)
 {
   ComponentType *_pType = componentRegistry.Get(typeId);
-  EPASSERT_THROW(_pType, epR_InvalidArgument, "typeId failed to lookup ComponentType");
+  EPASSERT_THROW(_pType, epR_InvalidArgument, "Unknown component type {0}", typeId);
   EPTHROW_IF(_pType->pDesc->info.flags & ComponentInfoFlags::Abstract, epR_InvalidType, "Cannot create component of abstract type '{0}'", typeId);
 
   try
@@ -729,7 +736,7 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
     const ComponentDescInl *pDesc = _pType->pDesc;
 
     // TODO: should we have a better uid generator than this?
-    MutableString64 newUid(Concat, pDesc->info.id, _pType->createCount++);
+    MutableString64 newUid(Concat, pDesc->info.identifier, _pType->createCount++);
 
     // attempt to create an instance
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, pInstance, newUid, initParams));
@@ -833,7 +840,7 @@ DataSourceRef KernelImpl::CreateDataSourceFromExtension(String ext, Variant::Var
   const ComponentDesc **ppDesc = extensionsRegistry.Get(ext);
   EPASSERT_THROW(ppDesc, epR_Failure, "No datasource for extension {0}", ext);
 
-  return component_cast<DataSource>(CreateComponent((*ppDesc)->info.id, initParams));
+  return component_cast<DataSource>(CreateComponent((*ppDesc)->info.identifier, initParams));
 }
 
 SharedPtr<Renderer> KernelImpl::GetRenderer() const

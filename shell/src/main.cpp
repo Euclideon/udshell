@@ -255,8 +255,10 @@ Array<Variant::VarMap> GetActivitiesInfo()
   for (auto desc : descs)
   {
     Variant::VarMap activityInfo;
-    activityInfo.Insert("id", desc->info.id);
-    activityInfo.Insert("displayName", desc->info.displayName);
+    activityInfo.Insert("namespace", desc->info.nameSpace);
+//    activityInfo.Insert("typename", desc->info.name);
+    activityInfo.Insert("identifier", desc->info.identifier);
+    activityInfo.Insert("name", desc->info.displayName);
     activityInfo.Insert("description", desc->info.description);
     infoArray.pushBack(std::move(activityInfo));
   }
@@ -284,18 +286,18 @@ void Init(String sender, String message, const Variant &data)
   RegisterEPControls();
 
   epscope(fail) { if (!spMainWindow) spKernel->LogError("Error creating MainWindow UI Component\n"); };
-  spMainWindow = spKernel->Call("createqmlcomponent", "window", "qrc:/qml/window.qml", nullptr).as<WindowRef>();
+  spMainWindow = spKernel->Call("createqmlcomponent", "ep.window", "qrc:/qml/window.qml", nullptr).as<WindowRef>();
 
   epscope(fail) { if (!spTopLevelUI) spKernel->LogError("Error creating top Level UI Component\n"); };
-  spTopLevelUI = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/main.qml", nullptr).as<UIComponentRef>();
+  spTopLevelUI = spKernel->Call("createqmlcomponent", "ep.uicomponent", "qrc:/qml/main.qml", nullptr).as<UIComponentRef>();
 
   epscope(fail) { if (!spMessageBox) spKernel->LogError("Error creating MessageBox UI Component\n"); };
-  spMessageBox = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/components/messagebox.qml", Variant::VarMap{{ "name", "messagebox" }}).as<UIComponentRef>();
+  spMessageBox = spKernel->Call("createqmlcomponent", "ep.uicomponent", "qrc:/qml/components/messagebox.qml", Variant::VarMap{{ "name", "messagebox" }}).as<UIComponentRef>();
   spTopLevelUI->Set("messageboxcomp", spMessageBox);
 
   UIComponentRef spConsole;
   epscope(fail) { if (!spConsole) spKernel->LogError("Error creating Console UI Component\n"); };
-  spConsole = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/kernel/console.qml", nullptr).as<UIComponentRef>();
+  spConsole = spKernel->Call("createqmlcomponent", "ep.uicomponent", "qrc:/kernel/console.qml", nullptr).as<UIComponentRef>();
   spTopLevelUI->Set("uiconsole", spConsole);
 
   // Load menus
@@ -317,7 +319,7 @@ void Init(String sender, String message, const Variant &data)
   spTopLevelUI->Set("toolbarcomp", spToolBar);
 
   // New Activity selecter panel
-  auto spActivitySelecter = spKernel->Call("createqmlcomponent", "uicomponent", "qrc:/qml/components/activityselecter.qml", nullptr).as<UIComponentRef>();
+  auto spActivitySelecter = spKernel->Call("createqmlcomponent", "ep.uicomponent", "qrc:/qml/components/activityselecter.qml", nullptr).as<UIComponentRef>();
   spActivitySelecter->Set("activitiesinfo", GetActivitiesInfo());
   spTopLevelUI->Set("activityselecter", spActivitySelecter);
 

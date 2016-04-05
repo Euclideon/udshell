@@ -20,7 +20,7 @@ SHARED_CLASS(Node);
 
 class GeomSource : public DataSource
 {
-  EP_DECLARE_COMPONENT(GeomSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides polygon geometry", 0)
+  EP_DECLARE_COMPONENT(ep, GeomSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides polygon geometry", 0)
 public:
 
   Slice<const String> GetFileExtensions() const override

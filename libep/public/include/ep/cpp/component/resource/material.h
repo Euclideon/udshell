@@ -14,7 +14,7 @@ SHARED_CLASS(Material);
 
 class Material : public Resource
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Material, IMaterial, Resource, EPKERNEL_PLUGINVERSION, "Material Resource", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Material, IMaterial, Resource, EPKERNEL_PLUGINVERSION, "Material Resource", 0)
 public:
   ShaderRef GetShader(ShaderType type) const { return pImpl->GetShader(type); }
   void SetShader(ShaderType type, ShaderRef spShader) { pImpl->SetShader(type, spShader); }

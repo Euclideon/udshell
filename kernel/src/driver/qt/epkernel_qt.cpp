@@ -79,7 +79,7 @@ ComponentDescInl *QtKernel::MakeKernelDescriptor()
   ComponentDescInl *pDesc = epNew ComponentDescInl;
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
-  pDesc->info = QtKernel::MakeDescriptor();
+  pDesc->info = QtKernel::ComponentInfo();
   pDesc->info.flags = ep::ComponentInfoFlags::Unregistered;
   pDesc->baseClass = Kernel::ComponentID();
 
@@ -292,8 +292,10 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file, V
   epscope(fail) { epDelete pDesc; };
 
   pDesc->pSuperDesc = pSuper;
-  pDesc->baseClass = pSuper->info.id;
-  pDesc->info.id = pSuper->info.id;
+  pDesc->baseClass = pSuper->info.identifier;
+  pDesc->info.nameSpace = pSuper->info.nameSpace;
+  pDesc->info.name = pSuper->info.name;
+  pDesc->info.identifier = pSuper->info.identifier;
   pDesc->info.displayName = file;
   pDesc->info.description = SharedString::format("{0} - {1} QML Component", file, pSuper->info.displayName);
   pDesc->info.epVersion = pSuper->info.epVersion;
@@ -307,10 +309,10 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file, V
   pDesc->newInstance = nullptr;
 
   // create the new component (glue and instance)
-  pKernel->LogDebug(4, "New (Unregistered QML Component): {0} - {1}", pDesc->info.id, file);
+  pKernel->LogDebug(4, "New (Unregistered QML Component): {0} - {1}", pDesc->info.identifier, file);
   QmlComponentData data(file, pQmlEngine);
   QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
-  ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, pDesc->info.id, spInstance, initParams);
+  ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, pDesc->info.identifier, spInstance, initParams);
   pDesc->PopulateFromDesc(pSuper);
   spInstance->AttachToGlue(spC.ptr());
 

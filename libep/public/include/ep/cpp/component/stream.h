@@ -22,7 +22,7 @@ EP_ENUM(SeekOrigin,
 
 class Stream : public Broadcaster
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Stream, IStream, Broadcaster, EPKERNEL_PLUGINVERSION, "Stream desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Stream, IStream, Broadcaster, EPKERNEL_PLUGINVERSION, "Stream desc...", 0)
 
 public:
   virtual int Flush() { return pImpl->Flush(); }

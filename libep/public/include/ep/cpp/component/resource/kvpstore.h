@@ -10,7 +10,7 @@ SHARED_CLASS(KVPStore);
 
 class KVPStore : public Resource
 {
-  EP_DECLARE_COMPONENT(KVPStore, Resource, EPKERNEL_PLUGINVERSION, "KVPStore resource", 0)
+  EP_DECLARE_COMPONENT(ep, KVPStore, Resource, EPKERNEL_PLUGINVERSION, "KVPStore resource", 0)
 
 public:
   virtual size_t NumRecords() const { return 0; }

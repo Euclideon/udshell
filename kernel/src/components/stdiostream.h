@@ -16,7 +16,7 @@ SHARED_CLASS(StdIOStream);
 
 class StdIOStream : public Stream
 {
-  EP_DECLARE_COMPONENT(StdIOStream, Stream, EPKERNEL_PLUGINVERSION, "Standard in/out stream", 0)
+  EP_DECLARE_COMPONENT(ep, StdIOStream, Stream, EPKERNEL_PLUGINVERSION, "Standard in/out stream", 0)
 public:
 
   Slice<void> Read(Slice<void> buffer) override;

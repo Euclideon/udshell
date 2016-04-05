@@ -12,7 +12,7 @@ SHARED_CLASS(Viewport);
 
 class Viewport : public UIComponent
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Viewport, IViewport, UIComponent, EPKERNEL_PLUGINVERSION, "UI Rendering Viewport", ComponentInfoFlags::Abstract)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Viewport, IViewport, UIComponent, EPKERNEL_PLUGINVERSION, "UI Rendering Viewport", ComponentInfoFlags::Abstract)
 public:
   ViewRef GetView() const { return pImpl->GetView(); }
   void SetView(const ViewRef &spView) { pImpl->SetView(spView); }

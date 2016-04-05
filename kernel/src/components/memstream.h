@@ -11,7 +11,7 @@ SHARED_CLASS(Buffer);
 
 class MemStream : public Stream
 {
-  EP_DECLARE_COMPONENT(MemStream, Stream, EPKERNEL_PLUGINVERSION, "Memory stream", 0)
+  EP_DECLARE_COMPONENT(ep, MemStream, Stream, EPKERNEL_PLUGINVERSION, "Memory stream", 0)
 public:
 
   Slice<void> Read(Slice<void> buffer) override;

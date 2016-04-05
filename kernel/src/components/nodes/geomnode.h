@@ -14,7 +14,7 @@ SHARED_CLASS(RenderScene);
 
 class GeomNode : public Node
 {
-  EP_DECLARE_COMPONENT(GeomNode, Node, EPKERNEL_PLUGINVERSION, "GeomNode desc...", 0)
+  EP_DECLARE_COMPONENT(ep, GeomNode, Node, EPKERNEL_PLUGINVERSION, "GeomNode desc...", 0)
 public:
 
   ModelRef GetModel() const { return spModel; }

@@ -17,7 +17,7 @@ SHARED_CLASS(RenderScene); // TODO Move RenderScene to epLib
 
 class Node : public Resource
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Node, INode, Resource, EPKERNEL_PLUGINVERSION, "Node desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Node, INode, Resource, EPKERNEL_PLUGINVERSION, "Node desc...", 0)
 public:
   friend class Scene;
   friend class SceneImpl;

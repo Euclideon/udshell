@@ -12,7 +12,7 @@ SHARED_CLASS(DataSource);
 
 class Resource : public Component
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Resource, IResource, Component, EPKERNEL_PLUGINVERSION, "Base resource", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Resource, IResource, Component, EPKERNEL_PLUGINVERSION, "Base resource", 0)
 public:
   MetadataRef GetMetadata() const { return pImpl->GetMetadata(); }
 

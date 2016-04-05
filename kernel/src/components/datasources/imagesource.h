@@ -13,7 +13,7 @@ SHARED_CLASS(ImageSource);
 
 class ImageSource : public DataSource
 {
-  EP_DECLARE_COMPONENT(ImageSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides images", 0)
+  EP_DECLARE_COMPONENT(ep, ImageSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides images", 0)
 public:
 
   Slice<const String> GetFileExtensions() const override

@@ -22,7 +22,7 @@ SHARED_CLASS(Kernel);
 // component API
 class Component : public RefCounted
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Component, IComponent, void, EPKERNEL_PLUGINVERSION, "Base component", 0)
 
 public:
   // virtual members
@@ -43,7 +43,7 @@ public:
   Kernel& GetKernel() const;
   const ComponentDesc* GetDescriptor() const;
 
-  String GetType() const { return pType->info.id; }
+  String GetType() const { return pType->info.identifier; }
   String GetDisplayName() const { return pType->info.displayName; }
   String GetDescription() const { return pType->info.description; }
 
@@ -168,7 +168,7 @@ inline SharedPtr<T> component_cast(ComponentRef spComponent)
   const ComponentDesc *pDesc = spComponent->GetDescriptor();
   while (pDesc)
   {
-    if (pDesc->info.id.eq(T::ComponentID()))
+    if (pDesc->info.identifier.eq(T::ComponentID()))
       return shared_pointer_cast<T>(spComponent);
     pDesc = pDesc->pSuperDesc;
   }

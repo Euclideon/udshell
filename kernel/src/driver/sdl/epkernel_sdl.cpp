@@ -27,7 +27,7 @@ using namespace ep;
 
 class SDLKernel : public Kernel
 {
-  EP_DECLARE_COMPONENT(SDLKernel, Kernel, EPKERNEL_PLUGINVERSION, "SDL Kernel instance", 0)
+  EP_DECLARE_COMPONENT(ep, SDLKernel, Kernel, EPKERNEL_PLUGINVERSION, "SDL Kernel instance", 0)
 public:
   SDLKernel(Variant::VarMap commandLine);
   ~SDLKernel();
@@ -141,7 +141,7 @@ ComponentDescInl *SDLKernel::MakeKernelDescriptor()
   ComponentDescInl *pDesc = epNew ComponentDescInl;
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
-  pDesc->info = SDLKernel::MakeDescriptor();
+  pDesc->info = SDLKernel::ComponentInfo();
   pDesc->info.flags = ComponentInfoFlags::Unregistered;
   pDesc->baseClass = Kernel::ComponentID();
 

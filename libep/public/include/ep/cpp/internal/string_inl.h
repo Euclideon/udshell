@@ -6,6 +6,10 @@ ptrdiff_t epStringifyTemplate(ep::Slice<char> buffer, ep::String format, const T
 ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, nullptr_t, const ep::VarArg *pArgs);
 template<typename C>
 ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, ep::BaseString<C> s, const ep::VarArg *pArgs);
+inline ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, char c, const ep::VarArg *pArgs)     { return epStringify(buffer, format, ep::BaseString<char>(&c, 1), pArgs); }
+inline ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, char16_t c, const ep::VarArg *pArgs) { return epStringify(buffer, format, ep::BaseString<char16_t>(&c, 1), pArgs); }
+inline ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, char32_t c, const ep::VarArg *pArgs) { return epStringify(buffer, format, ep::BaseString<char32_t>(&c, 1), pArgs); }
+inline ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, wchar_t c, const ep::VarArg *pArgs)  { char32_t d = c; return epStringify(buffer, format, ep::BaseString<char32_t>(&d, 1), pArgs); }
 ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, bool b, const ep::VarArg *pArgs);
 ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, int64_t i, const ep::VarArg *pArgs);
 ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, uint64_t i, const ep::VarArg *pArgs);

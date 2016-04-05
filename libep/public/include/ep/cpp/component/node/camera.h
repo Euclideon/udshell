@@ -13,7 +13,7 @@ SHARED_CLASS(View);
 
 class Camera : public Node
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Camera, ICamera, Node, EPKERNEL_PLUGINVERSION, "Camera desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Camera, ICamera, Node, EPKERNEL_PLUGINVERSION, "Camera desc...", 0)
 
 public:
   Double4x4 GetCameraMatrix() const { return pImpl->GetCameraMatrix(); }

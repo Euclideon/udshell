@@ -11,7 +11,7 @@ SHARED_CLASS(Menu);
 
 class Menu : public Resource
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(Menu, IMenu, Resource, EPKERNEL_PLUGINVERSION, "Tree model for menus and toolbars", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Menu, IMenu, Resource, EPKERNEL_PLUGINVERSION, "Tree model for menus and toolbars", 0)
 
 public:
   Variant GetMenuData() const { return pImpl->GetMenuData(); }
