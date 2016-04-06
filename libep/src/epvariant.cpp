@@ -14,50 +14,50 @@ void epVariant_Release(epVariant v)
 epVariant epVariant_CreateVoid()
 {
   epVariant v;
-  new(&v) ep::Variant(ep::Variant::Type::Void);
+  epConstruct(&v) ep::Variant(ep::Variant::Type::Void);
   return v;
 }
 epVariant epVariant_CreateNull()
 {
   epVariant v;
-  new(&v) ep::Variant(nullptr);
+  epConstruct(&v) ep::Variant(nullptr);
   return v;
 }
 epVariant epVariant_CreateBool(char b)
 {
   epVariant v;
-  new(&v) ep::Variant(b ? true : false);
+  epConstruct(&v) ep::Variant(b ? true : false);
   return v;
 }
 epVariant epVariant_CreateInt(int64_t i)
 {
   epVariant v;
-  new(&v) ep::Variant(i);
+  epConstruct(&v) ep::Variant(i);
   return v;
 }
 epVariant epVariant_CreateFloat(double f)
 {
   epVariant v;
-  new(&v) ep::Variant(f);
+  epConstruct(&v) ep::Variant(f);
   return v;
 }
 epVariant epVariant_CreateComponent(epComponent *pComponent)
 {
   epVariant v;
-  new(&v) ep::Variant((ep::ComponentRef&)pComponent);
+  epConstruct(&v) ep::Variant((ep::ComponentRef&)pComponent);
   return v;
 }
 //inline epVariant epVariant_CreateDelegate() {}
 epVariant epVariant_CreateCString(const char *pString)
 {
   epVariant v;
-  new(&v) ep::Variant(ep::String(pString));
+  epConstruct(&v) ep::Variant(ep::String(pString));
   return v;
 }
 epVariant epVariant_CreateString(epString string)
 {
   epVariant v;
-  new(&v) ep::Variant((ep::String&)string);
+  epConstruct(&v) ep::Variant((ep::String&)string);
   return v;
 }
 
@@ -89,14 +89,14 @@ double epVariant_AsFloat(epVariant v)
 epComponent* epVariant_AsComponent(epVariant v)
 {
   epComponent *pC;
-  new(&pC) ep::ComponentRef(((ep::Variant&)v).asComponent());
+  epConstruct(&pC) ep::ComponentRef(((ep::Variant&)v).asComponent());
   return pC;
 }
 //char epVariant_GetDelegate(epVariantHandle v) {}
 epString epVariant_AsString(epVariant v)
 {
   epString r;
-  new(&r) ep::String(((ep::Variant&)v).asString());
+  epConstruct(&r) ep::String(((ep::Variant&)v).asString());
   return r;
 }
 
@@ -234,7 +234,7 @@ Variant::Variant(Slice<Variant> a, bool unsafeReference)
     Variant *pA = internal::SliceAlloc<Variant>(a.length);
     this->p = pA;
     for (size_t j = 0; j < length; ++j)
-      new(&pA[j]) Variant(a.ptr[j]);
+      epConstruct(&pA[j]) Variant(a.ptr[j]);
   }
 }
 
@@ -249,7 +249,7 @@ void Variant::copyContent(const Variant &val)
   {
     case Type::SharedPtr:
     {
-      new((void*)&p) SharedPtr<RefCounted>((const SharedPtr<RefCounted>&)val.sp);
+      epConstruct((void*)&p) SharedPtr<RefCounted>((const SharedPtr<RefCounted>&)val.sp);
       break;
     }
     case Type::String:

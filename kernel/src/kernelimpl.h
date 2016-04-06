@@ -182,7 +182,7 @@ CT* KernelImpl::CreateComponentInstance(Args ...args)
   epscope(fail) { if (pMem) epFree(pMem); };
   EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
 
-  CT *pNew = new (pMem) CT(args...);
+  CT *pNew = epConstruct (pMem) CT(args...);
   pNew->pFreeFunc = [](RefCounted *pMem) { epFree((CT*)pMem); };
 
   return pNew;

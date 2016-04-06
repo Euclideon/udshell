@@ -669,7 +669,7 @@ inline SharedString::SharedString(Concat_T, const Args&... args)
   if (sizeof...(Args) == 0)
     return;
   VarArg proxies[sizeof...(Args)+1] = { VarArg(args)... };
-  new(this) SharedString(concatInternal(Slice<VarArg>(proxies, sizeof...(Args))));
+  epConstruct(this) SharedString(concatInternal(Slice<VarArg>(proxies, sizeof...(Args))));
 }
 template <typename... Args>
 inline SharedString::SharedString(Format_T, String _format, const Args&... args)
@@ -677,7 +677,7 @@ inline SharedString::SharedString(Format_T, String _format, const Args&... args)
   if (!_format)
     return;
   VarArg proxies[sizeof...(Args)+1] = { VarArg(args)... };
-  new(this) SharedString(formatInternal(_format, Slice<VarArg>(proxies, sizeof...(Args))));
+  epConstruct(this) SharedString(formatInternal(_format, Slice<VarArg>(proxies, sizeof...(Args))));
 }
 inline SharedString::SharedString(Sprintf_T, const char *pFormat, ...)
 {
@@ -692,7 +692,7 @@ inline SharedString::SharedString(Sprintf_T, const char *pFormat, ...)
 
   va_end(args);
 
-  new(this) SharedString(std::move(s));
+  epConstruct(this) SharedString(std::move(s));
 }
 
 inline SharedString::SharedString(const epSharedString &s)

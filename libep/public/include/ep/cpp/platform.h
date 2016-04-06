@@ -75,6 +75,8 @@ namespace internal {
 
 #define epDelete delete
 
+#define epConstruct ::new
+
 
 
 #include "ep/cpp/internal/slice_inl.h"

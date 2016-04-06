@@ -13,7 +13,7 @@ extern "C" {
 epSharedString epSharedString_Create(const char *pCString)
 {
   epSharedString s;
-  new(&s) ep::SharedString(pCString);
+  epConstruct(&s) ep::SharedString(pCString);
   return s;
 }
 

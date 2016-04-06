@@ -109,7 +109,7 @@ public:
     if (this != &d)
     {
       this->~Delegate();
-      new (this) Delegate(d);
+      epConstruct (this) Delegate(d);
     }
     return *this;
   }
