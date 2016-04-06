@@ -84,6 +84,8 @@ static Instance s_instance =
   [](Component *pInstance) -> void { pInstance->DecRef(); }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
 
   []() -> void* { return (void*)&KernelImpl::s_varAVLAllocator; }, // TreeAllocator
+
+  []() -> void* { return (void*)&KernelImpl::s_weakRefRegistry; } // weakRefRegistry
 };
 
 struct GlobalInstanceInitializer
@@ -154,6 +156,7 @@ Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCoun
 
 
 AVLTreeAllocator<VariantAVLNode> KernelImpl::s_varAVLAllocator;
+HashMap<internal::SafeProxy<void>*, void*, internal::PointerHash> KernelImpl::s_weakRefRegistry(65536);
 
 KernelImpl::KernelImpl(Kernel *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)

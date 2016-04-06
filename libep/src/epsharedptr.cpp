@@ -3,30 +3,38 @@
 #include "ep/cpp/safeptr.h"
 #include "ep/cpp/avltree.h"
 #include "ep/cpp/hashmap.h"
+#include "ep/cpp/plugin.h"
 
 namespace ep {
 namespace internal {
 
-struct PointerHash
+uint32_t PointerHash::hash(void *pAlloc)
 {
-  static uint32_t hash(void *pAlloc) { return HashPointer(pAlloc); }
-  static bool eq(const void *a, const void *b) { return a == b; }
-};
+  return HashPointer(pAlloc); // Move this back to header once HashPointer is moved out of hashmap.h
+}
 
-static HashMap<SafeProxy<void>*, void*, PointerHash> s_weakRefRegistry(65536);
+HashMap<SafeProxy<void>*, void*, PointerHash> *GetWeakRefRegistry() {return (HashMap<SafeProxy<void>*, void*, PointerHash>*)s_pInstance->WeakRegistry(); }
 
 void* GetSafePtr(void *pAlloc)
 {
-  return *s_weakRefRegistry.InsertLazy(pAlloc, [&]() { return RefCounted::New<SafeProxy<void>>(pAlloc); });
+  auto pRegistry = GetWeakRefRegistry();
+  if (pRegistry)
+    return *pRegistry->InsertLazy(pAlloc, [&]() { return RefCounted::New<SafeProxy<void>>(pAlloc); });
+
+  return nullptr;
 }
 
 void NullifySafePtr(void *pAlloc)
 {
-  SafeProxy<void> **ppProxy = s_weakRefRegistry.Get(pAlloc);
-  if (ppProxy)
+  auto pRegistry = GetWeakRefRegistry();
+  if (pRegistry)
   {
-    (*ppProxy)->pInstance = nullptr;
-    s_weakRefRegistry.Remove(pAlloc);
+    SafeProxy<void> **ppProxy = pRegistry->Get(pAlloc);
+    if (ppProxy)
+    {
+      (*ppProxy)->pInstance = nullptr;
+      pRegistry->Remove(pAlloc);
+    }
   }
 }
 

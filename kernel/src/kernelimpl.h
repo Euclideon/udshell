@@ -147,6 +147,7 @@ public:
   StdCapture *stdErrCapture = nullptr;
 
   static AVLTreeAllocator<VariantAVLNode> s_varAVLAllocator;
+  static HashMap<internal::SafeProxy<void>*, void*, internal::PointerHash> s_weakRefRegistry;
 
   bool bKernelCreated = false;
 

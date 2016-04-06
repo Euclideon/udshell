@@ -2,6 +2,8 @@
 #include "ep/cpp/platform.h"
 #include "ep/cpp/plugin.h"
 #include "ep/cpp/variant.h"
+#include "ep/cpp/hashmap.h"
+#include "ep/cpp/safeptr.h"
 
 namespace ep {
 namespace internal {
@@ -16,6 +18,7 @@ void _Free(void *pMemory);
 } // namespace ep
 
 static ep::AVLTreeAllocator<ep::VariantAVLNode> s_varAVLAllocator;
+static ep::HashMap<ep::internal::SafeProxy<void>*, void*, ep::internal::PointerHash> s_weakRefRegistry(65536);
 
 static ep::Instance s_instance =
 {
@@ -33,6 +36,9 @@ static ep::Instance s_instance =
   [](ep::Component *) -> void { }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
 
   []() -> void* { return (void*)&s_varAVLAllocator; }, // TreeAllocator
+
+  []() -> void* { return (void*)&s_weakRefRegistry; } // weakRefRegistry
+
 };
 
 struct GlobalInstanceInitializer

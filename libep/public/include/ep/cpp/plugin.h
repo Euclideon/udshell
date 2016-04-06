@@ -23,6 +23,8 @@ struct Instance
 
   void(*DestroyComponent)(Component *pInstance);
   void *(*TreeAllocator)();
+
+  void *(*WeakRegistry)();
 };
 
 extern Instance *s_pInstance;
