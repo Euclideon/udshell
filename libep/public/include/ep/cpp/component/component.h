@@ -136,7 +136,7 @@ protected:
     {
       const ComponentDesc *pDesc = pType;
       (const ComponentDesc*&)pType = pType->pSuperDesc;
-      epDelete pDesc;
+      epDelete(pDesc);
     }
   }
 

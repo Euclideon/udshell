@@ -98,7 +98,7 @@ GlobalInstanceInitializer globalInstanceInitializer;
 
 ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
 {
-  ComponentDescInl *pDesc = epNew ComponentDescInl;
+  ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = Kernel::ComponentInfo();
@@ -133,7 +133,7 @@ Kernel::Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine)
   : Component(Kernel::MakeKernelDescriptor(_pType), nullptr, "ep.kernel0", commandLine)
 {
   // alloc impl
-  pImpl = UniquePtr<Impl>(epNew KernelImpl(this, commandLine));
+  pImpl = UniquePtr<Impl>(epNew(KernelImpl, this, commandLine));
   GetImpl()->StartInit(commandLine);
 }
 
@@ -266,11 +266,11 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
 
   // Init capture and broadcast of stdout/stderr
   spStdOutBC = pInstance->CreateComponent<Broadcaster>({ { "name", "stdoutbc" } });
-  stdOutCapture = epNew StdCapture(stdout);
-  epscope(fail) { epDelete stdOutCapture; };
+  stdOutCapture = epNew(StdCapture, stdout);
+  epscope(fail) { epDelete(stdOutCapture); };
   spStdErrBC = pInstance->CreateComponent<Broadcaster>({ { "name", "stderrbc" } });
-  stdErrCapture = epNew StdCapture(stderr);
-  epscope(fail) { epDelete stdErrCapture; };
+  stdErrCapture = epNew(StdCapture, stderr);
+  epscope(fail) { epDelete(stdErrCapture); };
 
   // create lua VM
   spLua = pInstance->CreateComponent<Lua>();
@@ -312,8 +312,8 @@ KernelImpl::~KernelImpl()
   spResourceManager = nullptr;
   spCommandManager = nullptr;
 
-  epDelete stdOutCapture;
-  epDelete stdErrCapture;
+  epDelete (stdOutCapture);
+  epDelete (stdErrCapture);
   stdOutCapture = nullptr;
   stdErrCapture = nullptr;
 
@@ -338,7 +338,7 @@ KernelImpl::~KernelImpl()
   epHAL_Deinit();
 
   for (const auto &c : componentRegistry)
-    epDelete c.value.pDesc;
+    epDelete(c.value.pDesc);
 }
 
 void KernelImpl::Shutdown()
@@ -646,7 +646,7 @@ const ComponentDesc* KernelImpl::RegisterComponentType(ComponentDescInl *pDesc)
 
 const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
 {
-  DynamicComponentDesc *pDesc = epNew DynamicComponentDesc;
+  DynamicComponentDesc *pDesc = epNew(DynamicComponentDesc);
 
   pDesc->info.identifier = typeDesc["identifier"].asSharedString();
 

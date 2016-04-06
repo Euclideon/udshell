@@ -76,7 +76,7 @@ using ep::SharedString;
 
 ComponentDescInl *QtKernel::MakeKernelDescriptor()
 {
-  ComponentDescInl *pDesc = epNew ComponentDescInl;
+  ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = QtKernel::ComponentInfo();
@@ -288,8 +288,8 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file, V
   EPTHROW_IF(!pSuper, epR_InvalidType, "Base Component '{0}' not registered", superTypeId);
 
   // generate unregistered component descriptor
-  DynamicComponentDesc *pDesc = epNew DynamicComponentDesc;
-  epscope(fail) { epDelete pDesc; };
+  DynamicComponentDesc *pDesc = epNew(DynamicComponentDesc);
+  epscope(fail) { epDelete(pDesc); };
 
   pDesc->pSuperDesc = pSuper;
   pDesc->baseClass = pSuper->info.identifier;

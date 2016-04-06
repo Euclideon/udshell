@@ -27,6 +27,8 @@ template <typename C, typename I>
 class BaseImpl : public I
 {
   friend C;
+  template <typename T>
+  friend void ::_epDelete(T *pMemory);
 
 public:
   using Instance = C;

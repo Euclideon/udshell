@@ -55,7 +55,7 @@ private:
   static SharedString GetSuperImpl(...) { return nullptr; }
 
   template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
-  static CreateFunc GetCreateImplImpl(T* t) { return [](Component *pInstance, Variant::VarMap initParams) -> void* { return epNew ImplType(pInstance, initParams); }; }
+  static CreateFunc GetCreateImplImpl(T* t) { return [](Component *pInstance, Variant::VarMap initParams) -> void* { return epNew(ImplType,pInstance, initParams); }; }
   static CreateFunc GetCreateImplImpl(...) { return nullptr; }
 
   template <typename T>
@@ -82,7 +82,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
   // check the class has a 'super' member
   static_assert(CreateHelper<_ComponentType>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Namespace, Name, SuperType, Version, Description)' declared at the top of _ComponentType");
 
-  ComponentDescInl *pDesc = epNew ComponentDescInl;
+  ComponentDescInl *pDesc = epNew(ComponentDescInl);
 
   pDesc->info = _ComponentType::ComponentInfo();
   pDesc->baseClass = CreateHelper<_ComponentType>::GetSuper();

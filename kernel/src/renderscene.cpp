@@ -456,7 +456,7 @@ void Renderer::UDThread()
         job->spView = nullptr;
         spView->GetImpl<ViewImpl>()->SetLatestFrame(job);
       }
-      epDelete this;
+      epDelete(this);
     }
   };
 
@@ -482,7 +482,7 @@ void Renderer::UDThread()
       // TODO: message? produce an default/invalid/failed image?
     }
 
-    JobDone *done = epNew JobDone(job);
+    JobDone *done = epNew(JobDone, job);
     pKernel->DispatchToMainThread(MakeDelegate(done, &JobDone::FinishJob));
   }
 

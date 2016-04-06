@@ -30,34 +30,46 @@ namespace internal {
 
   template<typename T, bool isref, typename... Args>
   struct Create;
+
   template<typename T, typename... Args>
-  struct Create<T, false, Args...> {
+  struct Create<T, false, Args...>
+  {
     epforceinline static UniquePtr<T> create(Args... args);
   };
+
   template<typename T, typename... Args>
-  struct Create<T, true, Args...> {
+  struct Create<T, true, Args...>
+  {
     epforceinline static UniquePtr<T> create(Args... args);
   };
 
   template<typename T, bool isref>
   struct Acquire;
+
   template<class T>
-  struct Acquire<T, false> {
+  struct Acquire<T, false>
+  {
     epforceinline static void acquire(T *ptr);
   };
+
   template<class T>
-  struct Acquire<T, true> {
+  struct Acquire<T, true>
+  {
     epforceinline static void acquire(T *ptr);
   };
 
   template<typename T, bool isref>
   struct Release;
+
   template<class T>
-  struct Release<T, false> {
+  struct Release<T, false>
+  {
     epforceinline static void release(T *ptr);
   };
+
   template<class T>
-  struct Release<T, true> {
+  struct Release<T, true>
+  {
     epforceinline static void release(T *ptr);
   };
 
@@ -243,6 +255,7 @@ public:
   UniquePtr() {}
   UniquePtr(nullptr_t) {}
 
+  // NOTE: This function is potentially dangerous. If it is passed a pointer to something that wasn't allocated from our heap it will result in a crash on the call to delete.
   explicit UniquePtr(T *p) : pInstance(p)
   {
     internal::Acquire<T, std::is_base_of<RefCounted, T>::value>::acquire(pInstance);
@@ -442,7 +455,7 @@ namespace internal {
   template<class T, typename... Args>
   epforceinline UniquePtr<T> Create<T, false, Args...>::create(Args... args)
   {
-    return UniquePtr<T>(epNew T(args...));
+    return UniquePtr<T>(epNew(T,args...));
   }
   template<class T, typename... Args>
   epforceinline UniquePtr<T> Create<T, true, Args...>::create(Args... args)
@@ -468,7 +481,7 @@ namespace internal {
   template<class T>
   epforceinline void Release<T, false>::release(T *ptr)
   {
-    epDelete ptr;
+    epDelete(ptr);
   }
   template<class T>
   epforceinline void Release<T, true>::release(T *ptr)
