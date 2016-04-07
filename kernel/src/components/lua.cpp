@@ -26,12 +26,12 @@ Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant:
   : Component(pType, pKernel, uid, initParams)
 {
   spOutputBC = pKernel->CreateComponent<Broadcaster>();
-  pLua = epNew LuaState(pKernel);
+  pLua = epNew(LuaState, pKernel);
 }
 
 Lua::~Lua()
 {
-  epDelete pLua;
+  epDelete(pLua);
 }
 
 Variant Lua::GetGlobal(Variant key) const

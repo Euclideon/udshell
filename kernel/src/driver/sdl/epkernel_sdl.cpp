@@ -138,7 +138,7 @@ void SDLKernel::EventLoop()
 
 ComponentDescInl *SDLKernel::MakeKernelDescriptor()
 {
-  ComponentDescInl *pDesc = epNew ComponentDescInl;
+  ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
 
   pDesc->info = SDLKernel::ComponentInfo();
