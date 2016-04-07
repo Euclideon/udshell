@@ -22,6 +22,11 @@ ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString
   return ep::MutableString<ep::internal::VariantSmallStringSize>(byteArray.data(), byteArray.size());
 }
 
+ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQByteArray(const QByteArray &byteArray)
+{
+  return ep::MutableString<ep::internal::VariantSmallStringSize>(byteArray.data(), byteArray.size());
+}
+
 }
 
 using ep::Variant;

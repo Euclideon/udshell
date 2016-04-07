@@ -19,6 +19,7 @@
 namespace qt {
 
 ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string);
+ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQByteArray(const QByteArray &byteArray);
 
 class QtDelegate : public QObject
 {

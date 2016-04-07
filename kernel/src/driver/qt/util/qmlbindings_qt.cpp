@@ -27,21 +27,21 @@ using ep::Slice;
 class QtPropertyData : public RefCounted
 {
 public:
-  QtPropertyData(String propertyId) : propertyId(propertyId) {}
-  String propertyId;
+  QtPropertyData(const QMetaProperty &_property) : property(_property) {}
+  QMetaProperty property;
 };
 
 class QtMethodData : public RefCounted
 {
 public:
-  QtMethodData(QMetaMethod method) : method(method) {}
+  QtMethodData(const QMetaMethod &_method) : method(_method) {}
   QMetaMethod method;
 };
 
 class QtEventData : public RefCounted
 {
 public:
-  QtEventData(QMetaMethod method) : method(method) {}
+  QtEventData(const QMetaMethod &_method) : method(_method) {}
   ~QtEventData() { /* free sigToDel... */ }
   QMetaMethod method;
   mutable Array<QtSignalToDelegate*> sigToDel;
@@ -53,23 +53,18 @@ public:
   Variant getter(Slice<const Variant>, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
-    const QObject *pQObject = (const QObject*)((ep::Component*)this)->GetUserData();
-    return Variant(pQObject->property(data.propertyId.toStringz()));
+    return Variant(data.property.read((const QObject*)((ep::Component*)this)->GetUserData()));
   }
 
   Variant setter(Slice<const Variant> args, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
-    pQObject->setProperty(data.propertyId.toStringz(), args[0].as<QVariant>());
+    data.property.write((QObject*)((ep::Component*)this)->GetUserData(), args[0].as<QVariant>());
     return Variant();
   }
 
   Variant call(Slice<const Variant> values, const RefCounted &_data)
   {
-    const QtMethodData &data = (const QtMethodData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
-
     // TODO: do better runtime handling of this rather than assert since this can come from the user - check against Q_METAMETHOD_INVOKE_MAX_ARGS
     // TODO: error output??
     EPASSERT(values.length <= 10, "Attempting to call method shim with more than 10 arguments");
@@ -90,6 +85,8 @@ public:
     }
 
     QVariant retVal;
+    const QtMethodData &data = (const QtMethodData&)_data;
+    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
     data.method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
                            args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
 
@@ -111,77 +108,49 @@ public:
 namespace internal {
 
 // Helper function to dynamically populate the component descriptor with the QObject's meta data
-void PopulateComponentDesc(ep::Component *pComponent, QObject *pObject)
+void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
 {
   using namespace ep;
-
-  // TODO: add built-in properties, methods and events
-
   const QMetaObject *pMetaObject = pObject->metaObject();
 
   // Inject the properties
-  for (int i = 0; i < pMetaObject->propertyCount(); ++i)
+  for (int i = pMetaObject->propertyOffset(); i < pMetaObject->propertyCount(); ++i)
   {
-    // TODO: move this to class
-    static char propertyDescStr[] = "Qt Component Property";
-
+    static SharedString propertyDescStr("Qt Component Property");
     QMetaProperty property = pMetaObject->property(i);
 
-    // TODO: keep a list of string names that we manage so we can free
-    // TODO: type & flags
-    SharedString propertyName = AllocUDStringFromQString(property.name());
-    PropertyInfo info = { propertyName, propertyName, propertyDescStr };
+    SharedString propertyName = AllocUDStringFromQString(property.name()).toLower();
+    auto data = SharedPtr<QtPropertyData>::create(property);
+    auto getterShim = (property.isReadable() ? MethodShim(&QtShims::getter, data) : MethodShim(nullptr));
+    auto setterShim = (property.isWritable() ? MethodShim(&QtShims::setter, data) : MethodShim(nullptr));
 
-    // TODO: have non lookup qmlproperty version and lookup version for the dynamic properties
-    // TODO: list of qmlproperty - shared between getter and setter
-    // TODO: store list to free getter/setter?
-    auto data = SharedPtr<QtPropertyData>::create(propertyName);
-
-    auto getterShim = MethodShim(&QtShims::getter, data);
-    auto setterShim = MethodShim(&QtShims::setter, data);
-    pComponent->AddDynamicProperty(info, &getterShim, &setterShim);
+    pDesc->propertyTree.Insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyName, propertyDescStr }, getterShim, setterShim));
   }
 
-  // TODO: Inject the dynamic properties?
-  // TODO: hook up to new property signal
-  //foreach(const QByteArray &propName, pObject->dynamicPropertyNames())
-  //{
-  //qDebug() << "DYNAMIC PROPERTY " << propName;
-  //}
-
-  // TODO: Inject the methods
-  for (int i = 0; i < pMetaObject->methodCount(); ++i)
+  for (int i = pMetaObject->methodOffset(); i < pMetaObject->methodCount(); ++i)
   {
+    // Inject the methods
     QMetaMethod method = pMetaObject->method(i);
     if (method.methodType() == QMetaMethod::Slot)
     {
-      // TODO: move this to class
-      static char methodDescStr[] = "Qt Component Method";
+      static SharedString methodDescStr("Qt Component Method");
 
-      // TODO: keep list of strings
-      // TODO: keep free list of methods
-      SharedString methodName = AllocUDStringFromQString(method.name());
-      MethodInfo info = { methodName, methodDescStr, nullptr };
-
+      SharedString methodName = AllocUDStringFromQString(method.name()).toLower();
       auto data = SharedPtr<QtMethodData>::create(method);
-
       auto shim = MethodShim(&QtShims::call, data);
-      pComponent->AddDynamicMethod(info, &shim);
+
+      pDesc->methodTree.Insert(methodName, MethodDesc(MethodInfo{ methodName, methodDescStr }, shim));
     }
+    // Inject the events
     else if (method.methodType() == QMetaMethod::Signal)
     {
-      // TODO: move this to class
-      static char eventDescStr[] = "Qt Component Event";
+      static SharedString eventDescStr("Qt Component Event");
 
-      // TODO: keep list of strings
-      // TODO: keep free list of events
-      SharedString eventName = AllocUDStringFromQString(method.name());
-      EventInfo info = { eventName, eventName, eventDescStr, nullptr };
-
+      SharedString eventName = AllocUDStringFromQString(method.name()).toLower();
       auto data = SharedPtr<QtEventData>::create(method);
-
       auto shim = EventShim(&QtShims::subscribe, data);
-      pComponent->AddDynamicEvent(info, &shim);
+
+      pDesc->eventTree.Insert(eventName, EventDesc(EventInfo{ eventName, eventName, eventDescStr }, shim));
     }
   }
 }

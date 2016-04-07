@@ -178,7 +178,7 @@ void ComponentImpl::RemoveDynamicEvent(String _name)
 
 Variant ComponentImpl::Get(String property) const
 {
-  const PropertyDesc *pDesc = GetPropertyDesc(property);
+  const PropertyDesc *pDesc = pInstance->GetPropertyDesc(property);
   if (!pDesc || !pDesc->getter)
   {
     // TODO: throw in this case?
@@ -192,7 +192,7 @@ Variant ComponentImpl::Get(String property) const
 }
 void ComponentImpl::Set(String property, const Variant &value)
 {
-  const PropertyDesc *pDesc = GetPropertyDesc(property);
+  const PropertyDesc *pDesc = pInstance->GetPropertyDesc(property);
   if (!pDesc || !pDesc->setter || pDesc->flags & epPF_Immutable)
   {
     // TODO: throw in this case?
@@ -209,10 +209,10 @@ void ComponentImpl::Set(String property, const Variant &value)
 
 Variant ComponentImpl::Call(String method, Slice<const Variant> args)
 {
-  const MethodDesc *pDesc = GetMethodDesc(method);
+  const MethodDesc *pDesc = pInstance->GetMethodDesc(method);
   if (!pDesc)
   {
-    const StaticFuncDesc *pFunc = GetStaticFuncDesc(method);
+    const StaticFuncDesc *pFunc = pInstance->GetStaticFuncDesc(method);
     if (!pFunc)
     {
       // TODO: throw in this case?
@@ -230,7 +230,7 @@ Variant ComponentImpl::Call(String method, Slice<const Variant> args)
 
 void ComponentImpl::Subscribe(String eventName, const VarDelegate &d)
 {
-  const EventDesc *pDesc = GetEventDesc(eventName);
+  const EventDesc *pDesc = pInstance->GetEventDesc(eventName);
   if (!pDesc)
   {
     pInstance->LogWarning(2, "No event '{0}' for component '{1}'", eventName, pInstance->name.empty() ? pInstance->uid : pInstance->name);

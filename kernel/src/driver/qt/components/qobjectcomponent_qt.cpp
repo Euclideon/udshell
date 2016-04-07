@@ -42,18 +42,6 @@ QObjectComponent::~QObjectComponent()
     delete pQObject;
 }
 
-const ep::MethodDesc *QObjectComponent::GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags) const
-{
-  /*  if (!(enumerateFlags & EnumerateFlags::NoDynamic))
-  {
-  const Variant *pVal = qobject.Get(_name);
-  if (pVal)
-  return CacheMethodDesc(_name, pVal->as<Variant::VarDelegate>());
-  }
-  return Super::GetMethodDesc(_name, enumerateFlags);*/
-  return nullptr;
-}
-
 // PRIVATE QOBJECTCOMPONENTS ONLY -----------------------------------------------------------------
 
 // Called by the Kernel following construction of the enclosing Glue Component
@@ -71,10 +59,9 @@ void QObjectComponent::AttachToGlue(Component *pGlue)
   ComponentDescInl *pDesc = (ComponentDescInl*)pThis->GetDescriptor();
   if (pDesc->info.flags & ComponentInfoFlags::Unpopulated)
   {
-    internal::PopulateComponentDesc(pThis, pQObject);
+    internal::PopulateComponentDesc(pDesc, pQObject);
     pDesc->info.flags &= ~ComponentInfoFlags::Unpopulated;
   }
-
   if (pThis->IsType("ep.window"))
   {
     EPTHROW_IF(!pQObject->isWindowType(), epR_Failure, "Window component must create a QWindow based object");

@@ -60,6 +60,23 @@ public:
   {
     GetImpl<QtWindowImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
   }
+
+  /*const ep::PropertyDesc *GetPropertyDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
+  {
+    return GetImpl<QtWindowImpl>()->spQObject->GetPropertyDesc(_name, enumerateFlags);
+  }
+  const ep::MethodDesc *GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
+  {
+    return GetImpl<QtWindowImpl>()->spQObject->GetMethodDesc(_name, enumerateFlags);
+  }
+  const ep::EventDesc *GetEventDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
+  {
+    return GetImpl<QtWindowImpl>()->spQObject->GetEventDesc(_name, enumerateFlags);
+  }
+  const ep::StaticFuncDesc *GetStaticFuncDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
+  {
+    return GetImpl<QtWindowImpl>()->spQObject->GetStaticFuncDesc(_name, enumerateFlags);
+  }*/
 };
 
 } // namespace qt
