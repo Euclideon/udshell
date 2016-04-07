@@ -44,15 +44,17 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
   {
     // TODO: replace this with something more robust - maybe a full logging system and status console
     switch (type) {
-      case QtDebugMsg:
-        spKernel->LogDebug(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
-        break;
       case QtWarningMsg:
         spKernel->LogWarning(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
       case QtCriticalMsg:
       case QtFatalMsg:
         spKernel->LogError(SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        break;
+      case QtDebugMsg:
+      default:
+        spKernel->LogDebug(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        break;
     }
   }
   else
