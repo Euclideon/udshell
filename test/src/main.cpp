@@ -11,7 +11,6 @@ namespace internal {
 extern bool gUnitTesting;
 
 void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line);
-void *_AllocAligned(size_t size, size_t alignment, epAllocationFlags flags, const char * pFile, int line);
 void _Free(void *pMemory);
 
 } // namespace internal
@@ -26,8 +25,6 @@ static ep::Instance s_instance =
   nullptr,        // pKernelInstance;
 
   [](size_t size, epAllocationFlags flags, const char* pFile, int line) -> void* { return ep::internal::_Alloc(size, flags, pFile, line); }, //  Alloc
-
-  [](size_t size, size_t alignment, epAllocationFlags flags, const char *pFile, int line) -> void* { return ep::internal::_AllocAligned(size, alignment, flags, pFile, line); }, // AllocAligned
 
   [](void *pMem) -> void { ep::internal::_Free(pMem); }, // Free
 
