@@ -30,7 +30,7 @@ inline T* append(T *pBuffer) { return pBuffer; }
 template<typename T, typename U, typename... Args>
 inline T* append(T *pBuffer, U &&a, Args&&... args)
 {
-  new((void*)pBuffer) T(std::forward<U>(a));
+  epConstruct((void*)pBuffer) T(std::forward<U>(a));
   append(pBuffer + 1, std::forward<Args>(args)...);
   return pBuffer;
 }
@@ -523,7 +523,7 @@ inline Array<T, Count>::Array(Array<T, Count> &&rval)
     else
     {
       for (size_t i = 0; i < this->length; ++i)
-        new((void*)&this->ptr[i]) T(std::move(rval.ptr[i]));
+        epConstruct((void*)&this->ptr[i]) T(std::move(rval.ptr[i]));
     }
   }
 }
@@ -540,7 +540,7 @@ inline Array<T, Count>::Array(U *ptr, size_t length)
   //  else
   {
     for (size_t i = 0; i < length; ++i)
-      new((void*)&this->ptr[i]) T(ptr[i]);
+      epConstruct((void*)&this->ptr[i]) T(ptr[i]);
   }
 }
 
@@ -586,7 +586,7 @@ inline void Array<T, Count>::reserve(size_t count)
       {
         for (size_t i = 0; i < this->length; ++i)
         {
-          new((void*)&(pNew[i])) T(std::move(this->ptr[i]));
+          epConstruct((void*)&(pNew[i])) T(std::move(this->ptr[i]));
           this->ptr[i].~T();
         }
       }
@@ -602,7 +602,7 @@ inline void Array<T, Count>::alloc(size_t count)
   clear();
   reserve(count);
   for (size_t i = 0; i < count; ++i)
-    new(&this->ptr[i]) T();
+    epConstruct(&this->ptr[i]) T();
   this->length = count;
 }
 template <typename T, size_t Count>
@@ -617,7 +617,7 @@ inline void Array<T, Count>::resize(size_t count)
   {
     reserve(count);
     for (size_t i = this->length; i < count; ++i)
-      new(&this->ptr[i]) T();
+      epConstruct(&this->ptr[i]) T();
   }
   this->length = count;
 }
@@ -643,7 +643,7 @@ inline Array<T, Count>& Array<T, Count>::operator =(const Array<T, Count> &rh)
   if (this != &rh)
   {
     this->~Array();
-    new(this) Array<T, Count>(rh);
+    epConstruct(this) Array<T, Count>(rh);
   }
   return *this;
 }
@@ -653,7 +653,7 @@ inline Array<T, Count>& Array<T, Count>::operator =(Array<T, Count> &&rval)
   if (this != &rval)
   {
     this->~Array();
-    new(this) Array<T, Count>(std::move(rval));
+    epConstruct(this) Array<T, Count>(std::move(rval));
   }
   return *this;
 }
@@ -663,7 +663,7 @@ template <typename U>
 inline Array<T, Count>& Array<T, Count>::operator =(Slice<U> rh)
 {
   this->~Array();
-  new(this) Array<T, Count>(rh.ptr, rh.length);
+  epConstruct(this) Array<T, Count>(rh.ptr, rh.length);
   return *this;
 }
 
@@ -672,7 +672,7 @@ template <typename U>
 inline Array<T, Count>& Array<T, Count>::pushBack(U &&item)
 {
   reserve(this->length + 1);
-  new((void*)&(this->ptr[this->length++])) T(std::forward<U>(item));
+  epConstruct((void*)&(this->ptr[this->length++])) T(std::forward<U>(item));
   return *this;
 }
 
@@ -689,7 +689,7 @@ T Array<T, Count>::popFront()
   for (size_t i = 1; i < this->length; ++i)
   {
     this->ptr[i-1].~T();
-    new((void*)&this->ptr[i-1]) T(std::move(this->ptr[i]));
+    epConstruct((void*)&this->ptr[i-1]) T(std::move(this->ptr[i]));
   }
   this->ptr[--this->length].~T();
   return std::move(copy);
@@ -707,7 +707,7 @@ template <typename T, size_t Count>
 inline T& Array<T, Count>::pushBack()
 {
   reserve(this->length + 1);
-  new((void*)&(this->ptr[this->length])) T();
+  epConstruct((void*)&(this->ptr[this->length])) T();
   return this->ptr[this->length++];
 }
 
@@ -796,7 +796,7 @@ inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
     rval.ptr = nullptr;
   }
   else
-    new(this) SharedArray<T>(Slice<T>(rval));
+    epConstruct(this) SharedArray<T>(Slice<T>(rval));
 }
 
 template <typename T>
@@ -810,7 +810,7 @@ inline SharedArray<T>::SharedArray(U *ptr, size_t length)
 //  else
   {
     for (size_t i = 0; i < length; ++i)
-      new((void*)&this->ptr[i]) T(ptr[i]);
+      epConstruct((void*)&this->ptr[i]) T(ptr[i]);
   }
 }
 
@@ -858,7 +858,7 @@ inline SharedArray<T>& SharedArray<T>::operator =(const SharedArray<T> &rh)
   if (this->ptr != rh.ptr)
   {
     this->~SharedArray();
-    new(this) SharedArray<T>(rh);
+    epConstruct(this) SharedArray<T>(rh);
   }
   return *this;
 }
@@ -869,7 +869,7 @@ inline SharedArray<T>& SharedArray<T>::operator =(SharedArray<T> &&rval)
   if (this != &rval)
   {
     this->~SharedArray();
-    new(this) SharedArray<T>(std::move(rval));
+    epConstruct(this) SharedArray<T>(std::move(rval));
   }
   return *this;
 }

@@ -87,7 +87,7 @@ public:
     static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
-    T *ptr = new(pMem) T(args...);
+    T *ptr = epConstruct(pMem) T(args...);
     ptr->pFreeFunc = [](RefCounted *pMem) { epFree((T*)pMem); };
     return SharedPtr<T>(ptr);
   }
@@ -355,7 +355,7 @@ public:
     static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
-    T *ptr = new(pMem) T(args...);
+    T *ptr = epConstruct(pMem) T(args...);
     ptr->pFreeFunc = [](RefCounted *pMem) { epFree((T*)pMem); };
     return ptr;
   }
@@ -450,7 +450,7 @@ namespace internal {
     void *pMem = epAlloc(sizeof(T));
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
     using U = typename std::remove_const<T>::type;
-    UniquePtr<U> up(new(pMem) U(args...));
+    UniquePtr<U> up(epConstruct(pMem) U(args...));
     up->pFreeFunc = [](RefCounted *pMem) { epFree((U*)pMem); };
     return std::move(up);
   }

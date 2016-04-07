@@ -107,7 +107,7 @@ static int SendMessage(lua_State *L)
   // get args (is present)
   Variant args;
   if (numArgs >= 4)
-    new(&args) Variant(Variant::luaGet(l, 4));
+    epConstruct(&args) Variant(Variant::luaGet(l, 4));
 
   l.kernel()->SendMessage(target, sender, message, args);
 
@@ -134,9 +134,9 @@ static int CreateComponent(lua_State *L)
   Variant args;
   if (numArgs >= 2)
   {
-    new(&args) Variant(Variant::luaGet(l, 2));
+    epConstruct(&args) Variant(Variant::luaGet(l, 2));
     if (args.is(Variant::SharedPtrType::AssocArray))
-      new(&init) Variant::VarMap(args.asAssocArray());
+      epConstruct(&init) Variant::VarMap(args.asAssocArray());
   }
 
   ComponentRef c = nullptr;
@@ -451,7 +451,7 @@ void LuaState::pushComponent(const ComponentRef &c)
     return;
   }
 
-  new(lua_newuserdata(L, sizeof(ComponentRef))) ComponentRef(c);
+  epConstruct(lua_newuserdata(L, sizeof(ComponentRef))) ComponentRef(c);
   pushComponentMetatable(*c->GetDescriptor(), false);
   lua_setmetatable(L, -2);
 }
@@ -464,7 +464,7 @@ void LuaState::pushComponent(Component *pC)
     return;
   }
 
-  new(lua_newuserdata(L, sizeof(Component*))) Component*(pC);
+  epConstruct(lua_newuserdata(L, sizeof(Component*))) Component*(pC);
   pushComponentMetatable(*pC->GetDescriptor(), true);
   lua_setmetatable(L, -2);
 }
@@ -634,7 +634,7 @@ int LuaState::method(lua_State *L)
     pArgs = (Variant*)alloca(sizeof(Variant)*numArgs);
 
   for (int i = 0; i < numArgs; ++i)
-    new(&pArgs[i]) Variant(Variant::luaGet(l, 2 + i));
+    epConstruct(&pArgs[i]) Variant(Variant::luaGet(l, 2 + i));
 
   Variant v(pM->call(c.ptr(), Slice<Variant>(pArgs, numArgs)));
 
@@ -804,7 +804,7 @@ void LuaState::pushDelegate(const VarDelegate &d)
   // TODO: detect if d is a lua function delegate
   //       if it is, push the lua function directly...
 
-  new(lua_newuserdata(L, sizeof(VarDelegate))) VarDelegate(d);
+  epConstruct(lua_newuserdata(L, sizeof(VarDelegate))) VarDelegate(d);
   pushDelegateMetatable();
   lua_setmetatable(L, -2);
   lua_pushcclosure(L, &callDelegate, 1);
@@ -898,7 +898,7 @@ int LuaState::callDelegate(lua_State *L)
   Variant *pArgs = numArgs > 0 ? (Variant*)alloca(sizeof(Variant)*numArgs) : nullptr;
 
   for (int i = 0; i < numArgs; ++i)
-    new(&pArgs[i]) Variant(Variant::luaGet(l, 1 + i));
+    epConstruct(&pArgs[i]) Variant(Variant::luaGet(l, 1 + i));
 
   Variant v(d(Slice<Variant>(pArgs, numArgs)));
 
@@ -968,7 +968,7 @@ private:
 
 void LuaState::pushEvent(const ComponentRef &c, const EventDesc &desc)
 {
-  new(lua_newuserdata(L, sizeof(LuaEvent))) LuaEvent(c, desc);
+  epConstruct(lua_newuserdata(L, sizeof(LuaEvent))) LuaEvent(c, desc);
   pushEventMetatable();
   lua_setmetatable(L, -2);
 }

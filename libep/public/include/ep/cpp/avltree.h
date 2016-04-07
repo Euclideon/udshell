@@ -75,8 +75,8 @@ public:
   V& Insert(K &&key, V &&rval)
   {
     Node *node = Allocator::Get().Alloc();
-    new(&node->k) K(std::move(key));
-    new(&node->v) V(std::move(rval));
+    epConstruct(&node->k) K(std::move(key));
+    epConstruct(&node->v) V(std::move(rval));
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
@@ -85,8 +85,8 @@ public:
   V& Insert(const K &key, V &&rval)
   {
     Node *node = Allocator::Get().Alloc();
-    new(&node->k) K(key);
-    new(&node->v) V(std::move(rval));
+    epConstruct(&node->k) K(key);
+    epConstruct(&node->v) V(std::move(rval));
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
@@ -95,8 +95,8 @@ public:
   V& Insert(K &&key, const V &v)
   {
     Node *node = Allocator::Get().Alloc();
-    new(&node->k) K(std::move(key));
-    new(&node->v) V(v);
+    epConstruct(&node->k) K(std::move(key));
+    epConstruct(&node->v) V(v);
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
@@ -105,8 +105,8 @@ public:
   V& Insert(const K &key, const V &v)
   {
     Node *node = Allocator::Get().Alloc();
-    new(&node->k) K(key);
-    new(&node->v) V(v);
+    epConstruct(&node->k) K(key);
+    epConstruct(&node->v) V(v);
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
@@ -116,8 +116,8 @@ public:
   V& Insert(KVP<K, V> &&kvp)
   {
     Node *node = Allocator::Get().Alloc();
-    new(&node->k) K(std::move(kvp.key));
-    new(&node->v) V(std::move(kvp.value));
+    epConstruct(&node->k) K(std::move(kvp.key));
+    epConstruct(&node->v) V(std::move(kvp.value));
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
@@ -126,8 +126,8 @@ public:
   V& Insert(const KVP<K, V> &v)
   {
     Node *node = Allocator::Get().Alloc();
-    new(&node->k) K(v.key);
-    new(&node->v) V(v.value);
+    epConstruct(&node->k) K(v.key);
+    epConstruct(&node->v) V(v.value);
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
@@ -168,7 +168,7 @@ public:
     if (this != &rh)
     {
       this->~AVLTree();
-      new(this) AVLTree<K, V>(rh);
+      epConstruct(this) AVLTree<K, V>(rh);
     }
     return *this;
   }
@@ -178,7 +178,7 @@ public:
     if (this != &rval)
     {
       this->~AVLTree();
-      new(this) AVLTree<K, V>(std::move(rval));
+      epConstruct(this) AVLTree<K, V>(std::move(rval));
     }
     return *this;
   }

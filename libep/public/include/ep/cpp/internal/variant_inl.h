@@ -232,7 +232,7 @@ inline Variant::Variant(SharedPtr<RefCounted> &&spC, SharedPtrType type)
   t = (size_t)Type::SharedPtr;
   ownsContent = 1;
   length = (size_t)type;
-  new(&p) SharedPtr<RefCounted>(std::move(spC));
+  epConstruct(&p) SharedPtr<RefCounted>(std::move(spC));
 }
 inline Variant::Variant(RefCounted *pRef, SharedPtrType type, bool _ownsContent)
 {
@@ -240,7 +240,7 @@ inline Variant::Variant(RefCounted *pRef, SharedPtrType type, bool _ownsContent)
   ownsContent = _ownsContent ? 1 : 0;
   length = (size_t)type;
   if (ownsContent)
-    new(&p) SharedPtr<RefCounted>(pRef);
+    epConstruct(&p) SharedPtr<RefCounted>(pRef);
   else
     sp = pRef;
 }
@@ -289,7 +289,7 @@ inline Variant::Variant(MutableString<Len> &&s)
     s.ptr = nullptr;
   }
   else
-    new(this) Variant((String)s);
+    epConstruct(this) Variant((String)s);
 }
 inline Variant::Variant(const SharedString &s)
 {
@@ -327,7 +327,7 @@ inline Variant::Variant(Array<Variant, Len> &&a)
     a.ptr = nullptr;
   }
   else
-    new(this) Variant((Slice<Variant>)a);
+    epConstruct(this) Variant((Slice<Variant>)a);
 }
 inline Variant::Variant(const VarArray &a)
 {
@@ -377,7 +377,7 @@ inline Variant& Variant::operator=(const Variant &rval)
   if (this != &rval)
   {
     this->~Variant();
-    new(this) Variant(rval);
+    epConstruct(this) Variant(rval);
   }
   return *this;
 }

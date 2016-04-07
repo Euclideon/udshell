@@ -27,7 +27,7 @@ public:
   T* New(Args... args)
   {
     T *pMem = Alloc();
-    return new(pMem) T(args...);
+    return epConstruct(pMem) T(args...);
   }
 
   T* Alloc()

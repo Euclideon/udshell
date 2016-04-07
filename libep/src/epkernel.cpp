@@ -46,7 +46,7 @@ void epKernel_CreateComponent(epString typeId, const epKeyValuePair *pInitParams
 epComponent* epKernel_FindComponent(epString uid)
 {
   epComponent* r;
-  new(&r) ep::ComponentRef(ep::Kernel::GetInstance()->FindComponent(uid));
+  epConstruct(&r) ep::ComponentRef(ep::Kernel::GetInstance()->FindComponent(uid));
   return r;
 }
 

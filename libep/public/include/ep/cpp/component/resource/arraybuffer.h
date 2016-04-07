@@ -53,7 +53,7 @@ public:
     else
     {
       for (size_t i = 0; i < data.length; ++i)
-        new(buffer.ptr + i) ElementType(data.ptr[i]);
+        epConstruct(buffer.ptr + i) ElementType(data.ptr[i]);
     }
     Unmap();
   }
@@ -98,7 +98,7 @@ public:
     else
     {
       for (size_t i = 0; i < data.length; ++i)
-        new(buffer.ptr + i) T(data[i]);
+        epConstruct(buffer.ptr + i) T(data[i]);
     }
   }
 

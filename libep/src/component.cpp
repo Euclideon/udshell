@@ -35,7 +35,7 @@ bool epComponent_IsType(const epComponent *pComponent, epString type)
 epVariant epComponent_GetProperty(const epComponent *pComponent, epString property)
 {
   epVariant r;
-  new(&r) ep::Variant(((const ep::Component*)pComponent)->Get(property));
+  epConstruct(&r) ep::Variant(((const ep::Component*)pComponent)->Get(property));
   return r;
 }
 void epComponent_SetProperty(epComponent *pComponent, epString property, const epVariant *pValue)
@@ -46,7 +46,7 @@ void epComponent_SetProperty(epComponent *pComponent, epString property, const e
 epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs)
 {
   epVariant r;
-  new(&r) ep::Variant(((ep::Component*)pComponent)->Call(method, ep::Slice<const ep::Variant>((const ep::Variant*)pArgs, numArgs)));
+  epConstruct(&r) ep::Variant(((ep::Component*)pComponent)->Call(method, ep::Slice<const ep::Variant>((const ep::Variant*)pArgs, numArgs)));
   return r;
 }
 

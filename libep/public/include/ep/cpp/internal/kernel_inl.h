@@ -65,11 +65,10 @@ private:
     return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
       MutableString128 t(Format, "New: {0} - {1}", _pType->info.identifier, _uid);
       _pKernel->LogDebug(4, t);
-      // TODO: this new can't exist in the wild... need to call back into kernel!!
       void *pMem = epAlloc(sizeof(_ComponentType));
       epscope(fail) { if (pMem) epFree(pMem); };
       EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
-      _ComponentType *ptr = new (pMem) _ComponentType(_pType, _pKernel, _uid, initParams);
+      _ComponentType *ptr = epConstruct (pMem) _ComponentType(_pType, _pKernel, _uid, initParams);
       // NOTE: we need to cast to ensure we play nice with multi inheritance
       ptr->pFreeFunc = [](RefCounted *pMem) { epFree((_ComponentType*)pMem); };
       return SharedPtr<_ComponentType>(ptr);
@@ -120,11 +119,10 @@ template<typename GlueType>
 inline void Kernel::RegisterGlueType()
 {
   pImpl->RegisterGlueType(GlueType::ComponentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) -> ComponentRef {
-    // TODO: this new can't exist in the wild... need to call back into kernel!!
     void *pMem = epAlloc(sizeof(GlueType));
     epscope(fail) { if (pMem) epFree(pMem); };
     EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
-    GlueType *ptr = new (pMem) GlueType(_pType, _pKernel, _uid, spInstance, initParams);
+    GlueType *ptr = epConstruct (pMem) GlueType(_pType, _pKernel, _uid, spInstance, initParams);
     ptr->pFreeFunc = [](RefCounted *pMem) { epFree((GlueType*)pMem); };
     return ComponentRef(ptr);
   });

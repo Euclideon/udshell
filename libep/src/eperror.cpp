@@ -34,7 +34,7 @@ const char* EPException::what() const noexcept
 ErrorState* _PushError(epResult error, const SharedString &message, const char *function, const char *file, int line)
 {
   ep::internal::s_errorStack[ep::internal::s_errorDepth].error = error;
-  new(&ep::internal::s_errorStack[ep::internal::s_errorDepth].message) SharedString(message);
+  epConstruct(&ep::internal::s_errorStack[ep::internal::s_errorDepth].message) SharedString(message);
   ep::internal::s_errorStack[ep::internal::s_errorDepth].function = function;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].file = file;
   ep::internal::s_errorStack[ep::internal::s_errorDepth].line = line;
@@ -132,7 +132,7 @@ void epClearError()
 epSharedString epDumpError()
 {
   epSharedString r;
-  new(&r) ep::SharedString(ep::DumpError());
+  epConstruct(&r) ep::SharedString(ep::DumpError());
   return r;
 }
 
