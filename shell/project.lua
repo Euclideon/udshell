@@ -1,7 +1,7 @@
 project "epshell"
 	kind "WindowedApp"
 	language "C++"
-	flags { "FatalCompileWarnings", "StaticRuntime" }
+	flags { "FatalCompileWarnings" }
 
 	files { "src/**.cpp", "src/**.h" }
 	files { "res/**.qrc", "res/**.qml" }

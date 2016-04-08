@@ -1,7 +1,7 @@
 project "libep"
 	kind "StaticLib"
 	language "C++"
-	flags { "FatalCompileWarnings", "StaticRuntime", "OmitDefaultLibrary" }
+	flags { "FatalCompileWarnings", "OmitDefaultLibrary" }
 	pic "on"
 
 	files { "src/**" }

@@ -1,7 +1,7 @@
 project "eptest"
 	kind "ConsoleApp"
 	language "C++"
-	flags { "StaticRuntime" }
+--	flags { }
 
 	includedirs { "../3rdparty/googletest/" .. googletestPath .. "/include" }
 

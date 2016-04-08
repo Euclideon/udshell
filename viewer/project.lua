@@ -1,7 +1,7 @@
 project "epviewer"
 	kind "WindowedApp"
 	language "C++"
-	flags { "FatalCompileWarnings", "StaticRuntime" }
+	flags { "FatalCompileWarnings" }
 
 	files { "src/**.cpp", "src/**.h" }
 	files { "premake5.lua", "project.lua" }

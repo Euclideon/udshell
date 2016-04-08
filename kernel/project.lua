@@ -1,7 +1,7 @@
 project "epkernel"
 	kind "StaticLib"
 	language "C++"
-	flags { "FatalCompileWarnings", "StaticRuntime", "OmitDefaultLibrary" }
+	flags { "FatalCompileWarnings", "OmitDefaultLibrary" }
 
 	files { "src/**" }
 	files { "script/**" }

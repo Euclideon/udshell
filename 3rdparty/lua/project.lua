@@ -4,7 +4,7 @@ luaPath = "lua-5.3.1"
 project(luaPath)
   kind "StaticLib"
   language "C"
-  flags { "StaticRuntime", "OmitDefaultLibrary" }
+  flags { "OmitDefaultLibrary" }
 
   files { luaPath .. "/src/**" }
   removefiles { luaPath .. "/src/luac.c" }
