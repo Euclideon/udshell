@@ -1,7 +1,7 @@
 project "viewer"
 	kind "SharedLib"
 	language "C++"
-	flags { "StaticRuntime" }
+--	flags { }
 
 	files { "src/**" }
 	files { "res/**" }

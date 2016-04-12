@@ -4,7 +4,7 @@ googletestPath = "googletest-1.7.0"
 project(googletestPath)
   kind "StaticLib"
   language "C++"
-  flags { "StaticRuntime", "OmitDefaultLibrary" }
+  flags { "OmitDefaultLibrary" }
 
 --  defines { "GTEST_HAS_PTHREAD=0" }
 
