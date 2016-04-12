@@ -41,7 +41,7 @@ public:
   Variant Get(String property) const override final;
   void Set(String property, const Variant &value) override final;
   Variant Call(String method, Slice<const Variant> args) override final;
-  void Subscribe(String eventName, const VarDelegate &delegate) override final;
+  SubscriptionRef Subscribe(String eventName, const VarDelegate &delegate) override final;
 
   Variant Save() const override final { return Variant(Variant::VarMap()); }
 

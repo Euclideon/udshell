@@ -228,17 +228,18 @@ Variant ComponentImpl::Call(String method, Slice<const Variant> args)
   return std::move(r);
 }
 
-void ComponentImpl::Subscribe(String eventName, const VarDelegate &d)
+SubscriptionRef ComponentImpl::Subscribe(String eventName, const VarDelegate &d)
 {
   const EventDesc *pDesc = pInstance->GetEventDesc(eventName);
   if (!pDesc)
   {
     pInstance->LogWarning(2, "No event '{0}' for component '{1}'", eventName, pInstance->name.empty() ? pInstance->uid : pInstance->name);
-    return;
+    return nullptr;
   }
-  pDesc->ev.subscribe(pInstance, d);
-  if (ErrorLevel())
-    throw GetError();
+
+  Variant r = pDesc->ev.subscribe(pInstance, d);
+  r.throwError();
+  return std::move(r.asSubscription());
 }
 
 } // namespace ep
