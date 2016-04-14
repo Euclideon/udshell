@@ -19,4 +19,6 @@ exceptionhandling "Default"
 objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
-characterset "MBCS"
+if os.get() == premake.WINDOWS then
+  characterset "MBCS"
+end
