@@ -8,9 +8,7 @@ output="${output//\\//}"
 
 path=$(dirname "$output")
 
-filename=$(basename "$input")
-varname="${filename//./_}"
-
+varname="${3//./_}"
 mkdir -p $path
 
 echo -n "const char *$varname = \"" > $output
