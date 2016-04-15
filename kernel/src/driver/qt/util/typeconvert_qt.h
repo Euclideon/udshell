@@ -21,6 +21,28 @@ namespace qt {
 ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string);
 ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQByteArray(const QByteArray &byteArray);
 
+class QtSubscription : public QObject
+{
+  Q_OBJECT
+
+public:
+  QtSubscription(const ep::SubscriptionRef &spSub) : QObject(nullptr), spSubscription(spSub) {}
+  Q_INVOKABLE void unsubscribe()
+  {
+    try
+    {
+      spSubscription->Unsubscribe();
+    }
+    catch (ep::EPException &)
+    {
+      ep::ClearError();
+    }
+  }
+
+private:
+  ep::SubscriptionRef spSubscription;
+};
+
 class QtDelegate : public QObject
 {
   Q_OBJECT
@@ -80,39 +102,40 @@ template<> struct StringifyProxy<QString>       { inline static ptrdiff_t string
 
 namespace qt {
 
-  inline ep::Variant JSValueDelegate::call(ep::Slice<const ep::Variant> args)
+inline ep::Variant JSValueDelegate::call(ep::Slice<const ep::Variant> args)
+{
+  QJSValueList jsArgs;
+  jsArgs.reserve(static_cast<int>(args.length));
+
+  for (auto &arg : args)
+    jsArgs.append(arg.as<QJSValue>());
+
+  QJSValue ret = jsVal.call(jsArgs);
+  return epToVariant(ret);
+}
+
+inline JSValueDelegate::JSValueDelegate(const QJSValue &jsValue) : jsVal(jsValue)
+{
+  // set the memento to our call shim
+  ep::VarDelegate::FastDelegateType shim(this, &JSValueDelegate::call);
+  m = shim.GetMemento();
+}
+
+inline QVariant QtDelegate::call(QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const
+{
+  ep::Variant varArgs[10] = { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 };
+
+  int numArgs = 0;
+  for (auto &arg : varArgs)
   {
-    QJSValueList jsArgs;
-    jsArgs.reserve(static_cast<int>(args.length));
-
-    for (auto &arg : args)
-      jsArgs.append(arg.as<QJSValue>());
-
-    QJSValue ret = jsVal.call(jsArgs);
-    return epToVariant(ret);
+    if (!arg.isValid())
+      break;
+    ++numArgs;
   }
 
-  inline JSValueDelegate::JSValueDelegate(const QJSValue &jsValue) : jsVal(jsValue)
-  {
-    // set the memento to our call shim
-    ep::VarDelegate::FastDelegateType shim(this, &JSValueDelegate::call);
-    m = shim.GetMemento();
-  }
+  return d(ep::Slice<ep::Variant>(varArgs, numArgs)).as<QVariant>();
+}
 
-  inline QVariant QtDelegate::call(QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const
-  {
-    ep::Variant varArgs[10] = { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 };
-
-    int numArgs = 0;
-    for (auto &arg : varArgs)
-    {
-      if (!arg.isValid())
-        break;
-      ++numArgs;
-    }
-
-    return d(ep::Slice<ep::Variant>(varArgs, numArgs)).as<QVariant>();
-  }
 }
 
 

@@ -2,100 +2,71 @@
 #ifndef SIGNALTODELEGATE_H
 #define SIGNALTODELEGATE_H
 
-// suppress warnings from qt
-#if defined(_MSC_VER)
-# pragma warning(push,3)
-#endif
+#include "ep/cpp/event.h"
+
+#include "driver/qt/epqt.h"
+#include "driver/qt/util/typeconvert_qt.h"
+
 #include <QObject>
 #include <QMetaMethod>
-#if defined(_MSC_VER)
-# pragma warning(pop)
-#endif
 
-#include "typeconvert_qt.h"
+namespace qt {
 
-namespace qt
+namespace internal {
+
+class QtEvent : public ep::BaseEvent
 {
-
-// TODO: simplify these macros?
-// Ugly macros to simplify creation of new slots
-#define QT_SIGNAL_HANDLER_0() \
-  void SignalHandler() { \
-    using namespace ep; \
-    Delegate<void()> del = v.as<Delegate<void()>>(); \
-    del(); \
+public:
+  ep::SubscriptionRef AddSubscription(const ep::VarDelegate &del)
+  {
+    return BaseEvent::AddSubscription(del.GetMemento());
   }
 
-#define QT_SIGNAL_HANDLER_1(TYPE1) \
-  void SignalHandler(TYPE1 arg1) { \
-    using namespace ep; \
-    Delegate<void(Variant)> del = v.as<Delegate<void(Variant)>>(); \
-    del(Variant(arg1)); \
-  }
+  void Signal(ep::Slice<const ep::Variant> args);
+  bool HasSubscribers() const { return !subscribers.empty(); }
+};
 
-#define QT_SIGNAL_HANDLER_2(TYPE1, TYPE2) \
-  void SignalHandler(TYPE1 arg1, TYPE2 arg2) { \
-    using namespace ep; \
-    Delegate<void(Variant, Variant)> del = v.as<Delegate<void(Variant,Variant)>>(); \
-    del(Variant(arg1), Variant(arg2)); \
-  }
-
-#define QT_SIGNAL_HANDLER_3(TYPE1, TYPE2, TYPE3) \
-  void SignalHandler(TYPE1 arg1, TYPE2 arg2, TYPE3 arg3) { \
-    using namespace ep; \
-    Delegate<void(Variant,Variant,Variant)> del = v.as<Delegate<void(Variant,Variant,Variant)>>(); \
-    del(Variant(arg1), Variant(arg2), Variant(arg3)); \
-  }
-
-#define QT_SIGNAL_HANDLER_4(TYPE1, TYPE2, TYPE3, TYPE4) \
-  void SignalHandler(TYPE1 arg1, TYPE2 arg2, TYPE3 arg3, TYPE4 arg4) { \
-    using namespace ep; \
-    Delegate<void(Variant,Variant,Variant,Variant)> del = v.as<Delegate<void(Variant,Variant,Variant,Variant)>>(); \
-    del(Variant(arg1), Variant(arg2), Variant(arg3), Variant(arg4)); \
-  }
+} // namespace internal
 
 
-class QtSignalToDelegate : public QObject
+// This class will connect to a Qt signal of any type and redirect it back to its associated Euclideon Platform Event
+// Since the Event class tracks the list of subscribers, this essentially allows generic delegates to be connected to
+// Qt signals as if they were general EP Events.
+// NOTE: This requires some MOC magic - in order to allow a generic signal handler, we need to pipe signals of all
+// types via the execute() method.
+class QtSignalMapper : public QObject
 {
-  Q_OBJECT
+  // NOTE: this prevents MOC from generating anything for our object - replace this if we need to regenerate
+  Q_OBJECT_FAKE
 
 public:
-  QtSignalToDelegate(const QtSignalToDelegate &rh)
-    : QObject(), connection(rh.connection), v(rh.v)
-  {}
-  QtSignalToDelegate(QtSignalToDelegate &&rh)
-    : QObject(), connection(std::move(rh.connection)), v(std::move(rh.v))
-  {}
-  QtSignalToDelegate(const QObject *pSourceObj, const QMetaMethod &m, const ep::VarDelegate &d) : v(d)
-  {
-    QMetaMethod sigHandler = lookupSignalHandler(m);
-    if (sigHandler.isValid())
-      connection = QObject::connect(pSourceObj, m, this, sigHandler);
-  }
-  ~QtSignalToDelegate()
-  {
-    if (connection)
-      QObject::disconnect(connection);
-  }
+  QtSignalMapper(const QMetaMethod &sigMethod) : QObject(nullptr), signal(sigMethod) {}
+  ~QtSignalMapper() {}
 
-  explicit operator bool() { return connection; }
+  ep::SubscriptionRef Subscribe(QObject *pSourceObj, const ep::VarDelegate &del);
 
 private:
-  QMetaMethod lookupSignalHandler(const QMetaMethod &m);
+  Q_DISABLE_COPY(QtSignalMapper)
+
+  // NOTE: the connected Qt signal gets redirected to here
+  void execute(void **args);
 
 private slots:
-  QT_SIGNAL_HANDLER_0();
-  QT_SIGNAL_HANDLER_1(QVariant);
-  QT_SIGNAL_HANDLER_1(QString);
-  QT_SIGNAL_HANDLER_1(bool);
-  QT_SIGNAL_HANDLER_1(double);
-  QT_SIGNAL_HANDLER_1(int);
-  QT_SIGNAL_HANDLER_2(QVariant, QVariant);
-  QT_SIGNAL_HANDLER_3(QVariant, QVariant, QVariant);
+  //void execute() {}   // !! UNCOMMENT THIS IF WE NEED TO RE-MOC!
+
+  void onInstanceDestroyed(QObject *pObj) { instanceMap.Remove(pObj); }
 
 private:
-  QMetaObject::Connection connection;
-  ep::Variant v;
+  // This struct represents a connection instance - we need one connection per specific QObject
+  struct QtConnection
+  {
+    ~QtConnection() { QObject::disconnect(connection); }
+    internal::QtEvent event;
+    QMetaObject::Connection connection;
+  };
+
+  ep::AVLTree<QObject *, QtConnection> instanceMap;
+  QMetaMethod signal;
 };
 
 } // namespace qt

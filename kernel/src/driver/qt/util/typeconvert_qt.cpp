@@ -179,6 +179,15 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
           break;
         }
 
+        case Variant::SharedPtrType::Subscription:
+        {
+          using namespace qt;
+          QtSubscription *pSub = new QtSubscription(variant.asSubscription());
+          pVariant->setValue(pSub);
+          QQmlEngine::setObjectOwnership(pSub, QQmlEngine::JavaScriptOwnership);
+          break;
+        }
+
         case Variant::SharedPtrType::AssocArray:
         {
           QJSValue jsMap = qt::QtApplication::Kernel()->QmlEngine()->newObject();
