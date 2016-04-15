@@ -47,11 +47,11 @@ project "epkernel"
 
 	filter "files:script/**"
 		buildmessage 'text2c.sh %{file.relpath} %{cfg.objdir}/script/%{file.basename}.inc'
-		buildcommands { path.getabsolute('.') .. '/text2c.sh "%{file.relpath}" "%{cfg.objdir}/script/%{file.basename}.inc"' }
+		buildcommands { path.getabsolute('.') .. '/text2c.sh "%{file.relpath}" "%{cfg.objdir}/script/%{file.basename}.inc" "%{file.name}"' }
 		buildoutputs { '%{cfg.objdir}/script/%{file.basename}.inc' }
 	filter "files:shaders/**"
 		buildmessage 'text2c.sh %{file.relpath} %{cfg.objdir}/shaders/%{file.basename}.inc'
-		buildcommands { path.getabsolute('.') .. '/text2c.sh "%{file.relpath}" "%{cfg.objdir}/shaders/%{file.basename}.inc"' }
+		buildcommands { path.getabsolute('.') .. '/text2c.sh "%{file.relpath}" "%{cfg.objdir}/shaders/%{file.basename}.inc" "%{file.name}"' }
 		buildoutputs { '%{cfg.objdir}/shaders/%{file.basename}.inc' }
 	filter {}
 
