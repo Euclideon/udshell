@@ -140,10 +140,12 @@ void epInitMemoryTracking()
   HANDLE hCrtWarnReport = CreateFile(pFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
   if (hCrtWarnReport == INVALID_HANDLE_VALUE) OutputDebugStringA("Error creating CrtWarnReport.txt");
 
+  errno = 0;
   int warnMode = _CrtSetReportMode(_CRT_WARN, _CRTDBG_REPORT_MODE);
   _CrtSetReportMode(_CRT_WARN, warnMode | _CRTDBG_MODE_FILE);
   if (errno == EINVAL) OutputDebugStringA("Error calling _CrtSetReportMode() warnings");
 
+  errno = 0;
   _CrtSetReportFile(_CRT_WARN, hCrtWarnReport);
   if (errno == EINVAL)OutputDebugStringA("Error calling _CrtSetReportFile() warnings");
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
