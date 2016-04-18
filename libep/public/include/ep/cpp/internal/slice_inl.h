@@ -24,14 +24,41 @@ inline void SliceFree(T *pArray)
   pHeader->pFreeFunc(pHeader);
 }
 
+// functions that counts inputs for append operations; support appending arrays
+template<typename T>
+inline size_t count() { return 0; }
+// single element; SFINAE asserts that U is implicitly convertable to T
+template<typename T, typename U, typename... Args>
+inline auto count(U &&item, Args&&... args) -> decltype(T(std::forward<U>(item)), size_t()) // SFINAE fails if U is not implicitly convertable to T
+{
+  return count<T>(std::forward<Args>(args)...) + 1;
+}
+// array of element; SFINAE asserts that array element type U is implicitly convertable to T
+template<typename T, typename U, typename... Args>
+inline auto count(Slice<const U> slice, Args&&... args) -> decltype(T(slice[0]), size_t()) // SFINAE fails if array element type U is not implicitly convertible to T
+{
+  return count<T>(std::forward<Args>(args)...) + slice.length;
+}
+
 // functions that append inputs (TODO: look into a not-recursive version?)
 template<typename T>
 inline T* append(T *pBuffer) { return pBuffer; }
+// append single element; SFINAE asserts that U is implicitly convertable to T
+template<typename T> T* ReturnTStar();
 template<typename T, typename U, typename... Args>
-inline T* append(T *pBuffer, U &&a, Args&&... args)
+inline auto append(T *pBuffer, U &&a, Args&&... args) -> decltype(T(std::forward<U>(a)), ReturnTStar<T>())
 {
   epConstruct((void*)pBuffer) T(std::forward<U>(a));
   append(pBuffer + 1, std::forward<Args>(args)...);
+  return pBuffer;
+}
+// append array of element; SFINAE asserts that array element type U is implicitly convertable to T
+template<typename T, typename U, typename... Args>
+inline auto append(T *pBuffer, Slice<const U> s, Args&&... args) -> decltype(T(s.ptr[0]), ReturnTStar<T>())
+{
+  for(size_t i = 0; i < s.length; ++i)
+    epConstruct((void*)(pBuffer + i)) T(s.ptr[i]);
+  append(pBuffer + s.length, std::forward<Args>(args)...);
   return pBuffer;
 }
 
@@ -491,8 +518,10 @@ inline Array<T, Count>::Array(Reserve_T, size_t count)
 template <typename T, size_t Count>
 template <typename... Items>
 inline Array<T, Count>::Array(Concat_T, Items&&... items)
-  : Slice<T>(internal::append<T>(internal::SliceAlloc<T>(sizeof...(items)), std::forward<Items>(items)...), sizeof...(items))
-{}
+{
+  this->length = internal::count<T>(std::forward<Items>(items)...);
+  this->ptr = internal::append<T>(internal::SliceAlloc<T>(this->length), std::forward<Items>(items)...);
+}
 
 template <typename T, size_t Count>
 inline Array<T, Count>::Array(std::initializer_list<T> list)
@@ -757,8 +786,10 @@ inline SharedArray<T>::SharedArray(nullptr_t)
 template<typename T>
 template <typename... Items>
 inline SharedArray<T>::SharedArray(Concat_T, Items&&... items)
-  : Slice<T>(internal::append<T>(internal::SliceAlloc<T>(sizeof...(items), 1), std::forward<Items>(items)...), sizeof...(items))
-{}
+{
+  this->length = internal::count<T>(std::forward<Items>(items)...);
+  this->ptr = internal::append<T>(internal::SliceAlloc<T>(this->length), std::forward<Items>(items)...);
+}
 
 template<typename T>
 inline SharedArray<T>::SharedArray(std::initializer_list<typename SharedArray<T>::ET> list)
@@ -892,7 +923,7 @@ template<typename T, size_t Count>
 template<typename... Things>
 inline Array<T, Count>& Array<T, Count>::concat(Things&&... things)
 {
-  size_t len = this->length + sizeof...(things);
+  size_t len = this->length + internal::count<T>(std::forward<Things>(things)...);
   reserve(len);
   internal::append<T>(this->ptr + this->length, std::forward<Things>(things)...);
   this->length = len;
