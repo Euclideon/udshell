@@ -1046,6 +1046,9 @@ void ep::Variant::luaPush(ep::LuaState &l) const
         case SharedPtrType::Subscription:
           EPASSERT(false, "TODO!");
           break;
+        case SharedPtrType::Range:
+          EPASSERT(false, "TODO!");
+          break;
         case SharedPtrType::AssocArray:
         {
           lua_State *L = l.state();

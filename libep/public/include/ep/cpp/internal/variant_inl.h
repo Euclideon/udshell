@@ -276,6 +276,12 @@ inline Variant::Variant(VarMap &&spS)
 inline Variant::Variant(const VarMap &spS)
   : Variant((const SharedPtr<RefCounted>&)spS.ptr, SharedPtrType::AssocArray)
 {}
+inline Variant::Variant(VarRange &&spR)
+  : Variant(std::move((SharedPtr<RefCounted>&)spR), SharedPtrType::Range)
+{}
+inline Variant::Variant(const VarRange &spR)
+  : Variant((const SharedPtr<RefCounted>&)spR, SharedPtrType::Range)
+{}
 
 template<size_t Len>
 inline Variant::Variant(const MutableString<Len> &s)
@@ -439,7 +445,7 @@ struct Variant_Construct
 };
 
 // specialisation of non-const Variant, which annoyingly gets hooked by the T& constructor instead of the copy constructor
-template<>           struct Variant_Construct<Variant>                   { epforceinline static Variant construct(const Variant &v) { return Variant(v); } };
+template<>           struct Variant_Construct<Variant>                   { epforceinline static Variant construct(const Variant &v) { return v; } };
 template<size_t Len> struct Variant_Construct<MutableString<Len>>        { epforceinline static Variant construct(const MutableString<Len> &v) { return Variant(v); } };
 template<>           struct Variant_Construct<SharedString>              { epforceinline static Variant construct(const SharedString &v) { return Variant(v); } };
 template<size_t Len> struct Variant_Construct<Array<Variant, Len>>       { epforceinline static Variant construct(const Array<Variant, Len> &v) { return Variant(v); } };
@@ -517,9 +523,10 @@ template<> struct Variant_Cast < int64_t  > { inline static int64_t  as(const Va
 template<> struct Variant_Cast < uint64_t > { inline static uint64_t as(const Variant &v) { return (uint64_t)v.asInt(); } };
 
 template<> struct Variant_Cast < Variant >              { inline static Variant              as(const Variant &v) { return v; } };
-template<> struct Variant_Cast < VarDelegate > { inline static VarDelegate as(const Variant &v) { return v.asDelegate(); } };
+template<> struct Variant_Cast < VarDelegate >          { inline static VarDelegate          as(const Variant &v) { return v.asDelegate(); } };
 template<> struct Variant_Cast < Variant::VarArray >    { inline static Variant::VarArray    as(const Variant &v) { return v.asArray(); } };
 template<> struct Variant_Cast < Variant::VarMap >      { inline static Variant::VarMap      as(const Variant &v) { return v.asAssocArray(); } };
+template<> struct Variant_Cast < VarRange >             { inline static VarRange             as(const Variant &v) { return v.asRange(); } };
 
 template<typename T>
 struct Variant_Cast < SharedArray<T> >      { inline static SharedArray<T>     as(const Variant &v) { return v.as<Array<T, 0>>(); } };
@@ -592,6 +599,35 @@ protected:
 
 private:
   VarDelegateMemento<R(Args...)>& operator=(const VarDelegateMemento<R(Args...)> &rh) = delete;
+};
+
+template <typename SrcRange, typename To>
+class VarRangeAdapter
+{
+  using From = decltype(((SrcRange*)nullptr)->GetFront());
+
+  SrcRange spRange;
+
+public:
+  VarRangeAdapter(SrcRange r) : spRange(r) {}
+
+  RangeFeatures Features() const { return spRange->Features(); }
+
+  bool Empty() const { return spRange->Empty(); }
+  size_t Length() const { return spRange->Length(); }
+
+  // TODO: this is potentially inefficient! check that these redundant constructions are optimised away
+  To GetFront() const { return Variant(spRange->GetFront()).as<To>(); }
+  void SetFront(const To &value) const { spRange->SetFront(Variant(value).as<From>()); }
+  To PopFront() { return Variant(spRange->PopFront()).as<To>(); }
+  void PopFront(size_t n) { spRange->PopFront(n); }
+
+  To GetBack() const { return Variant(spRange->GetBack()).as<To>(); }
+  void SetBack(const To &value) const { spRange->SetBack(Variant(value).as<From>()); }
+  To PopBack() { return Variant(spRange->PopBack()).as<To>(); }
+  void PopBack(size_t n) { spRange->PopBack(n); }
+
+  To At(size_t index) const { return Variant(spRange->At(index)).as<To>(); }
 };
 
 } // namespace internal
@@ -723,6 +759,13 @@ inline Variant epToVariant(const SharedMap<Tree> &map)
     m.Insert(item.key, item.value);
   return std::move(m);
 }
+
+// TODO: FIX ME!!! enable_if T looks like a range!
+//template<typename T>
+//inline Variant epToVariant(const SharedPtr<Range<T>> &range)
+//{
+//  return Variant(VirtualRange<Variant>::create(range));
+//}
 
 // ***************************************************
 // ** Variant conversion adapters for complex types **
@@ -885,6 +928,13 @@ inline void epFromVariant(const Variant &v, Delegate<R(Args...)> *pD)
   typedef SharedPtr<internal::VarDelegateMemento<R(Args...)>> VarDelegateRef;
   *pD = Delegate<R(Args...)>(VarDelegateRef::create(v.asDelegate()));
 }
+
+// TODO: FIX ME!!! enable_if T looks like a range!
+//template<typename T>
+//inline void epFromVariant(const Variant &v, SharedPtr<Range<T>> *pRange)
+//{
+//  *pRange = SharedPtr<internal::VarRangeAdapter<Variant, T>>::create(v.asRange());
+//}
 
 template<typename U, size_t Len>
 inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)

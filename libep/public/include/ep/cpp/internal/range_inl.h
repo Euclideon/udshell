@@ -3,7 +3,7 @@ namespace internal {
 
   // ***** HORRIBLE META CRUFT!!! *****
   template <bool> struct FeaturesImpl {
-    template <typename T> static RangeFeatures call(const T &r) { return r.empty(); }
+    template <typename T> static RangeFeatures call(const T &r) { return r.features(); }
   };
   template <> struct FeaturesImpl<false> {
     template <typename T> static RangeFeatures call(const T &)

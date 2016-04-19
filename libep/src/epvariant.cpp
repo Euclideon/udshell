@@ -615,8 +615,8 @@ SharedArray<Variant> Variant::asSharedArray() const
       return SharedArray<Variant>();
     case Type::Array:
     {
-      Slice<Variant> r(a, length);
-      return (SharedArray<Variant>&)r;
+      Slice<Variant> arr(a, length);
+      return (SharedArray<Variant>&)arr;
     }
     case Type::SharedPtr:
       if((SharedPtrType)length == SharedPtrType::AssocArray)
@@ -659,6 +659,25 @@ Variant::VarMap Variant::asAssocArray() const
         return (VarMap&)aa;
     default:
       EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  }
+}
+VarRange Variant::asRange() const
+{
+  switch ((Type)t)
+  {
+  case Type::Void:
+    EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+  case Type::Null:
+    return VarRange();
+  case Type::Array:
+    return Slice<Variant>(a, length);
+  case Type::SharedPtr:
+    if ((SharedPtrType)length == SharedPtrType::Range)
+      return (VarRange&)r;
+    else if ((SharedPtrType)length == SharedPtrType::AssocArray)
+      return ((VarMap&)aa).getRange();
+  default:
+    EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
   }
 }
 
@@ -737,6 +756,15 @@ Variant& Variant::insertItem(Variant key, Variant value)
   EPASSERT_THROW(is(SharedPtrType::AssocArray), epR_InvalidType, "Variant is not a map");
 
   return aa->tree.Insert(key, value);
+}
+
+VarRange Variant::getRange() const
+{
+  if (is(Type::Array))
+    return Slice<Variant>(a, length);
+  else if (is(SharedPtrType::AssocArray))
+    return ((VarMap&)aa).getRange();
+  EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
 }
 
 void VarEvent::Signal(Slice<const Variant> args)
