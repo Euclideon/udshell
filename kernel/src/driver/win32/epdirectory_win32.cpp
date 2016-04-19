@@ -12,13 +12,17 @@ bool HalDirectory_FindFirst(EPFind *pFind, const char *pFolderPath, EPFindData *
   char path[260];
   snprintf(path, sizeof(path), "%s%s*", pFolderPath, (pFolderPath[strlen(pFolderPath - 1)] != '/' ? "/" : ""));
 
-  hFind = FindFirstFile(path, &fd);
+  wchar_t wpath[260];
+  int len = MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, sizeof(wpath)/sizeof(wpath[0]));
+  if (len == 0)
+    return false;
 
+  hFind = FindFirstFileW(wpath, &fd);
   if (hFind == INVALID_HANDLE_VALUE)
     return false;
 
   BOOL more = TRUE;
-  while (!strcmp(fd.cFileName, ".") || !strcmp(fd.cFileName, "..") && more)
+  while (!wcscmp(fd.cFileName, L".") || !wcscmp(fd.cFileName, L"..") && more)
     more = FindNextFile(hFind, &fd);
   if (!more)
   {
@@ -45,7 +49,7 @@ bool HalDirectory_FindFirst(EPFind *pFind, const char *pFolderPath, EPFindData *
   pFindData->fileSize = (uint64_t)fd.nFileSizeLow | (((uint64_t)fd.nFileSizeHigh) << 32);
   pFindData->writeTime.ticks = (uint64_t)fd.ftLastWriteTime.dwHighDateTime << 32 | (uint64_t)fd.ftLastWriteTime.dwLowDateTime;
   pFindData->accessTime.ticks = (uint64_t)fd.ftLastAccessTime.dwHighDateTime << 32 | (uint64_t)fd.ftLastAccessTime.dwLowDateTime;
-  strcpy_s((char*)pFindData->pFilename, sizeof(pFindData->pFilename), fd.cFileName);
+  WideCharToMultiByte(CP_UTF8, 0, fd.cFileName, -1, pFindData->pFilename, sizeof(pFindData->pFilename), NULL, NULL);
 
   return true;
 }
@@ -73,7 +77,7 @@ bool HalDirectory_FindNext(EPFind *pFind, EPFindData *pFindData)
   pFindData->writeTime.ticks = (uint64_t)fd.ftLastWriteTime.dwHighDateTime << 32 | (uint64_t)fd.ftLastWriteTime.dwLowDateTime;
   pFindData->accessTime.ticks = (uint64_t)fd.ftLastAccessTime.dwHighDateTime << 32 | (uint64_t)fd.ftLastAccessTime.dwLowDateTime;
   pFindData->fileSize = (uint64_t)fd.nFileSizeLow | (((uint64_t)fd.nFileSizeHigh) << 32);
-  strcpy_s((char*)pFindData->pFilename, sizeof(pFindData->pFilename), fd.cFileName);
+  WideCharToMultiByte(CP_UTF8, 0, fd.cFileName, -1, pFindData->pFilename, sizeof(pFindData->pFilename), NULL, NULL);
 
   return true;
 }

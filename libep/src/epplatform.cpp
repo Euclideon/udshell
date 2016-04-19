@@ -170,7 +170,7 @@ void _epFree(void *pMemory)
 void epInitMemoryTracking()
 {
 #if defined(EP_WINDOWS)
-  const char *pFilename = "MemoryReport_"
+  const wchar_t *pFilename = L"MemoryReport_"
 #if EP_DEBUG
     "Debug_"
 #else
@@ -185,15 +185,15 @@ void epInitMemoryTracking()
 #endif // defined (EP_ARCH_X64)
     ".txt";
 
-  HANDLE hCrtWarnReport = CreateFile(pFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-  if (hCrtWarnReport == INVALID_HANDLE_VALUE) OutputDebugStringA("Error creating CrtWarnReport.txt");
+  HANDLE hCrtWarnReport = CreateFileW(pFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (hCrtWarnReport == INVALID_HANDLE_VALUE) OutputDebugStringA("Error creating CrtWarnReport.txt\n");
 
   int warnMode = _CrtSetReportMode(_CRT_WARN, _CRTDBG_REPORT_MODE);
   _CrtSetReportMode(_CRT_WARN, warnMode | _CRTDBG_MODE_FILE);
-  if (errno == EINVAL) OutputDebugStringA("Error calling _CrtSetReportMode() warnings");
+  if (errno == EINVAL) OutputDebugStringA("Error calling _CrtSetReportMode() warnings\n");
 
   _CrtSetReportFile(_CRT_WARN, hCrtWarnReport);
-  if (errno == EINVAL)OutputDebugStringA("Error calling _CrtSetReportFile() warnings");
+  if (errno == EINVAL)OutputDebugStringA("Error calling _CrtSetReportFile() warnings\n");
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 }
