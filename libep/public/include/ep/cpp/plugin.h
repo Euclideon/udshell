@@ -21,9 +21,11 @@ struct Instance
   void(*AssertFailed)(String condition, String message, String file, int line);
 
   void(*DestroyComponent)(Component *pInstance);
-  void *(*TreeAllocator)();
+  void*(*TreeAllocator)();
 
-  void *(*WeakRegistry)();
+  void*(*WeakRegistry)();
+
+  void*(*Find)(String pattern, void *pHandle, void *pData);
 };
 
 extern Instance *s_pInstance;
