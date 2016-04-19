@@ -435,19 +435,19 @@ inline Slice<Slice<T>> Slice<T>::tokenise(Slice<Slice<T>> tokens, Slice<T> delim
     if (!skipEmptyTokens)
     {
       size_t tokStart = offset;
-      while (offset < length && !delimiters.canFind(ptr[offset]))
+      while (offset < length && !delimiters.exists(ptr[offset]))
         ++offset;
       tokens[numTokens++] = slice(tokStart, offset);
       ++offset;
     }
     else
     {
-      while (offset < length && delimiters.canFind(ptr[offset]))
+      while (offset < length && delimiters.exists(ptr[offset]))
         ++offset;
       if (offset == length)
         break;
       size_t tokStart = offset;
-      while (offset < length && !delimiters.canFind(ptr[offset]))
+      while (offset < length && !delimiters.exists(ptr[offset]))
         ++offset;
       tokens[numTokens++] = slice(tokStart, offset);
     }

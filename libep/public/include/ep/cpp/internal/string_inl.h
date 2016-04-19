@@ -454,7 +454,8 @@ template<typename C>
 template<bool skipEmptyTokens>
 inline Slice<BaseString<C>> BaseString<C>::tokenise(Slice<BaseString<C>> tokens, BaseString<C> delimiters)
 {
-  return Slice<const C>::tokenise<skipEmptyTokens>(tokens, delimiters);
+  auto t = Slice<const C>::tokenise<skipEmptyTokens>(tokens, delimiters);
+  return Slice<BaseString<C>>((BaseString<C>*)t.ptr, t.length);
 }
 
 template<typename C>

@@ -3,12 +3,16 @@
 #define _STRINGOF_H
 
 #include "ep/cpp/platform.h"
+#include "ep/cpp/math.h"
 
 #include <utility>
 #include <tuple>
 
 template<typename T>
 ep::String epStringify();
+
+template<typename... Types>
+ep::SharedString stringof();
 
 namespace ep {
 
@@ -49,6 +53,10 @@ template<> struct Stringify<uint32_t> { static String stringify() { return "u32"
 template<> struct Stringify<int32_t>  { static String stringify() { return "s32"; } };
 template<> struct Stringify<uint64_t> { static String stringify() { return "u64"; } };
 template<> struct Stringify<int64_t>  { static String stringify() { return "s64"; } };
+
+template <typename T> struct Stringify<Vector2<T>> { static SharedString stringify() { return SharedString(Concat, stringof<T>(), "[2]"); } };
+template <typename T> struct Stringify<Vector3<T>> { static SharedString stringify() { return SharedString(Concat, stringof<T>(), "[3]"); } };
+template <typename T> struct Stringify<Vector4<T>> { static SharedString stringify() { return SharedString(Concat, stringof<T>(), "[4]"); } };
 
 template<typename T>
 struct Stringify<T*>    { static SharedString stringify() { return SharedString::concat(Stringify<T>::stringify(), "*"); } };
