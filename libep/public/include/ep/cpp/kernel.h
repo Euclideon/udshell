@@ -32,6 +32,7 @@ public:
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) { return pImpl->GetDerivedComponentDescs(pBase, bIncludeBase); }
 
   void RegisterMessageHandler(SharedString _name, MessageHandler messageHandler) { pImpl->RegisterMessageHandler(_name, messageHandler); }
+  bool HasMessageHandler(SharedString _name) { return pImpl->HasMessageHandler(_name); }
 
   ComponentRef CreateComponent(String typeId, Variant::VarMap initParams = nullptr) { return pImpl->CreateComponent(typeId, initParams); }
   template<typename T>

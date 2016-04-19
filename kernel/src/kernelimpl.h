@@ -41,6 +41,7 @@ public:
   void SendMessage(String target, String sender, String message, const Variant &data) override final;
 
   void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) override final;
+  bool HasMessageHandler(SharedString _name) override final { return messageHandlers.Get(_name) != nullptr; }
 
   // synchronisation
   void DispatchToMainThread(MainThreadCallback callback) override final;

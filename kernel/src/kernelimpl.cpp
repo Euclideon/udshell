@@ -302,7 +302,8 @@ void KernelImpl::FinishInit()
   spUpdateTimer->Elapsed.Subscribe(FastDelegate<void()>(this, &KernelImpl::Update));
 
   // call application init
-  return SendMessage("$init", "#", "init", nullptr);
+  if (HasMessageHandler("init"))
+    SendMessage("$init", "#", "init", nullptr);
 }
 
 KernelImpl::~KernelImpl()
@@ -345,11 +346,14 @@ void KernelImpl::Shutdown()
 {
   // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
 
-  spStreamerTimer->Elapsed.Unsubscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
-  spUpdateTimer->Elapsed.Unsubscribe(FastDelegate<void()>(this, &KernelImpl::Update));
+  if (spStreamerTimer)
+    spStreamerTimer->Elapsed.Unsubscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
+  if (spUpdateTimer)
+    spUpdateTimer->Elapsed.Unsubscribe(FastDelegate<void()>(this, &KernelImpl::Update));
 
   // call application deinit
-  SendMessage("$deinit", "#", "deinit", nullptr);
+  if (HasMessageHandler("deinit"))
+    SendMessage("$deinit", "#", "deinit", nullptr);
 
   SetFocusView(nullptr);
 

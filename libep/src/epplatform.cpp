@@ -119,6 +119,7 @@ void _epFree(void *pMemory)
 }
 
 #if __EP_MEMORY_DEBUG__
+#if defined(EP_WINDOWS)
 namespace ep {
 namespace internal {
 
@@ -155,6 +156,7 @@ int reportingHook(int reportType, char* userMessage, int* retVal)
 
 } // namespace internal
 } // namespace ep
+#endif  // defined(EP_WINDOWS)
 
 void epInitMemoryTracking()
 {
