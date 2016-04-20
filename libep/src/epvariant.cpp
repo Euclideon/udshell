@@ -704,11 +704,38 @@ Variant& Variant::operator[](String key) const
   EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
 }
 
-Variant* Variant::getItem(String key) const
+Variant* Variant::getItem(Variant key) const
 {
-  if (is(SharedPtrType::AssocArray))
+  if (is(Type::Array) && key.is(Type::Int))
+  {
+    size_t index = key.as<size_t>();
+    if(index >= length)
+      return nullptr;
+    return &a[index];
+  }
+  else if (is(SharedPtrType::AssocArray))
     return aa->tree.Get(key);
   return nullptr;
+}
+
+Variant& Variant::insertItem(Variant key, Variant value)
+{
+  if (is(Type::Array))
+  {
+    if(key.is(Type::Int))
+    {
+      size_t index = key.as<size_t>();
+      if(index < length)
+      {
+        a[index] = value;
+        return a[index];
+      }
+    }
+    EPTHROW(epR_OutOfBounds, "Variant is array, and key is out of bounds");
+  }
+  EPASSERT_THROW(is(SharedPtrType::AssocArray), epR_InvalidType, "Variant is not a map");
+
+  return aa->tree.Insert(key, value);
 }
 
 namespace internal
