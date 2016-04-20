@@ -117,43 +117,6 @@ using namespace ep;
 
 namespace qt {
 
-namespace internal {
-
-void QtEvent::Signal(Slice<const Variant> args)
-{
-  for (auto &s : subscribers)
-  {
-    VarDelegate d;
-    d.SetMemento(s.spM);
-
-    size_t errorDepth = ErrorLevel();
-    try
-    {
-      d(args);
-
-      // stack error...
-      if (ErrorLevel() > errorDepth)
-      {
-        epDebugFormat("Unhandled error from event handler: {0}\n", GetError()->message);
-        PopErrorToLevel(errorDepth);
-      }
-    }
-    catch (std::exception &e)
-    {
-      epDebugFormat("Unhandled exception from event handler: {0}\n", e.what());
-      PopErrorToLevel(errorDepth);
-    }
-    catch (...)
-    {
-      epDebugFormat("Unhandled C++ exception from event handler!\n");
-      PopErrorToLevel(errorDepth);
-    }
-  }
-}
-
-} // namespace internal
-
-
 SubscriptionRef QtSignalMapper::Subscribe(QObject *pSourceObj, const ep::VarDelegate &del)
 {
   QtConnection *pConnection = instanceMap.Get(pSourceObj);
@@ -186,7 +149,7 @@ void QtSignalMapper::execute(void **args)
   }
 
   // Loop thru the parameters for the mapped signal and convert to ep::Variants
-  Array<Variant> varArgs(ep::Reserve, signal.parameterCount());
+  Array<Variant, 10> varArgs(ep::Reserve, signal.parameterCount());
   for (int i = 0; i < signal.parameterCount(); ++i)
   {
     // Note that args[0] is the return value

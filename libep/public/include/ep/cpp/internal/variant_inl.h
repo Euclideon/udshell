@@ -138,6 +138,11 @@ epforceinline Variant VarCall(FastDelegate<R(Args...)> f, Slice<const Variant> a
   return internal::MethodCallHack<R, Args...>::call(f, args, typename internal::GenSequence<sizeof...(Args)>::type());
 }
 
+inline ep::SubscriptionRef VarEvent::AddSubscription(const ep::VarDelegate &del)
+{
+  return BaseEvent::AddSubscription(del.GetMemento());
+}
+
 
 // *** Variant ***
 

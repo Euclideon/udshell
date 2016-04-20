@@ -2,8 +2,6 @@
 #ifndef SIGNALTODELEGATE_H
 #define SIGNALTODELEGATE_H
 
-#include "ep/cpp/event.h"
-
 #include "driver/qt/epqt.h"
 #include "driver/qt/util/typeconvert_qt.h"
 
@@ -11,23 +9,6 @@
 #include <QMetaMethod>
 
 namespace qt {
-
-namespace internal {
-
-class QtEvent : public ep::BaseEvent
-{
-public:
-  ep::SubscriptionRef AddSubscription(const ep::VarDelegate &del)
-  {
-    return BaseEvent::AddSubscription(del.GetMemento());
-  }
-
-  void Signal(ep::Slice<const ep::Variant> args);
-  bool HasSubscribers() const { return !subscribers.empty(); }
-};
-
-} // namespace internal
-
 
 // This class will connect to a Qt signal of any type and redirect it back to its associated Euclideon Platform Event
 // Since the Event class tracks the list of subscribers, this essentially allows generic delegates to be connected to
@@ -61,7 +42,7 @@ private:
   struct QtConnection
   {
     ~QtConnection() { QObject::disconnect(connection); }
-    internal::QtEvent event;
+    ep::VarEvent event;
     QMetaObject::Connection connection;
   };
 

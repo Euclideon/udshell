@@ -15,6 +15,9 @@ using SubscriptionRef = SharedPtr<Subscription>;
 
 class BaseEvent : public Safe
 {
+public:
+  bool HasSubscribers() const;
+
 protected:
   friend class Subscription;
 
@@ -178,6 +181,10 @@ inline void BaseEvent::RemoveSubscription(const SubscriptionRef &spSubscription)
   epDebugWrite("Unsubscribe failed...?\n");
 }
 
+inline bool BaseEvent::HasSubscribers() const
+{
+  return !subscribers.empty();
+}
 
 } // namespace ep
 
