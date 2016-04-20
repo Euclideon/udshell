@@ -4,8 +4,8 @@
 #include "ep/cpp/plugin.h"
 #include "ep/cpp/component/component.h"
 
-#if !defined(EP_WINDOWS)
-#include <dlfcn.h>
+#if defined(EP_LINUX)
+# include <dlfcn.h>
 #endif
 
 extern "C" {
@@ -37,6 +37,7 @@ bool NativePluginLoader::LoadPlugin(String filename)
 #endif
 
 #if defined(EP_WINDOWS)
+
   // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?
   int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, filename.ptr, (int)filename.length, nullptr, 0);
   wchar_t *widePath = (wchar_t*)alloca(sizeof(wchar_t) * (len + 1));
@@ -55,7 +56,18 @@ bool NativePluginLoader::LoadPlugin(String filename)
     FreeLibrary(hDll);
     return false;
   }
-#else
+
+  bool bSuccess = pInit(s_pInstance);
+  if (!bSuccess)
+    FreeLibrary(hDll);
+
+  // TODO: add plugin to plugin registry
+  // TODO: plugin component types need to be associated with the plugin, so when the plugin unloads, the component types can be removed
+
+  return bSuccess;
+
+#elif defined(EP_LINUX)
+
   void *hSo = dlopen(filename.toStringz(), RTLD_NOW);
   if (hSo == NULL)
     return false;
@@ -66,23 +78,24 @@ bool NativePluginLoader::LoadPlugin(String filename)
     dlclose(hSo);
     return false;
   }
-#endif
 
   bool bSuccess = pInit(s_pInstance);
-
   if (!bSuccess)
-  {
-#if defined(EP_WINDOWS)
-    FreeLibrary(hDll);
-#else
     dlclose(hSo);
-#endif
-  }
 
   // TODO: add plugin to plugin registry
   // TODO: plugin component types need to be associated with the plugin, so when the plugin unloads, the component types can be removed
 
   return bSuccess;
+
+#else
+
+  epUnused(pFuncName);
+
+  LogError("Platform has no shared-library support!");
+  return false;
+
+#endif
 }
 
 } // namespace ep

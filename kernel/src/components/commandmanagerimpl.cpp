@@ -84,7 +84,7 @@ String CommandManagerImpl::StripWhitespace(Slice<char> output, String input)
   size_t len = 0;
   for (size_t i = 0; i < input.length; i++)
   {
-    if (!isspace(input[i]))
+    if (!epIsWhitespace(input[i]))
       output[len++] = input[i];
   }
   return output.slice(0, len);

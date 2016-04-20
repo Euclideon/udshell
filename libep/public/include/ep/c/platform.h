@@ -171,12 +171,16 @@
 
 # define USE_GLES
 
-#elif defined(_NACL)
+#elif defined(__native_client__) || defined(__pnacl__)
 # define EP_NACL
 
-// TODO: check for pnacl...
+# include <alloca.h>
+# include <string.h>
+# include <stdarg.h>
 
-# if defined(__x86_64__)
+# if defined(__pnacl__)
+#   define EP_ARCH_LLVM_IR
+# elif defined(__x86_64__)
 #   define EP_ARCH_X64
 # elif defined(__i386__)
 #   define EP_ARCH_X86
@@ -223,7 +227,7 @@
 
 // if the architecture or platform didn't specify a data word size, try and detect one
 #if !defined(EP_32BIT) && !defined(EP_64BIT)
-# if defined(EP_ARCH_X86) || defined(EP_ARCH_SH4)
+# if defined(EP_ARCH_X86) || defined(EP_ARCH_SH4) || defined(__ILP32__) || defined(_ILP32) || defined(__le32__)
 #   define EP_32BIT
 # elif defined(EP_ARCH_X64) || defined(EP_ARCH_ITANIUM)
 #   define EP_64BIT
@@ -236,7 +240,7 @@
 #if !defined(EP_ENDIAN_BIG) && !defined(EP_ENDIAN_LITTLE)
 # if defined(EP_ARCH_PPC) || defined(EP_ARCH_SPU) || defined(EP_ARCH_68K)
 #   define EP_ENDIAN_BIG
-# elif defined(EP_ARCH_X86) || defined(EP_ARCH_X64) || defined(EP_ARCH_ITANIUM) || defined(EP_ARCH_SH4)
+# elif defined(EP_ARCH_X86) || defined(EP_ARCH_X64) || defined(EP_ARCH_ITANIUM) || defined(EP_ARCH_SH4) || defined(__le32__)
 #   define EP_ENDIAN_LITTLE
 # else
 #   error "Unable to detect target endian!"

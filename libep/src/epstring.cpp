@@ -65,24 +65,24 @@ const char s_epCharDetails[256] =
 namespace ep {
 namespace internal {
 
-int epvscprintf(const char * format, va_list args)
+int epvscprintf(const char *format, va_list args)
 {
   va_list argsCopy;
   va_copy(argsCopy, args);
 
 #if defined(EP_NACL)
-  return vsprintf(nullptr, pFormat, args);
-#elseif defined(EP_COMPILER_VISUALC)
+  return vsprintf(nullptr, format, args);
+#elif defined(EP_COMPILER_VISUALC)
   return _vscprintf(format, argsCopy);
 #else
   return vsnprintf(nullptr, 0, format, argsCopy);
 #endif
 }
-int epvsnprintf(char * s, size_t count, const char * format, va_list args)
+int epvsnprintf(char *s, size_t count, const char *format, va_list args)
 {
 #if defined(EP_NACL)
-  return vsprintf(s, pFormat, args);
-#elseif defined(EP_COMPILER_VISUALC)
+  return vsprintf(s, format, args);
+#elif defined(EP_COMPILER_VISUALC)
   return vsnprintf_s(s, count, count, format, args);
 #else
   return vsnprintf(s, count, format, args);
