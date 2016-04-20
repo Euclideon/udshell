@@ -555,9 +555,6 @@ enum epAllocationFlags
 void *_epAlloc(size_t size, epAllocationFlags flags = epAF_None EP_IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
 #define epAlloc(size) _epAlloc(size, epAF_None EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 
-void *_epAllocAligned(size_t size, size_t alignment, epAllocationFlags flags EP_IF_MEMORY_DEBUG(const char * pFile = __FILE__, int  line = __LINE__));
-#define epAllocAligned(size, alignment, flags) _epAllocAligned(size, alignment, flags EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
-
 #define epAllocFlags(size, flags) _epAlloc(size, flags EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 #define epAllocType(type, count, flags) (type*)_epAlloc(sizeof(type) * (count), flags EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))
 

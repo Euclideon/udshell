@@ -34,7 +34,7 @@ project "eptest"
 
 	configuration { "linux" }
 		libdirs { "../bin/amd64" }
-		links { "assimp-ep" }
+		links { "assimp-ep", "dl" }
 		linkoptions { "-Wl,-rpath=../bin/amd64,-rpath=bin/amd64" }
 
 	configuration {}

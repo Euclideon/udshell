@@ -26,7 +26,6 @@ struct epKernel;
 epKernel* epPlugin_GetKernel();
 
 void* epPlugin_Alloc(size_t size, epAllocationFlags flags, const char *pFile, int line);
-void* epPlugin_AllocAligned(size_t size, size_t alignment, epAllocationFlags flags, const char *pFile, int line);
 void epPlugin_Free(void *pMem);
 
 #if defined(__cplusplus)

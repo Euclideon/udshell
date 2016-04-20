@@ -226,3 +226,35 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, char *cmdline, int)
 }
 #endif // UDPLATFORM_WINDOWS
 
+
+// This pushes all calls to operator new through our memory tracking.
+#if EP_DEBUG
+
+#if defined (new)
+#undef new
+#endif // defined (new)
+
+#if defined (delete)
+#undef delete
+#endif // defined (new)
+
+
+void* operator new(std::size_t sz)
+{
+  return epAlloc(sz);
+}
+void operator delete(void* ptr) noexcept
+{
+  epFree(ptr);
+}
+
+void* operator new[](std::size_t sz)
+{
+  return epAlloc(sz);
+}
+
+void operator delete[](void* ptr) noexcept
+{
+  epFree(ptr);
+}
+#endif //EP_DEBUG

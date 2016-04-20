@@ -63,7 +63,6 @@ namespace ep {
 
 namespace internal {
   void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line);
-  void *_AllocAligned(size_t size, size_t alignment, epAllocationFlags flags, const char * pFile, int line);
   void _Free(void *pMemory);
 }
 
@@ -73,8 +72,6 @@ static Instance s_instance =
   nullptr,        // pKernelInstance;
 
   [](size_t size, epAllocationFlags flags, const char *pFile, int line) -> void* { return internal::_Alloc(size, flags, pFile, line); }, //  Alloc
-
-  [](size_t size, size_t alignment, epAllocationFlags flags, const char *pFile, int line) -> void* { return internal::_AllocAligned(size, alignment, flags, pFile, line); }, // AllocAligned
 
   [](void *pMem) -> void { internal::_Free(pMem); }, // Free
 
