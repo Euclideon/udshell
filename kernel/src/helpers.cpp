@@ -31,7 +31,7 @@ Array<const KeyValuePair> epParseCommandLine(const char *pCommandLine)
       output.pushBack(KeyValuePair(numArgs++, String(pCommandLine + start, i - start)));
   }
 
-  return std::move(output);
+  return output;
 }
 
 Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
@@ -43,7 +43,7 @@ Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
   for (int i = 0; i < argc; ++i)
     output.pushBack(KeyValuePair(i, String(argv[i])));
 
-  return std::move(output);
+  return output;
 }
 
 Array<const KeyValuePair> epParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
@@ -53,7 +53,7 @@ Array<const KeyValuePair> epParseCommandLine(uint32_t argc, const char* argn[], 
   for (uint32_t i = 0; i < argc; ++i)
     output.pushBack(KeyValuePair(String(argn[i]), String(argv[i])));
 
-  return std::move(output);
+  return output;
 }
 
 int epGetHardwareThreadCount()

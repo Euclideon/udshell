@@ -238,7 +238,7 @@ QVariant QtEPComponent::get(const QString &name) const
   String prop(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(pComponent->Get(prop), &res);
-  return std::move(res);
+  return res;
 }
 
 void QtEPComponent::set(const QString &name, QVariant val)
@@ -270,7 +270,7 @@ QVariant QtEPComponent::call(const QString &name) const
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
@@ -287,7 +287,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) const
@@ -304,7 +304,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const
@@ -321,7 +321,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const
@@ -338,7 +338,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const
@@ -356,7 +356,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -375,7 +375,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -394,7 +394,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -413,7 +413,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -433,7 +433,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -454,7 +454,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
     ep::ClearError();
   }
 
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::subscribe(QString eventName, QJSValue func) const
@@ -469,7 +469,6 @@ QVariant QtEPComponent::subscribe(QString eventName, QJSValue func) const
   QByteArray byteArray = eventName.toUtf8();
   String event(byteArray.data(), byteArray.size());
   QVariant res;
-
   try
   {
     epFromVariant(pComponent->Subscribe(event, ep::VarDelegate(JSValueDelegateRef::create(func))), &res);
@@ -478,8 +477,7 @@ QVariant QtEPComponent::subscribe(QString eventName, QJSValue func) const
   {
     ep::ClearError();
   }
-
-  return std::move(res);
+  return res;
 }
 
 

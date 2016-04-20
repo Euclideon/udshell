@@ -80,7 +80,7 @@ Array<SharedString> ComponentImpl::EnumerateProperties(EnumerateFlags enumerateF
     for (auto p : GetDescriptor()->propertyTree)
       props.pushBack(p.key);
   }
-  return std::move(props);
+  return props;
 }
 Array<SharedString> ComponentImpl::EnumerateFunctions(EnumerateFlags enumerateFlags) const
 {
@@ -97,7 +97,7 @@ Array<SharedString> ComponentImpl::EnumerateFunctions(EnumerateFlags enumerateFl
     for (auto sf : GetDescriptor()->staticFuncTree)
       functions.pushBack(sf.key);
   }
-  return std::move(functions);
+  return functions;
 }
 Array<SharedString> ComponentImpl::EnumerateEvents(EnumerateFlags enumerateFlags) const
 {
@@ -112,7 +112,7 @@ Array<SharedString> ComponentImpl::EnumerateEvents(EnumerateFlags enumerateFlags
     for (auto e : GetDescriptor()->eventTree)
       events.pushBack(e.key);
   }
-  return std::move(events);
+  return events;
 }
 
 const PropertyDesc *ComponentImpl::GetPropertyDesc(String _name, EnumerateFlags enumerateFlags) const
@@ -188,7 +188,7 @@ Variant ComponentImpl::Get(String property) const
   }
   Variant r = pDesc->getter.get(pInstance);
   r.throwError();
-  return std::move(r);
+  return r;
 }
 void ComponentImpl::Set(String property, const Variant &value)
 {
@@ -221,11 +221,11 @@ Variant ComponentImpl::Call(String method, Slice<const Variant> args)
     }
     Variant r2 = pFunc->staticFunc.call(args);
     r2.throwError();
-    return std::move(r2);
+    return r2;
   }
   Variant r = pDesc->method.call(pInstance, args);
   r.throwError();
-  return std::move(r);
+  return r;
 }
 
 SubscriptionRef ComponentImpl::Subscribe(String eventName, const VarDelegate &d)
@@ -239,7 +239,7 @@ SubscriptionRef ComponentImpl::Subscribe(String eventName, const VarDelegate &d)
 
   Variant r = pDesc->ev.subscribe(pInstance, d);
   r.throwError();
-  return std::move(r.asSubscription());
+  return r.asSubscription();
 }
 
 } // namespace ep

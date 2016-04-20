@@ -150,7 +150,7 @@ inline SubscriptionRef BaseEvent::AddSubscription(const DelegateMementoRef &spM)
 
   SubscriptionRef spS = SubscriptionRef::create(this);
   subscribers.pushBack(Subscriber(spM, spS));
-  return std::move(spS);
+  return spS;
 }
 
 inline void BaseEvent::RemoveSubscription(const DelegateMementoRef &spDelegate)

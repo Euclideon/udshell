@@ -37,7 +37,7 @@ struct VarCallHack
       Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
       if (ErrorLevel() > errorDepth)
         return Variant(GetError());
-      return std::move(r);
+      return r;
     } catch (EPException &e) {
       return Variant(e.pError);
     } catch (std::exception &e) {
@@ -80,7 +80,7 @@ struct MethodCallHack
       Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
       if (ErrorLevel() > errorDepth)
         return Variant(GetError());
-      return std::move(r);
+      return r;
     } catch (EPException &e) {
       return Variant(e.pError);
     } catch (std::exception &e) {

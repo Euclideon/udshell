@@ -207,7 +207,7 @@ template <typename V, typename K, typename HashPred>
 const KVPRef<K, V> HashMap<V, K, HashPred>::Iterator::operator*() const
 {
   const KVPRef<K, V> r = KVPRef<K, V>(pItem->data.key, pItem->data.value);
-  return std::move(r);
+  return r;
 }
 template <typename V, typename K, typename HashPred>
 KVPRef<K, V> HashMap<V, K, HashPred>::Iterator::operator*()

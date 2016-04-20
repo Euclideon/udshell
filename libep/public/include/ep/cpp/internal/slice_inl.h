@@ -721,7 +721,7 @@ T Array<T, Count>::popFront()
     epConstruct((void*)&this->ptr[i-1]) T(std::move(this->ptr[i]));
   }
   this->ptr[--this->length].~T();
-  return std::move(copy);
+  return copy;
 }
 template <typename T, size_t Count>
 T Array<T, Count>::popBack()
@@ -729,7 +729,7 @@ T Array<T, Count>::popBack()
   --this->length;
   T copy(std::move(this->ptr[this->length]));
   this->ptr[this->length].~T();
-  return std::move(copy);
+  return copy;
 }
 
 template <typename T, size_t Count>
