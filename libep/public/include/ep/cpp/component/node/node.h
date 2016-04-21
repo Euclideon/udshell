@@ -21,6 +21,7 @@ class Node : public Resource
 public:
   friend class Scene;
   friend class SceneImpl;
+  friend class SceneNodeImpl;
 
   // TODO: i don't think all these functions should be virtual; consider each one!
   virtual void SetMatrix(const Double4x4 &mat) { pImpl->SetMatrix(mat); }

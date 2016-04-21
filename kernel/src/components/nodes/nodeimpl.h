@@ -41,6 +41,7 @@ public:
 
 protected:
   friend class Scene;
+  friend class SceneNodeImpl;
 
   bool InputEvent(const epInputEvent &ev) override final;
   bool Update(double timeStep) override final;

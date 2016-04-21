@@ -7,7 +7,6 @@
 
 #include "ep/cpp/math.h"
 #include "ep/cpp/component/component.h"
-#include "ep/cpp/component/node/node.h"
 #include "ep/cpp/component/node/udnode.h"
 #include "ep/cpp/internal/i/iudnode.h"
 #include "hal/input.h"

@@ -38,6 +38,7 @@
 #include "components/resources/menuimpl.h"
 #include "components/resources/modelimpl.h"
 #include "components/nodes/nodeimpl.h"
+#include "components/nodes/scenenodeimpl.h"
 #include "components/nodes/udnodeimpl.h"
 #include "components/nodes/cameraimpl.h"
 #include "components/nodes/simplecameraimpl.h"
@@ -228,6 +229,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
 
   // nodes
   pInstance->RegisterComponentType<Node, NodeImpl>();
+  pInstance->RegisterComponentType<SceneNode, SceneImpl>();
   pInstance->RegisterComponentType<Camera, CameraImpl>();
   pInstance->RegisterComponentType<SimpleCamera, SimpleCameraImpl>();
   pInstance->RegisterComponentType<GeomNode>();
