@@ -38,12 +38,15 @@ public:
   void CalculateWorldMatrix(Double4x4 *pMatrix) const override final;
 
   Variant Save() const override final { return pInstance->Super::Save(); }
+
 protected:
   friend class Scene;
 
   bool InputEvent(const epInputEvent &ev) override final;
   bool Update(double timeStep) override final;
   void Render(RenderScene &spScene, const Double4x4 &mat) override final;
+
+  void OnChildChanged() const { pInstance->Changed.Signal(); }
 
   Node *pParent = nullptr;
   Array<NodeRef, 3> children;
