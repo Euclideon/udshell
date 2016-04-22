@@ -28,7 +28,9 @@ solution "epshell"
 
 	group "libs"
 		dofile "3rdparty/lua/project.lua"
-		dofile "3rdparty/pcre/project.lua"
+		if _OS == "windows" then
+			dofile "3rdparty/pcre/project.lua"
+		end
 		dofile "3rdparty/googletest/project.lua"
 
 		dofile "ud/udPlatform/project.lua"
