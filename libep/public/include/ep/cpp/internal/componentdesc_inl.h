@@ -112,7 +112,7 @@ public:
   EventShim(VarMethod subscribe) : subscribeFunc(subscribe) {}
   EventShim(VarMethodWithData subscribe, SharedPtr<const RefCounted> data) : subscribeWithDataFunc(subscribe), data(data) {}
 
-  void subscribe(Component *pThis, const VarDelegate &d) const;
+  Variant subscribe(Component *pThis, const VarDelegate &d) const;
 
 protected:
   union
@@ -229,13 +229,13 @@ inline Variant StaticFuncShim::call(Slice<const Variant> args) const
   }
 }
 
-inline void EventShim::subscribe(Component *pThis, const VarDelegate &handler) const
+inline Variant EventShim::subscribe(Component *pThis, const VarDelegate &handler) const
 {
   Variant v(handler);
   if (data)
-    subscribeWithDataFunc.Call(pThis, Slice<const Variant>(&v, 1), *data);
+    return subscribeWithDataFunc.Call(pThis, Slice<const Variant>(&v, 1), *data);
   else
-    subscribeFunc.Call(pThis, Slice<const Variant>(&v, 1));
+    return subscribeFunc.Call(pThis, Slice<const Variant>(&v, 1));
 }
 
 // Internal Component Descriptor struct

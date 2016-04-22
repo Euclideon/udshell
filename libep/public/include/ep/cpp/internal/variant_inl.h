@@ -37,7 +37,7 @@ struct VarCallHack
       Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
       if (ErrorLevel() > errorDepth)
         return Variant(GetError());
-      return std::move(r);
+      return r;
     } catch (EPException &e) {
       return Variant(e.pError);
     } catch (std::exception &e) {
@@ -80,7 +80,7 @@ struct MethodCallHack
       Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
       if (ErrorLevel() > errorDepth)
         return Variant(GetError());
-      return std::move(r);
+      return r;
     } catch (EPException &e) {
       return Variant(e.pError);
     } catch (std::exception &e) {
@@ -136,6 +136,11 @@ template<typename R, typename... Args>
 epforceinline Variant VarCall(FastDelegate<R(Args...)> f, Slice<const Variant> args)
 {
   return internal::MethodCallHack<R, Args...>::call(f, args, typename internal::GenSequence<sizeof...(Args)>::type());
+}
+
+inline ep::SubscriptionRef VarEvent::AddSubscription(const ep::VarDelegate &del)
+{
+  return BaseEvent::AddSubscription(del.GetMemento());
 }
 
 

@@ -751,7 +751,7 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
     // TODO: inform partner kernels that I created a component
     //...
 
-    return std::move(spComponent);
+    return spComponent;
   }
   catch (std::exception &e)
   {

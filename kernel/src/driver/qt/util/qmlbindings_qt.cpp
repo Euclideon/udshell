@@ -22,8 +22,12 @@ using ep::SharedString;
 using ep::Array;
 using ep::Slice;
 
+
 // ---------------------------------------------------------------------------------------
 // COMPONENT DESCRIPTOR SHIMS
+
+// Property Data object - stored alongside the getter/setter methodshims
+// This identifies which QObject property the EP property refers to
 class QtPropertyData : public RefCounted
 {
 public:
@@ -31,6 +35,8 @@ public:
   QMetaProperty property;
 };
 
+// Method Data object - stored alongside the call methodshim
+// This identifies which QObject method the EP meta method refers to
 class QtMethodData : public RefCounted
 {
 public:
@@ -38,24 +44,29 @@ public:
   QMetaMethod method;
 };
 
+// Event Data object - stored alongside the subscribe methodshim
+// This identifies which QObject signal the EP event refers to and keeps track of the current list of subscribers
 class QtEventData : public RefCounted
 {
 public:
-  QtEventData(const QMetaMethod &_method) : method(_method) {}
-  ~QtEventData() { /* free sigToDel... */ }
-  QMetaMethod method;
-  mutable Array<QtSignalToDelegate*> sigToDel;
+  QtEventData(const QMetaMethod &m) : signalMapper(m) {}
+  mutable QtSignalMapper signalMapper;
 };
 
+
+// This class is the conduit via which all meta system calls go from the Euclideon Platform system into QML
+// Component Descriptors that map to an underlying QML based component will use this classes methods for meta access
 class QtShims
 {
 public:
+  // Property Getter
   Variant getter(Slice<const Variant>, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
     return Variant(data.property.read((const QObject*)((ep::Component*)this)->GetUserData()));
   }
 
+  // Property Setter
   Variant setter(Slice<const Variant> args, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
@@ -63,6 +74,7 @@ public:
     return Variant();
   }
 
+  // Meta Method Call
   Variant call(Slice<const Variant> values, const RefCounted &_data)
   {
     // TODO: do better runtime handling of this rather than assert since this can come from the user - check against Q_METAMETHOD_INVOKE_MAX_ARGS
@@ -93,15 +105,14 @@ public:
     return Variant(retVal);
   }
 
+  // Event Subscription
   Variant subscribe(Slice<const Variant> values, const RefCounted &_data)
   {
+    using namespace ep;
     const QtEventData &data = (const QtEventData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((Component*)this)->GetUserData();
 
-    data.sigToDel.pushBack(new QtSignalToDelegate(pQObject, data.method, values[0].asDelegate()));
-
-    // TODO: return subscription handle of some sort
-    return Variant();
+    return Variant(data.signalMapper.Subscribe(pQObject, values[0].asDelegate()));
   }
 };
 
@@ -227,7 +238,7 @@ QVariant QtEPComponent::get(const QString &name) const
   String prop(byteArray.data(), byteArray.size());
   QVariant res;
   epFromVariant(pComponent->Get(prop), &res);
-  return std::move(res);
+  return res;
 }
 
 void QtEPComponent::set(const QString &name, QVariant val)
@@ -259,7 +270,7 @@ QVariant QtEPComponent::call(const QString &name) const
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
@@ -276,7 +287,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) const
@@ -293,7 +304,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const
@@ -310,7 +321,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const
@@ -327,7 +338,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const
@@ -345,7 +356,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -364,7 +375,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -383,7 +394,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -402,7 +413,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -422,7 +433,7 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
   {
     ep::ClearError();
   }
-  return std::move(res);
+  return res;
 }
 
 QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
@@ -443,29 +454,30 @@ QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, 
     ep::ClearError();
   }
 
-  return std::move(res);
+  return res;
 }
 
-void QtEPComponent::subscribe(QString eventName, QJSValue func) const
+QVariant QtEPComponent::subscribe(QString eventName, QJSValue func) const
 {
   EPASSERT(pComponent, "QtEPComponent contains a null component");
   if (!func.isCallable())
   {
     pComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString());
-    return;
+    return QVariant();
   }
 
   QByteArray byteArray = eventName.toUtf8();
   String event(byteArray.data(), byteArray.size());
-
+  QVariant res;
   try
   {
-    pComponent->Subscribe(event, ep::VarDelegate(JSValueDelegateRef::create(func)));
+    epFromVariant(pComponent->Subscribe(event, ep::VarDelegate(JSValueDelegateRef::create(func))), &res);
   }
   catch (ep::EPException &)
   {
     ep::ClearError();
   }
+  return res;
 }
 
 

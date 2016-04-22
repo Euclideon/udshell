@@ -15,6 +15,9 @@ using SubscriptionRef = SharedPtr<Subscription>;
 
 class BaseEvent : public Safe
 {
+public:
+  bool HasSubscribers() const;
+
 protected:
   friend class Subscription;
 
@@ -24,11 +27,11 @@ protected:
 
   struct Subscriber
   {
-    Subscriber(const DelegateMementoRef &spM, Subscription *pSubscription)
-      : spM(spM), pSubscription(pSubscription) {}
+    Subscriber(const DelegateMementoRef &spM, const SubscriptionRef spSub)
+      : spM(spM), spSubscription(spSub) {}
 
     DelegateMementoRef spM;
-    Subscription *pSubscription;
+    SubscriptionRef spSubscription;
   };
   Array<Subscriber, 0> subscribers;
 };
@@ -145,12 +148,12 @@ inline SubscriptionRef BaseEvent::AddSubscription(const DelegateMementoRef &spM)
   for (auto &s : subscribers)
   {
     if (s.spM == spM)
-      return SubscriptionRef(s.pSubscription);
+      return s.spSubscription;
   }
 
   SubscriptionRef spS = SubscriptionRef::create(this);
-  subscribers.pushBack(Subscriber(spM, spS.ptr()));
-  return std::move(spS);
+  subscribers.pushBack(Subscriber(spM, spS));
+  return spS;
 }
 
 inline void BaseEvent::RemoveSubscription(const DelegateMementoRef &spDelegate)
@@ -169,7 +172,7 @@ inline void BaseEvent::RemoveSubscription(const SubscriptionRef &spSubscription)
 {
   for (size_t i = 0; i < subscribers.length; ++i)
   {
-    if (subscribers[i].pSubscription == spSubscription.ptr())
+    if (subscribers[i].spSubscription == spSubscription)
     {
       subscribers.removeSwapLast(i);
       return;
@@ -178,6 +181,10 @@ inline void BaseEvent::RemoveSubscription(const SubscriptionRef &spSubscription)
   epDebugWrite("Unsubscribe failed...?\n");
 }
 
+inline bool BaseEvent::HasSubscribers() const
+{
+  return !subscribers.empty();
+}
 
 } // namespace ep
 

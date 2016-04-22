@@ -29,7 +29,7 @@ public:
   virtual Variant Get(String property) const = 0;
   virtual void Set(String property, const Variant &value) = 0;
   virtual Variant Call(String function, Slice<const Variant> args) = 0;
-  virtual void Subscribe(String eventName, const VarDelegate &delegate) = 0;
+  virtual SubscriptionRef Subscribe(String eventName, const VarDelegate &delegate) = 0;
 
   virtual Variant Save() const = 0;
 

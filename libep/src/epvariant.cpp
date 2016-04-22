@@ -153,8 +153,7 @@ ptrdiff_t epStringifyVariant(ep::Slice<char> buffer, ep::String format, const ep
     case Variant::Type::Array:
       return epStringifyTemplate(buffer, format, v.asArray(), pArgs);
     case Variant::Type::Error:
-      EPASSERT(false, "TODO! Please write me!");
-      return 0;
+      return epStringifyTemplate(buffer, format, v.stringify(), pArgs);
   }
   return 0;
 }
@@ -341,6 +340,8 @@ SharedString Variant::stringify() const
     case Type::String:
     case Type::SmallString:
       return asString();
+    case Type::Error:
+      return err->message;
     default:
       break;
   }
@@ -736,6 +737,40 @@ Variant& Variant::insertItem(Variant key, Variant value)
   EPASSERT_THROW(is(SharedPtrType::AssocArray), epR_InvalidType, "Variant is not a map");
 
   return aa->tree.Insert(key, value);
+}
+
+void VarEvent::Signal(Slice<const Variant> args)
+{
+  for (auto &s : subscribers)
+  {
+    VarDelegate d(s.spM);
+    size_t errorDepth = ErrorLevel();
+    try
+    {
+      Variant r = d(args);
+
+      // stack error...
+      if (ErrorLevel() > errorDepth)
+      {
+        epDebugFormat("Unhandled error from event handler: {0}\n", GetError()->message);
+        PopErrorToLevel(errorDepth);
+      }
+      else if (r.is(Variant::Type::Error))
+      {
+        epDebugFormat("Unhandled error returned from event handler: {0}\n", r);
+      }
+    }
+    catch (std::exception &e)
+    {
+      epDebugFormat("Unhandled exception from event handler: {0}\n", e.what());
+      PopErrorToLevel(errorDepth);
+    }
+    catch (...)
+    {
+      epDebugFormat("Unhandled C++ exception from event handler!\n");
+      PopErrorToLevel(errorDepth);
+    }
+  }
 }
 
 namespace internal

@@ -844,7 +844,7 @@ protected:
       // put the stack back how we got it
       lua_pop(L, numRet);
 
-      return std::move(v);
+      return v;
     }
     return Variant();
   }
@@ -1148,7 +1148,7 @@ ep::Variant ep::Variant::luaGet(LuaState &l, int idx)
       // construct a variant
       Variant v(std::move(m));
       v.length = len;
-      return std::move(v);
+      return v;
     }
     default:
       // TODO: make a noise of some sort...?

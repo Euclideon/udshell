@@ -37,15 +37,15 @@ inline Variant Component::Call(String method, Slice<const Variant> args)
   return pImpl->Call(method, args);
 }
 
-inline void Component::Subscribe(String eventName, const VarDelegate &delegate)
+inline SubscriptionRef Component::Subscribe(String eventName, const VarDelegate &delegate)
 {
-  pImpl->Subscribe(eventName, delegate);
+  return pImpl->Subscribe(eventName, delegate);
 }
 template<typename ...Args>
-inline void Component::Subscribe(String eventName, const Delegate<void(Args...)> &d)
+inline SubscriptionRef Component::Subscribe(String eventName, const Delegate<void(Args...)> &d)
 {
   typedef SharedPtr<internal::VarDelegateMemento<void(Args...)>> VarDelegateMementoRef;
-  Subscribe(eventName, VarDelegate(VarDelegateMementoRef::create(d)));
+  return Subscribe(eventName, VarDelegate(VarDelegateMementoRef::create(d)));
 }
 
 inline VarDelegate Component::GetGetterDelegate(String _name, EnumerateFlags enumerateFlags)

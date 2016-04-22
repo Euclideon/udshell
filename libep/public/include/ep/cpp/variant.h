@@ -189,6 +189,13 @@ private:
   void destroy();
 };
 
+class VarEvent : public ep::BaseEvent
+{
+public:
+  ep::SubscriptionRef AddSubscription(const ep::VarDelegate &del);
+  void Signal(ep::Slice<const ep::Variant> args);
+};
+
 namespace internal {
   static const size_t VariantSmallStringSize = sizeof(Variant) - 1;
 } // namespace internal

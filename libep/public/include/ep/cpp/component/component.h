@@ -69,15 +69,15 @@ public:
   template<typename ...Args>
   Variant Call(String method, Args... args);
 
-  void Subscribe(String eventName, const VarDelegate &delegate);
+  SubscriptionRef Subscribe(String eventName, const VarDelegate &delegate);
   template<typename ...Args>
-  void Subscribe(String eventName, const Delegate<void(Args...)> &d);
+  SubscriptionRef Subscribe(String eventName, const Delegate<void(Args...)> &d);
   template <class X, class Y, typename ...Args>
-  void Subscribe(String eventName, Y *pThis, void(X::*pMethod)(Args...)) { Subscribe(eventName, Delegate<void(Args...)>(pThis, pMethod)); }
+  SubscriptionRef Subscribe(String eventName, Y *pThis, void(X::*pMethod)(Args...)) { return Subscribe(eventName, Delegate<void(Args...)>(pThis, pMethod)); }
   template <class X, class Y, typename ...Args>
-  void Subscribe(String eventName, Y *pThis, void(X::*pMethod)(Args...) const) { Subscribe(eventName, Delegate<void(Args...)>(pThis, pMethod)); }
+  SubscriptionRef Subscribe(String eventName, Y *pThis, void(X::*pMethod)(Args...) const) { return Subscribe(eventName, Delegate<void(Args...)>(pThis, pMethod)); }
   template <typename ...Args>
-  void Subscribe(String eventName, void(*pFunc)(Args...)) { Subscribe(eventName, Delegate<void(Args...)>(pFunc)); }
+  SubscriptionRef Subscribe(String eventName, void(*pFunc)(Args...)) { return Subscribe(eventName, Delegate<void(Args...)>(pFunc)); }
 
   void SendMessage(String target, String message, const Variant &data) const;
   void SendMessage(const ComponentRef &target, String message, const Variant &data) const;

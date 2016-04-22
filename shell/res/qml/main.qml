@@ -113,18 +113,16 @@ Rectangle {
   }
 
   function initViewerUI(activity) {
-    // TODO Uncomment this when unsubscribe works
-    /*
     if(simplecamera)
-      simplecamera.unsubscribe("changed", cameraupdated);
+      subscriptions.changed.unsubscribe();
 
     if(view)
     {
-      view.unsubscribe("mousepositionchanged", viewmouseupdated);
-      view.unsubscribe("enabledpickingchanged", viewpickingenabledchanged);
-      view.unsubscribe("pickfound", viewpickfound);
+      subscriptions.mousepositionchanged.unsubscribe();
+      subscriptions.enabledpickingchanged.unsubscribe();
+      subscriptions.pickfound.unsubscribe();
     }
-    */
+
 
     if(!activity)
     {
@@ -135,13 +133,13 @@ Rectangle {
 
     simplecamera = activity.get("simplecamera");
     if(simplecamera)
-      simplecamera.subscribe("changed", cameraupdated);
+      subscriptions.changed = simplecamera.subscribe("changed", cameraupdated);
 
     view = activity.get("view");
     if(view) {
-      view.subscribe("mousepositionchanged", viewmouseupdated);
-      view.subscribe("enabledpickingchanged", viewpickingenabledchanged);
-      view.subscribe("pickfound", viewpickfound);
+      subscriptions.mousepositionchanged = view.subscribe("mousepositionchanged", viewmouseupdated);
+      subscriptions.enabledpickingchanged = view.subscribe("enabledpickingchanged", viewpickingenabledchanged);
+      subscriptions.pickfound = view.subscribe("pickfound", viewpickfound);
     }
   }
 
@@ -182,6 +180,14 @@ Rectangle {
       activityTabs.visible = false;
       activityTabs.currentIndex = -1;
     }
+  }
+
+  QtObject {
+    id: subscriptions
+    property var changed
+    property var mousepositionchanged
+    property var enabledpickingchanged
+    property var pickfound
   }
 
   ColumnLayout {
