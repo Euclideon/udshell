@@ -43,8 +43,13 @@ size_t StdIOStream::Write(Slice<const void> data)
   if (bDbgOutput)
   {
 #if defined(EP_WINDOWS)
-    String s((const char*)data.ptr, data.length);
-    OutputDebugString((LPCSTR)s.toStringz());
+    Array<wchar_t, 128> buffer(Alloc, data.length + 1);
+    int len = MultiByteToWideChar(CP_UTF8, 0, (char*)data.ptr, (int)data.length, buffer.ptr, (int)data.length);
+    if (len > 0)
+    {
+      buffer.ptr[len] = 0;
+      OutputDebugStringW(buffer.ptr);
+    }
 #endif
     written = data.length;
   }
