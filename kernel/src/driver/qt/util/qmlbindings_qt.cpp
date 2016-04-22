@@ -130,7 +130,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     static SharedString propertyDescStr("Qt Component Property");
     QMetaProperty property = pMetaObject->property(i);
 
-    SharedString propertyName = AllocUDStringFromQString(property.name()).toLower();
+    SharedString propertyName = epFromQString(property.name()).toLower();
     auto data = SharedPtr<QtPropertyData>::create(property);
     auto getterShim = (property.isReadable() ? MethodShim(&QtShims::getter, data) : MethodShim(nullptr));
     auto setterShim = (property.isWritable() ? MethodShim(&QtShims::setter, data) : MethodShim(nullptr));
@@ -146,7 +146,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     {
       static SharedString methodDescStr("Qt Component Method");
 
-      SharedString methodName = AllocUDStringFromQString(method.name()).toLower();
+      SharedString methodName = epFromQString(method.name()).toLower();
       auto data = SharedPtr<QtMethodData>::create(method);
       auto shim = MethodShim(&QtShims::call, data);
 
@@ -157,7 +157,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     {
       static SharedString eventDescStr("Qt Component Event");
 
-      SharedString eventName = AllocUDStringFromQString(method.name()).toLower();
+      SharedString eventName = epFromQString(method.name()).toLower();
       auto data = SharedPtr<QtEventData>::create(method);
       auto shim = EventShim(&QtShims::subscribe, data);
 

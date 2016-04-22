@@ -6,6 +6,13 @@ FocusScope {
   id: viewport
   anchors.fill: parent
 
+  property var epTypeDesc: {
+    "super": "ep.viewport",
+    "id": "ui.viewport",
+    "displayname": "UI.Viewport",
+    "description": "QML Based Viewport"
+  }
+
   EPRenderView {
     id: renderview
     anchors.fill: parent

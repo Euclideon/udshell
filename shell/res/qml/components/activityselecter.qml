@@ -6,6 +6,7 @@ import QtQuick.Layouts 1.1
 import epControls 0.1
 
 Item {
+  property var epTypeDesc: { "id": "ui.activityselector", "super": "ep.uicomponent" }
   property var activitiesinfo: []
   property var callback
 

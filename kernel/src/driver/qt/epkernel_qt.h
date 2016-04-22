@@ -94,16 +94,19 @@ public:
 
   QtFocusManager *GetFocusManager() { return pFocusManager; }
 
-  void RegisterQmlComponent(ep::String superTypeId, ep::String typeId, ep::String file);
-  ep::ComponentRef CreateQmlComponent(ep::String superTypeId, ep::String file, ep::Variant::VarMap initParams);
+  void RegisterQmlComponent(ep::String file);
+  ep::ComponentRef CreateQmlComponent(ep::String file, ep::Variant::VarMap initParams);
 
 private:
   friend class QtKernelMediator;
+  friend class QmlPluginLoader;
 
   static ep::ComponentDescInl *MakeKernelDescriptor();
 
   void FinishInit();
   void Shutdown();
+
+  void RegisterQml(ep::String file, ep::Variant::VarMap desc);
 
   ep::Array<const ep::MethodInfo> GetMethods() const
   {

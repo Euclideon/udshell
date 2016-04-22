@@ -4,30 +4,15 @@
 
 #include "typeconvert_qt.h"
 
-#include "../components/qobjectcomponent_qt.h"
-#include "../epkernel_qt.h"
-#include "qmlbindings_qt.h"
+#include "driver/qt/components/qobjectcomponent_qt.h"
+#include "driver/qt/epkernel_qt.h"
+#include "driver/qt/util/qmlbindings_qt.h"
 
 #include <QJSValueIterator>
 #include <QMetaType>
 
 
-// Qt type conversion to/from UD
-
-namespace qt {
-
-ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string)
-{
-  QByteArray byteArray = string.toUtf8();
-  return ep::MutableString<ep::internal::VariantSmallStringSize>(byteArray.data(), byteArray.size());
-}
-
-ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQByteArray(const QByteArray &byteArray)
-{
-  return ep::MutableString<ep::internal::VariantSmallStringSize>(byteArray.data(), byteArray.size());
-}
-
-}
+// Qt type conversion to/from EP
 
 using ep::Variant;
 using ep::SharedString;
@@ -35,12 +20,6 @@ using ep::Slice;
 using ep::Array;
 using ep::shared_pointer_cast;
 
-void epFromVariant(const Variant &variant, QString *pString)
-{
-  SharedString s = variant.asSharedString();
-  if (!s.empty())
-    *pString = QString::fromUtf8(s.ptr, static_cast<int>(s.length));
-}
 
 Variant epToVariant(QObject *pQObj)
 {
@@ -95,7 +74,7 @@ Variant epToVariant(const QVariant &var)
     case QMetaType::QByteArray:
     case QMetaType::QString:
     case QMetaType::QChar:
-      return Variant(qt::AllocUDStringFromQString(var.toString()));
+      return Variant(qt::epFromQString(var.toString()));
 
     case QMetaType::QObjectStar:
       return epToVariant(var.value<QObject*>());
@@ -247,7 +226,7 @@ Variant epToVariant(const QJSValue &v)
   if (v.isNumber())
     return Variant(v.toNumber());
   else if (v.isString())
-    return Variant(qt::AllocUDStringFromQString(v.toString()));
+    return Variant(qt::epFromQString(v.toString()));
   else if (v.isBool())
     return Variant(v.toBool());
   else if (v.isNull())
@@ -273,6 +252,18 @@ Variant epToVariant(const QJSValue &v)
     }
     return Variant(std::move(r));
   }
+  else if (v.isError())
+  {
+    // TODO: translate error info to errorstate?
+    QString errorStr = QString("Javascript Exception: %0 (%1:%2) - %3\nStack: %4")
+      .arg(v.property("name").toString())
+      .arg(v.property("fileName").toString())
+      .arg(v.property("lineNumber").toInt())
+      .arg(v.property("message").toString())
+      .arg(v.property("stack").toString());
+
+    return Variant(PushError(epR_ScriptException, qt::epFromQString(errorStr)));
+  }
   else if (v.isObject())
   {
     Variant::VarMap varMap;
@@ -283,14 +274,11 @@ Variant epToVariant(const QJSValue &v)
 
       QString name = i.name();
       QJSValue value = i.value();
-      varMap.Insert(ep::KeyValuePair(Variant(qt::AllocUDStringFromQString(name)), epToVariant(value)));
+      varMap.Insert(ep::KeyValuePair(Variant(qt::epFromQString(name)), epToVariant(value)));
     }
     return Variant(std::move(varMap));
   }
   else if (v.isDate())
-  {
-  }
-  else if (v.isError())
   {
   }
   else if (v.isRegExp())
@@ -426,7 +414,7 @@ Variant epToVariant(const QVariantMap &varMap)
   QVariantMap::const_iterator i = varMap.begin();
   while (i != varMap.end())
   {
-    v.Insert(ep::KeyValuePair(Variant(qt::AllocUDStringFromQString(i.key())), epToVariant(i.value())));
+    v.Insert(ep::KeyValuePair(Variant(qt::epFromQString(i.key())), epToVariant(i.value())));
     ++i;
   }
   return Variant(std::move(v));
