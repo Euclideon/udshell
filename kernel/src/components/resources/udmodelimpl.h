@@ -26,23 +26,23 @@ public:
     : ImplSuper(pInstance) {}
   virtual ~UDModelImpl();
 
-  uint32_t GetStartingRoot() const  override{ return startingRoot; }
-  void SetStartingRoot(uint32_t root) override { startingRoot = root; }
+  uint32_t GetStartingRoot() const override final { return startingRoot; }
+  void SetStartingRoot(uint32_t root) override final { startingRoot = root; }
 
-  const Rect<uint32_t> &GetRenderClipRect() const override { return rect; }
-  void SetRenderClipRect(const Rect<uint32_t>& _rect) override { rectSet = true; rect = _rect; }
+  const Rect<uint32_t> &GetRenderClipRect() const override final { return rect; }
+  void SetRenderClipRect(const Rect<uint32_t>& _rect) override final { rectSet = true; rect = _rect; }
 
-  uint32_t GetRenderFlags() const override { return renderFlags; }
-  void SetRenderFlags(uint32_t flags) override { renderFlags = (udRenderFlags)flags; }
+  uint32_t GetRenderFlags() const override final { return renderFlags; }
+  void SetRenderFlags(uint32_t flags) override final { renderFlags = (udRenderFlags)flags; }
 
-  double GetUDScale() const override { EPASSERT(udmatrix.a[0] == udmatrix.a[5] && udmatrix.a[0] == udmatrix.a[10], "NonUniform Scale"); return udmatrix.a[0]; }
-  const Double4x4 &GetUDMatrix() const override { return udmatrix; }
+  double GetUDScale() const override final { EPASSERT(udmatrix.a[0] == udmatrix.a[5] && udmatrix.a[0] == udmatrix.a[10], "NonUniform Scale"); return udmatrix.a[0]; }
+  const Double4x4 &GetUDMatrix() const override final { return udmatrix; }
 
-  BoundingVolume GetBoundingVolume() const override;
-  UDRenderState GetUDRenderState() const override;
+  BoundingVolume GetBoundingVolume() const override final;
+  UDRenderState GetUDRenderState() const override final;
 
-  VarDelegate GetVoxelVarDelegate() const override { return voxelVarDelegate; }
-  void SetVoxelVarDelegate(VarDelegate delegate);
+  VarDelegate GetVoxelVarDelegate() const override final { return voxelVarDelegate; }
+  void SetVoxelVarDelegate(VarDelegate delegate) override final;
 
   EP_FRIENDS_WITH_IMPL(UDDataSource);
 private:
