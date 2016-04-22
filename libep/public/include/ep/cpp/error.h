@@ -25,7 +25,11 @@
 #define EPTHROW_IF_NULL(condition, error, message, ...) { if((condition) == nullptr) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }
 #define EPTHROW_RESULT(error, message, ...) { epResult r = (error); if(r != epR_Success) { EPTHROW_ERROR(r, message, ##__VA_ARGS__); } }
 
+#if EP_DEBUG
+#define EPASSERT_THROW(condition, error, message, ...) { if(!(condition)) { DebugBreak(); EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }
+#else
 #define EPASSERT_THROW(condition, error, message, ...) { if(!(condition)) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }
+#endif
 
 
 namespace ep {
