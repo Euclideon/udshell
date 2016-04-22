@@ -152,13 +152,14 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   mainSurfaceFormat.setOption(QSurfaceFormat::DebugContext);
   QSurfaceFormat::setDefaultFormat(mainSurfaceFormat);
 
-  // create focus maanager;
+  // create focus manager;
   pFocusManager = new QtFocusManager();
 
   // create the splash screen
   QQmlComponent component(pQmlEngine, QUrl("qrc:/kernel/splashscreen.qml"));
-  QObject *object = component.create();
-  pSplashScreen = qobject_cast<QQuickWindow*>(object);
+  QObject *pObject = component.create();
+  epscope(fail) { delete pObject; };
+  pSplashScreen = qobject_cast<QQuickWindow*>(pObject);
   if (!pSplashScreen)
   {
     // TODO: better error information/handling
@@ -178,7 +179,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
 QtKernel::~QtKernel()
 {
   delete pMediator;
-  pApplication->deleteLater();
+  delete pApplication;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -386,8 +387,10 @@ void QtKernel::Shutdown()
   delete pFocusManager;
 
   // delete the QML engine and then pump the message queue to ensure we don't have pending resource destruction
+  pQmlEngine->clearComponentCache();
+  pQmlEngine->collectGarbage();
   delete pQmlEngine;
-  pApplication->sendPostedEvents();
+  pApplication->sendPostedEvents(nullptr, QEvent::DeferredDelete);
   pApplication->processEvents();
 
   delete pSplashScreen;

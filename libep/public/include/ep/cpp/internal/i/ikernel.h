@@ -35,6 +35,7 @@ public:
   virtual void SendMessage(String target, String sender, String message, const Variant &data) = 0;
 
   virtual void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) = 0;
+  virtual bool HasMessageHandler(SharedString _name) = 0;
 
   virtual void DispatchToMainThread(MainThreadCallback callback) = 0;
   virtual void DispatchToMainThreadAndWait(MainThreadCallback callback) = 0;

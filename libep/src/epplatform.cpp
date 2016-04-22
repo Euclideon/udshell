@@ -119,6 +119,45 @@ void _epFree(void *pMemory)
 }
 
 #if __EP_MEMORY_DEBUG__
+#if defined(EP_WINDOWS)
+namespace ep {
+namespace internal {
+
+int reportingHook(int reportType, char* userMessage, int* retVal)
+{
+  static bool filter = true;
+  static int debugMsgCount = 3;
+  static int leakCount = 0;
+
+  if (strcmp(userMessage, "Object dump complete.\n") == 0)
+    filter = false;
+
+  if (filter)
+  {
+    // Debug messages from our program should consist of 4 parts :
+    // File (line) | AllocID | Block Descriptor | Memory Data
+    if (!strstr(userMessage, ") : "))
+    {
+      ++debugMsgCount;
+    }
+    else
+    {
+      if (leakCount == 0)
+        OutputDebugStringA("Detected memory leaks!\nDumping objects ->\n");
+      debugMsgCount = 0;
+      ++leakCount;
+    }
+    // Filter the output if it's not from our program
+    return (debugMsgCount > 3);
+  }
+
+  return (leakCount == 0);
+}
+
+} // namespace internal
+} // namespace ep
+#endif  // defined(EP_WINDOWS)
+
 void epInitMemoryTracking()
 {
 #if defined(EP_WINDOWS)
@@ -140,13 +179,18 @@ void epInitMemoryTracking()
   HANDLE hCrtWarnReport = CreateFile(pFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
   if (hCrtWarnReport == INVALID_HANDLE_VALUE) OutputDebugStringA("Error creating CrtWarnReport.txt");
 
+  errno = 0;
   int warnMode = _CrtSetReportMode(_CRT_WARN, _CRTDBG_REPORT_MODE);
   _CrtSetReportMode(_CRT_WARN, warnMode | _CRTDBG_MODE_FILE);
   if (errno == EINVAL) OutputDebugStringA("Error calling _CrtSetReportMode() warnings");
 
+  errno = 0;
   _CrtSetReportFile(_CRT_WARN, hCrtWarnReport);
   if (errno == EINVAL)OutputDebugStringA("Error calling _CrtSetReportFile() warnings");
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+  //change the report function to only report memory leaks from program code
+  _CrtSetReportHook(ep::internal::reportingHook);
 #endif
 }
 #endif // __EP_MEMORY_DEBUG__
