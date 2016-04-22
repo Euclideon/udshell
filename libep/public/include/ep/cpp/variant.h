@@ -154,7 +154,8 @@ public:
 
   Variant& operator[](size_t i) const;
   Variant& operator[](String key) const;
-  Variant* getItem(String key) const;
+  Variant* getItem(Variant key) const;
+  Variant& insertItem(Variant key, Variant value);
 
   void throwError();
 
