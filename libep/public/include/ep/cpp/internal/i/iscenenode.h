@@ -1,20 +1,20 @@
 #pragma once
-#if !defined(_EP_IUDNODE_HPP)
-#define _EP_IUDNODE_HPP
+#if !defined(_EP_ISCENENODE_HPP)
+#define _EP_ISCENENODE_HPP
 
 #include "ep/cpp/component/component.h"
 
 namespace ep {
 
-SHARED_CLASS(UDModel);
+SHARED_CLASS(Scene);
 
 class RenderScene;
 
-class IUDNode
+class ISceneNode
 {
 public:
-  virtual UDModelRef GetUDModel() const = 0;
-  virtual void SetUDModel(UDModelRef spModel) = 0;
+  virtual SceneRef GetScene() const = 0;
+  virtual void SetScene(SceneRef spScene) = 0;
 
   virtual Variant Save() const = 0;
 
@@ -24,4 +24,4 @@ protected:
 
 } // namespace ep
 
-#endif // EP_UDNODE_H
+#endif // _EP_ISCENENODE_HPP

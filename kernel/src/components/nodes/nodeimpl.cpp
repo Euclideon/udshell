@@ -50,19 +50,30 @@ bool NodeImpl::Update(double timeStep)
 
 void NodeImpl::AddChild(NodeRef c)
 {
+  NodeImpl *pC = c->GetImpl<NodeImpl>();
+  EPASSERT_THROW(pC->pParent == nullptr, epR_InvalidArgument, "Node is already present in a scene");
+
+  c->Changed.Subscribe(this, &NodeImpl::OnChildChanged);
+
   children.concat(c);
+  pC->pParent = pInstance;
 }
 
 void NodeImpl::RemoveChild(NodeRef c)
 {
+  NodeImpl *pC = c->GetImpl<NodeImpl>();
+  EPASSERT_THROW(pC->pParent == pInstance, epR_InvalidArgument, "Node is not a child");
+
   children.removeFirst(c);
-  ((NodeImpl *)c->pImpl.ptr())->pParent = nullptr; // TODO This is ugly, we need a better way to access the Impl of another component instance
+  pC->pParent = nullptr;
+
+  c->Changed.Unsubscribe(this, &NodeImpl::OnChildChanged);
 }
 
 void NodeImpl::Detach()
 {
-  if (pParent)
-    pParent->RemoveChild(NodeRef(pInstance));
+  EPASSERT_THROW(pParent != nullptr, epR_Failure, "Node is not in scene");
+  pParent->RemoveChild(NodeRef(pInstance));
 }
 
 void NodeImpl::CalculateWorldMatrix(Double4x4 *pMatrix) const
