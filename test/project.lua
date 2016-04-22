@@ -20,6 +20,7 @@ project "eptest"
 	links { "libep" }
 	links { "epkernel" }
 	links { luaPath }
+	links { "pcre" }
 	links { googletestPath }
 
 	configuration { "windows" }

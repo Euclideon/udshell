@@ -16,6 +16,7 @@ project "epviewer"
 	links { "libep" }
 	links { "epkernel" }
 	links { luaPath }
+	links { "pcre" }
 
 	defines { "GLEW_STATIC" }
 

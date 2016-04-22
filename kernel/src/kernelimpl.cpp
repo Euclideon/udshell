@@ -47,6 +47,7 @@
 #include "components/datasources/datasourceimpl.h"
 #include "components/broadcasterimpl.h"
 #include "components/streamimpl.h"
+#include "components/regex.h"
 
 #include "components/dynamiccomponent.h"
 #include "components/varcomponent.h"
@@ -263,6 +264,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<File>();
   pInstance->RegisterComponentType<StdIOStream>();
   pInstance->RegisterComponentType<MemStream>();
+  pInstance->RegisterComponentType<Regex>();
   pInstance->RegisterComponentType<Logger>();
   pInstance->RegisterComponentType<PluginManager>();
   pInstance->RegisterComponentType<PluginLoader>();

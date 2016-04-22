@@ -26,13 +26,8 @@ project "epkernel"
 		defines { "GLEW_STATIC" }
 	end
 
-	filter "windows"
-		includedirs { "../ud/3rdParty/sdl2/include" }
-	filter "PNaCl"
-		buildoptions { "-std=c++11" }
-	filter {}
-
 	filter { "system:windows" }
+		includedirs { "../3rdParty/pcre/include" }
 		buildoptions { "/MP" }
 	filter { }
 

@@ -15,6 +15,7 @@ project "epshell"
 	links { "libep" }
 	links { "epkernel" }
 	links { luaPath }
+	links { "pcre" }
 
 	qt.enable()
 --	qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set

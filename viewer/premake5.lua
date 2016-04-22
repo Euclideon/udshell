@@ -37,6 +37,10 @@ solution "epviewer"
 		objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 		targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
 
+		dofile "../3rdparty/pcre/project.lua"
+		objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
+		targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
+
 		dofile "../3rdparty/googletest/project.lua"
 		objdir "int/%{cfg.buildcfg}_%{cfg.platform}"
 		targetdir "bin/%{cfg.buildcfg}_%{cfg.platform}"
