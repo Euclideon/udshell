@@ -16,7 +16,8 @@ public:
 
   Variant ParseXml();
   void FormatXml(Variant root);
-  Variant ParseJson() const; // TODO: Implement this?
+  Variant ParseJson();
+  void FormatJson(Variant root);
 
   static Variant XMLMapToComponentParams(Variant node);
   static Variant ComponentParamsToXMLMap(Variant map);

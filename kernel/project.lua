@@ -17,6 +17,7 @@ project "epkernel"
 	includedirs { "../3rdparty/lua/" .. luaPath .. "/src"}
 	includedirs { "../3rdparty/assimp-3.1.1/include" }
 	includedirs { "../3rdparty/rapidxml-1.13" }
+	includedirs { "../3rdparty/rapidjson-1.0.2/include" }
 
 	if not qt then
 --		includedirs { "../ud/3rdParty/GL/freeglut/static/Include" }
