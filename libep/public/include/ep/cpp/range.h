@@ -18,14 +18,14 @@ EP_BITFIELD(RangeFeatures,
 
 // Range<> wraps a duck-typed struct that looks like a range, but may not implement all range features
 // The missing features are detected, reported, and function stubs implemented for missing features
-template <typename T>
+template <typename R>
 struct Range
 {
-  using ElementType = decltype(std::declval<T>().front());
-  using Iterator = decltype(std::declval<T>().begin());
+  using ElementType = decltype(std::declval<R>().front());
+  using Iterator = decltype(std::declval<R>().begin());
 
 private:
-  T range;
+  R range;
 
   // ***** HORRIBLE SFINAE MAGIC!!! *****
   template <typename U> static auto TestHasEmpty(int) -> decltype(std::declval<U>().empty(), std::true_type());
@@ -43,15 +43,20 @@ private:
   // ***** PHEW, WE SURVIVED! *****
 
 public:
-  template<typename... Args>
+  Range(Range<R> &&rval) : range(std::move(rval.range)) {}
+  Range(const Range<R> &rh) : range(rh.range) {}
+  template <typename S> Range(Range<S> &&rval) : range(std::move(rval.range)) {}
+  template <typename S> Range(const Range<S> &rh) : range(rh.range) {}
+
+  template <typename... Args>
   Range(Args&&... args) : range(std::forward<Args>(args)...) {}
 
-  static constexpr bool HasEmpty = decltype(TestHasEmpty<T>(0))::value;
-  static constexpr bool HasLength = decltype(TestHasLength<T>(0))::value;
-  static constexpr bool HasFront = decltype(TestHasFront<T>(0))::value;
-  static constexpr bool HasBack = decltype(TestHasBack<T>(0))::value;
-  static constexpr bool HasIndex = decltype(TestHasIndex<T>(0))::value;
-  static constexpr bool HasFeatures = decltype(TestHasFeatures<T>(0))::value;
+  static constexpr bool HasEmpty = decltype(TestHasEmpty<R>(0))::value;
+  static constexpr bool HasLength = decltype(TestHasLength<R>(0))::value;
+  static constexpr bool HasFront = decltype(TestHasFront<R>(0))::value;
+  static constexpr bool HasBack = decltype(TestHasBack<R>(0))::value;
+  static constexpr bool HasIndex = decltype(TestHasIndex<R>(0))::value;
+  static constexpr bool HasFeatures = decltype(TestHasFeatures<R>(0))::value;
 
   RangeFeatures features() const;
 
@@ -79,14 +84,29 @@ class VirtualRange
 public:
   class Iterator
   {
-    //...
+    Iterator(VirtualRange<V> *pR) : pR(pR) {}
+
+    VirtualRange<V> *pR = nullptr;
+
+    Iterator &operator++()
+    {
+      pR->popFront();
+      if (pR->empty())
+        pR = nullptr;
+      return *this;
+    }
+
+    // TODO: HAX! this can only compare against 'end()'
+    bool operator!=(Iterator rhs) { return pR != rhs.pR; }
+
+    const V operator*() const { return pR->front(); }
+    V operator*() { return pR->front(); }
   };
 
   VirtualRange() {}
 
-  // TODO: copy construction should copy!!
-  VirtualRange(const VirtualRange &rh) : spRangeInstance(rh.spRangeInstance) {}
   VirtualRange(VirtualRange &&rval) : spRangeInstance(std::move(rval.spRangeInstance)) {}
+  VirtualRange(const VirtualRange &rh) : spRangeInstance(rh.spRangeInstance->clone()) {}
 
   template <typename R>
   VirtualRange(R &&srcRange)
@@ -94,9 +114,11 @@ public:
     class RangeType : public VirtualRangeImpl
     {
     public:
+      Range<R> range;
+
       RangeType(R &&srcRange) : range(std::forward<R>(srcRange)) {}
 
-      Range<R> range;
+      SharedPtr<VirtualRangeImpl> clone() const override final { return SharedPtr<RangeType>::create(*this); }
 
       RangeFeatures features() const override final { return range.features(); }
 
@@ -127,14 +149,16 @@ public:
 
   V operator[](size_t index) const { return (*spRangeInstance)[index]; }
 
-  Iterator begin() const { EPASSERT(false, "TODO!"); }
-  Iterator end() const { EPASSERT(false, "TODO!"); }
+  Iterator begin() const { return Iterator(this); }
+  Iterator end() const { return Iterator(nullptr); }
 
 private:
   friend struct Variant;
   class VirtualRangeImpl : public RefCounted
   {
     template <typename T> friend class VirtualRange;
+
+    virtual SharedPtr<VirtualRangeImpl> clone() const = 0;
 
     virtual RangeFeatures features() const = 0;
 
