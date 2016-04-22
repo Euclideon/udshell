@@ -10,6 +10,7 @@ template <typename Tree>
 struct SharedMap
 {
 public:
+  using MapType = Tree;
   using KeyType = typename Tree::KeyType;
   using ValueType = typename Tree::ValueType;
   using Iterator = typename Tree::Iterator;
@@ -112,6 +113,8 @@ public:
     EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
     return *pV;
   }
+
+  TreeRange<Tree> getRange() const { return ptr ? TreeRange<Tree>(ptr->tree) : TreeRange<Tree>(); }
 
   Iterator begin() const { return ptr ? ptr->tree.begin() : ptr->tree.end(); }
   Iterator end() const { return ptr->tree.end(); }

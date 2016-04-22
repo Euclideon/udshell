@@ -4,6 +4,7 @@
 
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/delegate.h"
+#include "ep/cpp/range.h"
 #include "ep/cpp/map.h"
 #include "ep/cpp/event.h"
 
@@ -26,8 +27,9 @@ struct Compare<Variant>
 
 SHARED_CLASS(Component);
 
-typedef MethodPointer<Variant(Slice<const Variant>)> VarMethod;
-typedef Delegate<Variant(Slice<const Variant>)> VarDelegate;
+using VarMethod = MethodPointer<Variant(Slice<const Variant>)>;
+using VarDelegate = Delegate<Variant(Slice<const Variant>)>;
+using VarRange = VirtualRange<Variant>;
 
 using KeyValuePair = KVP<Variant, Variant>;
 using VariantAVLNode = AVLTreeNode<Variant, Variant>;
@@ -37,8 +39,8 @@ struct AVLTreeAllocator<VariantAVLNode>;
 struct Variant
 {
 public:
-  typedef SharedArray<Variant> VarArray;
-  typedef SharedMap<AVLTree<Variant, Variant>> VarMap;
+  using VarArray = SharedArray<Variant>;
+  using VarMap = SharedMap<AVLTree<Variant, Variant>>;
 
   enum class Type
   {
@@ -64,7 +66,8 @@ public:
     Component,
     Delegate,
     Subscription,
-    AssocArray
+    AssocArray,
+    Range
   };
 
   Variant();
@@ -91,6 +94,8 @@ public:
   Variant(const ComponentRef &spC);
   Variant(SubscriptionRef &&spS);
   Variant(const SubscriptionRef &spS);
+  Variant(VarRange &&spS);
+  Variant(const VarRange &spS);
 
   // all the different strings
   Variant(String s, bool unsafeReference = false);
@@ -148,6 +153,7 @@ public:
   Slice<Variant> asArray() const;
   SharedArray<Variant> asSharedArray() const;
   VarMap asAssocArray() const;
+  VarRange asRange() const;
 
   size_t arrayLen() const;
   size_t assocArraySeriesLen() const;
@@ -156,6 +162,8 @@ public:
   Variant& operator[](String key) const;
   Variant* getItem(Variant key) const;
   Variant& insertItem(Variant key, Variant value);
+
+  VarRange getRange() const;
 
   void throwError();
 
@@ -182,6 +190,7 @@ private:
     void *p;
     Variant *a;
     VarMap::Node *aa;
+    VarRange::VirtualRangeImpl *r;
     ErrorState *err;
   };
 
