@@ -16,8 +16,10 @@
 #include <QEvent>
 #include <QPointer>
 
-#include "ui/focusmanager_qt.h"
 #include "ep/cpp/kernel.h"
+
+#include "driver/qt/components/qmlpluginloader_qt.h"
+#include "driver/qt/ui/focusmanager_qt.h"
 
 class QQuickWindow;
 
@@ -95,6 +97,7 @@ public:
   QtFocusManager *GetFocusManager() { return pFocusManager; }
 
   void RegisterQmlComponent(ep::String file);
+  void RegisterQmlComponents(ep::String folderPath);
   ep::ComponentRef CreateQmlComponent(ep::String file, ep::Variant::VarMap initParams);
 
 private:
@@ -112,6 +115,7 @@ private:
   {
     return{
       EP_MAKE_METHOD(RegisterQmlComponent, "Register a new QML Component type"),
+      EP_MAKE_METHOD(RegisterQmlComponents, "Scans the path for valid QML components and registers them"),
       EP_MAKE_METHOD(CreateQmlComponent, "Creates a new QML Component from file")
     };
   }
@@ -136,6 +140,8 @@ private:
 
   Qt::HANDLE mainThreadId = QThread::currentThreadId();
   Qt::HANDLE renderThreadId = nullptr;
+
+  QmlPluginLoaderRef spQmlPluginLoader = nullptr;
 };
 
 } // namespace qt

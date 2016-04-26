@@ -351,7 +351,7 @@ void KernelImpl::FinishInit()
   InitComponents();
 
   // load the plugins
-  LoadPlugins();
+  LoadPluginDir("bin/plugins");
 
   // make the kernel timers
   spStreamerTimer = pInstance->CreateComponent<Timer>({ { "duration", 33 },{ "timertype", "Interval" } });
@@ -424,7 +424,7 @@ void KernelImpl::Shutdown()
   spRenderer = nullptr;
 }
 
-Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath)
+Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const String> extFilter)
 {
   EPFindData findData;
   EPFind find;
@@ -438,12 +438,23 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath)
     {
       MutableString<260> childFolderPath(Format, "{0}/{1}", folderPath, String(findData.pFilename));
 
-      Array<SharedString> childNames = ScanPluginFolder(childFolderPath);
+      Array<SharedString> childNames = ScanPluginFolder(childFolderPath, extFilter);
       for (SharedString &cName : childNames)
         pluginFilenames.pushBack(std::move(cName));
     }
     else
-      pluginFilenames.pushBack(MutableString<260>(Format, "{0}/{1}", folderPath, String(findData.pFilename)));
+    {
+      bool valid = true;
+      MutableString<260> filename(Format, "{0}/{1}", folderPath, String(findData.pFilename));
+      for (auto &ext : extFilter)
+      {
+        valid = (filename.endsWithIC(ext));
+        if (valid)
+          break;
+      }
+      if (valid)
+        pluginFilenames.pushBack(filename);
+    }
   } while (HalDirectory_FindNext(&find, &findData));
 
   HalDirectory_FindClose(&find);
@@ -451,17 +462,21 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath)
   return pluginFilenames;
 }
 
-void KernelImpl::LoadPlugins()
+void KernelImpl::LoadPluginDir(String folderPath)
 {
-  Array<SharedString> pluginFilenames = ScanPluginFolder("bin/plugins");
+  Array<SharedString> pluginFilenames = ScanPluginFolder(folderPath);
+  LoadPlugins(pluginFilenames);
+}
 
-  size_t numRemaining = pluginFilenames.length;
+void KernelImpl::LoadPlugins(Slice<SharedString> files)
+{
+  size_t numRemaining = files.length;
   size_t lastTry;
   do
   {
     // since plugins may depend on other plugins, we'll keep trying to reload plugins while loads are succeeding
     lastTry = numRemaining;
-    for (auto &filename : pluginFilenames)
+    for (auto &filename : files)
     {
       if (!filename)
         continue;
@@ -472,6 +487,13 @@ void KernelImpl::LoadPlugins()
       }
     }
   } while (numRemaining && numRemaining < lastTry);
+
+  // output a warning if any plugins could not be loaded
+  for (auto &filename : files)
+  {
+    if (filename)
+      LogWarning(2, "Could not load plugin '{0}'", filename);
+  }
 }
 
 void KernelImpl::Update()

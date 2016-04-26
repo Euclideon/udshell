@@ -8,9 +8,10 @@
 #include "components/pluginmanager.h"
 
 #include "driver/qt/epkernel_qt.h"
+#include "driver/qt/util/qmlbindings_qt.h"
+#include "driver/qt/util/typeconvert_qt.h"
 #include "driver/qt/ui/renderview_qt.h"
 #include "driver/qt/ui/window_qt.h"
-#include "driver/qt/util/qmlbindings_qt.h"
 #include "driver/qt/components/qmlpluginloader_qt.h"
 #include "driver/qt/components/qobjectcomponent_qt.h"
 #include "driver/qt/components/windowimpl_qt.h"
@@ -18,6 +19,7 @@
 #include "driver/qt/components/viewportimpl_qt.h"
 
 #include <QSemaphore>
+#include <QDirIterator>
 
 
 // Init the kernel's qrc file resources - this has to happen from the global namespace
@@ -124,9 +126,11 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), epR_Failure, "Unable to register QtComponent");
   EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
   EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, WindowGlue>()), epR_Failure, "Unable to register Window component");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ViewportGlue>()), epR_Failure, "Unable to register UIComponent");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ViewportGlue>()), epR_Failure, "Unable to register Viewport UI Component");
 
-  GetImpl()->spPluginManager->RegisterPluginLoader(CreateComponent<QmlPluginLoader>());
+  // create and register the qml loader
+  spQmlPluginLoader = CreateComponent<QmlPluginLoader>();
+  GetImpl()->spPluginManager->RegisterPluginLoader(spQmlPluginLoader);
 
   // create our QApplication
   pApplication = new QtApplication(this, cmdArgc, (char**)cmdArgv.ptr);
@@ -138,6 +142,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   epscope(fail) { delete pMediator; };
   EPTHROW_IF(!QObject::connect(pApplication, &QCoreApplication::aboutToQuit, pMediator, &QtKernelMediator::OnAppQuit), epR_Failure, "Failed to create Qt connection");
 
+  // create the qml engine
   pQmlEngine = new QQmlEngine;
   EPTHROW_IF_NULL(pQmlEngine, epR_Failure, "Unable create QQmlEngine");
   epscope(fail) { delete pQmlEngine; };
@@ -148,8 +153,9 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   EPTHROW_IF(qRegisterMetaType<QtFocusManager*>("QtFocusManager*") == -1, epR_Failure, "qRegisterMetaType<QtFocusManager *> Failed");
   EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, epR_Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
 
-  // Load in the qrc file
+  // load in the kernel qml resources
   InitResources();
+  RegisterQmlComponents(":/kernel");
 
   // modify our surface format to support opengl debug logging
   // TODO: set gl version based on property settings?
@@ -279,6 +285,34 @@ void QtKernel::RegisterQmlComponent(String file)
 
   EPTHROW_IF(typeDesc.Empty(), epR_Failure, "Cannot register QML Component: File '{0}' does not contain valid type descriptor", file);
   RegisterQml(file, typeDesc);
+}
+
+// ---------------------------------------------------------------------------------------
+void QtKernel::RegisterQmlComponents(String folderPath)
+{
+  EPASSERT_THROW(!folderPath.empty(), epR_InvalidArgument, "Must supply a valid folderPath to search for QML components");
+
+  ep::Array<ep::SharedString> qmlFilenames;
+
+  // if the path refers to the Qt resource system, then scan the resource file
+  if (folderPath[0] == ':')
+  {
+    QDirIterator it(epToQString(folderPath), QDirIterator::Subdirectories);
+    while (it.hasNext())
+    {
+      QString file = it.next();
+      if (file.endsWith(QStringLiteral(".qml"), Qt::CaseInsensitive))
+        qmlFilenames.pushBack(epFromQString(file));
+    }
+  }
+  // otherwise assume it's a file system path and pass it via the plugin manager
+  else
+  {
+     qmlFilenames = GetImpl()->ScanPluginFolder(folderPath, {".qml"});
+  }
+
+  pQmlEngine->addImportPath(epToQString(folderPath));
+  GetImpl()->LoadPlugins(qmlFilenames);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -448,6 +482,8 @@ void QtKernel::Shutdown()
   }
 
   delete pMainThreadContext;
+
+  spQmlPluginLoader = nullptr;
 }
 
 // ---------------------------------------------------------------------------------------
