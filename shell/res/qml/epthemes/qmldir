@@ -1,2 +1,2 @@
-module themes
+module epThemes
 singleton Theme 0.1 shelltheme.qml

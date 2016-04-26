@@ -20,7 +20,7 @@ Rectangle {
   property var toolbarcomp
   property var simplecamera: null
   property var view: null
-  property var activityselecter
+  property var activityselector
   property var activitylist: []
   property var activityuilist: []
   property var tablist: [] // Store a strong reference to the tabs to stop TabView from garbage collecting them
@@ -53,8 +53,8 @@ Rectangle {
     toolBar.toolbarcomp = toolbarcomp;
   }
 
-  onActivityselecterChanged: {
-    activityselecter.get("uihandle").parent = this;
+  onActivityselectorChanged: {
+    activityselector.get("uihandle").parent = this;
   }
 
   function showhideconsolepanel() {
@@ -469,7 +469,7 @@ Rectangle {
   }
 
   function newactivity() {
-    activityselecter.call("show", newActivitySelected);
+    activityselector.call("show", newActivitySelected);
   }
 
   function newActivitySelected(id) {

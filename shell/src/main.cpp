@@ -63,23 +63,6 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
 }
 
-void RegisterEPControls()
-{
-  // Register Theme
-  EPTHROW_IF(qmlRegisterSingletonType(QUrl(defaultTheme), "epThemes", 0, 1, "Theme") == -1, epR_Failure, "qmlRegisterSingletonType \"epThemes\" Failed");
-
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/epmenubar.qml"), "epControls", 0, 1, "EPMenuBar") == -1, epR_Failure, "qmlRegisterType \"EPMenuBar\" Failed");
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/epmenu.qml"), "epControls", 0, 1, "EPMenu") == -1, epR_Failure, "qmlRegisterType \"EPMenu\" Failed");
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptoolbar.qml"), "epControls", 0, 1, "EPToolBar") == -1, epR_Failure, "qmlRegisterType \"EPToolBar\" Failed");
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/epmenubutton.qml"), "epControls", 0, 1, "EPMenuButton") == -1, epR_Failure, "qmlRegisterType \"EPMenuButton\" Failed");
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptoolbutton.qml"), "epControls", 0, 1, "EPToolButton") == -1, epR_Failure, "qmlRegisterType \"EPToolButton\" Failed");
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/epfiledialog.qml"), "epControls", 0, 1, "EPFileDialog") == -1, epR_Failure, "qmlRegisterType \"EPFileDialog\" Failed");
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptoolpanelmanager.qml"), "epControls", 0, 1, "EPToolPanelManager") == -1, epR_Failure, "qmlRegisterType \"EPToolPanelManager\" Failed");
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eplistmodel.qml"), "epControls", 0, 1, "EPListModel") == -1, epR_Failure, "qmlRegisterType \"EPListModel\" Failed");
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eplistview.qml"), "epControls", 0, 1, "EPListView") == -1, epR_Failure, "qmlRegisterType \"EPListView\" Failed");
-  EPTHROW_IF(qmlRegisterType(QUrl("qrc:/qml/epcontrols/eptableview.qml"), "epControls", 0, 1, "EPTableView") == -1, epR_Failure, "qmlRegisterType \"EPTableView\" Failed");
-}
-
 MutableString<0> ReadResourceFile(String src)
 {
   QFile file(QString(src.toStringz()));
@@ -285,21 +268,22 @@ void Deinit(String sender, String message, const Variant &data)
 
 void Init(String sender, String message, const Variant &data)
 {
-  RegisterEPControls();
+  // TODO: this path should be changed for release
+  spKernel->Call("registerqmlcomponents", "shell/res/qml");
 
   epscope(fail) { if (!spMainWindow) spKernel->LogError("Error creating MainWindow UI Component\n"); };
-  spMainWindow = spKernel->Call("createqmlcomponent", ":/qml/window.qml", nullptr).as<WindowRef>();
+  spMainWindow = component_cast<Window>(spKernel->CreateComponent("ui.appwindow"));
 
   epscope(fail) { if (!spTopLevelUI) spKernel->LogError("Error creating top Level UI Component\n"); };
-  spTopLevelUI = spKernel->Call("createqmlcomponent", ":/qml/main.qml", nullptr).as<UIComponentRef>();
+  spTopLevelUI = component_cast<UIComponent>(spKernel->CreateComponent("ui.main"));
 
   epscope(fail) { if (!spMessageBox) spKernel->LogError("Error creating MessageBox UI Component\n"); };
-  spMessageBox = spKernel->Call("createqmlcomponent", ":/qml/components/messagebox.qml", Variant::VarMap{{ "name", "messagebox" }}).as<UIComponentRef>();
+  spMessageBox = component_cast<UIComponent>(spKernel->CreateComponent("ui.messagebox", Variant::VarMap{ { "name", "messagebox" } }));
   spTopLevelUI->Set("messageboxcomp", spMessageBox);
 
   UIComponentRef spConsole;
   epscope(fail) { if (!spConsole) spKernel->LogError("Error creating Console UI Component\n"); };
-  spConsole = spKernel->Call("createqmlcomponent", ":/kernel/console.qml", nullptr).as<UIComponentRef>();
+  spConsole = component_cast<UIComponent>(spKernel->CreateComponent("ui.console"));
   spTopLevelUI->Set("uiconsole", spConsole);
 
   // Load menus
@@ -320,10 +304,10 @@ void Init(String sender, String message, const Variant &data)
   spToolBar = spKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
   spTopLevelUI->Set("toolbarcomp", spToolBar);
 
-  // New Activity selecter panel
-  auto spActivitySelecter = spKernel->Call("createqmlcomponent", ":/qml/components/activityselecter.qml", nullptr).as<UIComponentRef>();
-  spActivitySelecter->Set("activitiesinfo", GetActivitiesInfo());
-  spTopLevelUI->Set("activityselecter", spActivitySelecter);
+  // New Activity selector panel
+  auto spActivitySelector = component_cast<UIComponent>(spKernel->CreateComponent("ui.activityselector"));
+  spActivitySelector->Set("activitiesinfo", GetActivitiesInfo());
+  spTopLevelUI->Set("activityselector", spActivitySelector);
 
   // TODO: Remove this once UIComponent cleans up its events
   if (!CITest)
