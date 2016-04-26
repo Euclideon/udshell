@@ -1,8 +1,39 @@
 #include "ep/cpp/plugin.h"
+#include "ep/cpp/filesystem.h"
+#include "ep/cpp/variant.h"
 
 namespace ep {
 
 Instance *s_pInstance = nullptr;
+
+// TODO: should move this to some other cpp?
+Directory::Directory(String searchPattern)
+{
+  pDirectoryHandle = s_pInstance->Find(searchPattern, nullptr, &fd);
+}
+Directory::~Directory()
+{
+  if (pDirectoryHandle)
+    s_pInstance->Find(nullptr, pDirectoryHandle, nullptr);
+}
+FindData Directory::PopFront()
+{
+  FindData t = fd;
+  pDirectoryHandle = s_pInstance->Find(nullptr, pDirectoryHandle, &fd);
+  return t;
+}
+
+Variant epToVariant(const FindData& fd)
+{
+  return Variant::VarMap{
+    { "filename", fd.filename },
+    { "path", fd.path },
+    { "filesize", fd.fileSize },
+    { "attributes", fd.attributes },
+    { "writetime", fd.writeTime },
+    { "accesstime", fd.accessTime }
+  };
+}
 
 } // namespace ep
 

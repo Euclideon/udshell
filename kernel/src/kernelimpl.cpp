@@ -60,11 +60,26 @@
 #include "udPlatformUtil.h"
 #include "helpers.h"
 
+#include "ep/cpp/filesystem.h"
+
 namespace ep {
 
 namespace internal {
   void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line);
   void _Free(void *pMemory);
+
+  void TranslateFindData(const EPFindData &fd, ep::FindData *pFD)
+  {
+    pFD->filename = (const char*)fd.pFilename;
+    pFD->path = (const char*)fd.pSystemPath;
+    pFD->attributes = ((fd.attributes & EPFA_Directory) ? FileAttributes::Directory : 0) |
+                      ((fd.attributes & EPFA_SymLink) ? FileAttributes::SymLink : 0) |
+                      ((fd.attributes & EPFA_Hidden) ? FileAttributes::Hidden : 0) |
+                      ((fd.attributes & EPFA_ReadOnly) ? FileAttributes::ReadOnly : 0);
+    pFD->fileSize = fd.fileSize;
+    pFD->accessTime.ticks = fd.accessTime.ticks;
+    pFD->writeTime.ticks = fd.writeTime.ticks;
+  }
 }
 
 static Instance s_instance =
@@ -83,7 +98,50 @@ static Instance s_instance =
 
   []() -> void* { return (void*)&KernelImpl::s_varAVLAllocator; }, // TreeAllocator
 
-  []() -> void* { return (void*)&KernelImpl::s_weakRefRegistry; } // weakRefRegistry
+  []() -> void* { return (void*)&KernelImpl::s_weakRefRegistry; }, // weakRefRegistry
+
+  [](String pattern, void *pHandle, void *pData) -> void* {
+    EPFind *pFind = (EPFind*)pHandle;
+    FindData *pFD = (FindData*)pData;
+    if (pattern && !pFind && pFD)
+    {
+      EPFind *find = epNew(EPFind);
+      EPFindData fd;
+      if (HalDirectory_FindFirst(find, pattern.toStringz(), &fd))
+      {
+        internal::TranslateFindData(fd, pFD);
+        return find;
+      }
+      else
+      {
+        epDelete(find);
+        return nullptr;
+      }
+    }
+    else if (!pattern && pFind && pFD)
+    {
+      EPFindData fd;
+      if (HalDirectory_FindNext(pFind, &fd))
+      {
+        internal::TranslateFindData(fd, pFD);
+        return pHandle;
+      }
+      else
+      {
+        HalDirectory_FindClose(pFind);
+        epDelete(pFind);
+        return nullptr;
+      }
+    }
+    else if (!pattern && pFind && !pFD)
+    {
+      HalDirectory_FindClose(pFind);
+      epDelete(pFind);
+      return nullptr;
+    }
+    else
+      EPTHROW_ERROR(epR_InvalidArgument, "Bad call");
+  }, // Find
 };
 
 struct GlobalInstanceInitializer
