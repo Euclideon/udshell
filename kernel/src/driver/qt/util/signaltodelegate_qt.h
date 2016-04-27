@@ -21,7 +21,7 @@ class QtSignalMapper : public QObject
   Q_OBJECT_FAKE
 
 public:
-  QtSignalMapper(const QMetaMethod &sigMethod) : QObject(nullptr), signal(sigMethod) {}
+  QtSignalMapper(int _signalId, ep::SharedString _signalName) : QObject(nullptr), signalName(_signalName), signalId(_signalId) {}
   ~QtSignalMapper() {}
 
   ep::SubscriptionRef Subscribe(QObject *pSourceObj, const ep::VarDelegate &del);
@@ -47,7 +47,8 @@ private:
   };
 
   ep::AVLTree<QObject *, QtConnection> instanceMap;
-  QMetaMethod signal;
+  ep::SharedString signalName;
+  int signalId;
 };
 
 } // namespace qt

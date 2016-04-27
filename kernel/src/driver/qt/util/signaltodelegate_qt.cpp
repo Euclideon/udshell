@@ -126,8 +126,8 @@ SubscriptionRef QtSignalMapper::Subscribe(QObject *pSourceObj, const ep::VarDele
     pConnection = &(instanceMap.Insert(pSourceObj, QtConnection()));
     QObject::connect(pSourceObj, &QObject::destroyed, this, &QtSignalMapper::onInstanceDestroyed);
 
-    pConnection->connection = QObject::connect(pSourceObj, signal, this, metaObject()->method(metaObject()->methodOffset()));
-    EPTHROW_IF(!pConnection->connection, epR_Failure, "Signal Mapper connection failed: Cannot map signal '{0}'", signal.name().data());
+    pConnection->connection = QObject::connect(pSourceObj, pSourceObj->metaObject()->method(signalId), this, metaObject()->method(metaObject()->methodOffset()));
+    EPTHROW_IF(!pConnection->connection, epR_Failure, "Signal Mapper connection failed: Cannot map signal '{0}'", signalName);
   }
 
   return pConnection->event.AddSubscription(del);
@@ -137,9 +137,9 @@ void QtSignalMapper::execute(void **args)
 {
   // Find the calling instance in the map
   QObject *pSender = sender();
-  EPASSERT_THROW(pSender, epR_Failure, "Could not determine the calling instance of Qt Event {0}", signal.name().data());
+  EPASSERT_THROW(pSender, epR_Failure, "Could not determine the calling instance of Qt Event {0}", signalName);
   QtConnection *pConnection = instanceMap.Get(pSender);
-  EPASSERT_THROW(pConnection, epR_Failure, "Could not locate the calling instance in the Signal Mapper for Qt Event {0}", signal.name().data());
+  EPASSERT_THROW(pConnection, epR_Failure, "Could not locate the calling instance in the Signal Mapper for Qt Event {0}", signalName);
 
   // If there's no more active subscribers for this instance, let's unregister
   if (!pConnection->event.HasSubscribers())
@@ -147,6 +147,8 @@ void QtSignalMapper::execute(void **args)
     instanceMap.Remove(pSender);
     return;
   }
+
+  QMetaMethod signal = pSender->metaObject()->method(signalId);
 
   // Loop thru the parameters for the mapped signal and convert to ep::Variants
   Array<Variant, 10> varArgs(ep::Reserve, signal.parameterCount());
