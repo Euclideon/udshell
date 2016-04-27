@@ -155,8 +155,12 @@ void QtSignalMapper::execute(void **args)
   for (int i = 0; i < signal.parameterCount(); ++i)
   {
     // Note that args[0] is the return value
-    QVariant arg(signal.parameterType(i), args[i + 1]);
-    varArgs.pushBack(epToVariant(arg));
+    // We initialise a QVariant based on the parameter type - if the param is already a QVariant then pass it direct
+    int type = signal.parameterType(i);
+    if (type == QMetaType::QVariant)
+      varArgs.pushBack(epToVariant(*(QVariant*)args[i + 1]));
+    else
+      varArgs.pushBack(epToVariant(QVariant(type, args[i + 1])));
   }
   pConnection->event.Signal(varArgs);
 }
