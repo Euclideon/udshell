@@ -13,7 +13,7 @@ FocusScope {
   anchors.topMargin: 4
   anchors.bottomMargin: 4
 
-  property var epTypeDesc: { "super": "ep.uicomponent", "id": "ui.viewer" }
+  property var epTypeDesc: { "super": "ep.uicomponent", "id": "viewer.mainui" }
   property var viewport
   property var sidebarcomp
   property var bookmarkscomp

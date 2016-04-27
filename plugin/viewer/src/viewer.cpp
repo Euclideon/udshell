@@ -83,7 +83,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
-  spViewerUI = pKernel->Call("createqmlcomponent", ":/viewer/viewer.qml", nullptr).as<UIComponentRef>();
+  spViewerUI = component_cast<UIComponent>(pKernel->CreateComponent("viewer.mainui"));
   spViewerUI->Set("viewport", spViewport);
   spViewerUI->Subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
 
@@ -291,6 +291,9 @@ Variant Viewer::Save() const
 extern "C" bool epPluginAttach()
 {
   Kernel::GetInstance()->RegisterComponentType<Viewer>();
+
+  // TODO: this path should be changed before release
+  Kernel::GetInstance()->Call("registerqmlcomponents", "plugin/viewer/qml");
 
   return true;
 }
