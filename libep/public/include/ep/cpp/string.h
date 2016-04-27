@@ -101,6 +101,8 @@ struct BaseString : public Slice<const C>
   BaseString<C> popToken(BaseString<C> delimiters = " \t\r\n");
   template<bool skipEmptyTokens = true>
   Slice<BaseString<C>> tokenise(Slice<BaseString<C>> tokens, BaseString<C> delimiters = " \t\r\n");
+  template<bool skipEmptyTokens = true>
+  size_t tokenise(std::function<void(BaseString<C> token, size_t index)> onToken, BaseString<C> delimiters = " \t\r\n");
 
   int64_t parseInt(bool bDetectBase = true, int base = 10) const;
   double parseFloat() const;
@@ -183,6 +185,8 @@ struct MutableString : public Array<char, Size>
 
   template<bool skipEmptyTokens = true>
   Slice<String> tokenise(Slice<String> tokens, String delimiters = " \t\r\n")         { return ((String*)this)->tokenise<skipEmptyTokens>(tokens, delimiters); }
+  template<bool skipEmptyTokens = true>
+  size_t tokenise(std::function<void(String token, size_t index)> onToken, String delimiters = " \t\r\n") { return ((String*)this)->tokenise<skipEmptyTokens>(onToken, delimiters); }
 
   int64_t parseInt(bool bDetectBase = true, int base = 10) const                      { return ((String*)this)->parseInt(bDetectBase, base); }
   double parseFloat() const                                                           { return ((String*)this)->parseFloat(); }
@@ -279,6 +283,8 @@ struct SharedString : public SharedArray<const char>
 
   template<bool skipEmptyTokens = true>
   Slice<String> tokenise(Slice<String> tokens, String delimiters = " \t\r\n") const   { return ((String*)this)->tokenise<skipEmptyTokens>(tokens, delimiters); }
+  template<bool skipEmptyTokens = true>
+  size_t tokenise(std::function<void(String token, size_t index)> onToken, String delimiters = " \t\r\n") { return ((String*)this)->tokenise<skipEmptyTokens>(onToken, delimiters); }
 
   int64_t parseInt(bool bDetectBase = true, int base = 10) const                      { return ((String*)this)->parseInt(bDetectBase, base); }
   double parseFloat() const                                                           { return ((String*)this)->parseFloat(); }
