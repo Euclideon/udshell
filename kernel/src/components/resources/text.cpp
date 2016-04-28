@@ -3,6 +3,7 @@
 #include "components/memstream.h"
 
 #include "rapidxml.hpp"
+#include "rapidjson/document.h"
 
 namespace ep {
 
@@ -11,6 +12,8 @@ Array<const MethodInfo> Text::GetMethods() const
   return{
     EP_MAKE_METHOD(ParseXml, "Parse XML formatted text in buffer into a heirarchical structure of KeyValuePairs"),
     EP_MAKE_METHOD(FormatXml, "Format a heirarchical structure of KeyValuePairs as XML text"),
+    EP_MAKE_METHOD(ParseJson, "Parse Json formatted text in buffer into a heirarchical structure of KeyValuePairs"),
+    EP_MAKE_METHOD(FormatJson, "Format a heirarchical structure of KeyValuePairs as Json text"),
   };
 }
 Array<const StaticFuncInfo> Text::GetStaticFuncs() const
@@ -166,7 +169,7 @@ void Text::FormatXml(Variant root)
 {
   if (!root.is(Variant::SharedPtrType::AssocArray))
   {
-    LogWarning(2, "FormatXML -- parameter is not a Map");
+    LogWarning(2, "FormatXml -- parameter is not a Map");
     return;
   }
   Variant::VarMap rootElement = root.asAssocArray();
@@ -259,6 +262,80 @@ uint32_t Text::GetLineNumberFromByteIndex(String buffer, size_t index)
   }
 
   return lineNumber;
+}
+
+
+static Variant ParseJsonNode(const rapidjson::Value& val)
+{
+  using namespace rapidjson;
+  switch (val.GetType())
+  {
+    case Type::kNullType:
+      return nullptr;
+    case Type::kTrueType:
+      return true;
+    case Type::kFalseType:
+      return false;
+    case Type::kNumberType:
+      if (val.IsUint())
+        return val.GetUint();
+      else if (val.IsInt())
+        return val.GetInt();
+      else if (val.IsUint64())
+        return val.GetUint64();
+      else if (val.IsInt64())
+        return val.GetInt64();
+      else
+        return val.GetDouble();
+    case Type::kStringType:
+      return String(val.GetString(), val.GetStringLength());
+    case Type::kArrayType:
+    {
+      SizeType len = val.Size();
+      Array<Variant, 0> arr(Reserve, len);
+      for (SizeType i = 0; i < len; ++i)
+        arr.pushBack(ParseJsonNode(val[i]));
+      return arr;
+    }
+    case Type::kObjectType:
+    {
+      auto j = val.MemberEnd();
+      Variant::VarMap map;
+      for (auto i = val.MemberBegin(); i != j; ++i)
+        map.Insert(ParseJsonNode(i->name), ParseJsonNode(i->value));
+      return map;
+    }
+    default:
+      EPASSERT_THROW(false, epR_Failure, "Unknown error!");
+  }
+}
+
+Variant Text::ParseJson()
+{
+  Slice<const void> buffer = MapForRead();
+
+  // RapidXML requires buffer to be null terminated
+  if (buffer[buffer.length - 1] != '\0')
+  {
+    Unmap();
+    Resize(buffer.length + 1);
+    Slice<void> write = Map();
+    write[buffer.length] = '\0';
+    buffer = write;
+  }
+  epscope(exit) { Unmap(); };
+
+  using namespace rapidjson;
+
+  Document document;
+  document.Parse<ParseFlag::kParseDefaultFlags>((const char*)buffer.ptr);
+
+  return ParseJsonNode(document);
+}
+
+void Text::FormatJson(Variant root)
+{
+  EPASSERT(false, "TODO!");
 }
 
 } // namespace ep
