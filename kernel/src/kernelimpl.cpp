@@ -324,6 +324,10 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   // command manager
   spCommandManager = pInstance->CreateComponent<CommandManager>({ { "name", "commandmanager" } });
 
+  // plugin manager
+  spPluginManager = pInstance->CreateComponent<PluginManager>({ { "name", "pluginmanager" } });
+  spPluginManager->RegisterPluginLoader(pInstance->CreateComponent<NativePluginLoader>());
+
   // Init capture and broadcast of stdout/stderr
   spStdOutBC = pInstance->CreateComponent<Broadcaster>({ { "name", "stdoutbc" } });
   stdOutCapture = epNew(StdCapture, stdout);
@@ -346,12 +350,7 @@ void KernelImpl::FinishInit()
   // init the components
   InitComponents();
 
-  // prepare the plugins
-  spPluginManager = pInstance->CreateComponent<PluginManager>({ { "name", "pluginmanager" } });
-
-  PluginLoaderRef spNativePluginLoader = pInstance->CreateComponent<NativePluginLoader>();
-  spPluginManager->RegisterPluginLoader(spNativePluginLoader);
-
+  // load the plugins
   LoadPlugins();
 
   // make the kernel timers

@@ -36,8 +36,12 @@ public:
   {
     EPASSERT_THROW(!file.empty(), epR_InvalidArgument, "Must supply file name");
 
+    QString fileStr = QString::fromUtf8(file.ptr, (int)file.length);
+    if (file.ptr[0] == ':')
+      fileStr.prepend(QStringLiteral("qrc"));
+
     // create the qml component for the associated script
-    qmlComponent.loadUrl(QUrl(QString::fromUtf8(file.ptr, (int)file.length)), mode);
+    qmlComponent.loadUrl(QUrl(fileStr), mode);
   }
 
   ep::DynamicComponentRef CreateComponent(ep::KernelRef spKernel, ep::Variant::VarMap initParams = nullptr);

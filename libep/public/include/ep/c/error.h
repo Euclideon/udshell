@@ -21,6 +21,8 @@ enum epResult
   epR_ResourceInUse,
 
   epR_File_OpenFailure,
+
+  epR_ScriptException,
 };
 
 struct epErrorState

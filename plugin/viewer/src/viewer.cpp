@@ -79,16 +79,16 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
   ViewportRef spViewport;
   epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component\n"); };
-  spViewport = pKernel->Call("createqmlcomponent", "ep.viewport", "qrc:/kernel/viewport.qml", Variant::VarMap{ { "view", spView } }).as<ViewportRef>();
+  spViewport = pKernel->Call("createqmlcomponent", ":/kernel/viewport.qml", Variant::VarMap{ { "view", spView } }).as<ViewportRef>();
 
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
-  spViewerUI = pKernel->Call("createqmlcomponent", "ep.uicomponent", "qrc:/viewer/viewer.qml", nullptr).as<UIComponentRef>();
+  spViewerUI = pKernel->Call("createqmlcomponent", ":/viewer/viewer.qml", nullptr).as<UIComponentRef>();
   spViewerUI->Set("viewport", spViewport);
   spViewerUI->Subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
 
   epscope(fail) { if(!spUIBookmarks) pKernel->LogError("Error creating bookmarks UI Component\n"); };
-  spUIBookmarks = pKernel->Call("createqmlcomponent", "ep.uicomponent", "qrc:/qml/components/bookmarksui.qml", nullptr).as<UIComponentRef>();
+  spUIBookmarks = pKernel->Call("createqmlcomponent", ":/qml/components/bookmarksui.qml", nullptr).as<UIComponentRef>();
   spUIBookmarks->Set("view", spView);
   spViewerUI->Set("bookmarkscomp", spUIBookmarks);
 
@@ -99,7 +99,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   else
   {
     epscope(fail) { if (!spUIResources) pKernel->LogError("Error creating Resource Panel UI Component\n"); };
-    spUIResources = pKernel->Call("createqmlcomponent", "ep.uicomponent", "qrc:/qml/components/resourcespanel.qml", Variant::VarMap{ { "name", "resourcespanel" } }).as<UIComponentRef>();
+    spUIResources = pKernel->Call("createqmlcomponent", ":/qml/components/resourcespanel.qml", Variant::VarMap{ { "name", "resourcespanel" } }).as<UIComponentRef>();
   }
   spViewerUI->Set("resourcespanel", spUIResources);
 

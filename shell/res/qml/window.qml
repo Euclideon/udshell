@@ -8,5 +8,11 @@ Window {
   width: 960
   height: 540
 
+  property var epTypeDesc: {
+    "super": "ep.window",
+    "id": "ui.appwindow",
+    "displayname": "UI.AppWindow",
+    "description": "QML Based Application Window"
+  }
   property alias title: desktopwindow.title
 }

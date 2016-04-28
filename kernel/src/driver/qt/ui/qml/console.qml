@@ -8,6 +8,7 @@ import epKernel 0.1
 Item {
   id: consoleWin
 
+  property var epTypeDesc: { "id": "ui.console", "super": "ep.uicomponent" }
   property var tabs: []
 
   visible: false

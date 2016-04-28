@@ -2,7 +2,6 @@
 #ifndef TYPECONVERT_H
 #define TYPECONVERT_H
 
-#include "ep/c/platform.h"
 #include "ep/cpp/delegate.h"
 
 #include "driver/qt/epqt.h"
@@ -18,8 +17,9 @@
 
 namespace qt {
 
-ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQString(const QString &string);
-ep::MutableString<ep::internal::VariantSmallStringSize> AllocUDStringFromQByteArray(const QByteArray &byteArray);
+ep::MutableString<ep::internal::VariantSmallStringSize> epFromQString(const QString &string);
+ep::MutableString<ep::internal::VariantSmallStringSize> epFromQByteArray(const QByteArray &byteArray);
+QString epToQString(const ep::String &str);
 
 class QtSubscription : public QObject
 {
@@ -71,13 +71,20 @@ protected:
 };
 
 using JSValueDelegateRef = ep::SharedPtr<JSValueDelegate>;
-}
+
+} // namespace qt
+
 
 inline ep::Variant epToVariant(const QString &string)
 {
-  return ep::Variant(qt::AllocUDStringFromQString(string));
+  return ep::Variant(qt::epFromQString(string));
 }
-void epFromVariant(const ep::Variant &variant, QString *pString);
+inline void epFromVariant(const ep::Variant &variant, QString *pString)
+{
+  ep::SharedString s = variant.asSharedString();
+  if (!s.empty())
+    *pString = QString::fromUtf8(s.ptr, static_cast<int>(s.length));
+}
 
 ep::Variant epToVariant(const QVariant &var);
 void epFromVariant(const ep::Variant &variant, QVariant *pVariant);
@@ -101,6 +108,22 @@ template<> struct StringifyProxy<QString>       { inline static ptrdiff_t string
 
 
 namespace qt {
+
+inline ep::MutableString<ep::internal::VariantSmallStringSize> epFromQString(const QString &string)
+{
+  QByteArray byteArray = string.toUtf8();
+  return ep::MutableString<ep::internal::VariantSmallStringSize>(byteArray.data(), byteArray.size());
+}
+
+inline ep::MutableString<ep::internal::VariantSmallStringSize> epFromQByteArray(const QByteArray &byteArray)
+{
+  return ep::MutableString<ep::internal::VariantSmallStringSize>(byteArray.data(), byteArray.size());
+}
+
+inline QString epToQString(const ep::String &s)
+{
+  return QString::fromUtf8(s.ptr, static_cast<int>(s.length));
+}
 
 inline ep::Variant JSValueDelegate::call(ep::Slice<const ep::Variant> args)
 {
@@ -136,7 +159,7 @@ inline QVariant QtDelegate::call(QVariant arg0, QVariant arg1, QVariant arg2, QV
   return d(ep::Slice<ep::Variant>(varArgs, numArgs)).as<QVariant>();
 }
 
-}
+} // namespace qt
 
 
 #endif  // TYPECONVERT_H

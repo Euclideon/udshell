@@ -5,11 +5,13 @@
 #include "kernelimpl.h"
 #include "components/viewimpl.h"
 #include "components/glue/componentglue.h"
+#include "components/pluginmanager.h"
 
 #include "driver/qt/epkernel_qt.h"
 #include "driver/qt/ui/renderview_qt.h"
 #include "driver/qt/ui/window_qt.h"
 #include "driver/qt/util/qmlbindings_qt.h"
+#include "driver/qt/components/qmlpluginloader_qt.h"
 #include "driver/qt/components/qobjectcomponent_qt.h"
 #include "driver/qt/components/windowimpl_qt.h"
 #include "driver/qt/components/uicomponentimpl_qt.h"
@@ -118,10 +120,13 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   cmdArgc = (int)cmdArgv.length;
 
   // register Qt specific components
+  EPTHROW_IF_NULL(RegisterComponentType<QmlPluginLoader>(), epR_Failure, "Unable to register QmlPluginLoader");
   EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), epR_Failure, "Unable to register QtComponent");
   EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
   EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, WindowGlue>()), epR_Failure, "Unable to register Window component");
   EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ViewportGlue>()), epR_Failure, "Unable to register UIComponent");
+
+  GetImpl()->spPluginManager->RegisterPluginLoader(CreateComponent<QmlPluginLoader>());
 
   // create our QApplication
   pApplication = new QtApplication(this, cmdArgc, (char**)cmdArgv.ptr);
@@ -260,20 +265,33 @@ void QtKernel::UnregisterWindow(QQuickWindow *pWindow)
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::RegisterQmlComponent(String superTypeId, String typeId, String file)
+void QtKernel::RegisterQmlComponent(String file)
 {
-  EPASSERT_THROW(!superTypeId.empty(), epR_InvalidArgument, "Must supply a valid superTypeId to register a QML Component type");
-  EPASSERT_THROW(!typeId.empty(), epR_InvalidArgument, "Must supply a valid typeId to register a QML Component type");
   EPASSERT_THROW(!file.empty(), epR_InvalidArgument, "Must supply a valid file to register a QML component type");
 
+  ep::Variant::VarMap typeDesc;
+  try {
+    typeDesc = QmlPluginLoader::ParseTypeDescriptor(this, file);
+  }
+  catch (ep::EPException &e) {
+    EPTHROW_ERROR(epR_Failure, "Could not register QML file '{0}' as Component: \"{1}\"", file, e.what());
+  }
+
+  EPTHROW_IF(typeDesc.Empty(), epR_Failure, "Cannot register QML Component: File '{0}' does not contain valid type descriptor", file);
+  RegisterQml(file, typeDesc);
+}
+
+// ---------------------------------------------------------------------------------------
+void QtKernel::RegisterQml(ep::String file, ep::Variant::VarMap typeDesc)
+{
   auto data = SharedPtr<QmlComponentData>::create(file, pQmlEngine, QQmlComponent::Asynchronous);
   Variant::VarMap typeInfo = {
-    { "id", ep::MutableString128(typeId).toLower() },
-    { "name", typeId },
-    { "description", SharedString::format("{0} - {1} qml component", typeId, superTypeId) },
-    { "version", (int)EPKERNEL_PLUGINVERSION },
+    { "identifier", typeDesc["id"].asSharedString() },
+    { "name", typeDesc["displayname"].asSharedString() },
+    { "description", typeDesc["description"].asSharedString() },
+    { "version", typeDesc["version"].as<int>() },
     { "flags", ep::ComponentInfoFlags::Unpopulated },
-    { "super", superTypeId },
+    { "super", typeDesc["super"].asSharedString() },
     { "userdata", (const SharedPtr<RefCounted>&)data },
     { "new", ep::DynamicComponentDesc::NewInstanceFunc(data.ptr(), &QmlComponentData::CreateComponent) }
   };
@@ -282,9 +300,24 @@ void QtKernel::RegisterQmlComponent(String superTypeId, String typeId, String fi
 }
 
 // ---------------------------------------------------------------------------------------
-ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file, Variant::VarMap initParams)
+ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initParams)
 {
   using namespace ep;
+  EPASSERT_THROW(!file.empty(), epR_InvalidArgument, "Must supply a valid file to register a QML component type");
+
+  // verify that the qml file has a type descriptor property
+  Variant::VarMap typeDesc;
+  try {
+    typeDesc = QmlPluginLoader::ParseTypeDescriptor(this, file);
+  }
+  catch (ep::EPException &e) {
+    EPTHROW_ERROR(epR_Failure, "Could not create QML Component from file '{0}': \"{1}\"", file, e.what());
+  }
+
+  EPTHROW_IF(typeDesc.Empty(), epR_Failure, "Cannot create QML Component: File '{0}' does not contain valid type descriptor", file);
+
+  // locate the nominated super
+  String superTypeId = typeDesc["super"].asString();
   const ComponentDescInl *pSuper = (const ComponentDescInl *)GetImpl()->GetComponentDesc(superTypeId);
   EPTHROW_IF(!pSuper, epR_InvalidType, "Base Component '{0}' not registered", superTypeId);
 
@@ -294,14 +327,20 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String superTypeId, String file, V
 
   pDesc->pSuperDesc = pSuper;
   pDesc->baseClass = pSuper->info.identifier;
-  pDesc->info.nameSpace = pSuper->info.nameSpace;
-  pDesc->info.name = pSuper->info.name;
-  pDesc->info.identifier = pSuper->info.identifier;
-  pDesc->info.displayName = file;
-  pDesc->info.description = SharedString::format("{0} - {1} QML Component", file, pSuper->info.displayName);
+
+  pDesc->info.identifier = typeDesc["id"].asSharedString();
+
+  size_t offset = pDesc->info.identifier.findLast('.');
+  EPTHROW_IF(offset == (size_t)-1, epR_InvalidArgument, "Component identifier {0} has no namespace. Use form: namespace.componentname", pDesc->info.identifier);
+
+  pDesc->info.nameSpace = pDesc->info.identifier.slice(0, offset);
+  pDesc->info.name = pDesc->info.identifier.slice(offset + 1, pDesc->info.identifier.length);
+
+  pDesc->info.displayName = typeDesc["displayname"].asSharedString();
+  pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = pSuper->info.epVersion;
-  pDesc->info.pluginVersion = pSuper->info.pluginVersion;
-  pDesc->info.flags = pSuper->info.flags | ComponentInfoFlags::Unregistered | ComponentInfoFlags::Unpopulated;
+  pDesc->info.pluginVersion = typeDesc["version"].as<int>();
+  pDesc->info.flags = ComponentInfoFlags::Unregistered | ComponentInfoFlags::Unpopulated;
 
   pDesc->pInit = nullptr;
   pDesc->pCreateInstance = nullptr;
