@@ -9,10 +9,11 @@
 #include <QOpenGLDebugLogger>
 
 #include "synchronisedptr.h"
-#include "../epkernel_qt.h"
-#include "renderview_qt.h"
-#include "components/viewimpl.h"
 #include "renderscene.h"
+#include "components/viewimpl.h"
+
+#include "driver/qt/epkernel_qt.h"
+#include "driver/qt/ui/renderview_qt.h"
 
 epKeyCode qtKeyToEPKey(Qt::Key qk);
 
@@ -60,15 +61,9 @@ public:
 
 QtRenderView::QtRenderView(QQuickItem *pParent)
   : QQuickFramebufferObject(pParent)
-  , spView(nullptr)
-  , dirty(false)
 {
-  QtApplication::Kernel()->LogTrace("Create RenderView Quick Item");
-
-  // handle resize
   QObject::connect(this, &QQuickItem::widthChanged, this, &QtRenderView::OnResize);
   QObject::connect(this, &QQuickItem::heightChanged, this, &QtRenderView::OnResize);
-
   QObject::connect(this, &QQuickItem::visibleChanged, this, &QtRenderView::OnVisibleChanged);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
@@ -78,22 +73,17 @@ QtRenderView::QtRenderView(QQuickItem *pParent)
 
 QtRenderView::~QtRenderView()
 {
-  QtApplication::Kernel()->LogTrace("Destroy RenderView Quick Item");
-
   if (spView)
     spView->FrameReady.Unsubscribe(ep::Delegate<void()>(this, &QtRenderView::OnFrameReady));
 }
 
 QQuickFramebufferObject::Renderer *QtRenderView::createRenderer() const
 {
-  QtApplication::Kernel()->LogTrace("Create RenderView Renderer");
   return new QtFboRenderer(this);
 }
 
 void QtRenderView::AttachView(ep::ViewRef _spView)
 {
-  QtApplication::Kernel()->LogTrace("RenderView::AttachView()");
-
   spView = _spView;
   spView->FrameReady.Subscribe(ep::Delegate<void()>(this, &QtRenderView::OnFrameReady));
 
@@ -101,16 +91,34 @@ void QtRenderView::AttachView(ep::ViewRef _spView)
   QtApplication::Kernel()->SetFocusView(spView);
 }
 
+void QtRenderView::OnResize()
+{
+  int w = (int)width();
+  int h = (int)height();
+
+  if (spView && w > 0 && h > 0)
+    spView->Resize(w, h);
+}
+
+void QtRenderView::OnVisibleChanged()
+{
+  if (spView)
+  {
+    if (isVisible())
+      spView->Activate();
+    else
+      spView->Deactivate();
+  }
+}
+
 void QtRenderView::componentComplete()
 {
-  QtApplication::Kernel()->LogTrace("RenderView::componentComplete()");
   QQuickFramebufferObject::componentComplete();
 
   // TODO: Focus should be set based on mouse click from main window - possibly handle in QML
-  // TODO: Accepted mouse buttons should be item specific
   setFocus(true);
   setAcceptHoverEvents(true);
-  setAcceptedMouseButtons(Qt::LeftButton | Qt::MiddleButton | Qt::RightButton);
+  setAcceptedMouseButtons(Qt::AllButtons);
 }
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 6, 0))
@@ -159,44 +167,45 @@ void QtRenderView::focusOutEvent(QFocusEvent * event)
 
 void QtRenderView::keyPressEvent(QKeyEvent *pEv)
 {
-  epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
-  if (kc == epKC_Unknown)
-    return;
-  epInputEvent ev;
-  ev.deviceType = epID_Keyboard;
-  ev.deviceId = 0; // TODO: get keyboard id
-  ev.eventType = epInputEvent::Key;
-  ev.key.key = kc;
-  ev.key.state = 1;
-  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
-    pEv->accept();
+  if (!pEv->isAutoRepeat())
+  {
+    epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
+    if (kc == epKC_Unknown)
+      return;
+    epInputEvent ev;
+    ev.deviceType = epID_Keyboard;
+    ev.deviceId = 0; // TODO: get keyboard id
+    ev.eventType = epInputEvent::Key;
+    ev.key.key = kc;
+    ev.key.state = 1;
+    if (!spView || !spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+      pEv->ignore();
+  }
 }
 
 void QtRenderView::keyReleaseEvent(QKeyEvent *pEv)
 {
-  epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
-  if (kc == epKC_Unknown)
-    return;
-  epInputEvent ev;
-  ev.deviceType = epID_Keyboard;
-  ev.deviceId = 0; // TODO: get keyboard id
-  ev.eventType = epInputEvent::Key;
-  ev.key.key = kc;
-  ev.key.state = 0;
-  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
-    pEv->accept();
+  if (!pEv->isAutoRepeat())
+  {
+    epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
+    if (kc == epKC_Unknown)
+      return;
+    epInputEvent ev;
+    ev.deviceType = epID_Keyboard;
+    ev.deviceId = 0; // TODO: get keyboard id
+    ev.eventType = epInputEvent::Key;
+    ev.key.key = kc;
+    ev.key.state = 0;
+    if (!spView || !spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+      pEv->ignore();
+  }
 }
 
 void QtRenderView::mouseDoubleClickEvent(QMouseEvent *pEv)
 {
-  bool handled = false;
-  // translate and process
-  if (handled)
-    pEv->accept();
+  // TODO: translate and process
+  pEv->ignore();
 }
-
-// TODO: MASSIVE HAX!!! FIX ME!!
-static qreal mouseLastX, mouseLastY;
 
 void QtRenderView::mouseMoveEvent(QMouseEvent *pEv)
 {
@@ -212,11 +221,14 @@ void QtRenderView::mouseMoveEvent(QMouseEvent *pEv)
   ev.move.yDelta = (float)(mouseLastY - y);
   ev.move.xAbsolute = (float)x;
   ev.move.yAbsolute = (float)y;
-  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
-    pEv->accept();
 
   mouseLastX = x;
   mouseLastY = y;
+
+  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+    pEv->accept();
+  else
+    pEv->ignore();
 }
 
 void QtRenderView::mousePressEvent(QMouseEvent *pEv)
@@ -232,6 +244,8 @@ void QtRenderView::mousePressEvent(QMouseEvent *pEv)
   ev.key.state = 1;
   if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
     pEv->accept();
+  else
+    pEv->ignore();
 }
 
 void QtRenderView::mouseReleaseEvent(QMouseEvent *pEv)
@@ -244,14 +258,14 @@ void QtRenderView::mouseReleaseEvent(QMouseEvent *pEv)
   ev.key.state = 0;
   if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
     pEv->accept();
+  else
+    pEv->ignore();
 }
 
 void QtRenderView::touchEvent(QTouchEvent *pEv)
 {
-  bool handled = false;
-  // translate and process
-  if (handled)
-    pEv->accept();
+  // TODO: translate and process
+  pEv->ignore();
 }
 
 void QtRenderView::hoverMoveEvent(QHoverEvent *pEv)
@@ -275,6 +289,12 @@ void QtRenderView::hoverMoveEvent(QHoverEvent *pEv)
 
   if (spView)
     spView->GetImpl<ep::ViewImpl>()->InputEvent(ev);
+}
+
+void QtRenderView::wheelEvent(QWheelEvent *pEv)
+{
+  // TODO: translate and process
+  pEv->ignore();
 }
 
 } // namespace qt

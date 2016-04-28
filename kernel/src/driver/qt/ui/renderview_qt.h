@@ -24,10 +24,11 @@ public:
 
   void AttachView(ep::ViewRef spView);
 
-private:
-  ep::ViewRef spView;
-  bool dirty;
+private slots:
+  void OnResize();
+  void OnVisibleChanged();
 
+private:
   // TODO: Avoid this crap
   friend class QtFboRenderer;
 
@@ -37,45 +38,28 @@ private:
   QSGNode *updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData) override;
 #endif
 
-  void keyPressEvent(QKeyEvent * event) override;
-  void keyReleaseEvent(QKeyEvent * event) override;
+  void focusInEvent(QFocusEvent *) override;
+  void focusOutEvent(QFocusEvent *) override;
+  void keyPressEvent(QKeyEvent *) override;
+  void keyReleaseEvent(QKeyEvent *) override;
   void mouseDoubleClickEvent(QMouseEvent *) override;
   void mouseMoveEvent(QMouseEvent *) override;
   void mousePressEvent(QMouseEvent *) override;
   void mouseReleaseEvent(QMouseEvent *) override;
   void touchEvent(QTouchEvent *) override;
   void hoverMoveEvent(QHoverEvent *) override;
-  void focusInEvent(QFocusEvent * event);
-  void focusOutEvent(QFocusEvent * event);
-  // void inputMethodEvent(QInputMethodEvent *) override;
+  void wheelEvent(QWheelEvent *) override;
 
-private slots:
-  void OnResize()
-  {
-    int w = (int)width();
-    int h = (int)height();
-
-    if (spView && w > 0 && h > 0)
-      spView->Resize(w, h);
-  }
-
-  void OnVisibleChanged()
-  {
-    if (spView)
-    {
-      if (isVisible())
-        spView->Activate();
-      else
-        spView->Deactivate();
-    }
-  }
-
-private:
   void OnFrameReady()
   {
     dirty = true;
     update();
   }
+
+  ep::ViewRef spView = nullptr;
+  bool dirty = false;
+  qreal mouseLastX = 0.0f;
+  qreal mouseLastY = 0.0f;
 };
 
 } // namespace qt
