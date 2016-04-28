@@ -31,8 +31,8 @@ using ep::Slice;
 class QtPropertyData : public RefCounted
 {
 public:
-  QtPropertyData(const QMetaProperty &_property) : property(_property) {}
-  QMetaProperty property;
+  QtPropertyData(int _propertyId) : propertyId(_propertyId) {}
+  int propertyId;
 };
 
 // Method Data object - stored alongside the call methodshim
@@ -40,8 +40,8 @@ public:
 class QtMethodData : public RefCounted
 {
 public:
-  QtMethodData(const QMetaMethod &_method) : method(_method) {}
-  QMetaMethod method;
+  QtMethodData(int _methodId) : methodId(_methodId) {}
+  int methodId;
 };
 
 // Event Data object - stored alongside the subscribe methodshim
@@ -49,7 +49,7 @@ public:
 class QtEventData : public RefCounted
 {
 public:
-  QtEventData(const QMetaMethod &m) : signalMapper(m) {}
+  QtEventData(int signalId, SharedString signalName) : signalMapper(signalId, signalName) {}
   mutable QtSignalMapper signalMapper;
 };
 
@@ -63,14 +63,16 @@ public:
   Variant getter(Slice<const Variant>, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
-    return Variant(data.property.read((const QObject*)((ep::Component*)this)->GetUserData()));
+    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    return Variant(pQObject->metaObject()->property(data.propertyId).read(pQObject));
   }
 
   // Property Setter
   Variant setter(Slice<const Variant> args, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
-    data.property.write((QObject*)((ep::Component*)this)->GetUserData(), args[0].as<QVariant>());
+    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    pQObject->metaObject()->property(data.propertyId).write(pQObject, args[0].as<QVariant>());
     return Variant();
   }
 
@@ -99,8 +101,8 @@ public:
     QVariant retVal;
     const QtMethodData &data = (const QtMethodData&)_data;
     QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
-    data.method.invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
-                           args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+    pQObject->metaObject()->method(data.methodId).invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
+      args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
 
     return Variant(retVal);
   }
@@ -108,9 +110,8 @@ public:
   // Event Subscription
   Variant subscribe(Slice<const Variant> values, const RefCounted &_data)
   {
-    using namespace ep;
     const QtEventData &data = (const QtEventData&)_data;
-    QObject *pQObject = (QObject*)((Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
 
     return Variant(data.signalMapper.Subscribe(pQObject, values[0].asDelegate()));
   }
@@ -131,7 +132,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     QMetaProperty property = pMetaObject->property(i);
 
     SharedString propertyName = epFromQString(property.name()).toLower();
-    auto data = SharedPtr<QtPropertyData>::create(property);
+    auto data = SharedPtr<QtPropertyData>::create(i);
     auto getterShim = (property.isReadable() ? MethodShim(&QtShims::getter, data) : MethodShim(nullptr));
     auto setterShim = (property.isWritable() ? MethodShim(&QtShims::setter, data) : MethodShim(nullptr));
 
@@ -147,7 +148,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
       static SharedString methodDescStr("Qt Component Method");
 
       SharedString methodName = epFromQString(method.name()).toLower();
-      auto data = SharedPtr<QtMethodData>::create(method);
+      auto data = SharedPtr<QtMethodData>::create(i);
       auto shim = MethodShim(&QtShims::call, data);
 
       pDesc->methodTree.Insert(methodName, MethodDesc(MethodInfo{ methodName, methodDescStr }, shim));
@@ -158,7 +159,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
       static SharedString eventDescStr("Qt Component Event");
 
       SharedString eventName = epFromQString(method.name()).toLower();
-      auto data = SharedPtr<QtEventData>::create(method);
+      auto data = SharedPtr<QtEventData>::create(i, eventName);
       auto shim = EventShim(&QtShims::subscribe, data);
 
       pDesc->eventTree.Insert(eventName, EventDesc(EventInfo{ eventName, eventName, eventDescStr }, shim));
