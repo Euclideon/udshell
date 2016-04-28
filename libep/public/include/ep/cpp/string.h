@@ -116,7 +116,7 @@ typedef BaseString<char32_t> DString;
 // a static-length and/or stack-allocated string, useful for holding constructured temporaries (ie, target for sprintf/format)
 // alternatively useful for holding a string as a member of an aggregate without breaking out to separate allocations
 // useful in cases where 'char buffer[len]' is typically found
-template<size_t Size>
+template<size_t Size = 0>
 struct MutableString : public Array<char, Size>
 {
   // constructors

@@ -58,7 +58,7 @@ protected:
 typedef MethodPointer<Variant(Slice<const Variant>, const RefCounted &)> VarMethodWithData;
 
 // method glue
-class MethodShim
+struct MethodShim
 {
 public:
   MethodShim(const MethodShim &rh) : method(rh.method), data(rh.data) {}
@@ -91,7 +91,7 @@ protected:
 };
 
 // static funcion glue
-class StaticFuncShim
+struct StaticFuncShim
 {
 public:
   StaticFuncShim(void *pFunc, SharedPtr<const RefCounted> data = nullptr) : pFunc(pFunc), data(data) {}
@@ -104,7 +104,7 @@ protected:
 };
 
 // event glue
-class EventShim
+struct EventShim
 {
 public:
   EventShim(const EventShim &rh) : subscribeFunc(rh.subscribeFunc), data(rh.data) {}

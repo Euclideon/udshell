@@ -349,6 +349,8 @@ private:
 // ref counting base class
 class RefCounted : public Safe
 {
+  void Destroy();
+
 public:
   size_t RefCount() const { return rc; }
   size_t IncRef() { return ++rc; }
@@ -389,7 +391,6 @@ private:
   friend class Kernel;
   friend class KernelImpl;
 };
-
 
 // SharedPtr constructors and assignments
 template <class T>

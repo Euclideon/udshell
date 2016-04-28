@@ -114,7 +114,7 @@ struct MethodCallHack<void, Args...>
 
 } // namespace internal
 
-epforceinline ptrdiff_t Compare<Variant>::operator()(Variant a, Variant b)
+epforceinline ptrdiff_t Compare<Variant>::operator()(const Variant &a, const Variant &b)
 {
   return a.compare(b);
 }

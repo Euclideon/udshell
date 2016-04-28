@@ -5,7 +5,7 @@
 namespace ep {
 
 template<typename T>
-class FreeList
+struct FreeList
 {
 public:
   FreeList(size_t listSize) :

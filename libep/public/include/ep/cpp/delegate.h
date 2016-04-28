@@ -14,7 +14,7 @@ namespace ep {
 template<typename Signature>
 struct MethodPointer;
 template<typename Signature>
-class Delegate;
+struct Delegate;
 /// \endcond
 
 // helper to handle method pointers
@@ -70,7 +70,7 @@ public:
 
 protected:
   template<typename Signature>
-  friend class Delegate;
+  friend struct Delegate;
   template<typename T>
   friend struct SharedPtr;
 
@@ -83,7 +83,7 @@ typedef SharedPtr<DelegateMemento> DelegateMementoRef;
 
 // facilitate using the function template syntax
 template<typename R, typename... Args>
-class Delegate<R(Args...)>
+struct Delegate<R(Args...)>
 {
 public:
   typedef FastDelegate<R(Args...)> FastDelegateType;

@@ -79,7 +79,7 @@ public:
 
 // Wraps a range with a virtual interface, allowing for common access to any range type
 template <typename V>
-class VirtualRange
+struct VirtualRange
 {
 public:
   class Iterator
@@ -156,7 +156,7 @@ private:
   friend struct Variant;
   class VirtualRangeImpl : public RefCounted
   {
-    template <typename T> friend class VirtualRange;
+    template <typename T> friend struct VirtualRange;
 
     virtual SharedPtr<VirtualRangeImpl> clone() const = 0;
 
@@ -175,6 +175,57 @@ private:
   };
 
   SharedPtr<VirtualRangeImpl> spRangeInstance;
+};
+
+
+// TODO: maybe put this in its own file?
+template <typename Tree>
+struct TreeRange
+{
+public:
+  using TreeType = Tree;
+  using ValueType = typename Tree::ValueType;
+  using Iterator = typename Tree::Iterator;
+
+  TreeRange()
+    : i(nullptr), len(0) {}
+
+  TreeRange(const TreeRange<Tree> &rh)
+    : i(rh.i), len(rh.len)
+  {}
+  TreeRange(TreeRange<Tree> &&rval)
+    : i(std::move(rval.i)), len(rval.len)
+  {
+    rval.len = 0;
+  }
+
+  TreeRange(const Tree &tree)
+    : i(tree.begin()), len(tree.Size())
+  {}
+
+  bool empty() const { return len == 0; }
+  size_t length() const { return len; }
+
+  ValueType& front() const
+  {
+    return (*i).value;
+  }
+
+  ValueType& popFront()
+  {
+    ValueType &t = (*i).value; ++i;
+    // TODO: put this back
+    //    EPTHROW_IF(i == Tree::end() && len != 0, epR_OutOfBounds, "AVLTree length ");
+    return t;
+  }
+
+  // iterators
+  Iterator begin() const { return i; }
+  Iterator end() const { return Tree::end(); }
+
+private:
+  Iterator i;
+  size_t len;
 };
 
 } // namespace ep
