@@ -3,6 +3,7 @@
 #define _EP_SLICE_HPP
 
 #include <initializer_list>
+#include <functional>
 
 namespace ep {
 namespace internal {
@@ -123,6 +124,8 @@ public:
 
   template<bool skipEmptyTokens = false>
   Slice<Slice<T>> tokenise(Slice<Slice<T>> tokens, Slice<T> delimiters);
+  template<bool skipEmptyTokens = false>
+  size_t tokenise(std::function<void(Slice<T> token, size_t index)> onToken, Slice<T> delimiters);
 
   template<typename U>
   void copyTo(Slice<U> dest) const;

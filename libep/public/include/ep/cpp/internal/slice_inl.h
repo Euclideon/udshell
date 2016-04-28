@@ -485,6 +485,35 @@ inline Slice<Slice<T>> Slice<T>::tokenise(Slice<Slice<T>> tokens, Slice<T> delim
   length -= offset;
   return tokens.slice(0, numTokens);
 }
+template<typename T>
+template<bool skipEmptyTokens>
+inline size_t Slice<T>::tokenise(std::function<void(Slice<T> token, size_t index)> onToken, Slice<T> delimiters)
+{
+  size_t numTokens = 0;
+  size_t offset = 0;
+  while (offset < length)
+  {
+    if (!skipEmptyTokens)
+    {
+      size_t tokStart = offset;
+      while (offset < length && !delimiters.exists(ptr[offset]))
+        ++offset;
+      onToken(slice(tokStart, offset++), numTokens++);
+    }
+    else
+    {
+      while (offset < length && delimiters.exists(ptr[offset]))
+        ++offset;
+      if (offset == length)
+        break;
+      size_t tokStart = offset;
+      while (offset < length && !delimiters.exists(ptr[offset]))
+        ++offset;
+      onToken(slice(tokStart, offset), numTokens++);
+    }
+  }
+  return numTokens;
+}
 
 template<typename T>
 template<typename U>

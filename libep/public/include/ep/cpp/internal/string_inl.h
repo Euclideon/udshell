@@ -457,6 +457,12 @@ inline Slice<BaseString<C>> BaseString<C>::tokenise(Slice<BaseString<C>> tokens,
   auto t = Slice<const C>::tokenise<skipEmptyTokens>(tokens, delimiters);
   return Slice<BaseString<C>>((BaseString<C>*)t.ptr, t.length);
 }
+template<typename C>
+template<bool skipEmptyTokens>
+inline size_t BaseString<C>::tokenise(std::function<void(BaseString<C> onToken, size_t index)> onToken, BaseString<C> delimiters)
+{
+  return Slice<const C>::template tokenise<skipEmptyTokens>(onToken, delimiters);
+}
 
 template<typename C>
 inline uint32_t BaseString<C>::hash(uint32_t hash) const
