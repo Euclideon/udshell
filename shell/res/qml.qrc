@@ -1,31 +1,5 @@
 <RCC>
   <qresource prefix="/">
-    <file>qml/window.qml</file>
-    <file>qml/main.qml</file>
-
-    <!-- UI Components -->
-    <file>qml/components/messagebox.qml</file>
-    <file>qml/components/bookmarksui.qml</file>
-    <file>qml/components/resourcespanel.qml</file>
-    <file>qml/components/activityselecter.qml</file>
-
-     <!-- Custom Controls -->
-    <file>qml/epcontrols/epmenubar.qml</file>
-    <file>qml/epcontrols/epmenu.qml</file>
-    <file>qml/epcontrols/eptoolbar.qml</file>
-    <file>qml/epcontrols/epmenubutton.qml</file>
-    <file>qml/epcontrols/eptoolbutton.qml</file>
-    <file>qml/epcontrols/epfiledialog.qml</file>
-    <file>qml/epcontrols/eptoolpanelmanager.qml</file>
-    <file>qml/epcontrols/eplistmodel.qml</file>
-    <file>qml/epcontrols/eplistview.qml</file>
-    <file>qml/epcontrols/eptableview.qml</file>
-    <file>qml/epcontrols/eptooltip.qml</file>
-    <file>qml/epcontrols/qmldir</file>
-
-    <!-- Themes -->
-    <file>qml/themes/shelltheme.qml</file>
-
     <!-- XML files -->
     <file>menus.xml</file>
     <file>toolbar.xml</file>

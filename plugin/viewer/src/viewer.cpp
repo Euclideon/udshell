@@ -79,16 +79,16 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
   ViewportRef spViewport;
   epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component\n"); };
-  spViewport = pKernel->Call("createqmlcomponent", ":/kernel/viewport.qml", Variant::VarMap{ { "view", spView } }).as<ViewportRef>();
+  spViewport = component_cast<Viewport>(pKernel->CreateComponent("ui.viewport", Variant::VarMap{ { "view", spView } }));
 
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
-  spViewerUI = pKernel->Call("createqmlcomponent", ":/viewer/viewer.qml", nullptr).as<UIComponentRef>();
+  spViewerUI = component_cast<UIComponent>(pKernel->CreateComponent("viewer.mainui"));
   spViewerUI->Set("viewport", spViewport);
   spViewerUI->Subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
 
   epscope(fail) { if(!spUIBookmarks) pKernel->LogError("Error creating bookmarks UI Component\n"); };
-  spUIBookmarks = pKernel->Call("createqmlcomponent", ":/qml/components/bookmarksui.qml", nullptr).as<UIComponentRef>();
+  spUIBookmarks = component_cast<UIComponent>(pKernel->CreateComponent("ui.bookmarksui"));
   spUIBookmarks->Set("view", spView);
   spViewerUI->Set("bookmarkscomp", spUIBookmarks);
 
@@ -99,7 +99,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   else
   {
     epscope(fail) { if (!spUIResources) pKernel->LogError("Error creating Resource Panel UI Component\n"); };
-    spUIResources = pKernel->Call("createqmlcomponent", ":/qml/components/resourcespanel.qml", Variant::VarMap{ { "name", "resourcespanel" } }).as<UIComponentRef>();
+    spUIResources = component_cast<UIComponent>(pKernel->CreateComponent("ui.resourcespanel", Variant::VarMap{ { "name", "resourcespanel" } }));
   }
   spViewerUI->Set("resourcespanel", spUIResources);
 
@@ -291,6 +291,9 @@ Variant Viewer::Save() const
 extern "C" bool epPluginAttach()
 {
   Kernel::GetInstance()->RegisterComponentType<Viewer>();
+
+  // TODO: this path should be changed before release
+  Kernel::GetInstance()->Call("registerqmlcomponents", "plugin/viewer/qml");
 
   return true;
 }

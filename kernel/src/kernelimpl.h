@@ -159,8 +159,9 @@ public:
   void StartInit(Variant::VarMap initParams);
   void FinishInit() override final;
   void InitComponents();
-  void LoadPlugins();
-  Array<SharedString> ScanPluginFolder(String folderPath);
+  void LoadPluginDir(String folderPath);
+  void LoadPlugins(Slice<SharedString> files);
+  Array<SharedString> ScanPluginFolder(String folderPath, Slice<const String> extfilter = nullptr);
 
   void DestroyComponent(Component *pInstance);
 

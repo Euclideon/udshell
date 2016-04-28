@@ -4,7 +4,7 @@ project "viewer"
 --	flags { }
 
 	files { "src/**" }
-	files { "res/**" }
+	files { "qml/**" }
 	files { "project.lua" }
 
 	includedirs { "src" }
