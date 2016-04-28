@@ -88,12 +88,17 @@ Variant epToVariant(const QVariant &var)
       return Variant();
     }
 
+    // if we have a variant in a variant, we need to unpeel
+    case QMetaType::QVariant:
+      return epToVariant(var.value<QVariant>());
+
     case QMetaType::User:
     {
       int userType = var.userType();
       if (userType == qMetaTypeId<QJSValue>())
         return epToVariant(var.value<QJSValue>());
     }
+
     default:
       epDebugPrintf("epToVariant: Unsupported type '%s' (support me!)\n", var.typeName());
       return Variant();

@@ -20,7 +20,7 @@ FocusScope {
   property var bookmarksqq
   property var resourcespanel
 
-  signal resourcedropped(var uid, var x, var y)
+  signal resourcedropped(string uid, int x, int y)
 
   function togglebookmarkspanel() {
     toolPanelSlot.toggleVisible(bookmarkscomp.get("uihandle"));
