@@ -1,6 +1,7 @@
 #include "arraybufferimpl.h"
 #include "renderresource.h"
 #include "ep/cpp/kernel.h"
+#include "ep/cpp/component/resource/metadata.h"
 
 namespace ep {
 
@@ -43,6 +44,28 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
   pInstance->Buffer::Allocate(_elementSize*elements);
   if (alreadyAllocated)
     pInstance->Changed.Signal();
+
+  // record element types as metadata
+  Array<ElementMetadata,32> elementMetadata;
+  int offset = 0;
+
+  String et = _elementType.trim();
+  if(et.length > 2 && et.front() == '{' && et.back() == '}')
+  {
+    // multiple element stream
+    et = et.slice(1, et.length-1).trim();
+    et.tokenise([&](String t, size_t i) {
+      t = t.trim();
+
+      // calculate offset
+      elementMetadata.pushBack(ElementMetadata{ nullptr, t, offset });
+      offset += GetElementTypeSize(t);
+    }, ",");
+  }
+  else
+    elementMetadata.pushBack(ElementMetadata{ nullptr, et, 0 });
+
+  pInstance->GetMetadata()->Insert("attributeinfo", elementMetadata);
 }
 
 } // namespace ep
