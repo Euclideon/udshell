@@ -40,7 +40,7 @@ struct EnumDesc
     NAME() : v(Invalid) {}                                                        \
     NAME(const NAME &e) : v(e.v) {}                                               \
     NAME(Type _v) : v(_v) {}                                                      \
-    NAME(ep::String s)                                                            \
+    NAME(ep::String s) : v(Invalid)                                               \
     {                                                                             \
       ep::Slice<const ep::String> keys = Keys();                                  \
       for(size_t i = 0; i < keys.length; ++i)                                     \
