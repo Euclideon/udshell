@@ -188,6 +188,7 @@ SDLKernel::SDLKernel(Variant::VarMap commandLine)
 
 SDLKernel::~SDLKernel()
 {
+  GetImpl()->Shutdown();
   // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
   EventLoop();
 
