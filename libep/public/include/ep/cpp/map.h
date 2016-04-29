@@ -23,6 +23,17 @@ public:
   SharedMap(SharedMap &&rval)
     : ptr(std::move(rval.ptr))
   {}
+//  SharedMap(const Tree &map) // TODO: consider; do we want deep-copying constructors?
+//  {
+//    Alloc();
+//    for (auto &&kvp : map)
+//      ptr->tree.Insert(kvp.key, kvp.value);
+//  }
+  SharedMap(Tree &&map)
+  {
+    Alloc();
+    new(&ptr->tree) Tree(std::move(map));
+  }
   SharedMap(Slice<const typename Tree::KeyValuePair> arr)
   {
     Alloc();
