@@ -81,8 +81,8 @@ void GeomSource::Create(StreamRef spSource)
 
   Assimp::Importer importer;
 
-  unsigned int options = aiProcess_ConvertToLeftHanded      |
-                         aiProcess_FlipWindingOrder         |
+  unsigned int options = //aiProcess_ConvertToLeftHanded      |
+                         //aiProcess_FlipWindingOrder         |
 //                         aiProcess_CalcTangentSpace         |
                          aiProcess_Triangulate              |
                          aiProcess_GenUVCoords              |
@@ -120,6 +120,11 @@ void GeomSource::Create(StreamRef spSource)
     aiMatrix4x4 world;
     size_t numMeshes = 0; // TODO this is not being used
     NodeRef spRoot = ParseNode(pScene, pScene->mRootNode, &world, numMeshes);
+
+    // TODO: Massive hack !!!! Swizzle the matrix into ud space
+    const Double4x4 &mat = spRoot->GetMatrix();
+    spRoot->SetMatrix(Double4x4::create(mat.axis.x, mat.axis.z, -mat.axis.y, mat.axis.t));
+
     SetResource("scene0", spRoot);
   }
 
@@ -232,10 +237,11 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
     ArrayBufferRef spVerts = GetKernel().CreateComponent<ArrayBuffer>();
     spVerts->AllocateFromData<VertPos>(verts);
+    spVerts->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_position");
 
     SetResource(SharedString::concat("positions", i), spVerts);
 
-    spMesh->SetVertexArray(spVerts, { "a_position" });
+    spMesh->AddVertexArray(spVerts);
 
     // normals
     if (mesh.HasNormals())
@@ -245,10 +251,11 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       ArrayBufferRef spNormals = GetKernel().CreateComponent<ArrayBuffer>();
       spNormals->AllocateFromData<VertNorm>(normals);
+      spNormals->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_normal");
 
       SetResource(SharedString::concat("normals", i), spNormals);
 
-      spMesh->SetVertexArray(spNormals, { "a_normal" });
+      spMesh->AddVertexArray(spNormals);
     }
 
     // binormals & tangents
@@ -258,6 +265,8 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       ArrayBufferRef spBinTan = GetKernel().CreateComponent<ArrayBuffer>();
       spBinTan->Allocate<VertBinTan>(mesh.mNumVertices);
+      spBinTan->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_binormal");
+      spBinTan->GetMetadata()->Get("attributeinfo")[1].insertItem("name", "a_tangent");
 
       Slice<VertBinTan> bt = spBinTan->Map<VertBinTan>();
       for (uint32_t j = 0; j<mesh.mNumVertices; ++j)
@@ -273,7 +282,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       SetResource(SharedString::concat("binormalstangents", i), spBinTan);
 
-      spMesh->SetVertexArray(spBinTan, { "a_binormal", "a_tangent" });
+      spMesh->AddVertexArray(spBinTan);
     }
 
     // UVs
@@ -284,10 +293,11 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       ArrayBufferRef spUVs = GetKernel().CreateComponent<ArrayBuffer>();
       spUVs->AllocateFromData<VertUV>(uvs);
+      spUVs->GetMetadata()->Get("attributeinfo")[t].insertItem("name", SharedString::concat("a_uv", t));
 
       SetResource(SharedString::concat("uvs", i, "_", t), spUVs);
 
-      spMesh->SetVertexArray(spUVs, { SharedString::concat("a_uv", t) });
+      spMesh->AddVertexArray(spUVs);
     }
 
     // Colors
@@ -298,10 +308,11 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       ArrayBufferRef spColors = GetKernel().CreateComponent<ArrayBuffer>();
       spColors->AllocateFromData<VertColor>(colors);
+      spColors->GetMetadata()->Get("attributeinfo")[c].insertItem("name", SharedString::concat("a_color", c));
 
       SetResource(SharedString::concat("colors", i, "_", c), spColors);
 
-      spMesh->SetVertexArray(spColors, { SharedString::concat("a_color", c) });
+      spMesh->AddVertexArray(spColors);
     }
 
     // indices (faces)
