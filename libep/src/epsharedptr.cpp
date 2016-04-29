@@ -39,4 +39,10 @@ void NullifySafePtr(void *pAlloc)
 }
 
 } // namespace internal
+
+void RefCounted::Destroy()
+{
+  delete this;
+}
+
 } // namespace ep

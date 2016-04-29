@@ -4,8 +4,9 @@
 
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/delegate.h"
-#include "ep/cpp/range.h"
+#include "ep/cpp/avltree.h"
 #include "ep/cpp/map.h"
+#include "ep/cpp/range.h"
 #include "ep/cpp/event.h"
 
 #include "ep/c/variant.h"
@@ -21,7 +22,7 @@ struct Variant;
 template<>
 struct Compare<Variant>
 {
-  ptrdiff_t operator()(Variant a, Variant b);
+  ptrdiff_t operator()(const Variant &a, const Variant &b);
 };
 /// \endcond
 
