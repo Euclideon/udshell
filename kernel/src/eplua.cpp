@@ -206,7 +206,22 @@ int LuaState::udLuaPanic(lua_State *L)
 }
 
 namespace internal {
-void *_Realloc(void *pMemory, size_t size, const char *pFile, int line);
+  void *_Realloc(void *pMemory, size_t size, const char * pFile, int line)
+  {
+#if defined(EP_COMPILER_VISUALC)
+# if __EP_MEMORY_DEBUG__
+    pMemory = _realloc_dbg(pMemory, size, _NORMAL_BLOCK, pFile, line);
+# else
+    pMemory = realloc(pMemory, size);
+# endif // __EP_MEMORY_DEBUG__
+#else
+    epUnused(pFile);
+    epUnused(line);
+    pMemory = realloc(pMemory, size);
+#endif // defined(_MSC_VER)
+
+    return pMemory;
+  }
 }
 
 void* LuaState::udLuaAlloc(void *, void *ptr, size_t, size_t nsize)
