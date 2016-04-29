@@ -8,7 +8,7 @@
 #include "ep/cpp/component/resource/metadata.h"
 #include "ep/cpp/component/resource/udmodel.h"
 #include "components/file.h"
-#include "components/datasources/uddatasource.h"
+#include "components/datasources/udsource.h"
 #include "hal/image.h"
 #include "ep/cpp/kernel.h"
 
@@ -344,7 +344,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 GeomSource::XRefType GeomSource::GetXRefType(String url)
 {
   String ext = url.getRightAtLast(".", true);
-  Slice<const String> udDSExts = UDDataSource::StaticGetFileExtensions();
+  Slice<const String> udDSExts = UDSource::StaticGetFileExtensions();
   for (const String &udExt : udDSExts)
   {
     if (ext.eqIC(udExt))
@@ -369,9 +369,9 @@ void GeomSource::ParseXRefs(const aiScene *pScene)
     if (type == XRefType::UDModel)
     {
       // Load the UDDataSource
-      UDDataSourceRef spModelDS;
+      UDSourceRef spModelDS;
       epscope(fail) { if (!spModelDS) pKernel->LogError("GeomSource -- Failed to load UDModel \"{0}\"", url); };
-      spModelDS = GetKernel().CreateComponent<UDDataSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
+      spModelDS = GetKernel().CreateComponent<UDSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
 
       UDModelRef spUDModel;
       if (spModelDS->GetNumResources() > 0)

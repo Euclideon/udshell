@@ -36,7 +36,7 @@ public:
   VarDelegate GetVoxelVarDelegate() const { return pImpl->GetVoxelVarDelegate(); }
   void SetVoxelVarDelegate(VarDelegate del) { pImpl->SetVoxelVarDelegate(del); }
 
-  EP_FRIENDS_WITH_IMPL(UDDataSource);
+  EP_FRIENDS_WITH_IMPL(UDSource);
 protected:
   UDModel(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)

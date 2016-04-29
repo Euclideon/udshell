@@ -1,4 +1,4 @@
-#include "components/datasources/uddatasource.h"
+#include "components/datasources/udsource.h"
 #include "components/resources/udmodelimpl.h"
 #include "ep/cpp/component/resource/metadata.h"
 #include "components/file.h"
@@ -7,9 +7,9 @@
 
 namespace ep
 {
-const Array<const String> UDDataSource::extensions = { ".uds", ".ssf", ".upc", ".udi", ".oct3" };
+const Array<const String> UDSource::extensions = { ".uds", ".ssf", ".upc", ".udi", ".oct3" };
 
-UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : DataSource(pType, pKernel, uid, initParams)
 {
   const Variant *source = initParams.Get("src");
@@ -60,7 +60,7 @@ UDDataSource::UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedSt
   }
 }
 
-void UDDataSource::StaticInit(ep::Kernel *pKernel)
+void UDSource::StaticInit(ep::Kernel *pKernel)
 {
   pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
 }

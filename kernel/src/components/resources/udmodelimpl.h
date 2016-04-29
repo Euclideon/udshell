@@ -44,7 +44,7 @@ public:
   VarDelegate GetVoxelVarDelegate() const override final { return voxelVarDelegate; }
   void SetVoxelVarDelegate(VarDelegate delegate) override final;
 
-  EP_FRIENDS_WITH_IMPL(UDDataSource);
+  EP_FRIENDS_WITH_IMPL(UDSource);
 private:
 
   VarDelegate voxelVarDelegate;
