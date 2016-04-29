@@ -63,6 +63,11 @@ public:
   {
     rval.root = nullptr;
   }
+  AVLTree(std::initializer_list<KeyValuePair> init)
+  {
+    for (auto &&v : init)
+      Insert(v.key, v.value);
+  }
 
   ~AVLTree()
   {
