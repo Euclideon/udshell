@@ -239,7 +239,7 @@ Variant::Variant(Slice<Variant> a, bool unsafeReference)
 
 // KVP constructors
 Variant::Variant(Slice<KeyValuePair> aa)
-  : Variant(VarMap(aa))
+  : Variant(VarMap(Slice<const KeyValuePair>(aa)))
 {}
 
 void Variant::copyContent(const Variant &val)

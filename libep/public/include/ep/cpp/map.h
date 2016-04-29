@@ -29,6 +29,12 @@ public:
     for (auto &kvp : arr)
       ptr->tree.Insert(kvp.key, kvp.value);
   }
+  SharedMap(Slice<const ValueType> arr)
+  {
+    Alloc();
+    for (size_t i = 0; i < arr.length; ++i)
+      ptr->tree.Insert(i, arr[i]);
+  }
   SharedMap(std::initializer_list<typename Tree::KeyValuePair> init)
     : SharedMap(Slice<const typename Tree::KeyValuePair>(init.begin(), init.size()))
   {}
