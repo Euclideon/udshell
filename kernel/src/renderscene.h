@@ -52,19 +52,31 @@ struct GeomJob
 {
   Double4x4 matrix;
 
-  Array<RenderTextureRef, 8> textures;
-  Array<RenderArrayRef, 16> arrays;
-  RenderArrayRef index;
-
-  RenderShaderProgramRef spProgram;
-  RenderVertexFormatRef spVertexFormat;
-
+  Array<StencilState, 2> stencilStates;
   BlendMode blendMode;
   CullMode cullMode;
+  CompareFunc depthCompareFunc;
 
-  // TODO: has stuff
-  // constants
-  // render states
+  epPrimitiveType primType;
+  size_t numVertices;
+  size_t firstIndex;
+  size_t firstVertex;
+
+  RenderShaderProgramRef spProgram;
+  SharedArray<RenderShaderProperty> uniforms;
+
+  Array<RenderTextureRef, 8> textures;
+
+  Array<RenderArrayRef, 16> arrays;
+  Array<epArrayBuffer*, 16> epArrays;
+  RenderShaderInputConfigRef spShaderInputConfig;
+  RenderArrayRef index;
+
+  // TODO : Stitch this up later
+  Array<epVertexRange> vertexRanges;
+
+  // TODO : Hack until we standardise the shader inputs provide by ep.
+  RenderShaderProperty viewProjection;
 };
 
 class RenderableScene : public RefCounted
@@ -131,12 +143,22 @@ public:
   Renderer(Kernel *pKernel, int renderThreadCount);
   ~Renderer();
 
+  enum class RenderResourceType
+  {
+    VertexArray,
+    IndexArray,
+    Texture,
+  };
+
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
 
   void AddUDRenderJob(UniquePtr<RenderableView> job);
 
   ArrayBufferRef AllocRenderBuffer();
   void ReleaseRenderBuffer(ArrayBufferRef spBuffer) { renderBufferPool.pushBack(spBuffer); }
+
+  RenderShaderInputConfigRef GetShaderInputConfig(Slice<ArrayBufferRef> arrays, const RenderShaderProgramRef &spShaderProgram, Delegate<void(SharedPtr<RefCounted>)> retainShaderInputConfig);
+  RenderResourceRef GetRenderBuffer(const ArrayBufferRef &spArrayBuffer, RenderResourceType type);
 
 protected:
   friend class View;
@@ -152,25 +174,9 @@ protected:
   udSemaphore *pUDSemaphore, *pUDTerminateSemaphore;
   Array<UniquePtr<RenderableView>, 4> udRenderQueue;
 
-  AVLTree<uint32_t, RenderShaderProgram*> shaderPrograms;
-  AVLTree<uint32_t, RenderVertexFormat*> vertexFormats;
-
   Array<ArrayBufferRef> renderBufferPool;
   int numRenderBuffers = 0;
 
-  enum class RenderResourceType
-  {
-    VertexArray,
-    IndexArray,
-    Texture,
-  };
-
-  RenderResourceRef GetRenderBuffer(const ArrayBufferRef &spArrayBuffer, RenderResourceType type);
-  RenderShaderRef GetShader(const ShaderRef &spShader);
-  RenderShaderProgramRef GetShaderProgram(const MaterialRef &spShaderProgram);
-  RenderVertexFormatRef GetVertexFormat(const RenderShaderProgramRef &spShaderProgram, Slice<VertexArray> arrays);
-
-  void SetRenderstates(MaterialRef spMaterial, RenderShaderProgramRef spProgram);
 
   static uint32_t UDThreadStart(void *data)
   {
@@ -185,7 +191,7 @@ private:
   ArrayBufferRef spQuadVerts;
   ArrayBufferRef spQuadIndices;
 
-  epFormatDeclaration *s_pPosUV = nullptr;
+  epShaderInputConfig *s_pPosUV = nullptr;
   epArrayBuffer *s_pQuadVB = nullptr;
   epArrayBuffer *s_pQuadIB = nullptr;
 

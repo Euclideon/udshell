@@ -9,7 +9,7 @@
 namespace ep {
 
 SHARED_CLASS(Model);
-
+// TODO: Expose all properties/methods to meta
 class Model : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Model, IModel, Resource, EPKERNEL_PLUGINVERSION, "Model desc...", 0)
@@ -18,11 +18,15 @@ public:
   MaterialRef GetMaterial() const { return pImpl->GetMaterial(); }
   void SetMaterial(MaterialRef spMaterial) { pImpl->SetMaterial(spMaterial); }
 
-  void SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> attributeNames) { pImpl->SetVertexArray(spVertices, attributeNames); }
+  void AddVertexArray(ArrayBufferRef spVertices) { pImpl->AddVertexArray(spVertices); }
+  void RemoveVertexArray(ArrayBufferRef spVertices) { pImpl->RemoveVertexArray(spVertices); }
+  SharedArray<ArrayBufferRef> GetVertexArrays() { return pImpl->GetVertexArrays(); }
 
   ArrayBufferRef GetIndexArray() const { return pImpl->GetIndexArray(); }
   void SetIndexArray(ArrayBufferRef spIndices) { pImpl->SetIndexArray(spIndices); }
 
+  void SetRenderList(const RenderList &list) { pImpl->SetRenderList(list); }
+  const RenderList& GetRenderList() const { return pImpl->GetRenderList(); }
 protected:
   Model(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)

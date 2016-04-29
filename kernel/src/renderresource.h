@@ -8,7 +8,7 @@
 #include "hal/shader.h"
 #include "hal/texture.h"
 
-struct epFormatDeclaration;
+struct epShaderInputConfig;
 struct epArrayElement;
 struct epArrayBuffer;
 struct epTexture;
@@ -65,7 +65,7 @@ SHARED_CLASS(RenderTexture);
 class RenderShader : public RenderResource
 {
 public:
-  RenderShader(Renderer *pRenderer, ShaderRef spShader, epShaderType type);
+  RenderShader(Renderer *pRenderer, SharedString code, epShaderType type);
   virtual ~RenderShader();
 
   epShader *pShader;
@@ -77,31 +77,42 @@ SHARED_CLASS(RenderShader);
 class RenderShaderProgram : public RenderResource
 {
 public:
-  RenderShaderProgram(Renderer *pRenderer, RenderShaderRef vs, RenderShaderRef ps);
+  RenderShaderProgram(Renderer *pRenderer, Slice<RenderShaderRef> shaders);
   virtual ~RenderShaderProgram();
-
-  epShaderProgram *pProgram;
 
   size_t numAttributes();
   String getAttributeName(size_t i);
+  epShaderElement getAttributeType(size_t i);
+  SharedString getAttributeTypeString(size_t i);
 
   size_t numUniforms();
   String getUniformName(size_t i);
+  epShaderElement getUniformType(size_t i);
+  SharedString getUniformTypeString(size_t i);
 
-  void setUniform(int i, const Float4 &v4);
+  Variant getUniform(size_t i);
+
+  void Use();
+  void setUniform(size_t i, Variant v);
+
+  epShaderProgram *pProgram;
+  bool uniformsAssigned;
 };
 SHARED_CLASS(RenderShaderProgram);
 
-// render format descriptor
-class RenderVertexFormat : public RenderResource
+// render shader input
+class RenderShaderInputConfig : public RenderResource
 {
 public:
-  RenderVertexFormat(Renderer *pRenderer, const epArrayElement *pElements, size_t numElements);
-  virtual ~RenderVertexFormat();
+  RenderShaderInputConfig(Renderer *pRenderer, SharedArray<ArrayBufferRef> vertexArrays, RenderShaderProgramRef spProgram);
+  SharedArray<int> GetActiveStreams();
+  virtual ~RenderShaderInputConfig();
 
-  epFormatDeclaration *pFormat;
+  epShaderInputConfig *pConfig;
 };
-SHARED_CLASS(RenderVertexFormat);
+SHARED_CLASS(RenderShaderInputConfig);
+
+int GetElementTypeSize(String type);
 
 } // namespace ep
 

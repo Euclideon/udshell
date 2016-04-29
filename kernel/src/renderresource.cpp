@@ -4,69 +4,78 @@
 #include "hal/vertex.h"
 #include "hal/shader.h"
 #include "components/resources/shaderimpl.h"
+#include "ep/cpp/component/resource/metadata.h"
 
 namespace ep {
 
-static epArrayDataFormat GetElementType(String type)
+epArrayDataFormat GetElementType(String type, int *pSize = nullptr)
 {
   static const struct TypeMap
   {
     const char *pName;
     epArrayDataFormat format;
+    int size;
   } s_typeMap[] = {
-    { "f32[4]", epVDF_Float4 },
-    { "f32[3]", epVDF_Float3 },
-    { "f32[2]", epVDF_Float2 },
-    { "f32[1]", epVDF_Float },
-    { "f32", epVDF_Float },
-    { "s32[4]", epVDF_Int4 },
-    { "s32[3]", epVDF_Int3 },
-    { "s32[2]", epVDF_Int2 },
-    { "s32[1]", epVDF_Int },
-    { "s32", epVDF_Int },
-    { "u32[4]", epVDF_UInt4 },
-    { "u32[3]", epVDF_UInt3 },
-    { "u32[2]", epVDF_UInt2 },
-    { "u32[1]", epVDF_UInt },
-    { "u32", epVDF_UInt },
-    { "s16[4]", epVDF_Short4 },
-    { "s16[2]", epVDF_Short2 },
-    { "s16", epVDF_Short },
-    { "u16[4]", epVDF_UShort4 },
-    { "u16[2]", epVDF_UShort2 },
-    { "u16", epVDF_UShort },
-    { "s8[4]", epVDF_Byte4N },
-    { "u8[4]", epVDF_UByte4N_RGBA },
-  };
+    { "f32[4]", epVDF_Float4,      16 },
+    { "f32[3]", epVDF_Float3,      12 },
+    { "f32[2]", epVDF_Float2,       8 },
+    { "f32[1]", epVDF_Float,        4 },
+    { "f32",    epVDF_Float,        4 },
+    { "s32[4]", epVDF_Int4,        16 },
+    { "s32[3]", epVDF_Int3,        12 },
+    { "s32[2]", epVDF_Int2,         8 },
+    { "s32[1]", epVDF_Int,          4 },
+    { "s32",    epVDF_Int,          4 },
+    { "u32[4]", epVDF_UInt4,       16 },
+    { "u32[3]", epVDF_UInt3,       12 },
+    { "u32[2]", epVDF_UInt2,        8 },
+    { "u32[1]", epVDF_UInt,         4 },
+    { "u32",    epVDF_UInt,         4 },
+    { "s16[4]", epVDF_Short4,       8 },
+    { "s16[2]", epVDF_Short2,       4 },
+    { "s16",    epVDF_Short,        2 },
+    { "u16[4]", epVDF_UShort4,      8 },
+    { "u16[2]", epVDF_UShort2,      4 },
+    { "u16",    epVDF_UShort,       2 },
+    { "s8[4]",  epVDF_Byte4N,       4 },
+    { "u8[4]",  epVDF_UByte4N_RGBA, 4 }
+  }; // TODO: Make this a map and Add all the extra types later
   for (size_t i = 0; i<EPARRAYSIZE(s_typeMap); ++i)
   {
     if (type.eq(s_typeMap[i].pName))
+    {
+      if (pSize)
+        *pSize = s_typeMap[i].size;
       return s_typeMap[i].format;
+    }
   }
   return epVDF_Unknown;
+}
+
+// TODO: Remove this horribleness once s_typeMap is a map.
+int GetElementTypeSize(String type)
+{
+  int size = 0;
+  GetElementType(type, &size);
+  return size;
 }
 
 RenderArray::RenderArray(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, ArrayUsage usage)
   : RenderResource(pRenderer)
 {
-  epArrayDataFormat elements[16];
-  size_t numElements = 0;
+  SharedArray<ElementMetadata> attribs = spArrayBuffer->GetMetadata()->Get("attributeinfo").as<SharedArray<ElementMetadata>>();
 
-  String type = spArrayBuffer->GetType();
-  if (type[0] == '{')
-    type = type.slice(1, type.length-1);
-
-  String element;
-  while ((element = type.popToken(",")) != nullptr)
-    elements[numElements++] = GetElementType(type);
+  Array<epArrayDataFormat> elements;
+  for (const auto &elem : attribs)
+    elements.pushBack(GetElementType(elem.type));
 
   if (usage == ArrayUsage::VertexData)
   {
-    pArray = epVertex_CreateVertexBuffer(elements, numElements);
+    pArray = epVertex_CreateVertexBuffer(elements.ptr, elements.length);
   }
   else
   {
-    EPASSERT(numElements == 1, "Index buffers may only have a single integer element!");
+    EPASSERT(elements.length == 1, "Index buffers may only have a single integer element!");
     pArray = epVertex_CreateIndexBuffer(elements[0]);
   }
 
@@ -118,76 +127,358 @@ RenderTexture::~RenderTexture()
     epTexture_DestroyTexture(&pTexture);
 }
 
-RenderShader::RenderShader(Renderer *pRenderer, ShaderRef spShader, epShaderType type)
+RenderShader::RenderShader(Renderer *pRenderer, SharedString code, epShaderType type)
   : RenderResource(pRenderer), type(type)
 {
-  String shaderCode = spShader->GetImpl<ShaderImpl>()->code;
-  pShader = epShader_CreateShader(shaderCode.toStringz(), shaderCode.length, type);
+  pShader = epShader_CreateShader(code.toStringz(), code.length, type);
 }
 RenderShader::~RenderShader()
 {
   epShader_DestroyShader(&pShader);
 }
 
-RenderShaderProgram::RenderShaderProgram(Renderer *pRenderer, RenderShaderRef vs, RenderShaderRef ps)
+RenderShaderProgram::RenderShaderProgram(Renderer *pRenderer, Slice<RenderShaderRef> shaders)
   : RenderResource(pRenderer)
 {
-  // link the shader
-  pProgram = epShader_CreateShaderProgram(vs->pShader, ps->pShader);
-  if (!pProgram)
-    return;
+  Array<epShader*, ShaderType::ComputeShader+1> halShaders;
+  for (RenderShaderRef rs : shaders)
+    halShaders.pushBack(rs->pShader);
 
-  // TODO: derive KEY from 'this'
-  uint32_t key = 0;
-  pRenderer->shaderPrograms.Insert(key, this);
+  // link the shader
+  pProgram = epShader_CreateShaderProgram(halShaders.ptr, halShaders.length);
+  EPTHROW_IF_NULL(pProgram, epR_Failure, "Failed to compile shader program");
 }
+
 RenderShaderProgram::~RenderShaderProgram()
 {
-  // TODO: write the destroy function! ;)
-
-  // TODO: derive KEY from 'this'
-  uint32_t key = 0;
-  pRenderer->shaderPrograms.Remove(key);
+  epShader_DestroyShaderProgram(&pProgram);
 }
+
 size_t RenderShaderProgram::numAttributes()
 {
   return epShader_GetNumAttributes(pProgram);
 }
+
 String RenderShaderProgram::getAttributeName(size_t i)
 {
   return epShader_GetAttributeName(pProgram, i);
 }
+
 size_t RenderShaderProgram::numUniforms()
 {
   return epShader_GetNumUniforms(pProgram);
 }
+
 String RenderShaderProgram::getUniformName(size_t i)
 {
   return epShader_GetUniformName(pProgram, i);
 }
-void RenderShaderProgram::setUniform(int i, const Float4 &v)
+
+epShaderElement RenderShaderProgram::getAttributeType(size_t i)
+{
+  return epShader_GetAttributeType(pProgram, i);
+}
+
+epShaderElement RenderShaderProgram::getUniformType(size_t i)
+{
+  return epShader_GetUniformType(pProgram, i);
+}
+
+SharedString RenderShaderProgram::getAttributeTypeString(size_t i)
+{
+  epShaderElement type = epShader_GetAttributeType(pProgram, i);
+  char typeBuffer[16];
+  size_t length;
+  epShader_GetElementTypeString(type, typeBuffer, sizeof(typeBuffer), &length);
+
+  return SharedString(typeBuffer, length);
+}
+
+SharedString RenderShaderProgram::getUniformTypeString(size_t i)
+{
+  epShaderElement type = epShader_GetUniformType(pProgram, i);
+  char typeBuffer[16];
+  size_t length;
+  epShader_GetElementTypeString(type, typeBuffer, sizeof(typeBuffer), &length);
+
+  return SharedString(typeBuffer, length);
+}
+
+template <typename T>
+inline Variant GetShaderElementS(epShaderProgram *pProgram, size_t param)
+{
+  T data;
+  epShader_GetProgramData(pProgram, param, &data);
+  return data;
+}
+
+template <typename T>
+inline Variant GetShaderElementV(epShaderProgram *pProgram, size_t param)
+{
+  T data;
+  epShader_GetProgramData(pProgram, param, &data);
+  return data;
+}
+
+template <typename T>
+inline Variant GetShaderElementM(epShaderProgram *pProgram, size_t param)
+{
+  T data;
+  epShader_GetProgramData(pProgram, param, &data);
+  return data;
+}
+
+Variant RenderShaderProgram::getUniform(size_t i)
+{
+  epShaderElement t = epShader_GetUniformType(pProgram, i);
+  EPASSERT(t.type >= epSET_Int && t.type <= epSET_Double, "Invalid type");
+  if (t.m == 1)
+  {
+    switch (t.n)
+    {
+      case 1:
+        switch (t.type)
+        {
+          case epSET_Int:
+            return GetShaderElementS<int>(pProgram, i);
+          case epSET_Uint:
+            return GetShaderElementS<uint32_t>(pProgram, i);
+          case epSET_Float:
+            return GetShaderElementS<float>(pProgram, i);
+          case epSET_Double:
+            return GetShaderElementS<double>(pProgram, i);
+        }
+        break;
+      case 2:
+        switch (t.type)
+        {
+          case epSET_Int:
+            return GetShaderElementV<Vector2<int>>(pProgram, i);
+          case epSET_Uint:
+            return GetShaderElementV<Vector2<uint32_t>>(pProgram, i);
+          case epSET_Float:
+            return GetShaderElementV<Vector2<float>>(pProgram, i);
+          case epSET_Double:
+            return GetShaderElementV<Vector2<double>>(pProgram, i);
+        }
+        break;
+      case 3:
+        switch (t.type)
+        {
+          case epSET_Int:
+            return GetShaderElementV<Vector3<int>>(pProgram, i);
+          case epSET_Uint:
+            return GetShaderElementV<Vector3<uint32_t>>(pProgram, i);
+          case epSET_Float:
+            return GetShaderElementV<Vector3<float>>(pProgram, i);
+          case epSET_Double:
+            return GetShaderElementV<Vector3<double>>(pProgram, i);
+        }
+        break;
+      case 4:
+        switch (t.type)
+        {
+          case epSET_Int:
+            return GetShaderElementV<Vector4<int>>(pProgram, i);
+          case epSET_Uint:
+            return GetShaderElementV<Vector4<uint32_t>>(pProgram, i);
+          case epSET_Float:
+            return GetShaderElementV<Vector4<float>>(pProgram, i);
+          case epSET_Double:
+            return GetShaderElementV<Vector4<double>>(pProgram, i);
+        }
+      default:
+        EPTHROW(epR_Failure, "vector length {0} not supported", t.n);
+        break;
+    }
+  }
+  else if (t.m == 4)
+  {
+    if (t.n == 4)
+    {
+      switch (t.type)
+      {
+        case epSET_Int:
+        case epSET_Uint:
+          EPTHROW(epR_Failure, "Integer Matrix types not supported.");
+        case epSET_Float:
+          return GetShaderElementM<Matrix4x4<float>>(pProgram, i);
+        case epSET_Double:
+          return GetShaderElementM<Matrix4x4<double>>(pProgram, i);
+      }
+    }
+    else
+    {
+      EPTHROW(epR_Failure, "Matrix {0},{1} not supported", t.m, t.n);
+    }
+  }
+  else
+  {
+    EPTHROW(epR_Failure, "Unsupported element type m {0], n {1], type {2]");
+  }
+
+  return Variant();
+}
+
+void RenderShaderProgram::Use()
 {
   epShader_SetCurrent(pProgram);
-  epShader_SetProgramData(i, v);
 }
 
+void RenderShaderProgram::setUniform(size_t i, Variant v)
+{
+  epShaderElement t = epShader_GetUniformType(pProgram, i);
+  epShaderElementType et = (epShaderElementType)t.type;
+  EPASSERT(et >= epSET_Int && et <= epSET_Double, "Invalid type");
 
-RenderVertexFormat::RenderVertexFormat(Renderer *pRenderer, const epArrayElement *pElements, size_t numElements)
+  if (t.m == 1)
+  {
+    switch (t.n)
+    {
+      case 1:
+      {
+        switch (et)
+        {
+          case epSET_Int:
+            epShader_SetProgramData(i, v.as<int>());
+            return;
+          case epSET_Uint:
+            epShader_SetProgramData(i, v.as<uint32_t>());
+            return;
+          case epSET_Float:
+            epShader_SetProgramData(i, v.as<float>());
+            return;
+          case epSET_Double:
+            epShader_SetProgramData(i, v.as<double>());
+            return;
+        }
+      }
+      case 2:
+      {
+        switch (et)
+        {
+          case epSET_Int:
+            epShader_SetProgramData(i, v.as<Vector2<int>>());
+            return;
+          case epSET_Uint:
+            epShader_SetProgramData(i, v.as<Vector2<uint32_t>>());
+            return;
+          case epSET_Float:
+            epShader_SetProgramData(i, v.as<Vector2<float>>());
+            return;
+          case epSET_Double:
+            epShader_SetProgramData(i, v.as<Vector2<double>>());
+            return;
+        }
+      }
+      case 3:
+      {
+        switch (t.type)
+        {
+        case epSET_Int:
+          epShader_SetProgramData(i, v.as<Vector3<int>>());
+          return;
+        case epSET_Uint:
+          epShader_SetProgramData(i, v.as<Vector3<uint32_t>>());
+          return;
+        case epSET_Float:
+          epShader_SetProgramData(i, v.as<Vector3<float>>());
+          return;
+        case epSET_Double:
+          epShader_SetProgramData(i, v.as<Vector3<double>>());
+          return;
+        }
+      }
+      case 4:
+      {
+        switch (t.type)
+        {
+        case epSET_Int:
+          epShader_SetProgramData(i, v.as<Vector4<int>>());
+          return;
+        case epSET_Uint:
+          epShader_SetProgramData(i, v.as<Vector4<uint32_t>>());
+          return;
+        case epSET_Float:
+          epShader_SetProgramData(i, v.as<Vector4<float>>());
+          return;
+        case epSET_Double:
+          epShader_SetProgramData(i, v.as<Vector4<double>>());
+          return;
+        }
+      }
+      default:
+        EPTHROW(epR_Failure, "vector length {0} not supported", t.n);
+        break;
+    }
+  }
+  else if (t.m == 4)
+  {
+    if (t.n == 4)
+    {
+      switch (t.type)
+      {
+        case epSET_Int:
+        case epSET_Uint:
+          EPTHROW(epR_Failure, "Integer Matrix types not supported.");
+        case epSET_Float:
+          epShader_SetProgramData(i, v.as<Matrix4x4<float>>());
+          return;
+        case epSET_Double:
+          epShader_SetProgramData(i, v.as<Matrix4x4<double>>());
+          return;
+      }
+    }
+    else
+    {
+      EPTHROW(epR_Failure, "Matrix {0},{1} not supported", t.m, t.n);
+    }
+  }
+  else
+  {
+    EPTHROW(epR_Failure, "Unsupported element type m {0], n {1], type {2]");
+  }
+}
+
+RenderShaderInputConfig::RenderShaderInputConfig(Renderer *pRenderer, SharedArray<ArrayBufferRef> vertexArrays, RenderShaderProgramRef spProgram)
   : RenderResource(pRenderer)
 {
-  // TODO: derive KEY from 'this'
-  uint32_t key = 0;
-  pRenderer->vertexFormats.Insert(key, this);
+  Array<epArrayElement, 8> elementArray;
+  for (size_t i = 0; i < vertexArrays.length; ++i)
+  {
+    Variant varAttribs = vertexArrays[i]->GetMetadata()->Get("attributeinfo");
+    EPASSERT_THROW(varAttribs.isValid(), epR_Failure, "attribute info not present in buffer metadata");
+    SharedArray<ElementMetadata> attribs = varAttribs.as<SharedArray<ElementMetadata>>();
 
-  pFormat = epVertex_CreateFormatDeclaration(pElements, (int)numElements);
+    int stride = attribs.back().offset + GetElementTypeSize(attribs.back().type);
+    for (const auto &elem : attribs)
+    {
+      epArrayElement &halElem = elementArray.pushBack();
+      memcpy(halElem.attributeName, elem.name.ptr, Min(elem.name.length, sizeof(halElem.attributeName) - 1));
+      halElem.attributeName[sizeof(halElem.attributeName) - 1] = '\0';
+
+      halElem.format = GetElementType(elem.type);
+      halElem.stream = (int)i;
+      halElem.offset = elem.offset;
+      halElem.stride = stride;
+    }
+  }
+
+  pConfig = epVertex_CreateShaderInputConfig(elementArray.ptr, (int)elementArray.length, spProgram->pProgram);
 }
-RenderVertexFormat::~RenderVertexFormat()
-{
-  epVertex_DestroyFormatDeclaration(&pFormat);
 
-  // TODO: derive KEY from 'this'
-  uint32_t key = 0;
-  pRenderer->vertexFormats.Remove(key);
+RenderShaderInputConfig::~RenderShaderInputConfig()
+{
+  epVertex_DestroyShaderInputConfig(&pConfig);
+}
+
+SharedArray<int> RenderShaderInputConfig::GetActiveStreams()
+{
+  Array<int, 0> streams(Alloc, 32);
+  int numStreams = 0;
+  epVertex_GetShaderInputConfigStreams(pConfig, streams.ptr, streams.length, &numStreams);
+  streams.resize(numStreams);
+  return streams;
 }
 
 } // namespace ep

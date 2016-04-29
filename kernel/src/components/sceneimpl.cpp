@@ -8,6 +8,10 @@
 #include "ep/cpp/component/node/udnode.h"
 #include "ep/cpp/component/resourcemanager.h"
 #include "ep/cpp/component/resource/metadata.h"
+#include "kernelimpl.h"
+#include "renderscene.h"
+#include "components/resources/arraybufferimpl.h"
+#include "components/resources/materialimpl.h"
 
 namespace ep {
 
@@ -63,13 +67,20 @@ RenderableSceneRef SceneImpl::GetRenderScene()
   RenderScene scene;
   rootNode->Render(scene, rootNode->GetMatrix());
 
-  spCache = Convert(scene);
+  spCache = Convert(scene, GetKernel()->GetImpl()->GetRenderer().ptr());
 
   bDirty = false;
   return spCache;
 }
 
-RenderableSceneRef SceneImpl::Convert(RenderScene &scene)
+static epPrimitiveType s_PrimTypeMap[] =
+{
+  epPT_Points,   // PrimType::Points
+  epPT_Lines,    // PrimType::Lines
+  epPT_Triangles // PrimType::Triagnles
+};
+
+RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
 {
   RenderableSceneRef cache = RenderableSceneRef::create();
 
@@ -106,50 +117,56 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene)
   for (const auto &in : scene.geom)
   {
     auto &out = cache->geom.pushBack();
-
-/* in...
-    Double4x4 matrix;
-
-    SharedArray<VertexArray> vertexArrays;
-    ArrayBufferRef spIndices;
-    MaterialRef spMaterial;
-
-    Array<RenderList, 1> renderList;
-
-    Delegate<void(SharedPtr<RefCounted>)> programCacheCallback;
-    Delegate<void(SharedPtr<RefCounted>)> vertexFormatCacheCallback;
-
-
-    // out...
-    Double4x4 matrix;
-
-    uint32_t numTextures, numArrays;
-    RenderTextureRef textures[8];
-    RenderArrayRef arrays[16];
-    RenderArrayRef index;
-
-    RenderShaderProgramRef spProgram;
-    RenderVertexFormatRef spVertexFormat;
-
-    BlendMode blendMode;
-    CullMode cullMode;
-*/
-
     out.matrix = in.matrix;
+    MaterialImpl *pMatImpl = in.spMaterial->GetImpl<MaterialImpl>();
 
-    // TODO: Fix this
-    //out.arrays.resize(in.vertexArrays.length);
-    //for (size_t i = 0; i < in.vertexArrays.length; ++i)
-    //  out.arrays.ptr[i] = in.vertexArrays.ptr[i].spArray;
+    out.stencilStates = pMatImpl->stencilStates;
+    out.blendMode = pMatImpl->blendMode;
+    out.cullMode = pMatImpl->cullMode;
+    out.depthCompareFunc = pMatImpl->depthCompareFunc;
 
-/*
-    out.textures.resize(in.vertexArrays.length);
-    for (size_t i = 0; i < invertexArrays.length; ++i)
-      out.textures.ptr[i] = in.vertexArrays.ptr[i].spArray;
+    out.primType = s_PrimTypeMap[in.renderList.type];
+    out.numVertices = in.renderList.numVertices;
+    out.firstIndex = in.renderList.firstIndex;
+    out.firstVertex = in.renderList.firstVertex;
 
-    out.numTextures = in.numTextures;
-    out.numArrays = in.numArrays;
-*/
+    out.spProgram = pMatImpl->spShaderProgram;
+
+    if (in.spShaderInputConfig)
+      out.spShaderInputConfig = shared_pointer_cast<RenderShaderInputConfig>(in.spShaderInputConfig);
+    else
+      out.spShaderInputConfig = pRenderer->GetShaderInputConfig(in.vertexArrays, pMatImpl->spShaderProgram, in.retainShaderInputConfig);
+
+    out.arrays.resize(in.vertexArrays.length);
+
+    for (const auto a : out.arrays)
+      out.epArrays.pushBack(nullptr);
+
+    for (int stream : out.spShaderInputConfig->GetActiveStreams())
+    {
+      out.arrays[stream] = shared_pointer_cast<RenderArray>(pRenderer->GetRenderBuffer(in.vertexArrays[stream], Renderer::RenderResourceType::VertexArray));
+      out.epArrays[stream] = out.arrays[stream]->pArray;
+    }
+
+    out.index = shared_pointer_cast<RenderArray>(pRenderer->GetRenderBuffer(in.spIndices, Renderer::RenderResourceType::IndexArray));
+
+    Array<RenderShaderProperty> uniforms(Reserve, pMatImpl->uniforms.Size());
+    for (auto kvp : pMatImpl->uniforms)
+    {
+      if (kvp.value.current)
+      {
+        // TODO: Create mechanism for uniforms that are provided by the system. (projection, view, back buffer dimensions etc)
+        if (kvp.key.eq("u_mfwvp"))
+          out.viewProjection = RenderShaderProperty{ kvp.value.data, (int)kvp.value.element.location };
+        else
+          uniforms.pushBack(RenderShaderProperty{ kvp.value.data, (int)kvp.value.element.location } );
+      }
+    }
+
+    if (uniforms.length)
+      out.uniforms = uniforms;
+
+    // TODO: texures
   }
 
   return cache;

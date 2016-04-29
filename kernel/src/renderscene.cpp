@@ -158,11 +158,27 @@ void RenderableView::RenderGPU()
     epGPU_Clear(&color.x, -1.0, 0);
   }
 
-//  // render geometry
-//  for (auto &job : this->spScene->geom)
-//  {
-//    // ...render polygons...
-//  }
+  // render geometry
+  Double4x4 vp = Mul(projection, Inverse(camera));
+  for (auto &job : spScene->geom)
+  {
+    Double4x4 wvp = Mul(vp, job.matrix);
+
+    // TODO : Textures
+    // TODO : Renderstate
+
+    job.spProgram->Use();
+    job.spProgram->setUniform(job.viewProjection.index, Float4x4::create(wvp));
+    for (size_t i = 0; i < job.uniforms.length; ++i)
+      job.spProgram->setUniform(job.uniforms[i].index, job.uniforms[i].data);
+
+    if (job.index)
+      epGPU_RenderIndices(job.spProgram->pProgram, job.spShaderInputConfig->pConfig, job.epArrays.ptr, job.index->pArray,
+                          job.primType, job.numVertices, job.firstIndex, job.firstVertex);
+    else
+      epGPU_RenderRanges(job.spProgram->pProgram, job.spShaderInputConfig->pConfig, job.epArrays.ptr, job.primType,
+                         job.vertexRanges.ptr, job.vertexRanges.length);
+  }
 
 //  if (pPostRenderCallback)
 //    pPostRenderCallback(ViewRef(this), spScene);
@@ -180,6 +196,7 @@ Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   }
 
   // create UD thread
+  // TODO: Error handling
   pUDMutex = udCreateMutex();
   pUDSemaphore = udCreateSemaphore(65536, 0);
   pUDTerminateSemaphore = udCreateSemaphore(1, 0);
@@ -189,28 +206,34 @@ Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   // create a vertex buffer to render the quad to the screen
   epArrayDataFormat format[] = { epVDF_Float2 };
   s_pQuadVB = epVertex_CreateVertexBuffer(format, 1);
-  if (!s_pQuadVB)
-    EPTHROW(epR_Failure, "TODO: better error");
+  EPASSERT_THROW(s_pQuadVB, epR_Failure, "Failed to create vertex buffer");
+  epscope(fail) { epVertex_DestroyArrayBuffer(&s_pQuadVB); };
 
   s_pQuadIB = epVertex_CreateIndexBuffer(epVDF_UInt);
-  if (!s_pQuadIB)
-  {
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    EPTHROW(epR_Failure, "TODO: better error");
-  }
+  EPASSERT_THROW(s_pQuadIB, epR_Failure, "Failed to create index buffer");
+  epscope(fail) { epVertex_DestroyArrayBuffer(&s_pQuadIB); };
 
-  epArrayElement elements[] = {
-    //    { udVET_Position, 0, 2, epVDF_Float2 },
-    { "a_position", format[0], 0 },
+  epArrayElement elements[] =
+  {
+    { "a_position", format[0], 0, 0, 8 }
   };
 
-  s_pPosUV = epVertex_CreateFormatDeclaration(elements, sizeof(elements)/sizeof(elements[0]));
-  if (!s_pPosUV)
-  {
-    epVertex_DestroyArrayBuffer(&s_pQuadIB);
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    EPTHROW(epR_Failure, "TODO: better error");
-  }
+  pVS = epShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), epST_VertexShader);
+  EPASSERT_THROW(pVS, epR_Failure, "Failed to create vertex shader");
+  epscope(fail) { epShader_DestroyShader(&pVS); };
+
+  pPS = epShader_CreateShader(s_blitShader, sizeof(s_blitShader), epST_PixelShader);
+  EPASSERT_THROW(pPS, epR_Failure, "Failed to create pixel shader");
+  epscope(fail) { epShader_DestroyShader(&pPS); };
+
+  epShader *shaders[] = { pVS, pPS };
+  s_shader = epShader_CreateShaderProgram(shaders, 2);
+  EPASSERT_THROW(s_shader, epR_Failure, "Failed to create shader program");
+  epscope(fail) { epShader_DestroyShaderProgram(&s_shader); };
+
+  s_pPosUV = epVertex_CreateShaderInputConfig(elements, sizeof(elements)/sizeof(elements[0]), s_shader);
+  EPASSERT_THROW(s_pPosUV, epR_Failure, "Failed to create shader input configuration");
+
 /*
   using F2 = std::tuple<float, float>;
   using Vertex = std::tuple<const F2>;
@@ -243,38 +266,6 @@ Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
 
   uint32_t indices[] = { 0, 1, 2, 3 };
   epVertex_SetArrayBufferData(s_pQuadIB, indices, sizeof(indices));
-
-  pVS = epShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), epST_VertexShader);
-  if (!pVS)
-  {
-    epVertex_DestroyFormatDeclaration(&s_pPosUV);
-    epVertex_DestroyArrayBuffer(&s_pQuadIB);
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    EPTHROW(epR_Failure, "TODO: better error");
-  }
-
-  pPS = epShader_CreateShader(s_blitShader, sizeof(s_blitShader), epST_PixelShader);
-  if (!pPS)
-  {
-    // TODO: Add in calls to epShader_Destroy when implemented.
-    //epShader_Destroy(&pVS)
-    epVertex_DestroyFormatDeclaration(&s_pPosUV);
-    epVertex_DestroyArrayBuffer(&s_pQuadIB);
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    EPTHROW(epR_Failure, "TODO: better error");
-  }
-
-  s_shader = epShader_CreateShaderProgram(pVS, pPS);
-  if (!s_shader)
-  {
-    // TODO: Add in calls to epShader_Destroy when implemented.
-    //epShader_Destroy(&pPS)
-    //epShader_Destroy(&pVS)
-    epVertex_DestroyFormatDeclaration(&s_pPosUV);
-    epVertex_DestroyArrayBuffer(&s_pQuadIB);
-    epVertex_DestroyArrayBuffer(&s_pQuadVB);
-    EPTHROW(epR_Failure, "TODO: better error");
-  }
 }
 
 Renderer::~Renderer()
@@ -284,7 +275,7 @@ Renderer::~Renderer()
   epShader_DestroyShaderProgram(&s_shader);
   epShader_DestroyShader(&pPS);
   epShader_DestroyShader(&pVS);
-  epVertex_DestroyFormatDeclaration(&s_pPosUV);
+  epVertex_DestroyShaderInputConfig(&s_pPosUV);
   epVertex_DestroyArrayBuffer(&s_pQuadIB);
   epVertex_DestroyArrayBuffer(&s_pQuadVB);
 
@@ -325,89 +316,17 @@ RenderResourceRef Renderer::GetRenderBuffer(const ArrayBufferRef &spArrayBuffer,
     else
       spRenderBuffer = RenderArrayRef::create(this, spArrayBuffer, type == RenderResourceType::IndexArray ? ArrayUsage::IndexData : ArrayUsage::VertexData);
 
-//    pArrayBuffer->spCachedRenderData = spRenderBuffer; // TODO: if we cache this, it will be destroyed from the main thread, and renderables must destroy from the render thread! >_<
+    pArrayBuffer->spCachedRenderData = spRenderBuffer;
   }
   return spRenderBuffer;
 }
-RenderShaderRef Renderer::GetShader(const ShaderRef &spShader)
+
+RenderShaderInputConfigRef Renderer::GetShaderInputConfig(Slice<ArrayBufferRef> arrays, const RenderShaderProgramRef &spShaderProgram, Delegate<void(SharedPtr<RefCounted>)> retainShaderInputConfig)
 {
-  ShaderImpl *pShader = spShader->GetImpl<ShaderImpl>();
+  RenderShaderInputConfigRef spShaderInputConfig = SharedPtr<RenderShaderInputConfig>::create(this, arrays, spShaderProgram);
+  retainShaderInputConfig(spShaderInputConfig);
 
-  RenderShaderRef spRenderShader = shared_pointer_cast<RenderShader>(pShader->spCachedShader);
-  /*
-  if (!spShader)
-  {
-    RenderShader *pShader = epNew RenderShader(this, ShaderRef(pInstance), (epShaderType)type);
-    if (!pShader->pShader)
-    {
-      epDelete pShader;
-      spRenderShader = nullptr;
-    }
-    else
-      spRenderShader = RenderShaderRef(pShader);
-  }
-  */
-  return spRenderShader;
-}
-RenderShaderProgramRef Renderer::GetShaderProgram(const MaterialRef &spShaderProgram)
-{
-//  MaterialImpl *pMaterial = spShaderProgram->GetImpl<MaterialImpl>();
-  /*
-  RenderResourceRef spShaderProgram = shared_pointer_cast<RenderResource>(pMaterial->spCachedShaderProgram);
-  if (!spShaderProgram)
-  {
-    RenderShaderRef spVS = shaders[0] ? shaders[0]->GetImpl<ShaderImpl>()->GetRenderShader(epST_VertexShader) : nullptr;
-    RenderShaderRef spPS = shaders[1] ? shaders[1]->GetImpl<ShaderImpl>()->GetRenderShader(epST_PixelShader) : nullptr;
-    if (spVS && spPS)
-    {
-      // TODO: check if this program already exists in `pRenderer->shaderPrograms`
-
-      RenderShaderProgram *pProgram = epNew RenderShaderProgram(this, spVS, spPS);
-      if (!pProgram->pProgram)
-      {
-        epDelete pProgram;
-        spRenderProgram = nullptr;
-      }
-      else
-        spRenderProgram = RenderShaderProgramRef(pProgram);
-
-      // populate the material with properties from the shader...
-      // TODO...
-
-      pMaterial->spCachedShaderProgram = spShaderProgram;
-    }
-  }
-  */
-  return RenderShaderProgramRef();
-}
-RenderVertexFormatRef Renderer::GetVertexFormat(const RenderShaderProgramRef &spShaderProgram, Slice<VertexArray> arrays)
-{
-  SharedPtr<RenderVertexFormat> spRenderVertexFormat;
-  if (!spRenderVertexFormat)
-  {
-    EPASSERT(false, "TODO");
-
-    // get the attributes from the material
-
-    // create a descriptor that maps vertex arrays to shader attributes
-
-    //    VertexFormatDescriptor *pFormat = epNew VertexFormatDescriptor(this, spArrays);
-    //    spRenderVertexFormat = VertexFormatDescriptorRef(pFormat);
-  }
-  return spRenderVertexFormat;
-}
-
-void Renderer::SetRenderstates(MaterialRef spMaterial, RenderShaderProgramRef spProgram)
-{
-  MaterialImpl *pMat = spMaterial->GetImpl<MaterialImpl>();
-  auto &properties = pMat->MaterialProperties();
-  size_t numUniforms = spProgram->numUniforms();
-  for (size_t i = 0; i < numUniforms; ++i)
-  {
-    const Float4 *pVal = properties.Get(spProgram->getUniformName(i));
-    if (pVal)
-      spProgram->setUniform((int)i, *pVal);
-  }
+  return spShaderInputConfig;
 }
 
 ArrayBufferRef Renderer::AllocRenderBuffer()

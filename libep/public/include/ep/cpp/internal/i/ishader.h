@@ -6,11 +6,18 @@
 
 namespace ep {
 
+struct ShaderType;
+
 class IShader
 {
 public:
   virtual SharedString GetCode() const = 0;
   virtual void SetCode(SharedString code) = 0;
+
+  virtual void SetType(ShaderType type) = 0;
+  virtual ShaderType GetType() const = 0;
+
+  virtual SharedPtr<RefCounted> GetRenderShader() = 0;
 };
 
 } // namespace ep

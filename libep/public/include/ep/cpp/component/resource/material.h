@@ -12,28 +12,87 @@ namespace ep {
 
 SHARED_CLASS(Material);
 
+// TODO: Expose all properties/methods to meta
+// TODO: Add enums for each of these and move this structure to render.h
+// TODO: Consider how to set _EXT texture settings
+struct TextureSampler
+{
+  int minFilter;
+  int maxFilter;
+
+  int textureMinLOD;
+  int textureMaxLOD;
+
+  int wrapS;
+  int wrapT;
+  int wrapR;
+
+  Float4 borderColor;
+
+  int compareMode;
+  int compareFunc;
+
+  int clampToEdge;
+
+  float anisotropy = 1.0f;
+  ArrayBufferRef texture;
+};
+
 class Material : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Material, IMaterial, Resource, EPKERNEL_PLUGINVERSION, "Material Resource", 0)
 public:
-  ShaderRef GetShader(ShaderType type) const { return pImpl->GetShader(type); }
-  void SetShader(ShaderType type, ShaderRef spShader) { pImpl->SetShader(type, spShader); }
 
-  ShaderRef GetVertexShader() const { return pImpl->GetShader(ShaderType::VertexShader); }
-  void SetVertexShader(ShaderRef spShader) { pImpl->SetShader(ShaderType::VertexShader, spShader); }
-  ShaderRef GetPixelShader() const { return pImpl->GetShader(ShaderType::PixelShader); }
-  void SetPixelShader(ShaderRef spShader) { pImpl->SetShader(ShaderType::PixelShader, spShader); }
+  // Material Properties
+  Variant GetMaterialProperty(String property) const { return pImpl->GetMaterialProperty(property); }
+  void SetMaterialProperty(String property, Variant val) { pImpl->SetMaterialProperty(property, val); }
 
-  ArrayBufferRef GetTexture(int index) const { return pImpl->GetTexture(index); }
-  void SetTexture(int index, ArrayBufferRef spArray) { pImpl->SetTexture(index, spArray); }
+  // Shaders
+  ShaderRef GetShader(ShaderType type) const { return GetMaterialProperty(s_shaderNames[type]).as<ShaderRef>(); }
+  void SetShader(ShaderType type, ShaderRef spShader) { SetMaterialProperty(s_shaderNames[type], spShader); }
 
-  BlendMode GetBlendMode() const { return pImpl->GetBlendMode(); }
-  void SetBlendMode(BlendMode blendMode) { pImpl->SetBlendMode(blendMode); }
+  ShaderRef GetVertexShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::VertexShader]).as<ShaderRef>(); }
+  void SetVertexShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::VertexShader, epR_InvalidArgument, "Not a vertex shader"); SetMaterialProperty(s_shaderNames[ShaderType::VertexShader], spShader); }
 
-  CullMode GetCullMode() const { return pImpl->GetCullMode(); }
-  void SetCullMode(CullMode cullMode) { pImpl->SetCullMode(cullMode); }
+  ShaderRef GetPixelShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::PixelShader]).as<ShaderRef>(); }
+  void SetPixelShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::PixelShader, epR_InvalidArgument, "Not a pixel shader");  SetMaterialProperty(s_shaderNames[ShaderType::PixelShader], spShader); }
 
-  void SetMaterialProperty(SharedString property, const Float4 &val) { pImpl->SetMaterialProperty(property, val); }
+  ShaderRef GetGeometryShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::GeometryShader]).as<ShaderRef>(); }
+  void SetGeometryShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::GeometryShader, epR_InvalidArgument, "Not a Geometry shader");  SetMaterialProperty(s_shaderNames[ShaderType::GeometryShader], spShader); }
+
+  ShaderRef GetTesselationControlShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::TesselationControlShader]).as<ShaderRef>(); }
+  void SetTesselationControlShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::TesselationControlShader, epR_InvalidArgument, "Not a TesselationControl shader");  SetMaterialProperty(s_shaderNames[ShaderType::TesselationControlShader], spShader); }
+
+  ShaderRef GetTesselationEvaluationShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::TesselationEvaluationShader]).as<ShaderRef>(); }
+  void SetTesselationEvaluationShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::TesselationEvaluationShader, epR_InvalidArgument, "Not a TesselationEvaluation shader");   SetMaterialProperty(s_shaderNames[ShaderType::TesselationEvaluationShader], spShader); }
+
+  // Other states
+  BlendMode GetBlendMode() const { return GetMaterialProperty("blendmode").as<BlendMode>(); }
+  void SetBlendMode(BlendMode blendMode)  { SetMaterialProperty("blendmode", blendMode); }
+
+  CullMode GetCullMode() const { return GetMaterialProperty("cullmode").as<CullMode>(); }
+  void SetCullMode(CullMode cullMode) { SetMaterialProperty("cullmode", cullMode); }
+
+  CompareFunc GetDepthCompareFunc() const { return GetMaterialProperty("depthfunc").as<CompareFunc>(); }
+  void SetDepthCompareFunc(CompareFunc func) { SetMaterialProperty("depthfunc", func); }
+
+  StencilState GetStencilState() const { return GetMaterialProperty("stencilstate").as<StencilState>(); }
+  void SetStencilState(const StencilState &state) { return SetMaterialProperty("stencilstate", state); }
+
+  StencilState GetFrontStencilState() const { return GetMaterialProperty("frontstencilstate").as<StencilState>(); }
+  void SetFrontStencilState(const StencilState &state) { return SetMaterialProperty("frontstencilstate", state); }
+
+  StencilState GetBackStencilState() const { return GetMaterialProperty("backstencilstate").as<StencilState>(); }
+  void SetBackStencilState(const StencilState &state) { return SetMaterialProperty("backstencilstate", state); }
+
+//  // Textures
+//  ArrayBufferRef GetTexture(int index) const { return GetMaterialProperty(index); }
+//  void SetTexture(int index, ArrayBufferRef spArray) { SetMaterialProperty(index, spArray); }
+
+#if 0 // TODO: When ranges are implemented
+  const ShaderPropertyRange& GetShaderUniformsRange() const { return pImpl->GetShaderUniformsRange(); }
+  const ShaderPropertyRange& GetShaderAttributesRange() const { return pImpl->GetShaderAttributesRange(); }
+#endif
 
 protected:
   Material(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -42,9 +101,13 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-private:
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetPropertyDesc(_name, enumerateFlags); }
+
+  Array<const PropertyInfo> GetProperties();
+  Array<const MethodInfo> GetMethods();
+
+  static const char * const s_shaderNames[];
+  static AVLTree<String, int> s_builtinProperties;
 };
 
 } // namespace ep
