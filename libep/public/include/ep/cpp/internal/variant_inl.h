@@ -524,7 +524,7 @@ template<> struct Variant_Cast < uint64_t > { inline static uint64_t as(const Va
 
 template<> struct Variant_Cast < Variant >              { inline static Variant              as(const Variant &v) { return v; } };
 template<> struct Variant_Cast < VarDelegate >          { inline static VarDelegate          as(const Variant &v) { return v.asDelegate(); } };
-template<> struct Variant_Cast < Variant::VarArray >    { inline static Variant::VarArray    as(const Variant &v) { return v.asArray(); } };
+template<> struct Variant_Cast < Variant::VarArray >    { inline static Variant::VarArray    as(const Variant &v) { return v.asSharedArray(); } };
 template<> struct Variant_Cast < Variant::VarMap >      { inline static Variant::VarMap      as(const Variant &v) { return v.asAssocArray(); } };
 template<> struct Variant_Cast < VarRange >             { inline static VarRange             as(const Variant &v) { return v.asRange(); } };
 
