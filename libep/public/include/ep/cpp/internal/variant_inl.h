@@ -542,6 +542,10 @@ struct Variant_Cast < MutableString<Len> >  { inline static MutableString<Len> a
                                                                                                       else
                                                                                                         return MutableString<Len>(v.asSharedString()); // TODO: this double-allocation is a shame! >_<
                                                                                                     } };
+template<>
+struct Variant_Cast < Slice<Variant> >       { inline static Slice<Variant>       as(const Variant &v) { return v.asArray(); } };
+template<>
+struct Variant_Cast < Slice<const Variant> > { inline static Slice<const Variant> as(const Variant &v) { return v.asArray(); } };
 
 // **************************************************************
 // ** Variant delegates; implement typeless calling convention **
