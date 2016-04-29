@@ -35,7 +35,7 @@ inline auto count(U &&item, Args&&... args) -> decltype(T(std::forward<U>(item))
 }
 // array of element; SFINAE asserts that array element type U is implicitly convertable to T
 template<typename T, typename U, typename... Args>
-inline auto count(Slice<const U> slice, Args&&... args) -> decltype(T(slice[0]), size_t()) // SFINAE fails if array element type U is not implicitly convertible to T
+inline auto count(Slice<U> slice, Args&&... args) -> decltype(T(slice[0]), size_t()) // SFINAE fails if array element type U is not implicitly convertible to T
 {
   return count<T>(std::forward<Args>(args)...) + slice.length;
 }
@@ -54,7 +54,7 @@ inline auto append(T *pBuffer, U &&a, Args&&... args) -> decltype(T(std::forward
 }
 // append array of element; SFINAE asserts that array element type U is implicitly convertable to T
 template<typename T, typename U, typename... Args>
-inline auto append(T *pBuffer, Slice<const U> s, Args&&... args) -> decltype(T(s.ptr[0]), ReturnTStar<T>())
+inline auto append(T *pBuffer, Slice<U> s, Args&&... args) -> decltype(T(s.ptr[0]), ReturnTStar<T>())
 {
   for(size_t i = 0; i < s.length; ++i)
     epConstruct((void*)(pBuffer + i)) T(s.ptr[i]);

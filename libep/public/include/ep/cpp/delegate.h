@@ -35,6 +35,13 @@ struct MethodPointer<R(Args...)>
     u.d = FastDelegateType((T*)nullptr, method);
     ptr = u.ptrs[1];
   }
+  template <typename T>
+  epforceinline MethodPointer(R(T::*method)(Args... args) const) // TODO: accepts const methods, but const is not preserved!! fixme!
+  {
+    DelegateUnion u;
+    u.d = FastDelegateType((T*)nullptr, method);
+    ptr = u.ptrs[1];
+  }
 
   epforceinline FastDelegateType GetDelegate(void *pThis) const
   {

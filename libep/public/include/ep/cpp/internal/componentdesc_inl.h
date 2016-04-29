@@ -62,13 +62,11 @@ struct MethodShim
 {
 public:
   MethodShim(const MethodShim &rh) : method(rh.method), data(rh.data) {}
+  MethodShim(MethodShim &&rh) : method(rh.method), data(std::move(rh.data)) {}
 
   MethodShim(VarMethod method) : method(method) {}
   MethodShim(VarMethodWithData method, SharedPtr<const RefCounted> data)
-    : methodWithData(method), data(data)
-  {
-    EPASSERT(data != nullptr, "Invalid; 'data' is nullptr!");
-  }
+    : methodWithData(method), data(data) { EPASSERT(data != nullptr, "Invalid; 'data' is nullptr!"); }
 
   explicit operator bool() const { return (bool)method; }
 
@@ -108,6 +106,7 @@ struct EventShim
 {
 public:
   EventShim(const EventShim &rh) : subscribeFunc(rh.subscribeFunc), data(rh.data) {}
+  EventShim(EventShim &&rh) : subscribeFunc(rh.subscribeFunc), data(std::move(rh.data)) {}
 
   EventShim(VarMethod subscribe) : subscribeFunc(subscribe) {}
   EventShim(VarMethodWithData subscribe, SharedPtr<const RefCounted> data) : subscribeWithDataFunc(subscribe), data(data) {}
@@ -126,8 +125,7 @@ protected:
 struct PropertyDesc : public PropertyInfo
 {
   PropertyDesc(const PropertyInfo &info, const MethodShim &getter, const MethodShim &setter)
-    : PropertyInfo(info), getter(getter), setter(setter)
-  {}
+    : PropertyInfo(info), getter(getter), setter(setter) {}
 
   MethodShim getter;
   MethodShim setter;
@@ -136,8 +134,7 @@ struct PropertyDesc : public PropertyInfo
 struct MethodDesc : public MethodInfo
 {
   MethodDesc(const MethodInfo &desc, const MethodShim &method)
-    : MethodInfo(desc), method(method)
-  {}
+    : MethodInfo(desc), method(method) {}
 
   MethodShim method;
 };
