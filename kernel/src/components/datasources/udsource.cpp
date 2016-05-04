@@ -4,6 +4,7 @@
 #include "components/file.h"
 #include "udOctree.h"
 #include "ep/cpp/kernel.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
 
 namespace ep
 {
@@ -21,7 +22,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     MutableString<260> filePath = File::UrlToNativePath(source->asString());
 
     udOctree *pOctree = nullptr;
-    udResult result = udOctree_Load(&pOctree, filePath.toStringz(), useStreamer && useStreamer->is(Variant::Type::Bool) ? useStreamer->asBool() : true, 0);
+    udResult result = udOctree_Load(&pOctree, filePath.toStringz(), useStreamer && useStreamer->is(Variant::Type::Bool) ? useStreamer->asBool() : true, nullptr);
     EPTHROW_IF(result != udR_Success, epR_Failure, "Failed to Create UD model");
 
     epscope(fail) { udOctree_Destroy(&pOctree); };
@@ -39,6 +40,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     // Populate meta data
     int32_t count;
     result = udOctree_GetMetadataCount(pOctree, &count);
+    MetadataRef meta = model->GetMetadata();
     if (result == udR_Success)
     {
       for (int32_t i = 0; i < count; ++i)
@@ -48,7 +50,6 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
         result = udOctree_GetMetadataByIndex(pOctree, i, &pName, &pValue, nullptr, nullptr);
         if (result == udR_Success)
         {
-          MetadataRef meta = model->GetMetadata();
           meta->Insert(pName, pValue);
         }
       }
@@ -57,6 +58,37 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     result = udOctree_GetLocalMatrixF64(pModelImpl->pOctree, pModelImpl->udmatrix.a);
     if (result == udR_Success)
       SetResource(source->asString(), model);
+
+    Array<ElementMetadata, 32> elementMetadata;
+
+    for (udStreamType i = udST_RawAttributeFirst; i <= udST_RawAttributeLast; i = udStreamType(i + 1))
+    {
+      udAttributeDescriptor descriptor;
+      result = udOctree_GetAttributeDescriptor(pOctree, i, &descriptor);
+      if (result != udR_Success)
+        break;
+
+      ElementMetadata md;
+      md.name = descriptor.name;
+
+      md.info.size = (descriptor.typeInfo & udATI_SizeMask) >> udATI_SizeShift;
+      size_t numComponents = (descriptor.typeInfo & udATI_ComponentCountMask) >> udATI_ComponentCountShift;
+      if (numComponents > 1)
+        md.info.dimensions = SharedArray<size_t>{ numComponents };
+
+      md.info.flags |= descriptor.typeInfo & udATI_Float ? ElementInfoFlags::Float : 0;
+      md.info.flags |= descriptor.typeInfo & udATI_Signed ? ElementInfoFlags::Signed : 0;
+      md.info.flags |= descriptor.typeInfo & udATI_Color ? ElementInfoFlags::Color : 0;
+
+      md.type = md.info.AsString();
+
+      md.offset = 0;
+
+      elementMetadata.pushBack(md);
+    }
+
+    if (elementMetadata.length)
+      meta->Insert("attributeinfo", elementMetadata);
   }
 }
 

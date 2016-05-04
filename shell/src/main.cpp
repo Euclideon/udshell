@@ -52,10 +52,12 @@ struct Vertex
   Float4 color;
 };
 
+static const ElementInfo vertexInfo[] = { { sizeof(Float3), { 3 }, ElementInfoFlags::Float },
+                                          { sizeof(Float4), { 4 }, ElementInfoFlags::Float } };
 template<>
 ep::SharedString stringof<Vertex>()
 {
-  return "{f32[3], f32[4]}";
+  return ElementInfo::BuildTypeString(vertexInfo);
 }
 
 // ---------------------------------------------------------------------------------------
