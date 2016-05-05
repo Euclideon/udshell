@@ -205,23 +205,7 @@ SharedString RenderShaderProgram::getUniformTypeString(size_t i)
 }
 
 template <typename T>
-inline Variant GetShaderElementS(epShaderProgram *pProgram, size_t param)
-{
-  T data;
-  epShader_GetProgramData(pProgram, param, &data);
-  return data;
-}
-
-template <typename T>
-inline Variant GetShaderElementV(epShaderProgram *pProgram, size_t param)
-{
-  T data;
-  epShader_GetProgramData(pProgram, param, &data);
-  return data;
-}
-
-template <typename T>
-inline Variant GetShaderElementM(epShaderProgram *pProgram, size_t param)
+inline Variant GetShaderElement(epShaderProgram *pProgram, size_t param)
 {
   T data;
   epShader_GetProgramData(pProgram, param, &data);
@@ -240,52 +224,52 @@ Variant RenderShaderProgram::getUniform(size_t i)
         switch (t.type)
         {
           case epSET_Int:
-            return GetShaderElementS<int>(pProgram, i);
+            return GetShaderElement<int>(pProgram, i);
           case epSET_Uint:
-            return GetShaderElementS<uint32_t>(pProgram, i);
+            return GetShaderElement<uint32_t>(pProgram, i);
           case epSET_Float:
-            return GetShaderElementS<float>(pProgram, i);
+            return GetShaderElement<float>(pProgram, i);
           case epSET_Double:
-            return GetShaderElementS<double>(pProgram, i);
+            return GetShaderElement<double>(pProgram, i);
         }
         break;
       case 2:
         switch (t.type)
         {
           case epSET_Int:
-            return GetShaderElementV<Vector2<int>>(pProgram, i);
+            return GetShaderElement<Vector2<int>>(pProgram, i);
           case epSET_Uint:
-            return GetShaderElementV<Vector2<uint32_t>>(pProgram, i);
+            return GetShaderElement<Vector2<uint32_t>>(pProgram, i);
           case epSET_Float:
-            return GetShaderElementV<Vector2<float>>(pProgram, i);
+            return GetShaderElement<Vector2<float>>(pProgram, i);
           case epSET_Double:
-            return GetShaderElementV<Vector2<double>>(pProgram, i);
+            return GetShaderElement<Vector2<double>>(pProgram, i);
         }
         break;
       case 3:
         switch (t.type)
         {
           case epSET_Int:
-            return GetShaderElementV<Vector3<int>>(pProgram, i);
+            return GetShaderElement<Vector3<int>>(pProgram, i);
           case epSET_Uint:
-            return GetShaderElementV<Vector3<uint32_t>>(pProgram, i);
+            return GetShaderElement<Vector3<uint32_t>>(pProgram, i);
           case epSET_Float:
-            return GetShaderElementV<Vector3<float>>(pProgram, i);
+            return GetShaderElement<Vector3<float>>(pProgram, i);
           case epSET_Double:
-            return GetShaderElementV<Vector3<double>>(pProgram, i);
+            return GetShaderElement<Vector3<double>>(pProgram, i);
         }
         break;
       case 4:
         switch (t.type)
         {
           case epSET_Int:
-            return GetShaderElementV<Vector4<int>>(pProgram, i);
+            return GetShaderElement<Vector4<int>>(pProgram, i);
           case epSET_Uint:
-            return GetShaderElementV<Vector4<uint32_t>>(pProgram, i);
+            return GetShaderElement<Vector4<uint32_t>>(pProgram, i);
           case epSET_Float:
-            return GetShaderElementV<Vector4<float>>(pProgram, i);
+            return GetShaderElement<Vector4<float>>(pProgram, i);
           case epSET_Double:
-            return GetShaderElementV<Vector4<double>>(pProgram, i);
+            return GetShaderElement<Vector4<double>>(pProgram, i);
         }
       default:
         EPTHROW(epR_Failure, "vector length {0} not supported", t.n);
@@ -302,9 +286,9 @@ Variant RenderShaderProgram::getUniform(size_t i)
         case epSET_Uint:
           EPTHROW(epR_Failure, "Integer Matrix types not supported.");
         case epSET_Float:
-          return GetShaderElementM<Matrix4x4<float>>(pProgram, i);
+          return GetShaderElement<Matrix4x4<float>>(pProgram, i);
         case epSET_Double:
-          return GetShaderElementM<Matrix4x4<double>>(pProgram, i);
+          return GetShaderElement<Matrix4x4<double>>(pProgram, i);
       }
     }
     else
@@ -314,7 +298,7 @@ Variant RenderShaderProgram::getUniform(size_t i)
   }
   else
   {
-    EPTHROW(epR_Failure, "Unsupported element type m {0], n {1], type {2]");
+    EPTHROW(epR_Failure, "Unsupported element type m {0}, n {1}, type {2}", t.m, t.n, t.type);
   }
 
   return Variant();
@@ -436,7 +420,7 @@ void RenderShaderProgram::setUniform(size_t i, Variant v)
   }
   else
   {
-    EPTHROW(epR_Failure, "Unsupported element type m {0], n {1], type {2]");
+    EPTHROW(epR_Failure, "Unsupported element type m {0}, n {1}, type {2}", t.m, t.n, t.type);
   }
 }
 

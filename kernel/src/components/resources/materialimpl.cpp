@@ -38,7 +38,7 @@ void epFromVariant(const Variant &variant, ShaderProperty *p)
   p->type = variant["type"].asSharedString();
   p->data = variant["data"];
   p->current = variant["current"].asBool();
-  p->data = variant["ditry"].asBool();
+  p->dirty = variant["dirty"].asBool();
 }
 
 
@@ -72,7 +72,8 @@ Array<const MethodInfo> Material::GetMethods()
 
 void MaterialImpl::SetShader(ShaderType type, ShaderRef spShader)
 {
-  EPASSERT(spShader->GetType() == type, "Incorrect shader type!");
+  if (spShader)
+    EPASSERT_THROW(spShader->GetType() == type, epR_InvalidArgument, "Incorrect shader type!");
 
   if (shaders[type] == spShader)
     return;
@@ -128,8 +129,7 @@ void MaterialImpl::BuildShaderProgram()
 
 void MaterialImpl::PopulateShaderProperties()
 {
-  if (!spShaderProgram)
-    return;
+  EPASSERT_THROW(spShaderProgram, epR_Failure, "Shader program does not exist");
 
   for (size_t i = 0; i < spShaderProgram->numUniforms(); ++i)
   {

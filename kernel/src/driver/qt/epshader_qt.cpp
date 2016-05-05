@@ -317,9 +317,7 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *shaders[], size_t arrayL
     EP_ERROR_IF(!pQtProgram->addShader(shaders[i]->pShader), false);
   EP_ERROR_IF(!pQtProgram->link(), false);
 
-  // TODO:
-  // GL states that you should be detatching shaders after a successful link.
-  // Should we be doing this for Qt GL too?
+  pQtProgram->removeAllShaders();
 
   {
     pQtProgram->bind();

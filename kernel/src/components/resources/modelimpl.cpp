@@ -12,7 +12,7 @@ Variant epToVariant(const RenderList &r)
   map.Insert("type", r.type.v);
   map.Insert("firstVertex", r.firstVertex);
   map.Insert("firstIndex", r.firstIndex);
-  map.Insert("primtiveCount", r.numVertices);
+  map.Insert("numVertices", r.numVertices);
   return std::move(map);
 }
 
@@ -21,7 +21,7 @@ void epFromVariant(const Variant &variant, RenderList *r)
   r->type = PrimType::Type(variant["type"].asInt());
   r->firstVertex = variant["firstVertex"].as<size_t>();
   r->firstIndex = variant["firstIndex"].as<size_t>();
-  r->numVertices = variant["primtiveCount"].as<size_t>();
+  r->numVertices = variant["numVertices"].as<size_t>();
 }
 
 Array<const PropertyInfo> Model::GetProperties() const
@@ -62,6 +62,7 @@ void ModelImpl::RemoveVertexArray(ArrayBufferRef spVertices)
     {
       vertexArrays = SharedArray<ArrayBufferRef>(Concat, vertexArrays.slice(0, i), vertexArrays.slice(i + 1, vertexArrays.length));
       OnArrayOrShaderChanged();
+      break;
     }
   }
 }
