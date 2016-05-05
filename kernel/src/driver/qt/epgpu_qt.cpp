@@ -15,8 +15,9 @@
 // for convenience we keep track of Qt GL context info in this struct
 epQtGLContext s_QtGLContext =
 {
-  nullptr,  // pFunc
-  nullptr   // pFunc3_2_Core
+  nullptr, // pFunc
+  nullptr, // pFunc3_2_Core
+  nullptr  // pFunc4_0_Core
 };
 
 static int s_primTypes[] =
@@ -83,39 +84,32 @@ void epGPU_Clear(double color[4], double depth, int stencil)
 }
 
 // ***************************************************************************************
-void epGPU_RenderVertices(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epPrimitiveType primType, size_t vertexCount, size_t firstVertex)
+void epGPU_RenderVertices(epShaderProgram *pProgram, epShaderInputConfig *pConfig, epArrayBuffer *pVB[], epPrimitiveType primType, size_t vertexCount, size_t firstVertex)
 {
   epVertexRange r;
   r.firstVertex = (uint32_t)firstVertex;
   r.vertexCount = (uint32_t)vertexCount;
-  epGPU_RenderRanges(pProgram, pVertexDecl, pVB, primType, &r, 1);
+  epGPU_RenderRanges(pProgram, pConfig, pVB, primType, &r, 1);
 }
 
 // ***************************************************************************************
-void epGPU_RenderIndices(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epArrayBuffer *pIB, epPrimitiveType primType, size_t indexCount, size_t epUnusedParam(firstIndex), size_t epUnusedParam(firstVertex))
+void epGPU_RenderIndices(epShaderProgram *pProgram, epShaderInputConfig *pConfig, epArrayBuffer *pVB[], epArrayBuffer *pIB, epPrimitiveType primType, size_t indexCount, size_t epUnusedParam(firstIndex), size_t epUnusedParam(firstVertex))
 {
-  epArrayElement *pElements = pVertexDecl->pElements;
-  epArrayElementData *pElementData = pVertexDecl->pElementData;
+  epArrayElement *pElements = pConfig->pElements;
+  epArrayElementData *pElementData = pConfig->pElementData;
 
-  // bind the vertex streams to the shader attributes
-  int attribs[16];
   bool boundVB[16] = { false };
-  for (int a = 0; a < pVertexDecl->numElements; ++a)
+  for (int i = 0; i < pConfig->numElements; ++i)
   {
-    attribs[a] = pProgram->pProgram->attributeLocation(pElements[a].attributeName);
-    if (attribs[a] == -1)
-      continue;
-
-    if (!boundVB[pElements[a].stream])
+    if (!boundVB[pElements[i].stream])
     {
-      // bind the buffer
-      pVB[pElements[a].stream]->pBuffer->bind();
-      boundVB[pElements[a].stream] = true;
+      pVB[pElements[i].stream]->pBuffer->bind();
+      boundVB[pElements[i].stream] = true;
     }
 
-    epVertexDataFormatGL &f = s_dataFormat[pElements[a].format];
-    s_QtGLContext.pFunc->glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)(size_t)pElementData[a].offset);
-    pProgram->pProgram->enableAttributeArray(attribs[a]);
+    epVertexDataFormatGL &f = s_dataFormat[pElements[i].format];
+    s_QtGLContext.pFunc->glVertexAttribPointer(pElementData[i].attribLocation, f.components, f.type, f.normalise, pElements[i].stride, (GLvoid*)(size_t)pElements[i].offset);
+    pProgram->pProgram->enableAttributeArray(pElementData[i].attribLocation);
   }
 
   // issue the draw call
@@ -123,57 +117,49 @@ void epGPU_RenderIndices(epShaderProgram *pProgram, epFormatDeclaration *pVertex
   GLenum type;
   switch (pIB->pFormat[0])
   {
-    case epVDF_UInt:
-      type = GL_UNSIGNED_INT; break;
-    case epVDF_UShort:
-      type = GL_UNSIGNED_SHORT; break;
-    case epVDF_UByte:
-      type = GL_UNSIGNED_BYTE; break;
-    default:
-      type = GL_UNSIGNED_INT;
-      EPASSERT(false, "Invalid index buffer type!");
+  case epVDF_UInt:
+    type = GL_UNSIGNED_INT; break;
+  case epVDF_UShort:
+    type = GL_UNSIGNED_SHORT; break;
+  case epVDF_UByte:
+    type = GL_UNSIGNED_BYTE; break;
+  default:
+    type = GL_UNSIGNED_INT;
+    EPASSERT(false, "Invalid index buffer type!");
   }
+
   s_QtGLContext.pFunc->glDrawElements(s_primTypes[primType], (GLsizei)indexCount, type, nullptr);
   pIB->pBuffer->release();
 
-  // unbind the attributes  TODO: perhaps we can remove this...?
-  for (int a = 0; a<pVertexDecl->numElements; ++a)
+  for (int i = 0; i < pConfig->numElements; ++i)
   {
-    if (attribs[a] != -1)
-      pProgram->pProgram->disableAttributeArray(attribs[a]);
-    if (boundVB[pElements[a].stream])
+    pProgram->pProgram->disableAttributeArray(pElementData[i].attribLocation);
+    if (boundVB[pElements[i].stream])
     {
-      pVB[pElements[a].stream]->pBuffer->release();
-      boundVB[pElements[a].stream] = false;
+      pVB[pElements[i].stream]->pBuffer->release();
+      boundVB[pElements[i].stream] = false;
     }
   }
 }
 
 // ***************************************************************************************
-void epGPU_RenderRanges(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epPrimitiveType primType, epVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
+void epGPU_RenderRanges(epShaderProgram *pProgram, epShaderInputConfig *pConfig, epArrayBuffer *pVB[], epPrimitiveType primType, epVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
 {
-  epArrayElement *pElements = pVertexDecl->pElements;
-  epArrayElementData *pElementData = pVertexDecl->pElementData;
+  epArrayElement *pElements = pConfig->pElements;
+  epArrayElementData *pElementData = pConfig->pElementData;
 
-  // bind the vertex streams to the shader attributes
-  int attribs[16];
   bool boundVB[16] = { false };
-  for (int a = 0; a < pVertexDecl->numElements; ++a)
+  for (int i = 0; i < pConfig->numElements; ++i)
   {
-    attribs[a] = pProgram->pProgram->attributeLocation(pElements[a].attributeName);
-    if (attribs[a] == -1)
-      continue;
-
-    if (!boundVB[pElements[a].stream])
+    if (!boundVB[pElements[i].stream])
     {
-      // bind the buffer
-      pVB[pElements[a].stream]->pBuffer->bind();
-      boundVB[pElements[a].stream] = true;
+      pVB[pElements[i].stream]->pBuffer->bind();
+      boundVB[pElements[i].stream] = true;
     }
 
-    epVertexDataFormatGL &f = s_dataFormat[pElements[a].format];
-    s_QtGLContext.pFunc->glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)(size_t)pElementData[a].offset);
-    pProgram->pProgram->enableAttributeArray(attribs[a]);
+    epVertexDataFormatGL &f = s_dataFormat[pElements[i].format];
+    s_QtGLContext.pFunc->glVertexAttribPointer(pElementData[i].attribLocation, f.components, f.type, f.normalise, pElements[i].stride, (GLvoid*)(size_t)pElements[i].offset);
+    pProgram->pProgram->enableAttributeArray(pElementData[i].attribLocation);
   }
 
   // issue the draw call
@@ -184,15 +170,13 @@ void epGPU_RenderRanges(epShaderProgram *pProgram, epFormatDeclaration *pVertexD
     s_QtGLContext.pFunc->glDrawArrays(s_primTypes[primType], (GLint)pRanges[i].firstVertex, (GLsizei)pRanges[i].vertexCount);
   }
 
-  // unbind the attributes  TODO: perhaps we can remove this...?
-  for (int a = 0; a<pVertexDecl->numElements; ++a)
+  for (int i = 0; i < pConfig->numElements; ++i)
   {
-    if (attribs[a] != -1)
-      pProgram->pProgram->disableAttributeArray(attribs[a]);
-    if (boundVB[pElements[a].stream])
+    pProgram->pProgram->disableAttributeArray(pElementData[i].attribLocation);
+    if (boundVB[pElements[i].stream])
     {
-      pVB[pElements[a].stream]->pBuffer->release();
-      boundVB[pElements[a].stream] = false;
+      pVB[pElements[i].stream]->pBuffer->release();
+      boundVB[pElements[i].stream] = false;
     }
   }
 }
@@ -237,6 +221,14 @@ void epGPU_Init()
   EPASSERT(QOpenGLContext::currentContext(), "QOpenGLContext::currentContext() should not be null when we call epGPU_Init");
 
   s_QtGLContext.pFunc = QOpenGLContext::currentContext()->functions();
+
+  // NOTE: if we're using an old or incompatible version of GL, this will set our pointer to null.
+  // This should only be used for 4.0+ functionality
+  s_QtGLContext.pFunc4_0_Core = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_0_Core>();
+
+  if (s_QtGLContext.pFunc4_0_Core)
+    s_QtGLContext.pFunc4_0_Core->initializeOpenGLFunctions();
+
 
   // NOTE: if we're using an old or incompatible version of GL, this will set our pointer to null.
   // This should only be used for 3.2+ functionality

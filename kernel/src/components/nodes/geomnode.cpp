@@ -4,6 +4,9 @@
 #include "ep/cpp/kernel.h"
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/material.h"
+#include "components/resources/modelimpl.h"
+#include "components/resources/materialimpl.h"
+
 
 namespace ep {
 
@@ -14,34 +17,19 @@ Array<const PropertyInfo> GeomNode::GetProperties() const
   };
 }
 
+// TODO : Impl'ise this function
 void GeomNode::Render(RenderScene &spScene, const Double4x4 &mat)
 {
   GeomRenderJob &job = spScene.geom.pushBack();
-
   job.matrix = mat;
+  job.spMaterial = spModel->GetMaterial();
 
-  MaterialRef spMat = spModel->GetMaterial();
+  ModelImpl *pModelImpl = spModel->GetImpl<ModelImpl>();
+  job.vertexArrays = pModelImpl->vertexArrays;
+  job.spIndices = pModelImpl->spIndices;
+  job.renderList = pModelImpl->renderList;
 
-#if 0 // TODO : For Manu
-  job.spProgram = spMat->GetImpl<MaterialImpl>()->GetRenderProgram();
-  job.spVertexFormat = spModel->GetRenderVertexFormat(job.spProgram);
-#endif // 0
-
-  // for each shader stream...
-/*
-  for (int i = 0; i < Model::ArrayType::Max; ++i)
-  {
-    ArrayBufferRef spArray = spModel->GetArray(i);
-    ArrayBuffer::RenderResourceType rt = i == Model::ArrayType::Indices ? ArrayBuffer::RenderResourceType::IndexArray : ArrayBuffer::RenderResourceType::VertexArray;
-    job.arrays[i] = spArray ? spArray->GetRenderResource(rt) : nullptr;
-  }
-
-  for (int i = 0; i < 8; ++i)
-  {
-    ArrayBufferRef spArray = spModel->GetArray(i);
-    job.textures[i] = spArray ? spArray->GetRenderResource(ArrayBuffer::RenderResourceType::Texture) : nullptr;
-  }
-*/
+  job.retainShaderInputConfig = Delegate<void(SharedPtr<RefCounted>)>(pModelImpl, &ModelImpl::RetainShaderInputConfig);
 }
 
 } // namespace ep

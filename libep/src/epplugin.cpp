@@ -2,9 +2,20 @@
 #include "ep/cpp/filesystem.h"
 #include "ep/cpp/variant.h"
 
+#include "ep/cpp/component/resource/material.h"
+
 namespace ep {
 
 Instance *s_pInstance = nullptr;
+
+const char * const Material::s_shaderNames[] = {
+  "vertexshader",
+  "pixelshader",
+  "geometryshader",
+  "tesselationcontrolshader",
+  "tesselationevaluationshader",
+  "computeshader"
+};
 
 // TODO: should move this to some other cpp?
 Directory::Directory(String searchPattern)

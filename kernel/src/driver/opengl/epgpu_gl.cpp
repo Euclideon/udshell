@@ -69,40 +69,35 @@ void epGPU_Clear(double color[4], double depth, int stencil)
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void epGPU_RenderVertices(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epPrimitiveType primType, size_t vertexCount, size_t firstVertex)
+void epGPU_RenderVertices(epShaderProgram *pProgram, epShaderInputConfig *pConfig, epArrayBuffer *pVB[], epPrimitiveType primType, size_t vertexCount, size_t firstVertex)
 {
   epVertexRange r;
   r.firstVertex = (uint32_t)firstVertex;
   r.vertexCount = (uint32_t)vertexCount;
-  epGPU_RenderRanges(pProgram, pVertexDecl, pVB, primType, &r, 1);
+  epGPU_RenderRanges(pProgram, pConfig, pVB, primType, &r, 1);
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, Aug 2015
-void epGPU_RenderIndices(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epArrayBuffer *pIB, epPrimitiveType primType, size_t indexCount, size_t epUnusedParam(firstIndex), size_t epUnusedParam(firstVertex))
+void epGPU_RenderIndices(epShaderProgram *epUnusedParam(pProgram), epShaderInputConfig *pConfig, epArrayBuffer *pVB[], epArrayBuffer *pIB, epPrimitiveType primType, size_t indexCount, size_t epUnusedParam(firstIndex), size_t epUnusedParam(firstVertex))
 {
-  epArrayElement *pElements = pVertexDecl->pElements;
-  epArrayElementData *pElementData = pVertexDecl->pElementData;
+  epArrayElement *pElements = pConfig->pElements;
+  epArrayElementData *pElementData = pConfig->pElementData;
 
   // bind the vertex streams to the shader attributes
-  GLint attribs[16];
   bool boundVB[16] = { false };
-  for (int a = 0; a<pVertexDecl->numElements; ++a)
+  for (int i = 0; i < pConfig->numElements; ++i)
   {
-    attribs[a] = glGetAttribLocation(pProgram->program, pElements[a].attributeName);
-    if (attribs[a] == -1)
-      continue;
-
-    if (!boundVB[pElements[a].stream])
+    if (!boundVB[pElements[i].stream])
     {
       // bind the buffer
-      glBindBuffer(GL_ARRAY_BUFFER, pVB[pElements[a].stream]->buffer);
-      boundVB[pElements[a].stream] = true;
+      glBindBuffer(GL_ARRAY_BUFFER, pVB[pElements[i].stream]->buffer);
+      boundVB[pElements[i].stream] = true;
     }
 
-    epVertexDataFormatGL &f = s_dataFormat[pElements[a].format];
-    glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)(size_t)pElementData[a].offset);
-    glEnableVertexAttribArray(attribs[a]);
+    epVertexDataFormatGL &f = s_dataFormat[pElements[i].format];
+    glVertexAttribPointer(pElementData[i].attribLocation, f.components, f.type, f.normalise, pElements[i].stride, (GLvoid*)(size_t)pElements[i].offset);
+    glEnableVertexAttribArray(pElementData[i].attribLocation);
   }
 
   // issue the draw call
@@ -123,45 +118,31 @@ void epGPU_RenderIndices(epShaderProgram *pProgram, epFormatDeclaration *pVertex
   }
   glDrawElements(s_primTypes[primType], (GLsizei)indexCount, type, nullptr);
 
-  // unbind the attributes  TODO: perhaps we can remove this...?
-  for (int a = 0; a<pVertexDecl->numElements; ++a)
-  {
-    if (attribs[a] != -1)
-      glDisableVertexAttribArray(attribs[a]);
-//    if (boundVB[pElements[a].stream])
-//    {
-//      pVB[pElements[a].stream]->pVB->release();
-//      boundVB[pElements[a].stream] = false;
-//    }
-  }
+  for (int i = 0; i < pConfig->numElements; ++i)
+    glDisableVertexAttribArray(pElementData[i].attribLocation);
 }
 
 // ***************************************************************************************
 // Author: Manu Evans, May 2015
-void epGPU_RenderRanges(epShaderProgram *pProgram, epFormatDeclaration *pVertexDecl, epArrayBuffer *pVB[], epPrimitiveType primType, epVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
+void epGPU_RenderRanges(epShaderProgram *epUnusedParam(pProgram), epShaderInputConfig *pConfig, epArrayBuffer *pVB[], epPrimitiveType primType, epVertexRange *pRanges, size_t rangeCount, PrimCallback *pCallback, void *pCallbackData)
 {
-  epArrayElement *pElements = pVertexDecl->pElements;
-  epArrayElementData *pElementData = pVertexDecl->pElementData;
+  epArrayElement *pElements = pConfig->pElements;
+  epArrayElementData *pElementData = pConfig->pElementData;
 
   // bind the vertex streams to the shader attributes
-  GLint attribs[16];
   bool boundVB[16] = { false };
-  for (int a = 0; a<pVertexDecl->numElements; ++a)
+  for (int i = 0; i < pConfig->numElements; ++i)
   {
-    attribs[a] = glGetAttribLocation(pProgram->program, pElements[a].attributeName);
-    if (attribs[a] == -1)
-      continue;
-
-    if (!boundVB[pElements[a].stream])
+    if (!boundVB[pElements[i].stream])
     {
       // bind the buffer
-      glBindBuffer(GL_ARRAY_BUFFER, pVB[pElements[a].stream]->buffer);
-      boundVB[pElements[a].stream] = true;
+      glBindBuffer(GL_ARRAY_BUFFER, pVB[pElements[i].stream]->buffer);
+      boundVB[pElements[i].stream] = true;
     }
 
-    epVertexDataFormatGL &f = s_dataFormat[pElements[a].format];
-    glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)(size_t)pElementData[a].offset);
-    glEnableVertexAttribArray(attribs[a]);
+    epVertexDataFormatGL &f = s_dataFormat[pElements[i].format];
+    glVertexAttribPointer(pElementData[i].attribLocation, f.components, f.type, f.normalise, pElements[i].stride, (GLvoid*)(size_t)pElements[i].offset);
+    glEnableVertexAttribArray(pElementData[i].attribLocation);
   }
 
   // issue the draw call
@@ -172,17 +153,8 @@ void epGPU_RenderRanges(epShaderProgram *pProgram, epFormatDeclaration *pVertexD
     glDrawArrays(s_primTypes[primType], (GLint)pRanges[i].firstVertex, (GLsizei)pRanges[i].vertexCount);
   }
 
-  // unbind the attributes  TODO: perhaps we can remove this...?
-  for (int a = 0; a<pVertexDecl->numElements; ++a)
-  {
-    if (attribs[a] != -1)
-      glDisableVertexAttribArray(attribs[a]);
-//    if (boundVB[pElements[a].stream])
-//    {
-//      pVB[pElements[a].stream]->pVB->release();
-//      boundVB[pElements[a].stream] = false;
-//    }
-  }
+  for (int i = 0; i < pConfig->numElements; ++i)
+    glDisableVertexAttribArray(pElementData[i].attribLocation);
 }
 
 // ***************************************************************************************

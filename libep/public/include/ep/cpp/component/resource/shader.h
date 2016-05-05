@@ -10,8 +10,13 @@ namespace ep {
 SHARED_CLASS(Shader);
 
 EP_ENUM(ShaderType,
-        VertexShader,
-        PixelShader);
+  VertexShader = 0,
+  PixelShader,
+  GeometryShader,
+  TesselationControlShader,
+  TesselationEvaluationShader,
+  ComputeShader
+);
 
 class Shader : public Resource
 {
@@ -20,8 +25,10 @@ public:
   SharedString GetCode() const { return pImpl->GetCode(); }
   void SetCode(SharedString code) { pImpl->SetCode(code); }
 
-  // TODO: eager compile function, which attempts to compile the shader and produce error messages promptly
-//  void Compile();
+  void SetType(ShaderType type) { pImpl->SetType(type); }
+  ShaderType GetType() const { return pImpl->GetType(); }
+
+  SharedPtr<RefCounted> GetRenderShader() { return pImpl->GetRenderShader(); }
 
 protected:
   Shader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -30,8 +37,7 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-private:
-  Array<const PropertyInfo> GetProperties() const;
+  Array<const PropertyInfo> GetProperties();
 };
 
 } // namespace ep

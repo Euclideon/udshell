@@ -2,8 +2,27 @@
 #include "modelimpl.h"
 #include "renderresource.h"
 #include "ep/cpp/kernel.h"
+#include "materialimpl.h"
 
 namespace ep {
+
+Variant epToVariant(const RenderList &r)
+{
+  Variant::VarMap map;
+  map.Insert("type", r.type.v);
+  map.Insert("firstVertex", r.firstVertex);
+  map.Insert("firstIndex", r.firstIndex);
+  map.Insert("numVertices", r.numVertices);
+  return std::move(map);
+}
+
+void epFromVariant(const Variant &variant, RenderList *r)
+{
+  r->type = PrimType::Type(variant["type"].asInt());
+  r->firstVertex = variant["firstVertex"].as<size_t>();
+  r->firstIndex = variant["firstIndex"].as<size_t>();
+  r->numVertices = variant["numVertices"].as<size_t>();
+}
 
 Array<const PropertyInfo> Model::GetProperties() const
 {
@@ -15,19 +34,37 @@ Array<const PropertyInfo> Model::GetProperties() const
 Array<const MethodInfo> Model::GetMethods() const
 {
   return{
-// TODO: why no this bind?
 //    EP_MAKE_METHOD(SetVertexArray, "Set the Vertex buffer given an array of vertices and an array of attributes"), // TODO: Add this when we support passing slice to function
   };
 }
 
-void ModelImpl::SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> attributeNames)
+void ModelImpl::AddVertexArray(ArrayBufferRef spVertices)
 {
-//  String type = spVertices->GetType();
-  // TODO: assert that type has the same number of elements as `attributeNames.length`.
+  EPTHROW_IF(!spVertices, epR_InvalidArgument, "array buffer was empty");
 
-  auto &a = vertexArrays.pushBack();
-  a.spArray = spVertices;
-  a.attributes = attributeNames;
+  for (size_t i = 0; i < vertexArrays.length; ++i)
+  {
+    if (vertexArrays[i] == spVertices)
+      return;
+  }
+
+  vertexArrays = SharedArray<ArrayBufferRef>(Concat, vertexArrays, spVertices);
+  OnArrayOrShaderChanged();
+}
+
+void ModelImpl::RemoveVertexArray(ArrayBufferRef spVertices)
+{
+  EPTHROW_IF(!spVertices, epR_InvalidArgument, "array buffer was empty");
+
+  for (size_t i = 0; i < vertexArrays.length; ++i)
+  {
+    if (vertexArrays[i] == spVertices)
+    {
+      vertexArrays = SharedArray<ArrayBufferRef>(Concat, vertexArrays.slice(0, i), vertexArrays.slice(i + 1, vertexArrays.length));
+      OnArrayOrShaderChanged();
+      break;
+    }
+  }
 }
 
 } // namespace ep

@@ -63,11 +63,14 @@ public:
   {
     rval.root = nullptr;
   }
-  AVLTree(std::initializer_list<KeyValuePair> init)
+
+  AVLTree(Slice<const KeyValuePair> arr)
   {
-    for (auto &&v : init)
-      Insert(v.key, v.value);
+    for (auto &kvp : arr)
+      Insert(kvp.key, kvp.value);
   }
+  AVLTree(std::initializer_list<KeyValuePair> init)
+    : AVLTree(Slice<const KeyValuePair>(init.begin(), init.size())) {}
 
   ~AVLTree()
   {
@@ -400,7 +403,7 @@ private:
           // TODO: FIX THIS!!
           // this is copying the child node into the parent node because there is no parent pointer
           // DO: add parent pointer, then fix up the parent's child pointer to the child, and do away with this pointless copy!
-          *pRoot = *temp; // Copy the contents of the non-empty child
+          *pRoot = std::move(*temp); // Copy the contents of the non-empty child
         }
 
         temp->~Node();
@@ -580,6 +583,22 @@ struct AVLTreeNode
   int height;
 
   AVLTreeNode() = delete;
+  AVLTreeNode(const AVLTreeNode &rh)
+    : k(rh.k), left(rh.left), right(rh.right), v(rh.v), height(rh.height) {}
+  AVLTreeNode(AVLTreeNode &&rh)
+    : k(std::move(rh.k)), left(rh.left), right(rh.right), v(std::move(rh.v)), height(rh.height) {}
+  AVLTreeNode& operator = (const AVLTreeNode &rh)
+  {
+    this->~AVLTreeNode();
+    new(this) AVLTreeNode(rh);
+    return *this;
+  }
+  AVLTreeNode& operator = (AVLTreeNode &&rh)
+  {
+    this->~AVLTreeNode();
+    new(this) AVLTreeNode(std::move(rh));
+    return *this;
+  }
 };
 
 template <typename Node>

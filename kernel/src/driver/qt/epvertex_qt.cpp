@@ -3,76 +3,68 @@
 #if EPRENDER_DRIVER == EPDRIVER_QT
 
 #include "hal/vertex.h"
+#include "hal/shader.h"
 
 #include "eprender_qt.h"
 
 #include <QOpenGLBuffer>
 
-
-const int s_VertexDataStride[epVDF_Max] =
-{
-  16,	// epVDF_Float4
-  12,	// epVDF_Float3
-  8,	// epVDF_Float2
-  4,	// epVDF_Float
-  4,	// epVDF_UByte4N_RGBA
-  4,	// epVDF_UByte4N_BGRA
-  16, // epVDF_Int4
-  12, // epVDF_Int3
-  8,  // epVDF_Int2
-  4,  // epVDF_Int
-  16, // epVDF_UInt4
-  12, // epVDF_UInt3
-  8,  // epVDF_UInt2
-  4,  // epVDF_UInt
-  8,  // epVDF_Short4
-  4,  // epVDF_Short2
-  8,  // epVDF_Short4N
-  4,  // epVDF_Short2N
-  2,  // epVDF_Short
-  8,  // epVDF_UShort4
-  4,  // epVDF_UShort2
-  8,  // epVDF_UShort4N
-  4,  // epVDF_UShort2N
-  2,  // epVDF_UShort
-  4,  // epVDF_Byte4
-  4,  // epVDF_UByte4
-  4,  // epVDF_Byte4N
-  1,  // epVDF_Byte
-  1,  // epVDF_UByte
-};
-
-
 // ***************************************************************************************
-epFormatDeclaration *epVertex_CreateFormatDeclaration(const epArrayElement *pElementArray, int elementCount)
+epShaderInputConfig *epVertex_CreateShaderInputConfig(const epArrayElement *pElementArray, size_t numElements, epShaderProgram *pProgram)
 {
-  size_t size = sizeof(epFormatDeclaration) + (sizeof(epArrayElement) + sizeof(epArrayElementData))*elementCount;
-  epFormatDeclaration *pDecl = (epFormatDeclaration*)epAlloc(size);
-  pDecl->pElements = (epArrayElement*)&pDecl[1];
-  pDecl->pElementData = (epArrayElementData*)(pDecl->pElements + elementCount);
-  pDecl->numElements = elementCount;
+  // Note that this will over alloc when not all attributes are present in the shader but who cares
+  size_t size = sizeof(epShaderInputConfig) + (sizeof(epArrayElement) + sizeof(epArrayElementData))*numElements;
+  epShaderInputConfig *pCfg = (epShaderInputConfig*)epAlloc(size);
+  pCfg->pElements = (epArrayElement*)(pCfg + 1);
+  pCfg->pElementData = (epArrayElementData*)(pCfg->pElements + numElements);
 
-  memcpy(pDecl->pElements, pElementArray, sizeof(epArrayElement)*elementCount);
-
-  // set the element data and calculate the strides
-  int streamOffset[64] = { 0 };
-  for (int e=0; e<elementCount; ++e)
+  int count = 0;
+  for (size_t i = 0; i < numElements; ++i)
   {
-    pDecl->pElementData[e].offset = streamOffset[pElementArray[e].stream];
-    streamOffset[pElementArray[e].stream] += s_VertexDataStride[pElementArray[e].format];
+    size_t numAttribs = epShader_GetNumAttributes(pProgram);
+    for (size_t j = 0; j < numAttribs; ++j)
+    {
+      if (strncmp(pElementArray[i].attributeName, epShader_GetAttributeName(pProgram, j), sizeof(pElementArray[i].attributeName)) == 0)
+      {
+        // TODO: Add some error checking to ensure the the array elemnt matches or can be unpacked to match the shader attribute.
+        memcpy(&pCfg->pElements[count], &pElementArray[i], sizeof(pElementArray[i]));
+        pCfg->pElementData[count].attribLocation = epShader_GetAttributeType(pProgram, j).location;
+        count++;
+        break;
+      }
+    }
   }
-  // set the strides for each component
-  for (int e=0; e<elementCount; ++e)
-    pDecl->pElementData[e].stride = streamOffset[pElementArray[e].stream];
 
-  return pDecl;
+  pCfg->numElements = count;
+  return pCfg;
 }
 
 // ***************************************************************************************
-void epVertex_DestroyFormatDeclaration(epFormatDeclaration **ppDeclaration)
+void epVertex_DestroyShaderInputConfig(epShaderInputConfig **ppCfg)
 {
-  epFree(*ppDeclaration);
-  *ppDeclaration = nullptr;
+  epFree(*ppCfg);
+  *ppCfg = nullptr;
+}
+
+// ***************************************************************************************
+void epVertex_GetShaderInputConfigStreams(const epShaderInputConfig *pConfig, int *pStreams, size_t streamsLength, int *pNumStreams)
+{
+  size_t streamFoundSize = sizeof(bool) * pConfig->numElements;
+  bool *streamFound = (bool*)alloca(streamFoundSize);
+  memset(streamFound, 0, streamFoundSize);
+
+  int numStreams = 0;
+
+  for (int i = 0; i < pConfig->numElements && numStreams < (int)streamsLength; ++i)
+  {
+    int stream = pConfig->pElements[i].stream;
+    if (!streamFound[stream])
+    {
+      streamFound[stream] = true;
+      pStreams[numStreams++] = stream;
+    }
+  }
+  *pNumStreams = numStreams;
 }
 
 // ***************************************************************************************
@@ -84,7 +76,7 @@ epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format)
   EP_ERROR_IF(!pQtBuffer->create(), false);
   EP_ERROR_IF(!pQtBuffer->bind(), false);
 
-  pIB = (epArrayBuffer*)epAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat)*1);
+  pIB = (epArrayBuffer*)epAlloc(sizeof(epArrayBuffer) + sizeof(epArrayDataFormat));
   pIB->pFormat = (epArrayDataFormat*)&pIB[1];
   *pIB->pFormat = format;
   pIB->numElements = 1;

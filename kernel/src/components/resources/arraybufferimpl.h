@@ -10,6 +10,7 @@
 namespace ep {
 
 SHARED_CLASS(RenderResource);
+SHARED_CLASS(Scene);
 
 SHARED_CLASS(ArrayBuffer);
 

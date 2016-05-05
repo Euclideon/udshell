@@ -6,6 +6,7 @@
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/material.h"
 #include "ep/cpp/internal/i/imodel.h"
+#include "hal/vertex.h"
 
 namespace ep {
 
@@ -18,25 +19,47 @@ class ModelImpl : public BaseImpl<Model, IModel>
 {
 public:
   ModelImpl(Component *pInstance, Variant::VarMap initParams)
-    : ImplSuper(pInstance)
+    : ImplSuper(pInstance), renderList(RenderList { PrimType::Triangles, 0, 0, 0 })
   {}
 
   MaterialRef GetMaterial() const override final { return spMaterial; }
-  void SetMaterial(MaterialRef _spMaterial) override final { spMaterial = _spMaterial; }
+  void SetMaterial(MaterialRef _spMaterial) override final
+  {
+    if (_spMaterial == spMaterial)
+      return;
 
-  void SetVertexArray(ArrayBufferRef spVertices, Slice<const SharedString> attributeNames) override final;
+    if (spMaterial)
+      spMaterial->Changed.Unsubscribe(this, &ModelImpl::OnArrayOrShaderChanged);
+
+    spMaterial = _spMaterial;
+
+    if (spMaterial)
+      spMaterial->Changed.Subscribe(this, &ModelImpl::OnArrayOrShaderChanged);
+  }
+
+  void AddVertexArray(ArrayBufferRef spVertices) override final;
+  void RemoveVertexArray(ArrayBufferRef spVertices) override final;
+  SharedArray<ArrayBufferRef> GetVertexArrays() override final { return vertexArrays; }
 
   ArrayBufferRef GetIndexArray() const override final { return spIndices; }
   void SetIndexArray(ArrayBufferRef _spIndices) override final { spIndices = _spIndices; }
 
+  void SetRenderList(const RenderList& list) override final { renderList = list; }
+  const RenderList& GetRenderList() const override final { return renderList; }
+
 private:
-  void KeepCached(SharedPtr<RefCounted> spRC) { spVertexFormatCache = spRC; }
+  EP_FRIENDS_WITH_IMPL(GeomNode);
   void OnArrayOrShaderChanged() { spVertexFormatCache = nullptr; }
 
-  Array<VertexArray, 4> vertexArrays;
+  void RetainShaderInputConfig(SharedPtr<RefCounted> sp) { spVertexFormatCache = sp; }
+
+  SharedArray<ArrayBufferRef> vertexArrays;
   ArrayBufferRef spIndices;
   MaterialRef spMaterial;
 
+  RenderList renderList;
+
+  // TODO: spVertexFormatCache should be evicted when arrays are added/removed, material is changed, and also on the Resource::Changed events emitted by arrays and material.
   SharedPtr<RefCounted> spVertexFormatCache = nullptr;
 };
 

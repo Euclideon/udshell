@@ -40,7 +40,7 @@ public:
 
   RenderableSceneRef GetRenderScene() override final;
 
-  static RenderableSceneRef Convert(RenderScene &renderScene);
+  static RenderableSceneRef Convert(RenderScene &renderScene, class Renderer *pRenderer);
 
   void MakeDirty() override final
   {

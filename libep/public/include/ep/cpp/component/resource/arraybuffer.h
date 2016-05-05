@@ -11,6 +11,13 @@
 
 namespace ep {
 
+struct ElementMetadata
+{
+  SharedString name;
+  SharedString type;
+  int offset;
+};
+
 SHARED_CLASS(ArrayBuffer);
 
 class ArrayBuffer : public Buffer
@@ -34,6 +41,7 @@ public:
   {
     Allocate<ElementType>(Slice<size_t>(&length, 1));
   }
+
   template<typename ElementType>
   void Allocate(Slice<const size_t> shape)
   {
@@ -134,6 +142,33 @@ inline Slice<void> ArrayBuffer::Map<void>() { return Buffer::Map(); }
 
 template<>
 inline Slice<const void> ArrayBuffer::MapForRead<void>() { return Buffer::MapForRead(); }
+
+inline Variant epToVariant(const ElementMetadata &e)
+{
+  Variant::VarMap r;
+  if (e.type)
+    r.Insert("type", e.type);
+  if (e.type || e.offset)
+    r.Insert("offset", e.offset);
+  if(e.name)
+    r.Insert("name", e.name);
+  return std::move(r);
+}
+
+inline void epFromVariant(const Variant &v, ElementMetadata *pE)
+{
+  Variant *pI = v.getItem("type");
+  if (pI)
+    pE->type = pI->asSharedString();
+  pI = v.getItem("offset");
+  if (pI)
+    pE->offset = pI->as<int>();
+  else
+    pE->offset = 0;
+  pI = v.getItem("name");
+  if (pI)
+    pE->name = pI->asSharedString();
+}
 
 } // namespace ep
 

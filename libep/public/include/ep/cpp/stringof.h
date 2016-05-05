@@ -41,6 +41,7 @@ struct Stringify<T1, T2, Types...> {
   }
 };
 
+template<> struct Stringify<bool>     { static String stringify() { return "bool"; } };
 template<> struct Stringify<void>     { static String stringify() { return "void"; } };
 template<> struct Stringify<double>   { static String stringify() { return "f64"; } };
 template<> struct Stringify<float>    { static String stringify() { return "f32"; } };

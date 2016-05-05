@@ -18,7 +18,13 @@ struct Kernel::CreateHelper
   static Array<const MethodInfo> GetMethods() { return GetMethodsImpl((_ComponentType*)nullptr); }
   static Array<const EventInfo> GetEvents() { return GetEventsImpl((_ComponentType*)nullptr); }
   static Array<const StaticFuncInfo> GetStaticFuncs() { return GetStaticFuncsImpl((_ComponentType*)nullptr); }
-  static ComponentDescInl::InitComponent* GetStaticInit() { return GetStaticInitImpl((_ComponentType*)nullptr); }
+  static ComponentDescInl::InitComponent* GetStaticInit()
+  {
+    auto r = GetStaticInitImpl((ImplType*)nullptr);
+    if (r)
+      return r;
+    return GetStaticInitImpl((_ComponentType*)nullptr);
+  }
 
   static ComponentDescInl::CreateInstanceCallback* GetCreateFunc() { return GetCreateFuncImpl((_ComponentType*)nullptr); }
 

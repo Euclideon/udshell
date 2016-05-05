@@ -33,6 +33,7 @@
         <speed>1</speed>
       </camera>
       <scene>
+        <name>DirCubeScene</name>
         <url>data/udscene.dae</url>
       </scene>
     </ep.viewer>

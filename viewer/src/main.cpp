@@ -13,7 +13,27 @@
 #include "ep/cpp/component/resourcemanager.h"
 #include "components/timer.h"
 
+#include "ep/cpp/component/resource/model.h"
+#include "ep/cpp/component/resource/material.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
+#include "ep/cpp/component/resource/shader.h"
+#include "ep/cpp/component/scene.h"
+#include "ep/cpp/component/resource/metadata.h"
+#include "components/nodes/geomnode.h"
+
 using namespace ep;
+
+struct Vertex
+{
+  Float3 position;
+  Float4 color;
+};
+
+template<>
+ep::SharedString stringof<Vertex>()
+{
+  return "{f32[3], f32[4]}";
+}
 
 static void ProcessCmdline(int argc, char *argv[]);
 
@@ -33,6 +53,7 @@ static struct
   SceneRef spScene;
   SimpleCameraRef spSimpleCamera;
   UDNodeRef spUDNode;
+  GeomNodeRef spTestGeomNode;
   TimerRef spCITimer;
   SubscriptionRef spCITimerSub;
   bool CITest;
@@ -54,10 +75,119 @@ static struct
                nullptr,             // spScene
                nullptr,             // spSimpleCamera
                nullptr,             // spUDNode
+               nullptr,             // spTestGeomNode
                nullptr,             // spCITimer
                nullptr,             // spCITimerSub
                false                // CITest
               };
+
+
+static GeomNodeRef CreateTestModel(KernelRef kernel)
+{
+  // Vertex Shader
+  ShaderRef vertexShader = kernel->CreateComponent<Shader>();
+  {
+    vertexShader->SetType(ShaderType::VertexShader);
+
+    const char shaderText[] = "attribute vec3 a_position;\n"
+                              "attribute vec4 a_color;\n"
+                              "varying vec4 v_color;\n"
+                              "uniform mat4 u_mfwvp;\n"
+                              "void main()\n"
+                              "{\n"
+                              "  v_color = a_color;\n"
+                              "  gl_Position = u_mfwvp * vec4(a_position, 1.0);\n"
+                              "}\n";
+    vertexShader->SetCode(shaderText);
+  }
+
+  // Pixel Shader
+  ShaderRef pixelShader = kernel->CreateComponent<Shader>();
+  {
+    pixelShader->SetType(ShaderType::PixelShader);
+
+    const char shaderText[] = "varying vec4 v_color;\n"
+                              "void main()\n"
+                              "{\n"
+                              "  gl_FragColor = v_color;\n"
+                              "}\n";
+    pixelShader->SetCode(shaderText);
+  }
+
+  // Material
+  MaterialRef material = kernel->CreateComponent<Material>();
+  material->SetShader(ShaderType::VertexShader, vertexShader);
+  material->SetShader(ShaderType::PixelShader, pixelShader);
+#if 0
+  material->SetTexture(0, texture);
+#endif // 0
+
+  // Vertex Buffer
+  ArrayBufferRef vertexBuffer = kernel->CreateComponent<ArrayBuffer>();
+  {
+
+    static const Vertex vb[] = { Vertex{ Float3{ 0.0f, 0.0f, 0.0f },   Float4{ 1.0f, 1.0f, 1.0f, 1.0f } },
+                                 Vertex{ Float3{ 1.0f, 0.0f, 0.0f },   Float4{ 1.0f, 0.0f, 0.0f, 1.0f } },
+                                 Vertex{ Float3{ 1.0f, 1.0f, 0.0f },   Float4{ 0.0f, 1.0f, 0.0f, 1.0f } },
+                                 Vertex{ Float3{ 0.0f, 1.0f, 0.0f },   Float4{ 0.0f, 0.0f, 1.0f, 1.0f } },
+
+                                 Vertex{ Float3{ 0.0f, 0.0f, 1.0f },   Float4{ 1.0f, 1.0f, 0.0f, 1.0f } },
+                                 Vertex{ Float3{ 1.0f, 0.0f, 1.0f },   Float4{ 1.0f, 0.0f, 1.0f, 1.0f } },
+                                 Vertex{ Float3{ 1.0f, 1.0f, 1.0f },   Float4{ 0.0f, 1.0f, 1.0f, 1.0f } },
+                                 Vertex{ Float3{ 0.0f, 1.0f, 1.0f },   Float4{ 0.5f, 0.5f, 1.0f, 1.0f } } };
+
+    vertexBuffer->AllocateFromData(Slice<const Vertex>(vb));
+    MetadataRef metadata = vertexBuffer->GetMetadata();
+    metadata->Get("attributeinfo")[0].insertItem("name", "a_position");
+    metadata->Get("attributeinfo")[1].insertItem("name", "a_color");
+  }
+
+  // Index Buffer
+  ArrayBufferRef indexBuffer = kernel->CreateComponent<ArrayBuffer>();
+  static const uint16_t ib[] = {
+                                 0, 4, 5,
+                                 0, 5, 1,
+
+                                 1, 5, 6,
+                                 1, 6, 2,
+
+                                 2, 6, 7,
+                                 2, 7, 3,
+
+                                 3, 7, 4,
+                                 3, 4, 0,
+
+                                 4, 7, 6,
+                                 4, 6, 5,
+
+                                 3, 0, 1,
+                                 3, 1, 2
+                              };
+  indexBuffer->AllocateFromData(Slice<const uint16_t>(ib));
+
+#if 0
+  // Texture
+  ArrayBufferRef texture = kernel->CreateComponent<ArrayBuffer>();
+  {
+    texture->Allocate("White", sizeof(uint32_t), { 32, 32 });
+    Slice<void> data  = texture->Map();
+    memset(data.ptr, 0xFF, data.length);
+    texture->Unmap();
+  }
+#endif // 0
+
+  ModelRef model = kernel->CreateComponent<Model>();
+  model->SetName("TestModel");
+  model->AddVertexArray(vertexBuffer);
+  model->SetIndexArray(indexBuffer);
+  model->SetMaterial(material);
+  model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), size_t(EPARRAYSIZE(ib)) });
+
+  GeomNodeRef geomNode = kernel->CreateComponent<GeomNode>();
+  geomNode->SetModel(model);
+
+  return geomNode;
+}
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
@@ -100,7 +230,10 @@ static void ViewerInit(String sender, String message, const Variant &data)
     mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
   }
 
+  mData.spTestGeomNode = CreateTestModel(mData.spKernel);
+
   mData.spScene->GetRootNode()->AddChild(mData.spUDNode);
+  mData.spScene->GetRootNode()->AddChild(mData.spTestGeomNode);
   mData.spScene->MakeDirty();
 }
 
@@ -109,12 +242,14 @@ static void ViewerInit(String sender, String message, const Variant &data)
 static void ViewerDeinit(String sender, String message, const Variant &data)
 {
   mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
+  mData.spScene->GetRootNode()->RemoveChild(mData.spTestGeomNode);
 
   mData.spUDNode = nullptr;
   mData.spUDModel = nullptr;
   mData.spView = nullptr;
   mData.spScene = nullptr;
   mData.spSimpleCamera = nullptr;
+  mData.spTestGeomNode = nullptr;
   mData.spCITimerSub = nullptr;
   mData.spCITimer = nullptr;
 }

@@ -3,6 +3,7 @@
 #define EPVERTEX_H
 
 struct epFormatDeclaration;
+struct epShaderProgram;
 struct epArrayBuffer;
 
 enum epArrayDataFormat
@@ -45,14 +46,19 @@ enum epArrayDataFormat
 
 struct epArrayElement
 {
-  char attributeName[56];
+  char attributeName[48];
   epArrayDataFormat format;
-//  int componentCount;
   int stream;
+  int offset;
+  int stride;
 };
 
-epFormatDeclaration *epVertex_CreateFormatDeclaration(const epArrayElement *pElementArray, int elementCount);
-void epVertex_DestroyFormatDeclaration(epFormatDeclaration **ppDeclaration);
+struct epShaderInputConfig;
+
+epShaderInputConfig *epVertex_CreateShaderInputConfig(const epArrayElement *pElementArray, size_t elementCount, epShaderProgram *pShaderProgram);
+void epVertex_GetShaderInputConfigStreams(const epShaderInputConfig *pConfig, int *pStreams, size_t streamsLength, int *pNumStreams);
+
+void epVertex_DestroyShaderInputConfig(epShaderInputConfig **ppDeclaration);
 
 epArrayBuffer* epVertex_CreateIndexBuffer(epArrayDataFormat format);
 epArrayBuffer* epVertex_CreateVertexBuffer(epArrayDataFormat elements[], size_t numElements);

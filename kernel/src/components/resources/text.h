@@ -7,7 +7,7 @@
 
 namespace ep {
 
-SHARED_CLASS(Buffer);
+SHARED_CLASS(Text);
 
 class Text : public Buffer
 {
@@ -23,6 +23,17 @@ public:
   static Variant ComponentParamsToXMLMap(Variant map);
 
   void CopyBuffer(String text) { Buffer::CopyBuffer(text); }
+
+  Slice<char> Map()
+  {
+    Slice<void> _buffer = Buffer::Map();
+    return Slice<char>((char*)_buffer.ptr, _buffer.length);
+  }
+  Slice<const char> MapForRead()
+  {
+    Slice<const void> buffer = Buffer::MapForRead();
+    return Slice<const char>((const char*)buffer.ptr, buffer.length);
+  }
 
   // TODO: move this somewhere else
   static uint32_t GetLineNumberFromByteIndex(String buffer, size_t index);
