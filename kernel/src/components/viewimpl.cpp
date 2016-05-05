@@ -142,8 +142,9 @@ void ViewImpl::OnDirty()
     spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight, &spRenderView->projection);
 
     spRenderView->spScene = spScene->GetRenderScene();
-    spRenderView->spScene->renderFlags = (udRenderFlags)renderFlags.v;
-    spRenderView->options = options;
+
+    spRenderView->options = udRenderOptions{ sizeof(udRenderOptions), GetRenderableUDFlags(), nullptr, nullptr,
+                                             nullptr, nullptr, nullptr, nullptr };
 
     spRenderView->displayWidth = displayWidth;
     spRenderView->displayHeight = displayHeight;

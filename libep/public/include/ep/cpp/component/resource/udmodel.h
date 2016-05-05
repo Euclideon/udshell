@@ -11,6 +11,14 @@ namespace ep {
 
 SHARED_CLASS(UDModel);
 
+EP_EXPLICIT_BITFIELD(UDModelFlags,
+  None = 0,
+  SynchronousStream = 4096,
+  Transparent = 2048,
+  DoNotWriteColor = 64,
+  PixelApproxOpt = 1024
+);
+
 class UDModel : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, UDModel, IUDModel, Resource, EPKERNEL_PLUGINVERSION, "UD model resource", 0)
@@ -22,8 +30,8 @@ public:
   const Rect<uint32_t> &GetRenderClipRect() const { return pImpl->GetRenderClipRect(); }
   void SetRenderClipRect(const Rect<uint32_t>& _rect) { pImpl->SetRenderClipRect(_rect); }
 
-  uint32_t GetRenderFlags() const { return pImpl->GetRenderFlags(); }
-  void SetRenderFlags(uint32_t flags) { pImpl->SetRenderFlags(flags); }
+  UDModelFlags GetRenderFlags() const { return pImpl->GetRenderFlags(); }
+  void SetRenderFlags(UDModelFlags flags) { pImpl->SetRenderFlags(flags); }
 
   // This is temporary the Scale might be non uniform
   double GetUDScale() const { return pImpl->GetUDMatrix().a[0]; }

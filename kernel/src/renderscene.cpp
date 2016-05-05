@@ -108,8 +108,6 @@ void RenderableView::RenderUD()
     udRender_SetMatrixF64(pRenderView, udRMT_Projection, projection.a);
     udRender_SetMatrixF64(pRenderView, udRMT_Camera, camera.a);
 
-    options.flags = spScene->renderFlags;
-
     if (pickingEnabled)
       options.pick = &udPick;
 

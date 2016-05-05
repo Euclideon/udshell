@@ -10,6 +10,7 @@
 namespace ep {
 
 SHARED_CLASS(DataSource);
+EP_PROTOTYPE_ENUM(UDModelFlags);
 
 class IUDModel
 {
@@ -20,8 +21,8 @@ public:
   virtual const Rect<uint32_t> &GetRenderClipRect() const = 0;
   virtual void SetRenderClipRect(const Rect<uint32_t>& _rect) = 0;
 
-  virtual uint32_t GetRenderFlags() const = 0;
-  virtual void SetRenderFlags(uint32_t flags) = 0;
+  virtual UDModelFlags GetRenderFlags() const = 0;
+  virtual void SetRenderFlags(UDModelFlags flags) = 0;
 
   virtual double GetUDScale() const = 0;
   virtual const Double4x4 &GetUDMatrix() const = 0;

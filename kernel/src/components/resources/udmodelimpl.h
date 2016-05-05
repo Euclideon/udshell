@@ -32,8 +32,8 @@ public:
   const Rect<uint32_t> &GetRenderClipRect() const override final { return rect; }
   void SetRenderClipRect(const Rect<uint32_t>& _rect) override final { rectSet = true; rect = _rect; }
 
-  uint32_t GetRenderFlags() const override final { return renderFlags; }
-  void SetRenderFlags(uint32_t flags) override final { renderFlags = (udRenderFlags)flags; }
+  UDModelFlags GetRenderFlags() const override final { return renderFlags; }
+  void SetRenderFlags(UDModelFlags flags) override final { renderFlags = flags; }
 
   double GetUDScale() const override final { EPASSERT(udmatrix.a[0] == udmatrix.a[5] && udmatrix.a[0] == udmatrix.a[10], "NonUniform Scale"); return udmatrix.a[0]; }
   const Double4x4 &GetUDMatrix() const override final { return udmatrix; }
@@ -54,7 +54,7 @@ private:
   udOctree *pOctree = nullptr;
 
   uint32_t startingRoot = 0;
-  udRenderFlags renderFlags = udRF_None;
+  UDModelFlags renderFlags = UDModelFlags::None;
   bool rectSet = false;
 };
 
