@@ -8,7 +8,8 @@ namespace ep {
 
 EP_BITFIELD(EnumerateFlags,
   NoStatic,
-  NoDynamic
+  NoDynamic,
+  NoInherited
 );
 
 class IComponent
