@@ -59,7 +59,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     if (result == udR_Success)
       SetResource(source->asString(), model);
 
-    Array<ElementMetadata, 32> elementMetadata;
+    Array<Variant> varMetadata;
 
     for (udStreamType i = udST_RawAttributeFirst; i <= udST_RawAttributeLast; i = udStreamType(i + 1))
     {
@@ -83,12 +83,12 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
       md.type = md.info.AsString();
 
       md.offset = 0;
-
-      elementMetadata.pushBack(md);
+      varMetadata.pushBack(md);
+      varMetadata[size_t(i - udST_RawAttributeFirst)].insertItem("blend", UDAttributeBlend(descriptor.blendType));
     }
 
-    if (elementMetadata.length)
-      meta->Insert("attributeinfo", elementMetadata);
+    if (varMetadata.length)
+      meta->Insert("attributeinfo", std::move(varMetadata));
   }
 }
 
