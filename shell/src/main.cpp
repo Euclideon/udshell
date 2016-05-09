@@ -396,11 +396,14 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   return geomNode;
 }
 
-void Init(String sender, String message, const Variant &data)
+void Register(String sender, String message, const Variant &data)
 {
   // TODO: this path should be changed for release
   spKernel->Call("registerqmlcomponents", "shell/res/qml");
+}
 
+void Init(String sender, String message, const Variant &data)
+{
   epscope(fail) { if (!spMainWindow) spKernel->LogError("Error creating MainWindow UI Component\n"); };
   spMainWindow = component_cast<Window>(spKernel->CreateComponent("ui.appwindow"));
 
@@ -513,6 +516,7 @@ int main(int argc, char *argv[])
     int threadCount = epGetHardwareThreadCount() - 1;
     spKernel = SharedPtr<Kernel>(Kernel::CreateInstance(epParseCommandLine(argc, argv), threadCount));
 
+    spKernel->RegisterMessageHandler("register", &Register);
     spKernel->RegisterMessageHandler("init", &Init);
     spKernel->RegisterMessageHandler("deinit", &Deinit);
 
