@@ -77,6 +77,7 @@ struct GeomJob
 
   // TODO : Hack until we standardise the shader inputs provide by ep.
   RenderShaderProperty viewProjection;
+  bool setViewProjectionUniform;
 };
 
 class RenderableScene : public RefCounted

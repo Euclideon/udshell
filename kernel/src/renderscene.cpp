@@ -166,7 +166,9 @@ void RenderableView::RenderGPU()
     // TODO : Renderstate
 
     job.spProgram->Use();
-    job.spProgram->setUniform(job.viewProjection.index, Float4x4::create(wvp));
+    if (job.setViewProjectionUniform)
+      job.spProgram->setUniform(job.viewProjection.index, Float4x4::create(wvp));
+
     for (size_t i = 0; i < job.uniforms.length; ++i)
       job.spProgram->setUniform(job.uniforms[i].index, job.uniforms[i].data);
 
