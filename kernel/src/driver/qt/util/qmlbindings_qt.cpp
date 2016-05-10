@@ -137,7 +137,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     auto data = SharedPtr<QtPropertyData>::create(i);
     auto getterShim = (property.isReadable() ? MethodShim(&QtShims::getter, data) : MethodShim(nullptr));
     auto setterShim = (property.isWritable() ? MethodShim(&QtShims::setter, data) : MethodShim(nullptr));
-    uint32_t flags = (property.isConstant() ? ep::PropertyFlags::epPF_Immutable : 0);
+    uint32_t flags = (property.isConstant() ? (uint32_t)ep::PropertyFlags::epPF_Immutable : 0);
 
     pDesc->propertyTree.Insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyName, propertyDescStr, nullptr, flags }, getterShim, setterShim));
   }
@@ -606,7 +606,7 @@ const QtEPMetaObject *QtMetaObjectGenerator::Generate(const ep::ComponentDesc *p
   const QMetaObject *pParentObject = &QObject::staticMetaObject;
   const QtEPMetaObject *pMetaObj = nullptr;
 
-  if (pMetaObj = QtMetaObjectGenerator::CheckCache(pDesc))
+  if ((pMetaObj = QtMetaObjectGenerator::CheckCache(pDesc)))
     return pMetaObj;
 
   else if (pDesc->pSuperDesc)
