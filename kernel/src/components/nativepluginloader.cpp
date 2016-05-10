@@ -48,13 +48,22 @@ bool NativePluginLoader::LoadPlugin(String filename)
   // try and load library
   HMODULE hDll = LoadLibraryW(widePath);
   if (hDll == NULL)
-    return false;
+  {
+    LogError("Unable to load plugin '{0}' - error code '{1}'", filename, (uint32_t)GetLastError());
+
+    // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
+    // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
+    return true;
+  }
 
   epPlugin_InitProc *pInit = (epPlugin_InitProc*)GetProcAddress(hDll, pFuncName);
   if (!pInit)
   {
     FreeLibrary(hDll);
-    return false;
+
+    // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
+    // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
+    return true;
   }
 
   bool bSuccess = pInit(s_pInstance);
@@ -70,13 +79,22 @@ bool NativePluginLoader::LoadPlugin(String filename)
 
   void *hSo = dlopen(filename.toStringz(), RTLD_NOW);
   if (hSo == NULL)
-    return false;
+  {
+    LogError("Unable to load plugin '{0}' - error '{1}'", filename, dlerror());
+
+    // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
+    // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
+    return true;
+  }
 
   epPlugin_InitProc *pInit = (epPlugin_InitProc*)dlsym(hSo, pFuncName);
   if (!pInit)
   {
     dlclose(hSo);
-    return false;
+
+    // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
+    // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
+    return true;
   }
 
   bool bSuccess = pInit(s_pInstance);
