@@ -36,6 +36,7 @@ public:
   using ImplSuper = BaseImpl<C, I>;
 
   const ComponentDescInl* GetDescriptor() const { return (const ComponentDescInl*)pInstance->GetDescriptor(); }
+  const ComponentDescInl* GetSuperDescriptor() const { return (const ComponentDescInl*)GetDescriptor()->pSuperDesc; }
   Kernel* GetKernel() const { return &pInstance->GetKernel(); }
 
   C *pInstance;
