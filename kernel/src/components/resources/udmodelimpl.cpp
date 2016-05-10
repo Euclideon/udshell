@@ -27,9 +27,8 @@ Array<const PropertyInfo> UDModel::GetProperties() const
     EP_MAKE_PROPERTY(StartingRoot, "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", nullptr, 0),
     EP_MAKE_PROPERTY(RenderClipRect, "Clipping Rect of the Screen", nullptr, 0),
     EP_MAKE_PROPERTY(RenderFlags, "UD Rendering Flags", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(UDScale, "Internal Scale of the Model", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(UDMatrix, "UD Matrix", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(BoundingVolume, "The Bouning Volume", nullptr, 0),
+    EP_MAKE_PROPERTY(UDMatrix, "UD Matrix", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(MemoryUsage, "Memory Usage", nullptr, 0),
     EP_MAKE_PROPERTY_EXPLICIT("VoxelShader", "Voxel Shader", EP_MAKE_GETTER(GetVoxelVarDelegate), EP_MAKE_SETTER(SetVoxelVarDelegate), nullptr, 0)
   };
 }
@@ -57,27 +56,6 @@ UDRenderState UDModelImpl::GetUDRenderState() const
   }
 
   return state;
-}
-
-BoundingVolume UDModelImpl::GetBoundingVolume() const
-{
-  BoundingVolume vol;
-
-  EPASSERT(udmatrix.a[0] == udmatrix.a[5] && udmatrix.a[0] == udmatrix.a[10], "NonUniform Scale");
-
-  Double3 min = -(udmatrix.axis.t.toVector3());
-  Double3 max = min + Double3::create(udmatrix.a[0]);
-
-  // Theoretically there could be rotation so redoing min max
-  vol.min.x = udMin(min.x, max.x);
-  vol.min.y = udMin(min.y, max.y);
-  vol.min.z = udMin(min.z, max.z);
-
-  vol.max.x = udMax(min.x, max.x);
-  vol.max.y = udMax(min.y, max.y);
-  vol.max.z = udMax(min.z, max.z);
-
-  return vol;
 }
 
 } // namespace ep

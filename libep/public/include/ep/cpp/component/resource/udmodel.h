@@ -12,6 +12,26 @@ namespace ep {
 
 SHARED_CLASS(UDModel);
 
+// UDModel Metadata
+// ----------------
+// "octreeheader" The octree header data (VarMap)
+// "attributeinfo" Array of attribute descriptors (Array<UDElementMetadata>)
+
+// "octreeheader"
+//  This is a VarMap containg the models header data.
+//   Key              Type
+//  ------------------------
+//  "scale"           double
+//  "unitMeterScale   double
+//  "pivotOrigin"     Double3
+//  "sourceBias"      Double3
+//  "sourceScale"     Double3
+//  "boundingVolume"  BoundingVolume
+//  "maxOctreeDepth"  uint32_t
+
+// "attributeinfo"
+//  This is an array of UDElementMetadatas. The attributes present in each node.
+
 EP_EXPLICIT_BITFIELD(UDModelFlags,
   None = 0,
   SynchronousStream = 4096,
@@ -41,8 +61,8 @@ struct UDElementMetadata : public ElementMetadata
 class UDModel : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, UDModel, IUDModel, Resource, EPKERNEL_PLUGINVERSION, "UD model resource", 0)
-
 public:
+
   uint32_t GetStartingRoot() const { return pImpl->GetStartingRoot(); }
   void SetStartingRoot(uint32_t root) { return pImpl->SetStartingRoot(root); }
 
@@ -52,16 +72,15 @@ public:
   UDModelFlags GetRenderFlags() const { return pImpl->GetRenderFlags(); }
   void SetRenderFlags(UDModelFlags flags) { pImpl->SetRenderFlags(flags); }
 
-  // This is temporary the Scale might be non uniform
-  double GetUDScale() const { return pImpl->GetUDMatrix().a[0]; }
   const Double4x4 &GetUDMatrix() const { return pImpl->GetUDMatrix(); }
-
-  BoundingVolume GetBoundingVolume() const { return pImpl->GetBoundingVolume(); }
+  void SetUDMatrix(const Double4x4 &matrix){ pImpl->SetUDMatrix(matrix); }
 
   UDRenderState GetUDRenderState() const { return pImpl->GetUDRenderState(); }
 
   VarDelegate GetVoxelVarDelegate() const { return pImpl->GetVoxelVarDelegate(); }
   void SetVoxelVarDelegate(VarDelegate del) { pImpl->SetVoxelVarDelegate(del); }
+
+  int64_t GetMemoryUsage() const { return pImpl->GetMemoryUsage(); }
 
   EP_FRIENDS_WITH_IMPL(UDSource);
 protected:
