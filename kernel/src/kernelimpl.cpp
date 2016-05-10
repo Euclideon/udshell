@@ -350,6 +350,10 @@ void KernelImpl::FinishInit()
   // init the components
   InitComponents();
 
+  // call application register
+  if (HasMessageHandler("register"))
+    SendMessage("$register", "#", "register", nullptr);
+
   // load the plugins
   LoadPluginDir("bin/plugins");
 
