@@ -128,6 +128,27 @@ protected:
 };
 
 
+// This shim class wraps an ep::Component in a QObject that can be accessible from QML
+// A special QMetaObject will be generated in order to reflect the EP Meta Data and expose it to Qt
+// TODO: This class will eventually replace QtEPComponent
+class QtTestComponent : public QObject
+{
+  Q_OBJECT_FAKE
+
+public:
+  QtTestComponent(ep::Component *pComp);
+  ~QtTestComponent();
+
+private:
+  // Internal Meta Magic functions
+  static int qt_static_metacall_int(QtTestComponent *pObj, QMetaObject::Call, int, void **);
+  int qt_metacall_property_int(QMetaObject::Call call, int index, void **v);
+
+  mutable const QMetaObject *pMetaObj = nullptr;
+  ep::Component *pComponent = nullptr;
+};
+
+
 // This shim class wraps our qt::QtKernel specialised kernel in a QObject that can be accessible from QML
 class QtKernelQml : public QObject
 {
@@ -176,5 +197,17 @@ private:
 };
 
 } // namespace qt
+
+// This ensures qobject_cast works with our fake QtTestComponent objects
+template <> inline qt::QtTestComponent *qobject_cast<qt::QtTestComponent*>(const QObject *o)
+{
+  void *result = o ? const_cast<QObject *>(o)->qt_metacast("QtTestComponent") : 0;
+  return (qt::QtTestComponent*)(result);
+}
+template <> inline qt::QtTestComponent *qobject_cast<qt::QtTestComponent*>(QObject *o)
+{
+  void *result = o ? o->qt_metacast("QtTestComponent") : 0;
+  return (qt::QtTestComponent*)(result);
+}
 
 #endif  // QMLBINDINGS_QT_H

@@ -12,6 +12,8 @@
 #include "driver/qt/components/qobjectcomponent_qt.h"
 
 #include <QQmlContext>
+#include <QtCore/private/qmetaobject_p.h>
+#include <QtCore/private/qmetaobjectbuilder_p.h>
 
 namespace qt {
 
@@ -135,8 +137,9 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     auto data = SharedPtr<QtPropertyData>::create(i);
     auto getterShim = (property.isReadable() ? MethodShim(&QtShims::getter, data) : MethodShim(nullptr));
     auto setterShim = (property.isWritable() ? MethodShim(&QtShims::setter, data) : MethodShim(nullptr));
+    uint32_t flags = (property.isConstant() ? ep::PropertyFlags::epPF_Immutable : 0);
 
-    pDesc->propertyTree.Insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyName, propertyDescStr }, getterShim, setterShim));
+    pDesc->propertyTree.Insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyName, propertyDescStr, nullptr, flags }, getterShim, setterShim));
   }
 
   for (int i = pMetaObject->methodOffset(); i < pMetaObject->methodCount(); ++i)
@@ -548,6 +551,307 @@ void QtKernelQml::exec(QString str)
 QtFocusManager *QtKernelQml::getFocusManager() const
 {
   return pKernel->GetFocusManager();
+}
+
+
+// Our internal QMetaObject - we can stuff extra info in here if necessary
+struct QtEPMetaObject : public QMetaObject
+{
+  QtEPMetaObject()
+  {
+    d.data = 0;
+    d.stringdata = 0;
+  }
+
+  ~QtEPMetaObject()
+  {
+    delete[](int*)d.data;
+    delete[](char*)d.stringdata;
+  }
+};
+
+// Helper factory class which creates a new QMetaObject based on a EP Component Descriptor
+// TODO: This should cache meta objects for previously encountered types
+class QtMetaObjectGenerator
+{
+public:
+  // TODO
+  static const QtEPMetaObject *CheckCache(const ep::ComponentDesc *pDesc) { return nullptr; }
+
+  static const QtEPMetaObject *Generate(const ep::ComponentDesc *pDesc);
+
+private:
+  QtMetaObjectGenerator(const ep::ComponentDesc *pDesc);
+  ~QtMetaObjectGenerator() {}
+
+  QtEPMetaObject *CreateMetaObject(const QMetaObject *pParent);
+
+  void AddProperty(const ep::PropertyDesc *pProperty);
+
+  // TODO: potentially use this in the property map if we need further data
+  //struct Property
+  //{
+    //int type = 0;
+    //uint flags = 0;
+  //};
+  QMap<QByteArray, uint> propertyMap;
+  const ep::ComponentDescInl *pDesc;
+};
+
+
+// Generate a custom QMetaObject that is populated based on the EP Component Descriptor and reflects the inheritance structure of the EP Component
+// Note that QObject will be the always be the top most parent, followed by ep::Component and so forth.
+const QtEPMetaObject *QtMetaObjectGenerator::Generate(const ep::ComponentDesc *pDesc)
+{
+  const QMetaObject *pParentObject = &QObject::staticMetaObject;
+  const QtEPMetaObject *pMetaObj = nullptr;
+
+  if (pMetaObj = QtMetaObjectGenerator::CheckCache(pDesc))
+    return pMetaObj;
+
+  else if (pDesc->pSuperDesc)
+    pParentObject = QtMetaObjectGenerator::Generate(pDesc->pSuperDesc);
+
+  QtMetaObjectGenerator generator(pDesc);
+  return generator.CreateMetaObject(pParentObject);
+}
+
+// Internal only
+QtMetaObjectGenerator::QtMetaObjectGenerator(const ep::ComponentDesc *_pDesc)
+  : pDesc((const ep::ComponentDescInl*)_pDesc)
+{
+  using namespace ep;
+
+  // Populate our property map with the component descriptor's properties (not including its super)
+  for (auto p : pDesc->propertyTree)
+  {
+    if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->propertyTree.Get(p.key))
+      AddProperty(&p.value);
+  }
+
+  // TODO: methods and events
+}
+
+// Internal only
+QtEPMetaObject *QtMetaObjectGenerator::CreateMetaObject(const QMetaObject *pParent)
+{
+  // Verify MOC hasn't changed
+  static_assert(QMetaObjectPrivate::OutputRevision == 7, "QtMetaObjectGenerator should generate the same version as moc; this code may need to be updated in order to be binary compatible!!");
+
+  // QMetaObject's refer to two main variable length data blobs:
+  // a) const uint *data - This provides the index, type, flag etc information for the property/method/classinfo/signals etc in addition to the header data
+  // b) const QByteArrayData *stringdata - This provides the string data for property/method signatures etc.
+  // NOTE!! Generating this information requires access to a couple private qt headers (contained within core-private), since private Qt classes don't adhere to
+  // strict API conventions, these are subject to change and may require recompilation and/or code changes in order to be compatible with future releases.
+  // However since these classes are used extensively by Qt's internal meta system in addition to MOC itself, it is unlikely for this to change without notice
+  // and especially unlikely to occur in the 5.x series.
+
+  QtEPMetaObject *pMetaObj = epNew(QtEPMetaObject);
+
+  int paramsDataSize = 0; // TODO
+
+  // Work out the size of the uint data block and allocate
+  uint intDataSize = MetaObjectPrivateFieldCount; // base header
+  intDataSize += propertyMap.count() * 3;         // property field
+  ++intDataSize;                                  // eod marker
+  uint *pIntData = epAllocType(uint, intDataSize, epAF_Zero);
+
+  // Populate the data block header - this is internally represented as a QMetaObjectPrivate struct
+  QMetaObjectPrivate *pHeader = reinterpret_cast<QMetaObjectPrivate *>(pIntData);
+  pHeader->revision = QMetaObjectPrivate::OutputRevision;
+  pHeader->className = 0;
+  pHeader->classInfoCount = 0;
+  pHeader->classInfoData = MetaObjectPrivateFieldCount;
+  pHeader->methodCount = 0;
+  pHeader->methodData = pHeader->classInfoData + pHeader->classInfoCount * 2;
+  pHeader->propertyCount = propertyMap.count();
+  pHeader->propertyData = pHeader->methodData + pHeader->methodCount * 5 + paramsDataSize;
+  pHeader->enumeratorCount = 0;
+  pHeader->enumeratorData = pHeader->propertyData + pHeader->propertyCount * 3;
+  pHeader->constructorCount = 0;
+  pHeader->constructorData = 0;
+  pHeader->flags = 0;
+  pHeader->signalCount = 0;
+
+  // The QMetaStringTable will be used to generate the QMetaObject's stringdata block
+  QMetaStringTable metaStringTable(QByteArray(pDesc->info.identifier.ptr, (int)pDesc->info.identifier.length));
+  uint offset = pHeader->classInfoData;
+
+  // TODO: methods
+
+  // Populate the property data
+  for (QMap<QByteArray, uint>::ConstIterator i = propertyMap.begin(); i != propertyMap.end(); ++i) {
+    pIntData[offset++] = metaStringTable.enter(i.key());  // Property name
+    pIntData[offset++] = QMetaType::QVariant;             // Property type
+    pIntData[offset++] = i.value();                       // Property flags
+  }
+
+  EPASSERT_THROW(offset == (uint)pHeader->enumeratorData, epR_Failure, "Malformed QMetaObject");
+  EPASSERT_THROW(offset == intDataSize - 1, epR_Failure, "Malformed QMetaObject");
+
+  // eod marker
+  pIntData[offset] = 0;
+
+  // Allocate the stringdata block and populate from our QMetaStringTable object
+  char *stringData = epAllocType(char, metaStringTable.blobSize(), epAF_None);
+  metaStringTable.writeBlob(stringData);
+
+  // Put the MetaObject together
+  pMetaObj->d.data = pIntData;
+  pMetaObj->d.extradata = 0;
+  pMetaObj->d.stringdata = reinterpret_cast<const QByteArrayData *>(stringData);
+  pMetaObj->d.static_metacall = 0;
+  pMetaObj->d.relatedMetaObjects = 0;
+  pMetaObj->d.superdata = pParent;
+
+  return pMetaObj;
+}
+
+// Internal only
+void QtMetaObjectGenerator::AddProperty(const ep::PropertyDesc *pProperty)
+{
+  uint &propFlags = propertyMap[QByteArray(pProperty->id.ptr, (int)pProperty->id.length)];
+  propFlags = PropertyFlags::Designable | PropertyFlags::Scriptable;
+
+  if (pProperty->getter) propFlags |= PropertyFlags::Readable;
+  if (pProperty->setter) propFlags |= (PropertyFlags::Writable | PropertyFlags::Stored);
+  if (pProperty->flags & ep::PropertyFlags::epPF_Immutable) propFlags |= PropertyFlags::Constant;
+
+  // TODO: notify signal
+}
+
+// !! BEGIN INTERNAL MOC STUFF
+
+// Unused - we override this with our fabricated object
+const QMetaObject QtTestComponent::staticMetaObject = {
+  { 0, 0, 0, 0, 0, 0 }
+};
+
+void QtTestComponent::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+  qt_static_metacall_int(qobject_cast<QtTestComponent*>(_o), _c, _id, _a);
+}
+
+const QMetaObject *QtTestComponent::metaObject() const
+{
+  if (!pMetaObj)
+  {
+    pMetaObj = QtMetaObjectGenerator::Generate(pComponent->GetDescriptor());
+    EPASSERT_THROW(pMetaObj, epR_Failure, "Unable to generate QMetaObject for component type '{0}'", pComponent->GetType());
+  }
+
+  return pMetaObj;
+}
+
+void *QtTestComponent::qt_metacast(const char *cname)
+{
+  if (!qstrcmp(cname, "QtTestComponent")) return (void*)this;
+  return QObject::qt_metacast(cname);
+}
+
+int QtTestComponent::qt_metacall(QMetaObject::Call call, int id, void **v)
+{
+  id = QObject::qt_metacall(call, id, v);
+  if (id < 0)
+    return id;
+
+  const QMetaObject *mo = metaObject();
+
+  switch (call)
+  {
+    case QMetaObject::InvokeMetaMethod:
+      id = qt_static_metacall_int(this, call, id, v);
+      break;
+    case QMetaObject::ReadProperty:
+    case QMetaObject::WriteProperty:
+    case QMetaObject::ResetProperty:
+      id = qt_metacall_property_int(call, id, v);
+      break;
+    case QMetaObject::QueryPropertyScriptable:
+    case QMetaObject::QueryPropertyDesignable:
+    case QMetaObject::QueryPropertyStored:
+    case QMetaObject::QueryPropertyEditable:
+    case QMetaObject::QueryPropertyUser:
+      id -= mo->propertyCount();
+      break;
+    default:
+      break;
+  }
+
+  EPASSERT_THROW(id < 0, epR_Failure, "qt_metacall called with unknown index '{0}' call type '{1}'", id, (int)call);
+  return id;
+}
+
+// !! END INTERNAL MOC STUFF
+
+
+QtTestComponent::QtTestComponent(ep::Component *pComp)
+{
+  EPASSERT_THROW(pComp, epR_InvalidArgument, "Creating a QtTestComponent from a null component");
+  pComponent = pComp;
+}
+
+QtTestComponent::~QtTestComponent()
+{
+  // TODO: when these are cached, we won't need to do this
+  while (pMetaObj && pMetaObj != &QObject::staticMetaObject)
+  {
+    const QMetaObject *pSuper = pMetaObj->superClass();
+    epDelete((QtEPMetaObject*)pMetaObj);
+    pMetaObj = pSuper;
+  }
+}
+
+int QtTestComponent::qt_static_metacall_int(QtTestComponent *_tc, QMetaObject::Call _c, int _id, void **_a)
+{
+  // TODO: currently unused
+  Q_ASSERT(_tc != 0);
+  if (_c == QMetaObject::InvokeMetaMethod) {
+    const QMetaObject *mo = _tc->metaObject();
+    switch (mo->method(_id + mo->methodOffset()).methodType()) {
+      case QMetaMethod::Signal:
+        //QMetaObject::activate(_tc->qObject(), mo, _id, _a);
+        //return _id - mo->methodCount();
+      case QMetaMethod::Method:
+      case QMetaMethod::Slot:
+        //return _tc->internalInvoke(_c, _id, _a);
+      default:
+        break;
+    }
+  }
+  return 0;
+}
+
+int QtTestComponent::qt_metacall_property_int(QMetaObject::Call call, int index, void **v)
+{
+  const QMetaObject *mo = metaObject();
+  QMetaProperty prop = mo->property(index + QObject::staticMetaObject.propertyCount());
+  index -= mo->propertyCount();
+
+  switch (call)
+  {
+    case QMetaObject::ReadProperty:
+    {
+      ep::Variant var = pComponent->Get(prop.name());
+      epFromVariant(var, (QVariant*)*v);
+      break;
+    }
+    case QMetaObject::WriteProperty:
+    {
+      ep::Variant var;
+      int typeId = prop.userType();
+      if (typeId == (int)QMetaType::QVariant)
+        var = epToVariant(*(QVariant*)v[0]);
+      else
+        var = epToVariant(QVariant(typeId, v[0]));
+      pComponent->Set(prop.name(), var);
+      break;
+    }
+    default:
+      break;
+  }
+
+  return index;
 }
 
 } // namespace qt
