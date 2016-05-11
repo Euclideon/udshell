@@ -565,8 +565,8 @@ struct QtEPMetaObject : public QMetaObject
 
   ~QtEPMetaObject()
   {
-    delete[](int*)d.data;
-    delete[](char*)d.stringdata;
+    epFree((uint*)d.data);
+    epFree((char*)d.stringdata);
   }
 };
 
@@ -680,7 +680,8 @@ QtEPMetaObject *QtMetaObjectGenerator::CreateMetaObject(const QMetaObject *pPare
   // TODO: methods
 
   // Populate the property data
-  for (QMap<QByteArray, uint>::ConstIterator i = propertyMap.begin(); i != propertyMap.end(); ++i) {
+  for (QMap<QByteArray, uint>::ConstIterator i = propertyMap.begin(); i != propertyMap.end(); ++i)
+  {
     pIntData[offset++] = metaStringTable.enter(i.key());  // Property name
     pIntData[offset++] = QMetaType::QVariant;             // Property type
     pIntData[offset++] = i.value();                       // Property flags
@@ -708,6 +709,7 @@ QtEPMetaObject *QtMetaObjectGenerator::CreateMetaObject(const QMetaObject *pPare
 }
 
 // Internal only
+// This will build the necessary Qt property information we need from an EP Property Descriptor
 void QtMetaObjectGenerator::AddProperty(const ep::PropertyDesc *pProperty)
 {
   uint &propFlags = propertyMap[QByteArray(pProperty->id.ptr, (int)pProperty->id.length)];
@@ -727,11 +729,14 @@ const QMetaObject QtTestComponent::staticMetaObject = {
   { 0, 0, 0, 0, 0, 0 }
 };
 
+// MOC function - static based meta access goes via here
 void QtTestComponent::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
   qt_static_metacall_int(qobject_cast<QtTestComponent*>(_o), _c, _id, _a);
 }
 
+// MOC function - retrieves the metaobject for an instance - used internally and externally
+// This will lazily create the QMetaObject
 const QMetaObject *QtTestComponent::metaObject() const
 {
   if (!pMetaObj)
@@ -743,30 +748,39 @@ const QMetaObject *QtTestComponent::metaObject() const
   return pMetaObj;
 }
 
+// MOC function - used internally by qobject_cast
 void *QtTestComponent::qt_metacast(const char *cname)
 {
   if (!qstrcmp(cname, "QtTestComponent")) return (void*)this;
   return QObject::qt_metacast(cname);
 }
 
+// MOC function - instance based meta access goes via here
 int QtTestComponent::qt_metacall(QMetaObject::Call call, int id, void **v)
 {
+  // See if this is a QObject meta call
+  // Note that regular Qt behaviour is to try from the parent down, offsetting the id along the way
+  // A negative id indicates the parent handled it
   id = QObject::qt_metacall(call, id, v);
   if (id < 0)
     return id;
 
+  // This will spin up the meta object if we don't already have one
   const QMetaObject *mo = metaObject();
 
   switch (call)
   {
+    // Funnel meta method access
     case QMetaObject::InvokeMetaMethod:
       id = qt_static_metacall_int(this, call, id, v);
       break;
+    // Funnel meta property access
     case QMetaObject::ReadProperty:
     case QMetaObject::WriteProperty:
     case QMetaObject::ResetProperty:
       id = qt_metacall_property_int(call, id, v);
       break;
+    // Don't do anything with queries but say we did
     case QMetaObject::QueryPropertyScriptable:
     case QMetaObject::QueryPropertyDesignable:
     case QMetaObject::QueryPropertyStored:
@@ -778,7 +792,7 @@ int QtTestComponent::qt_metacall(QMetaObject::Call call, int id, void **v)
       break;
   }
 
-  EPASSERT_THROW(id < 0, epR_Failure, "qt_metacall called with unknown index '{0}' call type '{1}'", id, (int)call);
+  EPASSERT_THROW(id < 0, epR_Failure, "Unsupported Qt Meta Access with index '{0}' and call type '{1}'", id, (int)call);
   return id;
 }
 
@@ -822,6 +836,8 @@ int QtTestComponent::qt_static_metacall_int(QtTestComponent *_tc, QMetaObject::C
   return 0;
 }
 
+// Internal
+// Qt property access meta function
 int QtTestComponent::qt_metacall_property_int(QMetaObject::Call call, int index, void **v)
 {
   const QMetaObject *mo = metaObject();
@@ -832,22 +848,26 @@ int QtTestComponent::qt_metacall_property_int(QMetaObject::Call call, int index,
   {
     case QMetaObject::ReadProperty:
     {
-      ep::Variant var = pComponent->Get(prop.name());
-      epFromVariant(var, (QVariant*)*v);
+      try {
+        epFromVariant(pComponent->Get(prop.name()), (QVariant*)*v);
+      }
+      catch (ep::EPException &) {
+        ep::ClearError();
+      }
       break;
     }
     case QMetaObject::WriteProperty:
     {
-      ep::Variant var;
-      int typeId = prop.userType();
-      if (typeId == (int)QMetaType::QVariant)
-        var = epToVariant(*(QVariant*)v[0]);
-      else
-        var = epToVariant(QVariant(typeId, v[0]));
-      pComponent->Set(prop.name(), var);
+      try {
+        pComponent->Set(prop.name(), epToVariant(*(QVariant*)v[0]));
+      }
+      catch (ep::EPException &) {
+        ep::ClearError();
+      }
       break;
     }
     default:
+      EPASSERT_THROW(false, epR_Failure, "Unsupported meta property access of type '{0}'", (int)call);
       break;
   }
 
