@@ -62,6 +62,7 @@ function merge_master() {
     git merge --abort
     exit 3;
   fi
+  git submodule update --init --recursive
   echo "merged successfully with origin/master"
 }
 
