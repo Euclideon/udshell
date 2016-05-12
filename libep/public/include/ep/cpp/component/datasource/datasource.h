@@ -8,11 +8,11 @@
 
 namespace ep {
 
-EP_ENUM(DataSourceFlags,
-  ReadOnly = 1 << 0,
-  WriteOnly = 1 << 1,
-  FlushImmediately = 1 << 2,
-  DeferredLoad = 1 << 3
+EP_BITFIELD(DataSourceFlags,
+  ReadOnly,
+  WriteOnly,
+  FlushImmediately,
+  DeferredLoad
 );
 
 SHARED_CLASS(DataSource);
