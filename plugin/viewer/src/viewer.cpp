@@ -72,7 +72,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     spScene->AddBookmark(MutableString128(Format, "{0}_bookmark", Viewer::GetFileNameFromPath(model->asString())), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
 
-  spView->SetUDRenderFlags(UDRenderFlags::PointCubes | UDRenderFlags::ClearTargets);
+  spView->SetUDRenderFlags(UDRenderFlags::ClearTargets);
 
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);

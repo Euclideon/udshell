@@ -18,10 +18,7 @@ class ViewImpl : public BaseImpl<View, IView>
 {
 public:
   ViewImpl(Component *pInstance, Variant::VarMap initParams)
-    : ImplSuper(pInstance)
-  {
-    memset(&options, 0, sizeof(options));
-  }
+    : ImplSuper(pInstance) {}
 
   void SetScene(SceneRef spScene) override final;
   SceneRef GetScene() const override final { return spScene; }
@@ -32,10 +29,6 @@ public:
   Dimensions<int> GetDimensions() const override final { return{ displayWidth, displayHeight }; }
   Dimensions<int> GetRenderDimensions() const override final { return{ renderWidth, renderHeight }; }
   float GetAspectRatio() const override final { return (float)displayWidth / (float)displayHeight; }
-
-  // TODO: Re-evaluate these functions when we figure out how we're handling ud in the public interface
-  void SetRenderOptions(const udRenderOptions &_options) { options = _options; }
-  const udRenderOptions &GetRenderOptions() const { return options; }
 
   void SetEnablePicking(bool enable) override final;
   bool GetEnablePicking() const override final { return pickingEnabled; }
@@ -48,8 +41,8 @@ public:
   void GoToBookmark(String bookmarkName) override final;
 
   // TODO: Move this into the layer system once its implemented.
-  void SetUDRenderFlags(UDRenderFlags flags) override final { renderFlags = flags; }
-  UDRenderFlags GetUDRenderflags() const override final { return renderFlags; }
+  void SetUDRenderFlags(UDRenderFlags flags) override final { udFlags = flags; }
+  UDRenderFlags GetUDRenderflags() const override final { return udFlags; }
 
   // TODO: Implement this/expose to the public api
   struct PickResult
@@ -107,12 +100,9 @@ public:
 
   ScreenPoint mousePosition = { 0, 0 };
 
-  // --- possibly derived stuff? ---
-  udRenderOptions options;
-
   bool pickingEnabled = false;
 
-  UDRenderFlags renderFlags;
+  UDRenderFlags udFlags;
 
   // TODO: RequestPick uses this but needs to be implemented
   /*struct PickRequest
@@ -122,7 +112,16 @@ public:
   };
 
   Array<PickRequest> pickRequests;*/
+private:
+  udRenderFlags GetRenderableUDFlags();
 };
+
+
+inline udRenderFlags ViewImpl::GetRenderableUDFlags()
+{
+  // DoNotRenderCubes is the same bit as udRF_PointCubes but represents the inverse
+  return udRenderFlags(udFlags.v ^ UDRenderFlags::DoNotRenderCubes);
+}
 
 } // namespace ep
 

@@ -203,7 +203,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
   mData.spSimpleCamera = mData.spKernel->CreateComponent<SimpleCamera>();
   mData.spUDNode = mData.spKernel->CreateComponent<UDNode>();
 
-  mData.spView->SetUDRenderFlags(UDRenderFlags::PointCubes | UDRenderFlags::ClearTargets);
+  mData.spView->SetUDRenderFlags(UDRenderFlags::ClearTargets);
 
   mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
   mData.spSimpleCamera->SetSpeed(1.0);

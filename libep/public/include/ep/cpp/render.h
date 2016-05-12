@@ -105,21 +105,15 @@ struct GeomRenderJob
   Delegate<void(SharedPtr<RefCounted>)> retainShaderInputConfig;
 };
 
-EP_BITFIELD(UDRenderFlags,
-  NoOrtho,
-  RenderMask,
-  RenderImmediate,
-  RenderCellBounds,
-  ClearTargets,
-  ForceZCompare,
-  QuickTest,
-  PointCubes,
-  DisablePatch,
-  ForceSingleRoot,
-  Patch2PixelOpt,
-  Transparent,
-  SynchronousStream
-);
+EP_EXPLICIT_BITFIELD(UDRenderFlags,
+  None = 0,
+  ClearTargets = 16,
+  ForceZCompare = 32,
+  DoNotWriteColor = 64,
+  PixelApproxOpt = 1024,
+  DoNotRenderCubes = 128,
+  RenderPoints = 8192
+  );
 
 struct UDRenderState
 {
