@@ -434,7 +434,7 @@ RenderShaderInputConfig::RenderShaderInputConfig(Renderer *pRenderer, SharedArra
     EPASSERT_THROW(varAttribs.isValid(), epR_Failure, "attribute info not present in buffer metadata");
     SharedArray<ElementMetadata> attribs = varAttribs.as<SharedArray<ElementMetadata>>();
 
-    int stride = attribs.back().offset + GetElementTypeSize(attribs.back().type);
+    size_t stride = attribs.back().offset + GetElementTypeSize(attribs.back().type);
     for (const auto &elem : attribs)
     {
       epArrayElement &halElem = elementArray.pushBack();
@@ -443,8 +443,8 @@ RenderShaderInputConfig::RenderShaderInputConfig(Renderer *pRenderer, SharedArra
 
       halElem.format = GetElementType(elem.type);
       halElem.stream = (int)i;
-      halElem.offset = elem.offset;
-      halElem.stride = stride;
+      halElem.offset = (int)elem.offset;
+      halElem.stride = (int)stride;
     }
   }
 

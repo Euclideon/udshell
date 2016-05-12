@@ -7,11 +7,11 @@
 namespace ep
 {
 
-SHARED_CLASS(UDDataSource);
+SHARED_CLASS(UDSource);
 
-class UDDataSource : public DataSource
+class UDSource : public DataSource
 {
-  EP_DECLARE_COMPONENT(ep, UDDataSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides UD Data", 0)
+  EP_DECLARE_COMPONENT(ep, UDSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides UD Data", 0)
 public:
 
   enum class Flags : size_t
@@ -34,7 +34,7 @@ protected:
 
   static void StaticInit(ep::Kernel *pKernel);
 
-  UDDataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+  UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 };
 
 }

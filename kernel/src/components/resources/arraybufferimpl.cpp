@@ -47,9 +47,9 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
 
   // record element types as metadata
   Array<ElementMetadata,32> elementMetadata;
-  int offset = 0;
+  size_t offset = 0;
 
-  String et = _elementType.trim();
+  String et = elementType.trim();
   if(et.length > 2 && et.front() == '{' && et.back() == '}')
   {
     // multiple element stream
@@ -57,13 +57,13 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
     et.tokenise([&](String t, size_t i) {
       t = t.trim();
 
+      elementMetadata.pushBack(ElementMetadata{ nullptr, t, ElementInfo::Parse(t), offset });
       // calculate offset
-      elementMetadata.pushBack(ElementMetadata{ nullptr, t, offset });
       offset += GetElementTypeSize(t);
     }, ",");
   }
   else
-    elementMetadata.pushBack(ElementMetadata{ nullptr, et, 0 });
+    elementMetadata.pushBack(ElementMetadata{ nullptr, et, ElementInfo::Parse(et),  0 });
 
   pInstance->GetMetadata()->Insert("attributeinfo", elementMetadata);
 }

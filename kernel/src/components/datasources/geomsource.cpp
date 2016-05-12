@@ -8,7 +8,7 @@
 #include "ep/cpp/component/resource/metadata.h"
 #include "ep/cpp/component/resource/udmodel.h"
 #include "components/file.h"
-#include "components/datasources/uddatasource.h"
+#include "components/datasources/udsource.h"
 #include "hal/image.h"
 #include "ep/cpp/kernel.h"
 
@@ -16,6 +16,7 @@
 #include "assimp/Exporter.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
+#include "ep/cpp/stringof.h"
 
 #include <tuple>
 
@@ -206,6 +207,24 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
   }
 }
 
+struct BinTan
+{
+  Float3 binormal;
+  Float3 tangent;
+};
+
+static const ElementInfo binTanInfo[] = { { sizeof(Float3), { 3 }, ElementInfoFlags::Float },
+                                          { sizeof(Float3), { 3 }, ElementInfoFlags::Float } };
+} // ep
+
+template<> // TODO: Make this not in the gobal namespace!!!!!!!
+ep::SharedString stringof<ep::BinTan>()
+{
+  return ep::ElementInfo::BuildTypeString(ep::binTanInfo);
+}
+
+namespace ep {
+
 void GeomSource::ParseMeshes(const aiScene *pScene)
 {
   // copy all the meshes
@@ -232,11 +251,9 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     }
 
     // positions
-    typedef std::tuple<float[3]> VertPos;
-    Slice<VertPos> verts((VertPos*)mesh.mVertices, mesh.mNumVertices);
-
+    Slice<Float3> verts((Float3*)mesh.mVertices, mesh.mNumVertices);
     ArrayBufferRef spVerts = GetKernel().CreateComponent<ArrayBuffer>();
-    spVerts->AllocateFromData<VertPos>(verts);
+    spVerts->AllocateFromData<Float3>(verts);
     spVerts->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_position");
 
     SetResource(SharedString::concat("positions", i), spVerts);
@@ -246,11 +263,10 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     // normals
     if (mesh.HasNormals())
     {
-      typedef std::tuple<float[3]> VertNorm;
-      Slice<VertNorm> normals((VertNorm*)mesh.mNormals, mesh.mNumVertices);
 
+      Slice<Float3> normals((Float3*)mesh.mNormals, mesh.mNumVertices);
       ArrayBufferRef spNormals = GetKernel().CreateComponent<ArrayBuffer>();
-      spNormals->AllocateFromData<VertNorm>(normals);
+      spNormals->AllocateFromData<Float3>(normals);
       spNormals->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_normal");
 
       SetResource(SharedString::concat("normals", i), spNormals);
@@ -261,22 +277,20 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     // binormals & tangents
     if (mesh.HasTangentsAndBitangents())
     {
-      typedef std::tuple<float[3], float[3]> VertBinTan;
-
       ArrayBufferRef spBinTan = GetKernel().CreateComponent<ArrayBuffer>();
-      spBinTan->Allocate<VertBinTan>(mesh.mNumVertices);
+      spBinTan->Allocate<BinTan>(mesh.mNumVertices);
       spBinTan->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_binormal");
       spBinTan->GetMetadata()->Get("attributeinfo")[1].insertItem("name", "a_tangent");
 
-      Slice<VertBinTan> bt = spBinTan->Map<VertBinTan>();
+      Slice<BinTan> bt = spBinTan->Map<BinTan>();
       for (uint32_t j = 0; j<mesh.mNumVertices; ++j)
       {
-        std::get<0>(bt.ptr[j])[0] = mesh.mBitangents[j].x;
-        std::get<0>(bt.ptr[j])[1] = mesh.mBitangents[j].y;
-        std::get<0>(bt.ptr[j])[2] = mesh.mBitangents[j].z;
-        std::get<1>(bt.ptr[j])[0] = mesh.mTangents[j].x;
-        std::get<1>(bt.ptr[j])[1] = mesh.mTangents[j].y;
-        std::get<1>(bt.ptr[j])[2] = mesh.mTangents[j].z;
+        bt[j].binormal.x = mesh.mBitangents[j].x;
+        bt[j].binormal.y = mesh.mBitangents[j].y;
+        bt[j].binormal.z = mesh.mBitangents[j].z;
+        bt[j].tangent.x = mesh.mTangents[j].x;
+        bt[j].tangent.y = mesh.mTangents[j].y;
+        bt[j].tangent.z = mesh.mTangents[j].z;
       }
       spBinTan->Unmap();
 
@@ -288,11 +302,10 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     // UVs
     for (uint32_t t = 0; t<mesh.GetNumUVChannels(); ++t)
     {
-      typedef std::tuple<float[3]> VertUV;
-      Slice<VertUV> uvs((VertUV*)mesh.mTextureCoords[t], mesh.mNumVertices);
+      Slice<Float3> uvs((Float3*)mesh.mTextureCoords[t], mesh.mNumVertices);
 
       ArrayBufferRef spUVs = GetKernel().CreateComponent<ArrayBuffer>();
-      spUVs->AllocateFromData<VertUV>(uvs);
+      spUVs->AllocateFromData<Float3>(uvs);
       spUVs->GetMetadata()->Get("attributeinfo")[t].insertItem("name", SharedString::concat("a_uv", t));
 
       SetResource(SharedString::concat("uvs", i, "_", t), spUVs);
@@ -303,11 +316,10 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     // Colors
     for (uint32_t c = 0; c<mesh.GetNumColorChannels(); ++c)
     {
-      typedef std::tuple<float[4]> VertColor;
-      Slice<VertColor> colors((VertColor*)mesh.mColors[c], mesh.mNumVertices);
+      Slice<Float4> colors((Float4*)mesh.mColors[c], mesh.mNumVertices);
 
       ArrayBufferRef spColors = GetKernel().CreateComponent<ArrayBuffer>();
-      spColors->AllocateFromData<VertColor>(colors);
+      spColors->AllocateFromData<Float4>(colors);
       spColors->GetMetadata()->Get("attributeinfo")[c].insertItem("name", SharedString::concat("a_color", c));
 
       SetResource(SharedString::concat("colors", i, "_", c), spColors);
@@ -344,7 +356,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 GeomSource::XRefType GeomSource::GetXRefType(String url)
 {
   String ext = url.getRightAtLast(".", true);
-  Slice<const String> udDSExts = UDDataSource::StaticGetFileExtensions();
+  Slice<const String> udDSExts = UDSource::StaticGetFileExtensions();
   for (const String &udExt : udDSExts)
   {
     if (ext.eqIC(udExt))
@@ -369,9 +381,9 @@ void GeomSource::ParseXRefs(const aiScene *pScene)
     if (type == XRefType::UDModel)
     {
       // Load the UDDataSource
-      UDDataSourceRef spModelDS;
+      UDSourceRef spModelDS;
       epscope(fail) { if (!spModelDS) pKernel->LogError("GeomSource -- Failed to load UDModel \"{0}\"", url); };
-      spModelDS = GetKernel().CreateComponent<UDDataSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
+      spModelDS = GetKernel().CreateComponent<UDSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
 
       UDModelRef spUDModel;
       if (spModelDS->GetNumResources() > 0)

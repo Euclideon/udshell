@@ -19,7 +19,7 @@
 #include "components/resources/text.h"
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
-#include "components/datasources/uddatasource.h"
+#include "components/datasources/udsource.h"
 #include "components/console.h"
 
 // Components that do the Impl dance
@@ -296,7 +296,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   // data sources
   pInstance->RegisterComponentType<ImageSource>();
   pInstance->RegisterComponentType<GeomSource>();
-  pInstance->RegisterComponentType<UDDataSource>();
+  pInstance->RegisterComponentType<UDSource>();
 
   // dynamic components
   pInstance->RegisterComponentType<DynamicComponent>();
