@@ -157,6 +157,9 @@ struct Vector2
 {
   T x, y;
 
+  static const size_t elementCount = 2;
+  using ElementType = T;
+
   Vector2<T> operator -() const { Vector2<T> r = { -x, -y }; return r; }
 
   Vector2<T> operator +(const Vector2<T> &v) const { Vector2<T> r = { x+v.x, y+v.y }; return r; }
@@ -195,6 +198,9 @@ template <typename T>
 struct Vector3
 {
   T x, y, z;
+
+  static const size_t elementCount = 3;
+  using ElementType = T;
 
   Vector3<T>& toVector2() { return *(Vector2<T>*)this; }
   const Vector3<T>& toVector2() const { return *(Vector2<T>*)this; }
@@ -235,6 +241,9 @@ template <typename T>
 struct Vector4
 {
   T x, y, z, w;
+
+  static const size_t elementCount = 4;
+  using ElementType = T;
 
   Vector3<T>& toVector3() { return *(Vector3<T>*)this; }
   const Vector3<T>& toVector3() const { return *(Vector3<T>*)this; }
@@ -279,6 +288,9 @@ template <typename T>
 struct Quaternion
 {
   T x, y, z, w;
+
+  static const size_t elementCount = 4;
+  using ElementType = T;
 
   Quaternion<T> operator *(const Quaternion<T> &q) const { return Mul(*this, q); }
   Quaternion<T> operator *(T f) const { Quaternion<T> r = { x*f, y*f, z*f, w*f }; return r; }
@@ -332,6 +344,9 @@ struct Matrix4x4
         _03, _13, _23, _33;
     } m;
   };
+
+  static const size_t elementCount = 16;
+  using ElementType = T;
 
   Matrix4x4<T> operator *(const Matrix4x4<T> &_m) const { return Mul(*this, _m); }
   Matrix4x4<T> operator *(T f) const { return Mul(*this, f); }
