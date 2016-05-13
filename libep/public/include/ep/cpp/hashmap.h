@@ -1,8 +1,10 @@
 #if !defined(_EP_HASHMAP_HPP)
 #define _EP_HASHMAP_HPP
 
+#include "ep/cpp/platform.h"
 #include "ep/cpp/keyvaluepair.h"
 #include "ep/cpp/freelist.h"
+#include "ep/cpp/string.h"
 
 #include <functional>
 
@@ -40,6 +42,8 @@ public:
   size_t Size() const;
   bool Empty() const;
 
+  void Clear();
+
   template <typename Key, typename Val>
   V* Insert(Key&& key, Val&& val);
   V* Insert(KVP<K, V> &&v);
@@ -64,6 +68,8 @@ public:
   class Iterator;
   Iterator begin() const;
   Iterator end() const;
+  Iterator find(const K &key);
+  Iterator erase(Iterator it);
 
 private:
   struct Node
@@ -90,12 +96,17 @@ public:
 
     Iterator &operator++();
 
-    bool operator!=(Iterator rhs);
+    bool operator!=(Iterator rhs) const;
+    bool operator==(Iterator rhs) const;
 
     const KVPRef<K, V> operator*() const;
     KVPRef<K, V> operator*();
+    const V* operator->() const;
+    V* operator->();
 
   private:
+    friend class HashMap;
+
     Node **ppStart, **ppEnd;
     Node *pItem;
   };

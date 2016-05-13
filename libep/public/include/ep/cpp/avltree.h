@@ -74,12 +74,17 @@ public:
 
   ~AVLTree()
   {
-    Destroy(root);
-    root = nullptr;
+    Clear();
   }
 
   size_t Size() const { return size; }
   bool Empty() const { return size == 0; }
+
+  void Clear()
+  {
+    Destroy(root);
+    root = nullptr;
+  }
 
   V& Insert(K &&key, V &&rval)
   {

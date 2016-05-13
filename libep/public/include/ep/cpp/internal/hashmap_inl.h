@@ -46,13 +46,30 @@ bool HashMap<V, K, HashPred>::Empty() const
 }
 
 template <typename V, typename K, typename HashPred>
+void HashMap<V, K, HashPred>::Clear()
+{
+  for (size_t i = 0; (i < tableSizeMask + 1) && pool.Size(); ++i)
+  {
+    while (ppTable[i])
+    {
+      Node *pNext = ppTable[i]->pNext;
+      pool.Delete(ppTable[i]);
+      ppTable[i] = pNext;
+    }
+  }
+}
+
+template <typename V, typename K, typename HashPred>
 template <typename Key, typename Val>
 V* HashMap<V, K, HashPred>::Insert(Key&& key, Val&& val)
 {
   Node **ppBucket = GetBucket(key);
   V *pVal = GetValue(*ppBucket, key);
   if (pVal)
+  {
+    *pVal = std::forward<Val>(val);
     return pVal;
+  }
   Node *pNode = pool.New(std::forward<Key>(key), std::forward<Val>(val));
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
@@ -77,6 +94,7 @@ V* HashMap<V, K, HashPred>::InsertLazy(Key&& key, std::function<V()> lazy)
   V *pVal = GetValue(*ppBucket, key);
   if (pVal)
     return pVal;
+
   Node *pNode = pool.New(std::forward<Key>(key), lazy());
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
@@ -143,6 +161,44 @@ auto HashMap<V, K, HashPred>::end() const -> typename HashMap<V, K, HashPred>::I
 }
 
 template <typename V, typename K, typename HashPred>
+auto HashMap<V, K, HashPred>::find(const K &key) -> typename HashMap<V, K, HashPred>::Iterator
+{
+  Node **ppBucket = GetBucket(key);
+  Node *pItem = *ppBucket;
+  while (pItem)
+  {
+    if (HashPred::eq(pItem->data.key, key))
+    {
+      Iterator it(ppBucket, ppTable + tableSizeMask + 1);
+      it.pItem = pItem;
+      return it;
+    }
+    pItem = pItem->pNext;
+  }
+  return end();
+}
+
+template <typename V, typename K, typename HashPred>
+auto HashMap<V, K, HashPred>::erase(Iterator it) -> typename HashMap<V, K, HashPred>::Iterator
+{
+  EPASSERT_THROW(it.pItem, epR_InvalidArgument, "Attempting to erase null iterator");
+  if (*it.ppStart == it.pItem)
+    *it.ppStart = it.pItem->pNext;
+  else
+  {
+    Node **ppPrev = it.ppStart;
+    while (*ppPrev && (*ppPrev)->pNext != it.pItem)
+      ppPrev = &(*ppPrev)->pNext;
+    EPASSERT_THROW(*ppPrev, epR_InvalidArgument, "Attempting to erase with invalid iterator");
+    (*ppPrev)->pNext = it.pItem->pNext;
+  }
+
+  Node *pItem = it.pItem;
+  pool.Delete(pItem);
+  return ++it;
+}
+
+template <typename V, typename K, typename HashPred>
 auto HashMap<V, K, HashPred>::GetBucket(const K &key) const -> typename HashMap<V, K, HashPred>::Node**
 {
   auto h = HashPred::hash(key);
@@ -198,9 +254,15 @@ auto HashMap<V, K, HashPred>::Iterator::operator++() -> typename HashMap<V, K, H
 }
 
 template <typename V, typename K, typename HashPred>
-bool HashMap<V, K, HashPred>::Iterator::operator!=(Iterator rhs)
+bool HashMap<V, K, HashPred>::Iterator::operator!=(Iterator rhs) const
 {
   return pItem != rhs.pItem;
+}
+
+template <typename V, typename K, typename HashPred>
+bool HashMap<V, K, HashPred>::Iterator::operator==(Iterator rhs) const
+{
+  return pItem == rhs.pItem;
 }
 
 template <typename V, typename K, typename HashPred>
@@ -213,6 +275,18 @@ template <typename V, typename K, typename HashPred>
 KVPRef<K, V> HashMap<V, K, HashPred>::Iterator::operator*()
 {
   return KVPRef<K, V>(pItem->data.key, pItem->data.value);
+}
+
+template <typename V, typename K, typename HashPred>
+const V* HashMap<V, K, HashPred>::Iterator::operator->() const
+{
+  return &pItem->data.value;
+}
+
+template <typename V, typename K, typename HashPred>
+V* HashMap<V, K, HashPred>::Iterator::operator->()
+{
+  return &pItem->data.value;
 }
 
 } // namespace ep

@@ -11,6 +11,14 @@ public:
   FreeList(size_t listSize) :
     blockSize(listSize){}
 
+  FreeList(FreeList &&rval) :
+    pBlockList(rval.pBlockList), pFreeList(rval.pFreeList), numAllocated(rval.numAllocated), blockSize(rval.blockSize)
+  {
+    rval.numAllocated = rval.blockSize = 0;
+    rval.pBlockList = nullptr;
+    rval.pFreeList = nullptr;
+  }
+
   ~FreeList()
   {
     // TODO: Consider for each item searching the free list and if it doesn't exist calling its destructor.
