@@ -18,6 +18,7 @@
 #include "messagebox.h"
 #include "components/timer.h"
 
+#include "components/primitivegenerator.h"
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/material.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
@@ -45,20 +46,6 @@ static GeomNodeRef spTestGeomNode;
 
 MutableString256 projFilePath;
 MutableString256 projectName;
-
-struct Vertex
-{
-  Float3 position;
-  Float4 color;
-};
-
-static const ElementInfo vertexInfo[] = { { sizeof(Float3), { 3 }, ElementInfoFlags::Float },
-                                          { sizeof(Float4), { 4 }, ElementInfoFlags::Float } };
-template<>
-ep::SharedString stringof<Vertex>()
-{
-  return ElementInfo::BuildTypeString(vertexInfo);
-}
 
 // ---------------------------------------------------------------------------------------
 void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -331,48 +318,34 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   material->SetTexture(0, texture);
 #endif // 0
 
-  // Vertex Buffer
+  // Generate Cube
+  auto generator = kernel->CreateComponent<PrimitiveGenerator>();
+
   ArrayBufferRef vertexBuffer = kernel->CreateComponent<ArrayBuffer>();
-  {
-
-    static const Vertex vb[] = { Vertex{ Float3{ 0.0f, 0.0f, 0.0f },   Float4{ 1.0f, 1.0f, 1.0f, 1.0f } },
-                                 Vertex{ Float3{ 1.0f, 0.0f, 0.0f },   Float4{ 1.0f, 0.0f, 0.0f, 1.0f } },
-                                 Vertex{ Float3{ 1.0f, 1.0f, 0.0f },   Float4{ 0.0f, 1.0f, 0.0f, 1.0f } },
-                                 Vertex{ Float3{ 0.0f, 1.0f, 0.0f },   Float4{ 0.0f, 0.0f, 1.0f, 1.0f } },
-
-                                 Vertex{ Float3{ 0.0f, 0.0f, 1.0f },   Float4{ 1.0f, 1.0f, 0.0f, 1.0f } },
-                                 Vertex{ Float3{ 1.0f, 0.0f, 1.0f },   Float4{ 1.0f, 0.0f, 1.0f, 1.0f } },
-                                 Vertex{ Float3{ 1.0f, 1.0f, 1.0f },   Float4{ 0.0f, 1.0f, 1.0f, 1.0f } },
-                                 Vertex{ Float3{ 0.0f, 1.0f, 1.0f },   Float4{ 0.5f, 0.5f, 1.0f, 1.0f } } };
-
-    vertexBuffer->AllocateFromData(Slice<const Vertex>(vb));
-    MetadataRef metadata = vertexBuffer->GetMetadata();
-    metadata->Get("attributeinfo")[0].insertItem("name", "a_position");
-    metadata->Get("attributeinfo")[1].insertItem("name", "a_color");
-  }
-
-  // Index Buffer
   ArrayBufferRef indexBuffer = kernel->CreateComponent<ArrayBuffer>();
-  static const uint16_t ib[] = {
-                                 0, 4, 5,
-                                 0, 5, 1,
 
-                                 1, 5, 6,
-                                 1, 6, 2,
+  generator->GenerateCube(vertexBuffer, indexBuffer);
 
-                                 2, 6, 7,
-                                 2, 7, 3,
+  MetadataRef metadata = vertexBuffer->GetMetadata();
+  metadata->Get("attributeinfo")[0].insertItem("name", "a_position");
 
-                                 3, 7, 4,
-                                 3, 4, 0,
+  // Colour Buffer
+  ArrayBufferRef colourBuffer = kernel->CreateComponent<ArrayBuffer>();
+  {
+    colourBuffer->AllocateFromData(Slice<const Float4>{
+      Float4{ 1.0f, 1.0f, 1.0f, 1.0f },
+      Float4{ 1.0f, 0.0f, 0.0f, 1.0f },
+      Float4{ 0.0f, 1.0f, 0.0f, 1.0f },
+      Float4{ 0.0f, 0.0f, 1.0f, 1.0f },
 
-                                 4, 7, 6,
-                                 4, 6, 5,
-
-                                 3, 0, 1,
-                                 3, 1, 2
-                              };
-  indexBuffer->AllocateFromData(Slice<const uint16_t>(ib));
+      Float4{ 1.0f, 1.0f, 0.0f, 1.0f },
+      Float4{ 1.0f, 0.0f, 1.0f, 1.0f },
+      Float4{ 0.0f, 1.0f, 1.0f, 1.0f },
+      Float4{ 0.5f, 0.5f, 1.0f, 1.0f }
+    });
+    metadata = colourBuffer->GetMetadata();
+    metadata->Get("attributeinfo")[0].insertItem("name", "a_color");
+  }
 
 #if 0
   // Texture
@@ -388,9 +361,10 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   ModelRef model = kernel->CreateComponent<Model>();
   model->SetName("TestModel");
   model->AddVertexArray(vertexBuffer);
+  model->AddVertexArray(colourBuffer);
   model->SetIndexArray(indexBuffer);
   model->SetMaterial(material);
-  model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), size_t(EPARRAYSIZE(ib)) });
+  model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), indexBuffer->GetLength() });
 
   GeomNodeRef geomNode = kernel->CreateComponent<GeomNode>();
   geomNode->SetModel(model);
