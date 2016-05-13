@@ -47,6 +47,12 @@ template<typename ...Args> inline void LogTrace(String text, Args... args);
 
 struct ErrorState
 {
+  void Clear()
+  {
+    message.~SharedString();
+    message.ptr = nullptr;
+    message.length = 0;
+  }
   epResult error;
   SharedString message;
 

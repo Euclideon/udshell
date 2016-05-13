@@ -70,7 +70,7 @@ void ClearError()
 {
   while (ep::internal::s_errorDepth)
   {
-    ep::internal::s_errorStack[ep::internal::s_errorDepth-1].~ErrorState();
+    ep::internal::s_errorStack[ep::internal::s_errorDepth-1].Clear();
     --ep::internal::s_errorDepth;
   }
 }
@@ -79,7 +79,7 @@ void PopError()
 {
   if (ep::internal::s_errorDepth)
   {
-    ep::internal::s_errorStack[ep::internal::s_errorDepth - 1].~ErrorState();
+    ep::internal::s_errorStack[ep::internal::s_errorDepth - 1].Clear();
     --ep::internal::s_errorDepth;
   }
 }
