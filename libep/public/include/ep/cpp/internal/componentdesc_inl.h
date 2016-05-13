@@ -1,5 +1,7 @@
 namespace ep {
 
+namespace internal {
+
 // helper to get details from functions
 template<typename T>
 struct function_traits;
@@ -18,6 +20,23 @@ struct function_traits<R(C::*)(Args...)>
     using type = typename std::tuple_element<i, args>::type;
   };
 };
+template<typename C, typename R, typename ...Args>
+struct function_traits<R(C::*)(Args...) const>
+{
+  static const size_t num_args = sizeof...(Args);
+
+  using result_type = R;
+
+  using args = std::tuple<Args...>;
+
+  template <size_t i>
+  struct arg
+  {
+    using type = typename std::tuple_element<i, args>::type;
+  };
+};
+
+} // namespace internal
 
 class Kernel;
 

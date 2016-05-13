@@ -43,6 +43,8 @@ struct MethodInfo
   SharedString id;
   SharedString description;
 
+  SharedArray<SharedString> argTypes;
+
   VarMethod pMethod;
 };
 struct EventInfo
@@ -50,6 +52,8 @@ struct EventInfo
   SharedString id;
   SharedString displayName;
   SharedString description;
+
+  SharedArray<SharedString> argTypes;
 
   VarMethod pSubscribe;
 };
@@ -177,7 +181,7 @@ private:                                                                        
     {                                                                                    \
       Variant set(Slice<const Variant> args)                                             \
       {                                                                                  \
-        using PT = function_traits<decltype(&This::Setter)>::template arg<0>::type;      \
+        using PT = internal::function_traits<decltype(&This::Setter)>::template arg<0>::type;      \
         try {                                                                            \
           ((This*)(Component*)this)->Setter(args[0].as<std::remove_reference<PT>::type>()); \
           return Variant();                                                              \
@@ -231,7 +235,7 @@ private:                                                                        
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
-    id, Description,                                                                     \
+    id, Description, Array<SharedString>(Alloc, internal::function_traits<decltype(&This::Method)>::num_args), \
     []() -> VarMethod {                                                                  \
       struct Shim                                                                        \
       {                                                                                  \
@@ -257,7 +261,7 @@ private:                                                                        
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
-    id, Name, Description,                                                               \
+    id, Name, Description, Array<SharedString>(Alloc, decltype(This::Event)::ParamCount()), \
     []() -> VarMethod {                                                                  \
       struct Shim                                                                        \
       {                                                                                  \
