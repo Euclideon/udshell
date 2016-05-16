@@ -26,6 +26,14 @@ struct epTexture;
 
 namespace ep {
 
+struct RenderableTexture 
+{
+  int uniformIndex;
+  RenderTextureRef texture;
+
+  // TODO: fill out with TextureSampler members for texture options
+};
+
 struct UDRenderableState : public udRenderModel
 {
   Double4x4 matrix;
@@ -65,7 +73,7 @@ struct GeomJob
   RenderShaderProgramRef spProgram;
   SharedArray<RenderShaderProperty> uniforms;
 
-  Array<RenderTextureRef, 8> textures;
+  Array<RenderableTexture, 8> textures;
 
   Array<RenderArrayRef, 16> arrays;
   Array<epArrayBuffer*, 16> epArrays;

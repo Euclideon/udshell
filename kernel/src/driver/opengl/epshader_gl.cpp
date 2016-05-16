@@ -81,7 +81,7 @@ void epShader_DestroyShader(epShader **ppShader)
 // ***************************************************************************************
 static inline epShaderElement ConvertToShaderElementType(size_t type, uint32_t location)
 {
-  epShaderElement uniformType = { 0, 0 , 0, location, 0 };
+  epShaderElement uniformType = { 0, 0 , 0, location, 0, 0, 0 };
   switch (type)
   {
   case GL_FLOAT:
@@ -322,6 +322,15 @@ static inline epShaderElement ConvertToShaderElementType(size_t type, uint32_t l
     uniformType.type = epSET_Double;
     break;
   }
+  case GL_SAMPLER_2D:
+  {
+    uniformType.m = 1;
+    uniformType.n = 1;
+    uniformType.type = epSET_Float; // TODO: find element types
+    uniformType.samplerType = epSST_Default; // TODO: find texture type
+    uniformType.samplerDimensions = epSSD_2D; // TODO: find texture dimensions
+    break;
+  }
   }
 
   return uniformType;
@@ -484,7 +493,10 @@ void epShader_GetElementTypeString(epShaderElement t, char *pBuffer, size_t size
   }
   case epSET_Float:
   {
-    memcpy(pBuffer, "f32", 3);
+    if (t.samplerType == epSST_Default)
+      memcpy(pBuffer, "sampler", 7);
+    else
+      memcpy(pBuffer, "f32", 3);
     break;
   }
   case epSET_Double:

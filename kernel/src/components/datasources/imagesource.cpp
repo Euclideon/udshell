@@ -27,7 +27,7 @@ void ImageSource::Create(StreamRef spSource)
 
     // create image for each image element
     ArrayBufferRef spImage = GetKernel().CreateComponent<ArrayBuffer>();
-    spImage->Allocate("{u8[4]}", 4, { s.width, s.height });
+    spImage->Allocate("u8[4]", 4, { s.width, s.height });
 
     // write image to to the array buffer
     Slice<void> mem = spImage->Map();

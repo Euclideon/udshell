@@ -162,15 +162,19 @@ void RenderableView::RenderGPU()
   {
     Double4x4 wvp = Mul(vp, job.matrix);
 
-    // TODO : Textures
+    // TODO : Better texture support (support for TextureSampler type)
     // TODO : Renderstate
 
     job.spProgram->Use();
     if (job.setViewProjectionUniform)
       job.spProgram->setUniform(job.viewProjection.index, Float4x4::create(wvp));
 
+
     for (size_t i = 0; i < job.uniforms.length; ++i)
       job.spProgram->setUniform(job.uniforms[i].index, job.uniforms[i].data);
+
+    for (size_t i = 0; i < job.textures.length; i++)
+      epShader_SetProgramData(i, job.textures[i].uniformIndex, job.textures[i].texture->pTexture);
 
     if (job.index)
       epGPU_RenderIndices(job.spProgram->pProgram, job.spShaderInputConfig->pConfig, job.epArrays.ptr, job.index->pArray,
