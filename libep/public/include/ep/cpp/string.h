@@ -35,7 +35,7 @@ struct BaseString : public Slice<const C>
   BaseString(Slice<C2> rh);
   BaseString(const C *pString);
   template<size_t N>
-  BaseString(const C str[N]);
+  BaseString(const C (&str)[N]);
 
   // epString compatibility
   BaseString(epString s);
@@ -129,6 +129,7 @@ struct MutableString : public Array<char, Size>
   template <typename U> MutableString(U *ptr, size_t length);
   template <typename U> MutableString(Slice<U> slice);
   MutableString(const char *pString);
+  template<size_t N> MutableString(const char (&str)[N]);
 
   MutableString(Alloc_T, size_t count);
   MutableString(Reserve_T, size_t count);
@@ -222,6 +223,7 @@ struct SharedString : public SharedArray<const char>
   template <typename U> SharedString(U *ptr, size_t length);
   template <typename U> SharedString(Slice<U> slice);
   SharedString(const char *pString);
+  template<size_t N> SharedString(const char(&str)[N]);
 
   template <typename... Args> SharedString(Concat_T, const Args&... args);
   template <typename... Args> SharedString(Format_T, String format, const Args&... args);

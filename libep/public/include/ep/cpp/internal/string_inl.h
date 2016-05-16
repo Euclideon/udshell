@@ -144,7 +144,7 @@ inline BaseString<C>::BaseString(const C *pString)
 
 template<typename C>
 template<size_t N>
-inline BaseString<C>::BaseString(const C str[N])
+inline BaseString<C>::BaseString(const C (&str)[N])
   : Slice<const C>(str, N)
 {}
 
@@ -513,6 +513,11 @@ template<size_t Size>
 inline MutableString<Size>::MutableString(const char *pString)
   : Array<char, Size>(pString, pString ? epStrlen(pString) : 0)
 {}
+template<size_t Size>
+template<size_t N>
+inline MutableString<Size>::MutableString(const char(&str)[N])
+  : Array<char, Size>(str, N)
+{}
 
 template<size_t Size>
 inline MutableString<Size>::MutableString(Alloc_T, size_t count)
@@ -668,6 +673,10 @@ inline SharedString::SharedString(Slice<U> slice)
 
 inline SharedString::SharedString(const char *pString)
   : SharedArray<const char>(pString, pString ? epStrlen(pString) : 0)
+{}
+template<size_t N>
+inline SharedString::SharedString(const char(&str)[N])
+  : SharedArray<const char>(str, N)
 {}
 
 template <typename... Args>
