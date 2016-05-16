@@ -149,7 +149,13 @@ void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 {
   const Double4x4 &cameraMatrix = spCamera->GetMatrix();
 
-  BoundingVolume vol = spUDNode->GetUDModel()->GetBoundingVolume();
+  BoundingVolume vol = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
+
+  MetadataRef udMeta = spUDNode->GetUDModel()->GetMetadata();
+  Variant header = udMeta->Get("octreeHeader");
+  if (header.isValid())
+    vol = header["boundingVolume"].as<BoundingVolume>();
+
   Double3 modelCenter = (vol.max - vol.min) / 2;
 
   double dist = 2.0;

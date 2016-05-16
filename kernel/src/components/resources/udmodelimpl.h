@@ -35,14 +35,15 @@ public:
   UDModelFlags GetRenderFlags() const override final { return renderFlags; }
   void SetRenderFlags(UDModelFlags flags) override final { renderFlags = flags; }
 
-  double GetUDScale() const override final { EPASSERT(udmatrix.a[0] == udmatrix.a[5] && udmatrix.a[0] == udmatrix.a[10], "NonUniform Scale"); return udmatrix.a[0]; }
   const Double4x4 &GetUDMatrix() const override final { return udmatrix; }
+  void SetUDMatrix(const Double4x4 &mat) override final { udmatrix = mat; }
 
-  BoundingVolume GetBoundingVolume() const override final;
   UDRenderState GetUDRenderState() const override final;
 
   VarDelegate GetVoxelVarDelegate() const override final { return voxelVarDelegate; }
   void SetVoxelVarDelegate(VarDelegate delegate) override final;
+
+  int64_t GetMemoryUsage() const override final { return pOctree->memoryUsage; }
 
   EP_FRIENDS_WITH_IMPL(UDSource);
 private:

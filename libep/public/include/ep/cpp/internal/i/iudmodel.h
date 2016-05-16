@@ -24,14 +24,15 @@ public:
   virtual UDModelFlags GetRenderFlags() const = 0;
   virtual void SetRenderFlags(UDModelFlags flags) = 0;
 
-  virtual double GetUDScale() const = 0;
   virtual const Double4x4 &GetUDMatrix() const = 0;
-  virtual BoundingVolume GetBoundingVolume() const = 0;
+  virtual void SetUDMatrix(const Double4x4 &matrix) = 0;
 
   virtual UDRenderState GetUDRenderState() const = 0;
 
   virtual VarDelegate GetVoxelVarDelegate() const = 0;
   virtual void SetVoxelVarDelegate(VarDelegate del) = 0;
+
+  virtual int64_t GetMemoryUsage() const = 0;
 };
 
 }

@@ -38,9 +38,9 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     pModelImpl->pOctree = pOctree;
 
     // Populate meta data
+    MetadataRef meta = model->GetMetadata();
     int32_t count;
     result = udOctree_GetMetadataCount(pOctree, &count);
-    MetadataRef meta = model->GetMetadata();
     if (result == udR_Success)
     {
       for (int32_t i = 0; i < count; ++i)
@@ -48,11 +48,35 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
         const char *pName;
         const char *pValue;
         result = udOctree_GetMetadataByIndex(pOctree, i, &pName, &pValue, nullptr, nullptr);
-        if (result == udR_Success)
-        {
+        if (result == udR_Success && !String("ModelAttributes").eq(pName))
           meta->Insert(pName, pValue);
-        }
       }
+    }
+
+    udOctreeHeaderData headerData;
+    result = udOctree_GetHeaderData(pOctree, &headerData);
+    if (result == udR_Success)
+    {
+      Variant::VarMap header;
+      header.Insert("scale", headerData.scale);
+      header.Insert("unitMeterScale", headerData.unitMeterScale);
+
+      double *pPivot = headerData.pivotOrigin;
+      header.Insert("pivotOrigin", Double3{ pPivot[0], pPivot[1], pPivot[2] });
+
+      double *pBias = headerData.sourceBias;
+      header.Insert("sourceBias", Double3{ pBias[0], pBias[1], pBias[2] });
+
+      double *pScale = headerData.sourceScale;
+      header.Insert("sourceScale", Double3{ pScale[0], pScale[1], pScale[2] });
+
+      double *pOri = headerData.boundingBoxOrigin;
+      double *pExt = headerData.boundingBoxExtents;
+      header.Insert("boundingVolume", BoundingVolume{ { pOri[0], pOri[1], pOri[2] },
+                                                      { pOri[0] + pExt[0], pOri[1] + pExt[1], pOri[2] + pExt[2] } });
+
+      header.Insert("maxOctreeDepth", headerData.maxOctreeDepth);
+      meta->Insert("octreeheader", std::move(header));
     }
 
     result = udOctree_GetLocalMatrixF64(pModelImpl->pOctree, pModelImpl->udmatrix.a);
