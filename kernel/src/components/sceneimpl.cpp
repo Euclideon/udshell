@@ -131,6 +131,7 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
     out.firstVertex = in.renderList.firstVertex;
 
     out.spProgram = pMatImpl->spShaderProgram;
+    out.setViewProjectionUniform = false;
 
     if (in.spShaderInputConfig)
       out.spShaderInputConfig = shared_pointer_cast<RenderShaderInputConfig>(in.spShaderInputConfig);
@@ -157,7 +158,10 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
       {
         // TODO: Create mechanism for uniforms that are provided by the system. (projection, view, back buffer dimensions etc)
         if (kvp.key.eq("u_mfwvp"))
+        {
           out.viewProjection = RenderShaderProperty{ kvp.value.data, (int)kvp.value.element.location };
+          out.setViewProjectionUniform = true;
+        }
         else
           uniforms.pushBack(RenderShaderProperty{ kvp.value.data, (int)kvp.value.element.location } );
       }
