@@ -4,6 +4,7 @@
 
 #include "ep/cpp/internal/i/iudmodel.h"
 #include "ep/cpp/component/resource/resource.h"
+#include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/delegate.h"
 
@@ -18,6 +19,24 @@ EP_EXPLICIT_BITFIELD(UDModelFlags,
   DoNotWriteColor = 64,
   PixelApproxOpt = 1024
 );
+
+EP_ENUM(UDAttributeBlend,
+  None = -1,
+  Mean,
+  NearestMean,
+  Or,
+  And,
+  Min,
+  Max,
+  Sum,
+  Product,
+  Unique
+  );
+
+struct UDElementMetadata : public ElementMetadata
+{
+  UDAttributeBlend blend;
+};
 
 class UDModel : public Resource
 {
@@ -55,6 +74,28 @@ protected:
 private:
   Array<const PropertyInfo> GetProperties() const;
 };
+
+inline Variant epToVariant(const UDElementMetadata &e)
+{
+  Variant v = epToVariant(*static_cast<const ElementMetadata*>(&e));
+  if (e.blend != UDAttributeBlend::None)
+  {
+    Variant::VarMap r = v.asAssocArray();
+    r.Insert("blend", e.blend);
+  }
+  // v is a mutable reference to the VarMap
+  return v;
+}
+
+inline void epFromVariant(const Variant &v, UDElementMetadata *pE)
+{
+  epFromVariant(v, static_cast<ElementMetadata*>(pE));
+  Variant *pI = v.getItem("blend");
+  if (pI)
+    pE->blend = UDAttributeBlend(pI->as<int>());
+  else
+    pE->blend = UDAttributeBlend::None;
+}
 
 } // namespace ep
 
