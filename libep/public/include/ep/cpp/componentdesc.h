@@ -255,8 +255,9 @@ private:                                                                        
   EP_MAKE_EVENT_EXPLICIT(#Name, Name, Description)
 
 // make event explicit
+// TODO: Remove the "this" capture when the build machines get updated...
 #define EP_MAKE_EVENT_EXPLICIT(Name, Event, Description)                                 \
-([]() -> ep::EventInfo {                                                                 \
+([this]() -> ep::EventInfo {                                                                 \
   using namespace ep;                                                                    \
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
