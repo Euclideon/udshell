@@ -13,6 +13,8 @@ extern bool gUnitTesting;
 void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line);
 void _Free(void *pMemory);
 
+ErrorSystem s_errorSystem;
+
 } // namespace internal
 } // namespace ep
 
@@ -34,8 +36,11 @@ static ep::Instance s_instance =
 
   []() -> void* { return (void*)&s_varAVLAllocator; }, // TreeAllocator
 
-  []() -> void* { return (void*)&s_weakRefRegistry; } // weakRefRegistry
+  []() -> void* { return (void*)&s_weakRefRegistry; }, // weakRefRegistry
 
+  [](ep::String pattern, void *pHandle, void *pData) -> void* { return nullptr; }, // Find
+
+  (void*)&ep::internal::s_errorSystem, // ErrorSystem
 };
 
 struct GlobalInstanceInitializer

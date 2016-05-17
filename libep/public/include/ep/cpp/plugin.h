@@ -26,6 +26,7 @@ struct Instance
   void*(*WeakRegistry)();
 
   void*(*Find)(String pattern, void *pHandle, void *pData);
+  void *pErrorSystem;
 };
 
 extern Instance *s_pInstance;
