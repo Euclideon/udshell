@@ -11,6 +11,10 @@
 #include "ep/cpp/component/resourcemanager.h"
 #include "ep/cpp/component/commandmanager.h"
 #include "ep/cpp/kernel.h"
+#include "ep/cpp/component/resource/shader.h"
+#include "ep/cpp/component/resource/material.h"
+#include "ep/cpp/component/resource/model.h"
+#include "../../../kernel/src/components/nodes/geomnode.h"
 
 namespace ep {
 
@@ -109,6 +113,16 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   auto bmMap = spScene->GetBookmarkMap();
   for (auto bm : bmMap)
     spUIBookmarks->Call("createbookmark", bm.key);
+
+  try
+  {
+    CreatePlatformLogo();
+  }
+  catch (EPException ex)
+  {
+    pKernel->LogWarning(0, "Could not load platform logo");
+    ClearError();
+  }
 }
 
 MutableString<260> Viewer::GetFileNameFromPath(String path) // TODO Move this to File after implising File
@@ -292,6 +306,90 @@ Variant Viewer::Save() const
     params.insert("scene", spScene->Save());
 
   return Variant(std::move(params));
+}
+
+void Viewer::CreatePlatformLogo()
+{
+  ArrayBufferRef spImage;
+
+  DataSourceRef spImageSource = pKernel->CreateDataSourceFromExtension(".png", { { "src", "libep/doc/images/platform_logo.png" } });
+  spImage = spImageSource->GetResourceAs<ArrayBuffer>("image0");
+
+  // Vertex Shader
+  ShaderRef vertexShader = pKernel->CreateComponent<Shader>();
+  {
+    vertexShader->SetType(ShaderType::VertexShader);
+
+    const char shaderText[] = "attribute vec3 a_position;\n"
+      "uniform mat4 u_mfwvp;\n"
+      "void main()\n"
+      "{\n"
+      "  gl_Position = u_mfwvp == mat4(1.0) ? vec4(a_position, 1.0) : vec4(a_position, 1.0);\n"
+      "  gl_TexCoord[0].xy = a_position.xy*0.5+0.5;\n"
+      "}\n";
+    vertexShader->SetCode(shaderText);
+  }
+
+  // Pixel Shader
+  ShaderRef pixelShader = pKernel->CreateComponent<Shader>();
+  {
+    pixelShader->SetType(ShaderType::PixelShader);
+
+    const char shaderText[] =
+      "uniform sampler2D tex;"
+      "void main()\n"
+      "{\n"
+      "  vec2 texCoord = gl_TexCoord[0].xy;\n"
+      "  texCoord -= .8;\n"
+      "  texCoord *= 5;\n"
+      "  if (texCoord.x < 0 || texCoord.y < 0) discard;\n"
+//       "  texCoord.y = 1 - texCoord.y;\n" // hack to flip the y axis
+      "  vec4 col = texture(tex, texCoord);\n"
+//       "  if (col.a != 1) discard;" // hack to stop flickering
+//       "  gl_FragColor = vec4(col.b, col.g, col.r, col.a);\n" // hack to swap r and b
+      "  gl_FragColor = col;\n"
+      "}\n";
+    pixelShader->SetCode(shaderText);
+  }
+
+  MaterialRef spMaterial = pKernel->CreateComponent<Material>();
+  spMaterial->SetShader(ShaderType::VertexShader, vertexShader);
+  spMaterial->SetShader(ShaderType::PixelShader, pixelShader);
+
+  ArrayBufferRef spVertexBuffer = pKernel->CreateComponent<ArrayBuffer>();
+  {
+    static const Float3 vb[] = {
+      Float3{ -1.0f, -1.0f, 0.0f },
+      Float3{ 1.0f, -1.0f, 0.0f },
+      Float3{ -1.0f, 1, 0.0f },
+      Float3{ 1.0f, 1, 0.0f },
+    };
+
+    spVertexBuffer->AllocateFromData(Slice<const Float3>(vb));
+    MetadataRef spMetadata = spVertexBuffer->GetMetadata();
+    spMetadata->Get("attributeinfo")[0].insertItem("name", "a_position");
+  }
+
+  // Index Buffer
+  ArrayBufferRef spIndexBuffer = pKernel->CreateComponent<ArrayBuffer>();
+  static const uint16_t ib[] = {
+    0, 1, 2, 3, 2, 1
+  };
+  spIndexBuffer->AllocateFromData(Slice<const uint16_t>(ib));
+
+  ModelRef spImageModel = pKernel->CreateComponent<Model>();
+  spImageModel->SetName("Image");
+
+  spImageModel->AddVertexArray(spVertexBuffer);
+  spImageModel->SetIndexArray(spIndexBuffer);
+  spImageModel->SetMaterial(spMaterial);
+  spImageModel->SetRenderList(RenderList{ PrimType::Triangles, size_t(0), size_t(0), size_t(6) });
+
+  GeomNodeRef spGeomNode = pKernel->CreateComponent<GeomNode>();
+  spGeomNode->SetModel(spImageModel);
+  spScene->GetRootNode()->AddChild(spGeomNode);
+
+  spMaterial->SetMaterialProperty("tex", spImage);
 }
 
 extern "C" bool epPluginAttach()
