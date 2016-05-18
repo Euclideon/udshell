@@ -262,7 +262,7 @@ private:                                                                        
   static char id[sizeof(Name)];                                                          \
   for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
-    id, Name, Description, Array<SharedString>(Alloc, decltype(This::Event)::ParamCount()), \
+    id, Name, Description, Array<SharedString>(Alloc, decltype(This::Event)::ParamCount), \
     []() -> VarMethod {                                                                  \
       struct Shim                                                                        \
       {                                                                                  \
