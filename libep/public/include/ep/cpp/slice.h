@@ -44,6 +44,7 @@ public:
   bool operator!=(Iterator<T> rh) const { return pI != rh.pI; } // compare
   Iterator<T> operator++() { ++pI; return *this; }              // increment
   T& operator*() const { return *pI; }                            // value
+  T *operator->() const { return pI; }
 };
 
 // Slice does not retain ownership of it's memory, it is used for temporary ownership; working locals, function args, etc

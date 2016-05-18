@@ -119,6 +119,7 @@ public:
   }
 };
 
+
 namespace internal {
 
 // Helper function to dynamically populate the component descriptor with the QObject's meta data
@@ -137,7 +138,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
 
     if (pDesc->propertyTree.get(propertyName))
     {
-      QtApplication::Kernel()->LogWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.");
+      QtApplication::Kernel()->LogWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.", propertyName);
       continue;
     }
 
@@ -158,7 +159,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     {
       if (pDesc->methodTree.get(name))
       {
-        QtApplication::Kernel()->LogWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.");
+        QtApplication::Kernel()->LogWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
         continue;
       }
 
@@ -174,7 +175,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     {
       if (pDesc->eventTree.get(name))
       {
-        QtApplication::Kernel()->LogWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.");
+        QtApplication::Kernel()->LogWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
         continue;
       }
 
@@ -247,259 +248,6 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
   pEPComponent->setParent(pQtObject);
 
   return pQtObject;
-}
-
-
-// ---------------------------------------------------------------------------------------
-// QtEPComponent - ep::Component shim object into QML
-
-QVariant QtEPComponent::get(const QString &name) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String prop(byteArray.data(), byteArray.size());
-  QVariant res;
-  epFromVariant(pComponent->Get(prop), &res);
-  return res;
-}
-
-void QtEPComponent::set(const QString &name, QVariant val)
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String prop(byteArray.data(), byteArray.size());
-  try
-  {
-    pComponent->Set(prop, epToVariant(val));
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-}
-
-QVariant QtEPComponent::call(const QString &name) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, Slice<Variant>()), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1), epToVariant(arg2), epToVariant(arg3)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
-      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
-  QVariant arg4, QVariant arg5) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
-      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
-  QVariant arg4, QVariant arg5, QVariant arg6) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
-      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
-  QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
-      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6), epToVariant(arg7)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
-  QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
-      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5), epToVariant(arg6),
-      epToVariant(arg7), epToVariant(arg8)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
-}
-
-QVariant QtEPComponent::call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3,
-  QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  QByteArray byteArray = name.toUtf8();
-  String method(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Call(method, epToVariant(arg0), epToVariant(arg1),
-      epToVariant(arg2), epToVariant(arg3), epToVariant(arg4), epToVariant(arg5),
-      epToVariant(arg6), epToVariant(arg7), epToVariant(arg8), epToVariant(arg9)), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-
-  return res;
-}
-
-QVariant QtEPComponent::subscribe(QString eventName, QJSValue func) const
-{
-  EPASSERT(pComponent, "QtEPComponent contains a null component");
-  if (!func.isCallable())
-  {
-    pComponent->LogError("Must subscribe to a javascript function. '{0}' is not callable.", func.toString());
-    return QVariant();
-  }
-
-  QByteArray byteArray = eventName.toUtf8();
-  String event(byteArray.data(), byteArray.size());
-  QVariant res;
-  try
-  {
-    epFromVariant(pComponent->Subscribe(event, ep::VarDelegate(JSValueDelegateRef::create(func))), &res);
-  }
-  catch (ep::EPException &)
-  {
-    ep::ClearError();
-  }
-  return res;
 }
 
 
@@ -588,66 +336,39 @@ struct QtEPMetaObject : public QMetaObject
   }
 };
 
-// Helper factory class which creates a new QMetaObject based on a EP Component Descriptor
-// TODO: This should cache meta objects for previously encountered types
-class QtMetaObjectGenerator
-{
-public:
-  // TODO
-  static const QtEPMetaObject *CheckCache(const ep::ComponentDesc *pDesc) { return nullptr; }
-
-  static const QtEPMetaObject *Generate(const ep::ComponentDesc *pDesc);
-
-private:
-  const char *argNames[9] = { "arg0", "arg1", "arg2", "arg3", "arg4", "arg5", "arg6", "arg7", "arg8" };
-
-  struct Method
-  {
-    uint flags = 0;
-    uint returnType;
-    ep::SharedArray<uint> paramTypes;
-  };
-
-  QtMetaObjectGenerator(const ep::ComponentDesc *pDesc);
-  ~QtMetaObjectGenerator() {}
-
-  QtEPMetaObject *CreateMetaObject(const QMetaObject *pParent);
-
-  void AddProperty(const ep::PropertyDesc *pProperty);
-  void AddSlot(const ep::MethodDesc *pMethod);
-  void AddSignal(const ep::EventDesc *pEvent);
-
-  int AggregateParamCount(const QMap<QByteArray, Method> &map);
-
-  // TODO: potentially use this in the property map if we need further data
-  //struct Property
-  //{
-    //int type = 0;
-    //uint flags = 0;
-  //};
-  QMap<QByteArray, uint> propertyMap;
-  QMap<QByteArray, Method> slotMap;
-  QMap<QByteArray, Method> signalMap;
-
-  const ep::ComponentDescInl *pDesc;
-};
+ep::HashMap<ep::SharedString, QtEPMetaObject*> QtMetaObjectGenerator::metaObjectCache;
+ep::HashMap<ep::SharedString, QtMetaObjectGenerator::RunBuiltInFunc> QtMetaObjectGenerator::builtInMethods;
+int QtMetaObjectGenerator::builtInOffset = -1;
+int QtMetaObjectGenerator::builtInCount = 0;
 
 
 // Generate a custom QMetaObject that is populated based on the EP Component Descriptor and reflects the inheritance structure of the EP Component
 // Note that QObject will be the always be the top most parent, followed by ep::Component and so forth.
+// This will cache the result in an internal meta object hashmap
 const QtEPMetaObject *QtMetaObjectGenerator::Generate(const ep::ComponentDesc *pDesc)
 {
-  const QMetaObject *pParentObject = &QObject::staticMetaObject;
-  const QtEPMetaObject *pMetaObj = nullptr;
+  EPASSERT(pDesc, "Attempting to generate a Qt meta object from null descriptor");
 
-  if ((pMetaObj = QtMetaObjectGenerator::CheckCache(pDesc)))
-    return pMetaObj;
+  const QMetaObject *pParentObject = &QObject::staticMetaObject;
+  QtEPMetaObject **ppMetaObj = metaObjectCache.get(pDesc->info.identifier);
+
+  if (ppMetaObj)
+    return *ppMetaObj;
   else if (pDesc->pSuperDesc)
     pParentObject = QtMetaObjectGenerator::Generate(pDesc->pSuperDesc);
 
   QtMetaObjectGenerator generator(pDesc);
-  return generator.CreateMetaObject(pParentObject);
+  return metaObjectCache.insert(pDesc->info.identifier, generator.CreateMetaObject(pParentObject));
 }
+
+// Clear the internal cache
+void QtMetaObjectGenerator::ClearCache()
+{
+  for (auto pMetaObj : metaObjectCache)
+    epDelete(pMetaObj.value);
+  metaObjectCache.clear();
+}
+
 
 // Internal only
 QtMetaObjectGenerator::QtMetaObjectGenerator(const ep::ComponentDesc *_pDesc)
@@ -655,28 +376,59 @@ QtMetaObjectGenerator::QtMetaObjectGenerator(const ep::ComponentDesc *_pDesc)
 {
   using namespace ep;
 
+  // If we're the top level component, then insert our built-ins
+  if (!pDesc->pSuperDesc)
+  {
+    slotList.reserve(pDesc->methodTree.size() + 5);
+
+    // TODO: update these when arg types are supported
+    AddMethod(MethodType::Slot, "get", { "propertyName" },
+      [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
+        return pObj->pComponent->Get(varArgs[0].asString()).as<QVariant>();
+      });
+    AddMethod(MethodType::Slot, "set", { "propertyName", "value" },
+      [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
+        pObj->pComponent->Set(varArgs[0].asString(), varArgs[1]);
+        return QVariant();
+      });
+    AddMethod(MethodType::Slot, "call", { "methodName", "arg0", "arg1", "arg2", "arg3", "arg4", "arg5", "arg6", "arg7", "arg8" },
+      [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
+        return pObj->pComponent->Call(varArgs[0].asString(), varArgs.slice(1, varArgs.length)).as<QVariant>();
+      }, 9);
+    AddMethod(MethodType::Slot, "subscribe", { "eventName", "delegate" },
+      [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
+        return ep::Variant(pObj->pComponent->Subscribe(varArgs[0].asString(), varArgs[1].asDelegate())).as<QVariant>();
+      });
+    AddMethod(MethodType::Slot, "disconnectAll", nullptr,
+      [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
+        pObj->disconnect();
+        return QVariant();
+      });
+  }
+
   // Populate our various meta maps with the component descriptor's info (not including its super)
 
-  // Properties
+  // ------------- Properties
+  propertyList.reserve(pDesc->propertyTree.size());
   for (auto p : pDesc->propertyTree)
-  {
     if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->propertyTree.get(p.key))
       AddProperty(&p.value);
-  }
 
-  // Slots
+  // ------------- Slots
+  slotList.reserve(pDesc->methodTree.size());
   for (auto m : pDesc->methodTree)
-  {
     if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->methodTree.get(m.key))
       AddSlot(&m.value);
-  }
 
-  // Signals
+  // ------------- Signals
+  signalList.reserve(pDesc->eventTree.size());
   for (auto e : pDesc->eventTree)
-  {
     if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->eventTree.get(e.key))
       AddSignal(&e.value);
-  }
+
+  // Signals are inserted before slots so we need to keep track of the offset if this is the top level component (and hence has built-ins)
+  if (!pDesc->pSuperDesc)
+    builtInOffset = (int)signalList.size();
 }
 
 // Internal only
@@ -695,14 +447,14 @@ QtEPMetaObject *QtMetaObjectGenerator::CreateMetaObject(const QMetaObject *pPare
 
   QtEPMetaObject *pMetaObj = epNew(QtEPMetaObject);
 
-  int paramsDataSize = ((AggregateParamCount(signalMap) + AggregateParamCount(slotMap)) * 2)  // Types and parameter names
-                       - signalMap.count() - slotMap.count();                                 // Return parameters don't have names
+  int paramsDataSize = ((AggregateParamCount(signalList) + AggregateParamCount(slotList)) * 2)  // Types and parameter names
+                       - (int)(signalList.length + slotList.length);                            // Return parameters don't have names
 
   // Work out the size of the uint data block and allocate
-  uint intDataSize = MetaObjectPrivateFieldCount;                             // base header
-  intDataSize += (signalMap.count() + slotMap.count()) * 5 + paramsDataSize;  // slots/signals
-  intDataSize += propertyMap.count() * 3;                                     // property field
-  ++intDataSize;                                                              // eod marker
+  uint intDataSize = MetaObjectPrivateFieldCount;                                 // base header
+  intDataSize += (int)(signalList.length + slotList.length) * 5 + paramsDataSize; // slots/signals
+  intDataSize += (int)(propertyList.length * 3);                                  // property field
+  ++intDataSize;                                                                  // eod marker
   uint *pIntData = epAllocType(uint, intDataSize, epAF_Zero);
 
   // Populate the data block header - this is internally represented as a QMetaObjectPrivate struct
@@ -711,62 +463,62 @@ QtEPMetaObject *QtMetaObjectGenerator::CreateMetaObject(const QMetaObject *pPare
   pHeader->className = 0;
   pHeader->classInfoCount = 0;
   pHeader->classInfoData = MetaObjectPrivateFieldCount;
-  pHeader->methodCount = slotMap.count() + signalMap.count();
+  pHeader->methodCount = (int)(slotList.length + signalList.length);
   pHeader->methodData = pHeader->classInfoData + pHeader->classInfoCount * 2;
-  pHeader->propertyCount = propertyMap.count();
+  pHeader->propertyCount = (int)propertyList.length;
   pHeader->propertyData = pHeader->methodData + pHeader->methodCount * 5 + paramsDataSize;
   pHeader->enumeratorCount = 0;
   pHeader->enumeratorData = pHeader->propertyData + pHeader->propertyCount * 3;
   pHeader->constructorCount = 0;
   pHeader->constructorData = 0;
   pHeader->flags = 0;
-  pHeader->signalCount = signalMap.count();
+  pHeader->signalCount = (int)signalList.length;
 
   // The QMetaStringTable will be used to generate the QMetaObject's stringdata block
   QMetaStringTable metaStringTable(QByteArray(pDesc->info.identifier.ptr, (int)pDesc->info.identifier.length));
   uint offset = pHeader->classInfoData;
-  EPASSERT_THROW(offset == (uint)pHeader->methodData, epR_Failure, "Malformed QMetaObject");
+  EPASSERT(offset == (uint)pHeader->methodData, "Malformed QMetaObject");
 
   uint paramsOffset = offset + pHeader->methodCount * 5;
   // Populate the method data
   for (int x = 0; x < 2; ++x)
   {
     // Signals, then slots in order to match moc
-    const QMap<QByteArray, Method> &map = (x == 0) ? signalMap : slotMap;
-    for (QMap<QByteArray, Method>::ConstIterator it = map.begin(); it != map.end(); ++it)
+    Slice<Method> methodList = (x == 0) ? signalList : slotList;
+    for (auto &m : methodList)
     {
-      size_t paramCount = it.value().paramTypes.length;
-      pIntData[offset++] = metaStringTable.enter(it.key());       // Method name
+      size_t paramCount = m.paramTypes.length;
+      pIntData[offset++] = metaStringTable.enter(m.name);         // Method name
       pIntData[offset++] = (uint)paramCount;                      // Method param count
       pIntData[offset++] = paramsOffset;                          // Method param offset
       pIntData[offset++] = metaStringTable.enter(QByteArray());   // Method tag
-      pIntData[offset++] = it.value().flags;                      // Method flags
+      pIntData[offset++] = m.flags;                               // Method flags
 
       // param types
       for (int i = -1; i < (int)paramCount; ++i)
-        pIntData[paramsOffset++] = (i < 0) ? it.value().returnType : it.value().paramTypes[i];
+        pIntData[paramsOffset++] = (i < 0) ? m.returnType : m.paramTypes[i];
 
       // param names
-      for (int i = 0; i < (int)paramCount; ++i)
-        pIntData[paramsOffset++] = metaStringTable.enter(QByteArray::fromRawData(argNames[i], sizeof(argNames[i])));
+      for (size_t i = 0; i < paramCount; ++i)
+        pIntData[paramsOffset++] = metaStringTable.enter(QByteArray::fromRawData(pArgNames[i], sizeof(pArgNames[i])));
     }
   }
 
-  EPASSERT_THROW(offset == (uint)(pHeader->methodData + pHeader->methodCount * 5), epR_Failure, "Malformed QMetaObject");
-  EPASSERT_THROW(paramsOffset == (uint)pHeader->propertyData, epR_Failure, "Malformed QMetaObject");
+  EPASSERT(offset == (uint)(pHeader->methodData + pHeader->methodCount * 5), "Malformed QMetaObject");
+  EPASSERT(paramsOffset == (uint)pHeader->propertyData, "Malformed QMetaObject");
   offset += paramsDataSize;
-  EPASSERT_THROW(offset == (uint)(pHeader->propertyData), epR_Failure, "Malformed QMetaObject");
+  EPASSERT(offset == (uint)(pHeader->propertyData), "Malformed QMetaObject");
 
   // Populate the property data
-  for (QMap<QByteArray, uint>::ConstIterator i = propertyMap.begin(); i != propertyMap.end(); ++i)
+  for (auto &p : propertyList)
   {
-    pIntData[offset++] = metaStringTable.enter(i.key());  // Property name
+    pIntData[offset++] = metaStringTable.enter(p.name);   // Property name
     pIntData[offset++] = QMetaType::QVariant;             // Property type
-    pIntData[offset++] = i.value();                       // Property flags
+    pIntData[offset++] = p.flags;                         // Property flags
   }
 
-  EPASSERT_THROW(offset == (uint)pHeader->enumeratorData, epR_Failure, "Malformed QMetaObject");
-  EPASSERT_THROW(offset == intDataSize - 1, epR_Failure, "Malformed QMetaObject");
+  EPASSERT(offset == (uint)pHeader->enumeratorData, "Malformed QMetaObject");
+  EPASSERT(offset == intDataSize - 1, "Malformed QMetaObject");
 
   // eod marker
   pIntData[offset] = 0;
@@ -790,92 +542,128 @@ QtEPMetaObject *QtMetaObjectGenerator::CreateMetaObject(const QMetaObject *pPare
 // This will build the necessary Qt property information we need from an EP Property Descriptor
 void QtMetaObjectGenerator::AddProperty(const ep::PropertyDesc *pProperty)
 {
-  uint &propFlags = propertyMap[QByteArray(pProperty->id.ptr, (int)pProperty->id.length)];
-  propFlags = PropertyFlags::Designable | PropertyFlags::Scriptable;
+  auto &prop = propertyList.pushBack();
+  prop.name.setRawData(pProperty->id.ptr, (uint)pProperty->id.length);
+  prop.flags = PropertyFlags::Designable | PropertyFlags::Scriptable;
 
-  if (pProperty->getter) propFlags |= PropertyFlags::Readable;
-  if (pProperty->setter) propFlags |= (PropertyFlags::Writable | PropertyFlags::Stored);
-  if (pProperty->flags & ep::PropertyFlags::epPF_Immutable) propFlags |= PropertyFlags::Constant;
+  if (pProperty->getter) prop.flags |= PropertyFlags::Readable;
+  if (pProperty->setter) prop.flags |= (PropertyFlags::Writable | PropertyFlags::Stored);
+  if (pProperty->flags & ep::PropertyFlags::epPF_Immutable) prop.flags |= PropertyFlags::Constant;
 
   // TODO: notify signal
 }
 
 // Internal only
-// This will build the necessary Qt method/slot information we need from an EP Method Descriptor
-void QtMetaObjectGenerator::AddSlot(const ep::MethodDesc *pMethod)
+// This will build the necessary Qt method information we need from an EP Descriptor
+void QtMetaObjectGenerator::AddMethod(MethodType type, String name, Slice<const SharedString> params, RunBuiltInFunc runMethod, int numDefaultArgs)
 {
-  Method &slot = slotMap[QByteArray(pMethod->id.ptr, (int)pMethod->id.length)];
-  slot.flags = MethodFlags::AccessPublic | MethodFlags::MethodSlot;
-
-  // Args
-  if (!pMethod->argTypes.empty())
+  // If we've supplied a runMethod, then this is a built-in
+  if (runMethod)
   {
-    // TODO: should probably truncate and warn in this case?
-    EPASSERT_THROW(pMethod->argTypes.length <= Q_METAMETHOD_INVOKE_MAX_ARGS, epR_Failure, "Qt only supports a maximum of {0} parameters", Q_METAMETHOD_INVOKE_MAX_ARGS);
-    slot.paramTypes = ep::Array<uint>(ep::Alloc, pMethod->argTypes.length);
-    for (size_t i = 0; i < slot.paramTypes.length; ++i)
-      slot.paramTypes[i] = QMetaType::QVariant;
+    builtInMethods.insert(name, runMethod);
+    builtInCount += numDefaultArgs + 1;
   }
 
-  // Return type
-  slot.returnType = QMetaType::QVariant;
+  bool duplicate = false;
+  do
+  {
+    auto &method = (type == MethodType::Signal) ? signalList.pushBack() : slotList.pushBack();
+    method.name.setRawData(name.ptr, (uint)name.length);
+    method.flags = MethodFlags::AccessPublic | ((type == MethodType::Signal) ? MethodFlags::MethodSignal : MethodFlags::MethodSlot);
+    if (duplicate)
+      method.flags |= MethodFlags::MethodCloned;
+
+    // Args
+    if (!params.empty())
+    {
+      // TODO: should probably truncate and warn in this case?
+      EPASSERT_THROW(params.length <= Q_METAMETHOD_INVOKE_MAX_ARGS, epR_Failure, "Qt only supports a maximum of {0} parameters", Q_METAMETHOD_INVOKE_MAX_ARGS);
+      method.paramTypes = ep::Array<uint>(ep::Alloc, params.length);
+      for (size_t i = 0; i < method.paramTypes.length; ++i)
+        method.paramTypes[i] = QMetaType::QVariant;
+    }
+
+    // TODO: convert this from the EP?
+    method.returnType = (type == MethodType::Signal) ? QMetaType::Void : QMetaType::QVariant;
+
+    // If we have specified default args then we need to generate multiple entries
+    if (--numDefaultArgs < 0)
+      break;
+
+    duplicate = true;
+    params.popBack();
+  } while (true);
 }
 
 // Internal only
-// This will build the necessary Qt signal information we need from an EP Event Descriptor
-void QtMetaObjectGenerator::AddSignal(const ep::EventDesc *pEvent)
-{
-  Method &signal = signalMap[QByteArray(pEvent->id.ptr, (int)pEvent->id.length)];
-  signal.flags = MethodFlags::AccessPublic | MethodFlags::MethodSignal;
-
-  // Args
-  if (!pEvent->argTypes.empty())
-  {
-    // TODO: should probably truncate and warn in this case?
-    EPASSERT_THROW(pEvent->argTypes.length <= Q_METAMETHOD_INVOKE_MAX_ARGS, epR_Failure, "Qt only supports a maximum of {0} parameters", Q_METAMETHOD_INVOKE_MAX_ARGS);
-    signal.paramTypes = ep::Array<uint>(ep::Alloc, pEvent->argTypes.length);
-    for (size_t i = 0; i < signal.paramTypes.length; ++i)
-      signal.paramTypes[i] = QMetaType::QVariant;
-  }
-
-  signal.returnType = QMetaType::Void;
-}
-
-// Internal only
-// Returns the sum of all parameters (including the return type) for the give method map
-int QtMetaObjectGenerator::AggregateParamCount(const QMap<QByteArray, Method> &map)
+// Returns the sum of all parameters (including the return type) for the given method list
+int QtMetaObjectGenerator::AggregateParamCount(Slice<Method> methodList)
 {
   int sum = 0;
-  for (QMap<QByteArray, Method>::ConstIterator it = map.begin(); it != map.end(); ++it)
-    sum += (int)it->paramTypes.length + 1;
+  for (auto &m : methodList)
+    sum += (int)(m.paramTypes.length + 1);
   return sum;
 }
 
+
 // !! BEGIN INTERNAL MOC STUFF
 
-// Unused - we override this with our fabricated object
-const QMetaObject QtTestComponent::staticMetaObject = {
-  { 0, 0, 0, 0, 0, 0 }
+#define QT_MOC_LITERAL(idx, ofs, len) { \
+  Q_REFCOUNT_INITIALIZE_STATIC, len, 0, 0, offsetof(qt_meta_stringdata_QtEPComponent_t, stringdata) + ofs - idx * sizeof(QByteArrayData) \
+}
+
+struct qt_meta_stringdata_QtEPComponent_t {
+  QByteArrayData data[1];
+  char stringdata[18];
 };
 
-// MOC function - static based meta access goes via here
-void QtTestComponent::qt_static_metacall(QObject *pObj, QMetaObject::Call call, int id, void **v)
-{
-  QtTestComponent *pTC = qobject_cast<QtTestComponent*>(pObj);
-  EPASSERT_THROW(pTC != 0, epR_Failure, "QObject is not of type QtTestComponent");
+const qt_meta_stringdata_QtEPComponent_t qt_meta_stringdata_QtEPComponent = {
+  {
+    QT_MOC_LITERAL(0, 0, 17)
+  },
+  "qt::QtEPComponent"
+};
+#undef QT_MOC_LITERAL
 
-  const QMetaObject *pMO = pTC->metaObject();
+const uint qt_meta_data_QtEPComponent[] = {
+  // content:
+  7,       // revision
+  0,       // classname
+  0,    0, // classinfo
+  0,    0, // methods
+  0,    0, // properties
+  0,    0, // enums/sets
+  0,    0, // constructors
+  0,       // flags
+  0,       // signalCount
+  0        // eod
+};
+
+// Largely unused - we provide a basic static meta object for situations where the dynamic one wont get used
+const QMetaObject QtEPComponent::staticMetaObject = {
+  { &QObject::staticMetaObject, qt_meta_stringdata_QtEPComponent.data,
+  qt_meta_data_QtEPComponent, qt_static_metacall, 0, 0 }
+};
+
+
+// MOC function - static based meta access goes via here
+void QtEPComponent::qt_static_metacall(QObject *pObj, QMetaObject::Call call, int id, void **v)
+{
+  QtEPComponent *pC = qobject_cast<QtEPComponent*>(pObj);
+  EPASSERT(pC != 0, "QObject is not of type QtTestComponent");
+
+  const QMetaObject *pMO = pC->metaObject();
   while (pMO->methodOffset() > id)
     pMO = pMO->superClass();
 
   switch (pMO->method(id).methodType())
   {
     case QMetaMethod::Signal:
-      QMetaObject::activate(pTC, QMetaObjectPrivate::signalOffset(pMO), id - pMO->methodOffset(), v);
+      QMetaObject::activate(pC, QMetaObjectPrivate::signalOffset(pMO), id - pMO->methodOffset(), v);
       break;
     case QMetaMethod::Method:
     case QMetaMethod::Slot:
-      pTC->MethodInvoke(id - pMO->methodOffset(), v);
+      pC->MethodInvoke(pMO, id, v);
       break;
     default:
       break;
@@ -884,9 +672,9 @@ void QtTestComponent::qt_static_metacall(QObject *pObj, QMetaObject::Call call, 
 
 // MOC function - retrieves the metaobject for an instance - used internally and externally
 // This will lazily create the QMetaObject
-const QMetaObject *QtTestComponent::metaObject() const
+const QMetaObject *QtEPComponent::metaObject() const
 {
-  if (!pMetaObj)
+  if (!pMetaObj && pComponent)
   {
     pMetaObj = QtMetaObjectGenerator::Generate(pComponent->GetDescriptor());
     EPASSERT_THROW(pMetaObj, epR_Failure, "Unable to generate QMetaObject for component type '{0}'", pComponent->GetType());
@@ -896,7 +684,7 @@ const QMetaObject *QtTestComponent::metaObject() const
 }
 
 // MOC function - used internally by qobject_cast
-void *QtTestComponent::qt_metacast(const char *cname)
+void *QtEPComponent::qt_metacast(const char *cname)
 {
   if (!qstrcmp(cname, "QtTestComponent"))
     return (void*)this;
@@ -904,14 +692,14 @@ void *QtTestComponent::qt_metacast(const char *cname)
 }
 
 // MOC function - instance based meta access goes via here
-int QtTestComponent::qt_metacall(QMetaObject::Call call, int id, void **v)
+int QtEPComponent::qt_metacall(QMetaObject::Call call, int id, void **v)
 {
   // See if this is a QObject meta call
   // Note that regular Qt behaviour is to try from the parent down, offsetting the id along the way
   // A negative id indicates the parent handled it
-  id = QObject::qt_metacall(call, id, v);
-  if (id < 0)
-    return id;
+  int retId = QObject::qt_metacall(call, id, v);
+  if (retId < 0)
+    return retId;
 
   // This will spin up the meta object if we don't already have one
   const QMetaObject *pMO = metaObject();
@@ -921,15 +709,19 @@ int QtTestComponent::qt_metacall(QMetaObject::Call call, int id, void **v)
     // Funnel meta method access
     case QMetaObject::InvokeMetaMethod:
     {
-      switch (pMO->method(id + pMO->methodOffset()).methodType())
+      // Walk up the meta stack to the appropriate object
+      while (pMO->methodOffset() > id)
+        pMO = pMO->superClass();
+
+      switch (pMO->method(id).methodType())
       {
         case QMetaMethod::Signal:
-          QMetaObject::activate(this, pMO, id, v);
-          id -= pMO->methodCount();
+          QMetaObject::activate(this, QMetaObjectPrivate::signalOffset(pMO), id - pMO->methodOffset(), v);
+          retId -= pMO->methodCount();
           break;
         case QMetaMethod::Method:
         case QMetaMethod::Slot:
-          id = MethodInvoke(id, v);
+          retId = MethodInvoke(pMO, id, v);
           break;
         default:
           break;
@@ -940,50 +732,38 @@ int QtTestComponent::qt_metacall(QMetaObject::Call call, int id, void **v)
     case QMetaObject::ReadProperty:
     case QMetaObject::WriteProperty:
     case QMetaObject::ResetProperty:
-      id = PropertyInvoke(call, id, v);
+    {
+      // Walk up the meta stack to the appropriate object
+      while (pMO->propertyOffset() > id)
+        pMO = pMO->superClass();
+
+      retId = PropertyInvoke(pMO, call, id, v);
       break;
+    }
     // Don't do anything with queries but say we did
     case QMetaObject::QueryPropertyScriptable:
     case QMetaObject::QueryPropertyDesignable:
     case QMetaObject::QueryPropertyStored:
     case QMetaObject::QueryPropertyEditable:
     case QMetaObject::QueryPropertyUser:
-      id -= pMO->propertyCount();
+      retId -= pMO->propertyCount();
       break;
     default:
       break;
   }
 
-  EPASSERT_THROW(id < 0, epR_Failure, "Unsupported Qt Meta Access with index '{0}' and call type '{1}'", id, (int)call);
-  return id;
+  EPASSERT_THROW(retId < 0, epR_Failure, "Unsupported Qt Meta Access with index '{0}' and call type '{1}'", retId, (int)call);
+  return retId;
 }
 
 // !! END INTERNAL MOC STUFF
 
 
-QtTestComponent::QtTestComponent(ep::Component *pComp)
-{
-  EPASSERT_THROW(pComp, epR_InvalidArgument, "Creating a QtTestComponent from a null component");
-  pComponent = pComp;
-}
-
-QtTestComponent::~QtTestComponent()
-{
-  // TODO: when these are cached, we won't need to do this
-  while (pMetaObj && pMetaObj != &QObject::staticMetaObject)
-  {
-    const QMetaObject *pSuper = pMetaObj->superClass();
-    epDelete((QtEPMetaObject*)pMetaObj);
-    pMetaObj = pSuper;
-  }
-}
-
 // Internal
 // Qt method access function
-int QtTestComponent::MethodInvoke(int id, void **v)
+int QtEPComponent::MethodInvoke(const QMetaObject *pMO, int id, void **v)
 {
-  QMetaMethod method = pMetaObj->method(id + QObject::staticMetaObject.methodCount());
-  id -= pMetaObj->methodCount();
+  QMetaMethod method = pMO->method(id);
 
   try {
     // Loop thru the parameters for the mapped signal and convert to ep::Variants
@@ -999,56 +779,55 @@ int QtTestComponent::MethodInvoke(int id, void **v)
         varArgs.pushBack(epToVariant(QVariant(type, v[i + 1])));
     }
 
-    ep::Variant var = pComponent->Call(epFromQByteArray(method.name()), (Slice<const Variant>)varArgs);
+    QVariant retVal;
+    String methodName = epFromQByteArray(method.name());
+
+    // Check if this is a built-in method, otherwise pipe it thru to the EPComponent system
+    if ((id - QObject::staticMetaObject.methodCount() - QtMetaObjectGenerator::builtInOffset) < QtMetaObjectGenerator::builtInCount)
+      retVal = QtMetaObjectGenerator::builtInMethods[methodName](this, varArgs);
+    else
+      retVal = pComponent->Call(methodName, (Slice<const Variant>)varArgs).as<QVariant>();
 
     if (method.returnType() != QMetaType::Void)
-      epFromVariant(var, (QVariant*)v[0]);
+      *(QVariant*)v[0] = retVal;
   }
   catch (ep::EPException &) {
     ep::ClearError();
   }
 
-  return id;
+  return id - pMO->methodCount();
 }
 
 // Internal
 // Qt property access function
-int QtTestComponent::PropertyInvoke(QMetaObject::Call call, int id, void **v)
+int QtEPComponent::PropertyInvoke(const QMetaObject *pMO, QMetaObject::Call call, int id, void **v)
 {
-  QMetaProperty prop = pMetaObj->property(id + QObject::staticMetaObject.propertyCount());
-  id -= pMetaObj->propertyCount();
+  QMetaProperty prop = pMO->property(id);
+  bool supported = true;
 
-  switch (call)
-  {
-    case QMetaObject::ReadProperty:
+  try {
+    switch (call)
     {
-      try {
+      case QMetaObject::ReadProperty:
         epFromVariant(pComponent->Get(prop.name()), (QVariant*)*v);
-      }
-      catch (ep::EPException &) {
-        ep::ClearError();
-      }
-      break;
-    }
-    case QMetaObject::WriteProperty:
-    {
-      try {
+        break;
+      case QMetaObject::WriteProperty:
         pComponent->Set(prop.name(), epToVariant(*(QVariant*)v[0]));
-      }
-      catch (ep::EPException &) {
-        ep::ClearError();
-      }
-      break;
+        break;
+      default:
+        supported = false;
+        break;
     }
-    default:
-      EPASSERT_THROW(false, epR_Failure, "Unsupported meta property access of type '{0}'", (int)call);
-      break;
+  }
+  catch (ep::EPException &) {
+    ep::ClearError();
   }
 
-  return id;
+  EPASSERT_THROW(supported, epR_Failure, "Unsupported meta property access of type '{0}'", (int)call);
+  return id - pMO->propertyCount();
 }
 
-void QtTestComponent::connectNotify(const QMetaMethod &signal)
+void QtEPComponent::connectNotify(const QMetaMethod &signal)
 {
   ep::MutableString<0> signalName = epFromQByteArray(signal.name());
 
@@ -1057,10 +836,10 @@ void QtTestComponent::connectNotify(const QMetaMethod &signal)
     return;
 
   Connection *pConn = &connectionMap.insert(signalName, Connection{ this, signal });
-  pConn->subscription = pComponent->Subscribe(signalName, ep::VarDelegate(pConn, &QtTestComponent::Connection::SignalRouter));
+  pConn->subscription = pComponent->Subscribe(signalName, ep::VarDelegate(pConn, &QtEPComponent::Connection::SignalRouter));
 }
 
-void QtTestComponent::disconnectNotify(const QMetaMethod &signal)
+void QtEPComponent::disconnectNotify(const QMetaMethod &signal)
 {
   // If all signals have been disconnected, clean up everything
   if (!signal.isValid())
@@ -1079,7 +858,7 @@ void QtTestComponent::disconnectNotify(const QMetaMethod &signal)
   }
 }
 
-ep::Variant QtTestComponent::Connection::SignalRouter(ep::Slice<const ep::Variant> args)
+Variant QtEPComponent::Connection::SignalRouter(Slice<const Variant> args)
 {
   // Setup the params
   // Note that argv[0] is the return value - for signals we wont have one
@@ -1092,7 +871,7 @@ ep::Variant QtTestComponent::Connection::SignalRouter(ep::Slice<const ep::Varian
   }
 
   if (!pComp->signalsBlocked())
-    QtTestComponent::qt_static_metacall(pComp, QMetaObject::InvokeMetaMethod, signal.methodIndex(), argv);
+    QtEPComponent::qt_static_metacall(pComp, QMetaObject::InvokeMetaMethod, signal.methodIndex(), argv);
   return nullptr;
 }
 

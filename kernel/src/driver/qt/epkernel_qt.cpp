@@ -189,6 +189,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
 // ---------------------------------------------------------------------------------------
 QtKernel::~QtKernel()
 {
+  QtMetaObjectGenerator::ClearCache();
   delete pMediator;
   delete pApplication;
 }

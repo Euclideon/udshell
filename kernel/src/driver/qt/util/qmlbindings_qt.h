@@ -13,8 +13,9 @@
 namespace qt {
 
 // forward declare
-class QtEPComponent;
 class QtFocusManager;
+class QtEPComponent;
+struct QtEPMetaObject;
 
 namespace internal {
 
@@ -53,114 +54,123 @@ private:
 };
 
 
+// Helper factory class which creates a new QMetaObject based on a EP Component Descriptor
+class QtMetaObjectGenerator
+{
+public:
+  static const QtEPMetaObject *Generate(const ep::ComponentDesc *pDesc);
+  static void ClearCache();
+
+private:
+  friend class QtEPComponent;
+  using RunBuiltInFunc = std::function<QVariant(QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs)>;
+
+  const char * const pArgNames[10] = { "arg0", "arg1", "arg2", "arg3", "arg4", "arg5", "arg6", "arg7", "arg8", "arg9" };
+  static_assert(Q_METAMETHOD_INVOKE_MAX_ARGS == 10, "Qt's MetaMethod max args size has changed");
+
+  enum class MethodType
+  {
+    Signal,
+    Slot
+  };
+
+  struct Property
+  {
+    QByteArray name;
+    uint flags;
+  };
+
+  struct Method
+  {
+    QByteArray name;
+    ep::SharedArray<uint> paramTypes;
+    uint flags;
+    uint returnType;
+  };
+
+  QtMetaObjectGenerator(const ep::ComponentDesc *pDesc);
+  ~QtMetaObjectGenerator() {}
+
+  QtEPMetaObject *CreateMetaObject(const QMetaObject *pParent);
+
+  void AddProperty(const ep::PropertyDesc *pProperty);
+  void AddMethod(MethodType type, ep::String name, ep::Slice<const ep::SharedString> params = nullptr, RunBuiltInFunc runMethod = nullptr, int numDefaultArgs = 0);
+
+  void AddSlot(const ep::MethodDesc *pMethod) {
+    // TODO: Detect if this method is from a scripting language and needs to be vararg OR has default params
+    AddMethod(MethodType::Slot, pMethod->id, pMethod->argTypes);
+  }
+  void AddSignal(const ep::EventDesc *pEvent) {
+    // TODO: Detect if this method is from a scripting language and needs to be vararg OR has default params
+    AddMethod(MethodType::Signal, pEvent->id, pEvent->argTypes);
+  }
+
+  int AggregateParamCount(ep::Slice<Method> methodList);
+
+  static ep::HashMap<ep::SharedString, QtEPMetaObject*> metaObjectCache;
+  static ep::HashMap<ep::SharedString, RunBuiltInFunc> builtInMethods;
+  static int builtInOffset;
+  static int builtInCount;
+
+  ep::Array<Property> propertyList;
+  ep::Array<Method> slotList;
+  ep::Array<Method> signalList;
+
+  const ep::ComponentDescInl *pDesc;
+};
+
+
 // ---------------------------------------------------------------------------------------
 // SHIM OBJECTS
 
 struct BuildQtEPComponent;
-
 enum QtHasWeakRef_t { QtHasWeakRef };
 
 // This shim class wraps an ep::Component in a QObject that can be accessible from QML
-class QtEPComponent : public QObject
-{
-  Q_OBJECT
-
-public:
-  QtEPComponent() : QObject(nullptr), pComponent(nullptr) {}
-  QtEPComponent(const ep::ComponentRef &spComponent) : QObject(nullptr), spComponent(spComponent) { pComponent = spComponent.ptr(); }
-  QtEPComponent(const QtEPComponent &val) : QObject(val.parent()), spComponent(ep::ComponentRef(val.pComponent)), pComponent(val.pComponent) {}
-  ~QtEPComponent() {}
-
-  ep::ComponentRef GetComponent() const { return ep::ComponentRef(pComponent); }
-
-  Q_INVOKABLE bool isNull() const { return pComponent == nullptr; }
-
-  Q_INVOKABLE QVariant get(const QString &name) const;
-  Q_INVOKABLE void set(const QString &name, QVariant val);
-
-  // Ugly but necessary
-  Q_INVOKABLE QVariant call(const QString &name) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8) const;
-  Q_INVOKABLE QVariant call(const QString &name, QVariant arg0, QVariant arg1, QVariant arg2, QVariant arg3, QVariant arg4, QVariant arg5, QVariant arg6, QVariant arg7, QVariant arg8, QVariant arg9) const;
-
-  Q_INVOKABLE QVariant subscribe(QString eventName, QJSValue func) const;
-
-protected:
-  friend struct BuildQtEPComponent;
-
-  // this constructor ensures the QtEPComponent only holds a weak pointer to its ep::Component
-  // currently only used to define the QML "thisComponent" since a SharedPtr will result in a circular reference
-  QtEPComponent(ep::Component *pComp, QtHasWeakRef_t) : QObject(nullptr), pComponent(pComp) {}
-
-  ep::ComponentRef spComponent;
-  ep::Component* pComponent; // used to avoid circular references
-};
-
-
-// This shim class wraps an ep::UIComponent in a QObject that can be accessible from QML
-class QtEPUIComponent : public QtEPComponent
-{
-  Q_OBJECT
-
-public:
-  QtEPUIComponent() {}
-  QtEPUIComponent(const ep::ComponentRef &spComponent) : QtEPComponent(spComponent) {}
-  QtEPUIComponent(const QtEPUIComponent &val) : QtEPComponent(val) {}
-  ~QtEPUIComponent() {}
-
-  // QML exposed methods
-  Q_INVOKABLE QQuickWindow *parentWindow() const { return static_cast<QQuickItem*>(pComponent->GetUserData())->window(); }
-  Q_INVOKABLE QQuickItem *item() const { return static_cast<QQuickItem*>(pComponent->GetUserData()); }
-
-protected:
-  friend struct BuildQtEPComponent;
-
-  // this constructor ensures the QtEPComponent only holds a weak pointer to its ep::Component
-  // currently only used to define the QML "thisComponent" since a SharedPtr will result in a circular reference
-  QtEPUIComponent(ep::Component *pComp, QtHasWeakRef_t) : QtEPComponent(pComp, QtHasWeakRef) {}
-};
-
-
-// This shim class wraps an ep::Component in a QObject that can be accessible from QML
 // A special QMetaObject will be generated in order to reflect the EP Meta Data and expose it to Qt
-// TODO: This class will eventually replace QtEPComponent
-class QtTestComponent : public QObject
+class QtEPComponent : public QObject
 {
   Q_OBJECT_FAKE
 
 public:
-  QtTestComponent(ep::Component *pComp);
-  ~QtTestComponent();
+  ~QtEPComponent() {}
 
-  void disconnectAll() { disconnect(); }
+  ep::ComponentRef GetComponent() const { return ep::ComponentRef(pComponent); }
 
 private:
+  friend class QtMetaObjectGenerator;
+  friend struct BuildQtEPComponent;
+
   struct Connection
   {
-    QtTestComponent *pComp;
+    QtEPComponent *pComp;
     QMetaMethod signal;
     ep::SubscriptionRef subscription;
 
     ep::Variant SignalRouter(ep::Slice<const ep::Variant>);
   };
 
+  QtEPComponent() : QObject(nullptr), pComponent(nullptr) {}
+  QtEPComponent(const ep::ComponentRef &spComponent) : QObject(nullptr), spComponent(spComponent) { pComponent = spComponent.ptr(); }
+  QtEPComponent(const QtEPComponent &val)
+    : QObject(val.parent()), pMetaObj(val.pMetaObj), spComponent(ep::ComponentRef(val.pComponent)), pComponent(val.pComponent)
+  {
+  }
+
+  // this constructor ensures the QtEPComponent only holds a weak pointer to its ep::Component
+  // currently only used to define the QML "thisComponent" since a SharedPtr will result in a circular reference
+  QtEPComponent(ep::Component *pComp, QtHasWeakRef_t) : QObject(nullptr), pComponent(pComp) {}
+
   // Internal Meta Magic functions
-  int MethodInvoke(int id, void **v);
-  int PropertyInvoke(QMetaObject::Call call, int index, void **v);
+  int MethodInvoke(const QMetaObject *pMO, int id, void **v);
+  int PropertyInvoke(const QMetaObject *pMO, QMetaObject::Call call, int id, void **v);
 
   void connectNotify(const QMetaMethod &signal) override;
   void disconnectNotify(const QMetaMethod &signal) override;
 
   mutable const QMetaObject *pMetaObj = nullptr;
-  ep::Component *pComponent = nullptr;
+  ep::ComponentRef spComponent;
+  ep::Component *pComponent = nullptr;    // used to avoid circular references
 
   ep::HashMap<ep::SharedString, Connection> connectionMap;
 };
@@ -207,8 +217,6 @@ private:
   {
     if (!pComponent)
       return nullptr;
-    if (pComponent->IsType("ep.uicomponent"))
-      return new QtEPUIComponent(pComponent, args...);
     return new QtEPComponent(pComponent, args...);
   }
 };
@@ -216,15 +224,15 @@ private:
 } // namespace qt
 
 // This ensures qobject_cast works with our fake QtTestComponent objects
-template <> inline qt::QtTestComponent *qobject_cast<qt::QtTestComponent*>(const QObject *o)
+template <> inline qt::QtEPComponent *qobject_cast<qt::QtEPComponent*>(const QObject *o)
 {
   void *result = o ? const_cast<QObject *>(o)->qt_metacast("QtTestComponent") : 0;
-  return (qt::QtTestComponent*)(result);
+  return (qt::QtEPComponent*)(result);
 }
-template <> inline qt::QtTestComponent *qobject_cast<qt::QtTestComponent*>(QObject *o)
+template <> inline qt::QtEPComponent *qobject_cast<qt::QtEPComponent*>(QObject *o)
 {
   void *result = o ? o->qt_metacast("QtTestComponent") : 0;
-  return (qt::QtTestComponent*)(result);
+  return (qt::QtEPComponent*)(result);
 }
 
 #endif  // QMLBINDINGS_QT_H
