@@ -74,7 +74,7 @@ public:
     if(!resUrl.is(Variant::Type::String))
       spMeta->Insert("url", GetURL());
 
-    resources.Insert(_name, spResource);
+    resources.Replace(_name, spResource);
   }
 
   size_t CountResources(String filterPattern) const override final

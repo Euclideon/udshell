@@ -712,7 +712,7 @@ void KernelImpl::ReceiveMessage(String sender, String message, const Variant &da
 
 void KernelImpl::RegisterMessageHandler(SharedString _name, MessageHandler messageHandler)
 {
-  messageHandlers.Insert(_name, MessageCallback{ _name, messageHandler });
+  messageHandlers.Replace(_name, MessageCallback{ _name, messageHandler });
 }
 
 const ComponentDesc* KernelImpl::RegisterComponentType(ComponentDescInl *pDesc)

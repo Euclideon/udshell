@@ -72,6 +72,7 @@ public:
 
   Slice<T> slice(ptrdiff_t first, ptrdiff_t last) const;
 
+  size_t size() const { return length; }
   bool empty() const;
   explicit operator bool() const { return length != 0; }
 

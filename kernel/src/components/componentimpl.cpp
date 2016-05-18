@@ -43,6 +43,10 @@ void ComponentImpl::SetName(SharedString name)
 {
   // HAX: we take access to KernelImpl; low-level Component stuff
   KernelImpl *pKernelImpl = GetKernel()->GetImpl();
+
+  if (name && pKernelImpl->namedInstanceRegistry.exists(name))
+    EPTHROW_WARN(epR_AlreadyExists, 1, "Name is already in use");
+
   if (pInstance->name)
     pKernelImpl->namedInstanceRegistry.Remove(pInstance->name);
   pInstance->name = name;

@@ -19,6 +19,7 @@ enum epResult
   epR_BadCast,
   epR_AllocFailure,
   epR_ResourceInUse,
+  epR_AlreadyExists,
 
   epR_File_OpenFailure,
 

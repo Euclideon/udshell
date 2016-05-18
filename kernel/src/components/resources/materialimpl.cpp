@@ -162,15 +162,13 @@ void MaterialImpl::PopulateShaderProperties()
 
 const PropertyDesc *MaterialImpl::GetPropertyDesc(String _name, EnumerateFlags enumerateFlags) const
 {
-  PropertyDesc *pDesc = dynamicPropertyCache.Get(_name);
-  if (pDesc)
-    return pDesc;
-  PropertyDesc &desc = dynamicPropertyCache.Insert(_name, PropertyDesc(
-                                                            { _name, _name, _name, nullptr, 0 },
-                                                            MethodShim(&MaterialImpl::Get, SharedPtr<DynamicPropertyData>::create(_name)),
-                                                            MethodShim(&MaterialImpl::Set, SharedPtr<DynamicPropertyData>::create(_name))
-                                                          ));
-  return &desc;
+  return &dynamicPropertyCache.TryInsert(_name, [&]() {
+    return PropertyDesc(
+      { _name, _name, _name, nullptr, 0 },
+      MethodShim(&MaterialImpl::Get, SharedPtr<DynamicPropertyData>::create(_name)),
+      MethodShim(&MaterialImpl::Set, SharedPtr<DynamicPropertyData>::create(_name))
+    );
+  });
 }
 
 Variant MaterialImpl::GetMaterialProperty(String property) const

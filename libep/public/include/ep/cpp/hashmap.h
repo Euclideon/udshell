@@ -45,17 +45,21 @@ public:
   void Clear();
 
   template <typename Key, typename Val>
-  V* Insert(Key&& key, Val&& val);
-  V* Insert(KVP<K, V> &&v);
-  V* Insert(const KVP<K, V> &v);
+  V& Insert(Key&& key, Val&& val);
+  V& Insert(KVP<K, V> &&v);
+  V& Insert(const KVP<K, V> &v);
 
   template <typename Key>
-  V* InsertLazy(Key&& key, std::function<V()> lazyValue);
+  V& TryInsert(Key&& key, V&& val);
+  template <typename Key>
+  V& TryInsert(Key&& key, const V& val);
+  template <typename Key>
+  V& TryInsert(Key&& key, std::function<V()> lazyValue);
 
-  //  template <typename... Args>
-  //  V* Replace(Args&&... args)
-  //  {
-  //  }
+  template <typename Key, typename Val>
+  V& Replace(Key&& key, Val&& val);
+  V& Replace(KVP<K, V> &&v);
+  V& Replace(const KVP<K, V> &v);
 
   void Remove(const K &key);
 
@@ -64,6 +68,8 @@ public:
 
   const V& operator[](const K &key) const;
   V& operator[](const K &key);
+
+  bool exists(const K &key);
 
   class Iterator;
   Iterator begin() const;

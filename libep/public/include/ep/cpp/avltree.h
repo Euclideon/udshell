@@ -86,48 +86,111 @@ public:
     root = nullptr;
   }
 
-  V& Insert(K &&key, V &&rval)
+  V& Insert(K &&key, V &&val)
+  {
+    if (Get(key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return Replace(std::move(key), std::move(val));
+  }
+  V& Insert(const K &key, V &&val)
+  {
+    if (Get(key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return Replace(key, std::move(val));
+  }
+  V& Insert(K &&key, const V &val)
+  {
+    if (Get(key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return Replace(std::move(key), val);
+  }
+  V& Insert(const K &key, const V &val)
+  {
+    if (Get(key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return Replace(key, val);
+  }
+
+  V& Insert(KVP<K, V> &&kvp)
+  {
+    if (Get(kvp.key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return Replace(std::move(kvp));
+  }
+  V& Insert(const KVP<K, V> &kvp)
+  {
+    if (Get(kvp.key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return Replace(kvp);
+  }
+
+  template <typename Key>
+  V& TryInsert(Key&& key, V&& val)
+  {
+    V *v = Get(key);
+    if (v)
+      return *v;
+    return Replace(std::forward<Key>(key), std::move(val));
+  }
+  template <typename Key>
+  V& TryInsert(Key&& key, const V& val)
+  {
+    V *v = Get(key);
+    if (v)
+      return *v;
+    return Replace(std::forward<Key>(key), val);
+  }
+  template <typename Key>
+  V& TryInsert(Key&& key, std::function<V()> lazy)
+  {
+    V *v = Get(key);
+    if (v)
+      return *v;
+    return Replace(std::forward<Key>(key), lazy());
+  }
+
+  V& Replace(K &&key, V &&val)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(std::move(key));
-    epConstruct(&node->v) V(std::move(rval));
+    epConstruct(&node->v) V(std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
     return node->v;
   }
-  V& Insert(const K &key, V &&rval)
+  V& Replace(const K &key, V &&val)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(key);
-    epConstruct(&node->v) V(std::move(rval));
+    epConstruct(&node->v) V(std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
     return node->v;
   }
-  V& Insert(K &&key, const V &v)
+  V& Replace(K &&key, const V &val)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(std::move(key));
-    epConstruct(&node->v) V(v);
+    epConstruct(&node->v) V(val);
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
     return node->v;
   }
-  V& Insert(const K &key, const V &v)
+  V& Replace(const K &key, const V &val)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(key);
-    epConstruct(&node->v) V(v);
+    epConstruct(&node->v) V(val);
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
     return node->v;
   }
 
-  V& Insert(KVP<K, V> &&kvp)
+  V& Replace(KVP<K, V> &&kvp)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(std::move(kvp.key));
@@ -137,11 +200,11 @@ public:
     root = insert(root, node);
     return node->v;
   }
-  V& Insert(const KVP<K, V> &v)
+  V& Replace(const KVP<K, V> &kvp)
   {
     Node *node = Allocator::Get().Alloc();
-    epConstruct(&node->k) K(v.key);
-    epConstruct(&node->v) V(v.value);
+    epConstruct(&node->k) K(kvp.key);
+    epConstruct(&node->v) V(kvp.value);
     node->left = node->right = nullptr;
     node->height = 1;
     root = insert(root, node);
