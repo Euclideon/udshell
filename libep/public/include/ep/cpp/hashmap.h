@@ -30,7 +30,7 @@ struct Hash<SharedString>
 /// \endcond
 
 
-template <typename V, typename K = SharedString, typename HashPred = Hash<K>>
+template <typename K, typename V, typename HashPred = Hash<K>>
 class HashMap
 {
 public:
