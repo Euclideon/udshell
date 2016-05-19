@@ -111,7 +111,7 @@ inline void epFromVariant(const Variant &v, UDElementMetadata *pE)
   epFromVariant(v, static_cast<ElementMetadata*>(pE));
   Variant *pI = v.getItem("blend");
   if (pI)
-    pE->blend = UDAttributeBlend(pI->as<int>());
+    pE->blend = pI->as<UDAttributeBlend>();
   else
     pE->blend = UDAttributeBlend::None;
 }
