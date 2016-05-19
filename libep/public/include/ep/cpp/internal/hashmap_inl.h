@@ -61,50 +61,94 @@ void HashMap<V, K, HashPred>::Clear()
 
 template <typename V, typename K, typename HashPred>
 template <typename Key, typename Val>
-V* HashMap<V, K, HashPred>::Insert(Key&& key, Val&& val)
+V& HashMap<V, K, HashPred>::Insert(Key&& key, Val&& val)
 {
   Node **ppBucket = GetBucket(key);
   V *pVal = GetValue(*ppBucket, key);
   if (pVal)
-  {
-    *pVal = std::forward<Val>(val);
-    return pVal;
-  }
+    EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
   Node *pNode = pool.New(std::forward<Key>(key), std::forward<Val>(val));
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
-  return &pNode->data.value;
+  return pNode->data.value;
 }
 template <typename V, typename K, typename HashPred>
-V* HashMap<V, K, HashPred>::Insert(KVP<K, V> &&v)
+V& HashMap<V, K, HashPred>::Insert(KVP<K, V> &&v)
 {
   return Insert(std::move(v.key), std::move(v.value));
 }
 template <typename V, typename K, typename HashPred>
-V* HashMap<V, K, HashPred>::Insert(const KVP<K, V> &v)
+V& HashMap<V, K, HashPred>::Insert(const KVP<K, V> &v)
 {
   return Insert(v.key, v.value);
 }
 
 template <typename V, typename K, typename HashPred>
 template <typename Key>
-V* HashMap<V, K, HashPred>::InsertLazy(Key&& key, std::function<V()> lazy)
+V& HashMap<V, K, HashPred>::TryInsert(Key&& key, V&& val)
 {
   Node **ppBucket = GetBucket(key);
   V *pVal = GetValue(*ppBucket, key);
   if (pVal)
-    return pVal;
-
+    return *pVal;
+  Node *pNode = pool.New(std::forward<Key>(key), std::move(val));
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+template <typename V, typename K, typename HashPred>
+template <typename Key>
+V& HashMap<V, K, HashPred>::TryInsert(Key&& key, const V& val)
+{
+  Node **ppBucket = GetBucket(key);
+  V *pVal = GetValue(*ppBucket, key);
+  if (pVal)
+    return *pVal;
+  Node *pNode = pool.New(std::forward<Key>(key), val);
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+template <typename V, typename K, typename HashPred>
+template <typename Key>
+V& HashMap<V, K, HashPred>::TryInsert(Key&& key, std::function<V()> lazy)
+{
+  Node **ppBucket = GetBucket(key);
+  V *pVal = GetValue(*ppBucket, key);
+  if (pVal)
+    return *pVal;
   Node *pNode = pool.New(std::forward<Key>(key), lazy());
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
-  return &pNode->data.value;
+  return pNode->data.value;
 }
 
-//  template <typename... Args>
-//  V* Replace(Args&&... args)
-//  {
-//  }
+template <typename V, typename K, typename HashPred>
+template <typename Key, typename Val>
+V& HashMap<V, K, HashPred>::Replace(Key&& key, Val&& val)
+{
+  Node **ppBucket = GetBucket(key);
+  V *pVal = GetValue(*ppBucket, key);
+  if (pVal)
+  {
+    *pVal = std::forward<Val>(val);
+    return *pVal;
+  }
+  Node *pNode = pool.New(std::forward<Key>(key), std::forward<Val>(val));
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+template <typename V, typename K, typename HashPred>
+V& HashMap<V, K, HashPred>::Replace(KVP<K, V> &&v)
+{
+  return Replace(std::move(v.key), std::move(v.value));
+}
+template <typename V, typename K, typename HashPred>
+V& HashMap<V, K, HashPred>::Replace(const KVP<K, V> &v)
+{
+  return Replace(v.key, v.value);
+}
 
 template <typename V, typename K, typename HashPred>
 void HashMap<V, K, HashPred>::Remove(const K &key)
@@ -147,6 +191,12 @@ V& HashMap<V, K, HashPred>::operator[](const K &key)
   V *pV = Get(key);
   EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
   return *pV;
+}
+
+template <typename V, typename K, typename HashPred>
+bool HashMap<V, K, HashPred>::exists(const K &key)
+{
+  return Get(key) != nullptr;
 }
 
 template <typename V, typename K, typename HashPred>

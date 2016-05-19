@@ -114,21 +114,21 @@ TEST(HashMap, InsertAndRemove)
   EXPECT_TRUE(map.Empty());
 
   // Standard inserts
-  EXPECT_NE(nullptr, map.Insert("bob", 1));
+  EXPECT_NO_THROW(map.Insert("bob", 1));
   EXPECT_EQ(1, map.Size());
-  EXPECT_NE(nullptr, map.Insert(ep::KVP<SharedString, int>("sarah", 2)));
+  EXPECT_NO_THROW(map.Insert(ep::KVP<SharedString, int>("sarah", 2)));
   EXPECT_EQ(2, map.Size());
 
   // Check our move assigns aren't trashing
   using namespace hashmap_test;
   HashMap<TestValue> testMap;
-  EXPECT_NE(nullptr, testMap.Insert("bill", TestValue(10)));
+  EXPECT_NO_THROW(testMap.Insert("bill", TestValue(10)));
   EXPECT_EQ(1, testMap.Size());
   EXPECT_EQ(1, TestValue::numInstances);
 
   {
     TestValue localInstance(99);
-    EXPECT_NE(nullptr, testMap.Insert("nigel", localInstance));
+    EXPECT_NO_THROW(testMap.Insert("nigel", localInstance));
     EXPECT_EQ(3, TestValue::numInstances);
     EXPECT_EQ(99, localInstance.instanceData);
     EXPECT_EQ(99, testMap["nigel"].instanceData);
@@ -137,7 +137,7 @@ TEST(HashMap, InsertAndRemove)
   EXPECT_EQ(2, testMap.Size());
 
   // Lazy insert
-  EXPECT_NE(nullptr, testMap.InsertLazy("gordon", []() -> TestValue { return TestValue(101); }));
+  testMap.TryInsert("gordon", []() -> TestValue { return TestValue(101); });
   EXPECT_EQ(3, TestValue::numInstances);
   EXPECT_EQ(3, testMap.Size());
   EXPECT_EQ(101, testMap["gordon"].instanceData);
@@ -167,18 +167,22 @@ TEST(HashMap, InsertAndRemove)
   EXPECT_TRUE(testMap.Empty());
 
   // Insert and then insert replace
-  EXPECT_NE(nullptr, testMap.Insert("bob", TestValue(10)));
+  EXPECT_NO_THROW(testMap.Insert("bob", TestValue(10)));
   EXPECT_EQ(10, testMap["bob"].instanceData);
   EXPECT_EQ(1, TestValue::numInstances);
   EXPECT_EQ(1, testMap.Size());
-  EXPECT_NE(nullptr, testMap.Insert("bob", TestValue(11)));
-  EXPECT_EQ(11, testMap["bob"].instanceData);
+  EXPECT_THROW(testMap.Insert("bob", TestValue(11)), ep::EPException);
+  EXPECT_EQ(10, testMap["bob"].instanceData);
+  EXPECT_EQ(1, TestValue::numInstances);
+  EXPECT_EQ(1, testMap.Size());
+  testMap.Replace("bob", TestValue(12));
+  EXPECT_EQ(12, testMap["bob"].instanceData);
   EXPECT_EQ(1, TestValue::numInstances);
   EXPECT_EQ(1, testMap.Size());
 
   // Insert lazy when it already exists - shouldn't replace
-  EXPECT_NE(nullptr, testMap.InsertLazy("bob", []() -> TestValue { return TestValue(101); }));
-  EXPECT_NE(101, testMap.Get("bob")->instanceData);
+  testMap.TryInsert("bob", []() -> TestValue { return TestValue(101); });
+  EXPECT_EQ(12, testMap.Get("bob")->instanceData);
   EXPECT_EQ(1, TestValue::numInstances);
   EXPECT_EQ(1, testMap.Size());
 }

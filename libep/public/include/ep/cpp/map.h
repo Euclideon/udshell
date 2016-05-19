@@ -38,7 +38,7 @@ public:
   {
     Alloc();
     for (auto &kvp : arr)
-      ptr->tree.Insert(kvp.key, kvp.value);
+      ptr->tree.Insert(kvp);
   }
   SharedMap(Slice<const ValueType> arr)
   {
@@ -65,42 +65,102 @@ public:
 
   bool Empty() const { return ptr ? ptr->tree.Empty() : true; }
 
-  void Insert(KeyType &&key, ValueType &&rval)
+  ValueType& Insert(KeyType &&key, ValueType &&rval)
   {
     if (!ptr)
       Alloc();
-    ptr->tree.Insert(std::move(key), std::move(rval));
+    return ptr->tree.Insert(std::move(key), std::move(rval));
   }
-  void Insert(const KeyType &key, ValueType &&rval)
+  ValueType& Insert(const KeyType &key, ValueType &&rval)
   {
     if (!ptr)
       Alloc();
-    ptr->tree.Insert(key, std::move(rval));
+    return ptr->tree.Insert(key, std::move(rval));
   }
-  void Insert(KeyType &&key, const ValueType &v)
+  ValueType& Insert(KeyType &&key, const ValueType &v)
   {
     if (!ptr)
       Alloc();
-    ptr->tree.Insert(std::move(key), v);
+    return ptr->tree.Insert(std::move(key), v);
   }
-  void Insert(const KeyType &key, const ValueType &v)
+  ValueType& Insert(const KeyType &key, const ValueType &v)
   {
     if (!ptr)
       Alloc();
-    ptr->tree.Insert(key, v);
+    return ptr->tree.Insert(key, v);
   }
 
-  void Insert(KVP<KeyType, ValueType> &&kvp)
+  ValueType& Insert(KVP<KeyType, ValueType> &&kvp)
   {
     if (!ptr)
       Alloc();
-    ptr->tree.Insert(std::move(kvp));
+    return ptr->tree.Insert(std::move(kvp));
   }
-  void Insert(const KVP<KeyType, ValueType> &v)
+  ValueType& Insert(const KVP<KeyType, ValueType> &v)
   {
     if (!ptr)
       Alloc();
-    ptr->tree.Insert(v);
+    return ptr->tree.Insert(v);
+  }
+
+  template <typename Key>
+  ValueType& TryInsert(Key&& key, ValueType&& val)
+  {
+    if (!ptr)
+      Alloc();
+    return ptr->tree.TryInsert(std::forward<Key>(key), std::move(val));
+  }
+  template <typename Key>
+  ValueType& TryInsert(Key&& key, const ValueType& val)
+  {
+    if (!ptr)
+      Alloc();
+    return ptr->tree.TryInsert(std::forward<Key>(key), val);
+  }
+  template <typename Key>
+  ValueType& TryInsert(Key&& key, std::function<ValueType()> lazyValue)
+  {
+    if (!ptr)
+      Alloc();
+    return ptr->tree.TryInsert(std::forward<Key>(key), lazyValue);
+  }
+
+  ValueType& Replace(KeyType &&key, ValueType &&rval)
+  {
+    if (!ptr)
+      Alloc();
+    return ptr->tree.Replace(std::move(key), std::move(rval));
+  }
+  ValueType& Replace(const KeyType &key, ValueType &&rval)
+  {
+    if (!ptr)
+      Alloc();
+    return ptr->tree.Replace(key, std::move(rval));
+  }
+  ValueType& Replace(KeyType &&key, const ValueType &v)
+  {
+    if (!ptr)
+      Alloc();
+    return ptr->tree.Replace(std::move(key), v);
+  }
+  ValueType& Replace(const KeyType &key, const ValueType &v)
+  {
+    if (!ptr)
+      Alloc();
+    return ptr->tree.Replace(key, v);
+  }
+
+  ValueType& Replace(KVP<KeyType, ValueType> &&kvp)
+  {
+    if (!ptr)
+      Alloc();
+    return ptr->tree.Replace(std::move(kvp));
+  }
+  ValueType& Replace(const KVP<KeyType, ValueType> &v)
+  {
+    if (!ptr)
+      Alloc();
+    return ptr->tree.Replace(v);
   }
 
   void Remove(const KeyType &key)

@@ -134,6 +134,13 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     QMetaProperty property = pMetaObject->property(i);
 
     SharedString propertyName = epFromQString(property.name()).toLower();
+
+    if (pDesc->propertyTree.Get(propertyName))
+    {
+      QtApplication::Kernel()->LogWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.");
+      continue;
+    }
+
     auto data = SharedPtr<QtPropertyData>::create(i);
     auto getterShim = (property.isReadable() ? MethodShim(&QtShims::getter, data) : MethodShim(nullptr));
     auto setterShim = (property.isWritable() ? MethodShim(&QtShims::setter, data) : MethodShim(nullptr));
@@ -146,26 +153,37 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
   {
     // Inject the methods
     QMetaMethod method = pMetaObject->method(i);
+    SharedString name = epFromQString(method.name()).toLower();
     if (method.methodType() == QMetaMethod::Slot)
     {
+      if (pDesc->methodTree.Get(name))
+      {
+        QtApplication::Kernel()->LogWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.");
+        continue;
+      }
+
       static SharedString methodDescStr("Qt Component Method");
 
-      SharedString methodName = epFromQString(method.name()).toLower();
       auto data = SharedPtr<QtMethodData>::create(i);
       auto shim = MethodShim(&QtShims::call, data);
 
-      pDesc->methodTree.Insert(methodName, MethodDesc(MethodInfo{ methodName, methodDescStr }, shim));
+      pDesc->methodTree.Insert(name, MethodDesc(MethodInfo{ name, methodDescStr }, shim));
     }
     // Inject the events
     else if (method.methodType() == QMetaMethod::Signal)
     {
+      if (pDesc->eventTree.Get(name))
+      {
+        QtApplication::Kernel()->LogWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.");
+        continue;
+      }
+
       static SharedString eventDescStr("Qt Component Event");
 
-      SharedString eventName = epFromQString(method.name()).toLower();
-      auto data = SharedPtr<QtEventData>::create(i, eventName);
+      auto data = SharedPtr<QtEventData>::create(i, name);
       auto shim = EventShim(&QtShims::subscribe, data);
 
-      pDesc->eventTree.Insert(eventName, EventDesc(EventInfo{ eventName, eventName, eventDescStr }, shim));
+      pDesc->eventTree.Insert(name, EventDesc(EventInfo{ name, name, eventDescStr }, shim));
     }
   }
 }
@@ -1038,7 +1056,7 @@ void QtTestComponent::connectNotify(const QMetaMethod &signal)
   if (connectionMap.Get(signalName))
     return;
 
-  Connection *pConn = connectionMap.Insert(signalName, Connection{ this, signal });
+  Connection *pConn = &connectionMap.Insert(signalName, Connection{ this, signal });
   pConn->subscription = pComponent->Subscribe(signalName, ep::VarDelegate(pConn, &QtTestComponent::Connection::SignalRouter));
 }
 

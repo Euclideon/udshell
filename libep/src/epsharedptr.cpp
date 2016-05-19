@@ -19,8 +19,7 @@ void* GetSafePtr(void *pAlloc)
 {
   auto pRegistry = GetWeakRefRegistry();
   if (pRegistry)
-    return *pRegistry->InsertLazy(pAlloc, [&]() { return RefCounted::New<SafeProxy<void>>(pAlloc); });
-
+    return pRegistry->TryInsert(pAlloc, [&]() { return RefCounted::New<SafeProxy<void>>(pAlloc); });
   return nullptr;
 }
 

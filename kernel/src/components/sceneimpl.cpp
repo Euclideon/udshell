@@ -239,9 +239,9 @@ void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)
     spUDNode = component_cast<UDNode>(spChild);
 
     UDModelRef spUDModel = spUDNode->GetUDModel();
-    Variant filePath = spUDModel->GetMetadata()->Call("get", "url");
+    Variant filePath = spUDModel->GetMetadata()->Get("url");
     if (filePath.is(Variant::Type::String))
-      modelMap.Insert(filePath, spUDModel);
+      modelMap.Replace(filePath, spUDModel);
   }
 }
 
@@ -260,16 +260,13 @@ void SceneImpl::AddBookmark(String bmName, const Bookmark &bm)
 {
   if (!bmName)
     return;
-
-  KVP<SharedString, Bookmark> kvp(bmName, bm);
-  bookmarks.Insert(std::move(kvp));
+  bookmarks.Replace(KVP<SharedString, Bookmark>(bmName, bm));
 }
 
 void SceneImpl::RemoveBookmark(String bmName)
 {
   if (!bmName)
     return;
-
   bookmarks.Remove(bmName);
 }
 
