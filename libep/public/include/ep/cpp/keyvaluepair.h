@@ -7,9 +7,13 @@ namespace ep {
 template <typename K, typename V>
 struct KVPRef
 {
-  KVPRef(const K &key, V &value) : key(key), value(value) {}
+  KVPRef(const KVPRef<K, V> &kvp) : key(kvp.key), value(kvp.value) {}
 
-  const K &key;
+  // these are templated for const promotion
+  template <typename _K, typename _V> KVPRef(_K &key, _V &value) : key(key), value(value) {}
+  template <typename _K, typename _V> KVPRef(const KVPRef<_K, _V> &kvp) : key(kvp.key), value(kvp.value) {}
+
+  K &key;
   V &value;
 };
 
@@ -20,12 +24,15 @@ struct KVP
   KVP(KVP<K, V> &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
   KVP(const KVP<K, V> &val) : key(val.key), value(val.value) {}
 
-  KVP(const K &key, const V &value) : key(key), value(value) {}
+  KVP(K &&key, V &&value) : key(std::move(key)), value(std::move(value)) {}
   KVP(const K &key, V &&value) : key(key), value(std::move(value)) {}
   KVP(K &&key, const V &value) : key(std::move(key)), value(value) {}
-  KVP(K &&key, V &&value) : key(std::move(key)), value(std::move(value)) {}
+  KVP(const K &key, const V &value) : key(key), value(value) {}
 
-  KVP(const KVPRef<K, V> &val) : key(val.key), value(val.value) {}
+  // these are templated for const promotion
+  template <typename _K, typename _V> KVP(KVP<_K, _V> &&val) : key(std::move(val.key)), value(std::move(val.value)) {}
+  template <typename _K, typename _V> KVP(const KVP<_K, _V> &val) : key(val.key), value(val.value) {}
+  template <typename _K, typename _V> KVP(const KVPRef<_K, _V> &val) : key(val.key), value(val.value) {}
 
   // TODO: consider, should value be first? it is more likely to have alignment requirements.
   //       conversely, key is more frequently accessed, so should be in the first cache line...

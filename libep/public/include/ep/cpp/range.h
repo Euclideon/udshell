@@ -208,7 +208,7 @@ public:
 
   ValueType& front() const
   {
-    return (*i).value;
+    return const_cast<ValueType&>(i.value()); // TODO: revisit the const problems with KVP<>, there are a few of them...
   }
 
   ValueType& popFront()
@@ -216,7 +216,7 @@ public:
     ValueType &t = (*i).value; ++i;
     --len;
     // TODO: put this back
-    //    EPTHROW_IF(i == Tree::end() && len != 0, epR_OutOfBounds, "AVLTree length ");
+//    EPTHROW_IF(i == Tree::end() && len != 0, epR_OutOfBounds, "AVLTree length ");
     return t;
   }
 

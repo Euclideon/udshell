@@ -534,8 +534,6 @@ public:
   class Iterator
   {
   public:
-    using KVP = KVPRef<K, V>;
-
     Iterator(Node *pRoot) : depth(0), stack(0), pRoot(pRoot)
     {
       Node *pLeftMost = pRoot;
@@ -562,16 +560,37 @@ public:
 
     bool operator!=(Iterator rhs) { return pRoot != rhs.pRoot || data != rhs.data; }
 
-    const KVP operator*() const
+    const K& key() const
     {
-      auto *node = const_cast<Node*>(getNode(stack, depth));
-      const KVP r = KVP(node->k, node->v);
-      return r;
+      auto *node = getNode(stack, depth);
+      return node->k;
     }
-    KVP operator*()
+    const V& value() const
+    {
+      auto *node = getNode(stack, depth);
+      return node->v;
+    }
+    V& value()
     {
       auto *node = const_cast<Node*>(getNode(stack, depth));
-      return KVP(node->k, node->v);
+      return node->v;
+    }
+
+    KVPRef<const K, const V> operator*() const
+    {
+      return KVPRef<const K, const V>(key(), value());
+    }
+    KVPRef<const K, V> operator*()
+    {
+      return KVPRef<const K, V>(key(), value());
+    }
+    const V* operator->() const
+    {
+      return &value();
+    }
+    V* operator->()
+    {
+      return &value();
     }
 
     const Node *getNode(uint64_t s, uint64_t d) const
