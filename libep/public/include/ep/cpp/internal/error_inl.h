@@ -164,4 +164,14 @@ template<typename ...Args> inline void LogTrace(String text, Args... args)
   }
 }
 
+namespace internal {
+struct ErrorSystem
+{
+  enum : size_t { ErrorStackSize = 256 };
+  ErrorState errorStack[ErrorStackSize];
+  size_t errorDepth;
+};
+
+} // internal
+
 } // namespace ep

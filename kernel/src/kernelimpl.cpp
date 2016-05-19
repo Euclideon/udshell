@@ -80,6 +80,8 @@ namespace internal {
     pFD->accessTime.ticks = fd.accessTime.ticks;
     pFD->writeTime.ticks = fd.writeTime.ticks;
   }
+
+  ErrorSystem s_errorSystem;
 }
 
 static Instance s_instance =
@@ -142,6 +144,8 @@ static Instance s_instance =
     else
       EPTHROW_ERROR(epR_InvalidArgument, "Bad call");
   }, // Find
+
+  (void*)&internal::s_errorSystem // ErrorSystem
 };
 
 struct GlobalInstanceInitializer
