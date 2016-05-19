@@ -316,15 +316,30 @@ bool HashMap<K, V, HashPred>::Iterator::operator==(Iterator rhs) const
 }
 
 template <typename K, typename V, typename HashPred>
-const KVPRef<K, V> HashMap<K, V, HashPred>::Iterator::operator*() const
+const K& HashMap<K, V, HashPred>::Iterator::key() const
 {
-  const KVPRef<K, V> r = KVPRef<K, V>(pItem->data.key, pItem->data.value);
-  return r;
+  return pItem->data.key;
 }
 template <typename K, typename V, typename HashPred>
-KVPRef<K, V> HashMap<K, V, HashPred>::Iterator::operator*()
+const V& HashMap<K, V, HashPred>::Iterator::value() const
 {
-  return KVPRef<K, V>(pItem->data.key, pItem->data.value);
+  return pItem->data.value;
+}
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::Iterator::value()
+{
+  return pItem->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+KVPRef<const K, const V> HashMap<K, V, HashPred>::Iterator::operator*() const
+{
+  return KVPRef<const K, const V>(pItem->data.key, pItem->data.value);
+}
+template <typename K, typename V, typename HashPred>
+KVPRef<const K, V> HashMap<K, V, HashPred>::Iterator::operator*()
+{
+  return KVPRef<const K, V>(pItem->data.key, pItem->data.value);
 }
 
 template <typename K, typename V, typename HashPred>

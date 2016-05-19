@@ -106,8 +106,12 @@ public:
     bool operator!=(Iterator rhs) const;
     bool operator==(Iterator rhs) const;
 
-    const KVPRef<K, V> operator*() const;
-    KVPRef<K, V> operator*();
+    const K& key() const;
+    const V& value() const;
+    V& value();
+
+    KVPRef<const K, const V> operator*() const;
+    KVPRef<const K, V> operator*();
     const V* operator->() const;
     V* operator->();
 
