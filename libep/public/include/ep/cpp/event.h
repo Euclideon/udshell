@@ -42,6 +42,8 @@ class Event : public BaseEvent
 public:
   typedef Delegate<void(Args...)> EvDelegate;
 
+  enum { ParamCount = sizeof...(Args) };
+
   // subscribe
   SubscriptionRef Subscribe(EvDelegate callback)
   {

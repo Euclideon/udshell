@@ -4,6 +4,7 @@
 
 #include "ep/cpp/component/component.h"
 #include "ep/cpp/component/uicomponent.h"
+#include "ep/cpp/hashmap.h"
 #include "driver/qt/epkernel_qt.h"
 
 #include <QQuickItem>
@@ -139,13 +140,29 @@ public:
   QtTestComponent(ep::Component *pComp);
   ~QtTestComponent();
 
+  void disconnectAll() { disconnect(); }
+
 private:
+  struct Connection
+  {
+    QtTestComponent *pComp;
+    QMetaMethod signal;
+    ep::SubscriptionRef subscription;
+
+    ep::Variant SignalRouter(ep::Slice<const ep::Variant>);
+  };
+
   // Internal Meta Magic functions
-  static int qt_static_metacall_int(QtTestComponent *pObj, QMetaObject::Call, int, void **);
-  int qt_metacall_property_int(QMetaObject::Call call, int index, void **v);
+  int MethodInvoke(int id, void **v);
+  int PropertyInvoke(QMetaObject::Call call, int index, void **v);
+
+  void connectNotify(const QMetaMethod &signal) override;
+  void disconnectNotify(const QMetaMethod &signal) override;
 
   mutable const QMetaObject *pMetaObj = nullptr;
   ep::Component *pComponent = nullptr;
+
+  ep::HashMap<Connection> connectionMap;
 };
 
 

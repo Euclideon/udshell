@@ -151,7 +151,7 @@ void QtSignalMapper::execute(void **args)
   QMetaMethod signal = pSender->metaObject()->method(signalId);
 
   // Loop thru the parameters for the mapped signal and convert to ep::Variants
-  Array<Variant, 10> varArgs(ep::Reserve, signal.parameterCount());
+  Array<Variant, Q_METAMETHOD_INVOKE_MAX_ARGS> varArgs(ep::Reserve, signal.parameterCount());
   for (int i = 0; i < signal.parameterCount(); ++i)
   {
     // Note that args[0] is the return value
