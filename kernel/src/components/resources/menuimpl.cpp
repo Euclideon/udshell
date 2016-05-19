@@ -33,7 +33,7 @@ MenuImpl::MenuImpl(Component *pInstance, Variant::VarMap initParams)
 {
   menuData = Array<Variant>();
 
-  Variant *pSrc = initParams.Get("src");
+  Variant *pSrc = initParams.get("src");
   if (pSrc && pSrc->is(Variant::Type::String))
   {
     Variant menus = ParseXMLString(pSrc->asString());
@@ -86,26 +86,26 @@ Variant MenuImpl::ParseXMLMenu(Variant inMenu)
     return menu;
   Variant::VarMap inMap = inMenu.asAssocArray();
 
-  Variant *pName = inMap.Get("name");
+  Variant *pName = inMap.get("name");
   if(pName && pName->is(Variant::Type::String))
-    menu.Insert("type", pName->asString());
+    menu.insert("type", pName->asString());
 
-  Variant *pAttributes = inMap.Get("attributes");
+  Variant *pAttributes = inMap.get("attributes");
   if (pAttributes && pAttributes->is(Variant::SharedPtrType::AssocArray))
   {
     Variant::VarMap attributes = pAttributes->asAssocArray();
     for (auto attr : attributes)
-      menu.Insert(attr);
+      menu.insert(attr);
   }
 
-  Variant *pChildren = inMap.Get("children");
+  Variant *pChildren = inMap.get("children");
   if (pChildren && pChildren->is(Variant::Type::Array))
   {
     Slice<Variant> children = pChildren->asArray();
     for (auto child : children)
       menuChildren.pushBack(ParseXMLMenu(child));
 
-    menu.Insert("children", menuChildren);
+    menu.insert("children", menuChildren);
   }
 
   return menu;
@@ -231,18 +231,18 @@ bool MenuImpl::RemoveItem(String path)
 Variant MenuImpl::CreateMenuItem(Variant::VarMap properties)
 {
   Variant::VarMap map;
-  map.Insert(KeyValuePair("type", ""));
-  map.Insert(KeyValuePair("name", ""));
-  map.Insert(KeyValuePair("description", ""));
-  map.Insert(KeyValuePair("image", ""));
-  map.Insert(KeyValuePair("checkable", false));
-  map.Insert(KeyValuePair("checked", false));
-  map.Insert(KeyValuePair("exclusivegroup", false));
-  map.Insert(KeyValuePair("enabled", true));
-  map.Insert(KeyValuePair("shortcut", ""));
-  map.Insert(KeyValuePair("command", ""));
-  map.Insert(KeyValuePair("split", true));
-  map.Insert(KeyValuePair("children", Array<Variant>()));
+  map.insert(KeyValuePair("type", ""));
+  map.insert(KeyValuePair("name", ""));
+  map.insert(KeyValuePair("description", ""));
+  map.insert(KeyValuePair("image", ""));
+  map.insert(KeyValuePair("checkable", false));
+  map.insert(KeyValuePair("checked", false));
+  map.insert(KeyValuePair("exclusivegroup", false));
+  map.insert(KeyValuePair("enabled", true));
+  map.insert(KeyValuePair("shortcut", ""));
+  map.insert(KeyValuePair("command", ""));
+  map.insert(KeyValuePair("split", true));
+  map.insert(KeyValuePair("children", Array<Variant>()));
 
   Variant varMap(map);
 

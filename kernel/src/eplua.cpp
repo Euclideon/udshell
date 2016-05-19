@@ -432,7 +432,7 @@ void LuaState::pushDescriptor(const ComponentDescInl &desc)
 
   // TODO: parent descriptor should also be here...
 
-  if (desc.propertyTree.Empty())
+  if (desc.propertyTree.empty())
     return;
 
   lua_createtable(L, 0, 0);
@@ -1159,7 +1159,7 @@ ep::Variant ep::Variant::luaGet(LuaState &l, int idx)
       l.pushNil();  // first key
       while (lua_next(L, pos) != 0)
       {
-        m.Insert(l.get(-2), l.get(-1));
+        m.insert(l.get(-2), l.get(-1));
         l.pop();
       }
 

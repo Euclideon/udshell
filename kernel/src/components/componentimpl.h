@@ -22,7 +22,7 @@ public:
     : ImplSuper(pInstance)
   {
     // Temporary solution: get 'name' from initParams
-    Variant *pName = initParams.Get("name");
+    Variant *pName = initParams.get("name");
     if (pName)
       SetName(pName->asSharedString());
   }
@@ -60,10 +60,10 @@ protected:
   void ReceiveMessage(String message, String sender, const Variant &data) override final;
 
   // property access
-  size_t NumProperties() const { return instanceProperties.Size() + ((const ComponentDescInl*)GetDescriptor())->propertyTree.Size(); }
-  size_t NumMethods() const { return instanceMethods.Size() + ((const ComponentDescInl*)GetDescriptor())->methodTree.Size(); }
-  size_t NumEvents() const { return instanceEvents.Size() + ((const ComponentDescInl*)GetDescriptor())->eventTree.Size(); }
-  size_t NumStaticFuncs() const { return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.Size(); }
+  size_t NumProperties() const { return instanceProperties.size() + ((const ComponentDescInl*)GetDescriptor())->propertyTree.size(); }
+  size_t NumMethods() const { return instanceMethods.size() + ((const ComponentDescInl*)GetDescriptor())->methodTree.size(); }
+  size_t NumEvents() const { return instanceEvents.size() + ((const ComponentDescInl*)GetDescriptor())->eventTree.size(); }
+  size_t NumStaticFuncs() const { return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.size(); }
 
   // TODO: these substantially inflate the size of ComponentImpl and are almost always nullptr
   // ...should we move them to a separate allocation?

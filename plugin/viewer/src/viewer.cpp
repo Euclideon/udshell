@@ -30,18 +30,18 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   spView = pKernel->CreateComponent<View>();
 
   Variant::VarMap sceneParams;
-  const Variant *pSceneParams = initParams.Get("scene");
+  const Variant *pSceneParams = initParams.get("scene");
   if (pSceneParams && pSceneParams->is(Variant::SharedPtrType::AssocArray))
     sceneParams = pSceneParams->asAssocArray();
   spScene = pKernel->CreateComponent<Scene>(sceneParams);
 
   Variant::VarMap cameraParams;
-  const Variant *pCam = initParams.Get("camera");
+  const Variant *pCam = initParams.get("camera");
   if (pCam && pCam->is(Variant::SharedPtrType::AssocArray))
     cameraParams = pCam->asAssocArray();
   spCamera = pKernel->CreateComponent<SimpleCamera>(Variant::VarMap(cameraParams));
 
-  const Variant *model = initParams.Get("model");
+  const Variant *model = initParams.get("model");
   if (model)
   {
     if (model->is(Variant::Type::String))
@@ -213,7 +213,7 @@ void Viewer::StaticInit(ep::Kernel *pKernel)
 
 void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)
 {
-  Variant *pActivityVar = params.Get("activity");
+  Variant *pActivityVar = params.get("activity");
   ViewerRef spViewer = pActivityVar->as<ViewerRef>();
 
   spViewer->ToggleBookmarksPanel();
@@ -226,7 +226,7 @@ void Viewer::ToggleBookmarksPanel()
 
 void Viewer::StaticToggleResourcesPanel(Variant::VarMap params)
 {
-  Variant *pActivityVar = params.Get("activity");
+  Variant *pActivityVar = params.get("activity");
   ViewerRef spViewer = pActivityVar->as<ViewerRef>();
 
   spViewer->ToggleResourcesPanel();
@@ -239,7 +239,7 @@ void Viewer::ToggleResourcesPanel()
 
 void Viewer::StaticCreateBookmark(Variant::VarMap params)
 {
-  Variant *pActivityVar = params.Get("activity");
+  Variant *pActivityVar = params.get("activity");
   ViewerRef spViewer = pActivityVar->as<ViewerRef>();
   spViewer->CreateBookmark();
 }
@@ -274,7 +274,7 @@ Variant Viewer::Save() const
   Variant::VarMap params;
 
   if (spCamera)
-    params.Insert("camera", spCamera->Save());
+    params.insert("camera", spCamera->Save());
 
   if (spModel)
   {
@@ -284,12 +284,12 @@ Variant Viewer::Save() const
       String srcString = src.asString();
 
       if (!srcString.empty())
-        params.Insert("model", srcString);
+        params.insert("model", srcString);
     }
   }
 
   if (spScene)
-    params.Insert("scene", spScene->Save());
+    params.insert("scene", spScene->Save());
 
   return Variant(std::move(params));
 }

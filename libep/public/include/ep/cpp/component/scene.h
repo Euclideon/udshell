@@ -18,8 +18,8 @@ struct Bookmark
 inline Variant epToVariant(const Bookmark &bm)
 {
   Variant::VarMap map;
-  map.Insert("position", bm.position);
-  map.Insert("orientation", bm.ypr);
+  map.insert("position", bm.position);
+  map.insert("orientation", bm.ypr);
   return std::move(map);
 }
 

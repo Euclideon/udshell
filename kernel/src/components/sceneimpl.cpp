@@ -151,7 +151,7 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
 
     out.index = shared_pointer_cast<RenderArray>(pRenderer->GetRenderBuffer(in.spIndices, Renderer::RenderResourceType::IndexArray));
 
-    Array<RenderShaderProperty> uniforms(Reserve, pMatImpl->uniforms.Size());
+    Array<RenderShaderProperty> uniforms(Reserve, pMatImpl->uniforms.size());
     for (auto kvp : pMatImpl->uniforms)
     {
       if (kvp.value.current)
@@ -182,11 +182,11 @@ SceneImpl::SceneImpl(Component *_pInstance, Variant::VarMap initParams)
   timeStep = 1.0 / 30.0;
   rootNode = GetKernel()->CreateComponent<Node>();
 
-  Variant *pSrc = initParams.Get("url");
+  Variant *pSrc = initParams.get("url");
   if (pSrc && pSrc->is(Variant::Type::String))
     LoadSceneFile(pSrc->asString());
 
-  Variant *pMap = initParams.Get("bookmarks");
+  Variant *pMap = initParams.get("bookmarks");
   if (pMap && pMap->is(Variant::SharedPtrType::AssocArray))
     LoadBookmarks(pMap->asAssocArray());
 
@@ -241,7 +241,7 @@ void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)
     UDModelRef spUDModel = spUDNode->GetUDModel();
     Variant filePath = spUDModel->GetMetadata()->Get("url");
     if (filePath.is(Variant::Type::String))
-      modelMap.Replace(filePath, spUDModel);
+      modelMap.replace(filePath, spUDModel);
   }
 }
 
@@ -253,30 +253,30 @@ void SceneImpl::AddBookmarkFromCamera(String bmName, CameraRef camera)
   Double4x4 m = camera->GetCameraMatrix();
   Bookmark bm = { m.axis.t.toVector3(), m.extractYPR() };
   KVP<SharedString, Bookmark> kvp(bmName, bm);
-  bookmarks.Insert(std::move(kvp));
+  bookmarks.insert(std::move(kvp));
 }
 
 void SceneImpl::AddBookmark(String bmName, const Bookmark &bm)
 {
   if (!bmName)
     return;
-  bookmarks.Replace(KVP<SharedString, Bookmark>(bmName, bm));
+  bookmarks.replace(KVP<SharedString, Bookmark>(bmName, bm));
 }
 
 void SceneImpl::RemoveBookmark(String bmName)
 {
   if (!bmName)
     return;
-  bookmarks.Remove(bmName);
+  bookmarks.remove(bmName);
 }
 
 void SceneImpl::RenameBookmark(String oldName, String newName)
 {
-  Bookmark *pBm = bookmarks.Get(oldName);
+  Bookmark *pBm = bookmarks.get(oldName);
   if (pBm)
   {
-    bookmarks.Insert(newName, *pBm);
-    bookmarks.Remove(oldName);
+    bookmarks.insert(newName, *pBm);
+    bookmarks.remove(oldName);
   }
 }
 
@@ -288,9 +288,9 @@ void SceneImpl::LoadBookmarks(Variant::VarMap bm)
     {
       Variant::VarMap bmSaveMap = kvp.value.asAssocArray();
 
-      Variant *pName = bmSaveMap.Get("name");
-      Variant *pPosition = bmSaveMap.Get("position");
-      Variant *pOrientation = bmSaveMap.Get("orientation");
+      Variant *pName = bmSaveMap.get("name");
+      Variant *pPosition = bmSaveMap.get("position");
+      Variant *pOrientation = bmSaveMap.get("orientation");
       if (!pOrientation || !pPosition || !pName)
         continue;
 
@@ -317,8 +317,8 @@ Variant SceneImpl::SaveBookmarks() const
   {
     Variant bmVar = bm.value;
     Variant::VarMap bmSave = bmVar.asAssocArray();
-    bmSave.Insert("name", bm.key);
-    bookmarksSave.Insert(MutableString<16>(Format, "bookmark{0}", index), std::move(bmSave));
+    bmSave.insert("name", bm.key);
+    bookmarksSave.insert(MutableString<16>(Format, "bookmark{0}", index), std::move(bmSave));
     index++;
   }
 
@@ -334,11 +334,11 @@ Variant SceneImpl::Save() const
   {
     String urlString = url.asString();
     if (!urlString.empty())
-      map.Insert("url", urlString);
+      map.insert("url", urlString);
   }
 
-  if(!bookmarks.Empty())
-    map.Insert("bookmarks", SaveBookmarks());
+  if(!bookmarks.empty())
+    map.insert("bookmarks", SaveBookmarks());
 
   return map;
 }

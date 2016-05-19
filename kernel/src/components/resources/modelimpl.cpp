@@ -9,10 +9,10 @@ namespace ep {
 Variant epToVariant(const RenderList &r)
 {
   Variant::VarMap map;
-  map.Insert("type", r.type.v);
-  map.Insert("firstVertex", r.firstVertex);
-  map.Insert("firstIndex", r.firstIndex);
-  map.Insert("numVertices", r.numVertices);
+  map.insert("type", r.type.v);
+  map.insert("firstVertex", r.firstVertex);
+  map.insert("firstIndex", r.firstIndex);
+  map.insert("numVertices", r.numVertices);
   return std::move(map);
 }
 

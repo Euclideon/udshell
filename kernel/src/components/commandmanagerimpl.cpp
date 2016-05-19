@@ -25,7 +25,7 @@ Array<const MethodInfo> CommandManager::GetMethods() const
 
 SharedString CommandManagerImpl::GetShortcut(String id) const
 {
-  const Command *pCommand = commandRegistry.Get(id);
+  const Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
     return nullptr;
   return
@@ -34,7 +34,7 @@ SharedString CommandManagerImpl::GetShortcut(String id) const
 
 bool CommandManagerImpl::SetShortcut(String id, SharedString shortcut)
 {
-  Command *pCommand = commandRegistry.Get(id);
+  Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
   {
     LogWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\" - \"{1}\" doesn't exist", shortcut, id);
@@ -48,7 +48,7 @@ bool CommandManagerImpl::SetShortcut(String id, SharedString shortcut)
 
 bool CommandManagerImpl::RegisterCommand(String id, Delegate<void(Variant::VarMap)> func, String script, String activityTypeID, String shortcut)
 {
-  if (commandRegistry.Get(id))
+  if (commandRegistry.get(id))
   {
     LogWarning(5, "Command registration failed - \"{0}\" already exists", id);
     return false;
@@ -73,7 +73,7 @@ bool CommandManagerImpl::RegisterCommand(String id, Delegate<void(Variant::VarMa
     }
   }
 
-  commandRegistry.Insert(id, Command(id, func, script, activityTypeID, mShortcut));
+  commandRegistry.insert(id, Command(id, func, script, activityTypeID, mShortcut));
 
   return true;
 }
@@ -125,7 +125,7 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
       {
         if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
         {
-          params.Insert("activity", spActiveActivity);
+          params.insert("activity", spActiveActivity);
 
           if (comm.func)
             comm.func(params);
@@ -150,7 +150,7 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
 
 void CommandManagerImpl::UnregisterCommand(String id)
 {
-  commandRegistry.Remove(id);
+  commandRegistry.remove(id);
 }
 
 bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
@@ -177,7 +177,7 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
       {
         if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
         {
-          params.Insert("activity", spActiveActivity);
+          params.insert("activity", spActiveActivity);
 
           if (comm.func)
             comm.func(params);
@@ -202,7 +202,7 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
 
 bool CommandManagerImpl::SetFunction(String id, Delegate<void(Variant::VarMap)> func)
 {
-  Command *pCommand = commandRegistry.Get(id);
+  Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
   {
     LogWarning(2, "Can't bind function to command \"{0}\", command doesn't exist", id);
@@ -217,7 +217,7 @@ bool CommandManagerImpl::SetFunction(String id, Delegate<void(Variant::VarMap)> 
 
 bool CommandManagerImpl::SetScript(String id, String script)
 {
-  Command *pCommand = commandRegistry.Get(id);
+  Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
   {
     LogWarning(2, "Can't bind script to command \"{0}\", command doesn't exist", id);
@@ -232,7 +232,7 @@ bool CommandManagerImpl::SetScript(String id, String script)
 
 String CommandManagerImpl::GetActivityType(String commandID) const
 {
-  const Command *pCommand = commandRegistry.Get(commandID);
+  const Command *pCommand = commandRegistry.get(commandID);
   if (!pCommand)
     return nullptr;
 
@@ -241,7 +241,7 @@ String CommandManagerImpl::GetActivityType(String commandID) const
 
 bool CommandManagerImpl::SetActivityType(String commandID, String activityTypeID)
 {
-  Command *pCommand = commandRegistry.Get(commandID);
+  Command *pCommand = commandRegistry.get(commandID);
   if (!pCommand)
   {
     LogWarning(2, "Can't bind activity type to command \"{0}\", command doesn't exist", commandID);

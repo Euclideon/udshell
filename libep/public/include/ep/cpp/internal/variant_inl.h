@@ -751,7 +751,7 @@ inline Variant epToVariant(const AVLTree<K, V, Pred> &tree)
 {
   Variant::VarMap m;
   for (auto item : tree)
-    m.Insert(item.key, item.value);
+    m.insert(item.key, item.value);
   return std::move(m);
 }
 
@@ -760,7 +760,7 @@ inline Variant epToVariant(const SharedMap<Tree> &map)
 {
   Variant::VarMap m;
   for (auto item : map)
-    m.Insert(item.key, item.value);
+    m.insert(item.key, item.value);
   return std::move(m);
 }
 
@@ -820,9 +820,9 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
     size_t len = v.assocArraySeriesLen();
     if (len >= 2)
     {
-      size_t start = aa.Get(0) ? 0 : 1;
+      size_t start = aa.get(0) ? 0 : 1;
       for (size_t i = 0; i < 2; ++i)
-        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+        ((U*)pR)[i] = aa.get(start + i)->as<U>();
       return;
     }
     pR->y = aa["y"].as<U>();
@@ -851,9 +851,9 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
     size_t len = v.assocArraySeriesLen();
     if (len >= 3)
     {
-      size_t start = aa.Get(0) ? 0 : 1;
+      size_t start = aa.get(0) ? 0 : 1;
       for (size_t i = 0; i < 3; ++i)
-        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+        ((U*)pR)[i] = aa.get(start + i)->as<U>();
       return;
     }
     pR->z = aa["z"].as<U>();
@@ -883,9 +883,9 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
     size_t len = v.assocArraySeriesLen();
     if (len >= 4)
     {
-      size_t start = aa.Get(0) ? 0 : 1;
+      size_t start = aa.get(0) ? 0 : 1;
       for (size_t i = 0; i < 4; ++i)
-        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+        ((U*)pR)[i] = aa.get(start + i)->as<U>();
       return;
     }
     pR->w = aa["w"].as<U>();
@@ -916,9 +916,9 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
     size_t len = v.assocArraySeriesLen();
     if (len == 16)
     {
-      size_t start = aa.Get(0) ? 0 : 1;
+      size_t start = aa.get(0) ? 0 : 1;
       for (size_t i = 0; i < 16; ++i)
-        ((U*)pR)[i] = aa.Get(start + i)->as<U>();
+        ((U*)pR)[i] = aa.get(start + i)->as<U>();
       return;
     }
     EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
@@ -959,9 +959,9 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
     {
       Variant::VarMap m = v.asAssocArray();
       pArr->reserve(len);
-      size_t start = m.Get(0) ? 0 : 1;
+      size_t start = m.get(0) ? 0 : 1;
       for (size_t i = 0; i < len; ++i)
-        pArr->pushBack(m.Get(start + i)->as<U>());
+        pArr->pushBack(m.get(start + i)->as<U>());
     }
     return;
   }
@@ -1017,14 +1017,14 @@ inline void epFromVariant(const Variant &v, SharedMap<Tree> *pTree)
   {
     auto a = v.asArray();
     for (size_t i = 0; i < a.length; ++i)
-      pTree->Insert(Variant(i).as<typename Tree::KeyType>(), a[i].as<typename Tree::ValueType>());
+      pTree->insert(Variant(i).as<typename Tree::KeyType>(), a[i].as<typename Tree::ValueType>());
     return;
   }
   else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     auto aa = v.asAssocArray();
     for (auto kvp : aa)
-      pTree->Insert(kvp.key.as<typename Tree::KeyType>(), kvp.value.as<typename Tree::ValueType>());
+      pTree->insert(kvp.key.as<typename Tree::KeyType>(), kvp.value.as<typename Tree::ValueType>());
     return;
   }
   else if (v.is(Variant::Type::Null))

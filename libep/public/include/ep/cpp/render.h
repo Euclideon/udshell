@@ -149,17 +149,17 @@ inline Variant epToVariant(const StencilState &e)
   Variant::VarMap r;
   if (e.compare != CompareFunc::Disabled)
   {
-    r.Insert("compare", e.compare);
+    r.insert("compare", e.compare);
     if (e.value != 0)
-      r.Insert("value", e.value);
+      r.insert("value", e.value);
     if (e.mask != 0xFF)
-      r.Insert("mask", e.mask);
+      r.insert("mask", e.mask);
     if (e.stencilFail != StencilOp::Keep)
-      r.Insert("stencilfail", e.stencilFail);
+      r.insert("stencilfail", e.stencilFail);
     if (e.depthFail != StencilOp::Keep)
-      r.Insert("depthfail", e.depthFail);
+      r.insert("depthfail", e.depthFail);
     if (e.success != StencilOp::Keep)
-      r.Insert("success", e.success);
+      r.insert("success", e.success);
   }
   return std::move(r);
 }

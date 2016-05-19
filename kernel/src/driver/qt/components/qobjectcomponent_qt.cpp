@@ -24,7 +24,7 @@ QObjectComponent::QObjectComponent(const ep::ComponentDesc *pType, ep::Kernel *p
   // - holding a reference to a public component is *NOT* recommended because the underlying QObject may be deleted
   // Private components are assumed to have a QmlComponentData pointer passed in and *will* claim ownership of the created QObject
 
-  ep::Variant *pV = initParams.Get("object");
+  ep::Variant *pV = initParams.get("object");
   if (pV)
   {
     pQObject = (QObject*)(size_t)pV->asInt();

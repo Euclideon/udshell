@@ -42,34 +42,34 @@ Array<const MethodInfo> Console::GetMethods() const
 Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  const Variant *vTitle = initParams.Get("title");
+  const Variant *vTitle = initParams.get("title");
   if (!vTitle || !vTitle->is(Variant::Type::String))
     EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'title'");
   title = vTitle->asString();
 
-  const Variant *vSetOutputFunc = initParams.Get("setOutputFunc");
+  const Variant *vSetOutputFunc = initParams.get("setOutputFunc");
   if (!vSetOutputFunc || !vSetOutputFunc->is(Variant::SharedPtrType::Delegate))
     EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'setOutputFunc'");
   setOutputFunc = vSetOutputFunc->as<Delegate<void(String)>>();
 
-  const Variant *vAppendOutputFunc = initParams.Get("appendOutputFunc");
+  const Variant *vAppendOutputFunc = initParams.get("appendOutputFunc");
   if (!vAppendOutputFunc || !vAppendOutputFunc->is(Variant::SharedPtrType::Delegate))
     EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'appendOutputFunc'");
   appendOutputFunc = vAppendOutputFunc->as<Delegate<void(String)>>();
 
-  const Variant *vBHasInput = initParams.Get("hasInput");
+  const Variant *vBHasInput = initParams.get("hasInput");
   if (!vBHasInput || !vBHasInput->is(Variant::Type::Bool))
     EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'hasInput'");
   bHasInput = vBHasInput->asBool();
 
   if (bHasInput)
   {
-    const Variant *vInputFunc = initParams.Get("inputFunc");
+    const Variant *vInputFunc = initParams.get("inputFunc");
     if (!vInputFunc || !vInputFunc->is(Variant::SharedPtrType::Delegate))
       EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'inputFunc'");
     inputFunc = vInputFunc->as<Delegate<void(String)>>();
 
-    const Variant *vHistoryFileName = initParams.Get("historyFileName");
+    const Variant *vHistoryFileName = initParams.get("historyFileName");
     if (!vHistoryFileName || !vHistoryFileName->is(Variant::Type::String))
       EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'historyFileName'");
     historyFileName = vHistoryFileName->asString();
@@ -112,7 +112,7 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     }
   }
 
-  const Variant *vBOutputLog = initParams.Get("outputLog");
+  const Variant *vBOutputLog = initParams.get("outputLog");
   if (!vBOutputLog || !vBOutputLog->is(Variant::Type::Bool))
     EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'bOutputLog'");
   bOutputLog = vBOutputLog->asBool();

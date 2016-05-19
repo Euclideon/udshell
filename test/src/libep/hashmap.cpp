@@ -99,47 +99,47 @@ TEST(HashMap, Constructors)
 #endif
 
   HashMap<int> map2(8);
-  EXPECT_EQ(0, map2.Size());
-  map2.Insert("bob", 10);
-  EXPECT_EQ(1, map2.Size());
+  EXPECT_EQ(0, map2.size());
+  map2.insert("bob", 10);
+  EXPECT_EQ(1, map2.size());
 
   HashMap<int> map3 = std::move(map2);
-  EXPECT_EQ(1, map3.Size());
-  EXPECT_EQ(0, map2.Size());
+  EXPECT_EQ(1, map3.size());
+  EXPECT_EQ(0, map2.size());
 }
 
 TEST(HashMap, InsertAndRemove)
 {
   HashMap<int> map;
-  EXPECT_TRUE(map.Empty());
+  EXPECT_TRUE(map.empty());
 
   // Standard inserts
-  EXPECT_NO_THROW(map.Insert("bob", 1));
-  EXPECT_EQ(1, map.Size());
-  EXPECT_NO_THROW(map.Insert(ep::KVP<SharedString, int>("sarah", 2)));
-  EXPECT_EQ(2, map.Size());
+  EXPECT_NO_THROW(map.insert("bob", 1));
+  EXPECT_EQ(1, map.size());
+  EXPECT_NO_THROW(map.insert(ep::KVP<SharedString, int>("sarah", 2)));
+  EXPECT_EQ(2, map.size());
 
   // Check our move assigns aren't trashing
   using namespace hashmap_test;
   HashMap<TestValue> testMap;
-  EXPECT_NO_THROW(testMap.Insert("bill", TestValue(10)));
-  EXPECT_EQ(1, testMap.Size());
+  EXPECT_NO_THROW(testMap.insert("bill", TestValue(10)));
+  EXPECT_EQ(1, testMap.size());
   EXPECT_EQ(1, TestValue::numInstances);
 
   {
     TestValue localInstance(99);
-    EXPECT_NO_THROW(testMap.Insert("nigel", localInstance));
+    EXPECT_NO_THROW(testMap.insert("nigel", localInstance));
     EXPECT_EQ(3, TestValue::numInstances);
     EXPECT_EQ(99, localInstance.instanceData);
     EXPECT_EQ(99, testMap["nigel"].instanceData);
   }
   EXPECT_EQ(2, TestValue::numInstances);
-  EXPECT_EQ(2, testMap.Size());
+  EXPECT_EQ(2, testMap.size());
 
   // Lazy insert
-  testMap.TryInsert("gordon", []() -> TestValue { return TestValue(101); });
+  testMap.tryInsert("gordon", []() -> TestValue { return TestValue(101); });
   EXPECT_EQ(3, TestValue::numInstances);
-  EXPECT_EQ(3, testMap.Size());
+  EXPECT_EQ(3, testMap.size());
   EXPECT_EQ(101, testMap["gordon"].instanceData);
 
   // Accessing invalid key
@@ -150,41 +150,41 @@ TEST(HashMap, InsertAndRemove)
 #endif
 
   // Gets
-  EXPECT_EQ(nullptr, testMap.Get("optimus prime"));
-  EXPECT_EQ(101, testMap.Get("gordon")->instanceData);
+  EXPECT_EQ(nullptr, testMap.get("optimus prime"));
+  EXPECT_EQ(101, testMap.get("gordon")->instanceData);
 
   // Remove a key that doesn't exist
-  testMap.Remove("optimus prime");
-  EXPECT_EQ(3, testMap.Size());
+  testMap.remove("optimus prime");
+  EXPECT_EQ(3, testMap.size());
 
   // Remove a key that does
-  testMap.Remove("gordon");
-  EXPECT_EQ(2, testMap.Size());
+  testMap.remove("gordon");
+  EXPECT_EQ(2, testMap.size());
 
   // Clear
-  testMap.Clear();
-  EXPECT_EQ(0, testMap.Size());
-  EXPECT_TRUE(testMap.Empty());
+  testMap.clear();
+  EXPECT_EQ(0, testMap.size());
+  EXPECT_TRUE(testMap.empty());
 
   // Insert and then insert replace
-  EXPECT_NO_THROW(testMap.Insert("bob", TestValue(10)));
+  EXPECT_NO_THROW(testMap.insert("bob", TestValue(10)));
   EXPECT_EQ(10, testMap["bob"].instanceData);
   EXPECT_EQ(1, TestValue::numInstances);
-  EXPECT_EQ(1, testMap.Size());
-  EXPECT_THROW(testMap.Insert("bob", TestValue(11)), ep::EPException);
+  EXPECT_EQ(1, testMap.size());
+  EXPECT_THROW(testMap.insert("bob", TestValue(11)), ep::EPException);
   EXPECT_EQ(10, testMap["bob"].instanceData);
   EXPECT_EQ(1, TestValue::numInstances);
-  EXPECT_EQ(1, testMap.Size());
-  testMap.Replace("bob", TestValue(12));
+  EXPECT_EQ(1, testMap.size());
+  testMap.replace("bob", TestValue(12));
   EXPECT_EQ(12, testMap["bob"].instanceData);
   EXPECT_EQ(1, TestValue::numInstances);
-  EXPECT_EQ(1, testMap.Size());
+  EXPECT_EQ(1, testMap.size());
 
   // Insert lazy when it already exists - shouldn't replace
-  testMap.TryInsert("bob", []() -> TestValue { return TestValue(101); });
-  EXPECT_EQ(12, testMap.Get("bob")->instanceData);
+  testMap.tryInsert("bob", []() -> TestValue { return TestValue(101); });
+  EXPECT_EQ(12, testMap.get("bob")->instanceData);
   EXPECT_EQ(1, TestValue::numInstances);
-  EXPECT_EQ(1, testMap.Size());
+  EXPECT_EQ(1, testMap.size());
 }
 
 TEST(HashMap, Iterators)
@@ -204,9 +204,9 @@ TEST(HashMap, Iterators)
       { "ocho", 7 },
     };
   for (int i = 0; i < TABLE_SIZE; ++i)
-    smallMap.Insert(keyTable[i]);
+    smallMap.insert(keyTable[i]);
 
-  EXPECT_EQ(TABLE_SIZE, smallMap.Size());
+  EXPECT_EQ(TABLE_SIZE, smallMap.size());
 
   auto it = smallMap.begin();
   EXPECT_TRUE(it != smallMap.end());
@@ -253,7 +253,7 @@ TEST(HashMap, Iterators)
   ++prev;
   EXPECT_EQ(prev, next);
 
-  EXPECT_EQ(TABLE_SIZE-1, smallMap.Size());
+  EXPECT_EQ(TABLE_SIZE-1, smallMap.size());
 
   // Attempt to find a key that doesn't exist
   EXPECT_EQ(smallMap.end(), smallMap.find("bob"));
@@ -276,10 +276,10 @@ TEST(HashMap, Iterators)
     keys[i] = 'a' + (char)i;
     values[i] = i;
     expSum += i;
-    tinyMap.Insert(ep::String(&keys[i], 1), values[i]);
+    tinyMap.insert(ep::String(&keys[i], 1), values[i]);
   }
 
-  EXPECT_EQ(NUM_ENTRIES, tinyMap.Size());
+  EXPECT_EQ(NUM_ENTRIES, tinyMap.size());
 
   // Use a for each to iterate and verify the keys and values
   int sum = 0;
@@ -295,7 +295,7 @@ TEST(HashMap, Iterators)
   auto nextIter = firstIter;
   ++nextIter;
   EXPECT_EQ(nextIter, tinyMap.erase(firstIter));
-  EXPECT_EQ(NUM_ENTRIES-1, tinyMap.Size());
+  EXPECT_EQ(NUM_ENTRIES-1, tinyMap.size());
 
   // Remove the last element
   firstIter = tinyMap.begin();
@@ -305,7 +305,7 @@ TEST(HashMap, Iterators)
 
   EXPECT_EQ(nextIter, tinyMap.end());
   EXPECT_EQ(nextIter, tinyMap.erase(firstIter));
-  EXPECT_EQ(NUM_ENTRIES-2, tinyMap.Size());
+  EXPECT_EQ(NUM_ENTRIES-2, tinyMap.size());
 
   // Iterate and remove each remaining element
   nextIter = tinyMap.begin();
@@ -316,6 +316,6 @@ TEST(HashMap, Iterators)
     ++sum;
   }
 
-  EXPECT_TRUE(tinyMap.Empty());
+  EXPECT_TRUE(tinyMap.empty());
   EXPECT_EQ(NUM_ENTRIES-2, sum);
 }

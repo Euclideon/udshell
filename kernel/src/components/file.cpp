@@ -20,12 +20,12 @@ namespace ep {
 File::File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Stream(pType, pKernel, uid, initParams)
 {
-  const Variant *path = initParams.Get("path");
+  const Variant *path = initParams.get("path");
 
   if (!path || !path->is(Variant::Type::String))
 	  EPTHROW_ERROR(epR_InvalidArgument, "Missing or invalid 'path'");
 
-  const Variant *flags = initParams.Get("flags");
+  const Variant *flags = initParams.get("flags");
   if (!flags)
     EPTHROW_ERROR(epR_InvalidArgument, "Missing file open 'flags'");
 

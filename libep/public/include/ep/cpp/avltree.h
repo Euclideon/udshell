@@ -58,184 +58,183 @@ public:
   AVLTree() {}
   AVLTree(nullptr_t) {}
   AVLTree(AVLTree &&rval)
-    : size(rval.size),
-      root(rval.root)
+    : numNodes(rval.numNodes), pRoot(rval.pRoot)
   {
-    rval.root = nullptr;
+    rval.pRoot = nullptr;
   }
 
   AVLTree(Slice<const KeyValuePair> arr)
   {
     for (auto &kvp : arr)
-      Insert(kvp.key, kvp.value);
+      insert(kvp.key, kvp.value);
   }
   AVLTree(std::initializer_list<KeyValuePair> init)
     : AVLTree(Slice<const KeyValuePair>(init.begin(), init.size())) {}
 
   ~AVLTree()
   {
-    Clear();
+    clear();
   }
 
-  size_t Size() const { return size; }
-  bool Empty() const { return size == 0; }
+  size_t size() const { return numNodes; }
+  bool empty() const { return numNodes == 0; }
 
-  void Clear()
+  void clear()
   {
-    Destroy(root);
-    root = nullptr;
-  }
-
-  V& Insert(K &&key, V &&val)
-  {
-    if (Get(key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
-    return Replace(std::move(key), std::move(val));
-  }
-  V& Insert(const K &key, V &&val)
-  {
-    if (Get(key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
-    return Replace(key, std::move(val));
-  }
-  V& Insert(K &&key, const V &val)
-  {
-    if (Get(key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
-    return Replace(std::move(key), val);
-  }
-  V& Insert(const K &key, const V &val)
-  {
-    if (Get(key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
-    return Replace(key, val);
+    destroy(pRoot);
+    pRoot = nullptr;
   }
 
-  V& Insert(KVP<K, V> &&kvp)
+  V& insert(K &&key, V &&val)
   {
-    if (Get(kvp.key))
+    if (get(key))
       EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
-    return Replace(std::move(kvp));
+    return replace(std::move(key), std::move(val));
   }
-  V& Insert(const KVP<K, V> &kvp)
+  V& insert(const K &key, V &&val)
   {
-    if (Get(kvp.key))
+    if (get(key))
       EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
-    return Replace(kvp);
+    return replace(key, std::move(val));
+  }
+  V& insert(K &&key, const V &val)
+  {
+    if (get(key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return replace(std::move(key), val);
+  }
+  V& insert(const K &key, const V &val)
+  {
+    if (get(key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return replace(key, val);
+  }
+
+  V& insert(KVP<K, V> &&kvp)
+  {
+    if (get(kvp.key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return replace(std::move(kvp));
+  }
+  V& insert(const KVP<K, V> &kvp)
+  {
+    if (get(kvp.key))
+      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    return replace(kvp);
   }
 
   template <typename Key>
-  V& TryInsert(Key&& key, V&& val)
+  V& tryInsert(Key&& key, V&& val)
   {
-    V *v = Get(key);
+    V *v = get(key);
     if (v)
       return *v;
-    return Replace(std::forward<Key>(key), std::move(val));
+    return replace(std::forward<Key>(key), std::move(val));
   }
   template <typename Key>
-  V& TryInsert(Key&& key, const V& val)
+  V& tryInsert(Key&& key, const V& val)
   {
-    V *v = Get(key);
+    V *v = get(key);
     if (v)
       return *v;
-    return Replace(std::forward<Key>(key), val);
+    return replace(std::forward<Key>(key), val);
   }
   template <typename Key>
-  V& TryInsert(Key&& key, std::function<V()> lazy)
+  V& tryInsert(Key&& key, std::function<V()> lazy)
   {
-    V *v = Get(key);
+    V *v = get(key);
     if (v)
       return *v;
-    return Replace(std::forward<Key>(key), lazy());
+    return replace(std::forward<Key>(key), lazy());
   }
 
-  V& Replace(K &&key, V &&val)
+  V& replace(K &&key, V &&val)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(std::move(key));
     epConstruct(&node->v) V(std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
-    root = insert(root, node);
+    pRoot = insert(pRoot, node);
     return node->v;
   }
-  V& Replace(const K &key, V &&val)
+  V& replace(const K &key, V &&val)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(key);
     epConstruct(&node->v) V(std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
-    root = insert(root, node);
+    pRoot = insert(pRoot, node);
     return node->v;
   }
-  V& Replace(K &&key, const V &val)
+  V& replace(K &&key, const V &val)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(std::move(key));
     epConstruct(&node->v) V(val);
     node->left = node->right = nullptr;
     node->height = 1;
-    root = insert(root, node);
+    pRoot = insert(pRoot, node);
     return node->v;
   }
-  V& Replace(const K &key, const V &val)
+  V& replace(const K &key, const V &val)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(key);
     epConstruct(&node->v) V(val);
     node->left = node->right = nullptr;
     node->height = 1;
-    root = insert(root, node);
+    pRoot = insert(pRoot, node);
     return node->v;
   }
 
-  V& Replace(KVP<K, V> &&kvp)
+  V& replace(KVP<K, V> &&kvp)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(std::move(kvp.key));
     epConstruct(&node->v) V(std::move(kvp.value));
     node->left = node->right = nullptr;
     node->height = 1;
-    root = insert(root, node);
+    pRoot = insert(pRoot, node);
     return node->v;
   }
-  V& Replace(const KVP<K, V> &kvp)
+  V& replace(const KVP<K, V> &kvp)
   {
     Node *node = Allocator::Get().Alloc();
     epConstruct(&node->k) K(kvp.key);
     epConstruct(&node->v) V(kvp.value);
     node->left = node->right = nullptr;
     node->height = 1;
-    root = insert(root, node);
+    pRoot = insert(pRoot, node);
     return node->v;
   }
 
-  void Remove(const K &key)
+  void remove(const K &key)
   {
-    root = deleteNode(root, key);
+    pRoot = deleteNode(pRoot, key);
   }
 
-  const V* Get(const K &key) const
+  const V* get(const K &key) const
   {
-    const Node *n = find(root, key);
+    const Node *n = find(pRoot, key);
     return n ? &n->v : nullptr;
   }
-  V* Get(const K &key)
+  V* get(const K &key)
   {
-    Node *n = const_cast<Node*>(find(root, key));
+    Node *n = const_cast<Node*>(find(pRoot, key));
     return n ? &n->v : nullptr;
   }
 
   const V& operator[](const K &key) const
   {
-    const V *pV = Get(key);
+    const V *pV = get(key);
     EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
     return *pV;
   }
   V& operator[](const K &key)
   {
-    V *pV = Get(key);
+    V *pV = get(key);
     EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
     return *pV;
   }
@@ -261,14 +260,14 @@ public:
   }
 
   class Iterator;
-  Iterator begin() const { return Iterator(root); }
+  Iterator begin() const { return Iterator(pRoot); }
   static Iterator end() { return Iterator(nullptr); }
 
 private:
   using Node = AVLTreeNode<K, V>;
 
-  size_t size = 0;
-  Node *root = nullptr;
+  size_t numNodes = 0;
+  Node *pRoot = nullptr;
 
   static int height(const Node *n)
   {
@@ -339,13 +338,13 @@ private:
     return n;
   }
 
-  void Destroy(Node *n)
+  void destroy(Node *n)
   {
     if (!n)
       return;
 
-    Destroy(n->left);
-    Destroy(n->right);
+    destroy(n->left);
+    destroy(n->right);
 
     n->~Node();
     Allocator::Get().Free(n);
@@ -356,7 +355,7 @@ private:
     // 1.  Perform the normal BST rotation
     if (n == nullptr)
     {
-      ++size;
+      ++numNodes;
       return newnode;
     }
 
@@ -380,7 +379,7 @@ private:
     // 2. Update height of this ancestor Node
     n->height = maxHeight(n) + 1;
 
-    // 3. Get the balance factor of this ancestor Node to check whether
+    // 3. get the balance factor of this ancestor Node to check whether
     //    this Node became unbalanced
     int balance = getBalance(n);
 
@@ -432,103 +431,103 @@ private:
     return current;
   }
 
-  Node* deleteNode(Node *pRoot, const K &key)
+  Node* deleteNode(Node *_pRoot, const K &key)
   {
     // STEP 1: PERFORM STANDARD BST DELETE
 
-    if (pRoot == nullptr)
-      return pRoot;
+    if (_pRoot == nullptr)
+      return _pRoot;
 
-    ptrdiff_t c = PredFunctor()(key, pRoot->k);
+    ptrdiff_t c = PredFunctor()(key, _pRoot->k);
 
-    // If the key to be deleted is smaller than the pRoot's key,
+    // If the key to be deleted is smaller than the _pRoot's key,
     // then it lies in left subtree
     if (c < 0)
-      pRoot->left = deleteNode(pRoot->left, key);
+      _pRoot->left = deleteNode(_pRoot->left, key);
 
-    // If the key to be deleted is greater than the pRoot's key,
+    // If the key to be deleted is greater than the _pRoot's key,
     // then it lies in right subtree
     else if (c > 0)
-      pRoot->right = deleteNode(pRoot->right, key);
+      _pRoot->right = deleteNode(_pRoot->right, key);
 
-    // if key is same as pRoot's key, then this is the Node
+    // if key is same as _pRoot's key, then this is the Node
     // to be deleted
     else
     {
       // Node with only one child or no child
-      if ((pRoot->left == nullptr) || (pRoot->right == nullptr))
+      if ((_pRoot->left == nullptr) || (_pRoot->right == nullptr))
       {
-        Node *temp = pRoot->left ? pRoot->left : pRoot->right;
+        Node *temp = _pRoot->left ? _pRoot->left : _pRoot->right;
 
         // No child case
         if (temp == nullptr)
         {
-          temp = pRoot;
-          pRoot = nullptr;
+          temp = _pRoot;
+          _pRoot = nullptr;
         }
         else // One child case
         {
           // TODO: FIX THIS!!
           // this is copying the child node into the parent node because there is no parent pointer
           // DO: add parent pointer, then fix up the parent's child pointer to the child, and do away with this pointless copy!
-          *pRoot = std::move(*temp); // Copy the contents of the non-empty child
+          *_pRoot = std::move(*temp); // Copy the contents of the non-empty child
         }
 
         temp->~Node();
         Allocator::Get().Free(temp);
 
-        --size;
+        --numNodes;
       }
       else
       {
-        // Node with two children: Get the inorder successor (smallest
+        // Node with two children: get the inorder successor (smallest
         // in the right subtree)
-        Node *temp = minValueNode(pRoot->right);
+        Node *temp = minValueNode(_pRoot->right);
 
         // Copy the inorder successor's data to this Node
-        pRoot->k = temp->k;
+        _pRoot->k = temp->k;
 
         // Delete the inorder successor
-        pRoot->right = deleteNode(pRoot->right, temp->k);
+        _pRoot->right = deleteNode(_pRoot->right, temp->k);
       }
     }
 
     // If the tree had only one Node then return
-    if (pRoot == nullptr)
-      return pRoot;
+    if (_pRoot == nullptr)
+      return _pRoot;
 
     // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
-    pRoot->height = internal::epMax(height(pRoot->left), height(pRoot->right)) + 1;
+    _pRoot->height = internal::epMax(height(_pRoot->left), height(_pRoot->right)) + 1;
 
     // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to check whether
     //  this Node became unbalanced)
-    int balance = getBalance(pRoot);
+    int balance = getBalance(_pRoot);
 
     // If this Node becomes unbalanced, then there are 4 cases
 
     // Left Left Case
-    if (balance > 1 && getBalance(pRoot->left) >= 0)
-      return rightRotate(pRoot);
+    if (balance > 1 && getBalance(_pRoot->left) >= 0)
+      return rightRotate(_pRoot);
 
     // Left Right Case
-    if (balance > 1 && getBalance(pRoot->left) < 0)
+    if (balance > 1 && getBalance(_pRoot->left) < 0)
     {
-      pRoot->left = leftRotate(pRoot->left);
-      return rightRotate(pRoot);
+      _pRoot->left = leftRotate(_pRoot->left);
+      return rightRotate(_pRoot);
     }
 
     // Right Right Case
-    if (balance < -1 && getBalance(pRoot->right) <= 0)
-      return leftRotate(pRoot);
+    if (balance < -1 && getBalance(_pRoot->right) <= 0)
+      return leftRotate(_pRoot);
 
     // Right Left Case
-    if (balance < -1 && getBalance(pRoot->right) > 0)
+    if (balance < -1 && getBalance(_pRoot->right) > 0)
     {
-      pRoot->right = rightRotate(pRoot->right);
-      return leftRotate(pRoot);
+      _pRoot->right = rightRotate(_pRoot->right);
+      return leftRotate(_pRoot);
     }
 
-    return pRoot;
+    return _pRoot;
   }
 
 public:
@@ -557,7 +556,7 @@ public:
 
     Iterator &operator++()
     {
-      IterateNext(pRoot, nullptr, 0);
+      iterateNext(pRoot, nullptr, 0);
       return *this;
     }
 
@@ -565,17 +564,17 @@ public:
 
     const KVP operator*() const
     {
-      auto *node = const_cast<Node*>(GetNode(stack, depth));
+      auto *node = const_cast<Node*>(getNode(stack, depth));
       const KVP r = KVP(node->k, node->v);
       return r;
     }
     KVP operator*()
     {
-      auto *node = const_cast<Node*>(GetNode(stack, depth));
+      auto *node = const_cast<Node*>(getNode(stack, depth));
       return KVP(node->k, node->v);
     }
 
-    const Node *GetNode(uint64_t s, uint64_t d) const
+    const Node *getNode(uint64_t s, uint64_t d) const
     {
       const Node *pNode = pRoot;
       for (uint64_t i = 0; i < d; ++i)
@@ -589,12 +588,12 @@ public:
     }
 
   private:
-    bool IterateNext(Node *pNode, Node *pParent, uint64_t d)
+    bool iterateNext(Node *pNode, Node *pParent, uint64_t d)
     {
       if (d < depth)
       {
         Node *pNext = (stack & (1LL << d)) ? pNode->left : pNode->right;
-        if (!IterateNext(pNext, pNode, d + 1))
+        if (!iterateNext(pNext, pNode, d + 1))
           return false;
       }
       else

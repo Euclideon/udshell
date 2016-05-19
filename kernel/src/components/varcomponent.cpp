@@ -14,7 +14,7 @@ const MethodDesc *VarComponent::GetMethodDesc(String _name, EnumerateFlags enume
 {
   if (!(enumerateFlags & EnumerateFlags::NoDynamic))
   {
-    const Variant *pVal = map.Get(_name);
+    const Variant *pVal = map.get(_name);
     if (pVal)
       return CacheMethodDesc(_name, _name, pVal->as<VarDelegate>());
   }

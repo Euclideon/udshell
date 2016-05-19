@@ -135,7 +135,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
 
     SharedString propertyName = epFromQString(property.name()).toLower();
 
-    if (pDesc->propertyTree.Get(propertyName))
+    if (pDesc->propertyTree.get(propertyName))
     {
       QtApplication::Kernel()->LogWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.");
       continue;
@@ -146,7 +146,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     auto setterShim = (property.isWritable() ? MethodShim(&QtShims::setter, data) : MethodShim(nullptr));
     uint32_t flags = (property.isConstant() ? (uint32_t)ep::PropertyFlags::epPF_Immutable : 0);
 
-    pDesc->propertyTree.Insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyName, propertyDescStr, nullptr, flags }, getterShim, setterShim));
+    pDesc->propertyTree.insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyName, propertyDescStr, nullptr, flags }, getterShim, setterShim));
   }
 
   for (int i = pMetaObject->methodOffset(); i < pMetaObject->methodCount(); ++i)
@@ -156,7 +156,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     SharedString name = epFromQString(method.name()).toLower();
     if (method.methodType() == QMetaMethod::Slot)
     {
-      if (pDesc->methodTree.Get(name))
+      if (pDesc->methodTree.get(name))
       {
         QtApplication::Kernel()->LogWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.");
         continue;
@@ -167,12 +167,12 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
       auto data = SharedPtr<QtMethodData>::create(i);
       auto shim = MethodShim(&QtShims::call, data);
 
-      pDesc->methodTree.Insert(name, MethodDesc(MethodInfo{ name, methodDescStr }, shim));
+      pDesc->methodTree.insert(name, MethodDesc(MethodInfo{ name, methodDescStr }, shim));
     }
     // Inject the events
     else if (method.methodType() == QMetaMethod::Signal)
     {
-      if (pDesc->eventTree.Get(name))
+      if (pDesc->eventTree.get(name))
       {
         QtApplication::Kernel()->LogWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.");
         continue;
@@ -183,7 +183,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
       auto data = SharedPtr<QtEventData>::create(i, name);
       auto shim = EventShim(&QtShims::subscribe, data);
 
-      pDesc->eventTree.Insert(name, EventDesc(EventInfo{ name, name, eventDescStr }, shim));
+      pDesc->eventTree.insert(name, EventDesc(EventInfo{ name, name, eventDescStr }, shim));
     }
   }
 }
@@ -660,21 +660,21 @@ QtMetaObjectGenerator::QtMetaObjectGenerator(const ep::ComponentDesc *_pDesc)
   // Properties
   for (auto p : pDesc->propertyTree)
   {
-    if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->propertyTree.Get(p.key))
+    if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->propertyTree.get(p.key))
       AddProperty(&p.value);
   }
 
   // Slots
   for (auto m : pDesc->methodTree)
   {
-    if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->methodTree.Get(m.key))
+    if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->methodTree.get(m.key))
       AddSlot(&m.value);
   }
 
   // Signals
   for (auto e : pDesc->eventTree)
   {
-    if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->eventTree.Get(e.key))
+    if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->eventTree.get(e.key))
       AddSignal(&e.value);
   }
 }
@@ -1053,10 +1053,10 @@ void QtTestComponent::connectNotify(const QMetaMethod &signal)
   ep::MutableString<0> signalName = epFromQByteArray(signal.name());
 
   // Check if we already have an entry in the connection map
-  if (connectionMap.Get(signalName))
+  if (connectionMap.get(signalName))
     return;
 
-  Connection *pConn = &connectionMap.Insert(signalName, Connection{ this, signal });
+  Connection *pConn = &connectionMap.insert(signalName, Connection{ this, signal });
   pConn->subscription = pComponent->Subscribe(signalName, ep::VarDelegate(pConn, &QtTestComponent::Connection::SignalRouter));
 }
 
@@ -1067,7 +1067,7 @@ void QtTestComponent::disconnectNotify(const QMetaMethod &signal)
   {
     for (auto conn : connectionMap)
       conn.value.subscription->Unsubscribe();
-    connectionMap.Clear();
+    connectionMap.clear();
   }
 
   // If this was the last receiver for this signal, then clean up this connection

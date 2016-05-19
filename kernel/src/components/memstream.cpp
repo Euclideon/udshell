@@ -16,7 +16,7 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString u
 {
   BufferRef inBuffer;
 
-  const Variant *fl = initParams.Get("flags");
+  const Variant *fl = initParams.get("flags");
   if (!fl)
     EPTHROW_ERROR(epR_InvalidArgument, "Missing 'flags'");
 
@@ -24,7 +24,7 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   if (!(oFlags & (OpenFlags::Write | OpenFlags::Read)))
     EPTHROW_ERROR(epR_InvalidArgument, "Invalid 'flags'");
 
-  const Variant *buf = initParams.Get("buffer");
+  const Variant *buf = initParams.get("buffer");
   if (!buf)
   {
     inBuffer = pKernel->CreateComponent<Buffer>();

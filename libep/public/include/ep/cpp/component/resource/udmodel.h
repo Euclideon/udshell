@@ -100,7 +100,7 @@ inline Variant epToVariant(const UDElementMetadata &e)
   if (e.blend != UDAttributeBlend::None)
   {
     Variant::VarMap r = v.asAssocArray();
-    r.Insert("blend", e.blend);
+    r.insert("blend", e.blend);
   }
   // v is a mutable reference to the VarMap
   return v;

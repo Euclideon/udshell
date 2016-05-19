@@ -263,11 +263,11 @@ Array<Variant::VarMap> GetActivitiesInfo()
   for (auto desc : descs)
   {
     Variant::VarMap activityInfo;
-    activityInfo.Insert("namespace", desc->info.nameSpace);
-//    activityInfo.Insert("typename", desc->info.name);
-    activityInfo.Insert("identifier", desc->info.identifier);
-    activityInfo.Insert("name", desc->info.displayName);
-    activityInfo.Insert("description", desc->info.description);
+    activityInfo.insert("namespace", desc->info.nameSpace);
+//    activityInfo.insert("typename", desc->info.name);
+    activityInfo.insert("identifier", desc->info.identifier);
+    activityInfo.insert("name", desc->info.displayName);
+    activityInfo.insert("description", desc->info.description);
     infoArray.pushBack(std::move(activityInfo));
   }
 

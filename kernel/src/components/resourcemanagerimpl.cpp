@@ -38,7 +38,7 @@ Array<const EventInfo> ResourceManager::GetEvents() const
 void ResourceManagerImpl::AddResourceArray(Slice<const ResourceRef> resArray)
 {
   for(auto &res : resArray)
-    resources.Insert(res->uid, res);
+    resources.insert(res->uid, res);
 
   pInstance->Added.Signal(resArray);
 }
@@ -46,14 +46,14 @@ void ResourceManagerImpl::AddResourceArray(Slice<const ResourceRef> resArray)
 void ResourceManagerImpl::RemoveResourceArray(Slice<const ResourceRef> resArray)
 {
   for (auto &res : resArray)
-    resources.Remove(res->uid);
+    resources.remove(res->uid);
 
   pInstance->Removed.Signal(resArray);
 }
 
 void ResourceManagerImpl::ClearResources()
 {
-  Array<const ResourceRef> resArray(Reserve, resources.Size());
+  Array<const ResourceRef> resArray(Reserve, resources.size());
 
   for (auto kvp : resources) {
     resArray.pushBack(kvp.value);
@@ -72,15 +72,15 @@ Variant::VarMap ResourceManagerImpl::GetExtensions() const
 
   for (auto kvp : extensionsRegistry)
   {
-    Array<SharedString> *pCompExts = exts.Get(kvp.value->info.identifier);
+    Array<SharedString> *pCompExts = exts.get(kvp.value->info.identifier);
     if (pCompExts)
       pCompExts->pushBack(kvp.key);
     else
-      exts.Insert(kvp.value->info.identifier, { kvp.key });
+      exts.insert(kvp.value->info.identifier, { kvp.key });
   }
 
   for (auto item : exts)
-    map.Insert(item.key, item.value);
+    map.insert(item.key, item.value);
 
   return map;
 }
@@ -109,7 +109,7 @@ Array<ResourceRef> ResourceManagerImpl::GetResourcesByType(const ep::ComponentDe
 
 Array<ResourceRef> ResourceManagerImpl::GetResourceArray() const
 {
-  Array<ResourceRef> outs(Reserve, resources.Size());
+  Array<ResourceRef> outs(Reserve, resources.size());
 
   for (auto kvp : resources)
     outs.pushBack(kvp.value);
@@ -119,7 +119,7 @@ Array<ResourceRef> ResourceManagerImpl::GetResourceArray() const
 
 DataSourceRef ResourceManagerImpl::LoadResourcesFromFile(Variant::VarMap initParams)
 {
-  Variant src = *initParams.Get("src");
+  Variant src = *initParams.get("src");
   String ext = src.asString().getRightAtLast('.');
   if (ext.empty())
     EPTHROW_WARN(epR_InvalidArgument, 2, "LoadResourcesFromFile - \"src\" parameter is invalid");

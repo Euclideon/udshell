@@ -99,13 +99,13 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
 
   // build search trees
   for (auto &p : CreateHelper<_ComponentType>::GetProperties())
-    pDesc->propertyTree.Insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
+    pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
   for (auto &m : CreateHelper<_ComponentType>::GetMethods())
-    pDesc->methodTree.Insert(m.id, { m, m.pMethod });
+    pDesc->methodTree.insert(m.id, { m, m.pMethod });
   for (auto &e : CreateHelper<_ComponentType>::GetEvents())
-    pDesc->eventTree.Insert(e.id, { e, e.pSubscribe });
+    pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
   for (auto &f : CreateHelper<_ComponentType>::GetStaticFuncs())
-    pDesc->staticFuncTree.Insert(f.id, { f, (void*)f.pCall });
+    pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   // setup the super class and populate from its meta
   pDesc->pSuperDesc = nullptr;

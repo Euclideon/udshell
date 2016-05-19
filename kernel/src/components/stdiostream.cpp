@@ -9,7 +9,7 @@ StdIOStream::StdIOStream(const ComponentDesc *pType, Kernel *pKernel, SharedStri
 {
   bDbgOutput = false;
 
-  StdIOStreamOutputs out = initParams.Get("output")->as<StdIOStreamOutputs>();
+  StdIOStreamOutputs out = initParams.get("output")->as<StdIOStreamOutputs>();
 
   pIn = stdin;
 

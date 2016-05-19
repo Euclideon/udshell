@@ -165,9 +165,9 @@ inline Slice<const void> ArrayBuffer::MapForRead<void>() { return Buffer::MapFor
 inline Variant epToVariant(const ElementInfo &e)
 {
   Variant::VarMap r;
-  r.Insert("flags", e.flags);
-  r.Insert("size", e.size);
-  r.Insert("dimensions", e.dimensions);
+  r.insert("flags", e.flags);
+  r.insert("size", e.size);
+  r.insert("dimensions", e.dimensions);
   return std::move(r);
 }
 
@@ -190,13 +190,13 @@ inline Variant epToVariant(const ElementMetadata &e)
 {
   Variant::VarMap r;
   if (e.name)
-    r.Insert("name", e.name);
+    r.insert("name", e.name);
   if (e.type)
-    r.Insert("type", e.type);
+    r.insert("type", e.type);
   if (e.info.size)
-    r.Insert("info", epToVariant(e.info));
+    r.insert("info", epToVariant(e.info));
   if (e.type || e.offset)
-    r.Insert("offset", e.offset);
+    r.insert("offset", e.offset);
   return std::move(r);
 }
 

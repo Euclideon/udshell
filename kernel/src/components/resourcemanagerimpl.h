@@ -16,14 +16,14 @@ public:
   {}
 
   // Resource getter/setters
-  size_t GetNumResources() const override final { return resources.Size(); }
+  size_t GetNumResources() const override final { return resources.size(); }
   void AddResource(ResourceRef res) override final { AddResourceArray({ res }); }
   void AddResourceArray(Slice<const ResourceRef> resArray) override final;
   void RemoveResource(ResourceRef res) override final { RemoveResourceArray({ res }); }
   void RemoveResourceArray(Slice<const ResourceRef> resArray) override final;
 
   void ClearResources() override final;
-  ResourceRef GetResource(String key) const override final { return *resources.Get(key); }
+  ResourceRef GetResource(String key) const override final { return *resources.get(key); }
   Array<ResourceRef> GetResourceArray() const override final;
 
   template<typename CT>

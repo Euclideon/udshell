@@ -24,7 +24,7 @@ protected:
 
   PropertyDesc* CachePropertyDesc(String _name, String description, const VarDelegate &getter, const VarDelegate &setter) const
   {
-    PropertyDesc *pDesc = propertyCache.Get(_name);
+    PropertyDesc *pDesc = propertyCache.get(_name);
     if (pDesc)
     {
       // update the delegates to the one we just got
@@ -42,7 +42,7 @@ protected:
         }
       };
 
-      pDesc = &propertyCache.Insert(_name, PropertyDesc({ _name, _name, description },
+      pDesc = &propertyCache.insert(_name, PropertyDesc({ _name, _name, description },
         MethodShim(&Shim::call, getter.GetMemento()), MethodShim(&Shim::call, setter.GetMemento())));
     }
     return pDesc;
@@ -50,7 +50,7 @@ protected:
 
   MethodDesc* CacheMethodDesc(String _name, String description, const VarDelegate &method) const
   {
-    MethodDesc *pDesc = methodCache.Get(_name);
+    MethodDesc *pDesc = methodCache.get(_name);
     if (pDesc)
     {
       // update the delegate to the one we just got
@@ -66,7 +66,7 @@ protected:
           return ((VarDelegate&)data)(args);
         }
       };
-      pDesc = &methodCache.Insert(_name, MethodDesc({ _name, description, nullptr }, MethodShim(&Shim::call, method.GetMemento())));
+      pDesc = &methodCache.insert(_name, MethodDesc({ _name, description, nullptr }, MethodShim(&Shim::call, method.GetMemento())));
     }
     return pDesc;
   }

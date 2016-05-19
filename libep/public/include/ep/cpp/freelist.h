@@ -74,7 +74,7 @@ public:
     --numAllocated;
   }
 
-  size_t Size() const { return numAllocated; }
+  size_t size() const { return numAllocated; }
 
 private:
 
