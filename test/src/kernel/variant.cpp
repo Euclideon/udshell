@@ -80,7 +80,7 @@ TEST(EPVariant, EPVariantNull)
   EXPECT_TRUE(var.asString().empty());
 
   EXPECT_TRUE(var.asArray().empty());
-  EXPECT_TRUE(var.asAssocArray().Empty());
+  EXPECT_TRUE(var.asAssocArray().empty());
 //  EXPECT_TRUE(var.asAssocArraySeries().empty());
 
   EXPECT_EQ(0, var.arrayLen());
@@ -118,7 +118,7 @@ TEST(EPVariant, EPVariantBool)
   EXPECT_THROW(varTrue.asString().empty(), EPException);
 
   EXPECT_THROW(varTrue.asArray().empty(), EPException);
-  EXPECT_THROW(varTrue.asAssocArray().Empty(), EPException);
+  EXPECT_THROW(varTrue.asAssocArray().empty(), EPException);
 //  EXPECT_THROW(varTrue.asAssocArraySeries().empty(), EPException);
 
   EXPECT_EQ(0, varTrue.arrayLen());
@@ -157,7 +157,7 @@ TEST(EPVariant, EPVariantInt)
   EXPECT_THROW(varInt.asString().empty(), EPException);
 
   EXPECT_THROW(varInt.asArray().empty(), EPException);
-  EXPECT_THROW(varInt.asAssocArray().Empty(), EPException);
+  EXPECT_THROW(varInt.asAssocArray().empty(), EPException);
 //  EXPECT_THROW(varInt.asAssocArraySeries().empty(), EPException);
 
   EXPECT_EQ(0, varInt.arrayLen());
@@ -197,7 +197,7 @@ TEST(EPVariant, EPVariantDbl)
   EXPECT_THROW(varDbl.asString().empty(), EPException);
 
   EXPECT_THROW(varDbl.asArray().empty(), EPException);
-  EXPECT_THROW(varDbl.asAssocArray().Empty(), EPException);
+  EXPECT_THROW(varDbl.asAssocArray().empty(), EPException);
 //  EXPECT_THROW(varDbl.asAssocArraySeries().empty(), EPException);
 
   EXPECT_EQ(0, varDbl.arrayLen());
@@ -239,7 +239,7 @@ TEST(EPVariant, EPVariantSlice)
   for (size_t i = 0; i < 3; ++i)
     EXPECT_TRUE(testSlice[i].asInt() == varSlice.asArray()[i].asInt());
 
-  EXPECT_THROW(varSlice.asAssocArray().Empty(), EPException);
+  EXPECT_THROW(varSlice.asAssocArray().empty(), EPException);
 //  EXPECT_THROW(varSlice.asAssocArraySeries().empty(), EPException);
 
   EXPECT_EQ(varSlice[0].asInt(), 0);

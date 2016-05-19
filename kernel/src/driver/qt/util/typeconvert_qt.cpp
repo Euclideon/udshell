@@ -279,7 +279,7 @@ Variant epToVariant(const QJSValue &v)
 
       QString name = i.name();
       QJSValue value = i.value();
-      varMap.Insert(ep::KeyValuePair(Variant(qt::epFromQString(name)), epToVariant(value)));
+      varMap.insert(ep::KeyValuePair(Variant(qt::epFromQString(name)), epToVariant(value)));
     }
     return Variant(std::move(varMap));
   }
@@ -419,7 +419,7 @@ Variant epToVariant(const QVariantMap &varMap)
   QVariantMap::const_iterator i = varMap.begin();
   while (i != varMap.end())
   {
-    v.Insert(ep::KeyValuePair(Variant(qt::epFromQString(i.key())), epToVariant(i.value())));
+    v.insert(ep::KeyValuePair(Variant(qt::epFromQString(i.key())), epToVariant(i.value())));
     ++i;
   }
   return Variant(std::move(v));

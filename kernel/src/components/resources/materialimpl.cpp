@@ -26,10 +26,10 @@ AVLTree<String, int> MaterialImpl::builtinProperties{
 Variant epToVariant(const ShaderProperty &p)
 {
   Variant::VarMap map;
-  map.Insert("type", p.type);
-  map.Insert("data", p.data);
-  map.Insert("current", p.current);
-  map.Insert("dirty", p.dirty);
+  map.insert("type", p.type);
+  map.insert("data", p.data);
+  map.insert("current", p.current);
+  map.insert("dirty", p.dirty);
   return std::move(map);
 }
 
@@ -133,7 +133,7 @@ void MaterialImpl::PopulateShaderProperties()
 
   for (size_t i = 0; i < spShaderProgram->numUniforms(); ++i)
   {
-    uniforms.Insert(spShaderProgram->getUniformName(i),
+    uniforms.insert(spShaderProgram->getUniformName(i),
                     ShaderProperty
                     {
                       spShaderProgram->getUniformTypeString(i),
@@ -147,7 +147,7 @@ void MaterialImpl::PopulateShaderProperties()
 
   for (size_t i = 0; i < spShaderProgram->numAttributes(); ++i)
   {
-    attributes.Insert(spShaderProgram->getAttributeName(i),
+    attributes.insert(spShaderProgram->getAttributeName(i),
                     ShaderProperty
                     {
                       spShaderProgram->getAttributeTypeString(i),
@@ -162,7 +162,7 @@ void MaterialImpl::PopulateShaderProperties()
 
 const PropertyDesc *MaterialImpl::GetPropertyDesc(String _name, EnumerateFlags enumerateFlags) const
 {
-  return &dynamicPropertyCache.TryInsert(_name, [&]() {
+  return &dynamicPropertyCache.tryInsert(_name, [&]() {
     return PropertyDesc(
       { _name, _name, _name, nullptr, 0 },
       MethodShim(&MaterialImpl::Get, SharedPtr<DynamicPropertyData>::create(_name)),
@@ -174,7 +174,7 @@ const PropertyDesc *MaterialImpl::GetPropertyDesc(String _name, EnumerateFlags e
 Variant MaterialImpl::GetMaterialProperty(String property) const
 {
   // look up from map
-  int *pBuiltin = builtinProperties.Get(property);
+  int *pBuiltin = builtinProperties.get(property);
   if (pBuiltin)
   {
     switch (*pBuiltin)
@@ -205,7 +205,7 @@ Variant MaterialImpl::GetMaterialProperty(String property) const
 void MaterialImpl::SetMaterialProperty(String property, Variant data)
 {
   // look up from map
-  int *pBuiltin = builtinProperties.Get(property);
+  int *pBuiltin = builtinProperties.get(property);
   if (pBuiltin)
   {
     switch (*pBuiltin)

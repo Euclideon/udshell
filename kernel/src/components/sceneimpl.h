@@ -31,7 +31,7 @@ public:
   void AddBookmark(String bmName, const Bookmark &bm) override final;
   void RemoveBookmark(String bmName) override final;
   void RenameBookmark(String oldName, String newName) override final;
-  const Bookmark *FindBookmark(String bmName) const  override final { return bookmarks.Get(bmName); }
+  const Bookmark *FindBookmark(String bmName) const  override final { return bookmarks.get(bmName); }
   void LoadBookmarks(Variant::VarMap bookmarks) override final;
   Variant SaveBookmarks() const override final;
   const BookmarkMap &GetBookmarkMap() const override final { return bookmarks; }
@@ -49,7 +49,7 @@ public:
   }
 
 protected:
-  Variant FindBookmark_Internal(String bmName) const override final { auto *pBM = bookmarks.Get(bmName); return pBM ? Variant(*pBM) : Variant(nullptr); }
+  Variant FindBookmark_Internal(String bmName) const override final { auto *pBM = bookmarks.get(bmName); return pBM ? Variant(*pBM) : Variant(nullptr); }
 
   void LoadSceneFile(String filePath);
   void AddModelsToResourceManager();

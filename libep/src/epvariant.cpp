@@ -317,7 +317,7 @@ bool Variant::isNull() const
       return length == 0;
     case Type::SharedPtr:
       if ((SharedPtrType)length == SharedPtrType::AssocArray)
-        return aa ? aa->tree.Empty() : true;
+        return aa ? aa->tree.empty() : true;
       else
         return sp == nullptr;
     case Type::SmallString:
@@ -626,13 +626,13 @@ SharedArray<Variant> Variant::asSharedArray() const
           return SharedArray<Variant>();
 
         // does the series start at 0 or 1?
-        size_t j = aa->tree.Get(0) ? 0 : 1;
+        size_t j = aa->tree.get(0) ? 0 : 1;
 
         // append each item in the series to an array
         Array<Variant, 0> arr;
         do
         {
-          Variant *pV = aa->tree.Get(j++);
+          Variant *pV = aa->tree.get(j++);
           if (!pV)
             break;
           arr.pushBack(*pV);
@@ -695,10 +695,10 @@ size_t Variant::assocArraySeriesLen() const
     return 0;
 
   // does the series start at 0 or 1?
-  size_t j = aa->tree.Get(0) ? 0 : 1;
+  size_t j = aa->tree.get(0) ? 0 : 1;
 
   size_t len = 0;
-  while (aa->tree.Get(j++))
+  while (aa->tree.get(j++))
     ++len;
   return len;
 }
@@ -713,7 +713,7 @@ Variant& Variant::operator[](size_t j) const
   else if (is(SharedPtrType::AssocArray))
   {
     EPASSERT_THROW(j < length, epR_OutOfBounds, "Element not found: {0}", j);
-    return aa->tree[j + (aa->tree.Get(0) ? 0 : 1)];
+    return aa->tree[j + (aa->tree.get(0) ? 0 : 1)];
   }
   EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
 }
@@ -734,7 +734,7 @@ Variant* Variant::getItem(Variant key) const
     return &a[index];
   }
   else if (is(SharedPtrType::AssocArray))
-    return aa->tree.Get(key);
+    return aa->tree.get(key);
   return nullptr;
 }
 
@@ -755,7 +755,7 @@ Variant& Variant::insertItem(Variant key, Variant value)
   }
   EPASSERT_THROW(is(SharedPtrType::AssocArray), epR_InvalidType, "Variant is not a map");
 
-  return aa->tree.Insert(key, value);
+  return aa->tree.insert(key, value);
 }
 
 VarRange Variant::getRange() const

@@ -60,7 +60,7 @@ StreamRef DataSourceImpl::OpenStream(const Variant &source)
 DataSourceImpl::DataSourceImpl(Component *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)
 {
-  const Variant *source = initParams.Get("src");
+  const Variant *source = initParams.get("src");
   if (source && source->is(Variant::Type::String))
     url = source->asString();
 }

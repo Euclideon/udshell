@@ -16,27 +16,27 @@ public:
 
   size_t NumRecords() const override final
   {
-    return metadata.Size();
+    return metadata.size();
   }
 
-  void Insert(Variant &&key, Variant &&value) override final           { metadata.Replace(std::move(key), std::move(value)); }
-  void Insert(const Variant &key, Variant &&value) override final      { metadata.Replace(key, std::move(value)); }
-  void Insert(Variant &&key, const Variant &value) override final      { metadata.Replace(std::move(key), value); }
-  void Insert(const Variant &key, const Variant &value) override final { metadata.Replace(key, value); }
+  void Insert(Variant &&key, Variant &&value) override final           { metadata.replace(std::move(key), std::move(value)); }
+  void Insert(const Variant &key, Variant &&value) override final      { metadata.replace(key, std::move(value)); }
+  void Insert(Variant &&key, const Variant &value) override final      { metadata.replace(std::move(key), value); }
+  void Insert(const Variant &key, const Variant &value) override final { metadata.replace(key, value); }
 
   void Remove(const Variant &key) override final
   {
-    metadata.Remove(key);
+    metadata.remove(key);
   }
 
   bool Exists(const Variant &key) const override final
   {
-    return !!metadata.Get(key);
+    return !!metadata.get(key);
   }
 
   Variant Get(const Variant &key) const override final
   {
-    Variant *v = const_cast<Variant*>(metadata.Get(key));
+    Variant *v = const_cast<Variant*>(metadata.get(key));
     return v ? *v : Variant();
   }
 

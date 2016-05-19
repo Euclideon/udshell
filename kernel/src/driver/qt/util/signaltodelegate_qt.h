@@ -35,7 +35,7 @@ private:
 private slots:
   //void execute() {}   // !! UNCOMMENT THIS IF WE NEED TO RE-MOC!
 
-  void onInstanceDestroyed(QObject *pObj) { instanceMap.Remove(pObj); }
+  void onInstanceDestroyed(QObject *pObj) { instanceMap.remove(pObj); }
 
 private:
   // This struct represents a connection instance - we need one connection per specific QObject

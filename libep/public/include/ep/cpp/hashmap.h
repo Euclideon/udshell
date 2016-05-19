@@ -39,32 +39,32 @@ public:
 
   ~HashMap();
 
-  size_t Size() const;
-  bool Empty() const;
+  size_t size() const;
+  bool empty() const;
 
-  void Clear();
-
-  template <typename Key, typename Val>
-  V& Insert(Key&& key, Val&& val);
-  V& Insert(KVP<K, V> &&v);
-  V& Insert(const KVP<K, V> &v);
-
-  template <typename Key>
-  V& TryInsert(Key&& key, V&& val);
-  template <typename Key>
-  V& TryInsert(Key&& key, const V& val);
-  template <typename Key>
-  V& TryInsert(Key&& key, std::function<V()> lazyValue);
+  void clear();
 
   template <typename Key, typename Val>
-  V& Replace(Key&& key, Val&& val);
-  V& Replace(KVP<K, V> &&v);
-  V& Replace(const KVP<K, V> &v);
+  V& insert(Key&& key, Val&& val);
+  V& insert(KVP<K, V> &&v);
+  V& insert(const KVP<K, V> &v);
 
-  void Remove(const K &key);
+  template <typename Key>
+  V& tryInsert(Key&& key, V&& val);
+  template <typename Key>
+  V& tryInsert(Key&& key, const V& val);
+  template <typename Key>
+  V& tryInsert(Key&& key, std::function<V()> lazyValue);
 
-  const V* Get(const K &key) const;
-  V* Get(const K &key);
+  template <typename Key, typename Val>
+  V& replace(Key&& key, Val&& val);
+  V& replace(KVP<K, V> &&v);
+  V& replace(const KVP<K, V> &v);
+
+  void remove(const K &key);
+
+  const V* get(const K &key) const;
+  V* get(const K &key);
 
   const V& operator[](const K &key) const;
   V& operator[](const K &key);
@@ -74,6 +74,7 @@ public:
   class Iterator;
   Iterator begin() const;
   Iterator end() const;
+
   Iterator find(const K &key);
   Iterator erase(Iterator it);
 
@@ -91,8 +92,8 @@ private:
   size_t tableSizeMask;
   FreeList<Node> pool;
 
-  Node** GetBucket(const K &key) const;
-  V* GetValue(Node *pBucket, const K &key) const;
+  Node** getBucket(const K &key) const;
+  V* getValue(Node *pBucket, const K &key) const;
 
 public:
   class Iterator

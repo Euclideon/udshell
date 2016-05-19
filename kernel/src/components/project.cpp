@@ -31,7 +31,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
 {
   spResourceManager = pKernel->GetResourceManager();
 
-  const Variant *pSrc = initParams.Get("src");
+  const Variant *pSrc = initParams.get("src");
   StreamRef spSrc = nullptr;
 
   if (pSrc && pSrc->is(Variant::Type::String))
@@ -74,7 +74,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   }
 
   Variant::VarMap projectNode = rootElements.asAssocArray();
-  Variant *pName = projectNode.Get("name");
+  Variant *pName = projectNode.get("name");
   if (pName && pName->is(Variant::Type::String) && pName->asString().eq("project")) // TODO: I think we can make these comparisons better than this
     ParseProject(projectNode);
   else
@@ -89,10 +89,10 @@ void Project::SaveProject()
   Variant::VarMap projectNode;
   Array<Variant> children;
 
-  projectNode.Insert("name", "project");
+  projectNode.insert("name", "project");
   children.pushBack(SaveActivities());
 
-  projectNode.Insert("children", children);
+  projectNode.insert("children", children);
 
   spXMLBuffer->FormatXml(projectNode);
 
@@ -130,12 +130,12 @@ Variant Project::SaveActivities()
   for (ActivityRef activity : activities)
   {
     Variant::VarMap node = Text::ComponentParamsToXMLMap(activity->Save()).asAssocArray();
-    node.Insert("name", activity->GetType());
+    node.insert("name", activity->GetType());
     children.pushBack(node);
   }
 
-  activitiesNode.Insert("name", "activities");
-  activitiesNode.Insert("children", children);
+  activitiesNode.insert("name", "activities");
+  activitiesNode.insert("children", children);
 
   return activitiesNode;
 }
@@ -143,7 +143,7 @@ Variant Project::SaveActivities()
 void Project::ParseProject(Variant node)
 {
   Variant::VarMap projectNode = node.asAssocArray();
-  Variant *pChildren = projectNode.Get("children");
+  Variant *pChildren = projectNode.get("children");
   if (pChildren && pChildren->is(Variant::Type::Array))
   {
     Array<Variant> children = pChildren->asArray();
@@ -162,7 +162,7 @@ void Project::ParseProject(Variant node)
 void Project::ParseActivities(Variant node)
 {
   Variant::VarMap projectNode = node.asAssocArray();
-  Variant *pChildren = projectNode.Get("children");
+  Variant *pChildren = projectNode.get("children");
   if (pChildren && pChildren->is(Variant::Type::Array))
   {
     Array<Variant> children = pChildren->asArray();

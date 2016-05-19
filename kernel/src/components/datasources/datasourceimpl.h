@@ -33,7 +33,7 @@ public:
 
   size_t GetNumResources() const override final
   {
-    return resources.Size();
+    return resources.size();
   }
   String GetResourceName(size_t index) const override final
   {
@@ -60,7 +60,7 @@ public:
   }
   ResourceRef GetResource(String _name) const override final
   {
-    ResourceRef *r = const_cast<ResourceRef*>(resources.Get(_name));
+    ResourceRef *r = const_cast<ResourceRef*>(resources.get(_name));
     if (r)
       return *r;
     return nullptr;
@@ -74,7 +74,7 @@ public:
     if(!resUrl.is(Variant::Type::String))
       spMeta->Insert("url", GetURL());
 
-    resources.Replace(_name, spResource);
+    resources.replace(_name, spResource);
   }
 
   size_t CountResources(String filterPattern) const override final

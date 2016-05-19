@@ -35,24 +35,24 @@ Variant Text::ComponentParamsToXMLMap(Variant map)
     for (auto child : children)
     {
       if (child.key.asString().eq("_text"))
-        node.Insert("text", child.value.asString());
+        node.insert("text", child.value.asString());
       else if (child.key.asString().eq("_attributes"))
-        node.Insert("attributes", child.value.asAssocArray());
+        node.insert("attributes", child.value.asAssocArray());
       else
       {
         Variant::VarMap childNode = ComponentParamsToXMLMap(child.value).asAssocArray();
-        childNode.Insert("name", child.key);
+        childNode.insert("name", child.key);
         childNodes.pushBack(childNode);
       }
     }
 
-    node.Insert("children", childNodes);
+    node.insert("children", childNodes);
   }
   else
   {
     SharedString str = map.asSharedString();
     if (!str.empty())
-      node.Insert("text", str);
+      node.insert("text", str);
   }
 
   return node;
@@ -68,18 +68,18 @@ Variant Text::XMLMapToComponentParams(Variant node)
 
   Variant::VarMap element = node.asAssocArray();
 
-  Variant *pAttributes = element.Get("attributes");
+  Variant *pAttributes = element.get("attributes");
   if (pAttributes && pAttributes->is(Variant::SharedPtrType::AssocArray))
   {
     Variant::VarMap attributes = pAttributes->asAssocArray();
     for (auto attr : attributes)
     {
-      map.Insert(attr);
+      map.insert(attr);
       hasAttributes = true;
     }
   }
 
-  Variant *pChildren = element.Get("children");
+  Variant *pChildren = element.get("children");
   if (pChildren && pChildren->is(Variant::Type::Array))
   {
     Slice<Variant> children = pChildren->asArray();
@@ -88,18 +88,18 @@ Variant Text::XMLMapToComponentParams(Variant node)
       if (child.is(Variant::SharedPtrType::AssocArray))
       {
         Variant::VarMap childMap = child.asAssocArray();
-        map.Insert(*childMap.Get("name"), XMLMapToComponentParams(child));
+        map.insert(*childMap.get("name"), XMLMapToComponentParams(child));
 
         hasChildren = true;
       }
     }
   }
 
-  Variant *pText = element.Get("text");
+  Variant *pText = element.get("text");
   if (pText && pText->is(Variant::Type::String))
   {
     if (hasChildren || hasAttributes)
-      map.Insert("_text", pText->asString());
+      map.insert("_text", pText->asString());
     else
       return pText->asString();
   }
@@ -122,7 +122,7 @@ static Variant ParseXMLNode(rapidxml::xml_node<> *node)
   // Add the node's attributes as an element _attributes
 
   for (xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute())
-    attributes.Insert(KeyValuePair(String(attr->name(), attr->name_size()), String(attr->value(), attr->value_size())));
+    attributes.insert(KeyValuePair(String(attr->name(), attr->name_size()), String(attr->value(), attr->value_size())));
   for (xml_node<> *child = node->first_node(); child; child = child->next_sibling())
   {
     if (child->type() == node_data)
@@ -131,13 +131,13 @@ static Variant ParseXMLNode(rapidxml::xml_node<> *node)
       children.pushBack(ParseXMLNode(child));
   }
 
-  outNode.Insert("name", String(node->name(), node->name_size()));
+  outNode.insert("name", String(node->name(), node->name_size()));
   if(!text.empty())
-    outNode.Insert("text", std::move(text));
-  if (!attributes.Empty())
-    outNode.Insert("attributes", std::move(attributes));
+    outNode.insert("text", std::move(text));
+  if (!attributes.empty())
+    outNode.insert("attributes", std::move(attributes));
   if(!children.empty())
-    outNode.Insert("children", std::move(children));
+    outNode.insert("children", std::move(children));
 
   return std::move(outNode);
 }
@@ -184,12 +184,12 @@ void Text::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth)
 {
   bool hasAttributes = false, hasChildren = false, hasText = false;
 
-  String elemName = element.Get("name")->asString();
+  String elemName = element.get("name")->asString();
   MutableString<1024> str;
   str.format("{'',*0}<{1}", depth * 2, elemName);
   spOut->Write(str);
 
-  Variant *pAttributes = element.Get("attributes");
+  Variant *pAttributes = element.get("attributes");
   if (pAttributes && pAttributes->is(Variant::SharedPtrType::AssocArray))
   {
     Variant::VarMap attributes = pAttributes->asAssocArray();
@@ -200,11 +200,11 @@ void Text::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth)
       spOut->Write(str);
     }
 
-    if (attributes.Size() > 0)
+    if (attributes.size() > 0)
       hasAttributes = true;
   }
 
-  Variant *pChildren = element.Get("children");
+  Variant *pChildren = element.get("children");
   if (pChildren && pChildren->is(Variant::Type::Array))
   {
     Slice<Variant> children = pChildren->asArray();
@@ -226,7 +226,7 @@ void Text::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth)
   if(hasAttributes && !hasChildren)
     spOut->Write(String(">\n"));
 
-  Variant *pText = element.Get("text");
+  Variant *pText = element.get("text");
   if (pText && pText->is(Variant::Type::String))
   {
     hasText = true;
@@ -302,7 +302,7 @@ static Variant ParseJsonNode(const rapidjson::Value& val)
       auto j = val.MemberEnd();
       Variant::VarMap map;
       for (auto i = val.MemberBegin(); i != j; ++i)
-        map.Insert(ParseJsonNode(i->name), ParseJsonNode(i->value));
+        map.insert(ParseJsonNode(i->name), ParseJsonNode(i->value));
       return map;
     }
     default:

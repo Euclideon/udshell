@@ -170,13 +170,13 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
 
   // build search trees
   for (auto &p : CreateHelper<Kernel>::GetProperties())
-    pDesc->propertyTree.Insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
+    pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
   for (auto &m : CreateHelper<Kernel>::GetMethods())
-    pDesc->methodTree.Insert(m.id, { m, m.pMethod });
+    pDesc->methodTree.insert(m.id, { m, m.pMethod });
   for (auto &e : CreateHelper<Kernel>::GetEvents())
-    pDesc->eventTree.Insert(e.id, { e, e.pSubscribe });
+    pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
   for (auto &f : CreateHelper<Kernel>::GetStaticFuncs())
-    pDesc->staticFuncTree.Insert(f.id, { f, (void*)f.pCall });
+    pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   if (pType)
   {
@@ -204,8 +204,8 @@ Kernel::~Kernel()
 
 Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCount)
 {
-  if (!commandLine.Get("renderThreadCount"))
-    commandLine.Insert("renderThreadCount", renderThreadCount);
+  if (!commandLine.get("renderThreadCount"))
+    commandLine.insert("renderThreadCount", renderThreadCount);
 
   return CreateInstanceInternal(commandLine);
 }
@@ -237,7 +237,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Component, ComponentImpl, ComponentGlue>();
 
   // HACK: update the descriptor with the base class (bootup chicken/egg)
-  const ComponentDescInl *pComponentBase = componentRegistry.Get(Component::ComponentID())->pDesc;
+  const ComponentDescInl *pComponentBase = componentRegistry.get(Component::ComponentID())->pDesc;
   ComponentDescInl *pDesc = (ComponentDescInl*)pInstance->pType;
   while (pDesc->pSuperDesc)
   {
@@ -545,7 +545,7 @@ void KernelImpl::StreamerUpdate()
 
 Array<const ComponentDesc *> KernelImpl::GetDerivedComponentDescs(String id, bool bIncludeBase)
 {
-  ComponentType *compType = componentRegistry.Get(id);
+  ComponentType *compType = componentRegistry.get(id);
   if (compType)
     return GetDerivedComponentDescs(compType->pDesc, bIncludeBase);
   else
@@ -584,7 +584,7 @@ void KernelImpl::SendMessage(String target, String sender, String message, const
   if (targetType == '@')
   {
     // component message
-    Component **ppComponent = instanceRegistry.Get(target);
+    Component **ppComponent = instanceRegistry.get(target);
     if (ppComponent)
     {
       ComponentRef spComponent(*ppComponent);
@@ -651,7 +651,7 @@ void KernelImpl::SendMessage(String target, String sender, String message, const
   else if (targetType == '$')
   {
     // registered message
-    MessageCallback *pHandler = messageHandlers.Get(target);
+    MessageCallback *pHandler = messageHandlers.get(target);
     if (pHandler)
     {
       size_t errorDepth = ErrorLevel();
@@ -712,7 +712,7 @@ void KernelImpl::ReceiveMessage(String sender, String message, const Variant &da
 
 void KernelImpl::RegisterMessageHandler(SharedString _name, MessageHandler messageHandler)
 {
-  messageHandlers.Replace(_name, MessageCallback{ _name, messageHandler });
+  messageHandlers.replace(_name, MessageCallback{ _name, messageHandler });
 }
 
 const ComponentDesc* KernelImpl::RegisterComponentType(ComponentDescInl *pDesc)
@@ -721,11 +721,11 @@ const ComponentDesc* KernelImpl::RegisterComponentType(ComponentDescInl *pDesc)
     EPTHROW_ERROR(epR_InvalidArgument, "Invalid component id");
 
   // disallow duplicates
-  if (componentRegistry.Get(pDesc->info.identifier))
+  if (componentRegistry.get(pDesc->info.identifier))
     EPTHROW_ERROR(epR_InvalidArgument, "Component of type id '{0}' has already been registered", pDesc->info.identifier);
 
   // add to registry
-  componentRegistry.Insert(pDesc->info.identifier, ComponentType{ pDesc, 0 });
+  componentRegistry.insert(pDesc->info.identifier, ComponentType{ pDesc, 0 });
 
   if (bKernelCreated && pDesc->pInit)
     pDesc->pInit(pInstance);
@@ -748,9 +748,9 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
   pDesc->info.displayName = typeDesc["name"].asSharedString();
   pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = EP_APIVERSION;
-  Variant *pVar = typeDesc.Get("version");
+  Variant *pVar = typeDesc.get("version");
   pDesc->info.pluginVersion = pVar ? pVar->as<int>() : EPKERNEL_PLUGINVERSION;
-  pVar = typeDesc.Get("flags");
+  pVar = typeDesc.get("flags");
   pDesc->info.flags = pVar ? pVar->as<ComponentInfoFlags>() : ComponentInfoFlags();
 
   pDesc->baseClass = typeDesc["super"].asSharedString();
@@ -776,13 +776,13 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
 /*
   // build search trees
   for (auto &p : CreateHelper<_ComponentType>::GetProperties())
-    pDesc->propertyTree.Insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
+    pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
   for (auto &m : CreateHelper<_ComponentType>::GetMethods())
-    pDesc->methodTree.Insert(m.id, { m, m.pMethod });
+    pDesc->methodTree.insert(m.id, { m, m.pMethod });
   for (auto &e : CreateHelper<_ComponentType>::GetEvents())
-    pDesc->eventTree.Insert(e.id, { e, e.pSubscribe });
+    pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
   for (auto &f : CreateHelper<_ComponentType>::GetStaticFuncs())
-    pDesc->staticFuncTree.Insert(f.id, { f, (void*)f.pCall });
+    pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 */
 
   // setup the super class and populate from its meta
@@ -795,7 +795,7 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
 
 void KernelImpl::RegisterGlueType(String name, CreateGlueFunc *pCreateFunc)
 {
-  glueRegistry.Insert(name, pCreateFunc);
+  glueRegistry.insert(name, pCreateFunc);
 }
 
 void* KernelImpl::CreateImpl(String componentType, Component *_pInstance, Variant::VarMap initParams)
@@ -808,7 +808,7 @@ void* KernelImpl::CreateImpl(String componentType, Component *_pInstance, Varian
 
 const ComponentDesc* KernelImpl::GetComponentDesc(String id)
 {
-  ComponentType *pCT = componentRegistry.Get(id);
+  ComponentType *pCT = componentRegistry.get(id);
   if (!pCT)
     return nullptr;
   return pCT->pDesc;
@@ -816,7 +816,7 @@ const ComponentDesc* KernelImpl::GetComponentDesc(String id)
 
 ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initParams)
 {
-  ComponentType *_pType = componentRegistry.Get(typeId);
+  ComponentType *_pType = componentRegistry.get(typeId);
   EPASSERT_THROW(_pType, epR_InvalidArgument, "Unknown component type {0}", typeId);
   EPTHROW_IF(_pType->pDesc->info.flags & ComponentInfoFlags::Abstract, epR_InvalidType, "Cannot create component of abstract type '{0}'", typeId);
 
@@ -831,7 +831,7 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, pInstance, newUid, initParams));
 
     // add to the component registry
-    instanceRegistry.Insert(spComponent->uid, spComponent.ptr());
+    instanceRegistry.insert(spComponent->uid, spComponent.ptr());
 
     // TODO: inform partner kernels that I created a component
     //...
@@ -852,7 +852,7 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
 
 ComponentRef KernelImpl::CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams)
 {
-  CreateGlueFunc **ppCreate = glueRegistry.Get(typeId);
+  CreateGlueFunc **ppCreate = glueRegistry.get(typeId);
   EPTHROW_IF_NULL(ppCreate, epR_InvalidType, "No glue type {0}", typeId);
   return (*ppCreate)(pInstance, _pType, _uid, spInstance, initParams);
 }
@@ -860,8 +860,8 @@ ComponentRef KernelImpl::CreateGlue(String typeId, const ComponentDesc *_pType, 
 void KernelImpl::DestroyComponent(Component *_pInstance)
 {
   if (_pInstance->name)
-    namedInstanceRegistry.Remove(_pInstance->name);
-  instanceRegistry.Remove(_pInstance->uid);
+    namedInstanceRegistry.remove(_pInstance->name);
+  instanceRegistry.remove(_pInstance->uid);
 
   // TODO: inform partners that I destroyed a component
   //...
@@ -873,9 +873,9 @@ ComponentRef KernelImpl::FindComponent(String _name) const
     return nullptr;
   if (_name[0] == '@')
     _name.popFront();
-  Component * const * ppComponent = namedInstanceRegistry.Get(_name);
+  Component * const * ppComponent = namedInstanceRegistry.get(_name);
   if (!ppComponent)
-    ppComponent = instanceRegistry.Get(_name);
+    ppComponent = instanceRegistry.get(_name);
   return ppComponent ? ComponentRef(*ppComponent) : nullptr;
 }
 
@@ -918,12 +918,12 @@ const AVLTree<String, const ComponentDesc *> &KernelImpl::GetExtensionsRegistry(
 void KernelImpl::RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts)
 {
   for (const String &e : exts)
-    extensionsRegistry.Insert(e, pDesc);
+    extensionsRegistry.insert(e, pDesc);
 }
 
 DataSourceRef KernelImpl::CreateDataSourceFromExtension(String ext, Variant::VarMap initParams)
 {
-  const ComponentDesc **ppDesc = extensionsRegistry.Get(ext);
+  const ComponentDesc **ppDesc = extensionsRegistry.get(ext);
   EPASSERT_THROW(ppDesc, epR_Failure, "No datasource for extension {0}", ext);
 
   return component_cast<DataSource>(CreateComponent((*ppDesc)->info.identifier, initParams));

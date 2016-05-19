@@ -48,10 +48,10 @@ void ComponentImpl::SetName(SharedString name)
     EPTHROW_WARN(epR_AlreadyExists, 1, "Name is already in use");
 
   if (pInstance->name)
-    pKernelImpl->namedInstanceRegistry.Remove(pInstance->name);
+    pKernelImpl->namedInstanceRegistry.remove(pInstance->name);
   pInstance->name = name;
   if (name)
-    pKernelImpl->namedInstanceRegistry.Insert(name, pInstance);
+    pKernelImpl->namedInstanceRegistry.insert(name, pInstance);
 }
 
 void ComponentImpl::ReceiveMessage(String message, String sender, const Variant &data)
@@ -83,7 +83,7 @@ Array<SharedString> ComponentImpl::EnumerateProperties(EnumerateFlags enumerateF
   {
     for (auto p : GetDescriptor()->propertyTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->propertyTree.Get(p.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->propertyTree.get(p.key))
         props.pushBack(p.key);
     }
   }
@@ -101,12 +101,12 @@ Array<SharedString> ComponentImpl::EnumerateFunctions(EnumerateFlags enumerateFl
   {
     for (auto f : GetDescriptor()->methodTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->methodTree.Get(f.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->methodTree.get(f.key))
         functions.pushBack(f.key);
     }
     for (auto sf : GetDescriptor()->staticFuncTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->staticFuncTree.Get(sf.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->staticFuncTree.get(sf.key))
         functions.pushBack(sf.key);
     }
   }
@@ -124,7 +124,7 @@ Array<SharedString> ComponentImpl::EnumerateEvents(EnumerateFlags enumerateFlags
   {
     for (auto e : GetDescriptor()->eventTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->eventTree.Get(e.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->eventTree.get(e.key))
         events.pushBack(e.key);
     }
   }
@@ -135,11 +135,11 @@ const PropertyDesc *ComponentImpl::GetPropertyDesc(String _name, EnumerateFlags 
 {
   const PropertyDesc *pDesc = nullptr;
   if (!(enumerateFlags & EnumerateFlags::NoDynamic))
-    pDesc = instanceProperties.Get(_name);
+    pDesc = instanceProperties.get(_name);
   if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->propertyTree.Get(_name))
-      pDesc = ((const ComponentDescInl*)GetDescriptor())->propertyTree.Get(_name);
+    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->propertyTree.get(_name))
+      pDesc = ((const ComponentDescInl*)GetDescriptor())->propertyTree.get(_name);
   }
   return pDesc;
 }
@@ -147,11 +147,11 @@ const MethodDesc *ComponentImpl::GetMethodDesc(String _name, EnumerateFlags enum
 {
   const MethodDesc *pDesc = nullptr;
   if (!(enumerateFlags & EnumerateFlags::NoDynamic))
-    pDesc = instanceMethods.Get(_name);
+    pDesc = instanceMethods.get(_name);
   if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->methodTree.Get(_name))
-      pDesc = ((const ComponentDescInl*)GetDescriptor())->methodTree.Get(_name);
+    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->methodTree.get(_name))
+      pDesc = ((const ComponentDescInl*)GetDescriptor())->methodTree.get(_name);
   }
   return pDesc;
 }
@@ -159,48 +159,48 @@ const EventDesc *ComponentImpl::GetEventDesc(String _name, EnumerateFlags enumer
 {
   const EventDesc *pDesc = nullptr;
   if(!(enumerateFlags & EnumerateFlags::NoDynamic))
-    pDesc = instanceEvents.Get(_name);
+    pDesc = instanceEvents.get(_name);
   if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->eventTree.Get(_name))
-      pDesc = ((const ComponentDescInl*)GetDescriptor())->eventTree.Get(_name);
+    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->eventTree.get(_name))
+      pDesc = ((const ComponentDescInl*)GetDescriptor())->eventTree.get(_name);
   }
   return pDesc;
 }
 const StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags) const
 {
-  if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->staticFuncTree.Get(_name))
-    return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.Get(_name);
+  if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->staticFuncTree.get(_name))
+    return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.get(_name);
   return nullptr;
 }
 
 void ComponentImpl::AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter, const MethodShim *pSetter)
 {
   PropertyDesc desc(property, pGetter ? *pGetter : MethodShim(property.pGetterMethod), pSetter ? *pSetter : MethodShim(property.pSetterMethod));
-  instanceProperties.Insert(desc.id, desc);
+  instanceProperties.insert(desc.id, desc);
 }
 void ComponentImpl::AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod)
 {
   MethodDesc desc(method, pMethod ? *pMethod : MethodShim(method.pMethod));
-  instanceMethods.Insert(desc.id, desc);
+  instanceMethods.insert(desc.id, desc);
 }
 void ComponentImpl::AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe)
 {
   EventDesc desc(event, pSubscribe ? *pSubscribe : EventShim(event.pSubscribe));
-  instanceEvents.Insert(desc.id, desc);
+  instanceEvents.insert(desc.id, desc);
 }
 
 void ComponentImpl::RemoveDynamicProperty(String _name)
 {
-  instanceProperties.Remove(_name);
+  instanceProperties.remove(_name);
 }
 void ComponentImpl::RemoveDynamicMethod(String _name)
 {
-  instanceMethods.Remove(_name);
+  instanceMethods.remove(_name);
 }
 void ComponentImpl::RemoveDynamicEvent(String _name)
 {
-  instanceEvents.Remove(_name);
+  instanceEvents.remove(_name);
 }
 
 Variant ComponentImpl::Get(String property) const

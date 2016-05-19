@@ -30,15 +30,15 @@ Array<const MethodInfo> Camera::GetMethods() const
 CameraImpl::CameraImpl(Component *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)
 {
-  const Variant *perspParam = initParams.Get("perspective");
+  const Variant *perspParam = initParams.get("perspective");
   if (perspParam)
     SetPerspective(perspParam->asFloat());
 
-  const Variant *orthoParam = initParams.Get("ortho");
+  const Variant *orthoParam = initParams.get("ortho");
   if (orthoParam)
     SetOrtho(orthoParam->asFloat());
 
-  const Variant *paramDepthPlanes = initParams.Get("depthplanes");
+  const Variant *paramDepthPlanes = initParams.get("depthplanes");
   if (paramDepthPlanes)
   {
     auto depthPlanesArray = paramDepthPlanes->as<Array<double, 2>>();
@@ -46,11 +46,11 @@ CameraImpl::CameraImpl(Component *pInstance, Variant::VarMap initParams)
       SetDepthPlanes(depthPlanesArray[0], depthPlanesArray[1]);
   }
 
-  const Variant *paramNearPlane = initParams.Get("nearplane");
+  const Variant *paramNearPlane = initParams.get("nearplane");
   if (paramNearPlane)
     SetNearPlane(paramNearPlane->asFloat());
 
-  const Variant *paramFarPlane = initParams.Get("farplane");
+  const Variant *paramFarPlane = initParams.get("farplane");
   if (paramFarPlane)
     SetFarPlane(paramFarPlane->asFloat());
 }
@@ -67,13 +67,13 @@ Variant CameraImpl::Save() const
 {
   Variant::VarMap params;
 
-  params.Insert(KeyValuePair("matrix", pInstance->GetMatrix()));
+  params.insert(KeyValuePair("matrix", pInstance->GetMatrix()));
   if (bOrtho)
-    params.Insert(KeyValuePair("ortho", orthoHeight));
+    params.insert(KeyValuePair("ortho", orthoHeight));
   else
-    params.Insert(KeyValuePair("perspective", fovY));
-  params.Insert(KeyValuePair("nearplane", zNear));
-  params.Insert(KeyValuePair("farplane", zFar));
+    params.insert(KeyValuePair("perspective", fovY));
+  params.insert(KeyValuePair("nearplane", zNear));
+  params.insert(KeyValuePair("farplane", zFar));
 
   return Variant(std::move(params));
 }

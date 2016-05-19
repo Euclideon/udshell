@@ -31,19 +31,19 @@ bool QmlPluginLoader::LoadPlugin(String filename)
 
   try {
     descMap = ParseTypeDescriptor(pQtKernel, filename);
-    if (!descMap.Empty())
+    if (!descMap.empty())
       pQtKernel->RegisterQml(filename, descMap);
   }
   catch (ep::EPException &e) {
     // if ParseTypeDescriptor threw, then we have an invalid type descriptor
-    if (descMap.Empty())
+    if (descMap.empty())
       LogWarning(2, "Could not register QML file '{0}' as Component: \"{1}\"", filename, e.what());
     // if RegisterQml threw, then it might be due to the super not yet being loaded - hence we should try again
     else
       LogDebug(2, "Failed attempt to register QML file '{0}' as Component: \"{1}\"", filename, e.what());
 
     ep::ClearError();
-    return descMap.Empty();
+    return descMap.empty();
   }
 
   return true;
@@ -94,22 +94,22 @@ Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::St
       Variant::VarMap typeDesc = result.asAssocArray();
 
       // id and super must be present
-      Variant *pId = typeDesc.Get("id");
-      Variant *pSuper = typeDesc.Get("super");
+      Variant *pId = typeDesc.get("id");
+      Variant *pSuper = typeDesc.get("super");
       if (!pId) EPTHROW(epR_Failure, "Invalid Type Descriptor: Does not contain 'id' key");
       if (!pSuper) EPTHROW(epR_Failure, "Invalid Type Descriptor: Does not contain 'super' key");
 
-      if (!typeDesc.Get("displayname"))
-        typeDesc.Insert("displayname", pId->asString());
+      if (!typeDesc.get("displayname"))
+        typeDesc.insert("displayname", pId->asString());
 
       // id must be lowercase
       *pId = ep::MutableString128(pId->asString()).toLower();
 
-      if (!typeDesc.Get("description"))
-        typeDesc.Insert("description", ep::SharedString::format("{0} based QML component - {1}", pSuper->asString(), filename));
+      if (!typeDesc.get("description"))
+        typeDesc.insert("description", ep::SharedString::format("{0} based QML component - {1}", pSuper->asString(), filename));
 
-      if (!typeDesc.Get("version"))
-        typeDesc.Insert("version", (int)EPKERNEL_PLUGINVERSION);
+      if (!typeDesc.get("version"))
+        typeDesc.insert("version", (int)EPKERNEL_PLUGINVERSION);
 
       return typeDesc;
     }

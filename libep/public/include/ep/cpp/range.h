@@ -200,7 +200,7 @@ public:
   }
 
   TreeRange(const Tree &tree)
-    : i(tree.begin()), len(tree.Size())
+    : i(tree.begin()), len(tree.size())
   {}
 
   bool empty() const { return len == 0; }

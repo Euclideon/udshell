@@ -31,7 +31,7 @@ SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initPar
   : ImplSuper(pInstance)
 {
   memset(keyState, 0, sizeof(keyState));
-  const Variant *paramPos = initParams.Get("position");
+  const Variant *paramPos = initParams.get("position");
   if (paramPos)
   {
     auto posArray = paramPos->as<Array<double, 3>>();
@@ -42,7 +42,7 @@ SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initPar
     }
   }
 
-  const Variant *paramOrientation = initParams.Get("orientation");
+  const Variant *paramOrientation = initParams.get("orientation");
   if (paramOrientation)
   {
     auto oriArray = paramOrientation->as<Array<double, 3>>();
@@ -53,7 +53,7 @@ SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initPar
     }
   }
 
-  const Variant *paramMat = initParams.Get("matrix");
+  const Variant *paramMat = initParams.get("matrix");
   if (paramMat)
   {
     Array<double> matArray = paramMat->as<Array<double>>();
@@ -61,15 +61,15 @@ SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initPar
       SetMatrix(Double4x4::create(matArray.ptr));
   }
 
-  const Variant *paramSpeed = initParams.Get("speed");
+  const Variant *paramSpeed = initParams.get("speed");
   if (paramSpeed)
     SetSpeed(paramSpeed->asFloat());
 
-  const Variant *paramInvert = initParams.Get("invertyaxis");
+  const Variant *paramInvert = initParams.get("invertyaxis");
   if (paramInvert)
     SetInvertedYAxis(paramInvert->asBool());
 
-  const Variant *paramHeli = initParams.Get("helicoptermode");
+  const Variant *paramHeli = initParams.get("helicoptermode");
   if (paramHeli)
     SetHelicopterMode(paramHeli->asBool());
 }
@@ -305,9 +305,9 @@ Variant SimpleCameraImpl::Save() const
   Variant var = pInstance->Super::Save();
   Variant::VarMap params = var.asAssocArray();
 
-  params.Insert("speed", speed);
-  params.Insert("invertyaxis", (invertedYAxis == -1.0 ? true : false));
-  params.Insert("helicoptermode", helicopterMode);
+  params.insert("speed", speed);
+  params.insert("invertyaxis", (invertedYAxis == -1.0 ? true : false));
+  params.insert("helicoptermode", helicopterMode);
 
   return Variant(std::move(params));
 }

@@ -268,13 +268,13 @@ struct ComponentDescInl : public ComponentDesc
   void PopulateFromDesc(const ComponentDescInl *pDesc)
   {
     for (auto p : pDesc->propertyTree)
-      propertyTree.TryInsert(p.key, p.value);
+      propertyTree.tryInsert(p.key, p.value);
     for (auto m : pDesc->methodTree)
-      methodTree.TryInsert(m.key, m.value);
+      methodTree.tryInsert(m.key, m.value);
     for (auto e : pDesc->eventTree)
-      eventTree.TryInsert(e.key, e.value);
+      eventTree.tryInsert(e.key, e.value);
     for (auto f : pDesc->staticFuncTree)
-      staticFuncTree.TryInsert(f.key, f.value);
+      staticFuncTree.tryInsert(f.key, f.value);
   }
 
   SharedString baseClass;   // The base/super class type id

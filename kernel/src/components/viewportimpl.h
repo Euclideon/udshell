@@ -22,7 +22,7 @@ public:
     : ImplSuper(pInstance)
   {
     // check if we passed in a view, otherwise create a default one
-    Variant *pVar = initParams.Get("view");
+    Variant *pVar = initParams.get("view");
     if (pVar)
     {
       spView = pVar->as<ViewRef>();

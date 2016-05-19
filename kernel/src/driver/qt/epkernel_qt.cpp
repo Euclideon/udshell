@@ -94,13 +94,13 @@ ComponentDescInl *QtKernel::MakeKernelDescriptor()
 
   // build search trees
   for (auto &p : CreateHelper<QtKernel>::GetProperties())
-    pDesc->propertyTree.Insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
+    pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
   for (auto &m : CreateHelper<QtKernel>::GetMethods())
-    pDesc->methodTree.Insert(m.id, { m, m.pMethod });
+    pDesc->methodTree.insert(m.id, { m, m.pMethod });
   for (auto &e : CreateHelper<QtKernel>::GetEvents())
-    pDesc->eventTree.Insert(e.id, { e, e.pSubscribe });
+    pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
   for (auto &f : CreateHelper<QtKernel>::GetStaticFuncs())
-    pDesc->staticFuncTree.Insert(f.id, { f, (void*)f.pCall });
+    pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   return pDesc;
 }
@@ -283,7 +283,7 @@ void QtKernel::RegisterQmlComponent(String file)
     EPTHROW_ERROR(epR_Failure, "Could not register QML file '{0}' as Component: \"{1}\"", file, e.what());
   }
 
-  EPTHROW_IF(typeDesc.Empty(), epR_Failure, "Cannot register QML Component: File '{0}' does not contain valid type descriptor", file);
+  EPTHROW_IF(typeDesc.empty(), epR_Failure, "Cannot register QML Component: File '{0}' does not contain valid type descriptor", file);
   RegisterQml(file, typeDesc);
 }
 
@@ -348,7 +348,7 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initP
     EPTHROW_ERROR(epR_Failure, "Could not create QML Component from file '{0}': \"{1}\"", file, e.what());
   }
 
-  EPTHROW_IF(typeDesc.Empty(), epR_Failure, "Cannot create QML Component: File '{0}' does not contain valid type descriptor", file);
+  EPTHROW_IF(typeDesc.empty(), epR_Failure, "Cannot create QML Component: File '{0}' does not contain valid type descriptor", file);
 
   // locate the nominated super
   String superTypeId = typeDesc["super"].asString();
@@ -395,7 +395,7 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initP
   pDesc->PopulateFromDesc(pSuper);
 
   // add to the component registry
-  GetImpl<KernelImpl>()->instanceRegistry.Insert(spC->uid, spC.ptr());
+  GetImpl<KernelImpl>()->instanceRegistry.insert(spC->uid, spC.ptr());
 
   return spC;
 }

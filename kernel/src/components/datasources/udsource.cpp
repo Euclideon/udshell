@@ -13,11 +13,11 @@ const Array<const String> UDSource::extensions = { ".uds", ".ssf", ".upc", ".udi
 UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : DataSource(pType, pKernel, uid, initParams)
 {
-  const Variant *source = initParams.Get("src");
+  const Variant *source = initParams.get("src");
 
   if (source && source->is(Variant::Type::String))
   {
-    const Variant *useStreamer = initParams.Get("useStreamer");
+    const Variant *useStreamer = initParams.get("useStreamer");
 
     MutableString<260> filePath = File::UrlToNativePath(source->asString());
 
@@ -27,7 +27,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
 
     epscope(fail) { udOctree_Destroy(&pOctree); };
 
-    const Variant *udModel = initParams.Get("existingComponent");
+    const Variant *udModel = initParams.get("existingComponent");
     UDModelRef model;
     if (udModel && udModel->is(Variant::SharedPtrType::Component))
       model = component_cast<UDModel>(udModel->asComponent());
@@ -58,24 +58,24 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     if (result == udR_Success)
     {
       Variant::VarMap header;
-      header.Insert("scale", headerData.scale);
-      header.Insert("unitMeterScale", headerData.unitMeterScale);
+      header.insert("scale", headerData.scale);
+      header.insert("unitMeterScale", headerData.unitMeterScale);
 
       double *pPivot = headerData.pivotOrigin;
-      header.Insert("pivotOrigin", Double3{ pPivot[0], pPivot[1], pPivot[2] });
+      header.insert("pivotOrigin", Double3{ pPivot[0], pPivot[1], pPivot[2] });
 
       double *pBias = headerData.sourceBias;
-      header.Insert("sourceBias", Double3{ pBias[0], pBias[1], pBias[2] });
+      header.insert("sourceBias", Double3{ pBias[0], pBias[1], pBias[2] });
 
       double *pScale = headerData.sourceScale;
-      header.Insert("sourceScale", Double3{ pScale[0], pScale[1], pScale[2] });
+      header.insert("sourceScale", Double3{ pScale[0], pScale[1], pScale[2] });
 
       double *pOri = headerData.boundingBoxOrigin;
       double *pExt = headerData.boundingBoxExtents;
-      header.Insert("boundingVolume", BoundingVolume{ { pOri[0], pOri[1], pOri[2] },
+      header.insert("boundingVolume", BoundingVolume{ { pOri[0], pOri[1], pOri[2] },
                                                       { pOri[0] + pExt[0], pOri[1] + pExt[1], pOri[2] + pExt[2] } });
 
-      header.Insert("maxOctreeDepth", headerData.maxOctreeDepth);
+      header.insert("maxOctreeDepth", headerData.maxOctreeDepth);
       meta->Insert("octreeheader", std::move(header));
     }
 
