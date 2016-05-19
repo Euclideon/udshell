@@ -1,22 +1,22 @@
 namespace ep {
 
-template <typename V, typename K, typename HashPred>
-HashMap<V, K, HashPred>::HashMap(size_t tableSize, size_t itemBucketSize)
+template <typename K, typename V, typename HashPred>
+HashMap<K, V, HashPred>::HashMap(size_t tableSize, size_t itemBucketSize)
   : tableSizeMask(tableSize - 1), pool(itemBucketSize)
 {
   EPASSERT(tableSize > 0 && (tableSize & (tableSize-1)) == 0, "tableSize must be power-of-2!");
   ppTable = epAllocType(Node*, tableSize, epAF_Zero);
   EPTHROW_IF_NULL(ppTable, epR_AllocFailure, "Allocation failed");
 }
-template <typename V, typename K, typename HashPred>
-HashMap<V, K, HashPred>::HashMap(HashMap &&rval)
+template <typename K, typename V, typename HashPred>
+HashMap<K, V, HashPred>::HashMap(HashMap &&rval)
   : ppTable(rval.ppTable), tableSizeMask(rval.tableSizeMask), pool(std::move(rval.pool))
 {
   rval.ppTable = nullptr;
 }
 
-template <typename V, typename K, typename HashPred>
-HashMap<V, K, HashPred>::~HashMap()
+template <typename K, typename V, typename HashPred>
+HashMap<K, V, HashPred>::~HashMap()
 {
   if (ppTable)
   {
@@ -34,19 +34,19 @@ HashMap<V, K, HashPred>::~HashMap()
   }
 }
 
-template <typename V, typename K, typename HashPred>
-size_t HashMap<V, K, HashPred>::size() const
+template <typename K, typename V, typename HashPred>
+size_t HashMap<K, V, HashPred>::size() const
 {
   return pool.size();
 }
-template <typename V, typename K, typename HashPred>
-bool HashMap<V, K, HashPred>::empty() const
+template <typename K, typename V, typename HashPred>
+bool HashMap<K, V, HashPred>::empty() const
 {
   return pool.size() == 0;
 }
 
-template <typename V, typename K, typename HashPred>
-void HashMap<V, K, HashPred>::clear()
+template <typename K, typename V, typename HashPred>
+void HashMap<K, V, HashPred>::clear()
 {
   for (size_t i = 0; (i < tableSizeMask + 1) && pool.size(); ++i)
   {
@@ -59,9 +59,9 @@ void HashMap<V, K, HashPred>::clear()
   }
 }
 
-template <typename V, typename K, typename HashPred>
+template <typename K, typename V, typename HashPred>
 template <typename Key, typename Val>
-V& HashMap<V, K, HashPred>::insert(Key&& key, Val&& val)
+V& HashMap<K, V, HashPred>::insert(Key&& key, Val&& val)
 {
   Node **ppBucket = getBucket(key);
   V *pVal = getValue(*ppBucket, key);
@@ -72,20 +72,20 @@ V& HashMap<V, K, HashPred>::insert(Key&& key, Val&& val)
   *ppBucket = pNode;
   return pNode->data.value;
 }
-template <typename V, typename K, typename HashPred>
-V& HashMap<V, K, HashPred>::insert(KVP<K, V> &&v)
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::insert(KVP<K, V> &&v)
 {
   return insert(std::move(v.key), std::move(v.value));
 }
-template <typename V, typename K, typename HashPred>
-V& HashMap<V, K, HashPred>::insert(const KVP<K, V> &v)
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::insert(const KVP<K, V> &v)
 {
   return insert(v.key, v.value);
 }
 
-template <typename V, typename K, typename HashPred>
+template <typename K, typename V, typename HashPred>
 template <typename Key>
-V& HashMap<V, K, HashPred>::tryInsert(Key&& key, V&& val)
+V& HashMap<K, V, HashPred>::tryInsert(Key&& key, V&& val)
 {
   Node **ppBucket = getBucket(key);
   V *pVal = getValue(*ppBucket, key);
@@ -96,9 +96,9 @@ V& HashMap<V, K, HashPred>::tryInsert(Key&& key, V&& val)
   *ppBucket = pNode;
   return pNode->data.value;
 }
-template <typename V, typename K, typename HashPred>
+template <typename K, typename V, typename HashPred>
 template <typename Key>
-V& HashMap<V, K, HashPred>::tryInsert(Key&& key, const V& val)
+V& HashMap<K, V, HashPred>::tryInsert(Key&& key, const V& val)
 {
   Node **ppBucket = getBucket(key);
   V *pVal = getValue(*ppBucket, key);
@@ -109,9 +109,9 @@ V& HashMap<V, K, HashPred>::tryInsert(Key&& key, const V& val)
   *ppBucket = pNode;
   return pNode->data.value;
 }
-template <typename V, typename K, typename HashPred>
+template <typename K, typename V, typename HashPred>
 template <typename Key>
-V& HashMap<V, K, HashPred>::tryInsert(Key&& key, std::function<V()> lazy)
+V& HashMap<K, V, HashPred>::tryInsert(Key&& key, std::function<V()> lazy)
 {
   Node **ppBucket = getBucket(key);
   V *pVal = getValue(*ppBucket, key);
@@ -123,9 +123,9 @@ V& HashMap<V, K, HashPred>::tryInsert(Key&& key, std::function<V()> lazy)
   return pNode->data.value;
 }
 
-template <typename V, typename K, typename HashPred>
+template <typename K, typename V, typename HashPred>
 template <typename Key, typename Val>
-V& HashMap<V, K, HashPred>::replace(Key&& key, Val&& val)
+V& HashMap<K, V, HashPred>::replace(Key&& key, Val&& val)
 {
   Node **ppBucket = getBucket(key);
   V *pVal = getValue(*ppBucket, key);
@@ -139,19 +139,19 @@ V& HashMap<V, K, HashPred>::replace(Key&& key, Val&& val)
   *ppBucket = pNode;
   return pNode->data.value;
 }
-template <typename V, typename K, typename HashPred>
-V& HashMap<V, K, HashPred>::replace(KVP<K, V> &&v)
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::replace(KVP<K, V> &&v)
 {
   return replace(std::move(v.key), std::move(v.value));
 }
-template <typename V, typename K, typename HashPred>
-V& HashMap<V, K, HashPred>::replace(const KVP<K, V> &v)
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::replace(const KVP<K, V> &v)
 {
   return replace(v.key, v.value);
 }
 
-template <typename V, typename K, typename HashPred>
-void HashMap<V, K, HashPred>::remove(const K &key)
+template <typename K, typename V, typename HashPred>
+void HashMap<K, V, HashPred>::remove(const K &key)
 {
   Node **ppBucket = getBucket(key);
   while (*ppBucket)
@@ -167,51 +167,51 @@ void HashMap<V, K, HashPred>::remove(const K &key)
   }
 }
 
-template <typename V, typename K, typename HashPred>
-const V* HashMap<V, K, HashPred>::get(const K &key) const
+template <typename K, typename V, typename HashPred>
+const V* HashMap<K, V, HashPred>::get(const K &key) const
 {
   return getValue(*getBucket(key), key);
 }
-template <typename V, typename K, typename HashPred>
-V* HashMap<V, K, HashPred>::get(const K &key)
+template <typename K, typename V, typename HashPred>
+V* HashMap<K, V, HashPred>::get(const K &key)
 {
   return getValue(*getBucket(key), key);
 }
 
-template <typename V, typename K, typename HashPred>
-const V& HashMap<V, K, HashPred>::operator[](const K &key) const
+template <typename K, typename V, typename HashPred>
+const V& HashMap<K, V, HashPred>::operator[](const K &key) const
 {
   const V *pV = get(key);
   EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
   return *pV;
 }
-template <typename V, typename K, typename HashPred>
-V& HashMap<V, K, HashPred>::operator[](const K &key)
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::operator[](const K &key)
 {
   V *pV = get(key);
   EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
   return *pV;
 }
 
-template <typename V, typename K, typename HashPred>
-bool HashMap<V, K, HashPred>::exists(const K &key)
+template <typename K, typename V, typename HashPred>
+bool HashMap<K, V, HashPred>::exists(const K &key)
 {
   return get(key) != nullptr;
 }
 
-template <typename V, typename K, typename HashPred>
-auto HashMap<V, K, HashPred>::begin() const -> typename HashMap<V, K, HashPred>::Iterator
+template <typename K, typename V, typename HashPred>
+auto HashMap<K, V, HashPred>::begin() const -> typename HashMap<K, V, HashPred>::Iterator
 {
   return Iterator(ppTable, ppTable + tableSizeMask + 1);
 }
-template <typename V, typename K, typename HashPred>
-auto HashMap<V, K, HashPred>::end() const -> typename HashMap<V, K, HashPred>::Iterator
+template <typename K, typename V, typename HashPred>
+auto HashMap<K, V, HashPred>::end() const -> typename HashMap<K, V, HashPred>::Iterator
 {
   return Iterator(ppTable + tableSizeMask + 1, ppTable + tableSizeMask + 1);
 }
 
-template <typename V, typename K, typename HashPred>
-auto HashMap<V, K, HashPred>::find(const K &key) -> typename HashMap<V, K, HashPred>::Iterator
+template <typename K, typename V, typename HashPred>
+auto HashMap<K, V, HashPred>::find(const K &key) -> typename HashMap<K, V, HashPred>::Iterator
 {
   Node **ppBucket = getBucket(key);
   Node *pItem = *ppBucket;
@@ -228,8 +228,8 @@ auto HashMap<V, K, HashPred>::find(const K &key) -> typename HashMap<V, K, HashP
   return end();
 }
 
-template <typename V, typename K, typename HashPred>
-auto HashMap<V, K, HashPred>::erase(Iterator it) -> typename HashMap<V, K, HashPred>::Iterator
+template <typename K, typename V, typename HashPred>
+auto HashMap<K, V, HashPred>::erase(Iterator it) -> typename HashMap<K, V, HashPred>::Iterator
 {
   EPASSERT_THROW(it.pItem, epR_InvalidArgument, "Attempting to erase null iterator");
   if (*it.ppStart == it.pItem)
@@ -248,16 +248,16 @@ auto HashMap<V, K, HashPred>::erase(Iterator it) -> typename HashMap<V, K, HashP
   return ++it;
 }
 
-template <typename V, typename K, typename HashPred>
-auto HashMap<V, K, HashPred>::getBucket(const K &key) const -> typename HashMap<V, K, HashPred>::Node**
+template <typename K, typename V, typename HashPred>
+auto HashMap<K, V, HashPred>::getBucket(const K &key) const -> typename HashMap<K, V, HashPred>::Node**
 {
   auto h = HashPred::hash(key);
   size_t bucket = h & tableSizeMask;
   return &ppTable[bucket];
 }
 
-template <typename V, typename K, typename HashPred>
-V* HashMap<V, K, HashPred>::getValue(Node *pBucket, const K &key) const
+template <typename K, typename V, typename HashPred>
+V* HashMap<K, V, HashPred>::getValue(Node *pBucket, const K &key) const
 {
   while (pBucket)
   {
@@ -271,8 +271,8 @@ V* HashMap<V, K, HashPred>::getValue(Node *pBucket, const K &key) const
 
 // iterator methods
 
-template <typename V, typename K, typename HashPred>
-HashMap<V, K, HashPred>::Iterator::Iterator(Node **ppStart, Node **ppEnd)
+template <typename K, typename V, typename HashPred>
+HashMap<K, V, HashPred>::Iterator::Iterator(Node **ppStart, Node **ppEnd)
   : ppEnd(ppEnd)
 {
   while (ppStart != ppEnd && !*ppStart)
@@ -284,8 +284,8 @@ HashMap<V, K, HashPred>::Iterator::Iterator(Node **ppStart, Node **ppEnd)
   this->ppStart = ppStart;
 }
 
-template <typename V, typename K, typename HashPred>
-auto HashMap<V, K, HashPred>::Iterator::operator++() -> typename HashMap<V, K, HashPred>::Iterator&
+template <typename K, typename V, typename HashPred>
+auto HashMap<K, V, HashPred>::Iterator::operator++() -> typename HashMap<K, V, HashPred>::Iterator&
 {
   if (!pItem)
     return *this;
@@ -303,38 +303,38 @@ auto HashMap<V, K, HashPred>::Iterator::operator++() -> typename HashMap<V, K, H
   return *this;
 }
 
-template <typename V, typename K, typename HashPred>
-bool HashMap<V, K, HashPred>::Iterator::operator!=(Iterator rhs) const
+template <typename K, typename V, typename HashPred>
+bool HashMap<K, V, HashPred>::Iterator::operator!=(Iterator rhs) const
 {
   return pItem != rhs.pItem;
 }
 
-template <typename V, typename K, typename HashPred>
-bool HashMap<V, K, HashPred>::Iterator::operator==(Iterator rhs) const
+template <typename K, typename V, typename HashPred>
+bool HashMap<K, V, HashPred>::Iterator::operator==(Iterator rhs) const
 {
   return pItem == rhs.pItem;
 }
 
-template <typename V, typename K, typename HashPred>
-const KVPRef<K, V> HashMap<V, K, HashPred>::Iterator::operator*() const
+template <typename K, typename V, typename HashPred>
+const KVPRef<K, V> HashMap<K, V, HashPred>::Iterator::operator*() const
 {
   const KVPRef<K, V> r = KVPRef<K, V>(pItem->data.key, pItem->data.value);
   return r;
 }
-template <typename V, typename K, typename HashPred>
-KVPRef<K, V> HashMap<V, K, HashPred>::Iterator::operator*()
+template <typename K, typename V, typename HashPred>
+KVPRef<K, V> HashMap<K, V, HashPred>::Iterator::operator*()
 {
   return KVPRef<K, V>(pItem->data.key, pItem->data.value);
 }
 
-template <typename V, typename K, typename HashPred>
-const V* HashMap<V, K, HashPred>::Iterator::operator->() const
+template <typename K, typename V, typename HashPred>
+const V* HashMap<K, V, HashPred>::Iterator::operator->() const
 {
   return &pItem->data.value;
 }
 
-template <typename V, typename K, typename HashPred>
-V* HashMap<V, K, HashPred>::Iterator::operator->()
+template <typename K, typename V, typename HashPred>
+V* HashMap<K, V, HashPred>::Iterator::operator->()
 {
   return &pItem->data.value;
 }

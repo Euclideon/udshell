@@ -162,7 +162,7 @@ private:
   mutable const QMetaObject *pMetaObj = nullptr;
   ep::Component *pComponent = nullptr;
 
-  ep::HashMap<Connection> connectionMap;
+  ep::HashMap<ep::SharedString, Connection> connectionMap;
 };
 
 

@@ -48,7 +48,7 @@ int TestValue::numInstances = 0;
 
 
 template <typename K, typename V>
-int FindInstances(const ep::KVP<K, V> *keyTable, size_t tableSize, const ep::HashMap<V, K> &map)
+int FindInstances(const ep::KVP<K, V> *keyTable, size_t tableSize, const ep::HashMap<K, V> &map)
 {
   int foundCount = 0;
   auto it = map.begin();
@@ -95,22 +95,23 @@ TEST(Hash, SharedStringHashTests)
 TEST(HashMap, Constructors)
 {
 #if EP_DEBUG
-  EXPECT_DEATH(HashMap<int> map(99), "tableSize must be power-of-2!");
+  using Test = HashMap<SharedString, int>;
+  EXPECT_DEATH(Test map(99), "tableSize must be power-of-2!");
 #endif
 
-  HashMap<int> map2(8);
+  HashMap<SharedString, int> map2(8);
   EXPECT_EQ(0, map2.size());
   map2.insert("bob", 10);
   EXPECT_EQ(1, map2.size());
 
-  HashMap<int> map3 = std::move(map2);
+  HashMap<SharedString, int> map3 = std::move(map2);
   EXPECT_EQ(1, map3.size());
   EXPECT_EQ(0, map2.size());
 }
 
 TEST(HashMap, InsertAndRemove)
 {
-  HashMap<int> map;
+  HashMap<SharedString, int> map;
   EXPECT_TRUE(map.empty());
 
   // Standard inserts
@@ -121,7 +122,7 @@ TEST(HashMap, InsertAndRemove)
 
   // Check our move assigns aren't trashing
   using namespace hashmap_test;
-  HashMap<TestValue> testMap;
+  HashMap<SharedString, TestValue> testMap;
   EXPECT_NO_THROW(testMap.insert("bill", TestValue(10)));
   EXPECT_EQ(1, testMap.size());
   EXPECT_EQ(1, TestValue::numInstances);
@@ -190,7 +191,7 @@ TEST(HashMap, InsertAndRemove)
 TEST(HashMap, Iterators)
 {
   using namespace hashmap_test;
-  HashMap<TestValue> smallMap(8, 4);
+  HashMap<SharedString, TestValue> smallMap(8, 4);
   const int TABLE_SIZE = 8;
   ep::KVP<SharedString, TestValue> keyTable[TABLE_SIZE] =
     {
@@ -266,7 +267,7 @@ TEST(HashMap, Iterators)
 #endif
 
   // Insert past the proposed size and verify all our members exist
-  HashMap<int> tinyMap(2);
+  HashMap<SharedString, int> tinyMap(2);
   const int NUM_ENTRIES = 10;
   char keys[NUM_ENTRIES];
   int values[NUM_ENTRIES];

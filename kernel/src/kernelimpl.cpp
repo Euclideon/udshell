@@ -216,7 +216,7 @@ Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCoun
 
 
 AVLTreeAllocator<VariantAVLNode> KernelImpl::s_varAVLAllocator;
-HashMap<internal::SafeProxy<void>*, void*, internal::PointerHash> KernelImpl::s_weakRefRegistry(65536);
+HashMap<void*, internal::SafeProxy<void>*, internal::PointerHash> KernelImpl::s_weakRefRegistry(65536);
 
 KernelImpl::KernelImpl(Kernel *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)

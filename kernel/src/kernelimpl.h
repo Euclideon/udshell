@@ -120,12 +120,12 @@ public:
 
   SharedString uid;
 
-  HashMap<ComponentType> componentRegistry;
-  HashMap<CreateGlueFunc*> glueRegistry;
-  HashMap<Component*> instanceRegistry;
-  HashMap<Component*> namedInstanceRegistry;
-  HashMap<ForeignInstance> foreignInstanceRegistry;
-  HashMap<MessageCallback> messageHandlers;
+  HashMap<SharedString, ComponentType> componentRegistry;
+  HashMap<SharedString, CreateGlueFunc*> glueRegistry;
+  HashMap<SharedString, Component*> instanceRegistry;
+  HashMap<SharedString, Component*> namedInstanceRegistry;
+  HashMap<SharedString, ForeignInstance> foreignInstanceRegistry;
+  HashMap<SharedString, MessageCallback> messageHandlers;
 
   AVLTree<String, const ComponentDesc *> extensionsRegistry;
 
@@ -148,7 +148,7 @@ public:
   StdCapture *stdErrCapture = nullptr;
 
   static AVLTreeAllocator<VariantAVLNode> s_varAVLAllocator;
-  static HashMap<internal::SafeProxy<void>*, void*, internal::PointerHash> s_weakRefRegistry;
+  static HashMap<void*, internal::SafeProxy<void>*, internal::PointerHash> s_weakRefRegistry;
 
   bool bKernelCreated = false;
 
