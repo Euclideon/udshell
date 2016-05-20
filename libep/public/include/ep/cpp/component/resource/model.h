@@ -27,6 +27,7 @@ public:
 
   void SetRenderList(const RenderList &list) { pImpl->SetRenderList(list); }
   const RenderList& GetRenderList() const { return pImpl->GetRenderList(); }
+
 protected:
   Model(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)
