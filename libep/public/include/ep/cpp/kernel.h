@@ -64,7 +64,7 @@ public:
   ResourceManagerRef GetResourceManager() const { return pImpl->GetResourceManager(); }
 
   const AVLTree<String, const ComponentDesc *> &GetExtensionsRegistry() const { return pImpl->GetExtensionsRegistry(); }
-  void RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts) { pImpl->RegisterExtensions(pDesc, exts); }
+  void RegisterExtensions(const ComponentDesc *pDesc, Slice<const String> exts) { pImpl->RegisterExtensions(pDesc, exts); }
   DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) { return pImpl->CreateDataSourceFromExtension(ext, initParams); }
 
   // stdio relaying functions

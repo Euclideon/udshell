@@ -34,9 +34,9 @@ public:
 
   virtual Variant Save() const = 0;
 
-  virtual void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter = nullptr, const MethodShim *pSetter = nullptr) = 0;
-  virtual void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod = nullptr) = 0;
-  virtual void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe = nullptr) = 0;
+  virtual void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter, const MethodShim *pSetter) = 0;
+  virtual void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod) = 0;
+  virtual void AddDynamicEvent(const EventInfo &event, const EventShim *pSubscribe) = 0;
   virtual void RemoveDynamicProperty(String name) = 0;
   virtual void RemoveDynamicMethod(String name) = 0;
   virtual void RemoveDynamicEvent(String name) = 0;
