@@ -310,10 +310,8 @@ Variant Viewer::Save() const
 
 void Viewer::CreatePlatformLogo()
 {
-  ArrayBufferRef spImage;
-
-  DataSourceRef spImageSource = pKernel->CreateDataSourceFromExtension(".png", { { "src", "libep/doc/images/platform_logo.png" } });
-  spImage = spImageSource->GetResourceAs<ArrayBuffer>("image0");
+  DataSourceRef spImageSource = pKernel->CreateDataSourceFromFile("libep/doc/images/platform_logo.png");
+  ArrayBufferRef spImage = spImageSource->GetResourceAs<ArrayBuffer>("image0");
 
   // Vertex Shader
   ShaderRef vertexShader = pKernel->CreateComponent<Shader>();
@@ -378,7 +376,6 @@ void Viewer::CreatePlatformLogo()
   spIndexBuffer->AllocateFromData(Slice<const uint16_t>(ib));
 
   ModelRef spImageModel = pKernel->CreateComponent<Model>();
-  spImageModel->SetName("Image");
 
   spImageModel->AddVertexArray(spVertexBuffer);
   spImageModel->SetIndexArray(spIndexBuffer);
