@@ -12,9 +12,13 @@ void epImage_DeinitInternal()
 {
 }
 
-epImage* epImage_ReadImage(void *epUnusedParam(pBuffer), size_t epUnusedParam(bufferLen), const char *epUnusedParam(pFileExt))
+epImage* epImage_LoadImage(void *epUnusedParam(pBuffer), size_t epUnusedParam(bufferLen), const char *epUnusedParam(pFileExt))
 {
   return nullptr;
+}
+
+void epImage_DestroyImage(epImage **epUnusedParam(ppImage))
+{
 }
 
 void* epImage_WriteImage(epImage *epUnusedParam(pImage), const char *epUnusedParam(pFileExt), size_t *pOutputSize)

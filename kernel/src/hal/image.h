@@ -34,7 +34,8 @@ struct epImage
   KVP *pMetadata;
 };
 
-epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *pFileExt);
+epImage* epImage_LoadImage(void *pBuffer, size_t bufferLen, const char *pFileExt);
+void epImage_DestroyImage(epImage **ppImage);
 void* epImage_WriteImage(epImage *pImage, const char *pFileExt, size_t *pOutputSize);
 
 #endif // EPIMAGE_H
