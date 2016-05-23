@@ -66,6 +66,7 @@ public:
   const AVLTree<String, const ComponentDesc *> &GetExtensionsRegistry() const { return pImpl->GetExtensionsRegistry(); }
   void RegisterExtensions(const ComponentDesc *pDesc, Slice<const String> exts) { pImpl->RegisterExtensions(pDesc, exts); }
   DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) { return pImpl->CreateDataSourceFromExtension(ext, initParams); }
+  DataSourceRef CreateDataSourceFromFile(String filePath) { return pImpl->CreateDataSourceFromExtension(filePath.getRightAtLast('.'), { { "src", filePath } }); }
 
   // stdio relaying functions
   BroadcasterRef GetStdOutBroadcaster() const { return pImpl->GetStdOutBroadcaster(); }
