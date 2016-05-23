@@ -168,9 +168,24 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
     }
 
     if (uniforms.length)
-      out.uniforms = uniforms;
+    {
+      Array<RenderShaderProperty> outUniforms;
+      
+      for (size_t i = 0; i < uniforms.length; i++) // set up textures
+      {
+        if (uniforms[i].data.is(Variant::SharedPtrType::Component) && uniforms[i].data.asComponent()->IsType<ArrayBuffer>()) // if the uniform is a texture
+        {
+          ArrayBufferRef spImage = uniforms[i].data.as<ArrayBufferRef>();
+          RenderTextureRef spRenderTexture = shared_pointer_cast<RenderTexture>(pRenderer->GetRenderBuffer(spImage, Renderer::RenderResourceType::Texture)); // TODO: set texture parameters
 
-    // TODO: texures
+          out.textures.pushBack(RenderableTexture{ uniforms[i].index, spRenderTexture });
+        }
+        else
+          outUniforms.pushBack(uniforms[i]);
+      }
+
+      out.uniforms = std::move(outUniforms);
+    }
   }
 
   return cache;

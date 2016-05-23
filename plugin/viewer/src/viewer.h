@@ -34,6 +34,9 @@ public:
 
 protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+
+  void CreatePlatformLogo();
+
   ~Viewer() { Deactivate(); }
 
   static void StaticInit(ep::Kernel *pKernel);

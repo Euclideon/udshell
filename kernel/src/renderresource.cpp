@@ -215,7 +215,8 @@ inline Variant GetShaderElement(epShaderProgram *pProgram, size_t param)
 Variant RenderShaderProgram::getUniform(size_t i)
 {
   epShaderElement t = epShader_GetUniformType(pProgram, i);
-  EPASSERT(t.type >= epSET_Int && t.type <= epSET_Double, "Invalid type");
+  EPASSERT(t.type >= epSET_Int && t.type <= epSET_Double && t.samplerType == epSST_Default ? t.m == 1 && t.n == 1 && t.type == epSET_Float : true, "Invalid type");
+
   if (t.m == 1)
   {
     switch (t.n)
@@ -228,7 +229,7 @@ Variant RenderShaderProgram::getUniform(size_t i)
           case epSET_Uint:
             return GetShaderElement<uint32_t>(pProgram, i);
           case epSET_Float:
-            return GetShaderElement<float>(pProgram, i);
+            return t.samplerType == epSST_Default ? nullptr : GetShaderElement<float>(pProgram, i);
           case epSET_Double:
             return GetShaderElement<double>(pProgram, i);
         }
@@ -313,7 +314,10 @@ void RenderShaderProgram::setUniform(size_t i, Variant v)
 {
   epShaderElement t = epShader_GetUniformType(pProgram, i);
   epShaderElementType et = (epShaderElementType)t.type;
-  EPASSERT(et >= epSET_Int && et <= epSET_Double, "Invalid type");
+  EPASSERT(et >= epSET_Int && et <= epSET_Double && t.samplerType == epSST_Default ? t.m == 1 && t.n == 1 && t.type == epSET_Float : true, "Invalid type");
+
+  if (t.samplerType == epSST_Default)
+    return;
 
   if (t.m == 1)
   {

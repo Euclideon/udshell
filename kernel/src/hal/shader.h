@@ -27,13 +27,37 @@ enum epShaderElementType
   epSET_Double
 };
 
+enum epShaderSamplerType
+{
+  epSST_None,
+  epSST_Default,
+  epSST_Shadow,
+  epSST_Multisample,
+  epSST_Buffer,
+  epSST_Rect,
+  epSST_ShadowRect
+};
+
+enum epShaderSamplerDimensions
+{
+  epSSD_1D,
+  epSSD_1DArray,
+  epSSD_2D,
+  epSSD_2DArray,
+  epSSD_Cube,
+  epSSD_CubeArray,
+  epSSD_3D
+};
+
 struct epShaderElement
 {
   uint32_t n : 3;
   uint32_t m : 3;
   uint32_t type : 3;
   uint32_t location : 16; // opengls max attribute and uniform values are within 16 bits
-  uint32_t reserved: 7;
+  uint32_t samplerType : 3;
+  uint32_t samplerDimensions : 3;
+  uint32_t reserved: 1;
 };
 
 epShader* epShader_CreateShaderFromFile(const char *pFilename, epShaderType type);
