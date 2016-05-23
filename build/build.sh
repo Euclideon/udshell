@@ -56,7 +56,7 @@ function execute_build() {
 }
 
 function merge_master() {
-  git merge origin/master
+  git merge origin/master --no-commit
   if [ $? -ne 0 ]; then
     echo "merged with origin/master failed"
     git merge --abort
