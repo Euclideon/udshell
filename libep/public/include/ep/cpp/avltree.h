@@ -151,7 +151,9 @@ public:
   V& replace(K &&key, V &&val)
   {
     Node *node = Allocator::Get().Alloc();
+    epscope(fail) { Allocator::Get().Free(node); };
     epConstruct(&node->k) K(std::move(key));
+    epscope(fail) { node->k.~K(); };
     epConstruct(&node->v) V(std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
@@ -161,7 +163,9 @@ public:
   V& replace(const K &key, V &&val)
   {
     Node *node = Allocator::Get().Alloc();
+    epscope(fail) { Allocator::Get().Free(node); };
     epConstruct(&node->k) K(key);
+    epscope(fail) { node->k.~K(); };
     epConstruct(&node->v) V(std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
@@ -171,7 +175,9 @@ public:
   V& replace(K &&key, const V &val)
   {
     Node *node = Allocator::Get().Alloc();
+    epscope(fail) { Allocator::Get().Free(node); };
     epConstruct(&node->k) K(std::move(key));
+    epscope(fail) { node->k.~K(); };
     epConstruct(&node->v) V(val);
     node->left = node->right = nullptr;
     node->height = 1;
@@ -181,7 +187,9 @@ public:
   V& replace(const K &key, const V &val)
   {
     Node *node = Allocator::Get().Alloc();
+    epscope(fail) { Allocator::Get().Free(node); };
     epConstruct(&node->k) K(key);
+    epscope(fail) { node->k.~K(); };
     epConstruct(&node->v) V(val);
     node->left = node->right = nullptr;
     node->height = 1;
@@ -192,7 +200,9 @@ public:
   V& replace(KVP<K, V> &&kvp)
   {
     Node *node = Allocator::Get().Alloc();
+    epscope(fail) { Allocator::Get().Free(node); };
     epConstruct(&node->k) K(std::move(kvp.key));
+    epscope(fail) { node->k.~K(); };
     epConstruct(&node->v) V(std::move(kvp.value));
     node->left = node->right = nullptr;
     node->height = 1;
@@ -202,7 +212,9 @@ public:
   V& replace(const KVP<K, V> &kvp)
   {
     Node *node = Allocator::Get().Alloc();
+    epscope(fail) { Allocator::Get().Free(node); };
     epConstruct(&node->k) K(kvp.key);
+    epscope(fail) { node->k.~K(); };
     epConstruct(&node->v) V(kvp.value);
     node->left = node->right = nullptr;
     node->height = 1;
