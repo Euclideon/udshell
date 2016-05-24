@@ -7,6 +7,15 @@ namespace ep {
 
 const Array<const String> ImageSource::extensions = { ".bmp", ".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".tga", ".dds", ".webp" };
 
+const char* GetFormatString(epImageFormat format)
+{
+  if (format == epIF_RGBA8) return "u8[4]";
+  if (format == epIF_BGRA8) return "u32";
+
+  // TODO: add support for more ep formats
+  EPTHROW(epR_Failure, "Image format not supported yet");
+}
+
 void ImageSource::Create(StreamRef spSource)
 {
   // allocate for file
@@ -31,7 +40,7 @@ void ImageSource::Create(StreamRef spSource)
 
     // create image for each image element
     ArrayBufferRef spImage = GetKernel().CreateComponent<ArrayBuffer>();
-    spImage->Allocate("u8[4]", 4, { s.width, s.height });
+    spImage->Allocate(GetFormatString(s.format), 4, { s.width, s.height });
 
     // write image to to the array buffer
     Slice<void> mem = spImage->Map();
