@@ -156,7 +156,7 @@ elif [ $# -eq 1 ]; then
   fi
 else
   git submodule foreach --recursive 'git clean -ffdx'
-  git submodule update --init --recursive
+  git submodule update -f --init --recursive 
   if [ $? -ne 0 ]; then exit 3; fi
 
   if [ $# -eq 3 ]; then
