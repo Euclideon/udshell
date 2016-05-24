@@ -3,7 +3,7 @@ function execute_build() {
   if [ $OSTYPE == "msys" ]; then # Windows, MingW
     # These must be here until Runner specific variables are implemented
     if [ -z "$QTDIR" ]; then
-      export QTDIR="C:/dev/Qt/5.4/msvc2013_64_opengl"
+      export QTDIR="C:/dev/Qt/5.6/msvc2015_64"
     fi
 
     # generate the project files
@@ -28,7 +28,7 @@ function execute_build() {
     if [ $? -ne 0 ]; then exit 5; fi
   else
     # These must be here until Runner specific variables are implemented
-    export QTDIR=~/dev/Qt/5.4/gcc_64
+    export QTDIR=~/dev/Qt/5.6/gcc_64
     export PATH=$QTDIR/bin:$PATH
 
     # This will need to use the $2 (configuration) and $3 (platform) variables somehow
