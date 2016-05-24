@@ -94,10 +94,8 @@ TEST(Hash, SharedStringHashTests)
 
 TEST(HashMap, Constructors)
 {
-#if EP_DEBUG
   using Test = HashMap<SharedString, int>;
-  EXPECT_DEATH(Test map(99), "tableSize must be power-of-2!");
-#endif
+  EXPECT_DEATH_FROM_ASSERT(Test map(99), "tableSize must be power-of-2!");
 
   HashMap<SharedString, int> map2(8);
   EXPECT_EQ(0, map2.size());
@@ -144,11 +142,7 @@ TEST(HashMap, InsertAndRemove)
   EXPECT_EQ(101, testMap["gordon"].instanceData);
 
   // Accessing invalid key
-#if EP_DEBUG
-  EXPECT_DEATH(testMap["mary"], "");
-#else
-  EXPECT_THROW(testMap["mary"], ep::EPException);
-#endif
+  EXPECT_ASSERT_THROW(testMap["mary"]);
 
   // Gets
   EXPECT_EQ(nullptr, testMap.get("optimus prime"));
@@ -260,11 +254,7 @@ TEST(HashMap, Iterators)
   EXPECT_EQ(smallMap.end(), smallMap.find("bob"));
 
   // Attempt to erase an invalid iterator
-#if EP_DEBUG
-  EXPECT_DEATH(smallMap.erase(smallMap.end()), "");
-#else
-  EXPECT_THROW(smallMap.erase(smallMap.end()), ep::EPException);
-#endif
+  EXPECT_ASSERT_THROW(smallMap.erase(smallMap.end()));
 
   // Insert past the proposed size and verify all our members exist
   HashMap<SharedString, int> tinyMap(2);
