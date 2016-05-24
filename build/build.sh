@@ -1,58 +1,10 @@
 #set -x #echo on
 function execute_build() {
-  if [ $OSTYPE == "msys" ]; then # Windows, MingW
-    # These must be here until Runner specific variables are implemented
-    if [ -z "$QTDIR" ]; then
-      export QTDIR="C:/dev/Qt/5.6/msvc2015_64"
-    fi
+  ./build/dobuild.sh $1 $2 $3 $4
+}
 
-    # generate the project files
-    if [ $1 == "epshell" ]; then # epshell
-      bin/premake/premake5.exe vs2015
-    elif [ $1 == "epviewer" ]; then # epviewer
-      cd viewer
-      ../bin/premake/premake5.exe vs2015
-    else
-      exit 4;
-    fi
-    if [ $? -ne 0 ]; then exit 4; fi
-
-    if [[ $# -eq 4 && $4 == "clean" ]]; then
-      "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3 //v:m //t:clean
-    elif [ $# -eq 3 ]; then
-      "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" $1.sln //p:Configuration=$2 //p:Platform=$3 //v:m //m
-    else
-      exit 5
-    fi
-
-    if [ $? -ne 0 ]; then exit 5; fi
-  else
-    # These must be here until Runner specific variables are implemented
-    export QTDIR=~/dev/Qt/5.6/gcc_64
-    export PATH=$QTDIR/bin:$PATH
-
-    # This will need to use the $2 (configuration) and $3 (platform) variables somehow
-    if [ $1 == "epshell" ]; then # epshell
-      bin/premake/premake5 gmake
-    elif [ $1 == "epviewer" ]; then # epviewer
-      cd viewer
-      ../bin/premake/premake5 gmake
-    else
-      exit 4;
-    fi
-    if [ $? -ne 0 ]; then exit 4; fi
-
-    if [ $# -eq 4 ]; then
-      if [ $4 == "clean" ]; then
-        make config=${2,,} clean
-      else
-        exit 5
-      fi
-    elif [ $# -eq 3 ]; then
-      make config=${2,,} -j4
-    fi
-    if [ $? -ne 0 ]; then exit 5; fi
-  fi
+function run_testsuite() {
+  ./build/runtests.sh $1 $2 $3
 }
 
 function merge_master() {
@@ -64,58 +16,6 @@ function merge_master() {
   fi
   git submodule update --init --recursive
   echo "merged successfully with origin/master"
-}
-
-function run_testsuite() {
-  if [ $OSTYPE == "msys" ]; then # Windows, MingW
-    if [ $3 == "win32" ]; then
-      PLAT="x86"
-    else
-      PLAT=$3
-    fi
-  else
-    PLAT=""
-  fi
-
-  if [ $1 == "epshell" ]; then # epshell
-    ./public/bin/$2_$PLAT/eptest
-  elif [ $1 == "epviewer" ]; then # epviewer
-    ./bin/$2_$PLAT/eptest
-  else
-    exit 4;
-  fi
-
-  if [ $? -ne 0 ]; then
-    echo "Unit Tests Failed"
-    exit 3;
-  fi
-  echo "Unit Tests succeeded"
-}
-
-function run_leak_test() {
-  if [ $OSTYPE == "msys" ]; then # Windows, MingW
-    if [ $3 == "win32" ]; then
-      PLAT="x86"
-    else
-      PLAT=$3
-    fi
-  else
-    PLAT=""
-  fi
-  
-  # TODO: Make this run on every config and platform
-  if [[ $OSTYPE == "msys" && $2 == "Debug" && $3 == "x64" ]]; then  	
-    if [ $1 == "epshell" ]; then # epshell
-	  ./public/bin/$2_$PLAT/$1 CITest
-    elif [ $1 == "epviewer" ]; then # epviewer
-	  ./bin/$2_$PLAT/$1 CITest
-	fi
-	grep -i "Detected memory leaks" MemoryReport_$2_$PLAT.txt
-	if [ $? -eq 0 ]; then # epshell leaked memory
-	  grep "normal block" MemoryReport_$2_$PLAT.txt
-	  exit 3
-	fi
-  fi
 }
 
 if [ $# -eq 0 ]; then # if no args just build shell debug x64
@@ -156,13 +56,12 @@ elif [ $# -eq 1 ]; then
   fi
 else
   git submodule foreach --recursive 'git clean -ffdx'
-  git submodule update -f --init --recursive 
+  git submodule update --init --recursive
   if [ $? -ne 0 ]; then exit 3; fi
 
   if [ $# -eq 3 ]; then
     execute_build $1 $2 $3
     run_testsuite $1 $2 $3
-#	run_leak_test $1 $2 $3
   else
     if [ $4 == "merge" ]; then
       merge_master
@@ -171,7 +70,5 @@ else
       execute_build $1 $2 $3 $4
     fi
     run_testsuite $1 $2 $3
-#	run_leak_test $1 $2 $3
   fi
 fi
-
