@@ -97,6 +97,7 @@ void Project::SaveProject()
   spXMLBuffer->FormatXml(projectNode);
 
   Slice<const void> buffer = spXMLBuffer->MapForRead();
+  epscope(exit) { spXMLBuffer->Unmap(); };
   if (buffer.empty())
   {
     LogDebug(1, "SaveProject() -- Can't Map XML buffer for reading");
