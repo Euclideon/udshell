@@ -73,7 +73,27 @@ namespace internal {
 
 #define epConstruct ::new
 
-#define epNew(type, ...) epConstruct (_epAlloc(sizeof(type), epAF_None EP_IF_MEMORY_DEBUG(__FILE__, __LINE__))) type(__VA_ARGS__)
+#if __EP_MEMORY_DEBUG__
+# define epNew(type, ...) _epNew<type>(__FILE__, __LINE__, ##__VA_ARGS__)
+
+template <typename Type, typename... Args>
+inline Type* _epNew(const char *pFile, int line, Args&&... args)
+{
+  void *pMem = _epAlloc(sizeof(Type), epAF_None, pFile, line);
+  epscope(fail) { _epFree(pMem); };
+  return ::new(pMem) Type(std::forward<Args>(args)...);
+}
+#else
+# define epNew(type, ...) _epNew<type>(__VA_ARGS__)
+
+template <typename Type, typename... Args>
+inline Type* _epNew(Args&&... args)
+{
+  void *pMem = _epAlloc(sizeof(Type), epAF_None);
+  epscope(fail) { _epFree(pMem); };
+  return ::new(pMem) Type(std::forward<Args>(args)...);
+}
+#endif
 
 template <typename T>
 void _epDelete(T *pMemory)
