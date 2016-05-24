@@ -246,11 +246,7 @@ TEST(EPVariant, EPVariantSlice)
   EXPECT_EQ(varSlice[1].asInt(), 1);
   EXPECT_EQ(varSlice[2].asInt(), 2);
 
-#if EP_DEBUG
-  EXPECT_DEATH(varSlice[3], "");
-#else
-  EXPECT_THROW(varSlice[3], EPException);
-#endif
+  EXPECT_ASSERT_THROW(varSlice[3]);
 }
 
 
