@@ -4,11 +4,11 @@
 
 #include "components/componentimpl.h"
 #include "components/lua.h"
-#include "components/timer.h"
 #include "components/logger.h"
 
 #include "ep/cpp/hashmap.h"
 #include "ep/cpp/kernel.h"
+#include "ep/cpp/component/timer.h"
 
 #include "ep/cpp/internal/i/ikernel.h"
 

@@ -1,7 +1,7 @@
 #include "components/logger.h"
 #include "ep/cpp/component/stream.h"
 #include "ep/cpp/datetime.h"
-#include "hal/haltimer.h"
+#include "hal/timer.h"
 
 namespace ep {
 

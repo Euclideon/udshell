@@ -1,6 +1,5 @@
 #include <QLoggingCategory>
 #include <QQuickItem>
-#include "driver/qt/util/typeconvert_qt.h"
 
 #include "ep/cpp/kernel.h"
 #include "helpers.h"
@@ -14,15 +13,14 @@
 #include "ep/cpp/component/resourcemanager.h"
 #include "components/pluginmanager.h"
 #include "components/file.h"
-#include "hal/debugfont.h"
 #include "messagebox.h"
-#include "components/timer.h"
 
 #include "components/primitivegenerator.h"
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/material.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/shader.h"
+#include "ep/cpp/component/timer.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/resource/metadata.h"
 #include "components/nodes/geomnode.h"

@@ -1,0 +1,67 @@
+#pragma once
+#ifndef EP_DRIVER_H
+#define EP_DRIVER_H
+
+#include "ep/cpp/platform.h"
+
+#define EPDRIVER_NULL   100
+#define EPDRIVER_OPENGL 101
+#define EPDRIVER_GLUT   102
+#define EPDRIVER_SDL    103
+#define EPDRIVER_PPAPI  104
+#define EPDRIVER_QT     105
+#define EPDRIVER_WIN32  106
+#define EPDRIVER_POSIX  107
+
+#if defined(EP_WINDOWS)
+# define EPSYSTEM_DRIVER EPDRIVER_WIN32
+# define EPWINDOW_DRIVER EPDRIVER_SDL
+# define EPRENDER_DRIVER EPDRIVER_OPENGL
+# define EPINPUT_DRIVER  EPDRIVER_SDL
+# define EPUI_DRIVER     EPDRIVER_NULL
+# define EPIMAGE_DRIVER  EPDRIVER_WIN32
+# define USE_GLEW
+#elif defined(EP_LINUX)
+# define EPSYSTEM_DRIVER EPDRIVER_POSIX
+# define EPWINDOW_DRIVER EPDRIVER_SDL
+# define EPRENDER_DRIVER EPDRIVER_OPENGL
+# define EPINPUT_DRIVER  EPDRIVER_SDL
+# define EPUI_DRIVER     EPDRIVER_NULL
+# define EPIMAGE_DRIVER  EPDRIVER_NULL
+# define USE_GLEW
+#elif defined(EP_NACL)
+# define EPWINDOW_DRIVER EPDRIVER_PPAPI
+# define EPRENDER_DRIVER EPDRIVER_OPENGL
+# define EPINPUT_DRIVER  EPDRIVER_PPAPI
+# define EPUI_DRIVER     EPDRIVER_NULL
+# define EPIMAGE_DRIVER  EPDRIVER_NULL
+#elif defined(EP_NULL)
+# define EPWINDOW_DRIVER EPDRIVER_NULL
+# define EPRENDER_DRIVER EPDRIVER_NULL
+# define EPINPUT_DRIVER  EPDRIVER_NULL
+# define EPUI_DRIVER     EPDRIVER_NULL
+# define EPIMAGE_DRIVER  EPDRIVER_NULL
+#endif
+
+#if defined(EP_USE_QT)
+# undef  USE_GLEW
+# undef  EPWINDOW_DRIVER
+# define EPWINDOW_DRIVER EPDRIVER_QT
+# undef  EPRENDER_DRIVER
+# define EPRENDER_DRIVER EPDRIVER_QT
+# undef  EPINPUT_DRIVER
+# define EPINPUT_DRIVER  EPDRIVER_QT
+# undef  EPUI_DRIVER
+# define EPUI_DRIVER     EPDRIVER_QT
+# undef EPIMAGE_DRIVER
+# define EPIMAGE_DRIVER  EPDRIVER_QT
+#endif
+
+// Suppress no public symbols warnings for the file - works with unity builds
+#if defined(EP_COMPILER_VISUALC)
+#define EPEMPTYFILE   namespace { char __emptyFileDummy##__LINE__; }
+#else
+#define EPEMPTYFILE
+#endif
+
+#endif // EP_DRIVER_H

@@ -3,13 +3,12 @@
 
 #include "kernelimpl.h"
 
-#include "hal/hal.h"
 #include "components/file.h"
 #include "components/stdiostream.h"
 #include "components/memstream.h"
 #include "components/lua.h"
 #include "components/logger.h"
-#include "components/timer.h"
+#include "components/timerimpl.h"
 #include "components/nodes/geomnode.h"
 #include "components/pluginmanager.h"
 #include "components/pluginloader.h"
@@ -57,7 +56,9 @@
 #include "renderscene.h"
 #include "eplua.h"
 #include "stdcapture.h"
-#include "hal/haldirectory.h"
+
+#include "hal/hal.h"
+#include "hal/directory.h"
 
 #include "udPlatformUtil.h"
 #include "helpers.h"
@@ -272,7 +273,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<ResourceManager, ResourceManagerImpl>();
   pInstance->RegisterComponentType<CommandManager, CommandManagerImpl>();
   pInstance->RegisterComponentType<Project>();
-  pInstance->RegisterComponentType<Timer>();
+  pInstance->RegisterComponentType<Timer, TimerImpl>();
   pInstance->RegisterComponentType<Lua>();
   pInstance->RegisterComponentType<View, ViewImpl>();
   pInstance->RegisterComponentType<Activity, ActivityImpl>();

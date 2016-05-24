@@ -26,7 +26,7 @@ struct epTexture;
 
 namespace ep {
 
-struct RenderableTexture 
+struct RenderableTexture
 {
   int uniformIndex;
   RenderTextureRef texture;
