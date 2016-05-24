@@ -152,8 +152,6 @@ bool GeomSource::Write(const aiScene *pScene)
   catch (EPException &)
   {
     LogWarning(1, "Failed to open collada file for writing: \"{0}\"", GetURL());
-    ClearError();
-
     exporter.FreeBlob();
     return false;
   }

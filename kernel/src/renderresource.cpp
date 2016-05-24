@@ -119,7 +119,7 @@ RenderTexture::RenderTexture(Renderer *pRenderer, ArrayBufferRef spArrayBuffer)
   if (pTexture)
     epTexture_SetImageData(pTexture, -1, 0, colorBuffer.ptr);
   else
-    EPTHROW_ERROR(epR_Failure, "Failed to create texture!");
+    EPTHROW_ERROR(Result::Failure, "Failed to create texture!");
 }
 RenderTexture::~RenderTexture()
 {
@@ -146,7 +146,7 @@ RenderShaderProgram::RenderShaderProgram(Renderer *pRenderer, Slice<RenderShader
 
   // link the shader
   pProgram = epShader_CreateShaderProgram(halShaders.ptr, halShaders.length);
-  EPTHROW_IF_NULL(pProgram, epR_Failure, "Failed to compile shader program");
+  EPTHROW_IF_NULL(pProgram, Result::Failure, "Failed to compile shader program");
 }
 
 RenderShaderProgram::~RenderShaderProgram()
@@ -273,7 +273,7 @@ Variant RenderShaderProgram::getUniform(size_t i)
             return GetShaderElement<Vector4<double>>(pProgram, i);
         }
       default:
-        EPTHROW(epR_Failure, "vector length {0} not supported", t.n);
+        EPTHROW(Result::Failure, "vector length {0} not supported", t.n);
         break;
     }
   }
@@ -285,7 +285,7 @@ Variant RenderShaderProgram::getUniform(size_t i)
       {
         case epSET_Int:
         case epSET_Uint:
-          EPTHROW(epR_Failure, "Integer Matrix types not supported.");
+          EPTHROW(Result::Failure, "Integer Matrix types not supported.");
         case epSET_Float:
           return GetShaderElement<Matrix4x4<float>>(pProgram, i);
         case epSET_Double:
@@ -294,12 +294,12 @@ Variant RenderShaderProgram::getUniform(size_t i)
     }
     else
     {
-      EPTHROW(epR_Failure, "Matrix {0},{1} not supported", t.m, t.n);
+      EPTHROW(Result::Failure, "Matrix {0},{1} not supported", t.m, t.n);
     }
   }
   else
   {
-    EPTHROW(epR_Failure, "Unsupported element type m {0}, n {1}, type {2}", t.m, t.n, t.type);
+    EPTHROW(Result::Failure, "Unsupported element type m {0}, n {1}, type {2}", t.m, t.n, t.type);
   }
 
   return Variant();
@@ -396,7 +396,7 @@ void RenderShaderProgram::setUniform(size_t i, Variant v)
         }
       }
       default:
-        EPTHROW(epR_Failure, "vector length {0} not supported", t.n);
+        EPTHROW(Result::Failure, "vector length {0} not supported", t.n);
         break;
     }
   }
@@ -408,7 +408,7 @@ void RenderShaderProgram::setUniform(size_t i, Variant v)
       {
         case epSET_Int:
         case epSET_Uint:
-          EPTHROW(epR_Failure, "Integer Matrix types not supported.");
+          EPTHROW(Result::Failure, "Integer Matrix types not supported.");
         case epSET_Float:
           epShader_SetProgramData(i, v.as<Matrix4x4<float>>());
           return;
@@ -419,12 +419,12 @@ void RenderShaderProgram::setUniform(size_t i, Variant v)
     }
     else
     {
-      EPTHROW(epR_Failure, "Matrix {0},{1} not supported", t.m, t.n);
+      EPTHROW(Result::Failure, "Matrix {0},{1} not supported", t.m, t.n);
     }
   }
   else
   {
-    EPTHROW(epR_Failure, "Unsupported element type m {0}, n {1}, type {2}", t.m, t.n, t.type);
+    EPTHROW(Result::Failure, "Unsupported element type m {0}, n {1}, type {2}", t.m, t.n, t.type);
   }
 }
 
@@ -435,7 +435,7 @@ RenderShaderInputConfig::RenderShaderInputConfig(Renderer *pRenderer, SharedArra
   for (size_t i = 0; i < vertexArrays.length; ++i)
   {
     Variant varAttribs = vertexArrays[i]->GetMetadata()->Get("attributeinfo");
-    EPASSERT_THROW(varAttribs.isValid(), epR_Failure, "attribute info not present in buffer metadata");
+    EPASSERT_THROW(varAttribs.isValid(), Result::Failure, "attribute info not present in buffer metadata");
     SharedArray<ElementMetadata> attribs = varAttribs.as<SharedArray<ElementMetadata>>();
 
     size_t stride = attribs.back().offset + GetElementTypeSize(attribs.back().type);

@@ -13,7 +13,7 @@ struct ChunkedArray
   ChunkedArray();
   ~ChunkedArray();
 
-  epResult Clear();
+  Result Clear();
 
   T &operator[](size_t index);
   T *GetElement(size_t index);
@@ -21,7 +21,7 @@ struct ChunkedArray
 
   T *PushBack();
   T *PushFront();
-  epResult GrowBack(size_t numberOfNewElements);
+  Result GrowBack(size_t numberOfNewElements);
 
   bool PopBack(T *pData = nullptr);
   bool PopFront(T *pData = nullptr);
@@ -50,7 +50,7 @@ private:
   size_t length;
   size_t inset;
 
-  epResult AddChunks(size_t numberOfNewChunks);
+  Result AddChunks(size_t numberOfNewChunks);
 };
 
 // --------------------------------------------------------------------------
@@ -73,13 +73,13 @@ inline ChunkedArray<T, chunkElementCount>::ChunkedArray()
 
   ppChunks = epAllocType(chunk_t*, ptrArraySize, epAF_Zero);
   if (!ppChunks)
-    EPTHROW_ERROR(epR_MemoryAllocationFailure, "Alloc failed");
+    EPTHROW_ERROR(Result::MemoryAllocationFailure, "Alloc failed");
 
   for (; c < chunkCount; ++c)
   {
     ppChunks[c] = epAllocType(chunk_t, 1, epAF_None);
     if (!ppChunks[c])
-      EPTHROW_ERROR(epR_MemoryAllocationFailure, "Alloc failure");
+      EPTHROW_ERROR(Result::MemoryAllocationFailure, "Alloc failure");
   }
 }
 
@@ -101,18 +101,18 @@ inline ChunkedArray<T, chunkElementCount>::~ChunkedArray()
 // --------------------------------------------------------------------------
 // Author: Paul Fox, June 2015
 template <typename T, size_t chunkElementCount>
-inline epResult ChunkedArray<T, chunkElementCount>::Clear()
+inline Result ChunkedArray<T, chunkElementCount>::Clear()
 {
   length = 0;
   inset = 0;
 
-  return epR_Success;
+  return Result::Success;
 }
 
 // --------------------------------------------------------------------------
 // Author: David Ely, May 2015
 template <typename T, size_t chunkElementCount>
-inline epResult ChunkedArray<T, chunkElementCount>::AddChunks(size_t numberOfNewChunks)
+inline Result ChunkedArray<T, chunkElementCount>::AddChunks(size_t numberOfNewChunks)
 {
   size_t newChunkCount = chunkCount + numberOfNewChunks;
 
@@ -121,7 +121,7 @@ inline epResult ChunkedArray<T, chunkElementCount>::AddChunks(size_t numberOfNew
     size_t newPtrArraySize = ((newChunkCount + ptrArrayInc - 1) / ptrArrayInc) * ptrArrayInc;
     chunk_t **newppChunks = epAllocType(chunk_t*, newPtrArraySize, epAF_Zero);
     if (!newppChunks)
-      return epR_MemoryAllocationFailure;
+      return Result::MemoryAllocationFailure;
 
     memcpy(newppChunks, ppChunks, ptrArraySize * sizeof(chunk_t*));
     epFree(ppChunks);
@@ -136,21 +136,21 @@ inline epResult ChunkedArray<T, chunkElementCount>::AddChunks(size_t numberOfNew
     if (!ppChunks[c])
     {
       chunkCount = c;
-      return epR_MemoryAllocationFailure;
+      return Result::MemoryAllocationFailure;
     }
   }
 
   chunkCount = newChunkCount;
-  return epR_Success;
+  return Result::Success;
 }
 
 // --------------------------------------------------------------------------
 // Author: David Ely, May 2015
 template <typename T, size_t chunkElementCount>
-inline epResult ChunkedArray<T, chunkElementCount>::GrowBack(size_t numberOfNewElements)
+inline Result ChunkedArray<T, chunkElementCount>::GrowBack(size_t numberOfNewElements)
 {
   if (numberOfNewElements == 0)
-    return epR_InvalidParameter_;
+    return Result::InvalidParameter_;
 
   size_t oldLength = inset + length;
   size_t newLength = oldLength + numberOfNewElements;
@@ -162,8 +162,8 @@ inline epResult ChunkedArray<T, chunkElementCount>::GrowBack(size_t numberOfNewE
     size_t requiredEntries = newLength - capacity;
     size_t numberOfNewChunksToAdd = (requiredEntries + chunkElementCount - 1) / chunkElementCount;
 
-    epResult result = AddChunks(numberOfNewChunksToAdd);
-    if (result != epR_Success)
+    Result result = AddChunks(numberOfNewChunksToAdd);
+    if (result != Result::Success)
       return result;
   }
 
@@ -192,7 +192,7 @@ inline epResult ChunkedArray<T, chunkElementCount>::GrowBack(size_t numberOfNewE
 
   length += numberOfNewElements;
 
-  return epR_Success;
+  return Result::Success;
 }
 
 // --------------------------------------------------------------------------

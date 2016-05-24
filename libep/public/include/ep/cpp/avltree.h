@@ -88,38 +88,38 @@ public:
   V& insert(K &&key, V &&val)
   {
     if (get(key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+      EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
     return replace(std::move(key), std::move(val));
   }
   V& insert(const K &key, V &&val)
   {
     if (get(key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+      EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
     return replace(key, std::move(val));
   }
   V& insert(K &&key, const V &val)
   {
     if (get(key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+      EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
     return replace(std::move(key), val);
   }
   V& insert(const K &key, const V &val)
   {
     if (get(key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+      EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
     return replace(key, val);
   }
 
   V& insert(KVP<K, V> &&kvp)
   {
     if (get(kvp.key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+      EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
     return replace(std::move(kvp));
   }
   V& insert(const KVP<K, V> &kvp)
   {
     if (get(kvp.key))
-      EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+      EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
     return replace(kvp);
   }
 
@@ -241,13 +241,13 @@ public:
   const V& operator[](const K &key) const
   {
     const V *pV = get(key);
-    EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+    EPASSERT_THROW(pV, Result::OutOfBounds, "Element not found: {0}", key);
     return *pV;
   }
   V& operator[](const K &key)
   {
     V *pV = get(key);
-    EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+    EPASSERT_THROW(pV, Result::OutOfBounds, "Element not found: {0}", key);
     return *pV;
   }
 
@@ -705,7 +705,7 @@ struct AVLTreeAllocator
   Node *Alloc()
   {
     void *pMem = epAlloc(sizeof(Node));
-    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "AVLTreeAllocator failed");
+    EPTHROW_IF_NULL(pMem, Result::AllocFailure, "AVLTreeAllocator failed");
     return (Node*)pMem;
   }
 

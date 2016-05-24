@@ -194,16 +194,16 @@ private:
     {                                                                                    \
       Variant set(Slice<const Variant> args)                                             \
       {                                                                                  \
-        using PT = internal::function_traits<decltype(&This::Setter)>::template arg<0>::type;      \
+        using PT = internal::function_traits<decltype(&This::Setter)>::template arg<0>::type; \
         try {                                                                            \
           ((This*)(Component*)this)->Setter(args[0].as<std::remove_reference<PT>::type>()); \
           return Variant();                                                              \
-        } catch (EPException &) {                                                        \
-          return Variant(GetError()); /* it's already on the stack */                    \
+        } catch (EPException &e) {                                                       \
+          return Variant(e.claim());                                                     \
         } catch (std::exception &e) {                                                    \
-          return Variant(PushError(epR_CppException, e.what()));                         \
+          return Variant(AllocError(Result::CppException, e.what()));                    \
         } catch (...) {                                                                  \
-          return Variant(PushError(epR_CppException, "C++ exception"));                  \
+          return Variant(AllocError(Result::CppException, "C++ exception"));             \
         }                                                                                \
       }                                                                                  \
     };                                                                                   \

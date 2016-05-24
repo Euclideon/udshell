@@ -45,7 +45,7 @@ public:
     if (!pNew)
     {
       T *pNewBlock = (T*)epAllocFlags(blockSize * sizeof(T) + sizeof(void*), epAF_None);
-      EPTHROW_IF_NULL(pNewBlock, epR_AllocFailure, "Memory allocation failed");
+      EPTHROW_IF_NULL(pNewBlock, Result::AllocFailure, "Memory allocation failed");
       *(void**)(pNewBlock + blockSize) = pBlockList;
       pBlockList = pNewBlock;
 

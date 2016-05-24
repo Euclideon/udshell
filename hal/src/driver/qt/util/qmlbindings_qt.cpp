@@ -210,7 +210,7 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
     while (qmlComponent.isLoading())
       QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
-    EPTHROW_IF(qmlComponent.isNull(), epR_InvalidType, "Attempting to create QML item from an empty QQmlComponent.");
+    EPTHROW_IF(qmlComponent.isNull(), Result::InvalidType, "Attempting to create QML item from an empty QQmlComponent.");
 
     // error encountered with loading the file
     if (qmlComponent.isError())
@@ -218,7 +218,7 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
       // TODO: better error information/handling
       foreach(const QQmlError &error, qmlComponent.errors())
         pGlueComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
-      EPTHROW(epR_Failure, "Error compiling QML file");
+      EPTHROW(Result::Failure, "Error compiling QML file");
     }
   }
 
@@ -240,7 +240,7 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
     // TODO: better error information/handling
     foreach(const QQmlError &error, qmlComponent.errors())
       pGlueComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
-    EPTHROW(epR_Failure, "Error creating QML Item");
+    EPTHROW(Result::Failure, "Error creating QML Item");
   }
 
   // transfer ownership of our qt objects to ensure they are cleaned up
@@ -276,7 +276,6 @@ QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariant initP
   }
   catch (ep::EPException &)
   {
-    ep::ClearError();
     return nullptr;
   }
 }
@@ -577,7 +576,7 @@ void QtMetaObjectGenerator::AddMethod(MethodType type, String name, Slice<const 
     if (!params.empty())
     {
       // TODO: should probably truncate and warn in this case?
-      EPASSERT_THROW(params.length <= Q_METAMETHOD_INVOKE_MAX_ARGS, epR_Failure, "Qt only supports a maximum of {0} parameters", Q_METAMETHOD_INVOKE_MAX_ARGS);
+      EPASSERT_THROW(params.length <= Q_METAMETHOD_INVOKE_MAX_ARGS, ep::Result::Failure, "Qt only supports a maximum of {0} parameters", Q_METAMETHOD_INVOKE_MAX_ARGS);
       method.paramTypes = ep::Array<uint>(ep::Alloc, params.length);
       for (size_t i = 0; i < method.paramTypes.length; ++i)
         method.paramTypes[i] = QMetaType::QVariant;
@@ -677,7 +676,7 @@ const QMetaObject *QtEPComponent::metaObject() const
   if (!pMetaObj && pComponent)
   {
     pMetaObj = QtMetaObjectGenerator::Generate(pComponent->GetDescriptor());
-    EPASSERT_THROW(pMetaObj, epR_Failure, "Unable to generate QMetaObject for component type '{0}'", pComponent->GetType());
+    EPASSERT_THROW(pMetaObj, ep::Result::Failure, "Unable to generate QMetaObject for component type '{0}'", pComponent->GetType());
   }
 
   return pMetaObj;
@@ -752,7 +751,7 @@ int QtEPComponent::qt_metacall(QMetaObject::Call call, int id, void **v)
       break;
   }
 
-  EPASSERT_THROW(retId < 0, epR_Failure, "Unsupported Qt Meta Access with index '{0}' and call type '{1}'", retId, (int)call);
+  EPASSERT_THROW(retId < 0, ep::Result::Failure, "Unsupported Qt Meta Access with index '{0}' and call type '{1}'", retId, (int)call);
   return retId;
 }
 
@@ -791,9 +790,7 @@ int QtEPComponent::MethodInvoke(const QMetaObject *pMO, int id, void **v)
     if (method.returnType() != QMetaType::Void)
       *(QVariant*)v[0] = retVal;
   }
-  catch (ep::EPException &) {
-    ep::ClearError();
-  }
+  catch (ep::EPException &) {}
 
   return id - pMO->methodCount();
 }
@@ -819,11 +816,9 @@ int QtEPComponent::PropertyInvoke(const QMetaObject *pMO, QMetaObject::Call call
         break;
     }
   }
-  catch (ep::EPException &) {
-    ep::ClearError();
-  }
+  catch (ep::EPException &) {}
 
-  EPASSERT_THROW(supported, epR_Failure, "Unsupported meta property access of type '{0}'", (int)call);
+  EPASSERT_THROW(supported, ep::Result::Failure, "Unsupported meta property access of type '{0}'", (int)call);
   return id - pMO->propertyCount();
 }
 

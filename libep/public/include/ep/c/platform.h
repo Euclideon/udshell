@@ -443,7 +443,6 @@ struct epTheTypeIs;
 #include <stdlib.h>
 #include <new>
 
-//#include "ep/c/error.h"
 #include "ep/c/string.h"
 
 

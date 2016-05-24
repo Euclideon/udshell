@@ -100,7 +100,7 @@ public:
   {
     static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
     void *pMem = epAlloc(sizeof(T));
-    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+    EPTHROW_IF_NULL(pMem, Result::AllocFailure, "Memory allocation failed");
     epscope(fail) { epFree(pMem); };
     T *ptr = epConstruct(pMem) T(std::forward<Args>(args)...);
     ptr->pFreeFunc = [](RefCounted *pMem) { epFree((T*)pMem); };
@@ -267,12 +267,6 @@ public:
   UniquePtr(const UniquePtr<T> &ptr) = delete;
   UniquePtr &operator=(const UniquePtr<T> &ptr) = delete;
 
-  template<typename U>
-  UniquePtr(UniquePtr<U> &ptr)
-    : pInstance(ptr.pInstance)
-  {
-    ptr.pInstance = nullptr;
-  }
   UniquePtr(UniquePtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
@@ -290,17 +284,6 @@ public:
     internal::Release<T, std::is_base_of<RefCounted, T>::value>::release(pInstance);
   }
 
-  template<typename U>
-  UniquePtr &operator=(UniquePtr<U> &ptr)
-  {
-    if (this != &ptr)
-    {
-      reset();
-      pInstance = ptr.pInstance;
-      ptr.pInstance = nullptr;
-    }
-    return *this;
-  }
   UniquePtr &operator=(UniquePtr<T> &&ptr)
   {
     if (this != &ptr)
@@ -372,9 +355,9 @@ public:
   {
     static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
     void *pMem = epAlloc(sizeof(T));
-    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+    EPTHROW_IF_NULL(pMem, Result::AllocFailure, "Memory allocation failed");
     epscope(fail) { epFree(pMem); };
-    T *ptr = epConstruct(pMem) T(args...);
+    T *ptr = epConstruct(pMem) T(std::forward<Args>(args)...);
     ptr->pFreeFunc = [](RefCounted *pMem) { epFree((T*)pMem); };
     return ptr;
   }
@@ -468,7 +451,7 @@ namespace internal {
   epforceinline UniquePtr<T> Create<T, true>::create(Args&&... args)
   {
     void *pMem = epAlloc(sizeof(T));
-    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+    EPTHROW_IF_NULL(pMem, Result::AllocFailure, "Memory allocation failed");
     epscope(fail) { epFree(pMem); };
     using U = typename std::remove_const<T>::type;
     UniquePtr<U> up(epConstruct(pMem) U(std::forward<Args>(args)...));

@@ -90,7 +90,7 @@ public:
 
   QQmlEngine *QmlEngine() const { return pQmlEngine; }
 
-  epResult RegisterWindow(QQuickWindow *pWindow);
+  ep::Result RegisterWindow(QQuickWindow *pWindow);
   void UnregisterWindow(QQuickWindow *pWindow);
   QPointer<QQuickWindow> TopLevelWindow() { return pTopLevelWindow; }
 

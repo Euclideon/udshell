@@ -51,7 +51,7 @@ bool NodeImpl::Update(double timeStep)
 void NodeImpl::AddChild(NodeRef c)
 {
   NodeImpl *pC = c->GetImpl<NodeImpl>();
-  EPASSERT_THROW(pC->pParent == nullptr, epR_InvalidArgument, "Node is already present in a scene");
+  EPASSERT_THROW(pC->pParent == nullptr, Result::InvalidArgument, "Node is already present in a scene");
 
   c->Changed.Subscribe(this, &NodeImpl::OnChildChanged);
 
@@ -62,7 +62,7 @@ void NodeImpl::AddChild(NodeRef c)
 void NodeImpl::RemoveChild(NodeRef c)
 {
   NodeImpl *pC = c->GetImpl<NodeImpl>();
-  EPASSERT_THROW(pC->pParent == pInstance, epR_InvalidArgument, "Node is not a child");
+  EPASSERT_THROW(pC->pParent == pInstance, Result::InvalidArgument, "Node is not a child");
 
   children.removeFirst(c);
   pC->pParent = nullptr;
@@ -72,7 +72,7 @@ void NodeImpl::RemoveChild(NodeRef c)
 
 void NodeImpl::Detach()
 {
-  EPASSERT_THROW(pParent != nullptr, epR_Failure, "Node is not in scene");
+  EPASSERT_THROW(pParent != nullptr, Result::Failure, "Node is not in scene");
   pParent->RemoveChild(NodeRef(pInstance));
 }
 

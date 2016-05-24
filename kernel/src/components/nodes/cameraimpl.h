@@ -44,7 +44,7 @@ protected:
 
   bool InputEvent(const ep::InputEvent &ev) override final { return false; }
   bool ViewportInputEvent(const ep::InputEvent &ev) override final { return false; }
-  bool Update(double timeStep) override final { return epR_Success; }
+  bool Update(double timeStep) override final { return false; }
 };
 
 } // namespace ep

@@ -64,12 +64,12 @@ void QObjectComponent::AttachToGlue(Component *pGlue)
   }
   if (pThis->IsType("ep.window"))
   {
-    EPTHROW_IF(!pQObject->isWindowType(), epR_Failure, "Window component must create a QWindow based object");
+    EPTHROW_IF(!pQObject->isWindowType(), Result::Failure, "Window component must create a QWindow based object");
     static_cast<ep::Window*>(pThis)->PostInit(pQObject);
   }
   else
   {
-    EPTHROW_IF(qobject_cast<QQuickItem*>(pQObject) == nullptr, epR_Failure, "UI based components must create a QQuickItem");
+    EPTHROW_IF(qobject_cast<QQuickItem*>(pQObject) == nullptr, Result::Failure, "UI based components must create a QQuickItem");
     static_cast<ep::UIComponent*>(pThis)->PostInit(pQObject);
   }
 

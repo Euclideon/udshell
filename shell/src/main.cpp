@@ -184,7 +184,6 @@ void OpenProject(String filePath)
   catch (EPException &)
   {
     spKernel->LogWarning(2, "Couldn't open project file \"{0}\"", MutableString256().urlDecode(filePath));
-    ClearError();
     return;
   }
 

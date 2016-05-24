@@ -72,7 +72,7 @@ private:
       MutableString128 t(Format, "New: {0} - {1}", _pType->info.identifier, _uid);
       _pKernel->LogDebug(4, t);
       void *pMem = epAlloc(sizeof(_ComponentType));
-      EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+      EPTHROW_IF_NULL(pMem, Result::AllocFailure, "Memory allocation failed");
       epscope(fail) { if (pMem) epFree(pMem); };
       _ComponentType *ptr = epConstruct (pMem) _ComponentType(_pType, _pKernel, _uid, initParams);
       // NOTE: we need to cast to ensure we play nice with multi inheritance
@@ -112,7 +112,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
   if (!pDesc->info.identifier.eq("ep.component"))
   {
     pDesc->pSuperDesc = GetComponentDesc(pDesc->baseClass);
-    EPTHROW_IF(!pDesc->pSuperDesc, epR_InvalidType, "Base Component '{0}' not registered", pDesc->baseClass);
+    EPTHROW_IF(!pDesc->pSuperDesc, Result::InvalidType, "Base Component '{0}' not registered", pDesc->baseClass);
     pDesc->PopulateFromDesc((const ep::ComponentDescInl*)pDesc->pSuperDesc);
   }
 
@@ -127,7 +127,7 @@ inline void Kernel::RegisterGlueType()
 {
   pImpl->RegisterGlueType(GlueType::ComponentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) -> ComponentRef {
     void *pMem = epAlloc(sizeof(GlueType));
-    EPTHROW_IF_NULL(pMem, epR_AllocFailure, "Memory allocation failed");
+    EPTHROW_IF_NULL(pMem, Result::AllocFailure, "Memory allocation failed");
     epscope(fail) { if (pMem) epFree(pMem); };
     GlueType *ptr = epConstruct (pMem) GlueType(_pType, _pKernel, _uid, spInstance, initParams);
     ptr->pFreeFunc = [](RefCounted *pMem) { epFree((GlueType*)pMem); };

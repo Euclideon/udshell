@@ -46,7 +46,7 @@ public:
   explicit udNewPepperInstance(PP_Instance instance);
   virtual ~udNewPepperInstance();
 
-  epResult InitInternal() override;
+  Result InitInternal() override;
 
   // Pepper overrides
   virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
@@ -90,10 +90,10 @@ void udNewPepperInstance::SendToJsCallback(String sender, String message, const 
 }
 
 // ---------------------------------------------------------------------------------------
-epResult udNewPepperInstance::InitInternal()
+Result udNewPepperInstance::InitInternal()
 {
   RegisterMessageHandler("js", MakeDelegate((udNewPepperInstance*)this, &udNewPepperInstance::SendToJsCallback));
-  return epR_Success;
+  return Result::Success;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ ViewRef Kernel::SetFocusView(ViewRef spView)
   return spOld;
 }
 
-epResult Kernel::RunMainLoop()
+Result Kernel::RunMainLoop()
 {
 //  epNaClInstance *pInternal = (epNaClInstance*)pInstance;
 //
@@ -114,17 +114,17 @@ epResult Kernel::RunMainLoop()
 //  // wait for the main loop to terminate
 //  udWaitSemaphore(pInternal->pPepperInstance->pTerminateSem, -1);
 
-  return epR_Success;
+  return Result::Success;
 }
 
-epResult Kernel::Quit()
+Result Kernel::Quit()
 {
 //  epNaClInstance *pInternal = (epNaClInstance*)pInstance;
 //
 //  // signal to exit the main loop
 //  pInternal->pPepperInstance->bQuit = true;
 
-  return epR_Success;
+  return Result::Success;
 }
 
 

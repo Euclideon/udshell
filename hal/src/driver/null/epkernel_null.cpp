@@ -24,7 +24,7 @@ Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
 // Author: Manu Evans, May 2015
 void Kernel::Quit()
 {
-  return epR_Success;
+  return Result::Success;
 }
 
 void Kernel::DispatchToMainThread(MainThreadCallback callback)

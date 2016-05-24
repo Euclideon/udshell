@@ -32,18 +32,14 @@ struct VarCallHack
   template<size_t... S>
   epforceinline static Variant call(R(*f)(Args...), Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
-    size_t errorDepth = ErrorLevel();
     try {
-      Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
-      if (ErrorLevel() > errorDepth)
-        return Variant(GetError());
-      return r;
+      return Variant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
     } catch (EPException &e) {
-      return Variant(e.pError);
+      return Variant(e.claim());
     } catch (std::exception &e) {
-      return Variant(PushError(epR_CppException, e.what()));
+      return Variant(AllocError(Result::CppException, e.what()));
     } catch (...) {
-      return Variant(PushError(epR_CppException, "C++ exception"));
+      return Variant(AllocError(Result::CppException, "C++ exception"));
     }
   }
 };
@@ -53,18 +49,15 @@ struct VarCallHack<void, Args...>
   template<size_t... S>
   epforceinline static Variant call(void(*f)(Args...), Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
-    size_t errorDepth = ErrorLevel();
     try {
       f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
-      if (ErrorLevel() > errorDepth)
-        return Variant(GetError());
       return Variant();
     } catch (EPException &e) {
-      return Variant(e.pError);
+      return Variant(e.claim());
     } catch (std::exception &e) {
-      return Variant(PushError(epR_CppException, e.what()));
+      return Variant(AllocError(Result::CppException, e.what()));
     } catch (...) {
-      return Variant(PushError(epR_CppException, "C++ exception"));
+      return Variant(AllocError(Result::CppException, "C++ exception"));
     }
   }
 };
@@ -75,18 +68,14 @@ struct MethodCallHack
   template<size_t... S>
   epforceinline static Variant call(FastDelegate<R(Args...)> f, Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
-    size_t errorDepth = ErrorLevel();
     try {
-      Variant r(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
-      if (ErrorLevel() > errorDepth)
-        return Variant(GetError());
-      return r;
+      return Variant(f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...));
     } catch (EPException &e) {
-      return Variant(e.pError);
+      return Variant(e.claim());
     } catch (std::exception &e) {
-      return Variant(PushError(epR_CppException, e.what()));
+      return Variant(AllocError(Result::CppException, e.what()));
     } catch (...) {
-      return Variant(PushError(epR_CppException, "C++ exception"));
+      return Variant(AllocError(Result::CppException, "C++ exception"));
     }
   }
 };
@@ -96,18 +85,15 @@ struct MethodCallHack<void, Args...>
   template<size_t... S>
   epforceinline static Variant call(FastDelegate<void(Args...)> f, Slice<const Variant> args, ep::internal::Sequence<S...>)
   {
-    size_t errorDepth = ErrorLevel();
     try {
       f(args[S].as<typename std::remove_const<typename std::remove_reference<Args>::type>::type>()...);
-      if (ErrorLevel() > errorDepth)
-        return Variant(GetError());
       return Variant();
     } catch (EPException &e) {
-      return Variant(e.pError);
+      return Variant(e.claim());
     } catch (std::exception &e) {
-      return Variant(PushError(epR_CppException, e.what()));
+      return Variant(AllocError(Result::CppException, e.what()));
     } catch (...) {
-      return Variant(PushError(epR_CppException, "C++ exception"));
+      return Variant(AllocError(Result::CppException, "C++ exception"));
     }
   }
 };
@@ -403,7 +389,7 @@ inline Variant::Type Variant::type() const
 }
 inline Variant::SharedPtrType Variant::spType() const
 {
-  EPASSERT_THROW((Type)t == Type::SharedPtr, epR_InvalidType, "Variant is not a SharedPtr!");
+  EPASSERT_THROW((Type)t == Type::SharedPtr, Result::InvalidType, "Variant is not a SharedPtr!");
   return (SharedPtrType)length;
 }
 
@@ -424,7 +410,13 @@ inline bool Variant::isValid() const
 inline void Variant::throwError()
 {
   if ((Type)t == Type::Error)
-    throw EPException(err);
+  {
+    // transfer ownership of the error object to the exception
+    ErrorState *pError = err;
+    err = nullptr;
+    t = (size_t)Type::Void;
+    throw EPException(pError);
+  }
 }
 
 
@@ -787,7 +779,7 @@ inline void epFromVariant(const Variant &v, T *pE)
   {
     size_t val;
     const EnumDesc *pDesc = v.asEnum(&val);
-    EPASSERT_THROW(pDesc->name.eq(T::Name()), epR_InvalidType, "Incorrect type: enum type {0} can not convert to {1}", pDesc->name, T::Name());
+    EPASSERT_THROW(pDesc->name.eq(T::Name()), Result::InvalidType, "Incorrect type: enum type {0} can not convert to {1}", pDesc->name, T::Name());
     *pE = T((typename T::Type)val);
   }
   else if (v.is(Variant::Type::Int))
@@ -795,7 +787,7 @@ inline void epFromVariant(const Variant &v, T *pE)
   else if (v.is(Variant::Type::String))
     *pE = T(v.asString());
   else
-    EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+    EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
 }
 
 // math types
@@ -812,7 +804,7 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
         ((U*)pR)[i] = a[i].as<U>();
       return;
     }
-    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
+    EPTHROW_ERROR(Result::InvalidArgument, "Incorrect number of elements");
   }
   else if (v.is(Variant::SharedPtrType::AssocArray))
   {
@@ -828,7 +820,7 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
     pR->y = aa["y"].as<U>();
     pR->x = aa["x"].as<U>();
   }
-  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Vector3<U> *pR)
@@ -843,7 +835,7 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
         ((U*)pR)[i] = a[i].as<U>();
       return;
     }
-    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
+    EPTHROW_ERROR(Result::InvalidArgument, "Incorrect number of elements");
   }
   else if (v.is(Variant::SharedPtrType::AssocArray))
   {
@@ -860,7 +852,7 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
     pR->y = aa["y"].as<U>();
     pR->x = aa["x"].as<U>();
   }
-  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Vector4<U> *pR)
@@ -875,7 +867,7 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
         ((U*)pR)[i] = a[i].as<U>();
       return;
     }
-    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
+    EPTHROW_ERROR(Result::InvalidArgument, "Incorrect number of elements");
   }
   else if (v.is(Variant::SharedPtrType::AssocArray))
   {
@@ -893,7 +885,7 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
     pR->y = aa["y"].as<U>();
     pR->x = aa["x"].as<U>();
   }
-  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
@@ -908,7 +900,7 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
         ((U*)pR)[i] = a[i].as<U>();
       return;
     }
-    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
+    EPTHROW_ERROR(Result::InvalidArgument, "Incorrect number of elements");
   }
   else if (v.is(Variant::SharedPtrType::AssocArray))
   {
@@ -921,9 +913,9 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
         ((U*)pR)[i] = aa.get(start + i)->as<U>();
       return;
     }
-    EPTHROW_ERROR(epR_InvalidArgument, "Incorrect number of elements");
+    EPTHROW_ERROR(Result::InvalidArgument, "Incorrect number of elements");
   }
-  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
 }
 
 template<typename R, typename... Args>
@@ -981,11 +973,11 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
       } while (s);
       return;
     }
-    EPTHROW_ERROR(epR_InvalidArgument, "String does not look like an array, ie: \"[x, y, z]\"");
+    EPTHROW_ERROR(Result::InvalidArgument, "String does not look like an array, ie: \"[x, y, z]\"");
   }
   else if (v.is(Variant::Type::Null))
     return;
-  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
 }
 
 template<typename K, typename V, typename Pred>
@@ -1007,7 +999,7 @@ inline void epFromVariant(const Variant &v, AVLTree<K, V, Pred> *pTree)
   }
   else if (v.is(Variant::Type::Null))
     return;
-  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
 }
 
 template<typename Tree>
@@ -1029,7 +1021,7 @@ inline void epFromVariant(const Variant &v, SharedMap<Tree> *pTree)
   }
   else if (v.is(Variant::Type::Null))
     return;
-  EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+  EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
 }
 
 template<>

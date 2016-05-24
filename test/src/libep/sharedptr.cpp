@@ -438,14 +438,14 @@ TEST(UniquePtr, CreateAndDestroyFromCopy)
 
   {
     // copy construction - this should reset the original unique pointer
-    UniquePtr<sharedptr_test::TestClass> upCopy = upTC;
+    UniquePtr<sharedptr_test::TestClass> upCopy = std::move(upTC);
     EXPECT_TRUE(upCopy.ptr() != nullptr);
     EXPECT_TRUE(upTC.ptr() == nullptr);
     EXPECT_EQ(1, upCopy->RefCount());
     EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
 
     // copy construction to const TestClass
-    UniquePtr<const sharedptr_test::TestClass> upCopyConst = upCopy;
+    UniquePtr<const sharedptr_test::TestClass> upCopyConst = std::move(upCopy);
     EXPECT_TRUE(upCopyConst.ptr() != nullptr);
     EXPECT_TRUE(upCopy.ptr() == nullptr);
     EXPECT_EQ(1, upCopyConst->RefCount());
@@ -543,14 +543,14 @@ TEST(UniquePtr, Assignment)
   ASSERT_TRUE(upTest1.ptr() != nullptr);
   ASSERT_TRUE(upTest2.ptr() == nullptr);
   EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
-  upTest2 = upTest1;
+  upTest2 = std::move(upTest1);
   EXPECT_TRUE(upTest1.ptr() == nullptr);
   EXPECT_TRUE(upTest2.ptr() != nullptr);
   EXPECT_EQ(1, upTest2->RefCount());
   EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
 
   // assignment to self should not kill or modify the pointer/refcount
-  upTest2 = upTest2;
+  upTest2 = std::move(upTest2);
   EXPECT_TRUE(upTest2 != nullptr);
   EXPECT_EQ(1, upTest2->RefCount());
 

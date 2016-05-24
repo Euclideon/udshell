@@ -20,7 +20,7 @@ public:
   {
     QQuickItem *pRootItem = (QQuickItem*)pInstance->GetUserData();
     QList<qt::QtRenderView *> renderViews = pRootItem->findChildren<qt::QtRenderView *>();
-    EPTHROW_IF(renderViews.size() != 1, epR_Failure, "Viewport component must contain only one RenderView QML item");
+    EPTHROW_IF(renderViews.size() != 1, ep::Result::Failure, "Viewport component must contain only one RenderView QML item");
 
     LogDebug(2, "Attaching View Component '{0}' to Viewport", spView->GetUid());
     renderViews.first()->AttachView(spView);

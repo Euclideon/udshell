@@ -169,10 +169,10 @@ void ViewImpl::OnDirty()
       spRenderView->spColorBuffer->Allocate<uint32_t>({ (size_t)renderWidth, (size_t)renderHeight });
       spRenderView->spDepthBuffer = spRenderer->AllocRenderBuffer();
       spRenderView->spDepthBuffer->Allocate<float>({ (size_t)renderWidth, (size_t)renderHeight });
-      spRenderer->AddUDRenderJob(spRenderView);
+      spRenderer->AddUDRenderJob(std::move(spRenderView));
     }
     else
-      SetLatestFrame(spRenderView);
+      SetLatestFrame(std::move(spRenderView));
   }
 
   // emit the dirty signal

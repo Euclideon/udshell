@@ -73,7 +73,7 @@ Array<const MethodInfo> Material::GetMethods()
 void MaterialImpl::SetShader(ShaderType type, ShaderRef spShader)
 {
   if (spShader)
-    EPASSERT_THROW(spShader->GetType() == type, epR_InvalidArgument, "Incorrect shader type!");
+    EPASSERT_THROW(spShader->GetType() == type, Result::InvalidArgument, "Incorrect shader type!");
 
   if (shaders[type] == spShader)
     return;
@@ -104,7 +104,6 @@ void MaterialImpl::OnShaderChanged()
   }
   catch (...)
   {
-    epClearError();
     spShaderProgram = nullptr;
   }
 
@@ -115,7 +114,7 @@ void MaterialImpl::OnShaderChanged()
 void MaterialImpl::BuildShaderProgram()
 {
   // TODO: Add shader combination validation
-  EPTHROW_IF(!(shaders[0] && shaders[1]), epR_Failure, "Missing shader program");
+  EPTHROW_IF(!(shaders[0] && shaders[1]), Result::Failure, "Missing shader program");
 
   Array<RenderShaderRef, NumShaders-1> renderShaders;
   for (ShaderRef &s : Slice<ShaderRef>(shaders, NumShaders-1))
@@ -129,7 +128,7 @@ void MaterialImpl::BuildShaderProgram()
 
 void MaterialImpl::PopulateShaderProperties()
 {
-  EPASSERT_THROW(spShaderProgram, epR_Failure, "Shader program does not exist");
+  EPASSERT_THROW(spShaderProgram, Result::Failure, "Shader program does not exist");
 
   for (size_t i = 0; i < spShaderProgram->numUniforms(); ++i)
   {
@@ -246,7 +245,7 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
           spShader->SetType(*pBuiltin);
           spShader->SetCode(data.asString());
         }
-        EPASSERT_THROW(spShader, epR_InvalidArgument, "Expected shader object or shader text");
+        EPASSERT_THROW(spShader, Result::InvalidArgument, "Expected shader object or shader text");
 
         SetShader(ShaderType(*pBuiltin), spShader);
         break;

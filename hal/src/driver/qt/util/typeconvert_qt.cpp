@@ -267,7 +267,7 @@ Variant epToVariant(const QJSValue &v)
       .arg(v.property("message").toString())
       .arg(v.property("stack").toString());
 
-    return Variant(PushError(epR_ScriptException, qt::epFromQString(errorStr)));
+    return Variant(AllocError(ep::Result::ScriptException, qt::epFromQString(errorStr)));
   }
   else if (v.isObject())
   {

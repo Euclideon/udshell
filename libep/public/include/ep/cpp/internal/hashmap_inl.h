@@ -6,7 +6,7 @@ HashMap<K, V, HashPred>::HashMap(size_t tableSize, size_t itemBucketSize)
 {
   EPASSERT(tableSize > 0 && (tableSize & (tableSize-1)) == 0, "tableSize must be power-of-2!");
   ppTable = epAllocType(Node*, tableSize, epAF_Zero);
-  EPTHROW_IF_NULL(ppTable, epR_AllocFailure, "Allocation failed");
+  EPTHROW_IF_NULL(ppTable, Result::AllocFailure, "Allocation failed");
 }
 template <typename K, typename V, typename HashPred>
 HashMap<K, V, HashPred>::HashMap(HashMap &&rval)
@@ -66,7 +66,7 @@ V& HashMap<K, V, HashPred>::insert(Key&& key, Val&& val)
   Node **ppBucket = getBucket(key);
   V *pVal = getValue(*ppBucket, key);
   if (pVal)
-    EPTHROW_ERROR(epR_AlreadyExists, "Key already exists");
+    EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
   Node *pNode = pool.New(std::forward<Key>(key), std::forward<Val>(val));
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
@@ -182,14 +182,14 @@ template <typename K, typename V, typename HashPred>
 const V& HashMap<K, V, HashPred>::operator[](const K &key) const
 {
   const V *pV = get(key);
-  EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+  EPASSERT_THROW(pV, Result::OutOfBounds, "Element not found: {0}", key);
   return *pV;
 }
 template <typename K, typename V, typename HashPred>
 V& HashMap<K, V, HashPred>::operator[](const K &key)
 {
   V *pV = get(key);
-  EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+  EPASSERT_THROW(pV, Result::OutOfBounds, "Element not found: {0}", key);
   return *pV;
 }
 
@@ -231,7 +231,7 @@ auto HashMap<K, V, HashPred>::find(const K &key) -> typename HashMap<K, V, HashP
 template <typename K, typename V, typename HashPred>
 auto HashMap<K, V, HashPred>::erase(Iterator it) -> typename HashMap<K, V, HashPred>::Iterator
 {
-  EPASSERT_THROW(it.pItem, epR_InvalidArgument, "Attempting to erase null iterator");
+  EPASSERT_THROW(it.pItem, Result::InvalidArgument, "Attempting to erase null iterator");
   if (*it.ppStart == it.pItem)
     *it.ppStart = it.pItem->pNext;
   else
@@ -239,7 +239,7 @@ auto HashMap<K, V, HashPred>::erase(Iterator it) -> typename HashMap<K, V, HashP
     Node **ppPrev = it.ppStart;
     while (*ppPrev && (*ppPrev)->pNext != it.pItem)
       ppPrev = &(*ppPrev)->pNext;
-    EPASSERT_THROW(*ppPrev, epR_InvalidArgument, "Attempting to erase with invalid iterator");
+    EPASSERT_THROW(*ppPrev, Result::InvalidArgument, "Attempting to erase with invalid iterator");
     (*ppPrev)->pNext = it.pItem->pNext;
   }
 

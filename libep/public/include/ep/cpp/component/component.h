@@ -161,7 +161,7 @@ private:
 template<typename T>
 inline SharedPtr<T> component_cast(ComponentRef spComponent)
 {
-  EPTHROW_IF(!spComponent, epR_BadCast, "component is null");
+  EPTHROW_IF(!spComponent, Result::BadCast, "component is null");
 
   const ComponentDesc *pDesc = spComponent->GetDescriptor();
   while (pDesc)
@@ -170,7 +170,7 @@ inline SharedPtr<T> component_cast(ComponentRef spComponent)
       return shared_pointer_cast<T>(spComponent);
     pDesc = pDesc->pSuperDesc;
   }
-  EPTHROW(epR_BadCast, "component cast failed");
+  EPTHROW(Result::BadCast, "component cast failed");
 }
 // TODO: cast for IComponent types...
 

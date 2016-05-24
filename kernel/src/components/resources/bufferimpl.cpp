@@ -21,7 +21,7 @@ Array<const MethodInfo> Buffer::GetMethods() const
 
 bool BufferImpl::Reserve(size_t size)
 {
-  EPTHROW_IF(mapDepth > 0, epR_ResourceInUse, "Buffer is mapped for {0}", readMap ? "reading" : "writing");
+  EPTHROW_IF(mapDepth > 0, Result::ResourceInUse, "Buffer is mapped for {0}", readMap ? "reading" : "writing");
 
   if (size <= buffer.length)
     return true;

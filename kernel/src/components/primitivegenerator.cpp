@@ -50,7 +50,7 @@ void PrimitiveGenerator::GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, 
 
 void PrimitiveGenerator::GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
-  EPASSERT_THROW(numSegments >= 3 && numSlices >= 2, epR_InvalidArgument, "Invalid args!");
+  EPASSERT_THROW(numSegments >= 3 && numSlices >= 2, Result::InvalidArgument, "Invalid args!");
 
   size_t numVerts = 2 + numSegments*(numSlices-1);
   size_t numIndices = numSegments*(numSlices-1)*2*3;
@@ -130,7 +130,7 @@ void PrimitiveGenerator::GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB
 
 void PrimitiveGenerator::GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
-  EPASSERT_THROW(numSegments >= 3 && numSlices >= 1, epR_InvalidArgument, "Invalid args!");
+  EPASSERT_THROW(numSegments >= 3 && numSlices >= 1, Result::InvalidArgument, "Invalid args!");
 
   size_t numVerts = 2 + numSegments*(numSlices+1);
   size_t numIndices = numSegments*2*(numSlices+1)*3;
@@ -208,7 +208,7 @@ void PrimitiveGenerator::GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef sp
 
 void PrimitiveGenerator::GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
-  EPASSERT_THROW(numSegments >= 3 && numSlices >= 1, epR_InvalidArgument, "Invalid args!");
+  EPASSERT_THROW(numSegments >= 3 && numSlices >= 1, Result::InvalidArgument, "Invalid args!");
 
   size_t numVerts = 2 + numSegments*numSlices;
   size_t numIndices = numSegments*numSlices*2*3;

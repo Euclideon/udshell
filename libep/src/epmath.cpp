@@ -45,7 +45,7 @@ template ptrdiff_t epStringify<double>(Slice<char> buffer, String format, const 
 
 } // namespace ep
 
-epResult epMath_Test()
+ep::Result epMath_Test()
 {
   using namespace ep;
 
@@ -89,6 +89,6 @@ epResult epMath_Test()
 //  Float3 ypr = r.extractYPR();
 //  Float4x4 r2 = Float4x4::rotationYPR(ypr);
 
-  return epR_Success;
+  return Result::Success;
 }
 

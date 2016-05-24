@@ -13,7 +13,7 @@ const char* GetFormatString(epImageFormat format)
   if (format == epIF_BGRA8) return "u32";
 
   // TODO: add support for more ep formats
-  EPTHROW(epR_Failure, "Image format not supported yet");
+  EPTHROW(Result::Failure, "Image format not supported yet");
 }
 
 void ImageSource::Create(StreamRef spSource)
@@ -21,7 +21,7 @@ void ImageSource::Create(StreamRef spSource)
   // allocate for file
   int64_t len = spSource->Length();
   void *pBuffer = epAlloc((size_t)len);
-  EPTHROW_IF_NULL(pBuffer, epR_AllocFailure, "Memory allocation failed");
+  EPTHROW_IF_NULL(pBuffer, Result::AllocFailure, "Memory allocation failed");
   epscope(exit) { epFree(pBuffer); };
 
   // read file from source
@@ -31,7 +31,7 @@ void ImageSource::Create(StreamRef spSource)
 
   // load the image
   epImage *pImage = epImage_LoadImage(pBuffer, (size_t)len, nullptr);
-  EPTHROW_IF_NULL(pImage, epR_AllocFailure, "Memory allocation failed");
+  EPTHROW_IF_NULL(pImage, Result::AllocFailure, "Memory allocation failed");
   epscope(exit) { epImage_DestroyImage(&pImage); };
 
   for (size_t i = 0; i<pImage->elements; ++i)

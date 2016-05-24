@@ -84,27 +84,12 @@ public:
       EvDelegate d;
       d.SetMemento(s.spM);
 
-      size_t errorDepth = ErrorLevel();
-      try
-      {
+      try {
         d(args...);
-
-        // stack error...
-        if (ErrorLevel() > errorDepth)
-        {
-          epDebugFormat("Unhandled error from event handler: {0}\n", GetError()->message);
-          PopErrorToLevel(errorDepth);
-        }
-      }
-      catch (std::exception &e)
-      {
+      } catch (std::exception &e) {
         epDebugFormat("Unhandled exception from event handler: {0}\n", e.what());
-        PopErrorToLevel(errorDepth);
-      }
-      catch (...)
-      {
+      } catch (...) {
         epDebugFormat("Unhandled C++ exception from event handler!\n");
-        PopErrorToLevel(errorDepth);
       }
     }
   }

@@ -127,7 +127,7 @@ SubscriptionRef QtSignalMapper::Subscribe(QObject *pSourceObj, const ep::VarDele
     QObject::connect(pSourceObj, &QObject::destroyed, this, &QtSignalMapper::onInstanceDestroyed);
 
     pConnection->connection = QObject::connect(pSourceObj, pSourceObj->metaObject()->method(signalId), this, metaObject()->method(metaObject()->methodOffset()));
-    EPTHROW_IF(!pConnection->connection, epR_Failure, "Signal Mapper connection failed: Cannot map signal '{0}'", signalName);
+    EPTHROW_IF(!pConnection->connection, Result::Failure, "Signal Mapper connection failed: Cannot map signal '{0}'", signalName);
   }
 
   return pConnection->event.AddSubscription(del);
@@ -137,9 +137,9 @@ void QtSignalMapper::execute(void **args)
 {
   // Find the calling instance in the map
   QObject *pSender = sender();
-  EPASSERT_THROW(pSender, epR_Failure, "Could not determine the calling instance of Qt Event {0}", signalName);
+  EPASSERT_THROW(pSender, Result::Failure, "Could not determine the calling instance of Qt Event {0}", signalName);
   QtConnection *pConnection = instanceMap.get(pSender);
-  EPASSERT_THROW(pConnection, epR_Failure, "Could not locate the calling instance in the Signal Mapper for Qt Event {0}", signalName);
+  EPASSERT_THROW(pConnection, Result::Failure, "Could not locate the calling instance in the Signal Mapper for Qt Event {0}", signalName);
 
   // If there's no more active subscribers for this instance, let's unregister
   if (!pConnection->event.HasSubscribers())
