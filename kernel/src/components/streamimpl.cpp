@@ -7,16 +7,14 @@ namespace ep
 BufferRef StreamImpl::ReadBuffer(size_t bytes)
 {
   BufferRef spBuffer = GetKernel()->CreateComponent<Buffer>();
-
   spBuffer->Allocate(bytes);
 
   Slice<void> buffer = spBuffer->Map();
   if (!buffer)
     return nullptr;
+  epscope(exit) { spBuffer->Unmap(); };
 
-  IF_EPASSERT(Slice<void> read =) Read(buffer);
-  spBuffer->Unmap();
-
+  IF_EPASSERT(Slice<void> read =) pInstance->Read(buffer);
   EPASSERT(read.length == bytes, "TODO: handle the case where we read less bytes than we expect!");
 
   return spBuffer;
@@ -34,10 +32,10 @@ BufferRef StreamImpl::Load()
   Slice<void> buffer = spBuffer->Map();
   if (!buffer)
     return nullptr;
+  epscope(exit) { spBuffer->Unmap(); };
 
   pInstance->Seek(SeekOrigin::Begin, 0);
   pInstance->Read(buffer);
-  spBuffer->Unmap();
 
   return spBuffer;
 }
@@ -47,13 +45,12 @@ void StreamImpl::Save(BufferRef spBuffer)
   // TODO: check and bail if stream is not writable...
 
   Slice<const void> buffer = spBuffer->MapForRead();
-  if (buffer)
-  {
-    pInstance->Seek(SeekOrigin::Begin, 0);
-    pInstance->Write(buffer);
+  if (!buffer)
+    return;
+  epscope(exit) { spBuffer->Unmap(); };
 
-    spBuffer->Unmap();
-  }
+  pInstance->Seek(SeekOrigin::Begin, 0);
+  pInstance->Write(buffer);
 }
 
 String StreamImpl::ReadLn(Slice<char> buf)
