@@ -3,6 +3,7 @@
 #define EP_VIEWER_H
 
 #include "ep/cpp/component/activity.h"
+#include "ep/cpp/input.h"
 
 namespace ep {
 
@@ -15,6 +16,7 @@ SHARED_CLASS(UDNode);
 SHARED_CLASS(SimpleCamera);
 SHARED_CLASS(Scene);
 SHARED_CLASS(View);
+SHARED_CLASS(Node);
 
 class Viewer : public Activity
 {
@@ -36,6 +38,7 @@ protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
   void CreatePlatformLogo();
+  bool InputHook(ep::InputEvent ev);
 
   ~Viewer() { Deactivate(); }
 
@@ -57,6 +60,7 @@ protected:
   SimpleCameraRef spCamera;
   ViewRef spView;
   UIComponentRef spUIBookmarks;
+  NodeRef spImageNode;
 
 private:
   Array<const PropertyInfo> GetProperties() const;

@@ -32,6 +32,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
 
   spView = pKernel->CreateComponent<View>();
+  spView->SetInputEventHook(Delegate<bool(ep::InputEvent)>(this, &Viewer::InputHook));
 
   Variant::VarMap sceneParams;
   const Variant *pSceneParams = initParams.get("scene");
@@ -385,8 +386,31 @@ void Viewer::CreatePlatformLogo()
   GeomNodeRef spGeomNode = pKernel->CreateComponent<GeomNode>();
   spGeomNode->SetModel(spImageModel);
   spScene->GetRootNode()->AddChild(spGeomNode);
+  spImageNode = spGeomNode;
 
   spMaterial->SetMaterialProperty("tex", spImage);
+}
+
+bool Viewer::InputHook(ep::InputEvent ev)
+{
+  if (ev.eventType == ep::InputEvent::EventType::Key && ev.deviceType == ep::InputDevice::Keyboard) // if a key event happened on the keyboard
+  {
+    if (ev.key.state == 1 && ev.key.key == (int)ep::KeyCode::I) // if pressing down on the 'i' key then switch the logos visibility
+    {
+      NodeRef spRootNode = spScene->GetRootNode();
+      bool contains = spRootNode->Children().exists(spImageNode);
+
+      if (contains)
+        spRootNode->RemoveChild(spImageNode);
+      else
+        spRootNode->AddChild(spImageNode);
+
+      spScene->MakeDirty();
+      return true; // we return true here so I is not used as input for another action
+    }
+  }
+
+  return false; // return false so that this can be handled by another action
 }
 
 extern "C" bool epPluginAttach()
