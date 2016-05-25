@@ -372,7 +372,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
           }
           else
           {
-            pQObject = new qt::QtEPComponent(spComponent);
+            pQObject = qt::BuildQtEPComponent::Create(spComponent);
           }
 
           *pJSValue = qt::QtApplication::Kernel()->QmlEngine()->newQObject(pQObject);
