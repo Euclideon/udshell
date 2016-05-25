@@ -13,6 +13,7 @@ enum epResult
   epR_Failure,
 
   epR_CppException,
+  epR_InvalidCall,
   epR_InvalidArgument,
   epR_InvalidType,
   epR_OutOfBounds,
