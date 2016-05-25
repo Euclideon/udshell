@@ -38,7 +38,7 @@ static epImageFormat GUIDToImageFormat(WICPixelFormatGUID format)
   return epIF_Unknown;
 }
 
-epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
+epImage* epImage_LoadImage(void *pBuffer, size_t bufferLen, const char *)
 {
   epImage *pOutput = nullptr;
 
@@ -158,6 +158,17 @@ epilogue:
   pStream->Release();
 
   return pOutput;
+}
+
+void epImage_DestroyImage(epImage **ppImage)
+{
+  if (ppImage && *ppImage)
+  {
+    for (size_t i = 0; i < (*ppImage)->elements; ++i)
+      epFree((*ppImage)->pSurfaces[i].pImage);
+    epFree(*ppImage);
+    *ppImage = nullptr;
+  }
 }
 
 void* epImage_WriteImage(epImage epUnusedParam(*pImage), const char epUnusedParam(*pFileExt), size_t epUnusedParam(*pOutputSize))

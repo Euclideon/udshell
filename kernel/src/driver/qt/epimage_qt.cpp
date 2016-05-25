@@ -18,7 +18,7 @@ void epImage_DeinitInternal()
 
 }
 
-epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
+epImage* epImage_LoadImage(void *pBuffer, size_t bufferLen, const char *)
 {
   QByteArray a = QByteArray::fromRawData((const char *)(pBuffer), (int)bufferLen);
   QBuffer b;
@@ -77,6 +77,17 @@ epImage* epImage_ReadImage(void *pBuffer, size_t bufferLen, const char *)
   memcpy(surface.pImage, qImageBuffer, surface.width * surface.height * 4);
 
   return pOutput;
+}
+
+void epImage_DestroyImage(epImage **ppImage)
+{
+  if (ppImage && *ppImage)
+  {
+    for (size_t i = 0; i < (*ppImage)->elements; ++i)
+      epFree((*ppImage)->pSurfaces[i].pImage);
+    epFree(*ppImage);
+    *ppImage = nullptr;
+  }
 }
 
 void* epImage_WriteImage(epImage epUnusedParam(*pImage), const char epUnusedParam(*pFileExt), size_t epUnusedParam(*pOutputSize))

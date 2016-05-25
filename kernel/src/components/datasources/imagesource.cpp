@@ -12,6 +12,8 @@ void ImageSource::Create(StreamRef spSource)
   // allocate for file
   int64_t len = spSource->Length();
   void *pBuffer = epAlloc((size_t)len);
+  EPTHROW_IF_NULL(pBuffer, epR_AllocFailure, "Memory allocation failed");
+  epscope(exit) { epFree(pBuffer); };
 
   // read file from source
   Slice<void> buf(pBuffer, (size_t)len);
@@ -19,7 +21,9 @@ void ImageSource::Create(StreamRef spSource)
   EPASSERT((int64_t)buf.length == len, "!");
 
   // load the image
-  epImage *pImage = epImage_ReadImage(pBuffer, (size_t)len, nullptr);
+  epImage *pImage = epImage_LoadImage(pBuffer, (size_t)len, nullptr);
+  EPTHROW_IF_NULL(pImage, epR_AllocFailure, "Memory allocation failed");
+  epscope(exit) { epImage_DestroyImage(&pImage); };
 
   for (size_t i = 0; i<pImage->elements; ++i)
   {
@@ -39,8 +43,6 @@ void ImageSource::Create(StreamRef spSource)
     // add resource
     SetResource(MutableString64(Concat, "image", i), spImage);
   }
-
-  epFree(pBuffer);
 }
 
 void ImageSource::StaticInit(ep::Kernel *pKernel)
