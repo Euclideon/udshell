@@ -64,7 +64,7 @@ public:
 
   ~ScopeGuardForNewException() noexcept(executeOnException)
   {
-    if (executeOnException == (getUncaughtExceptionCount() > exceptionCount) || executeOnException == (GetError() != nullptr))
+    if (executeOnException == (getUncaughtExceptionCount() > exceptionCount))
       function();
   }
 

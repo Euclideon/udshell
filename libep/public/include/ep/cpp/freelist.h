@@ -35,6 +35,7 @@ public:
   T* New(Args... args)
   {
     T *pMem = Alloc();
+    epscope(fail) { Free(pMem); };
     return epConstruct(pMem) T(args...);
   }
 
