@@ -112,7 +112,9 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
       SetEnablePicking(!pickingEnabled);
   }
 
-  if (spScene)
+  bool handled = inputEventHook ? inputEventHook(ev) : false;
+
+  if (!handled && spScene)
     handled = spScene->InputEvent(ev);
   if (!handled && spCamera)
     handled = spCamera->ViewportInputEvent(ev);

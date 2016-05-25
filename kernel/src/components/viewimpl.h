@@ -82,6 +82,9 @@ public:
       OnDirty();
   }
 
+  void SetInputEventHook(Delegate<bool(ep::InputEvent)> eventHook) { inputEventHook = eventHook; }
+  void ClearInputEventHook() { inputEventHook = nullptr; }
+
   Double3 pickedPoint = { 0, 0, 0 };
 
   struct PickHighlightData
@@ -114,6 +117,7 @@ public:
   Array<PickRequest> pickRequests;*/
 private:
   udRenderFlags GetRenderableUDFlags();
+  Delegate<bool(ep::InputEvent)> inputEventHook;
 };
 
 

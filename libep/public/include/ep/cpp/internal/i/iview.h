@@ -5,6 +5,7 @@
 #include "ep/cpp/component/component.h"
 #include "ep/cpp/rect.h"
 #include "ep/cpp/render.h"
+#include "ep/cpp/input.h"
 
 namespace ep {
 
@@ -39,6 +40,9 @@ public:
   // TODO: Move this into the layer system once its implemented.
   virtual void SetUDRenderFlags(UDRenderFlags flags) = 0;
   virtual UDRenderFlags GetUDRenderflags() const = 0;
+
+  virtual void SetInputEventHook(Delegate<bool(ep::InputEvent)> inputEventHook) = 0;
+  virtual void ClearInputEventHook() = 0;
 
 };
 

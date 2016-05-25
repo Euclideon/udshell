@@ -41,6 +41,12 @@ public:
   void SetUDRenderFlags(UDRenderFlags flags) { pImpl->SetUDRenderFlags(flags); }
   UDRenderFlags GetUDRenderflags() const { return pImpl->GetUDRenderflags(); }
 
+  /// Set the input event hook.  Will overwrite if a hook already exists.
+  /// \param inputEventHook: returns true if the event is handled and should not be passed on to the default input handler
+  /// \see ClearInputEventHook()
+  void SetInputEventHook(Delegate<bool(ep::InputEvent)> inputEventHook) { pImpl->SetInputEventHook(inputEventHook); }
+  void ClearInputEventHook() { pImpl->ClearInputEventHook(); }
+
   Event<> Dirty;
   Event<> FrameReady;
   Event<bool> EnabledPickingChanged;
