@@ -42,8 +42,8 @@ protected:
   double zNear = 0.1;
   double zFar = 1000.0;
 
-  bool InputEvent(const epInputEvent &ev) override final { return false; }
-  bool ViewportInputEvent(const epInputEvent &ev) override final { return false; }
+  bool InputEvent(const ep::InputEvent &ev) override final { return false; }
+  bool ViewportInputEvent(const ep::InputEvent &ev) override final { return false; }
   bool Update(double timeStep) override final { return epR_Success; }
 };
 

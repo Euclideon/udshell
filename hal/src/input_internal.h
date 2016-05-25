@@ -6,9 +6,9 @@
 
 struct InputState
 {
-  uint8_t keys[MAX_KEYBOARDS][epKC_Max];
-  float mouse[MAX_MOUSES][epMC_Max];
-  float gamepad[MAX_GAMEPADS][epGC_Max];
+  uint8_t keys[MAX_KEYBOARDS][(size_t)ep::KeyCode::Max];
+  float mouse[MAX_MOUSES][(size_t)ep::MouseControls::Max];
+  float gamepad[MAX_GAMEPADS][(size_t)ep::GamepadControl::Max];
 };
 
 extern InputState gInputState[2];

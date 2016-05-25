@@ -4,7 +4,7 @@
 
 #include "ep/cpp/component/node/node.h"
 #include "ep/cpp/internal/i/icamera.h"
-#include "ep/c/input.h"
+#include "ep/cpp/input.h"
 
 namespace ep {
 
@@ -45,9 +45,9 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  virtual bool ViewportInputEvent(const epInputEvent &ev) { return pImpl->ViewportInputEvent(ev); }
+  virtual bool ViewportInputEvent(const ep::InputEvent &ev) { return pImpl->ViewportInputEvent(ev); }
 
-  bool InputEvent(const epInputEvent &ev) override { return pImpl->InputEvent(ev); }
+  bool InputEvent(const ep::InputEvent &ev) override { return pImpl->InputEvent(ev); }
   bool Update(double timeStep) override { return pImpl->Update(timeStep); }
 
 private:

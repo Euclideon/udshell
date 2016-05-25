@@ -64,7 +64,7 @@ public:
   RenderableViewRef GetRenderableView() const { return spLatestFrame; }
 
   // TODO: Should this go in the public (non-impl) api? ideally should be protected but is used in the driver...
-  bool InputEvent(const epInputEvent &ev);
+  bool InputEvent(const ep::InputEvent &ev);
 
 //private:
 //  // TODO: REMOVE THESE FRIEND HACKS (IF POSSIBLE)

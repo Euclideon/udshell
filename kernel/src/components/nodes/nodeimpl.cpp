@@ -28,7 +28,7 @@ void NodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
     n->Render(spScene, mat * n->GetMatrix());
 }
 
-bool NodeImpl::InputEvent(const epInputEvent &ev)
+bool NodeImpl::InputEvent(const ep::InputEvent &ev)
 {
   for (auto &c : children)
   {

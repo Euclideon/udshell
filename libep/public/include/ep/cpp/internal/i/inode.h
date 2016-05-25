@@ -3,7 +3,7 @@
 #define _EP_INODE_HPP
 
 #include "ep/cpp/component/component.h"
-#include "ep/c/input.h"
+#include "ep/cpp/input.h"
 
 namespace ep
 {
@@ -32,7 +32,7 @@ public:
 
   virtual Variant Save() const = 0;
 protected:
-  virtual bool InputEvent(const epInputEvent &ev) = 0;
+  virtual bool InputEvent(const ep::InputEvent &ev) = 0;
   virtual bool Update(double timeStep) = 0;
   virtual void Render(RenderScene &spScene, const Double4x4 &mat) = 0;
 };

@@ -6,7 +6,7 @@
 #include "ep/cpp/component/node/camera.h"
 #include "ep/cpp/component/node/node.h"
 #include "ep/cpp/internal/i/isimplecamera.h"
-#include "ep/c/input.h"
+#include "ep/cpp/input.h"
 
 namespace ep {
 
@@ -33,7 +33,7 @@ public:
   Event<Double3, Double3> Changed;
 
 protected:
-  bool ViewportInputEvent(const epInputEvent &ev) override { return pImpl->ViewportInputEvent(ev); }
+  bool ViewportInputEvent(const ep::InputEvent &ev) override { return pImpl->ViewportInputEvent(ev); }
   bool Update(double timeStep) override { return pImpl->Update(timeStep); }
 
   SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

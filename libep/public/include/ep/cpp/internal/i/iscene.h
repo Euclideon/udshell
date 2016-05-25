@@ -3,7 +3,7 @@
 #define _EP_ISCENE_HPP
 
 #include "ep/cpp/component/component.h"
-#include "ep/c/input.h"
+#include "ep/cpp/input.h"
 
 namespace ep {
 
@@ -17,7 +17,7 @@ using BookmarkMap = SharedMap<AVLTree<SharedString, Bookmark>>;
 class IScene
 {
 public:
-  virtual bool InputEvent(const epInputEvent &ev) = 0;
+  virtual bool InputEvent(const ep::InputEvent &ev) = 0;
   virtual void Update(double timeDelta) = 0;
   virtual Variant Save() const = 0;
 

@@ -25,6 +25,8 @@
 #include "components/scene.h"
 #include "components/nodes/camera.h"
 
+using namespace ep;
+
 // Pepper module
 class epPepperModule : public pp::Module
 {
@@ -271,16 +273,16 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
   if (!spView)
     return false;
 
-  epInputEvent inputEvent;
+  InputEvent inputEvent;
   switch (pepperEvent.GetType())
   {
     case PP_INPUTEVENT_TYPE_MOUSEDOWN:
     case PP_INPUTEVENT_TYPE_MOUSEUP:
     {
       pp::MouseInputEvent mouse_event(pepperEvent);
-      inputEvent.deviceType = epID_Mouse;
+      inputEvent.deviceType = InputDevice::Mouse;
       inputEvent.deviceId = 0;
-      inputEvent.eventType = epInputEvent::Key;
+      inputEvent.eventType = InputEvent::EventType::Key;
 
       PP_InputEvent_MouseButton button = mouse_event.GetButton();
       int32_t key = -1;
@@ -309,9 +311,9 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
     case PP_INPUTEVENT_TYPE_MOUSEMOVE:
     {
       pp::MouseInputEvent mouse_event(pepperEvent);
-      inputEvent.deviceType = epID_Mouse;
+      inputEvent.deviceType = InputDevice::Mouse;
       inputEvent.deviceId = 0;
-      inputEvent.eventType = epInputEvent::Move;
+      inputEvent.eventType = InputEvent::EventType::Move;
 
       pp::Point delta = mouse_event.GetMovement();
       pp::Point absolute = mouse_event.GetPosition();
@@ -327,9 +329,9 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
     case PP_INPUTEVENT_TYPE_CHAR:
     {
       pp::KeyboardInputEvent keyEvent(pepperEvent);
-      inputEvent.deviceType = epID_Keyboard;
+      inputEvent.deviceType = InputDevice::Keyboard;
       inputEvent.deviceId = 0;
-      inputEvent.eventType = epInputEvent::Text;
+      inputEvent.eventType = InputEvent::Text;
       // TODO : Once epInput::TextEvent is fleshed out finish this.
     }
     break;
@@ -339,9 +341,9 @@ bool udNewPepperInstance::HandleInputEvent(const pp::InputEvent& pepperEvent)
     {
       pp::KeyboardInputEvent keyEvent(pepperEvent);
 
-      inputEvent.deviceType = epID_Keyboard;
+      inputEvent.deviceType = InputDevice::Keyboard;
       inputEvent.deviceId = 0;
-      inputEvent.eventType = epInputEvent::Key;
+      inputEvent.eventType = InputEvent::EventType::Key;
 
       inputEvent.key.key = MapPPKeyToEPKey(keyEvent.GetKeyCode());
       inputEvent.key.state = pepperEvent.GetType() == PP_INPUTEVENT_TYPE_KEYDOWN ? 1 : 0;

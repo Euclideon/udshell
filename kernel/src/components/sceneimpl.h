@@ -22,7 +22,7 @@ class SceneImpl : public BaseImpl<Scene, IScene>
 public:
   SceneImpl(Component *pInstance, Variant::VarMap initParams);
 
-  virtual bool InputEvent(const epInputEvent &ev) override final;
+  virtual bool InputEvent(const ep::InputEvent &ev) override final;
   virtual void Update(double timeDelta) override final;
   Variant Save() const override final;
 

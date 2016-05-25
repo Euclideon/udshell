@@ -40,7 +40,7 @@ Array<const EventInfo> Scene::GetEvents() const
   };
 }
 
-bool SceneImpl::InputEvent(const epInputEvent &ev)
+bool SceneImpl::InputEvent(const ep::InputEvent &ev)
 {
   // do anything here?
   //...

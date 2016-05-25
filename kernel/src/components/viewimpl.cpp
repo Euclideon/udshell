@@ -95,21 +95,20 @@ void ViewImpl::GoToBookmark(String bookmarkName)
   }
 }
 
-bool ViewImpl::InputEvent(const epInputEvent &ev)
+bool ViewImpl::InputEvent(const ep::InputEvent &ev)
 {
-  bool handled = false;
-  if (ev.deviceType == epID_Mouse)
+  if (ev.deviceType == InputDevice::Mouse)
   {
-    if (ev.eventType == epInputEvent::Move)
+    if (ev.eventType == ep::InputEvent::EventType::Move)
     {
       mousePosition.x = (uint32_t)ev.move.xAbsolute;
       mousePosition.y = (uint32_t)ev.move.yAbsolute;
       pInstance->MousePositionChanged.Signal(mousePosition);
     }
   }
-  else if (ev.deviceType == epID_Keyboard)
+  else if (ev.deviceType == ep::InputDevice::Keyboard)
   {
-    if (ev.key.key == epKC_P && ev.key.state == 0)
+    if ((KeyCode)ev.key.key == KeyCode::P && ev.key.state == 0)
       SetEnablePicking(!pickingEnabled);
   }
 
