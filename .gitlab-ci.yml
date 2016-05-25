@@ -14,6 +14,22 @@ windows_shell_release_64:
     - vs2015
     - newbuild
 
+windows_shell_debug_32:
+  stage: build
+  script: "build\\build.sh epshell Debug win32 merge"
+  tags:
+    - windows
+    - vs2015
+    - newbuild
+
+windows_shell_release_32:
+  stage: build
+  script: "build\\build.sh epshell Release win32 merge"
+  tags:
+    - windows
+    - vs2015
+    - newbuild
+
 ubuntu_shell_debug_gcc:
   stage: build
   script: "./build/build.sh epshell Debug x64 merge"
@@ -78,106 +94,10 @@ rpm_shell_release_clang:
     - rpm
     - newbuild
 
-windows_viewer_debug_64:
-  stage: build
-  script: "build\\build.sh epviewer Debug x64 merge"
-  tags:
-    - windows
-    - vs2015
-    - newbuild
-
-windows_viewer_release_64:
-  stage: build
-  script: "build\\build.sh epviewer Release x64 merge"
-  tags:
-    - windows
-    - vs2015
-    - newbuild
-
-windows_viewer_debug_32:
-  stage: build
-  script: "build\\build.sh epviewer Debug win32 merge"
-  tags:
-    - windows
-    - vs2015
-    - newbuild
-
-windows_viewer_release_32:
-  stage: build
-  script: "build\\build.sh epviewer Release win32 merge"
-  tags:
-    - windows
-    - vs2015
-    - newbuild
-
-ubuntu_viewer_debug_gcc:
-  stage: build
-  script: "./build/build.sh epviewer Debug x64 merge"
-  tags:
-    - linux
-    - deb
-    - newbuild
-
-ubuntu_viewer_release_gcc:
-  stage: build
-  script: "./build/build.sh epviewer Release x64 merge"
-  tags:
-    - linux
-    - deb
-    - newbuild
-
-ubuntu_viewer_debug_clang:
-  stage: build
-  script: "./build/build.sh epviewer DebugClang x64 merge"
-  tags:
-    - linux
-    - deb
-    - newbuild
-
-ubuntu_viewer_release_clang:
-  stage: build
-  script: "./build/build.sh epviewer ReleaseClang x64 merge"
-  tags:
-    - linux
-    - deb
-    - newbuild
-
-rpm_viewer_debug_gcc:
-  stage: build
-  script: "./build/build.sh epviewer Debug x64 merge"
-  tags:
-    - linux
-    - rpm
-    - newbuild
-
-rpm_viewer_release_gcc:
-  stage: build
-  script: "./build/build.sh epviewer Release x64 merge"
-  tags:
-    - linux
-    - rpm
-    - newbuild
-
-rpm_viewer_debug_clang:
-  stage: build
-  script: "./build/build.sh epviewer DebugClang x64 merge"
-  tags:
-    - linux
-    - rpm
-    - newbuild
-
-rpm_viewer_release_clang:
-  stage: build
-  script: "./build/build.sh epviewer ReleaseClang x64 merge"
-  tags:
-    - linux
-    - rpm
-    - newbuild
-
 update_merge_requests:
   stage: deploy
   script:
-    - export QTDIR=~/dev/Qt/5.4/gcc_64
+    - export QTDIR=~/dev/Qt/5.6/gcc_64
     - export PATH=$QTDIR/bin:$PATH
     - git submodule update --init --recursive
     - "bin/premake/premake5 --ci_project_id=$CI_PROJECT_ID --ci_build_ref_name=$CI_BUILD_REF_NAME --trigger_token=7b183a6a00a2405e30f5af529deb82 gitlab"
