@@ -13,7 +13,7 @@ uint32_t PointerHash::hash(void *pAlloc)
   return HashPointer(pAlloc); // Move this back to header once HashPointer is moved out of hashmap.h
 }
 
-HashMap<void*, SafeProxy<void>*, PointerHash> *GetWeakRefRegistry() {return (HashMap<void*, SafeProxy<void>*, PointerHash>*)s_pInstance->WeakRegistry(); }
+HashMap<void*, SafeProxy<void>*, PointerHash> *GetWeakRefRegistry() { return (HashMap<void*, SafeProxy<void>*, PointerHash>*)s_pInstance->pWeakRegistry; }
 
 void* GetSafePtr(void *pAlloc)
 {

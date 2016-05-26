@@ -2,7 +2,7 @@
 #include "components/file.h"
 #include "ep/cpp/component/resourcemanager.h"
 #include "ep/cpp/component/activity.h"
-#include "components/resources/text.h"
+#include "ep/cpp/component/resource/text.h"
 #include "ep/cpp/kernel.h"
 #include "rapidxml.hpp"
 

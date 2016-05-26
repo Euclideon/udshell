@@ -36,6 +36,9 @@ struct function_traits<R(C::*)(Args...) const>
   };
 };
 
+RefCounted* GetStaticImpl(String name);
+void AddStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl);
+
 } // namespace internal
 
 class Kernel;
@@ -71,6 +74,10 @@ protected:
   {}
   virtual ~BaseImpl() {}
 };
+
+template <typename I>
+class BaseStaticImpl : public RefCounted, public I
+{};
 
 
 // interface for getters, setters, methods, events

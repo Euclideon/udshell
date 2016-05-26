@@ -1,5 +1,6 @@
 #include "components/streamimpl.h"
 #include "ep/cpp/kernel.h"
+#include "ep/cpp/component/resource/text.h"
 
 namespace ep
 {
@@ -36,6 +37,35 @@ BufferRef StreamImpl::Load()
 
   pInstance->Seek(SeekOrigin::Begin, 0);
   pInstance->Read(buffer);
+
+  return spBuffer;
+}
+
+TextRef StreamImpl::LoadText()
+{
+  int64_t len = pInstance->Length();
+  if (len < 0)
+    return nullptr;
+
+  len += 1; // for null terminator    TODO: Text::Allocate() should override to do this implicitly
+
+  TextRef spBuffer = GetKernel()->CreateComponent<Text>();
+  spBuffer->Allocate((size_t)len);
+
+  Slice<char> buffer = spBuffer->Map();
+  if (!buffer)
+    return nullptr;
+
+  size_t bytesRead = 0;
+  {
+    epscope(exit) { spBuffer->Unmap(); };
+
+    pInstance->Seek(SeekOrigin::Begin, 0);
+    bytesRead = pInstance->Read(buffer).length;
+    if (bytesRead < (size_t)len)
+      memset(buffer.ptr + bytesRead, 0, (size_t)len - bytesRead);
+  }
+  spBuffer->Resize(bytesRead);
 
   return spBuffer;
 }

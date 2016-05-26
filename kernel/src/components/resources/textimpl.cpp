@@ -1,4 +1,4 @@
-#include "text.h"
+#include "textimpl.h"
 #include "ep/cpp/kernel.h"
 #include "components/memstream.h"
 
@@ -24,7 +24,7 @@ Array<const StaticFuncInfo> Text::GetStaticFuncs() const
   };
 }
 
-Variant Text::ComponentParamsToXMLMap(Variant map)
+Variant TextImplStatic::ComponentParamsToXMLMap(Variant map)
 {
   Variant::VarMap node;
   Array<Variant> childNodes;
@@ -58,7 +58,7 @@ Variant Text::ComponentParamsToXMLMap(Variant map)
   return node;
 }
 
-Variant Text::XMLMapToComponentParams(Variant node)
+Variant TextImplStatic::XMLMapToComponentParams(Variant node)
 {
   bool hasAttributes = false, hasChildren = false;
   Variant::VarMap map;
@@ -142,30 +142,35 @@ static Variant ParseXMLNode(rapidxml::xml_node<> *node)
   return std::move(outNode);
 }
 
-Variant Text::ParseXml()
+Variant TextImpl::ParseXml()
 {
-  Slice<const void> buffer = MapForRead();
+  char *pNew = nullptr;
+  Slice<const void> buffer = pInstance->MapForRead();
+  epscope(exit)
+  {
+    pInstance->Unmap();
+    epFree(pNew);
+  };
 
   // RapidXML requires buffer to be null terminated
   if (buffer[buffer.length - 1] != '\0')
   {
-    Unmap();
-    Resize(buffer.length + 1);
-    Slice<void> write = Map();
-    write[buffer.length] = '\0';
-    buffer = write;
+    pNew = (char*)epAlloc(buffer.length + 1);
+    memcpy(pNew, buffer.ptr, buffer.length);
+    pNew[buffer.length] = 0;
+    buffer.ptr = pNew;
   }
-  epscope(exit) { Unmap(); };
 
   using namespace rapidxml;
 
   xml_document<> doc;
   doc.parse<parse_no_string_terminators>((char *)buffer.ptr);
+  Variant r(ParseXMLNode(doc.first_node()));
 
-  return ParseXMLNode(doc.first_node());
+  return r;
 }
 
-void Text::FormatXml(Variant root)
+void TextImpl::FormatXml(Variant root)
 {
   if (!root.is(Variant::SharedPtrType::AssocArray))
   {
@@ -174,13 +179,13 @@ void Text::FormatXml(Variant root)
   }
   Variant::VarMap rootElement = root.asAssocArray();
 
-  StreamRef spOut = GetKernel().CreateComponent<MemStream>({ { "buffer", ComponentRef(this) }, { "flags", OpenFlags::Write } });
+  StreamRef spOut = GetKernel()->CreateComponent<MemStream>({ { "buffer", ComponentRef(pInstance) }, { "flags", OpenFlags::Write } });
   spOut->WriteLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 
   FormatXmlElement(spOut, rootElement, 0);
 }
 
-void Text::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth)
+void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth)
 {
   bool hasAttributes = false, hasChildren = false, hasText = false;
 
@@ -251,7 +256,7 @@ void Text::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int depth)
   }
 }
 
-uint32_t Text::GetLineNumberFromByteIndex(String buffer, size_t index)
+uint32_t TextImplStatic::GetLineNumberFromByteIndex(String buffer, size_t index)
 {
   int lineNumber = 0;
 
@@ -310,20 +315,20 @@ static Variant ParseJsonNode(const rapidjson::Value& val)
   }
 }
 
-Variant Text::ParseJson()
+Variant TextImpl::ParseJson()
 {
-  Slice<const void> buffer = MapForRead();
+  Slice<const void> buffer = pInstance->MapForRead();
 
   // RapidXML requires buffer to be null terminated
   if (buffer[buffer.length - 1] != '\0')
   {
-    Unmap();
-    Resize(buffer.length + 1);
-    Slice<void> write = Map();
+    pInstance->Unmap();
+    pInstance->Resize(buffer.length + 1);
+    Slice<void> write = pInstance->Map();
     write[buffer.length] = '\0';
     buffer = write;
   }
-  epscope(exit) { Unmap(); };
+  epscope(exit) { pInstance->Unmap(); };
 
   using namespace rapidjson;
 
@@ -333,7 +338,7 @@ Variant Text::ParseJson()
   return ParseJsonNode(document);
 }
 
-void Text::FormatJson(Variant root)
+void TextImpl::FormatJson(Variant root)
 {
   EPASSERT(false, "TODO!");
 }

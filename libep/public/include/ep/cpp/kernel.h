@@ -20,7 +20,7 @@ public:
 
   void SendMessage(String target, String sender, String message, const Variant &data) { pImpl->SendMessage(target, sender, message, data); }
 
-  template<typename ComponentType, typename Impl = void, typename GlueType = void>
+  template<typename ComponentType, typename Impl = void, typename GlueType = void, typename StaticImpl = void>
   const ComponentDesc* RegisterComponentType();
   const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) { return pImpl->RegisterComponentType(typeDesc); }
 
@@ -107,6 +107,8 @@ private:
 
   template<typename GlueType>
   void RegisterGlueType();
+  template<typename StaticImpl, typename ComponentType>
+  struct CreateStaticImpl;
 
   static Kernel* CreateInstanceInternal(Variant::VarMap commandLine);
 

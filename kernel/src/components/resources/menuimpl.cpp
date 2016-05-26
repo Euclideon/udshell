@@ -1,7 +1,7 @@
 #include "menuimpl.h"
 #include "ep/cpp/kernel.h"
 #include "rapidxml.hpp"
-#include "components/resources/text.h"
+#include "ep/cpp/component/resource/text.h"
 #include "ep/cpp/component/commandmanager.h"
 
 namespace ep {

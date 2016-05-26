@@ -30,6 +30,7 @@ public:
   int Flush() override final { return 0; }
 
   BufferRef Load() override final;
+  TextRef LoadText() override final;
   void Save(BufferRef spBuffer) override final;
 
   // TODO: support async operations?
