@@ -14,6 +14,7 @@ project "epviewer"
 	links { "udPlatform" }
 	links { "udPointCloud" }
 	links { "libep" }
+	links { "hal-sdl" }
 	links { "epkernel" }
 	links { luaPath }
 	links { "pcre" }
@@ -26,11 +27,11 @@ project "epviewer"
 	configuration { "windows", "x64" }
 		links { "assimp-ep64.lib" }
 		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64", "../ud/3rdparty/sdl2/lib/x64" }
-		postbuildcommands { "postbuild.sh x64" }
+		postbuildcommands { "$(ProjectDir)/viewer/postbuild.sh x64" }
 	configuration { "windows", "x86" }
 		links { "assimp-ep32.lib" }
 		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32", "../ud/3rdparty/sdl2/lib/x86" }
-		postbuildcommands { "postbuild.sh x86" }
+		postbuildcommands { "$(ProjectDir)/viewer/postbuild.sh x86" }
 
 	configuration { "linux" }
 		links { "assimp-ep", "GL", "dl" }

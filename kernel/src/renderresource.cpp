@@ -1,10 +1,10 @@
 #include "renderscene.h"
 #include "renderresource.h"
+#include "components/resources/shaderimpl.h"
+#include "ep/cpp/component/resource/metadata.h"
 #include "hal/texture.h"
 #include "hal/vertex.h"
 #include "hal/shader.h"
-#include "components/resources/shaderimpl.h"
-#include "ep/cpp/component/resource/metadata.h"
 
 namespace ep {
 

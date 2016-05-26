@@ -1,6 +1,9 @@
 project "viewer"
 	kind "SharedLib"
 	language "C++"
+
+	removeplatforms "x86"
+
 --	flags { }
 
 	files { "src/**" }

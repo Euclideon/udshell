@@ -1,7 +1,7 @@
 #include "imagesource.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
-#include "hal/image.h"
 #include "ep/cpp/kernel.h"
+#include "hal/image.h"
 
 namespace ep {
 

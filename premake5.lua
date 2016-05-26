@@ -14,7 +14,7 @@ solution "epshell"
 	else
 		configurations { "Debug", "DebugOpt", "Release" }
 		if _OS == "windows" then
-			platforms { "x64", "Clang" }
+			platforms { "x64", "x86", "Clang" }
 			configuration { "Clang" }
 				toolset "msc-LLVM-vs2013"
 				architecture "x86_64"
@@ -24,9 +24,9 @@ solution "epshell"
 
 	startproject "epshell"
 
-	defines { "EP_USE_QT" }
-
 	group "libs"
+		dofile "ud/3rdParty/GL/glew/project.lua"
+
 		dofile "3rdparty/lua/project.lua"
 		if _OS == "windows" then
 			dofile "3rdparty/pcre/project.lua"
@@ -36,10 +36,20 @@ solution "epshell"
 		dofile "ud/udPlatform/project.lua"
 		dofile "ud/udPointCloud/project.lua"
 
+	group "hal"
+		halBuild = "qt"
+		dofile "hal/project.lua"
+		halBuild = "sdl"
+		dofile "hal/project.lua"
+--		halBuild = "null"
+--		dofile "hal/project.lua"
+
 	group ""
 		dofile "libep/project.lua"
 		dofile "kernel/project.lua"
 		dofile "shell/project.lua"
+		dofile "viewer/project.lua"
+--		dofile "daemon/project.lua"
 		dofile "test/project.lua"
 
 	group "plugins"

@@ -6,7 +6,7 @@
 #include "components/file.h"
 #include "ep/cpp/delegate.h"
 #include "ep/cpp/kernel.h"
-#include "hal/haltimer.h"
+#include "hal/timer.h"
 
 namespace ep {
 

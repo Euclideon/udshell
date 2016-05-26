@@ -9,8 +9,8 @@
 #include "ep/cpp/component/resource/udmodel.h"
 #include "components/file.h"
 #include "components/datasources/udsource.h"
-#include "hal/image.h"
 #include "ep/cpp/kernel.h"
+#include "hal/image.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/Exporter.hpp"

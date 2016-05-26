@@ -8,9 +8,6 @@
 #include "components/resources/shaderimpl.h"
 #include "components/resources/materialimpl.h"
 
-// TODO: remove when resource cleanup is implemented
-#include "hal/driver.h"
-
 namespace ep {
 
 // shaders for blitting

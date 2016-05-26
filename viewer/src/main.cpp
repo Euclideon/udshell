@@ -11,8 +11,8 @@
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/component/node/udnode.h"
 #include "ep/cpp/component/resourcemanager.h"
-#include "components/timer.h"
 
+#include "ep/cpp/component/timer.h"
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/material.h"
 #include "ep/cpp/component/resource/arraybuffer.h"

@@ -20,6 +20,10 @@ solution "platform-web"
 		dofile "ud/udPlatform/project.lua"
 		dofile "ud/udPointCloud/project.lua"
 
+	group "hal"
+		halSuffix = "nacl"
+		dofile "hal/project.lua"
+
 	group ""
 		dofile "libep/project.lua"
 		dofile "kernel/project.lua"

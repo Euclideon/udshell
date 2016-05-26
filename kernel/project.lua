@@ -11,6 +11,8 @@ project "epkernel"
 
 	includedirs { "src" }
 
+	includedirs { "../hal/include" }
+
 	includedirs { "../ud/udPlatform/Include" }
 	includedirs { "../ud/udPointCloud/Include" }
 
@@ -19,12 +21,6 @@ project "epkernel"
 	includedirs { "../3rdparty/rapidxml-1.13" }
 	includedirs { "../3rdparty/rapidjson-1.0.2/include" }
 
-	if not qt then
---		includedirs { "../ud/3rdParty/GL/freeglut/static/Include" }
-		includedirs { "../ud/3rdParty/sdl2/include" }
-		includedirs { "../ud/3rdParty/GL/glew/include" }
-		defines { "GLEW_STATIC" }
-	end
 
 	filter { "system:windows" }
 		includedirs { "../3rdParty/pcre/include" }
@@ -50,13 +46,3 @@ project "epkernel"
 		buildcommands { path.getabsolute('.') .. '/text2c.sh "%{file.relpath}" "%{cfg.objdir}/shaders/%{file.basename}.inc" "%{file.name}"' }
 		buildoutputs { '%{cfg.objdir}/shaders/%{file.basename}.inc' }
 	filter {}
-
-	if qt then
-		qt.enable()
---		qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
-		qtmodules { "core", "core-private", "qml", "quick", "gui" }
-		qtprefix "Qt5"
-		pic "on"
-		configuration { "windows", "Debug* or DebugOpt*" }
-			qtsuffix "d"
-	end

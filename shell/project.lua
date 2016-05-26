@@ -1,6 +1,9 @@
 project "epshell"
 	kind "WindowedApp"
 	language "C++"
+
+	removeplatforms "x86"
+
 	flags { "FatalCompileWarnings" }
 
 	files { "src/**.cpp", "src/**.h" }
@@ -13,9 +16,12 @@ project "epshell"
 	links { "udPlatform" }
 	links { "udPointCloud" }
 	links { "libep" }
+	links { "hal-qt" }
 	links { "epkernel" }
 	links { luaPath }
 	links { "pcre" }
+
+	defines { "EP_USE_QT" }
 
 	qt.enable()
 --	qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
