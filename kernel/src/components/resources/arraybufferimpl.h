@@ -29,6 +29,8 @@ public:
 
   void Allocate(SharedString _elementType, size_t _elementSize, Slice<const size_t> _shape) override final;
 
+  bool ReshapeInternal(Slice<const size_t> shape, bool copy) override final;
+
   SharedString GetElementType() const override final { return elementType; }
   size_t GetElementSize() const override final { return elementSize; }
   size_t GetNumDimensions() const override final { return dimensions; }

@@ -40,7 +40,7 @@ SHARED_CLASS(ArrayBuffer);
 
 class ArrayBuffer : public Buffer
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(ep, ArrayBuffer, IArrayBuffer, Buffer, EPKERNEL_PLUGINVERSION, "ArrayBuffer desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, ArrayBuffer, IArrayBuffer, Buffer, EPKERNEL_PLUGINVERSION, "Buffer object for arrays of elements", 0)
 public:
 
   // array allocation
@@ -84,6 +84,9 @@ public:
     }
     Unmap();
   }
+
+  bool Reshape(size_t elements) { return Reshape(Slice<size_t>(&elements, 1)); }
+  bool Reshape(Slice<const size_t> shape) { return ReshapeInternal(shape, true); }
 
   SharedString GetElementType() const { return pImpl->GetElementType(); }
   size_t GetElementSize() const { return pImpl->GetElementSize(); }
@@ -140,6 +143,8 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
+  bool ReshapeInternal(Slice<const size_t> shape, bool copy) { return pImpl->ReshapeInternal(shape, copy); }
+
 private:
   void AllocateMethod(SharedString _elementType, size_t _elementSize, Variant length)
   {
@@ -151,6 +156,10 @@ private:
     else
       Allocate(_elementType, _elementSize, length.as<Array<size_t>>());
   }
+
+  // Buffer's raw alloc/resize functions are hidden at this level of abstraction
+  bool Allocate(size_t) override final { EPASSERT_THROW(false, Result::InvalidCall, "Can't call Buffer::Allocate for ArrayBuffer!"); return false; }
+  bool Resize(size_t) override final { EPASSERT_THROW(false, Result::InvalidCall, "Can't call Buffer::Resize for ArrayBuffer!"); return false; }
 
   Array<const PropertyInfo> GetProperties() const;
   Array<const MethodInfo> GetMethods() const;

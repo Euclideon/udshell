@@ -68,4 +68,44 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
   pInstance->GetMetadata()->Insert("attributeinfo", elementMetadata);
 }
 
+bool ArrayBufferImpl::ReshapeInternal(Slice<const size_t> _shape, bool copy)
+{
+  // count total number of elements
+  size_t elements = 1;
+  for (size_t i = 0; i < _shape.length; ++i)
+    elements *= _shape.ptr[i];
+
+  // resize the buffer
+  pInstance->Buffer::ResizeInternal(elements*elementSize, copy);
+  if (copy)
+  {
+    // we only need to shuffle if the lesser significant dimensions changed size
+    size_t shuffleDimensions = dimensions < _shape.length ? dimensions : _shape.length;
+    bool needsShuffle = false;
+    for (size_t i = 0; i < shuffleDimensions-1; ++i)
+    {
+      if (_shape.ptr[i] != shape[i])
+      {
+        needsShuffle = true;
+        break;
+      }
+    }
+
+    if (needsShuffle)
+    {
+      // if >1D array, and the dimensions changed, we need to shuffle the memory...
+      EPASSERT(false, "TODO: support non-destructive resizing multi-dimensional arrays!");
+
+      // TODO: if the 'x' dimension grew, then existing data needs to be interleaved with empty space
+    }
+  }
+
+  // record new dimensions
+  dimensions = _shape.length;
+  for (size_t i = 0; i < _shape.length; ++i)
+    shape[i] = _shape.ptr[i];
+
+  return true; // TODO Error handling
+}
+
 } // namespace ep
