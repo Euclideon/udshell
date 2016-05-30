@@ -42,7 +42,6 @@ static SubscriptionRef spCITimerSub;
 static bool CITest = false;
 static GeomNodeRef spTestGeomNode;
 
-MutableString256 projFilePath;
 MutableString256 projectName;
 
 // ---------------------------------------------------------------------------------------
@@ -430,11 +429,8 @@ void Init(String sender, String message, const Variant &data)
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 
-  if (!projFilePath.empty())
-    OpenProject(projFilePath);
 #ifdef _DEBUG
-  else
-    OpenProject("testproj.epproj");
+  OpenProject("testproj.epproj");
 #endif
 
   if (CITest)
@@ -467,13 +463,7 @@ int main(int argc, char *argv[])
   if (argc > 1)
   {
     if (String(argv[1]).eqIC("CITest"))
-    {
       CITest = true;
-    }
-    else
-    {
-      projFilePath.append(argv[1]);
-    }
   }
 
   // install our qt message handler

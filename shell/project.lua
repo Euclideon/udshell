@@ -22,13 +22,16 @@ project "epshell"
 	links { "pcre" }
 
 	defines { "EP_USE_QT" }
+	configuration { "*QML" }
+		defines { "QT_QML_DEBUG" }
+	configuration {}
 
 	qt.enable()
 --	qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
 	qtmodules { "core", "qml", "quick", "gui" }
 	qtprefix "Qt5"
 	pic "on"
-	configuration { "windows", "Debug* or DebugOpt*" }
+	configuration { "windows", "Debug*" }
 		qtsuffix "d"
 
 	configuration { "windows" }
