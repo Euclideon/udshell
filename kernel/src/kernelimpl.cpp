@@ -14,6 +14,7 @@
 #include "components/pluginloader.h"
 #include "components/nativepluginloader.h"
 #include "components/project.h"
+#include "components/settings.h"
 #include "ep/cpp/component/resource/kvpstore.h"
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
@@ -286,6 +287,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<CommandManager, CommandManagerImpl>();
   pInstance->RegisterComponentType<Project>();
   pInstance->RegisterComponentType<Timer, TimerImpl>();
+  pInstance->RegisterComponentType<Settings>();
   pInstance->RegisterComponentType<Lua>();
   pInstance->RegisterComponentType<View, ViewImpl>();
   pInstance->RegisterComponentType<Activity, ActivityImpl>();
@@ -344,6 +346,9 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
 
   // command manager
   spCommandManager = pInstance->CreateComponent<CommandManager>({ { "name", "commandmanager" } });
+
+  // settings
+  spSettings = pInstance->CreateComponent<Settings>({ { "name", "settings" }, { "src", "settings.epset" } });
 
   // plugin manager
   spPluginManager = pInstance->CreateComponent<PluginManager>({ { "name", "pluginmanager" } });
@@ -919,6 +924,11 @@ SharedPtr<Renderer> KernelImpl::GetRenderer() const
 CommandManagerRef KernelImpl::GetCommandManager() const
 {
   return spCommandManager;
+}
+
+SettingsRef KernelImpl::GetSettings() const
+{
+  return spSettings;
 }
 
 ResourceManagerRef KernelImpl::GetResourceManager() const
