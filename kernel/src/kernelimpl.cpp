@@ -207,6 +207,18 @@ Kernel::~Kernel()
   // HACK: undo chicken/egg hacks
   Component::pImpl = nullptr;
   (Kernel*&)pKernel = nullptr;
+
+  // Unhook the registered components from our stack before they get deleted
+  const ComponentDesc *pDesc = pType;
+  while (pDesc)
+  {
+    if (pDesc->pSuperDesc && !(pDesc->pSuperDesc->info.flags & ComponentInfoFlags::Unregistered))
+    {
+      (const ComponentDesc*&)pDesc->pSuperDesc = nullptr;
+      break;
+    }
+    pDesc = pDesc->pSuperDesc;
+  }
 }
 
 Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCount)

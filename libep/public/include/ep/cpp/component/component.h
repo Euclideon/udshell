@@ -132,7 +132,7 @@ protected:
   {
     pImpl = nullptr;
     // unregistered component types aren't in the registry and will be deleted when the component destroys
-    while (pType->info.flags & ComponentInfoFlags::Unregistered)
+    while (pType && pType->info.flags & ComponentInfoFlags::Unregistered)
     {
       const ComponentDesc *pDesc = pType;
       (const ComponentDesc*&)pType = pType->pSuperDesc;
