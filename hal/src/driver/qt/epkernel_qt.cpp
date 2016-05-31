@@ -392,7 +392,7 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initP
   QmlComponentData data(file, pQmlEngine);
   QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
   ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, newUid, spInstance, initParams);
-  spInstance->AttachToGlue(spC.ptr());
+  spInstance->AttachToGlue(spC.ptr(), initParams);
   pDesc->PopulateFromDesc(pSuper);
 
   // add to the component registry

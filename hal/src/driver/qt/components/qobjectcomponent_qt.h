@@ -33,7 +33,7 @@ public:
 private:
   friend class QtKernel;
 
-  void AttachToGlue(Component *pGlue) override final;
+  void AttachToGlue(Component *pGlue, ep::Variant::VarMap initParams) override final;
 
   QObject *pQObject = nullptr;
   bool hasOwnership = false;

@@ -47,7 +47,7 @@ public:
   }
 
   ep::DynamicComponentRef CreateComponent(ep::KernelRef spKernel, ep::Variant::VarMap initParams = nullptr);
-  QObject *CreateInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent);
+  QObject *CreateInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent, ep::Variant::VarMap initParams);
 
 private:
   QQmlComponent qmlComponent;

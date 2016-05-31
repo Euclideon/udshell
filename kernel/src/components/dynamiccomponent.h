@@ -71,7 +71,7 @@ protected:
     return pDesc;
   }
 
-  virtual void AttachToGlue(Component *pGlue) { pThis = pGlue; }
+  virtual void AttachToGlue(Component *pGlue, Variant::VarMap initParams) { pThis = pGlue; }
 
   Component *pThis;
 
