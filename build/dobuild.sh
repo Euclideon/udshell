@@ -1,4 +1,7 @@
+#!/bin/bash
+#set -e
 #set -x #echo on
+
 if [ $OSTYPE == "msys" ]; then # Windows, MingW
   # These must be here until Runner specific variables are implemented
   if [ -z "$QTDIR" ]; then
@@ -52,3 +55,7 @@ else
   fi
   if [ $? -ne 0 ]; then exit 5; fi
 fi
+
+echo "Executing post-build..."
+./build/postbuild.sh $1 $2 $3
+

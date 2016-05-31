@@ -1,4 +1,7 @@
+#!/bin/bash
+#set -e
 #set -x #echo on
+
 function execute_build() {
   ./build/dobuild.sh $1 $2 $3 $4
 }

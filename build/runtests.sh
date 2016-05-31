@@ -1,7 +1,10 @@
+#!/bin/bash
+#set -e
 #set -x #echo on
+
 function run_testsuite() {
   if [ $OSTYPE == "msys" ]; then # Windows, MingW
-    if [ $3 == "win32" ]; then
+    if [ $3 == "Win32" ]; then
       PLAT="x86"
     else
       PLAT=$3
