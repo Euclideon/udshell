@@ -5,7 +5,7 @@
 #include "ep/cpp/component/component.h"
 #include "ep/cpp/component/node/node.h"
 #include "ep/cpp/internal/i/iscene.h"
-#include "ep/c/input.h"
+#include "ep/cpp/input.h"
 
 namespace ep {
 
@@ -39,7 +39,7 @@ class Scene : public Resource
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Scene, IScene, Resource, EPKERNEL_PLUGINVERSION, "Scene desc...", 0)
 
 public:
-  virtual bool InputEvent(const epInputEvent &ev) { return pImpl->InputEvent(ev); }
+  virtual bool InputEvent(const ep::InputEvent &ev) { return pImpl->InputEvent(ev); }
   virtual void Update(double timeDelta) { pImpl->Update(timeDelta); }
 
   Variant Save() const override { return pImpl->Save(); }

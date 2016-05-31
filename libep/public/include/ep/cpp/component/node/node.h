@@ -7,7 +7,7 @@
 
 #include "ep/cpp/math.h"
 #include "ep/cpp/component/resource/resource.h"
-#include "ep/c/input.h"
+#include "ep/cpp/input.h"
 
 namespace ep {
 
@@ -49,7 +49,7 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  virtual bool InputEvent(const epInputEvent &ev) { return pImpl->InputEvent(ev); }
+  virtual bool InputEvent(const ep::InputEvent &ev) { return pImpl->InputEvent(ev); }
   virtual bool Update(double timeStep) { return pImpl->Update(timeStep); }
   virtual void Render(RenderScene &spScene, const Double4x4 &mat) { pImpl->Render(spScene, mat); }
 

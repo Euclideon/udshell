@@ -15,7 +15,7 @@
 #include "driver/qt/epkernel_qt.h"
 #include "driver/qt/ui/renderview_qt.h"
 
-epKeyCode qtKeyToEPKey(Qt::Key qk);
+ep::KeyCode qtKeyToEPKey(Qt::Key qk);
 
 namespace qt {
 
@@ -139,10 +139,10 @@ QSGNode *QtRenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNod
 
 void QtRenderView::focusInEvent(QFocusEvent * event)
 {
-  epInputEvent ev;
-  ev.deviceType = epID_Keyboard;
+  ep::InputEvent ev;
+  ev.deviceType = ep::InputDevice::Keyboard;
   ev.deviceId = 0;
-  ev.eventType = epInputEvent::Focus;
+  ev.eventType = ep::InputEvent::EventType::Focus;
   ev.hasFocus = true;
 
   if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
@@ -153,10 +153,10 @@ void QtRenderView::focusInEvent(QFocusEvent * event)
 
 void QtRenderView::focusOutEvent(QFocusEvent * event)
 {
-  epInputEvent ev;
-  ev.deviceType = epID_Keyboard;
+  ep::InputEvent ev;
+  ev.deviceType = ep::InputDevice::Keyboard;
   ev.deviceId = 0;
-  ev.eventType = epInputEvent::Focus;
+  ev.eventType = ep::InputEvent::EventType::Focus;
   ev.hasFocus = false;
 
   if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
@@ -169,14 +169,14 @@ void QtRenderView::keyPressEvent(QKeyEvent *pEv)
 {
   if (!pEv->isAutoRepeat())
   {
-    epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
-    if (kc == epKC_Unknown)
+    ep::KeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
+    if (kc == ep::KeyCode::Unknown)
       return;
-    epInputEvent ev;
-    ev.deviceType = epID_Keyboard;
+    ep::InputEvent ev;
+    ev.deviceType = ep::InputDevice::Keyboard;
     ev.deviceId = 0; // TODO: get keyboard id
-    ev.eventType = epInputEvent::Key;
-    ev.key.key = kc;
+    ev.eventType = ep::InputEvent::EventType::Key;
+    ev.key.key = (int)kc;
     ev.key.state = 1;
     if (!spView || !spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
       pEv->ignore();
@@ -187,14 +187,14 @@ void QtRenderView::keyReleaseEvent(QKeyEvent *pEv)
 {
   if (!pEv->isAutoRepeat())
   {
-    epKeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
-    if (kc == epKC_Unknown)
+    ep::KeyCode kc = qtKeyToEPKey((Qt::Key)pEv->key());
+    if (kc == ep::KeyCode::Unknown)
       return;
-    epInputEvent ev;
-    ev.deviceType = epID_Keyboard;
+    ep::InputEvent ev;
+    ev.deviceType = ep::InputDevice::Keyboard;
     ev.deviceId = 0; // TODO: get keyboard id
-    ev.eventType = epInputEvent::Key;
-    ev.key.key = kc;
+    ev.eventType = ep::InputEvent::EventType::Key;
+    ev.key.key = (int)kc;
     ev.key.state = 0;
     if (!spView || !spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
       pEv->ignore();
@@ -213,10 +213,10 @@ void QtRenderView::mouseMoveEvent(QMouseEvent *pEv)
   qreal x = pos.x();
   qreal y = pos.y();
 
-  epInputEvent ev;
-  ev.deviceType = epID_Mouse;
+  ep::InputEvent ev;
+  ev.deviceType = ep::InputDevice::Mouse;
   ev.deviceId = 0; // TODO: get mouse id
-  ev.eventType = epInputEvent::Move;
+  ev.eventType = ep::InputEvent::EventType::Move;
   ev.move.xDelta = (float)(mouseLastX - x);
   ev.move.yDelta = (float)(mouseLastY - y);
   ev.move.xAbsolute = (float)x;
@@ -236,10 +236,10 @@ void QtRenderView::mousePressEvent(QMouseEvent *pEv)
   if ((pEv->buttons() & Qt::LeftButton) && !hasActiveFocus())
     forceActiveFocus();
 
-  epInputEvent ev;
-  ev.deviceType = epID_Mouse;
+  ep::InputEvent ev;
+  ev.deviceType = ep::InputDevice::Mouse;
   ev.deviceId = 0; // TODO: get mouse id
-  ev.eventType = epInputEvent::Key;
+  ev.eventType = ep::InputEvent::EventType::Key;
   ev.key.key = pEv->button();
   ev.key.state = 1;
   if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
@@ -250,10 +250,10 @@ void QtRenderView::mousePressEvent(QMouseEvent *pEv)
 
 void QtRenderView::mouseReleaseEvent(QMouseEvent *pEv)
 {
-  epInputEvent ev;
-  ev.deviceType = epID_Mouse;
+  ep::InputEvent ev;
+  ev.deviceType = ep::InputDevice::Mouse;
   ev.deviceId = 0; // TODO: get mouse id
-  ev.eventType = epInputEvent::Key;
+  ev.eventType = ep::InputEvent::EventType::Key;
   ev.key.key = pEv->button();
   ev.key.state = 0;
   if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
@@ -278,10 +278,10 @@ void QtRenderView::hoverMoveEvent(QHoverEvent *pEv)
   mouseLastX = oldPos.x();
   mouseLastY = oldPos.y();
 
-  epInputEvent ev;
-  ev.deviceType = epID_Mouse;
+  ep::InputEvent ev;
+  ev.deviceType = ep::InputDevice::Mouse;
   ev.deviceId = 0; // TODO: get mouse id
-  ev.eventType = epInputEvent::Move;
+  ev.eventType = ep::InputEvent::EventType::Move;
   ev.move.xDelta = (float)(mouseLastX - x);
   ev.move.yDelta = (float)(mouseLastY - y);
   ev.move.xAbsolute = (float)x;

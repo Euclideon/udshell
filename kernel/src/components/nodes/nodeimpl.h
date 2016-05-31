@@ -43,7 +43,7 @@ protected:
   friend class Scene;
   friend class SceneNodeImpl;
 
-  bool InputEvent(const epInputEvent &ev) override final;
+  bool InputEvent(const ep::InputEvent &ev) override final;
   bool Update(double timeStep) override final;
   void Render(RenderScene &spScene, const Double4x4 &mat) override final;
 

@@ -60,7 +60,7 @@ protected:
     Float2 delta = { 0, 0 };
   } mouse;
 
-  bool ViewportInputEvent(const epInputEvent &ev) override final;
+  bool ViewportInputEvent(const InputEvent &ev) override final;
   bool Update(double timeStep) override final;
 };
 

@@ -74,9 +74,9 @@ SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initPar
     SetHelicopterMode(paramHeli->asBool());
 }
 
-bool SimpleCameraImpl::ViewportInputEvent(const epInputEvent &ev)
+bool SimpleCameraImpl::ViewportInputEvent(const InputEvent &ev)
 {
-  if (ev.eventType == epInputEvent::EventType::Focus)
+  if (ev.eventType == InputEvent::EventType::Focus)
   {
     if (!ev.hasFocus)
     {
@@ -84,61 +84,63 @@ bool SimpleCameraImpl::ViewportInputEvent(const epInputEvent &ev)
       stateChanged = true;
     }
   }
-  else if (ev.deviceType == epID_Keyboard)
+  else if (ev.deviceType == InputDevice::Keyboard)
   {
-    if (ev.eventType == epInputEvent::EventType::Key)
+    if (ev.eventType == InputEvent::EventType::Key)
     {
-      switch (ev.key.key)
+      switch ((KeyCode)ev.key.key)
       {
-        case epKC_W:
-        case epKC_Up:
+        case KeyCode::W:
+        case KeyCode::Up:
           keyState[(int)Keys::Up] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
-        case epKC_S:
-        case epKC_Down:
+        case KeyCode::S:
+        case KeyCode::Down:
           keyState[(int)Keys::Down] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
-        case epKC_A:
-        case epKC_Left:
+        case KeyCode::A:
+        case KeyCode::Left:
           keyState[(int)Keys::Left] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
-        case epKC_D:
-        case epKC_Right:
+        case KeyCode::D:
+        case KeyCode::Right:
           keyState[(int)Keys::Right] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
-        case epKC_R:
-        case epKC_PageUp:
+        case KeyCode::R:
+        case KeyCode::PageUp:
           keyState[(int)Keys::Elevate] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
-        case epKC_F:
-        case epKC_PageDown:
+        case KeyCode::F:
+        case KeyCode::PageDown:
           keyState[(int)Keys::Descend] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
-        case epKC_LShift:
-        case epKC_RShift:
+        case KeyCode::LShift:
+        case KeyCode::RShift:
           keyState[(int)Keys::Boost] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
-        case epKC_1:
+        case KeyCode::_1:
           keyState[(int)Keys::Key_1] = ev.key.state ? 1 : 0;
           stateChanged = true;
           break;
-        case epKC_2:
+        case KeyCode::_2:
           keyState[(int)Keys::Key_2] = ev.key.state ? 1 : 0;
           stateChanged = true;
+          break;
+        default:
           break;
       }
     }
   }
-  else if (ev.deviceType == epID_Mouse)
+  else if (ev.deviceType == InputDevice::Mouse)
   {
-    if (ev.eventType == epInputEvent::Move)
+    if (ev.eventType == InputEvent::EventType::Move)
     {
       if (mouse.buttons[Mouse::Left])
       {
@@ -158,7 +160,7 @@ bool SimpleCameraImpl::ViewportInputEvent(const epInputEvent &ev)
       mouse.delta = mouse.prevAbsolute - mouse.absolute;
       stateChanged = true;
     }
-    else if (ev.eventType == epInputEvent::Key)
+    else if (ev.eventType == InputEvent::EventType::Key)
     {
       int button = mouseRemap[ev.key.key];
 
@@ -185,9 +187,9 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
   // rotations
   double rotSpeed = 3.14159*0.5*timeDelta;
-  if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisRY)) > 0.2f)
+  if(fabs(s = epInput_State(InputDevice::Gamepad, GamepadControl::AxisRY)) > 0.2f)
     pitch += s*invertedYAxis*rotSpeed;
-  if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisRX)) > 0.2f)
+  if(fabs(s = epInput_State(InputDevice::Gamepad, GamepadControl::AxisRX)) > 0.2f)
     yaw += -s*rotSpeed;
 
   if (mouse.buttons[Mouse::Left])
@@ -196,19 +198,19 @@ bool SimpleCameraImpl::Update(double timeDelta)
     yaw += mouse.delta.x*0.005;
   }
 
-  if(epInput_State(epID_Mouse, epMC_LeftButton))
+  if(epInput_State(InputDevice::Mouse, MouseControls::LeftButton))
   {
-    pitch += epInput_State(epID_Mouse, epMC_YDelta)*invertedYAxis*0.005;
-    yaw += -epInput_State(epID_Mouse, epMC_XDelta)*0.005;
+    pitch += epInput_State(InputDevice::Mouse, MouseControls::YDelta)*invertedYAxis*0.005;
+    yaw += -epInput_State(InputDevice::Mouse, MouseControls::XDelta)*0.005;
   }
 
-  yaw += epInput_State(epID_Keyboard, epKC_Q)*rotSpeed
-         -epInput_State(epID_Keyboard, epKC_E)*rotSpeed;
+  yaw += epInput_State(InputDevice::Keyboard, (int)KeyCode::Q)*rotSpeed
+         -epInput_State(InputDevice::Keyboard, (int)KeyCode::E)*rotSpeed;
 
   // translations
-  if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisLY)) > 0.2f)
+  if(fabs(s = epInput_State(InputDevice::Gamepad, GamepadControl::AxisLY)) > 0.2f)
     ty += -s;
-  if(fabs(s = epInput_State(epID_Gamepad, epGC_AxisLX)) > 0.2f)
+  if(fabs(s = epInput_State(InputDevice::Gamepad, GamepadControl::AxisLX)) > 0.2f)
     tx += s;
 
   ty += keyState[(int)Keys::Up]
@@ -217,10 +219,10 @@ bool SimpleCameraImpl::Update(double timeDelta)
         -keyState[(int)Keys::Left];
   tz += keyState[(int)Keys::Elevate]
         -keyState[(int)Keys::Descend]
-        +epInput_State(epID_Gamepad, epGC_ButtonDUp)
-        -epInput_State(epID_Gamepad, epGC_ButtonDDown)
-        +epInput_State(epID_Gamepad, epGC_ButtonRT)
-        -epInput_State(epID_Gamepad, epGC_ButtonLT);
+        +epInput_State(InputDevice::Gamepad, GamepadControl::ButtonDUp)
+        -epInput_State(InputDevice::Gamepad, GamepadControl::ButtonDDown)
+        +epInput_State(InputDevice::Gamepad, GamepadControl::ButtonRT)
+        -epInput_State(InputDevice::Gamepad, GamepadControl::ButtonLT);
 
   ty += mouse.buttons[Mouse::Right];
 
@@ -231,25 +233,25 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
   // mode switch
 #if 0
-  bool bToggle = !!epInput_WasPressed(epID_Gamepad, epGC_ButtonY);
-  if(epInput_State(epID_Keyboard, epKC_1) || (bToggle && helicopterMode))
+  bool bToggle = !!epInput_WasPressed(InputDevice::Gamepad, GamepadControl::ButtonY);
+  if(epInput_State(InputDevice::Keyboard, KeyCode::1) || (bToggle && helicopterMode))
     helicopterMode(false);
-  else if(epInput_State(epID_Keyboard, epKC_2) || (bToggle && !helicopterMode))
+  else if(epInput_State(InputDevice::Keyboard, KeyCode::2) || (bToggle && !helicopterMode))
     helicopterMode(true);
 #endif // 0
   double tmpSpeed = 1.0;
-  if((s = -epInput_State(epID_Mouse, epMC_Wheel)) != 0.0)
+  if((s = -epInput_State(InputDevice::Mouse, MouseControls::Wheel)) != 0.0)
     tmpSpeed = pow(1.2, s);
-  if(epInput_State(epID_Gamepad, epGC_ButtonA) || epInput_State(epID_Keyboard, epKC_Equals) || epInput_State(epID_Keyboard, epKC_NumpadPlus))
+  if(epInput_State(InputDevice::Gamepad, (int)GamepadControl::ButtonA) || epInput_State(InputDevice::Keyboard, (int)KeyCode::Equals) || epInput_State(InputDevice::Keyboard, (int)KeyCode::NumpadPlus))
     tmpSpeed = 1.0 + 1.0*timeDelta;
-  if(epInput_State(epID_Gamepad, epGC_ButtonB) || epInput_State(epID_Keyboard, epKC_Hyphen) || epInput_State(epID_Keyboard, epKC_NumpadMinus))
+  if(epInput_State(InputDevice::Gamepad, (int)GamepadControl::ButtonB) || epInput_State(InputDevice::Keyboard, (int)KeyCode::Hyphen) || epInput_State(InputDevice::Keyboard, (int)KeyCode::NumpadMinus))
     tmpSpeed = 1.0 - 0.5*timeDelta;
   this->speed = Clamp(speed * tmpSpeed, 0.001, 999.0);
 
   float multiplier = 1.f;
-  if (keyState[(int)Keys::Boost] || epInput_State(epID_Gamepad, epGC_ButtonRB))
+  if (keyState[(int)Keys::Boost] || epInput_State(InputDevice::Gamepad, GamepadControl::ButtonRB))
     multiplier *= 3.f;
-  if(epInput_State(epID_Gamepad, epGC_ButtonLB))
+  if(epInput_State(InputDevice::Gamepad, GamepadControl::ButtonLB))
     multiplier *= 0.333f;
 
   tmpSpeed = speed * multiplier * timeDelta;

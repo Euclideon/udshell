@@ -7,34 +7,36 @@
 
 #include "input_internal.h"
 
+using namespace ep;
+
 
 static unsigned char fkeysToEPKey[] =
 {
-  epKC_F1,
-  epKC_F2,
-  epKC_F3,
-  epKC_F4,
-  epKC_F5,
-  epKC_F6,
-  epKC_F7,
-  epKC_F8,
-  epKC_F9,
-  epKC_F10,
-  epKC_F11,
-  epKC_F12
+  KeyCode::F1,
+  KeyCode::F2,
+  KeyCode::F3,
+  KeyCode::F4,
+  KeyCode::F5,
+  KeyCode::F6,
+  KeyCode::F7,
+  KeyCode::F8,
+  KeyCode::F9,
+  KeyCode::F10,
+  KeyCode::F11,
+  KeyCode::F12
 };
 
 static unsigned char specialToEPKey[] =
 {
-  epKC_Left,
-  epKC_Up,
-  epKC_Right,
-  epKC_Down,
-  epKC_PageUp,
-  epKC_PageDown,
-  epKC_Home,
-  epKC_End,
-  epKC_Insert
+  KeyCode::Left,
+  KeyCode::Up,
+  KeyCode::Right,
+  KeyCode::Down,
+  KeyCode::PageUp,
+  KeyCode::PageDown,
+  KeyCode::Home,
+  KeyCode::End,
+  KeyCode::Insert
 };
 
 
@@ -44,7 +46,7 @@ InputState gInputAccum;
 // Author: Manu Evans, March 2015
 static void KeyPressedFunc(unsigned char key, int, int)
 {
-  if(epAsciiToEPKey[key] != epKC_Unknown)
+  if((KeyCode)epAsciiToEPKey[key] != KeyCode::Unknown)
     gInputAccum.keys[0][epAsciiToEPKey[key]] = 1;
 }
 
@@ -52,7 +54,7 @@ static void KeyPressedFunc(unsigned char key, int, int)
 // Author: Manu Evans, March 2015
 static void KeyReleasedFunc(unsigned char key, int, int)
 {
-  if(epAsciiToEPKey[key] != epKC_Unknown)
+  if((KeyCode)epAsciiToEPKey[key] != KeyCode::Unknown)
     gInputAccum.keys[0][epAsciiToEPKey[key]] = 0;
 }
 
@@ -81,17 +83,17 @@ static void SpecialKeyReleasedFunc(int key, int, int)
 static void MouseFunc(int button, int state, int x, int y)
 {
   if (button >= 0 && button < 4)
-    gInputAccum.mouse[0][epMC_LeftButton + button] = state == GLUT_DOWN ? 1.f : 0.f;
-  gInputAccum.mouse[0][epMC_XAbsolute] = (float)x;
-  gInputAccum.mouse[0][epMC_YAbsolute] = (float)y;
+    gInputAccum.mouse[0][MouseControls::LeftButton + button] = state == GLUT_DOWN ? 1.f : 0.f;
+  gInputAccum.mouse[0][MouseControls::XAbsolute] = (float)x;
+  gInputAccum.mouse[0][MouseControls::YAbsolute] = (float)y;
 }
 
 // --------------------------------------------------------
 // Author: Manu Evans, March 2015
 static void PassiveMotionFunc(int x, int y)
 {
-  gInputAccum.mouse[0][epMC_XAbsolute] = (float)x;
-  gInputAccum.mouse[0][epMC_YAbsolute] = (float)y;
+  gInputAccum.mouse[0][MouseControls::XAbsolute] = (float)x;
+  gInputAccum.mouse[0][MouseControls::YAbsolute] = (float)y;
 }
 
 // --------------------------------------------------------
@@ -119,29 +121,29 @@ void epInput_UpdateInternal()
   input = gInputAccum;
 
   // update deltas
-  input.mouse[0][epMC_XDelta] = input.mouse[0][epMC_XAbsolute] - prev.mouse[0][epMC_XAbsolute];
-  input.mouse[0][epMC_YDelta] = input.mouse[0][epMC_YAbsolute] - prev.mouse[0][epMC_YAbsolute];
+  input.mouse[0][MouseControls::XDelta] = input.mouse[0][MouseControls::XAbsolute] - prev.mouse[0][MouseControls::XAbsolute];
+  input.mouse[0][MouseControls::YDelta] = input.mouse[0][MouseControls::YAbsolute] - prev.mouse[0][MouseControls::YAbsolute];
 
   // poll gamepads
   //...
 
   // Fix up numpad
-  input.keys[0][epKC_NumpadMinus]   = input.keys[0][epKC_Hyphen];
-  input.keys[0][epKC_NumpadDivide]  = input.keys[0][epKC_ForwardSlash];
-  input.keys[0][epKC_NumpadDecimal] = input.keys[0][epKC_Period];
-  input.keys[0][epKC_NumpadEnter]   = input.keys[0][epKC_Enter];
+  input.keys[0][KeyCode::NumpadMinus]   = input.keys[0][KeyCode::Hyphen];
+  input.keys[0][KeyCode::NumpadDivide]  = input.keys[0][KeyCode::ForwardSlash];
+  input.keys[0][KeyCode::NumpadDecimal] = input.keys[0][KeyCode::Period];
+  input.keys[0][KeyCode::NumpadEnter]   = input.keys[0][KeyCode::Enter];
 
-  input.keys[0][epKC_Numpad0]   = input.keys[0][epKC_0];
-  input.keys[0][epKC_Numpad1]   = input.keys[0][epKC_1];
-  input.keys[0][epKC_Numpad2]   = input.keys[0][epKC_2];
-  input.keys[0][epKC_Numpad3]   = input.keys[0][epKC_3];
-  input.keys[0][epKC_Numpad4]   = input.keys[0][epKC_4];
+  input.keys[0][KeyCode::Numpad0]   = input.keys[0][KeyCode::N0];
+  input.keys[0][KeyCode::Numpad1]   = input.keys[0][KeyCode::N1];
+  input.keys[0][KeyCode::Numpad2]   = input.keys[0][KeyCode::N2];
+  input.keys[0][KeyCode::Numpad3]   = input.keys[0][KeyCode::N3];
+  input.keys[0][KeyCode::Numpad4]   = input.keys[0][KeyCode::N4];
 
-  input.keys[0][epKC_Numpad5]   = input.keys[0][epKC_5];
-  input.keys[0][epKC_Numpad6]   = input.keys[0][epKC_6];
-  input.keys[0][epKC_Numpad7]   = input.keys[0][epKC_7];
-  input.keys[0][epKC_Numpad8]   = input.keys[0][epKC_8];
-  input.keys[0][epKC_Numpad9]   = input.keys[0][epKC_9];
+  input.keys[0][KeyCode::Numpad5]   = input.keys[0][KeyCode::N5];
+  input.keys[0][KeyCode::Numpad6]   = input.keys[0][KeyCode::N6];
+  input.keys[0][KeyCode::Numpad7]   = input.keys[0][KeyCode::N7];
+  input.keys[0][KeyCode::Numpad8]   = input.keys[0][KeyCode::N8];
+  input.keys[0][KeyCode::Numpad9]   = input.keys[0][KeyCode::N9];
 
 
 }

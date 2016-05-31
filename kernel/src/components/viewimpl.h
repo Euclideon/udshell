@@ -64,7 +64,7 @@ public:
   RenderableViewRef GetRenderableView() const { return spLatestFrame; }
 
   // TODO: Should this go in the public (non-impl) api? ideally should be protected but is used in the driver...
-  bool InputEvent(const epInputEvent &ev);
+  bool InputEvent(const ep::InputEvent &ev);
 
 //private:
 //  // TODO: REMOVE THESE FRIEND HACKS (IF POSSIBLE)
@@ -81,6 +81,9 @@ public:
     if ((spCamera && spCamera->Update(timeStep)) || pickingEnabled)
       OnDirty();
   }
+
+  void SetInputEventHook(Delegate<bool(ep::InputEvent)> eventHook) { inputEventHook = eventHook; }
+  void ClearInputEventHook() { inputEventHook = nullptr; }
 
   Double3 pickedPoint = { 0, 0, 0 };
 
@@ -114,6 +117,7 @@ public:
   Array<PickRequest> pickRequests;*/
 private:
   udRenderFlags GetRenderableUDFlags();
+  Delegate<bool(ep::InputEvent)> inputEventHook;
 };
 
 
