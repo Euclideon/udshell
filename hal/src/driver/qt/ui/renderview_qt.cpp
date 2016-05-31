@@ -14,6 +14,7 @@
 
 #include "driver/qt/epkernel_qt.h"
 #include "driver/qt/ui/renderview_qt.h"
+#include "driver/qt/util/typeconvert_qt.h"
 
 ep::KeyCode qtKeyToEPKey(Qt::Key qk);
 
@@ -66,9 +67,7 @@ QtRenderView::QtRenderView(QQuickItem *pParent)
   QObject::connect(this, &QQuickItem::heightChanged, this, &QtRenderView::OnResize);
   QObject::connect(this, &QQuickItem::visibleChanged, this, &QtRenderView::OnVisibleChanged);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
   setMirrorVertically(true);
-#endif
 }
 
 QtRenderView::~QtRenderView()
@@ -82,10 +81,13 @@ QQuickFramebufferObject::Renderer *QtRenderView::createRenderer() const
   return new QtFboRenderer(this);
 }
 
-void QtRenderView::AttachView(ep::ViewRef _spView)
+void QtRenderView::attachView(const QVariant &view)
 {
-  spView = _spView;
-  spView->FrameReady.Subscribe(ep::Delegate<void()>(this, &QtRenderView::OnFrameReady));
+  using namespace ep;
+  spView = component_cast<View>(Variant(view).asComponent());
+  spView->LogDebug(2, "Attaching View Component '{0}' to Render Viewport", spView->GetUid());
+
+  spView->FrameReady.Subscribe(Delegate<void()>(this, &QtRenderView::OnFrameReady));
 
   // TEMP HAX:
   QtApplication::Kernel()->SetFocusView(spView);
@@ -120,22 +122,6 @@ void QtRenderView::componentComplete()
   setAcceptHoverEvents(true);
   setAcceptedMouseButtons(Qt::AllButtons);
 }
-
-#if (QT_VERSION < QT_VERSION_CHECK(5, 6, 0))
-QSGNode *QtRenderView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData)
-{
-  // MAD HAX: QML flips our framebuffer texture along the y-axis - better fix in 5.6: https://bugreports.qt.io/browse/QTBUG-41073
-  if (!node)
-  {
-    node = QQuickFramebufferObject::updatePaintNode(node, nodeData);
-    QSGSimpleTextureNode *n = static_cast<QSGSimpleTextureNode *>(node);
-    if (n)
-      n->setTextureCoordinatesTransform(QSGSimpleTextureNode::MirrorVertically);
-    return node;
-  }
-  return QQuickFramebufferObject::updatePaintNode(node, nodeData);
-}
-#endif
 
 void QtRenderView::focusInEvent(QFocusEvent * event)
 {

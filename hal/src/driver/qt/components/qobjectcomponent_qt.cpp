@@ -10,7 +10,6 @@
 
 #include "driver/qt/util/qmlbindings_qt.h"
 #include "driver/qt/components/qobjectcomponent_qt.h"
-#include "driver/qt/components/viewportimpl_qt.h"
 
 namespace qt {
 

@@ -1,20 +1,37 @@
-import QtQuick 2.4
-import QtQuick.Controls 1.3
+import QtQuick 2.6
 import epKernel 0.1
 
 FocusScope {
   id: viewport
   anchors.fill: parent
 
+  // Properties // ------------------------
   property var epTypeDesc: {
-    "super": "ep.viewport",
+    "super": "ep.uicomponent",
     "id": "ui.viewport",
     "displayname": "UI.Viewport",
     "description": "QML Based Viewport"
   }
+  property var view
 
+  // Methods // ---------------------------
+  function epInitComponent(initParams) {
+    if ("view" in initParams)
+      view = initParams.view;
+    else {
+      console.log("Creating internal view component");
+      view = EPKernel.createComponent("ep.view", {});
+    }
+  }
+
+  // Signal Handlers // ------------------
+  onViewChanged: {
+    renderView.attachView(view);
+  }
+
+  // Item Tree // ------------------------
   EPRenderView {
-    id: renderview
+    id: renderView
     anchors.fill: parent
 
     onActiveFocusChanged: {

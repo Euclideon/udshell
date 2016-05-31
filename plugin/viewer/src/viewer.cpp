@@ -1,6 +1,5 @@
 #include "viewer.h"
 
-#include "ep/cpp/component/viewport.h"
 #include "ep/cpp/component/view.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/node/simplecamera.h"
@@ -82,9 +81,9 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);
 
-  ViewportRef spViewport;
+  UIComponentRef spViewport;
   epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component\n"); };
-  spViewport = component_cast<Viewport>(pKernel->CreateComponent("ui.viewport", Variant::VarMap{ { "view", spView } }));
+  spViewport = component_cast<UIComponent>(pKernel->CreateComponent("ui.viewport", Variant::VarMap{ { "view", spView } }));
 
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
