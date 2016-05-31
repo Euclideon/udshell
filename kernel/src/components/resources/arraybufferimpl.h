@@ -20,11 +20,6 @@ public:
   ArrayBufferImpl(Component *_pInstance, Variant::VarMap initParams)
     : ImplSuper(_pInstance)
   {
-    pInstance->Changed.Subscribe(Delegate<void()>(this, &ArrayBufferImpl::OnBufferDirty));
-  }
-  ~ArrayBufferImpl()
-  {
-    pInstance->Changed.Unsubscribe(Delegate<void()>(this, &ArrayBufferImpl::OnBufferDirty));
   }
 
   void Allocate(SharedString _elementType, size_t _elementSize, Slice<const size_t> _shape) override final;
@@ -53,17 +48,10 @@ protected:
   friend class Renderer;
   friend class GeomNode;
 
-  void OnBufferDirty()
-  {
-    spCachedRenderData = nullptr;
-  }
-
   SharedString elementType;
   size_t elementSize;
   size_t dimensions;
   size_t shape[4];
-
-  SharedPtr<RefCounted> spCachedRenderData;
 };
 
 } // namespace ep

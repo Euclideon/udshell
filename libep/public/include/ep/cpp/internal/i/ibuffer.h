@@ -18,6 +18,7 @@ public:
 
   virtual bool Empty() const = 0;
   virtual size_t GetBufferSize() const = 0;
+  virtual bool Mapped() const = 0;
 
   virtual Slice<void> Map() = 0;
   virtual Slice<const void> MapForRead() = 0;

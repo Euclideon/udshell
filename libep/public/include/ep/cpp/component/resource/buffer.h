@@ -27,6 +27,8 @@ public:
   Slice<const void> MapForRead() { return pImpl->MapForRead(); }
   void Unmap() { pImpl->Unmap(); }
 
+  bool Mapped() const { return pImpl->Mapped(); }
+
   bool CopyBuffer(BufferRef buffer) { return pImpl->CopyBuffer(buffer); }
   bool CopyBuffer(Slice<const void> buffer) { return pImpl->CopyBuffer(buffer); }
 
