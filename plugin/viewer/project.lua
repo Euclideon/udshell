@@ -24,7 +24,7 @@ project "viewer"
 
 	configuration { "windows" }
 		postbuildcommands {
-			"IF NOT EXIST bin/plugins/ ( {MKDIR} bin/plugins/ )",
+			"IF NOT EXIST bin/plugins/ {MKDIR} bin/plugins/",
 			"{COPY} %{cfg.buildtarget.abspath} bin/plugins/"
 		}
 	configuration { "not windows" }

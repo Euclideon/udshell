@@ -27,11 +27,17 @@ project "epviewer"
 	configuration { "windows", "x64" }
 		links { "assimp-ep64.lib" }
 		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64", "../ud/3rdparty/sdl2/lib/x64" }
-		postbuildcommands { "$(ProjectDir)/viewer/postbuild.sh x64" }
+		postbuildcommands {
+			"{COPY} ud/3rdParty/sdl2/lib/x64/SDL2.dll .",
+			"{COPY} 3rdparty/assimp-3.1.1/lib/windows/x64/assimp-ep64.dll ."
+		}
 	configuration { "windows", "x86" }
 		links { "assimp-ep32.lib" }
 		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32", "../ud/3rdparty/sdl2/lib/x86" }
-		postbuildcommands { "$(ProjectDir)/viewer/postbuild.sh x86" }
+		postbuildcommands {
+			"{COPY} ud/3rdParty/sdl2/lib/x86/SDL2.dll .",
+			"{COPY} 3rdparty/assimp-3.1.1/lib/windows/x32/assimp-ep32.dll ."
+		}
 
 	configuration { "linux" }
 		links { "assimp-ep", "GL", "dl" }

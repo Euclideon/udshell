@@ -10,7 +10,6 @@ project "epshell"
 	files { "res/**.qrc", "res/**.qml" }
 	files { "../premake5.lua", "project.lua" }
 
-	includedirs { "../public/include" }
 	includedirs { "../kernel/src" }
 
 	links { "udPlatform" }
