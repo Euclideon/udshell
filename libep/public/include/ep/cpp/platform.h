@@ -107,6 +107,8 @@ void _epDelete(T *pMemory)
 
 #define epDelete(pMem) _epDelete(pMem)
 
+namespace ep {
+
 template <typename Dst, typename Src>
 Dst union_reinterpret_cast(Src _src)
 {
@@ -126,9 +128,11 @@ Dst union_reinterpret_cast(Src _src)
 template <typename Dst, typename Src>
 Dst slice_cast(Src src)
 {
-  EPASSERT_THROW(src.length * sizeof(typename Src::ET) % sizeof(typename Dst::ET) == 0, epR_OutOfBounds, "The destination slice cannot represent the source slice without truncating data");
+  EPASSERT_THROW(src.length * sizeof(typename Src::ET) % sizeof(typename Dst::ET) == 0, Result::OutOfBounds, "The destination slice cannot represent the source slice without truncating data");
   return Dst((typename Dst::ET*)src.ptr, src.length * sizeof(typename Src::ET) / sizeof(typename Dst::ET));
 }
+
+} // namespace ep
 
 #include "ep/cpp/internal/slice_inl.h"
 #include "ep/cpp/internal/string_inl.h"

@@ -6,6 +6,7 @@
 #include "ep/cpp/math.h"
 #include "ep/cpp/rect.h"
 #include "ep/cpp/internal/i/imaterial.h"
+#include "ep/cpp/internal/i/iudmodel.h"
 
 namespace ep {
 
@@ -115,26 +116,11 @@ EP_EXPLICIT_BITFIELD(UDRenderFlags,
   RenderPoints = 8192
   );
 
-struct UDRenderState
-{
-  Double4x4 matrix;
-
-  VarDelegate voxelVarDelegate;
-  void *pVoxelVarDelegateMutex;
-
-  uint32_t flags;
-  uint32_t startingRoot;
-
-  Rect<uint32_t> rect;
-  bool useClip;
-};
-
 struct UDRenderJob
 {
   UDModelRef spModel;
-  UDRenderState renderState;
+  Double4x4 matrix;
 };
-
 
 class RenderScene
 {
@@ -142,7 +128,6 @@ public:
   Array<GeomRenderJob, 16> geom;
   Array<UDRenderJob, 4> ud;
 };
-
 
 inline Variant epToVariant(const StencilState &e)
 {

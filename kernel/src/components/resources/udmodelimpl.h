@@ -4,7 +4,7 @@
 
 #include "ep/cpp/platform.h"
 #include "udOctree.h"
-
+#include "ep/cpp/render.h"
 #include "ep/cpp/component/resource/udmodel.h"
 #include "ep/cpp/component/datasource/datasource.h"
 #include "ep/cpp/delegate.h"
@@ -29,6 +29,9 @@ public:
   uint32_t GetStartingRoot() const override final { return startingRoot; }
   void SetStartingRoot(uint32_t root) override final { startingRoot = root; }
 
+  uint32_t GetAnimationFrame() const override final { return animationFrame; }
+  void SetAnimationFrame(uint32_t frame) override final { animationFrame = frame; }
+
   const Rect<uint32_t> &GetRenderClipRect() const override final { return rect; }
   void SetRenderClipRect(const Rect<uint32_t>& _rect) override final { rectSet = true; rect = _rect; }
 
@@ -38,34 +41,61 @@ public:
   const Double4x4 &GetUDMatrix() const override final { return udmatrix; }
   void SetUDMatrix(const Double4x4 &mat) override final { udmatrix = mat; }
 
-  UDRenderState GetUDRenderState() const override final;
+  void SetVoxelFilter(VoxelFilter *pFilter) override final { pVoxelFilter = pFilter; }
+  VoxelFilter* GetVoxelFilter() const override final { return pVoxelFilter; }
 
-  VarDelegate GetVoxelVarDelegate() const override final { return voxelVarDelegate; }
-  void SetVoxelVarDelegate(VarDelegate delegate) override final;
+  void SetVoxelShader(VoxelShader *pShader) override final;
+  VoxelShader* GetVoxelShader() const override final { return pVoxelShader; }
 
+  void SetPixelShader(PixelShader *pShader) override final { pPixelShader = pShader; }
+  PixelShader* GetPixelShader() const override final { return pPixelShader; }
+
+  void SetConstantData(UDConstantDataType type, BufferRef buffer) override final { constantBuffers[type] = buffer; }
+  BufferRef GetConstantData(UDConstantDataType type) const override final { return constantBuffers[type]; }
+
+  VarDelegate GetVarVoxelShader() const override final { return varVoxelShader; }
+  void SetVarVoxelShader(VarDelegate varShader) override final;
+
+  void CopyRenderContext(UDRenderContext *pContext) const override final;
   int64_t GetMemoryUsage() const override final { return pOctree->memoryUsage; }
 
   EP_FRIENDS_WITH_IMPL(UDSource);
 private:
+  static uint32_t VoxelVarShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex, udRenderNodeInfo *epUnusedParam(pNodeInfo));
 
-  VarDelegate voxelVarDelegate;
+  VarDelegate varVoxelShader;
 
   Double4x4 udmatrix;
   Rect<uint32_t> rect;
   udOctree *pOctree = nullptr;
 
+  VoxelFilter *pVoxelFilter = nullptr;
+  VoxelShader *pVoxelShader = nullptr;
+  PixelShader *pPixelShader = nullptr;
+
+  BufferRef constantBuffers[UDConstantDataType::PixelShader + 1];
+
   uint32_t startingRoot = 0;
+  uint32_t animationFrame = 0;
   UDModelFlags renderFlags = UDModelFlags::None;
+
   bool rectSet = false;
 };
 
-inline void UDModelImpl::SetVoxelVarDelegate(VarDelegate delegate)
+inline void UDModelImpl::SetVoxelShader(VoxelShader *pShader)
 {
-  if (delegate.GetMemento())
-    voxelVarDelegate = delegate;
-  else
-    voxelVarDelegate = VarDelegate();
+  if (pShader)
+    varVoxelShader = nullptr;
 
+  pVoxelShader = pShader;
+}
+
+inline void UDModelImpl::SetVarVoxelShader(VarDelegate varShader)
+{
+  if (varShader)
+    pVoxelShader = nullptr;
+
+  varVoxelShader = varShader;
 }
 
 } // namespace ep
