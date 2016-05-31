@@ -872,4 +872,6 @@ Variant QtEPComponent::Connection::SignalRouter(Slice<const Variant> args)
 
 } // namespace qt
 
+#else
+EPEMPTYFILE
 #endif

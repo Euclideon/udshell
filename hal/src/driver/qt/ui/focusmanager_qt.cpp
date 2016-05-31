@@ -349,4 +349,6 @@ void QtFocusManager::DestroyWindowStack(QQuickWindow *pQtWindow)
 
 } // end namespace qt
 
-#endif // EPUI_DRIVER == EPDRIVER_QT
+#else
+EPEMPTYFILE
+#endif
