@@ -40,7 +40,7 @@ void ImageSource::Create(StreamRef spSource)
 
     // create image for each image element
     ArrayBufferRef spImage = GetKernel().CreateComponent<ArrayBuffer>();
-    spImage->Allocate(GetFormatString(s.format), 4, { s.width, s.height });
+    spImage->Allocate(GetFormatString(s.format), 4, Slice<const size_t>{ s.width, s.height });
 
     // write image to to the array buffer
     Slice<void> mem = spImage->Map();

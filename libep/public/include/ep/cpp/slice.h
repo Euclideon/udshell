@@ -60,7 +60,7 @@ public:
   // constructors
   Slice();
   Slice(nullptr_t);
-  Slice(std::initializer_list<ET> list);
+  explicit Slice(std::initializer_list<ET> list);
   Slice(T* ptr, size_t length);
   template<typename U> Slice(Slice<U> rh);
   template<typename U, size_t N> Slice(U(&arr)[N]);

@@ -46,7 +46,7 @@ TEST(EPVariant, Deprecated)
   Variant t15(spC);
   Variant t16(ComponentRef(nullptr));
 
-  Slice<const Variant> arr = { 1, 2, "3" };
+  const Variant arr[] = { 1, 2, "3" };
   Variant t17(arr);
   auto a1 = t17.as<Array<float>>();
 

@@ -4,7 +4,7 @@
 
 namespace ep {
 
-static const Slice<const EnumKVP> renderFlags =
+static const EnumKVP renderFlags[] =
 {
   { "udRenderFlags::None", udRF_None },
   { "udRenderFlags::NoOrtho", udRF_NoOrtho },

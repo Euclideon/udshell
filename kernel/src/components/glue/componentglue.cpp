@@ -27,7 +27,7 @@ Variant ComponentGlue::Save() const
 void ComponentGlue::ReceiveMessage(String message, String sender, const Variant &data)
 {
   if (receiveMessage)
-    receiveMessage({ message, sender, data });
+    receiveMessage(Slice<const Variant>{ message, sender, data });
 
   // TODO: are we meant to pass to Super::?
 }

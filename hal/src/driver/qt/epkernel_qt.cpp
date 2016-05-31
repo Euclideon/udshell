@@ -309,7 +309,7 @@ void QtKernel::RegisterQmlComponents(String folderPath)
   // otherwise assume it's a file system path and pass it via the plugin manager
   else
   {
-     qmlFilenames = GetImpl()->ScanPluginFolder(folderPath, {".qml"});
+     qmlFilenames = GetImpl()->ScanPluginFolder(folderPath, ep::Slice<const ep::String>{ ".qml" });
   }
 
   pQmlEngine->addImportPath(epToQString(folderPath));

@@ -17,9 +17,9 @@ public:
 
   // Resource getter/setters
   size_t GetNumResources() const override final { return resources.size(); }
-  void AddResource(ResourceRef res) override final { AddResourceArray({ res }); }
+  void AddResource(ResourceRef res) override final { AddResourceArray(Slice<const ResourceRef>{ res }); }
   void AddResourceArray(Slice<const ResourceRef> resArray) override final;
-  void RemoveResource(ResourceRef res) override final { RemoveResourceArray({ res }); }
+  void RemoveResource(ResourceRef res) override final { RemoveResourceArray(Slice<const ResourceRef>{ res }); }
   void RemoveResourceArray(Slice<const ResourceRef> resArray) override final;
 
   void ClearResources() override final;

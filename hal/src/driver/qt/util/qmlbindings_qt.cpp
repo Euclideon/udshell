@@ -381,20 +381,20 @@ QtMetaObjectGenerator::QtMetaObjectGenerator(const ep::ComponentDesc *_pDesc)
     slotList.reserve(pDesc->methodTree.size() + 5);
 
     // TODO: update these when arg types are supported
-    AddMethod(MethodType::Slot, "get", { "propertyName" },
+    AddMethod(MethodType::Slot, "get", Slice<const SharedString>{ "propertyName" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
         return pObj->pComponent->Get(varArgs[0].asString()).as<QVariant>();
       });
-    AddMethod(MethodType::Slot, "set", { "propertyName", "value" },
+    AddMethod(MethodType::Slot, "set", Slice<const SharedString>{ "propertyName", "value" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
         pObj->pComponent->Set(varArgs[0].asString(), varArgs[1]);
         return QVariant();
       });
-    AddMethod(MethodType::Slot, "call", { "methodName", "arg0", "arg1", "arg2", "arg3", "arg4", "arg5", "arg6", "arg7", "arg8" },
+    AddMethod(MethodType::Slot, "call", Slice<const SharedString>{ "methodName", "arg0", "arg1", "arg2", "arg3", "arg4", "arg5", "arg6", "arg7", "arg8" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
         return pObj->pComponent->Call(varArgs[0].asString(), varArgs.slice(1, varArgs.length)).as<QVariant>();
       }, 9);
-    AddMethod(MethodType::Slot, "subscribe", { "eventName", "delegate" },
+    AddMethod(MethodType::Slot, "subscribe", Slice<const SharedString>{ "eventName", "delegate" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
         return ep::Variant(pObj->pComponent->Subscribe(varArgs[0].asString(), varArgs[1].asDelegate())).as<QVariant>();
       });
