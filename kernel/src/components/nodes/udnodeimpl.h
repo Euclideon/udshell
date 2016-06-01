@@ -28,7 +28,7 @@ public:
   {}
 
   UDModelRef GetUDModel() const override final { return spModel; }
-  void SetUDModel(UDModelRef _spModel) override final { spModel = _spModel; }
+  void SetUDModel(UDModelRef _spModel) override final;
 
   Variant Save() const override final { return pInstance->Super::Save(); }
 
