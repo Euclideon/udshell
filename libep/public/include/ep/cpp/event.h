@@ -97,7 +97,7 @@ public:
   // misc
   EvDelegate GetDelegate() const
   {
-    return EvDelegate(this, &Signal);
+    return EvDelegate(this, &Event::Signal);
   }
 };
 
