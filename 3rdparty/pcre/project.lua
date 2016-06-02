@@ -12,6 +12,10 @@ project "pcre"
 
   includedirs { "include", "src" }
 
+  filter { "system:windows" }
+    disablewarnings { "4244", "4701" }
+  filter { }
+
   defines {
     'HAVE_CONFIG_H',
     '_CRT_SECURE_NO_DEPRECATE',
