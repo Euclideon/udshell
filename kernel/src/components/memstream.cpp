@@ -18,11 +18,11 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString u
 
   const Variant *fl = initParams.get("flags");
   if (!fl)
-    EPTHROW_ERROR(epR_InvalidArgument, "Missing 'flags'");
+    EPTHROW_ERROR(Result::InvalidArgument, "Missing 'flags'");
 
   oFlags = fl->as<OpenFlags>();
   if (!(oFlags & (OpenFlags::Write | OpenFlags::Read)))
-    EPTHROW_ERROR(epR_InvalidArgument, "Invalid 'flags'");
+    EPTHROW_ERROR(Result::InvalidArgument, "Invalid 'flags'");
 
   const Variant *buf = initParams.get("buffer");
   if (!buf)
@@ -34,7 +34,7 @@ MemStream::MemStream(const ComponentDesc *pType, Kernel *pKernel, SharedString u
   {
     inBuffer = buf->as<BufferRef>();
     if (!inBuffer)
-      EPTHROW_ERROR(epR_InvalidArgument, "Expected 'buffer' is Buffer object");
+      EPTHROW_ERROR(Result::InvalidArgument, "Expected 'buffer' is Buffer object");
   }
 
   SetBuffer(inBuffer);

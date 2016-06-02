@@ -81,7 +81,7 @@ using ep::SharedString;
 ComponentDescInl *QtKernel::MakeKernelDescriptor()
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
-  EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
+  EPTHROW_IF_NULL(pDesc, ep::Result::AllocFailure, "Memory allocation failed");
 
   pDesc->info = QtKernel::ComponentInfo();
   pDesc->info.flags = ep::ComponentInfoFlags::Unregistered;
@@ -122,11 +122,11 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   cmdArgc = (int)cmdArgv.length;
 
   // register Qt specific components
-  EPTHROW_IF_NULL(RegisterComponentType<QmlPluginLoader>(), epR_Failure, "Unable to register QmlPluginLoader");
-  EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), epR_Failure, "Unable to register QtComponent");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, UIComponentGlue>()), epR_Failure, "Unable to register UI Component");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, WindowGlue>()), epR_Failure, "Unable to register Window component");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ViewportGlue>()), epR_Failure, "Unable to register Viewport UI Component");
+  EPTHROW_IF_NULL(RegisterComponentType<QmlPluginLoader>(), ep::Result::Failure, "Unable to register QmlPluginLoader");
+  EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), ep::Result::Failure, "Unable to register QtComponent");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, UIComponentGlue>()), ep::Result::Failure, "Unable to register UI Component");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, WindowGlue>()), ep::Result::Failure, "Unable to register Window component");
+  EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ViewportGlue>()), ep::Result::Failure, "Unable to register Viewport UI Component");
 
   // create and register the qml loader
   spQmlPluginLoader = CreateComponent<QmlPluginLoader>();
@@ -134,24 +134,24 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
 
   // create our QApplication
   pApplication = new QtApplication(this, cmdArgc, (char**)cmdArgv.ptr);
-  EPTHROW_IF_NULL(pApplication, epR_Failure, "Unable create QtApplication");
+  EPTHROW_IF_NULL(pApplication, ep::Result::Failure, "Unable create QtApplication");
   epscope(fail) { delete pApplication; };
 
   // make sure we cleanup the kernel when we're about to quit
   pMediator = new QtKernelMediator(this);
   epscope(fail) { delete pMediator; };
-  EPTHROW_IF(!QObject::connect(pApplication, &QCoreApplication::aboutToQuit, pMediator, &QtKernelMediator::OnAppQuit), epR_Failure, "Failed to create Qt connection");
+  EPTHROW_IF(!QObject::connect(pApplication, &QCoreApplication::aboutToQuit, pMediator, &QtKernelMediator::OnAppQuit), ep::Result::Failure, "Failed to create Qt connection");
 
   // create the qml engine
   pQmlEngine = new QQmlEngine;
-  EPTHROW_IF_NULL(pQmlEngine, epR_Failure, "Unable create QQmlEngine");
+  EPTHROW_IF_NULL(pQmlEngine, ep::Result::Failure, "Unable create QQmlEngine");
   epscope(fail) { delete pQmlEngine; };
 
   // register our internal qml types
-  EPTHROW_IF(qmlRegisterType<QtRenderView>("epKernel", 0, 1, "EPRenderView") == -1, epR_Failure, "qmlRegisterType<QtRenderView> Failed");
-  EPTHROW_IF(qmlRegisterType<QtEPComponent>() == -1, epR_Failure, "qmlRegisterType<QtEPComponent> Failed");
-  EPTHROW_IF(qRegisterMetaType<QtFocusManager*>("QtFocusManager*") == -1, epR_Failure, "qRegisterMetaType<QtFocusManager *> Failed");
-  EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, epR_Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
+  EPTHROW_IF(qmlRegisterType<QtRenderView>("epKernel", 0, 1, "EPRenderView") == -1, ep::Result::Failure, "qmlRegisterType<QtRenderView> Failed");
+  EPTHROW_IF(qmlRegisterType<QtEPComponent>() == -1, ep::Result::Failure, "qmlRegisterType<QtEPComponent> Failed");
+  EPTHROW_IF(qRegisterMetaType<QtFocusManager*>("QtFocusManager*") == -1, ep::Result::Failure, "qRegisterMetaType<QtFocusManager *> Failed");
+  EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, ep::Result::Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
 
   // load in the kernel qml resources
   InitResources();
@@ -177,13 +177,13 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
     foreach(const QQmlError &error, component.errors())
       LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
 
-    EPTHROW_ERROR(epR_Failure, "Error creating Splash Screen");
+    EPTHROW_ERROR(ep::Result::Failure, "Error creating Splash Screen");
   }
 
   // defer the heavier init stuff and app specific init to after Qt hits the event loop
   // we'll hook into the splash screen to do this
   EPTHROW_IF(!QObject::connect(pSplashScreen, &QQuickWindow::afterRendering, pMediator, &QtKernelMediator::OnFirstRender, Qt::DirectConnection),
-    epR_Failure, "Failed to create Qt connection for Splash Screen");
+    ep::Result::Failure, "Failed to create Qt connection for Splash Screen");
 }
 
 // ---------------------------------------------------------------------------------------
@@ -198,7 +198,7 @@ QtKernel::~QtKernel()
 void QtKernel::RunMainLoop()
 {
   // run the Qt event loop - this may never return
-  EPTHROW_IF(pApplication->exec() != 0, epR_Failure, "Application was not shutdown from a call to quit()");
+  EPTHROW_IF(pApplication->exec() != 0, ep::Result::Failure, "Application was not shutdown from a call to quit()");
 }
 
 // ---------------------------------------------------------------------------------------
@@ -208,7 +208,7 @@ void QtKernel::Quit()
 }
 
 // ---------------------------------------------------------------------------------------
-epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
+ep::Result QtKernel::RegisterWindow(QQuickWindow *pWindow)
 {
   // sanity checks
   EPASSERT(pSplashScreen != nullptr, "No splash screen window set");
@@ -239,13 +239,13 @@ epResult QtKernel::RegisterWindow(QQuickWindow *pWindow)
   {
     // TODO: error handle
     LogError("Error making main gl context current");
-    return epR_Failure;
+    return ep::Result::Failure;
   }
 
   if (pGLDebugLogger->initialize())
     pGLDebugLogger->startLogging();
 
-  return epR_Success;
+  return ep::Result::Success;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -274,24 +274,24 @@ void QtKernel::UnregisterWindow(QQuickWindow *pWindow)
 // ---------------------------------------------------------------------------------------
 void QtKernel::RegisterQmlComponent(String file)
 {
-  EPASSERT_THROW(!file.empty(), epR_InvalidArgument, "Must supply a valid file to register a QML component type");
+  EPASSERT_THROW(!file.empty(), ep::Result::InvalidArgument, "Must supply a valid file to register a QML component type");
 
   ep::Variant::VarMap typeDesc;
   try {
     typeDesc = QmlPluginLoader::ParseTypeDescriptor(this, file);
   }
   catch (ep::EPException &e) {
-    EPTHROW_ERROR(epR_Failure, "Could not register QML file '{0}' as Component: \"{1}\"", file, e.what());
+    EPTHROW_ERROR(ep::Result::Failure, "Could not register QML file '{0}' as Component: \"{1}\"", file, e.what());
   }
 
-  EPTHROW_IF(typeDesc.empty(), epR_Failure, "Cannot register QML Component: File '{0}' does not contain valid type descriptor", file);
+  EPTHROW_IF(typeDesc.empty(), ep::Result::Failure, "Cannot register QML Component: File '{0}' does not contain valid type descriptor", file);
   RegisterQml(file, typeDesc);
 }
 
 // ---------------------------------------------------------------------------------------
 void QtKernel::RegisterQmlComponents(String folderPath)
 {
-  EPASSERT_THROW(!folderPath.empty(), epR_InvalidArgument, "Must supply a valid folderPath to search for QML components");
+  EPASSERT_THROW(!folderPath.empty(), ep::Result::InvalidArgument, "Must supply a valid folderPath to search for QML components");
 
   ep::Array<ep::SharedString> qmlFilenames;
 
@@ -338,7 +338,7 @@ void QtKernel::RegisterQml(ep::String file, ep::Variant::VarMap typeDesc)
 ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initParams)
 {
   using namespace ep;
-  EPASSERT_THROW(!file.empty(), epR_InvalidArgument, "Must supply a valid file to register a QML component type");
+  EPASSERT_THROW(!file.empty(), Result::InvalidArgument, "Must supply a valid file to register a QML component type");
 
   // verify that the qml file has a type descriptor property
   Variant::VarMap typeDesc;
@@ -346,15 +346,15 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initP
     typeDesc = QmlPluginLoader::ParseTypeDescriptor(this, file);
   }
   catch (ep::EPException &e) {
-    EPTHROW_ERROR(epR_Failure, "Could not create QML Component from file '{0}': \"{1}\"", file, e.what());
+    EPTHROW_ERROR(Result::Failure, "Could not create QML Component from file '{0}': \"{1}\"", file, e.what());
   }
 
-  EPTHROW_IF(typeDesc.empty(), epR_Failure, "Cannot create QML Component: File '{0}' does not contain valid type descriptor", file);
+  EPTHROW_IF(typeDesc.empty(), Result::Failure, "Cannot create QML Component: File '{0}' does not contain valid type descriptor", file);
 
   // locate the nominated super
   String superTypeId = typeDesc["super"].asString();
   const ComponentDescInl *pSuper = (const ComponentDescInl *)GetImpl()->GetComponentDesc(superTypeId);
-  EPTHROW_IF(!pSuper, epR_InvalidType, "Base Component '{0}' not registered", superTypeId);
+  EPTHROW_IF(!pSuper, Result::InvalidType, "Base Component '{0}' not registered", superTypeId);
 
   // generate unregistered component descriptor
   DynamicComponentDesc *pDesc = epNew(DynamicComponentDesc);
@@ -366,7 +366,7 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initP
   pDesc->info.identifier = typeDesc["id"].asSharedString();
 
   size_t offset = pDesc->info.identifier.findLast('.');
-  EPTHROW_IF(offset == (size_t)-1, epR_InvalidArgument, "Component identifier {0} has no namespace. Use form: namespace.componentname", pDesc->info.identifier);
+  EPTHROW_IF(offset == (size_t)-1, Result::InvalidArgument, "Component identifier {0} has no namespace. Use form: namespace.componentname", pDesc->info.identifier);
 
   pDesc->info.nameSpace = pDesc->info.identifier.slice(0, offset);
   pDesc->info.name = pDesc->info.identifier.slice(offset + 1, pDesc->info.identifier.length);
@@ -591,25 +591,12 @@ void QtKernelMediator::customEvent(QEvent *pEvent)
   {
     MainThreadCallback d;
     d.SetMemento(static_cast<KernelEvent*>(pEvent)->m);
-    size_t errorDepth = ErrorLevel();
-    try
-    {
+    try {
       d();
-      if (ErrorLevel() > errorDepth)
-      {
-        pQtKernel->LogError("Exception occurred in MainThreadCallback : {0}", GetError()->message);
-        PopErrorToLevel(errorDepth);
-      }
-    }
-    catch (std::exception &e)
-    {
-      pQtKernel->LogError("Exception occurred in MainThreadCallback : {0}", e.what());
-      PopErrorToLevel(errorDepth);
-    }
-    catch (...)
-    {
-      pQtKernel->LogError("Exception occurred in MainThreadCallback : C++ Exception");
-      PopErrorToLevel(errorDepth);
+    } catch (std::exception &e) {
+      pQtKernel->LogError("Exception occurred in DispatchToMainThread handler: {0}", e.what());
+    } catch (...) {
+      pQtKernel->LogError("Exception occurred in DispatchToMainThread handler: C++ Exception");
     }
   }
   else

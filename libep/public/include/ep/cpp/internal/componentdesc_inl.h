@@ -98,7 +98,7 @@ public:
   explicit operator bool() const { return (bool)method; }
 
   Variant get(Component *pThis) const;
-  void set(Component *pThis, const Variant &value) const;
+  Variant set(Component *pThis, const Variant &value) const;
   Variant call(Component *pThis, Slice<const Variant> args) const;
 
   VarDelegate getDelegate(Component *pThis) const;
@@ -192,12 +192,12 @@ inline Variant MethodShim::get(Component *pThis) const
   else
     return method.Call(pThis, nullptr);
 }
-inline void MethodShim::set(Component *pThis, const Variant &value) const
+inline Variant MethodShim::set(Component *pThis, const Variant &value) const
 {
   if (data)
-    methodWithData.Call(pThis, Slice<const Variant>(&value, 1), *data);
+    return methodWithData.Call(pThis, Slice<const Variant>(&value, 1), *data);
   else
-    method.Call(pThis, Slice<const Variant>(&value, 1));
+    return method.Call(pThis, Slice<const Variant>(&value, 1));
 }
 inline Variant MethodShim::call(Component *pThis, Slice<const Variant> args) const
 {

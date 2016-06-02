@@ -43,7 +43,6 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     }
     catch (EPException &) {
       LogDebug(2, "Project file \"{0}\" does not exist. Creating new project.", *pSrc);
-      ClearError();
       return;
     }
   }
@@ -70,7 +69,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   }
   catch (parse_error &e)
   {
-    EPTHROW_ERROR(epR_Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
+    EPTHROW_ERROR(Result::Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
   }
 
   Variant::VarMap projectNode = rootElements.asAssocArray();
@@ -78,7 +77,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   if (pName && pName->is(Variant::Type::String) && pName->asString().eq("project")) // TODO: I think we can make these comparisons better than this
     ParseProject(projectNode);
   else
-    EPTHROW_ERROR(epR_Failure, "Invalid project file \"{0}\" -- Missing <project> element", srcString);
+    EPTHROW_ERROR(Result::Failure, "Invalid project file \"{0}\" -- Missing <project> element", srcString);
 }
 
 void Project::SaveProject()
@@ -118,7 +117,6 @@ void Project::SaveProject()
   catch (EPException &)
   {
     LogWarning(1, "Failed to open Project file for writing: \"{0}\"", srcString);
-    ClearError();
     return;
   }
 }
@@ -188,7 +186,6 @@ void Project::ParseActivity(Variant node)
   }
   catch (EPException &)
   {
-    ClearError();
     LogError("Unable to load Activity from project file \"{0}\"", srcString);
   }
 }

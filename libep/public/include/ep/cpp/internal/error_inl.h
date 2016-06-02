@@ -33,6 +33,16 @@
 namespace ep {
 namespace internal {
 
+struct ErrorSystem
+{
+  ErrorSystem();
+  ~ErrorSystem();
+
+  ErrorState *pError = nullptr;
+
+  void *pErrorPool = nullptr;
+};
+
 inline int getUncaughtExceptionCount() noexcept
 {
 #if defined(EXCEPTION_COUNT_USE_CXA_GET_GLOBALS)
@@ -163,15 +173,5 @@ template<typename ...Args> inline void LogTrace(String text, Args... args)
     internal::Log(1<<5, 2, tmp);
   }
 }
-
-namespace internal {
-struct ErrorSystem
-{
-  enum : size_t { ErrorStackSize = 256 };
-  ErrorState errorStack[ErrorStackSize];
-  size_t errorDepth;
-};
-
-} // internal
 
 } // namespace ep

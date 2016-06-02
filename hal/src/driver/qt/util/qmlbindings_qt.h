@@ -36,7 +36,7 @@ public:
   QmlComponentData(ep::String file, QQmlEngine *pQmlEngine, QQmlComponent::CompilationMode mode = QQmlComponent::PreferSynchronous)
     : qmlComponent(pQmlEngine)
   {
-    EPASSERT_THROW(!file.empty(), epR_InvalidArgument, "Must supply file name");
+    EPASSERT_THROW(!file.empty(), ep::Result::InvalidArgument, "Must supply file name");
 
     QString fileStr = QString::fromUtf8(file.ptr, (int)file.length);
     if (file.ptr[0] == ':')

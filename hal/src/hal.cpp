@@ -2,13 +2,15 @@
 
 #include "hal/hal.h"
 
+using namespace ep;
+
 static bool bInitialised = false;
 static bool bRenderInitialised = false;
 
-epResult epHAL_Init()
+Result epHAL_Init()
 {
   if (bInitialised)
-    return epR_Success;
+    return Result::Success;
 
   void epInput_Init();
   epInput_Init();
@@ -17,13 +19,13 @@ epResult epHAL_Init()
   epImage_InitInternal();
 
   bInitialised = true;
-  return epR_Success;
+  return Result::Success;
 }
 
-epResult epHAL_InitRender()
+Result epHAL_InitRender()
 {
   if (bRenderInitialised)
-    return epR_Success;
+    return Result::Success;
 
   void epGPU_Init();
   epGPU_Init();
@@ -32,10 +34,10 @@ epResult epHAL_InitRender()
   epDebugFont_Init();
 
   bRenderInitialised = true;
-  return epR_Success;
+  return Result::Success;
 }
 
-epResult epHAL_DeinitRender()
+Result epHAL_DeinitRender()
 {
   if (bRenderInitialised)
   {
@@ -46,10 +48,10 @@ epResult epHAL_DeinitRender()
     epGPU_Deinit();
     bRenderInitialised = false;
   }
-  return epR_Success;
+  return Result::Success;
 }
 
-epResult epHAL_Deinit()
+Result epHAL_Deinit()
 {
   if (bInitialised)
   {
@@ -59,5 +61,5 @@ epResult epHAL_Deinit()
     epInput_Deinit();
     bInitialised = false;
   }
-  return epR_Success;
+  return Result::Success;
 }

@@ -311,7 +311,7 @@ static Variant ParseJsonNode(const rapidjson::Value& val)
       return map;
     }
     default:
-      EPASSERT_THROW(false, epR_Failure, "Unknown error!");
+      EPASSERT_THROW(false, Result::Failure, "Unknown error!");
   }
 }
 

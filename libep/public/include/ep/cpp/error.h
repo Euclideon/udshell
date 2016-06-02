@@ -2,28 +2,20 @@
 #ifndef EPERROR_HPP
 #define EPERROR_HPP
 
-#include "ep/c/error.h"
 #include "ep/cpp/string.h"
 
 #include <utility>
 
+#define ConstructException(error, message, ...) ep::EPException(error, ep::MutableString<0>(ep::Format, ep::String(message), ##__VA_ARGS__), __PRETTY_FUNCTION__, __FILE__, __LINE__)
+#define AllocError(error, message, ...) ep::internal::_AllocError(error, ep::MutableString<0>(ep::Format, ep::String(message), ##__VA_ARGS__), __PRETTY_FUNCTION__, __FILE__, __LINE__, nullptr)
 
-#define PushError(error, message, ...) ep::_PushError(error, ep::MutableString<0>(ep::Format, ep::String(message), ##__VA_ARGS__), __PRETTY_FUNCTION__, __FILE__, __LINE__)
-
-
-#ifdef EPERROR
-# undef EPERROR
-#endif
-#define EPERROR(error, message, ...) (ep::LogError(ep::String(message), ##__VA_ARGS__), PushError(error, message, ##__VA_ARGS__))
-
-
-#define EPTHROW(error, message, ...) throw ep::EPException(PushError(error, message, ##__VA_ARGS__))
-#define EPTHROW_ERROR(error, message, ...) throw ep::EPException(EPERROR(error, message, ##__VA_ARGS__))
-#define EPTHROW_WARN(error, level, message, ...) throw ep::EPException((ep::LogWarning(level, ep::String(message), ##__VA_ARGS__), PushError(error, message, ##__VA_ARGS__)))
+#define EPTHROW(error, message, ...) throw ConstructException(error, message, ##__VA_ARGS__)
+#define EPTHROW_ERROR(error, message, ...) throw (ep::LogError(ep::String(message), ##__VA_ARGS__), ConstructException(error, message, ##__VA_ARGS__))
+#define EPTHROW_WARN(error, level, message, ...) throw (ep::LogWarning(level, ep::String(message), ##__VA_ARGS__), ConstructException(error, message, ##__VA_ARGS__))
 
 #define EPTHROW_IF(condition, error, message, ...) { if(condition) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }
 #define EPTHROW_IF_NULL(condition, error, message, ...) { if((condition) == nullptr) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }
-#define EPTHROW_RESULT(error, message, ...) { epResult r = (error); if(r != epR_Success) { EPTHROW_ERROR(r, message, ##__VA_ARGS__); } }
+#define EPTHROW_RESULT(error, message, ...) { Result r = (error); if(r != Result::Success) { EPTHROW_ERROR(r, message, ##__VA_ARGS__); } }
 
 #if EP_DEBUG
 #define EPASSERT_THROW(condition, error, message, ...) { if(!(condition)) { DebugBreak(); EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }
@@ -34,9 +26,25 @@
 
 namespace ep {
 
-namespace internal {
-  void Log(int type, int level, String text);
-}
+enum class Result
+{
+  Success,
+  Failure,
+
+  CppException,
+  InvalidCall,
+  InvalidArgument,
+  InvalidType,
+  OutOfBounds,
+  BadCast,
+  AllocFailure,
+  ResourceInUse,
+  AlreadyExists,
+
+  File_OpenFailure,
+
+  ScriptException,
+};
 
 template<typename ...Args> inline void LogError(String text, Args... args);
 template<typename ...Args> inline void LogWarning(int level, String text, Args... args);
@@ -53,35 +61,35 @@ struct ErrorState
     message.ptr = nullptr;
     message.length = 0;
   }
-  epResult error;
+
+  Result error;
   SharedString message;
 
   const char *function;
   const char *file;
   int line;
 
-  ErrorState *pPrior;
+  ErrorState *pPrior = nullptr;
 };
-
-ErrorState* _PushError(epResult error, const SharedString &message, const char *function, const char *file, int line);
-void PopError();
-
-void PopErrorToLevel(size_t level);
-
-size_t ErrorLevel();
-ErrorState* GetError();
-SharedString GetErrorMessage();
-void ClearError();
-
-SharedString DumpError();
 
 
 class EPException : public std::exception
 {
 public:
-  EPException(ErrorState *pError);
+  EPException(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pPrior = nullptr);
+  EPException(const EPException &e) : pError(e.pError) {}
+  EPException(EPException &&e) : pError(e.pError) { e.pError = nullptr; }
+  EPException(ErrorState *pError) : pError(pError) {}
   ~EPException();
-  const char* what() const noexcept override;
+
+  const char* what() const noexcept override { return pError->message.ptr; }
+
+  ErrorState *claim() noexcept
+  {
+    ErrorState *pR = pError;
+    pError = nullptr;
+    return pR;
+  }
 
   ErrorState *pError;
 };
@@ -117,12 +125,21 @@ private:
   bool dismissed;
 };
 
+
+SharedString DumpError(ErrorState *pError);
+
+
 // helper to make a scope guard
 template <typename Func>
 ScopeGuard<typename std::decay<Func>::type> makeGuard(Func&& fn)
 {
   return ScopeGuard<typename std::decay<Func>::type>(std::forward<Func>(fn));
 }
+
+namespace internal {
+  ErrorState* _AllocError(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pParent);
+  void Log(int type, int level, String text);
+} // namespace internal
 
 } // namespace ep
 

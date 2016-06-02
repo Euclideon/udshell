@@ -34,7 +34,7 @@ TimerImpl::TimerImpl(Component *pInstance, Variant::VarMap initParams)
   uint32_t duration = intervalVar.as<uint32_t>();
   if (!intervalVar.is(Variant::Type::Int) || !duration)
   {
-    EPTHROW_ERROR(epR_InvalidArgument, "Invalid 'duration'");
+    EPTHROW_ERROR(Result::InvalidArgument, "Invalid 'duration'");
   }
 
   TimerType timerType = TimerType::Interval;
@@ -47,12 +47,12 @@ TimerImpl::TimerImpl(Component *pInstance, Variant::VarMap initParams)
     else if (typeStr.eqIC("CountDown"))
       timerType = TimerType::CountDown;
     else
-      EPTHROW_ERROR(epR_InvalidArgument, "Invalid 'timertype'");
+      EPTHROW_ERROR(Result::InvalidArgument, "Invalid 'timertype'");
   }
 
   pTimer = HalTimer_Create(HalTimerType(timerType.v), duration, TimerCallback, this);
   if (!pTimer)
-    EPTHROW_ERROR(epR_Failure, "Failed to create timer");
+    EPTHROW_ERROR(Result::Failure, "Failed to create timer");
 }
 
 

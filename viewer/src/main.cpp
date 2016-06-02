@@ -272,7 +272,7 @@ int main(int argc, char* argv[])
   mData.rendererThreadCount = epGetHardwareThreadCount() - 1;
   ProcessCmdline(argc, argv);
 
-  epResult result = epR_Failure;
+  Result result = Result::Success;
   try
   {
     mData.spKernel = SharedPtr<Kernel>(Kernel::CreateInstance(epParseCommandLine(argc, argv), mData.rendererThreadCount));
@@ -293,15 +293,15 @@ int main(int argc, char* argv[])
   catch (std::exception &e)
   {
     epDebugFormat("Unhandled exception: {0}\n", e.what());
-    result = epR_Failure;
+    result = Result::Failure;
   }
   catch (...)
   {
     epDebugWrite("Unhandled exception!\n");
-    result = epR_Failure;
+    result = Result::Failure;
   }
 
-  return result != epR_Success ? 1 : 0;
+  return result != Result::Success ? 1 : 0;
 }
 
 // ---------------------------------------------------------------------------------------

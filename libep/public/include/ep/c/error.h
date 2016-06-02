@@ -32,7 +32,8 @@ struct epErrorState
   epResult error;
   epString message;
 
-  epString file;
+  const char *function;
+  const char *file;
   int line;
 
   epErrorState *pPrior;

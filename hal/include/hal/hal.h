@@ -2,9 +2,9 @@
 #ifndef EPHAL_H
 #define EPHAL_H
 
-epResult epHAL_Init();
-epResult epHAL_InitRender();
-epResult epHAL_DeinitRender();
-epResult epHAL_Deinit();
+ep::Result epHAL_Init();
+ep::Result epHAL_InitRender();
+ep::Result epHAL_DeinitRender();
+ep::Result epHAL_Deinit();
 
 #endif // EPHAL_H

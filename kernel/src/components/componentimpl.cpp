@@ -45,7 +45,7 @@ void ComponentImpl::SetName(SharedString name)
   KernelImpl *pKernelImpl = GetKernel()->GetImpl();
 
   if (name && pKernelImpl->namedInstanceRegistry.exists(name))
-    EPTHROW_WARN(epR_AlreadyExists, 1, "Name is already in use");
+    EPTHROW_WARN(Result::AlreadyExists, 1, "Name is already in use");
 
   if (pInstance->name)
     pKernelImpl->namedInstanceRegistry.remove(pInstance->name);
@@ -227,9 +227,10 @@ void ComponentImpl::Set(String property, const Variant &value)
     pInstance->LogWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return;
   }
-  pDesc->setter.set(pInstance, value);
-  if (ErrorLevel())
-    throw GetError();
+
+  Variant r = pDesc->setter.set(pInstance, value);
+  r.throwError();
+
   // TODO: should properties have implicit signals?
   //  propertyChange[pDesc->index].Signal();
 }

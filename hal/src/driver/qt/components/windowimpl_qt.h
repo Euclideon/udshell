@@ -23,8 +23,8 @@ public:
     pInstance->ep::Component::GetImpl<ep::ComponentImpl>()->SetUserData(pData);
 
     // register the window with the kernel
-    if (static_cast<QtKernel*>(GetKernel())->RegisterWindow((QQuickWindow*)pInstance->GetUserData()) != epR_Success)
-      EPTHROW_ERROR(epR_Failure, "Unable to register Window component with Kernel");
+    if (static_cast<QtKernel*>(GetKernel())->RegisterWindow((QQuickWindow*)pInstance->GetUserData()) != ep::Result::Success)
+      EPTHROW_ERROR(ep::Result::Failure, "Unable to register Window component with Kernel");
   }
 
   void SetTopLevelUI(ep::UIComponentRef spUIComponent) override final
@@ -42,7 +42,7 @@ public:
     else
     {
       QQuickItem *pUI = (QQuickItem*)(spUIComponent->GetUserData());
-      EPTHROW_IF(!pUI, epR_InvalidArgument, "The top level UI component does not contain a valid UI");
+      EPTHROW_IF(!pUI, ep::Result::InvalidArgument, "The top level UI component does not contain a valid UI");
 
       pUI->setParentItem(pQtWindow->contentItem());
       spTopLevelUI = spUIComponent;

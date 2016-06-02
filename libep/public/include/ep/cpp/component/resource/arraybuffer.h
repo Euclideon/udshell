@@ -96,7 +96,7 @@ public:
   template<typename T = void>
   Slice<T> Map()
   {
-    EPASSERT_THROW(stringof<T>().eq(GetElementType()), epR_InvalidType, "Incompatible type!");
+    EPASSERT_THROW(stringof<T>().eq(GetElementType()), Result::InvalidType, "Incompatible type!");
     Slice<void> _buffer = Buffer::Map();
     return Slice<T>((T*)_buffer.ptr, _buffer.length/sizeof(T));
   }
@@ -104,7 +104,7 @@ public:
   template<typename T = void>
   Slice<const T> MapForRead()
   {
-    EPASSERT_THROW(stringof<T>().eq(GetElementType()), epR_InvalidType, "Incompatible type!");
+    EPASSERT_THROW(stringof<T>().eq(GetElementType()), Result::InvalidType, "Incompatible type!");
     Slice<const void> buffer = Buffer::MapForRead();
     return Slice<const T>((const T*)buffer.ptr, buffer.length/sizeof(T));
   }
@@ -112,12 +112,12 @@ public:
   template<typename T>
   void SetData(Slice<const T> data)
   {
-    EPASSERT_THROW(stringof<T>().eq(GetElementType()), epR_InvalidType, "Incompatible type!");
+    EPASSERT_THROW(stringof<T>().eq(GetElementType()), Result::InvalidType, "Incompatible type!");
 
     Slice<T> buffer = Map<T>();
     epscope(exit) { Unmap(); };
 
-    EPASSERT_THROW(buffer.length == data.length, epR_InvalidArgument, "Incorrect number of elements!");
+    EPASSERT_THROW(buffer.length == data.length, Result::InvalidArgument, "Incorrect number of elements!");
 
     // initialise buffer
     if (std::is_pod<T>::value)
@@ -220,7 +220,7 @@ inline void epFromVariant(const Variant &v, ElementMetadata *pE)
 
 inline SharedString ElementInfo::AsString() const
 {
-  EPASSERT_THROW(size > 0, epR_Failure, "Invalid size");
+  EPASSERT_THROW(size > 0, Result::Failure, "Invalid size");
 
   MutableString<0> str;
 
@@ -250,7 +250,7 @@ inline SharedString ElementInfo::AsString() const
 inline ElementInfo ElementInfo::Parse(String s)
 {
   ElementInfo info = ElementInfo{ 0, { 0 }, 0 };
-  EPASSERT_THROW(s, epR_InvalidArgument, "String is empty");
+  EPASSERT_THROW(s, Result::InvalidArgument, "String is empty");
 
   s = s.trim();
   if (s.length > 2 && s.front() == '{' && s.back() == '}')
@@ -260,7 +260,7 @@ inline ElementInfo ElementInfo::Parse(String s)
   {
     case 'c':
     {
-      EPASSERT_THROW(s.slice(0, 5).eqIC("color"), epR_InvalidArgument, "The string does not represent a valid ElementInfo");
+      EPASSERT_THROW(s.slice(0, 5).eqIC("color"), Result::InvalidArgument, "The string does not represent a valid ElementInfo");
       info.flags |= ElementInfoFlags::Color;
       info.size = uint16_t(s.slice(5, s.length).parseInt() / 8);
       info.dimensions = SharedArray<size_t>{ 1 };
@@ -293,7 +293,7 @@ inline ElementInfo ElementInfo::Parse(String s)
       break;
     }
     default:
-      EPASSERT_THROW(false, epR_InvalidArgument, "The string does not represent a valid ElementInfo");
+      EPASSERT_THROW(false, Result::InvalidArgument, "The string does not represent a valid ElementInfo");
       break;
   }
 

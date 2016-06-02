@@ -147,7 +147,7 @@ static Instance s_instance =
       return nullptr;
     }
     else
-      EPTHROW_ERROR(epR_InvalidArgument, "Bad call");
+      EPTHROW_ERROR(Result::InvalidArgument, "Bad call");
   } // Find
 };
 
@@ -164,7 +164,7 @@ GlobalInstanceInitializer globalInstanceInitializer;
 ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
-  EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
+  EPTHROW_IF_NULL(pDesc, Result::AllocFailure, "Memory allocation failed");
 
   pDesc->info = Kernel::ComponentInfo();
   pDesc->info.flags = ComponentInfoFlags::Unregistered;
@@ -599,7 +599,7 @@ Array<const ComponentDesc *> KernelImpl::GetDerivedComponentDescs(const Componen
 
 void KernelImpl::SendMessage(String target, String sender, String message, const Variant &data)
 {
-  EPASSERT_THROW(!target.empty(), epR_InvalidArgument, "target was empty");
+  EPASSERT_THROW(!target.empty(), Result::InvalidArgument, "target was empty");
 
   char targetType = target.popFront();
   if (targetType == '@')
@@ -609,31 +609,18 @@ void KernelImpl::SendMessage(String target, String sender, String message, const
     if (ppComponent)
     {
       ComponentRef spComponent(*ppComponent);
-      size_t errorDepth = ErrorLevel();
-      try
-      {
+      try {
         spComponent->ReceiveMessage(message, sender, data);
-        if (ErrorLevel() > errorDepth)
-        {
-          LogError("Message Handler {0} failed {1}", target, GetError()->message);
-          PopErrorToLevel(errorDepth);
-        }
-      }
-      catch (std::exception &e)
-      {
+      } catch (std::exception &e) {
         LogError("Message Handler {0} failed: {1}", target, e.what());
-        PopErrorToLevel(errorDepth);
-      }
-      catch (...)
-      {
-        LogError("Message Handler {0} failed", target);
-        PopErrorToLevel(errorDepth);
+      } catch (...) {
+        LogError("Message Handler {0} failed: C++ exception", target);
       }
     }
     else
     {
       // TODO: check if it's in the foreign component registry and send it there
-      EPTHROW_ERROR(epR_Failure, "Target component not found");
+      EPTHROW_ERROR(Result::Failure, "Target component not found");
     }
   }
   else if (targetType == '#')
@@ -642,31 +629,18 @@ void KernelImpl::SendMessage(String target, String sender, String message, const
     if (target.eq(uid))
     {
       // it's for me!
-      size_t errorDepth = ErrorLevel();
-      try
-      {
+      try {
         ReceiveMessage(sender, message, data);
-        if (ErrorLevel() > errorDepth)
-        {
-          LogError("Message Handler {0} failed {1}", target, GetError()->message);
-          PopErrorToLevel(errorDepth);
-        }
-      }
-      catch (std::exception &e)
-      {
+      } catch (std::exception &e) {
         LogError("Message Handler {0} failed: {1}", target, e.what());
-        PopErrorToLevel(errorDepth);
-      }
-      catch (...)
-      {
-        LogError("Message Handler {0} failed", target);
-        PopErrorToLevel(errorDepth);
+      } catch (...) {
+        LogError("Message Handler {0} failed: C++ exception", target);
       }
     }
     else
     {
       // TODO: foreign kernels?!
-      EPTHROW_ERROR(epR_Failure, "Invalid Kernel");
+      EPTHROW_ERROR(Result::Failure, "Invalid Kernel");
     }
   }
   else if (targetType == '$')
@@ -675,35 +649,22 @@ void KernelImpl::SendMessage(String target, String sender, String message, const
     MessageCallback *pHandler = messageHandlers.get(target);
     if (pHandler)
     {
-      size_t errorDepth = ErrorLevel();
-      try
-      {
+      try {
         pHandler->callback(sender, message, data);
-        if (ErrorLevel() > errorDepth)
-        {
-          LogError("Message Handler {0} failed {1}", target, GetError()->message);
-          PopErrorToLevel(errorDepth);
-        }
-      }
-      catch (std::exception &e)
-      {
+      } catch (std::exception &e) {
         LogError("Message Handler {0} failed: {1}", target, e.what());
-        PopErrorToLevel(errorDepth);
-      }
-      catch (...)
-      {
-        LogError("Message Handler {0} failed", target);
-        PopErrorToLevel(errorDepth);
+      } catch (...) {
+        LogError("Message Handler {0} failed: C++ exception", target);
       }
     }
     else
     {
-      EPTHROW_ERROR(epR_Failure, "No Message Handler");
+      EPTHROW_ERROR(Result::Failure, "No Message Handler");
     }
   }
   else
   {
-    EPTHROW_ERROR(epR_Failure, "Invalid target");
+    EPTHROW_ERROR(Result::Failure, "Invalid target");
   }
 }
 
@@ -739,11 +700,11 @@ void KernelImpl::RegisterMessageHandler(SharedString _name, MessageHandler messa
 const ComponentDesc* KernelImpl::RegisterComponentType(ComponentDescInl *pDesc)
 {
   if (pDesc->info.identifier.exists('@') || pDesc->info.identifier.exists('$') || pDesc->info.identifier.exists('#'))
-    EPTHROW_ERROR(epR_InvalidArgument, "Invalid component id");
+    EPTHROW_ERROR(Result::InvalidArgument, "Invalid component id");
 
   // disallow duplicates
   if (componentRegistry.get(pDesc->info.identifier))
-    EPTHROW_ERROR(epR_InvalidArgument, "Component of type id '{0}' has already been registered", pDesc->info.identifier);
+    EPTHROW_ERROR(Result::InvalidArgument, "Component of type id '{0}' has already been registered", pDesc->info.identifier);
 
   // add to registry
   componentRegistry.insert(pDesc->info.identifier, ComponentType{ pDesc, 0 });
@@ -761,7 +722,7 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
   pDesc->info.identifier = typeDesc["identifier"].asSharedString();
 
   size_t offset = pDesc->info.identifier.findLast('.');
-  EPTHROW_IF(offset == (size_t)-1, epR_InvalidArgument, "Component identifier {0} has no namespace. Use form: namespace.componentname", pDesc->info.identifier);
+  EPTHROW_IF(offset == (size_t)-1, Result::InvalidArgument, "Component identifier {0} has no namespace. Use form: namespace.componentname", pDesc->info.identifier);
 
   pDesc->info.nameSpace = pDesc->info.identifier.slice(0, offset);
   pDesc->info.name = pDesc->info.identifier.slice(offset+1, pDesc->info.identifier.length);
@@ -808,7 +769,7 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
 
   // setup the super class and populate from its meta
   pDesc->pSuperDesc = GetComponentDesc(pDesc->baseClass);
-  EPTHROW_IF(!pDesc->pSuperDesc, epR_InvalidType, "Base Component '{0}' not registered", pDesc->baseClass);
+  EPTHROW_IF(!pDesc->pSuperDesc, Result::InvalidType, "Base Component '{0}' not registered", pDesc->baseClass);
   pDesc->PopulateFromDesc((ComponentDescInl*)pDesc->pSuperDesc);
 
   return RegisterComponentType(pDesc);
@@ -838,8 +799,8 @@ const ComponentDesc* KernelImpl::GetComponentDesc(String id)
 ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initParams)
 {
   ComponentType *_pType = componentRegistry.get(typeId);
-  EPASSERT_THROW(_pType, epR_InvalidArgument, "Unknown component type {0}", typeId);
-  EPTHROW_IF(_pType->pDesc->info.flags & ComponentInfoFlags::Abstract, epR_InvalidType, "Cannot create component of abstract type '{0}'", typeId);
+  EPASSERT_THROW(_pType, Result::InvalidArgument, "Unknown component type {0}", typeId);
+  EPTHROW_IF(_pType->pDesc->info.flags & ComponentInfoFlags::Abstract, Result::InvalidType, "Cannot create component of abstract type '{0}'", typeId);
 
   try
   {
@@ -874,7 +835,7 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
 ComponentRef KernelImpl::CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams)
 {
   CreateGlueFunc **ppCreate = glueRegistry.get(typeId);
-  EPTHROW_IF_NULL(ppCreate, epR_InvalidType, "No glue type {0}", typeId);
+  EPTHROW_IF_NULL(ppCreate, Result::InvalidType, "No glue type {0}", typeId);
   return (*ppCreate)(pInstance, _pType, _uid, spInstance, initParams);
 }
 
@@ -911,8 +872,8 @@ void KernelImpl::InitComponents()
 
 void KernelImpl::InitRender()
 {
-  epResult result = epHAL_InitRender();
-  EPASSERT_THROW(result == epR_Success, result, "epHAL_InitRender() Failed");
+  Result result = epHAL_InitRender();
+  EPASSERT_THROW(result == Result::Success, result, "epHAL_InitRender() Failed");
 }
 
 void KernelImpl::DeinitRender()
@@ -945,7 +906,7 @@ void KernelImpl::RegisterExtensions(const ComponentDesc *pDesc, const Slice<cons
 DataSourceRef KernelImpl::CreateDataSourceFromExtension(String ext, Variant::VarMap initParams)
 {
   const ComponentDesc **ppDesc = extensionsRegistry.get(ext);
-  EPASSERT_THROW(ppDesc, epR_Failure, "No datasource for extension {0}", ext);
+  EPASSERT_THROW(ppDesc, Result::Failure, "No datasource for extension {0}", ext);
 
   return component_cast<DataSource>(CreateComponent((*ppDesc)->info.identifier, initParams));
 }

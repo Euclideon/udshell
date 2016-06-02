@@ -60,25 +60,12 @@ void SDLKernel::EventLoop()
 
         MainThreadCallback d;
         d.SetMemento(m);
-        size_t errorDepth = ErrorLevel();
-        try
-        {
+        try {
           d();
-          if (ErrorLevel() > errorDepth)
-          {
-            LogError("Exception occurred in MainThreadCallback : {0}", GetError()->message);
-            PopErrorToLevel(errorDepth);
-          }
-        }
-        catch (std::exception &e)
-        {
+        } catch (std::exception &e) {
           LogError("Exception occurred in MainThreadCallback : {0}", e.what());
-          PopErrorToLevel(errorDepth);
-        }
-        catch (...)
-        {
+        } catch (...) {
           LogError("Exception occurred in MainThreadCallback : C++ Exception");
-          PopErrorToLevel(errorDepth);
         }
       }
       else if (event.user.code == 1)
@@ -87,25 +74,12 @@ void SDLKernel::EventLoop()
 
         MainThreadCallback d;
         d.SetMemento(pDispatch->m);
-        size_t errorDepth = ErrorLevel();
-        try
-        {
+        try {
           d();
-          if (ErrorLevel() > errorDepth)
-          {
-            LogError("Exception occurred in MainThreadCallback : {0}", GetError()->message);
-            PopErrorToLevel(errorDepth);
-          }
-        }
-        catch (std::exception &e)
-        {
+        } catch (std::exception &e) {
           LogError("Exception occurred in MainThreadCallback : {0}", e.what());
-          PopErrorToLevel(errorDepth);
-        }
-        catch (...)
-        {
+        } catch (...) {
           LogError("Exception occurred in MainThreadCallback : C++ Exception");
-          PopErrorToLevel(errorDepth);
         }
         udIncrementSemaphore(pDispatch->pSem);
       }
@@ -138,7 +112,7 @@ void SDLKernel::EventLoop()
 ComponentDescInl *SDLKernel::MakeKernelDescriptor()
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
-  EPTHROW_IF_NULL(pDesc, epR_AllocFailure, "Memory allocation failed");
+  EPTHROW_IF_NULL(pDesc, Result::AllocFailure, "Memory allocation failed");
 
   pDesc->info = SDLKernel::ComponentInfo();
   pDesc->info.flags = ComponentInfoFlags::Unregistered;
@@ -168,18 +142,18 @@ SDLKernel::SDLKernel(Variant::VarMap commandLine)
   s_displayHeight = 720;
 
   int sdlInit = SDL_Init(SDL_INIT_VIDEO);
-  EPTHROW_IF(sdlInit < 0, epR_Failure, "Failed to initialise SDL");
+  EPTHROW_IF(sdlInit < 0, Result::Failure, "Failed to initialise SDL");
   epscope(fail) { SDL_Quit(); };
 
   s_sdlEvent = SDL_RegisterEvents(1);
-  EPTHROW_IF(s_sdlEvent == (Uint32)-1, epR_Failure, "Failed to register SDL events");
+  EPTHROW_IF(s_sdlEvent == (Uint32)-1, Result::Failure, "Failed to register SDL events");
 
   s_window = SDL_CreateWindow("udPointCloud Viewer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s_displayWidth, s_displayHeight, SDL_WINDOW_OPENGL);
-  EPTHROW_IF(!s_window, epR_Failure, "Failed to create SDL Window");
+  EPTHROW_IF(!s_window, Result::Failure, "Failed to create SDL Window");
   epscope(fail) { SDL_DestroyWindow(s_window); };
 
   s_context = SDL_GL_CreateContext(s_window);
-  EPTHROW_IF(!s_context, epR_Failure, "Failed to create SDL Window");
+  EPTHROW_IF(!s_context, Result::Failure, "Failed to create SDL Window");
   epscope(fail) { SDL_GL_DeleteContext(s_context); };
 
   GetImpl()->InitRender();

@@ -418,7 +418,7 @@ typedef Quaternion<double>  DoubleQuat;
 } // namespace ep
 
 // unit tests
-epResult epMath_Test();
+ep::Result epMath_Test();
 
 #include "ep/cpp/internal/math_inl.h"
 

@@ -23,7 +23,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
 
     udOctree *pOctree = nullptr;
     udResult result = udOctree_Load(&pOctree, filePath.toStringz(), useStreamer && useStreamer->is(Variant::Type::Bool) ? useStreamer->asBool() : true, nullptr);
-    EPTHROW_IF(result != udR_Success, epR_Failure, "Failed to Create UD model");
+    EPTHROW_IF(result != udR_Success, Result::Failure, "Failed to Create UD model");
 
     epscope(fail) { udOctree_Destroy(&pOctree); };
 

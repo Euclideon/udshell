@@ -2,6 +2,7 @@
 #include "ep/cpp/error.h"
 #include "ep/cpp/math.h"
 #include "ep/cpp/kernel.h"
+#include "ep/cpp/freelist.h"
 
 namespace ep {
 namespace internal {
@@ -15,101 +16,92 @@ void Log(int type, int level, String text)
     epDebugWrite(text.toStringz());
 }
 
-static inline ErrorSystem *GetErrorSystem()
+ErrorSystem::ErrorSystem()
 {
-  return (ErrorSystem*)s_pInstance->pErrorSystem;
+  pErrorPool = epNew(FreeList<ErrorState>, 64);
+}
+ErrorSystem::~ErrorSystem()
+{
+  epDelete((FreeList<ErrorState>*)pErrorPool);
+}
+
+inline ErrorSystem& GetErrorSystem()
+{
+  static ErrorSystem *pSystem = nullptr;
+  if (!pSystem)
+    pSystem = (ErrorSystem*)s_pInstance->pErrorSystem;
+  return *pSystem;
+}
+
+inline FreeList<ErrorState>& GetErrorPool()
+{
+  return *(FreeList<ErrorState>*)GetErrorSystem().pErrorPool;
+}
+
+ErrorState* _AllocError(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pParent)
+{
+  ErrorState *pError = internal::GetErrorPool().Alloc();
+  pError->error = error;
+  epConstruct(&pError->message) SharedString(message);
+  pError->function = function;
+  pError->file = file;
+  pError->line = line;
+  pError->pPrior = pParent;
+  return pError;
 }
 
 } // namespace internal
 
-EPException::EPException(ErrorState *_pError)
-  : pError(_pError)
+EPException::EPException(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pPrior)
+  : pError(internal::_AllocError(error, message, function, file, line, pPrior))
 {}
+
 EPException::~EPException()
-{}
-const char* EPException::what() const noexcept
 {
-  return pError->message.ptr;
+  FreeList<ErrorState>& pool = internal::GetErrorPool();
+  while (pError)
+  {
+    ErrorState *pPrev = pError->pPrior;
+    pError->Clear();
+    pool.Free(pError);
+    pError = pPrev;
+  }
 }
 
-ErrorState* _PushError(epResult error, const SharedString &message, const char *function, const char *file, int line)
-{
-  using namespace internal;
-  ErrorSystem *pErrorSystem = GetErrorSystem();
-  ErrorState *pErrorStack = pErrorSystem->errorStack;
-  size_t &errorDepth = pErrorSystem->errorDepth;
 
-  pErrorStack[errorDepth].error = error;
-  epConstruct(&pErrorStack[errorDepth].message) SharedString(message);
-  pErrorStack[errorDepth].function = function;
-  pErrorStack[errorDepth].file = file;
-  pErrorStack[errorDepth].line = line;
-  pErrorStack[errorDepth].pPrior = errorDepth > 0 ? &pErrorStack[errorDepth-1] : nullptr;
-
-  ErrorState *pState = &pErrorStack[errorDepth];
-  // If the error state will exceeded the stack size just overwrite the last entry.
-  // This is necessary to handle the case where script implements a loop that errors every iteration
-  // and so may exceed the stack.
-  errorDepth = ep::Min(ErrorSystem::ErrorStackSize - 1, ++errorDepth);
-  return pState;
-}
-size_t ErrorLevel()
+ErrorState* _PushError(Result error, const SharedString &message, const char *function, const char *file, int line)
 {
-  return ep::internal::GetErrorSystem()->errorDepth;
+  internal::ErrorSystem& errorSystem = internal::GetErrorSystem();
+  errorSystem.pError = internal::_AllocError(error, message, function, file, line, errorSystem.pError);
+  return errorSystem.pError;
 }
 ErrorState* GetError()
 {
-  using namespace internal;
-  ErrorSystem *pErrorSystem = GetErrorSystem();
-  return pErrorSystem->errorDepth ? &pErrorSystem->errorStack[pErrorSystem->errorDepth -1] : nullptr;
-}
-
-SharedString GetErrorMessage()
-{
-  ErrorState *pE = GetError();
-  if (pE)
-    return pE->message;
-
-  return nullptr;
+  return internal::GetErrorSystem().pError;
 }
 
 void ClearError()
 {
-  using namespace internal;
-  ErrorSystem *pErrorSystem = GetErrorSystem();
-  size_t &errorDepth = pErrorSystem->errorDepth;
-  while (errorDepth)
-    pErrorSystem->errorStack[--errorDepth].Clear();
+  internal::ErrorSystem& errorSystem = internal::GetErrorSystem();
+  FreeList<ErrorState>& pool = internal::GetErrorPool();
+  while (errorSystem.pError)
+  {
+    ErrorState *pPrev = errorSystem.pError->pPrior;
+    errorSystem.pError->Clear();
+    pool.Free(errorSystem.pError);
+    errorSystem.pError = pPrev;
+  }
 }
 
-void PopError()
+SharedString DumpError(ErrorState *pError)
 {
-  using namespace internal;
-  ErrorSystem *pErrorSystem = GetErrorSystem();
-  size_t &errorDepth = pErrorSystem->errorDepth;
-  if (errorDepth)
-    pErrorSystem ->errorStack[--errorDepth].Clear();
-}
-
-void PopErrorToLevel(size_t level)
-{
-  while (ep::internal::GetErrorSystem()->errorDepth > level)
-    PopError();
-}
-
-SharedString DumpError()
-{
-  using namespace internal;
-  ErrorSystem *pErrorSystem = GetErrorSystem();
-  size_t depth = pErrorSystem->errorDepth;
-
-  MutableString<0> s(Reserve, depth * 96);
+  MutableString<0> s(Reserve, 256);
   s = "Errors occurred!\n";
 
-  while (depth-- > 0)
+  while (pError)
   {
-    ErrorState &e = pErrorSystem->errorStack[depth];
-    s.append(e.file, "(", e.line, "): Error ", (int)e.error, ": ", e.message);
+    s.append(pError->file, "(", pError->line, "): Error ", (int)pError->error, ": ", pError->message);
+    pError = pError->pPrior;
   }
 
   return std::move(s);
@@ -117,18 +109,17 @@ SharedString DumpError()
 
 } // namespace ep
 
+
 // C bindings...
+#include "ep/c/error.h"
+
 extern "C" {
 
 epErrorState* epPushError(epResult error, epString message, const char *function, const char *file, int line)
 {
-  return (epErrorState*)ep::_PushError(error, ep::String(message), function, file, line);
+  return (epErrorState*)ep::_PushError((ep::Result)error, ep::String(message), function, file, line);
 }
 
-size_t epErrorLevel()
-{
-  return ep::ErrorLevel();
-}
 epErrorState* epGetError()
 {
   return (epErrorState*)ep::GetError();
@@ -140,8 +131,10 @@ void epClearError()
 
 epSharedString epDumpError()
 {
+  ep::internal::ErrorSystem& errorSystem = ep::internal::GetErrorSystem();
+
   epSharedString r;
-  epConstruct(&r) ep::SharedString(ep::DumpError());
+  epConstruct(&r) ep::SharedString(ep::DumpError(errorSystem.pError));
   return r;
 }
 

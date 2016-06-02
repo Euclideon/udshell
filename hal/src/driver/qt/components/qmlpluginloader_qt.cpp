@@ -41,8 +41,6 @@ bool QmlPluginLoader::LoadPlugin(String filename)
     // if RegisterQml threw, then it might be due to the super not yet being loaded - hence we should try again
     else
       LogDebug(2, "Failed attempt to register QML file '{0}' as Component: \"{1}\"", filename, e.what());
-
-    ep::ClearError();
     return descMap.empty();
   }
 
@@ -54,7 +52,7 @@ Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::St
   // Open and read the entire file
   QFile file(epToQString(filename));
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    EPTHROW(epR_Failure, "Unable to open file '{0}'", filename);
+    EPTHROW(ep::Result::Failure, "Unable to open file '{0}'", filename);
   QByteArray data = file.readAll();
 
   // Check if we contain an epTypeDesc property
@@ -84,20 +82,20 @@ Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::St
       } while (expEnd != fileData.size());
 
       // Malformed
-      if (braceStack != 0) EPTHROW(epR_Failure, "Cannot Parse Type Descriptor: File contains malformed 'epTypeDesc' property map");
+      if (braceStack != 0) EPTHROW(ep::Result::Failure, "Cannot Parse Type Descriptor: File contains malformed 'epTypeDesc' property map");
 
       // Evaluate the value of the property map using the JS engine
       Variant result = epToVariant(pQtKernel->QmlEngine()->evaluate(fileData.mid(expStart, expEnd - expStart + 1)));
       if (result.is(Variant::Type::Error))
-        EPTHROW(epR_ScriptException, "Cannot Parse Type Descriptor: 'epTypeDesc' property map does not contain a valid javascript expression");
+        EPTHROW(ep::Result::ScriptException, "Cannot Parse Type Descriptor: 'epTypeDesc' property map does not contain a valid javascript expression");
 
       Variant::VarMap typeDesc = result.asAssocArray();
 
       // id and super must be present
       Variant *pId = typeDesc.get("id");
       Variant *pSuper = typeDesc.get("super");
-      if (!pId) EPTHROW(epR_Failure, "Invalid Type Descriptor: Does not contain 'id' key");
-      if (!pSuper) EPTHROW(epR_Failure, "Invalid Type Descriptor: Does not contain 'super' key");
+      if (!pId) EPTHROW(ep::Result::Failure, "Invalid Type Descriptor: Does not contain 'id' key");
+      if (!pSuper) EPTHROW(ep::Result::Failure, "Invalid Type Descriptor: Does not contain 'super' key");
 
       if (!typeDesc.get("displayname"))
         typeDesc.insert("displayname", pId->asString());
@@ -115,7 +113,7 @@ Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::St
     }
     else
     {
-      EPTHROW(epR_Failure, "Cannot Parse Type Descriptor: File contains empty 'epTypeDesc' property");
+      EPTHROW(ep::Result::Failure, "Cannot Parse Type Descriptor: File contains empty 'epTypeDesc' property");
     }
   }
   return nullptr;

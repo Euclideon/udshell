@@ -24,8 +24,8 @@ void epKernel_RegisterComponentType(const epComponentDesc *pDesc)
   };
 
   if (!Kernel::GetInstance()->RegisterComponentType<CComponent>())
-    return epR_Failure;
-  return epR_Success;
+    return Result::Failure;
+  return Result::Success;
 */
 }
 

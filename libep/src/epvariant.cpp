@@ -309,7 +309,7 @@ bool Variant::isNull() const
   {
     case Type::Void:
       // TODO: consider, is this correct?
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void; has no value");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void; has no value");
     case Type::Null:
       return true;
     case Type::String:
@@ -389,7 +389,7 @@ bool Variant::asBool() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return false;
     case Type::Bool:
@@ -409,7 +409,7 @@ bool Variant::asBool() const
       return !str.empty();
     }
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 int64_t Variant::asInt() const
@@ -417,7 +417,7 @@ int64_t Variant::asInt() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return 0;
     case Type::Bool:
@@ -434,7 +434,7 @@ int64_t Variant::asInt() const
       return String((char*)pBuffer + 1, pBuffer[0] >> 4).parseInt();
     }
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 double Variant::asFloat() const
@@ -442,7 +442,7 @@ double Variant::asFloat() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return 0.0;
     case Type::Bool:
@@ -459,13 +459,13 @@ double Variant::asFloat() const
       return String((char*)pBuffer + 1, pBuffer[0] >> 4).parseFloat();
     }
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 const EnumDesc* Variant::asEnum(size_t *pVal) const
 {
   if ((Type)t == Type::Void)
-    EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+    EPTHROW_ERROR(Result::InvalidType, "Variant is void");
   else if ((Type)t == Type::Enum || (Type)t == Type::Bitfield)
   {
     *pVal = (ptrdiff_t)(length << 5) >> 5;
@@ -478,13 +478,13 @@ SharedPtr<RefCounted> Variant::asSharedPtr() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return nullptr;
     case Type::SharedPtr:
         return (SharedPtr<RefCounted>&)sp;
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 ComponentRef Variant::asComponent() const
@@ -492,14 +492,14 @@ ComponentRef Variant::asComponent() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return ComponentRef();
     case Type::SharedPtr:
       if((SharedPtrType)length == SharedPtrType::Component)
         return (ComponentRef&)c;
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 VarDelegate Variant::asDelegate() const
@@ -507,14 +507,14 @@ VarDelegate Variant::asDelegate() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return VarDelegate();
     case Type::SharedPtr:
       if ((SharedPtrType)length == SharedPtrType::Delegate)
         return VarDelegate((DelegateMementoRef&)d);
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 SubscriptionRef Variant::asSubscription() const
@@ -522,14 +522,14 @@ SubscriptionRef Variant::asSubscription() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return SubscriptionRef();
     case Type::SharedPtr:
       if ((SharedPtrType)length == SharedPtrType::Subscription)
         return (SubscriptionRef&)d;
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 String Variant::asString() const
@@ -537,7 +537,7 @@ String Variant::asString() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return String();
     case Type::String:
@@ -551,7 +551,7 @@ String Variant::asString() const
       if ((SharedPtrType)length == SharedPtrType::Component)
         return c->GetUid();
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 SharedString Variant::asSharedString() const
@@ -559,7 +559,7 @@ SharedString Variant::asSharedString() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return String();
     case Type::Bool:
@@ -587,7 +587,7 @@ SharedString Variant::asSharedString() const
       if ((SharedPtrType)length == SharedPtrType::Component)
         return c->GetUid();
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 
@@ -596,13 +596,13 @@ Slice<Variant> Variant::asArray() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return Slice<Variant>();
     case Type::Array:
       return Slice<Variant>(a, length);
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 SharedArray<Variant> Variant::asSharedArray() const
@@ -610,7 +610,7 @@ SharedArray<Variant> Variant::asSharedArray() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return SharedArray<Variant>();
     case Type::Array:
@@ -639,11 +639,11 @@ SharedArray<Variant> Variant::asSharedArray() const
         } while (1);
         return std::move(arr);
       }
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
     case Type::String:
       // TODO: should we parse strings that look like arrays??
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 Variant::VarMap Variant::asAssocArray() const
@@ -651,14 +651,14 @@ Variant::VarMap Variant::asAssocArray() const
   switch ((Type)t)
   {
     case Type::Void:
-      EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+      EPTHROW_ERROR(Result::InvalidType, "Variant is void");
     case Type::Null:
       return VarMap();
     case Type::SharedPtr:
       if ((SharedPtrType)length == SharedPtrType::AssocArray)
         return (VarMap&)aa;
     default:
-      EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+      EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 VarRange Variant::asRange() const
@@ -666,7 +666,7 @@ VarRange Variant::asRange() const
   switch ((Type)t)
   {
   case Type::Void:
-    EPTHROW_ERROR(epR_InvalidType, "Variant is void");
+    EPTHROW_ERROR(Result::InvalidType, "Variant is void");
   case Type::Null:
     return VarRange();
   case Type::Array:
@@ -677,7 +677,7 @@ VarRange Variant::asRange() const
     else if ((SharedPtrType)length == SharedPtrType::AssocArray)
       return ((VarMap&)aa).getRange();
   default:
-    EPTHROW_ERROR(epR_InvalidType, "Wrong type!");
+    EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
 }
 
@@ -707,21 +707,21 @@ Variant& Variant::operator[](size_t j) const
 {
   if (is(Type::Array))
   {
-    EPASSERT_THROW(j < length, epR_OutOfBounds, "Index out of range: {0} in [0 .. {1})", j, length);
+    EPASSERT_THROW(j < length, Result::OutOfBounds, "Index out of range: {0} in [0 .. {1})", j, length);
     return a[j];
   }
   else if (is(SharedPtrType::AssocArray))
   {
-    EPASSERT_THROW(j < length, epR_OutOfBounds, "Element not found: {0}", j);
+    EPASSERT_THROW(j < length, Result::OutOfBounds, "Element not found: {0}", j);
     return aa->tree[j + (aa->tree.get(0) ? 0 : 1)];
   }
-  EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
+  EPTHROW_ERROR(Result::InvalidType, "Invalid type!");
 }
 Variant& Variant::operator[](String key) const
 {
   if (is(SharedPtrType::AssocArray))
     return aa->tree[key];
-  EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
+  EPTHROW_ERROR(Result::InvalidType, "Invalid type!");
 }
 
 Variant* Variant::getItem(Variant key) const
@@ -751,9 +751,9 @@ Variant& Variant::insertItem(Variant key, Variant value)
         return a[index];
       }
     }
-    EPTHROW(epR_OutOfBounds, "Variant is array, and key is out of bounds");
+    EPTHROW(Result::OutOfBounds, "Variant is array, and key is out of bounds");
   }
-  EPASSERT_THROW(is(SharedPtrType::AssocArray), epR_InvalidType, "Variant is not a map");
+  EPASSERT_THROW(is(SharedPtrType::AssocArray), Result::InvalidType, "Variant is not a map");
 
   return aa->tree.insert(key, value);
 }
@@ -764,7 +764,7 @@ VarRange Variant::getRange() const
     return Slice<Variant>(a, length);
   else if (is(SharedPtrType::AssocArray))
     return ((VarMap&)aa).getRange();
-  EPTHROW_ERROR(epR_InvalidType, "Invalid type!");
+  EPTHROW_ERROR(Result::InvalidType, "Invalid type!");
 }
 
 void VarEvent::Signal(Slice<const Variant> args)
@@ -772,31 +772,20 @@ void VarEvent::Signal(Slice<const Variant> args)
   for (auto &s : subscribers)
   {
     VarDelegate d(s.spM);
-    size_t errorDepth = ErrorLevel();
-    try
+
+    try // TODO: I don't think a vardelegate can actually throw right? this try/catch is redundant?
     {
       Variant r = d(args);
-
-      // stack error...
-      if (ErrorLevel() > errorDepth)
-      {
-        epDebugFormat("Unhandled error from event handler: {0}\n", GetError()->message);
-        PopErrorToLevel(errorDepth);
-      }
-      else if (r.is(Variant::Type::Error))
-      {
+      if (r.is(Variant::Type::Error))
         epDebugFormat("Unhandled error returned from event handler: {0}\n", r);
-      }
     }
     catch (std::exception &e)
     {
       epDebugFormat("Unhandled exception from event handler: {0}\n", e.what());
-      PopErrorToLevel(errorDepth);
     }
     catch (...)
     {
       epDebugFormat("Unhandled C++ exception from event handler!\n");
-      PopErrorToLevel(errorDepth);
     }
   }
 }

@@ -122,7 +122,6 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   catch (EPException ex)
   {
     pKernel->LogWarning(0, "Could not load platform logo");
-    ClearError();
   }
 }
 
@@ -145,12 +144,13 @@ void Viewer::OnResourceDropped(String resourceUID, int x, int y)
   ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
   UDModelRef spUDModel;
 
-  try {
+  try
+  {
     spUDModel = spResourceManager->GetResourceAs<UDModel>(resourceUID);
   }
-  catch(EPException &) {
+  catch(EPException &)
+  {
     LogDebug(2, "Can't drop \"{0}\" into viewport -- Component type is not supported", resourceUID);
-    ClearError();
     return;
   }
 

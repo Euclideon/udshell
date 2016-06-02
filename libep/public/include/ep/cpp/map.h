@@ -181,13 +181,13 @@ public:
   const ValueType& operator[](const KeyType &key) const
   {
     const ValueType *pV = get(key);
-    EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+    EPASSERT_THROW(pV, Result::OutOfBounds, "Element not found: {0}", key);
     return *pV;
   }
   ValueType& operator[](const KeyType &key)
   {
     ValueType *pV = get(key);
-    EPASSERT_THROW(pV, epR_OutOfBounds, "Element not found: {0}", key);
+    EPASSERT_THROW(pV, Result::OutOfBounds, "Element not found: {0}", key);
     return *pV;
   }
 

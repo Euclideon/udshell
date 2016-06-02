@@ -207,11 +207,11 @@ Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   // create a vertex buffer to render the quad to the screen
   epArrayDataFormat format[] = { epVDF_Float2 };
   s_pQuadVB = epVertex_CreateVertexBuffer(format, 1);
-  EPASSERT_THROW(s_pQuadVB, epR_Failure, "Failed to create vertex buffer");
+  EPASSERT_THROW(s_pQuadVB, Result::Failure, "Failed to create vertex buffer");
   epscope(fail) { epVertex_DestroyArrayBuffer(&s_pQuadVB); };
 
   s_pQuadIB = epVertex_CreateIndexBuffer(epVDF_UInt);
-  EPASSERT_THROW(s_pQuadIB, epR_Failure, "Failed to create index buffer");
+  EPASSERT_THROW(s_pQuadIB, Result::Failure, "Failed to create index buffer");
   epscope(fail) { epVertex_DestroyArrayBuffer(&s_pQuadIB); };
 
   epArrayElement elements[] =
@@ -220,20 +220,20 @@ Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   };
 
   pVS = epShader_CreateShader(s_vertexShader, sizeof(s_vertexShader), epST_VertexShader);
-  EPASSERT_THROW(pVS, epR_Failure, "Failed to create vertex shader");
+  EPASSERT_THROW(pVS, Result::Failure, "Failed to create vertex shader");
   epscope(fail) { epShader_DestroyShader(&pVS); };
 
   pPS = epShader_CreateShader(s_blitShader, sizeof(s_blitShader), epST_PixelShader);
-  EPASSERT_THROW(pPS, epR_Failure, "Failed to create pixel shader");
+  EPASSERT_THROW(pPS, Result::Failure, "Failed to create pixel shader");
   epscope(fail) { epShader_DestroyShader(&pPS); };
 
   epShader *shaders[] = { pVS, pPS };
   s_shader = epShader_CreateShaderProgram(shaders, 2);
-  EPASSERT_THROW(s_shader, epR_Failure, "Failed to create shader program");
+  EPASSERT_THROW(s_shader, Result::Failure, "Failed to create shader program");
   epscope(fail) { epShader_DestroyShaderProgram(&s_shader); };
 
   s_pPosUV = epVertex_CreateShaderInputConfig(elements, sizeof(elements)/sizeof(elements[0]), s_shader);
-  EPASSERT_THROW(s_pPosUV, epR_Failure, "Failed to create shader input configuration");
+  EPASSERT_THROW(s_pPosUV, Result::Failure, "Failed to create shader input configuration");
 
 /*
   using F2 = std::tuple<float, float>;
@@ -346,14 +346,14 @@ void Renderer::AddUDRenderJob(UniquePtr<RenderableView> job)
     if (udRenderQueue[i]->spView == job->spView)
     {
       // replace queued job with latest frame
-      udRenderQueue[i] = job;
+      udRenderQueue[i] = std::move(job);
       udReleaseMutex(pUDMutex);
       return;
     }
   }
 
   // add new job
-  udRenderQueue.concat(job);
+  udRenderQueue.concat(std::move(job));
   udReleaseMutex(pUDMutex);
   udIncrementSemaphore(pUDSemaphore);
 }
@@ -362,7 +362,7 @@ void Renderer::UDThread()
 {
   struct JobDone
   {
-    JobDone(UniquePtr<RenderableView> &job) : job(job) {}
+    JobDone(UniquePtr<RenderableView> &job) : job(std::move(job)) {}
 
     UniquePtr<RenderableView> job;
 
@@ -374,7 +374,7 @@ void Renderer::UDThread()
         job->CreateResources();
         // NOTE: we need to clear this pointer here to prevent circular referencing!
         job->spView = nullptr;
-        spView->GetImpl<ViewImpl>()->SetLatestFrame(job);
+        spView->GetImpl<ViewImpl>()->SetLatestFrame(std::move(job));
       }
       epDelete(this);
     }

@@ -52,7 +52,7 @@ StreamRef DataSourceImpl::OpenStream(const Variant &source)
   }
 
   if (!spSource)
-    EPTHROW_ERROR(epR_InvalidArgument, "Unknown type for \"src\" init paramater");
+    EPTHROW_ERROR(Result::InvalidArgument, "Unknown type for \"src\" init paramater");
 
   return spSource;
 }

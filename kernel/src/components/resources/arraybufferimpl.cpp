@@ -24,8 +24,8 @@ Array<const MethodInfo> ArrayBuffer::GetMethods() const
 
 void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, Slice<const size_t> _shape)
 {
-  EPASSERT_THROW(_shape.length > 0, epR_InvalidArgument, "No dimensions given!");
-  EPASSERT_THROW(_shape.length <= 4, epR_InvalidArgument, "More than 4 dimensional matrices is not supported...");
+  EPASSERT_THROW(_shape.length > 0, Result::InvalidArgument, "No dimensions given!");
+  EPASSERT_THROW(_shape.length <= 4, Result::InvalidArgument, "More than 4 dimensional matrices is not supported...");
 
   dimensions = _shape.length;
   elementType = _elementType;

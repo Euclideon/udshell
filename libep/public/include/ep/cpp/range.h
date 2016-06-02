@@ -216,7 +216,7 @@ public:
     ValueType &t = (*i).value; ++i;
     --len;
     // TODO: put this back
-//    EPTHROW_IF(i == Tree::end() && len != 0, epR_OutOfBounds, "AVLTree length ");
+//    EPTHROW_IF(i == Tree::end() && len != 0, Result::OutOfBounds, "AVLTree length ");
     return t;
   }
 

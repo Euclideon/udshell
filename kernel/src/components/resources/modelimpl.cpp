@@ -40,7 +40,7 @@ Array<const MethodInfo> Model::GetMethods() const
 
 void ModelImpl::AddVertexArray(ArrayBufferRef spVertices)
 {
-  EPTHROW_IF(!spVertices, epR_InvalidArgument, "array buffer was empty");
+  EPTHROW_IF(!spVertices, Result::InvalidArgument, "array buffer was empty");
 
   for (size_t i = 0; i < vertexArrays.length; ++i)
   {
@@ -54,7 +54,7 @@ void ModelImpl::AddVertexArray(ArrayBufferRef spVertices)
 
 void ModelImpl::RemoveVertexArray(ArrayBufferRef spVertices)
 {
-  EPTHROW_IF(!spVertices, epR_InvalidArgument, "array buffer was empty");
+  EPTHROW_IF(!spVertices, Result::InvalidArgument, "array buffer was empty");
 
   for (size_t i = 0; i < vertexArrays.length; ++i)
   {

@@ -29,14 +29,7 @@ public:
   QtSubscription(const ep::SubscriptionRef &spSub) : QObject(nullptr), spSubscription(spSub) {}
   Q_INVOKABLE void unsubscribe()
   {
-    try
-    {
-      spSubscription->Unsubscribe();
-    }
-    catch (ep::EPException &)
-    {
-      ep::ClearError();
-    }
+    spSubscription->Unsubscribe();
   }
 
 private:
