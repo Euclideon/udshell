@@ -40,6 +40,7 @@ public:
   BufferRef ReadBuffer(size_t bytes) { return pImpl->ReadBuffer(bytes); }
 
   BufferRef Load() { return pImpl->Load(); }
+  TextRef LoadText() { return pImpl->LoadText(); }
   void Save(BufferRef spBuffer) { return pImpl->Save(spBuffer); }
 
   Event<> PosChanged;

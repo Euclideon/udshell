@@ -1,10 +1,25 @@
 #include "ep/cpp/plugin.h"
 #include "ep/cpp/filesystem.h"
 #include "ep/cpp/variant.h"
+#include "ep/cpp/hashmap.h"
 
 #include "ep/cpp/component/resource/material.h"
 
 namespace ep {
+
+namespace internal {
+
+RefCounted* GetStaticImpl(String name)
+{
+  return (*(HashMap<SharedString, UniquePtr<RefCounted>>*)s_pInstance->pStaticImplRegistry)[name].ptr();
+}
+
+void AddStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl)
+{
+  ((HashMap<SharedString, UniquePtr<RefCounted>>*)s_pInstance->pStaticImplRegistry)->insert(name, std::move(upImpl));
+}
+
+} // namespace internal
 
 Instance *s_pInstance = nullptr;
 

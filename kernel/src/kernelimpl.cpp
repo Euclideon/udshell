@@ -15,7 +15,6 @@
 #include "components/nativepluginloader.h"
 #include "components/project.h"
 #include "ep/cpp/component/resource/kvpstore.h"
-#include "components/resources/text.h"
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
 #include "components/datasources/udsource.h"
@@ -37,6 +36,7 @@
 #include "components/resources/shaderimpl.h"
 #include "components/resources/menuimpl.h"
 #include "components/resources/modelimpl.h"
+#include "components/resources/textimpl.h"
 #include "components/nodes/nodeimpl.h"
 #include "components/nodes/scenenodeimpl.h"
 #include "components/nodes/udnodeimpl.h"
@@ -85,12 +85,18 @@ namespace internal {
   }
 
   ErrorSystem s_errorSystem;
+  HashMap<SharedString, UniquePtr<RefCounted>> s_staticImplRegistry;
 }
 
 static Instance s_instance =
 {
   EP_APIVERSION,  // apiVersion;
+
   nullptr,        // pKernelInstance;
+  (void*)&internal::s_errorSystem, // ErrorSystem
+  (void*)&internal::s_staticImplRegistry,
+  (void*)&KernelImpl::s_varAVLAllocator,
+  (void*)&KernelImpl::s_weakRefRegistry,
 
   [](size_t size, epAllocationFlags flags, const char *pFile, int line) -> void* { return internal::_Alloc(size, flags, pFile, line); }, //  Alloc
 
@@ -100,10 +106,6 @@ static Instance s_instance =
 
   // NOTE: this was called when an RC reached zero...
   [](Component *pInstance) -> void { pInstance->DecRef(); }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
-
-  []() -> void* { return (void*)&KernelImpl::s_varAVLAllocator; }, // TreeAllocator
-
-  []() -> void* { return (void*)&KernelImpl::s_weakRefRegistry; }, // weakRefRegistry
 
   [](String pattern, void *pHandle, void *pData) -> void* {
     EPFind *pFind = (EPFind*)pHandle;
@@ -146,9 +148,7 @@ static Instance s_instance =
     }
     else
       EPTHROW_ERROR(epR_InvalidArgument, "Bad call");
-  }, // Find
-
-  (void*)&internal::s_errorSystem // ErrorSystem
+  } // Find
 };
 
 struct GlobalInstanceInitializer
@@ -300,7 +300,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Shader, ShaderImpl>();
   pInstance->RegisterComponentType<Material, MaterialImpl>();
   pInstance->RegisterComponentType<Model, ModelImpl>();
-  pInstance->RegisterComponentType<Text>();
+  pInstance->RegisterComponentType<Text, TextImpl, void, TextImplStatic>();
   pInstance->RegisterComponentType<Menu, MenuImpl>();
   pInstance->RegisterComponentType<KVPStore>();
   pInstance->RegisterComponentType<Metadata, MetadataImpl>();

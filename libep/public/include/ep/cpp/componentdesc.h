@@ -160,6 +160,19 @@ private:                                                                        
   }
 
 
+#define EP_DECLARE_COMPONENT_WITH_STATIC_IMPL(Namespace, Name, Interface, StaticInterface, SuperType, Version, Description, Flags)  \
+  EP_DECLARE_COMPONENT_WITH_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)                                \
+public:                                                                                                                             \
+  static StaticInterface* GetStaticImpl()                                                                                           \
+  {                                                                                                                                 \
+    static BaseStaticImpl<StaticInterface> *pStaticImpl = nullptr;                                                                  \
+    if(!pStaticImpl)                                                                                                                \
+      pStaticImpl = static_cast<BaseStaticImpl<StaticInterface>*>(internal::GetStaticImpl(ComponentID()));                          \
+    return static_cast<StaticInterface*>(pStaticImpl);                                                                              \
+  }                                                                                                                                 \
+private:
+
+
 // emit getter and setter magic
 #define EP_MAKE_GETTER(Getter)                                                           \
   []() -> ep::VarMethod {                                                                \

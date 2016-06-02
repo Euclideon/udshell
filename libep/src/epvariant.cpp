@@ -805,7 +805,7 @@ namespace internal
 {
   AVLTreeAllocator<VariantAVLNode> &GetAVLTreeAllocator()
   {
-    return *(AVLTreeAllocator<VariantAVLNode>*)s_pInstance->TreeAllocator();
+    return *(AVLTreeAllocator<VariantAVLNode>*)s_pInstance->pTreeAllocator;
   }
 }
 

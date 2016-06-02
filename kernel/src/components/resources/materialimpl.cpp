@@ -1,9 +1,9 @@
 #include "ep/cpp/component/component.h"
+#include "ep/cpp/component/resource/text.h"
 #include "materialimpl.h"
 #include "shaderimpl.h"
 #include "renderresource.h"
 #include "kernelimpl.h"
-#include "components/resources/text.h"
 
 namespace ep {
 

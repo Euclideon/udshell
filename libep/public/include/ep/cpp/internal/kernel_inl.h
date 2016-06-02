@@ -82,7 +82,7 @@ private:
   }
 };
 
-template<typename _ComponentType, typename ImplType, typename GlueType>
+template<typename _ComponentType, typename ImplType, typename GlueType, typename StaticImpl>
 inline const ComponentDesc* Kernel::RegisterComponentType()
 {
   // check the class has a 'super' member
@@ -117,6 +117,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
   }
 
   RegisterGlueType<GlueType>();
+  CreateStaticImpl<StaticImpl, _ComponentType>::Do();
 
   return RegisterComponentType(pDesc);
 }
@@ -137,6 +138,16 @@ template<>
 inline void Kernel::RegisterGlueType<void>()
 {
 }
+
+template<typename StaticImpl, typename ComponentType>
+struct Kernel::CreateStaticImpl {
+  static inline void Do()
+  {
+    internal::AddStaticImpl(ComponentType::ComponentID(), UniquePtr<StaticImpl>::create());
+  }
+};
+template<typename T>
+struct Kernel::CreateStaticImpl<void, T> { static inline void Do() {} };
 
 
 template<typename _ComponentType>

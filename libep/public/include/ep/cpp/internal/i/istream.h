@@ -5,6 +5,7 @@
 namespace ep {
 
 SHARED_CLASS(Buffer);
+SHARED_CLASS(Text);
 
 struct SeekOrigin;
 struct OpenFlags;
@@ -26,6 +27,7 @@ public:
   virtual int Flush() = 0;
 
   virtual BufferRef Load() = 0;
+  virtual TextRef LoadText() = 0;
   virtual void Save(BufferRef spBuffer) = 0;
 
   // TODO: support async operations?

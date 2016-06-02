@@ -3,6 +3,8 @@
 
 #include "ep/cpp/platform.h"
 #include "ep/c/plugin.h"
+#include "ep/cpp/hashmap.h"
+#include "ep/cpp/sharedptr.h"
 
 namespace ep {
 
@@ -14,6 +16,10 @@ struct Instance
   int apiVersion;
 
   Kernel *pKernelInstance;
+  void *pErrorSystem;
+  void *pStaticImplRegistry;
+  void *pTreeAllocator;
+  void *pWeakRegistry;
 
   void*(*Alloc)(size_t size, epAllocationFlags flags, const char *pFile, int line);
   void(*Free)(void *pMemory);
@@ -21,12 +27,8 @@ struct Instance
   void(*AssertFailed)(String condition, String message, String file, int line);
 
   void(*DestroyComponent)(Component *pInstance);
-  void*(*TreeAllocator)();
-
-  void*(*WeakRegistry)();
 
   void*(*Find)(String pattern, void *pHandle, void *pData);
-  void *pErrorSystem;
 };
 
 extern Instance *s_pInstance;

@@ -32,11 +32,11 @@ public:
   }
 
   template<typename... Args>
-  T* New(Args... args)
+  T* New(Args&&... args)
   {
     T *pMem = Alloc();
     epscope(fail) { Free(pMem); };
-    return epConstruct(pMem) T(args...);
+    return epConstruct(pMem) T(std::forward<Args>(args)...);
   }
 
   T* Alloc()

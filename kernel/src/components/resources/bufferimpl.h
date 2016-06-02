@@ -12,8 +12,7 @@ class BufferImpl : public BaseImpl<Buffer, IBuffer>
 public:
   BufferImpl(Component *pInstance, Variant::VarMap initParams)
     : ImplSuper(pInstance)
-  {
-  }
+  {}
 
   bool Reserve(size_t size) override final;
   bool Allocate(size_t size) override final;

@@ -14,6 +14,7 @@ void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line)
 void _Free(void *pMemory);
 
 ErrorSystem s_errorSystem;
+HashMap<SharedString, UniquePtr<RefCounted>> s_staticImplRegistry;
 
 } // namespace internal
 } // namespace ep
@@ -24,7 +25,12 @@ static ep::HashMap<ep::internal::SafeProxy<void>*, void*, ep::internal::PointerH
 static ep::Instance s_instance =
 {
   EP_APIVERSION,  // apiVersion;
+
   nullptr,        // pKernelInstance;
+  (void*)&ep::internal::s_errorSystem, // ErrorSystem
+  (void*)&ep::internal::s_staticImplRegistry,
+  (void*)&s_varAVLAllocator,
+  (void*)&s_weakRefRegistry,
 
   [](size_t size, epAllocationFlags flags, const char* pFile, int line) -> void* { return ep::internal::_Alloc(size, flags, pFile, line); }, //  Alloc
 
@@ -34,13 +40,7 @@ static ep::Instance s_instance =
 
   [](ep::Component *) -> void { }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
 
-  []() -> void* { return (void*)&s_varAVLAllocator; }, // TreeAllocator
-
-  []() -> void* { return (void*)&s_weakRefRegistry; }, // weakRefRegistry
-
-  [](ep::String pattern, void *pHandle, void *pData) -> void* { return nullptr; }, // Find
-
-  (void*)&ep::internal::s_errorSystem, // ErrorSystem
+  [](ep::String pattern, void *pHandle, void *pData) -> void* { return nullptr; } // Find
 };
 
 struct GlobalInstanceInitializer
