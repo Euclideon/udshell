@@ -11,14 +11,14 @@ SHARED_CLASS(Buffer);
 
 class Buffer : public Resource
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Buffer, IBuffer, Resource, EPKERNEL_PLUGINVERSION, "Buffer desc...", 0)
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, Buffer, IBuffer, Resource, EPKERNEL_PLUGINVERSION, "Binary buffer object", 0)
 public:
 
-  bool Reserve(size_t size) { return pImpl->Reserve(size); }
-  bool Allocate(size_t size) { return pImpl->Allocate(size); }
+  bool Reserve(size_t bytes) { return pImpl->Reserve(bytes); }
+  virtual bool Allocate(size_t bytes) { return pImpl->Allocate(bytes); }
   bool Free() { return pImpl->Free(); }
 
-  bool Resize(size_t size) { return ResizeInternal(size, true); }
+  virtual bool Resize(size_t bytes) { return ResizeInternal(bytes, true); }
 
   bool Empty() const { return pImpl->Empty(); }
   size_t GetBufferSize() const { return pImpl->GetBufferSize(); }
@@ -40,7 +40,7 @@ protected:
   }
   virtual ~Buffer() { Free(); }
 
-  bool ResizeInternal(size_t size, bool copy) { return pImpl->ResizeInternal(size, copy); }
+  bool ResizeInternal(size_t bytes, bool copy) { return pImpl->ResizeInternal(bytes, copy); }
 
 private:
   bool CopyBufferMethod(BufferRef _buffer) { return CopyBuffer(_buffer); };
