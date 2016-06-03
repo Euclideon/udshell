@@ -1,6 +1,5 @@
-#include "components/primitivegenerator.h"
-#include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
+#include "components/primitivegeneratorimpl.h"
 
 namespace ep {
 
@@ -14,7 +13,7 @@ Array<const MethodInfo> PrimitiveGenerator::GetMethods() const
   };
 }
 
-void PrimitiveGenerator::GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
+void PrimitiveGeneratorImpl::GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
 {
   // vertex buffer
   spVB->Allocate<Float3>(8);
@@ -48,7 +47,7 @@ void PrimitiveGenerator::GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, 
   });
 }
 
-void PrimitiveGenerator::GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
+void PrimitiveGeneratorImpl::GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
   EPASSERT_THROW(numSegments >= 3 && numSlices >= 2, Result::InvalidArgument, "Invalid args!");
 
@@ -128,7 +127,7 @@ void PrimitiveGenerator::GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB
   }
 }
 
-void PrimitiveGenerator::GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
+void PrimitiveGeneratorImpl::GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
   EPASSERT_THROW(numSegments >= 3 && numSlices >= 1, Result::InvalidArgument, "Invalid args!");
 
@@ -206,7 +205,7 @@ void PrimitiveGenerator::GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef sp
   }
 }
 
-void PrimitiveGenerator::GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
+void PrimitiveGeneratorImpl::GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
   EPASSERT_THROW(numSegments >= 3 && numSlices >= 1, Result::InvalidArgument, "Invalid args!");
 

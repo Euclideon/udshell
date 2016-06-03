@@ -19,7 +19,6 @@
 #include "components/datasources/geomsource.h"
 #include "components/datasources/udsource.h"
 #include "components/console.h"
-#include "components/primitivegenerator.h"
 
 // Components that do the Impl dance
 #include "components/componentimpl.h"
@@ -47,6 +46,7 @@
 #include "components/broadcasterimpl.h"
 #include "components/streamimpl.h"
 #include "components/regex.h"
+#include "components/primitivegeneratorimpl.h"
 
 #include "components/dynamiccomponent.h"
 #include "components/varcomponent.h"
@@ -290,7 +290,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<View, ViewImpl>();
   pInstance->RegisterComponentType<Activity, ActivityImpl>();
   pInstance->RegisterComponentType<Console>();
-  pInstance->RegisterComponentType<PrimitiveGenerator>();
+  pInstance->RegisterComponentType<PrimitiveGenerator, PrimitiveGeneratorImpl>();
 
   // resources
   pInstance->RegisterComponentType<Resource, ResourceImpl>();

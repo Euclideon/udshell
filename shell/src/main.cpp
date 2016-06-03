@@ -15,7 +15,7 @@
 #include "components/file.h"
 #include "messagebox.h"
 
-#include "components/primitivegenerator.h"
+#include "ep/cpp/component/primitivegenerator.h"
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/material.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
