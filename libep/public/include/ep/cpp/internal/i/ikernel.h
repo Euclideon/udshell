@@ -14,6 +14,7 @@ typedef FastDelegate<void(String sender, String message, const Variant &data)> M
 typedef FastDelegate<void()> MainThreadCallback;
 typedef ComponentRef(CreateGlueFunc)(Kernel *pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams);
 
+SHARED_CLASS(Settings);
 SHARED_CLASS(ResourceManager);
 SHARED_CLASS(CommandManager);
 SHARED_CLASS(Broadcaster);
@@ -58,6 +59,8 @@ public:
   virtual void Log(int kind, int level, String text, String component) const = 0;
 
   virtual ResourceManagerRef GetResourceManager() const = 0;
+
+  virtual SettingsRef GetSettings() const = 0;
 
   virtual const AVLTree<String, const ComponentDesc *> &GetExtensionsRegistry() const = 0;
   virtual void RegisterExtensions(const ComponentDesc *pDesc, const Slice<const String> exts) = 0;

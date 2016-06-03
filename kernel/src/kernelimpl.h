@@ -90,6 +90,8 @@ public:
 
   CommandManagerRef GetCommandManager() const override final;
 
+  SettingsRef GetSettings() const override final;
+
   void InitRender();
   void DeinitRender();
 
@@ -138,6 +140,7 @@ public:
   PluginManagerRef spPluginManager;
   ResourceManagerRef spResourceManager;
   CommandManagerRef spCommandManager;
+  SettingsRef spSettings;
   ViewRef spFocusView;
   TimerRef spStreamerTimer;
   TimerRef spUpdateTimer;

@@ -1,0 +1,180 @@
+#include "components/settings.h"
+#include "components/file.h"
+#include "ep/cpp/component/resourcemanager.h"
+#include "ep/cpp/component/activity.h"
+#include "ep/cpp/component/resource/text.h"
+#include "ep/cpp/kernel.h"
+#include "rapidxml.hpp"
+
+namespace ep {
+
+Array<const MethodInfo> Settings::GetMethods() const
+{
+  return{
+    EP_MAKE_METHOD(GetValue, "Get a setting"),
+    EP_MAKE_METHOD(SetValue, "Set a setting"),
+    EP_MAKE_METHOD(SaveSettings, "Save Settings to an XML file"),
+  };
+}
+
+Settings::Settings(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+  : Component(pType, pKernel, uid, initParams)
+{
+  const Variant *pSrc = initParams.get("src");
+  StreamRef spSrc = nullptr;
+
+  if (pSrc && pSrc->is(Variant::Type::String))
+  {
+    srcString = pSrc->asString();
+
+    try {
+      spSrc = pKernel->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+    } catch (EPException &) {
+      LogDebug(2, "Settings file \"{0}\" does not exist. Create new settings.", *pSrc);
+      return;
+    }
+  }
+  else
+  {
+    LogDebug(3, "No \"src\" parameter. Create empty settings");
+    return;
+  }
+
+  using namespace rapidxml;
+  Variant rootElements;
+  TextRef spXMLBuffer = spSrc->LoadText();
+
+  try {
+    rootElements = spXMLBuffer->ParseXml();
+  } catch (parse_error &e) {
+    auto xmlBuff = spXMLBuffer->MapForRead();
+    epscope(exit) { spXMLBuffer->Unmap(); };
+    EPTHROW_ERROR(Result::Failure, "Unable to parse settings file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
+  }
+
+  Variant::VarMap settingsNode = rootElements.asAssocArray();
+  Variant *pName = settingsNode.get("name");
+  if (pName && pName->is(Variant::Type::String) && pName->asString().eq("settings")) // TODO: I think we can make these comparisons better than this
+    ParseSettings(settingsNode);
+}
+
+void Settings::SaveSettings()
+{
+  Variant::VarMap settingsNode;
+  Array<Variant> children;
+
+  settingsNode.insert("name", "settings");
+  for (auto setting : settings)
+  {
+    Variant::VarMap node = Text::ComponentParamsToXMLMap(setting.value).asAssocArray();
+    node.insert("name", setting.key);
+    children.pushBack(node);
+  }
+
+  settingsNode.insert("children", children);
+
+  auto spXMLBuffer = GetKernel().CreateComponent<Text>();
+  spXMLBuffer->Reserve(10240); // TODO: this is not okay...
+  spXMLBuffer->FormatXml(settingsNode);
+
+  try {
+    StreamRef spFile = GetKernel().CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    spFile->Save(spXMLBuffer);
+  } catch (EPException &) {
+    LogWarning(1, "Failed to open Settings file for writing: \"{0}\"", srcString);
+    return;
+  }
+}
+
+void Settings::ParseSettings(Variant node)
+{
+  Variant::VarMap settingsNode = node.asAssocArray();
+  Variant *pChildren = settingsNode.get("children");
+  if (pChildren && pChildren->is(Variant::Type::Array))
+  {
+    Array<Variant> children = pChildren->asArray();
+    for (auto child : children)
+    {
+      if (child.is(Variant::SharedPtrType::AssocArray))
+      {
+        Variant *pName = child.getItem("name");
+        if (pName && pName->is(Variant::Type::String))
+        {
+          Variant *pValue = child.getItem("text");
+          //if it's a node
+          if (!pValue)
+          {
+            ParsePluginSettings(child);
+          }
+          //else it's a leaf
+          else
+          {
+            settings.insert(pName->asString(), *pValue);
+          }
+        }
+      }
+    }
+  }
+}
+
+void Settings::ParsePluginSettings(Variant node)
+{
+  Variant *pNodeName = node.getItem("name");
+  Variant *pChildren = node.getItem("children");
+  if (pChildren && pChildren->is(Variant::Type::Array))
+  {
+    for (auto child : pChildren->asArray())
+    {
+      if (child.is(Variant::SharedPtrType::AssocArray))
+      {
+        Variant *pName = child.getItem("name");
+        if (pName && pName->is(Variant::Type::String))
+        {
+          Variant *pValue = child.getItem("text");
+          if (pValue)
+            SetValue(pNodeName->asString(), pName->asString(), *pValue);
+        }
+      }
+    }
+  }
+}
+
+void Settings::SetValue(SharedString pluginkey, SharedString key, Variant value)
+{
+  Variant *pSetting = settings.get(pluginkey);
+  if (pSetting != nullptr)
+  {
+    //test if node is an AVLTree<SharedString, Variant>
+    if (pSetting->is(Variant::SharedPtrType::AssocArray))
+    {
+      pSetting->asAssocArray().replace(key, value);
+    }
+    //if not an AVLTree return pluginkey already use for a global setting
+    else
+      LogWarning(0, "\"{0}\" is already used for a global setting", pluginkey);
+  }
+  else
+  {
+    settings.insert(pluginkey, AVLTree<SharedString, Variant> { { key, value} });
+  }
+}
+
+Variant Settings::GetValue(SharedString pluginkey, SharedString key)
+{
+  Variant *pSetting = settings.get(pluginkey);
+  if (pSetting == nullptr)
+  {
+    return Variant();
+  }
+  else
+  {
+    Variant *pValue = pSetting->asAssocArray().get(key);
+    if (pValue == nullptr)
+    {
+      return Variant();
+    }
+    return *pValue;
+  }
+}
+
+} // namespace ep

@@ -78,6 +78,8 @@ public:
 
   CommandManagerRef GetCommandManager() const { return pImpl->GetCommandManager(); }
 
+  SettingsRef GetSettings() const { return pImpl->GetSettings(); }
+
   // events
   Event<double> UpdatePulse;
 

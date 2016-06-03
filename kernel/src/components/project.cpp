@@ -52,13 +52,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     return;
   }
 
-  size_t len = (size_t)spSrc->Length() + 1;
-  Array<char> buffer(Reserve, len);
-  buffer.length = spSrc->Read(buffer.getBuffer()).length;
-  buffer.pushBack('\0');
-
-  auto spXMLBuffer = pKernel->CreateComponent<Text>();
-  spXMLBuffer->CopyBuffer(buffer);
+  TextRef spXMLBuffer = spSrc->LoadText();
 
   using namespace rapidxml;
   Variant rootElements;
@@ -69,7 +63,9 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
   }
   catch (parse_error &e)
   {
-    EPTHROW_ERROR(Result::Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
+    auto xmlBuff = spXMLBuffer->MapForRead();
+    epscope(exit) { spXMLBuffer->Unmap(); };
+    EPTHROW_ERROR(Result::Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
   }
 
   Variant::VarMap projectNode = rootElements.asAssocArray();
