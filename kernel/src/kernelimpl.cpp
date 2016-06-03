@@ -745,7 +745,7 @@ const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
     const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)_pType;
     DynamicComponentRef spInstance = pDesc->newInstance(KernelRef(_pKernel), initParams);
     ComponentRef spC = _pKernel->CreateGlue(pDesc->baseClass, _pType, _uid, spInstance, initParams);
-    spInstance->AttachToGlue(spC.ptr());
+    spInstance->AttachToGlue(spC.ptr(), initParams);
     spC->pUserData = spInstance->GetUserData();
     return spC;
   };

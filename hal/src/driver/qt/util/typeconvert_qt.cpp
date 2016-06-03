@@ -425,4 +425,6 @@ Variant epToVariant(const QVariantMap &varMap)
   return Variant(std::move(v));
 }
 
+#else
+EPEMPTYFILE
 #endif

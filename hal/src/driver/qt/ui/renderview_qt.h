@@ -22,7 +22,7 @@ public:
 
   Renderer *createRenderer() const override;
 
-  void AttachView(ep::ViewRef spView);
+  Q_INVOKABLE void attachView(const QVariant &view);
 
 private slots:
   void OnResize();
@@ -33,10 +33,6 @@ private:
   friend class QtFboRenderer;
 
   void componentComplete() override;
-
-#if (QT_VERSION < QT_VERSION_CHECK(5, 6, 0))
-  QSGNode *updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData) override;
-#endif
 
   void focusInEvent(QFocusEvent *) override;
   void focusOutEvent(QFocusEvent *) override;

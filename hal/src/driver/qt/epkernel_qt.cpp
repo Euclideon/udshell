@@ -16,7 +16,6 @@
 #include "driver/qt/components/qobjectcomponent_qt.h"
 #include "driver/qt/components/windowimpl_qt.h"
 #include "driver/qt/components/uicomponentimpl_qt.h"
-#include "driver/qt/components/viewportimpl_qt.h"
 
 #include <QSemaphore>
 #include <QDirIterator>
@@ -126,7 +125,6 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), ep::Result::Failure, "Unable to register QtComponent");
   EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, UIComponentGlue>()), ep::Result::Failure, "Unable to register UI Component");
   EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, WindowGlue>()), ep::Result::Failure, "Unable to register Window component");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::Viewport, QtViewportImpl, ViewportGlue>()), ep::Result::Failure, "Unable to register Viewport UI Component");
 
   // create and register the qml loader
   spQmlPluginLoader = CreateComponent<QmlPluginLoader>();
@@ -392,7 +390,7 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initP
   QmlComponentData data(file, pQmlEngine);
   QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
   ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, newUid, spInstance, initParams);
-  spInstance->AttachToGlue(spC.ptr());
+  spInstance->AttachToGlue(spC.ptr(), initParams);
   pDesc->PopulateFromDesc(pSuper);
 
   // add to the component registry

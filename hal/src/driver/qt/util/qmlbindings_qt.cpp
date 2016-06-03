@@ -199,7 +199,7 @@ ep::DynamicComponentRef QmlComponentData::CreateComponent(ep::KernelRef spKernel
 }
 
 // Creates a QML Item from the stored QQmlComponent
-QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent)
+QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent, ep::Variant::VarMap initParams)
 {
   using namespace ep;
 
@@ -234,7 +234,7 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
   pContext->setContextProperty("thisComponent", pEPComponent);
 
   // now create the actual qml item
-  QObject *pQtObject = qmlComponent.create(pContext);
+  QObject *pQtObject = qmlComponent.beginCreate(pContext);
   if (!pQtObject)
   {
     // TODO: better error information/handling
@@ -242,6 +242,13 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
       pGlueComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
     EPTHROW(Result::Failure, "Error creating QML Item");
   }
+
+  // check if the qml has an init property method and if so, pass in the initparams
+  // this lets us modify the state of the qml component according to the init params *before* onCompleted and property binding occurs
+  int initPropId = pQtObject->metaObject()->indexOfMethod("epInitComponent(QVariant)");
+  if (initPropId != -1)
+    pQtObject->metaObject()->method(initPropId).invoke(pQtObject, Qt::DirectConnection, Q_ARG(QVariant, ep::Variant(initParams).as<QVariant>()));
+  qmlComponent.completeCreate();
 
   // transfer ownership of our qt objects to ensure they are cleaned up
   pContext->setParent(pQtObject);
@@ -872,4 +879,6 @@ Variant QtEPComponent::Connection::SignalRouter(Slice<const Variant> args)
 
 } // namespace qt
 
+#else
+EPEMPTYFILE
 #endif
