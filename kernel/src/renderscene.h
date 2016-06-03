@@ -45,7 +45,7 @@ struct UDRenderableState : public udRenderModel
     UDRenderableState *pUDRenderState = static_cast<UDRenderableState*>(pRenderModel);
     udOctree *pOctree = pRenderModel->pOctree;
     uint32_t color = pOctree->pGetNodeColor(pOctree, nodeIndex);
-    color = (uint32_t)pUDRenderState->voxelVarDelegate( { Variant(color) }).asInt();
+    color = (uint32_t)pUDRenderState->voxelVarDelegate( Slice<const Variant>{ Variant(color) }).asInt();
     return color;
   }
 };

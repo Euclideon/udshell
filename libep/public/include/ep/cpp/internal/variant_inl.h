@@ -450,7 +450,7 @@ template<>           struct Variant_Construct<SharedArray<KeyValuePair>> { epfor
 template<typename T>
 struct Variant_Construct<const T>               { epforceinline static Variant construct(const T &v) { return Variant((T&)v); } };
 template<typename T, size_t N>
-struct Variant_Construct<const T[N]>            { epforceinline static Variant construct(const T v[N]) { return Variant_Construct<T[N]>::construct(v); } };
+struct Variant_Construct<const T[N]>            { epforceinline static Variant construct(const T (&v)[N]) { return Variant_Construct<T[N]>::construct(v); } };
 template<typename T>
 struct Variant_Construct<const T *>             { epforceinline static Variant construct(const T *v) { return Variant((T*)v); } };
 
@@ -465,11 +465,11 @@ template<> struct Variant_Construct <uint32_t>  { epforceinline static Variant c
 template<> struct Variant_Construct <uint64_t>  { epforceinline static Variant construct(uint64_t i)      { return Variant((int64_t)i); } };
 template<> struct Variant_Construct <char*>     { epforceinline static Variant construct(const char *s)   { return Variant(String(s)); } };
 template<size_t N>
-struct Variant_Construct <char[N]>              { epforceinline static Variant construct(const char s[N]) { return Variant(String(s, N-1)); } };
+struct Variant_Construct <char[N]>              { epforceinline static Variant construct(const char (&s)[N]) { return Variant(String(s, N-1)); } };
 template<size_t N>
-struct Variant_Construct <const char[N]>        { epforceinline static Variant construct(const char s[N]) { return Variant(String(s, N-1), true); } };
+struct Variant_Construct <const char[N]>        { epforceinline static Variant construct(const char (&s)[N]) { return Variant(String(s, N-1), true); } };
 template<typename T, size_t N>
-struct Variant_Construct <T[N]>                 { epforceinline static Variant construct(const T a[N])    { return Variant(Slice<T>(a, N)); } };
+struct Variant_Construct <T[N]>                 { epforceinline static Variant construct(const T (&a)[N])    { return Variant(Slice<const T>(a, N)); } };
 
 
 // ********************************

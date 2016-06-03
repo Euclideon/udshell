@@ -166,9 +166,9 @@ void ViewImpl::OnDirty()
     if (spRenderView->spScene->ud.length > 0)
     {
       spRenderView->spColorBuffer = spRenderer->AllocRenderBuffer();
-      spRenderView->spColorBuffer->Allocate<uint32_t>({ (size_t)renderWidth, (size_t)renderHeight });
+      spRenderView->spColorBuffer->Allocate<uint32_t>(Slice<const size_t>{ (size_t)renderWidth, (size_t)renderHeight });
       spRenderView->spDepthBuffer = spRenderer->AllocRenderBuffer();
-      spRenderView->spDepthBuffer->Allocate<float>({ (size_t)renderWidth, (size_t)renderHeight });
+      spRenderView->spDepthBuffer->Allocate<float>(Slice<const size_t>{ (size_t)renderWidth, (size_t)renderHeight });
       spRenderer->AddUDRenderJob(std::move(spRenderView));
     }
     else
