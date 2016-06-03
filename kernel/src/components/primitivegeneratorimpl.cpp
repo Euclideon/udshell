@@ -13,6 +13,30 @@ Array<const MethodInfo> PrimitiveGenerator::GetMethods() const
   };
 }
 
+void PrimitiveGeneratorImpl::GenerateQuad(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
+{
+  static const Float3 rawVB[] = {
+    Float3{ -1.0f, -1.0f, 0.0f },
+    Float3{  1.0f, -1.0f, 0.0f },
+    Float3{ -1.0f,  1.0f, 0.0f },
+    Float3{  1.0f,  1.0f, 0.0f },
+  };
+
+  spVB->AllocateFromData(Slice<const Float3>(rawVB));
+
+  Slice<Float3> vb = spVB->Map<Float3>();
+  epscope(exit) { spVB->Unmap(); };
+
+  if (transformVertex)
+  {
+    for (Float3 &v : vb)
+      v = transformVertex(v);
+  }
+
+  static const uint16_t rawIB[] = { 0, 1, 2, 3, 2, 1 };
+  spIB->AllocateFromData(Slice<const uint16_t>(rawIB));
+}
+
 void PrimitiveGeneratorImpl::GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
 {
   // vertex buffer

@@ -15,6 +15,7 @@
 #include "ep/cpp/component/resource/material.h"
 #include "ep/cpp/component/resource/model.h"
 #include "../../../kernel/src/components/nodes/geomnode.h"
+#include "ep/cpp/component/primitivegenerator.h"
 
 namespace ep {
 
@@ -356,25 +357,13 @@ void Viewer::CreatePlatformLogo()
   spMaterial->SetShader(ShaderType::PixelShader, pixelShader);
 
   ArrayBufferRef spVertexBuffer = pKernel->CreateComponent<ArrayBuffer>();
-  {
-    static const Float3 vb[] = {
-      Float3{ -1.0f, -1.0f, 0.0f },
-      Float3{ 1.0f, -1.0f, 0.0f },
-      Float3{ -1.0f, 1, 0.0f },
-      Float3{ 1.0f, 1, 0.0f },
-    };
-
-    spVertexBuffer->AllocateFromData(Slice<const Float3>(vb));
-    MetadataRef spMetadata = spVertexBuffer->GetMetadata();
-    spMetadata->Get("attributeinfo")[0].insertItem("name", "a_position");
-  }
-
-  // Index Buffer
   ArrayBufferRef spIndexBuffer = pKernel->CreateComponent<ArrayBuffer>();
-  static const uint16_t ib[] = {
-    0, 1, 2, 3, 2, 1
-  };
-  spIndexBuffer->AllocateFromData(Slice<const uint16_t>(ib));
+  PrimitiveGeneratorRef generator = pKernel->CreateComponent<PrimitiveGenerator>();
+
+  generator->GenerateQuad(spVertexBuffer, spIndexBuffer);
+
+  MetadataRef spMetadata = spVertexBuffer->GetMetadata();
+  spMetadata->Get("attributeinfo")[0].insertItem("name", "a_position");
 
   ModelRef spImageModel = pKernel->CreateComponent<Model>();
 
