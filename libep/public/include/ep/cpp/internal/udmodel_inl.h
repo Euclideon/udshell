@@ -60,63 +60,63 @@ namespace ep {
 
   inline const Double4x4& UDRender::GetMatrix() const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
-    return *union_reinterpret_cast<Double4x4*>(pContext->private0[3]);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
+    return *reinterpret_cast<Double4x4*>(pContext->private0[3]);
   }
 
   inline const UDClipArea& UDRender::GetClipArea() const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
-    return *union_reinterpret_cast<UDClipArea*>(pContext->private0[1]);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
+    return *reinterpret_cast<UDClipArea*>(pContext->private0[1]);
   }
 
   inline UDModelFlags UDRender::GetFlags() const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return UDModelFlags(pContext->private1[0]);
   }
 
   inline uint32_t UDRender::GetStartingRoot() const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return pContext->private1[1];
   }
 
   inline uint32_t UDRender::GetAnimationFrame() const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return pContext->private1[2];
   }
 
   template <typename T>
   inline const T &UDFilterVoxel::GetConstantData() const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
-    return *union_reinterpret_cast<T*>(pContext->private0[5]);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
+    return *reinterpret_cast<T*>(pContext->private0[5]);
   }
 
   template <typename T>
   inline const T &UDRenderVoxel::GetConstantData() const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
-    return *union_reinterpret_cast<T*>(pContext->private0[7]);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
+    return *reinterpret_cast<T*>(pContext->private0[7]);
   }
 
   template <typename T>
   inline const T &UDRenderPixel::GetConstantData() const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
-    return *union_reinterpret_cast<T*>(pContext->private0[9]);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
+    return *reinterpret_cast<T*>(pContext->private0[9]);
   }
 
   inline uint32_t UDRenderNode::GetNodeColor(UDNodeIndex nodeIndex) const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     using GetNodeColor = uint32_t(internal::UDPrivateData *pInternal, UDNodeIndex nodeIndex);
 
-    internal::UDPrivateData* pInternal = union_reinterpret_cast<internal::UDPrivateData*>(pContext->private0[0]);
+    internal::UDPrivateData* pInternal = reinterpret_cast<internal::UDPrivateData*>(pContext->private0[0]);
 
-    GetNodeColor *pGetNodeColor = union_reinterpret_cast<GetNodeColor*>(pInternal->private3[7]);
+    GetNodeColor *pGetNodeColor = reinterpret_cast<GetNodeColor*>(pInternal->private3[7]);
 
     return pGetNodeColor(pInternal, nodeIndex);
   }
@@ -124,12 +124,12 @@ namespace ep {
   template <typename T>
   inline const T& UDRenderNode::GetAttribute(UDNodeIndex nodeIndex, UDRenderNode::UDStreamType type) const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     using GetAttribute = const void *(internal::UDPrivateData *pInternal, UDNodeIndex nodeIndex, UDRenderNode::UDStreamType type);
 
-    internal::UDPrivateData* pInternal = union_reinterpret_cast<internal::UDPrivateData*>(pContext->private0[0]);
+    internal::UDPrivateData* pInternal = reinterpret_cast<internal::UDPrivateData*>(pContext->private0[0]);
 
-    GetAttribute *pGetAttribute = union_reinterpret_cast<GetAttribute*>(pInternal->private3[9]);
+    GetAttribute *pGetAttribute = reinterpret_cast<GetAttribute*>(pInternal->private3[9]);
 
     return *reinterpret_cast<T*>(pGetAttribute(pInternal, nodeIndex, type));
   }
@@ -137,12 +137,12 @@ namespace ep {
   template <typename T>
   inline const T& UDRenderNode::GetAttribute(UDNodeIndex nodeIndex, uint32_t attributeIndex) const
   {
-    UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(this);
+    const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     using GetAttribute = const void *(internal::UDPrivateData *pInternal, UDNodeIndex nodeIndex, uint32_t index);
 
-    internal::UDPrivateData* pInternal = union_reinterpret_cast<internal::UDPrivateData*>(pContext->private0[0]);
+    internal::UDPrivateData* pInternal = reinterpret_cast<internal::UDPrivateData*>(pContext->private0[0]);
 
-    GetAttribute *pGetAttribute = union_reinterpret_cast<GetAttribute*>(pInternal->private3[9]);
+    GetAttribute *pGetAttribute = reinterpret_cast<GetAttribute*>(pInternal->private3[9]);
 
     return *reinterpret_cast<T*>(pGetAttribute(pInternal, nodeIndex, LightingComposite + 1 + attributeIndex));
   }

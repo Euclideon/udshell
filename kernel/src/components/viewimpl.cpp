@@ -194,7 +194,7 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
         1.0
       };
 
-      pickedPoint = (union_reinterpret_cast<const UDRenderContext*>(pick.model)->matrix * transPos).toVector3();
+      pickedPoint = (reinterpret_cast<const UDRenderContext*>(pick.model)->matrix * transPos).toVector3();
 
       pickHighlightData = { pick.model, pick.nodeIndex };
       pInstance->PickFound.Signal(pickedPoint);

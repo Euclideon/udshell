@@ -137,6 +137,9 @@ inline bool operator ==(nullptr_t, Slice<T> rh) { return rh == nullptr; }
 template<typename T>
 inline bool operator !=(nullptr_t, Slice<T> rh) { return rh == nullptr; }
 
+// Cast from a Slice<T> to a Slice<U> where T and U are compatible types.  Its typical use is for casting from a Slice<void>.
+template <typename Dst, typename Src>
+Dst slice_cast(Src src);
 
 // Array introduces static-sized and/or stack-based ownership. this is useful anywhere that fixed-length arrays are appropriate
 // Array will fail-over to an allocated buffer if the contents exceed the fixed size

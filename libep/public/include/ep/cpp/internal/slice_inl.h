@@ -966,4 +966,32 @@ inline SharedArray<T> SharedArray<T>::concat(Things&&... things)
   return SharedArray<T>(Concat, std::forward<Things>(things)...);
 }
 
+namespace internal {
+
+  template<typename T>
+  struct is_slice
+  {
+    enum { value = 0 };
+  };
+  template<typename T>
+  struct is_slice<Slice<T>>
+  {
+    enum { value = 1 };
+  };
+  template<typename T>
+  struct is_slice<const Slice<T>>
+  {
+    enum { value = 1 };
+  };
+
+} // internal
+
+template <typename Dst, typename Src>
+inline Dst slice_cast(Src src)
+{
+  static_assert(internal::is_slice<Src>::value && internal::is_slice<Dst>::value, "Dst and/or Src is not a Slice");
+  EPASSERT_THROW(src.length * sizeof(typename Src::ET) % sizeof(typename Dst::ET) == 0, Result::OutOfBounds, "The destination slice cannot represent the source slice without truncating data");
+  return Dst((typename Dst::ET*)src.ptr, src.length * sizeof(typename Src::ET) / sizeof(typename Dst::ET));
+}
+
 } // namespace ep

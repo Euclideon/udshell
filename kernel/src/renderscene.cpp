@@ -97,7 +97,7 @@ void RenderableView::RenderUD()
     udRenderModel **ppRenderModels = (udRenderModel**)alloca(size);
 
     for (size_t i = 0; i < spScene->ud.length; ++i)
-      ppRenderModels[i] = union_reinterpret_cast<udRenderModel*>(&spScene->ud[i].context);
+      ppRenderModels[i] = reinterpret_cast<udRenderModel*>(&spScene->ud[i].context);
 
     // allocate view
     udRender_CreateView(&pRenderView, pRenderEngine, renderWidth, renderHeight);

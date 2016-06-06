@@ -107,33 +107,6 @@ void _epDelete(T *pMemory)
 
 #define epDelete(pMem) _epDelete(pMem)
 
-namespace ep {
-
-template <typename Dst, typename Src>
-Dst union_reinterpret_cast(Src _src)
-{
-  static_assert(std::is_scalar<Src>(), "The source type is not a integral type");
-  static_assert(std::is_scalar<Dst>(), "The return type is not a integral type");
-
-  union
-  {
-    Src src;
-    Dst dst;
-  } u = { 0 };
-
-  u.src = _src;
-  return u.dst;
-}
-
-template <typename Dst, typename Src>
-Dst slice_cast(Src src)
-{
-  EPASSERT_THROW(src.length * sizeof(typename Src::ET) % sizeof(typename Dst::ET) == 0, Result::OutOfBounds, "The destination slice cannot represent the source slice without truncating data");
-  return Dst((typename Dst::ET*)src.ptr, src.length * sizeof(typename Src::ET) / sizeof(typename Dst::ET));
-}
-
-} // namespace ep
-
 #include "ep/cpp/internal/slice_inl.h"
 #include "ep/cpp/internal/string_inl.h"
 
