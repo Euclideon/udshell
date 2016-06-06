@@ -356,6 +356,7 @@ struct Matrix4x4
   Matrix4x4<T>& operator *=(T f) { *this = Mul(*this, f); return *this; }
 
   bool operator ==(const Matrix4x4& rh) const { return memcmp(this, &rh, sizeof(*this)) == 0; }
+  bool operator !=(const Matrix4x4& rh) const { return memcmp(this, &rh, sizeof(*this)) != 0; }
 
   Matrix4x4<T>& transpose();
   T determinant();

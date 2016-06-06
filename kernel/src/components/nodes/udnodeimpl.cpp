@@ -15,6 +15,17 @@ Array<const PropertyInfo> UDNode::GetProperties() const
   };
 }
 
+void UDNodeImpl::SetUDModel(UDModelRef _spModel)
+{
+  if (spModel)
+    spModel->Changed.Unsubscribe(pInstance->Changed);
+
+  spModel = _spModel;
+
+  if (spModel)
+    spModel->Changed.Subscribe(pInstance->Changed);
+}
+
 void UDNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
 {
   if (spModel)

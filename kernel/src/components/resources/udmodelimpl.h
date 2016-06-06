@@ -27,31 +27,31 @@ public:
   virtual ~UDModelImpl();
 
   uint32_t GetStartingRoot() const override final { return startingRoot; }
-  void SetStartingRoot(uint32_t root) override final { startingRoot = root; }
+  void SetStartingRoot(uint32_t root) override final;
 
   uint32_t GetAnimationFrame() const override final { return animationFrame; }
-  void SetAnimationFrame(uint32_t frame) override final { animationFrame = frame; }
+  void SetAnimationFrame(uint32_t frame) override final;
 
   const Rect<uint32_t> &GetRenderClipRect() const override final { return rect; }
-  void SetRenderClipRect(const Rect<uint32_t>& _rect) override final { rectSet = true; rect = _rect; }
+  void SetRenderClipRect(const Rect<uint32_t>& _rect) override final;
 
   UDModelFlags GetRenderFlags() const override final { return renderFlags; }
-  void SetRenderFlags(UDModelFlags flags) override final { renderFlags = flags; }
+  void SetRenderFlags(UDModelFlags flags) override final;
 
   const Double4x4 &GetUDMatrix() const override final { return udmatrix; }
-  void SetUDMatrix(const Double4x4 &mat) override final { udmatrix = mat; }
+  void SetUDMatrix(const Double4x4 &mat) override final;
 
-  void SetVoxelFilter(VoxelFilter *pFilter) override final { pVoxelFilter = pFilter; }
   VoxelFilter* GetVoxelFilter() const override final { return pVoxelFilter; }
+  void SetVoxelFilter(VoxelFilter *pFilter) override final;
 
-  void SetVoxelShader(VoxelShader *pShader) override final;
   VoxelShader* GetVoxelShader() const override final { return pVoxelShader; }
+  void SetVoxelShader(VoxelShader *pShader) override final;
 
-  void SetPixelShader(PixelShader *pShader) override final { pPixelShader = pShader; }
   PixelShader* GetPixelShader() const override final { return pPixelShader; }
+  void SetPixelShader(PixelShader *pShader) override final;
 
-  void SetConstantData(UDConstantDataType type, BufferRef buffer) override final { constantBuffers[type] = buffer; }
   BufferRef GetConstantData(UDConstantDataType type) const override final { return constantBuffers[type]; }
+  void SetConstantData(UDConstantDataType type, BufferRef buffer) override final;
 
   VarDelegate GetVarVoxelShader() const override final { return varVoxelShader; }
   void SetVarVoxelShader(VarDelegate varShader) override final;
@@ -82,20 +82,101 @@ private:
   bool rectSet = false;
 };
 
+inline void UDModelImpl::SetStartingRoot(uint32_t root)
+{
+  if (root != startingRoot)
+  {
+    startingRoot = root;
+    pInstance->Changed.Signal();
+  }
+}
+
+inline void UDModelImpl::SetAnimationFrame(uint32_t frame)
+{
+  if (frame != animationFrame)
+  {
+    animationFrame = frame;
+    pInstance->Changed.Signal();
+  }
+}
+
+inline void UDModelImpl::SetRenderClipRect(const Rect<uint32_t>& _rect)
+{
+  if (!rectSet ||
+    _rect.x != rect.x || _rect.y != rect.y || _rect.width != rect.width || _rect.height != rect.height)
+  {
+    rectSet = true;
+    rect = _rect;
+    pInstance->Changed.Signal();
+  }
+}
+
+inline void UDModelImpl::SetRenderFlags(UDModelFlags flags)
+{
+  if (flags != renderFlags)
+  {
+    renderFlags = flags;
+    pInstance->Changed.Signal();
+  }
+}
+
+inline void UDModelImpl::SetUDMatrix(const Double4x4 &mat)
+{
+  if (mat != udmatrix)
+  {
+    udmatrix = mat;
+    pInstance->Changed.Signal();
+  }
+}
+
+inline void UDModelImpl::SetVoxelFilter(VoxelFilter *pFilter)
+{
+  if (pFilter != pVoxelFilter)
+  {
+    pVoxelFilter = pFilter;
+    pInstance->Changed.Signal();
+  }
+}
+
 inline void UDModelImpl::SetVoxelShader(VoxelShader *pShader)
 {
-  if (pShader)
-    varVoxelShader = nullptr;
+  if (pShader != pVoxelShader)
+  {
+    if (pShader)
+      varVoxelShader = nullptr;
 
-  pVoxelShader = pShader;
+    pVoxelShader = pShader;
+    pInstance->Changed.Signal();
+  }
 }
 
 inline void UDModelImpl::SetVarVoxelShader(VarDelegate varShader)
 {
-  if (varShader)
-    pVoxelShader = nullptr;
+  if (varShader != varVoxelShader)
+  {
+    if (varShader)
+      pVoxelShader = nullptr;
 
-  varVoxelShader = varShader;
+    varVoxelShader = varShader;
+    pInstance->Changed.Signal();
+  }
+}
+
+inline void UDModelImpl::SetPixelShader(PixelShader *pShader)
+{
+  if (pShader != pPixelShader)
+  {
+    pPixelShader = pShader;
+    pInstance->Changed.Signal();
+  }
+}
+inline void UDModelImpl::SetConstantData(UDConstantDataType type, BufferRef buffer)
+{
+  if (buffer != constantBuffers[type])
+  {
+    constantBuffers[type] = buffer;
+    pInstance->Changed.Signal();
+  }
 }
 
 } // namespace ep
