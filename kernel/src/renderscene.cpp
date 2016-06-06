@@ -4,7 +4,7 @@
 #include "ep/cpp/component/resource/shader.h"
 
 #include "components/viewimpl.h"
-#include "components/resources/arraybufferimpl.h"
+#include "components/resources/bufferimpl.h"
 #include "components/resources/shaderimpl.h"
 #include "components/resources/materialimpl.h"
 
@@ -97,7 +97,7 @@ void RenderableView::RenderUD()
     udRenderModel **ppRenderModels = (udRenderModel**)alloca(size);
 
     for (size_t i = 0; i < spScene->ud.length; ++i)
-      ppRenderModels[i] = &spScene->ud[i].renderState;
+      ppRenderModels[i] = union_reinterpret_cast<udRenderModel*>(&spScene->ud[i].context);
 
     // allocate view
     udRender_CreateView(&pRenderView, pRenderEngine, renderWidth, renderHeight);
@@ -303,9 +303,9 @@ Renderer::~Renderer()
 
 RenderResourceRef Renderer::GetRenderBuffer(const ArrayBufferRef &spArrayBuffer, RenderResourceType type)
 {
-  ArrayBufferImpl *pArrayBuffer = spArrayBuffer->GetImpl<ArrayBufferImpl>();
+  BufferImpl *pBuffer = spArrayBuffer->Super::GetImpl<BufferImpl>();
 
-  RenderResourceRef spRenderBuffer = shared_pointer_cast<RenderResource>(pArrayBuffer->spCachedRenderData);
+  RenderResourceRef spRenderBuffer = shared_pointer_cast<RenderResource>(pBuffer->spCachedRenderData);
   if (!spRenderBuffer)
   {
     if (type == RenderResourceType::Texture)
@@ -317,8 +317,21 @@ RenderResourceRef Renderer::GetRenderBuffer(const ArrayBufferRef &spArrayBuffer,
     else
       spRenderBuffer = RenderArrayRef::create(this, spArrayBuffer, type == RenderResourceType::IndexArray ? ArrayUsage::IndexData : ArrayUsage::VertexData);
 
-    pArrayBuffer->spCachedRenderData = spRenderBuffer;
+    pBuffer->spCachedRenderData = spRenderBuffer;
   }
+  return spRenderBuffer;
+}
+
+RenderResourceRef Renderer::GetConstantBuffer(const BufferRef &spBuffer)
+{
+  BufferImpl *pBuffer = spBuffer->GetImpl<BufferImpl>();
+  RenderResourceRef spRenderBuffer = shared_pointer_cast<RenderResource>(pBuffer->spCachedRenderData);
+  if (!spRenderBuffer)
+  {
+    spRenderBuffer = RenderConstantBufferRef::create(this, spBuffer);
+    pBuffer->spCachedRenderData = spRenderBuffer;
+  }
+
   return spRenderBuffer;
 }
 

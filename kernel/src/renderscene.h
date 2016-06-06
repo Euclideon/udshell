@@ -34,26 +34,12 @@ struct RenderableTexture
   // TODO: fill out with TextureSampler members for texture options
 };
 
-struct UDRenderableState : public udRenderModel
-{
-  Double4x4 matrix;
-  udRenderClipArea clipArea;
-  VarDelegate voxelVarDelegate;
-
-  static unsigned VoxelVarDelegateShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex, udRenderNodeInfo *epUnusedParam(pNodeInfo))
-  {
-    UDRenderableState *pUDRenderState = static_cast<UDRenderableState*>(pRenderModel);
-    udOctree *pOctree = pRenderModel->pOctree;
-    uint32_t color = pOctree->pGetNodeColor(pOctree, nodeIndex);
-    color = (uint32_t)pUDRenderState->voxelVarDelegate( Slice<const Variant>{ Variant(color) }).asInt();
-    return color;
-  }
-};
-
 struct UDJob
 {
-  UDModelRef spModel = nullptr;
-  UDRenderableState renderState;
+  UDJob() : constantBuffers(Alloc, 3) {}
+  UDModelRef spModel;
+  UDRenderContext context;
+  Array<RenderConstantBufferRef, 3> constantBuffers;
 };
 
 struct GeomJob
@@ -155,7 +141,7 @@ public:
   {
     VertexArray,
     IndexArray,
-    Texture,
+    Texture
   };
 
   udRenderEngine *GetRenderEngine() const { return pRenderEngine; }
@@ -167,6 +153,7 @@ public:
 
   RenderShaderInputConfigRef GetShaderInputConfig(Slice<ArrayBufferRef> arrays, const RenderShaderProgramRef &spShaderProgram, Delegate<void(SharedPtr<RefCounted>)> retainShaderInputConfig);
   RenderResourceRef GetRenderBuffer(const ArrayBufferRef &spArrayBuffer, RenderResourceType type);
+  RenderResourceRef GetConstantBuffer(const BufferRef &spBuffer);
 
 protected:
   friend class View;

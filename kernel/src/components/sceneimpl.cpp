@@ -86,32 +86,51 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
 
   for (const auto &in : scene.ud)
   {
-    auto &out = cache->ud.pushBack();
-    out.spModel = in.spModel;
+    UDJob &job = cache->ud.pushBack();
+    job.spModel = in.spModel;
+    UDModelImpl *pImpl = in.spModel->GetImpl<UDModelImpl>();
+    pImpl->CopyRenderContext(&job.context);
+    job.context.matrix = Mul(in.matrix, job.context.matrix);
 
-    const UDRenderState &iS = in.renderState;
-    UDRenderableState &oS = out.renderState;
-    memset(&oS, 0, sizeof(udRenderModel));
-
-    oS.pOctree = in.spModel->GetImpl<UDModelImpl>()->pOctree;
-
-    if (iS.useClip)
+    udRenderModel *pRenderModel = union_reinterpret_cast<udRenderModel*>(&job.context);
+    const BufferRef &filterConstants = pImpl->constantBuffers[UDConstantDataType::VoxelFilter];
+    if (filterConstants)
     {
-      oS.clipArea = udRenderClipArea { iS.rect.x, iS.rect.y, iS.rect.width, iS.rect.height };
-      oS.pClip = &oS.clipArea;
+      job.constantBuffers[UDConstantDataType::VoxelFilter] = shared_pointer_cast<RenderConstantBuffer>(pRenderer->GetConstantBuffer(filterConstants));
+      pRenderModel->pFilterData = job.constantBuffers[UDConstantDataType::VoxelFilter]->pBuffer;
     }
 
-    oS.matrix = iS.matrix;
-    oS.pWorldMatrixD = &oS.matrix.a[0];
-
-    if (iS.voxelVarDelegate)
+    const BufferRef &voxelConstants = pImpl->constantBuffers[UDConstantDataType::VoxelShader];
+    if (voxelConstants)
     {
-      oS.pVoxelShader = UDRenderableState::VoxelVarDelegateShaderFunc;
-      oS.voxelVarDelegate = iS.voxelVarDelegate;
+      if (voxelConstants == filterConstants)
+      {
+        pRenderModel->pVoxelShaderData = pRenderModel->pFilterData;
+      }
+      else
+      {
+        job.constantBuffers[UDConstantDataType::VoxelShader] = shared_pointer_cast<RenderConstantBuffer>(pRenderer->GetConstantBuffer(voxelConstants));
+        pRenderModel->pVoxelShaderData = job.constantBuffers[UDConstantDataType::VoxelShader]->pBuffer;
+      }
     }
 
-    oS.flags = (udRenderFlags)iS.flags;
-    oS.startingRoot = iS.startingRoot;
+    const BufferRef &pixelConstants = pImpl->constantBuffers[UDConstantDataType::PixelShader];
+    if (pixelConstants)
+    {
+      if (pixelConstants == voxelConstants)
+      {
+        pRenderModel->pPixelShaderData = pRenderModel->pVoxelShaderData;
+      }
+      else if (pixelConstants == filterConstants)
+      {
+        pRenderModel->pPixelShaderData = pRenderModel->pFilterData;
+      }
+      else
+      {
+        job.constantBuffers[UDConstantDataType::PixelShader] = shared_pointer_cast<RenderConstantBuffer>(pRenderer->GetConstantBuffer(pixelConstants));
+        pRenderModel->pPixelShaderData = job.constantBuffers[UDConstantDataType::PixelShader]->pBuffer;
+      }
+    }
   }
 
   for (const auto &in : scene.geom)
@@ -170,7 +189,7 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
     if (uniforms.length)
     {
       Array<RenderShaderProperty> outUniforms;
-      
+
       for (size_t i = 0; i < uniforms.length; i++) // set up textures
       {
         if (uniforms[i].data.is(Variant::SharedPtrType::Component) && uniforms[i].data.asComponent()->IsType<ArrayBuffer>()) // if the uniform is a texture

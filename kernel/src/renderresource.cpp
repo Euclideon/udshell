@@ -127,6 +127,23 @@ RenderTexture::~RenderTexture()
     epTexture_DestroyTexture(&pTexture);
 }
 
+RenderConstantBuffer::RenderConstantBuffer(Renderer *pRenderer, BufferRef spBuffer)
+  : RenderResource(pRenderer)
+{
+  Slice<const void> src = spBuffer->MapForRead();
+  EPASSERT_THROW(src, Result::Failure, "Failed to Map Buffer for Reading");
+  epscope(exit) { spBuffer->Unmap(); };
+
+  pBuffer = epAlloc(src.length);
+  EPASSERT_THROW(pBuffer, Result::AllocFailure, "Failed to allocate memory for UDConstantBuffer Cache");
+  memcpy(pBuffer, src.ptr, src.length);
+}
+
+RenderConstantBuffer::~RenderConstantBuffer()
+{
+  epFree(pBuffer);
+}
+
 RenderShader::RenderShader(Renderer *pRenderer, SharedString code, epShaderType type)
   : RenderResource(pRenderer), type(type)
 {

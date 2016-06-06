@@ -61,6 +61,16 @@ public:
 };
 SHARED_CLASS(RenderTexture);
 
+class RenderConstantBuffer : public RenderResource
+{
+public:
+  RenderConstantBuffer(Renderer *pRenderer, BufferRef spBuffer);
+  virtual ~RenderConstantBuffer();
+
+  void *pBuffer;
+};
+SHARED_CLASS(RenderConstantBuffer);
+
 // render shader
 class RenderShader : public RenderResource
 {
