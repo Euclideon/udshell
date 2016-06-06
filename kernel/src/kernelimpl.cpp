@@ -86,8 +86,39 @@ namespace internal {
   }
 
   ErrorSystem s_errorSystem;
-  HashMap<SharedString, UniquePtr<RefCounted>> s_staticImplRegistry;
-}
+
+  struct Allocators
+  {
+    static void *GetVarAVLAllocator()
+    {
+      if (!KernelImpl::s_pVarAVLAllocator)
+        KernelImpl::s_pVarAVLAllocator = epNew(KernelImpl::VarAVLTreeAllocator);
+      return KernelImpl::s_pVarAVLAllocator;
+    }
+
+    static void *GetWeakRefRegistry()
+    {
+      if (!KernelImpl::s_pWeakRefRegistry)
+        KernelImpl::s_pWeakRefRegistry = epNew(KernelImpl::WeakRefRegistryMap, 65536);
+      return KernelImpl::s_pWeakRefRegistry;
+    }
+
+    static void *GetStaticImplRegistry()
+    {
+      if (!KernelImpl::s_pStaticImplRegistry)
+        KernelImpl::s_pStaticImplRegistry = epNew(KernelImpl::StaticImplRegistryMap);
+      return KernelImpl::s_pStaticImplRegistry;
+    }
+
+    static void Destroy()
+    {
+      epDelete(KernelImpl::s_pVarAVLAllocator);
+      epDelete(KernelImpl::s_pStaticImplRegistry);
+      epDelete(KernelImpl::s_pWeakRefRegistry);
+    }
+  };
+
+} // internal
 
 static Instance s_instance =
 {
@@ -95,9 +126,9 @@ static Instance s_instance =
 
   nullptr,        // pKernelInstance;
   (void*)&internal::s_errorSystem, // ErrorSystem
-  (void*)&internal::s_staticImplRegistry,
-  (void*)&KernelImpl::s_varAVLAllocator,
-  (void*)&KernelImpl::s_weakRefRegistry,
+  internal::Allocators::GetStaticImplRegistry(),
+  internal::Allocators::GetVarAVLAllocator(),
+  internal::Allocators::GetWeakRefRegistry(),
 
   [](size_t size, epAllocationFlags flags, const char *pFile, int line) -> void* { return internal::_Alloc(size, flags, pFile, line); }, //  Alloc
 
@@ -157,6 +188,11 @@ struct GlobalInstanceInitializer
   GlobalInstanceInitializer()
   {
     ep::s_pInstance = &s_instance;
+  }
+
+  ~GlobalInstanceInitializer()
+  {
+    internal::Allocators::Destroy();
   }
 };
 
@@ -230,9 +266,9 @@ Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCoun
   return CreateInstanceInternal(commandLine);
 }
 
-
-AVLTreeAllocator<VariantAVLNode> KernelImpl::s_varAVLAllocator;
-HashMap<void*, internal::SafeProxy<void>*, internal::PointerHash> KernelImpl::s_weakRefRegistry(65536);
+KernelImpl::VarAVLTreeAllocator* KernelImpl::s_pVarAVLAllocator;
+KernelImpl::WeakRefRegistryMap* KernelImpl::s_pWeakRefRegistry;
+KernelImpl::StaticImplRegistryMap* KernelImpl::s_pStaticImplRegistry;
 
 KernelImpl::KernelImpl(Kernel *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)
@@ -411,6 +447,7 @@ KernelImpl::~KernelImpl()
   spStdOutBC = nullptr;
 
   spLogger = nullptr;
+  spSettings = nullptr;
 
   if (instanceRegistry.begin() != instanceRegistry.end())
   {
