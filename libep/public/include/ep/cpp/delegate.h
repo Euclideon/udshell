@@ -131,6 +131,16 @@ public:
     return *this;
   }
 
+  bool operator==(const Delegate &val)
+  {
+    return this->m == val.m;
+  }
+
+  bool operator!=(const Delegate &val)
+  {
+    return this->m != val.m;
+  }
+
   epforceinline R operator()(Args... args) const
   {
     FastDelegateType d;
