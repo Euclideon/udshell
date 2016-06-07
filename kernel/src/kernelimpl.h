@@ -150,8 +150,13 @@ public:
   StdCapture *stdOutCapture = nullptr;
   StdCapture *stdErrCapture = nullptr;
 
-  static AVLTreeAllocator<VariantAVLNode> s_varAVLAllocator;
-  static HashMap<void*, internal::SafeProxy<void>*, internal::PointerHash> s_weakRefRegistry;
+  using VarAVLTreeAllocator = AVLTreeAllocator<VariantAVLNode>;
+  using WeakRefRegistryMap = HashMap<void*, internal::SafeProxy<void>*, internal::PointerHash>;
+  using StaticImplRegistryMap = HashMap<SharedString, UniquePtr<RefCounted>>;
+
+  static VarAVLTreeAllocator *s_pVarAVLAllocator;
+  static WeakRefRegistryMap *s_pWeakRefRegistry;
+  static StaticImplRegistryMap *s_pStaticImplRegistry;
 
   bool bKernelCreated = false;
 
