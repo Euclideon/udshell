@@ -2,8 +2,6 @@ project "epshell"
 	kind "WindowedApp"
 	language "C++"
 
-	removeplatforms "x86"
-
 	flags { "FatalCompileWarnings" }
 
 	files { "src/**.cpp", "src/**.h" }
@@ -26,10 +24,10 @@ project "epshell"
 	configuration {}
 
 	qt.enable()
---	qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
 	qtmodules { "core", "qml", "quick", "gui" }
 	qtprefix "Qt5"
 	pic "on"
+
 	configuration { "windows", "Debug*" }
 		qtsuffix "d"
 
@@ -41,6 +39,11 @@ project "epshell"
 		links { "assimp-ep64.lib" }
 		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64" }
 	configuration { "windows", "x86" }
+		if _OS == "windows" then
+			local qtdir32 = os.getenv("QTDIR32") or os.getenv("QT_DIR32")
+			qtpath(qtdir32)
+			debugenvs { "PATH=" .. qtdir32 .. "\\bin;%PATH%" }
+		end
 		links { "assimp-ep32.lib" }
 		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32" }
 

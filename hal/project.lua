@@ -26,20 +26,26 @@ project("hal-" .. halBuild)
 	dofile "../common-proj.lua"
 
 	if halBuild == "qt" then
-		removeplatforms "x86"
-
 		defines { "EP_USE_QT" }
 		configuration { "*QML" }
 			defines { "QT_QML_DEBUG" }
 		configuration {}
 
 		qt.enable()
---		qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
 		qtmodules { "core", "core-private", "qml", "quick", "gui" }
 		qtprefix "Qt5"
 		pic "on"
+
 		configuration { "windows", "Debug*" }
 			qtsuffix "d"
+
+		if _OS == "windows" then
+		configuration { "windows", "x86" }
+			local qtdir32 = os.getenv("QTDIR32") or os.getenv("QT_DIR32")
+			qtpath(qtdir32)
+			debugenvs { "PATH=" .. qtdir32 .. "\\bin;%PATH%" }
+		end
+
 		configuration {}
 	else
 		defines { "GLEW_STATIC" }
