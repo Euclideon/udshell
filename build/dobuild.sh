@@ -58,4 +58,7 @@ fi
 
 echo "Executing post-build..."
 ./build/postbuild.sh $1 $2 $3
-
+PSTBR=$?
+if [ $PSTBR -ne 0 ]; then
+  exit $PSTBR
+fi

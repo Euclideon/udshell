@@ -4,10 +4,18 @@
 
 function execute_build() {
   ./build/dobuild.sh $1 $2 $3 $4
+  RET=$?
+  if [ $RET -ne 0 ]; then
+    exit $RET
+  fi
 }
 
 function run_testsuite() {
   ./build/runtests.sh $1 $2 $3
+  RET=$?
+  if [ $RET -ne 0 ]; then
+    exit $RET
+  fi
 }
 
 function merge_master() {

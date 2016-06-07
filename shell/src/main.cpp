@@ -39,7 +39,7 @@ static MenuRef spToolBar;
 static ProjectRef spProject;
 static TimerRef spCITimer;
 static SubscriptionRef spCITimerSub;
-static bool CITest = false;
+static bool shutdownTest = false;
 static GeomNodeRef spTestGeomNode;
 
 MutableString256 projectName;
@@ -414,17 +414,13 @@ void Init(String sender, String message, const Variant &data)
   spActivitySelector->Set("activitiesinfo", GetActivitiesInfo());
   spTopLevelUI->Set("activityselector", spActivitySelector);
 
-  // TODO: Remove this once UIComponent cleans up its events
-  if (!CITest)
-  {
-    // Subscribe to UI events
-    spTopLevelUI->Subscribe("newprojectsignal", Delegate<void(String)>(&NewProject));
-    spTopLevelUI->Subscribe("openprojectsignal", Delegate<void(String)>(&OpenProject));
-    spTopLevelUI->Subscribe("saveprojectsignal", Delegate<void(void)>(&SaveProject));
-    spTopLevelUI->Subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
-    spTopLevelUI->Subscribe("newactivitysignal", Delegate<void(String)>(&NewActivity));
-    spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
-  }
+  // Subscribe to UI events
+  spTopLevelUI->Subscribe("newprojectsignal", Delegate<void(String)>(&NewProject));
+  spTopLevelUI->Subscribe("openprojectsignal", Delegate<void(String)>(&OpenProject));
+  spTopLevelUI->Subscribe("saveprojectsignal", Delegate<void(void)>(&SaveProject));
+  spTopLevelUI->Subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
+  spTopLevelUI->Subscribe("newactivitysignal", Delegate<void(String)>(&NewActivity));
+  spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 
@@ -432,7 +428,7 @@ void Init(String sender, String message, const Variant &data)
   OpenProject("testproj.epproj");
 #endif
 
-  if (CITest)
+  if (shutdownTest)
   {
     spCITimer = spKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 }, { "timertype", "CountDown" } });
     spCITimerSub = spCITimer->Elapsed.Subscribe([]() { Kernel::GetInstance()->Quit(); });
@@ -461,8 +457,8 @@ int main(int argc, char *argv[])
   epInitMemoryTracking();
   if (argc > 1)
   {
-    if (String(argv[1]).eqIC("CITest"))
-      CITest = true;
+    if (String(argv[1]).eqIC("shut_down_test"))
+      shutdownTest = true;
   }
 
   // install our qt message handler

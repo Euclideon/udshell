@@ -2,8 +2,6 @@ project "viewer"
 	kind "SharedLib"
 	language "C++"
 
-	removeplatforms "x86"
-
 --	flags { }
 
 	files { "src/**" }
@@ -15,12 +13,19 @@ project "viewer"
 	links { "libep" }
 
 	qt.enable()
---	qtpath "C:/dev/Qt/5.4" -- ** Expect QTDIR is set
 	qtmodules { "core", "qml", "quick", "gui" }
 	qtprefix "Qt5"
 	pic "on"
+
 	configuration { "windows", "Debug*" }
 		qtsuffix "d"
+
+	if _OS == "windows" then
+	configuration { "windows", "x86" }
+		local qtdir32 = os.getenv("QTDIR32") or os.getenv("QT_DIR32")
+		qtpath(qtdir32)
+		debugenvs { "PATH=" .. qtdir32 .. "\\bin;%PATH%" }
+	end
 
 	configuration { "windows" }
 		postbuildcommands {
