@@ -21,19 +21,36 @@ PACKAGE_PATH=$PACKAGE_ROOT/$BUILT_TYPE/$BUILD_NAME
 # collate outputs into proper locations...
 
 # arrange windows package
-echo "Collating Windows package..."
-WINDOWS_ROOT=$PACKAGE_PATH/windows
-mkdir -p $WINDOWS_ROOT/include
-mkdir -p $WINDOWS_ROOT/lib
-mkdir -p $WINDOWS_ROOT/plugins
-cp -R libep/public/include/* $WINDOWS_ROOT/include
-cp -R $BUILD_PATH/windows_shell_release_32/lib/* $WINDOWS_ROOT/lib/
-cp -R $BUILD_PATH/windows_shell_release_64/lib/* $WINDOWS_ROOT/lib/
-cp -R $BUILD_PATH/windows_shell_release_64/plugin/* $WINDOWS_ROOT/plugins/
-cp $BUILD_PATH/windows_shell_release_64/bin/epshell.exe $WINDOWS_ROOT/
-cp $BUILD_PATH/windows_shell_release_64/bin/epviewer.exe $WINDOWS_ROOT/
-cp 3rdparty/assimp-3.1.1/lib/windows/x64/assimp-ep64.dll $WINDOWS_ROOT/
-cp ud/3rdParty/sdl2/lib/x64/SDL2.dll $WINDOWS_ROOT/
+echo "Collating Win64 package..."
+WIN64_ROOT=$PACKAGE_PATH/win64
+mkdir -p $WIN64_ROOT/include
+mkdir -p $WIN64_ROOT/lib
+mkdir -p $WIN64_ROOT/plugins
+cp -R libep/public/include/* $WIN64_ROOT/include
+cp -R $BUILD_PATH/windows_shell_release_32/lib/* $WIN64_ROOT/lib/
+cp -R $BUILD_PATH/windows_shell_release_64/lib/* $WIN64_ROOT/lib/
+cp -R $BUILD_PATH/windows_shell_release_64/plugin/* $WIN64_ROOT/plugins/
+cp $BUILD_PATH/windows_shell_release_64/bin/epshell.exe $WIN64_ROOT/
+cp $BUILD_PATH/windows_shell_release_64/bin/epviewer.exe $WIN64_ROOT/
+cp 3rdparty/assimp-3.1.1/lib/windows/x64/assimp-ep64.dll $WIN64_ROOT/
+cp ud/3rdParty/sdl2/lib/x64/SDL2.dll $WIN64_ROOT/
+#TODO: make installer
+
+# arrange windows package
+echo "Collating Win32 package..."
+WIN32_ROOT=$PACKAGE_PATH/win32
+mkdir -p $WIN32_ROOT/include
+mkdir -p $WIN32_ROOT/lib
+mkdir -p $WIN32_ROOT/plugins
+cp -R libep/public/include/* $WIN32_ROOT/include
+cp -R $BUILD_PATH/windows_shell_release_32/lib/* $WIN32_ROOT/lib/
+cp -R $BUILD_PATH/windows_shell_release_64/lib/* $WIN32_ROOT/lib/
+cp -R $BUILD_PATH/windows_shell_release_32/plugin/* $WIN32_ROOT/plugins/
+cp $BUILD_PATH/windows_shell_release_32/bin/epshell.exe $WIN32_ROOT/
+cp $BUILD_PATH/windows_shell_release_32/bin/epviewer.exe $WIN32_ROOT/
+cp 3rdparty/assimp-3.1.1/lib/windows/x32/assimp-ep32.dll $WIN32_ROOT/
+cp ud/3rdParty/sdl2/lib/x86/SDL2.dll $WIN32_ROOT/
+#TODO: make installer
 
 # arrange ubuntu package
 echo "Collating Ubuntu package..."
