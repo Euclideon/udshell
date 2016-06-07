@@ -56,8 +56,7 @@ static struct
   GeomNodeRef spTestGeomNode;
   TimerRef spCITimer;
   SubscriptionRef spCITimerSub;
-  bool CITest;
-
+  bool shutdownTest;
 } mData = {
 #if defined(EP_WINDOWS)
                "/src/data/DirCube.uds", // filename
@@ -78,7 +77,7 @@ static struct
                nullptr,             // spTestGeomNode
                nullptr,             // spCITimer
                nullptr,             // spCITimerSub
-               false                // CITest
+               false                // shutdownTest
               };
 
 
@@ -261,9 +260,9 @@ int main(int argc, char* argv[])
   epInitMemoryTracking();
   if (argc > 1)
   {
-    if (String(argv[1]).eqIC("CITest"))
+    if (String(argv[1]).eqIC("shut_down_test"))
     {
-      mData.CITest = true;
+      mData.shutdownTest = true;
       argc = 1;
     }
   }
@@ -280,7 +279,7 @@ int main(int argc, char* argv[])
     mData.spKernel->RegisterMessageHandler("init", &ViewerInit);
     mData.spKernel->RegisterMessageHandler("deinit", &ViewerDeinit);
 
-    if (mData.CITest)
+    if (mData.shutdownTest)
     {
       mData.spCITimer = mData.spKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 },{ "timertype", "CountDown" } });
       mData.spCITimerSub = mData.spCITimer->Elapsed.Subscribe([]() { Kernel::GetInstance()->Quit(); });

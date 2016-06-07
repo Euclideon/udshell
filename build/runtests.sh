@@ -4,7 +4,7 @@
 
 function run_testsuite() {
   if [ $OSTYPE == "msys" ]; then # Windows, MingW
-    if [ $3 == "Win32" ]; then
+    if [ $3 == "win32" ]; then
       PLAT="x86"
     else
       PLAT=$3
@@ -15,8 +15,6 @@ function run_testsuite() {
 
   if [ $1 == "epshell" ]; then # epshell
     ./public/bin/$2_$PLAT/eptest
-  elif [ $1 == "epviewer" ]; then # epviewer
-    ./viewer/bin/$2_$PLAT/eptest
   else
     exit 4;
   fi
@@ -28,7 +26,7 @@ function run_testsuite() {
   echo "Unit Tests succeeded"
 }
 
-function run_leak_test() {
+function run_shutdown_test() {
   if [ $OSTYPE == "msys" ]; then # Windows, MingW
     if [ $3 == "win32" ]; then
       PLAT="x86"
@@ -41,18 +39,34 @@ function run_leak_test() {
 
   # TODO: Make this run on every config and platform
   if [[ $OSTYPE == "msys" && $2 == "Debug" && $3 == "x64" ]]; then
-    if [ $1 == "epshell" ]; then # epshell
-	  ./public/bin/$2_$PLAT/$1 CITest
-    elif [ $1 == "epviewer" ]; then # epviewer
-	  ./viewer/bin/$2_$PLAT/$1 CITest
+
+    if [[ -f MemoryReport_$2_$PLAT.txt ]]; then
+	  rm MemoryReport_$2_$PLAT.txt
 	fi
-	grep -i "Detected memory leaks" MemoryReport_$2_$PLAT.txt
-	if [ $? -eq 0 ]; then # epshell leaked memory
-	  grep "normal block" MemoryReport_$2_$PLAT.txt
-	  exit 3
+
+    if [ $1 == "epshell" ]; then # epshell
+	  export PATH=$QTDIR/bin:$PATH
+	  ./public/bin/$2_$PLAT/$1 shut_down_test
+#     TODO test epviewer
+#	  ./public/bin/$2_$PLAT/epviewer shut_down_test
+	fi
+
+	if [ $? -ne 0 ]; then
+	  echo $1 "Failed to shutdown cleanly"
+	  ERR=1
+	else
+	  ERR=0
+	fi
+
+    if [[ -f MemoryReport_$2_$PLAT.txt ]]; then
+	  if [ $? -eq 0 ]; then # epshell leaked memory
+	    echo "Memory leaks detected"
+	    grep "normal block" MemoryReport_$2_$PLAT.txt
+	    exit 3
+	  fi
 	fi
   fi
 }
 
 run_testsuite $1 $2 $3
-#run_leak_test() $1 $2 $3
+#run_shutdown_test $1 $2 $3
