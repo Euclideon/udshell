@@ -5,7 +5,8 @@ project "epshell"
 	flags { "FatalCompileWarnings" }
 
 	files { "src/**.cpp", "src/**.h" }
-	files { "res/**.qrc", "res/**.qml" }
+	files { "qml/**.qrc", "qml/**.qml" }
+	files { "res/**.qrc", "res/**.xml" }
 	files { "../premake5.lua", "project.lua" }
 
 	includedirs { "../kernel/src" }

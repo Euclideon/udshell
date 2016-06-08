@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/EP/Platform/Themes">
+    <file>qmldir</file>
+    <file>shelltheme.qml</file>
+  </qresource>
+</RCC>

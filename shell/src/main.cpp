@@ -28,7 +28,6 @@
 using namespace ep;
 
 static String appTitle = "Euclideon Platform";
-static QString defaultTheme = "qrc:/qml/themes/shelltheme.qml";
 
 static SharedPtr<Kernel> spKernel = nullptr;
 static WindowRef spMainWindow;
@@ -370,8 +369,12 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 
 void Register(String sender, String message, const Variant &data)
 {
-  // TODO: this path should be changed for release
-  spKernel->Call("registerqmlcomponents", "shell/res/qml");
+#if 0
+  // NOTE: Use to test off disk
+  spKernel->Call("registerqmlcomponents", "shell/qml");
+#else
+  spKernel->Call("registerqmlcomponents", ":/EP");
+#endif
 }
 
 void Init(String sender, String message, const Variant &data)

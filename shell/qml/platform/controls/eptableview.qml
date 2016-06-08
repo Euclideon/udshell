@@ -1,8 +1,8 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
-import epControls 0.1
-import epThemes 0.1
+import Platform.Controls 0.1
+import Platform.Themes 0.1
 
 TableView {
   property var menu: null

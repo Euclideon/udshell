@@ -2,8 +2,8 @@ import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
-import epKernel 0.1
-import epThemes 0.1
+import Platform 0.1
+import Platform.Themes 0.1
 
 Rectangle {
   property bool vertical
