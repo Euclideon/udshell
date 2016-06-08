@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Generate package..."
+echo "Gather build outputs..."
 
 BUILD_ROOT=/mnt/Resources/Builds/Platform/Intermediate
 PACKAGE_ROOT=/mnt/Resources/Builds/Platform/Builds
@@ -30,8 +30,8 @@ cp -R libep/public/include/* $WIN64_ROOT/include
 cp -R $BUILD_PATH/windows_shell_release_32/lib/* $WIN64_ROOT/lib/
 cp -R $BUILD_PATH/windows_shell_release_64/lib/* $WIN64_ROOT/lib/
 cp -R $BUILD_PATH/windows_shell_release_64/plugin/* $WIN64_ROOT/plugins/
-cp $BUILD_PATH/windows_shell_release_64/bin/epshell.exe $WIN64_ROOT/
-cp $BUILD_PATH/windows_shell_release_64/bin/epviewer.exe $WIN64_ROOT/
+cp $BUILD_PATH/windows_shell_release_64/bin/epshell.exe $WIN64_ROOT/epshell_unprotected.exe
+cp $BUILD_PATH/windows_shell_release_64/bin/epviewer.exe $WIN64_ROOT/epviewer_unprotected.exe
 cp 3rdparty/assimp-3.1.1/lib/windows/x64/assimp-ep64.dll $WIN64_ROOT/
 cp ud/3rdParty/sdl2/lib/x64/SDL2.dll $WIN64_ROOT/
 #TODO: make installer
@@ -46,8 +46,8 @@ cp -R libep/public/include/* $WIN32_ROOT/include
 cp -R $BUILD_PATH/windows_shell_release_32/lib/* $WIN32_ROOT/lib/
 cp -R $BUILD_PATH/windows_shell_release_64/lib/* $WIN32_ROOT/lib/
 cp -R $BUILD_PATH/windows_shell_release_32/plugin/* $WIN32_ROOT/plugins/
-cp $BUILD_PATH/windows_shell_release_32/bin/epshell.exe $WIN32_ROOT/
-cp $BUILD_PATH/windows_shell_release_32/bin/epviewer.exe $WIN32_ROOT/
+cp $BUILD_PATH/windows_shell_release_32/bin/epshell.exe $WIN32_ROOT/epshell_unprotected.exe
+cp $BUILD_PATH/windows_shell_release_32/bin/epviewer.exe $WIN32_ROOT/epviewer_unprotected.exe
 cp 3rdparty/assimp-3.1.1/lib/windows/x32/assimp-ep32.dll $WIN32_ROOT/
 cp ud/3rdParty/sdl2/lib/x86/SDL2.dll $WIN32_ROOT/
 #TODO: make installer
@@ -81,20 +81,12 @@ cp bin/amd64/libassimp-ep.so.3.1.1 $CENTOS_ROOT/
 #TODO: make .rpm
 
 
-# generate docs
-echo "Generate docs..."
-mkdir -p public/doc
-cd libep
-doxygen doc/Doxyfile
-cd ..
-cp -R public/doc $PACKAGE_PATH/docs
-
-
 # generate commit log
 echo "TODO: Generate commit log..."
 #TODO...
 
 
+#TODO: this moves to post-packaging when it works
 # copy build to 'latest' directory (HACK! replace with symlink...)
 if [ $BUILT_TYPE == "master" ]; then
   echo "Copy build to latest/..."

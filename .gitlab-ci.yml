@@ -1,6 +1,7 @@
 stages:
   - build
-  - deploy
+  - postbuild
+  - package
   - rebuild_pending
   - clean
 
@@ -116,15 +117,33 @@ rpm_shell_release_clang:
     - linux
     - rpm
 
-package:
-  stage: deploy
+collate_builds:
+  stage: postbuild
   only:
     - master
     - tags
   script: "./build/collate.sh"
   tags:
     - ubuntu
- 
+
+build_docs:
+  stage: postbuild
+  only:
+    - master
+    - tags
+  script: "./build/builddocs.sh"
+  tags:
+    - ubuntu
+
+windows_packaging:
+  stage: package
+  only:
+    - master
+    - tags
+  script: "build\\packagewindows.sh"
+  tags:
+    - windows
+
 update_merge_requests:
   stage: rebuild_pending
   script:
@@ -144,4 +163,3 @@ cleanup:
   script: "./build/cleanup.sh"
   tags:
     - linux
-
