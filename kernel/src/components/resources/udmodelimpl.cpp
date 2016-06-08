@@ -28,50 +28,60 @@ UDModelImpl::~UDModelImpl()
   udOctree_Destroy(&pOctree);
 }
 
+namespace internal {
+union SharedModel
+{
+  UDRenderContext epRc;
+  udRenderModel udRm;
+
+  ~SharedModel() = delete; // Gets rid of warning
+};
+} // internal
+
 void UDModelImpl::CopyRenderContext(UDRenderContext *pRenderContext) const
 {
   EPASSERT(pRenderContext, "pRenderContext is NULL");
 
-  udRenderModel *pRenderModel = union_reinterpret_cast<udRenderModel*>(pRenderContext);
-  memset(pRenderModel, 0, sizeof(udRenderModel));
+  internal::SharedModel *pShared = reinterpret_cast<internal::SharedModel*>(pRenderContext);
+  memset(pShared, 0, sizeof(internal::SharedModel));
 
-  pRenderModel->pOctree = pOctree;
+  pShared->udRm.pOctree = pOctree;
   if (rectSet)
   {
-    pRenderContext->privateClip.x0 = rect.x;
-    pRenderContext->privateClip.y0 = rect.y;
-    pRenderContext->privateClip.x1 = rect.x + rect.width;
-    pRenderContext->privateClip.y1 = rect.y + rect.height;
-    pRenderModel->pClip = union_reinterpret_cast<udRenderClipArea*>(&pRenderContext->privateClip);
+    pShared->epRc.privateClip.x0 = rect.x;
+    pShared->epRc.privateClip.y0 = rect.y;
+    pShared->epRc.privateClip.x1 = rect.x + rect.width;
+    pShared->epRc.privateClip.y1 = rect.y + rect.height;
+    pShared->udRm.pClip = reinterpret_cast<udRenderClipArea*>(&pShared->epRc.privateClip);
   }
 
-  pRenderContext->matrix = udmatrix;
-  pRenderModel->pWorldMatrixD = pRenderContext->matrix.a;
+  pShared->epRc.matrix = udmatrix;
+  pShared->udRm.pWorldMatrixD = pShared->epRc.matrix.a;
 
   if (pVoxelFilter)
-    pRenderModel->pFilter = (udRender_FilterFunc*)pVoxelFilter;
+    pShared->udRm.pFilter = (udRender_FilterFunc*)pVoxelFilter;
 
   if (pVoxelShader)
-    pRenderModel->pVoxelShader = (udRender_VoxelShaderFunc*)pVoxelShader;
+    pShared->udRm.pVoxelShader = (udRender_VoxelShaderFunc*)pVoxelShader;
   else if (varVoxelShader)
-    pRenderModel->pVoxelShader = VoxelVarShaderFunc;
+    pShared->udRm.pVoxelShader = VoxelVarShaderFunc;
 
   if (pPixelShader)
-    pRenderModel->pPixelShader = (udRender_PixelShaderFunc*)pPixelShader;
+    pShared->udRm.pPixelShader = (udRender_PixelShaderFunc*)pPixelShader;
 
-  pRenderModel->flags = (udRenderFlags)renderFlags.v;
-  pRenderModel->startingRoot = startingRoot;
-  pRenderModel->animationFrame = animationFrame;
+  pShared->udRm.flags = (udRenderFlags)renderFlags.v;
+  pShared->udRm.startingRoot = startingRoot;
+  pShared->udRm.animationFrame = animationFrame;
 
-  pRenderContext->varVoxelShader = varVoxelShader;
+  pShared->epRc.varVoxelShader = varVoxelShader;
 }
 
 uint32_t UDModelImpl::VoxelVarShaderFunc(udRenderModel *pRenderModel, udNodeIndex nodeIndex, udRenderNodeInfo *epUnusedParam(pNodeInfo))
 {
-  UDRenderContext *pContext = union_reinterpret_cast<UDRenderContext*>(pRenderModel);
-  udOctree *pOctree = pRenderModel->pOctree;
+  internal::SharedModel *pShared = reinterpret_cast<internal::SharedModel*>(pRenderModel);
+  udOctree *pOctree = pShared->udRm.pOctree;
   uint32_t color = pOctree->pGetNodeColor(pOctree, nodeIndex);
-  color = (uint32_t)pContext->varVoxelShader(Slice<const Variant>{ Variant(color) }).asInt();
+  color = (uint32_t)pShared->epRc.varVoxelShader(Slice<const Variant>{ Variant(color) }).asInt();
   return color;
 }
 
