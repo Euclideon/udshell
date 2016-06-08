@@ -23,8 +23,10 @@ project "viewer"
 	if _OS == "windows" then
 	configuration { "windows", "x86" }
 		local qtdir32 = os.getenv("QTDIR32") or os.getenv("QT_DIR32")
-		qtpath(qtdir32)
-		debugenvs { "PATH=" .. qtdir32 .. "\\bin;%PATH%" }
+		if qtdir32 ~= nil then
+			qtpath(qtdir32)
+			debugenvs { "PATH=" .. qtdir32 .. "\\bin;%PATH%" }
+		end
 	end
 
 	configuration { "windows" }
