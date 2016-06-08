@@ -41,8 +41,15 @@ project "epshell"
 	configuration { "windows", "x86" }
 		if _OS == "windows" then
 			local qtdir32 = os.getenv("QTDIR32") or os.getenv("QT_DIR32")
-			qtpath(qtdir32)
-			debugenvs { "PATH=" .. qtdir32 .. "\\bin;%PATH%" }
+			if qtdir32 ~= nil then
+				qtpath(qtdir32)
+				debugenvs { "PATH=" .. qtdir32 .. "\\bin;%PATH%" }
+			else
+				prebuildcommands {
+					"echo \"WIN32 build requires 32bit Qt toolchain. Please set QTDIR32 env variable\"",
+					"exit -1"
+				}
+			end
 		end
 		links { "assimp-ep32.lib" }
 		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32" }
