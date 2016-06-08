@@ -30,11 +30,7 @@ Slice<const String> NativePluginLoader::GetSupportedExtensions() const
 
 bool NativePluginLoader::LoadPlugin(String filename)
 {
-#if defined(EP_ARCH_X86)
-  const char *pFuncName = "_epPlugin_Init";
-#else
   const char *pFuncName = "epPlugin_Init";
-#endif
 
 #if defined(EP_WINDOWS)
 
