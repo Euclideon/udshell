@@ -1,6 +1,6 @@
 #pragma once
-#ifndef EP_SETTINGS_H
-#define EP_SETTINGS_H
+#if !defined(_EP_ISETTINGS_HPP)
+#define _EP_ISETTINGS_HPP
 
 #include "ep/cpp/component/resource/resource.h"
 
@@ -20,4 +20,4 @@ public:
 
 } //namespace ep
 
-#endif // EP_SETTINGS_H
+#endif // _EP_ISETTINGS_HPP
