@@ -1,5 +1,5 @@
 #include "components/commandmanagerimpl.h"
-#include "components/project.h"
+#include "ep/cpp/component/project.h"
 #include "ep/cpp/component/activity.h"
 #include "ep/cpp/kernel.h"
 
