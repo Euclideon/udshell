@@ -175,9 +175,10 @@ public:
 private:
   Variant(RefCounted *pRef, SharedPtrType type = SharedPtrType::Unknown, bool ownsContent = true);
 
-  size_t t : 4;
-  size_t ownsContent : 1;
-  size_t length : (sizeof(size_t)*8)-5; // NOTE: if you change this, update the shift's in asEnum()!!!
+  // HACK: variant is 16 bytes. TODO: 32bit variant should be 8 bytes to pass quickly
+  uint64_t t : 4;
+  uint64_t ownsContent : 1;
+  uint64_t length : (sizeof(uint64_t)*8)-5; // NOTE: if you change this, update the shift's in asEnum()!!!
   union
   {
     char b;
