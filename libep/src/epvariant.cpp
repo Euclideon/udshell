@@ -2,118 +2,6 @@
 #include "ep/cpp/component/component.h"
 #include "ep/cpp/plugin.h"
 
-extern "C" {
-
-void epVariant_Release(epVariant v)
-{
-  // Note: Variant's destructor will clean our instance up
-  ep::Variant t;
-  (epVariant&)t = v;
-}
-
-epVariant epVariant_CreateVoid()
-{
-  epVariant v;
-  epConstruct(&v) ep::Variant(ep::Variant::Type::Void);
-  return v;
-}
-epVariant epVariant_CreateNull()
-{
-  epVariant v;
-  epConstruct(&v) ep::Variant(nullptr);
-  return v;
-}
-epVariant epVariant_CreateBool(char b)
-{
-  epVariant v;
-  epConstruct(&v) ep::Variant(b ? true : false);
-  return v;
-}
-epVariant epVariant_CreateInt(int64_t i)
-{
-  epVariant v;
-  epConstruct(&v) ep::Variant(i);
-  return v;
-}
-epVariant epVariant_CreateFloat(double f)
-{
-  epVariant v;
-  epConstruct(&v) ep::Variant(f);
-  return v;
-}
-epVariant epVariant_CreateComponent(epComponent *pComponent)
-{
-  epVariant v;
-  epConstruct(&v) ep::Variant((ep::ComponentRef&)pComponent);
-  return v;
-}
-//inline epVariant epVariant_CreateDelegate() {}
-epVariant epVariant_CreateCString(const char *pString)
-{
-  epVariant v;
-  epConstruct(&v) ep::Variant(ep::String(pString));
-  return v;
-}
-epVariant epVariant_CreateString(epString string)
-{
-  epVariant v;
-  epConstruct(&v) ep::Variant((ep::String&)string);
-  return v;
-}
-
-epVariantType epVariant_GetType(epVariant v)
-{
-  return (epVariantType)v.t;
-}
-
-int epVariant_IsVoid(epVariant v)
-{
-  return v.t == epVT_Void;
-}
-int epVariant_IsNull(epVariant v)
-{
-  return v.t == epVT_Null || (v.t == epVT_String && v.length == 0) || (v.t == epVT_SharedPtr && v.p == NULL);
-}
-char epVariant_AsBool(epVariant v)
-{
-  return (char)((ep::Variant&)v).asBool();
-}
-int64_t epVariant_AsInt(epVariant v)
-{
-  return ((ep::Variant&)v).asInt();
-}
-double epVariant_AsFloat(epVariant v)
-{
-  return ((ep::Variant&)v).asFloat();
-}
-epComponent* epVariant_AsComponent(epVariant v)
-{
-  epComponent *pC;
-  epConstruct(&pC) ep::ComponentRef(((ep::Variant&)v).asComponent());
-  return pC;
-}
-//char epVariant_GetDelegate(epVariantHandle v) {}
-epString epVariant_AsString(epVariant v)
-{
-  epString r;
-  epConstruct(&r) ep::String(((ep::Variant&)v).asString());
-  return r;
-}
-
-const epVariant* epVariant_AsArray(epVariant v, size_t *pLength)
-{
-  ep::Slice<ep::Variant> arr = ((ep::Variant&)v).asArray();
-  *pLength = arr.length;
-  return (epVariant*)arr.ptr;
-}
-const epVarMap* epVariant_AsAssocArray(epVariant v)
-{
-  return (epVarMap*)v.p;
-}
-
-} // extern "C"
-
-
 ptrdiff_t epStringifyVariant(ep::Slice<char> buffer, ep::String format, const ep::Variant &v, const ep::VarArg *pArgs)
 {
   using namespace ep;
@@ -777,15 +665,15 @@ void VarEvent::Signal(Slice<const Variant> args)
     {
       Variant r = d(args);
       if (r.is(Variant::Type::Error))
-        epDebugFormat("Unhandled error returned from event handler: {0}\n", r);
+        DebugFormat("Unhandled error returned from event handler: {0}\n", r);
     }
     catch (std::exception &e)
     {
-      epDebugFormat("Unhandled exception from event handler: {0}\n", e.what());
+      DebugFormat("Unhandled exception from event handler: {0}\n", e.what());
     }
     catch (...)
     {
-      epDebugFormat("Unhandled C++ exception from event handler!\n");
+      DebugFormat("Unhandled C++ exception from event handler!\n");
     }
   }
 }

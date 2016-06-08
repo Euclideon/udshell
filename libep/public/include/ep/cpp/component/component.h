@@ -12,7 +12,6 @@
 #include "ep/cpp/variant.h"
 #include "ep/cpp/componentdesc.h"
 #include "ep/cpp/internal/i/icomponent.h"
-#include "ep/c/internal/component_inl.h"
 
 namespace ep {
 

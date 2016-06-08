@@ -3,6 +3,8 @@
 #include "ep/cpp/datetime.h"
 #include "hal/timer.h"
 
+#include <time.h>
+
 namespace ep {
 
 Array<const PropertyInfo> Logger::GetProperties() const

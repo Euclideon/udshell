@@ -1,4 +1,4 @@
-#include "ep/eputf.h"
+#include "ep/cpp/utf.h"
 
 template<typename T>
 ptrdiff_t epStringifyTemplate(ep::Slice<char> buffer, ep::String format, const T &val, const ep::VarArg *pArgs);
@@ -52,9 +52,14 @@ ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, ep::Slice<T> ar
 namespace ep {
 
 namespace internal {
+  extern const char s_charDetails[256];
+
   int epvscprintf(const char * format, va_list args);
   int epvsnprintf(char * s, size_t count, const char * format, va_list args);
 }
+
+epforceinline char toLower(char c) { return epIsAlpha(c) ? c|0x20 : c; }
+epforceinline char toUpper(char c) { return epIsAlpha(c) ? c&~0x20 : c; }
 
 template<typename C>
 class CString
@@ -95,27 +100,27 @@ inline size_t epStrlen(const char32_t *pStr)
   return pEnd - pStr;
 }
 
-inline size_t epUTF8Len(const char *pStr)
+inline size_t UTF8Len(const char *pStr)
 {
   return strlen(pStr);
 }
-inline size_t epUTF8Len(const char16_t *pStr)
+inline size_t UTF8Len(const char16_t *pStr)
 {
   size_t len = 0;
   while (*pStr)
   {
     size_t srcLen;
-    len += epUTF8SequenceLength(pStr, &srcLen);
+    len += UTF8SequenceLength(pStr, &srcLen);
     pStr += srcLen;
   }
   return len;
 }
-inline size_t epUTF8Len(const char32_t *pStr)
+inline size_t UTF8Len(const char32_t *pStr)
 {
   size_t len = 0;
   while (*pStr)
   {
-    len += epUTF8SequenceLength(pStr);
+    len += UTF8SequenceLength(pStr);
     ++pStr;
   }
   return len;
@@ -147,22 +152,6 @@ template<size_t N>
 inline BaseString<C>::BaseString(const C (&str)[N])
   : Slice<const C>(str, N)
 {}
-
-template<typename C>
-BaseString<C>::BaseString(epString s)
-  : Slice<const C>((const C*)s.ptr, s.length)
-{
-  EPASSERT(sizeof(C) == sizeof(char), "Wrong type!");
-}
-template<typename C>
-BaseString<C>::operator epString() const
-{
-  EPASSERT(sizeof(C) == sizeof(char), "Wrong type!");
-  epString s;
-  s.length = this->length;
-  s.ptr = this->ptr;
-  return s;
-}
 
 template<typename C>
 inline BaseString<C>& BaseString<C>::operator =(Slice<const C> rh)
@@ -211,7 +200,7 @@ template<typename C>
 inline char32_t BaseString<C>::frontChar() const
 {
   char32_t r;
-  epUTFDecode(this->ptr, &r);
+  UTFDecode(this->ptr, &r);
   return r;
 }
 template<>
@@ -221,7 +210,7 @@ inline char32_t BaseString<char>::backChar() const
   while ((*pLast & 0xC) == 0x80)
     --pLast;
   char32_t r;
-  epUTFDecode(pLast, &r);
+  UTFDecode(pLast, &r);
   return r;
 }
 template<>
@@ -231,7 +220,7 @@ inline char32_t BaseString<char16_t>::backChar() const
   if (back >= 0xD800 && (back & 0xFC00) == 0xDC00)
   {
     char32_t r;
-    epUTFDecode(ptr + length-2, &r);
+    UTFDecode(ptr + length-2, &r);
     return r;
   }
   return back;
@@ -246,7 +235,7 @@ template<typename C>
 inline char32_t BaseString<C>::popFrontChar()
 {
   char32_t r;
-  size_t codeUnits = epUTFDecode(this->ptr, &r);
+  size_t codeUnits = UTFDecode(this->ptr, &r);
   this->ptr += codeUnits;
   this->length -= codeUnits;
   return r;
@@ -258,7 +247,7 @@ inline char32_t BaseString<char>::popBackChar()
   while ((ptr[length - numChars] & 0xC) == 0x80)
     --numChars;
   char32_t r;
-  epUTFDecode(ptr + length - numChars, &r);
+  UTFDecode(ptr + length - numChars, &r);
   length -= numChars;
   return r;
 }
@@ -269,7 +258,7 @@ inline char32_t BaseString<char16_t>::popBackChar()
   if (back >= 0xD800 && (back & 0xFC00) == 0xDC00)
   {
     char32_t r;
-    epUTFDecode(ptr + --length, &r);
+    UTFDecode(ptr + --length, &r);
     return r;
   }
   return back;
@@ -709,22 +698,6 @@ inline SharedString::SharedString(Sprintf_T, const char *pFormat, ...)
   va_end(args);
 
   epConstruct(this) SharedString(std::move(s));
-}
-
-inline SharedString::SharedString(const epSharedString &s)
-  : SharedString((const SharedString&)s)
-{}
-inline SharedString::SharedString(epSharedString &&s)
-  : SharedString(std::move((SharedString&)s))
-{}
-inline SharedString::operator epSharedString() const
-{
-  epSharedString s;
-  s.length = this->length;
-  s.ptr = this->ptr;
-  if (s.ptr)
-    ++internal::GetSliceHeader(s.ptr)->refCount;
-  return s;
 }
 
 inline SharedString& SharedString::operator =(const SharedString &val)

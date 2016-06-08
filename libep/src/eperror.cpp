@@ -108,34 +108,3 @@ SharedString DumpError(ErrorState *pError)
 }
 
 } // namespace ep
-
-
-// C bindings...
-#include "ep/c/error.h"
-
-extern "C" {
-
-epErrorState* epPushError(epResult error, epString message, const char *function, const char *file, int line)
-{
-  return (epErrorState*)ep::_PushError((ep::Result)error, ep::String(message), function, file, line);
-}
-
-epErrorState* epGetError()
-{
-  return (epErrorState*)ep::GetError();
-}
-void epClearError()
-{
-  ep::ClearError();
-}
-
-epSharedString epDumpError()
-{
-  ep::internal::ErrorSystem& errorSystem = ep::internal::GetErrorSystem();
-
-  epSharedString r;
-  epConstruct(&r) ep::SharedString(ep::DumpError(errorSystem.pError));
-  return r;
-}
-
-} // extern "C"

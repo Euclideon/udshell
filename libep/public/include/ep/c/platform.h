@@ -443,8 +443,6 @@ struct epTheTypeIs;
 #include <stdlib.h>
 #include <new>
 
-#include "ep/c/string.h"
-
 
 // Outputs a string to debug console
 extern "C" {
@@ -506,7 +504,7 @@ void epDebugPrintf(const char *format, ...) epprintf_func(1, 2);
 // TODO: Make assertion system handle pop-up window where possible
 #if EPASSERT_ON
 
-extern "C" void epAssertFailed(epString condition, epString message, epString file, int line);
+extern "C" void epAssertFailed(const char *condition, const char *message, const char *file, int line);
 
     // C assert just has a fixed message...
 # define EPASSERT(condition, message) do { if (!(condition)) { epAssertFailed(#condition, message, __FILE__, __LINE__); DebugBreak(); } } while (0)

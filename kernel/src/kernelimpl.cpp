@@ -134,7 +134,7 @@ static Instance s_instance =
 
   [](void *pMem) -> void { internal::_Free(pMem); }, // Free
 
-  [](String condition, String message, String file, int line) -> void { IF_EPASSERT(epAssertFailed(condition, message, file, line);) }, // AssertFailed
+  [](String condition, String message, String file, int line) -> void { IF_EPASSERT(AssertFailed(condition, message, file, line);) }, // AssertFailed
 
   // NOTE: this was called when an RC reached zero...
   [](Component *pInstance) -> void { pInstance->DecRef(); }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
@@ -285,7 +285,7 @@ KernelImpl::KernelImpl(Kernel *pInstance, Variant::VarMap initParams)
 void KernelImpl::StartInit(Variant::VarMap initParams)
 {
   // init the kernel
-  epscope(fail) { epDebugFormat("Error creating Kernel\n"); };
+  epscope(fail) { DebugFormat("Error creating Kernel\n"); };
 
   renderThreadCount = initParams["renderThreadCount"].as<int>();
 
@@ -452,14 +452,14 @@ KernelImpl::~KernelImpl()
   if (instanceRegistry.begin() != instanceRegistry.end())
   {
     int count = 0;
-    epDebugFormat("!!!WARNING: Some Components have not been freed\n");
+    DebugFormat("!!!WARNING: Some Components have not been freed\n");
 
     for (const auto &c : instanceRegistry)
     {
       ++count;
-      epDebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->GetName(), c.value->RefCount());
+      DebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->GetName(), c.value->RefCount());
     }
-    epDebugFormat("{0} Unfreed Component(s)\n", count);
+    DebugFormat("{0} Unfreed Component(s)\n", count);
   }
 
   epHAL_Deinit();

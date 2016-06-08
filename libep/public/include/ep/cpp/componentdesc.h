@@ -1,7 +1,6 @@
 #if !defined(_EP_COMPONENTDESC_HPP)
 #define _EP_COMPONENTDESC_HPP
 
-#include "ep/c/componentdesc.h"
 #include "ep/cpp/variant.h"
 #include "ep/cpp/delegate.h"
 #include "ep/cpp/event.h"

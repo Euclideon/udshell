@@ -7,8 +7,6 @@
 
 #include "eprender_qt.h"
 
-#include "ep/c/error.h"
-
 #include <QOpenGLBuffer>
 
 // ***************************************************************************************

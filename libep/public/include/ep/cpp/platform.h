@@ -8,33 +8,32 @@
 #include "ep/cpp/error.h"
 #include "ep/cpp/string.h"
 
+namespace ep {
 template<typename ...Args>
-inline void epDebugFormat(ep::String format, Args... args)
+inline void DebugFormat(ep::String format, Args... args)
 {
   ep::MutableString64 t(ep::Format, format, args...);
   epDebugWrite(t.ptr);
 }
+} // namespace ep
 
 #if EPASSERT_ON
 
-inline void epAssertFailed(ep::String condition, ep::String message, ep::String file, int line)
-{
-  epAssertFailed((epString&)condition, (epString&)message, (epString&)file, line);
-}
+namespace ep {
+void AssertFailed(ep::String condition, ep::String message, ep::String file, int line);
 
 // C++ assert code uses our fancy variadic format() function
-namespace ep {
 namespace internal {
   extern MutableString256 assertBuffer;
-  inline void epAssertTemplate(String condition, String file, int line)
+  inline void AssertTemplate(String condition, String file, int line)
   {
-    epAssertFailed(condition, nullptr, file, line);
+    AssertFailed(condition, nullptr, file, line);
   }
   template<typename ...Args>
-  inline void epAssertTemplate(String condition, String file, int line, String format, Args... args)
+  inline void AssertTemplate(String condition, String file, int line, String format, Args... args)
   {
     assertBuffer.format(format, args...);
-    epAssertFailed(condition, assertBuffer, file, line);
+    AssertFailed(condition, assertBuffer, file, line);
   }
 } // namespace internal
 } // namespace ep
@@ -45,7 +44,7 @@ namespace internal {
 # if defined(IF_EPASSERT)
 #   undef IF_EPASSERT
 # endif
-# define EPASSERT(condition, ...) do { if (!(condition)) { ::ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+# define EPASSERT(condition, ...) do { if (!(condition)) { ::ep::internal::AssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
 # define IF_EPASSERT(x) x
 
 # if defined(EPRELASSERT)
@@ -55,7 +54,7 @@ namespace internal {
 #   undef IF_EPRELASSERT
 # endif
 # if EPRELASSERT_ON
-#   define EPRELASSERT(condition, ...) do { if (!(condition)) { ::ep::internal::epAssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+#   define EPRELASSERT(condition, ...) do { if (!(condition)) { ::ep::internal::AssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
 #   define IF_EPRELASSERT(x) x
 # else
 #   define EPRELASSERT(condition, ...) do {} while(0) // TODO: Make platform-specific __assume(condition)

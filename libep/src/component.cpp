@@ -1,68 +1,6 @@
 #include "ep/cpp/component/component.h"
-#include "ep/cpp/kernel.h"
-
-extern "C" {
-
-size_t epComponent_Acquire(epComponent *pComponent)
-{
-  return ++pComponent->refCount;
-}
-
-size_t epComponent_Release(epComponent *pComponent)
-{
-  if (pComponent->refCount == 1)
-  {
-    ep::s_pInstance->DestroyComponent((ep::Component*)pComponent); // TODO: this can go, replace with normal DecRef, pFree will take care of it
-    return 0;
-  }
-  return --pComponent->refCount;
-}
-
-epSharedString epComponent_GetUID(const epComponent *pComponent)
-{
-  return ((const ep::Component*)pComponent)->GetUid();
-}
-epSharedString epComponent_GetName(const epComponent *pComponent)
-{
-  return ((const ep::Component*)pComponent)->GetName();
-}
-
-bool epComponent_IsType(const epComponent *pComponent, epString type)
-{
-  return ((const ep::Component*)pComponent)->IsType(type);
-}
-
-epVariant epComponent_GetProperty(const epComponent *pComponent, epString property)
-{
-  epVariant r;
-  epConstruct(&r) ep::Variant(((const ep::Component*)pComponent)->Get(property));
-  return r;
-}
-void epComponent_SetProperty(epComponent *pComponent, epString property, const epVariant *pValue)
-{
-  ((ep::Component*)pComponent)->Set(property, *(ep::Variant*)pValue);
-}
-
-epVariant epComponent_CallMethod(epComponent *pComponent, epString method, const epVariant *pArgs, size_t numArgs)
-{
-  epVariant r;
-  epConstruct(&r) ep::Variant(((ep::Component*)pComponent)->Call(method, ep::Slice<const ep::Variant>((const ep::Variant*)pArgs, numArgs)));
-  return r;
-}
-
-void epComponent_Subscribe(epComponent *pComponent, epString eventName, const epVarDelegate *pDelegate)
-{
-  ((ep::Component*)pComponent)->Subscribe(eventName, (const ep::VarDelegate&)pDelegate);
-}
-
-void epComponent_SendMessage(epComponent *pComponent, epString target, epString message, const epVariant *pData)
-{
-  try { ((const ep::Component*)pComponent)->SendMessage(target, message, *(ep::Variant*)pData); } catch (...) {}
-}
-
-} // extern "C"
-
 #include "ep/cpp/componentdesc.h"
+#include "ep/cpp/kernel.h"
 
 namespace ep {
 
