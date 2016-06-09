@@ -117,21 +117,21 @@ rpm_shell_release_clang:
     - linux
     - rpm
 
+build_docs:
+  stage: build
+  only:
+    - master
+    - tags
+  script: "build\\builddocs.sh"
+  tags:
+    - windows
+
 collate_builds:
   stage: postbuild
   only:
     - master
     - tags
   script: "./build/collate.sh"
-  tags:
-    - ubuntu
-
-build_docs:
-  stage: postbuild
-  only:
-    - master
-    - tags
-  script: "./build/builddocs.sh"
   tags:
     - ubuntu
 
