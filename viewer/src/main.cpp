@@ -19,7 +19,7 @@
 #include "ep/cpp/component/resource/shader.h"
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/resource/metadata.h"
-#include "components/nodes/geomnode.h"
+#include "ep/cpp/component/node/geomnode.h"
 
 using namespace ep;
 
