@@ -1,9 +1,8 @@
-#include "components/project.h"
+#include "components/projectimpl.h"
 #include "components/file.h"
 #include "ep/cpp/component/resourcemanager.h"
 #include "ep/cpp/component/activity.h"
 #include "ep/cpp/component/resource/text.h"
-#include "ep/cpp/kernel.h"
 #include "rapidxml.hpp"
 
 namespace ep {
@@ -26,10 +25,10 @@ Array<const MethodInfo> Project::GetMethods() const
   };
 }
 
-Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-  : Component(pType, pKernel, uid, initParams)
+ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
+  : ImplSuper(pInstance)
 {
-  spResourceManager = pKernel->GetResourceManager();
+  spResourceManager = GetKernel()->GetResourceManager();
 
   const Variant *pSrc = initParams.get("src");
   StreamRef spSrc = nullptr;
@@ -39,7 +38,7 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     srcString = pSrc->asString();
 
     try {
-      spSrc = pKernel->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+      spSrc = GetKernel()->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
     }
     catch (EPException &) {
       LogDebug(2, "Project file \"{0}\" does not exist. Creating new project.", *pSrc);
@@ -76,9 +75,9 @@ Project::Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     EPTHROW_ERROR(Result::Failure, "Invalid project file \"{0}\" -- Missing <project> element", srcString);
 }
 
-void Project::SaveProject()
+void ProjectImpl::SaveProject()
 {
-  auto spXMLBuffer = GetKernel().CreateComponent<Text>();
+  auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
   spXMLBuffer->Reserve(10240);
 
   Variant::VarMap projectNode;
@@ -107,7 +106,7 @@ void Project::SaveProject()
 
   try
   {
-    StreamRef spFile = GetKernel().CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    StreamRef spFile = GetKernel()->CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
     spFile->Write(buffer);
   }
   catch (EPException &)
@@ -117,7 +116,7 @@ void Project::SaveProject()
   }
 }
 
-Variant Project::SaveActivities()
+Variant ProjectImpl::SaveActivities()
 {
   Variant::VarMap activitiesNode;
   Array<Variant> children;
@@ -135,7 +134,7 @@ Variant Project::SaveActivities()
   return activitiesNode;
 }
 
-void Project::ParseProject(Variant node)
+void ProjectImpl::ParseProject(Variant node)
 {
   Variant::VarMap projectNode = node.asAssocArray();
   Variant *pChildren = projectNode.get("children");
@@ -154,7 +153,7 @@ void Project::ParseProject(Variant node)
   }
 }
 
-void Project::ParseActivities(Variant node)
+void ProjectImpl::ParseActivities(Variant node)
 {
   Variant::VarMap projectNode = node.asAssocArray();
   Variant *pChildren = projectNode.get("children");
@@ -169,7 +168,7 @@ void Project::ParseActivities(Variant node)
   }
 }
 
-void Project::ParseActivity(Variant node)
+void ProjectImpl::ParseActivity(Variant node)
 {
   try
   {
@@ -178,7 +177,7 @@ void Project::ParseActivity(Variant node)
     if (vParams.is(Variant::SharedPtrType::AssocArray))
       initParams = vParams.asAssocArray();
 
-    activities.pushBack(component_cast<Activity>(pKernel->CreateComponent(node["name"].asString(), initParams)));
+    activities.pushBack(component_cast<Activity>(GetKernel()->CreateComponent(node["name"].asString(), initParams)));
   }
   catch (EPException &)
   {

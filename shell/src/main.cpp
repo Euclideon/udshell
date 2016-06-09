@@ -6,7 +6,7 @@
 #include "components/logger.h"
 #include "ep/cpp/component/window.h"
 #include "ep/cpp/component/uicomponent.h"
-#include "components/project.h"
+#include "ep/cpp/component/project.h"
 #include "ep/cpp/component/activity.h"
 #include "ep/cpp/component/resource/menu.h"
 #include "ep/cpp/component/commandmanager.h"
