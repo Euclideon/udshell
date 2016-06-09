@@ -1,4 +1,4 @@
-#include "components/regex.h"
+#include "regeximpl.h"
 
 #define PCRE_STATIC
 #define PCRE_CODE_UNIT_WIDTH 8
@@ -6,14 +6,14 @@
 
 namespace ep {
 
-Regex::Regex(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-  : Component(pType, pKernel, uid, initParams)
+RegexImpl::RegexImpl(Component *pInstance, Variant::VarMap initParams)
+  : ImplSuper(pInstance)
 {
   Variant *pV = initParams.get("pattern");
   if (pV)
     CompilePattern(pV->asString());
 }
-Regex::~Regex()
+RegexImpl::~RegexImpl()
 {
   if (pExtra)
     pcre_free((pcre_extra*)pExtra);
@@ -21,7 +21,7 @@ Regex::~Regex()
     pcre_free((pcre*)pCode);
 }
 
-void Regex::CompilePattern(String pattern)
+void RegexImpl::CompilePattern(String pattern)
 {
   if (pExtra)
   {
@@ -43,7 +43,7 @@ void Regex::CompilePattern(String pattern)
     EPTHROW_ERROR(Result::Failure, "Optimising regex failed: {0}", pError);
 }
 
-Array<String> Regex::Match(String text)
+Array<String> RegexImpl::Match(String text)
 {
   EPTHROW_IF(!pCode || !pExtra, Result::InvalidCall, "Call to match requires a valid regex pattern!");
 
