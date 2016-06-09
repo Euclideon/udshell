@@ -1,10 +1,7 @@
-#include "components/settings.h"
+#include "components/settingsimpl.h"
 #include "components/file.h"
-#include "ep/cpp/component/resourcemanager.h"
-#include "ep/cpp/component/activity.h"
-#include "ep/cpp/component/resource/text.h"
-#include "ep/cpp/kernel.h"
 #include "rapidxml.hpp"
+#include "ep/cpp/component/resource/text.h"
 
 namespace ep {
 
@@ -17,8 +14,8 @@ Array<const MethodInfo> Settings::GetMethods() const
   };
 }
 
-Settings::Settings(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-  : Component(pType, pKernel, uid, initParams)
+SettingsImpl::SettingsImpl(Component *pInstance, Variant::VarMap initParams)
+  : ImplSuper(pInstance)
 {
   const Variant *pSrc = initParams.get("src");
   StreamRef spSrc = nullptr;
@@ -28,7 +25,7 @@ Settings::Settings(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     srcString = pSrc->asString();
 
     try {
-      spSrc = pKernel->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+      spSrc = GetKernel()->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
     } catch (EPException &) {
       LogDebug(2, "Settings file \"{0}\" does not exist. Create new settings.", *pSrc);
       return;
@@ -44,9 +41,9 @@ Settings::Settings(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
   Variant rootElements;
   TextRef spXMLBuffer = spSrc->LoadText();
 
-  try {
-    rootElements = spXMLBuffer->ParseXml();
-  } catch (parse_error &e) {
+  try { rootElements = spXMLBuffer->ParseXml(); }
+  catch (parse_error &e)
+  {
     auto xmlBuff = spXMLBuffer->MapForRead();
     epscope(exit) { spXMLBuffer->Unmap(); };
     EPTHROW_ERROR(Result::Failure, "Unable to parse settings file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
@@ -58,7 +55,7 @@ Settings::Settings(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     ParseSettings(settingsNode);
 }
 
-void Settings::SaveSettings()
+void SettingsImpl::SaveSettings()
 {
   Variant::VarMap settingsNode;
   Array<Variant> children;
@@ -73,12 +70,12 @@ void Settings::SaveSettings()
 
   settingsNode.insert("children", children);
 
-  auto spXMLBuffer = GetKernel().CreateComponent<Text>();
+  auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
   spXMLBuffer->Reserve(10240); // TODO: this is not okay...
   spXMLBuffer->FormatXml(settingsNode);
 
   try {
-    StreamRef spFile = GetKernel().CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    StreamRef spFile = GetKernel()->CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
     spFile->Save(spXMLBuffer);
   } catch (EPException &) {
     LogWarning(1, "Failed to open Settings file for writing: \"{0}\"", srcString);
@@ -86,7 +83,7 @@ void Settings::SaveSettings()
   }
 }
 
-void Settings::ParseSettings(Variant node)
+void SettingsImpl::ParseSettings(Variant node)
 {
   Variant::VarMap settingsNode = node.asAssocArray();
   Variant *pChildren = settingsNode.get("children");
@@ -117,7 +114,7 @@ void Settings::ParseSettings(Variant node)
   }
 }
 
-void Settings::ParsePluginSettings(Variant node)
+void SettingsImpl::ParsePluginSettings(Variant node)
 {
   Variant *pNodeName = node.getItem("name");
   Variant *pChildren = node.getItem("children");
@@ -139,7 +136,7 @@ void Settings::ParsePluginSettings(Variant node)
   }
 }
 
-void Settings::SetValue(SharedString pluginkey, SharedString key, Variant value)
+void SettingsImpl::SetValue(SharedString pluginkey, SharedString key, Variant value)
 {
   Variant *pSetting = settings.get(pluginkey);
   if (pSetting != nullptr)
@@ -159,7 +156,7 @@ void Settings::SetValue(SharedString pluginkey, SharedString key, Variant value)
   }
 }
 
-Variant Settings::GetValue(SharedString pluginkey, SharedString key)
+Variant SettingsImpl::GetValue(SharedString pluginkey, SharedString key)
 {
   Variant *pSetting = settings.get(pluginkey);
   if (pSetting == nullptr)

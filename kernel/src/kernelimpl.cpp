@@ -14,7 +14,6 @@
 #include "components/pluginloader.h"
 #include "components/nativepluginloader.h"
 #include "components/project.h"
-#include "components/settings.h"
 #include "ep/cpp/component/resource/kvpstore.h"
 #include "components/datasources/imagesource.h"
 #include "components/datasources/geomsource.h"
@@ -48,6 +47,7 @@
 #include "components/streamimpl.h"
 #include "components/regex.h"
 #include "components/primitivegeneratorimpl.h"
+#include "components/settingsimpl.h"
 
 #include "components/dynamiccomponent.h"
 #include "components/varcomponent.h"
@@ -323,7 +323,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<CommandManager, CommandManagerImpl>();
   pInstance->RegisterComponentType<Project>();
   pInstance->RegisterComponentType<Timer, TimerImpl>();
-  pInstance->RegisterComponentType<Settings>();
+  pInstance->RegisterComponentType<Settings, SettingsImpl>();
   pInstance->RegisterComponentType<Lua>();
   pInstance->RegisterComponentType<View, ViewImpl>();
   pInstance->RegisterComponentType<Activity, ActivityImpl>();
