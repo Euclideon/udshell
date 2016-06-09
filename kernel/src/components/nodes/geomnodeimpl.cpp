@@ -1,4 +1,4 @@
-#include "geomnode.h"
+#include "geomnodeimpl.h"
 #include "renderscene.h"
 #include "renderresource.h"
 #include "ep/cpp/kernel.h"
@@ -17,8 +17,7 @@ Array<const PropertyInfo> GeomNode::GetProperties() const
   };
 }
 
-// TODO : Impl'ise this function
-void GeomNode::Render(RenderScene &spScene, const Double4x4 &mat)
+void GeomNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
 {
   GeomRenderJob &job = spScene.geom.pushBack();
   job.matrix = mat;

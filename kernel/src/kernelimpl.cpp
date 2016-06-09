@@ -9,7 +9,6 @@
 #include "components/lua.h"
 #include "components/logger.h"
 #include "components/timerimpl.h"
-#include "components/nodes/geomnode.h"
 #include "components/pluginmanager.h"
 #include "components/pluginloader.h"
 #include "components/nativepluginloader.h"
@@ -41,6 +40,7 @@
 #include "components/nodes/udnodeimpl.h"
 #include "components/nodes/cameraimpl.h"
 #include "components/nodes/simplecameraimpl.h"
+#include "components/nodes/geomnodeimpl.h"
 #include "components/sceneimpl.h"
 #include "components/datasources/datasourceimpl.h"
 #include "components/broadcasterimpl.h"
@@ -349,7 +349,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<SceneNode, SceneImpl>();
   pInstance->RegisterComponentType<Camera, CameraImpl>();
   pInstance->RegisterComponentType<SimpleCamera, SimpleCameraImpl>();
-  pInstance->RegisterComponentType<GeomNode>();
+  pInstance->RegisterComponentType<GeomNode, GeomNodeImpl>();
   pInstance->RegisterComponentType<UDNode, UDNodeImpl>();
 
   // data sources

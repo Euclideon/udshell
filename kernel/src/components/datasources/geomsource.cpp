@@ -1,7 +1,7 @@
 #include "geomsource.h"
 #include "ep/cpp/component/node/node.h"
 #include "ep/cpp/component/node/udnode.h"
-#include "components/nodes/geomnode.h"
+#include "ep/cpp/component/node/geomnode.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/material.h"
 #include "ep/cpp/component/resource/model.h"
