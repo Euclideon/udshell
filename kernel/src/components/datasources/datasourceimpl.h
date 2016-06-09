@@ -47,7 +47,7 @@ public:
     return nullptr;
   }
 
-  ResourceRef GetResource(size_t index) const override final
+  ResourceRef GetResourceFromIndex(size_t index) const override final
   {
     size_t i = 0;
     for (auto r: resources)
@@ -58,6 +58,7 @@ public:
     }
     return nullptr;
   }
+
   ResourceRef GetResource(String _name) const override final
   {
     ResourceRef *r = const_cast<ResourceRef*>(resources.get(_name));
