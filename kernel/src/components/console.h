@@ -2,7 +2,7 @@
 #ifndef EP_CONSOLE_H
 #define EP_CONSOLE_H
 
-#include "memstream.h"
+#include "ep/cpp/component/memstream.h"
 #include "logger.h"
 #include "ep/cpp/component/file.h"
 
