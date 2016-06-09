@@ -2,7 +2,7 @@
 
 #if EPUI_DRIVER == EPDRIVER_QT
 
-#include "components/file.h"
+#include "ep/cpp/component/file.h"
 
 #include "driver/qt/epqt.h"
 

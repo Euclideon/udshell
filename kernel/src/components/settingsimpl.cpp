@@ -1,5 +1,5 @@
 #include "components/settingsimpl.h"
-#include "components/file.h"
+#include "components/fileimpl.h"
 #include "rapidxml.hpp"
 #include "ep/cpp/component/resource/text.h"
 
