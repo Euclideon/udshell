@@ -28,7 +28,7 @@ public:
 
   virtual BufferRef Load() = 0;
   virtual TextRef LoadText() = 0;
-  virtual void Save(BufferRef spBuffer) = 0;
+  virtual void SaveBuffer(BufferRef spBuffer) = 0;
 
   // TODO: support async operations?
   // TODO: remove support for sync operations?

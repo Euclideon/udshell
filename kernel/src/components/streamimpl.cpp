@@ -70,7 +70,7 @@ TextRef StreamImpl::LoadText()
   return spBuffer;
 }
 
-void StreamImpl::Save(BufferRef spBuffer)
+void StreamImpl::SaveBuffer(BufferRef spBuffer)
 {
   // TODO: check and bail if stream is not writable...
 

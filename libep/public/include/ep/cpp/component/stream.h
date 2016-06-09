@@ -41,7 +41,7 @@ public:
 
   BufferRef Load() { return pImpl->Load(); }
   TextRef LoadText() { return pImpl->LoadText(); }
-  void Save(BufferRef spBuffer) { return pImpl->Save(spBuffer); }
+  void Save(BufferRef spBuffer) { return pImpl->SaveBuffer(spBuffer); }
 
   Event<> PosChanged;
 
