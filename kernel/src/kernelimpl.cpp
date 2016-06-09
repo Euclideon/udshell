@@ -606,7 +606,7 @@ void KernelImpl::StreamerUpdate()
   }
 }
 
-Array<const ComponentDesc *> KernelImpl::GetDerivedComponentDescs(String id, bool bIncludeBase)
+Array<const ComponentDesc *> KernelImpl::GetDerivedComponentDescsFromString(String id, bool bIncludeBase)
 {
   ComponentType *compType = componentRegistry.get(id);
   if (compType)
@@ -757,7 +757,7 @@ const ComponentDesc* KernelImpl::RegisterComponentType(ComponentDescInl *pDesc)
   return pDesc;
 }
 
-const ComponentDesc* KernelImpl::RegisterComponentType(Variant::VarMap typeDesc)
+const ComponentDesc* KernelImpl::RegisterComponentTypeFromMap(Variant::VarMap typeDesc)
 {
   DynamicComponentDesc *pDesc = epNew(DynamicComponentDesc);
 

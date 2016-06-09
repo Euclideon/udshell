@@ -153,7 +153,7 @@ struct Kernel::CreateStaticImpl<void, T> { static inline void Do() {} };
 template<typename _ComponentType>
 Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(bool bIncludeBase)
 {
-  return pImpl->GetDerivedComponentDescs(_ComponentType::ComponentID(), bIncludeBase);
+  return pImpl->GetDerivedComponentDescsFromString(_ComponentType::ComponentID(), bIncludeBase);
 }
 
 template<typename T>
