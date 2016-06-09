@@ -126,14 +126,14 @@ bool BufferImpl::CopyBuffer(BufferRef buf)
   EPASSERT(mBuf != nullptr, "Unable to map buffer!");
   if (mBuf != nullptr)
   {
-    CopyBuffer(mBuf);
+    CopySlice(mBuf);
     buf->Unmap();
   }
 
   return true; // TODO Error handling
 }
 
-bool BufferImpl::CopyBuffer(Slice<const void> buf)
+bool BufferImpl::CopySlice(Slice<const void> buf)
 {
   if (mapDepth > 0)
     return false; // TODO Error handling

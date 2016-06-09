@@ -34,7 +34,7 @@ public:
   void Unmap() override final;
 
   bool CopyBuffer(BufferRef buffer) override final;
-  bool CopyBuffer(Slice<const void> buffer) override final;
+  bool CopySlice(Slice<const void> buffer) override final;
 
   Variant Save() const override final { return pInstance->Super::Save(); }
 

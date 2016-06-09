@@ -30,7 +30,7 @@ public:
   bool Mapped() const { return pImpl->Mapped(); }
 
   bool CopyBuffer(BufferRef buffer) { return pImpl->CopyBuffer(buffer); }
-  bool CopyBuffer(Slice<const void> buffer) { return pImpl->CopyBuffer(buffer); }
+  bool CopyBuffer(Slice<const void> buffer) { return pImpl->CopySlice(buffer); }
 
   Variant Save() const override { return pImpl->Save(); }
 
