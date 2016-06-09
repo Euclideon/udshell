@@ -19,10 +19,10 @@ public:
     return metadata.size();
   }
 
-  void Insert(Variant &&key, Variant &&value) override final           { metadata.replace(std::move(key), std::move(value)); }
-  void Insert(const Variant &key, Variant &&value) override final      { metadata.replace(key, std::move(value)); }
-  void Insert(Variant &&key, const Variant &value) override final      { metadata.replace(std::move(key), value); }
-  void Insert(const Variant &key, const Variant &value) override final { metadata.replace(key, value); }
+  void InsertRR(Variant &&key, Variant &&value) override final           { metadata.replace(std::move(key), std::move(value)); }
+  void InsertLR(const Variant &key, Variant &&value) override final      { metadata.replace(key, std::move(value)); }
+  void InsertRL(Variant &&key, const Variant &value) override final      { metadata.replace(std::move(key), value); }
+  void InsertLL(const Variant &key, const Variant &value) override final { metadata.replace(key, value); }
 
   void Remove(const Variant &key) override final
   {
