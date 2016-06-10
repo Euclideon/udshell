@@ -22,13 +22,13 @@ public:
 
   template<typename ComponentType, typename Impl = void, typename GlueType = void, typename StaticImpl = void>
   const ComponentDesc* RegisterComponentType();
-  const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) { return pImpl->RegisterComponentType(typeDesc); }
+  const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) { return pImpl->RegisterComponentTypeFromMap(typeDesc); }
 
   const ComponentDesc* GetComponentDesc(String id) { return pImpl->GetComponentDesc(id); }
 
   template<typename CT>
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase);
-  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase) { return pImpl->GetDerivedComponentDescs(id, bIncludeBase); }
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase) { return pImpl->GetDerivedComponentDescsFromString(id, bIncludeBase); }
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) { return pImpl->GetDerivedComponentDescs(pBase, bIncludeBase); }
 
   void RegisterMessageHandler(SharedString _name, MessageHandler messageHandler) { pImpl->RegisterMessageHandler(_name, messageHandler); }

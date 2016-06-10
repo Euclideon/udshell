@@ -49,13 +49,13 @@ public:
 
   // component registry
   const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) override final;
-  const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) override final;
+  const ComponentDesc* RegisterComponentTypeFromMap(Variant::VarMap typeDesc) override final;
 
   void RegisterGlueType(String name, CreateGlueFunc *pCreateFunc) override final;
 
   const ComponentDesc* GetComponentDesc(String id) override final;
 
-  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase) override final;
+  Array<const ep::ComponentDesc *> GetDerivedComponentDescsFromString(String id, bool bIncludeBase) override final;
   Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) override final;
 
   ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) override final;

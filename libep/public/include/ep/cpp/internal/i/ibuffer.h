@@ -25,7 +25,7 @@ public:
   virtual void Unmap() = 0;
 
   virtual bool CopyBuffer(BufferRef buffer) = 0;
-  virtual bool CopyBuffer(Slice<const void> buffer) = 0;
+  virtual bool CopySlice(Slice<const void> buffer) = 0;
 
   virtual Variant Save() const = 0;
 

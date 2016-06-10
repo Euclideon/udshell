@@ -27,7 +27,7 @@ class IKernel
 {
 public:
   virtual const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) = 0;
-  virtual const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) = 0;
+  virtual const ComponentDesc* RegisterComponentTypeFromMap(Variant::VarMap typeDesc) = 0;
 
   virtual void RegisterGlueType(String name, CreateGlueFunc *pCreateFunc) = 0;
 
@@ -43,7 +43,7 @@ public:
 
   virtual const ComponentDesc* GetComponentDesc(String id) = 0;
 
-  virtual Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase) = 0;
+  virtual Array<const ep::ComponentDesc *> GetDerivedComponentDescsFromString(String id, bool bIncludeBase) = 0;
   virtual Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) = 0;
 
   virtual ComponentRef CreateComponent(String typeId, Variant::VarMap initParams) = 0;

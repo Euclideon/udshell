@@ -33,7 +33,7 @@ public:
   virtual size_t GetNumResources() const { return pImpl->GetNumResources(); }
   virtual String GetResourceName(size_t index) const { return pImpl->GetResourceName(index); }
 
-  virtual ResourceRef GetResource(size_t index) const { return pImpl->GetResource(index); }
+  virtual ResourceRef GetResource(size_t index) const { return pImpl->GetResourceFromIndex(index); }
 
   virtual ResourceRef GetResource(String _name) const { return pImpl->GetResource(_name); }
   virtual void SetResource(String _name, const ResourceRef &spResource) { pImpl->SetResource(_name, spResource); }

@@ -329,7 +329,7 @@ void QtKernel::RegisterQml(ep::String file, ep::Variant::VarMap typeDesc)
     { "new", ep::DynamicComponentDesc::NewInstanceFunc(data.ptr(), &QmlComponentData::CreateComponent) }
   };
 
-  GetImpl()->RegisterComponentType(typeInfo);
+  GetImpl()->RegisterComponentTypeFromMap(typeInfo);
 }
 
 // ---------------------------------------------------------------------------------------

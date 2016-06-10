@@ -16,10 +16,10 @@ class Metadata : public KVPStore
 public:
   virtual size_t NumRecords() const { return pImpl->NumRecords(); }
 
-  virtual void Insert(Variant &&key, Variant &&value) { pImpl->Insert(key, value); }
-  virtual void Insert(const Variant &key, Variant &&value) { pImpl->Insert(key, value); }
-  virtual void Insert(Variant &&key, const Variant &value) { pImpl->Insert(key, value); }
-  virtual void Insert(const Variant &key, const Variant &value) { pImpl->Insert(key, value); }
+  virtual void Insert(Variant &&key, Variant &&value) { pImpl->InsertRR(std::move(key), std::move(value)); }
+  virtual void Insert(const Variant &key, Variant &&value) { pImpl->InsertLR(key, std::move(value)); }
+  virtual void Insert(Variant &&key, const Variant &value) { pImpl->InsertRL(std::move(key), value); }
+  virtual void Insert(const Variant &key, const Variant &value) { pImpl->InsertLL(key, value); }
 
   virtual void Remove(const Variant &key) { pImpl->Remove(key); }
   virtual bool Exists(const Variant &key) const { return pImpl->Exists(key); }

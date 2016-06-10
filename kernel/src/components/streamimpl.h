@@ -31,7 +31,7 @@ public:
 
   BufferRef Load() override final;
   TextRef LoadText() override final;
-  void Save(BufferRef spBuffer) override final;
+  void SaveBuffer(BufferRef spBuffer) override final;
 
   // TODO: support async operations?
   // TODO: remove support for sync operations?

@@ -18,7 +18,7 @@ public:
   virtual size_t GetNumResources() const = 0;
   virtual String GetResourceName(size_t index) const = 0;
 
-  virtual ResourceRef GetResource(size_t index) const = 0;
+  virtual ResourceRef GetResourceFromIndex(size_t index) const = 0;
 
   virtual ResourceRef GetResource(String name) const = 0;
   virtual void SetResource(String name, const ResourceRef &spResource) = 0;
