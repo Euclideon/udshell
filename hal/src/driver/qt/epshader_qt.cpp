@@ -7,7 +7,7 @@
 
 #include "eprender_qt.h"
 
-#include "ep/c/error.h"
+#include "ep/cpp/error.h"
 
 #include <QOpenGLShaderProgram>
 #include <QOpenGLShader>

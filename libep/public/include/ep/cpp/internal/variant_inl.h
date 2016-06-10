@@ -162,13 +162,6 @@ inline Variant::Variant(const Variant &val)
     copyContent(val);
 }
 
-inline Variant::Variant(epVariant &&rval)
-  : Variant(std::move((Variant&)rval))
-{}
-inline Variant::Variant(const epVariant &val)
-  : Variant((Variant&)val)
-{}
-
 inline Variant::Variant(Type _t)
 {
   EPASSERT(_t == Type::Void, "Only void type assignment supported!");

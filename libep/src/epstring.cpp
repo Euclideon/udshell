@@ -8,38 +8,11 @@
 # pragma warning(disable: 4996)
 #endif
 
-extern "C" {
-
-epSharedString epSharedString_Create(const char *pCString)
-{
-  epSharedString s;
-  epConstruct(&s) ep::SharedString(pCString);
-  return s;
-}
-
-size_t epSharedString_Acquire(const epSharedString *pSS)
-{
-  if (!pSS || !pSS->ptr)
-    return 0;
-  ep::internal::SliceHeader *pH = ep::internal::GetSliceHeader(pSS->ptr);
-  return ++pH->refCount;
-}
-size_t epSharedString_Release(const epSharedString *pSS)
-{
-  if (!pSS || !pSS->ptr)
-    return 0;
-  ep::internal::SliceHeader *pH = ep::internal::GetSliceHeader(pSS->ptr);
-  if(pH->refCount > 1)
-    return --pH->refCount;
-  ep::internal::SliceFree(pSS->ptr);
-  ((epSharedString*)pSS)->ptr = nullptr;
-  ((epSharedString*)pSS)->length = 0;
-  return 0;
-}
-
+namespace ep {
+namespace internal {
 
 // 1 = alpha, 2 = numeric, 4 = white, 8 = newline
-const char s_epCharDetails[256] =
+const char s_charDetails[256] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 0, 0, 8, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -58,12 +31,6 @@ const char s_epCharDetails[256] =
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
-
-} // extern "C"
-
-
-namespace ep {
-namespace internal {
 
 int epvscprintf(const char *format, va_list args)
 {
@@ -559,7 +526,7 @@ ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, ep::BaseString<
     for (size_t i = 0; i<s.length; )
     {
       size_t l = 0;
-      secLen += epUTF8SequenceLength(s.ptr + i, &l);
+      secLen += ep::UTF8SequenceLength(s.ptr + i, &l);
       i += l;
     }
   }
@@ -594,7 +561,7 @@ ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, ep::BaseString<
     while (s)
     {
       char32_t c = s.popFrontChar();
-      offset += epUTFEncode(c, pBuffer + offset);
+      offset += ep::UTFEncode(c, pBuffer + offset);
     }
   }
 

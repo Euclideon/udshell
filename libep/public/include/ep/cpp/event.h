@@ -87,9 +87,9 @@ public:
       try {
         d(args...);
       } catch (std::exception &e) {
-        epDebugFormat("Unhandled exception from event handler: {0}\n", e.what());
+        DebugFormat("Unhandled exception from event handler: {0}\n", e.what());
       } catch (...) {
-        epDebugFormat("Unhandled C++ exception from event handler!\n");
+        DebugFormat("Unhandled C++ exception from event handler!\n");
       }
     }
   }

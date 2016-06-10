@@ -33,12 +33,8 @@ void _Free(void *pMemory)
 }
 
 } // namespace internal
-} // namespace ep
 
-// Plugin API API
-extern "C" {
-
-void epAssertFailed(epString condition, epString message, epString file, int line)
+void AssertFailed(ep::String condition, ep::String message, ep::String file, int line)
 {
   // TODO: Agree on formatting of assets
   if (ep::internal::gUnitTesting)
@@ -48,9 +44,19 @@ void epAssertFailed(epString condition, epString message, epString file, int lin
   }
   else
   {
-    ep::MutableString256 t(ep::Format, "ASSERT FAILED : {0}\n{1}\n{2}({3})", (ep::String&)condition, (ep::String&)message, (ep::String&)file, line);
+    ep::MutableString256 t(ep::Format, "ASSERT FAILED : {0}\n{1}\n{2}({3})", condition, message, file, line);
     epDebugWrite(t.ptr);
   }
+}
+
+} // namespace ep
+
+// Plugin API API
+extern "C" {
+
+void epAssertFailed(const char *condition, const char *message, const char *file, int line)
+{
+  ep::AssertFailed(condition, message, file, line);
 }
 
 void epDebugWrite(const char *pString)

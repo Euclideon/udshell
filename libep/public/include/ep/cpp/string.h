@@ -2,14 +2,23 @@
 #if !defined(_EP_STRING_HPP)
 #define _EP_STRING_HPP
 
-#include "ep/c/string.h"
-
 #include "ep/cpp/slice.h"
+
+// TODO: should be inline functions?
+#define epIsNewline(c) ((c) < 256 && (::ep::internal::s_charDetails[(size_t)c] & 8))
+#define epIsWhitespace(c) ((c) < 256 && (::ep::internal::s_charDetails[(size_t)c] & 0xC))
+#define epIsAlpha(c) ((c) < 256 && (::ep::internal::s_charDetails[(size_t)c] & 1))
+#define epIsNumeric(c) ((c) < 256 && (::ep::internal::s_charDetails[(size_t)c] & 2))
+#define epIsAlphaNumeric(c) ((c) < 256 && (::ep::internal::s_charDetails[(size_t)c] & 3))
+#define epIsHex(c) (epIsAlphaNumeric(c) && ((c)|0x20) <= 'f')
+
+#define epToLower(c) (epIsAlpha(c) ? (c)|0x20 : (c))
+#define epToUpper(c) (epIsAlpha(c) ? (c)&~0x20 : (c))
 
 namespace ep {
 
-epforceinline char toLower(char c) { return epIsAlpha(c) ? c|0x20 : c; }
-epforceinline char toUpper(char c) { return epIsAlpha(c) ? c&~0x20 : c; }
+epforceinline char toLower(char c);
+epforceinline char toUpper(char c);
 
 
 enum Format_T { Format };
@@ -36,10 +45,6 @@ struct BaseString : public Slice<const C>
   BaseString(const C *pString);
   template<size_t N>
   BaseString(const C (&str)[N]);
-
-  // epString compatibility
-  BaseString(epString s);
-  operator epString() const;
 
   // assignment
   BaseString<C>& operator =(Slice<const C> rh);
@@ -228,11 +233,6 @@ struct SharedString : public SharedArray<const char>
   template <typename... Args> SharedString(Concat_T, const Args&... args);
   template <typename... Args> SharedString(Format_T, String format, const Args&... args);
   SharedString(Sprintf_T, const char *pFormat, ...) epprintf_func(3, 4);
-
-  // epString compatibility
-  SharedString(const epSharedString &s);
-  SharedString(epSharedString &&s);
-  operator epSharedString() const;
 
   // construction
   template<typename... Args> static SharedString concat(const Args&... args);

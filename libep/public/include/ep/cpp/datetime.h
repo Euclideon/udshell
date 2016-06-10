@@ -2,14 +2,27 @@
 #if !defined(_EPDATETIME_HPP)
 #define _EPDATETIME_HPP
 
-#include "ep/c/datetime.h"
+#define DEFAULT_DATETIME_STRING "%Y-%m-%d %H:%M:%S"
+#define START_YEAR -10000 // 10000 BC
+
 #include "ep/cpp/variant.h"
 
 namespace ep {
 
-class DateTime : public epDateTime
+class DateTime
 {
 public:
+  uint64_t isdst : 1;
+  uint64_t wday : 3;
+  uint64_t mday : 5;
+  uint64_t mon : 4;
+  uint64_t msec : 10;
+  uint64_t sec : 6;
+  uint64_t min : 6;
+  uint64_t hour : 5;
+  uint64_t yday : 9;
+  uint64_t year : 15;
+
   DateTime();
   DateTime(time_t ti);
 

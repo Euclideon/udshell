@@ -36,7 +36,7 @@ static ep::Instance s_instance =
 
   [](void *pMem) -> void { ep::internal::_Free(pMem); }, // Free
 
-  [](ep::String condition, ep::String message, ep::String file, int line) -> void { IF_EPASSERT(epAssertFailed(condition, message, file, line);) }, // AssertFailed
+  [](ep::String condition, ep::String message, ep::String file, int line) -> void { IF_EPASSERT(AssertFailed(condition, message, file, line);) }, // AssertFailed
 
   [](ep::Component *) -> void { }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
 

@@ -291,7 +291,7 @@ int main(int argc, char* argv[])
   }
   catch (std::exception &e)
   {
-    epDebugFormat("Unhandled exception: {0}\n", e.what());
+    DebugFormat("Unhandled exception: {0}\n", e.what());
     result = Result::Failure;
   }
   catch (...)

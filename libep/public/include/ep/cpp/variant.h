@@ -9,8 +9,6 @@
 #include "ep/cpp/range.h"
 #include "ep/cpp/event.h"
 
-#include "ep/c/variant.h"
-
 namespace ep {
 class LuaState;
 }
@@ -45,20 +43,20 @@ public:
 
   enum class Type
   {
-    Void = epVT_Void,
-    Error = epVT_Error,
+    Void,
+    Error,
 
-    Null = epVT_Null,
-    Bool = epVT_Bool,
-    Int = epVT_Int,
-    Float = epVT_Float,
-    Enum = epVT_Enum,
-    Bitfield = epVT_Bitfield,
-    SharedPtr = epVT_SharedPtr,
-    String = epVT_String,
-    Array = epVT_Array,
+    Null,
+    Bool,
+    Int,
+    Float,
+    Enum,
+    Bitfield,
+    SharedPtr,
+    String,
+    Array,
 
-    SmallString = epVT_SmallString
+    SmallString
   };
 
   enum class SharedPtrType
@@ -74,9 +72,6 @@ public:
   Variant();
   Variant(Variant &&rval);
   Variant(const Variant &val);
-
-  Variant(epVariant &&rval);
-  Variant(const epVariant &val);
 
   Variant(Type);
   Variant(nullptr_t);

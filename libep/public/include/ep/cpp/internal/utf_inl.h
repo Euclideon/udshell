@@ -1,5 +1,6 @@
+namespace ep {
 
-inline size_t epUTFEncode(char32_t c, char *pUTF8)
+inline size_t UTFEncode(char32_t c, char *pUTF8)
 {
   if (c < 0x80)
   {
@@ -28,7 +29,7 @@ inline size_t epUTFEncode(char32_t c, char *pUTF8)
     return 4;
   }
 }
-inline size_t epUTFEncode(char32_t c, char16_t *pUTF16)
+inline size_t UTFEncode(char32_t c, char16_t *pUTF16)
 {
   if (c < 0x10000)
   {
@@ -43,13 +44,13 @@ inline size_t epUTFEncode(char32_t c, char16_t *pUTF16)
     return 2;
   }
 }
-inline size_t epUTFEncode(char32_t c, char32_t *pUTF32)
+inline size_t UTFEncode(char32_t c, char32_t *pUTF32)
 {
   *pUTF32 = c;
   return 1;
 }
 
-inline size_t epUTFDecode(const char *pUTF8, char32_t *pC)
+inline size_t UTFDecode(const char *pUTF8, char32_t *pC)
 {
   if (pUTF8[0] < 128)
   {
@@ -72,7 +73,7 @@ inline size_t epUTFDecode(const char *pUTF8, char32_t *pC)
     return 4;
   }
 }
-inline size_t epUTFDecode(const char16_t *pUTF16, char32_t *pC)
+inline size_t UTFDecode(const char16_t *pUTF16, char32_t *pC)
 {
   if (pUTF16[0] >= 0xD800 && (pUTF16[0] & 0xFC00) == 0xD800)
   {
@@ -85,14 +86,14 @@ inline size_t epUTFDecode(const char16_t *pUTF16, char32_t *pC)
     return 1;
   }
 }
-inline size_t epUTFDecode(const char32_t *pUTF32, char32_t *pC)
+inline size_t UTFDecode(const char32_t *pUTF32, char32_t *pC)
 {
   *pC = *pUTF32;
   return 1;
 }
 
 template<>
-inline size_t epUTFSequenceLength<char>(char32_t c)
+inline size_t UTFSequenceLength<char>(char32_t c)
 {
   if (c < 0x80)
     return 1;
@@ -101,27 +102,27 @@ inline size_t epUTFSequenceLength<char>(char32_t c)
   else if (c < 0x10000)
     return 3;
   return 4;
-/*
-  // NOTE: unicode was restricted to 20 bits, so we will stop here.
-  else if(c < 0x200000)
-    return 4;
-  else if (c < 0x4000000)
-    return 5;
-  return 6;
-*/
+  /*
+    // NOTE: unicode was restricted to 20 bits, so we will stop here.
+    else if(c < 0x200000)
+      return 4;
+    else if (c < 0x4000000)
+      return 5;
+    return 6;
+  */
 }
 template<>
-inline size_t epUTFSequenceLength<char16_t>(char32_t c)
+inline size_t UTFSequenceLength<char16_t>(char32_t c)
 {
   return c < 0x10000 ? 1 : 2;
 }
 template<>
-inline size_t epUTFSequenceLength<char32_t>(char32_t)
+inline size_t UTFSequenceLength<char32_t>(char32_t)
 {
   return 1;
 }
 
-inline size_t epUTFSequenceLength(const char *pUTF8)
+inline size_t UTFSequenceLength(const char *pUTF8)
 {
   if (pUTF8[0] < 128)
     return 1;
@@ -132,37 +133,39 @@ inline size_t epUTFSequenceLength(const char *pUTF8)
   else
     return 4;
 }
-inline size_t epUTFSequenceLength(const char16_t *pUTF16)
+inline size_t UTFSequenceLength(const char16_t *pUTF16)
 {
   if (pUTF16[0] >= 0xD800 && (pUTF16[0] & 0xFC00) == 0xD800)
     return 2;
   else
     return 1;
 }
-inline size_t epUTFSequenceLength(const char32_t*)
+inline size_t UTFSequenceLength(const char32_t*)
 {
   return 1;
 }
 
 // get the UTF8 sequence length for an encoded character
-inline size_t epUTF8SequenceLength(const char *pUTF8, size_t *pSrcLen)
+inline size_t UTF8SequenceLength(const char *pUTF8, size_t *pSrcLen)
 {
-  size_t l = epUTFSequenceLength(pUTF8);
+  size_t l = UTFSequenceLength(pUTF8);
   if (pSrcLen)
     *pSrcLen = l;
   return l;
 }
-inline size_t epUTF8SequenceLength(const char16_t *pUTF16, size_t *pSrcLen)
+inline size_t UTF8SequenceLength(const char16_t *pUTF16, size_t *pSrcLen)
 {
   char32_t c;
-  size_t l = epUTFDecode(pUTF16, &c);
+  size_t l = UTFDecode(pUTF16, &c);
   if (pSrcLen)
     *pSrcLen = l;
-  return epUTFSequenceLength<char>(c);
+  return UTFSequenceLength<char>(c);
 }
-inline size_t epUTF8SequenceLength(const char32_t *pUTF32, size_t *pSrcLen)
+inline size_t UTF8SequenceLength(const char32_t *pUTF32, size_t *pSrcLen)
 {
   if (pSrcLen)
     *pSrcLen = 1;
-  return epUTFSequenceLength<char>(pUTF32[0]);
+  return UTFSequenceLength<char>(pUTF32[0]);
 }
+
+} // namespace ep
