@@ -405,8 +405,12 @@ extern "C" bool epPluginAttach()
 {
   Kernel::GetInstance()->RegisterComponentType<Viewer>();
 
-  // TODO: this path should be changed before release
+#if 0
+  // NOTE: Use to test off disk
   Kernel::GetInstance()->Call("registerqmlcomponents", "plugin/viewer/qml");
+#else
+  Kernel::GetInstance()->Call("registerqmlcomponents", ":/viewer");
+#endif
 
   return true;
 }

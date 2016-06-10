@@ -1,0 +1,16 @@
+<RCC>
+  <qresource prefix="/EP/Platform/Controls">
+    <file>qmldir</file>
+    <file>epfiledialog.qml</file>
+    <file>eplistmodel.qml</file>
+    <file>eplistview.qml</file>
+    <file>epmenu.qml</file>
+    <file>epmenubar.qml</file>
+    <file>epmenubutton.qml</file>
+    <file>eptableview.qml</file>
+    <file>eptoolbar.qml</file>
+    <file>eptoolbutton.qml</file>
+    <file>eptoolpanelmanager.qml</file>
+    <file>eptooltip.qml</file>
+  </qresource>
+</RCC>

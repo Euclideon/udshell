@@ -146,10 +146,10 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   epscope(fail) { delete pQmlEngine; };
 
   // register our internal qml types
-  EPTHROW_IF(qmlRegisterType<QtRenderView>("epKernel", 0, 1, "EPRenderView") == -1, ep::Result::Failure, "qmlRegisterType<QtRenderView> Failed");
+  EPTHROW_IF(qmlRegisterType<QtRenderView>("Platform", 0, 1, "EPRenderView") == -1, ep::Result::Failure, "qmlRegisterType<QtRenderView> Failed");
   EPTHROW_IF(qmlRegisterType<QtEPComponent>() == -1, ep::Result::Failure, "qmlRegisterType<QtEPComponent> Failed");
   EPTHROW_IF(qRegisterMetaType<QtFocusManager*>("QtFocusManager*") == -1, ep::Result::Failure, "qRegisterMetaType<QtFocusManager *> Failed");
-  EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("epKernel", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, ep::Result::Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
+  EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("Platform", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, ep::Result::Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
 
   // load in the kernel qml resources
   InitResources();

@@ -1,4 +1,4 @@
-module epControls
+module Platform.Controls
 EPMenuBar 0.1 epmenubar.qml
 EPMenu 0.1 epmenu.qml
 EPToolBar 0.1 eptoolbar.qml

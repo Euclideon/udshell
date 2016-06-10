@@ -1,5 +1,5 @@
 import QtQuick 2.6
-import epKernel 0.1
+import Platform 0.1
 
 FocusScope {
   id: viewport

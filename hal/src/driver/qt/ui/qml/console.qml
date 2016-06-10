@@ -3,7 +3,7 @@ import QtQuick.Window 2.1
 import QtQuick.Controls 1.5
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
-import epKernel 0.1
+import Platform 0.1
 
 Item {
   id: consoleWin
