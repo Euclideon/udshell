@@ -103,8 +103,8 @@ protected:
 
   const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetPropertyDesc(_name, enumerateFlags); }
 
-  Array<const PropertyInfo> GetProperties();
-  Array<const MethodInfo> GetMethods();
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
 
   static const char * const s_shaderNames[];
   static AVLTree<String, int> s_builtinProperties;

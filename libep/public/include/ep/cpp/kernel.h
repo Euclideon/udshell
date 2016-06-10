@@ -95,9 +95,6 @@ protected:
   ~Kernel();
 
   /// \cond
-  template<typename ComponentType, typename Impl = void>
-  struct CreateHelper;
-
   void FinishInit() { pImpl->FinishInit(); }
   /// \endcond
 

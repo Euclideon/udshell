@@ -5,106 +5,87 @@ namespace ep {
 namespace internal {
   using ComponentDesc_InitComponentPtr = ComponentDescInl::InitComponent*;
   using ComponentDesc_CreateInstanceCallbackPtr = ComponentDescInl::CreateInstanceCallback*;
+
+  // TODO: HAX HAX! this whole mess needs to be made private somehow...
+  template<typename _ComponentType, typename ImplType = void>
+  struct CreateHelper
+  {
+    using CreateFunc = ComponentDescInl::CreateImplCallback*;
+
+    static constexpr bool HasDescriptor() { return HasDescriptorImpl((_ComponentType*)nullptr); }
+    static ComponentDescInl::InitComponent* GetStaticInit()
+    {
+      auto r = GetStaticInitImpl((ImplType*)nullptr);
+      if (r)
+        return r;
+      return GetStaticInitImpl((_ComponentType*)nullptr);
+    }
+
+    static ComponentDescInl::CreateInstanceCallback* GetCreateFunc() { return GetCreateFuncImpl((_ComponentType*)nullptr); }
+
+    static SharedString GetSuper() { return GetSuperImpl((typename _ComponentType::Super*)nullptr); }
+
+    static CreateFunc GetCreateImpl() { return GetCreateImplImpl((typename _ComponentType::Impl*)nullptr); }
+
+  private:
+    // TODO: these need to go somewhere else, instantiating this class for these functions instantiates the other functions too that should be specialised for IComponent and friends
+    template <typename T>
+    static constexpr auto HasDescriptorImpl(T* t) -> decltype(T::ComponentInfo(), bool()) { return true; }
+    static constexpr bool HasDescriptorImpl(...) { return false; }
+    template <typename T>
+    static auto GetStaticInitImpl(T* t) -> decltype(T::StaticInit(nullptr), internal::ComponentDesc_InitComponentPtr()) { return &T::StaticInit; }
+    static ComponentDescInl::InitComponent* GetStaticInitImpl(...) { return nullptr; }
+
+    template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
+    static SharedString GetSuperImpl(T* t) { return T::ComponentID(); }
+    static SharedString GetSuperImpl(...) { return nullptr; }
+
+    template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
+    static CreateFunc GetCreateImplImpl(T* t) { return [](Component *pInstance, Variant::VarMap initParams) -> void* { return epNew(ImplType, pInstance, initParams); }; }
+    static CreateFunc GetCreateImplImpl(...) { return nullptr; }
+
+    template <typename T>
+    static auto GetCreateFuncImpl(T* t) -> decltype(T::CreateInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::CreateInstance; }
+    static ComponentDescInl::CreateInstanceCallback* GetCreateFuncImpl(...)
+    {
+      return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
+        MutableString128 t(Format, "New: {0} - {1}", _pType->info.identifier, _uid);
+        _pKernel->LogDebug(4, t);
+        void *pMem = epAlloc(sizeof(_ComponentType));
+        EPTHROW_IF_NULL(pMem, Result::AllocFailure, "Memory allocation failed");
+        epscope(fail) { if (pMem) epFree(pMem); };
+        _ComponentType *ptr = epConstruct(pMem) _ComponentType(_pType, _pKernel, _uid, initParams);
+        // NOTE: we need to cast to ensure we play nice with multi inheritance
+        ptr->pFreeFunc = [](RefCounted *pMem) { epFree((_ComponentType*)pMem); };
+        return SharedPtr<_ComponentType>(ptr);
+      };
+    }
+  };
 }
-
-// TODO: HAX HAX! this whole mess needs to be made private somehow...
-template<typename _ComponentType, typename ImplType>
-struct Kernel::CreateHelper
-{
-  using CreateFunc = ComponentDescInl::CreateImplCallback*;
-
-  static constexpr bool HasDescriptor() { return HasDescriptorImpl((_ComponentType*)nullptr); }
-  static Array<const PropertyInfo> GetProperties() { return GetPropertiesImpl((_ComponentType*)nullptr); }
-  static Array<const MethodInfo> GetMethods() { return GetMethodsImpl((_ComponentType*)nullptr); }
-  static Array<const EventInfo> GetEvents() { return GetEventsImpl((_ComponentType*)nullptr); }
-  static Array<const StaticFuncInfo> GetStaticFuncs() { return GetStaticFuncsImpl((_ComponentType*)nullptr); }
-  static ComponentDescInl::InitComponent* GetStaticInit()
-  {
-    auto r = GetStaticInitImpl((ImplType*)nullptr);
-    if (r)
-      return r;
-    return GetStaticInitImpl((_ComponentType*)nullptr);
-  }
-
-  static ComponentDescInl::CreateInstanceCallback* GetCreateFunc() { return GetCreateFuncImpl((_ComponentType*)nullptr); }
-
-  static SharedString GetSuper() { return GetSuperImpl((typename _ComponentType::Super*)nullptr); }
-
-  static CreateFunc GetCreateImpl() { return GetCreateImplImpl((typename _ComponentType::Impl*)nullptr); }
-
-private:
-  template <typename Owner, typename C, typename R, typename... Args>
-  static constexpr bool FunctionBelongsTo(R(C::*)(Args...) const) { return std::is_same<C, Owner>::value; }
-
-  // TODO: these need to go somewhere else, instantiating this class for these functions instantiates the other functions too that should be specialised for IComponent and friends
-  template <typename T>
-  static constexpr auto HasDescriptorImpl(T* t) -> decltype(T::ComponentInfo(), bool()) { return true; }
-  static constexpr bool HasDescriptorImpl(...) { return false; }
-  template <typename T>
-  static auto GetPropertiesImpl(const T* t) -> decltype(std::enable_if<FunctionBelongsTo<T>(&T::GetProperties)>::type(), Array<const PropertyInfo>()) { return t->GetProperties(); }
-  static Array<const PropertyInfo> GetPropertiesImpl(...) { return nullptr; }
-  template <typename T>
-  static auto GetMethodsImpl(const T* t) -> decltype(std::enable_if<FunctionBelongsTo<T>(&T::GetMethods)>::type(), Array<const MethodInfo>()) { return t->GetMethods(); }
-  static Array<const MethodInfo> GetMethodsImpl(...) { return nullptr; }
-  template <typename T>
-  static auto GetEventsImpl(const T* t) -> decltype(std::enable_if<FunctionBelongsTo<T>(&T::GetEvents)>::type(), Array<const EventInfo>()) { return t->GetEvents(); }
-  static Array<const EventInfo> GetEventsImpl(...) { return nullptr; }
-  template <typename T>
-  static auto GetStaticFuncsImpl(const T* t) -> decltype(std::enable_if<FunctionBelongsTo<T>(&T::GetStaticFuncs)>::type(), Array<const StaticFuncInfo>()) { return t->GetStaticFuncs(); }
-  static Array<const StaticFuncInfo> GetStaticFuncsImpl(...) { return nullptr; }
-  template <typename T>
-  static auto GetStaticInitImpl(T* t) -> decltype(T::StaticInit(nullptr), internal::ComponentDesc_InitComponentPtr()) { return &T::StaticInit; }
-  static ComponentDescInl::InitComponent* GetStaticInitImpl(...) { return nullptr; }
-
-  template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
-  static SharedString GetSuperImpl(T* t) { return T::ComponentID(); }
-  static SharedString GetSuperImpl(...) { return nullptr; }
-
-  template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
-  static CreateFunc GetCreateImplImpl(T* t) { return [](Component *pInstance, Variant::VarMap initParams) -> void* { return epNew(ImplType,pInstance, initParams); }; }
-  static CreateFunc GetCreateImplImpl(...) { return nullptr; }
-
-  template <typename T>
-  static auto GetCreateFuncImpl(T* t) -> decltype(T::CreateInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::CreateInstance; }
-  static ComponentDescInl::CreateInstanceCallback* GetCreateFuncImpl(...)
-  {
-    return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
-      MutableString128 t(Format, "New: {0} - {1}", _pType->info.identifier, _uid);
-      _pKernel->LogDebug(4, t);
-      void *pMem = epAlloc(sizeof(_ComponentType));
-      EPTHROW_IF_NULL(pMem, Result::AllocFailure, "Memory allocation failed");
-      epscope(fail) { if (pMem) epFree(pMem); };
-      _ComponentType *ptr = epConstruct (pMem) _ComponentType(_pType, _pKernel, _uid, initParams);
-      // NOTE: we need to cast to ensure we play nice with multi inheritance
-      ptr->pFreeFunc = [](RefCounted *pMem) { epFree((_ComponentType*)pMem); };
-      return SharedPtr<_ComponentType>(ptr);
-    };
-  }
-};
 
 template<typename _ComponentType, typename ImplType, typename GlueType, typename StaticImpl>
 inline const ComponentDesc* Kernel::RegisterComponentType()
 {
   // check the class has a 'super' member
-  static_assert(CreateHelper<_ComponentType>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Namespace, Name, SuperType, Version, Description)' declared at the top of _ComponentType");
+  static_assert(internal::CreateHelper<_ComponentType>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Namespace, Name, SuperType, Version, Description, Flags)' declared at the top of _ComponentType");
 
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
 
   pDesc->info = _ComponentType::ComponentInfo();
-  pDesc->baseClass = CreateHelper<_ComponentType>::GetSuper();
+  pDesc->baseClass = internal::CreateHelper<_ComponentType>::GetSuper();
 
-  pDesc->pInit = CreateHelper<_ComponentType>::GetStaticInit();
-  pDesc->pCreateInstance = CreateHelper<_ComponentType>::GetCreateFunc();
-  pDesc->pCreateImpl = CreateHelper<_ComponentType, ImplType>::GetCreateImpl();
+  pDesc->pInit = internal::CreateHelper<_ComponentType>::GetStaticInit();
+  pDesc->pCreateInstance = internal::CreateHelper<_ComponentType>::GetCreateFunc();
+  pDesc->pCreateImpl = internal::CreateHelper<_ComponentType, ImplType>::GetCreateImpl();
 
   // build search trees
-  for (auto &p : CreateHelper<_ComponentType>::GetProperties())
+  for (auto &p : _ComponentType::GetPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : CreateHelper<_ComponentType>::GetMethods())
+  for (auto &m : _ComponentType::GetMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : CreateHelper<_ComponentType>::GetEvents())
+  for (auto &e : _ComponentType::GetEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : CreateHelper<_ComponentType>::GetStaticFuncs())
+  for (auto &f : _ComponentType::GetStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   // setup the super class and populate from its meta

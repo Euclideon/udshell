@@ -213,13 +213,13 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   pDesc->pSuperDesc = nullptr;
 
   // build search trees
-  for (auto &p : CreateHelper<Kernel>::GetProperties())
+  for (auto &p : Kernel::GetPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : CreateHelper<Kernel>::GetMethods())
+  for (auto &m : Kernel::GetMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : CreateHelper<Kernel>::GetEvents())
+  for (auto &e : Kernel::GetEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : CreateHelper<Kernel>::GetStaticFuncs())
+  for (auto &f : Kernel::GetStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   if (pType)

@@ -42,7 +42,7 @@ void epFromVariant(const Variant &variant, ShaderProperty *p)
 }
 
 
-Array<const PropertyInfo> Material::GetProperties()
+Array<const PropertyInfo> Material::GetProperties() const
 {
   return{
     EP_MAKE_PROPERTY(VertexShader, "Vertex shader for rendering", nullptr, 0),
@@ -60,7 +60,7 @@ Array<const PropertyInfo> Material::GetProperties()
   };
 }
 
-Array<const MethodInfo> Material::GetMethods()
+Array<const MethodInfo> Material::GetMethods() const
 {
   return{
     EP_MAKE_METHOD(GetMaterialProperty, "Get a material property"),

@@ -9,6 +9,10 @@
 
 namespace ep {
 
+namespace internal {
+  template <typename T, typename U>
+  struct CreateHelper;
+}
 class Kernel;
 struct ComponentDescInl;
 
@@ -100,10 +104,28 @@ inline ComponentDesc::~ComponentDesc()
 {
 }
 
+
+// TODO: find alternative solution for this block of SFINAE madness!
+#define EP_SFINAE_META_GETTERS                                                                                                                                                                   \
+  template <typename T> static inline auto TryCallGetProperties(const T* t) -> decltype(t->GetProperties(), ep::Array<const ep::PropertyInfo>()) { return t->GetProperties(); }      \
+  static inline ep::Array<const ep::PropertyInfo> TryCallGetProperties(...) { return nullptr; }                                                                                                          \
+  static inline ep::Array<const ep::PropertyInfo> GetPropertiesImpl() { return TryCallGetProperties((This*)nullptr); }                                                                             \
+  template <typename T> static inline auto TryCallGetMethods(const T* t) -> decltype(t->GetMethods(), ep::Array<const ep::MethodInfo>()) { return t->GetMethods(); }                 \
+  static inline ep::Array<const ep::MethodInfo> TryCallGetMethods(...) { return nullptr; }                                                                                                               \
+  static inline ep::Array<const ep::MethodInfo> GetMethodsImpl() { return TryCallGetMethods((This*)nullptr); }                                                                                     \
+  template <typename T> static inline auto TryCallGetEvents(const T* t) -> decltype(t->GetEvents(), ep::Array<const ep::EventInfo>()) { return t->GetEvents(); }                     \
+  static inline ep::Array<const ep::EventInfo> TryCallGetEvents(...) { return nullptr; }                                                                                                                 \
+  static inline ep::Array<const ep::EventInfo> GetEventsImpl() { return TryCallGetEvents((This*)nullptr); }                                                                                        \
+  template <typename T> static inline auto TryCallGetStaticFuncs(const T* t) -> decltype(t->GetStaticFuncs(), ep::Array<const ep::StaticFuncInfo>()) { return t->GetStaticFuncs(); } \
+  static inline ep::Array<const ep::StaticFuncInfo> TryCallGetStaticFuncs(...) { return nullptr; }                                                                                                       \
+  static inline ep::Array<const ep::StaticFuncInfo> GetStaticFuncsImpl() { return TryCallGetStaticFuncs((This*)nullptr); }
+
+
 // declare magic for a C++ component
 #define EP_DECLARE_COMPONENT(Namespace, Name, SuperType, Version, Description, Flags)    \
 public:                                                                                  \
   friend class ::ep::Kernel;                                                             \
+  template <typename T, typename U> friend struct ::ep::internal::CreateHelper;          \
   using Super = SuperType;                                                               \
   using This = Name;                                                                     \
   using Ref = ep::SharedPtr<This>;                                                       \
@@ -115,17 +137,19 @@ public:                                                                         
     {                                                                                    \
       EP_APIVERSION, Version,                                                            \
       #Namespace, std::move(ep::MutableString<0>(#Name).toLower()),                      \
-      std::move(ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower())), \
+      ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower()), \
       #Name, Description,                                                                \
       Flags                                                                              \
     };                                                                                   \
     return info;                                                                         \
   }                                                                                      \
-private:
+private:                                                                                 \
+  EP_SFINAE_META_GETTERS
 
 // declare magic for a C++ component with a pImpl interface
 #define EP_DECLARE_COMPONENT_WITH_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags) \
   friend class ::ep::Kernel;                                                                               \
+  template <typename T, typename U> friend struct ::ep::internal::CreateHelper;                            \
   __EP_DECLARE_COMPONENT_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)
 
 #define __EP_DECLARE_COMPONENT_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)    \
@@ -156,8 +180,8 @@ private:                                                                        
   {                                                                                      \
     using namespace ep;                                                                  \
     return UniquePtr<Impl>((Impl*)CreateImplInternal(This::ComponentID(), initParams));  \
-  }
-
+  }                                                                                      \
+  EP_SFINAE_META_GETTERS
 
 #define EP_DECLARE_COMPONENT_WITH_STATIC_IMPL(Namespace, Name, Interface, StaticInterface, SuperType, Version, Description, Flags)  \
   EP_DECLARE_COMPONENT_WITH_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)                                \
