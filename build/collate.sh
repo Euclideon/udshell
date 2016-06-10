@@ -34,6 +34,7 @@ cp $BUILD_PATH/windows_shell_release_64/bin/epshell.exe $WIN64_ROOT/epshell_unpr
 cp $BUILD_PATH/windows_shell_release_64/bin/epviewer.exe $WIN64_ROOT/epviewer_unprotected.exe
 cp 3rdparty/assimp-3.1.1/lib/windows/x64/assimp-ep64.dll $WIN64_ROOT/
 cp ud/3rdParty/sdl2/lib/x64/SDL2.dll $WIN64_ROOT/
+cp $PACKAGE_PATH/docs/libep-docs.chm $WIN64_ROOT/
 #TODO: make installer
 
 # arrange windows package
@@ -50,6 +51,7 @@ cp $BUILD_PATH/windows_shell_release_32/bin/epshell.exe $WIN32_ROOT/epshell_unpr
 cp $BUILD_PATH/windows_shell_release_32/bin/epviewer.exe $WIN32_ROOT/epviewer_unprotected.exe
 cp 3rdparty/assimp-3.1.1/lib/windows/x32/assimp-ep32.dll $WIN32_ROOT/
 cp ud/3rdParty/sdl2/lib/x86/SDL2.dll $WIN32_ROOT/
+cp $PACKAGE_PATH/docs/libep-docs.chm $WIN64_ROOT/
 #TODO: make installer
 
 # arrange ubuntu package
