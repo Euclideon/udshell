@@ -1,5 +1,5 @@
 #include "components/projectimpl.h"
-#include "components/file.h"
+#include "ep/cpp/component/file.h"
 #include "ep/cpp/component/resourcemanager.h"
 #include "ep/cpp/component/activity.h"
 #include "ep/cpp/component/resource/text.h"

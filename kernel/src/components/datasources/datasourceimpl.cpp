@@ -1,5 +1,5 @@
 #include "components/datasources/datasourceimpl.h"
-#include "components/file.h"
+#include "ep/cpp/component/file.h"
 #include "components/memstream.h"
 #include "ep/cpp/component/stream.h"
 #include "ep/cpp/kernel.h"

@@ -7,7 +7,7 @@
 #include "ep/cpp/component/resource/model.h"
 #include "ep/cpp/component/resource/metadata.h"
 #include "ep/cpp/component/resource/udmodel.h"
-#include "components/file.h"
+#include "ep/cpp/component/file.h"
 #include "components/datasources/udsource.h"
 #include "ep/cpp/kernel.h"
 #include "hal/image.h"

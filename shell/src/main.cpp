@@ -11,8 +11,8 @@
 #include "ep/cpp/component/resource/menu.h"
 #include "ep/cpp/component/commandmanager.h"
 #include "ep/cpp/component/resourcemanager.h"
+#include "ep/cpp/component/file.h"
 #include "components/pluginmanager.h"
-#include "components/file.h"
 #include "messagebox.h"
 
 #include "ep/cpp/component/primitivegenerator.h"
