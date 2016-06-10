@@ -4,7 +4,6 @@
 #include "kernelimpl.h"
 
 #include "components/stdiostream.h"
-#include "components/memstream.h"
 #include "components/lua.h"
 #include "components/logger.h"
 #include "components/timerimpl.h"
@@ -48,6 +47,7 @@
 #include "components/projectimpl.h"
 #include "components/settingsimpl.h"
 #include "components/fileimpl.h"
+#include "components/memstreamimpl.h"
 
 #include "components/dynamiccomponent.h"
 #include "components/varcomponent.h"
@@ -313,7 +313,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Stream, StreamImpl>();
   pInstance->RegisterComponentType<File, FileImpl, void, FileImplStatic>();
   pInstance->RegisterComponentType<StdIOStream>();
-  pInstance->RegisterComponentType<MemStream>();
+  pInstance->RegisterComponentType<MemStream, MemStreamImpl>();
   pInstance->RegisterComponentType<Regex, RegexImpl>();
   pInstance->RegisterComponentType<Logger>();
   pInstance->RegisterComponentType<PluginManager>();

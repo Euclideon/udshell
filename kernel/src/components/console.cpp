@@ -1,5 +1,5 @@
 #include "components/console.h"
-#include "components/memstream.h"
+#include "ep/cpp/component/memstream.h"
 #include "ep/cpp/component/broadcaster.h"
 #include "components/logger.h"
 #include "ep/cpp/component/resource/buffer.h"

@@ -1,6 +1,6 @@
 #include "textimpl.h"
 #include "ep/cpp/kernel.h"
-#include "components/memstream.h"
+#include "ep/cpp/component/memstream.h"
 
 #include "rapidxml.hpp"
 #include "rapidjson/document.h"
