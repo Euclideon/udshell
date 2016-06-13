@@ -34,6 +34,9 @@ struct MethodPointer<R(Args...)>
     DelegateUnion u;
     u.d = FastDelegateType((T*)nullptr, method);
     ptr = u.ptrs[1];
+#if !defined(EP_WINDOWS)
+    EPASSERT(u.ptrs[2] == nullptr, "Unexpected: method has data in the second size_t!");
+#endif
   }
   template <typename T>
   epforceinline MethodPointer(R(T::*method)(Args... args) const) // TODO: accepts const methods, but const is not preserved!! fixme!
@@ -41,6 +44,9 @@ struct MethodPointer<R(Args...)>
     DelegateUnion u;
     u.d = FastDelegateType((T*)nullptr, method);
     ptr = u.ptrs[1];
+#if !defined(EP_WINDOWS)
+    EPASSERT(u.ptrs[2] == nullptr, "Unexpected: method has data in the second size_t!");
+#endif
   }
 
   epforceinline FastDelegateType GetDelegate(void *pThis) const
@@ -61,9 +67,15 @@ struct MethodPointer<R(Args...)>
 private:
   union DelegateUnion
   {
-    DelegateUnion() {}
+    DelegateUnion() : d() {}
     FastDelegateType d;
+#if defined(EP_WINDOWS)
+    static_assert(sizeof(FastDelegateType) == sizeof(void*)*2, "Unexpected FastDelegate size!");
     void *ptrs[2];
+#else
+    static_assert(sizeof(FastDelegateType) == sizeof(void*)*3, "Unexpected FastDelegate size!");
+    void *ptrs[3];
+#endif
   };
 
   void *ptr;
