@@ -167,7 +167,7 @@ public:
   void StartInit(Variant::VarMap initParams);
   void FinishInit() override final;
   void InitComponents();
-  void LoadPluginDir(String folderPath);
+  void LoadPluginDir(Slice<const String> folderPaths);
   void LoadPlugins(Slice<SharedString> files);
   Array<SharedString> ScanPluginFolder(String folderPath, Slice<const String> extfilter = nullptr);
 
