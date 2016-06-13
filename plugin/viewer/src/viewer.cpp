@@ -115,6 +115,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   for (auto bm : bmMap)
     spUIBookmarks->Call("createbookmark", bm.key);
 
+#if EP_DEBUG
   try
   {
     CreatePlatformLogo();
@@ -123,6 +124,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   {
     pKernel->LogWarning(0, "Could not load platform logo");
   }
+#endif // EP_DEBUG
 }
 
 MutableString<260> Viewer::GetFileNameFromPath(String path) // TODO Move this to File after implising File

@@ -417,7 +417,7 @@ void KernelImpl::FinishInit()
     SendMessage("$register", "#", "register", nullptr);
 
   // load the plugins
-  LoadPluginDir("bin/plugins");
+  LoadPluginDir(Slice<const String>{ "bin/plugins", "plugins" });
 
   // make the kernel timers
   spStreamerTimer = pInstance->CreateComponent<Timer>({ { "duration", 33 },{ "timertype", "Interval" } });
@@ -529,10 +529,13 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const 
   return pluginFilenames;
 }
 
-void KernelImpl::LoadPluginDir(String folderPath)
+void KernelImpl::LoadPluginDir(Slice<const String> folderPaths)
 {
-  Array<SharedString> pluginFilenames = ScanPluginFolder(folderPath);
-  LoadPlugins(pluginFilenames);
+  for (auto path : folderPaths)
+  {
+    Array<SharedString> pluginFilenames = ScanPluginFolder(path);
+    LoadPlugins(pluginFilenames);
+  }
 }
 
 void KernelImpl::LoadPlugins(Slice<SharedString> files)

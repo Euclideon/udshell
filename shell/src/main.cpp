@@ -273,6 +273,7 @@ void Deinit(String sender, String message, const Variant &data)
   spTestGeomNode = nullptr;
 }
 
+#if EP_DEBUG
 static GeomNodeRef CreateTestModel(KernelRef kernel)
 {
   // Vertex Shader
@@ -366,6 +367,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 
   return geomNode;
 }
+#endif // EP_DEBUG
 
 void Register(String sender, String message, const Variant &data)
 {
@@ -437,8 +439,9 @@ void Init(String sender, String message, const Variant &data)
     spCITimerSub = spCITimer->Elapsed.Subscribe([]() { Kernel::GetInstance()->Quit(); });
   }
 
+#if EP_DEBUG
   spTestGeomNode = CreateTestModel(spKernel);
-
+#endif // EP_DEBUG
   SceneRef spDircubeScene;
   {
     ComponentRef spComp = spKernel->FindComponent("DirCubeScene");
