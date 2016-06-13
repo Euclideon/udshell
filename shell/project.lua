@@ -61,6 +61,21 @@ project "epshell"
 		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell" }
 		linkoptions { "-Wl,-rpath=bin/amd64" }
 
+	-- These lines are commented out as we don't currently use Dinkey API method in windows so don't need to link
+	-- configuration { "windows", "x64", "Debug*" }
+		-- linkoptions { "bin/dinkey/lib/dpwin64debug.obj" }
+	-- configuration { "windows", "x64", "not Debug*" }
+		-- linkoptions { "bin/dinkey/lib/dpwin64.obj" }
+	-- configuration { "windows", "x86", "Debug*" }
+		-- linkoptions { "bin/dinkey/lib/dpwin32_coff_debug.obj" }
+	-- configuration { "windows", "x86", "not Debug*" }
+		-- linkoptions { "bin/dinkey/lib/dpwin32_coff.obj" }
+	
+	configuration { "linux", "Debug*" }
+		links { "../bin/dinkey/linux/lib/dplin64debug.o" }
+	configuration { "linux", "not Debug*" }
+		links { "../bin/dinkey/linux/lib/dplin64.o" }
+
 	configuration { }
 
 	filter { "system:windows" }
