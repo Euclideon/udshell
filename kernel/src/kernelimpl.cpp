@@ -497,13 +497,13 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const 
   EPFind find;
   Array<SharedString> pluginFilenames;
 
-  if (!HalDirectory_FindFirst(&find, folderPath.ptr, &findData))
+  if (!HalDirectory_FindFirst(&find, folderPath.toStringz(), &findData))
     return nullptr;
   do
   {
     if (findData.attributes & EPFA_Directory)
     {
-      MutableString<260> childFolderPath(Format, "{0}/{1}", folderPath, String(findData.pFilename));
+      MutableString<260> childFolderPath(Format, "{0}/{1}", folderPath, String((const char*)findData.pFilename));
 
       Array<SharedString> childNames = ScanPluginFolder(childFolderPath, extFilter);
       for (SharedString &cName : childNames)
@@ -512,7 +512,7 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const 
     else
     {
       bool valid = true;
-      MutableString<260> filename(Format, "{0}/{1}", folderPath, String(findData.pFilename));
+      MutableString<260> filename(Format, "{0}/{1}", folderPath, String((const char*)findData.pFilename));
       for (auto &ext : extFilter)
       {
         valid = (filename.endsWithIC(ext));
