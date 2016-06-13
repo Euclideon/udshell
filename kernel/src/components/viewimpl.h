@@ -82,8 +82,8 @@ public:
       OnDirty();
   }
 
-  void SetInputEventHook(Delegate<bool(ep::InputEvent)> eventHook) { inputEventHook = eventHook; }
-  void ClearInputEventHook() { inputEventHook = nullptr; }
+  void SetInputEventHook(Delegate<bool(ep::InputEvent)> eventHook) override final { inputEventHook = eventHook; }
+  void ClearInputEventHook() override final { inputEventHook = nullptr; }
 
   Double3 pickedPoint = { 0, 0, 0 };
 

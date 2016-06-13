@@ -28,6 +28,9 @@ struct UniquePtr;
 
 namespace internal {
 
+  template <typename T, typename U>
+  struct CreateHelper;
+
   template<typename T, bool isref>
   struct Create;
 
@@ -375,6 +378,8 @@ private:
   friend struct internal::Create;
   friend class Kernel;
   friend class KernelImpl;
+  template<typename T, typename U>
+  friend struct internal::CreateHelper;
 };
 
 // SharedPtr constructors and assignments

@@ -92,13 +92,13 @@ ComponentDescInl *QtKernel::MakeKernelDescriptor()
   pDesc->pSuperDesc = nullptr;
 
   // build search trees
-  for (auto &p : CreateHelper<QtKernel>::GetProperties())
+  for (auto &p : QtKernel::GetPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : CreateHelper<QtKernel>::GetMethods())
+  for (auto &m : QtKernel::GetMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : CreateHelper<QtKernel>::GetEvents())
+  for (auto &e : QtKernel::GetEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : CreateHelper<QtKernel>::GetStaticFuncs())
+  for (auto &f : QtKernel::GetStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   return pDesc;

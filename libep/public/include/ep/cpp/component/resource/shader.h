@@ -37,7 +37,7 @@ protected:
     pImpl = CreateImpl(initParams);
   }
 
-  Array<const PropertyInfo> GetProperties();
+  Array<const PropertyInfo> GetProperties() const;
 };
 
 } // namespace ep

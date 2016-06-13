@@ -124,13 +124,13 @@ ComponentDescInl *SDLKernel::MakeKernelDescriptor()
   pDesc->pSuperDesc = nullptr;
 
   // build search trees
-  for (auto &p : CreateHelper<SDLKernel>::GetProperties())
+  for (auto &p : SDLKernel::GetPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : CreateHelper<SDLKernel>::GetMethods())
+  for (auto &m : SDLKernel::GetMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : CreateHelper<SDLKernel>::GetEvents())
+  for (auto &e : SDLKernel::GetEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : CreateHelper<SDLKernel>::GetStaticFuncs())
+  for (auto &f : SDLKernel::GetStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   return pDesc;
