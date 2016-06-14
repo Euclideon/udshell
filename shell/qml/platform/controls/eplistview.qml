@@ -3,7 +3,7 @@ import QtQuick.Controls 1.5
 import Platform.Themes 0.1
 
 ListView {
-  property var menu: null
+  property var menu
   property int rightClickIndex: 0
   property var selectedItemData
   property var rightClickItemData
@@ -15,8 +15,6 @@ ListView {
 
   onCurrentItemChanged: selectedItemData = model.get(currentIndex);
   onMenuShowingChanged: if(menuShowing) rightClickItemData = model.get(rightClickIndex);
-
-  Binding { target: menu; property: "parent"; value: listView }
 
   id: listView
   clip: true
