@@ -25,7 +25,7 @@ project "epshell"
 	configuration {}
 
 	qt.enable()
-	qtmodules { "core", "qml", "quick", "gui" }
+	qtmodules { "core", "qml", "quick", "gui", "widgets" }
 	qtprefix "Qt5"
 	pic "on"
 

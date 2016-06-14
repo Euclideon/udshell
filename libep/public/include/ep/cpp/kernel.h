@@ -98,6 +98,9 @@ protected:
   void FinishInit() { pImpl->FinishInit(); }
   /// \endcond
 
+  // HACK: This is a temporary method to let us handle fatals; this should probably be moved to a separate component
+  virtual void OnFatal(String epUnusedParam(msg)) {}
+
 private:
   friend class Component;
   friend class ComponentImpl;

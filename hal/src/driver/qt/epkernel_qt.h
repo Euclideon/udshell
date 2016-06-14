@@ -6,7 +6,7 @@
 
 #include "driver/qt/epqt.h"
 
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlEngine>
 #include <QOpenGLContext>
 #include <QQuickWindow>
@@ -30,12 +30,12 @@ class QtKernel;
 
 // Qt's QCoreApplication based classes are treated by Qt as a singleton
 // We specialise our own version to store our Kernel pointer and provide global access around the Qt set of classes
-class QtApplication : public QGuiApplication
+class QtApplication : public QApplication
 {
   Q_OBJECT
 
 public:
-  QtApplication(QtKernel *pKern, int &argc, char ** argv) : QGuiApplication(argc, argv), pKernel(pKern) {}
+  QtApplication(QtKernel *pKern, int &argc, char ** argv) : QApplication(argc, argv), pKernel(pKern) {}
 
   static QtKernel *Kernel() {
     EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
@@ -108,6 +108,8 @@ private:
 
   void FinishInit();
   void Shutdown();
+
+  void OnFatal(ep::String msg) override final;
 
   void RegisterQml(ep::String file, ep::Variant::VarMap desc);
 

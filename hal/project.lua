@@ -32,7 +32,7 @@ project("hal-" .. halBuild)
 		configuration {}
 
 		qt.enable()
-		qtmodules { "core", "core-private", "qml", "quick", "gui" }
+		qtmodules { "core", "core-private", "qml", "quick", "gui", "widgets" }
 		qtprefix "Qt5"
 		pic "on"
 
