@@ -1,6 +1,7 @@
 import QtQuick 2.6
 import QtQuick.Controls 1.5
 import QtGraphicalEffects 1.0
+import Platform 0.1
 
 Item {
   id: toolTipRoot
@@ -24,7 +25,7 @@ Item {
     toolTipRoot.x = obj.x;
     toolTipRoot.y = obj.y + 5;
 
-    parent = thisComponent.parentWindow().contentItem;
+    parent = EP.parentWindow(thisComponent.uihandle).contentItem;
   }
 
   function onVisibleStatus(flag) {

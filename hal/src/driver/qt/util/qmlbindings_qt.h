@@ -201,6 +201,17 @@ private:
   QtKernel *pKernel;
 };
 
+// This class provides some helper functions that are accessible from QML via the EP global singleton
+class QtGlobalEPSingleton : public QObject
+{
+  Q_OBJECT
+
+public:
+  QtGlobalEPSingleton(QObject *pParent = nullptr) : QObject(pParent) {}
+
+  Q_INVOKABLE QQuickWindow *parentWindow(QQuickItem *pQuickItem) const;
+};
+
 
 // factory class to build a qml shim component from a component
 struct BuildQtEPComponent
