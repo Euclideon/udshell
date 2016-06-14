@@ -14,33 +14,21 @@ else
 fi
 
 PACKAGE_PATH=$PACKAGE_ROOT/$BUILT_TYPE/$BUILD_NAME
-WIN64_ROOT=$PACKAGE_PATH/win64
-WIN32_ROOT=$PACKAGE_PATH/win32
+WIN_ROOT=$PACKAGE_PATH/$1
+
 
 echo "Dinkey Dongle protect binaries..."
 
 # Protect 64bit build
-cp $WIN64_ROOT/*.exe .
+cp $WIN_ROOT/*.exe .
 
 ./bin/dinkey/DinkeyAdd.exe "build\\dinkey\\platform.dapf /s"
 if [ $? -ne 0 ]; then # Protecting the build failed!
 	exit 3
 fi
 
-cp ./epshell.exe $WIN64_ROOT/
-cp ./epviewer.exe $WIN64_ROOT/
-rm ./*.exe
-
-# Protect 32bit build
-cp $WIN32_ROOT/*.exe .
-
-./bin/dinkey/DinkeyAdd.exe "build\\dinkey\\platform.dapf /s"
-if [ $? -ne 0 ]; then # Protecting the build failed!
-	exit 3
-fi
-
-cp ./epshell.exe $WIN32_ROOT/
-cp ./epviewer.exe $WIN32_ROOT/
+cp ./epshell.exe $WIN_ROOT/
+cp ./epviewer.exe $WIN_ROOT/
 rm ./*.exe
 
 
