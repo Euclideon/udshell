@@ -16,7 +16,8 @@ Rectangle {
   anchors.fill: parent
   color: Theme.toolPanelBgColor
 
-  property var epTypeDesc: { "super": "ep.uicomponent", "id": "ui.resourcespanel" }
+  // TODO: Bug EP-66
+  //property var epTypeDesc: { "super": "ep.uicomponent", "id": "ui.resourcespanel" }
   property var commandManager
   property var resourceManager
   property var messagebox

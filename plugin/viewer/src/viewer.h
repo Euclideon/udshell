@@ -43,7 +43,8 @@ protected:
   ~Viewer() { Deactivate(); }
 
   static void StaticInit(ep::Kernel *pKernel);
-  void ToggleResourcesPanel();
+  // TODO: Bug EP-66
+  //void ToggleResourcesPanel();
   void ToggleBookmarksPanel();
   void CreateBookmark();
 
@@ -53,7 +54,8 @@ protected:
   // Static functions for CommandManager callbacks
   static void StaticToggleBookmarksPanel(Variant::VarMap params);
   static void StaticCreateBookmark(Variant::VarMap params);
-  static void StaticToggleResourcesPanel(Variant::VarMap params);
+  // TODO: Bug EP-66
+  //static void StaticToggleResourcesPanel(Variant::VarMap params);
 
   UDModelRef spModel;
   SceneRef spScene;
