@@ -97,7 +97,8 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   spUIBookmarks->Set("view", spView);
   spViewerUI->Set("bookmarkscomp", spUIBookmarks);
 
-  UIComponentRef spUIResources;
+  // TODO: Bug EP-66
+  /*UIComponentRef spUIResources;
   ComponentRef spComp = pKernel->FindComponent("resourcespanel");
   if (spComp)
     spUIResources = component_cast<UIComponent>(spComp);
@@ -106,7 +107,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     epscope(fail) { if (!spUIResources) pKernel->LogError("Error creating Resource Panel UI Component\n"); };
     spUIResources = component_cast<UIComponent>(pKernel->CreateComponent("ui.resourcespanel", Variant::VarMap{ { "name", "resourcespanel" } }));
   }
-  spViewerUI->Set("resourcespanel", spUIResources);
+  spViewerUI->Set("resourcespanel", spUIResources);*/
 
   SetUI(spViewerUI);
 
@@ -224,7 +225,8 @@ void Viewer::StaticInit(ep::Kernel *pKernel)
   auto spCommandManager = pKernel->GetCommandManager();
 
   spCommandManager->RegisterCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", ComponentID(), "Ctrl+Shift+B");
-  spCommandManager->RegisterCommand("toggleresourcespanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleResourcesPanel), "", ComponentID(), "Ctrl+Shift+R");
+  // TODO: Bug EP-66
+  //spCommandManager->RegisterCommand("toggleresourcespanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleResourcesPanel), "", ComponentID(), "Ctrl+Shift+R");
   spCommandManager->RegisterCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", ComponentID(), "Ctrl+B");
 }
 
@@ -241,7 +243,8 @@ void Viewer::ToggleBookmarksPanel()
   GetUI()->Call("togglebookmarkspanel");
 }
 
-void Viewer::StaticToggleResourcesPanel(Variant::VarMap params)
+// TODO: Bug EP-66
+/*void Viewer::StaticToggleResourcesPanel(Variant::VarMap params)
 {
   Variant *pActivityVar = params.get("activity");
   ViewerRef spViewer = pActivityVar->as<ViewerRef>();
@@ -252,7 +255,7 @@ void Viewer::StaticToggleResourcesPanel(Variant::VarMap params)
 void Viewer::ToggleResourcesPanel()
 {
   GetUI()->Call("toggleresourcespanel");
-}
+}*/
 
 void Viewer::StaticCreateBookmark(Variant::VarMap params)
 {

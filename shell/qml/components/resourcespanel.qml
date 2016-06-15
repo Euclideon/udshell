@@ -1,8 +1,8 @@
-import QtQuick 2.4
-import QtQuick.Controls 1.3
-import QtQuick.Controls.Styles 1.3
-import QtQuick.Layouts 1.1
-import QtQuick.Dialogs 1.1
+import QtQuick 2.6
+import QtQuick.Controls 1.5
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Layouts 1.2
+import QtQuick.Dialogs 1.2
 import Platform 0.1
 import Platform.Controls 0.1
 import Platform.Themes 0.1
@@ -16,7 +16,8 @@ Rectangle {
   anchors.fill: parent
   color: Theme.toolPanelBgColor
 
-  property var epTypeDesc: { "super": "ep.uicomponent", "id": "ui.resourcespanel" }
+  // TODO: Bug EP-66
+  //property var epTypeDesc: { "super": "ep.uicomponent", "id": "ui.resourcespanel" }
   property var commandManager
   property var resourceManager
   property var messagebox

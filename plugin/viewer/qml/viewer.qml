@@ -1,8 +1,8 @@
-import QtQuick 2.4
-import QtQuick.Controls 1.3
-import QtQuick.Controls.Styles 1.3
+import QtQuick 2.6
+import QtQuick.Controls 1.5
+import QtQuick.Controls.Styles 1.4
 import QtQuick.Window 2.2
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.2
 import Platform 0.1
 import Platform.Controls 0.1
 import Platform.Themes 0.1
@@ -18,7 +18,8 @@ FocusScope {
   property var sidebarcomp
   property var bookmarkscomp
   property var bookmarksqq
-  property var resourcespanel
+  // TODO: Bug EP-66
+  //property var resourcespanel
 
   signal resourcedropped(string uid, int x, int y)
 
@@ -31,14 +32,16 @@ FocusScope {
     toolPanelSlot.addPanel(bookmarksqq, 200);
   }
 
-  function toggleresourcespanel() {
-    toolPanelSlot.toggleVisible(resourcespanel.get("uihandle"));
-  }
+  // TODO: Bug EP-66
+  //function toggleresourcespanel() {
+    //toolPanelSlot.toggleVisible(resourcespanel.get("uihandle"));
+  //}
 
-  onResourcespanelChanged: {
-    var resourcespanelqq = resourcespanel.get("uihandle");
-    toolPanelSlot.addPanel(resourcespanelqq, 300);
-  }
+  // TODO: Bug EP-66
+  //onResourcespanelChanged: {
+    //var resourcespanelqq = resourcespanel.get("uihandle");
+    //toolPanelSlot.addPanel(resourcespanelqq, 300);
+  //}
 
   Component.onCompleted: {
     sidebarcomp = EPKernel.createComponent("ep.menu", {});
@@ -47,14 +50,15 @@ FocusScope {
       return;
     }
 
-    var resourcesPanelButton = {
+    // TODO: Bug EP-66
+    /*var resourcesPanelButton = {
       "name" : "Toggle Resources Panel",
       "type" : "button",
       "command" : "toggleresourcespanel",
       "description" : "Toggles open/closed the Resources panel",
       "image" : "qrc:/images/icon_UDS_48.png",
     };
-    sidebarcomp.call("additem", "", resourcesPanelButton);
+    sidebarcomp.call("additem", "", resourcesPanelButton);*/
 
     var bookMarksButton = {
       "name" : "Toggle Bookmarks Panel",
