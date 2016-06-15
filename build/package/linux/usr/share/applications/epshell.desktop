@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Shell
+Comment=Euclideon Platform Shell application
+Exec=/opt/Euclideon/Shell/epshell
+Icon=euclideon
+Terminal=false
+Categories=Graphics;Science;Engineering;
+

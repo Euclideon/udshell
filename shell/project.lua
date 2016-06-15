@@ -58,6 +58,7 @@ project "epshell"
 	configuration { "linux" }
 		libdirs { "../bin/amd64" }
 		links { "assimp-ep", "dl" }
+		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell" }
 		linkoptions { "-Wl,-rpath=bin/amd64" }
 
 	configuration { }

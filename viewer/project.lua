@@ -42,6 +42,7 @@ project "epviewer"
 	configuration { "linux" }
 		links { "assimp-ep", "GL", "dl" }
 		libdirs { "../bin/amd64" }
+		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell" }
 		linkoptions { "-Wl,-rpath=../bin/amd64" }
 
 	configuration { }

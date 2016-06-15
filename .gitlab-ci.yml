@@ -2,7 +2,7 @@ stages:
   - build
   - postbuild
   - package
-  - rebuild_pending
+  - finalise
   - clean
 
 windows_shell_debug_64:
@@ -135,17 +135,53 @@ collate_builds:
   tags:
     - ubuntu
 
-windows_packaging:
+win64_packaging:
   stage: package
   only:
     - master
     - tags
-  script: "build\\packagewindows.sh"
+  script: "build\\packagewindows.sh win64"
   tags:
     - windows
 
+win32_packaging:
+  stage: package
+  only:
+    - master
+    - tags
+  script: "build\\packagewindows.sh win32"
+  tags:
+    - windows
+
+trusty_packaging:
+  stage: package
+  only:
+    - master
+    - tags
+  script: ./build/packagelinux.sh trusty deb
+  tags:
+    - deb
+
+centos_packaging:
+  stage: package
+  only:
+    - master
+    - tags
+  script: ./build/packagelinux.sh centos7 rpm
+  tags:
+    - rpm
+
+update_latest:
+  stage: finalise
+  only:
+    - master
+    - tags
+  script: "./build/updatelatest.sh"
+  tags:
+    - linux
+
 update_merge_requests:
-  stage: rebuild_pending
+  stage: finalise
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - export PATH=$QTDIR/bin:$PATH

@@ -1,0 +1,59 @@
+#!/bin/bash
+set -e
+
+PACKAGE_ROOT=/mnt/Resources/Builds/Platform/Builds
+
+if [ -z "$CI_BUILD_TAG" ]; then
+  BUILT_TYPE=master
+  BUILD_NAME=$CI_BUILD_REF
+  BUILD_SHORT_NAME=${CI_BUILD_REF:0:6}
+else
+  BUILT_TYPE=release
+  BUILD_NAME=$CI_BUILD_TAG
+  BUILD_SHORT_NAME=$BUILD_NAME
+fi
+
+PACKAGE_PATH=$PACKAGE_ROOT/$BUILT_TYPE/$BUILD_NAME
+
+PACKAGE_NAME=epsdk-$1-$BUILD_SHORT_NAME
+
+
+# copy it locally for working on
+echo "Formatting package..."
+
+cp -r $PACKAGE_PATH/$1 $PACKAGE_NAME
+
+cd $PACKAGE_NAME
+
+ln -s libassimp-ep.so.3.1.1 libassimp-ep.so.3
+ln -s libassimp-ep.so.3.1.1 libassimp-ep.so
+
+chmod +x epshell
+chmod +x epviewer
+
+chmod +x install.sh
+
+cd ..
+
+
+# make .tar.bz2
+echo "Packing $PACKAGE_NAME.tar.bz2..."
+
+tar -cvjSf $PACKAGE_NAME.tar.bz2 $PACKAGE_NAME/
+
+cp $PACKAGE_NAME.tar.bz2 $PACKAGE_PATH
+
+
+# make .deb
+if [ $2 == "deb" ]; then
+  echo "Generate $PACKAGE_NAME.deb..."
+
+  # TODO
+fi
+
+# make .rpm
+if [ $2 == "rpm" ]; then
+  echo "Generate $PACKAGE_NAME.rpm..."
+
+  # TODO
+fi
