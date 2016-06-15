@@ -136,7 +136,25 @@ collate_builds:
   tags:
     - ubuntu
 
-ubuntu_dongleprotect:
+win64_dongleprotect:
+  stage: dongleprotect
+  only:
+    - master
+    - tags
+  script: "build\\dongleprotectwindows.sh win64"
+  tags:
+    - windows
+
+win32_dongleprotect:
+  stage: dongleprotect
+  only:
+    - master
+    - tags
+  script: "build\\dongleprotectwindows.sh win32"
+  tags:
+    - windows
+
+trusty_dongleprotect:
   stage: dongleprotect
   only:
     - master
@@ -145,7 +163,7 @@ ubuntu_dongleprotect:
   tags:
     - windows
 
-rpm_dongleprotect:
+centos7_dongleprotect:
   stage: dongleprotect
   only:
     - master
@@ -181,7 +199,7 @@ trusty_packaging:
   tags:
     - deb
 
-centos_packaging:
+centos7_packaging:
   stage: package
   only:
     - master
