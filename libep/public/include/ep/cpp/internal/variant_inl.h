@@ -213,20 +213,40 @@ inline Variant::Variant(size_t val, const EnumDesc *pDesc, bool isBitfield)
 }
 inline Variant::Variant(SharedPtr<RefCounted> &&spC, SharedPtrType type)
 {
-  t = (size_t)Type::SharedPtr;
-  ownsContent = 1;
-  length = (size_t)type;
-  epConstruct(&p) SharedPtr<RefCounted>(std::move(spC));
+  if (spC.ptr())
+  {
+    t = (size_t)Type::SharedPtr;
+    ownsContent = 1;
+    length = (size_t)type;
+    epConstruct(&sp) SharedPtr<RefCounted>(std::move(spC));
+  }
+  else
+  {
+    t = (size_t)Type::Null;
+    ownsContent = false;
+    length = 0;
+    sp = nullptr;
+  }
 }
 inline Variant::Variant(RefCounted *pRef, SharedPtrType type, bool _ownsContent)
 {
-  t = (size_t)Type::SharedPtr;
-  ownsContent = _ownsContent ? 1 : 0;
-  length = (size_t)type;
-  if (ownsContent)
-    epConstruct(&p) SharedPtr<RefCounted>(pRef);
+  if (pRef)
+  {
+    t = (size_t)Type::SharedPtr;
+    ownsContent = _ownsContent ? 1 : 0;
+    length = (size_t)type;
+    if (ownsContent)
+      epConstruct(&sp) SharedPtr<RefCounted>(pRef);
+    else
+      sp = pRef;
+  }
   else
-    sp = pRef;
+  {
+    t = (size_t)Type::Null;
+    ownsContent = false;
+    length = 0;
+    sp = nullptr;
+  }
 }
 inline Variant::Variant(const SharedPtr<RefCounted> &spRC, SharedPtrType type, bool _ownsContent)
   : Variant(spRC.ptr(), type, _ownsContent)
