@@ -6,9 +6,9 @@ echo "Removing old install..."
 sudo rm -rf /opt/Euclideon/Shell
 sudo rm -rf /usr/local/include/ep
 sudo rm -f /usr/local/lib/liblibep.a
-sudo rm -f /usr/share/applications/epshell.desktop
-sudo rm -rf /usr/share/pixmaps/euclideon
-sudo rm -f /usr/share/pixmaps/euclideon.png
+sudo rm -f /usr/local/share/applications/epshell.desktop
+sudo rm -rf /usr/local/share/pixmaps/euclideon
+sudo rm -f /usr/local/share/pixmaps/euclideon.png
 
 
 echo "Installing Shell to /opt/Euclideon/Shell/..."
@@ -29,8 +29,8 @@ sudo ln -s libassimp-ep.so.3.1.1 /opt/Euclideon/Shell/libassimp-ep.so
 sudo cp -v plugins/libviewer.so /opt/Euclideon/Shell/plugins/
 
 # copy system data
-sudo cp -rv usr/share/* /usr/share/
-sudo cp -rv usr/share/pixmaps/euclideon/48x48/euclideon.png /usr/share/pixmaps/euclideon.png
+sudo cp -rv usr/share/* /usr/local/share/
+sudo cp -rv usr/share/pixmaps/euclideon/64x64/euclideon.png /usr/local/share/pixmaps/euclideon.png
 
 
 echo "Installing SDK to /usr/local/..."
