@@ -20,6 +20,7 @@
 #include "ep/cpp/component/scene.h"
 #include "ep/cpp/component/resource/metadata.h"
 #include "ep/cpp/component/node/geomnode.h"
+#include "dinkey.h"
 
 using namespace ep;
 
@@ -257,6 +258,49 @@ static void ViewerDeinit(String sender, String message, const Variant &data)
 // Author: David Ely, September 2015
 int main(int argc, char* argv[])
 {
+
+#ifdef DINKEY_DONGLE_PROTECT
+  // NOTE: The dinkey manual recommends this code be spread amongst other code
+  // to make it harder for crackers to follow what is going on.
+  // TODO: Do this.
+
+  // Prepare the DRIS structure
+  DRIS dris;
+  dinkey_random_set(&dris, sizeof(DRIS)); // Init the DRIS structure with random values
+  memcpy(dris.header, "DRIS", 4);
+  dris.size = sizeof(DRIS);
+  dris.function = PROTECTION_CHECK;
+  dris.flags = 0;
+
+  // Perform dongle check
+  dinkey_CryptDRIS(&dris, dris.seed1, dris.seed2);			// encrypt DRIS (!!!!you should separate from DDProtCheck for greater security)
+  int ret_code = DDProtCheck(&dris, NULL);
+  dinkey_CryptDRIS(&dris, dris.seed1, dris.seed2);			// decrypt DRIS (!!!!you should separate from DDProtCheck for greater security)
+
+  // Check for dongle error
+  if (ret_code != 0)
+  {
+    const char *errmsg = dinkey_GetError(ret_code, dris.ext_err);
+    DebugFormat("Dongle error ({0}): {1}\n", ret_code, errmsg);
+    return ret_code;
+  }
+
+  // Check SDSN (all our dongles have the same SDSN)
+  if (dris.sdsn != DINKEY_DONGLE_SDSN)
+  {
+    DebugFormat("Dongle error: Incorrect SDSN!");
+    return 10001;
+  }
+
+  // Check product code
+  if (strcmp(dris.prodcode, DINKEY_DONGLE_PRODCODE) != 0)
+  {
+    DebugFormat("Dongle error: Incorrect Product Code!");
+    return 10002;
+  }
+
+#endif // DINKEY_DONGLE_PROTECT
+
   epInitMemoryTracking();
   if (argc > 1)
   {

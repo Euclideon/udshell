@@ -1,6 +1,7 @@
 stages:
   - build
   - postbuild
+  - dongleprotect
   - package
   - finalise
   - clean
@@ -134,6 +135,24 @@ collate_builds:
   script: "./build/collate.sh"
   tags:
     - ubuntu
+
+ubuntu_dongleprotect:
+  stage: dongleprotect
+  only:
+    - master
+    - tags
+  script: "build\\dongleprotectlinux.sh trusty"
+  tags:
+    - windows
+
+rpm_dongleprotect:
+  stage: dongleprotect
+  only:
+    - master
+    - tags
+  script: "build\\dongleprotectlinux.sh centos7"
+  tags:
+    - windows
 
 win64_packaging:
   stage: package
