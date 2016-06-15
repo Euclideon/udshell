@@ -7,3 +7,6 @@
 [submodule "bin/dinkey"]
 	path = bin/dinkey
 	url = git@bne-fs-git-001.euclideon.local:external/dinkey-bin.git
+[submodule "bin/nsis"]
+	path = bin/nsis
+	url = git@bne-fs-git-001.euclideon.local:external/nsis.git

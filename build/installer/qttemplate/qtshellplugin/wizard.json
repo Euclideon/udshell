@@ -1,0 +1,101 @@
+{
+	"version": 1,
+	"kind": "project",
+	"id": "QA.QtEPPlugin",
+	"category": "H.Project",
+	"trDescription": "Creates a Euclideon Platform Plugin Project",
+	"trDisplayName": "Qt EP Plugin",
+	"trDisplayCategory": "Other Project",
+	"icon": "qml_wizard.png",
+	"enabled": "%{JS: [ %{Plugins} ].indexOf('QmlProjectManager') >= 0}",
+	"featuresRequired": [ "QtSupport.Wizards.FeatureQtQuick.Controls.1.3", "QtSupport.Wizards.FeatureQtQuickProject", "QtSupport.Wizards.FeatureQt" ],
+
+	"options": [
+		{
+			"key": "epShellPluginName",
+			"value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}"
+		}
+	],
+
+	"pages": [
+		{
+			"trDisplayName": "EP link",
+			"trShortTitle": "Details",
+			"typeId": "Fields",
+			"data": [
+				{
+					"name": "IncludeQtCore",
+					"trDisplayName": "Include QtCore",
+					"type": "CheckBox",
+					"data": {
+						"checkedValue": "core ",
+						"uncheckedValue": "",
+						"checked": "%{JS: '%{BaseCB}' === 'core'}"
+					}
+				},
+				{
+					"name": "IncludeQtQml",
+					"trDisplayName": "Include QtQml",
+					"type": "CheckBox",
+					"data": {
+						"checkedValue": "qml ",
+						"uncheckedValue": "",
+						"checked": "%{JS: '%{BaseCB}' === 'qml'}"
+					}
+				},
+				{
+					"name": "IncludeQtQuick",
+					"trDisplayName": "Include QtQuick",
+					"type": "CheckBox",
+					"data": {
+						"checkedValue": "quick ",
+						"uncheckedValue": "",
+						"checked": "%{JS: '%{BaseCB}' === 'quick'}"
+					}
+				},
+				{
+					"name": "IncludeQtGui",
+					"trDisplayName": "Include QtGui",
+					"type": "CheckBox",
+					"data": {
+						"checkedValue": "gui",
+						"uncheckedValue": "",
+						"checked": "%{JS: '%{BaseCB}' === 'gui'}"
+					}
+				}
+			]
+		},
+		{
+			"trDisplayName": "Project Location",
+			"trShortTitle": "Location",
+			"typeId": "Project"
+		},
+		{
+			"trDisplayName": "Project Management",
+			"trShortTitle": "Summary",
+			"typeId": "Summary"
+		}
+	],
+	"generators": [
+		{
+			"typeId": "File",
+			"data": [
+				{
+					"source": "myplugin.cpp",
+					"target": "%{ProjectDirectory}/%{ProjectName}/src/%{ProjectName}.cpp",
+					"openInEditor": true
+				},
+				{
+					"source": "myplugin.h",
+					"target": "%{ProjectDirectory}/%{ProjectName}/headers/%{ProjectName}.h",
+					"openInEditor": true
+				},
+				{
+					"source": "epshell.pro",
+					"target": "%{epShellPluginName}",
+					"openAsProject": true
+				}
+			]
+		}
+	]
+}

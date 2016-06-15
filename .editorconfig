@@ -18,7 +18,7 @@ insert_final_newline = true
 charset = utf-8
 
 # files use tabs
-[**.{lua,sh,bat}]
+[**.{lua,sh,bat,json}]
 indent_style = tab
 indent_size = 4
 tab_width = 4
