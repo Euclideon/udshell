@@ -16,13 +16,13 @@ WIN64_ROOT=$PACKAGE_PATH/win64
 
 rm -rf tempinstalldir
 cp -r $WIN32_ROOT tempinstalldir
-./bin/nsis/makensis -DTARGET32 build/installer/installer.nsi 
-mv build/installer/EP_Setup.exe EP_Setup_Win32.exe
+./bin/nsis/makensis -DTARGET32 build/package/windows/installer.nsi 
+mv build/package/windows/EP_Setup.exe EP_Setup_Win32.exe
 
 rm -rf tempinstalldir
 cp -r $WIN64_ROOT tempinstalldir
-./bin/nsis/makensis -DTARGET64 build/installer/installer.nsi
-mv build/installer/EP_Setup.exe EP_Setup_Win64.exe
+./bin/nsis/makensis -DTARGET64 build/package/windows/installer.nsi
+mv build/package/windows/EP_Setup.exe EP_Setup_Win64.exe
 
 rm -rf tempinstalldir
-rm -f build/installer/*.exe
+rm -f build/package/windows/*.exe
