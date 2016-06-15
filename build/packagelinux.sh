@@ -25,6 +25,8 @@ cp -r $PACKAGE_PATH/$1 $PACKAGE_NAME
 
 cd $PACKAGE_NAME
 
+rm *_unprotected
+
 ln -s libassimp-ep.so.3.1.1 libassimp-ep.so.3
 ln -s libassimp-ep.so.3.1.1 libassimp-ep.so
 
