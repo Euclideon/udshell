@@ -59,6 +59,7 @@ project "epshell"
 		libdirs { "../bin/amd64" }
 		links { "assimp-ep", "dl" }
 		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell" }
+		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell/Qt" }
 		linkoptions { "-Wl,-rpath=bin/amd64" }
 
 	-- These lines are commented out as we don't currently use Dinkey API method in windows so don't need to link
@@ -70,7 +71,7 @@ project "epshell"
 		-- linkoptions { "bin/dinkey/lib/dpwin32_coff_debug.obj" }
 	-- configuration { "windows", "x86", "not Debug*" }
 		-- linkoptions { "bin/dinkey/lib/dpwin32_coff.obj" }
-	
+
 	configuration { "linux", "Debug*" }
 		links { "../bin/dinkey/linux/lib/dplin64debug.o" }
 	configuration { "linux", "not Debug*" }

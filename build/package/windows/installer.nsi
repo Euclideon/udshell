@@ -237,10 +237,10 @@ Section "install"
   # Files for the install directory - to build the installer, these should be in the same directory as the install script (this file)
   setOutPath $INSTDIR
   # Files added here should be removed by the uninstaller (see section "uninstall")
-  File /r '..\..\tempinstalldir\*.dll'
-  File /r '..\..\tempinstalldir\epshell.exe'
-  File /r '..\..\tempinstalldir\epviewer.exe'
-  File /r '..\..\tempinstalldir\libep-docs.chm'
+  File /r '..\..\..\tempinstalldir\*.dll'
+  File /r '..\..\..\tempinstalldir\epshell.exe'
+  File /r '..\..\..\tempinstalldir\epviewer.exe'
+  File /r '..\..\..\tempinstalldir\libep-docs.chm'
   
   WriteIniStr "$INSTDIR\uninstall.ini" "Uninstall" "QtCCheckbox_State" $QtCCheckbox_State 
   WriteIniStr "$INSTDIR\uninstall.ini" "Uninstall" "VSCheckbox_State" $VSCheckbox_State
@@ -257,25 +257,25 @@ Section "install"
     ${If} $0 != error
       StrCpy $VSPath "$0..\Packages\Debugger\Visualizers"
       SetOutPath $VSPath
-      File "..\..\bin\natvis\euclideon.*"      
+      File "..\..\..\bin\natvis\euclideon.*"      
 
       ${If} $QtCCheckbox_State == ${BST_CHECKED}
-        File "..\..\bin\natvis\qt5.natvis"
+        File "..\..\..\bin\natvis\qt5.natvis"
       ${EndIf}
     ${EndIf}
 
   # Libs and include
   CreateDirectory $INSTDIR\include
   setOutPath $INSTDIR\include
-  File /r '..\..\tempinstalldir\include\'
+  File /r '..\..\..\tempinstalldir\include\'
   
   CreateDirectory $INSTDIR\lib
   setOutPath $INSTDIR\lib
-  File /r '..\..\tempinstalldir\lib\'
+  File /r '..\..\..\tempinstalldir\lib\'
   
   CreateDirectory $INSTDIR\plugins
   setOutPath $INSTDIR\plugins
-  File /r '..\..\tempinstalldir\plugins\'
+  File /r '..\..\..\tempinstalldir\plugins\'
     
   #file "logo.ico"
   # Add any other files for the install directory (license files, app data, etc) here
