@@ -877,6 +877,18 @@ Variant QtEPComponent::Connection::SignalRouter(Slice<const Variant> args)
   return nullptr;
 }
 
+
+// Retrieves the window that the quick item currently belongs to
+QQuickWindow *QtGlobalEPSingleton::parentWindow(QQuickItem *pQuickItem) const
+{
+  if (!pQuickItem)
+  {
+    QtApplication::Kernel()->LogError("Attempted to get parent window for null item");
+    return nullptr;
+  }
+  return pQuickItem->window();
+}
+
 } // namespace qt
 
 #else

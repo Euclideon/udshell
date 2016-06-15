@@ -1,6 +1,7 @@
 import QtQuick 2.6
 import QtQuick.Controls 1.5
 import QtQuick.Controls.Styles 1.4
+import Platform 0.1
 import Platform.Controls 0.1
 import Platform.Themes 0.1
 
@@ -91,10 +92,10 @@ TableView {
             (Math.abs(mouseX - mouseXStart) > 10 || Math.abs(mouseY - mouseYStart) > 10)) {
 
           bDragging = true;
-          dragItem = dragItemComp.createObject(thisComponent.parentWindow());
+          dragItem = dragItemComp.createObject(EP.parentWindow(thisComponent.uihandle));
           dragItem.text = model.get(styleData.row)[dragColumn];
           dragItem.payload = model.get(styleData.row);
-          var winXY = mapToItem(thisComponent.parentWindow().contentItem, mouse.x - dragItem.width / 2, mouse.y - dragItem.height / 2);
+          var winXY = mapToItem(EP.parentWindow(thisComponent.uihandle).contentItem, mouse.x - dragItem.width / 2, mouse.y - dragItem.height / 2);
           dragItem.x = winXY.x;
           dragItem.y = winXY.y;
           dragItem.Drag.active = Qt.binding(function() { return mouseArea.drag.active; });

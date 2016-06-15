@@ -35,6 +35,15 @@ static QObject *QtKernelQmlSingletonProvider(QQmlEngine *pEngine, QJSEngine *pSc
   return new QtKernelQml((QtKernel*)QtApplication::Kernel());
 }
 
+static QObject *QtGlobalEPSingletonProvider(QQmlEngine *pEngine, QJSEngine *pScriptEngine)
+{
+  Q_UNUSED(pEngine);
+  Q_UNUSED(pScriptEngine);
+
+  // NOTE: QML takes ownership of this object
+  return new QtGlobalEPSingleton();
+}
+
 // custom kernel event
 class KernelEvent : public QEvent
 {
@@ -150,6 +159,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   EPTHROW_IF(qmlRegisterType<QtEPComponent>() == -1, ep::Result::Failure, "qmlRegisterType<QtEPComponent> Failed");
   EPTHROW_IF(qRegisterMetaType<QtFocusManager*>("QtFocusManager*") == -1, ep::Result::Failure, "qRegisterMetaType<QtFocusManager *> Failed");
   EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("Platform", 0, 1, "EPKernel", QtKernelQmlSingletonProvider) == -1, ep::Result::Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
+  EPTHROW_IF(qmlRegisterSingletonType<QtGlobalEPSingleton>("Platform", 0, 1, "EP", QtGlobalEPSingletonProvider) == -1, ep::Result::Failure, "qmlRegisterSingletonType<QtGlobalEPSingleton> Failed");
 
   // load in the kernel qml resources
   InitResources();
