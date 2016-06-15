@@ -38,7 +38,7 @@ public:
   template <typename CT, typename ...Args>
   static CT* CreateComponentInstance(Args ...args);
 
-  void SendMessage(String target, String sender, String message, const Variant &data) override final;
+  bool SendMessage(String target, String sender, String message, const Variant &data) override final;
 
   void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) override final;
   bool HasMessageHandler(SharedString _name) override final { return messageHandlers.get(_name) != nullptr; }

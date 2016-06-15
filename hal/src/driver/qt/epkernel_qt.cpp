@@ -19,6 +19,7 @@
 
 #include <QSemaphore>
 #include <QDirIterator>
+#include <QMessageBox>
 
 
 // Init the kernel's qrc file resources - this has to happen from the global namespace
@@ -212,7 +213,10 @@ void QtKernel::RunMainLoop()
 // ---------------------------------------------------------------------------------------
 void QtKernel::Quit()
 {
-  pTopLevelWindow->close();
+  if (pTopLevelWindow)
+    pTopLevelWindow->close();
+  else
+    pApplication->exit(0);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -493,6 +497,13 @@ void QtKernel::Shutdown()
   delete pMainThreadContext;
 
   spQmlPluginLoader = nullptr;
+}
+
+// ---------------------------------------------------------------------------------------
+void QtKernel::OnFatal(ep::String msg)
+{
+  LogError(msg);
+  QMessageBox::critical(nullptr, "Fatal Error!", epToQString(msg));
 }
 
 // ---------------------------------------------------------------------------------------

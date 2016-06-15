@@ -414,7 +414,14 @@ void KernelImpl::FinishInit()
 
   // call application register
   if (HasMessageHandler("register"))
-    SendMessage("$register", "#", "register", nullptr);
+  {
+    // TODO: Crash handler?
+    if (!SendMessage("$register", "#", "register", nullptr))
+    {
+      pInstance->OnFatal("Fatal error encountered during application register phase.\nSee epKernel.log for details.\n\nExiting...");
+      pInstance->Quit();
+    }
+  }
 
   // load the plugins
   LoadPluginDir(Slice<const String>{ "bin/plugins", "plugins" });
@@ -428,7 +435,14 @@ void KernelImpl::FinishInit()
 
   // call application init
   if (HasMessageHandler("init"))
-    SendMessage("$init", "#", "init", nullptr);
+  {
+    // TODO: Crash handler?
+    if (!SendMessage("$init", "#", "init", nullptr))
+    {
+      pInstance->OnFatal("Fatal error encountered during application init phase.\nSee epKernel.log for details.\n\nExiting...");
+      pInstance->Quit();
+    }
+  }
 }
 
 KernelImpl::~KernelImpl()
@@ -642,7 +656,7 @@ Array<const ComponentDesc *> KernelImpl::GetDerivedComponentDescs(const Componen
   return derivedDescs;
 }
 
-void KernelImpl::SendMessage(String target, String sender, String message, const Variant &data)
+bool KernelImpl::SendMessage(String target, String sender, String message, const Variant &data)
 {
   EPASSERT_THROW(!target.empty(), Result::InvalidArgument, "target was empty");
 
@@ -658,8 +672,10 @@ void KernelImpl::SendMessage(String target, String sender, String message, const
         spComponent->ReceiveMessage(message, sender, data);
       } catch (std::exception &e) {
         LogError("Message Handler {0} failed: {1}", target, e.what());
+        return false;
       } catch (...) {
         LogError("Message Handler {0} failed: C++ exception", target);
+        return false;
       }
     }
     else
@@ -678,8 +694,10 @@ void KernelImpl::SendMessage(String target, String sender, String message, const
         ReceiveMessage(sender, message, data);
       } catch (std::exception &e) {
         LogError("Message Handler {0} failed: {1}", target, e.what());
+        return false;
       } catch (...) {
         LogError("Message Handler {0} failed: C++ exception", target);
+        return false;
       }
     }
     else
@@ -698,8 +716,10 @@ void KernelImpl::SendMessage(String target, String sender, String message, const
         pHandler->callback(sender, message, data);
       } catch (std::exception &e) {
         LogError("Message Handler {0} failed: {1}", target, e.what());
+        return false;
       } catch (...) {
         LogError("Message Handler {0} failed: C++ exception", target);
+        return false;
       }
     }
     else
@@ -711,6 +731,7 @@ void KernelImpl::SendMessage(String target, String sender, String message, const
   {
     EPTHROW_ERROR(Result::Failure, "Invalid target");
   }
+  return true;
 }
 
 // ---------------------------------------------------------------------------------------
