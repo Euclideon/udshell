@@ -27,11 +27,11 @@ echo "Creating Windows installers..."
 rm -rf tempinstalldir
 cp -r $WIN_ROOT tempinstalldir
 if [ $1 == "win32" ]; then
-  ./bin/nsis/makensis -DTARGET32 build/installer/installer.nsi
-  mv build/installer/EP_Setup.exe $PACKAGE_PATH/EP_Setup_Win32.exe
+  ./bin/nsis/makensis -DTARGET32 build/package/windows/installer.nsi
+  mv build/package/windows/EP_Setup.exe $PACKAGE_PATH/EP_Setup_Win32.exe
 elif [ $1 == "win64" ]; then
-  ./bin/nsis/makensis -DTARGET64 build/installer/installer.nsi
-  mv build/installer/EP_Setup.exe $PACKAGE_PATH/EP_Setup_Win64.exe
+  ./bin/nsis/makensis -DTARGET64 build/package/windows/installer.nsi
+  mv build/package/windows/EP_Setup.exe $PACKAGE_PATH/EP_Setup_Win64.exe
 else
   echo "Error unsupported windows target"
   exit 3

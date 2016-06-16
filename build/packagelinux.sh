@@ -27,6 +27,46 @@ cd $PACKAGE_NAME
 
 rm *_unprotected
 
+# Qt
+mkdir -p Qt
+cp $QTDIR/lib/libicudata.so.56.1 Qt/.
+ln -s libicudata.so.56.1 Qt/libicudata.so.56
+cp $QTDIR/lib/libicui18n.so.56.1 Qt/.
+ln -s libicui18n.so.56.1 Qt/libicui18n.so.56
+cp $QTDIR/lib/libicuuc.so.56.1 Qt/.
+ln -s libicuuc.so.56.1 Qt/libicuuc.so.56
+
+cp $QTDIR/lib/libQt5Core.so.5.6.0 Qt/.
+ln -s libQt5Core.so.5.6.0 Qt/libQt5Core.so.5.6
+ln -s libQt5Core.so.5.6.0 Qt/libQt5Core.so.5
+ln -s libQt5Core.so.5.6.0 Qt/libQt5Core.so
+cp $QTDIR/lib/libQt5Gui.so.5.6.0 Qt/.
+ln -s libQt5Gui.so.5.6.0 Qt/libQt5Gui.so.5.6
+ln -s libQt5Gui.so.5.6.0 Qt/libQt5Gui.so.5
+ln -s libQt5Gui.so.5.6.0 Qt/libQt5Gui.so
+cp $QTDIR/lib/libQt5Quick.so.5.6.0 Qt/.
+ln -s libQt5Quick.so.5.6.0 Qt/libQt5Quick.so.5.6
+ln -s libQt5Quick.so.5.6.0 Qt/libQt5Quick.so.5
+ln -s libQt5Quick.so.5.6.0 Qt/libQt5Quick.so
+cp $QTDIR/lib/libQt5Qml.so.5.6.0 Qt/.
+ln -s libQt5Qml.so.5.6.0 Qt/libQt5Qml.so.5.6
+ln -s libQt5Qml.so.5.6.0 Qt/libQt5Qml.so.5
+ln -s libQt5Qml.so.5.6.0 Qt/libQt5Qml.so
+cp $QTDIR/lib/libQt5Widgets.so.5.6.0 Qt/.
+ln -s libQt5Widgets.so.5.6.0 Qt/libQt5Widgets.so.5.6
+ln -s libQt5Widgets.so.5.6.0 Qt/libQt5Widgets.so.5
+ln -s libQt5Widgets.so.5.6.0 Qt/libQt5Widgets.so
+cp $QTDIR/lib/libQt5Network.so.5.6.0 Qt/.
+ln -s libQt5Network.so.5.6.0 Qt/libQt5Network.so.5.6
+ln -s libQt5Network.so.5.6.0 Qt/libQt5Network.so.5
+ln -s libQt5Network.so.5.6.0 Qt/libQt5Network.so
+
+mkdir -p Qt/plugins
+cp -r $QTDIR/plugins/platforms Qt/plugins/.
+mkdir -p Qt/qml
+cp -r $QTDIR/qml/QtQuick Qt/qml/.
+cp -r $QTDIR/qml/QtQuick.2 Qt/qml/.
+
 ln -s libassimp-ep.so.3.1.1 libassimp-ep.so.3
 ln -s libassimp-ep.so.3.1.1 libassimp-ep.so
 

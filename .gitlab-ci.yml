@@ -195,7 +195,9 @@ trusty_packaging:
   only:
     - master
     - tags
-  script: ./build/packagelinux.sh trusty deb
+  script:
+    - export QTDIR=~/dev/Qt/5.6/gcc_64
+    - ./build/packagelinux.sh trusty deb
   tags:
     - deb
 
@@ -204,7 +206,9 @@ centos7_packaging:
   only:
     - master
     - tags
-  script: ./build/packagelinux.sh centos7 rpm
+  script:
+    - export QTDIR=~/dev/Qt/5.6/gcc_64
+    - ./build/packagelinux.sh centos7 rpm
   tags:
     - rpm
 

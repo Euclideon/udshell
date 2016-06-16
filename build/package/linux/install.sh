@@ -20,10 +20,12 @@ sudo mkdir -p /opt/Euclideon/Shell/plugins
 sudo cp -v epshell /opt/Euclideon/Shell/
 sudo cp -v epviewer /opt/Euclideon/Shell/
 
+# copy Qt
+sudo cp -v qt.conf /opt/Euclideon/Shell/
+sudo cp -dr --preserve=links Qt /opt/Euclideon/Shell/
+
 # copy libs
-sudo cp -v libassimp-ep.so.3.1.1 /opt/Euclideon/Shell/
-sudo ln -s libassimp-ep.so.3.1.1 /opt/Euclideon/Shell/libassimp-ep.so.3
-sudo ln -s libassimp-ep.so.3.1.1 /opt/Euclideon/Shell/libassimp-ep.so
+sudo cp -dv --preserve=links libassimp-ep.so* /opt/Euclideon/Shell/
 
 # copy plugins
 sudo cp -v plugins/libviewer.so /opt/Euclideon/Shell/plugins/
