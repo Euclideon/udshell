@@ -182,9 +182,18 @@ public:
 
   void RelayStdIO();
 
+  void WrangleEnvironmentVariables();
+
   template<typename CT>
   static Component *NewComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 };
+
+class KernelImplStatic : public BaseStaticImpl<IKernelStatic>
+{
+  void SetEnvironmentVar(String name, String value) override final;
+  MutableString<0> GetEnvironmentVar(String name) override final;
+};
+
 
 template <typename CT, typename ...Args>
 CT* KernelImpl::CreateComponentInstance(Args ...args)

@@ -198,6 +198,37 @@ struct GlobalInstanceInitializer
 
 GlobalInstanceInitializer globalInstanceInitializer;
 
+
+Array<const PropertyInfo> Kernel::GetProperties() const
+{
+  return Array<const PropertyInfo>{
+    EP_MAKE_PROPERTY_RO(ResourceManager, "Resource manager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(CommandManager, "Command manager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(StdOutBroadcaster, "stdout broadcaster", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(StdErrBroadcaster, "stderr broadcaster", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Kernel::GetMethods() const
+{
+  return Array<const MethodInfo>{
+    EP_MAKE_METHOD(Exec, "Execute Lua script")
+  };
+}
+Array<const EventInfo> Kernel::GetEvents() const
+{
+  return Array<const EventInfo>{
+    EP_MAKE_EVENT(UpdatePulse, "Periodic update signal")
+  };
+}
+Array<const StaticFuncInfo> Kernel::GetStaticFuncs() const
+{
+  return Array<const StaticFuncInfo>{
+    EP_MAKE_STATICFUNC(GetEnvironmentVar, "Get an environment variable"),
+    EP_MAKE_STATICFUNC(SetEnvironmentVar, "Set an environment variable")
+  };
+}
+
+
 ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
@@ -288,6 +319,9 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   epscope(fail) { DebugFormat("Error creating Kernel\n"); };
 
   renderThreadCount = initParams["renderThreadCount"].as<int>();
+
+  // register global environment vars
+  WrangleEnvironmentVariables();
 
   // register the base Component type
   pInstance->RegisterComponentType<Component, ComponentImpl, ComponentGlue>();
@@ -507,6 +541,11 @@ void KernelImpl::Shutdown()
   spPluginManager = nullptr;
 
   spRenderer = nullptr;
+}
+
+void KernelImpl::WrangleEnvironmentVariables()
+{
+  // TODO: ...
 }
 
 Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const String> extFilter)
@@ -1021,6 +1060,34 @@ ViewRef KernelImpl::SetFocusView(ViewRef spView)
   ViewRef spOld = spFocusView;
   spFocusView = spView;
   return spOld;
+}
+
+void KernelImplStatic::SetEnvironmentVar(String name, String value)
+{
+#if defined(EP_WINDOWS)
+  _putenv_s(name.toStringz(), value.toStringz());
+#else
+  setenv(name.toStringz(), value.toStringz(), 1);
+#endif
+}
+
+MutableString<0> KernelImplStatic::GetEnvironmentVar(String name)
+{
+#if defined(EP_WINDOWS)
+  MutableString<0> r;
+  auto sz = name.toStringz();
+  size_t size;
+  getenv_s(&size, nullptr, 0, sz);
+  if (size)
+  {
+    r.reserve(size);
+    getenv_s(nullptr, r.ptr, size, sz);
+    r.length = size-1;
+  }
+  return r;
+#else
+  return getenv(name.toStringz());
+#endif
 }
 
 } // namespace ep
