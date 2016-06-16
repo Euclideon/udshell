@@ -60,12 +60,25 @@ cp $QTDIR/lib/libQt5Network.so.5.6.0 Qt/.
 ln -s libQt5Network.so.5.6.0 Qt/libQt5Network.so.5.6
 ln -s libQt5Network.so.5.6.0 Qt/libQt5Network.so.5
 ln -s libQt5Network.so.5.6.0 Qt/libQt5Network.so
+cp $QTDIR/lib/libQt5Dbus.so.5.6.0 Qt/.
+ln -s libQt5Dbus.so.5.6.0 Qt/libQt5Dbus.so.5.6
+ln -s libQt5Dbus.so.5.6.0 Qt/libQt5Dbus.so.5
+ln -s libQt5Dbus.so.5.6.0 Qt/libQt5Dbus.so
+cp $QTDIR/lib/libQt5XcbQpa.so.5.6.0 Qt/.
+ln -s libQt5XcbQpa.so.5.6.0 Qt/libQt5XcbQpa.so.5.6
+ln -s libQt5XcbQpa.so.5.6.0 Qt/libQt5XcbQpa.so.5
+ln -s libQt5XcbQpa.so.5.6.0 Qt/libQt5XcbQpa.so
 
 mkdir -p Qt/plugins
 cp -r $QTDIR/plugins/platforms Qt/plugins/.
+cp -r $QTDIR/plugins/xcbglintegrations Qt/plugins/.
 mkdir -p Qt/qml
 cp -r $QTDIR/qml/QtQuick Qt/qml/.
 cp -r $QTDIR/qml/QtQuick.2 Qt/qml/.
+cp -r $QTDIR/qml/Qt Qt/qml/.
+cp -r $QTDIR/qml/QtQml Qt/qml/.
+cp -r $QTDIR/qml/QtGraphicalEffects Qt/qml/.
+cp -r $QTDIR/qml/QtMultimedia Qt/qml/.
 
 ln -s libassimp-ep.so.3.1.1 libassimp-ep.so.3
 ln -s libassimp-ep.so.3.1.1 libassimp-ep.so
