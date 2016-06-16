@@ -60,10 +60,10 @@ cp $QTDIR/lib/libQt5Network.so.5.6.0 Qt/.
 ln -s libQt5Network.so.5.6.0 Qt/libQt5Network.so.5.6
 ln -s libQt5Network.so.5.6.0 Qt/libQt5Network.so.5
 ln -s libQt5Network.so.5.6.0 Qt/libQt5Network.so
-cp $QTDIR/lib/libQt5Dbus.so.5.6.0 Qt/.
-ln -s libQt5Dbus.so.5.6.0 Qt/libQt5Dbus.so.5.6
-ln -s libQt5Dbus.so.5.6.0 Qt/libQt5Dbus.so.5
-ln -s libQt5Dbus.so.5.6.0 Qt/libQt5Dbus.so
+cp $QTDIR/lib/libQt5DBus.so.5.6.0 Qt/.
+ln -s libQt5DBus.so.5.6.0 Qt/libQt5DBus.so.5.6
+ln -s libQt5DBus.so.5.6.0 Qt/libQt5DBus.so.5
+ln -s libQt5DBus.so.5.6.0 Qt/libQt5DBus.so
 cp $QTDIR/lib/libQt5XcbQpa.so.5.6.0 Qt/.
 ln -s libQt5XcbQpa.so.5.6.0 Qt/libQt5XcbQpa.so.5.6
 ln -s libQt5XcbQpa.so.5.6.0 Qt/libQt5XcbQpa.so.5
