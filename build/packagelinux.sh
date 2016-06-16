@@ -83,7 +83,7 @@ cp -r $QTDIR/qml/QtMultimedia Qt/qml/.
 ln -s libassimp-ep.so.3.1.1 libassimp-ep.so.3
 ln -s libassimp-ep.so.3.1.1 libassimp-ep.so
 
-chmod +x epshell
+chmod +x epshell*
 chmod +x epviewer
 
 chmod +x install.sh

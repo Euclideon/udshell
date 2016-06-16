@@ -17,7 +17,7 @@ echo "Installing Shell to /opt/Euclideon/Shell/..."
 sudo mkdir -p /opt/Euclideon/Shell/plugins
 
 # copy binaries
-sudo cp -v epshell /opt/Euclideon/Shell/
+sudo cp -v epshell* /opt/Euclideon/Shell/
 sudo cp -v epviewer /opt/Euclideon/Shell/
 
 # copy Qt
