@@ -368,9 +368,13 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   spLogger = pInstance->CreateComponent<Logger>();
   spLogger->DisableCategory(LogCategories::Trace);
 
-  StreamRef spDebugFile = pInstance->CreateComponent<File>({ { "name", "logfile" }, { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
-  spLogger->AddStream(spDebugFile);
-  spDebugFile->WriteLn("\n*** Logging started ***");
+  try
+  {
+    StreamRef spDebugFile = pInstance->CreateComponent<File>({ { "name", "logfile" }, { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
+    spLogger->AddStream(spDebugFile);
+    spDebugFile->WriteLn("\n*** Logging started ***");
+  }
+  catch (...) {}
 
 #if EP_DEBUG
   StreamRef spStdIOStream = pInstance->CreateComponent<StdIOStream>({ { "output", StdIOStreamOutputs::StdDbg }, {"name", "debugout"} });
