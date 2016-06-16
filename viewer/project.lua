@@ -22,7 +22,7 @@ project "epviewer"
 	defines { "GLEW_STATIC" }
 
 	configuration { "windows" }
-		links { "ws2_32.lib", "winmm.lib", "opengl32.lib", "glu32.lib", "GLEW" }
+		links { "ws2_32.lib", "winmm.lib", "opengl32.lib", "glu32.lib" }
  		includedirs { "../ud/3rdParty/sdl2/include", "../up/3rdParty/GL/glew/include" }
 	configuration { "windows", "x64" }
 		links { "assimp-ep64.lib" }

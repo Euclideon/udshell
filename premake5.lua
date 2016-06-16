@@ -25,12 +25,12 @@ solution "epshell"
 	startproject "epshell"
 
 	group "libs"
-		dofile "ud/3rdParty/GL/glew/project.lua"
-
-		dofile "3rdparty/lua/project.lua"
 		if _OS == "windows" then
+			dofile "ud/3rdParty/GL/glew/project.lua"
 			dofile "3rdparty/pcre/project.lua"
 		end
+
+		dofile "3rdparty/lua/project.lua"
 		dofile "3rdparty/googletest/project.lua"
 
 		dofile "ud/udPlatform/project.lua"
