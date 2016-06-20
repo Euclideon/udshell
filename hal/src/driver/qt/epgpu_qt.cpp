@@ -244,6 +244,8 @@ void epGPU_Deinit()
   // TODO: cleanup all current gl objects?
 
   s_QtGLContext.pFunc = nullptr;
+  s_QtGLContext.pFunc3_2_Core = nullptr;
+  s_QtGLContext.pFunc4_0_Core = nullptr;
 }
 
 #else

@@ -140,6 +140,25 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   spQmlPluginLoader = CreateComponent<QmlPluginLoader>();
   GetImpl()->spPluginManager->RegisterPluginLoader(spQmlPluginLoader);
 
+  // TODO: control this with a command line switch...
+  //qputenv("QSG_RENDER_LOOP", "single");
+
+  // Qt Debugging
+  // TODO: control this with a command line switch...
+  //qputenv("QSG_INFO", "1");
+  mainSurfaceFormat.setOption(QSurfaceFormat::DebugContext);
+
+  // Force gl hints
+  // TODO: allow this to be overriden
+  QCoreApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+  QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
+  // set up our default context format
+  // TODO: set gl version based on property settings? should try and get the latest
+  //mainSurfaceFormat.setVersion(4, 0);
+  //mainSurfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
+  QSurfaceFormat::setDefaultFormat(mainSurfaceFormat);
+
   // create our QApplication
   pApplication = new QtApplication(this, cmdArgc, (char**)cmdArgv.ptr);
   EPTHROW_IF_NULL(pApplication, ep::Result::Failure, "Unable create QtApplication");
@@ -149,6 +168,9 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   pMediator = new QtKernelMediator(this);
   epscope(fail) { delete pMediator; };
   EPTHROW_IF(!QObject::connect(pApplication, &QCoreApplication::aboutToQuit, pMediator, &QtKernelMediator::OnAppQuit), ep::Result::Failure, "Failed to create Qt connection");
+
+  singleThreadMode = !QOpenGLContext::supportsThreadedOpenGL();
+  EPTHROW_IF(QOpenGLContext::globalShareContext() == nullptr, ep::Result::Failure, "Unable to create global share context");
 
   // create the qml engine
   pQmlEngine = new QQmlEngine;
@@ -166,17 +188,12 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   InitResources();
   RegisterQmlComponents(":/kernel");
 
-  // modify our surface format to support opengl debug logging
-  // TODO: set gl version based on property settings?
-  // TODO: control setting a debug context based on command line switches?
-  mainSurfaceFormat.setOption(QSurfaceFormat::DebugContext);
-  QSurfaceFormat::setDefaultFormat(mainSurfaceFormat);
-
   // create focus manager;
   pFocusManager = new QtFocusManager();
 
+  // TODO: replace this with a better splash screen
   // create the splash screen
-  QQmlComponent component(pQmlEngine, QUrl("qrc:/kernel/splashscreen.qml"));
+  /*QQmlComponent component(pQmlEngine, QUrl("qrc:/kernel/splashscreen.qml"));
   QObject *pObject = component.create();
   epscope(fail) { delete pObject; };
   pSplashScreen = qobject_cast<QQuickWindow*>(pObject);
@@ -192,7 +209,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   // defer the heavier init stuff and app specific init to after Qt hits the event loop
   // we'll hook into the splash screen to do this
   EPTHROW_IF(!QObject::connect(pSplashScreen, &QQuickWindow::afterRendering, pMediator, &QtKernelMediator::OnFirstRender, Qt::DirectConnection),
-    ep::Result::Failure, "Failed to create Qt connection for Splash Screen");
+    ep::Result::Failure, "Failed to create Qt connection for Splash Screen");*/
 }
 
 // ---------------------------------------------------------------------------------------
@@ -206,6 +223,9 @@ QtKernel::~QtKernel()
 // ---------------------------------------------------------------------------------------
 void QtKernel::RunMainLoop()
 {
+  // TODO: move finish init to the constructor???
+  FinishInit();
+
   // run the Qt event loop - this may never return
   EPTHROW_IF(pApplication->exec() != 0, ep::Result::Failure, "Application was not shutdown from a call to quit()");
 }
@@ -223,23 +243,16 @@ void QtKernel::Quit()
 ep::Result QtKernel::RegisterWindow(QQuickWindow *pWindow)
 {
   // sanity checks
-  EPASSERT(pSplashScreen != nullptr, "No splash screen window set");
-  EPASSERT(pMainThreadContext != nullptr, "No main thread GL context");
   EPASSERT(pGLDebugLogger != nullptr, "No GL debugger");
 
   // TODO: support adding multiple windows?
   EPASSERT(pTopLevelWindow.isNull(), "Multiple windows not supported - you must unregister your current window first");
 
-  // TODO: maybe destroy this rather than keeping it around - check mem usage
-  if (pSplashScreen->isVisible())
-    pSplashScreen->hide();
-
-  pGLDebugLogger->stopLogging();
-  pMainThreadContext->doneCurrent();
   pTopLevelWindow = pWindow;
 
   // Hook up window signals
   QObject::connect(pTopLevelWindow.data(), &QQuickWindow::openglContextCreated, pMediator, &QtKernelMediator::OnGLContextCreated, Qt::DirectConnection);
+  QObject::connect(pTopLevelWindow.data(), &QQuickWindow::beforeRendering, pMediator, &QtKernelMediator::OnFirstRender, Qt::DirectConnection);
 
   // install event filter - this will get automatically cleaned up when the top window is destroyed
   pTopLevelWindow->installEventFilter(new QtWindowEventFilter(pTopLevelWindow));
@@ -247,34 +260,21 @@ ep::Result QtKernel::RegisterWindow(QQuickWindow *pWindow)
   pTopLevelWindow->show();
   pTopLevelWindow->raise();
 
-  if (!pMainThreadContext->makeCurrent(pTopLevelWindow))
-  {
-    // TODO: error handle
-    LogError("Error making main gl context current");
-    return ep::Result::Failure;
-  }
-
-  if (pGLDebugLogger->initialize())
-    pGLDebugLogger->startLogging();
-
   return ep::Result::Success;
 }
 
 // ---------------------------------------------------------------------------------------
 void QtKernel::UnregisterWindow(QQuickWindow *pWindow)
 {
-  // if we're unregistering the top level window then stop logging and switch the context
-  // back to the splash screen since this is a surface that we know exists
+  // if we're unregistering the top level window and we're in single thread mode then stop logging and switch contexts
   // this means we can log thru to final cleanup
-  if (pTopLevelWindow.data() == pWindow)
+  if (pTopLevelWindow.data() == pWindow && singleThreadMode)
   {
     // sanity checks
-    EPASSERT(pSplashScreen != nullptr, "No splash screen window set");
-    EPASSERT(pMainThreadContext != nullptr, "No main thread GL context");
     EPASSERT(pGLDebugLogger != nullptr, "No GL debugger");
 
     pGLDebugLogger->stopLogging();
-    pMainThreadContext->makeCurrent(pSplashScreen);
+    pMainThreadContext->makeCurrent(pOffscreenSurface);
 
     if (pGLDebugLogger->initialize())
       pGLDebugLogger->startLogging();
@@ -418,12 +418,15 @@ void QtKernel::FinishInit()
 {
   epscope(fail) { LogError("Error initialising renderer");  pApplication->quit(); };
 
-  EPASSERT(pSplashScreen != nullptr, "No splash screen window set");
-  EPASSERT(pMainThreadContext == nullptr, "Main Thread context already exists");
+  // create the offscreen surface
+  pOffscreenSurface = new QOffscreenSurface();
+  pOffscreenSurface->setFormat(mainSurfaceFormat);
+  pOffscreenSurface->create();
 
   // create main opengl context
   pMainThreadContext = new QOpenGLContext();
   pMainThreadContext->setFormat(mainSurfaceFormat);
+  pMainThreadContext->setShareContext(QOpenGLContext::globalShareContext());
   IF_EPASSERT(bool succeed = )pMainThreadContext->create();
   EPASSERT(succeed, "Couldn't create render context!");
 
@@ -436,7 +439,7 @@ void QtKernel::FinishInit()
     (mainSurfaceFormat.profile() == QSurfaceFormat::CoreProfile ? "Core" : "Compatibility"),
     (mainSurfaceFormat.profile() != QSurfaceFormat::NoProfile));
 
-  if (!pMainThreadContext->makeCurrent(pSplashScreen))
+  if (!pMainThreadContext->makeCurrent(pOffscreenSurface))
   {
     // TODO: handle error
     LogError("Error making main GL Context current");
@@ -469,7 +472,6 @@ void QtKernel::Shutdown()
   pApplication->sendPostedEvents();
   pApplication->processEvents();
 
-  delete pGLDebugLogger;
   delete pFocusManager;
 
   // delete the QML engine and then pump the message queue to ensure we don't have pending resource destruction
@@ -478,8 +480,6 @@ void QtKernel::Shutdown()
   delete pQmlEngine;
   pApplication->sendPostedEvents(nullptr, QEvent::DeferredDelete);
   pApplication->processEvents();
-
-  delete pSplashScreen;
 
   try
   {
@@ -494,7 +494,11 @@ void QtKernel::Shutdown()
     LogError("Error cleaning up renderer, DeinitRender failed");
   }
 
+  pMainThreadContext->makeCurrent(pOffscreenSurface);
+  delete pGLDebugLogger;
+  pMainThreadContext->doneCurrent();
   delete pMainThreadContext;
+  delete pOffscreenSurface;
 
   spQmlPluginLoader = nullptr;
 }
@@ -564,14 +568,19 @@ void QtKernelMediator::PostEvent(QEvent *pEvent, int priority)
 // RENDER THREAD
 void QtKernelMediator::OnGLContextCreated(QOpenGLContext *pContext)
 {
-  EPASSERT(pQtKernel->pMainThreadContext != nullptr, "Expected GL context");
-
-  // we need to share our context with Qt and recreate
-  pContext->setShareContext(pQtKernel->pMainThreadContext);
+  // we need to share our context with Qt's global context and recreate
+  pContext->setShareContext(QOpenGLContext::globalShareContext());
   IF_EPASSERT(bool succeed = ) pContext->create();
 
   // TODO: error handle
   EPASSERT(succeed, "Couldn't create shared render context!");
+
+  if (pQtKernel->singleThreadMode)
+  {
+    pQtKernel->pGLDebugLogger->stopLogging();
+    pQtKernel->pMainThreadContext->doneCurrent();
+    // TODO: cleanup the main thread context?
+  }
 }
 
 // ---------------------------------------------------------------------------------------
@@ -579,14 +588,18 @@ void QtKernelMediator::OnGLContextCreated(QOpenGLContext *pContext)
 void QtKernelMediator::OnFirstRender()
 {
   // we only want this called on the first render cycle
-  // this will be after the qt scenegraph and render thread has been created for the first window (splash screen)
-  QObject::disconnect(pQtKernel->pSplashScreen, &QQuickWindow::afterRendering, this, &QtKernelMediator::OnFirstRender);
+  // this will be after the qt scenegraph and render thread has been created for the first window
+  QObject::disconnect(pQtKernel->pTopLevelWindow.data(), &QQuickWindow::beforeRendering, this, &QtKernelMediator::OnFirstRender);
 
   // TODO: hook up render thread id stuff again
   pQtKernel->renderThreadId = QThread::currentThreadId();
 
-  // dispatch init call to create our render context and resources on the main thread
-  pQtKernel->DispatchToMainThread(MakeDelegate(pQtKernel, &QtKernel::FinishInit));
+  // if we're in single thread mode, we need to restart the gl logger now that we have a new context
+  if (pQtKernel->singleThreadMode)
+  {
+    if (pQtKernel->pGLDebugLogger->initialize())
+      pQtKernel->pGLDebugLogger->startLogging();
+  }
 }
 
 // ---------------------------------------------------------------------------------------

@@ -15,6 +15,8 @@ win32:releaseEP:TOOLSET = ReleaseQML_x64
 unix:debugEP:TOOLSET = Debug_
 unix:releaseEP:TOOLSET = Release_
 
+debugEP:DEFINES += _DEBUG
+
 DESTDIR = $${PWD}/../
 build_pass:DESTDIR = $${PWD}/../public/bin/$${TOOLSET}
 
