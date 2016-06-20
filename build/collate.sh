@@ -65,10 +65,14 @@ cp $BUILD_PATH/ubuntu_shell_release_clang/bin/epshell $UBUNTU_ROOT/epshell_unpro
 cp $BUILD_PATH/ubuntu_shell_release_clang/bin/epviewer $UBUNTU_ROOT/epviewer_unprotected
 cp bin/amd64/libassimp-ep.so.3.1.1 $UBUNTU_ROOT/
 cp build/package/linux/install.sh $UBUNTU_ROOT/
+cp build/package/linux/install_qtcreator_helpers.sh $UBUNTU_ROOT/
 cp build/package/linux/epshell.sh $UBUNTU_ROOT/
 cp build/package/linux/qt.conf $UBUNTU_ROOT/
 cp -R build/package/linux/usr $UBUNTU_ROOT/
 cp $PACKAGE_PATH/docs/libep-docs.chm $UBUNTU_ROOT/
+
+mkdir -p $UBUNTU_ROOT/usr/share/qtcreator/templates/wizards
+cp -R build/package/qtcreator/wizards/* $UBUNTU_ROOT/usr/share/qtcreator/templates/wizards/
 
 strip $UBUNTU_ROOT/epshell_unprotected
 strip $UBUNTU_ROOT/epviewer_unprotected
@@ -87,10 +91,14 @@ cp $BUILD_PATH/rpm_shell_release_clang/bin/epshell $CENTOS_ROOT/epshell_unprotec
 cp $BUILD_PATH/rpm_shell_release_clang/bin/epviewer $CENTOS_ROOT/epviewer_unprotected
 cp bin/amd64/libassimp-ep.so.3.1.1 $CENTOS_ROOT/
 cp build/package/linux/install.sh $CENTOS_ROOT/
+cp build/package/linux/install_qtcreator_helpers.sh $CENTOS_ROOT/
 cp build/package/linux/epshell.sh $CENTOS_ROOT/
 cp build/package/linux/qt.conf $CENTOS_ROOT/
 cp -R build/package/linux/usr $CENTOS_ROOT/
 cp $PACKAGE_PATH/docs/libep-docs.chm $CENTOS_ROOT/
+
+mkdir -p $CENTOS_ROOT/usr/share/qtcreator/templates/wizards
+cp -R build/package/qtcreator/wizards/* $CENTOS_ROOT/usr/share/qtcreator/templates/wizards/
 
 strip $CENTOS_ROOT/epshell_unprotected
 strip $CENTOS_ROOT/epviewer_unprotected

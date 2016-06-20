@@ -9,6 +9,13 @@ sudo rm -f /usr/local/lib/liblibep.a
 sudo rm -f /usr/local/share/applications/epshell.desktop
 sudo rm -rf /usr/local/share/pixmaps/euclideon
 sudo rm -f /usr/local/share/pixmaps/euclideon.png
+sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epplugin
+
+
+# if we just want to uninstall...
+if [[ $1 == "--remove" || $1 == "-r" ]]; then
+  exit 0
+fi
 
 
 echo "Installing Shell to /opt/Euclideon/Shell/..."
@@ -43,6 +50,12 @@ sudo cp -r include/ep /usr/local/include/
 
 sudo mkdir -p /usr/local/lib/
 sudo cp lib/liblibep.a /usr/local/lib/
+
+
+echo "Install QtCreator project templates..."
+
+mkdir -p ~/.config/QtProject/qtcreator
+cp -rf usr/share/qtcreator ~/.config/QtProject/
 
 
 echo "Creating local directory structure in ~/.local/share/Euclideon/..."

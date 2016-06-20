@@ -88,6 +88,7 @@ chmod +x epshell*
 chmod +x epviewer
 
 chmod +x install.sh
+chmod +x install_qtcreator_helpers.sh
 
 cd ..
 
