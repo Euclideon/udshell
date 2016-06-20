@@ -515,10 +515,6 @@ int main(int argc, char *argv[])
   qInstallMessageHandler(DbgMessageHandler);
   //QLoggingCategory::setFilterRules("qt.*=true");
 
-  // TEMP: this is just for testing - force qt to use the threaded renderer on windows
-  // 5.5 uses this by default
-  qputenv("QSG_RENDER_LOOP", "threaded");
-
   try
   {
     // create a kernel

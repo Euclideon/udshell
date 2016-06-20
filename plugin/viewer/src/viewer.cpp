@@ -340,15 +340,15 @@ void Viewer::CreatePlatformLogo()
     pixelShader->SetType(ShaderType::PixelShader);
 
     const char shaderText[] =
-      "uniform sampler2D tex;"
+      "uniform sampler2D tex;\n"
       "void main()\n"
       "{\n"
       "  vec2 texCoord = gl_TexCoord[0].xy;\n"
       "  texCoord -= .8;\n"
-      "  texCoord *= 5;\n"
-      "  if (texCoord.x < 0 || texCoord.y < 0) discard;\n"
+      "  texCoord *= 5.0;\n"
+      "  if (texCoord.x < 0.0 || texCoord.y < 0.0) discard;\n"
 //       "  texCoord.y = 1 - texCoord.y;\n" // hack to flip the y axis
-      "  vec4 col = texture(tex, texCoord);\n"
+      "  vec4 col = texture2D(tex, texCoord);\n"
 //       "  if (col.a != 1) discard;" // hack to stop flickering
 //       "  gl_FragColor = vec4(col.b, col.g, col.r, col.a);\n" // hack to swap r and b
       "  gl_FragColor = col;\n"

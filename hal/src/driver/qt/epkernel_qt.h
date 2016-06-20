@@ -12,6 +12,7 @@
 #include <QQuickWindow>
 #include <QOpenGLDebugLogger>
 #include <QSurfaceFormat>
+#include <QOffscreenSurface>
 #include <QThread>
 #include <QEvent>
 #include <QPointer>
@@ -137,9 +138,11 @@ private:
   QSurfaceFormat mainSurfaceFormat = QSurfaceFormat::defaultFormat();
   QQuickWindow *pSplashScreen = nullptr;
   QPointer<QQuickWindow> pTopLevelWindow = nullptr;
+  QOffscreenSurface *pOffscreenSurface = nullptr;
 
   QtFocusManager *pFocusManager = nullptr;
 
+  bool singleThreadMode;
   Qt::HANDLE mainThreadId = QThread::currentThreadId();
   Qt::HANDLE renderThreadId = nullptr;
 
