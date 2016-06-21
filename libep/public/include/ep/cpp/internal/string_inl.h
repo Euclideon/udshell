@@ -67,6 +67,11 @@ class CString
   friend struct BaseString<C>;
 public:
   operator const C*() const { return pCStr; }
+  CString(CString<C> &&str)
+    : pCStr(str.pCStr)
+  {
+    str.pCStr = nullptr;
+  }
   ~CString()
   {
     epFree((void*)pCStr);
