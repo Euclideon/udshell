@@ -600,7 +600,10 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const 
           break;
       }
       if (valid)
+      {
+        pInstance->LogInfo(2, "  Found {0}", filename);
         pluginFilenames.pushBack(filename);
+      }
     }
   } while (HalDirectory_FindNext(&find, &findData));
 
@@ -613,6 +616,7 @@ void KernelImpl::LoadPluginDir(Slice<const String> folderPaths)
 {
   for (auto path : folderPaths)
   {
+    pInstance->LogInfo(2, "Scanning {0} for plugins...", path);
     Array<SharedString> pluginFilenames = ScanPluginFolder(path);
     LoadPlugins(pluginFilenames);
   }
@@ -632,6 +636,7 @@ void KernelImpl::LoadPlugins(Slice<SharedString> files)
         continue;
       if (spPluginManager->LoadPlugin(filename))
       {
+        pInstance->LogInfo(2, "Loaded plugin {0}", filename);
         filename = nullptr;
         --numRemaining;
       }
