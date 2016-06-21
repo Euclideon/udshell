@@ -50,7 +50,7 @@ bool HalDirectory_FindNext(EPFind *pFind, EPFindData *pFindData)
   strncat(pFindData->pSystemPath, pFind->searchPattern, sizeof(pFindData->pSystemPath) - 1);
 
   char pFilePath[260];
-  snprintf(pFilePath, sizeof(pFilePath), "%s%s", pFindData->pSystemPath, pDir->d_name);
+  snprintf(pFilePath, sizeof(pFilePath), "%s/%s", pFindData->pSystemPath, pDir->d_name);
 
   struct stat statbuf;
   if (stat(pFilePath, &statbuf) < 0)
