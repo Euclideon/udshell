@@ -84,6 +84,7 @@ class IKernelStatic
 public:
   virtual void SetEnvironmentVar(String name, String value) = 0;
   virtual MutableString<0> GetEnvironmentVar(String name) = 0;
+  virtual MutableString<0> ResolveString(String string) = 0;
 };
 
 } // namespace ep

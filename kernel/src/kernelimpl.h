@@ -192,6 +192,7 @@ class KernelImplStatic : public BaseStaticImpl<IKernelStatic>
 {
   void SetEnvironmentVar(String name, String value) override final;
   MutableString<0> GetEnvironmentVar(String name) override final;
+  MutableString<0> ResolveString(String string) override final;
 };
 
 

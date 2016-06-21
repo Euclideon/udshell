@@ -88,8 +88,9 @@ public:
 
 
   // static methods
-  static String GetEnvironmentVar(String name) { return GetStaticImpl()->GetEnvironmentVar(name); }
   static void SetEnvironmentVar(String name, String value) { return GetStaticImpl()->SetEnvironmentVar(name, value); }
+  static MutableString<0> GetEnvironmentVar(String name) { return GetStaticImpl()->GetEnvironmentVar(name); }
+  static MutableString<0> ResolveString(String string) { return GetStaticImpl()->ResolveString(string); }
 
 
   // *** these are for internal use ***
