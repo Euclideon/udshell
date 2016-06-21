@@ -15,7 +15,8 @@ fi
 
 PACKAGE_PATH=$PACKAGE_ROOT/$BUILT_TYPE/$BUILD_NAME
 
-PACKAGE_NAME=epsdk-$1-$BUILD_SHORT_NAME
+DATE=`date +%y%m%d`
+PACKAGE_NAME=epsdk-$1-$DATE-$BUILD_SHORT_NAME
 
 
 # copy it locally for working on
