@@ -1,4 +1,4 @@
-	{
+{
 	"version": 1,
 	"kind": "project",
 	"id": "QA.PlatformPlugin",
@@ -8,20 +8,19 @@
 	"trDisplayCategory": "Other Project",
 	"icon": "euclideon.png",
 
-    "options": 
-    [
-        {
-            "key": "PluginName",
-            "value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}"
-        },
-        {
-            "key": "PluginDescription",
-            "value": "%{Description}"
-        },        
-        {
-            "key": "Namespace",
-            "value": "%{NAMESPACE}"
-        },
+	"options": [
+		{
+			"key": "PluginName",
+			"value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}"
+		},
+		{
+			"key": "PluginDescription",
+			"value": "%{Description}"
+		},
+		{
+			"key": "Namespace",
+			"value": "%{NAMESPACE}"
+		},
 		{
 			"key": "GUARD",
 			"value": "%{JS: Cpp.classToHeaderGuard('%{ProjectName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}"
@@ -30,53 +29,53 @@
 			"key": "LIBEP",
 			"value": "liblibep.a"
 		}
-    ],
+	],
 
-    "pages": [
-                {
-                    "trDisplayName": "Project Location",
-                    "trShortTitle": "Location",
-                    "typeId": "Project"
-                },
-                {
-                    "trDisplayName": "Component Details",
-                    "trShortTitle": "Details",
-                    "typeId": "Fields",
-                    "data": [
-                        {
-                            "name": "NAMESPACE",
-                            "trDisplayName": "Namespace:",
-                            "mandatory": true,
-                            "type": "LineEdit",
-                            "data": { "validator": "(?:(?:[a-zA-Z_][a-zA-Z_0-9]*::)+[a-zA-Z_][a-zA-Z_0-9]*|)" }
-                        },
-                        {
-                            "name": "Description",
-                            "trDisplayName": "Description:",
-                            "mandatory": true,
-                            "type": "LineEdit",
-                            "data": {  }
-                        }
-                    ]
-                },
-                {
-                    "trDisplayName": "Project Management",
-                    "trShortTitle": "Summary",
-                    "typeId": "Summary"
-                }
-            ],
+	"pages": [
+		{
+			"trDisplayName": "Project Location",
+			"trShortTitle": "Location",
+			"typeId": "Project"
+		},
+		{
+			"trDisplayName": "Component Details",
+			"trShortTitle": "Details",
+			"typeId": "Fields",
+			"data": [
+				{
+					"name": "NAMESPACE",
+					"trDisplayName": "Namespace:",
+					"mandatory": true,
+					"type": "LineEdit",
+					"data": { "validator": "(?:(?:[a-zA-Z_][a-zA-Z_0-9]*::)+[a-zA-Z_][a-zA-Z_0-9]*|)" }
+				},
+				{
+					"name": "Description",
+					"trDisplayName": "Description:",
+					"mandatory": true,
+					"type": "LineEdit",
+					"data": { }
+				}
+			]
+		},
+		{
+			"trDisplayName": "Project Management",
+			"trShortTitle": "Summary",
+			"typeId": "Summary"
+		}
+	],
 	"generators": [
 		{
 			"typeId": "File",
 			"data": [
 				{
 					"source": "Sample.cpp",
-					"target": "%{ProjectDirectory}/%{ProjectName}/src/%{ProjectName}.cpp",
+					"target": "%{ProjectDirectory}/src/%{ProjectName}.cpp",
 					"openInEditor": true
 				},
 				{
 					"source": "Sample.h",
-					"target": "%{ProjectDirectory}/%{ProjectName}/headers/%{ProjectName}.h",
+					"target": "%{ProjectDirectory}/src/%{ProjectName}.h",
 					"openInEditor": true
 				},
 				{
