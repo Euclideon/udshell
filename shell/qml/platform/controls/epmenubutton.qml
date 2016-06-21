@@ -48,10 +48,10 @@ RowLayout {
 
     style: menuButtonStyle
 
-    EPToolTip {
-      target: button
-      text: button.tooltip
-    }
+    //EPToolTip {
+      //target: button
+      //text: button.tooltip
+    //}
   }
 
   Button {
