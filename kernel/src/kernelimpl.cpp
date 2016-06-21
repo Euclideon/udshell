@@ -198,6 +198,37 @@ struct GlobalInstanceInitializer
 
 GlobalInstanceInitializer globalInstanceInitializer;
 
+
+Array<const PropertyInfo> Kernel::GetProperties() const
+{
+  return Array<const PropertyInfo>{
+    EP_MAKE_PROPERTY_RO(ResourceManager, "Resource manager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(CommandManager, "Command manager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(StdOutBroadcaster, "stdout broadcaster", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(StdErrBroadcaster, "stderr broadcaster", nullptr, 0),
+  };
+}
+Array<const MethodInfo> Kernel::GetMethods() const
+{
+  return Array<const MethodInfo>{
+    EP_MAKE_METHOD(Exec, "Execute Lua script")
+  };
+}
+Array<const EventInfo> Kernel::GetEvents() const
+{
+  return Array<const EventInfo>{
+    EP_MAKE_EVENT(UpdatePulse, "Periodic update signal")
+  };
+}
+Array<const StaticFuncInfo> Kernel::GetStaticFuncs() const
+{
+  return Array<const StaticFuncInfo>{
+    EP_MAKE_STATICFUNC(GetEnvironmentVar, "Get an environment variable"),
+    EP_MAKE_STATICFUNC(SetEnvironmentVar, "Set an environment variable")
+  };
+}
+
+
 ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
@@ -260,6 +291,17 @@ Kernel::~Kernel()
 
 Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCount)
 {
+  // HACK: create the KernelImplStatic instance here!
+  ((HashMap<SharedString, UniquePtr<RefCounted>>*)internal::Allocators::GetStaticImplRegistry())->insert(ComponentID(), UniquePtr<KernelImplStatic>::create());
+
+  // set $(AppPath) to argv[0]
+  String exe = commandLine[0].asString();
+#if defined(EP_WINDOWS)
+  Kernel::SetEnvironmentVar("AppPath", exe.getLeftAtLast('\\', true));
+#else
+  Kernel::SetEnvironmentVar("AppPath", exe.getLeftAtLast('/', true));
+#endif
+
   if (!commandLine.get("renderThreadCount"))
     commandLine.insert("renderThreadCount", renderThreadCount);
 
@@ -288,6 +330,9 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   epscope(fail) { DebugFormat("Error creating Kernel\n"); };
 
   renderThreadCount = initParams["renderThreadCount"].as<int>();
+
+  // register global environment vars
+  WrangleEnvironmentVariables();
 
   // register the base Component type
   pInstance->RegisterComponentType<Component, ComponentImpl, ComponentGlue>();
@@ -428,13 +473,23 @@ void KernelImpl::FinishInit()
   }
 
   // load the plugins
-  LoadPluginDir(Slice<const String>{ "bin/plugins", "plugins" });
+  LoadPluginDir(Slice<const String>{
+    "bin/plugins", // *relative path* used during dev
+#if defined(EP_LINUX)
+    "~/.local/share/Euclideon/plugins",
+#endif
+    "$(AppPath)/plugins",
+#if defined(EP_LINUX)
+    "/usr/local/share/Euclideon/plugins",
+    "/usr/share/Euclideon/plugins"
+#endif
+  });
 
   // make the kernel timers
-  spStreamerTimer = pInstance->CreateComponent<Timer>({ { "duration", 33 },{ "timertype", "Interval" } });
+  spStreamerTimer = pInstance->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
   spStreamerTimer->Elapsed.Subscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
 
-  spUpdateTimer = pInstance->CreateComponent<Timer>({ { "duration", 16 },{ "timertype", "Interval" } });
+  spUpdateTimer = pInstance->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
   spUpdateTimer->Elapsed.Subscribe(FastDelegate<void()>(this, &KernelImpl::Update));
 
   // call application init
@@ -509,19 +564,26 @@ void KernelImpl::Shutdown()
   spRenderer = nullptr;
 }
 
+void KernelImpl::WrangleEnvironmentVariables()
+{
+  // TODO: ...
+}
+
 Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const String> extFilter)
 {
   EPFindData findData;
   EPFind find;
   Array<SharedString> pluginFilenames;
 
-  if (!HalDirectory_FindFirst(&find, folderPath.toStringz(), &findData))
+  SharedString path = Kernel::ResolveString(folderPath);
+
+  if (!HalDirectory_FindFirst(&find, path.toStringz(), &findData))
     return nullptr;
   do
   {
     if (findData.attributes & EPFA_Directory)
     {
-      MutableString<260> childFolderPath(Format, "{0}/{1}", folderPath, String((const char*)findData.pFilename));
+      MutableString<260> childFolderPath(Format, "{0}/{1}", path, String((const char*)findData.pFilename));
 
       Array<SharedString> childNames = ScanPluginFolder(childFolderPath, extFilter);
       for (SharedString &cName : childNames)
@@ -530,7 +592,7 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const 
     else
     {
       bool valid = true;
-      MutableString<260> filename(Format, "{0}/{1}", folderPath, String((const char*)findData.pFilename));
+      MutableString<260> filename(Format, "{0}/{1}", path, String((const char*)findData.pFilename));
       for (auto &ext : extFilter)
       {
         valid = (filename.endsWithIC(ext));
@@ -1021,6 +1083,62 @@ ViewRef KernelImpl::SetFocusView(ViewRef spView)
   ViewRef spOld = spFocusView;
   spFocusView = spView;
   return spOld;
+}
+
+void KernelImplStatic::SetEnvironmentVar(String name, String value)
+{
+#if defined(EP_WINDOWS)
+  _putenv_s(name.toStringz(), value.toStringz());
+#else
+  setenv(name.toStringz(), value.toStringz(), 1);
+#endif
+}
+
+MutableString<0> KernelImplStatic::GetEnvironmentVar(String name)
+{
+#if defined(EP_WINDOWS)
+  MutableString<0> r;
+  auto sz = name.toStringz();
+  size_t size;
+  getenv_s(&size, nullptr, 0, sz);
+  if (size)
+  {
+    r.reserve(size);
+    getenv_s(&size, r.ptr, size, sz);
+    r.length = size-1;
+  }
+  return r;
+#else
+  return getenv(name.toStringz());
+#endif
+}
+
+MutableString<0> KernelImplStatic::ResolveString(String string)
+{
+  // TODO: do this loop in blocks rather than one byte at a time!
+  MutableString<0> r(Reserve, string.length);
+  for (size_t i = 0; i < string.length; ++i)
+  {
+    if (string[i] == '$' && string.length > i+1 && string[i+1] == '$')
+    {
+      ++i;
+      r.pushBack(string[i]);
+    }
+    else if (string[i] == '$' && string.length > i+2 && string[i+1] == '(')
+    {
+      size_t end = i + 2;
+      while (end < string.length && string[end] != ')')
+        ++end;
+      String var = string.slice(i+2, end);
+      auto val = GetEnvironmentVar(var);
+      if (val)
+        r.append(val);
+      i = end;
+    }
+    else
+      r.pushBack(string[i]);
+  }
+  return r;
 }
 
 } // namespace ep

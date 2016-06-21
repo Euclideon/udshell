@@ -12,7 +12,7 @@ SHARED_CLASS(DynamicComponent);
 
 class Kernel : public Component
 {
-  __EP_DECLARE_COMPONENT_IMPL(ep, Kernel, IKernel, Component, EPKERNEL_PLUGINVERSION, "Kernel instance", 0)
+  __EP_DECLARE_COMPONENT_STATIC_IMPL(ep, Kernel, IKernel, IKernelStatic, Component, EPKERNEL_PLUGINVERSION, "Kernel instance", 0)
 public:
   static Kernel* CreateInstance(Variant::VarMap commandLine, int renderThreadCount);
 
@@ -86,9 +86,21 @@ public:
   // HACK: we might be able to make better paths to this
   KernelImpl* GetImpl() const { return (KernelImpl*)pImpl.ptr(); }
 
+
+  // static methods
+  static void SetEnvironmentVar(String name, String value) { return GetStaticImpl()->SetEnvironmentVar(name, value); }
+  static MutableString<0> GetEnvironmentVar(String name) { return GetStaticImpl()->GetEnvironmentVar(name); }
+  static MutableString<0> ResolveString(String string) { return GetStaticImpl()->ResolveString(string); }
+
+
   // *** these are for internal use ***
   virtual void RunMainLoop() = 0;
   virtual void Quit() {}
+
+  Array<const PropertyInfo> GetProperties() const;
+  Array<const MethodInfo> GetMethods() const;
+  Array<const EventInfo> GetEvents() const;
+  Array<const StaticFuncInfo> GetStaticFuncs() const;
 
 protected:
   Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine);

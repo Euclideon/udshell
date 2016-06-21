@@ -184,7 +184,13 @@ private:                                                                        
   EP_SFINAE_META_GETTERS
 
 #define EP_DECLARE_COMPONENT_WITH_STATIC_IMPL(Namespace, Name, Interface, StaticInterface, SuperType, Version, Description, Flags)  \
-  EP_DECLARE_COMPONENT_WITH_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)                                \
+  friend class ::ep::Kernel;                                                                                                        \
+  template <typename T, typename U> friend struct ::ep::internal::CreateHelper;                                                     \
+  __EP_DECLARE_COMPONENT_STATIC_IMPL(Namespace, Name, Interface, StaticInterface, SuperType, Version, Description, Flags)
+
+
+#define __EP_DECLARE_COMPONENT_STATIC_IMPL(Namespace, Name, Interface, StaticInterface, SuperType, Version, Description, Flags)     \
+  __EP_DECLARE_COMPONENT_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)                                   \
 public:                                                                                                                             \
   static StaticInterface* GetStaticImpl()                                                                                           \
   {                                                                                                                                 \
