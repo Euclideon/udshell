@@ -24,6 +24,7 @@ if [[ "$CREATOR_DIR" =~ /usr/(local/)?(s)?bin/.* ]]; then
     # goes to /usr/share/qtcreator/...  (TODO: investigate why system installed QtCreator doesn't search /usr/local/...')
     echo "Removing old install..."
     sudo rm -rf /usr/share/qtcreator/templates/wizards/epplugin
+    sudo rm -rf /usr/share/qtcreator/templates/wizards/epactivity
 
     echo "Copying wizard..."
     sudo mkdir -p /usr/share/qtcreator/templates/wizards
@@ -38,6 +39,7 @@ else
   # goes to $CREATOR_DIR/../share/qtcreator/...
   echo "Removing old install..."
   rm -rf $CREATOR_DIR/../share/qtcreator/templates/wizards/epplugin
+  rm -rf $CREATOR_DIR/../share/qtcreator/templates/wizards/epactivity
 
   echo "Copying wizard..."
   mkdir -p $CREATOR_DIR/../share/qtcreator/templates/wizards

@@ -10,6 +10,7 @@ sudo rm -f /usr/local/share/applications/epshell.desktop
 sudo rm -rf /usr/local/share/pixmaps/euclideon
 sudo rm -f /usr/local/share/pixmaps/euclideon.png
 sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epplugin
+sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epactivity
 
 
 # if we just want to uninstall...
