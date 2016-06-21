@@ -8,10 +8,10 @@ Button {
   id: button
   style: epToolButtonStyle
 
-  EPToolTip {
-    target: button
-    text: button.tooltip
-  }
+  //EPToolTip {
+    //target: button
+    //text: button.tooltip
+  //}
 
   Component {
     id: epToolButtonStyle
