@@ -20,7 +20,7 @@ Item {
       activitiesinfo[i]["formattedText"] = text;
       infoModel.append(activitiesinfo[i]);
     }
-    infoModel.sort();
+    //infoModel.sort();
 
     listView.currentIndex = -1;
 
