@@ -472,8 +472,25 @@ void KernelImpl::FinishInit()
     }
   }
 
-  // load the plugins
-  LoadPluginDir(Slice<const String>{
+  // load the plugins...
+  Array<const String> pluginPaths;
+
+  // search env vars for extra plugin paths
+  SharedString pluginPathsVar = Kernel::GetEnvironmentVar("PluginDirs");
+#if defined(EP_WINDOWS)
+  String delimiters = ";";
+#else
+  String delimiters = ";:";
+#endif
+  pluginPathsVar.tokenise([&](String token, size_t) {
+    pluginPaths.pushBack(token);
+  }, delimiters);
+
+  // search global settings for extra plugin paths
+  //...
+
+  // default search paths have lower precedence
+  pluginPaths.concat(Slice<const String>{
     "bin/plugins", // *relative path* used during dev
 #if defined(EP_LINUX)
     "$(HOME)/.local/share/Euclideon/plugins",
@@ -484,6 +501,8 @@ void KernelImpl::FinishInit()
     "/usr/share/Euclideon/plugins"
 #endif
   });
+
+  LoadAllPlugins(pluginPaths);
 
   // make the kernel timers
   spStreamerTimer = pInstance->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
@@ -612,7 +631,7 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const 
   return pluginFilenames;
 }
 
-void KernelImpl::LoadPluginDir(Slice<const String> folderPaths)
+void KernelImpl::LoadAllPlugins(Slice<const String> folderPaths)
 {
   for (auto path : folderPaths)
   {

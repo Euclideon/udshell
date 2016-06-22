@@ -32,6 +32,8 @@ bool NativePluginLoader::LoadPlugin(String filename)
 {
   const char *pFuncName = "epPlugin_Init";
 
+  epPlugin_InitProc *pInit = nullptr;
+
 #if defined(EP_WINDOWS)
 
   // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?
@@ -45,14 +47,14 @@ bool NativePluginLoader::LoadPlugin(String filename)
   HMODULE hDll = LoadLibraryW(widePath);
   if (hDll == NULL)
   {
-    LogError("Unable to load plugin '{0}' - error code '{1}'", filename, (uint32_t)GetLastError());
+    LogError("Unable to load dll '{0}' - error code '{1}'", filename, (uint32_t)GetLastError());
 
     // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
     // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
     return true;
   }
 
-  epPlugin_InitProc *pInit = (epPlugin_InitProc*)GetProcAddress(hDll, pFuncName);
+  pInit = (epPlugin_InitProc*)GetProcAddress(hDll, pFuncName);
   if (!pInit)
   {
     FreeLibrary(hDll);
@@ -61,29 +63,20 @@ bool NativePluginLoader::LoadPlugin(String filename)
     // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
     return true;
   }
-
-  bool bSuccess = pInit(s_pInstance);
-  if (!bSuccess)
-    FreeLibrary(hDll);
-
-  // TODO: add plugin to plugin registry
-  // TODO: plugin component types need to be associated with the plugin, so when the plugin unloads, the component types can be removed
-
-  return bSuccess;
 
 #elif defined(EP_LINUX)
 
   void *hSo = dlopen(filename.toStringz(), RTLD_NOW);
   if (hSo == NULL)
   {
-    LogError("Unable to load plugin '{0}' - error '{1}'", filename, dlerror());
+    LogError("Unable to open library '{0}' - error '{1}'", filename, dlerror());
 
     // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
     // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
     return true;
   }
 
-  epPlugin_InitProc *pInit = (epPlugin_InitProc*)dlsym(hSo, pFuncName);
+  pInit = (epPlugin_InitProc*)dlsym(hSo, pFuncName);
   if (!pInit)
   {
     dlclose(hSo);
@@ -93,23 +86,47 @@ bool NativePluginLoader::LoadPlugin(String filename)
     return true;
   }
 
-  bool bSuccess = pInit(s_pInstance);
-  if (!bSuccess)
-    dlclose(hSo);
-
-  // TODO: add plugin to plugin registry
-  // TODO: plugin component types need to be associated with the plugin, so when the plugin unloads, the component types can be removed
-
-  return bSuccess;
-
 #else
 
   epUnused(pFuncName);
 
   LogError("Platform has no shared-library support!");
-  return false;
 
 #endif
+
+  if (!pInit)
+    return true;
+
+  // initialise the plugin
+  bool bSuccess = false;
+
+  try
+  {
+    bSuccess = pInit(s_pInstance);
+  }
+  catch(std::exception &e)
+  {
+    LogError("Unhandled exception from epPlugin_Init() while loading plugin {0}: {1}", filename, e.what());
+  }
+  catch(...)
+  {
+    LogError("Unhandled C++ exception from epPlugin_Init() while loading plugin {0}!", filename);
+  }
+
+  if (!bSuccess)
+  {
+    LogError("Failed to load plugin {0}!", filename);
+#if defined(EP_WINDOWS)
+    FreeLibrary(hDll);
+#elif defined(EP_LINUX)
+    dlclose(hSo);
+#endif
+  }
+
+  // TODO: add plugin to plugin registry
+  // TODO: plugin component types need to be associated with the plugin, so when the plugin unloads, the component types can be removed
+
+  return bSuccess;
 }
 
 } // namespace ep
