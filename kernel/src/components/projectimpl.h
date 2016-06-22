@@ -34,6 +34,8 @@ namespace ep
   protected:
     Variant SaveActivities();
 
+    void SetVars(String path);
+
     void ParseProject(Variant node);
     void ParseActivities(Variant node);
     void ParseActivity(Variant node);

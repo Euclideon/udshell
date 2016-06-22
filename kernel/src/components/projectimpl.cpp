@@ -5,6 +5,13 @@
 #include "ep/cpp/component/resource/text.h"
 #include "rapidxml.hpp"
 
+// HACK: REMOVE THIS!!!
+#if defined(EP_LINUX)
+# include <unistd.h>
+#elif defined(EP_WINDOWS)
+# include <direct.h>
+#endif
+
 namespace ep {
 
 Array<const PropertyInfo> Project::GetProperties() const
@@ -36,6 +43,18 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
   if (pSrc && pSrc->is(Variant::Type::String))
   {
     spSrc = GetKernel()->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+
+    // set $(ProjectDir)
+    SetVars(pSrc->asString());
+
+    // HACK: fix me later!!!
+    auto dir = GetKernel()->GetEnvironmentVar("ProjectDir");
+#if defined(EP_LINUX)
+    if (chdir(dir.toStringz()) != 0)
+      LogWarning(2, "Unable to change directory to {0}", dir);
+#elif defined(EP_WINDOWS)
+    _chdir(dir.toStringz());
+#endif
   }
   else
   {
@@ -175,6 +194,16 @@ void ProjectImpl::ParseActivity(Variant node)
   {
     LogError("Unable to load Activity from project file \"{0}\"", srcString);
   }
+}
+
+void ProjectImpl::SetVars(String path)
+{
+  GetKernel()->SetEnvironmentVar("ProjectPath", path);
+  size_t s1 = path.findLast('/');
+  size_t s2 = path.findLast('\\');
+  if (s2 > s1 && s2 < path.length)
+    s1 = s2;
+  GetKernel()->SetEnvironmentVar("ProjectDir", path.slice(0, s1));
 }
 
 } // namespace ep
