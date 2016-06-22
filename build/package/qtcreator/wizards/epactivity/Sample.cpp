@@ -42,9 +42,11 @@ Array<const StaticFuncInfo> %{ProjectName}::GetStaticFuncs() const
   ViewRef spView = pKernel->CreateComponent<View>();
   spScene = pKernel->CreateComponent<Scene>();
   CameraRef spCamera = pKernel->CreateComponent<SimpleCamera>();
+  spCamera->SetPerspective(1.0471975512);
+  spCamera->SetMatrix({ 1, 0, 0, 0, -0, 1, 0, 0, 0, -0, 1, 0, 0.59999999999999998, -2.553059046268463, 0.51000000000000001, 1 });
   spView->SetScene(spScene);
   spView->SetCamera(spCamera);
-  
+
   // Add a test cube to the scene
   // Vertex Shader
   ShaderRef spVertexShader = pKernel->CreateComponent<Shader>();
@@ -121,7 +123,7 @@ Array<const StaticFuncInfo> %{ProjectName}::GetStaticFuncs() const
   spTestCube->SetModel(spModel);
 
   spScene->GetRootNode()->AddChild(spTestCube);
-  
+
   // Create the Viewport UIComponent - this provides a renderable frame buffer object in the UI of our view component
   UIComponentRef spViewport;
   epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component"); };
@@ -132,7 +134,7 @@ Array<const StaticFuncInfo> %{ProjectName}::GetStaticFuncs() const
   epscope(fail) { if(!sp%{ProjectName}UI) pKernel->LogError("Error creating %{ProjectName} UI Component"); };
   sp%{ProjectName}UI = component_cast<UIComponent>(pKernel->CreateComponent("%{Namespace}.mainui"));
   sp%{ProjectName}UI->Set("viewport", spViewport);
-  
+
   // Associate the Main UIComponent with our Activity Component
   SetUI(sp%{ProjectName}UI);
 }
