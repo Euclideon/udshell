@@ -3,7 +3,7 @@ Type=Application
 Encoding=UTF-8
 Name=Shell
 Comment=Euclideon Platform Shell application
-Exec=/opt/Euclideon/Shell/epshell.sh "%f"
+Exec=/opt/Euclideon/Shell/epshell.sh --project="%f"
 Icon=euclideon
 Terminal=false
 Categories=Graphics;Science;Engineering;

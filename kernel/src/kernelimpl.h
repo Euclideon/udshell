@@ -131,6 +131,8 @@ public:
 
   AVLTree<String, const ComponentDesc *> extensionsRegistry;
 
+  Variant::VarMap commandLineArgs;
+
   SharedPtr<Renderer> spRenderer;
   int renderThreadCount;
 

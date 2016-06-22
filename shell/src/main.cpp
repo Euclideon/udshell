@@ -430,9 +430,19 @@ void Init(String sender, String message, const Variant &data)
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 
+  Variant *pProject = data.getItem("--project");
+  if (!pProject)
+    pProject = data.getItem("-p");
+  if (pProject)
+  {
+    OpenProject(pProject->asString());
+  }
+  else
+  {
 #ifdef _DEBUG
-  OpenProject("testproj.epproj");
+    OpenProject("testproj.epproj");
 #endif
+  }
 
   if (shutdownTest)
   {

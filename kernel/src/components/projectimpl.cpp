@@ -35,15 +35,7 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
 
   if (pSrc && pSrc->is(Variant::Type::String))
   {
-    srcString = pSrc->asString();
-
-    try {
-      spSrc = GetKernel()->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
-    }
-    catch (EPException &) {
-      LogDebug(2, "Project file \"{0}\" does not exist. Creating new project.", *pSrc);
-      return;
-    }
+    spSrc = GetKernel()->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
   }
   else
   {
