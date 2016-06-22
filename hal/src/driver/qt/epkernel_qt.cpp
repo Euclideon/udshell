@@ -8,6 +8,7 @@
 #include "components/pluginmanager.h"
 
 #include "driver/qt/epkernel_qt.h"
+#include "driver/qt/eprender_qt.h"
 #include "driver/qt/util/qmlbindings_qt.h"
 #include "driver/qt/util/typeconvert_qt.h"
 #include "driver/qt/ui/renderview_qt.h"
@@ -169,7 +170,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   epscope(fail) { delete pMediator; };
   EPTHROW_IF(!QObject::connect(pApplication, &QCoreApplication::aboutToQuit, pMediator, &QtKernelMediator::OnAppQuit), ep::Result::Failure, "Failed to create Qt connection");
 
-  singleThreadMode = !QOpenGLContext::supportsThreadedOpenGL();
+  s_QtGLContext.singleThreadMode = singleThreadMode = !QOpenGLContext::supportsThreadedOpenGL();
   EPTHROW_IF(QOpenGLContext::globalShareContext() == nullptr, ep::Result::Failure, "Unable to create global share context");
 
   // create the qml engine
@@ -260,6 +261,10 @@ ep::Result QtKernel::RegisterWindow(QQuickWindow *pWindow)
   pTopLevelWindow->show();
   pTopLevelWindow->raise();
 
+  // HACK HACK
+  s_QtGLContext.pSurface = pWindow;
+  s_QtGLContext.pContext = nullptr;
+
   return ep::Result::Success;
 }
 
@@ -279,6 +284,10 @@ void QtKernel::UnregisterWindow(QQuickWindow *pWindow)
     if (pGLDebugLogger->initialize())
       pGLDebugLogger->startLogging();
   }
+
+  // HACK HACK
+  s_QtGLContext.pSurface = pOffscreenSurface;
+  s_QtGLContext.pContext = pMainThreadContext;
 
   QObject::disconnect(pWindow, &QQuickWindow::openglContextCreated, pMediator, &QtKernelMediator::OnGLContextCreated);
 }
@@ -457,6 +466,9 @@ void QtKernel::FinishInit()
     pGLDebugLogger->startLogging();
   }
 
+  s_QtGLContext.pContext = pMainThreadContext;
+  s_QtGLContext.pSurface = pOffscreenSurface;
+
   // init the HAL's render system
   GetImpl()->InitRender();
 
@@ -581,6 +593,8 @@ void QtKernelMediator::OnGLContextCreated(QOpenGLContext *pContext)
     pQtKernel->pMainThreadContext->doneCurrent();
     // TODO: cleanup the main thread context?
   }
+
+  s_QtGLContext.pContext = pContext;
 }
 
 // ---------------------------------------------------------------------------------------
