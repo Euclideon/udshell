@@ -165,9 +165,9 @@ void NewProject(String filePath)
   spProject = nullptr;
 
   spProject = spKernel->CreateComponent<Project>({ { "name", "project" } });
-  spProject->SetSrc(filePath);
+  spProject->SetSrc(sFilePath);
 
-  projectName = GetNameFromFilePath(filePath);
+  projectName = GetNameFromFilePath(sFilePath);
   spMainWindow->Set("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   InitProject();
