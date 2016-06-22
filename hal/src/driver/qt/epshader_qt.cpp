@@ -35,6 +35,13 @@ epShader* epShader_CreateShaderFromFile(const char *epUnusedParam(pFilename), ep
 // ***************************************************************************************
 epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType type)
 {
+  // HACK HACK
+  if (s_QtGLContext.singleThreadMode)
+  {
+    if (!QOpenGLContext::currentContext())
+      s_QtGLContext.pContext->makeCurrent(s_QtGLContext.pSurface);
+  }
+
   QOpenGLShader *pQtShader = new QOpenGLShader(s_shaderType[type]);
   if (!pQtShader->compileSourceCode(QByteArray(pSource, static_cast<int>(length))))
   {
@@ -45,6 +52,7 @@ epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType
 
   epShader *pShader = epAllocType(epShader, 1, epAF_None);
   pShader->pShader = pQtShader;
+
   return pShader;
 }
 
@@ -52,6 +60,13 @@ epShader* epShader_CreateShader(const char *pSource, size_t length, epShaderType
 // Author: David Ely, February 2016
 void epShader_DestroyShader(epShader **ppShader)
 {
+  // HACK HACK
+  if (s_QtGLContext.singleThreadMode)
+  {
+    if (!QOpenGLContext::currentContext())
+      s_QtGLContext.pContext->makeCurrent(s_QtGLContext.pSurface);
+  }
+
   EPASSERT(ppShader && *ppShader, "ppShader is invalid");
   epShader *pShader = *ppShader;
   delete pShader->pShader;
@@ -320,6 +335,13 @@ static inline epShaderElement ConvertToShaderElementType(size_t type, uint32_t l
 // ***************************************************************************************
 epShaderProgram* epShader_CreateShaderProgram(epShader *shaders[], size_t arrayLength)
 {
+  // HACK HACK
+  if (s_QtGLContext.singleThreadMode)
+  {
+    if (!QOpenGLContext::currentContext())
+      s_QtGLContext.pContext->makeCurrent(s_QtGLContext.pSurface);
+  }
+
   bool result = true;
   epShaderProgram *pProgram = nullptr;
 
@@ -408,6 +430,13 @@ epilogue:
 // ***************************************************************************************
 void epShader_DestroyShaderProgram(epShaderProgram **ppProgram)
 {
+  // HACK HACK
+  if (s_QtGLContext.singleThreadMode)
+  {
+    if (!QOpenGLContext::currentContext())
+      s_QtGLContext.pContext->makeCurrent(s_QtGLContext.pSurface);
+  }
+
   EPASSERT(ppProgram && *ppProgram, "ppProgram is invalid");
   epShaderProgram *pProgram = *ppProgram;
   delete pProgram->pProgram;

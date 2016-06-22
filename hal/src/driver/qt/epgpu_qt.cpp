@@ -218,21 +218,21 @@ void epGPU_DestroySyncPoint(epSyncPoint **ppSync)
 void epGPU_Init()
 {
   // TODO: gracefully handle this case, maybe try to create a context or postpone init?
-  EPASSERT(QOpenGLContext::currentContext(), "QOpenGLContext::currentContext() should not be null when we call epGPU_Init");
+  //EPASSERT(QOpenGLContext::currentContext(), "QOpenGLContext::currentContext() should not be null when we call epGPU_Init");
+  EPASSERT(s_QtGLContext.pContext, "s_QtGLContext.pResourceContext should not be null when we call epGPU_Init");
 
-  s_QtGLContext.pFunc = QOpenGLContext::currentContext()->functions();
+  s_QtGLContext.pFunc = s_QtGLContext.pContext->functions();
 
   // NOTE: if we're using an old or incompatible version of GL, this will set our pointer to null.
   // This should only be used for 4.0+ functionality
-  s_QtGLContext.pFunc4_0_Core = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_0_Core>();
+  s_QtGLContext.pFunc4_0_Core = s_QtGLContext.pContext->versionFunctions<QOpenGLFunctions_4_0_Core>();
 
   if (s_QtGLContext.pFunc4_0_Core)
     s_QtGLContext.pFunc4_0_Core->initializeOpenGLFunctions();
 
-
   // NOTE: if we're using an old or incompatible version of GL, this will set our pointer to null.
   // This should only be used for 3.2+ functionality
-  s_QtGLContext.pFunc3_2_Core = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_2_Core>();
+  s_QtGLContext.pFunc3_2_Core = s_QtGLContext.pContext->versionFunctions<QOpenGLFunctions_3_2_Core>();
 
   if (s_QtGLContext.pFunc3_2_Core)
     s_QtGLContext.pFunc3_2_Core->initializeOpenGLFunctions();
@@ -246,6 +246,9 @@ void epGPU_Deinit()
   s_QtGLContext.pFunc = nullptr;
   s_QtGLContext.pFunc3_2_Core = nullptr;
   s_QtGLContext.pFunc4_0_Core = nullptr;
+
+  s_QtGLContext.pContext = nullptr;
+  s_QtGLContext.pSurface = nullptr;
 }
 
 #else

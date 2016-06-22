@@ -13,6 +13,8 @@
 #include <QOpenGLFunctions_3_2_Core>
 #include <QOpenGLFunctions_4_0_Core>
 #include <QOpenGLDebugLogger>
+#include <QQuickWindow>
+#include <QOffscreenSurface>
 
 // internal storage of the Qt GL Context
 struct epQtGLContext
@@ -20,6 +22,11 @@ struct epQtGLContext
   QOpenGLFunctions *pFunc;
   QOpenGLFunctions_3_2_Core *pFunc3_2_Core;
   QOpenGLFunctions_4_0_Core *pFunc4_0_Core;
+
+  // HACK HACK HACK
+  QOpenGLContext *pContext;
+  QSurface *pSurface;
+  bool singleThreadMode;
 };
 
 extern epQtGLContext s_QtGLContext;
