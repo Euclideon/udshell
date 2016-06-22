@@ -59,6 +59,14 @@
 			]
 		},
 		{
+			"trDisplayName": "Kit Selection",
+			"trShortTitle": "Kits",
+			"typeId": "Kits",
+			"data": {
+				"projectFilePath": "%{PluginName}"
+			}
+		},
+		{
 			"trDisplayName": "Project Management",
 			"trShortTitle": "Summary",
 			"typeId": "Summary"
