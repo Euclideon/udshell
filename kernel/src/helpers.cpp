@@ -47,7 +47,15 @@ Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
     String arg = output[i].value.asString();
     size_t eq = arg.findFirst('=');
     if (eq < arg.length)
-      output.pushBack(KeyValuePair(arg.slice(0, eq).trim(), arg.slice(eq+1, arg.length).trim()));
+    {
+      String val = arg.slice(eq+1, arg.length).trim();
+      if(val.length >= 2)
+      {
+        if ((val[0] == '\'' && val[val.length-1] == '\'') || (val[0] == '\"' && val[val.length-1] == '\"'))
+          val = val.slice(1, val.length-1);
+      }
+      output.pushBack(KeyValuePair(arg.slice(0, eq).trim(), val));
+    }
   }
 
   return output;
