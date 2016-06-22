@@ -476,9 +476,9 @@ void KernelImpl::FinishInit()
   LoadPluginDir(Slice<const String>{
     "bin/plugins", // *relative path* used during dev
 #if defined(EP_LINUX)
-    "~/.local/share/Euclideon/plugins",
+    "$(HOME)/.local/share/Euclideon/plugins",
 #endif
-    "$(AppPath)/plugins",
+    "$(AppPath)plugins",
 #if defined(EP_LINUX)
     "/usr/local/share/Euclideon/plugins",
     "/usr/share/Euclideon/plugins"

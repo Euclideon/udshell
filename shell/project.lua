@@ -59,7 +59,6 @@ project "epshell"
 		libdirs { "../bin/amd64" }
 		links { "assimp-ep", "dl" }
 		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell" }
-		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell/Qt" }
 		linkoptions { "-Wl,-rpath=bin/amd64" }
 
 	-- These lines are commented out as we don't currently use Dinkey API method in windows so don't need to link
