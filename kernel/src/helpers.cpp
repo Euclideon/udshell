@@ -38,10 +38,17 @@ Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
 {
   Array<const KeyValuePair> output(ep::Reserve, argc);
 
-  // TODO: more comprehensive version that parses for '=' to distinguish key=value ??
-
   for (int i = 0; i < argc; ++i)
-    output.pushBack(KeyValuePair(i, String(argv[i])));
+    output.pushBack(KeyValuePair(i, argv[i]));
+
+  // parse '=' arguments
+  for (int i = 1; i < argc; ++i)
+  {
+    String arg = output[i].value.asString();
+    size_t eq = arg.findFirst('=');
+    if (eq < arg.length)
+      output.pushBack(KeyValuePair(arg.slice(0, eq).trim(), arg.slice(eq+1, arg.length).trim()));
+  }
 
   return output;
 }

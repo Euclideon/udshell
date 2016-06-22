@@ -320,6 +320,7 @@ KernelImpl::KernelImpl(Kernel *pInstance, Variant::VarMap initParams)
   , namedInstanceRegistry(4096)
   , foreignInstanceRegistry(4096)
   , messageHandlers(64)
+  , commandLineArgs(initParams)
 {
   s_pInstance->pKernelInstance = pInstance;
 }
@@ -515,7 +516,7 @@ void KernelImpl::FinishInit()
   if (HasMessageHandler("init"))
   {
     // TODO: Crash handler?
-    if (!SendMessage("$init", "#", "init", nullptr))
+    if (!SendMessage("$init", "#", "init", commandLineArgs))
     {
       pInstance->OnFatal("Fatal error encountered during application init phase.\nSee epKernel.log for details.\n\nExiting...");
       pInstance->Quit();
