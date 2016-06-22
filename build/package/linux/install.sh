@@ -1,14 +1,19 @@
 #!/bin/bash
 
 
+INSTALL_PATH=/usr/local
+
+
 echo "Removing old install..."
 
 sudo rm -rf /opt/Euclideon/Shell
-sudo rm -rf /usr/local/include/ep
-sudo rm -f /usr/local/lib/liblibep.a
-sudo rm -f /usr/local/share/applications/epshell.desktop
-sudo rm -rf /usr/local/share/pixmaps/euclideon
-sudo rm -f /usr/local/share/pixmaps/euclideon.png
+sudo rm -rf $INSTALL_PATH/include/ep
+sudo rm -f $INSTALL_PATH/lib/liblibep.a
+sudo rm -f $INSTALL_PATH/share/applications/epshell.desktop
+sudo rm -f $INSTALL_PATH/share/applications/epviewer.desktop
+sudo rm -rf $INSTALL_PATH/share/pixmaps/euclideon
+sudo rm -f $INSTALL_PATH/share/pixmaps/euclideon.png
+sudo rm -f $INSTALL_PATH/share/mime/packages/euclideon.xml
 sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epplugin
 sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epactivity
 
@@ -39,18 +44,18 @@ sudo cp -dv --preserve=links libassimp-ep.so* /opt/Euclideon/Shell/
 sudo cp -v plugins/libviewer.so /opt/Euclideon/Shell/plugins/
 
 # copy system data
-sudo cp -rv usr/share/* /usr/local/share/
-sudo cp -rv usr/share/pixmaps/euclideon/64x64/euclideon.png /usr/local/share/pixmaps/euclideon.png
+sudo cp -rv usr/share/* $INSTALL_PATH/share/
+sudo cp -rv usr/share/pixmaps/euclideon/64x64/euclideon.png $INSTALL_PATH/share/pixmaps/euclideon.png
 
 
-echo "Installing SDK to /usr/local/..."
+echo "Installing SDK to $INSTALL_PATH/..."
 
 # copy the sdk
-sudo mkdir -p /usr/local/include/
-sudo cp -r include/ep /usr/local/include/
+sudo mkdir -p $INSTALL_PATH/include/
+sudo cp -r include/ep $INSTALL_PATH/include/
 
-sudo mkdir -p /usr/local/lib/
-sudo cp lib/liblibep.a /usr/local/lib/
+sudo mkdir -p $INSTALL_PATH/lib/
+sudo cp lib/liblibep.a $INSTALL_PATH/lib/
 
 
 echo "Install QtCreator project templates..."
@@ -62,6 +67,13 @@ cp -rf usr/share/qtcreator ~/.config/QtProject/
 echo "Creating local directory structure in ~/.local/share/Euclideon/..."
 
 mkdir -p ~/.local/share/Euclideon/plugins
+
+
+echo "Registering mime-types..."
+
+sudo xdg-mime install --novendor --mode system $INSTALL_PATH/share/mime/packages/euclideon.xml
+sudo xdg-mime default epshell.desktop application/epshell
+sudo xdg-mime default epviewer.desktop application/uds
 
 
 echo "Installed successfully!"

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Viewer
+Comment=Application for viewing Unlimited Detail data files
+Exec=/opt/Euclideon/Shell/epviewer "%f"
+Icon=euclideon
+Terminal=false
+Categories=Graphics;Science;Engineering;
+MimeType=application/uds;
