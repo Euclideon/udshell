@@ -49,8 +49,6 @@ Var Label
 #Var Text_State
 Var QtCCheckbox
 Var QtCCheckbox_State
-Var QtLaunchQtCreatorCheckbox
-Var QtLaunchQtCreatorCheckbox_State
 Var QtBrowseButton
 Var QtFolder
 Var QtEnvPath
@@ -133,13 +131,7 @@ Function nsDialogsPage
   ${NSD_OnClick} $QtBrowseButton QtBrowseButtonOnclick
   
   ${NSD_OnChange} $QtFolderText QtFolderValidate
-  
-  #${NSD_CreateCheckbox} 5% 75u 100% 10u "Launch QtCreator at the end of the installation to update the wizards"
-  #Pop $QtLaunchQtCreatorCheckbox
-  #${NSD_OnClick} $QtLaunchQtCreatorCheckbox QtLaunchQtCreatorCheckboxOnClick
-  #${NSD_GetState} $QtLaunchQtCreatorCheckbox $QtLaunchQtCreatorCheckbox_State
-  #EnableWindow $QtLaunchQtCreatorCheckbox 0
-  
+    
   #${NSD_CreateCheckbox} 0 100u 100% 10u "Visual Studio"
   #Pop $VSCheckbox
   #${NSD_OnClick} $VSCheckbox VSCheckboxOnClick
@@ -180,21 +172,14 @@ Function QtCCheckboxOnClick
   ${If} $QtCCheckbox_State == ${BST_CHECKED}
     EnableWindow $QtBrowseButton 1
     EnableWindow $QtFolderText 1  
-    EnableWindow $QtLaunchQtCreatorCheckbox 1
     ${NSD_GetText} $QtFolderText $textBuffer
     Push $textBuffer
     Pop $QtFolder
   ${Else}
     EnableWindow $QtBrowseButton 0
     EnableWindow $QtFolderText 0
-   ${NSD_SetState} $QtLaunchQtCreatorCheckbox 0
-    EnableWindow $QtLaunchQtCreatorCheckbox 0
     EnableWindow $InstalButton 1
   ${EndIf}
-FunctionEnd
-
-Function QtLaunchQtCreatorCheckboxOnClick
-  ${NSD_GetState} $QtLaunchQtCreatorCheckbox $QtLaunchQtCreatorCheckbox_State
 FunctionEnd
 
 
@@ -227,21 +212,26 @@ Section "install"
     WriteIniStr "$INSTDIR\uninstall.ini" "Uninstall" "QtFolder" $QtFolder 
     CreateDirectory $QtFolder\..\share\qtcreator\templates\wizards\euclideon
     setOutPath $QtFolder\..\share\qtcreator\templates\wizards\euclideon
-    File /r "..\..\..\qtcreator\"
+    File /r "..\..\..\tempinstalldir\qtcreator\"
   ${EndIf}
-
-  ${If} $QtLaunchQtCreatorCheckbox_State == ${BST_CHECKED}
-    Exec '"$QtFolder\qtcreator.exe" -customwizard-verbose'
-  ${EndIf}
-      
-  #Run QtCreator QtLaunchQtCreatorCheckbox  
+    
   # Files for the install directory - to build the installer, these should be in the same directory as the install script (this file)
   setOutPath $INSTDIR
   # Files added here should be removed by the uninstaller (see section "uninstall")
-  File /r '..\..\..\tempinstalldir\*.dll'
-  File /r '..\..\..\tempinstalldir\epshell.exe'
-  File /r '..\..\..\tempinstalldir\epviewer.exe'
-  File /r '..\..\..\tempinstalldir\libep-docs.chm'
+  File '..\..\..\tempinstalldir\*.dll'
+  File '..\..\..\tempinstalldir\epshell.exe'
+  File '..\..\..\tempinstalldir\epviewer.exe'
+  File '..\..\..\tempinstalldir\libep-docs.chm'
+  
+  # Qt
+  File '..\..\..\tempinstalldir\qt.conf'
+  File '..\..\..\tempinstalldir\qt\libs\*.dll'
+  CreateDirectory $INSTDIR\qt\plugins
+  setOutPath $INSTDIR\qt\plugins
+  File /r '..\..\..\tempinstalldir\qt\plugins\'
+  CreateDirectory $INSTDIR\qt\qml
+  setOutPath $INSTDIR\qt\qml
+  File /r '..\..\..\tempinstalldir\qt\qml\'
   
   WriteIniStr "$INSTDIR\uninstall.ini" "Uninstall" "QtCCheckbox_State" $QtCCheckbox_State 
   WriteIniStr "$INSTDIR\uninstall.ini" "Uninstall" "VSCheckbox_State" $VSCheckbox_State
@@ -382,10 +372,13 @@ Section "uninstall"
   #${EndIf}
   #delete "$INSTDIR\logo.ico" 
  
+  rmDir /r $INSTDIR\qt
+ 
   delete $INSTDIR\plugins\*.dll
   rmDir $INSTDIR\plugins
 
   delete $INSTDIR\*.dll
+  delete $INSTDIR\qt.conf
   delete $INSTDIR\epshell.exe
   delete $INSTDIR\epviewer.exe
   delete $INSTDIR\libep-docs.chm

@@ -16,11 +16,21 @@ WIN64_ROOT=$PACKAGE_PATH/win64
 
 rm -rf tempinstalldir
 cp -r $WIN32_ROOT tempinstalldir
+
+# Use Qt's windeployqt tool to simplify deployment and packaging
+$QTDIR32/bin/windeployqt --release --no-quick-import --no-translations --no-angle --no-opengl-sw --no-system-d3d-compiler --no-webkit2 --dir tempinstalldir/qt --plugindir tempinstalldir/qt/plugins --libdir tempinstalldir/qt/libs tempinstalldir/epshell.exe
+$QTDIR32/bin/windeployqt --release --no-plugins --no-libraries --no-translations --qmldir shell/qml --dir tempinstalldir/qt/qml tempinstalldir/epshell.exe
+
 ./bin/nsis/makensis -DTARGET32 build/package/windows/installer.nsi 
 mv build/package/windows/epsdk.exe epsdk-win32.exe
 
 rm -rf tempinstalldir
 cp -r $WIN64_ROOT tempinstalldir
+
+# Use Qt's windeployqt tool to simplify deployment and packaging
+$QTDIR/bin/windeployqt --release --no-quick-import --no-translations --no-angle --no-opengl-sw --no-system-d3d-compiler --no-webkit2 --dir tempinstalldir/qt --plugindir tempinstalldir/qt/plugins --libdir tempinstalldir/qt/libs tempinstalldir/epshell.exe
+$QTDIR/bin/windeployqt --release --no-plugins --no-libraries --no-translations --qmldir shell/qml --dir tempinstalldir/qt/qml tempinstalldir/epshell.exe
+
 ./bin/nsis/makensis -DTARGET64 build/package/windows/installer.nsi
 mv build/package/windows/epsdk.exe epsdk-win64.exe
 

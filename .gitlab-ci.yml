@@ -177,7 +177,9 @@ win64_packaging:
   only:
     - master
     - tags
-  script: "build\\packagewindows.sh win64"
+  script: 
+    - set QTDIR=C:\dev\Qt\5.6\msvc2015_64
+    - "build\\packagewindows.sh win64"
   tags:
     - windows
 
@@ -186,7 +188,9 @@ win32_packaging:
   only:
     - master
     - tags
-  script: "build\\packagewindows.sh win32"
+  script:
+  - set QTDIR=C:\dev\Qt\5.6\msvc2015
+  - "build\\packagewindows.sh win32"
   tags:
     - windows
 
