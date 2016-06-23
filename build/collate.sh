@@ -76,6 +76,7 @@ cp bin/amd64/libassimp-ep.so.3.1.1 $UBUNTU_ROOT/
 cp build/package/linux/install.sh $UBUNTU_ROOT/
 cp build/package/linux/install_qtcreator_helpers.sh $UBUNTU_ROOT/
 cp build/package/linux/epshell.sh $UBUNTU_ROOT/
+cp build/package/linux/epshell_debug.sh $UBUNTU_ROOT/
 cp build/package/linux/qt.conf $UBUNTU_ROOT/
 cp -R build/package/qtcreator/debugger/* $UBUNTU_ROOT/debugger/
 cp -R build/package/linux/usr $UBUNTU_ROOT/
@@ -104,6 +105,7 @@ cp bin/amd64/libassimp-ep.so.3.1.1 $CENTOS_ROOT/
 cp build/package/linux/install.sh $CENTOS_ROOT/
 cp build/package/linux/install_qtcreator_helpers.sh $CENTOS_ROOT/
 cp build/package/linux/epshell.sh $CENTOS_ROOT/
+cp build/package/linux/epshell_debug.sh $CENTOS_ROOT/
 cp build/package/linux/qt.conf $CENTOS_ROOT/
 cp -R build/package/qtcreator/debugger/* $CENTOS_ROOT/debugger/
 cp -R build/package/linux/usr $CENTOS_ROOT/
