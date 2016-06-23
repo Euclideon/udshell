@@ -21,6 +21,7 @@
 #include "ep/cpp/component/resource/metadata.h"
 #include "ep/cpp/component/node/geomnode.h"
 #include "dinkey.h"
+#include "ep/cpp/delegate.h"
 
 using namespace ep;
 
@@ -189,6 +190,13 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   return geomNode;
 }
 #endif // EP_DEBUG
+
+void Update(double delta)
+{
+  if (mData.spScene)
+    mData.spScene->Update(delta);
+}
+
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
 static void ViewerInit(String sender, String message, const Variant &data)
@@ -214,6 +222,8 @@ static void ViewerInit(String sender, String message, const Variant &data)
   mData.spView->SetScene(mData.spScene);
   mData.spView->SetCamera(mData.spSimpleCamera);
   mData.spKernel->SetFocusView(mData.spView);
+
+  mData.spView->Activate();
 
   ResourceManagerRef spResourceManager = mData.spKernel->GetResourceManager();
 
@@ -241,6 +251,8 @@ static void ViewerInit(String sender, String message, const Variant &data)
     mData.spScene->GetRootNode()->AddChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
 
+  mData.spKernel->UpdatePulse.Subscribe(Delegate<void(double)>(&Update));
+
   mData.spScene->MakeDirty();
 }
 
@@ -248,6 +260,8 @@ static void ViewerInit(String sender, String message, const Variant &data)
 // Author: David Ely, September 2015
 static void ViewerDeinit(String sender, String message, const Variant &data)
 {
+  mData.spKernel->UpdatePulse.Unsubscribe(Delegate<void(double)>(&Update));
+
   mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
 #if EP_DEBUG
   mData.spScene->GetRootNode()->RemoveChild(mData.spTestGeomNode);
