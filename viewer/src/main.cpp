@@ -81,7 +81,7 @@ static struct
                false                // shutdownTest
               };
 
-
+#if EP_DEBUG
 static GeomNodeRef CreateTestModel(KernelRef kernel)
 {
   // Vertex Shader
@@ -188,7 +188,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 
   return geomNode;
 }
-
+#endif // EP_DEBUG
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
 static void ViewerInit(String sender, String message, const Variant &data)
@@ -219,6 +219,10 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
   if (spResourceManager)
   {
+    Variant *pFile = data.getItem("--file");
+    if (pFile)
+      mData.filename = pFile->asString();
+
     // TODO: enable streamer once we have a tick running to update the streamer
     DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", mData.filename },{ "useStreamer", false } });
     if (spModelDS && spModelDS->GetNumResources() > 0)
@@ -230,10 +234,13 @@ static void ViewerInit(String sender, String message, const Variant &data)
     mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
   }
 
-  mData.spTestGeomNode = CreateTestModel(mData.spKernel);
-
   mData.spScene->GetRootNode()->AddChild(mData.spUDNode);
-  mData.spScene->GetRootNode()->AddChild(mData.spTestGeomNode);
+
+#if EP_DEBUG
+    mData.spTestGeomNode = CreateTestModel(mData.spKernel);
+    mData.spScene->GetRootNode()->AddChild(mData.spTestGeomNode);
+#endif // EP_DEBUG
+
   mData.spScene->MakeDirty();
 }
 
@@ -242,7 +249,9 @@ static void ViewerInit(String sender, String message, const Variant &data)
 static void ViewerDeinit(String sender, String message, const Variant &data)
 {
   mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
+#if EP_DEBUG
   mData.spScene->GetRootNode()->RemoveChild(mData.spTestGeomNode);
+#endif // EP_DEBUG
 
   mData.spUDNode = nullptr;
   mData.spUDModel = nullptr;
