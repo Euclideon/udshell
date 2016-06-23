@@ -804,6 +804,14 @@ namespace internal {
   struct StringifyProxy<MutableString<N>>         { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const VarArg *pArgs) { return ::epStringify(buffer, format, *(String*)pData, pArgs); } static const size_t intify = 0; };
   template<> struct StringifyProxy<SharedString>  { inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const VarArg *pArgs) { return ::epStringify(buffer, format, *(String*)pData, pArgs); } static const size_t intify = 0; };
 
+  template<typename C>
+  struct StringifyProxy<CString<C>>
+  {
+    static_assert(sizeof(C) == 0, "Inefficient call: toStringz() used unnecessarily");
+    inline static ptrdiff_t stringify(Slice<char> buffer, String format, const void *pData, const VarArg *pArgs) { return ::epStringify(buffer, format, String((const char*)*(CString<C>*)pData), pArgs); }
+    static const size_t intify = 0;
+  };
+
   size_t getLength(Slice<VarArg> args);
   Slice<char> concatenate(Slice<char> buffer, Slice<VarArg> args);
   Slice<char> format(String format, Slice<char> buffer, Slice<VarArg> args);
