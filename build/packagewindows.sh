@@ -9,9 +9,10 @@ echo "Generate $1 packages..."
 PACKAGE_ROOT=//bne-fs-fs-002.euclideon.local/Resources/Builds/Platform/Builds
 
 if [ -z "$CI_BUILD_TAG" ]; then
+  DATE=`date +%y%m%d`
   BUILT_TYPE=master
   BUILD_NAME=$CI_BUILD_REF
-  BUILD_SHORT_NAME=${CI_BUILD_REF:0:6}
+  BUILD_SHORT_NAME=$DATE-${CI_BUILD_REF:0:6}
 else
   BUILT_TYPE=release
   BUILD_NAME=$CI_BUILD_TAG
@@ -21,8 +22,7 @@ fi
 PACKAGE_PATH=$PACKAGE_ROOT/$BUILT_TYPE/$BUILD_NAME
 WIN_ROOT=$PACKAGE_PATH/$1
 
-DATE=`date +%y%m%d`
-PACKAGE_NAME=epsdk-$1-$DATE-$BUILD_SHORT_NAME
+PACKAGE_NAME=epsdk-$1-$BUILD_SHORT_NAME
 
 
 # Build windows installers
