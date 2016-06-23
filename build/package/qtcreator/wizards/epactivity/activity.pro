@@ -5,7 +5,7 @@ CONFIG(debug, debug|release) {
   DEFINES += _DEBUG
 }
 
-CONFIG += c++11
+CONFIG += c++11 plugin
 
 SOURCES += src/%{ProjectName}.cpp
 HEADERS += src/%{ProjectName}.h
