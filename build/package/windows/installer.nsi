@@ -38,7 +38,7 @@ LicenseData "license.rtf"
 # This will be in the installer/uninstaller's title bar
 Name "${COMPANYNAME} - ${APPNAME}"
 #Icon "logo.ico"
-outFile "EP_Setup.exe"
+outFile "epsdk.exe"
  
 !include LogicLib.nsh
 !include nsDialogs.nsh
@@ -134,11 +134,11 @@ Function nsDialogsPage
   
   ${NSD_OnChange} $QtFolderText QtFolderValidate
   
-  ${NSD_CreateCheckbox} 5% 75u 100% 10u "Launch QtCreator at the end of the installation to update the wizards"
-  Pop $QtLaunchQtCreatorCheckbox
-  ${NSD_OnClick} $QtLaunchQtCreatorCheckbox QtLaunchQtCreatorCheckboxOnClick
-  ${NSD_GetState} $QtLaunchQtCreatorCheckbox $QtLaunchQtCreatorCheckbox_State
-  EnableWindow $QtLaunchQtCreatorCheckbox 0
+  #${NSD_CreateCheckbox} 5% 75u 100% 10u "Launch QtCreator at the end of the installation to update the wizards"
+  #Pop $QtLaunchQtCreatorCheckbox
+  #${NSD_OnClick} $QtLaunchQtCreatorCheckbox QtLaunchQtCreatorCheckboxOnClick
+  #${NSD_GetState} $QtLaunchQtCreatorCheckbox $QtLaunchQtCreatorCheckbox_State
+  #EnableWindow $QtLaunchQtCreatorCheckbox 0
   
   #${NSD_CreateCheckbox} 0 100u 100% 10u "Visual Studio"
   #Pop $VSCheckbox
@@ -214,9 +214,9 @@ end:
 error:
 FunctionEnd
 
-Function VSCheckboxOnClick
-  ${NSD_GetState} $VSCheckbox $VSCheckbox_State
-FunctionEnd
+#Function VSCheckboxOnClick
+#  ${NSD_GetState} $VSCheckbox $VSCheckbox_State
+#FunctionEnd
  
 Section "install"
   #C:\Qt\Qt5.6.0\Tools\QtCreator\share\qtcreator\templates\wizards\projects\qmlproject
@@ -225,8 +225,9 @@ Section "install"
   
   ${If} $QtCCheckbox_State == ${BST_CHECKED}
     WriteIniStr "$INSTDIR\uninstall.ini" "Uninstall" "QtFolder" $QtFolder 
-    setOutPath $QtFolder\..\share\qtcreator\templates\wizards\projects
-    File /r "qttemplate\"   
+    CreateDirectory $QtFolder\..\share\qtcreator\templates\wizards\euclideon
+    setOutPath $QtFolder\..\share\qtcreator\templates\wizards\euclideon
+    File /r "..\..\..\qtcreator\"
   ${EndIf}
 
   ${If} $QtLaunchQtCreatorCheckbox_State == ${BST_CHECKED}
@@ -363,7 +364,7 @@ Section "uninstall"
   #delete /r "$INSTDIR\EPDK"
   ${If} $QtCCheckbox_State == ${BST_CHECKED}
     ReadINIStr $QtFolder "$INSTDIR\uninstall.ini" "Uninstall" "QtFolder" 
-    RMDir /r $QtFolder\..\share\qtcreator\templates\wizards\projects\qtshellplugin
+    RMDir /r $QtFolder\..\share\qtcreator\templates\wizards\euclideon
   ${EndIf}
 
   #${If} $VSCheckbox_State == ${BST_CHECKED}

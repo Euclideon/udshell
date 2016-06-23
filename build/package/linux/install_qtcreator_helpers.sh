@@ -23,12 +23,14 @@ if [[ "$CREATOR_DIR" =~ /usr/(local/)?(s)?bin/.* ]]; then
   if [[ "$CREATOR_DIR" =~ /usr/?(s)?bin/.* ]]; then
     # goes to /usr/share/qtcreator/...  (TODO: investigate why system installed QtCreator doesn't search /usr/local/...')
     echo "Removing old install..."
+    sudo rm -rf /usr/share/qtcreator/templates/wizards/euclideon
+    # legacy removal - these can be removed in a few releases
     sudo rm -rf /usr/share/qtcreator/templates/wizards/epplugin
     sudo rm -rf /usr/share/qtcreator/templates/wizards/epactivity
 
     echo "Copying wizard..."
-    sudo mkdir -p /usr/share/qtcreator/templates/wizards
-    sudo cp -r usr/share/qtcreator/templates/wizards/* /usr/share/qtcreator/templates/wizards/
+    sudo mkdir -p /usr/share/qtcreator/templates/wizards/euclideon
+    sudo cp -r usr/share/qtcreator/templates/wizards/* /usr/share/qtcreator/templates/wizards/euclideon/
   fi
 
 else
@@ -38,12 +40,14 @@ else
 
   # goes to $CREATOR_DIR/../share/qtcreator/...
   echo "Removing old install..."
+  rm -rf $CREATOR_DIR/../share/qtcreator/templates/wizards/euclideon
+  # legacy removal - these can be removed in a few releases
   rm -rf $CREATOR_DIR/../share/qtcreator/templates/wizards/epplugin
   rm -rf $CREATOR_DIR/../share/qtcreator/templates/wizards/epactivity
 
   echo "Copying wizard..."
-  mkdir -p $CREATOR_DIR/../share/qtcreator/templates/wizards
-  cp -r usr/share/qtcreator/templates/wizards/* $CREATOR_DIR/../share/qtcreator/templates/wizards/
+  mkdir -p $CREATOR_DIR/../share/qtcreator/templates/wizards/euclideon
+  cp -r usr/share/qtcreator/templates/wizards/* $CREATOR_DIR/../share/qtcreator/templates/wizards/euclideon/
 
 fi
 
