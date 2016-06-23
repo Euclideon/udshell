@@ -14,6 +14,9 @@ sudo rm -f $INSTALL_PATH/share/applications/epviewer.desktop
 sudo rm -rf $INSTALL_PATH/share/pixmaps/euclideon
 sudo rm -f $INSTALL_PATH/share/pixmaps/euclideon.png
 sudo rm -f $INSTALL_PATH/share/mime/packages/euclideon.xml
+sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/euclideon
+
+# legacy removal - this can be removed from the install script in a few releases
 sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epplugin
 sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epactivity
 
