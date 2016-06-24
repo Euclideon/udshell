@@ -9,6 +9,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+#include "input_internal.h"
 
 SDL_Window* s_window = nullptr;
 SDL_GLContext s_context = nullptr;
@@ -181,6 +182,40 @@ void SDLKernel::RunMainLoop()
 
     // TODO: need to translate input polling into messages...
     epInput_Update();
+
+    InputState &input = gInputState[gCurrentInputState];
+    InputState &prevInput = gInputState[1 - gCurrentInputState];
+
+    InputEvent ie;
+    if (input.mouse[0][MouseControls::XDelta] || input.mouse[0][MouseControls::YDelta])
+    {
+      ie.deviceType = InputDevice::Mouse;
+      ie.eventType = InputEvent::EventType::Move;
+      ie.move = InputEvent::MoveEvent{ input.mouse[0][MouseControls::XDelta], input.mouse[0][MouseControls::YDelta], input.mouse[0][MouseControls::XAbsolute], input.mouse[0][MouseControls::YAbsolute] };
+      GetImpl()->spFocusView->GetImpl<ep::ViewImpl>()->InputEvent(ie);
+    }
+
+    ie.deviceType = InputDevice::Mouse;
+    ie.eventType = InputEvent::EventType::Key;
+    for (size_t i = (int)MouseControls::LeftButton; i < (int)MouseControls::Button5; i++)
+    {
+      if (input.mouse[0][i] != prevInput.mouse[0][i])
+      {
+        ie.key = InputEvent::KeyEvent{ (int)i, (int)input.mouse[0][i] };
+        GetImpl()->spFocusView->GetImpl<ep::ViewImpl>()->InputEvent(ie);
+      }
+    }
+
+    ie.deviceType = InputDevice::Keyboard;
+    ie.eventType = InputEvent::EventType::Key;
+    for (size_t i = 0; i < (int)KeyCode::Max; i++)
+    {
+      if (input.keys[0][i] != prevInput.keys[0][i])
+      {
+        ie.key = InputEvent::KeyEvent{ (int)i, (int)input.keys[0][i] };
+        GetImpl()->spFocusView->GetImpl<ep::ViewImpl>()->InputEvent(ie);
+      }
+    }
 
     // render a frame (this could move to another thread!)
     RenderableViewRef spRenderView = GetImpl()->spFocusView->GetImpl<ViewImpl>()->GetRenderableView();

@@ -21,6 +21,7 @@
 #include "ep/cpp/component/resource/metadata.h"
 #include "ep/cpp/component/node/geomnode.h"
 #include "dinkey.h"
+#include "ep/cpp/delegate.h"
 
 using namespace ep;
 
@@ -81,7 +82,7 @@ static struct
                false                // shutdownTest
               };
 
-
+#if EP_DEBUG
 static GeomNodeRef CreateTestModel(KernelRef kernel)
 {
   // Vertex Shader
@@ -188,6 +189,13 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 
   return geomNode;
 }
+#endif // EP_DEBUG
+
+void Update(double delta)
+{
+  if (mData.spScene)
+    mData.spScene->Update(delta);
+}
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
@@ -215,10 +223,16 @@ static void ViewerInit(String sender, String message, const Variant &data)
   mData.spView->SetCamera(mData.spSimpleCamera);
   mData.spKernel->SetFocusView(mData.spView);
 
+  mData.spView->Activate();
+
   ResourceManagerRef spResourceManager = mData.spKernel->GetResourceManager();
 
   if (spResourceManager)
   {
+    Variant *pFile = data.getItem("--file");
+    if (pFile)
+      mData.filename = pFile->asString();
+
     // TODO: enable streamer once we have a tick running to update the streamer
     DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", mData.filename },{ "useStreamer", false } });
     if (spModelDS && spModelDS->GetNumResources() > 0)
@@ -228,12 +242,25 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
     mData.spUDNode->SetUDModel(mData.spUDModel);
     mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
+
+    Double4x4 modelMat = mData.spUDModel->GetUDMatrix();
+    Double3 modelCorner = mData.spUDModel->GetUDMatrix().axis.t.toVector3();
+    Double3 camPos = modelCorner + Double3{ modelMat.axis.x.x*2, modelMat.axis.y.y*2, modelMat.axis.z.z*2 };
+
+    Double4x4 camMat = Double4x4::lookAt(camPos, modelCorner + Double3{ modelMat.axis.x.x / 2, modelMat.axis.y.y / 2, modelMat.axis.z.z / 2 });
+
+    mData.spSimpleCamera->SetMatrix(camMat);
   }
 
-  mData.spTestGeomNode = CreateTestModel(mData.spKernel);
-
   mData.spScene->GetRootNode()->AddChild(mData.spUDNode);
-  mData.spScene->GetRootNode()->AddChild(mData.spTestGeomNode);
+
+#if EP_DEBUG
+    mData.spTestGeomNode = CreateTestModel(mData.spKernel);
+    mData.spScene->GetRootNode()->AddChild(mData.spTestGeomNode);
+#endif // EP_DEBUG
+
+  mData.spKernel->UpdatePulse.Subscribe(Delegate<void(double)>(&Update));
+
   mData.spScene->MakeDirty();
 }
 
@@ -241,8 +268,12 @@ static void ViewerInit(String sender, String message, const Variant &data)
 // Author: David Ely, September 2015
 static void ViewerDeinit(String sender, String message, const Variant &data)
 {
+  mData.spKernel->UpdatePulse.Unsubscribe(Delegate<void(double)>(&Update));
+
   mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
+#if EP_DEBUG
   mData.spScene->GetRootNode()->RemoveChild(mData.spTestGeomNode);
+#endif // EP_DEBUG
 
   mData.spUDNode = nullptr;
   mData.spUDModel = nullptr;
