@@ -2,23 +2,26 @@ QT += core qml quick gui widgets
 TEMPLATE = app
 TARGET = "epshell"
 
+ARCH = x86
+contains (QMAKE_TARGET.arch, x86_64) {
+  ARCH = x64
+  CONFIG += x64
+}
+
 CONFIG(debug, debug|release) {
-  CONFIG += debugEP
+  DEFINES += _DEBUG
+  TOOLSET = Debug_$${ARCH}
 }
 else {
-  CONFIG += releaseEP
+  TOOLSET = Release_$${ARCH}
 }
 
-win32:debugEP:TOOLSET = DebugQML_x64
-win32:releaseEP:TOOLSET = ReleaseQML_x64
-
-unix:debugEP:TOOLSET = Debug_
-unix:releaseEP:TOOLSET = Release_
-
-debugEP:DEFINES += _DEBUG
-
 DESTDIR = $${PWD}/../
-build_pass:DESTDIR = $${PWD}/../public/bin/$${TOOLSET}
+build_pass:DESTDIR = $${PWD}/bin/$${TOOLSET}
+MOC_DIR = $${PWD}/int/.moc/$${TOOLSET}
+OBJECTS_DIR = $${PWD}/int/.obj/$${TOOLSET}
+RCC_DIR = $${PWD}/int/.rcc/$${TOOLSET}
+UI_DIR = $${PWD}/int/.ui/$${TOOLSET}
 
 CONFIG += c++11 qml_debug
 
@@ -47,10 +50,11 @@ LIBS += -L$${LIB_PATH} -llibep \
 
 win32 {
   THIRDPARTY_LIB_PATH = $${PWD}/../3rdparty/
-  LIBS += -L$${THIRDPARTY_LIB_PATH}/assimp-3.1.1/lib/windows/x64 -lassimp-ep64 \
-          -L$${LIB_PATH} -lpcre \
+  LIBS += -L$${LIB_PATH} -lpcre \
           -lws2_32 \
           -lwinmm
+  x64:LIBS += -L$${THIRDPARTY_LIB_PATH}/assimp-3.1.1/lib/windows/x64 -lassimp-ep64
+  else:LIBS += -L$${THIRDPARTY_LIB_PATH}/assimp-3.1.1/lib/windows/x32 -lassimp-ep32
 }
 unix {
   LIBS += -L$${PWD}/../bin/amd64/ -lassimp-ep \
