@@ -109,6 +109,7 @@ V& HashMap<K, V, HashPred>::tryInsert(Key&& key, const V& val)
   *ppBucket = pNode;
   return pNode->data.value;
 }
+#if 0 // TODO : Fix this once delegate supports lambdas
 template <typename K, typename V, typename HashPred>
 template <typename Key>
 V& HashMap<K, V, HashPred>::tryInsert(Key&& key, std::function<V()> lazy)
@@ -122,7 +123,7 @@ V& HashMap<K, V, HashPred>::tryInsert(Key&& key, std::function<V()> lazy)
   *ppBucket = pNode;
   return pNode->data.value;
 }
-
+#endif
 template <typename K, typename V, typename HashPred>
 template <typename Key, typename Val>
 V& HashMap<K, V, HashPred>::replace(Key&& key, Val&& val)

@@ -18,13 +18,17 @@ project "eptest"
 	links { "udPlatform" }
 	links { "udPointCloud" }
 	links { "libep" }
+	links { "hal-null" }
 	links { "epkernel" }
 	links { luaPath }
 	links { "pcre" }
 	links { googletestPath }
 
+	links { "GLEW" }
+	defines { "GLEW_STATIC" }
+
 	configuration { "windows" }
-		links { "ws2_32.lib", "winmm.lib" }
+		links { "ws2_32.lib", "winmm.lib", "opengl32.lib", "glu32.lib" }
 
 	configuration { "windows", "x64" }
 		links { "assimp-ep64.lib" }
@@ -35,7 +39,7 @@ project "eptest"
 
 	configuration { "linux" }
 		libdirs { "../bin/amd64" }
-		links { "assimp-ep", "dl" }
+		links { "assimp-ep", "GL", "dl" }
 		linkoptions { "-Wl,-rpath=../bin/amd64,-rpath=bin/amd64" }
 
 	configuration {}

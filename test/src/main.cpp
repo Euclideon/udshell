@@ -1,60 +1,23 @@
 #include "gtest/gtest.h"
 #include "ep/cpp/platform.h"
-#include "ep/cpp/plugin.h"
-#include "ep/cpp/variant.h"
-#include "ep/cpp/hashmap.h"
-#include "ep/cpp/safeptr.h"
 
 namespace ep {
 namespace internal {
 
 extern bool gUnitTesting;
 
-void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line);
-void _Free(void *pMemory);
-
-ErrorSystem s_errorSystem;
-HashMap<SharedString, UniquePtr<RefCounted>> s_staticImplRegistry;
+// HACK !!! (GCC and Clang)
+// For the implementation fo epInternalInit defined in globalinitialisers to override
+// the weak version in epplatform.cpp at least one symbol from that file must
+// be referenced externally.
+void *GetStaticImplRegistry();
 
 } // namespace internal
 } // namespace ep
 
-static ep::AVLTreeAllocator<ep::VariantAVLNode> s_varAVLAllocator;
-static ep::HashMap<ep::internal::SafeProxy<void>*, void*, ep::internal::PointerHash> s_weakRefRegistry(65536);
-
-static ep::Instance s_instance =
-{
-  EP_APIVERSION,  // apiVersion;
-
-  nullptr,        // pKernelInstance;
-  (void*)&ep::internal::s_errorSystem, // ErrorSystem
-  (void*)&ep::internal::s_staticImplRegistry,
-  (void*)&s_varAVLAllocator,
-  (void*)&s_weakRefRegistry,
-
-  [](size_t size, epAllocationFlags flags, const char* pFile, int line) -> void* { return ep::internal::_Alloc(size, flags, pFile, line); }, //  Alloc
-
-  [](void *pMem) -> void { ep::internal::_Free(pMem); }, // Free
-
-  [](ep::String condition, ep::String message, ep::String file, int line) -> void { IF_EPASSERT(AssertFailed(condition, message, file, line);) }, // AssertFailed
-
-  [](ep::Component *) -> void { }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
-
-  [](ep::String pattern, void *pHandle, void *pData) -> void* { return nullptr; } // Find
-};
-
-struct GlobalInstanceInitializer
-{
-  GlobalInstanceInitializer()
-  {
-    ep::s_pInstance = &s_instance;
-  }
-};
-
-GlobalInstanceInitializer globalInstanceInitializer;
-
 int main(int argc, char **argv)
 {
+  ep::internal::GetStaticImplRegistry();
   ep::internal::gUnitTesting = true;
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

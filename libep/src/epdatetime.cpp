@@ -1,3 +1,4 @@
+#include "libep_internal.h"
 #include "ep/cpp/datetime.h"
 #include <time.h>
 

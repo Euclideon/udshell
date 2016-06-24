@@ -1,3 +1,4 @@
+#include "libep_internal.h"
 #include "ep/cpp/plugin.h"
 #include "ep/cpp/filesystem.h"
 #include "ep/cpp/variant.h"
