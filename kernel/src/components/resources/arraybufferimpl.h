@@ -49,9 +49,9 @@ protected:
   friend class GeomNode;
 
   SharedString elementType;
-  size_t elementSize;
-  size_t dimensions;
-  size_t shape[4];
+  size_t elementSize = 0;
+  size_t dimensions = 0;
+  size_t shape[4] = { 0 };
 };
 
 } // namespace ep
