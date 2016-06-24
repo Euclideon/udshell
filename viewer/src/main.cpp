@@ -242,6 +242,14 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
     mData.spUDNode->SetUDModel(mData.spUDModel);
     mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
+
+    Double4x4 modelMat = mData.spUDModel->GetUDMatrix();
+    Double3 modelCorner = mData.spUDModel->GetUDMatrix().axis.t.toVector3();
+    Double3 camPos = modelCorner + Double3{ modelMat.axis.x.x*2, modelMat.axis.y.y*2, modelMat.axis.z.z*2 };
+
+    Double4x4 camMat = Double4x4::lookAt(camPos, modelCorner + Double3{ modelMat.axis.x.x / 2, modelMat.axis.y.y / 2, modelMat.axis.z.z / 2 });
+
+    mData.spSimpleCamera->SetMatrix(camMat);
   }
 
   mData.spScene->GetRootNode()->AddChild(mData.spUDNode);

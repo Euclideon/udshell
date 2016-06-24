@@ -679,7 +679,7 @@ template <typename T>
 Matrix4x4<T> Matrix4x4<T>::lookAt(const Vector3<T> &from, const Vector3<T> &at, const Vector3<T> &up)
 {
   Vector3<T> y = Normalize3(at - from);
-  Vector3<T> x = Normalize3(udCross3(y, up));
+  Vector3<T> x = Normalize3(Cross3(y, up));
   Vector3<T> z = Cross3(x, y);
   Matrix4x4<T> r = { {{ x.x,    x.y,    x.z,    0,
                        y.x,    y.y,    y.z,    0,
