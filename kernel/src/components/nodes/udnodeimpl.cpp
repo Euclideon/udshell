@@ -33,6 +33,7 @@ void UDNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
     UDRenderJob &job = spScene.ud.pushBack();
     job.spModel = spModel;
     job.matrix = mat;
+    job.udNodePtr = NodeRef(pInstance);
   }
 }
 

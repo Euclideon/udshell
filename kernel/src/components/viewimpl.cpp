@@ -1,5 +1,6 @@
 #include "viewimpl.h"
 #include "kernelimpl.h"
+#include "ep/cpp/component/node/node.h"
 
 namespace ep {
 
@@ -199,7 +200,23 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
         pickedPoint = (reinterpret_cast<const UDRenderContext*>(pick.model)->matrix * transPos).toVector3();
 
         pickHighlightData = { pick.model, pick.nodeIndex };
-        pInstance->PickFound.Signal(pickedPoint);
+
+        NodeRef udNodePtr = nullptr;
+
+        for (const UDJob &job : spLatestFrame->spScene->ud)
+        {
+          const udRenderModel* prModel = reinterpret_cast<const udRenderModel*>(&job.context);
+
+          if (prModel == pick.model)
+          {
+            udNodePtr = job.udNodePtr;
+            break;
+          }
+        }
+
+        EPASSERT(udNodePtr != nullptr, "No node for octree");
+
+        pInstance->PickFound.Signal(pickedPoint, udNodePtr);
       }
       else
       {

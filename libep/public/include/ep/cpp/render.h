@@ -7,6 +7,7 @@
 #include "ep/cpp/rect.h"
 #include "ep/cpp/internal/i/imaterial.h"
 #include "ep/cpp/internal/i/iudmodel.h"
+#include "ep/cpp/component/node/node.h"
 
 namespace ep {
 
@@ -120,6 +121,8 @@ struct UDRenderJob
 {
   UDModelRef spModel;
   Double4x4 matrix;
+
+  NodeRef udNodePtr; // TODO: Change this so there is no need to pass the scene ptr down
 };
 
 class RenderScene

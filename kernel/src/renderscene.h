@@ -13,6 +13,7 @@
 #include "ep/cpp/component/resource/arraybuffer.h"
 #include "ep/cpp/component/resource/shader.h"
 #include "ep/cpp/component/resource/model.h"
+#include "ep/cpp/component/node/node.h"
 #include "ep/cpp/render.h"
 
 #include "hal/render.h"
@@ -40,6 +41,8 @@ struct UDJob
   UDModelRef spModel;
   UDRenderContext context;
   Array<RenderConstantBufferRef, 3> constantBuffers;
+
+  NodeRef udNodePtr; // TODO: Change this so there is no need to pass the scene ptr down
 };
 
 struct GeomJob

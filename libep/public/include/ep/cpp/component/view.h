@@ -72,7 +72,7 @@ public:
   Event<> Dirty;
   Event<> FrameReady;
   Event<bool> EnabledPickingChanged;
-  Event<Double3> PickFound;
+  Event<Double3, NodeRef&> PickFound;
   Event<ScreenPoint> MousePositionChanged;
 
 protected:
