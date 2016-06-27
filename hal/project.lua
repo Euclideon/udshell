@@ -50,13 +50,12 @@ project("hal-" .. halBuild)
 
 		configuration {}
 	else
+		if halBuild == "null" then
+			defines { "EP_HEADLESS" }
+		end
 		defines { "GLEW_STATIC" }
 
 --		includedirs { "../ud/3rdParty/GL/freeglut/static/Include" }
 		includedirs { "../ud/3rdParty/sdl2/include" }
 		includedirs { "../ud/3rdParty/GL/glew/include" }
-
---		filter "windows"
---			includedirs { "../ud/3rdParty/sdl2/include" }
---		filter {}
 	end

@@ -13,7 +13,7 @@ struct HalTimerWin32 : public HalTimer
   UINT_PTR timer;
 };
 
-static void Win32Callback(HWND , UINT , UINT_PTR idEvent, DWORD )
+static void CALLBACK Win32Callback(HWND , UINT , UINT_PTR idEvent, DWORD )
 {
   HalTimerWin32 *pTimer = (HalTimerWin32*)idEvent;
   pTimer->pCallBack(pTimer, pTimer->pUserData);

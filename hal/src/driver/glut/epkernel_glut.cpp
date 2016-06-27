@@ -1,6 +1,6 @@
 #include "driver.h"
 
-#if EPWINDOW_DRIVER == EPDRIVER_GLUT
+#if EPKERNEL_DRIVER == EPDRIVER_GLUT
 
 #include "udGLUT_Internal.h"
 

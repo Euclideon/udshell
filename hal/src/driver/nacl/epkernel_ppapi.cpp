@@ -1,6 +1,6 @@
 #include "driver.h"
 
-#if EPWINDOW_DRIVER == EPDRIVER_PPAPI
+#if EPKERNEL_DRIVER == EPDRIVER_PPAPI
 
 #include <stdarg.h>
 #include "udPlatformUtil.h"
