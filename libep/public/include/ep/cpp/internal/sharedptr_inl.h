@@ -6,6 +6,8 @@ namespace ep {
 template<typename T>
 ptrdiff_t epStringify(Slice<char> buffer, String format, SharedPtr<T> spT, const VarArg *pArgs)
 {
+  if (!spT)
+    return ::epStringify(buffer, format, nullptr, pArgs);
   return epStringifyTemplate(buffer, format, spT.ptr(), pArgs);
 }
 
