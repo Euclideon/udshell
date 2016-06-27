@@ -574,7 +574,7 @@ void KernelImpl::Shutdown()
   if (HasMessageHandler("deinit"))
     SendMessage("$deinit", "#", "deinit", nullptr);
 
-  SetFocusView(nullptr);
+  pInstance->SetFocusView(nullptr);
 
   spUpdateTimer = nullptr;
   spStreamerTimer = nullptr;

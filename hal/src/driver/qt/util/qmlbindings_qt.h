@@ -152,6 +152,7 @@ private:
 
   QtEPComponent() : QObject(nullptr), pComponent(nullptr) {}
   QtEPComponent(const ep::ComponentRef &spComponent) : QObject(nullptr), spComponent(spComponent) { pComponent = spComponent.ptr(); }
+  QtEPComponent(ep::ComponentRef &&rval) : QObject(nullptr), spComponent(std::move(rval)) { pComponent = spComponent.ptr(); }
   QtEPComponent(const QtEPComponent &val)
     : QObject(val.parent()), pMetaObj(val.pMetaObj), spComponent(ep::ComponentRef(val.pComponent)), pComponent(val.pComponent)
   {
@@ -216,20 +217,12 @@ public:
 // factory class to build a qml shim component from a component
 struct BuildQtEPComponent
 {
-  // create a qml shim component that has a shared ref to the ep::component
-  static QtEPComponent *Create(const ep::ComponentRef &spComponent) { return CreateInternal(spComponent); }
+  // create a qml shim component that has a shared ref to the ep::Component
+  static QtEPComponent *Create(const ep::ComponentRef &spComponent) { return (spComponent ? new QtEPComponent(spComponent) : nullptr); }
+  static QtEPComponent *Create(ep::ComponentRef &&spComponent) { return (spComponent ? new QtEPComponent(std::move(spComponent)) : nullptr); }
 
   // create a qml shim component that has a weak ref to the ep::component - used to avoid circular deps
-  static QtEPComponent *CreateWeak(ep::Component *pThis) { return CreateInternal(pThis, QtHasWeakRef); }
-
-private:
-  template <typename Component, typename ...Args>
-  static QtEPComponent *CreateInternal(Component pComponent, Args ...args)
-  {
-    if (!pComponent)
-      return nullptr;
-    return new QtEPComponent(pComponent, args...);
-  }
+  static QtEPComponent *CreateWeak(ep::Component *pThis) { return (pThis ? new QtEPComponent(pThis, QtHasWeakRef) : nullptr); }
 };
 
 } // namespace qt

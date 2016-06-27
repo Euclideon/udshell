@@ -158,7 +158,7 @@ private:
 
 // component cast
 template<typename T>
-inline SharedPtr<T> component_cast(ComponentRef spComponent)
+inline SharedPtr<T> component_cast(const ComponentRef &spComponent)
 {
   EPTHROW_IF(!spComponent, Result::BadCast, "component is null");
 
