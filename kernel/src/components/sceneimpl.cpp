@@ -65,7 +65,7 @@ RenderableSceneRef SceneImpl::GetRenderScene()
     return spCache;
 
   RenderScene scene;
-  rootNode->Render(scene, rootNode->GetMatrix());
+  rootNode->DoRender(scene, rootNode->GetMatrix());
 
   spCache = Convert(scene, GetKernel()->GetImpl()->GetRenderer().ptr());
 
