@@ -2,26 +2,32 @@
 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-<Type Name="epString">
-    <DisplayString>{ptr,[length]s8}</DisplayString>
-</Type>
-
 <Type Name="ep::BaseString&lt;char&gt;">
     <DisplayString>{ptr,[length]s8}</DisplayString>
+    <StringView>ptr,[length]s8</StringView>
+</Type>
+<Type Name="ep::BaseString&lt;wchar_t&gt;">
+    <DisplayString>{ptr,[length]su}</DisplayString>
+    <StringView>ptr,[length]su</StringView>
 </Type>
 <Type Name="ep::BaseString&lt;char16_t&gt;">
-    <DisplayString>{ptr,[length]s16}</DisplayString>
+    <!-- TODO: check out Why doesn't 's16' work, but 's32' does? -->
+    <DisplayString>{ptr,[length]}</DisplayString>
+    <StringView>ptr,[length]</StringView>
 </Type>
 <Type Name="ep::BaseString&lt;char32_t&gt;">
     <DisplayString>{ptr,[length]s32}</DisplayString>
+    <StringView>ptr,[length]s32</StringView>
 </Type>
 
 <Type Name="ep::MutableString&lt;*&gt;">
     <DisplayString>{ptr,[length]s8}</DisplayString>
+    <StringView>ptr,[length]s8</StringView>
 </Type>
 
 <Type Name="ep::SharedString">
     <DisplayString>{ptr,[length]s8}</DisplayString>
+    <StringView>ptr,[length]s8</StringView>
 </Type>
 
 <Type Name="ep::Slice&lt;*&gt;">
@@ -55,23 +61,23 @@
     </Expand>
 </Type>
 
-<Type Name="ep::AVLTree&lt;*,*,*&gt;">
+<Type Name="ep::AVLTree&lt;*,*,*,*&gt;">
     <Expand>
         <TreeItems>
-            <Size>size</Size>
-            <HeadPointer>root</HeadPointer>
+            <Size>numNodes</Size>
+            <HeadPointer>pRoot</HeadPointer>
             <LeftPointer>left</LeftPointer>
             <RightPointer>right</RightPointer>
-            <ValueNode>v</ValueNode>
+            <ValueNode>kvp</ValueNode>
         </TreeItems>
     </Expand>
 </Type>
 
-<Type Name="ep::SharedMap&lt;*,*,*&gt;">
+<Type Name="ep::SharedMap&lt;*&gt;">
     <Expand>
-        <Item Name="refcount" Condition="ptr != nullptr">ptr-&gt;rc</Item>
-        <Item Name="tree" Condition="ptr == nullptr">"nullptr"</Item>
-        <Item Name="tree" Condition="ptr != nullptr">ptr-&gt;tree</Item>
+        <Item Name="rc" Condition="ptr.pInstance != nullptr">ptr.pInstance-&gt;rc</Item>
+        <Item Name="tree" Condition="ptr.pInstance == nullptr">nullptr</Item>
+        <Item Name="tree" Condition="ptr.pInstance != nullptr">ptr.pInstance-&gt;tree</Item>
     </Expand>
 </Type>
 
@@ -79,44 +85,52 @@
     <DisplayString Condition="t == 0">void</DisplayString>
     <DisplayString Condition="t == 1">{err}</DisplayString>
     <DisplayString Condition="t == 2">nullptr</DisplayString>
-    <DisplayString Condition="t == 3">{b}</DisplayString>
+    <DisplayString Condition="t == 3">{(bool)b}</DisplayString>
     <DisplayString Condition="t == 4">{i}</DisplayString>
     <DisplayString Condition="t == 5">{f}</DisplayString>
     <DisplayString Condition="t == 6">{length}</DisplayString>
     <DisplayString Condition="t == 7">{length}</DisplayString>
-    <DisplayString Condition="t == 8 &amp;&amp; length == 0 &amp;&amp; p == nullptr">nullptr</DisplayString>
-    <DisplayString Condition="t == 8 &amp;&amp; length == 1 &amp;&amp; p == nullptr">nullptr</DisplayString>
-    <DisplayString Condition="t == 8 &amp;&amp; length == 2 &amp;&amp; p == nullptr">nullptr</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; p == nullptr">nullptr</DisplayString>
     <DisplayString Condition="t == 8 &amp;&amp; length == 0 &amp;&amp; p != nullptr">{sp}</DisplayString>
     <DisplayString Condition="t == 8 &amp;&amp; length == 1 &amp;&amp; p != nullptr">{c}</DisplayString>
     <DisplayString Condition="t == 8 &amp;&amp; length == 2 &amp;&amp; p != nullptr">{d}</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; length == 3 &amp;&amp; p != nullptr">{sub}</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; length == 4 &amp;&amp; p != nullptr">{aa-&gt;tree}</DisplayString>
+    <DisplayString Condition="t == 8 &amp;&amp; length == 5 &amp;&amp; p != nullptr">{r}</DisplayString>
     <DisplayString Condition="t == 9">{s,[length]s8}</DisplayString>
     <DisplayString Condition="t == 10">{a,[length]}</DisplayString>
-    <DisplayString Condition="t == 11">{aa}</DisplayString>
-    <DisplayString Condition="t == 12">{((char*)this+1),[((unsigned int)*(unsigned char*)this) &gt;&gt; 4]s8}</DisplayString>
+    <DisplayString Condition="t == 11">{((char*)this+1),[((unsigned int)*(unsigned char*)this) &gt;&gt; 4]s8}</DisplayString>
 
     <StringView Condition="t == 9">s,[length]s8</StringView>
-    <StringView Condition="t == 12">((char*)this+1),[((unsigned int)*(unsigned char*)this) &gt;&gt; 4]s8</StringView>
+    <StringView Condition="t == 11">((char*)this+1),[((unsigned int)*(unsigned char*)this) &gt;&gt; 4]s8</StringView>
 
     <Expand>
         <Item Name="sharedptr" Condition="t == 8 &amp;&amp; length == 0">sp</Item>
         <Item Name="component" Condition="t == 8 &amp;&amp; length == 1">c</Item>
         <Item Name="delegate" Condition="t == 8 &amp;&amp; length == 2">d</Item>
+        <Item Name="subscription" Condition="t == 8 &amp;&amp; length == 3">sub</Item>
+        <Item Name="range" Condition="t == 8 &amp;&amp; length == 5">r</Item>
+        <TreeItems Condition="t == 8 &amp;&amp; length == 4 &amp;&amp; p != nullptr">
+            <Size>aa-&gt;tree.numNodes</Size>
+            <HeadPointer>aa-&gt;tree.pRoot</HeadPointer>
+            <LeftPointer>left</LeftPointer>
+            <RightPointer>right</RightPointer>
+            <ValueNode>kvp</ValueNode>
+        </TreeItems>
 
         <Item Name="length" Condition="t == 10">length</Item>
         <ArrayItems Condition="t == 10">
             <Size>length</Size>
             <ValuePointer>a</ValuePointer>
         </ArrayItems>
-
-        <TreeItems Condition="t == 11">
-            <Size>aa-&gt;size</Size>
-            <HeadPointer>aa-&gt;root</HeadPointer>
-            <LeftPointer>left</LeftPointer>
-            <RightPointer>right</RightPointer>
-            <ValueNode>this</ValueNode>
-        </TreeItems>
     </Expand>
+</Type>
+
+<Type Name="ep::KVP&lt;*,*&gt;">
+    <DisplayString>{key} = {value}</DisplayString>
+</Type>
+<Type Name="ep::KVPRef&lt;*,*&gt;">
+    <DisplayString>{key} = {value}</DisplayString>
 </Type>
 
 <Type Name="ep::Component">
@@ -124,8 +138,11 @@
     <DisplayString Condition="name.length != 0">{uid} ({name})</DisplayString>
 </Type>
 
-<Type Name="ep::KeyValuePair">
-    <DisplayString>{key} = {value}</DisplayString>
+<Type Name="ep::SharedPtr&lt;*&gt;">
+    <Expand>
+        <Item Name="rc" Condition="pInstance != nullptr">pInstance-&gt;rc</Item>
+        <Item Name="pInstance">pInstance</Item>
+    </Expand>
 </Type>
 
 </AutoVisualizer>
