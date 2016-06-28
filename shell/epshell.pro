@@ -2,10 +2,12 @@ QT += core qml quick gui widgets
 TEMPLATE = app
 TARGET = "epshell"
 
-ARCH = x86
-contains (QMAKE_TARGET.arch, x86_64) {
-  ARCH = x64
-  CONFIG += x64
+win32 {
+  ARCH = x86
+  contains (QMAKE_TARGET.arch, x86_64) {
+    ARCH = x64
+    CONFIG += x64
+  }
 }
 
 CONFIG(debug, debug|release) {
