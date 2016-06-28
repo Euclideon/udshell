@@ -39,7 +39,10 @@ project "epshell"
 	configuration { "windows", "x64" }
 		links { "assimp-ep64.lib" }
 		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64" }
-		debugenvs { "PATH=" .. (os.getenv("QTDIR") or os.getenv("QT_DIR")) .. "\\bin;%PATH%" }
+		local qtdir = os.getenv("QTDIR") or os.getenv("QT_DIR")
+		if qtdir ~= nil then
+			debugenvs { "PATH=" .. qtdir .. "\\bin;%PATH%" }
+		end
 	configuration { "windows", "x86" }
 		if _OS == "windows" then
 			local qtdir32 = os.getenv("QTDIR32") or os.getenv("QT_DIR32")
