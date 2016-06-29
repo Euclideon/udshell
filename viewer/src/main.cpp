@@ -58,6 +58,7 @@ static struct
   GeomNodeRef spTestGeomNode;
   TimerRef spCITimer;
   SubscriptionRef spCITimerSub;
+  SubscriptionRef spUpdateSub;
   bool shutdownTest;
 } mData = {
 #if defined(EP_WINDOWS)
@@ -79,6 +80,7 @@ static struct
                nullptr,             // spTestGeomNode
                nullptr,             // spCITimer
                nullptr,             // spCITimerSub
+               nullptr,             // spUpdateSub
                false                // shutdownTest
               };
 
@@ -259,7 +261,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
     mData.spScene->GetRootNode()->AddChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
 
-  mData.spKernel->UpdatePulse.Subscribe(Delegate<void(double)>(&Update));
+  mData.spUpdateSub = mData.spKernel->UpdatePulse.Subscribe(Delegate<void(double)>(&Update));
 
   mData.spScene->MakeDirty();
 }
@@ -268,12 +270,13 @@ static void ViewerInit(String sender, String message, const Variant &data)
 // Author: David Ely, September 2015
 static void ViewerDeinit(String sender, String message, const Variant &data)
 {
-  mData.spKernel->UpdatePulse.Unsubscribe(Delegate<void(double)>(&Update));
-
+  mData.spUpdateSub->Unsubscribe();
   mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
 #if EP_DEBUG
   mData.spScene->GetRootNode()->RemoveChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
+  if (mData.spCITimerSub)
+    mData.spCITimerSub->Unsubscribe();
 
   mData.spUDNode = nullptr;
   mData.spUDModel = nullptr;
@@ -282,6 +285,7 @@ static void ViewerDeinit(String sender, String message, const Variant &data)
   mData.spSimpleCamera = nullptr;
   mData.spTestGeomNode = nullptr;
   mData.spCITimerSub = nullptr;
+  mData.spUpdateSub = nullptr;
   mData.spCITimer = nullptr;
 }
 
