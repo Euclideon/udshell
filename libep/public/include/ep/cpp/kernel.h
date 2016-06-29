@@ -90,7 +90,7 @@ public:
   // static methods
   static void SetEnvironmentVar(String name, String value) { return GetStaticImpl()->SetEnvironmentVar(name, value); }
   static MutableString<0> GetEnvironmentVar(String name) { return GetStaticImpl()->GetEnvironmentVar(name); }
-  static MutableString<0> ResolveString(String string) { return GetStaticImpl()->ResolveString(string); }
+  static MutableString<0> ResolveString(String string, bool bRecursive = true) { return GetStaticImpl()->ResolveString(string, bRecursive); }
 
 
   // *** these are for internal use ***

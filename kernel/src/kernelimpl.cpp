@@ -1138,7 +1138,7 @@ MutableString<0> KernelImplStatic::GetEnvironmentVar(String name)
 #endif
 }
 
-MutableString<0> KernelImplStatic::ResolveString(String string)
+MutableString<0> KernelImplStatic::ResolveString(String string, bool bRecursive)
 {
   // TODO: do this loop in blocks rather than one byte at a time!
   MutableString<0> r(Reserve, string.length);
@@ -1157,7 +1157,11 @@ MutableString<0> KernelImplStatic::ResolveString(String string)
       String var = string.slice(i+2, end);
       auto val = GetEnvironmentVar(var);
       if (val)
+      {
+        if (bRecursive)
+          val = ResolveString(val, true);
         r.append(val);
+      }
       i = end;
     }
     else
