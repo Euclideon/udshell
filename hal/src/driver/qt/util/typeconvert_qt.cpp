@@ -141,7 +141,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
             pVariant->setValue(shared_pointer_cast<qt::QObjectComponent>(spComponent)->GetQObject());
           else
           {
-            QObject *pQObject = qt::BuildQtEPComponent::Create(spComponent);
+            QObject *pQObject = qt::BuildQtEPComponent::Create(std::move(spComponent));
             pVariant->setValue(pQObject);
 
             // since we allocated this QObject, we'll set it to QML ownership so it can be freed
@@ -372,7 +372,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
           }
           else
           {
-            pQObject = qt::BuildQtEPComponent::Create(spComponent);
+            pQObject = qt::BuildQtEPComponent::Create(std::move(spComponent));
           }
 
           *pJSValue = qt::QtApplication::Kernel()->QmlEngine()->newQObject(pQObject);
