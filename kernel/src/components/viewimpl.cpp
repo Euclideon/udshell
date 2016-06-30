@@ -140,7 +140,7 @@ void ViewImpl::OnDirty()
     spRenderView->spView = ViewRef(pInstance);
 
     spRenderView->camera = spCamera->GetCameraMatrix();
-    spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight, &spRenderView->projection);
+    spRenderView->projection = spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight);
 
     spRenderView->spScene = spScene->GetRenderScene();
 

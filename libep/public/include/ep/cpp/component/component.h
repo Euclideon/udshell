@@ -1,8 +1,6 @@
-///
-/// @file component.h
-/// @brief Base class for Euclideon Platform Components
-/// @author Manu Evans
-///
+//! \file component.h
+//! \brief Base class for Euclideon Platform Components
+//! \author Manu Evans
 
 #pragma once
 #if !defined(_EP_COMPONENT_HPP)
@@ -36,35 +34,117 @@ public:
   virtual const EventDesc *GetEventDesc(String _name, EnumerateFlags enumerateFlags = 0) const { return pImpl->GetEventDesc(_name, enumerateFlags); }
   virtual const StaticFuncDesc *GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags = 0) const { return pImpl->GetStaticFuncDesc(_name, enumerateFlags); }
 
+
   // regular members
   const SharedString uid;
 
+  //! Gets the components kernel instance.
+  //! \return Returns the components kernel instance.
+  //! \see GetDescriptor, GetType, GetDisplayName, GetDescription, GetUid, GetName
   Kernel& GetKernel() const;
+
+  //! Gets the components descriptor
+  //! \return Returns the components descriptor
+  //! \see GetKernel, GetType, GetDisplayName, GetDescription, GetUid, GetName
   const ComponentDesc* GetDescriptor() const;
 
+  //! Gets the components type identifier.
+  //! \return Returns the component type as a string.
+  //! \see IsType, GetDescriptor, GetKernel, GetDisplayName, GetDescription, GetUid, GetName
   String GetType() const { return pType->info.identifier; }
+
+  //! Gets a user-friendly name for the component.
+  //! \return Returns the component display name.
+  //! \see GetDescriptor, GetKernel, GetType, GetDescription, GetUid, GetName
   String GetDisplayName() const { return pType->info.displayName; }
+
+  //! Gets a user-friendly description of the component.
+  //! \return Returns the component description.
+  //! \see GetDescriptor, GetKernel, GetType, GetDisplayName, GetUid, GetName
   String GetDescription() const { return pType->info.description; }
 
+  //! Gets the components unique identifier.
+  //! \return Returns the component uid.
+  //! \see GetDescriptor, GetKernel, GetType, GetDisplayName, GetDescription, GetName
   SharedString GetUid() const;
-  SharedString GetName() const;
-  void SetName(SharedString _name);
 
+  //! Gets a user-specified name for the component.
+  //! \return Returns the component name, or an empty string if no name has been assigned.
+  //! \see SetName, GetDescriptor, GetKernel, GetType, GetDisplayName, GetDescription, GetUid
+  SharedString GetName() const;
+
+  //! Sets a user-specified name for the component.
+  //! \param name Name to be assigned to the component.
+  //! \return None.
+  //! \see GetName
+  void SetName(SharedString name);
+
+  //! Checks to see if \a T is present in the components inheritance hierarchy.
+  //! \tparam T Type to check.
+  //! \return Returns \c true if the component has the specified type in its inheritance hierarchy.
+  //! \see GetType
   template<typename T>
   bool IsType() const { return IsType(T::ComponentID()); }
+
+  //! Checks to see if the component has the named type in its inheritance hierarchy.
+  //! \param type Type name to check.
+  //! \return Returns \c true if the component has the specified type in its inheritance hierarchy.
+  //! \see GetType
   bool IsType(String type) const;
+
 
   // meta access
 
+  //! Gets a delegate for the specified property's getter method.
+  //! \param name Name of the property.
+  //! \param enumerateFlags Flags that control property enumeration.
+  //! \return Returns a Delegate for the property's getter.
+  //! \see GetSetterDelegate, GetFunctionDelegate
   VarDelegate GetGetterDelegate(String name, EnumerateFlags enumerateFlags = 0);
+
+  //! Gets a delegate for the specified property's setter method.
+  //! \param name Name of the property.
+  //! \param enumerateFlags Flags that control property enumeration.
+  //! \return Returns a Delegate for the property's setter.
+  //! \see GetGetterDelegate, GetFunctionDelegate
   VarDelegate GetSetterDelegate(String name, EnumerateFlags enumerateFlags = 0);
+
+  //! Gets a delegate for the specified function or method.
+  //! \param name Name of the function or method.
+  //! \param enumerateFlags Flags that control property enumeration.
+  //! \return Returns a Delegate for the function.
+  //! \see GetGetterDelegate, GetSetterDelegate
   VarDelegate GetFunctionDelegate(String name, EnumerateFlags enumerateFlags = 0);
 
+
   // meta interface
+
+  //! Gets the value of a components property.
+  //! \param property Name of the property.
+  //! \return The current value of the specified property.
+  //! \see Set, Call
   Variant Get(String property) const;
+
+  //! Sets the value of a components property.
+  //! \param property Name of the property.
+  //! \param value Value to assign to the property.
+  //! \return None.
+  //! \see Get, Call
   void Set(String property, const Variant &value);
 
+  //! Calls a components method or function.
+  //! \param method Name of method or function.
+  //! \param args Slice of args to pass to the function.
+  //! \return Variant containing the function's return value, or \c void if the function has no return value.
+  //! \see Get, Set
   Variant Call(String method, Slice<const Variant> args);
+
+  //! Calls a components method or function.
+  //! \param method Name of method or function.
+  //! \param args Variadic list of arguments to pass to the function.
+  //! \return Variant containing the function's return value, or \c void if the function has no return value.
+  //! \remarks \a args must each be convertible to Variant, otherwise \c Call will throw.
+  //! \see Get, Set
   template<typename ...Args>
   Variant Call(String method, Args... args);
 

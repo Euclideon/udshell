@@ -55,6 +55,8 @@ public:
 
   const BookmarkMap &GetBookmarkMap() const { return pImpl->GetBookmarkMap(); }
 
+  //! Gets the root node of the scene graph.
+  //! \return The scenes root node.
   NodeRef GetRootNode() const { return pImpl->GetRootNode(); }
 
   RenderableSceneRef GetRenderScene() { return pImpl->GetRenderScene(); }

@@ -17,10 +17,27 @@ class View : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, View, IView, Component, EPKERNEL_PLUGINVERSION, "View desc...", 0)
 public:
+
+  //! Sets a Scene for the view.
+  //! \param spScene The scene to associate with this view.
+  //! \return None.
+  //! \see GetScene, SetCamera
   void SetScene(SceneRef spScene) { pImpl->SetScene(spScene); }
+
+  //! Gets the Scene associated with the view.
+  //! \return The scene currently associated with the view.
+  //! \see SetScene, GetCamera
   SceneRef GetScene() const { return pImpl->GetScene(); }
 
+  //! Sets a Camera for the view.
+  //! \param spCamera The camera to associate with this view.
+  //! \return None.
+  //! \see GetCamera, SetScene
   void SetCamera(CameraRef spCamera) { pImpl->SetCamera(spCamera); }
+
+  //! Gets the Camera associated with the view.
+  //! \return The camera currently associated with the view.
+  //! \see SetCamera, GetScene
   CameraRef GetCamera() const { return pImpl->GetCamera(); }
 
   Dimensions<int> GetDimensions() const { return pImpl->GetDimensions(); }
@@ -41,10 +58,15 @@ public:
   void SetUDRenderFlags(UDRenderFlags flags) { pImpl->SetUDRenderFlags(flags); }
   UDRenderFlags GetUDRenderflags() const { return pImpl->GetUDRenderflags(); }
 
-  /// Set the input event hook.  Will overwrite if a hook already exists.
-  /// \param inputEventHook: returns true if the event is handled and should not be passed on to the default input handler
-  /// \see ClearInputEventHook()
-  void SetInputEventHook(Delegate<bool(ep::InputEvent)> inputEventHook) { pImpl->SetInputEventHook(inputEventHook); }
+  //! Sets an input event hook that is called prior to normal handling of input events. If a hook already exists, it will be replaced.
+  //! \param inputEventHook A delegate to call for each input event. Delegate should return \c true if the event was handled and should not be passed on to the default input handler.
+  //! \return None.
+  //! \see ClearInputEventHook
+  void SetInputEventHook(Delegate<bool(InputEvent)> inputEventHook) { pImpl->SetInputEventHook(inputEventHook); }
+
+  //! Clears the input event hook if one exists.
+  //! \return None.
+  //! \see SetInputEventHook
   void ClearInputEventHook() { pImpl->ClearInputEventHook(); }
 
   Event<> Dirty;

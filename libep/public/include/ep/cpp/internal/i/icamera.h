@@ -13,7 +13,7 @@ public:
   virtual Double4x4 GetCameraMatrix() const = 0;
   virtual Double4x4 GetViewMatrix() const = 0;
 
-  virtual void GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const = 0;
+  virtual Double4x4 GetProjectionMatrix(double aspectRatio) const = 0;
 
   virtual void SetPerspective(double _fovY) = 0;
   virtual void SetOrtho(double _orthoHeight) = 0;

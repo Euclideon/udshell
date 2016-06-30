@@ -13,6 +13,7 @@ Array<const PropertyInfo> Camera::GetProperties() const
     EP_MAKE_PROPERTY_RO(OrthoHeight, "Height of the viewing frustrum in Orthographic mode", nullptr, 0),
     EP_MAKE_PROPERTY_RO(CameraMatrix, "Position of camera", nullptr, 0),
     EP_MAKE_PROPERTY_RO(ViewMatrix, "Position of camera", nullptr, 0),
+    EP_MAKE_PROPERTY_EXPLICIT("IsOrtho", "If the camera is in Orthographic mode", EP_MAKE_GETTER(IsOrtho), nullptr, nullptr, 0),
   };
 }
 Array<const MethodInfo> Camera::GetMethods() const
@@ -20,8 +21,8 @@ Array<const MethodInfo> Camera::GetMethods() const
   return{
     EP_MAKE_METHOD(SetDepthPlanes, "Set the near and far depth planes:\n  setdepthplanes(near, far)"),
     EP_MAKE_METHOD(SetOrtho, "Set the projection mode to Orthographic with given ortho height"),
-    EP_MAKE_METHOD(IsOrtho, "Returns true if the camera is in Orthographic mode"),
     EP_MAKE_METHOD(SetPerspective, "Set the projection mode to Perspective with given field of view"),
+    EP_MAKE_METHOD(GetProjectionMatrix, "Generate a projection matrix for the camera: getprojectionmatrix(aspectratio)"),
   };
 }
 
@@ -55,12 +56,12 @@ CameraImpl::CameraImpl(Component *pInstance, Variant::VarMap initParams)
     SetFarPlane(paramFarPlane->asFloat());
 }
 
-void CameraImpl::GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const
+Double4x4 CameraImpl::GetProjectionMatrix(double aspectRatio) const
 {
   if (!bOrtho)
-    *pMatrix = Double4x4::perspective(fovY, aspectRatio, zNear, zFar);
+    return Double4x4::perspective(fovY, aspectRatio, zNear, zFar);
   else
-    *pMatrix = Double4x4::ortho(-orthoHeight*aspectRatio*0.5, orthoHeight*aspectRatio*0.5, -orthoHeight*0.5, orthoHeight*0.5, zNear, zFar);
+    return Double4x4::ortho(-orthoHeight*aspectRatio*0.5, orthoHeight*aspectRatio*0.5, -orthoHeight*0.5, orthoHeight*0.5, zNear, zFar);
 }
 
 Variant CameraImpl::Save() const

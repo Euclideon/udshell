@@ -24,12 +24,12 @@ namespace internal {
     >::type;
 }
 
-/// \cond
+//! \cond
 template<typename Signature>
 struct MethodPointer;
 template<typename Signature>
 struct Delegate;
-/// \endcond
+//! \endcond
 
 // helper to handle method pointers
 template <typename R, typename... Args>

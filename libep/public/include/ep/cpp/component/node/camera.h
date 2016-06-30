@@ -16,22 +16,43 @@ class Camera : public Node
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Camera, ICamera, Node, EPKERNEL_PLUGINVERSION, "Camera desc...", 0)
 
 public:
+  //! Gets the camera's world matrix.
+  //! \return The camera's world matrix.
+  //! \see GetViewMatrix, GetProjectionMatrix
   Double4x4 GetCameraMatrix() const { return pImpl->GetCameraMatrix(); }
+
+  //! Gets the view matrix for this camera.
+  //! \return The view matrix for the camera.
+  //! \see GetCameraMatrix, GetProjectionMatrix
   Double4x4 GetViewMatrix() const { return pImpl->GetViewMatrix(); }
 
-  void GetProjectionMatrix(double aspectRatio, Double4x4 *pMatrix) const { pImpl->GetProjectionMatrix(aspectRatio, pMatrix); }
+  //! Generates a projection matrix for this camera.
+  //! \param aspectRatio Aspect ratio for the surface that the projection matrix will be used to render.
+  //! \return The projection matrix for the camera with the specified aspect ratio.
+  //! \see GetCameraMatrix, GetViewMatrix
+  Double4x4 GetProjectionMatrix(double aspectRatio) const { return pImpl->GetProjectionMatrix(aspectRatio); }
 
-  void SetPerspective(double _fovY) { pImpl->SetPerspective(_fovY); }
-  void SetOrtho(double _orthoHeight) { pImpl->SetOrtho(_orthoHeight); }
+  //! Sets the camera to have perspective projection.
+  //! \param fovY Field of view on the Y axis.
+  //! \return None.
+  //! \see SetOrtho, GetProjectionMatrix
+  void SetPerspective(double fovY) { pImpl->SetPerspective(fovY); }
+
+  //! Sets the camera to have orthographic projection.
+  //! \param orthoHeight The height of the orthographic projection volume.
+  //! \return None.
+  //! \remarks Note: The width of the projection will be implied by \a orthoHeight * \a aspectRatio when calling \c GetProjectionMatrix().
+  //! \see SetPerspective, GetProjectionMatrix
+  void SetOrtho(double orthoHeight) { pImpl->SetOrtho(orthoHeight); }
 
   double GetFovY() const { return pImpl->GetFovY(); }
   double GetOrthoHeight() const { return pImpl->GetOrthoHeight(); }
   bool IsOrtho() const { return pImpl->IsOrtho(); }
 
-  void SetDepthPlanes(double _zNear, double _zFar) { pImpl->SetDepthPlanes(_zNear, _zFar); }
-  void SetNearPlane(double _zNear) { pImpl->SetNearPlane(_zNear); }
+  void SetDepthPlanes(double zNear, double zFar) { pImpl->SetDepthPlanes(zNear, zFar); }
+  void SetNearPlane(double zNear) { pImpl->SetNearPlane(zNear); }
   double GetNearPlane() const { return pImpl->GetNearPlane(); }
-  void SetFarPlane(double _zFar) { pImpl->SetFarPlane(_zFar); }
+  void SetFarPlane(double zFar) { pImpl->SetFarPlane(zFar); }
   double GetFarPlane() const { return pImpl->GetFarPlane(); }
 
   Variant Save() const override { return pImpl->Save(); }
