@@ -58,7 +58,6 @@ public:
   SubscriptionRef Subscribe(Y *i, void(X::*f)(Args...))        { return Subscribe(EvDelegate(i, f)); }
   template <class X, class Y>
   SubscriptionRef Subscribe(Y *i, void(X::*f)(Args...) const)  { return Subscribe(EvDelegate(i, f)); }
-  SubscriptionRef Subscribe(void(*f)(Args...))                 { return Subscribe(EvDelegate(f)); }
 
   // unsubscribe
   void Unsubscribe(EvDelegate callback)
@@ -74,7 +73,6 @@ public:
   void Unsubscribe(Y *i, void(X::*f)(Args...)) { Unsubscribe(EvDelegate(i, f)); }
   template <class X, class Y>
   void Unsubscribe(Y *i, void(X::*f)(Args...) const) { Unsubscribe(EvDelegate(i, f)); }
-  void Unsubscribe(void(*f)(Args...)) { Unsubscribe(EvDelegate(f)); }
 
   // signal
   void Signal(Args... args) const

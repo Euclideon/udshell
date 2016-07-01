@@ -86,7 +86,17 @@ TEST(Delegate, functorDelegate)
   EXPECT_EQ(constObjFunctorDelegate(), constFunctorObj()); // check that the delegate correctly called the functor and return the value correctly
 }
 
-TEST(Delegate, lambdaDelegate)
+TEST(Delegate, capturelessLambdaDelegate)
+{
+  const auto constLambda = []() { return delegate_test::k_magicNum1; };
+  Delegate<int()> lambdaDelegate([]() { return delegate_test::k_magicNum1; }),
+    constLambdaDelegate(constLambda);
+
+  EXPECT_EQ(delegate_test::k_magicNum1, lambdaDelegate()); // check that the delegate correctly called the lambda and return the value correctly
+  EXPECT_EQ(delegate_test::k_magicNum1, constLambdaDelegate()); // check that the delegate correctly called the lambda and return the value correctly
+}
+
+TEST(Delegate, captureLambdaDelegate)
 {
   int result = delegate_test::k_magicNum1;
   const auto constLambda = [&result]() { return result; };
