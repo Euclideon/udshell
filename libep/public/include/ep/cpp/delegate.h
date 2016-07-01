@@ -10,6 +10,20 @@ typedef fastdelegate::DelegateMemento FastDelegateMemento;
 
 namespace ep {
 
+namespace internal {
+  // helper to get details from functions
+  template<typename T>
+  struct function_traits;
+
+  template<typename T, typename Del, typename R, typename... Args>
+  using enable_if_valid_functor =
+    typename std::enable_if<
+      std::is_same<R(Args...), typename internal::function_traits<decltype(&std::remove_reference<T>::type::operator())>::function_signature>::value  // check has operator() and signature is the same
+      && !std::is_convertible<T, R(*)(Args...)>::value  // check is it not implicitly convertable to function pointer (lambda without capture)
+      && !std::is_same<typename std::remove_reference<T>::type, Del>::value // check is it not delegate itself
+    >::type;
+}
+
 /// \cond
 template<typename Signature>
 struct MethodPointer;
@@ -102,6 +116,11 @@ typedef SharedPtr<DelegateMemento> DelegateMementoRef;
 
 // facilitate using the function template syntax
 template<typename R, typename... Args>
+struct Delegate<R(Args...) const>
+{
+  static_assert(sizeof(R) == 0, "Delegate signatures should not be 'const'");
+};
+template<typename R, typename... Args>
 struct Delegate<R(Args...)>
 {
 public:
@@ -120,6 +139,8 @@ public:
   template <class X, class Y>
   Delegate(Y *i, R(X::*f)(Args...) const) : Delegate(FastDelegateType(i, f)) {}
   Delegate(R(*f)(Args...)) : Delegate(FastDelegateType(f)) {}
+  template <typename T, internal::enable_if_valid_functor<T, Delegate<R(Args...)>, R, Args...>* = nullptr>
+  Delegate(T &&lambda);
 
   explicit operator bool() const { return m ? !m->m.empty() : false; }
 
@@ -177,5 +198,7 @@ inline ptrdiff_t epStringify(Slice<char> epUnusedParam(buffer), String epUnusedP
 }
 
 } // namespace ep
+
+#include "ep/cpp/internal/delegate_inl.h"
 
 #endif // _EPDELEGATE_HPP
