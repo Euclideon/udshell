@@ -1,6 +1,6 @@
 #include "driver.h"
 
-#if EPWINDOW_DRIVER == EPDRIVER_QT
+#if EPKERNEL_DRIVER == EPDRIVER_QT
 
 #include "kernelimpl.h"
 #include "components/viewimpl.h"
