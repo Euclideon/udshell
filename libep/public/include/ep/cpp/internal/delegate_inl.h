@@ -37,7 +37,7 @@ struct function_traits<R(C::*)(Args...) const>
 
 } // namespace internal
 
-template <typename T, typename R, typename... Args>
+template <typename T>
 class LambdaMemento : public DelegateMemento
 {
 public:
@@ -54,7 +54,7 @@ private:
 template <typename R, typename... Args>
 template <typename T, internal::enable_if_valid_functor<T, Delegate<R(Args...)>, R, Args...>*>
 Delegate<R(Args...)>::Delegate(T &&lambda)
-  : Delegate((DelegateMementoRef)SharedPtr<LambdaMemento<typename std::remove_reference<T>::type, R, Args...>>::create(std::forward<T>(lambda)))
+  : Delegate(SharedPtr<LambdaMemento<typename std::remove_reference<T>::type>>::create(std::forward<T>(lambda)))
 {}
 
 } // namespace ep

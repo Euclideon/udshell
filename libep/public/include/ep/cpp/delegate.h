@@ -16,7 +16,7 @@ namespace internal {
   struct function_traits;
 
   template<typename T, typename Del, typename R, typename... Args>
-  using enable_if_valid_functor = 
+  using enable_if_valid_functor =
     typename std::enable_if<
       std::is_same<R(Args...), typename internal::function_traits<decltype(&std::remove_reference<T>::type::operator())>::function_signature>::value  // check has operator() and signature is the same
       && !std::is_convertible<T, R(*)(Args...)>::value  // check is it not implicitly convertable to function pointer (lambda without capture)
