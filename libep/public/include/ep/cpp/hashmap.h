@@ -4,7 +4,7 @@
 #include "ep/cpp/platform.h"
 #include "ep/cpp/keyvaluepair.h"
 #include "ep/cpp/freelist.h"
-#include "ep/cpp/string.h"
+#include "ep/cpp/delegate.h"
 
 #include <functional>
 
@@ -53,10 +53,8 @@ public:
   V& tryInsert(Key&& key, V&& val);
   template <typename Key>
   V& tryInsert(Key&& key, const V& val);
-#if 0 // TODO : Fix this once delegate supports lambdas
   template <typename Key>
-  V& tryInsert(Key&& key, std::function<V()> lazyValue);
-#endif
+  V& tryInsert(Key&& key, Delegate<V()> lazyValue);
 
   template <typename Key, typename Val>
   V& replace(Key&& key, Val&& val);
