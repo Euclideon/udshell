@@ -20,7 +20,8 @@ OBJECTS_DIR = $${PWD}/int/.obj/$${TOOLSET}
 RCC_DIR = $${PWD}/int/.rcc/$${TOOLSET}
 UI_DIR = $${PWD}/int/.ui/$${TOOLSET}
 
-CONFIG += c++11
+CONFIG -= qt
+CONFIG += c++11 plugin
 
 SOURCES += src/%{ProjectName}.cpp
 HEADERS += src/%{ProjectName}.h
