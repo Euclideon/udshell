@@ -299,6 +299,8 @@ private:
 };
 
 
+//! \cond
+
 // vararg for stringification
 struct VarArg
 {
@@ -320,6 +322,8 @@ private:
   StringifyFunc *pStringProxy;
   IntConvFunc *pIntProxy;
 };
+
+//! \endcond
 
 } // namespace ep
 

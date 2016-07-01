@@ -325,8 +325,10 @@
 using std::nullptr_t;
 #endif
 
+//! \cond
 template<typename T>
 struct epTheTypeIs;
+//! \endcond
 
 
 // helper macros

@@ -16,13 +16,13 @@ class LuaState;
 namespace ep {
 
 struct Variant;
-/// \cond
+//! \cond
 template<>
 struct Compare<Variant>
 {
   ptrdiff_t operator()(const Variant &a, const Variant &b);
 };
-/// \endcond
+//! \endcond
 
 SHARED_CLASS(Component);
 

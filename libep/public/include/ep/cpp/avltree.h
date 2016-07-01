@@ -22,7 +22,7 @@ struct Compare
   }
 };
 
-/// \cond
+//! \cond
 template<>
 struct Compare<String>
 {
@@ -39,7 +39,7 @@ struct Compare<SharedString>
     return a.cmp(b);
   }
 };
-/// \endcond
+//! \endcond
 
 template <typename K, typename V>
 struct AVLTreeNode;

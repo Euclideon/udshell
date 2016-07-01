@@ -106,9 +106,9 @@ protected:
   Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine);
   ~Kernel();
 
-  /// \cond
+  //! \cond
   void FinishInit() { pImpl->FinishInit(); }
-  /// \endcond
+  //! \endcond
 
   // HACK: This is a temporary method to let us handle fatals; this should probably be moved to a separate component
   virtual void OnFatal(String epUnusedParam(msg)) {}

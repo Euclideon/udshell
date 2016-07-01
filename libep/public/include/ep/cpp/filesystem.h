@@ -20,12 +20,12 @@ namespace ep {
 
   struct FindData
   {
-    SharedString filename;      ///< The files filename
-    SharedString path;          ///< The system path to the file
-    uint64_t fileSize;          ///< The files size
-    FileAttributes attributes;  ///< The files attributes
-    FileTime writeTime;         ///< Last time the file was written
-    FileTime accessTime;        ///< Last time the file was accessed
+    SharedString filename;      //!< The files filename
+    SharedString path;          //!< The system path to the file
+    uint64_t fileSize;          //!< The files size
+    FileAttributes attributes;  //!< The files attributes
+    FileTime writeTime;         //!< Last time the file was written
+    FileTime accessTime;        //!< Last time the file was accessed
   };
 
   class Directory
