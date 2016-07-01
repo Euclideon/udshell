@@ -93,8 +93,9 @@ TEST(EPStringTest, Deprecated)
   //  poo[2];
   //  poo.alloc(10);
 
-  ep::WString wstr = (const char16_t*)L"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
-  ms.format("{0}", wstr);
+  ep::WString wstr = u"xyz"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
+  ep::DString dstr = U"uvw"; // TODO: HACK! should be: u"xyz" (utf16), NOT L"xyz" (wchar_t)
+  ms.format("{0} {1}", wstr, dstr);
 
   cc.parseInt();
 }

@@ -8,8 +8,10 @@ using namespace ep;
 // TODO: these tests are old and should be deprecated!!
 TEST(EPVariant, Deprecated)
 {
-  Variant t0;
-  EPASSERT(t0.type() == Variant::Type::Void, "!");
+  Variant t;
+  EPASSERT(t.type() == Variant::Type::Void, "!");
+  Variant t0(nullptr);
+  EPASSERT(t0.type() == Variant::Type::Null, "!");
   Variant t1(true);
   EPASSERT(t1.type() == Variant::Type::Bool && t1.asBool() == true, "!");
   Variant t2(10);

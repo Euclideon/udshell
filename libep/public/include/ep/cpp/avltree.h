@@ -152,74 +152,62 @@ public:
   {
     Node *node = Allocator::Get().Alloc();
     epscope(fail) { Allocator::Get().Free(node); };
-    epConstruct(&node->k) K(std::move(key));
-    epscope(fail) { node->k.~K(); };
-    epConstruct(&node->v) V(std::move(val));
+    epConstruct(&node->kvp) KVP<K, V>(std::move(key), std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
     pRoot = insert(pRoot, node);
-    return node->v;
+    return node->kvp.value;
   }
   V& replace(const K &key, V &&val)
   {
     Node *node = Allocator::Get().Alloc();
     epscope(fail) { Allocator::Get().Free(node); };
-    epConstruct(&node->k) K(key);
-    epscope(fail) { node->k.~K(); };
-    epConstruct(&node->v) V(std::move(val));
+    epConstruct(&node->kvp) KVP<K, V>(key, std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
     pRoot = insert(pRoot, node);
-    return node->v;
+    return node->kvp.value;
   }
   V& replace(K &&key, const V &val)
   {
     Node *node = Allocator::Get().Alloc();
     epscope(fail) { Allocator::Get().Free(node); };
-    epConstruct(&node->k) K(std::move(key));
-    epscope(fail) { node->k.~K(); };
-    epConstruct(&node->v) V(val);
+    epConstruct(&node->kvp) KVP<K, V>(std::move(key), val);
     node->left = node->right = nullptr;
     node->height = 1;
     pRoot = insert(pRoot, node);
-    return node->v;
+    return node->kvp.value;
   }
   V& replace(const K &key, const V &val)
   {
     Node *node = Allocator::Get().Alloc();
     epscope(fail) { Allocator::Get().Free(node); };
-    epConstruct(&node->k) K(key);
-    epscope(fail) { node->k.~K(); };
-    epConstruct(&node->v) V(val);
+    epConstruct(&node->kvp) KVP<K, V>(key, val);
     node->left = node->right = nullptr;
     node->height = 1;
     pRoot = insert(pRoot, node);
-    return node->v;
+    return node->kvp.value;
   }
 
   V& replace(KVP<K, V> &&kvp)
   {
     Node *node = Allocator::Get().Alloc();
     epscope(fail) { Allocator::Get().Free(node); };
-    epConstruct(&node->k) K(std::move(kvp.key));
-    epscope(fail) { node->k.~K(); };
-    epConstruct(&node->v) V(std::move(kvp.value));
+    epConstruct(&node->kvp) KVP<K, V>(std::move(kvp));
     node->left = node->right = nullptr;
     node->height = 1;
     pRoot = insert(pRoot, node);
-    return node->v;
+    return node->kvp.value;
   }
   V& replace(const KVP<K, V> &kvp)
   {
     Node *node = Allocator::Get().Alloc();
     epscope(fail) { Allocator::Get().Free(node); };
-    epConstruct(&node->k) K(kvp.key);
-    epscope(fail) { node->k.~K(); };
-    epConstruct(&node->v) V(kvp.value);
+    epConstruct(&node->kvp) KVP<K, V>(kvp);
     node->left = node->right = nullptr;
     node->height = 1;
     pRoot = insert(pRoot, node);
-    return node->v;
+    return node->kvp.value;
   }
 
   void remove(const K &key)
@@ -230,12 +218,12 @@ public:
   const V* get(const K &key) const
   {
     const Node *n = find(pRoot, key);
-    return n ? &n->v : nullptr;
+    return n ? &n->kvp.value : nullptr;
   }
   V* get(const K &key)
   {
     Node *n = const_cast<Node*>(find(pRoot, key));
-    return n ? &n->v : nullptr;
+    return n ? &n->kvp.value : nullptr;
   }
 
   const V& operator[](const K &key) const
@@ -342,7 +330,7 @@ private:
   {
     if (!n)
       return nullptr;
-    ptrdiff_t c = PredFunctor()(key, n->k);
+    ptrdiff_t c = PredFunctor()(key, n->kvp.key);
     if (c < 0)
       return find(n->left, key);
     if (c > 0)
@@ -371,7 +359,7 @@ private:
       return newnode;
     }
 
-    ptrdiff_t c = PredFunctor()(newnode->k, n->k);
+    ptrdiff_t c = PredFunctor()(newnode->kvp.key, n->kvp.key);
     if (c < 0)
       n->left = insert(n->left, newnode);
     else if (c > 0)
@@ -399,7 +387,7 @@ private:
 
     if (balance > 1)
     {
-      ptrdiff_t lc = PredFunctor()(newnode->k, n->left->k);
+      ptrdiff_t lc = PredFunctor()(newnode->kvp.key, n->left->kvp.key);
       // Left Left Case
       if (lc < 0)
         return rightRotate(n);
@@ -414,7 +402,7 @@ private:
 
     if (balance < -1)
     {
-      ptrdiff_t rc = PredFunctor()(newnode->k, n->right->k);
+      ptrdiff_t rc = PredFunctor()(newnode->kvp.key, n->right->kvp.key);
 
       // Right Right Case
       if (rc > 0)
@@ -450,7 +438,7 @@ private:
     if (_pRoot == nullptr)
       return _pRoot;
 
-    ptrdiff_t c = PredFunctor()(key, _pRoot->k);
+    ptrdiff_t c = PredFunctor()(key, _pRoot->kvp.key);
 
     // If the key to be deleted is smaller than the _pRoot's key,
     // then it lies in left subtree
@@ -497,10 +485,10 @@ private:
         Node *temp = minValueNode(_pRoot->right);
 
         // Copy the inorder successor's data to this Node
-        _pRoot->k = temp->k;
+        _pRoot->kvp.key = temp->kvp.key;
 
         // Delete the inorder successor
-        _pRoot->right = deleteNode(_pRoot->right, temp->k);
+        _pRoot->right = deleteNode(_pRoot->right, temp->kvp.key);
       }
     }
 
@@ -575,17 +563,17 @@ public:
     const K& key() const
     {
       auto *node = getNode(stack, depth);
-      return node->k;
+      return node->kvp.key;
     }
     const V& value() const
     {
       auto *node = getNode(stack, depth);
-      return node->v;
+      return node->kvp.value;
     }
     V& value()
     {
       auto *node = const_cast<Node*>(getNode(stack, depth));
-      return node->v;
+      return node->kvp.value;
     }
 
     KVPRef<const K, const V> operator*() const
@@ -675,16 +663,15 @@ public:
 template <typename K, typename V>
 struct AVLTreeNode
 {
-  K k;
   AVLTreeNode *left, *right;
-  V v;
+  KVP<K, V> kvp;
   int height;
 
   AVLTreeNode() = delete;
   AVLTreeNode(const AVLTreeNode &rh)
-    : k(rh.k), left(rh.left), right(rh.right), v(rh.v), height(rh.height) {}
+    : left(rh.left), right(rh.right), kvp(rh.kvp), height(rh.height) {}
   AVLTreeNode(AVLTreeNode &&rh)
-    : k(std::move(rh.k)), left(rh.left), right(rh.right), v(std::move(rh.v)), height(rh.height) {}
+    : left(rh.left), right(rh.right), kvp(std::move(rh.kvp)), height(rh.height) {}
   AVLTreeNode& operator = (const AVLTreeNode &rh)
   {
     this->~AVLTreeNode();
