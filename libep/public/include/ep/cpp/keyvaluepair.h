@@ -34,6 +34,9 @@ struct KVP
   template <typename _K, typename _V> KVP(const KVP<_K, _V> &val) : key(val.key), value(val.value) {}
   template <typename _K, typename _V> KVP(const KVPRef<_K, _V> &val) : key(val.key), value(val.value) {}
 
+  KVP<K, V>& operator=(KVP<K, V> &&val) { key = std::move(val.key); value = std::move(val.value); return *this; }
+  KVP<K, V>& operator=(const KVP<K, V> &val) { key = val.key; value = val.value; return *this; }
+
   // TODO: consider, should value be first? it is more likely to have alignment requirements.
   //       conversely, key is more frequently accessed, so should be in the first cache line...
   K key;
