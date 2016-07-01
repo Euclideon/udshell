@@ -63,6 +63,7 @@ private:
     return _matrix;
   }
 
+  void DoRender(RenderScene &spScene, const Double4x4 &mat) { pImpl->DoRender(spScene, mat); }
   Array<const PropertyInfo> GetProperties() const;
   Array<const MethodInfo> GetMethods() const;
 };

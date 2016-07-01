@@ -45,7 +45,8 @@ protected:
 
   bool InputEvent(const ep::InputEvent &ev) override final;
   bool Update(double timeStep) override final;
-  void Render(RenderScene &spScene, const Double4x4 &mat) override final;
+  void Render(RenderScene &spScene, const Double4x4 &mat) override final { }
+  void DoRender(RenderScene & spScene, const Double4x4 & mat) override final;
 
   void OnChildChanged() const { pInstance->Changed.Signal(); }
 

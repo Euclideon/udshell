@@ -35,6 +35,7 @@ protected:
   virtual bool InputEvent(const ep::InputEvent &ev) = 0;
   virtual bool Update(double timeStep) = 0;
   virtual void Render(RenderScene &spScene, const Double4x4 &mat) = 0;
+  virtual void DoRender(RenderScene &spScene, const Double4x4 &mat) = 0;
 };
 
 } // namespace ep

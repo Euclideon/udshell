@@ -22,10 +22,12 @@ Array<const MethodInfo> Node::GetMethods() const
   };
 }
 
-void NodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
+void NodeImpl::DoRender(RenderScene &spScene, const Double4x4 &mat)
 {
+  pInstance->Render(spScene, mat);
+
   for (NodeRef &n : children)
-    n->Render(spScene, mat * n->GetMatrix());
+    n->DoRender(spScene, mat * n->GetMatrix());
 }
 
 bool NodeImpl::InputEvent(const ep::InputEvent &ev)
