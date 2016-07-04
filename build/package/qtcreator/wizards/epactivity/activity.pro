@@ -41,5 +41,7 @@ win32 {
   LIBS += -L$$(EPDIR)/lib/$${ARCH} -llibep
 }
 else {
+  QMAKE_CFLAGS_DEBUG += -O0
+  QMAKE_CXXFLAGS_DEBUG += -O0
   LIBS += -llibep
 }
