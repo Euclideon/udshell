@@ -15,6 +15,7 @@ sudo rm -rf $INSTALL_PATH/share/pixmaps/euclideon
 sudo rm -f $INSTALL_PATH/share/pixmaps/euclideon.png
 sudo rm -f $INSTALL_PATH/share/mime/packages/euclideon.xml
 sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/euclideon
+sudo rm -rf $INSTALL_PATH/share/Euclideon
 
 # legacy removal - this can be removed from the install script in a few releases
 sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epplugin
@@ -66,6 +67,10 @@ echo "Install QtCreator project templates..."
 mkdir -p ~/.config/QtProject/qtcreator
 cp -rf usr/share/qtcreator ~/.config/QtProject/
 
+echo "Install QtCreator debug helpers..."
+mkdir -p $INSTALL_PATH/share/Euclideon/debugger
+cp -rf debugger/* $INSTALL_PATH/share/Euclideon/debugger/
+cat $INSTALL_PATH/share/Euclideon/debugger/README
 
 echo "Creating local directory structure in ~/.local/share/Euclideon/..."
 

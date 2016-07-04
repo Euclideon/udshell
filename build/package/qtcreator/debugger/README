@@ -1,0 +1,8 @@
+
+To load custom Euclideon Platform Debug Helpers in QtCreator, you must:
+  1) Go to "Tools -> Options -> Debugger"
+  2) Add the following to the "Debugging Helper Customization" box:
+      
+      python theDumper.addDumperModule({"path":"/usr/local/share/Euclideon/debugger/eptypes.py"})
+     
+     Where addDumperModule should be listed for each custom debug helper.
