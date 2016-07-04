@@ -1,3 +1,4 @@
+#include "libep_internal.h"
 #include "ep/cpp/platform.h"
 #include "ep/cpp/error.h"
 #include "ep/cpp/math.h"

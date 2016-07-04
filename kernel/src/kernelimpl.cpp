@@ -68,137 +68,6 @@
 
 namespace ep {
 
-namespace internal {
-  void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line);
-  void _Free(void *pMemory);
-
-  void TranslateFindData(const EPFindData &fd, ep::FindData *pFD)
-  {
-    pFD->filename = (const char*)fd.pFilename;
-    pFD->path = (const char*)fd.pSystemPath;
-    pFD->attributes = ((fd.attributes & EPFA_Directory) ? FileAttributes::Directory : 0) |
-                      ((fd.attributes & EPFA_SymLink) ? FileAttributes::SymLink : 0) |
-                      ((fd.attributes & EPFA_Hidden) ? FileAttributes::Hidden : 0) |
-                      ((fd.attributes & EPFA_ReadOnly) ? FileAttributes::ReadOnly : 0);
-    pFD->fileSize = fd.fileSize;
-    pFD->accessTime.ticks = fd.accessTime.ticks;
-    pFD->writeTime.ticks = fd.writeTime.ticks;
-  }
-
-  ErrorSystem s_errorSystem;
-
-  struct Allocators
-  {
-    static void *GetVarAVLAllocator()
-    {
-      if (!KernelImpl::s_pVarAVLAllocator)
-        KernelImpl::s_pVarAVLAllocator = epNew(KernelImpl::VarAVLTreeAllocator);
-      return KernelImpl::s_pVarAVLAllocator;
-    }
-
-    static void *GetWeakRefRegistry()
-    {
-      if (!KernelImpl::s_pWeakRefRegistry)
-        KernelImpl::s_pWeakRefRegistry = epNew(KernelImpl::WeakRefRegistryMap, 65536);
-      return KernelImpl::s_pWeakRefRegistry;
-    }
-
-    static void *GetStaticImplRegistry()
-    {
-      if (!KernelImpl::s_pStaticImplRegistry)
-        KernelImpl::s_pStaticImplRegistry = epNew(KernelImpl::StaticImplRegistryMap);
-      return KernelImpl::s_pStaticImplRegistry;
-    }
-
-    static void Destroy()
-    {
-      epDelete(KernelImpl::s_pVarAVLAllocator);
-      epDelete(KernelImpl::s_pStaticImplRegistry);
-      epDelete(KernelImpl::s_pWeakRefRegistry);
-    }
-  };
-
-} // internal
-
-static Instance s_instance =
-{
-  EP_APIVERSION,  // apiVersion;
-
-  nullptr,        // pKernelInstance;
-  (void*)&internal::s_errorSystem, // ErrorSystem
-  internal::Allocators::GetStaticImplRegistry(),
-  internal::Allocators::GetVarAVLAllocator(),
-  internal::Allocators::GetWeakRefRegistry(),
-
-  [](size_t size, epAllocationFlags flags, const char *pFile, int line) -> void* { return internal::_Alloc(size, flags, pFile, line); }, //  Alloc
-
-  [](void *pMem) -> void { internal::_Free(pMem); }, // Free
-
-  [](String condition, String message, String file, int line) -> void { IF_EPASSERT(AssertFailed(condition, message, file, line);) }, // AssertFailed
-
-  // NOTE: this was called when an RC reached zero...
-  [](Component *pInstance) -> void { pInstance->DecRef(); }, // DestroyComponent, dec it with the internal function which actually performs the cleanup
-
-  [](String pattern, void *pHandle, void *pData) -> void* {
-    EPFind *pFind = (EPFind*)pHandle;
-    FindData *pFD = (FindData*)pData;
-    if (pattern && !pFind && pFD)
-    {
-      EPFind *find = epNew(EPFind);
-      EPFindData fd;
-      if (HalDirectory_FindFirst(find, pattern.toStringz(), &fd))
-      {
-        internal::TranslateFindData(fd, pFD);
-        return find;
-      }
-      else
-      {
-        epDelete(find);
-        return nullptr;
-      }
-    }
-    else if (!pattern && pFind && pFD)
-    {
-      EPFindData fd;
-      if (HalDirectory_FindNext(pFind, &fd))
-      {
-        internal::TranslateFindData(fd, pFD);
-        return pHandle;
-      }
-      else
-      {
-        HalDirectory_FindClose(pFind);
-        epDelete(pFind);
-        return nullptr;
-      }
-    }
-    else if (!pattern && pFind && !pFD)
-    {
-      HalDirectory_FindClose(pFind);
-      epDelete(pFind);
-      return nullptr;
-    }
-    else
-      EPTHROW_ERROR(Result::InvalidArgument, "Bad call");
-  } // Find
-};
-
-struct GlobalInstanceInitializer
-{
-  GlobalInstanceInitializer()
-  {
-    ep::s_pInstance = &s_instance;
-  }
-
-  ~GlobalInstanceInitializer()
-  {
-    internal::Allocators::Destroy();
-  }
-};
-
-GlobalInstanceInitializer globalInstanceInitializer;
-
-
 Array<const PropertyInfo> Kernel::GetProperties() const
 {
   return Array<const PropertyInfo>{
@@ -289,10 +158,17 @@ Kernel::~Kernel()
   }
 }
 
+// HACK !!! (GCC and Clang)
+// For the implementation of epInternalInit defined in globalinitialisers to override
+// the weak version in epplatform.cpp at least one symbol from that file must
+// be referenced externally.  This has been implemented in below inside
+// CreateInstance().
+namespace internal { void *GetStaticImplRegistry(); }
+
 Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCount)
 {
   // HACK: create the KernelImplStatic instance here!
-  ((HashMap<SharedString, UniquePtr<RefCounted>>*)internal::Allocators::GetStaticImplRegistry())->insert(ComponentID(), UniquePtr<KernelImplStatic>::create());
+  ((HashMap<SharedString, UniquePtr<RefCounted>>*)internal::GetStaticImplRegistry())->insert(ComponentID(), UniquePtr<KernelImplStatic>::create());
 
   // set $(AppPath) to argv[0]
   String exe = commandLine[0].asString();
@@ -1171,3 +1047,83 @@ MutableString<0> KernelImplStatic::ResolveString(String string, bool bRecursive)
 }
 
 } // namespace ep
+
+#if __EP_MEMORY_DEBUG__
+#if defined(EP_WINDOWS)
+namespace ep {
+  namespace internal {
+
+    int reportingHook(int reportType, char* userMessage, int* retVal)
+    {
+      static bool filter = true;
+      static int debugMsgCount = 3;
+      static int leakCount = 0;
+
+      if (strcmp(userMessage, "Object dump complete.\n") == 0)
+        filter = false;
+
+      if (filter)
+      {
+        // Debug messages from our program should consist of 4 parts :
+        // File (line) | AllocID | Block Descriptor | Memory Data
+        if (!strstr(userMessage, ") : "))
+        {
+          ++debugMsgCount;
+        }
+        else
+        {
+          if (leakCount == 0)
+            OutputDebugStringA("Detected memory leaks!\nDumping objects ->\n");
+          debugMsgCount = 0;
+          ++leakCount;
+        }
+        // Filter the output if it's not from our program
+        return (debugMsgCount > 3);
+      }
+
+      return (leakCount == 0);
+    }
+
+  } // namespace internal
+} // namespace ep
+#endif  // defined(EP_WINDOWS)
+
+# if defined (epInitMemoryTracking)
+#   undef epInitMemoryTracking
+# endif // epInitMemoryTracking
+void epInitMemoryTracking()
+{
+#if defined(EP_WINDOWS)
+  const wchar_t *pFilename = L"MemoryReport_"
+#if EP_DEBUG
+    "Debug_"
+#else
+    "Release_"
+#endif // EP_DEBUG
+#if defined(EP_ARCH_X64)
+    "x64"
+#elif defined(EP_ARCH_X86)
+    "x86"
+#else
+#   error "Couldn't detect target architecture"
+#endif // defined (EP_ARCH_X64)
+    ".txt";
+
+  HANDLE hCrtWarnReport = CreateFileW(pFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (hCrtWarnReport == INVALID_HANDLE_VALUE) OutputDebugStringA("Error creating CrtWarnReport.txt\n");
+
+  errno = 0;
+  int warnMode = _CrtSetReportMode(_CRT_WARN, _CRTDBG_REPORT_MODE);
+  _CrtSetReportMode(_CRT_WARN, warnMode | _CRTDBG_MODE_FILE);
+  if (errno == EINVAL) OutputDebugStringA("Error calling _CrtSetReportMode() warnings\n");
+
+  errno = 0;
+  _CrtSetReportFile(_CRT_WARN, hCrtWarnReport);
+  if (errno == EINVAL)OutputDebugStringA("Error calling _CrtSetReportFile() warnings\n");
+  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+  //change the report function to only report memory leaks from program code
+  _CrtSetReportHook(ep::internal::reportingHook);
+#endif
+}
+#endif // __EP_MEMORY_DEBUG__

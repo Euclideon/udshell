@@ -2,9 +2,8 @@
 #if !defined(_EPSHAREDPTR_HPP)
 #define _EPSHAREDPTR_HPP
 
-#include <utility>
-
 #include "ep/cpp/platform.h"
+#include <utility>
 
 #define SHARED_CLASS(Name) \
   class Name; \

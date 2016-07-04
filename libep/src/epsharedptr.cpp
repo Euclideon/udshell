@@ -1,4 +1,4 @@
-
+#include "libep_internal.h"
 #include "ep/cpp/sharedptr.h"
 #include "ep/cpp/safeptr.h"
 #include "ep/cpp/avltree.h"
@@ -19,7 +19,13 @@ void* GetSafePtr(void *pAlloc)
 {
   auto pRegistry = GetWeakRefRegistry();
   if (pRegistry)
-    return pRegistry->tryInsert(pAlloc, [&]() { return RefCounted::New<SafeProxy<void>>(pAlloc); });
+  {
+    SafeProxy<void>** pPtr = pRegistry->get(pAlloc);
+    if (pPtr)
+      return *pPtr;
+
+    return pRegistry->insert(pAlloc, RefCounted::New<SafeProxy<void>>(pAlloc));
+  }
   return nullptr;
 }
 

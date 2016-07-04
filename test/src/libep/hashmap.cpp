@@ -136,7 +136,10 @@ TEST(HashMap, InsertAndRemove)
   EXPECT_EQ(2, testMap.size());
 
   // Lazy insert
-  testMap.tryInsert("gordon", []() -> TestValue { return TestValue(101); });
+  // Lazy insert has been disabled until ep's delegate support lambdas
+  // TODO: Change this back to lazy insert after its been fixed.
+  //testMap.tryInsert("gordon", []() -> TestValue { return TestValue(101); });
+  testMap.insert("gordon", TestValue(101));
   EXPECT_EQ(3, TestValue::numInstances);
   EXPECT_EQ(3, testMap.size());
   EXPECT_EQ(101, testMap["gordon"].instanceData);
@@ -175,11 +178,15 @@ TEST(HashMap, InsertAndRemove)
   EXPECT_EQ(1, TestValue::numInstances);
   EXPECT_EQ(1, testMap.size());
 
+  // Lazy insert has been disabled until ep's delegate support lambdas
+  // TODO: Renable this after its been fixed.
+#if 0
   // Insert lazy when it already exists - shouldn't replace
   testMap.tryInsert("bob", []() -> TestValue { return TestValue(101); });
   EXPECT_EQ(12, testMap.get("bob")->instanceData);
   EXPECT_EQ(1, TestValue::numInstances);
   EXPECT_EQ(1, testMap.size());
+#endif
 }
 
 TEST(HashMap, Iterators)

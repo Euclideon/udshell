@@ -14,7 +14,6 @@ class Component;
 struct Instance
 {
   int apiVersion;
-
   Kernel *pKernelInstance;
   void *pErrorSystem;
   void *pStaticImplRegistry;

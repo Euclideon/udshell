@@ -1,7 +1,24 @@
+#include "libep_internal.h"
 #include "ep/cpp/platform.h"
-
 #include <stdio.h>
 #include "ep/cpp/plugin.h"
+
+extern "C" {
+
+void epInternalInit() epweak;
+
+#if defined(EP_COMPILER_VISUALC)
+void epInternalInitWeak() { }
+# if defined(EP_ARCH_X86)
+#   pragma comment(linker, "/alternatename:_epInternalInit=_epInternalInitWeak")
+# else
+#   pragma comment(linker, "/alternatename:epInternalInit=epInternalInitWeak")
+# endif
+#else
+void epInternalInit() { }
+#endif // defined(EP_COMPILER_VISUALC)
+
+} // extern "C"
 
 namespace ep {
 namespace internal {
@@ -9,28 +26,6 @@ namespace internal {
 bool gUnitTesting = false;
 
 MutableString256 assertBuffer;
-
-void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line)
-{
-#if defined(EP_COMPILER_VISUALC)
-# if __EP_MEMORY_DEBUG__
-  void *pMemory = (flags & epAF_Zero) ? _recalloc_dbg(nullptr, 1, size, _NORMAL_BLOCK, pFile, line) : _malloc_dbg(size, _NORMAL_BLOCK, pFile, line);
-# else
-  void *pMemory = (flags & epAF_Zero) ? _recalloc(nullptr, 1, size) : malloc(size);
-# endif // __EP_MEMORY_DEBUG__
-#else // defined(EP_COMPILER_VISUALC)
-  epUnused(pFile);
-  epUnused(line);
-  void *pMemory = (flags & epAF_Zero) ? calloc(1, size) : malloc(size);
-#endif
-  return pMemory;
-}
-
-void _Free(void *pMemory)
-{
-  if (pMemory)
-    free(pMemory);
-}
 
 } // namespace internal
 
@@ -84,16 +79,24 @@ void epDebugPrintf(const char *format, ...)
 void *_epAlloc(size_t size, epAllocationFlags flags EP_IF_MEMORY_DEBUG(const char * pFile, int line))
 {
 #if __EP_MEMORY_DEBUG__
-  if (ep::s_pInstance)
-    return ep::s_pInstance->Alloc(size, flags, pFile, line);
-
-  return ep::internal::_Alloc(size, flags, pFile, line);
+  const char *_pFile = pFile;
+  int _line = line;
 #else
-  if (ep::s_pInstance)
-    return ep::s_pInstance->Alloc(size, flags, nullptr, 0);
+  const char *_pFile = nullptr;
+  int _line = 0;
+#endif
 
-  return ep::internal::_Alloc(size, flags, nullptr, 0);
-#endif // __EP_MEMORY_DEBUG__
+  if (ep::s_pInstance)
+  {
+    return ep::s_pInstance->Alloc(size, flags, _pFile, _line);
+  }
+  else
+  {
+    epInternalInit();
+    if (ep::s_pInstance)
+      return ep::s_pInstance->Alloc(size, flags, _pFile, _line);
+  }
+  return nullptr;
 }
 
 void _epFree(void *pMemory)
@@ -101,88 +104,14 @@ void _epFree(void *pMemory)
   if (ep::s_pInstance)
   {
     ep::s_pInstance->Free(pMemory);
-    return;
   }
-
-  ep::internal::_Free(pMemory);
-}
-
-#if __EP_MEMORY_DEBUG__
-#if defined(EP_WINDOWS)
-namespace ep {
-namespace internal {
-
-int reportingHook(int reportType, char* userMessage, int* retVal)
-{
-  static bool filter = true;
-  static int debugMsgCount = 3;
-  static int leakCount = 0;
-
-  if (strcmp(userMessage, "Object dump complete.\n") == 0)
-    filter = false;
-
-  if (filter)
+  else
   {
-    // Debug messages from our program should consist of 4 parts :
-    // File (line) | AllocID | Block Descriptor | Memory Data
-    if (!strstr(userMessage, ") : "))
-    {
-      ++debugMsgCount;
-    }
-    else
-    {
-      if (leakCount == 0)
-        OutputDebugStringA("Detected memory leaks!\nDumping objects ->\n");
-      debugMsgCount = 0;
-      ++leakCount;
-    }
-    // Filter the output if it's not from our program
-    return (debugMsgCount > 3);
+    epInternalInit();
+    if (ep::s_pInstance)
+      ep::s_pInstance->Free(pMemory);
   }
-
-  return (leakCount == 0);
 }
-
-} // namespace internal
-} // namespace ep
-#endif  // defined(EP_WINDOWS)
-
-void epInitMemoryTracking()
-{
-#if defined(EP_WINDOWS)
-  const wchar_t *pFilename = L"MemoryReport_"
-#if EP_DEBUG
-    "Debug_"
-#else
-    "Release_"
-#endif // EP_DEBUG
-#if defined(EP_ARCH_X64)
-    "x64"
-#elif defined(EP_ARCH_X86)
-    "x86"
-#else
-#   error "Couldn't detect target architecture"
-#endif // defined (EP_ARCH_X64)
-    ".txt";
-
-  HANDLE hCrtWarnReport = CreateFileW(pFilename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-  if (hCrtWarnReport == INVALID_HANDLE_VALUE) OutputDebugStringA("Error creating CrtWarnReport.txt\n");
-
-  errno = 0;
-  int warnMode = _CrtSetReportMode(_CRT_WARN, _CRTDBG_REPORT_MODE);
-  _CrtSetReportMode(_CRT_WARN, warnMode | _CRTDBG_MODE_FILE);
-  if (errno == EINVAL) OutputDebugStringA("Error calling _CrtSetReportMode() warnings\n");
-
-  errno = 0;
-  _CrtSetReportFile(_CRT_WARN, hCrtWarnReport);
-  if (errno == EINVAL)OutputDebugStringA("Error calling _CrtSetReportFile() warnings\n");
-  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
-  //change the report function to only report memory leaks from program code
-  _CrtSetReportHook(ep::internal::reportingHook);
-#endif
-}
-#endif // __EP_MEMORY_DEBUG__
 
 #if EP_DEBUG
 # if !defined(EP_WINDOWS)
