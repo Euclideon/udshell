@@ -36,6 +36,7 @@ cp $BUILD_PATH/windows_shell_release_64/bin/epviewer.exe $WIN64_ROOT/epviewer_un
 cp 3rdparty/assimp-3.1.1/lib/windows/x64/assimp-ep64.dll $WIN64_ROOT/
 cp ud/3rdParty/sdl2/lib/x64/SDL2.dll $WIN64_ROOT/
 cp build/package/windows/qt.conf $WIN64_ROOT/
+cp build/package/windows/QtToMSVC.bat $WIN64_ROOT/
 cp $PACKAGE_PATH/docs/libep-docs.chm $WIN64_ROOT/
 cp -R build/package/qtcreator/wizards/* $WIN64_ROOT/qtcreator/
 
@@ -55,6 +56,7 @@ cp $BUILD_PATH/windows_shell_release_32/bin/epviewer.exe $WIN32_ROOT/epviewer_un
 cp 3rdparty/assimp-3.1.1/lib/windows/x32/assimp-ep32.dll $WIN32_ROOT/
 cp ud/3rdParty/sdl2/lib/x86/SDL2.dll $WIN32_ROOT/
 cp build/package/windows/qt.conf $WIN32_ROOT/
+cp build/package/windows/QtToMSVC.bat $WIN32_ROOT/
 cp $PACKAGE_PATH/docs/libep-docs.chm $WIN32_ROOT/
 cp -R build/package/qtcreator/wizards/* $WIN32_ROOT/qtcreator/
 

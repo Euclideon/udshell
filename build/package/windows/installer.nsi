@@ -222,6 +222,7 @@ Section "install"
   File '..\..\..\tempinstalldir\epshell.exe'
   File '..\..\..\tempinstalldir\epviewer.exe'
   File '..\..\..\tempinstalldir\libep-docs.chm'
+  File '..\..\..\tempinstalldir\QtToMSVC.bat'
   
   # Qt
   File '..\..\..\tempinstalldir\qt.conf'
@@ -382,6 +383,7 @@ Section "uninstall"
   delete $INSTDIR\epshell.exe
   delete $INSTDIR\epviewer.exe
   delete $INSTDIR\libep-docs.chm
+  delete $INSTDIR\QtToMSVC.bat
 
   # Always delete uninstaller as the last action
   delete $INSTDIR\uninstall.exe
