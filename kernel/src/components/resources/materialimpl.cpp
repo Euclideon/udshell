@@ -44,12 +44,14 @@ void epFromVariant(const Variant &variant, ShaderProperty *p)
 
 Array<const PropertyInfo> Material::GetProperties() const
 {
+#define EP_MAKE_PROPERTY_METASET(FuncName, desc) EP_MAKE_PROPERTY_EXPLICIT(#FuncName, desc, EP_MAKE_GETTER(Get##FuncName), EP_MAKE_SETTER(Set##FuncName##_Meta), nullptr, 0)
+
   return{
-    EP_MAKE_PROPERTY(VertexShader, "Vertex shader for rendering", nullptr, 0),
-    EP_MAKE_PROPERTY(PixelShader, "Pixel shader for rendering", nullptr, 0),
-    EP_MAKE_PROPERTY(GeometryShader, "Geometry shader for rendering", nullptr, 0),
-    EP_MAKE_PROPERTY(TesselationControlShader, "Tesselation Control shader for rendering", nullptr, 0),
-    EP_MAKE_PROPERTY(TesselationEvaluationShader, "Tesselation Evaluation shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY_METASET(VertexShader, "Vertex shader for rendering"),
+    EP_MAKE_PROPERTY_METASET(PixelShader, "Pixel shader for rendering"),
+    EP_MAKE_PROPERTY_METASET(GeometryShader, "Geometry shader for rendering"),
+    EP_MAKE_PROPERTY_METASET(TesselationControlShader, "Tesselation Control shader for rendering"),
+    EP_MAKE_PROPERTY_METASET(TesselationEvaluationShader, "Tesselation Evaluation shader for rendering"),
 
     EP_MAKE_PROPERTY(BlendMode, "Frame buffer blend mode", nullptr, 0),
     EP_MAKE_PROPERTY(CullMode, "Back face cull mode", nullptr, 0),

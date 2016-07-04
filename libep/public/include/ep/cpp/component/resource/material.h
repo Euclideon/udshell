@@ -50,21 +50,27 @@ public:
   // Shaders
   ShaderRef GetShader(ShaderType type) const { return GetMaterialProperty(s_shaderNames[type]).as<ShaderRef>(); }
   void SetShader(ShaderType type, ShaderRef spShader) { SetMaterialProperty(s_shaderNames[type], spShader); }
+  void SetShader(ShaderType type, String shader) { SetMaterialProperty(s_shaderNames[type], shader); }
 
   ShaderRef GetVertexShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::VertexShader]).as<ShaderRef>(); }
   void SetVertexShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::VertexShader, Result::InvalidArgument, "Not a vertex shader"); SetMaterialProperty(s_shaderNames[ShaderType::VertexShader], spShader); }
+  void SetVertexShader(String shader) { SetShader(ShaderType::VertexShader, shader); }
 
   ShaderRef GetPixelShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::PixelShader]).as<ShaderRef>(); }
   void SetPixelShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::PixelShader, Result::InvalidArgument, "Not a pixel shader");  SetMaterialProperty(s_shaderNames[ShaderType::PixelShader], spShader); }
+  void SetPixelShader(String shader) { SetShader(ShaderType::PixelShader, shader); }
 
   ShaderRef GetGeometryShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::GeometryShader]).as<ShaderRef>(); }
   void SetGeometryShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::GeometryShader, Result::InvalidArgument, "Not a Geometry shader");  SetMaterialProperty(s_shaderNames[ShaderType::GeometryShader], spShader); }
+  void SetGeometryShader(String shader) { SetShader(ShaderType::GeometryShader, shader); }
 
   ShaderRef GetTesselationControlShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::TesselationControlShader]).as<ShaderRef>(); }
   void SetTesselationControlShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::TesselationControlShader, Result::InvalidArgument, "Not a TesselationControl shader");  SetMaterialProperty(s_shaderNames[ShaderType::TesselationControlShader], spShader); }
+  void SetTesselationControlShader(String shader) { SetShader(ShaderType::TesselationControlShader, shader); }
 
   ShaderRef GetTesselationEvaluationShader() const { return GetMaterialProperty(s_shaderNames[ShaderType::TesselationEvaluationShader]).as<ShaderRef>(); }
   void SetTesselationEvaluationShader(ShaderRef spShader) { EPTHROW_IF(!spShader || spShader->GetType() != ShaderType::TesselationEvaluationShader, Result::InvalidArgument, "Not a TesselationEvaluation shader");   SetMaterialProperty(s_shaderNames[ShaderType::TesselationEvaluationShader], spShader); }
+  void SetTesselationEvaluationShader(String shader) { SetShader(ShaderType::TesselationEvaluationShader, shader); }
 
   // Other states
   BlendMode GetBlendMode() const { return GetMaterialProperty("blendmode").as<BlendMode>(); }
@@ -100,6 +106,13 @@ protected:
   {
     pImpl = CreateImpl(initParams);
   }
+
+private:
+  void SetVertexShader_Meta(Variant shader) { SetMaterialProperty(s_shaderNames[ShaderType::VertexShader], shader); }
+  void SetPixelShader_Meta(Variant shader) { SetMaterialProperty(s_shaderNames[ShaderType::PixelShader], shader); }
+  void SetGeometryShader_Meta(Variant shader) { SetMaterialProperty(s_shaderNames[ShaderType::GeometryShader], shader); }
+  void SetTesselationControlShader_Meta(Variant shader) { SetMaterialProperty(s_shaderNames[ShaderType::TesselationControlShader], shader); }
+  void SetTesselationEvaluationShader_Meta(Variant shader) { SetMaterialProperty(s_shaderNames[ShaderType::TesselationEvaluationShader], shader); }
 
   const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetPropertyDesc(_name, enumerateFlags); }
 
