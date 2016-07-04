@@ -90,6 +90,11 @@
 					"source": "plugin.pro",
 					"target": "%{PluginName}",
 					"openAsProject": true
+				},
+				{
+					"source": "make_vcxproj.bat",
+					"target": "%{ProjectDirectory}/make_vcxproj.bat",
+					"openInEditor": false
 				}
 			]
 		}
