@@ -1,8 +1,13 @@
 TEMPLATE = lib
 TARGET = "%{ProjectName}"
 
-ARCH = x86
-contains (QMAKE_TARGET.arch, x86_64) {
+win32 {
+  ARCH = x86
+  contains (QMAKE_TARGET.arch, x86_64) {
+    ARCH = x64
+  }
+}
+else {
   ARCH = x64
 }
 
