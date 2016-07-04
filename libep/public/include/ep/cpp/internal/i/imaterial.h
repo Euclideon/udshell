@@ -9,6 +9,7 @@ namespace ep {
 
 SHARED_CLASS(ArrayBuffer);
 SHARED_CLASS(Shader);
+SHARED_CLASS(Resource);
 
 struct ShaderProperty;
 
@@ -26,6 +27,8 @@ public:
 
   virtual Variant GetMaterialProperty(String property) const = 0;
   virtual void SetMaterialProperty(String property, Variant data) = 0;
+
+  virtual ResourceRef Clone() const = 0;
 
 #if 0 // When ranges are implemented
   const ShaderPropertyRange& GetShaderUniformsRange() const = 0;

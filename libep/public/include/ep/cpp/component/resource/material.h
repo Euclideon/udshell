@@ -43,6 +43,8 @@ class Material : public Resource
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Material, IMaterial, Resource, EPKERNEL_PLUGINVERSION, "Material Resource", 0)
 public:
 
+  ResourceRef Clone() const override { return pImpl->Clone(); }
+
   // Material Properties
   Variant GetMaterialProperty(String property) const { return pImpl->GetMaterialProperty(property); }
   void SetMaterialProperty(String property, Variant val) { pImpl->SetMaterialProperty(property, val); }

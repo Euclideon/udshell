@@ -18,6 +18,8 @@ public:
 
   Variant Save() const override { return pImpl->Save(); }
 
+  virtual ResourceRef Clone() const { EPTHROW(Result::InvalidCall, "Not implemented!"); }
+
   Event<> Changed;
 
 protected:
@@ -32,6 +34,9 @@ private:
   Array<const MethodInfo> GetMethods() const;
   Array<const EventInfo> GetEvents() const;
 };
+
+template <typename T, typename std::enable_if<std::is_base_of<Resource, T>::value>::type* = nullptr>
+inline SharedPtr<T> CloneResource(SharedPtr<T> inst) { return component_cast<T>(inst->Clone()); }
 
 }
 

@@ -15,12 +15,14 @@ class Model : public Resource
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Model, IModel, Resource, EPKERNEL_PLUGINVERSION, "Model desc...", 0)
 public:
 
+  ResourceRef Clone() const override { return pImpl->Clone(); }
+
   MaterialRef GetMaterial() const { return pImpl->GetMaterial(); }
   void SetMaterial(MaterialRef spMaterial) { pImpl->SetMaterial(spMaterial); }
 
   void AddVertexArray(ArrayBufferRef spVertices) { pImpl->AddVertexArray(spVertices); }
   void RemoveVertexArray(ArrayBufferRef spVertices) { pImpl->RemoveVertexArray(spVertices); }
-  SharedArray<ArrayBufferRef> GetVertexArrays() { return pImpl->GetVertexArrays(); }
+  Array<ArrayBufferRef> GetVertexArrays() { return pImpl->GetVertexArrays(); }
 
   ArrayBufferRef GetIndexArray() const { return pImpl->GetIndexArray(); }
   void SetIndexArray(ArrayBufferRef spIndices) { pImpl->SetIndexArray(spIndices); }

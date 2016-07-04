@@ -269,6 +269,30 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
   uniforms[property].dirty = true;
 }
 
+ResourceRef MaterialImpl::Clone() const
+{
+  MaterialRef spNewMat = GetKernel()->CreateComponent<Material>();
+  MaterialImpl* pImpl = spNewMat->GetImpl<MaterialImpl>();
+
+  for (size_t i = 0; i < NumShaders; i++)
+    pImpl->shaders[i] = shaders[i];
+
+  for (size_t i = 0; i < (TriangleFace::Back + 1); i++)
+    pImpl->stencilStates[i] = stencilStates[i];
+
+  pImpl->textures = textures;
+  pImpl->blendMode = blendMode;
+  pImpl->cullMode = cullMode;
+  pImpl->depthCompareFunc = depthCompareFunc;
+  pImpl->spShaderProgram = spShaderProgram;
+
+  pImpl->uniforms = uniforms;
+  pImpl->attributes = attributes;
+  pImpl->dynamicPropertyCache = dynamicPropertyCache;
+
+  return spNewMat;
+}
+
 void MaterialImpl::InvalidateProperties()
 {
   for (auto p : uniforms)
