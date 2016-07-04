@@ -68,8 +68,8 @@ mkdir -p ~/.config/QtProject/qtcreator
 cp -rf usr/share/qtcreator ~/.config/QtProject/
 
 echo "Install QtCreator debug helpers..."
-mkdir -p $INSTALL_PATH/share/Euclideon/debugger
-cp -rf debugger/* $INSTALL_PATH/share/Euclideon/debugger/
+sudo mkdir -p $INSTALL_PATH/share/Euclideon/debugger
+sudo cp -rf debugger/* $INSTALL_PATH/share/Euclideon/debugger/
 cat $INSTALL_PATH/share/Euclideon/debugger/README
 
 echo "Creating local directory structure in ~/.local/share/Euclideon/..."
