@@ -237,6 +237,8 @@ struct SharedArray : public Slice<T>
 
   size_t refcount() const;
 
+  SharedArray<T> clone() { return Array<T>(*this); }
+
   // static constructors (make proper constructors?)
   template<typename... Things> static SharedArray<T> concat(Things&&... things);
 
