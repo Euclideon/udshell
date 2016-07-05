@@ -59,6 +59,17 @@ public:
   ep::SynchronisedPtr<ep::RenderableView> spRenderableView;
 };
 
+ep::MouseControls GetMouseButton(Qt::MouseButton button)
+{
+  // TODO: qt mouse buttons is a bit field
+  if (button & Qt::LeftButton)   return ep::MouseControls::LeftButton;
+  if (button & Qt::MiddleButton) return ep::MouseControls::MiddleButton;
+  if (button & Qt::RightButton)  return ep::MouseControls::RightButton;
+  if (button & Qt::ExtraButton1) return ep::MouseControls::Button4;
+  if (button & Qt::ExtraButton2) return ep::MouseControls::Button5;
+
+  return ep::MouseControls::Max; // redundant return for not yet supported buttons.
+}
 
 QtRenderView::QtRenderView(QQuickItem *pParent)
   : QQuickFramebufferObject(pParent)
@@ -226,9 +237,9 @@ void QtRenderView::mousePressEvent(QMouseEvent *pEv)
   ev.deviceType = ep::InputDevice::Mouse;
   ev.deviceId = 0; // TODO: get mouse id
   ev.eventType = ep::InputEvent::EventType::Key;
-  ev.key.key = pEv->button();
+  ev.key.key = GetMouseButton(pEv->button());
   ev.key.state = 1;
-  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (ev.key.key != ep::MouseControls::Max && spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
     pEv->accept();
   else
     pEv->ignore();
@@ -240,9 +251,9 @@ void QtRenderView::mouseReleaseEvent(QMouseEvent *pEv)
   ev.deviceType = ep::InputDevice::Mouse;
   ev.deviceId = 0; // TODO: get mouse id
   ev.eventType = ep::InputEvent::EventType::Key;
-  ev.key.key = pEv->button();
+  ev.key.key = GetMouseButton(pEv->button());
   ev.key.state = 0;
-  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (ev.key.key != ep::MouseControls::Max && spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
     pEv->accept();
   else
     pEv->ignore();
