@@ -315,13 +315,11 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   material->SetTexture(0, texture);
 #endif // 0
 
-  // Generate Cube
-  auto generator = kernel->CreateComponent<PrimitiveGenerator>();
-
   ArrayBufferRef vertexBuffer = kernel->CreateComponent<ArrayBuffer>();
   ArrayBufferRef indexBuffer = kernel->CreateComponent<ArrayBuffer>();
 
-  generator->GenerateCube(vertexBuffer, indexBuffer);
+  // Generate Cube
+  PrimitiveGenerator::GenerateCube(vertexBuffer, indexBuffer);
 
   MetadataRef metadata = vertexBuffer->GetMetadata();
   metadata->Get("attributeinfo")[0].insertItem("name", "a_position");
