@@ -42,6 +42,7 @@ outFile "epsdk.exe"
 
 !include LogicLib.nsh
 !include nsDialogs.nsh
+!include "FileAssociation.nsh"
 
 Var Dialog
 Var Label
@@ -275,8 +276,20 @@ Section "install"
   writeUninstaller "$INSTDIR\uninstall.exe"
 
   # Start Menu
-  #createDirectory "$SMPROGRAMS\${COMPANYNAME}"
-  #createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}.lnk" "$INSTDIR\app.exe" "" "$INSTDIR\logo.ico"
+  createDirectory "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}"
+  createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Shell.lnk" "$INSTDIR\epshell.exe" "" ""
+  createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Viewer.lnk" "$INSTDIR\epviewer.exe" "" ""
+  createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Platform SDK Documentation.lnk" "$INSTDIR\libep-docs.chm" "" ""
+  createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" ""
+
+  # register file extensions
+  ${registerExtension} "$INSTDIR\epshell.exe" ".epproj" "Euclideon Platform Project"
+  ${registerExtension} "$INSTDIR\epviewer.exe" ".uds" "Unlimited Detail Model"
+  ${registerExtension} "$INSTDIR\epviewer.exe" ".upc" "Unlimited Detail Model"
+  ${registerExtension} "$INSTDIR\epviewer.exe" ".oct3" "Unlimited Detail Model"
+  ${registerExtension} "$INSTDIR\epviewer.exe" ".udi" "Unlimited Detail Model"
+  ${registerExtension} "$INSTDIR\epviewer.exe" ".udg" "Unlimited Detail Model"
+  ${registerExtension} "$INSTDIR\epviewer.exe" ".udm" "Unlimited Detail Model"
 
   # Env. Variable
   !define env_hkcu 'HKCU "Environment"'
@@ -289,12 +302,12 @@ Section "install"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "InstallLocation" "$\"$INSTDIR$\""
-  #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayIcon" "$\"$INSTDIR\logo.ico$\""
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "Publisher" "$\"${COMPANYNAME}$\""
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayIcon" "$\"$INSTDIR\epshell.exe$\",0"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "Publisher" "${COMPANYNAME}"
   #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "HelpLink" "$\"${HELPURL}$\""
   #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "URLUpdateInfo" "$\"${UPDATEURL}$\""
   #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "URLInfoAbout" "$\"${ABOUTURL}$\""
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayVersion" "$\"${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}$\""
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayVersion" "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "VersionMajor" ${VERSIONMAJOR}
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "VersionMinor" ${VERSIONMINOR}
   # There is no option for modifying or repairing the install
@@ -325,10 +338,23 @@ FunctionEnd
 
 Section "uninstall"
 
+  # register file extensions
+  ${unregisterExtension} ".epproj" "Euclideon Platform Project"
+  ${unregisterExtension} ".uds" "Unlimited Detail Model"
+  ${unregisterExtension} ".upc" "Unlimited Detail Model"
+  ${unregisterExtension} ".oct3" "Unlimited Detail Model"
+  ${unregisterExtension} ".udi" "Unlimited Detail Model"
+  ${unregisterExtension} ".udg" "Unlimited Detail Model"
+  ${unregisterExtension} ".udm" "Unlimited Detail Model"
+
   # Remove Start Menu launcher
-  #delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}.lnk"
+  delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Shell.lnk"
+  delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Viewer.lnk"
+  delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Platform SDK Documentation.lnk"
+  delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Uninstall.lnk"
   # Try to remove the Start Menu folder - this will only happen if it is empty
-  #rmDir "$SMPROGRAMS\${COMPANYNAME}"
+  rmDir "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}"
+  rmDir "$SMPROGRAMS\${COMPANYNAME}"
 
   #Remove libs and include
   RMDir /r $INSTDIR\include
