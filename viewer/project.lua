@@ -6,6 +6,10 @@ project "epviewer"
 	files { "src/**.cpp", "src/**.h" }
 	files { "premake5.lua", "project.lua" }
 
+	if _OS == "windows" then
+		files { "viewer.rc", "resource.h" }
+	end
+
 	includedirs { "../public/include" }
 	includedirs { "../kernel/src" }
 

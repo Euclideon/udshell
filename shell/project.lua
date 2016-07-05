@@ -9,6 +9,10 @@ project "epshell"
 	files { "res/**.qrc", "res/**.xml" }
 	files { "../premake5.lua", "project.lua" }
 
+	if _OS == "windows" then
+		files { "shell.rc", "resource.h" }
+	end
+
 	includedirs { "../kernel/src" }
 
 	links { "udPlatform" }
