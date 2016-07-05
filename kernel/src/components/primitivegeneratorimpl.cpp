@@ -3,17 +3,17 @@
 
 namespace ep {
 
-Array<const MethodInfo> PrimitiveGenerator::GetMethods() const
+Array<const StaticFuncInfo> PrimitiveGenerator::GetStaticFuncs() const
 {
   return{
-    EP_MAKE_METHOD(GenerateCube, "Generate a cube primitive"),
-    EP_MAKE_METHOD(GenerateSphere, "Generate a sphere primitive"),
-    EP_MAKE_METHOD(GenerateCylinder, "Generate a cylinder primitive"),
-    EP_MAKE_METHOD(GenerateCone, "Generate a cone primitive"),
+    EP_MAKE_STATICFUNC(GenerateCube, "Generate a cube primitive"),
+    EP_MAKE_STATICFUNC(GenerateSphere, "Generate a sphere primitive"),
+    EP_MAKE_STATICFUNC(GenerateCylinder, "Generate a cylinder primitive"),
+    EP_MAKE_STATICFUNC(GenerateCone, "Generate a cone primitive"),
   };
 }
 
-void PrimitiveGeneratorImpl::GenerateQuad(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
+void PrimitiveGeneratorImplStatic::GenerateQuad(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
 {
   static const Float3 rawVB[] = {
     Float3{ -1.0f, -1.0f, 0.0f },
@@ -37,7 +37,7 @@ void PrimitiveGeneratorImpl::GenerateQuad(ArrayBufferRef spVB, ArrayBufferRef sp
   spIB->AllocateFromData(Slice<const uint16_t>(rawIB));
 }
 
-void PrimitiveGeneratorImpl::GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
+void PrimitiveGeneratorImplStatic::GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
 {
   // vertex buffer
   spVB->Allocate<Float3>(8);
@@ -71,7 +71,7 @@ void PrimitiveGeneratorImpl::GenerateCube(ArrayBufferRef spVB, ArrayBufferRef sp
   });
 }
 
-void PrimitiveGeneratorImpl::GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
+void PrimitiveGeneratorImplStatic::GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
   EPASSERT_THROW(numSegments >= 3 && numSlices >= 2, Result::InvalidArgument, "Invalid args!");
 
@@ -151,7 +151,7 @@ void PrimitiveGeneratorImpl::GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef 
   }
 }
 
-void PrimitiveGeneratorImpl::GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
+void PrimitiveGeneratorImplStatic::GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
   EPASSERT_THROW(numSegments >= 3 && numSlices >= 1, Result::InvalidArgument, "Invalid args!");
 
@@ -229,7 +229,7 @@ void PrimitiveGeneratorImpl::GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRe
   }
 }
 
-void PrimitiveGeneratorImpl::GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
+void PrimitiveGeneratorImplStatic::GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
   EPASSERT_THROW(numSegments >= 3 && numSlices >= 1, Result::InvalidArgument, "Invalid args!");
 

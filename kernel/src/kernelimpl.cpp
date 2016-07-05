@@ -250,7 +250,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<View, ViewImpl>();
   pInstance->RegisterComponentType<Activity, ActivityImpl>();
   pInstance->RegisterComponentType<Console>();
-  pInstance->RegisterComponentType<PrimitiveGenerator, PrimitiveGeneratorImpl>();
+  pInstance->RegisterComponentType<PrimitiveGenerator, PrimitiveGeneratorImpl, void, PrimitiveGeneratorImplStatic>();
 
   // resources
   pInstance->RegisterComponentType<Resource, ResourceImpl>();

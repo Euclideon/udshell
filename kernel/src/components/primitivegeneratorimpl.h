@@ -12,11 +12,14 @@ SHARED_CLASS(ArrayBuffer);
 class PrimitiveGeneratorImpl : public BaseImpl<PrimitiveGenerator, IPrimitiveGenerator>
 {
 public:
-
   PrimitiveGeneratorImpl(Component *pInstance, Variant::VarMap initParams)
     : ImplSuper(pInstance)
   {}
+};
 
+class PrimitiveGeneratorImplStatic : public BaseStaticImpl<IPrimitiveGeneratorStatic>
+{
+public:
   void GenerateQuad(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex = nullptr) override final;
   void GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex = nullptr) override final;
   void GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 6, Delegate<Float3(Float3)> transformVertex = nullptr) override final;
