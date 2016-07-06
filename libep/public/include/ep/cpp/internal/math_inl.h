@@ -685,6 +685,7 @@ Matrix4x4<T> Matrix4x4<T>::scaleNonUniform(T x, T y, T z, const Vector3<T> &t)
 template <typename T>
 Matrix4x4<T> Matrix4x4<T>::perspective(T fovY, T aspectRatio, T znear, T zfar)
 {
+  // TODO: This presumes OpenGL clip space
   T fov = Tan(fovY / T(2));
   Matrix4x4<T> r = { {{ T(1)/(aspectRatio*fov), T(0),         T(0),                                T(0),
                        T(0),                   T(0),         (zfar + znear) / (zfar - znear),     T(1),

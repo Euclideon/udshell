@@ -228,4 +228,65 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
   }
 }
 
+Double3 ViewImpl::ScreenToNDCPoint(Double2 screenPixel, double z) const
+{
+  // TODO: this presumes OpenGl clip space
+  Dimensions<int> screenSize = GetDimensions();
+
+  double glPixelX = double(screenPixel.x) / (screenSize.width * 0.5) - 1.0;
+  double glPixelY = -(double(screenPixel.y) / (screenSize.height * 0.5) - 1.0);
+
+  return Double3{ glPixelX, glPixelY, z * 2.0 - 1.0 };
+}
+
+Double3 ViewImpl::NDCToScreenPoint(Double3 ndcPoint) const
+{
+  // TODO: this presumes OpenGl clip space
+  Dimensions<int> screenSize = GetDimensions();
+
+  double pixelX = (ndcPoint.x * 0.5 + 0.5) * screenSize.width;
+  double pixelY = (-ndcPoint.y * 0.5 + 0.5) * screenSize.height;
+
+  return Double3{ pixelX, pixelY, ndcPoint.z * 0.5 + 0.5 };
+}
+
+Double3 ViewImpl::UnprojectScreenPoint(const Double4x4 &invProj, Double2 screenPixel, double z) const
+{
+  Double3 ndcPoint = ScreenToNDCPoint(screenPixel, z);
+
+  Double4 unprojectedPoint = invProj * Double4::create(ndcPoint, 1);
+  return unprojectedPoint.toVector3() / unprojectedPoint.w;
+}
+
+Double3 ViewImpl::ProjectToScreenPoint(const Double4x4 &proj, Double3 point) const
+{
+  Double4 clipPoint = proj * Double4::create(point, 1);
+  Double3 ndcPoint = clipPoint.toVector3() / clipPoint.w;
+
+  return NDCToScreenPoint(ndcPoint);
+}
+
+DoubleRay3 ViewImpl::ScreenPointToWorldRay(Double2 screenPoint) const
+{
+  EPTHROW_IF_NULL(spCamera, Result::InvalidCall, "This function needs the camera to be available");
+
+  Dimensions<int> screenSize = GetDimensions();
+
+  Double4x4 viewMat = spCamera->GetViewMatrix();
+  Double4x4 projMat = spCamera->GetProjectionMatrix((double)screenSize.width / (double)screenSize.height);
+
+  Double4x4 VP = projMat * viewMat;
+  Double4x4 invVP = Inverse(VP);
+
+  Double2 ndcPoint = ScreenToNDCPoint(screenPoint).toVector2(); // screen to clip point
+
+  Double4 worldLinePoint1 = invVP * Double4::create(ndcPoint, -1, 1); // start at the near plane
+  Double4 worldLinePoint2 = invVP * Double4::create(ndcPoint, 1, 1);  // go to the end plane
+
+  Double3 rayStart = worldLinePoint1.toVector3() / worldLinePoint1.w;
+  Double3 rayDirection = worldLinePoint2.toVector3() / worldLinePoint2.w - rayStart;
+
+  return DoubleRay3{ rayStart, rayDirection };
+}
+
 } // namespace ep

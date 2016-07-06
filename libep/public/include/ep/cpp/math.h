@@ -205,8 +205,8 @@ struct Vector3
   static const size_t elementCount = 3;
   using ElementType = T;
 
-  Vector3<T>& toVector2() { return *(Vector2<T>*)this; }
-  const Vector3<T>& toVector2() const { return *(Vector2<T>*)this; }
+  Vector2<T>& toVector2() { return *(Vector2<T>*)this; }
+  const Vector2<T>& toVector2() const { return *(Vector2<T>*)this; }
 
   Vector3<T> operator -() const { Vector3<T> r = { -x, -y, -z }; return r; }
 
