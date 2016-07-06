@@ -82,7 +82,7 @@ project "epshell"
 	configuration { "linux", "Debug*" }
 		links { "../bin/dinkey/linux/lib/dplin64debug.o" }
 	configuration { "linux", "not Debug*" }
-		links { "../bin/dinkey/linux/lib/dplin64.o" }
+		links { "../bin/dinkey/linux/lib/dplin64debug.o" }
 
 	configuration { }
 
