@@ -59,7 +59,7 @@ sudo mkdir -p $INSTALL_PATH/include/
 sudo cp -r include/ep $INSTALL_PATH/include/
 
 sudo mkdir -p $INSTALL_PATH/lib/
-sudo cp lib/liblibep.a $INSTALL_PATH/lib/
+sudo cp lib/x64/liblibep.a $INSTALL_PATH/lib/
 
 
 echo "Install QtCreator project templates..."
