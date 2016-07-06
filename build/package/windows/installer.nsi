@@ -274,6 +274,8 @@ Section "install"
 
   # Uninstaller - See function un.onInit and section "uninstall" for configuration
   writeUninstaller "$INSTDIR\uninstall.exe"
+  createDirectory "C:\ProgramData\${COMPANYNAME}\${APPNAME}"
+  setOutPath "C:\ProgramData\${COMPANYNAME}\${APPNAME}"
 
   # Start Menu
   createDirectory "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}"
@@ -355,6 +357,10 @@ Section "uninstall"
   # Try to remove the Start Menu folder - this will only happen if it is empty
   rmDir "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}"
   rmDir "$SMPROGRAMS\${COMPANYNAME}"
+  
+  # Remove app data
+  RMDir /r "C:\ProgramData\${COMPANYNAME}\${APPNAME}"
+  rmDir "C:\ProgramData\${COMPANYNAME}"
 
   #Remove libs and include
   RMDir /r $INSTDIR\include
