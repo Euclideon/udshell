@@ -49,10 +49,18 @@ project "epviewer"
 		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell" }
 		linkoptions { "-Wl,-rpath=../bin/amd64" }
 
+	configuration { "windows", "x64", "Debug*" }
+		linkoptions { "bin/dinkey/lib/dpwin64debug.obj" }
+	configuration { "windows", "x64", "not Debug*" }
+		linkoptions { "bin/dinkey/lib/dpwin64debug.obj" }
+	configuration { "windows", "x86", "Debug*" }
+		linkoptions { "bin/dinkey/lib/dpwin32_coff_debug.obj" }
+	configuration { "windows", "x86", "not Debug*" }
+		linkoptions { "bin/dinkey/lib/dpwin32_coff_debug.obj" }
 	configuration { "linux", "Debug*" }
 		links { "../bin/dinkey/linux/lib/dplin64debug.o" }
 	configuration { "linux", "not Debug*" }
-		links { "../bin/dinkey/linux/lib/dplin64.o" }
+		links { "../bin/dinkey/linux/lib/dplin64debug.o" }
 
 	configuration { }
 
