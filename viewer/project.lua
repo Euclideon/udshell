@@ -56,7 +56,7 @@ project "epviewer"
 	configuration { "windows", "x86", "Debug*" }
 		linkoptions { "bin/dinkey/lib/dpwin32_coff_debug.obj" }
 	configuration { "windows", "x86", "not Debug*" }
-		linkoptions { "bin/dinkey/lib/dpwin32_coff_debug.obj" }
+		linkoptions { "bin/dinkey/lib/dpwin32_coff_debug.obj", "/SAFESEH:NO" }
 	configuration { "linux", "Debug*" }
 		links { "../bin/dinkey/linux/lib/dplin64debug.o" }
 	configuration { "linux", "not Debug*" }
