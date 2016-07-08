@@ -279,8 +279,8 @@ Section "install"
 
   # Start Menu
   createDirectory "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}"
-  createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Shell.lnk" "$INSTDIR\epshell.exe" "" ""
-  createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Viewer.lnk" "$INSTDIR\epviewer.exe" "" ""
+  createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Shell (Dev).lnk" "$INSTDIR\epshell.exe" "" ""
+  createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Viewer (Dev).lnk" "$INSTDIR\epviewer.exe" "" ""
   createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Platform SDK Documentation.lnk" "$INSTDIR\libep-docs.chm" "" ""
   createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" ""
 
@@ -350,14 +350,14 @@ Section "uninstall"
   ${unregisterExtension} ".udm" "Unlimited Detail Model"
 
   # Remove Start Menu launcher
-  delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Shell.lnk"
-  delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Viewer.lnk"
+  delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Shell (Dev).lnk"
+  delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Viewer (Dev).lnk"
   delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Platform SDK Documentation.lnk"
   delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}\Uninstall.lnk"
   # Try to remove the Start Menu folder - this will only happen if it is empty
   rmDir "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}"
   rmDir "$SMPROGRAMS\${COMPANYNAME}"
-  
+
   # Remove app data
   RMDir /r "C:\ProgramData\${COMPANYNAME}\${APPNAME}"
   rmDir "C:\ProgramData\${COMPANYNAME}"

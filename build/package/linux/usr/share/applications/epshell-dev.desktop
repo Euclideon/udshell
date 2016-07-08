@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Encoding=UTF-8
-Name=Shell
+Name=Shell (Dev)
 Comment=Euclideon Platform Shell application
 Exec=/opt/Euclideon/Shell/epshell.sh --project="%f"
 Icon=euclideon

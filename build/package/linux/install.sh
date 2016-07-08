@@ -9,8 +9,8 @@ echo "Removing old install..."
 sudo rm -rf /opt/Euclideon/Shell
 sudo rm -rf $INSTALL_PATH/include/ep
 sudo rm -f $INSTALL_PATH/lib/liblibep.a
-sudo rm -f $INSTALL_PATH/share/applications/epshell.desktop
-sudo rm -f $INSTALL_PATH/share/applications/epviewer.desktop
+sudo rm -f $INSTALL_PATH/share/applications/epshell-dev.desktop
+sudo rm -f $INSTALL_PATH/share/applications/epviewer-dev.desktop
 sudo rm -rf $INSTALL_PATH/share/pixmaps/euclideon
 sudo rm -f $INSTALL_PATH/share/pixmaps/euclideon.png
 sudo rm -f $INSTALL_PATH/share/mime/packages/euclideon.xml
@@ -18,6 +18,8 @@ sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/euclideon
 sudo rm -rf $INSTALL_PATH/share/Euclideon
 
 # legacy removal - this can be removed from the install script in a few releases
+sudo rm -f $INSTALL_PATH/share/applications/epshell.desktop
+sudo rm -f $INSTALL_PATH/share/applications/epviewer.desktop
 sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epplugin
 sudo rm -rf ~/.config/QtProject/qtcreator/templates/wizards/epactivity
 
@@ -80,8 +82,8 @@ mkdir -p ~/.local/share/Euclideon/plugins
 echo "Registering mime-types..."
 
 sudo xdg-mime install --novendor --mode system $INSTALL_PATH/share/mime/packages/euclideon.xml
-sudo xdg-mime default epshell.desktop application/epshell
-sudo xdg-mime default epviewer.desktop application/uds
+sudo xdg-mime default epshell-dev.desktop application/epshell
+sudo xdg-mime default epviewer-dev.desktop application/uds
 
 
 echo "Installed successfully!"
