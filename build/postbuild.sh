@@ -4,11 +4,11 @@ set -e
 if [[ $CI_BUILD_REF_NAME == "master" || -n "$CI_BUILD_TAG" ]]; then
   echo "Copying build to network..."
 
+  PLATFORM_NAME=$3
+
   if [ $OSTYPE == "msys" ]; then # Windows, MingW
     if [ $3 == "win32" ]; then
       PLATFORM_NAME=x86
-    else
-      PLATFORM_NAME=$3
     fi
     BUILD_ROOT=//bne-fs-fs-002.euclideon.local/Resources/Builds/Platform/Intermediate
   else

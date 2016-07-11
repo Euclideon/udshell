@@ -3,14 +3,12 @@
 #set -x #echo on
 
 function run_testsuite() {
+  PLAT=$3
+
   if [ $OSTYPE == "msys" ]; then # Windows, MingW
     if [ $3 == "win32" ]; then
       PLAT="x86"
-    else
-      PLAT=$3
     fi
-  else
-    PLAT=""
   fi
 
   if [ $1 == "epshell" ]; then # epshell
@@ -27,14 +25,12 @@ function run_testsuite() {
 }
 
 function run_shutdown_test() {
+  PLAT=$3
+
   if [ $OSTYPE == "msys" ]; then # Windows, MingW
     if [ $3 == "win32" ]; then
       PLAT="x86"
-    else
-      PLAT=$3
     fi
-  else
-    PLAT=""
   fi
 
   # TODO: Make this run on every config and platform
