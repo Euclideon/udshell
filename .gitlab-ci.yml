@@ -16,12 +16,12 @@ windows_shell_debug_64:
     - windows
     - vs2015
 
-windows_shell_release_64:
+windows_shell_releasedev_64:
   stage: build
   script:
     - set QTDIR=C:\dev\Qt\5.6\msvc2015_64
     - set QTDIR32=C:\dev\Qt\5.6\msvc2015
-    - "build\\build.sh epshell Release x64 merge"
+    - "build\\build.sh epshell ReleaseDev x64 merge"
   tags:
     - windows
     - vs2015
@@ -36,12 +36,12 @@ windows_shell_debug_32:
     - windows
     - vs2015
 
-windows_shell_release_32:
+windows_shell_releasedev_32:
   stage: build
   script:
     - set QTDIR=C:\dev\Qt\5.6\msvc2015_64
     - set QTDIR32=C:\dev\Qt\5.6\msvc2015
-    - "build\\build.sh epshell Release win32 merge"
+    - "build\\build.sh epshell ReleaseDev win32 merge"
   tags:
     - windows
     - vs2015
@@ -55,11 +55,11 @@ ubuntu_shell_debug_gcc:
     - linux
     - deb
 
-ubuntu_shell_release_gcc:
+ubuntu_shell_releasedev_gcc:
   stage: build
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
-    - "./build/build.sh epshell Release x64 merge"
+    - "./build/build.sh epshell ReleaseDev x64 merge"
   tags:
     - linux
     - deb
@@ -73,11 +73,11 @@ ubuntu_shell_debug_clang:
     - linux
     - deb
 
-ubuntu_shell_release_clang:
+ubuntu_shell_releasedev_clang:
   stage: build
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
-    - "./build/build.sh epshell ReleaseClang x64 merge"
+    - "./build/build.sh epshell ReleaseDevClang x64 merge"
   tags:
     - linux
     - deb
@@ -91,11 +91,11 @@ rpm_shell_debug_gcc:
     - linux
     - rpm
 
-rpm_shell_release_gcc:
+rpm_shell_releasedev_gcc:
   stage: build
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
-    - "./build/build.sh epshell Release x64 merge"
+    - "./build/build.sh epshell ReleaseDev x64 merge"
   tags:
     - linux
     - rpm
@@ -109,11 +109,11 @@ rpm_shell_debug_clang:
     - linux
     - rpm
 
-rpm_shell_release_clang:
+rpm_shell_releasedev_clang:
   stage: build
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
-    - "./build/build.sh epshell ReleaseClang x64 merge"
+    - "./build/build.sh epshell ReleaseDevClang x64 merge"
   tags:
     - linux
     - rpm
@@ -177,7 +177,7 @@ win64_packaging:
   only:
     - master
     - tags
-  script: 
+  script:
     - set QTDIR=C:\dev\Qt\5.6\msvc2015_64
     - "build\\packagewindows.sh win64"
   tags:

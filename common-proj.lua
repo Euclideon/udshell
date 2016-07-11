@@ -8,6 +8,8 @@ flags { "C++11", "NoMinimalRebuild", "NoPCH" }
 -- override with local settings
 configuration { "Debug*" }
 	optimize "Off"
+configuration { "ReleaseDev*" }
+	defines { "EP_RELEASEDEV" }
 configuration {}
 
 includedirs { "libep/public/include" }
