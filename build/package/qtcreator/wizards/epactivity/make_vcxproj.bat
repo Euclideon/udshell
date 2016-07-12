@@ -7,4 +7,4 @@ IF "%QTDIR%"=="" (
 )
 
 %QTDIR%\\bin\\qmake.exe -spec win32-msvc2015 -tp vc %{ProjectName}.pro
-powershell -Command "(gc %{ProjectName}.vcxproj) -replace 'Qt5Cored.lib', 'Qt5Core.lib' | Out-File %{ProjectName}.vcxproj"
+powershell -Command "(gc %{ProjectName}.vcxproj) -replace 'Qt5Cored.lib', 'Qt5Core.lib' | Out-File -Encoding ASCII %{ProjectName}.vcxproj"
