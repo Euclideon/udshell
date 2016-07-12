@@ -7,7 +7,6 @@ solution "epshell"
 
 	-- This hack just makes the VS project and also the makefile output their configurations in the idiomatic order
 	if _ACTION == "gmake" then
-		platforms { "x64" }
 		configurations { "Release", "Debug", "DebugOpt", "DebugQML", "ReleaseQML", "ReleaseClang", "DebugClang", "DebugOptClang" }
 		configuration { "*Clang" }
 			toolset "clang"
