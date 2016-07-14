@@ -167,14 +167,12 @@ void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 {
   const Double4x4 &cameraMatrix = spCamera->GetMatrix();
 
-  BoundingVolume vol = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
+  Double4x4 udMat = spUDNode->GetUDModel()->GetUDMatrix();
 
-  MetadataRef udMeta = spUDNode->GetUDModel()->GetMetadata();
-  Variant header = udMeta->Get("octreeHeader");
-  if (header.isValid())
-    vol = header["boundingVolume"].as<BoundingVolume>();
+  Double3 modelMin = Double3::zero();
+  Double3 modelMax = modelMin + Double3{ udMat.axis.x.x, udMat.axis.y.y, udMat.axis.z.z };
 
-  Double3 modelCenter = (vol.max - vol.min) / 2;
+  Double3 modelCenter = (modelMax - modelMin) / 2;
 
   double dist = 2.0;
 
@@ -210,9 +208,9 @@ void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 
   Double4 nodePos = transformT * transformR * nodeCameraPos;
 
-  // Set node's orientation so it faces towards the camera
-  cameraYPR.y = -cameraYPR.y;
-  Double4x4 nodeMatrix = Double4x4::rotationYPR(cameraYPR, nodePos.toVector3());
+  nodePos -= udMat.axis.t;
+
+  Double4x4 nodeMatrix = Double4x4::translation(nodePos.toVector3());
 
   spUDNode->SetMatrix(nodeMatrix);
 
