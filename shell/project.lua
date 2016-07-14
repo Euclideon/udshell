@@ -22,6 +22,7 @@ project "epshell"
 	links { "epkernel" }
 	links { luaPath }
 	links { "pcre" }
+	dependson { "viewer" }
 
 	defines { "EP_USE_QT" }
 	configuration { "*QML" }
