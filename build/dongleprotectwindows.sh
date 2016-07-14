@@ -13,17 +13,8 @@ dist="$1"
 
 echo "Applying dongle protection to $dist package..."
 
-PACKAGE_ROOT=//bne-fs-fs-002.euclideon.local/Resources/Builds/Platform/Builds
+. build/setvars.sh
 
-if [ -z "$CI_BUILD_TAG" ]; then
-  BUILT_TYPE=master
-  BUILD_NAME=$CI_BUILD_REF
-else
-  BUILT_TYPE=release
-  BUILD_NAME=$CI_BUILD_TAG
-fi
-
-PACKAGE_PATH=$PACKAGE_ROOT/$BUILT_TYPE/$BUILD_NAME
 DIST_ROOT=$PACKAGE_PATH/$dist
 
 echo "PACKAGE_PATH: $PACKAGE_PATH"

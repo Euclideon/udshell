@@ -9,7 +9,7 @@ insert_final_newline = true
 charset = utf-8
 
 # special files
-[**.{yml}]
+[**.{yml,sh}]
 indent_style = space
 indent_size = 2
 tab_width = 2
@@ -18,7 +18,7 @@ insert_final_newline = true
 charset = utf-8
 
 # files use tabs
-[**.{lua,sh,bat,json}]
+[**.{lua,bat,json}]
 indent_style = tab
 indent_size = 4
 tab_width = 4

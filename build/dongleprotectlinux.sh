@@ -5,25 +5,16 @@ date
 echo
 
 if [ -z "$1" ]; then
-    echo "Error: Need distribution name as first arg"
-		exit 3
+  echo "Error: Need distribution name as first arg"
+  exit 3
 fi
 
 dist="$1"
 
 echo "Applying dongle protection to $dist package..."
 
-PACKAGE_ROOT=//bne-fs-fs-002.euclideon.local/Resources/Builds/Platform/Builds
+. build/setvars.sh
 
-if [ -z "$CI_BUILD_TAG" ]; then
-  BUILT_TYPE=master
-  BUILD_NAME=$CI_BUILD_REF
-else
-  BUILT_TYPE=release
-  BUILD_NAME=$CI_BUILD_TAG
-fi
-
-PACKAGE_PATH=$PACKAGE_ROOT/$BUILT_TYPE/$BUILD_NAME
 DIST_ROOT=$PACKAGE_PATH/$dist
 
 echo "PACKAGE_PATH: $PACKAGE_PATH"
@@ -43,11 +34,11 @@ echo
 date
 
 if [ $errcode -ne 0 ]; then # Protecting the build failed!
-	echo "DinkeyAdd.exe error: $errcode"
-	if [ $errcode -eq 127 ]; then
-		echo " - Error 127 usually means the Dinkey .o hasn't been linked to the binary!"
-	fi
-	exit 3
+  echo "DinkeyAdd.exe error: $errcode"
+  if [ $errcode -eq 127 ]; then
+    echo " - Error 127 usually means the Dinkey .o hasn't been linked to the binary!"
+  fi
+  exit 3
 fi
 
 set -e
