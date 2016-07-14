@@ -36,6 +36,9 @@ solution "epshell"
 
 		dofile "ud/udPlatform/project.lua"
 		dofile "ud/udPointCloud/project.lua"
+		configuration { "Debug*" }
+			optimize "Full"
+		configuration {}
 
 	group "hal"
 		halBuild = "qt"
