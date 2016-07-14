@@ -360,9 +360,8 @@ void Viewer::CreatePlatformLogo()
 
   ArrayBufferRef spVertexBuffer = pKernel->CreateComponent<ArrayBuffer>();
   ArrayBufferRef spIndexBuffer = pKernel->CreateComponent<ArrayBuffer>();
-  PrimitiveGeneratorRef generator = pKernel->CreateComponent<PrimitiveGenerator>();
 
-  generator->GenerateQuad(spVertexBuffer, spIndexBuffer);
+  PrimitiveGenerator::GenerateQuad(spVertexBuffer, spIndexBuffer);
 
   MetadataRef spMetadata = spVertexBuffer->GetMetadata();
   spMetadata->Get("attributeinfo")[0].insertItem("name", "a_position");

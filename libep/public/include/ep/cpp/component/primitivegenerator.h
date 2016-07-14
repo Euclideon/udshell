@@ -11,14 +11,14 @@ SHARED_CLASS(ArrayBuffer);
 
 class PrimitiveGenerator : public Component
 {
-  EP_DECLARE_COMPONENT_WITH_IMPL(ep, PrimitiveGenerator, IPrimitiveGenerator, Component, EPKERNEL_PLUGINVERSION, "Generate vertex buffers for primitive shapes", 0)
+  EP_DECLARE_COMPONENT_WITH_STATIC_IMPL(ep, PrimitiveGenerator, IPrimitiveGenerator, IPrimitiveGeneratorStatic, Component, EPKERNEL_PLUGINVERSION, "Generate vertex buffers for primitive shapes", ComponentInfoFlags::Abstract)
 public:
 
-  void GenerateQuad(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex = nullptr) { pImpl->GenerateQuad(spVB, spIB, transformVertex); }
-  void GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex = nullptr) { pImpl->GenerateCube(spVB, spIB, transformVertex); }
-  void GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 6, Delegate<Float3(Float3)> transformVertex = nullptr) { pImpl->GenerateSphere(spVB, spIB, numSegments, numSlices, transformVertex); }
-  void GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 1, Delegate<Float3(Float3)> transformVertex = nullptr) { pImpl->GenerateCylinder(spVB, spIB, numSegments, numSlices, transformVertex); }
-  void GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 1, Delegate<Float3(Float3)> transformVertex = nullptr) { pImpl->GenerateCone(spVB, spIB, numSegments, numSlices, transformVertex); }
+  static void GenerateQuad(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateQuad(spVB, spIB, transformVertex); }
+  static void GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCube(spVB, spIB, transformVertex); }
+  static void GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 6, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateSphere(spVB, spIB, numSegments, numSlices, transformVertex); }
+  static void GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 1, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCylinder(spVB, spIB, numSegments, numSlices, transformVertex); }
+  static void GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 1, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCone(spVB, spIB, numSegments, numSlices, transformVertex); }
 
 protected:
   PrimitiveGenerator(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -29,7 +29,7 @@ protected:
   ~PrimitiveGenerator()
   {}
 
-  Array<const MethodInfo> GetMethods() const;
+  Array<const StaticFuncInfo> GetStaticFuncs() const;
 };
 
 }
