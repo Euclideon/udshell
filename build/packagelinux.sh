@@ -1,22 +1,7 @@
 #!/bin/bash
 set -e
 
-PACKAGE_ROOT=/mnt/Resources/Builds/Platform/Builds
-
-if [ -z "$CI_BUILD_TAG" ]; then
-  DATE=`date +%y%m%d`
-  BUILT_TYPE=master
-  BUILD_NAME=$CI_BUILD_REF
-  BUILD_SHORT_NAME=$DATE-${CI_BUILD_REF:0:6}
-else
-  BUILT_TYPE=release
-  BUILD_NAME=$CI_BUILD_TAG
-  BUILD_SHORT_NAME=$BUILD_NAME
-fi
-
-PACKAGE_PATH=$PACKAGE_ROOT/$BUILT_TYPE/$BUILD_NAME
-PACKAGE_NAME=epsdk-$1-$BUILD_SHORT_NAME
-
+. build/setvars.sh
 
 # copy it locally for working on
 echo "Formatting package..."

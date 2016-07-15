@@ -3,26 +3,12 @@ set -e
 
 echo "Gather build outputs..."
 
-BUILD_ROOT=/mnt/Resources/Builds/Platform/Intermediate
-PACKAGE_ROOT=/mnt/Resources/Builds/Platform/Builds
-
-if [ -z "$CI_BUILD_TAG" ]; then
-  BUILT_TYPE=master
-  BUILD_NAME=$CI_BUILD_REF
-else
-  BUILT_TYPE=release
-  BUILD_NAME=$CI_BUILD_TAG
-fi
-
-BUILD_PATH=$BUILD_ROOT/$BUILT_TYPE/$BUILD_NAME
-PACKAGE_PATH=$PACKAGE_ROOT/$BUILT_TYPE/$BUILD_NAME
-
+. build/setvars.sh
 
 # collate outputs into proper locations...
 
 # arrange windows package
 echo "Collating Win64 package..."
-WIN64_ROOT=$PACKAGE_PATH/win64
 mkdir -p $WIN64_ROOT/include
 mkdir -p $WIN64_ROOT/lib
 mkdir -p $WIN64_ROOT/plugins
@@ -41,7 +27,6 @@ cp -R build/package/qtcreator/wizards/* $WIN64_ROOT/qtcreator/
 
 # arrange windows package
 echo "Collating Win32 package..."
-WIN32_ROOT=$PACKAGE_PATH/win32
 mkdir -p $WIN32_ROOT/include
 mkdir -p $WIN32_ROOT/lib
 mkdir -p $WIN32_ROOT/plugins
@@ -60,7 +45,6 @@ cp -R build/package/qtcreator/wizards/* $WIN32_ROOT/qtcreator/
 
 # arrange trusty package
 echo "Collating Ubuntu trusty package..."
-UBUNTU_ROOT=$PACKAGE_PATH/trusty
 mkdir -p $UBUNTU_ROOT/include
 mkdir -p $UBUNTU_ROOT/lib
 mkdir -p $UBUNTU_ROOT/plugins
@@ -89,7 +73,6 @@ strip $UBUNTU_ROOT/plugins/*
 
 # arrange centos package
 echo "Collating CentOS7 package..."
-CENTOS_ROOT=$PACKAGE_PATH/centos7
 mkdir -p $CENTOS_ROOT/include
 mkdir -p $CENTOS_ROOT/lib
 mkdir -p $CENTOS_ROOT/plugins
