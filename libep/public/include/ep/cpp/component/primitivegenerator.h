@@ -17,6 +17,7 @@ public:
   static void GenerateQuad(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateQuad(spVB, spIB, transformVertex); }
   static void GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCube(spVB, spIB, transformVertex); }
   static void GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 6, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateSphere(spVB, spIB, numSegments, numSlices, transformVertex); }
+  static void GenerateCircle(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, double arcLength = EP_2PI, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCircle(spVB, spIB, numSegments, arcLength, transformVertex); }
   static void GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 1, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCylinder(spVB, spIB, numSegments, numSlices, transformVertex); }
   static void GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 1, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCone(spVB, spIB, numSegments, numSlices, transformVertex); }
 
