@@ -6,6 +6,16 @@
 
 namespace ep {
 
+template <typename Tree> struct SharedMap;
+template <typename Tree>
+ptrdiff_t epStringify(Slice<char> buffer, String format, const SharedMap<Tree> &map, const VarArg *pArgs)
+{
+  if (!map.ptr)
+    return epStringifyTemplate(buffer, format, nullptr, pArgs);
+  return epStringify(buffer, format, map.ptr->tree, pArgs);
+}
+
+
 template <typename Tree>
 struct SharedMap
 {
@@ -198,6 +208,7 @@ public:
 
 private:
   friend struct Variant;
+  friend ptrdiff_t epStringify<Tree>(Slice<char>, String, const SharedMap<Tree>&, const VarArg*);
 
   struct Node : public RefCounted
   {

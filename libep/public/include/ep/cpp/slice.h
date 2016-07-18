@@ -130,7 +130,7 @@ public:
   size_t tokenise(std::function<void(Slice<T> token, size_t index)> onToken, Slice<T> delimiters);
 
   template<typename U>
-  void copyTo(Slice<U> dest) const;
+  size_t copyTo(Slice<U> dest) const;
 };
 template<typename T>
 inline bool operator ==(nullptr_t, Slice<T> rh) { return rh == nullptr; }

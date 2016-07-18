@@ -517,11 +517,12 @@ inline size_t Slice<T>::tokenise(std::function<void(Slice<T> token, size_t index
 
 template<typename T>
 template<typename U>
-inline void Slice<T>::copyTo(Slice<U> dest) const
+inline size_t Slice<T>::copyTo(Slice<U> dest) const
 {
   EPASSERT_THROW(dest.length >= length, Result::OutOfBounds, "Not enough elements!");
   for (size_t i = 0; i<length; ++i)
     dest.ptr[i] = ptr[i];
+  return length;
 }
 
 
