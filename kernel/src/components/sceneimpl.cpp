@@ -84,51 +84,57 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
 {
   RenderableSceneRef cache = RenderableSceneRef::create();
 
-  for (const auto &in : scene.ud)
+  if (scene.ud.length)
   {
-    UDJob &job = cache->ud.pushBack();
-    job.spModel = in.spModel;
-    UDModelImpl *pImpl = in.spModel->GetImpl<UDModelImpl>();
-    pImpl->CopyRenderContext(&job.context);
-    job.context.matrix = Mul(in.matrix, job.context.matrix);
-
-    udRenderModel *pRenderModel = reinterpret_cast<udRenderModel*>(&job.context);
-    const BufferRef &filterConstants = pImpl->constantBuffers[UDConstantDataType::VoxelFilter];
-    if (filterConstants)
+    // We must reserve the memory required before hand as the RenderContext contains internal pointers
+    // that won't be fixed up when pushBack does a realloc.
+    cache->ud.reserve(scene.ud.length);
+    for (const auto &in : scene.ud)
     {
-      job.constantBuffers[UDConstantDataType::VoxelFilter] = shared_pointer_cast<RenderConstantBuffer>(pRenderer->GetConstantBuffer(filterConstants));
-      pRenderModel->pFilterData = job.constantBuffers[UDConstantDataType::VoxelFilter]->pBuffer;
-    }
+      UDJob &job = cache->ud.pushBack();
+      job.spModel = in.spModel;
+      UDModelImpl *pImpl = in.spModel->GetImpl<UDModelImpl>();
+      pImpl->CopyRenderContext(&job.context);
+      job.context.matrix = Mul(in.matrix, job.context.matrix);
 
-    const BufferRef &voxelConstants = pImpl->constantBuffers[UDConstantDataType::VoxelShader];
-    if (voxelConstants)
-    {
-      if (voxelConstants == filterConstants)
+      udRenderModel *pRenderModel = reinterpret_cast<udRenderModel*>(&job.context);
+      const BufferRef &filterConstants = pImpl->constantBuffers[UDConstantDataType::VoxelFilter];
+      if (filterConstants)
       {
-        pRenderModel->pVoxelShaderData = pRenderModel->pFilterData;
+        job.constantBuffers[UDConstantDataType::VoxelFilter] = shared_pointer_cast<RenderConstantBuffer>(pRenderer->GetConstantBuffer(filterConstants));
+        pRenderModel->pFilterData = job.constantBuffers[UDConstantDataType::VoxelFilter]->pBuffer;
       }
-      else
-      {
-        job.constantBuffers[UDConstantDataType::VoxelShader] = shared_pointer_cast<RenderConstantBuffer>(pRenderer->GetConstantBuffer(voxelConstants));
-        pRenderModel->pVoxelShaderData = job.constantBuffers[UDConstantDataType::VoxelShader]->pBuffer;
-      }
-    }
 
-    const BufferRef &pixelConstants = pImpl->constantBuffers[UDConstantDataType::PixelShader];
-    if (pixelConstants)
-    {
-      if (pixelConstants == voxelConstants)
+      const BufferRef &voxelConstants = pImpl->constantBuffers[UDConstantDataType::VoxelShader];
+      if (voxelConstants)
       {
-        pRenderModel->pPixelShaderData = pRenderModel->pVoxelShaderData;
+        if (voxelConstants == filterConstants)
+        {
+          pRenderModel->pVoxelShaderData = pRenderModel->pFilterData;
+        }
+        else
+        {
+          job.constantBuffers[UDConstantDataType::VoxelShader] = shared_pointer_cast<RenderConstantBuffer>(pRenderer->GetConstantBuffer(voxelConstants));
+          pRenderModel->pVoxelShaderData = job.constantBuffers[UDConstantDataType::VoxelShader]->pBuffer;
+        }
       }
-      else if (pixelConstants == filterConstants)
+
+      const BufferRef &pixelConstants = pImpl->constantBuffers[UDConstantDataType::PixelShader];
+      if (pixelConstants)
       {
-        pRenderModel->pPixelShaderData = pRenderModel->pFilterData;
-      }
-      else
-      {
-        job.constantBuffers[UDConstantDataType::PixelShader] = shared_pointer_cast<RenderConstantBuffer>(pRenderer->GetConstantBuffer(pixelConstants));
-        pRenderModel->pPixelShaderData = job.constantBuffers[UDConstantDataType::PixelShader]->pBuffer;
+        if (pixelConstants == voxelConstants)
+        {
+          pRenderModel->pPixelShaderData = pRenderModel->pVoxelShaderData;
+        }
+        else if (pixelConstants == filterConstants)
+        {
+          pRenderModel->pPixelShaderData = pRenderModel->pFilterData;
+        }
+        else
+        {
+          job.constantBuffers[UDConstantDataType::PixelShader] = shared_pointer_cast<RenderConstantBuffer>(pRenderer->GetConstantBuffer(pixelConstants));
+          pRenderModel->pPixelShaderData = job.constantBuffers[UDConstantDataType::PixelShader]->pBuffer;
+        }
       }
     }
   }
