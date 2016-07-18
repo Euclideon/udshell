@@ -17,19 +17,19 @@ namespace internal {
 
   template<typename T, typename Del, typename R, typename... Args>
   using enable_if_valid_functor =
-    typename std::enable_if<
+    std::enable_if<
       std::is_same<R(Args...), typename internal::function_traits<decltype(&std::remove_reference<T>::type::operator())>::function_signature>::value  // check has operator() and signature is the same
       && !std::is_convertible<T, R(*)(Args...)>::value  // check it is not implicitly convertible to function pointer (lambda without capture)
       && !std::is_same<typename std::remove_reference<T>::type, Del>::value // check is it not delegate itself
-    >::type;
+    >;
 
   template<typename T, typename Del, typename R, typename... Args>
   using enable_if_captureless_lambda =
-    typename std::enable_if<
-    std::is_same<R(Args...), typename internal::function_traits<decltype(&std::remove_reference<T>::type::operator())>::function_signature>::value  // check has operator() and signature is the same
-    && std::is_convertible<T, R(*)(Args...)>::value  // check it is implicitly convertible to function pointer (lambda without capture)
-    && !std::is_same<typename std::remove_reference<T>::type, Del>::value // check it is not delegate itself
-    >::type;
+    std::enable_if<
+      std::is_same<R(Args...), typename internal::function_traits<decltype(&std::remove_reference<T>::type::operator())>::function_signature>::value  // check has operator() and signature is the same
+      && std::is_convertible<T, R(*)(Args...)>::value  // check it is implicitly convertible to function pointer (lambda without capture)
+      && !std::is_same<typename std::remove_reference<T>::type, Del>::value // check it is not delegate itself
+    >;
 }
 
 //! \cond
@@ -147,9 +147,9 @@ public:
   template <class X, class Y>
   Delegate(Y *i, R(X::*f)(Args...) const) : Delegate(FastDelegateType(i, f)) {}
   Delegate(R(*f)(Args...)) : Delegate(FastDelegateType(f)) {}
-  template <typename T, internal::enable_if_valid_functor<T, Delegate<R(Args...)>, R, Args...>* = nullptr>
+  template <typename T, typename internal::enable_if_valid_functor<T, Delegate<R(Args...)>, R, Args...>::type* = nullptr>
   Delegate(T &&lambda);
-  template <typename T, internal::enable_if_captureless_lambda<T, Delegate<R(Args...)>, R, Args...>* = nullptr>
+  template <typename T, typename internal::enable_if_captureless_lambda<T, Delegate<R(Args...)>, R, Args...>::type* = nullptr>
   Delegate(T &&lambda) : Delegate((R(*)(Args...))lambda) {}
 
   explicit operator bool() const { return m ? !m->m.empty() : false; }
