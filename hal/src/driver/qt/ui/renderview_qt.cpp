@@ -84,7 +84,10 @@ QtRenderView::QtRenderView(QQuickItem *pParent)
 QtRenderView::~QtRenderView()
 {
   if (spView)
+  {
     spView->FrameReady.Unsubscribe(ep::Delegate<void()>(this, &QtRenderView::OnFrameReady));
+    spView->GetImpl<ep::ViewImpl>()->SetLatestFrame(nullptr);
+  }
 }
 
 QQuickFramebufferObject::Renderer *QtRenderView::createRenderer() const

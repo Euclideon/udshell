@@ -182,30 +182,33 @@ void ViewImpl::OnDirty()
 void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
 {
   spLatestFrame = spFrame;
-  if (spLatestFrame && spLatestFrame->pickingEnabled)
+  if (spLatestFrame)
   {
-    udRenderPick &pick = spLatestFrame->udPick;
-    if (pick.found)
+    if (spLatestFrame->pickingEnabled)
     {
-      Double4 transPos = {
-        pick.nodePosMS[0] + pick.childSizeMS,
-        pick.nodePosMS[1] + pick.childSizeMS,
-        pick.nodePosMS[2] + pick.childSizeMS,
-        1.0
-      };
+      udRenderPick &pick = spLatestFrame->udPick;
+      if (pick.found)
+      {
+        Double4 transPos = {
+          pick.nodePosMS[0] + pick.childSizeMS,
+          pick.nodePosMS[1] + pick.childSizeMS,
+          pick.nodePosMS[2] + pick.childSizeMS,
+          1.0
+        };
 
-      pickedPoint = (reinterpret_cast<const UDRenderContext*>(pick.model)->matrix * transPos).toVector3();
+        pickedPoint = (reinterpret_cast<const UDRenderContext*>(pick.model)->matrix * transPos).toVector3();
 
-      pickHighlightData = { pick.model, pick.nodeIndex };
-      pInstance->PickFound.Signal(pickedPoint);
+        pickHighlightData = { pick.model, pick.nodeIndex };
+        pInstance->PickFound.Signal(pickedPoint);
+      }
+      else
+      {
+        pickedPoint = { 0 , 0, 0 };
+        pickHighlightData = { nullptr, 0, };
+      }
     }
-    else
-    {
-      pickedPoint = { 0 , 0, 0 };
-      pickHighlightData = { nullptr, 0, };
-    }
+    pInstance->FrameReady.Signal();
   }
-  pInstance->FrameReady.Signal();
 }
 
 } // namespace ep
