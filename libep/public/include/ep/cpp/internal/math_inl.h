@@ -82,6 +82,8 @@ template <typename T> Vector2<T> Clamp(const Vector2<T> &v, const Vector2<T> &_m
 template <typename T> Vector3<T> Clamp(const Vector3<T> &v, const Vector3<T> &_min, const Vector3<T> &_max) { Vector3<T> r = { v.x<_min.x ? _min.x : (v.x>_max.x ? _max.x : v.x), v.y<_min.y ? _min.y : (v.y>_max.y ? _max.y : v.y), v.z<_min.z ? _min.z : (v.z>_max.z ? _max.z : v.z) }; return r; }
 template <typename T> Vector4<T> Clamp(const Vector4<T> &v, const Vector4<T> &_min, const Vector4<T> &_max) { Vector4<T> r = { v.x<_min.x ? _min.x : (v.x>_max.x ? _max.x : v.x), v.y<_min.y ? _min.y : (v.y>_max.y ? _max.y : v.y), v.z<_min.z ? _min.z : (v.z>_max.z ? _max.z : v.z), v.w<_min.w ? _min.w : (v.w>_max.w ? _max.w : v.w) }; return r; }
 
+template <typename V, typename T> bool IsUnitLengthQ(const Quaternion<V> &v, T epsilon) { return Abs(V(1) - MagQ(v)) < V(epsilon); }
+
 template <typename T> T Dot2(const Vector2<T> &v1, const Vector2<T> &v2) { return v1.x*v2.x + v1.y*v2.y; }
 template <typename T> T Dot2(const Vector3<T> &v1, const Vector3<T> &v2) { return v1.x*v2.x + v1.y*v2.y; }
 template <typename T> T Dot2(const Vector4<T> &v1, const Vector4<T> &v2) { return v1.x*v2.x + v1.y*v2.y; }
@@ -104,6 +106,7 @@ template <typename T> T Mag2(const Vector4<T> &v) { return Sqrt(v.x*v.x + v.y*v.
 template <typename T> T Mag3(const Vector3<T> &v) { return Sqrt(v.x*v.x + v.y*v.y + v.z*v.z); }
 template <typename T> T Mag3(const Vector4<T> &v) { return Sqrt(v.x*v.x + v.y*v.y + v.z*v.z); }
 template <typename T> T Mag4(const Vector4<T> &v) { return Sqrt(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w); }
+template <typename T> T MagQ(const Quaternion<T> &q) { return Sqrt(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w); }
 
 template <typename T> T Cross2(const Vector2<T> &v1, const Vector2<T> &v2) { return v1.x*v2.y - v1.y*v2.x; }
 template <typename T> T Cross2(const Vector3<T> &v1, const Vector3<T> &v2) { return v1.x*v2.y - v1.y*v2.x; }
@@ -244,45 +247,36 @@ Quaternion<T> Lerp(const Quaternion<T> &q1, const Quaternion<T> &q2, T t)
 }
 
 template <typename T>
-Quaternion<T> Slerp(const Quaternion<T> &q1, const Quaternion<T> &q2, T t)
+Quaternion<T> Slerp(const Quaternion<T> &q1, const Quaternion<T> &_q2, T t)
 {
-  //http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
+  constexpr T epsilon = T(1.0 / 4096);
+  constexpr T thetaEpsilon = T(EP_PI / (180.0 * 100.0)); // 1/100 of a degree
 
-  // quaternion to return
-  Quaternion<T> r;
+  Quaternion<T> q2 = _q2;
 
-  // Calculate angle between them.
-  T cosHalfTheta = q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
+  EPASSERT(IsUnitLengthQ(q1, epsilon), "q1 is not normalized, magnitude %f\n", MagQ(q1));
+  EPASSERT(IsUnitLengthQ(q2, epsilon), "q2 is not normalized, magnitude %f\n", MagQ(q2));
 
-  // if q1=q2 or q1=-q2 then theta = 0 and we can return q1
-  if (udAbs(cosHalfTheta) >= T(1))
+  T cosHalfTheta = DotQ(q1, q2); // Dot product of 2 quaterions results in cos(theta/2)
+
+  if (cosHalfTheta < T(0)) // Rotation is greater than PI
   {
-    r.w = q1.w;
-    r.x = q1.x;
-    r.y = q1.y;
-    r.z = q1.z;
-    return r;
+    q2 = -_q2;
+    cosHalfTheta = -cosHalfTheta;
   }
 
-  // Calculate temporary values.
+  if ((T(1) - cosHalfTheta) < thetaEpsilon)
+    return NormalizeQ(Lerp(q1, q2, t));
+
   T halfTheta = ACos(cosHalfTheta);
-  T sinHalfTheta = Sqrt(T(1) - cosHalfTheta*cosHalfTheta);
 
-  // if theta = 180 degrees then result is not fully defined
-  // we could rotate around any axis normal to qa or qb
-  if (fabs(sinHalfTheta) < T(0.001)) // fabs is floating point absolute
-  {
-    r.w = (q1.w * T(0.5) + q2.w * T(0.5));
-    r.x = (q1.x * T(0.5) + q2.x * T(0.5));
-    r.y = (q1.y * T(0.5) + q2.y * T(0.5));
-    r.z = (q1.z * T(0.5) + q2.z * T(0.5));
-    return r;
-  }
+  EPASSERT(Abs(2.0 * halfTheta - T(EP_PI)) >= thetaEpsilon, "The angle between q1 and q2 is too close to PI, theta %.6f", T(2.0) * halfTheta);
 
-  //calculate Quaternion.
-  T ratioA = sin((1 - t) * halfTheta) / sinHalfTheta;
-  T ratioB = sin(t * halfTheta) / sinHalfTheta;
+  T sinHalfTheta = Sqrt(T(1) - cosHalfTheta * cosHalfTheta);
+  T ratioA = Sin(halfTheta * (T(1) - t)) / sinHalfTheta;
+  T ratioB = Sin(halfTheta * t) / sinHalfTheta;
 
+  Quaternion<T> r;
   r.w = (q1.w * ratioA + q2.w * ratioB);
   r.x = (q1.x * ratioA + q2.x * ratioB);
   r.y = (q1.y * ratioA + q2.y * ratioB);

@@ -86,6 +86,8 @@ template <typename T> Vector2<T> Clamp(const Vector2<T> &v, const Vector2<T> &_m
 template <typename T> Vector3<T> Clamp(const Vector3<T> &v, const Vector3<T> &_min, const Vector3<T> &_max);
 template <typename T> Vector4<T> Clamp(const Vector4<T> &v, const Vector4<T> &_min, const Vector4<T> &_max);
 
+template <typename V, typename T> bool IsUnitLengthQ(const V &v, T epsilon);
+
 template <typename T> T Dot2(const Vector2<T> &v1, const Vector2<T> &v2);
 template <typename T> T Dot2(const Vector3<T> &v1, const Vector3<T> &v2);
 template <typename T> T Dot2(const Vector4<T> &v1, const Vector4<T> &v2);
@@ -108,6 +110,7 @@ template <typename T> T Mag2(const Vector4<T> &v);
 template <typename T> T Mag3(const Vector3<T> &v);
 template <typename T> T Mag3(const Vector4<T> &v);
 template <typename T> T Mag4(const Vector4<T> &v);
+template <typename T> T MagQ(const Quaternion<T> &v);
 
 template <typename T> T Cross2(const Vector2<T> &v1, const Vector2<T> &v2);
 template <typename T> T Cross2(const Vector3<T> &v1, const Vector3<T> &v2);
@@ -291,6 +294,8 @@ struct Quaternion
 
   static const size_t elementCount = 4;
   using ElementType = T;
+
+  Quaternion<T> operator -() const { Quaternion<T> r = { -x, -y, -z, -w }; return r; }
 
   Quaternion<T> operator *(const Quaternion<T> &q) const { return Mul(*this, q); }
   Quaternion<T> operator *(T f) const { Quaternion<T> r = { x*f, y*f, z*f, w*f }; return r; }
