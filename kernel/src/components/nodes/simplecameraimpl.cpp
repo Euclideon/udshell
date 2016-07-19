@@ -5,8 +5,6 @@
 
 namespace ep {
 
-static int mouseRemap[] = { -1, 0, 2, -1, 1 };
-
 Array<const PropertyInfo> SimpleCamera::GetProperties() const
 {
   return{
@@ -162,13 +160,16 @@ bool SimpleCameraImpl::ViewportInputEvent(const InputEvent &ev)
     }
     else if (ev.eventType == InputEvent::EventType::Key)
     {
-      int button = mouseRemap[ev.key.key];
+      int button = ev.key.key;
 
-      if (!mouse.buttons[button])
-        mouse.stateChanged[button] = 1;
+      if (button >= 0 && button <= 2)
+      {
+        if (!mouse.buttons[button])
+          mouse.stateChanged[button] = 1;
 
-      mouse.buttons[button] = (char)ev.key.state;
-      stateChanged = true;
+        mouse.buttons[button] = (char)ev.key.state;
+        stateChanged = true;
+      }
     }
   }
 
