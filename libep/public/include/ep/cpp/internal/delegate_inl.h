@@ -52,7 +52,7 @@ private:
 };
 
 template <typename R, typename... Args>
-template <typename T, internal::enable_if_valid_functor<T, Delegate<R(Args...)>, R, Args...>*>
+template <typename T, typename internal::enable_if_valid_functor<T, Delegate<R(Args...)>, R, Args...>::type*>
 Delegate<R(Args...)>::Delegate(T &&lambda)
   : Delegate(SharedPtr<LambdaMemento<typename std::remove_reference<T>::type>>::create(std::forward<T>(lambda)))
 {}
