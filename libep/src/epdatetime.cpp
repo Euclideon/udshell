@@ -26,7 +26,7 @@ MutableString64 DateTime::ToString(String format) const
 
 time_t DateTime::ToTimeStamp() const
 {
-  tm t;
+  tm t = DateTimeToTm();
 
   return mktime(&t);
 }
