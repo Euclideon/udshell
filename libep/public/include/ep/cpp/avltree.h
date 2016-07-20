@@ -57,6 +57,11 @@ public:
 
   AVLTree() {}
   AVLTree(nullptr_t) {}
+  AVLTree(const AVLTree &rval)
+    : numNodes(rval.numNodes), pRoot(clone(rval.pRoot))
+  {
+  }
+
   AVLTree(AVLTree &&rval)
     : numNodes(rval.numNodes), pRoot(rval.pRoot)
   {
@@ -528,6 +533,19 @@ private:
     }
 
     return _pRoot;
+  }
+
+  static Node* clone(Node *pOld)
+  {
+    if (!pOld)
+      return nullptr;
+
+    Node *pNew = Allocator::Get().Alloc();
+    new(&pNew->kvp) KeyValuePair(pOld->kvp);
+    pNew->height = pOld->height;
+    pNew->left = clone(pOld->left);
+    pNew->right = clone(pOld->right);
+    return pNew;
   }
 
 public:

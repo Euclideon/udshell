@@ -14,6 +14,7 @@ Array<const MethodInfo> Resource::GetMethods() const
 {
   return{
     EP_MAKE_METHOD(Save, "Save the state of the Resource"),
+    EP_MAKE_METHOD(Clone, "Make a shallow clone of this object"),
   };
 }
 Array<const EventInfo> Resource::GetEvents() const

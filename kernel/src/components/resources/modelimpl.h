@@ -39,7 +39,7 @@ public:
 
   void AddVertexArray(ArrayBufferRef spVertices) override final;
   void RemoveVertexArray(ArrayBufferRef spVertices) override final;
-  SharedArray<ArrayBufferRef> GetVertexArrays() override final { return vertexArrays; }
+  Array<ArrayBufferRef> GetVertexArrays() override final { return vertexArrays; }
 
   ArrayBufferRef GetIndexArray() const override final { return spIndices; }
   void SetIndexArray(ArrayBufferRef _spIndices) override final { spIndices = _spIndices; }
@@ -47,13 +47,15 @@ public:
   void SetRenderList(const RenderList& list) override final { renderList = list; }
   const RenderList& GetRenderList() const override final { return renderList; }
 
+  ResourceRef Clone() const override final;
+
 private:
   EP_FRIENDS_WITH_IMPL(GeomNode);
   void OnArrayOrShaderChanged() { spVertexFormatCache = nullptr; }
 
   void RetainShaderInputConfig(SharedPtr<RefCounted> sp) { spVertexFormatCache = sp; }
 
-  SharedArray<ArrayBufferRef> vertexArrays;
+  Array<ArrayBufferRef, 2> vertexArrays;
   ArrayBufferRef spIndices;
   MaterialRef spMaterial;
 

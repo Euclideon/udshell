@@ -44,6 +44,8 @@ public:
   Variant GetMaterialProperty(String property) const override final;
   void SetMaterialProperty(String property, Variant data) override final;
 
+  ResourceRef Clone() const override final;
+
   ShaderRef GetShader(ShaderType type) const { return shaders[(int)type]; }
   void SetShader(ShaderType type, ShaderRef spShader);
 

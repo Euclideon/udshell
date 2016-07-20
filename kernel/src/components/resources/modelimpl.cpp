@@ -67,4 +67,19 @@ void ModelImpl::RemoveVertexArray(ArrayBufferRef spVertices)
   }
 }
 
+ResourceRef ModelImpl::Clone() const
+{
+  ModelRef spNewModel = GetKernel()->CreateComponent<Model>();
+  ModelImpl* pImpl = spNewModel->GetImpl<ModelImpl>();
+
+  pImpl->vertexArrays = vertexArrays;
+  pImpl->spIndices = spIndices;
+  pImpl->spMaterial = spMaterial;
+  pImpl->renderList = renderList;
+
+  pImpl->spVertexFormatCache = spVertexFormatCache;
+
+  return spNewModel;
+}
+
 } // namespace ep
