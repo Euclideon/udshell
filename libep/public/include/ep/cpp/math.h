@@ -350,8 +350,12 @@ struct Matrix4x4
 
   Matrix4x4<T> operator *(const Matrix4x4<T> &_m) const { return Mul(*this, _m); }
   Matrix4x4<T> operator *(T f) const { return Mul(*this, f); }
+  Matrix4x4<T> operator +(const Matrix4x4<T> &m2) const { return Add(*this, m2); }
+  Matrix4x4<T> operator -(const Matrix4x4<T> &m2) const { return Sub(*this, m2); }
   Vector4<T> operator *(const Vector4<T> &v) const { return Mul(*this, v); }
 
+  Matrix4x4<T>& operator +=(const Matrix4x4<T> &m2) { *this = Add(*this, m2); return *this; }
+  Matrix4x4<T>& operator -=(const Matrix4x4<T> &m2) { *this = Sub(*this, m2); return *this; }
   Matrix4x4<T>& operator *=(const Matrix4x4<T> &_m) { *this = Mul(*this, _m); return *this; }
   Matrix4x4<T>& operator *=(T f) { *this = Mul(*this, f); return *this; }
 
