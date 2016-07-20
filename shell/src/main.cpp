@@ -444,7 +444,7 @@ void Init(String sender, String message, const Variant &data)
 
   if (shutdownTest)
   {
-    spCITimer = spKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 }, { "timertype", "CountDown" } });
+    spCITimer = spKernel->CreateComponent<Timer>({ { "countdown", 4 } });
     spCITimerSub = spCITimer->Elapsed.Subscribe([]() { Kernel::GetInstance()->Quit(); });
   }
 

@@ -14,13 +14,13 @@ class Timer : public Component
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Timer, ITimer, Component, EPKERNEL_PLUGINVERSION, "Timer desc...", 0)
 public:
 
-  uint32_t GetDuration() const { return pImpl->GetDuration(); };
+  double GetDuration() const { return pImpl->GetDuration(); };
   TimerType GetTimerType() const { return pImpl->GetTimerType(); }
 
   void Reset() { pImpl->Reset(); }
 
-  void SetInterval(uint32_t interval) { pImpl->SetInterval(interval); }
-  void SetCountDown(uint32_t countDown) { pImpl->SetCountDown(countDown); }
+  void BeginInterval(double interval) { pImpl->BeginInterval(interval); }
+  void BeginCountdown(double duration) { pImpl->BeginCountdown(duration); }
 
   Event<> Elapsed;
 
