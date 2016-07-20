@@ -97,6 +97,8 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
       pImpl->CopyRenderContext(&job.context);
       job.context.matrix = Mul(in.matrix, job.context.matrix);
 
+      job.udNodePtr = in.udNodePtr;
+
       udRenderModel *pRenderModel = reinterpret_cast<udRenderModel*>(&job.context);
       const BufferRef &filterConstants = pImpl->constantBuffers[UDConstantDataType::VoxelFilter];
       if (filterConstants)
