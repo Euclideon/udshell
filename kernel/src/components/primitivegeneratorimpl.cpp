@@ -8,6 +8,7 @@ Array<const StaticFuncInfo> PrimitiveGenerator::GetStaticFuncs() const
   return{
     EP_MAKE_STATICFUNC(GenerateCube, "Generate a cube primitive"),
     EP_MAKE_STATICFUNC(GenerateSphere, "Generate a sphere primitive"),
+    EP_MAKE_STATICFUNC(GenerateCircle, "Generate a line circle primitive"),
     EP_MAKE_STATICFUNC(GenerateCylinder, "Generate a cylinder primitive"),
     EP_MAKE_STATICFUNC(GenerateCone, "Generate a cone primitive"),
   };
@@ -142,6 +143,48 @@ void PrimitiveGeneratorImplStatic::GenerateSphere(ArrayBufferRef spVB, ArrayBuff
   }
 
   EPASSERT(++v == numVerts, "Incorrect number of vertices!");
+  EPASSERT(i == numIndices, "Incorrect number of indices!");
+
+  if (transformVertex)
+  {
+    for (Float3 &vert : vb)
+      vert = transformVertex(vert);
+  }
+}
+
+void PrimitiveGeneratorImplStatic::GenerateCircle(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, double arcLength, Delegate<Float3(Float3)> transformVertex)
+{
+  EPASSERT_THROW(numSegments >= 3, Result::InvalidArgument, "Circle must have at least 3 segments!");
+
+  const double radius = .5;
+  bool completeRotation = Abs(arcLength - EP_2PI) < 0.001;
+
+  size_t numVerts = completeRotation ? numSegments : numSegments + 1; // if not complete rotation add a extra vertex.
+  size_t numIndices = numSegments * 2;
+
+  spVB->Allocate<Float3>(numVerts);
+  spIB->Allocate<uint16_t>(numIndices);
+
+  Slice<Float3> vb = spVB->Map<Float3>();
+  epscope(exit) { spVB->Unmap(); };
+  Slice<uint16_t> ib = spIB->Map<uint16_t>();
+  epscope(exit) { spIB->Unmap(); };
+
+  size_t v = 0;
+  for (size_t j = 0; j < numVerts; ++j)
+  {
+    double a = arcLength*double(j) / numSegments;
+    vb[v++] = Float3{ (float)(Sin(a)*radius), (float)(Cos(a)*radius), 0.0f };
+  }
+
+  size_t i = 0;
+  for (uint16_t j = 0; j < numSegments; j++)
+  {
+    ib[i++] = j;
+    ib[i++] = (j + 1) % (numVerts);
+  }
+
+  EPASSERT(v == numVerts, "Incorrect number of vertices!");
   EPASSERT(i == numIndices, "Incorrect number of indices!");
 
   if (transformVertex)
