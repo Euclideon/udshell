@@ -14,11 +14,11 @@ mkdir -p $WIN64_ROOT/lib
 mkdir -p $WIN64_ROOT/plugins
 mkdir -p $WIN64_ROOT/qtcreator
 cp -R libep/public/include/* $WIN64_ROOT/include
-cp -R $BUILD_PATH/windows_shell_release_32/lib/* $WIN64_ROOT/lib/
-cp -R $BUILD_PATH/windows_shell_release_64/lib/* $WIN64_ROOT/lib/
-cp -R $BUILD_PATH/windows_shell_release_64/plugin/* $WIN64_ROOT/plugins/
-cp $BUILD_PATH/windows_shell_release_64/bin/epshell.exe $WIN64_ROOT/epshell_unprotected.exe
-cp $BUILD_PATH/windows_shell_release_64/bin/epviewer.exe $WIN64_ROOT/epviewer_unprotected.exe
+cp -R $BUILD_PATH/windows_shell_releasedev_32/lib/* $WIN64_ROOT/lib/
+cp -R $BUILD_PATH/windows_shell_releasedev_64/lib/* $WIN64_ROOT/lib/
+cp -R $BUILD_PATH/windows_shell_releasedev_64/plugin/* $WIN64_ROOT/plugins/
+cp $BUILD_PATH/windows_shell_releasedev_64/bin/epshell.exe $WIN64_ROOT/epshell_unprotected.exe
+cp $BUILD_PATH/windows_shell_releasedev_64/bin/epviewer.exe $WIN64_ROOT/epviewer_unprotected.exe
 cp 3rdparty/assimp-3.1.1/lib/windows/x64/assimp-ep64.dll $WIN64_ROOT/
 cp ud/3rdParty/sdl2/lib/x64/SDL2.dll $WIN64_ROOT/
 cp build/package/windows/qt.conf $WIN64_ROOT/
@@ -32,11 +32,11 @@ mkdir -p $WIN32_ROOT/lib
 mkdir -p $WIN32_ROOT/plugins
 mkdir -p $WIN32_ROOT/qtcreator
 cp -R libep/public/include/* $WIN32_ROOT/include
-cp -R $BUILD_PATH/windows_shell_release_32/lib/* $WIN32_ROOT/lib/
-cp -R $BUILD_PATH/windows_shell_release_64/lib/* $WIN32_ROOT/lib/
-cp -R $BUILD_PATH/windows_shell_release_32/plugin/* $WIN32_ROOT/plugins/
-cp $BUILD_PATH/windows_shell_release_32/bin/epshell.exe $WIN32_ROOT/epshell_unprotected.exe
-cp $BUILD_PATH/windows_shell_release_32/bin/epviewer.exe $WIN32_ROOT/epviewer_unprotected.exe
+cp -R $BUILD_PATH/windows_shell_releasedev_32/lib/* $WIN32_ROOT/lib/
+cp -R $BUILD_PATH/windows_shell_releasedev_64/lib/* $WIN32_ROOT/lib/
+cp -R $BUILD_PATH/windows_shell_releasedev_32/plugin/* $WIN32_ROOT/plugins/
+cp $BUILD_PATH/windows_shell_releasedev_32/bin/epshell.exe $WIN32_ROOT/epshell_unprotected.exe
+cp $BUILD_PATH/windows_shell_releasedev_32/bin/epviewer.exe $WIN32_ROOT/epviewer_unprotected.exe
 cp 3rdparty/assimp-3.1.1/lib/windows/x32/assimp-ep32.dll $WIN32_ROOT/
 cp ud/3rdParty/sdl2/lib/x86/SDL2.dll $WIN32_ROOT/
 cp build/package/windows/qt.conf $WIN32_ROOT/
@@ -50,10 +50,10 @@ mkdir -p $UBUNTU_ROOT/lib
 mkdir -p $UBUNTU_ROOT/plugins
 mkdir -p $UBUNTU_ROOT/debugger
 cp -R libep/public/include/* $UBUNTU_ROOT/include
-cp -R $BUILD_PATH/ubuntu_shell_release_clang/lib/* $UBUNTU_ROOT/lib/
-cp -R $BUILD_PATH/ubuntu_shell_release_clang/plugin/* $UBUNTU_ROOT/plugins/
-cp $BUILD_PATH/ubuntu_shell_release_clang/bin/epshell $UBUNTU_ROOT/epshell_unprotected
-cp $BUILD_PATH/ubuntu_shell_release_clang/bin/epviewer $UBUNTU_ROOT/epviewer_unprotected
+cp -R $BUILD_PATH/ubuntu_shell_releasedev_clang/lib/* $UBUNTU_ROOT/lib/
+cp -R $BUILD_PATH/ubuntu_shell_releasedev_clang/plugin/* $UBUNTU_ROOT/plugins/
+cp $BUILD_PATH/ubuntu_shell_releasedev_clang/bin/epshell $UBUNTU_ROOT/epshell_unprotected
+cp $BUILD_PATH/ubuntu_shell_releasedev_clang/bin/epviewer $UBUNTU_ROOT/epviewer_unprotected
 cp bin/amd64/libassimp-ep.so.3.1.1 $UBUNTU_ROOT/
 cp build/package/linux/install.sh $UBUNTU_ROOT/
 cp build/package/linux/epshell.sh $UBUNTU_ROOT/
@@ -77,10 +77,10 @@ mkdir -p $CENTOS_ROOT/lib
 mkdir -p $CENTOS_ROOT/plugins
 mkdir -p $CENTOS_ROOT/debugger
 cp -R libep/public/include/* $CENTOS_ROOT/include
-cp -R $BUILD_PATH/rpm_shell_release_clang/lib/* $CENTOS_ROOT/lib/
-cp -R $BUILD_PATH/rpm_shell_release_clang/plugin/* $CENTOS_ROOT/plugins/
-cp $BUILD_PATH/rpm_shell_release_clang/bin/epshell $CENTOS_ROOT/epshell_unprotected
-cp $BUILD_PATH/rpm_shell_release_clang/bin/epviewer $CENTOS_ROOT/epviewer_unprotected
+cp -R $BUILD_PATH/rpm_shell_releasedev_clang/lib/* $CENTOS_ROOT/lib/
+cp -R $BUILD_PATH/rpm_shell_releasedev_clang/plugin/* $CENTOS_ROOT/plugins/
+cp $BUILD_PATH/rpm_shell_releasedev_clang/bin/epshell $CENTOS_ROOT/epshell_unprotected
+cp $BUILD_PATH/rpm_shell_releasedev_clang/bin/epviewer $CENTOS_ROOT/epviewer_unprotected
 cp bin/amd64/libassimp-ep.so.3.1.1 $CENTOS_ROOT/
 cp build/package/linux/install.sh $CENTOS_ROOT/
 cp build/package/linux/epshell.sh $CENTOS_ROOT/

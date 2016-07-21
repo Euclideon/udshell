@@ -27,7 +27,7 @@ project("hal-" .. halBuild)
 
 	if halBuild == "qt" then
 		defines { "EP_USE_QT" }
-		configuration { "*QML" }
+		configuration { "Debug* or ReleaseDev*" }
 			defines { "QT_QML_DEBUG" }
 		configuration {}
 
