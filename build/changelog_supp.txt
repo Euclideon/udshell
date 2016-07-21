@@ -1,0 +1,12 @@
+tag: 0.10.0
+~fix: Fixed incorrect mouse button mapping in Qt Viewport.
+~fix: Improved model placement in Viewer plugin via Drag and Drop.
+~fix: Fixed potential shutdown leak when multiple activities are open.
+~fix: Fixed rendering bug when there are more than 4 UD models in the scene.
+~fix: Fixed DateTime::ToTimeStamp().
+~fix: Fixed Matrix lerp functionality.
+~fix: Fixed Quaternion slerp functionality.
+~add: Added += and -= operators to Matrix4x4 class.
+~api: enable_if_valid_functor<> and enable_if_captureless_lambda<> helpers now conform with enable_if<>.
+~api: PrimitiveGenerator methods are now static.
+~api: View::PickFound event now also gives a reference to the udnode that owns the model.
