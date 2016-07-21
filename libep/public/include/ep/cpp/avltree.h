@@ -727,6 +727,43 @@ struct AVLTreeAllocator
   // TODO: Add API for memory usage statistics
 };
 
+
+template<typename K, typename V, typename PredFunctor, typename Allocator>
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const AVLTree<K, V, PredFunctor, Allocator> &tree, const VarArg *epUnusedParam(pArgs))
+{
+  size_t offset = 0;
+  if (buffer)
+    offset += String("{ ").copyTo(buffer);
+  else
+    offset += String("{ ").length;
+
+  bool bFirst = true;
+  for (auto &&kvp : tree)
+  {
+    if (!bFirst)
+    {
+      if (buffer)
+        offset += String(", ").copyTo(buffer.strip(offset));
+      else
+        offset += String(", ").length;
+    }
+    else
+      bFirst = false;
+
+    if (buffer)
+      offset += epStringify(buffer.strip(offset), nullptr, kvp, nullptr);
+    else
+      offset += epStringify(nullptr, nullptr, kvp, nullptr);
+  }
+
+  if (buffer)
+    offset += String(" }").copyTo(buffer.strip(offset));
+  else
+    offset += String(" }").length;
+
+  return offset;
+}
+
 } // namespace ep
 
 #endif // _EPAVLTREE_HPP

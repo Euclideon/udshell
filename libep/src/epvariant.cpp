@@ -33,8 +33,7 @@ ptrdiff_t epStringifyVariant(ep::Slice<char> buffer, ep::String format, const ep
         case Variant::SharedPtrType::Delegate:
           return epStringifyTemplate(buffer, format, v.asDelegate(), pArgs);
         case Variant::SharedPtrType::AssocArray:
-          EPASSERT(false, "TODO! Please write me!");
-          return 0;
+          return epStringify(buffer, format, v.asAssocArray(), pArgs);
         default:
           EPASSERT(false, "TODO! Please write me!");
           return 0;

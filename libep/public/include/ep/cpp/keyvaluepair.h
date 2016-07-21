@@ -43,6 +43,32 @@ struct KVP
   V value;
 };
 
+
+template <typename K, typename V>
+ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), KVPRef<K, V> kvp, const VarArg *epUnusedParam(pArgs))
+{
+  size_t offset = 0;
+  if (buffer)
+  {
+    offset += epStringifyTemplate(buffer, nullptr, kvp.key, nullptr);
+    offset += String(": ").copyTo(buffer.strip(offset));
+    offset += epStringifyTemplate(buffer.strip(offset), nullptr, kvp.value, nullptr);
+  }
+  else
+  {
+    offset += epStringifyTemplate(nullptr, nullptr, kvp.key, nullptr);
+    offset += String(": ").length;
+    offset += epStringifyTemplate(nullptr, nullptr, kvp.value, nullptr);
+  }
+
+  return offset;
+}
+template <typename K, typename V>
+ptrdiff_t epStringify(Slice<char> buffer, String format, const KVP<K, V> &kvp, const VarArg *pArgs)
+{
+  return epStringify(buffer, format, KVPRef<K, V>(kvp.key, kvp.value), pArgs);
+}
+
 } // namespace ep
 
 #endif // _EPKEYVALUEPAIR_HPP
