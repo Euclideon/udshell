@@ -8,19 +8,19 @@ namespace ep {
 
 EP_ENUM(TimerType,
   Interval,
-  CountDown
+  Countdown
 );
 
 class ITimer
 {
 public:
-  virtual uint32_t GetDuration() const = 0;
+  virtual double GetDuration() const = 0;
   virtual TimerType GetTimerType() const = 0;
 
   virtual void Reset() = 0;
 
-  virtual void SetInterval(uint32_t interval) = 0;
-  virtual void SetCountDown(uint32_t countDown) = 0;
+  virtual void BeginInterval(double interval) = 0;
+  virtual void BeginCountdown(double countDown) = 0;
 };
 
 } // namespace ep

@@ -360,7 +360,7 @@ int main(int argc, char* argv[])
 
     if (mData.shutdownTest)
     {
-      mData.spCITimer = mData.spKernel->CreateComponent<Timer>({ { "duration", 4 * 1000 },{ "timertype", "CountDown" } });
+      mData.spCITimer = mData.spKernel->CreateComponent<Timer>({ { "countdown", 4 } });
       mData.spCITimerSub = mData.spCITimer->Elapsed.Subscribe([]() { Kernel::GetInstance()->Quit(); });
     }
 

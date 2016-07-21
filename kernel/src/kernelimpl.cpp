@@ -382,10 +382,10 @@ void KernelImpl::FinishInit()
   LoadAllPlugins(pluginPaths);
 
   // make the kernel timers
-  spStreamerTimer = pInstance->CreateComponent<Timer>({ { "duration", 33 }, { "timertype", "Interval" } });
+  spStreamerTimer = pInstance->CreateComponent<Timer>({ { "interval", 0.033 } });
   spStreamerTimer->Elapsed.Subscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
 
-  spUpdateTimer = pInstance->CreateComponent<Timer>({ { "duration", 16 }, { "timertype", "Interval" } });
+  spUpdateTimer = pInstance->CreateComponent<Timer>({ { "interval", 0.016 } });
   spUpdateTimer->Elapsed.Subscribe(FastDelegate<void()>(this, &KernelImpl::Update));
 
   // call application init

@@ -7,64 +7,52 @@ namespace ep {
 Array<const PropertyInfo> Timer::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(Duration, "The duration for the timer", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(TimerType, "Gets the Timer Type", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(Duration, "The duration for the timer in seconds", nullptr, 0),
+    EP_MAKE_PROPERTY_RO(TimerType, "The TimerType of this timer", nullptr, 0),
   };
 }
 Array<const MethodInfo> Timer::GetMethods() const
 {
   return{
-    EP_MAKE_METHOD(SetInterval, "Sets the Duration and the Timer Type to Interval"),
-    EP_MAKE_METHOD(SetCountDown, "Sets the Duration and the Timer Type to CountDown"),
+    EP_MAKE_METHOD(BeginInterval, "Begins an interval counter triggering at each given interval"),
+    EP_MAKE_METHOD(BeginCountdown, "Begins a countdown of the given duration"),
     EP_MAKE_METHOD(Reset, "Resets the Timer"),
   };
 }
 Array<const EventInfo> Timer::GetEvents() const
 {
   return{
-    EP_MAKE_EVENT(Elapsed, "Timer Event"),
+    EP_MAKE_EVENT(Elapsed, "Elapsed Event"),
   };
 }
 
 TimerImpl::TimerImpl(Component *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)
 {
-  const Variant intervalVar = *initParams.get("duration");
+  const Variant *pCountdown = initParams.get("countdown");
+  const Variant *pInterval = initParams.get("interval");
 
-  uint32_t duration = intervalVar.as<uint32_t>();
-  if (!intervalVar.is(Variant::Type::Int) || !duration)
-  {
-    EPTHROW_ERROR(Result::InvalidArgument, "Invalid 'duration'");
-  }
+  if (pCountdown && pInterval)
+    LogWarning(1, "'countdown' and 'interval' both supplied to Timer initParams, 'interval' will be used.");
 
-  TimerType timerType = TimerType::Interval;
-  const Variant typeVar = *initParams.get("timertype");
-  if (typeVar.is(Variant::Type::String))
-  {
-    String typeStr = typeVar.as<String>();
-    if (typeStr.eqIC("Interval"))
-      timerType = TimerType::Interval;
-    else if (typeStr.eqIC("CountDown"))
-      timerType = TimerType::CountDown;
-    else
-      EPTHROW_ERROR(Result::InvalidArgument, "Invalid 'timertype'");
-  }
-
-  pTimer = HalTimer_Create(HalTimerType(timerType.v), duration, TimerCallback, this);
-  if (!pTimer)
-    EPTHROW_ERROR(Result::Failure, "Failed to create timer");
+  if (pInterval)
+    BeginInterval(pInterval->as<double>());
+  else if (pCountdown)
+    BeginCountdown(pCountdown->as<double>());
 }
 
 
 TimerImpl::~TimerImpl()
 {
-  HalTimer_Destroy(&pTimer);
+  if (pTimer)
+    HalTimer_Destroy(&pTimer);
 }
 
-void TimerImpl::SetTimer(uint32_t d, TimerType tt)
+void TimerImpl::SetTimer(double d, TimerType tt)
 {
-  HalTimer_Destroy(&pTimer);
-  pTimer = HalTimer_Create(HalTimerType(tt.v), d, TimerCallback, this);
+  if (pTimer)
+    HalTimer_Destroy(&pTimer);
+  pTimer = HalTimer_Create(HalTimerType(tt.v), (uint32_t)(d * 1000.0), TimerCallback, this);
 }
 
 
