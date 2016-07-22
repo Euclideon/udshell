@@ -35,9 +35,9 @@ UI_DIR = $${PWD}/int/.ui/$${TOOLSET}
 CONFIG += c++11 plugin
 QT -= gui
 
-SOURCES += src/%{ProjectName}.cpp
-HEADERS += src/%{ProjectName}.h
-RESOURCES += src/%{ProjectName}.qrc
+SOURCES += src/%{ActivityCpp}
+HEADERS += src/%{ActivityHdr}
+RESOURCES += src/%{ProjectQrc}
 
 win32 {
   EPDIR = $$(EPDIR)

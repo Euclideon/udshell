@@ -8,14 +8,16 @@ namespace %{Namespace} {
 
 using namespace ep;
 
-class %{ProjectName} : public Component
+SHARED_CLASS(%{ActivityName});
+
+class %{ActivityName} : public Component
 {
-  EP_DECLARE_COMPONENT(%{Namespace}, %{ProjectName}, Component, EPKERNEL_PLUGINVERSION, "%{PluginDescription}", 0);
+  EP_DECLARE_COMPONENT(%{Namespace}, %{ActivityName}, Component, EPKERNEL_PLUGINVERSION, "%{ActivityDescription}", 0);
 public:
 
 protected:
-  %{ProjectName}(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
-  ~%{ProjectName}() { }
+  %{ActivityName}(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+  ~%{ActivityName}() { }
 
 private:
   Array<const PropertyInfo> GetProperties() const;    // Register Properties

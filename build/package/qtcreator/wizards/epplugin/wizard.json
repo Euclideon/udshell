@@ -8,53 +8,54 @@
 	"trDisplayCategory": "Other Project",
 	"icon": "euclideon.png",
 
-	"options": [
-		{
-			"key": "PluginName",
-			"value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}"
-		},
-		{
-			"key": "PluginDescription",
-			"value": "%{Description}"
-		},
-		{
-			"key": "Namespace",
-			"value": "%{NAMESPACE}"
-		},
-		{
-			"key": "GUARD",
-			"value": "%{JS: Cpp.classToHeaderGuard('%{ProjectName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}"
-		},
-		{
-			"key": "LIBEP",
-			"value": "liblibep.a"
-		}
+	"options":
+	[
+		{ "key": "ProFileName", "value": "%{JS: Util.fileName('%{ProjectDirectory}/%{ProjectName}', 'pro')}" },
+		{ "key": "ActivityName", "value": "%{JS: Cpp.className('%{ACTIVITY}')}" },
+		{ "key": "ActivityCpp", "value": "%{JS: Util.fileName('%{ActivityName}', 'cpp')}" },
+		{ "key": "ActivityHdr", "value": "%{JS: Util.fileName('%{ActivityName}', 'h')}" },
+		{ "key": "ActivityDescription", "value": "%{DESC}" },
+		{ "key": "Namespace", "value": "%{JS: '%{NAMESPACE}'.toLowerCase() }" },
+		{ "key": "GUARD", "value": "%{JS: Cpp.classToHeaderGuard('%{ProjectName}', '%{JS: Util.preferredSuffix('text/x-c++hdr')}')}" }
 	],
 
-	"pages": [
+	"pages":
+	[
 		{
 			"trDisplayName": "Project Location",
 			"trShortTitle": "Location",
 			"typeId": "Project"
 		},
 		{
-			"trDisplayName": "Component Details",
+			"trDisplayName": "Activity Details",
 			"trShortTitle": "Details",
 			"typeId": "Fields",
-			"data": [
+			"data":
+			[
 				{
-					"name": "NAMESPACE",
-					"trDisplayName": "Namespace:",
+					"name": "ACTIVITY",
+					"trDisplayName": "Activity Name:",
 					"mandatory": true,
 					"type": "LineEdit",
-					"data": { "validator": "(?:(?:[a-zA-Z_][a-zA-Z_0-9]*::)+[a-zA-Z_][a-zA-Z_0-9]*|)" }
+					"data":
+					{ 
+						"trText": "%{JS: Cpp.className('%{ProjectName}')}",
+						"validator": "[a-zA-Z_0-9]+" 
+					}
 				},
 				{
-					"name": "Description",
-					"trDisplayName": "Description:",
+					"name": "NAMESPACE",
+					"trDisplayName": "Activity Namespace:",
 					"mandatory": true,
 					"type": "LineEdit",
-					"data": { }
+					"data": { "trText": "%{JS: '%{ActivityName}'.toLowerCase() }", "validator": "[a-z_0-9]+" }
+				},
+				{
+					"name": "DESC",
+					"trDisplayName": "Description:",
+					"mandatory": false,
+					"type": "LineEdit",
+					"data": { "trText": "%{ActivityName} Component" }
 				}
 			]
 		},
@@ -63,7 +64,7 @@
 			"trShortTitle": "Kits",
 			"typeId": "Kits",
 			"data": {
-				"projectFilePath": "%{PluginName}"
+				"projectFilePath": "%{ProFileName}"
 			}
 		},
 		{
@@ -72,23 +73,25 @@
 			"typeId": "Summary"
 		}
 	],
-	"generators": [
+	"generators":
+	[
 		{
 			"typeId": "File",
-			"data": [
+			"data":
+			[
 				{
 					"source": "Sample.cpp",
-					"target": "%{ProjectDirectory}/src/%{ProjectName}.cpp",
+					"target": "%{ProjectDirectory}/src/%{ActivityCpp}",
 					"openInEditor": true
 				},
 				{
 					"source": "Sample.h",
-					"target": "%{ProjectDirectory}/src/%{ProjectName}.h",
+					"target": "%{ProjectDirectory}/src/%{ActivityHdr}",
 					"openInEditor": true
 				},
 				{
 					"source": "plugin.pro",
-					"target": "%{PluginName}",
+					"target": "%{ProFileName}",
 					"openAsProject": true
 				},
 				{

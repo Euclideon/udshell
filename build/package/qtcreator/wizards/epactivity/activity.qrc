@@ -1,5 +1,5 @@
 <RCC>
   <qresource prefix="/%{Namespace}">
-    <file>%{ProjectName}.qml</file>
+    <file>%{ActivityQml}</file>
   </qresource>
 </RCC>

@@ -8,5 +8,5 @@ tag: 0.10.0
 ~fix: Fixed Quaternion slerp functionality.
 ~add: Added += and -= operators to Matrix4x4 class.
 ~api: enable_if_valid_functor<> and enable_if_captureless_lambda<> helpers now conform with enable_if<>.
-~api: PrimitiveGenerator methods are now static.
+~api: PrimitiveGenerator methods are now static, and the component itself is abstract.
 ~api: View::PickFound event now also gives a reference to the udnode that owns the model.
