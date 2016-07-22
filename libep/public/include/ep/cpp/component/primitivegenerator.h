@@ -26,6 +26,7 @@ public:
   //! \return None.
   //! \remarks Note: Throws if numSegments is less than 3.
   static void GenerateCircle(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, double arcLength = EP_2PI, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCircle(spVB, spIB, numSegments, arcLength, transformVertex); }
+  static void GenerateDisc(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, double arcLength = EP_2PI, double innerRadius = 0, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateDisc(spVB, spIB, numSegments, arcLength, innerRadius, transformVertex); }
   static void GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 1, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCylinder(spVB, spIB, numSegments, numSlices, transformVertex); }
   static void GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments = 12, int numSlices = 1, Delegate<Float3(Float3)> transformVertex = nullptr) { GetStaticImpl()->GenerateCone(spVB, spIB, numSegments, numSlices, transformVertex); }
 
