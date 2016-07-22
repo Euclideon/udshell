@@ -85,6 +85,12 @@ public:
   void SetInputEventHook(Delegate<bool(ep::InputEvent)> eventHook) override final { inputEventHook = eventHook; }
   void ClearInputEventHook() override final { inputEventHook = nullptr; }
 
+  ep::Double3 ScreenToNDCPoint(Double2 screenPixel, double z = 0.0) const override final;
+  Double3 NDCToScreenPoint(Double3 ndcPoint) const override final;
+  Double3 UnprojectScreenPoint(const Double4x4 &invProj, Double2 screenPixel, double z = 0.0) const override final;
+  Double3 ProjectToScreenPoint(const Double4x4 &proj, Double3 point) const override final;
+  DoubleRay3 ScreenPointToWorldRay(Double2 screenPoint) const override final;
+
   Double3 pickedPoint = { 0, 0, 0 };
 
   struct PickHighlightData
