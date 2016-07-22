@@ -99,5 +99,12 @@ strip $CENTOS_ROOT/plugins/*
 
 
 # generate commit log
-echo "TODO: Generate commit log..."
-#TODO...
+echo "Generating commit log..."
+build/genchangelog.d
+cp build/CHANGELOG $UBUNTU_ROOT/.
+cp build/CHANGELOG $CENTOS_ROOT/.
+
+# fix the line endings for windows (since we're running the script on linux)
+sed -i "s/$/`echo -e \\\r`/" build/CHANGELOG
+cp build/CHANGELOG $WIN64_ROOT/changelog.txt
+cp build/CHANGELOG $WIN32_ROOT/changelog.txt
