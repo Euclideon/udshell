@@ -45,8 +45,12 @@ private:
 //! \return A copy of inst.
 //! \remarks Note: This method throws if the object has not implemented Clone.
 //! \see Resource::Clone
-template <typename T, typename std::enable_if<std::is_base_of<Resource, T>::value>::type* = nullptr>
-inline SharedPtr<T> CloneResource(SharedPtr<T> inst) { return component_cast<T>(inst->Clone()); }
+template <typename T>
+inline SharedPtr<T> CloneResource(SharedPtr<T> inst)
+{
+  static_assert(std::is_base_of<Resource, T>::value, "Class must be derived off Resource");
+  return component_cast<T>(inst->Clone());
+}
 
 }
 
