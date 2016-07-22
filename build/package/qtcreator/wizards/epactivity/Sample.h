@@ -9,11 +9,11 @@ namespace %{Namespace} {
 
 using namespace ep;
 
-SHARED_CLASS(%{ProjectName});
+SHARED_CLASS(%{ActivityName});
 
-class %{ProjectName} : public Activity
+class %{ActivityName} : public Activity
 {
-  EP_DECLARE_COMPONENT(%{Namespace}, %{ProjectName}, Activity, EPKERNEL_PLUGINVERSION, "%{PluginDescription}", 0);
+  EP_DECLARE_COMPONENT(%{Namespace}, %{ActivityName}, Activity, EPKERNEL_PLUGINVERSION, "%{ActivityDescription}", 0);
 public:
   void Activate() override final;
   void Deactivate() override final;
@@ -21,8 +21,8 @@ public:
   Variant Save() const override final;
 
 protected:
-  %{ProjectName}(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
-  ~%{ProjectName}() { Deactivate(); }
+  %{ActivityName}(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
+  ~%{ActivityName}() { Deactivate(); }
   
 private:
   Array<const PropertyInfo> GetProperties() const;    // Register Properties

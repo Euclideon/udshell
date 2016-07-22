@@ -1,4 +1,4 @@
-#include "%{ProjectName}.h"
+#include "%{ActivityHdr}"
 
 #include "ep/cpp/component/view.h"
 #include "ep/cpp/component/resource/shader.h"
@@ -14,28 +14,28 @@ using namespace ep;
 
 namespace %{Namespace} {
 
-Array<const PropertyInfo> %{ProjectName}::GetProperties() const
+Array<const PropertyInfo> %{ActivityName}::GetProperties() const
 {
   return { };
 }
 
-Array<const ep::MethodInfo> %{ProjectName}::GetMethods() const
+Array<const ep::MethodInfo> %{ActivityName}::GetMethods() const
 {
   return { };
 }
 
 
-Array<const EventInfo> %{ProjectName}::GetEvents() const
+Array<const EventInfo> %{ActivityName}::GetEvents() const
 {
   return { };
 }
 
-Array<const StaticFuncInfo> %{ProjectName}::GetStaticFuncs() const
+Array<const StaticFuncInfo> %{ActivityName}::GetStaticFuncs() const
 {
   return { };
 }
 
-%{ProjectName}::%{ProjectName}(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+%{ActivityName}::%{ActivityName}(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Activity(pType, pKernel, uid, initParams)
 {
   // Setup the Scene, Camera and View Components
@@ -84,12 +84,10 @@ Array<const StaticFuncInfo> %{ProjectName}::GetStaticFuncs() const
   spMaterial->SetShader(ShaderType::PixelShader, spPixelShader);
 
   // Generate Cube
-  auto spGenerator = pKernel->CreateComponent<PrimitiveGenerator>();
-
   ArrayBufferRef spVertexBuffer = pKernel->CreateComponent<ArrayBuffer>();
   ArrayBufferRef spIndexBuffer = pKernel->CreateComponent<ArrayBuffer>();
 
-  spGenerator->GenerateCube(spVertexBuffer, spIndexBuffer);
+  PrimitiveGenerator::GenerateCube(spVertexBuffer, spIndexBuffer);
 
   MetadataRef spMetadata = spVertexBuffer->GetMetadata();
   spMetadata->Get("attributeinfo")[0].insertItem("name", "a_position");
@@ -130,32 +128,32 @@ Array<const StaticFuncInfo> %{ProjectName}::GetStaticFuncs() const
   spViewport = component_cast<UIComponent>(pKernel->CreateComponent("ui.viewport", Variant::VarMap{ { "view", spView } }));
 
   // Create the Main UIComponent for the activity and attach the viewport ui component
-  UIComponentRef sp%{ProjectName}UI;
-  epscope(fail) { if(!sp%{ProjectName}UI) pKernel->LogError("Error creating %{ProjectName} UI Component"); };
-  sp%{ProjectName}UI = component_cast<UIComponent>(pKernel->CreateComponent("%{Namespace}.mainui"));
-  sp%{ProjectName}UI->Set("viewport", spViewport);
+  UIComponentRef sp%{ActivityName}UI;
+  epscope(fail) { if(!sp%{ActivityName}UI) pKernel->LogError("Error creating %{ActivityName} UI Component"); };
+  sp%{ActivityName}UI = component_cast<UIComponent>(pKernel->CreateComponent("%{Namespace}.mainui"));
+  sp%{ActivityName}UI->Set("viewport", spViewport);
 
   // Associate the Main UIComponent with our Activity Component
-  SetUI(sp%{ProjectName}UI);
+  SetUI(sp%{ActivityName}UI);
 }
 
-void %{ProjectName}::Activate()
+void %{ActivityName}::Activate()
 {
-  GetKernel().UpdatePulse.Subscribe(Delegate<void(double)>(this, &%{ProjectName}::Update));
+  GetKernel().UpdatePulse.Subscribe(Delegate<void(double)>(this, &%{ActivityName}::Update));
 }
 
-void %{ProjectName}::Deactivate()
+void %{ActivityName}::Deactivate()
 {
-  GetKernel().UpdatePulse.Unsubscribe(Delegate<void(double)>(this, &%{ProjectName}::Update));
+  GetKernel().UpdatePulse.Unsubscribe(Delegate<void(double)>(this, &%{ActivityName}::Update));
 }
 
-void %{ProjectName}::Update(double timeStep)
+void %{ActivityName}::Update(double timeStep)
 {
   if (spScene)
     spScene->Update(timeStep);
 }
 
-Variant %{ProjectName}::Save() const
+Variant %{ActivityName}::Save() const
 {
   return nullptr;
 }
@@ -163,7 +161,7 @@ Variant %{ProjectName}::Save() const
 extern "C" bool epPluginAttach()
 {
   // Register the Activity Component
-  Kernel::GetInstance()->RegisterComponentType<%{ProjectName}>();
+  Kernel::GetInstance()->RegisterComponentType<%{ActivityName}>();
 
   // Register the plugin's QML Components
   Kernel::GetInstance()->Call("registerqmlcomponents", ":/%{Namespace}");

@@ -1,31 +1,31 @@
-#include "%{ProjectName}.h"
+#include "%{ActivityHdr}"
 
 using namespace ep;
 
 namespace %{Namespace} {
 
-Array<const PropertyInfo> %{ProjectName}::GetProperties() const
+Array<const PropertyInfo> %{ActivityName}::GetProperties() const
 {
   return { };
 }
 
-Array<const ep::MethodInfo> %{ProjectName}::GetMethods() const
+Array<const ep::MethodInfo> %{ActivityName}::GetMethods() const
 {
   return { };
 }
 
 
-Array<const EventInfo> %{ProjectName}::GetEvents() const
+Array<const EventInfo> %{ActivityName}::GetEvents() const
 {
   return { };
 }
 
-Array<const StaticFuncInfo> %{ProjectName}::GetStaticFuncs() const
+Array<const StaticFuncInfo> %{ActivityName}::GetStaticFuncs() const
 {
   return { };
 }
 
-%{ProjectName}::%{ProjectName}(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+%{ActivityName}::%{ActivityName}(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
 
@@ -33,7 +33,7 @@ Array<const StaticFuncInfo> %{ProjectName}::GetStaticFuncs() const
 
 extern "C" bool epPluginAttach()
 {
-  Kernel::GetInstance()->RegisterComponentType<%{ProjectName}>();
+  Kernel::GetInstance()->RegisterComponentType<%{ActivityName}>();
   return true;
 }
 
