@@ -194,6 +194,90 @@ void PrimitiveGeneratorImplStatic::GenerateCircle(ArrayBufferRef spVB, ArrayBuff
   }
 }
 
+void PrimitiveGeneratorImplStatic::GenerateDisc(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, double arcLength, double innerRadius, Delegate<Float3(Float3)> transformVertex)
+{
+  EPASSERT_THROW(numSegments >= 3, Result::InvalidArgument, "Disc must have at least 3 segments!");
+
+  bool isDisc = innerRadius > 0.001; // is disc or circle
+  bool completeRotation = Abs(arcLength - EP_2PI) < 0.001;
+
+  size_t vertN = completeRotation ? numSegments : numSegments + 1;
+  size_t numVerts = isDisc ? 2 * vertN : vertN + 1;
+  size_t numIndices = isDisc ? numSegments * 3 * 2 : numSegments * 3;
+
+  spVB->Allocate<Float3>(numVerts);
+  spIB->Allocate<uint16_t>(numIndices);
+
+  Slice<Float3> vb = spVB->Map<Float3>();
+  epscope(exit) { spVB->Unmap(); };
+  Slice<uint16_t> ib = spIB->Map<uint16_t>();
+  epscope(exit) { spIB->Unmap(); };
+
+  size_t v = 0, i = 0;
+
+  // top and bottom center verts
+  if (!isDisc)
+    vb[v++] = Float3{ 0.0, 0.0, 0.0 };
+
+  for (size_t j = 0; j < vertN; ++j)
+  {
+    double a = arcLength*double(j) / double(numSegments);
+    vb[v++] = Float3{ (float)(Sin(a)*0.5), (float)(Cos(a)*0.5), 0.0f };
+  }
+
+  if (isDisc)
+  {
+    for (size_t j = 0; j < vertN; ++j)
+    {
+      double a = arcLength*double(j) / double(numSegments);
+      vb[v++] = Float3{ (float)(Sin(a)*innerRadius), (float)(Cos(a)*innerRadius), 0.0f };
+    }
+
+    size_t loopCount = numSegments;
+
+    for (size_t j = 0; j < loopCount; j++)
+    {
+      uint16_t it = (uint16_t)j;
+      ib[i++] = it;
+      ib[i++] = (it + 1) % vertN;
+      ib[i++] = (uint16_t)vertN + it;
+    }
+
+    for (size_t j = 0; j < loopCount; j++)
+    {
+      uint16_t it = (uint16_t)j;
+      ib[i++] = it + (uint16_t)vertN;
+      ib[i++] = (it + 1) % vertN + (uint16_t)vertN;
+      ib[i++] = (it + 1) % vertN;
+    }
+  }
+  else
+  {
+    size_t loopCount = numSegments + 1;
+
+    for (size_t j = 1; j < loopCount; j++)
+    {
+      uint16_t it = (uint16_t)j;
+      ib[i++] = 0;
+      ib[i++] = it;
+
+      if (j == loopCount - 1 && completeRotation) // if complete rotation, loop back
+        ib[i++] = 1;
+      else
+        ib[i++] = (it % numVerts) + (1);
+    }
+  }
+
+  EPASSERT(v == numVerts, "Incorrect number of vertices!");
+  EPASSERT(i == numIndices, "Incorrect number of indices!");
+
+  if (transformVertex)
+  {
+    for (Float3 &vert : vb)
+      vert = transformVertex(vert);
+  }
+}
+
 void PrimitiveGeneratorImplStatic::GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex)
 {
   EPASSERT_THROW(numSegments >= 3 && numSlices >= 1, Result::InvalidArgument, "Invalid args!");

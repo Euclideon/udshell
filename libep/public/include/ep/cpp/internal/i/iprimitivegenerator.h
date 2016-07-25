@@ -20,6 +20,7 @@ public:
   virtual void GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex) = 0;
   virtual void GenerateSphere(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex) = 0;
   virtual void GenerateCircle(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, double arcLength, Delegate<Float3(Float3)> transformVertex) = 0;
+  virtual void GenerateDisc(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, double arcLength, double innerRadius, Delegate<Float3(Float3)> transformVertex) = 0;
   virtual void GenerateCylinder(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex) = 0;
   virtual void GenerateCone(ArrayBufferRef spVB, ArrayBufferRef spIB, int numSegments, int numSlices, Delegate<Float3(Float3)> transformVertex) = 0;
 };
