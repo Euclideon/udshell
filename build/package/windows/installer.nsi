@@ -87,10 +87,12 @@ Function nsDialogsPage
 
   ReadEnvStr $0 QTDIR
   ${If} $0 != error
+  ${AndIf} $0 != ''
       StrCpy $0 "$0\..\..\Tools\QtCreator\bin"
   ${Else}
     ReadEnvStr $0 QT_DIR
     ${If} $0 != error
+    ${AndIf} $0 != ''
       StrCpy $0 "$0\..\..\Tools\QtCreator\bin"
     ${Endif}
   ${EndIf}
@@ -248,6 +250,7 @@ Section "install"
     #Debugger assist for VS 14.0
     ReadEnvStr $0 VS140COMNTOOLS
     ${If} $0 != error
+    ${AndIf} $0 != ''
       StrCpy $VSPath "$0..\Packages\Debugger\Visualizers"
       SetOutPath $VSPath
       File "..\..\..\bin\natvis\euclideon.*"
@@ -395,6 +398,7 @@ Section "uninstall"
     ReadEnvStr $0 VS140COMNTOOLS
 
     ${If} $0 != error
+    ${AndIf} $0 != ''
       StrCpy $VSPath "$0..\Packages\Debugger\Visualizers"
       delete "$VSPath\euclideon.*"
       ${If} $QtCCheckbox_State == ${BST_CHECKED}
