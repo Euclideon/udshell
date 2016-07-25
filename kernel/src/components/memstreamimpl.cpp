@@ -7,7 +7,7 @@ namespace ep {
 Array<const PropertyInfo> MemStream::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(Buffer, "The Buffer component MemStream reads/writes to", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("buffer", GetBuffer, "The Buffer component MemStream reads/writes to", nullptr, 0),
   };
 }
 

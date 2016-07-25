@@ -12,13 +12,13 @@ namespace ep {
 Array<const PropertyInfo> Console::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(FilterComponents, "List of Components to filter the log text by", nullptr, 0),
-    EP_MAKE_PROPERTY(FilterText, "Text string to filter console and log lines by", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(NumConsoleLines, "Number of console lines to output", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(HistoryLength, "Number of lines in the input history", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Title, "The console page's title", nullptr, 0),
-    EP_MAKE_PROPERTY_EXPLICIT("HasInput", "Bool specifies whether this console accepts input", EP_MAKE_GETTER(HasInput), nullptr, nullptr, 0),
-    EP_MAKE_PROPERTY_EXPLICIT("OutputLog", "Bool specifies whether this console outputs the application log", EP_MAKE_GETTER(OutputLog), nullptr, nullptr, 0),
+    EP_MAKE_PROPERTY("filterComponents", GetFilterComponents, SetFilterComponents, "List of Components to filter the log text by", nullptr, 0),
+    EP_MAKE_PROPERTY("filterText", GetFilterText, SetFilterText, "Text string to filter console and log lines by", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("numConsoleLines", GetNumConsoleLines, "Number of console lines to output", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("historyLength", GetHistoryLength, "Number of lines in the input history", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("title", GetTitle, "The console page's title", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("hasInput", HasInput, "Bool specifies whether this console accepts input", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("outputLog", OutputLog, "Bool specifies whether this console outputs the application log", nullptr, 0),
   };
 }
 Array<const MethodInfo> Console::GetMethods() const

@@ -10,7 +10,7 @@ namespace ep {
 inline Array<const PropertyInfo> Window::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_EXPLICIT("UI", "Top level UI for the window", EP_MAKE_GETTER(GetTopLevelUI), EP_MAKE_SETTER(SetTopLevelUI), nullptr, 0)
+    EP_MAKE_PROPERTY("ui", GetTopLevelUI, SetTopLevelUI, "Top level UI for the window", nullptr, 0)
   };
 }
 

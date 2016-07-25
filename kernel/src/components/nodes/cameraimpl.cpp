@@ -7,13 +7,13 @@ namespace ep {
 Array<const PropertyInfo> Camera::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(NearPlane, "Near depth plane", nullptr, 0),
-    EP_MAKE_PROPERTY(FarPlane, "Far depth plane", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(FovY, "Field of view in the Y direction when in Perspective mode", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(OrthoHeight, "Height of the viewing frustrum in Orthographic mode", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(CameraMatrix, "Position of camera", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(ViewMatrix, "Position of camera", nullptr, 0),
-    EP_MAKE_PROPERTY_EXPLICIT("IsOrtho", "If the camera is in Orthographic mode", EP_MAKE_GETTER(IsOrtho), nullptr, nullptr, 0),
+    EP_MAKE_PROPERTY("nearPlane", GetNearPlane, SetNearPlane, "Near depth plane", nullptr, 0),
+    EP_MAKE_PROPERTY("farPlane", GetFarPlane, SetFarPlane, "Far depth plane", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("fovY", GetFovY, "Field of view in the Y direction when in Perspective mode", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("orthoHeight", GetOrthoHeight, "Height of the viewing frustrum in Orthographic mode", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("cameraMatrix", GetCameraMatrix, "Position of camera", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("viewMatrix", GetViewMatrix, "Position of camera", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("isOrtho", IsOrtho, "If the camera is in Orthographic mode", nullptr, 0),
   };
 }
 Array<const MethodInfo> Camera::GetMethods() const

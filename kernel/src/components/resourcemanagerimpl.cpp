@@ -8,9 +8,9 @@ namespace ep {
 Array<const PropertyInfo> ResourceManager::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(NumResources, "The number of Resources in the ResourceManager", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(ResourceArray, "An array populated with the ResourceManager's resources", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Extensions, "The file extensions supported by the ResourceManager orgnanised by DataSource type", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("numResources", GetNumResources, "The number of Resources in the ResourceManager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("resourceArray", GetResourceArray, "An array populated with the ResourceManager's resources", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("extensions", GetExtensions, "The file extensions supported by the ResourceManager orgnanised by DataSource type", nullptr, 0),
   };
 }
 Array<const MethodInfo> ResourceManager::GetMethods() const

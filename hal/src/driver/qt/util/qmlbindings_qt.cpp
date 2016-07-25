@@ -134,7 +134,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     static SharedString propertyDescStr("Qt Component Property");
     QMetaProperty property = pMetaObject->property(i);
 
-    SharedString propertyName = epFromQString(property.name()).toLower();
+    SharedString propertyName = epFromQString(property.name());
 
     if (pDesc->propertyTree.get(propertyName))
     {
@@ -147,14 +147,14 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     auto setterShim = (property.isWritable() ? MethodShim(&QtShims::setter, data) : MethodShim(nullptr));
     uint32_t flags = (property.isConstant() ? (uint32_t)ep::PropertyFlags::epPF_Immutable : 0);
 
-    pDesc->propertyTree.insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyName, propertyDescStr, nullptr, flags }, getterShim, setterShim));
+    pDesc->propertyTree.insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyDescStr, nullptr, flags }, getterShim, setterShim));
   }
 
   for (int i = pMetaObject->methodOffset(); i < pMetaObject->methodCount(); ++i)
   {
     // Inject the methods
     QMetaMethod method = pMetaObject->method(i);
-    SharedString name = epFromQString(method.name()).toLower();
+    SharedString name = epFromQString(method.name());
     if (method.methodType() == QMetaMethod::Slot)
     {
       if (pDesc->methodTree.get(name))
@@ -184,7 +184,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
       auto data = SharedPtr<QtEventData>::create(i, name);
       auto shim = EventShim(&QtShims::subscribe, data);
 
-      pDesc->eventTree.insert(name, EventDesc(EventInfo{ name, name, eventDescStr }, shim));
+      pDesc->eventTree.insert(name, EventDesc(EventInfo{ name, eventDescStr }, shim));
     }
   }
 }

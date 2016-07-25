@@ -11,7 +11,7 @@ namespace ep {
 inline Array<const PropertyInfo> Activity::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(UI, "The top level UI compoment for this activity", nullptr, 0),
+    EP_MAKE_PROPERTY("ui", GetUI, SetUI, "The top level UI component for this activity", nullptr, 0),
   };
 }
 inline Array<const MethodInfo> Activity::GetMethods() const

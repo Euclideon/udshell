@@ -44,21 +44,19 @@ void epFromVariant(const Variant &variant, ShaderProperty *p)
 
 Array<const PropertyInfo> Material::GetProperties() const
 {
-#define EP_MAKE_PROPERTY_METASET(FuncName, desc) EP_MAKE_PROPERTY_EXPLICIT(#FuncName, desc, EP_MAKE_GETTER(Get##FuncName), EP_MAKE_SETTER(Set##FuncName##_Meta), nullptr, 0)
-
   return{
-    EP_MAKE_PROPERTY_METASET(VertexShader, "Vertex shader for rendering"),
-    EP_MAKE_PROPERTY_METASET(PixelShader, "Pixel shader for rendering"),
-    EP_MAKE_PROPERTY_METASET(GeometryShader, "Geometry shader for rendering"),
-    EP_MAKE_PROPERTY_METASET(TesselationControlShader, "Tesselation Control shader for rendering"),
-    EP_MAKE_PROPERTY_METASET(TesselationEvaluationShader, "Tesselation Evaluation shader for rendering"),
+    EP_MAKE_PROPERTY("vertexShader", GetVertexShader, SetVertexShader_Meta, "Vertex shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("pixelShader", GetPixelShader, SetPixelShader_Meta, "Pixel shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("geometryShader", GetGeometryShader, SetGeometryShader_Meta, "Geometry shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("tesselationControlShader", GetTesselationControlShader, SetTesselationControlShader_Meta, "Tesselation Control shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("tesselationEvaluationShader", GetTesselationEvaluationShader, SetTesselationEvaluationShader_Meta, "Tesselation Evaluation shader for rendering", nullptr, 0),
 
-    EP_MAKE_PROPERTY(BlendMode, "Frame buffer blend mode", nullptr, 0),
-    EP_MAKE_PROPERTY(CullMode, "Back face cull mode", nullptr, 0),
-    EP_MAKE_PROPERTY(DepthCompareFunc, "Depth compare function", nullptr, 0),
-    EP_MAKE_PROPERTY(StencilState, "Stencil state", nullptr, 0),
-    EP_MAKE_PROPERTY(FrontStencilState, "Front-face stencil state", nullptr, 0),
-    EP_MAKE_PROPERTY(BackStencilState, "Back-face stencil state", nullptr, 0),
+    EP_MAKE_PROPERTY("blendMode", GetBlendMode, SetBlendMode, "Frame buffer blend mode", nullptr, 0),
+    EP_MAKE_PROPERTY("cullMode", GetCullMode, SetCullMode, "Back face cull mode", nullptr, 0),
+    EP_MAKE_PROPERTY("depthCompareFunc", GetDepthCompareFunc, SetDepthCompareFunc, "Depth compare function", nullptr, 0),
+    EP_MAKE_PROPERTY("stencilState", GetStencilState, SetStencilState, "Stencil state", nullptr, 0),
+    EP_MAKE_PROPERTY("frontStencilState", GetFrontStencilState, SetFrontStencilState, "Front-face stencil state", nullptr, 0),
+    EP_MAKE_PROPERTY("backStencilState", GetBackStencilState, SetBackStencilState, "Back-face stencil state", nullptr, 0),
   };
 }
 
@@ -165,7 +163,7 @@ const PropertyDesc *MaterialImpl::GetPropertyDesc(String _name, EnumerateFlags e
 {
   return &dynamicPropertyCache.tryInsert(_name, [&]() {
     return PropertyDesc(
-      { _name, _name, _name, nullptr, 0 },
+      { _name, _name, nullptr, 0 },
       MethodShim(&MaterialImpl::Get, SharedPtr<DynamicPropertyData>::create(_name)),
       MethodShim(&MaterialImpl::Set, SharedPtr<DynamicPropertyData>::create(_name))
     );

@@ -32,7 +32,8 @@ enum PropertyFlags : uint32_t
 struct PropertyInfo
 {
   SharedString id;
-  SharedString displayName;
+
+//  SharedString displayName; // TODO: this requires human-entry in our meta registration macros...
   SharedString description;
 
   SharedString uiType;
@@ -53,7 +54,8 @@ struct MethodInfo
 struct EventInfo
 {
   SharedString id;
-  SharedString displayName;
+
+//  SharedString displayName; // TODO: this requires human-entry in our meta registration macros...
   SharedString description;
 
   SharedArray<SharedString> argTypes;
@@ -241,25 +243,23 @@ private:
 
 
 // make property with getter and setter
-#define EP_MAKE_PROPERTY(Name, Description, UIType, Flags) \
-  EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, EP_MAKE_GETTER(Get##Name), EP_MAKE_SETTER(Set##Name), UIType, Flags)
+#define EP_MAKE_PROPERTY(Name, Getter, Setter, Description, UIType, Flags) \
+  EP_MAKE_PROPERTY_EXPLICIT(Name, Description, EP_MAKE_GETTER(Getter), EP_MAKE_SETTER(Setter), UIType, Flags)
 
 // make property with getter only (read only)
-#define EP_MAKE_PROPERTY_RO(Name, Description, UIType, Flags) \
-  EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, EP_MAKE_GETTER(Get##Name), nullptr, UIType, Flags)
+#define EP_MAKE_PROPERTY_RO(Name, Getter, Description, UIType, Flags) \
+  EP_MAKE_PROPERTY_EXPLICIT(Name, Description, EP_MAKE_GETTER(Getter), nullptr, UIType, Flags)
 
 // make property with setter only (write only)
-#define EP_MAKE_PROPERTY_WO(Name, Description, UIType, Flags) \
-  EP_MAKE_PROPERTY_EXPLICIT(#Name, Description, nullptr, EP_MAKE_SETTER(Set##Name), UIType, Flags)
+#define EP_MAKE_PROPERTY_WO(Name, Setter, Description, UIType, Flags) \
+  EP_MAKE_PROPERTY_EXPLICIT(Name, Description, nullptr, EP_MAKE_SETTER(Setter), UIType, Flags)
 
 // make property with explicit getter and setter
 #define EP_MAKE_PROPERTY_EXPLICIT(Name, Description, Getter, Setter, UIType, Flags)      \
 ([]() -> ep::PropertyInfo {                                                              \
   using namespace ep;                                                                    \
-  static char id[sizeof(Name)];                                                          \
-  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
-    id, Name, Description, UIType, Flags,                                                \
+    Name, Description, UIType, Flags,                                                    \
     Getter,                                                                              \
     Setter                                                                               \
   };                                                                                     \
@@ -274,10 +274,8 @@ private:
 #define EP_MAKE_METHOD_EXPLICIT(Name, Method, Description)                               \
 ([]() -> ep::MethodInfo {                                                                \
   using namespace ep;                                                                    \
-  static char id[sizeof(Name)];                                                          \
-  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
-    id, Description, Array<SharedString>(Alloc, internal::function_traits<decltype(&This::Method)>::num_args), \
+    Name, Description, Array<SharedString>(Alloc, internal::function_traits<decltype(&This::Method)>::num_args), \
     []() -> VarMethod {                                                                  \
       struct Shim                                                                        \
       {                                                                                  \
@@ -300,10 +298,8 @@ private:
 #define EP_MAKE_EVENT_EXPLICIT(Name, Event, Description)                                 \
 ([]() -> ep::EventInfo {                                                                 \
   using namespace ep;                                                                    \
-  static char id[sizeof(Name)];                                                          \
-  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
-    id, Name, Description, Array<SharedString>(Alloc, decltype(This::Event)::ParamCount), \
+    Name, Description, Array<SharedString>(Alloc, decltype(This::Event)::ParamCount),    \
     []() -> VarMethod {                                                                  \
       struct Shim                                                                        \
       {                                                                                  \
@@ -327,10 +323,8 @@ private:
 #define EP_MAKE_STATICFUNC_EXPLICIT(Name, Function, Description)                         \
 ([]() -> ep::StaticFuncInfo {                                                            \
   using namespace ep;                                                                    \
-  static char id[sizeof(Name)];                                                          \
-  for (size_t i = 0; i < sizeof(id); ++i) id[i] = (char)epToLower(Name[i]);              \
   return{                                                                                \
-    id, Description,                                                                     \
+    Name, Description,                                                                   \
     [](Slice<const Variant> args) -> Variant {                                           \
       return VarCall(&This::Function, args);                                             \
     }                                                                                    \

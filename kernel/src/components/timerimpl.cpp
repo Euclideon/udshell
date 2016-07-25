@@ -7,8 +7,8 @@ namespace ep {
 Array<const PropertyInfo> Timer::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(Duration, "The duration for the timer in seconds", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(TimerType, "The TimerType of this timer", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("duration", GetDuration, "The duration for the timer in seconds", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("timerType", GetTimerType, "The TimerType of this timer", nullptr, 0),
   };
 }
 Array<const MethodInfo> Timer::GetMethods() const

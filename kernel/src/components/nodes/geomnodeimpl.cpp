@@ -13,7 +13,7 @@ namespace ep {
 Array<const PropertyInfo> GeomNode::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(Model, "The Node's Model", nullptr, 0),
+    EP_MAKE_PROPERTY("model", GetModel, SetModel, "The Node's Model", nullptr, 0),
   };
 }
 

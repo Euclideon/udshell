@@ -443,8 +443,8 @@ void LuaState::pushDescriptor(const ComponentDescInl &desc)
 
     pushString(p.value.id);
     lua_setfield(L, -2, "id");
-    pushString(p.value.displayName);
-    lua_setfield(L, -2, "displayname");
+//    pushString(p.value.displayName); // TODO: add this back at some point?
+//    lua_setfield(L, -2, "displayname");
     pushString(p.value.description);
     lua_setfield(L, -2, "description");
 

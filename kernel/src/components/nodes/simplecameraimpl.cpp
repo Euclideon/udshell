@@ -8,12 +8,13 @@ namespace ep {
 Array<const PropertyInfo> SimpleCamera::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_WO(Matrix, "Local matrix", nullptr, 0),
-    EP_MAKE_PROPERTY_WO(Position, "Local position", nullptr, 0),
-    EP_MAKE_PROPERTY_WO(Orientation, "Camera orientation (YPR)", nullptr, 0),
-    EP_MAKE_PROPERTY_WO(Speed, "Camera speed", nullptr, 0),
-    EP_MAKE_PROPERTY(HelicopterMode, "Helicopter Mode", nullptr, 0),
-    EP_MAKE_PROPERTY(InvertedYAxis, "InvertYAxis", nullptr, 0),
+    // TODO: why are these write-only?
+    EP_MAKE_PROPERTY_WO("matrix", SetMatrix, "Local matrix", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("position", SetPosition, "Local position", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("orientation", SetOrientation, "Camera orientation (YPR)", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("speed", SetSpeed, "Camera speed", nullptr, 0),
+    EP_MAKE_PROPERTY("helicopterMode", GetHelicopterMode, SetHelicopterMode, "Helicopter Mode", nullptr, 0),
+    EP_MAKE_PROPERTY("invertedYAxis", GetInvertedYAxis, SetInvertedYAxis, "Invert Y-axis", nullptr, 0),
   };
 }
 Array<const EventInfo> SimpleCamera::GetEvents() const

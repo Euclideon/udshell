@@ -18,8 +18,8 @@ namespace ep {
 Array<const PropertyInfo> Scene::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(RootNode, "Scene root node", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(BookmarkMap, "Bookmark map", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("rootNode", GetRootNode, "Scene root node", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("bookmarkMap", GetBookmarkMap, "Bookmark map", nullptr, 0),
   };
 }
 Array<const MethodInfo> Scene::GetMethods() const

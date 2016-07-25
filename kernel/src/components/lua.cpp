@@ -9,7 +9,7 @@ namespace ep {
 Array<const PropertyInfo> Lua::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(OutputBroadcaster, "Output broadcaster used by the Lua print functions", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("outputBroadcaster", GetOutputBroadcaster, "Output broadcaster used by the Lua print functions", nullptr, 0),
   };
 }
 Array<const MethodInfo> Lua::GetMethods() const

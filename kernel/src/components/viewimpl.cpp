@@ -7,13 +7,13 @@ namespace ep {
 Array<const PropertyInfo> View::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(Camera, "Camera for viewport", nullptr, 0),
-    EP_MAKE_PROPERTY(Scene, "Scene for viewport", nullptr, 0),
-    EP_MAKE_PROPERTY(EnablePicking, "Enable Picking", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(MousePosition, "Mouse Position", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(AspectRatio, "Aspect ratio", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Dimensions, "The height and width of the View", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(RenderDimensions, "The resolution of the rendered content", nullptr, 0),
+    EP_MAKE_PROPERTY("camera", GetCamera, SetCamera, "Camera for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY("scene", GetScene, SetScene, "Scene for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY("enablePicking", GetEnablePicking, SetEnablePicking, "Enable Picking", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("mousePosition", GetMousePosition, "Mouse Position", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("aspectRatio", GetAspectRatio, "Aspect ratio", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("dimensions", GetDimensions, "The height and width of the View", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("renderDimensions", GetRenderDimensions, "The resolution of the rendered content", nullptr, 0),
   };
 }
 

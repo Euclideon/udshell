@@ -8,11 +8,11 @@ namespace ep {
 Array<const PropertyInfo> ArrayBuffer::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(ElementType, "Element type of the Array as a String", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(ElementSize, "The Array's element size", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(NumDimensions, "Number of dimensions", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Length, "Number of Array elements", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Shape, "The sizes of the Array's dimensions", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("elementType", GetElementType, "Element type of the Array as a String", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("elementSize", GetElementSize, "The Array's element size", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("numDimensions", GetNumDimensions, "Number of dimensions", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("length", GetLength, "Number of Array elements", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("shape", GetShape, "The sizes of the Array's dimensions", nullptr, 0),
   };
 }
 Array<const MethodInfo> ArrayBuffer::GetMethods() const

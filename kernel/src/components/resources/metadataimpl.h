@@ -54,7 +54,7 @@ protected:
 inline Array<const PropertyInfo> Metadata::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_EXPLICIT("NumRecords", "Number of records in the metadata", EP_MAKE_GETTER(NumRecords), nullptr, nullptr, 0),
+    EP_MAKE_PROPERTY_RO("numRecords", NumRecords, "Number of records in the metadata", nullptr, 0),
   };
 }
 

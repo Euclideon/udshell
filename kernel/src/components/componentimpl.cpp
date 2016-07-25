@@ -16,11 +16,11 @@ namespace ep {
 Array<const PropertyInfo> Component::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(Uid, "Component UID", nullptr, 0),
-    EP_MAKE_PROPERTY(Name, "Component Name", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Type, "Component Type", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(DisplayName, "Component Display Name", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Description, "Component Description", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("uid", GetUid, "Component UID", nullptr, 0),
+    EP_MAKE_PROPERTY("name", GetName, SetName, "Component Name", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("type", GetType, "Component Type", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("displayName", GetDisplayName, "Component Display Name", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("description", GetDescription, "Component Description", nullptr, 0),
   };
 }
 Array<const MethodInfo> Component::GetMethods() const

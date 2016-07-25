@@ -10,7 +10,7 @@ namespace ep {
 Array<const PropertyInfo> Logger::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(Enabled, "Is Enabled", nullptr, 0),
+    EP_MAKE_PROPERTY("enabled", GetEnabled, SetEnabled, "Is Enabled", nullptr, 0),
   };
 }
 Array<const MethodInfo> Logger::GetMethods() const

@@ -24,7 +24,7 @@ protected:
   Array<const PropertyInfo> GetProperties() const
   {
     return{
-      EP_MAKE_PROPERTY_RO(SupportedExtensions, "List of file extension strings handled by this PluginLoader", nullptr, 0),
+      EP_MAKE_PROPERTY_RO("supportedExtensions", GetSupportedExtensions, "List of file extension strings handled by this PluginLoader", nullptr, 0),
     };
   }
 

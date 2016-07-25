@@ -5,10 +5,10 @@ namespace ep {
 Array<const PropertyInfo> Node::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(Matrix, "Local matrix", nullptr, 0),
-    EP_MAKE_PROPERTY(Position, "Local position", nullptr, 0),
-    EP_MAKE_PROPERTY_EXPLICIT("Parent", "Parent node", EP_MAKE_GETTER(Parent), nullptr, nullptr, 0),
-    EP_MAKE_PROPERTY_EXPLICIT("Children", "Child nodes", EP_MAKE_GETTER(Children), nullptr, nullptr, 0),
+    EP_MAKE_PROPERTY("matrix", GetMatrix, SetMatrix, "Local matrix", nullptr, 0),
+    EP_MAKE_PROPERTY("position", GetPosition, SetPosition, "Local position", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("parent", Parent, "Parent node", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("children", Children, "Child nodes", nullptr, 0),
   };
 }
 Array<const MethodInfo> Node::GetMethods() const

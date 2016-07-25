@@ -5,9 +5,9 @@ namespace ep {
 Array<const PropertyInfo> Buffer::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_EXPLICIT("Empty", "Is the Buffer Empty", EP_MAKE_GETTER(Empty), nullptr, 0, 0),
-    EP_MAKE_PROPERTY_RO(BufferSize, "The buffer's size", nullptr, 0),
-    EP_MAKE_PROPERTY_EXPLICIT("Mapped", "Is the Buffer Mapped", EP_MAKE_GETTER(Mapped), nullptr, 0, 0),
+    EP_MAKE_PROPERTY_RO("empty", Empty, "Is the Buffer Empty", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("bufferSize", GetBufferSize, "The buffer's size", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("mapped", Mapped, "Is the Buffer Mapped", nullptr, 0),
   };
 }
 Array<const MethodInfo> Buffer::GetMethods() const

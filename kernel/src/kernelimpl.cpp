@@ -71,10 +71,10 @@ namespace ep {
 Array<const PropertyInfo> Kernel::GetProperties() const
 {
   return Array<const PropertyInfo>{
-    EP_MAKE_PROPERTY_RO(ResourceManager, "Resource manager", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(CommandManager, "Command manager", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(StdOutBroadcaster, "stdout broadcaster", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(StdErrBroadcaster, "stderr broadcaster", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("resourceManager", GetResourceManager, "Resource manager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("commandManager", GetCommandManager, "Command manager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("stdOutBroadcaster", GetStdOutBroadcaster, "stdout broadcaster", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("stdErrBroadcaster", GetStdErrBroadcaster, "stderr broadcaster", nullptr, 0),
   };
 }
 Array<const MethodInfo> Kernel::GetMethods() const

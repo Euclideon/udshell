@@ -21,8 +21,8 @@ namespace ep {
 Array<const PropertyInfo> Viewer::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(SimpleCamera, "The Viewer's SimpleCamera Component", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(View, "The Viewer's View Component", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("simpleCamera", GetSimpleCamera, "The Viewer's SimpleCamera Component", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("view", GetView, "The Viewer's View Component", nullptr, 0),
   };
 }
 

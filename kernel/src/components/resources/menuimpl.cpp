@@ -9,7 +9,7 @@ namespace ep {
 Array<const PropertyInfo> Menu::GetProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(MenuData, "Heirarchical structure of menus", nullptr, 0),
+    EP_MAKE_PROPERTY("menuData", GetMenuData, SetMenuData, "Heirarchical structure of menus", nullptr, 0),
   };
 }
 Array<const MethodInfo> Menu::GetMethods() const
