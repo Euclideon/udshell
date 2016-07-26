@@ -187,7 +187,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
 
   // load in the kernel qml resources
   InitResources();
-  RegisterQmlComponents(":/kernel");
+  registerQmlComponents(":/kernel");
 
   // create focus manager;
   pFocusManager = new QtFocusManager();
@@ -293,7 +293,7 @@ void QtKernel::UnregisterWindow(QQuickWindow *pWindow)
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::RegisterQmlComponent(String file)
+void QtKernel::registerQmlComponent(String file)
 {
   EPASSERT_THROW(!file.empty(), ep::Result::InvalidArgument, "Must supply a valid file to register a QML component type");
 
@@ -310,7 +310,7 @@ void QtKernel::RegisterQmlComponent(String file)
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::RegisterQmlComponents(String folderPath)
+void QtKernel::registerQmlComponents(String folderPath)
 {
   EPASSERT_THROW(!folderPath.empty(), ep::Result::InvalidArgument, "Must supply a valid folderPath to search for QML components");
 
@@ -356,7 +356,7 @@ void QtKernel::RegisterQml(ep::String file, ep::Variant::VarMap typeDesc)
 }
 
 // ---------------------------------------------------------------------------------------
-ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initParams)
+ep::ComponentRef QtKernel::createQmlComponent(String file, Variant::VarMap initParams)
 {
   using namespace ep;
   EPASSERT_THROW(!file.empty(), Result::InvalidArgument, "Must supply a valid file to register a QML component type");

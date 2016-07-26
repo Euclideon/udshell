@@ -373,9 +373,9 @@ void Register(String sender, String message, const Variant &data)
 {
 #if 0
   // NOTE: Use to test off disk
-  spKernel->Call("registerqmlcomponents", "shell/qml");
+  spKernel->Call("registerQmlComponents", "shell/qml");
 #else
-  spKernel->Call("registerqmlcomponents", ":/EP");
+  spKernel->Call("registerQmlComponents", ":/EP");
 #endif
 }
 

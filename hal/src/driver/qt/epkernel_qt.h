@@ -97,9 +97,9 @@ public:
 
   QtFocusManager *GetFocusManager() { return pFocusManager; }
 
-  void RegisterQmlComponent(ep::String file);
-  void RegisterQmlComponents(ep::String folderPath);
-  ep::ComponentRef CreateQmlComponent(ep::String file, ep::Variant::VarMap initParams);
+  void registerQmlComponent(ep::String file);
+  void registerQmlComponents(ep::String folderPath);
+  ep::ComponentRef createQmlComponent(ep::String file, ep::Variant::VarMap initParams);
 
 private:
   friend class QtKernelMediator;
@@ -117,9 +117,9 @@ private:
   ep::Array<const ep::MethodInfo> GetMethods() const
   {
     return{
-      EP_MAKE_METHOD(RegisterQmlComponent, "Register a new QML Component type"),
-      EP_MAKE_METHOD(RegisterQmlComponents, "Scans the path for valid QML components and registers them"),
-      EP_MAKE_METHOD(CreateQmlComponent, "Creates a new QML Component from file")
+      EP_MAKE_METHOD(registerQmlComponent, "Register a new QML Component type"),
+      EP_MAKE_METHOD(registerQmlComponents, "Scans the path for valid QML components and registers them"),
+      EP_MAKE_METHOD(createQmlComponent, "Creates a new QML Component from file")
     };
   }
 

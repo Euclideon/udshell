@@ -409,9 +409,9 @@ extern "C" bool epPluginAttach()
 
 #if 0
   // NOTE: Use to test off disk
-  Kernel::GetInstance()->Call("registerqmlcomponents", "plugin/viewer/qml");
+  Kernel::GetInstance()->Call("registerQmlComponents", "plugin/viewer/qml");
 #else
-  Kernel::GetInstance()->Call("registerqmlcomponents", ":/viewer");
+  Kernel::GetInstance()->Call("registerQmlComponents", ":/viewer");
 #endif
 
   return true;
