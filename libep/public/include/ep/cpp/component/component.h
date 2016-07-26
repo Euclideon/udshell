@@ -53,10 +53,11 @@ public:
   //! \see IsType, GetDescriptor, GetKernel, GetDisplayName, GetDescription, GetUid, GetName
   String GetType() const { return pType->info.identifier; }
 
-  //! Gets a user-friendly name for the component.
-  //! \return Returns the component display name.
-  //! \see GetDescriptor, GetKernel, GetType, GetDescription, GetUid, GetName
-  String GetDisplayName() const { return pType->info.displayName; }
+// TODO: put this back one day?
+//  //! Gets a user-friendly name for the component.
+//  //! \return Returns the component display name.
+//  //! \see GetDescriptor, GetKernel, GetType, GetDescription, GetUid, GetName
+//  String GetDisplayName() const { return pType->info.displayName; }
 
   //! Gets a user-friendly description of the component.
   //! \return Returns the component description.

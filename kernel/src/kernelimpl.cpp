@@ -132,7 +132,7 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   return pDesc;
 }
 Kernel::Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine)
-  : Component(Kernel::MakeKernelDescriptor(_pType), nullptr, "ep.kernel0", commandLine)
+  : Component(Kernel::MakeKernelDescriptor(_pType), nullptr, "ep.Kernel0", commandLine)
 {
   // alloc impl
   pImpl = UniquePtr<Impl>(epNew(KernelImpl, this, commandLine));
@@ -760,7 +760,7 @@ const ComponentDesc* KernelImpl::RegisterComponentTypeFromMap(Variant::VarMap ty
   pDesc->info.nameSpace = pDesc->info.identifier.slice(0, offset);
   pDesc->info.name = pDesc->info.identifier.slice(offset+1, pDesc->info.identifier.length);
 
-  pDesc->info.displayName = typeDesc["name"].asSharedString();
+//  pDesc->info.displayName = typeDesc["name"].asSharedString(); // TODO: add this back at some point?
   pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = EP_APIVERSION;
   Variant *pVar = typeDesc.get("version");

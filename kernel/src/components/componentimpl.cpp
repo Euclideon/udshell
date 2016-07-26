@@ -19,7 +19,7 @@ Array<const PropertyInfo> Component::GetProperties() const
     EP_MAKE_PROPERTY_RO("uid", GetUid, "Component UID", nullptr, 0),
     EP_MAKE_PROPERTY("name", GetName, SetName, "Component Name", nullptr, 0),
     EP_MAKE_PROPERTY_RO("type", GetType, "Component Type", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("displayName", GetDisplayName, "Component Display Name", nullptr, 0),
+//    EP_MAKE_PROPERTY_RO("displayName", GetDisplayName, "Component Display Name", nullptr, 0),  // TODO: add this back at some point?
     EP_MAKE_PROPERTY_RO("description", GetDescription, "Component Description", nullptr, 0),
   };
 }

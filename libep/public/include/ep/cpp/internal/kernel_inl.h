@@ -90,7 +90,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
 
   // setup the super class and populate from its meta
   pDesc->pSuperDesc = nullptr;
-  if (!pDesc->info.identifier.eq("ep.component"))
+  if (!pDesc->info.identifier.eq("ep.Component"))
   {
     pDesc->pSuperDesc = GetComponentDesc(pDesc->baseClass);
     EPTHROW_IF(!pDesc->pSuperDesc, Result::InvalidType, "Base Component '{0}' not registered", pDesc->baseClass);

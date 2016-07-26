@@ -392,7 +392,7 @@ ep::ComponentRef QtKernel::CreateQmlComponent(String file, Variant::VarMap initP
   pDesc->info.nameSpace = pDesc->info.identifier.slice(0, offset);
   pDesc->info.name = pDesc->info.identifier.slice(offset + 1, pDesc->info.identifier.length);
 
-  pDesc->info.displayName = typeDesc["displayname"].asSharedString();
+//  pDesc->info.displayName = typeDesc["displayname"].asSharedString(); // TODO: add this back at some point?
   pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = pSuper->info.epVersion;
   pDesc->info.pluginVersion = typeDesc["version"].as<int>();

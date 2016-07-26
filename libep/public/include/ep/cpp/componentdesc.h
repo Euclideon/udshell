@@ -85,7 +85,7 @@ struct ComponentInfo
   SharedString name;        // name
   SharedString identifier;  // identifier
 
-  SharedString displayName; // display name
+//  SharedString displayName; // display name  // TODO: this requires human-entry in our meta registration macros...
   SharedString description; // description
 
   // icon image...?
@@ -138,9 +138,9 @@ public:                                                                         
     static const ep::ComponentInfo info                                                  \
     {                                                                                    \
       EP_APIVERSION, Version,                                                            \
-      #Namespace, std::move(ep::MutableString<0>(#Name).toLower()),                      \
-      ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower()), \
-      #Name, Description,                                                                \
+      #Namespace, #Name,                                                                 \
+      ep::MutableString<0>(ep::Concat, #Namespace, '.', #Name),                          \
+      Description,                                                                       \
       Flags                                                                              \
     };                                                                                   \
     return info;                                                                         \
@@ -167,9 +167,9 @@ public:                                                                         
     static const ep::ComponentInfo info                                                  \
     {                                                                                    \
       EP_APIVERSION, Version,                                                            \
-      #Namespace, ep::MutableString<0>(#Name).toLower(),                                 \
-      ep::MutableString<0>(ep::Concat, #Namespace, '.', ep::MutableString<0>(#Name).toLower()), \
-      #Name, Description,                                                                \
+      #Namespace, #Name,                                                                 \
+      ep::MutableString<0>(ep::Concat, #Namespace, '.', #Name),                          \
+      Description,                                                                       \
       Flags                                                                              \
     };                                                                                   \
     return info;                                                                         \

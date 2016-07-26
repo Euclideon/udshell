@@ -221,12 +221,12 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
         if (data.is(Variant::SharedPtrType::Component))
         {
           ComponentRef spC = data.asComponent();
-          if (spC->GetType().eq("ep.shader"))
+          if (spC->GetType().eq("ep.Shader"))
           {
             // data is a shader object
             spShader = shared_pointer_cast<Shader>(spC);
           }
-          else if (spC->GetType().eq("ep.text"))
+          else if (spC->GetType().eq("ep.Text"))
           {
             // data is a text buffer object (presumably containing shader source)
             spShader = GetKernel()->CreateComponent<Shader>();

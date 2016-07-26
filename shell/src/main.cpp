@@ -247,9 +247,10 @@ Array<Variant::VarMap> GetActivitiesInfo()
   {
     Variant::VarMap activityInfo;
     activityInfo.insert("namespace", desc->info.nameSpace);
-//    activityInfo.insert("typename", desc->info.name);
+    activityInfo.insert("typename", desc->info.name);
     activityInfo.insert("identifier", desc->info.identifier);
-    activityInfo.insert("name", desc->info.displayName);
+//    activityInfo.insert("name", desc->info.displayName); // TODO: add this back at some point?
+    activityInfo.insert("name", desc->info.name);
     activityInfo.insert("description", desc->info.description);
     infoArray.pushBack(std::move(activityInfo));
   }

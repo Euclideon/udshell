@@ -425,8 +425,8 @@ void LuaState::pushDescriptor(const ComponentDescInl &desc)
   lua_setfield(L, -2, "name");
   pushString(desc.info.identifier);
   lua_setfield(L, -2, "identifier");
-  pushString(desc.info.displayName);
-  lua_setfield(L, -2, "displayname");
+//  pushString(desc.info.displayName); // TODO: add this back at some point?
+//  lua_setfield(L, -2, "displayname");
   pushString(desc.info.description);
   lua_setfield(L, -2, "description");
 
