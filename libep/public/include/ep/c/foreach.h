@@ -2,6 +2,7 @@
 #if !defined(_EP_FOREACH_H)
 #define _EP_FOREACH_H
 
+#define FOR_EACH_0(DO, N, ...)
 #define FOR_EACH_1(DO, N, a)        DO(a, N-1)
 #define FOR_EACH_2(DO, N, a,...)    EXPAND( DO(a, N-2) FOR_EACH_1(DO, N, __VA_ARGS__) )
 #define FOR_EACH_3(DO, N, a,...)    EXPAND( DO(a, N-3) FOR_EACH_2(DO, N, __VA_ARGS__) )
