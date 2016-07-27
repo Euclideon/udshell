@@ -216,8 +216,8 @@ static void ViewerInit(String sender, String message, const Variant &data)
   mData.spView->setUDRenderFlags(UDRenderFlags::ClearTargets);
 
   mData.spSimpleCamera->setPosition(Double3::create(0.5, -1.0, 0.5));
-  mData.spSimpleCamera->SetSpeed(1.0);
-  mData.spSimpleCamera->SetInvertedYAxis(true);
+  mData.spSimpleCamera->setSpeed(1.0);
+  mData.spSimpleCamera->setInvertedYAxis(true);
   mData.spSimpleCamera->setPerspective(EP_PIf / 3.f);
   mData.spSimpleCamera->setDepthPlanes(0.0001f, 7500.f);
 

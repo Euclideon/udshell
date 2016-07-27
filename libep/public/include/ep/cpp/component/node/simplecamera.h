@@ -20,17 +20,17 @@ public:
   void setMatrix(const Double4x4 &_matrix) override { pImpl->SetMatrix(_matrix); }
   void setPosition(const Double3 &_pos) override { pImpl->SetPosition(_pos); }
 
-  void SetOrientation(const Double3 &_ypr) { pImpl->SetOrientation(_ypr); }
-  void SetSpeed(double _speed) { pImpl->SetSpeed(_speed); }
+  void setOrientation(const Double3 &_ypr) { pImpl->SetOrientation(_ypr); }
+  void setSpeed(double _speed) { pImpl->SetSpeed(_speed); }
 
-  void SetInvertedYAxis(bool bInvert) { pImpl->SetInvertedYAxis(bInvert); }
-  bool GetInvertedYAxis() const { return pImpl->GetInvertedYAxis(); }
-  void SetHelicopterMode(bool bEnable) { pImpl->SetHelicopterMode(bEnable); }
-  bool GetHelicopterMode() const { return pImpl->GetHelicopterMode(); }
+  void setInvertedYAxis(bool bInvert) { pImpl->SetInvertedYAxis(bInvert); }
+  bool getInvertedYAxis() const { return pImpl->GetInvertedYAxis(); }
+  void setHelicopterMode(bool bEnable) { pImpl->SetHelicopterMode(bEnable); }
+  bool getHelicopterMode() const { return pImpl->GetHelicopterMode(); }
 
   Variant save() const override { return pImpl->Save(); }
 
-  Event<Double3, Double3> Changed;
+  Event<Double3, Double3> changed;
 
 protected:
   bool viewportInputEvent(const ep::InputEvent &ev) override { return pImpl->ViewportInputEvent(ev); }
