@@ -30,7 +30,7 @@ Rectangle {
     messagebox = EPKernel.findComponent("messagebox");
 
     resourceManager = EPKernel.findComponent("resourcemanager");
-    var res = resourceManager.get("resourcearray");
+    var res = resourceManager.resourceArray;
     for(var i = 0; i < res.length; i++) {
       addResourceHelper(res[i]);
     }
@@ -48,11 +48,11 @@ Rectangle {
   }
 
   function createResourceName(res) {
-    var meta = res.get("metadata");
-    var url = meta.call("get", "url");
+    var meta = res.metadata;
+    var url = meta.get("url");
 
     if(!url)
-      return res.get("uid");
+      return res.uid;
 
     var name = url.replace(/^.*[\\\/]/, ''); // get filename from path
     var name = name.replace(/\.[^/.]+$/, ''); // remove extension from filename
@@ -89,7 +89,7 @@ Rectangle {
 
   function addResourceHelper(res) {
     var name = createResourceName(res);
-    var item = { "uid" : res.get("uid"), "name" : name, "type" : res.get("type") };
+    var item = { "uid" : res.uid, "name" : name, "type" : res.type };
 
     resources.push(item);
 
@@ -107,7 +107,7 @@ Rectangle {
   }
 
   function removeResource(res) {
-    var uid = res.get("uid");
+    var uid = res.uid;
     resourcesLM.remove(resourcesLM.find("uid", uid));
     for(var i = 0; i < resources.length; i++) {
       if(resources[i].uid == uid) {
@@ -118,7 +118,7 @@ Rectangle {
   }
 
   function openresources() {
-    var exts = resourceManager.get("extensions");
+    var exts = resourceManager.extensions;
     var filters = [];
     filters.push("All Files (*)");
     for(var key in exts) {
@@ -153,7 +153,7 @@ Rectangle {
   function openResourcesAccepted() {
     for(var i = 0; i < fileDialog.fileUrls.length; i++) {
       var path = fileDialog.fileUrls[i].toString();
-      resourceManager.call("loadresourcesfromfile", {"src" : path, "useStreamer" : true });
+      resourceManager.loadResourcesFromFile({"src" : path, "useStreamer" : true });
     }
 
     fileDialog.destroy();
@@ -197,9 +197,9 @@ Rectangle {
           tooltip: "Unload the selected Resource"
           onClicked: {
             if(tableView.currentRow != -1) {
-              var res = resourceManager.call("getresource", tableView.selectedItemData.uid);
+              var res = resourceManager.getResource(tableView.selectedItemData.uid);
               if(!res.isNull())
-                resourceManager.call("removeresource", res);
+                resourceManager.removeResource(res);
             }
           }
           Layout.preferredHeight: toolBar.height
@@ -220,7 +220,7 @@ Rectangle {
         onEntered: {
           if (drag.hasText && (drag.proposedAction == Qt.MoveAction || drag.proposedAction == Qt.CopyAction)) {
             var resourceManager = EPKernel.findComponent("resourcemanager");
-            var exts = resourceManager.get("extensions");
+            var exts = resourceManager.extensions;
 
             var urls = drag.text.trim().split("\n");
 
@@ -242,7 +242,7 @@ Rectangle {
           if (drop.hasText && (drop.proposedAction == Qt.MoveAction || drop.proposedAction == Qt.CopyAction)) {
             var urls = drop.text.trim().split("\n");
             for(var i = 0; i < urls.length; i++)
-              resourceManager.call("loadresourcesfromfile", {"src" : urls[i]});
+              resourceManager.loadResourcesFromFile({"src" : urls[i]});
 
             drop.acceptProposedAction();
           }
@@ -272,9 +272,9 @@ Rectangle {
           MenuItem {
             text: "Delete"
             onTriggered: {
-              var res = resourceManager.call("getresource", tableView.rightClickItemData.uid);
+              var res = resourceManager.getResource(tableView.rightClickItemData.uid);
               if(!res.isNull())
-                resourceManager.call("removeresource", res);
+                resourceManager.removeResource(res);
             }
           }
         }

@@ -33,7 +33,7 @@ ColumnLayout {
       Component.onCompleted: {
         filterWindow.consolecompChanged.connect(onConsoleChanged);
       }
-      function onConsoleChanged() { ftTextField.text = consolecomp.get("filtertext"); }
+      function onConsoleChanged() { ftTextField.text = consolecomp.filterText; }
     }
   }
 
@@ -42,7 +42,7 @@ ColumnLayout {
       filterWindow.consolecompChanged.connect(onConsoleChanged);
     }
     function onConsoleChanged() {
-      visible = consolecomp.get("outputlog");
+      visible = consolecomp.outputLog;
     }
 
     RowLayout {
@@ -64,7 +64,7 @@ ColumnLayout {
         Component.onCompleted: {
           filterWindow.consolecompChanged.connect(onConsoleChanged);
         }
-        function onConsoleChanged() { fcTextField.text = consolecomp.get("filtercomponents"); }
+        function onConsoleChanged() { fcTextField.text = consolecomp.filterComponents; }
       }
     }
 
@@ -89,15 +89,15 @@ ColumnLayout {
 
               function updateCategoryFiltersUI()
               {
-                filterCatCB.checked = consolecomp.call("isfiltercategoryenabled", modelData);
+                filterCatCB.checked = consolecomp.isFilterCategoryEnabled(modelData);
               }
 
               function updateCategoryFilters()
               {
                 if(filterCatCB.checked)
-                  consolecomp.call("enablefiltercategory", modelData);
+                  consolecomp.enableFilterCategory(modelData);
                 else
-                  consolecomp.call("disablefiltercategory", modelData);
+                  consolecomp.disableFilterCategory(modelData);
               }
 
               Component.onCompleted: {
@@ -137,7 +137,7 @@ ColumnLayout {
 
               function updateLevelFiltersUI()
               {
-                var level = consolecomp.call("getfilterlevel", modelData);
+                var level = consolecomp.getFilterLevel(modelData);
                 if(level != -1)
                 {
                   filterLevelCB.checked = true;
@@ -154,7 +154,7 @@ ColumnLayout {
                   level = parseInt(filterLevelField.text);
                 else
                   level = -1;
-                consolecomp.call("setfilterlevel", modelData, level);
+                consolecomp.setFilterLevel(modelData, level);
               }
 
               Component.onCompleted: {

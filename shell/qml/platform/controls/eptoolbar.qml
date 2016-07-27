@@ -28,7 +28,7 @@ Rectangle {
   function updatetoolbar() {
     clearAll();
 
-    var toolBarData = toolbarcomp.get("menudata");
+    var toolBarData = toolbarcomp.menuData;
 
     if(toolBarData)
     {
