@@ -18,31 +18,31 @@ class Camera : public Node
 public:
   //! Gets the camera's world matrix.
   //! \return The camera's world matrix.
-  //! \see GetViewMatrix, GetProjectionMatrix
+  //! \see getViewMatrix, getProjectionMatrix
   Double4x4 getCameraMatrix() const { return pImpl->GetCameraMatrix(); }
 
   //! Gets the view matrix for this camera.
   //! \return The view matrix for the camera.
-  //! \see GetCameraMatrix, GetProjectionMatrix
+  //! \see getCameraMatrix, getProjectionMatrix
   Double4x4 getViewMatrix() const { return pImpl->GetViewMatrix(); }
 
   //! Generates a projection matrix for this camera.
   //! \param aspectRatio Aspect ratio for the surface that the projection matrix will be used to render.
   //! \return The projection matrix for the camera with the specified aspect ratio.
-  //! \see GetCameraMatrix, GetViewMatrix
+  //! \see getCameraMatrix, getViewMatrix
   Double4x4 getProjectionMatrix(double aspectRatio) const { return pImpl->GetProjectionMatrix(aspectRatio); }
 
   //! Sets the camera to have perspective projection.
   //! \param fovY Field of view on the Y axis.
   //! \return None.
-  //! \see SetOrtho, GetProjectionMatrix
+  //! \see setOrtho, getProjectionMatrix
   void setPerspective(double fovY) { pImpl->SetPerspective(fovY); }
 
   //! Sets the camera to have orthographic projection.
   //! \param orthoHeight The height of the orthographic projection volume.
   //! \return None.
   //! \remarks Note: The width of the projection will be implied by \a orthoHeight * \a aspectRatio when calling \c GetProjectionMatrix().
-  //! \see SetPerspective, GetProjectionMatrix
+  //! \see setPerspective, getProjectionMatrix
   void setOrtho(double orthoHeight) { pImpl->SetOrtho(orthoHeight); }
 
   double getFovY() const { return pImpl->GetFovY(); }
