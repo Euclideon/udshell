@@ -50,7 +50,7 @@ void ImageSource::Create(StreamRef spSource)
     spImage->unmap();
 
     // add resource
-    SetResource(MutableString64(Concat, "image", i), spImage);
+    setResource(MutableString64(Concat, "image", i), spImage);
   }
 }
 

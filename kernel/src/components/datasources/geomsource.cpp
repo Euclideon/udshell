@@ -126,7 +126,7 @@ void GeomSource::Create(StreamRef spSource)
     const Double4x4 &mat = spRoot->GetMatrix();
     spRoot->SetMatrix(Double4x4::create(mat.axis.x, mat.axis.z, -mat.axis.y, mat.axis.t));
 
-    SetResource("scene0", spRoot);
+    setResource("scene0", spRoot);
   }
 
   epFree(pBuffer);
@@ -146,12 +146,12 @@ bool GeomSource::Write(const aiScene *pScene)
 
   try
   {
-    StreamRef spFile = getKernel().createComponent<File>({ { "path", GetURL() }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    StreamRef spFile = getKernel().createComponent<File>({ { "path", getURL() }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
     spFile->Write(Slice<void>(pBlob->data, pBlob->size));
   }
   catch (EPException &)
   {
-    LogWarning(1, "Failed to open collada file for writing: \"{0}\"", GetURL());
+    LogWarning(1, "Failed to open collada file for writing: \"{0}\"", getURL());
     exporter.FreeBlob();
     return false;
   }
@@ -201,7 +201,7 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
     }
 
     // add resource
-    SetResource(SharedString::concat("material", i), spMat);
+    setResource(SharedString::concat("material", i), spMat);
   }
 }
 
@@ -236,7 +236,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     ModelRef spMesh = getKernel().createComponent<Model>({ { "name", FromAIString(mesh.mName) } });
 
     // get material
-    ResourceRef spMat = GetResource(SharedString::concat("material", mesh.mMaterialIndex));
+    ResourceRef spMat = getResource(SharedString::concat("material", mesh.mMaterialIndex));
     if (spMat)
     {
       spMesh->SetMaterial(component_cast<Material>(spMat));
@@ -254,7 +254,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     spVerts->allocateFromData<Float3>(verts);
     spVerts->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_position");
 
-    SetResource(SharedString::concat("positions", i), spVerts);
+    setResource(SharedString::concat("positions", i), spVerts);
 
     spMesh->AddVertexArray(spVerts);
 
@@ -267,7 +267,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       spNormals->allocateFromData<Float3>(normals);
       spNormals->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_normal");
 
-      SetResource(SharedString::concat("normals", i), spNormals);
+      setResource(SharedString::concat("normals", i), spNormals);
 
       spMesh->AddVertexArray(spNormals);
     }
@@ -292,7 +292,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       }
       spBinTan->unmap();
 
-      SetResource(SharedString::concat("binormalstangents", i), spBinTan);
+      setResource(SharedString::concat("binormalstangents", i), spBinTan);
 
       spMesh->AddVertexArray(spBinTan);
     }
@@ -306,7 +306,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       spUVs->allocateFromData<Float3>(uvs);
       spUVs->GetMetadata()->Get("attributeinfo")[t].insertItem("name", SharedString::concat("a_uv", t));
 
-      SetResource(SharedString::concat("uvs", i, "_", t), spUVs);
+      setResource(SharedString::concat("uvs", i, "_", t), spUVs);
 
       spMesh->AddVertexArray(spUVs);
     }
@@ -320,7 +320,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       spColors->allocateFromData<Float4>(colors);
       spColors->GetMetadata()->Get("attributeinfo")[c].insertItem("name", SharedString::concat("a_color", c));
 
-      SetResource(SharedString::concat("colors", i, "_", c), spColors);
+      setResource(SharedString::concat("colors", i, "_", c), spColors);
 
       spMesh->AddVertexArray(spColors);
     }
@@ -342,12 +342,12 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     EPASSERT(pIndices - indices.ptr == (ptrdiff_t)indices.length, "Wrong number of indices?!");
     spIndices->unmap();
 
-    SetResource(SharedString::concat("indices", i), spIndices);
+    setResource(SharedString::concat("indices", i), spIndices);
 
     spMesh->SetIndexArray(spIndices);
 
     // add mesh resource
-    SetResource(SharedString::concat("mesh", i), spMesh);
+    setResource(SharedString::concat("mesh", i), spMesh);
   }
 }
 
@@ -384,11 +384,11 @@ void GeomSource::ParseXRefs(const aiScene *pScene)
       spModelDS = getKernel().createComponent<UDSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
 
       UDModelRef spUDModel;
-      if (spModelDS->GetNumResources() > 0)
-        spUDModel = spModelDS->GetResourceAs<UDModel>(0);
+      if (spModelDS->getNumResources() > 0)
+        spUDModel = spModelDS->getResourceAs<UDModel>(0);
 
       // add UDModel resource
-      SetResource(SharedString::concat("udmodel", i), spUDModel);
+      setResource(SharedString::concat("udmodel", i), spUDModel);
     }
     else
       LogWarning(2, "GeomSource -- Unsupported XRef type \"{0}\"", url);
@@ -421,7 +421,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   // parse node mesh
   for (uint32_t i = 0; i<node.mNumMeshes; ++i)
   {
-    ResourceRef spMesh = GetResource(SharedString::concat("mesh", node.mMeshes[i]));
+    ResourceRef spMesh = getResource(SharedString::concat("mesh", node.mMeshes[i]));
     if (spMesh)
     {
       // create geom node
@@ -450,7 +450,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
 
     if (type == XRefType::UDModel)
     {
-      ResourceRef spUDModel = GetResource(SharedString::concat("udmodel", node.mXRefs[i]));
+      ResourceRef spUDModel = getResource(SharedString::concat("udmodel", node.mXRefs[i]));
       if (spUDModel)
       {
         // create UDNode

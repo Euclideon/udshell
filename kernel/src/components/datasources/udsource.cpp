@@ -81,7 +81,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
 
     result = udOctree_GetLocalMatrixF64(pModelImpl->pOctree, pModelImpl->udmatrix.a);
     if (result == udR_Success)
-      SetResource(source->asString(), model);
+      setResource(source->asString(), model);
 
     Array<Variant> varMetadata;
 

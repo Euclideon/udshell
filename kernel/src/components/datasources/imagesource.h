@@ -31,7 +31,7 @@ protected:
   ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
-    StreamRef ref = OpenStream(*initParams.get("src"));
+    StreamRef ref = openStream(*initParams.get("src"));
     Create(ref);
   }
 

@@ -128,10 +128,10 @@ DataSourceRef ResourceManagerImpl::LoadResourcesFromFile(Variant::VarMap initPar
   epscope(fail) { if (!spDS) LogWarning(2, "LoadResourcesFromFile - \"src\" file not found or not supported: {0}", src.asString()); };
   spDS = GetKernel()->createDataSourceFromExtension(ext, initParams);
 
-  size_t numResources = spDS->GetNumResources();
+  size_t numResources = spDS->getNumResources();
   Array<ResourceRef> resArray(Reserve, numResources);
   for (size_t i = 0; i < numResources; i++)
-    resArray.pushBack(spDS->GetResource(i));
+    resArray.pushBack(spDS->getResource(i));
 
   AddResourceArray(resArray);
 

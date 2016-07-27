@@ -243,12 +243,12 @@ void SceneImpl::LoadSceneFile(String filePath)
   spSceneDS = GetKernel()->createComponent<GeomSource>({ { "src", filePath } });
 
   NodeRef spNode;
-  if (spSceneDS->GetNumResources() > 0)
+  if (spSceneDS->getNumResources() > 0)
   {
     for (NodeRef &child : rootNode->Children())
       child->Detach();
 
-    spNode = spSceneDS->GetResourceAs<Node>(0);
+    spNode = spSceneDS->getResourceAs<Node>(0);
 
     rootNode->AddChild(spNode);
     AddModelsToResourceManager();
