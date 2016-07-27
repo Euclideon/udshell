@@ -17,7 +17,7 @@ Array<const MethodInfo> Node::getMethods() const
     EP_MAKE_METHOD(addChild, "Add a child to the Node"),
     EP_MAKE_METHOD(removeChild, "Remove a child from the Node"),
     EP_MAKE_METHOD(detach, "Detach the Node from its parent"),
-    EP_MAKE_METHOD_EXPLICIT("CalculateWorldMatrix", calculateWorldMatrixMethod, "Calculate the World Matrix of the Node"),
+    EP_MAKE_METHOD_EXPLICIT("calculateWorldMatrix", calculateWorldMatrixMethod, "Calculate the World Matrix of the Node"),
     EP_MAKE_METHOD(save, "Save the state of the Node"),
   };
 }
