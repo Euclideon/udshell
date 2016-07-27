@@ -13,18 +13,18 @@ class KVPStore : public Resource
   EP_DECLARE_COMPONENT(ep, KVPStore, Resource, EPKERNEL_PLUGINVERSION, "KVPStore resource", 0)
 
 public:
-  virtual size_t NumRecords() const { return 0; }
+  virtual size_t numRecords() const { return 0; }
 
-  virtual void Insert(Variant &&key, Variant &&value) {}
-  virtual void Insert(const Variant &key, Variant &&value) {}
-  virtual void Insert(Variant &&key, const Variant &value) {}
-  virtual void Insert(const Variant &key, const Variant &value) {}
+  virtual void insert(Variant &&key, Variant &&value) {}
+  virtual void insert(const Variant &key, Variant &&value) {}
+  virtual void insert(Variant &&key, const Variant &value) {}
+  virtual void insert(const Variant &key, const Variant &value) {}
 
-  virtual void Remove(const Variant &key) {}
-  virtual bool Exists(const Variant &key) const { return false; }
-  virtual Variant Get(const Variant &key) const { return Variant(); }
+  virtual void remove(const Variant &key) {}
+  virtual bool exists(const Variant &key) const { return false; }
+  virtual Variant get(const Variant &key) const { return Variant(); }
 
-  Variant operator[](const Variant &key) const { return Get(key); }
+  Variant operator[](const Variant &key) const { return get(key); }
 
 protected:
   KVPStore(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -35,7 +35,7 @@ protected:
   Array<const MethodInfo> getMethods() const;
 
 private:
-  void InsertMethod(const Variant &key, const Variant &value) { Insert(key, value); }
+  void insertMethod(const Variant &key, const Variant &value) { insert(key, value); }
 };
 
 }
