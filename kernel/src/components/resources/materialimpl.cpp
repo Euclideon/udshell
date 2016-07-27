@@ -233,7 +233,7 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
             spShader->SetType(*pBuiltin);
 
             TextRef spText = shared_pointer_cast<Text>(spC);
-            String s = spText->MapForRead();
+            String s = spText->mapForRead();
             spShader->SetCode(s);
             spText->unmap();
           }

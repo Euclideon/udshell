@@ -10,17 +10,17 @@ namespace ep {
 Array<const MethodInfo> Text::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(ParseXml, "Parse XML formatted text in buffer into a heirarchical structure of KeyValuePairs"),
-    EP_MAKE_METHOD(FormatXml, "Format a heirarchical structure of KeyValuePairs as XML text"),
-    EP_MAKE_METHOD(ParseJson, "Parse Json formatted text in buffer into a heirarchical structure of KeyValuePairs"),
-    EP_MAKE_METHOD(FormatJson, "Format a heirarchical structure of KeyValuePairs as Json text"),
+    EP_MAKE_METHOD(parseXml, "Parse XML formatted text in buffer into a hierarchical structure of KeyValuePairs"),
+    EP_MAKE_METHOD(formatXml, "Format a hierarchical structure of KeyValuePairs as XML text"),
+    EP_MAKE_METHOD(parseJson, "Parse Json formatted text in buffer into a hierarchical structure of KeyValuePairs"),
+    EP_MAKE_METHOD(formatJson, "Format a hierarchical structure of KeyValuePairs as Json text"),
   };
 }
 Array<const StaticFuncInfo> Text::getStaticFuncs() const
 {
   return{
-    EP_MAKE_STATICFUNC(XMLMapToComponentParams, "Convert a map representing a heirarchy of XML elements into 'Component Params' format, i.e. suitable as InitParams and for returning from Save()"),
-    EP_MAKE_STATICFUNC(ComponentParamsToXMLMap, "Convert a map in 'Component Params' format into a map representing a heirarchy of XML elements"),
+    EP_MAKE_STATICFUNC(xmlMapToComponentParams, "Convert a map representing a hierarchy of XML elements into 'Component Params' format, i.e. suitable as InitParams and for returning from Save()"),
+    EP_MAKE_STATICFUNC(componentParamsToXmlMap, "Convert a map in 'Component Params' format into a map representing a hierarchy of XML elements"),
   };
 }
 
@@ -145,7 +145,7 @@ static Variant ParseXMLNode(rapidxml::xml_node<> *node)
 Variant TextImpl::ParseXml()
 {
   char *pNew = nullptr;
-  Slice<const void> buffer = pInstance->MapForRead();
+  Slice<const void> buffer = pInstance->mapForRead();
   epscope(exit)
   {
     pInstance->unmap();
@@ -317,14 +317,14 @@ static Variant ParseJsonNode(const rapidjson::Value& val)
 
 Variant TextImpl::ParseJson()
 {
-  Slice<const void> buffer = pInstance->MapForRead();
+  Slice<const void> buffer = pInstance->mapForRead();
 
   // RapidXML requires buffer to be null terminated
   if (buffer[buffer.length - 1] != '\0')
   {
     pInstance->unmap();
     pInstance->resize(buffer.length + 1);
-    Slice<void> write = pInstance->Map();
+    Slice<void> write = pInstance->map();
     write[buffer.length] = '\0';
     buffer = write;
   }

@@ -52,7 +52,7 @@ TextRef StreamImpl::LoadText()
   TextRef spBuffer = GetKernel()->createComponent<Text>();
   spBuffer->allocate((size_t)len);
 
-  Slice<char> buffer = spBuffer->Map();
+  Slice<char> buffer = spBuffer->map();
   if (!buffer)
     return nullptr;
 

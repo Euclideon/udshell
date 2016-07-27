@@ -47,8 +47,8 @@ Variant MenuImpl::ParseXMLString(String buffer)
 {
   auto spXMLBuffer = GetKernel()->createComponent<Text>();
   spXMLBuffer->allocate(buffer.length + 1);
-  spXMLBuffer->CopyBuffer(buffer);
-  Slice<void> buf = spXMLBuffer->Map();
+  spXMLBuffer->copyBuffer(buffer);
+  Slice<void> buf = spXMLBuffer->map();
   buf[buffer.length] = '\0';
   spXMLBuffer->unmap();
 
@@ -57,11 +57,11 @@ Variant MenuImpl::ParseXMLString(String buffer)
 
   try
   {
-    rootNode = spXMLBuffer->ParseXml();
+    rootNode = spXMLBuffer->parseXml();
   }
   catch (parse_error &e)
   {
-    LogError("Unable to parse menus xml string on line {0} : {1}", Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
+    LogError("Unable to parse menus xml string on line {0} : {1}", Text::getLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
     return false;
   }
 

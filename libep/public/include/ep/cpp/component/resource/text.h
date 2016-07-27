@@ -15,29 +15,29 @@ class Text : public Buffer
   EP_DECLARE_COMPONENT_WITH_STATIC_IMPL(ep, Text, IText, ITextStatic, Buffer, EPKERNEL_PLUGINVERSION, "Text resource", 0)
 public:
 
-  Variant ParseXml() { return pImpl->ParseXml(); }
-  void FormatXml(Variant root) { pImpl->FormatXml(root); }
-  Variant ParseJson() { return pImpl->ParseJson(); }
-  void FormatJson(Variant root) { pImpl->FormatJson(root); }
+  Variant parseXml() { return pImpl->ParseXml(); }
+  void formatXml(Variant root) { pImpl->FormatXml(root); }
+  Variant parseJson() { return pImpl->ParseJson(); }
+  void formatJson(Variant root) { pImpl->FormatJson(root); }
 
-  static Variant XMLMapToComponentParams(Variant node) { return GetStaticImpl()->XMLMapToComponentParams(node); }
-  static Variant ComponentParamsToXMLMap(Variant map) { return GetStaticImpl()->ComponentParamsToXMLMap(map); }
+  static Variant xmlMapToComponentParams(Variant node) { return GetStaticImpl()->XMLMapToComponentParams(node); }
+  static Variant componentParamsToXmlMap(Variant map) { return GetStaticImpl()->ComponentParamsToXMLMap(map); }
 
-  void CopyBuffer(String text) { Buffer::copyBuffer(text); }
+  void copyBuffer(String text) { Buffer::copyBuffer(text); }
 
-  Slice<char> Map()
+  Slice<char> map()
   {
     Slice<void> _buffer = Buffer::map();
     return Slice<char>((char*)_buffer.ptr, _buffer.length);
   }
-  String MapForRead()
+  String mapForRead()
   {
     Slice<const void> buffer = Buffer::mapForRead();
     return String((const char*)buffer.ptr, buffer.length);
   }
 
   // TODO: move this somewhere else!
-  static uint32_t GetLineNumberFromByteIndex(String buffer, size_t index) { return GetStaticImpl()->GetLineNumberFromByteIndex(buffer, index); }
+  static uint32_t getLineNumberFromByteIndex(String buffer, size_t index) { return GetStaticImpl()->GetLineNumberFromByteIndex(buffer, index); }
 
 protected:
   Text(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
