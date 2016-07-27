@@ -131,14 +131,14 @@ void OnActivityChanged(String uid)
 void InitProject()
 {
   // Enable menu items
-  spMenu->SetItemProperties("File/Save Project", { { "enabled", true } });
-  spMenu->SetItemProperties("File/Save Project As...", { { "enabled", true } });
-  spMenu->SetItemProperties("File/New.../New Activity", { { "enabled", true } });
+  spMenu->setItemProperties("File/Save Project", { { "enabled", true } });
+  spMenu->setItemProperties("File/Save Project As...", { { "enabled", true } });
+  spMenu->setItemProperties("File/New.../New Activity", { { "enabled", true } });
 
   // Enable toolbar buttons
-  spToolBar->SetItemProperties("Save Project", { { "enabled", true } });
-  spToolBar->SetItemProperties("Save Project As...", { { "enabled", true } });
-  spToolBar->SetItemProperties("New.../New Activity", { { "enabled", true } });
+  spToolBar->setItemProperties("Save Project", { { "enabled", true } });
+  spToolBar->setItemProperties("Save Project As...", { { "enabled", true } });
+  spToolBar->setItemProperties("New.../New Activity", { { "enabled", true } });
 
   // Enable shortcuts
   auto spCommandManager = spKernel->getCommandManager();
