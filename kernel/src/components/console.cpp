@@ -77,9 +77,9 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     epscope(fail) { if (!spHistoryFile) LogError("Console -- Could not open history file \"{0}\"", historyFileName); };
     spHistoryFile = pKernel->createComponent<File>({ { "path", historyFileName },{ "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
 
-    size_t len = (size_t)spHistoryFile->Length();
+    size_t len = (size_t)spHistoryFile->length();
     Array<char> buffer(Reserve, len);
-    buffer.length = spHistoryFile->Read(buffer.getBuffer()).length;
+    buffer.length = spHistoryFile->read(buffer.getBuffer()).length;
 
     String str = buffer;
     MutableString<1024> multiLineString;
@@ -124,7 +124,7 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
 Console::~Console()
 {
   for (BroadcasterRef spBC : outputBCArray)
-    spBC->Written.Unsubscribe(this, &Console::OnConsoleOutput);
+    spBC->written.Unsubscribe(this, &Console::OnConsoleOutput);
 
   if(bOutputLog)
     spLogger->Changed.Unsubscribe(this, &Console::OnLogChanged);
@@ -133,7 +133,7 @@ Console::~Console()
 void Console::AddBroadcaster(BroadcasterRef spBC)
 {
   outputBCArray.pushBack(spBC);
-  spBC->Written.Subscribe(this, &Console::OnConsoleOutput);
+  spBC->written.Subscribe(this, &Console::OnConsoleOutput);
 }
 
 void Console::RemoveBroadcaster(BroadcasterRef spBC)
@@ -279,11 +279,11 @@ void Console::AppendHistory(String str)
     if (!token.empty())
     {
       if (str.empty())
-        spHistoryFile->WriteLn(token);
+        spHistoryFile->writeLn(token);
       else
       {
-        spHistoryFile->Write(token);
-        spHistoryFile->Write(String(" \\\n"));
+        spHistoryFile->write(token);
+        spHistoryFile->write(String(" \\\n"));
       }
     }
   }

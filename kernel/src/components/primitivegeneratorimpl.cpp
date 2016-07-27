@@ -6,11 +6,11 @@ namespace ep {
 Array<const StaticFuncInfo> PrimitiveGenerator::getStaticFuncs() const
 {
   return{
-    EP_MAKE_STATICFUNC(GenerateCube, "Generate a cube primitive"),
-    EP_MAKE_STATICFUNC(GenerateSphere, "Generate a sphere primitive"),
-    EP_MAKE_STATICFUNC(GenerateCircle, "Generate a line circle primitive"),
-    EP_MAKE_STATICFUNC(GenerateCylinder, "Generate a cylinder primitive"),
-    EP_MAKE_STATICFUNC(GenerateCone, "Generate a cone primitive"),
+    EP_MAKE_STATICFUNC(generateCube, "Generate a cube primitive"),
+    EP_MAKE_STATICFUNC(generateSphere, "Generate a sphere primitive"),
+    EP_MAKE_STATICFUNC(generateCircle, "Generate a line circle primitive"),
+    EP_MAKE_STATICFUNC(generateCylinder, "Generate a cylinder primitive"),
+    EP_MAKE_STATICFUNC(generateCone, "Generate a cone primitive"),
   };
 }
 

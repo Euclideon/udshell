@@ -1,16 +1,8 @@
 #ifdef _MSC_VER
 #include <io.h>
-#define popen _popen
-#define pclose _pclose
-#define stat _stat
-#define dup _dup
-#define dup2 _dup2
-#define fileno _fileno
-#define close _close
+#pragma warning(push)
+#pragma warning(disable:4996) //The POSIX name for this item is deprecated
 #define pipe _pipe
-#define read _read
-#define write _write
-#define eof _eof
 #else
 #include <unistd.h>
 #endif
@@ -152,3 +144,9 @@ private:
 };
 
 } // end namespace ep
+
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#undef pipe
+#endif // _MSC_VER

@@ -19,9 +19,9 @@ class StdIOStream : public Stream
   EP_DECLARE_COMPONENT(ep, StdIOStream, Stream, EPKERNEL_PLUGINVERSION, "Standard in/out stream", 0)
 public:
 
-  Slice<void> Read(Slice<void> buffer) override;
-  size_t Write(Slice<const void> data) override;
-  int Flush() override;
+  Slice<void> read(Slice<void> buffer) override;
+  size_t write(Slice<const void> data) override;
+  int flush() override;
 
 protected:
   StdIOStream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);

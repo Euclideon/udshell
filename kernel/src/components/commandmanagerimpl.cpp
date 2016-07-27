@@ -8,18 +8,18 @@ namespace ep {
 Array<const MethodInfo> CommandManager::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(SetShortcut, "Set the shortcut for the given command"),
-    EP_MAKE_METHOD(GetShortcut, "Get the shortcut for the given command"),
-    EP_MAKE_METHOD(RegisterCommand, "register a command and assign it a function, script and/or shortcut"),
-    EP_MAKE_METHOD(UnregisterCommand, "remove a command from the command manager"),
-    EP_MAKE_METHOD(HandleShortcutEvent, "execute the command attached to the given shortcut"),
-    EP_MAKE_METHOD(RunCommand, "call the function or script attached to the given command"),
-    EP_MAKE_METHOD(SetFunction, "Assign a callback function to the given command"),
-    EP_MAKE_METHOD(SetScript, "Assign a script string to the given command"),
-    EP_MAKE_METHOD(SetActivityType, "Set the activity type associated with the given command"),
-    EP_MAKE_METHOD(GetActivityType, "Get the activity type associated with the given command"),
-    EP_MAKE_METHOD(EnableShortcut, "Enable shortcut for the given command"),
-    EP_MAKE_METHOD(DisableShortcut, "Disable shortcut for the given command"),
+    EP_MAKE_METHOD(setShortcut, "Set the shortcut for the given command"),
+    EP_MAKE_METHOD(getShortcut, "Get the shortcut for the given command"),
+    EP_MAKE_METHOD(registerCommand, "register a command and assign it a function, script and/or shortcut"),
+    EP_MAKE_METHOD(unregisterCommand, "remove a command from the command manager"),
+    EP_MAKE_METHOD(handleShortcutEvent, "execute the command attached to the given shortcut"),
+    EP_MAKE_METHOD(runCommand, "call the function or script attached to the given command"),
+    EP_MAKE_METHOD(setFunction, "Assign a callback function to the given command"),
+    EP_MAKE_METHOD(setScript, "Assign a script string to the given command"),
+    EP_MAKE_METHOD(setActivityType, "Set the activity type associated with the given command"),
+    EP_MAKE_METHOD(getActivityType, "Get the activity type associated with the given command"),
+    EP_MAKE_METHOD(enableShortcut, "Enable shortcut for the given command"),
+    EP_MAKE_METHOD(disableShortcut, "Disable shortcut for the given command"),
   };
 }
 
@@ -112,7 +112,7 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
   if (spComp)
   {
     spProject = component_cast<Project>(spComp);
-    spActiveActivity = spProject->GetActiveActivity();
+    spActiveActivity = spProject->getActiveActivity();
   }
 
   for (auto kvp : commandRegistry)
@@ -162,7 +162,7 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
   if (spComp)
   {
     spProject = component_cast<Project>(spComp);
-    spActiveActivity = spProject->GetActiveActivity();
+    spActiveActivity = spProject->getActiveActivity();
   }
 
   Variant::VarMap params;

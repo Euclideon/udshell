@@ -23,9 +23,9 @@ class Viewer : public Activity
   EP_DECLARE_COMPONENT(ep, Viewer, Activity, EPKERNEL_PLUGINVERSION, "View UD data files", 0);
 public:
 
-  void Activate() override;
-  void Deactivate() override;
-  void Update(double timeStep);
+  void activate() override;
+  void deactivate() override;
+  void update(double timeStep);
   Variant save() const override;
 
   // TODO: Remove Temp hacks!
@@ -40,7 +40,7 @@ protected:
   void CreatePlatformLogo();
   bool InputHook(ep::InputEvent ev);
 
-  ~Viewer() { Deactivate(); }
+  ~Viewer() { deactivate(); }
 
   static void StaticInit(ep::Kernel *pKernel);
   // TODO: Bug EP-66

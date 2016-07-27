@@ -72,7 +72,7 @@ static int PrintOutput(lua_State *L)
   Kernel *pKernel = l.kernel();
   auto spLua = pKernel->getLua();
 
-  spLua->GetOutputBroadcaster()->Write(CreateStringFromArgs(L));
+  spLua->GetOutputBroadcaster()->write(CreateStringFromArgs(L));
 
   return 0;
 }

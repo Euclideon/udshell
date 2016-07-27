@@ -15,7 +15,7 @@ BufferRef StreamImpl::ReadBuffer(size_t bytes)
     return nullptr;
   epscope(exit) { spBuffer->unmap(); };
 
-  IF_EPASSERT(Slice<void> read =) pInstance->Read(buffer);
+  IF_EPASSERT(Slice<void> read =) pInstance->read(buffer);
   EPASSERT(read.length == bytes, "TODO: handle the case where we read less bytes than we expect!");
 
   return spBuffer;
@@ -23,7 +23,7 @@ BufferRef StreamImpl::ReadBuffer(size_t bytes)
 
 BufferRef StreamImpl::Load()
 {
-  int64_t len = pInstance->Length();
+  int64_t len = pInstance->length();
   if (len < 0)
     return nullptr;
 
@@ -35,15 +35,15 @@ BufferRef StreamImpl::Load()
     return nullptr;
   epscope(exit) { spBuffer->unmap(); };
 
-  pInstance->Seek(SeekOrigin::Begin, 0);
-  pInstance->Read(buffer);
+  pInstance->seek(SeekOrigin::Begin, 0);
+  pInstance->read(buffer);
 
   return spBuffer;
 }
 
 TextRef StreamImpl::LoadText()
 {
-  int64_t len = pInstance->Length();
+  int64_t len = pInstance->length();
   if (len < 0)
     return nullptr;
 
@@ -60,8 +60,8 @@ TextRef StreamImpl::LoadText()
   {
     epscope(exit) { spBuffer->unmap(); };
 
-    pInstance->Seek(SeekOrigin::Begin, 0);
-    bytesRead = pInstance->Read(buffer).length;
+    pInstance->seek(SeekOrigin::Begin, 0);
+    bytesRead = pInstance->read(buffer).length;
     if (bytesRead < (size_t)len)
       memset(buffer.ptr + bytesRead, 0, (size_t)len - bytesRead);
   }
@@ -79,8 +79,8 @@ void StreamImpl::SaveBuffer(BufferRef spBuffer)
     return;
   epscope(exit) { spBuffer->unmap(); };
 
-  pInstance->Seek(SeekOrigin::Begin, 0);
-  pInstance->Write(buffer);
+  pInstance->seek(SeekOrigin::Begin, 0);
+  pInstance->write(buffer);
 }
 
 String StreamImpl::ReadLn(Slice<char> buf)

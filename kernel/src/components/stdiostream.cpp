@@ -30,15 +30,15 @@ StdIOStream::StdIOStream(const ComponentDesc *pType, Kernel *pKernel, SharedStri
     pOut = stdout;
 }
 
-Slice<void> StdIOStream::Read(Slice<void> buffer)
+Slice<void> StdIOStream::read(Slice<void> buffer)
 {
   size_t read = fread(buffer.ptr, 1, buffer.length, pIn);
   return buffer.slice(0, read);
 }
 
-size_t StdIOStream::Write(Slice<const void> data)
+size_t StdIOStream::write(Slice<const void> data)
 {
-  size_t written;
+  size_t bytesWritten;
 
   if (bDbgOutput)
   {
@@ -51,17 +51,17 @@ size_t StdIOStream::Write(Slice<const void> data)
       OutputDebugStringW(buffer.ptr);
     }
 #endif
-    written = data.length;
+    bytesWritten = data.length;
   }
   else
-    written = fwrite(data.ptr, 1, data.length, pOut);
+    bytesWritten = fwrite(data.ptr, 1, data.length, pOut);
 
-  Broadcaster::Write(data);
+  Broadcaster::write(data);
 
-  return written;
+  return bytesWritten;
 }
 
-int StdIOStream::Flush()
+int StdIOStream::flush()
 {
   if (pOut)
   {

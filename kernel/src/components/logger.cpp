@@ -94,8 +94,8 @@ void Logger::Log(int level, String text, LogCategories category, String componen
       if (s.filter.FilterLogLine(line))
       {
         SharedString out = line.ToString(s.format);
-        s.spStream->WriteLn(out);
-        s.spStream->Flush();
+        s.spStream->writeLn(out);
+        s.spStream->flush();
       }
     }
   }

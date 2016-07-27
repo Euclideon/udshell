@@ -109,7 +109,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   }
   spViewerUI->Set("resourcespanel", spUIResources);*/
 
-  SetUI(spViewerUI);
+  setUI(spViewerUI);
 
   // Add bookmarks to UI
   auto bmMap = spScene->getBookmarkMap();
@@ -222,10 +222,10 @@ void Viewer::StaticInit(ep::Kernel *pKernel)
 {
   auto spCommandManager = pKernel->getCommandManager();
 
-  spCommandManager->RegisterCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", componentID(), "Ctrl+Shift+B");
+  spCommandManager->registerCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", componentID(), "Ctrl+Shift+B");
   // TODO: Bug EP-66
-  //spCommandManager->RegisterCommand("toggleresourcespanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleResourcesPanel), "", componentID(), "Ctrl+Shift+R");
-  spCommandManager->RegisterCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", componentID(), "Ctrl+B");
+  //spCommandManager->registerCommand("toggleresourcespanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleResourcesPanel), "", componentID(), "Ctrl+Shift+R");
+  spCommandManager->registerCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", componentID(), "Ctrl+B");
 }
 
 void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)
@@ -238,7 +238,7 @@ void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)
 
 void Viewer::ToggleBookmarksPanel()
 {
-  GetUI()->call("togglebookmarkspanel");
+  getUI()->call("togglebookmarkspanel");
 }
 
 // TODO: Bug EP-66
@@ -252,7 +252,7 @@ void Viewer::ToggleBookmarksPanel()
 
 void Viewer::ToggleResourcesPanel()
 {
-  GetUI()->call("toggleresourcespanel");
+  GetUI()->Call("toggleresourcespanel");
 }*/
 
 void Viewer::StaticCreateBookmark(Variant::VarMap params)
@@ -271,17 +271,17 @@ void Viewer::CreateBookmark()
   spScene->addBookmarkFromCamera(bookmarkName.asString(), spCamera);
 }
 
-void Viewer::Activate()
+void Viewer::activate()
 {
-  getKernel().updatePulse.Subscribe(Delegate<void(double)>(this, &Viewer::Update));
+  getKernel().updatePulse.Subscribe(Delegate<void(double)>(this, &Viewer::update));
 }
 
-void Viewer::Deactivate()
+void Viewer::deactivate()
 {
-  getKernel().updatePulse.Unsubscribe(Delegate<void(double)>(this, &Viewer::Update));
+  getKernel().updatePulse.Unsubscribe(Delegate<void(double)>(this, &Viewer::update));
 }
 
-void Viewer::Update(double timeStep)
+void Viewer::update(double timeStep)
 {
   if (spScene)
     spScene->update(timeStep);
@@ -361,7 +361,7 @@ void Viewer::CreatePlatformLogo()
   ArrayBufferRef spVertexBuffer = pKernel->createComponent<ArrayBuffer>();
   ArrayBufferRef spIndexBuffer = pKernel->createComponent<ArrayBuffer>();
 
-  PrimitiveGenerator::GenerateQuad(spVertexBuffer, spIndexBuffer);
+  PrimitiveGenerator::generateQuad(spVertexBuffer, spIndexBuffer);
 
   MetadataRef spMetadata = spVertexBuffer->getMetadata();
   spMetadata->get("attributeInfo")[0].insertItem("name", "a_position");
