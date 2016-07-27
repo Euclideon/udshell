@@ -27,7 +27,7 @@ Menu {
       onTriggered: {
         if(command)
         {
-          commandManager.call("runcommand", command, null);
+          commandManager.runCommand(command, null);
         }
       }
     }

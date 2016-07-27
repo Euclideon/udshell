@@ -71,8 +71,8 @@ Rectangle {
           iconSource: "qrc:/images/icon_bookmark_addnew_24.png"
           onClicked: {
             var bmName = bookmarksui.createbookmark("");
-            var spScene = view.get("scene");
-            spScene.call("addbookmarkfromcamera", bmName, view.get("camera"));
+            var spScene = view.scene;
+            spScene.addBookmarkFromCamera(bmName, view.camera);
           }
           Layout.preferredHeight: toolBar.height
           Layout.preferredWidth: toolBar.height
@@ -82,8 +82,8 @@ Rectangle {
           iconSource: "qrc:/images/icon_delete.png"
           onClicked: {
             if(listView.currentIndex != -1) {
-              var spScene = view.get("scene");
-              spScene.call("removebookmark", listView.selectedItemData.name);
+              var spScene = view.scene;
+              spScene.removeBookmark(listView.selectedItemData.name);
               bookmarks.remove(listView.currentIndex, 1);
             }
           }
@@ -103,10 +103,10 @@ Rectangle {
         anchors.fill: parent
         model: bookmarks
         modelDisplayItem: "name"
-        onItemSelected: view.call("gotobookmark", listView.selectedItemData.name);
+        onItemSelected: view.gotoBookmark(listView.selectedItemData.name);
 
         function showRenameBookmarkEditBox() {
-          messagebox.call("show", {
+          messagebox.show( {
             "title": "Rename Bookmark",
             "text": "Enter new Bookmark name",
             "callback": renameBookmarkCallback,
@@ -127,7 +127,7 @@ Rectangle {
               for(var i = 0; i < bookmarks.count; i++) {
                 if(bookmarks.get(i).name == retValues.editText && listView.rightClickIndex != i)
                 {
-                  messagebox.call("show", {
+                  messagebox.show( {
                     "title": "Error renaming Bookmark",
                     "text": "A Bookmark with that name already exists",
                     "callback": showRenameBookmarkEditBox
@@ -139,8 +139,8 @@ Rectangle {
 
             var bm = listView.rightClickItemData;
 
-            var spScene = view.get("scene");
-            spScene.call("renamebookmark", bm.name, retValues.editText);
+            var spScene = view.scene;
+            spScene.renameBookmark(bm.name, retValues.editText);
 
             bookmarks.remove(listView.rightClickIndex);
             var newIndex = bookmarks.insertOrdered({"name" : retValues.editText});
@@ -153,8 +153,8 @@ Rectangle {
           MenuItem {
             text: "Save location to Bookmark"
             onTriggered: {
-              var spScene = view.get("scene");
-              spScene.call("addbookmarkfromcamera", listView.rightClickItemData.name, view.get("camera"))
+              var spScene = view.scene;
+              spScene.addBookmarkFromCamera(listView.rightClickItemData.name, view.camera);
             }
           }
           MenuItem {
@@ -166,8 +166,8 @@ Rectangle {
           MenuItem {
             text: "Delete"
             onTriggered: {
-              var spScene = view.get("scene");
-              spScene.call("removebookmark", listView.rightClickItemData.name);
+              var spScene = view.scene;
+              spScene.removeBookmark(listView.rightClickItemData.name);
               bookmarks.remove(listView.rightClickIndex, 1);
             }
           }

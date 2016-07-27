@@ -9,7 +9,6 @@ FocusScope {
   property var epTypeDesc: {
     "id": "ui.Viewport",
     "super": "ep.UIComponent",
-    "displayname": "UI.Viewport",
     "description": "QML Based Viewport"
   }
   property var view

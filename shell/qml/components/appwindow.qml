@@ -11,7 +11,6 @@ Window {
   property var epTypeDesc: {
     "id": "ui.AppWindow",
     "super": "ep.Window",
-    "displayname": "UI.AppWindow",
     "description": "QML Based Application Window"
   }
   property alias title: desktopwindow.title

@@ -25,12 +25,12 @@ void AddStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl)
 Instance *s_pInstance = nullptr;
 
 const char * const Material::s_shaderNames[] = {
-  "vertexshader",
-  "pixelshader",
-  "geometryshader",
-  "tesselationcontrolshader",
-  "tesselationevaluationshader",
-  "computeshader"
+  "vertexShader",
+  "pixelShader",
+  "geometryShader",
+  "tesselationControlShader",
+  "tesselationEvaluationShader",
+  "computeShader"
 };
 
 // TODO: should move this to some other cpp?

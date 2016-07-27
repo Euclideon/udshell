@@ -343,7 +343,6 @@ void QtKernel::registerQml(ep::String file, ep::Variant::VarMap typeDesc)
   auto data = SharedPtr<QmlComponentData>::create(file, pQmlEngine, QQmlComponent::Asynchronous);
   Variant::VarMap typeInfo = {
     { "identifier", typeDesc["id"].asSharedString() },
-    { "name", typeDesc["displayname"].asSharedString() },
     { "description", typeDesc["description"].asSharedString() },
     { "version", typeDesc["version"].as<int>() },
     { "flags", ep::ComponentInfoFlags::Unpopulated },
@@ -392,7 +391,6 @@ ep::ComponentRef QtKernel::createQmlComponent(String file, Variant::VarMap initP
   pDesc->info.nameSpace = pDesc->info.identifier.slice(0, offset);
   pDesc->info.name = pDesc->info.identifier.slice(offset + 1, pDesc->info.identifier.length);
 
-//  pDesc->info.displayName = typeDesc["displayname"].asSharedString(); // TODO: add this back at some point?
   pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = pSuper->info.epVersion;
   pDesc->info.pluginVersion = typeDesc["version"].as<int>();
