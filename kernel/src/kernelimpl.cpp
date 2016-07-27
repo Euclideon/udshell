@@ -586,7 +586,7 @@ void KernelImpl::StreamerUpdate()
   {
     SceneRef spScene = spFocusView->getScene();
     if (spScene)
-      spScene->MakeDirty();
+      spScene->makeDirty();
   }
 }
 

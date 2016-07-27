@@ -196,7 +196,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 void Update(double delta)
 {
   if (mData.spScene)
-    mData.spScene->Update(delta);
+    mData.spScene->update(delta);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -254,16 +254,16 @@ static void ViewerInit(String sender, String message, const Variant &data)
     mData.spSimpleCamera->setMatrix(camMat);
   }
 
-  mData.spScene->GetRootNode()->addChild(mData.spUDNode);
+  mData.spScene->getRootNode()->addChild(mData.spUDNode);
 
 #if EP_DEBUG
     mData.spTestGeomNode = CreateTestModel(mData.spKernel);
-    mData.spScene->GetRootNode()->addChild(mData.spTestGeomNode);
+    mData.spScene->getRootNode()->addChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
 
   mData.spUpdateSub = mData.spKernel->updatePulse.Subscribe(Delegate<void(double)>(&Update));
 
-  mData.spScene->MakeDirty();
+  mData.spScene->makeDirty();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -271,9 +271,9 @@ static void ViewerInit(String sender, String message, const Variant &data)
 static void ViewerDeinit(String sender, String message, const Variant &data)
 {
   mData.spUpdateSub->Unsubscribe();
-  mData.spScene->GetRootNode()->removeChild(mData.spUDNode);
+  mData.spScene->getRootNode()->removeChild(mData.spUDNode);
 #if EP_DEBUG
-  mData.spScene->GetRootNode()->removeChild(mData.spTestGeomNode);
+  mData.spScene->getRootNode()->removeChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
   if (mData.spCITimerSub)
     mData.spCITimerSub->Unsubscribe();

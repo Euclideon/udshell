@@ -44,12 +44,12 @@ void ViewImpl::SetScene(SceneRef spNewScene)
     return;
 
   if (spScene)
-    spScene->Dirty.Unsubscribe(this, &ViewImpl::OnDirty);
+    spScene->dirty.Unsubscribe(this, &ViewImpl::OnDirty);
 
   spScene = spNewScene;
 
   if (spScene)
-    spScene->Dirty.Subscribe(this, &ViewImpl::OnDirty);
+    spScene->dirty.Subscribe(this, &ViewImpl::OnDirty);
 
   OnDirty();
 }
@@ -87,7 +87,7 @@ void ViewImpl::GoToBookmark(String bookmarkName)
 {
   if (spScene && spCamera)
   {
-    const Bookmark *pBM = spScene->FindBookmark(bookmarkName);
+    const Bookmark *pBM = spScene->findBookmark(bookmarkName);
     if (pBM)
     {
       spCamera->setMatrix(Double4x4::rotationYPR(pBM->ypr, pBM->position));
@@ -116,7 +116,7 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
   bool handled = inputEventHook ? inputEventHook(ev) : false;
 
   if (!handled && spScene)
-    handled = spScene->InputEvent(ev);
+    handled = spScene->inputEvent(ev);
   if (!handled && spCamera)
     handled = spCamera->viewportInputEvent(ev);
   return handled;
@@ -143,7 +143,7 @@ void ViewImpl::OnDirty()
     spRenderView->camera = spCamera->getCameraMatrix();
     spRenderView->projection = spCamera->getProjectionMatrix((double)displayWidth / (double)displayHeight);
 
-    spRenderView->spScene = spScene->GetRenderScene();
+    spRenderView->spScene = spScene->getRenderScene();
 
     spRenderView->options = udRenderOptions{ sizeof(udRenderOptions), GetRenderableUDFlags(), nullptr, nullptr,
                                              nullptr, nullptr, nullptr, nullptr };
