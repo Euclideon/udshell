@@ -69,7 +69,7 @@ public:
 
   void SetResource(String _name, const ResourceRef &spResource) override final
   {
-    MetadataRef spMeta = spResource->GetMetadata();
+    MetadataRef spMeta = spResource->getMetadata();
 
     Variant resUrl = spMeta->Get("url");
     if(!resUrl.is(Variant::Type::String))

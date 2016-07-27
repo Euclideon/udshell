@@ -38,7 +38,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     pModelImpl->pOctree = pOctree;
 
     // Populate meta data
-    MetadataRef meta = model->GetMetadata();
+    MetadataRef meta = model->getMetadata();
     int32_t count;
     result = udOctree_GetMetadataCount(pOctree, &count);
     if (result == udR_Success)

@@ -15,7 +15,7 @@ class Model : public Resource
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Model, IModel, Resource, EPKERNEL_PLUGINVERSION, "Model desc...", 0)
 public:
 
-  ResourceRef Clone() const override { return pImpl->Clone(); }
+  ResourceRef clone() const override { return pImpl->Clone(); }
 
   MaterialRef GetMaterial() const { return pImpl->GetMaterial(); }
   void SetMaterial(MaterialRef spMaterial) { pImpl->SetMaterial(spMaterial); }

@@ -252,7 +252,7 @@ void SceneImpl::LoadSceneFile(String filePath)
 
     rootNode->AddChild(spNode);
     AddModelsToResourceManager();
-    pInstance->GetMetadata()->Insert("url", filePath);
+    pInstance->getMetadata()->Insert("url", filePath);
   }
 }
 
@@ -281,7 +281,7 @@ void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)
     spUDNode = component_cast<UDNode>(spChild);
 
     UDModelRef spUDModel = spUDNode->GetUDModel();
-    Variant filePath = spUDModel->GetMetadata()->Get("url");
+    Variant filePath = spUDModel->getMetadata()->Get("url");
     if (filePath.is(Variant::Type::String))
       modelMap.replace(filePath, spUDModel);
   }
@@ -371,7 +371,7 @@ Variant SceneImpl::Save() const
 {
   Variant::VarMap map;
 
-  Variant url = pInstance->GetMetadata()->Get("url");
+  Variant url = pInstance->getMetadata()->Get("url");
   if (url.is(Variant::Type::String))
   {
     String urlString = url.asString();

@@ -55,7 +55,7 @@ void NodeImpl::AddChild(NodeRef c)
   NodeImpl *pC = c->GetImpl<NodeImpl>();
   EPASSERT_THROW(pC->pParent == nullptr, Result::InvalidArgument, "Node is already present in a scene");
 
-  c->Changed.Subscribe(this, &NodeImpl::OnChildChanged);
+  c->changed.Subscribe(this, &NodeImpl::OnChildChanged);
 
   children.concat(c);
   pC->pParent = pInstance;
@@ -69,7 +69,7 @@ void NodeImpl::RemoveChild(NodeRef c)
   children.removeFirst(c);
   pC->pParent = nullptr;
 
-  c->Changed.Unsubscribe(this, &NodeImpl::OnChildChanged);
+  c->changed.Unsubscribe(this, &NodeImpl::OnChildChanged);
 }
 
 void NodeImpl::Detach()

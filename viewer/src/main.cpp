@@ -140,7 +140,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
                                  Vertex{ Float3{ 0.0f, 1.0f, 1.0f },   Float4{ 0.5f, 0.5f, 1.0f, 1.0f } } };
 
     vertexBuffer->allocateFromData(Slice<const Vertex>(vb));
-    MetadataRef metadata = vertexBuffer->GetMetadata();
+    MetadataRef metadata = vertexBuffer->getMetadata();
     metadata->Get("attributeinfo")[0].insertItem("name", "a_position");
     metadata->Get("attributeinfo")[1].insertItem("name", "a_color");
   }

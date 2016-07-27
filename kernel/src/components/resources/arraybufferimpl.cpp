@@ -43,7 +43,7 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
   elementSize = _elementSize;
   pInstance->Buffer::allocate(_elementSize*elements);
   if (alreadyAllocated)
-    pInstance->Changed.Signal();
+    pInstance->changed.Signal();
 
   // record element types as metadata
   Array<ElementMetadata,32> elementMetadata;
@@ -65,7 +65,7 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
   else
     elementMetadata.pushBack(ElementMetadata{ nullptr, et, ElementInfo::parse(et),  0 });
 
-  pInstance->GetMetadata()->Insert("attributeinfo", elementMetadata);
+  pInstance->getMetadata()->Insert("attributeinfo", elementMetadata);
 }
 
 bool ArrayBufferImpl::ReshapeInternal(Slice<const size_t> _shape, bool copy)
