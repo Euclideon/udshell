@@ -60,14 +60,14 @@ FocusScope {
     };
     sidebarcomp.call("additem", "", resourcesPanelButton);*/
 
-    var bookMarksButton = {
+    var bookmarksButton = {
       "name" : "Toggle Bookmarks Panel",
       "type" : "button",
       "command" : "togglebookmarkspanel",
       "description" : "Toggles open/closed the Bookmarks panel",
       "image" : "qrc:/images/icon_bookmark_24.png",
     };
-    sidebarcomp.addItem(bookMarksButton);
+    sidebarcomp.addItem("", bookmarksButton);
 
     sideBar.toolbarcomp = sidebarcomp;
   }

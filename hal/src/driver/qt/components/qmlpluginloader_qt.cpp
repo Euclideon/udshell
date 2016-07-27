@@ -97,9 +97,6 @@ Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::St
       if (!pId) EPTHROW(ep::Result::Failure, "Invalid Type Descriptor: Does not contain 'id' key");
       if (!pSuper) EPTHROW(ep::Result::Failure, "Invalid Type Descriptor: Does not contain 'super' key");
 
-      if (!typeDesc.get("displayname"))
-        typeDesc.insert("displayname", pId->asString());
-
       // id must be lowercase
       *pId = ep::MutableString128(pId->asString());
 
