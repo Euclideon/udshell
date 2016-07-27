@@ -17,8 +17,8 @@ class SceneNode : public Node
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, SceneNode, ISceneNode, Node, EPKERNEL_PLUGINVERSION, "Scene node", 0)
 
 public:
-  SceneRef GetScene() const { return pImpl->GetScene(); };
-  void SetScene(SceneRef spScene) { pImpl->SetScene(spScene); }
+  SceneRef getScene() const { return pImpl->GetScene(); };
+  void setScene(SceneRef spScene) { pImpl->SetScene(spScene); }
 
   Variant save() const override { return pImpl->Save(); }
 
