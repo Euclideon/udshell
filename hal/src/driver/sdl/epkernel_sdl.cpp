@@ -64,9 +64,9 @@ void SDLKernel::EventLoop()
         try {
           d();
         } catch (std::exception &e) {
-          LogError("Exception occurred in MainThreadCallback : {0}", e.what());
+          logError("Exception occurred in MainThreadCallback : {0}", e.what());
         } catch (...) {
-          LogError("Exception occurred in MainThreadCallback : C++ Exception");
+          logError("Exception occurred in MainThreadCallback : C++ Exception");
         }
       }
       else if (event.user.code == 1)
@@ -78,9 +78,9 @@ void SDLKernel::EventLoop()
         try {
           d();
         } catch (std::exception &e) {
-          LogError("Exception occurred in MainThreadCallback : {0}", e.what());
+          logError("Exception occurred in MainThreadCallback : {0}", e.what());
         } catch (...) {
-          LogError("Exception occurred in MainThreadCallback : C++ Exception");
+          logError("Exception occurred in MainThreadCallback : C++ Exception");
         }
         udIncrementSemaphore(pDispatch->pSem);
       }

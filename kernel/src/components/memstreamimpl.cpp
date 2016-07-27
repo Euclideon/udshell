@@ -69,14 +69,14 @@ void MemStreamImpl::SetBuffer(BufferRef spNewBuffer)
   {
     bufferSlice = spBuffer->map();
     if (bufferSlice == nullptr)
-      LogError("Can't reserve Buffer for writing.");
+      logError("Can't reserve Buffer for writing.");
   }
   else if (oFlags & OpenFlags::Read)
   {
     auto map = spBuffer->mapForRead();
     bufferSlice = Slice<void>(const_cast<void*>(map.ptr), map.length);
     if (!bufferSlice)
-      LogError("Can't reserve Buffer for reading.");
+      logError("Can't reserve Buffer for reading.");
   }
 
   if (bufferSlice == nullptr)

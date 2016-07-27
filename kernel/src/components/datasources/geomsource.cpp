@@ -140,7 +140,7 @@ bool GeomSource::Write(const aiScene *pScene)
   pBlob = exporter.ExportToBlob(pScene, "collada", aiProcess_ConvertToLeftHanded);
   if(!pBlob)
   {
-    LogDebug(1, "Unable to export Assimp scene to collada");
+    logDebug(1, "Unable to export Assimp scene to collada");
     return false;
   }
 
@@ -151,7 +151,7 @@ bool GeomSource::Write(const aiScene *pScene)
   }
   catch (EPException &)
   {
-    LogWarning(1, "Failed to open collada file for writing: \"{0}\"", getURL());
+    logWarning(1, "Failed to open collada file for writing: \"{0}\"", getURL());
     exporter.FreeBlob();
     return false;
   }
@@ -168,7 +168,7 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
 
     aiString aiName;
     aiMat.Get(AI_MATKEY_NAME, aiName);
-    LogDebug(4, "Material {0}: \"{1}\"", i, FromAIString(aiName));
+    logDebug(4, "Material {0}: \"{1}\"", i, FromAIString(aiName));
 
     String _name = FromAIString(aiName);
     MaterialRef spMat = getKernel().createComponent<Material>({ { "name", _name } });
@@ -194,7 +194,7 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
     aiMat.Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), texture);
     if (texture.length > 0)
     {
-      LogDebug(4, "  Texture: {0}", FromAIString(texture));
+      logDebug(4, "  Texture: {0}", FromAIString(texture));
 
       // TODO: try and load texture...
       //...
@@ -230,7 +230,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
   {
     aiMesh &mesh = *pScene->mMeshes[i];
 
-    LogDebug(4, "Mesh {0}: {1}", i, FromAIString(mesh.mName));
+    logDebug(4, "Mesh {0}: {1}", i, FromAIString(mesh.mName));
 
     // create a model
     ModelRef spMesh = getKernel().createComponent<Model>({ { "name", FromAIString(mesh.mName) } });
@@ -240,12 +240,12 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     if (spMat)
     {
       spMesh->setMaterial(component_cast<Material>(spMat));
-      LogDebug(4, "  Material: {0} ({1})", mesh.mMaterialIndex, spMat->getName());
+      logDebug(4, "  Material: {0} ({1})", mesh.mMaterialIndex, spMat->getName());
     }
     else
     {
       // unknown material!
-      LogWarning(2, "  Material: Unknown material!");
+      logWarning(2, "  Material: Unknown material!");
     }
 
     // positions
@@ -372,7 +372,7 @@ void GeomSource::ParseXRefs(const aiScene *pScene)
     String refName = String(FromAIString(xref.mName));
     String url = FromAIString(xref.mUrl);
 
-    LogDebug(4, "XRef {0}: {1} - \"{2}\"", i, refName, url);
+    logDebug(4, "XRef {0}: {1} - \"{2}\"", i, refName, url);
 
     XRefType type = GetXRefType(url);
 
@@ -391,7 +391,7 @@ void GeomSource::ParseXRefs(const aiScene *pScene)
       setResource(SharedString::concat("udmodel", i), spUDModel);
     }
     else
-      LogWarning(2, "GeomSource -- Unsupported XRef type \"{0}\"", url);
+      logWarning(2, "GeomSource -- Unsupported XRef type \"{0}\"", url);
   }
 }
 
@@ -400,15 +400,15 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   aiNode &node = *pNode;
   const aiMatrix4x4 &parent = *pParent;
 
-  LogDebug(4, "{1,*0}Node: {2}", depth, "", FromAIString(node.mName));
+  logDebug(4, "{1,*0}Node: {2}", depth, "", FromAIString(node.mName));
 
   aiMatrix4x4 &local = node.mTransformation;
   aiMatrix4x4 world = parent * local;
 
-  LogDebug(4, "{1,*0}  Local Position: %.2f,%.2f,%.2f", depth, "", local.a4, local.b4, local.c4);
-  LogDebug(4, "{1,*0}  Local Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", local.a1, local.b1, local.c1, local.a2, local.b2, local.c2, local.a3, local.b3, local.c3);
-  LogDebug(4, "{1,*0}  World Position: %.2f,%.2f,%.2f", depth, "", world.a4, world.b4, world.c4);
-  LogDebug(4, "{1,*0}  World Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", world.a1, world.b1, world.c1, world.a2, world.b2, world.c2, world.a3, world.b3, world.c3);
+  logDebug(4, "{1,*0}  Local Position: %.2f,%.2f,%.2f", depth, "", local.a4, local.b4, local.c4);
+  logDebug(4, "{1,*0}  Local Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", local.a1, local.b1, local.c1, local.a2, local.b2, local.c2, local.a3, local.b3, local.c3);
+  logDebug(4, "{1,*0}  World Position: %.2f,%.2f,%.2f", depth, "", world.a4, world.b4, world.c4);
+  logDebug(4, "{1,*0}  World Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", world.a1, world.b1, world.c1, world.a2, world.b2, world.c2, world.a3, world.b3, world.c3);
 
   // create bone from node
   NodeRef spNode = getKernel().createComponent<Node>({{ "name", FromAIString(node.mName) }});
@@ -431,12 +431,12 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       // add geom node to world node (we could collapse this if there is only one mesh...)
       spNode->addChild(spGeomNode);
 
-      LogDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], spMesh->getName());
+      logDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], spMesh->getName());
     }
     else
     {
       // unknown mesh!
-      LogWarning(2, "{1,*0}  Mesh {2}: {3} Unknown mesh!!", depth, "", i, node.mMeshes[i]);
+      logWarning(2, "{1,*0}  Mesh {2}: {3} Unknown mesh!!", depth, "", i, node.mMeshes[i]);
     }
   }
 
@@ -460,13 +460,13 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
         // add UDNode to world node (we could collapse this if there is only one model...)
         spNode->addChild(spUDNode);
 
-        LogDebug(4, "{1,*0}  UDModel {2}: {3} ({4})", depth, "", i, node.mXRefs[i], spUDModel->getName());
+        logDebug(4, "{1,*0}  UDModel {2}: {3} ({4})", depth, "", i, node.mXRefs[i], spUDModel->getName());
       }
       else
-        LogWarning(2, "GeomSource -- Node references UDModel which does not exist");
+        logWarning(2, "GeomSource -- Node references UDModel which does not exist");
     }
     else
-      LogWarning(2, "GeomSource -- Unsupported XRef type \"{0}\" in node", url);
+      logWarning(2, "GeomSource -- Unsupported XRef type \"{0}\" in node", url);
   }
 
   // recurse children

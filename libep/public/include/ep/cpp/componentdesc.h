@@ -232,9 +232,9 @@ private:
         } catch (EPException &e) {                                                       \
           return Variant(e.claim());                                                     \
         } catch (std::exception &e) {                                                    \
-          return Variant(AllocError(Result::CppException, e.what()));                    \
+          return Variant(allocError(Result::CppException, e.what()));                    \
         } catch (...) {                                                                  \
-          return Variant(AllocError(Result::CppException, "C++ exception"));             \
+          return Variant(allocError(Result::CppException, "C++ exception"));             \
         }                                                                                \
       }                                                                                  \
     };                                                                                   \

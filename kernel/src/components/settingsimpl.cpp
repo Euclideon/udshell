@@ -27,13 +27,13 @@ SettingsImpl::SettingsImpl(Component *pInstance, Variant::VarMap initParams)
     try {
       spSrc = GetKernel()->createComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
     } catch (EPException &) {
-      LogDebug(2, "Settings file \"{0}\" does not exist. Create new settings.", *pSrc);
+      logDebug(2, "Settings file \"{0}\" does not exist. Create new settings.", *pSrc);
       return;
     }
   }
   else
   {
-    LogDebug(3, "No \"src\" parameter. Create empty settings");
+    logDebug(3, "No \"src\" parameter. Create empty settings");
     return;
   }
 
@@ -78,7 +78,7 @@ void SettingsImpl::SaveSettings()
     StreamRef spFile = GetKernel()->createComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
     spFile->save(spXMLBuffer);
   } catch (EPException &) {
-    LogWarning(1, "Failed to open Settings file for writing: \"{0}\"", srcString);
+    logWarning(1, "Failed to open Settings file for writing: \"{0}\"", srcString);
     return;
   }
 }
@@ -148,7 +148,7 @@ void SettingsImpl::SetValue(SharedString pluginkey, SharedString key, Variant va
     }
     //if not an AVLTree return pluginkey already use for a global setting
     else
-      LogWarning(0, "\"{0}\" is already used for a global setting", pluginkey);
+      logWarning(0, "\"{0}\" is already used for a global setting", pluginkey);
   }
   else
   {

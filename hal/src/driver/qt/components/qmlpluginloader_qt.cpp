@@ -37,10 +37,10 @@ bool QmlPluginLoader::LoadPlugin(String filename)
   catch (ep::EPException &e) {
     // if ParseTypeDescriptor threw, then we have an invalid type descriptor
     if (descMap.empty())
-      LogWarning(2, "Could not register QML file '{0}' as Component: \"{1}\"", filename, e.what());
+      logWarning(2, "Could not register QML file '{0}' as Component: \"{1}\"", filename, e.what());
     // if RegisterQml threw, then it might be due to the super not yet being loaded - hence we should try again
     else
-      LogDebug(2, "Failed attempt to register QML file '{0}' as Component: \"{1}\"", filename, e.what());
+      logDebug(2, "Failed attempt to register QML file '{0}' as Component: \"{1}\"", filename, e.what());
     return descMap.empty();
   }
 

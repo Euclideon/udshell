@@ -174,7 +174,7 @@ void TextImpl::FormatXml(Variant root)
 {
   if (!root.is(Variant::SharedPtrType::AssocArray))
   {
-    LogWarning(2, "FormatXml -- parameter is not a Map");
+    logWarning(2, "FormatXml -- parameter is not a Map");
     return;
   }
   Variant::VarMap rootElement = root.asAssocArray();

@@ -104,7 +104,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     spUIResources = component_cast<UIComponent>(spComp);
   else
   {
-    epscope(fail) { if (!spUIResources) pKernel->LogError("Error creating Resource Panel UI Component\n"); };
+    epscope(fail) { if (!spUIResources) pKernel->logError("Error creating Resource Panel UI Component\n"); };
     spUIResources = component_cast<UIComponent>(pKernel->CreateComponent("ui.resourcespanel", Variant::VarMap{ { "name", "resourcespanel" } }));
   }
   spViewerUI->Set("resourcespanel", spUIResources);*/
@@ -153,7 +153,7 @@ void Viewer::onResourceDropped(String resourceUID, int x, int y)
   }
   catch(EPException &)
   {
-    LogDebug(2, "Can't drop \"{0}\" into viewport -- Component type is not supported", resourceUID);
+    logDebug(2, "Can't drop \"{0}\" into viewport -- Component type is not supported", resourceUID);
     return;
   }
 

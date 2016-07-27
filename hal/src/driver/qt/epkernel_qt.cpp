@@ -202,7 +202,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   {
     // TODO: better error information/handling
     foreach(const QQmlError &error, component.errors())
-      LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+      logError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
 
     EPTHROW_ERROR(ep::Result::Failure, "Error creating Splash Screen");
   }
@@ -518,7 +518,7 @@ void QtKernel::shutdown()
 // ---------------------------------------------------------------------------------------
 void QtKernel::onFatal(ep::String msg)
 {
-  LogError(msg);
+  logError(msg);
   QMessageBox::critical(nullptr, "Fatal Error!", epToQString(msg));
 }
 

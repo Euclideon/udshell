@@ -74,7 +74,7 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     historyFileName = vHistoryFileName->asString();
 
     // Console input history file
-    epscope(fail) { if (!spHistoryFile) LogError("Console -- Could not open history file \"{0}\"", historyFileName); };
+    epscope(fail) { if (!spHistoryFile) logError("Console -- Could not open history file \"{0}\"", historyFileName); };
     spHistoryFile = pKernel->createComponent<File>({ { "path", historyFileName },{ "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
 
     size_t len = (size_t)spHistoryFile->length();

@@ -8,15 +8,15 @@ DateTime::DateTime() : DateTime(time(nullptr)) {}
 
 DateTime::DateTime(time_t ti)
 {
-  TimeStampToDateTime(ti);
+  timeStampToDateTime(ti);
 }
 
-MutableString64 DateTime::ToString(String format) const
+MutableString64 DateTime::toString(String format) const
 {
   if (format.empty())
     format = DEFAULT_DATETIME_STRING;
 
-  tm t = DateTimeToTm();
+  tm t = dateTimeToTm();
 
   MutableString64 timeStr(Reserve, format.length * 2);
   timeStr.length = strftime(timeStr.ptr, format.length * 2, format.toStringz(), &t);
@@ -24,14 +24,14 @@ MutableString64 DateTime::ToString(String format) const
   return timeStr;
 }
 
-time_t DateTime::ToTimeStamp() const
+time_t DateTime::toTimeStamp() const
 {
-  tm t = DateTimeToTm();
+  tm t = dateTimeToTm();
 
   return mktime(&t);
 }
 
-void DateTime::TimeStampToDateTime(time_t ti)
+void DateTime::timeStampToDateTime(time_t ti)
 {
 #if defined(EP_WINDOWS)
   tm t, *pTm = &t;
@@ -40,10 +40,10 @@ void DateTime::TimeStampToDateTime(time_t ti)
   tm *pTm = localtime(&ti);
 #endif
 
-  TmToDateTime(pTm);
+  tmToDateTime(pTm);
 }
 
-void DateTime::TmToDateTime(tm *pTm)
+void DateTime::tmToDateTime(tm *pTm)
 {
   sec   = pTm->tm_sec;
   min   = pTm->tm_min;
@@ -56,7 +56,7 @@ void DateTime::TmToDateTime(tm *pTm)
   isdst = pTm->tm_isdst;
 }
 
-tm DateTime::DateTimeToTm() const
+tm DateTime::dateTimeToTm() const
 {
   tm t;
 
@@ -73,14 +73,14 @@ tm DateTime::DateTimeToTm() const
   return t;
 }
 
-int16_t DateTime::GetAbsoluteYear() const
+int16_t DateTime::getAbsoluteYear() const
 {
   return START_YEAR + (int16_t)year;
 }
 
 inline ptrdiff_t epStringify(Slice<char> buffer, String format, const DateTime &dt, const VarArg *epUnusedParam(pArgs))
 {
-  SharedString out = dt.ToString(format);
+  SharedString out = dt.toString(format);
 
   // if we're only counting
   if (!buffer.ptr)

@@ -55,7 +55,7 @@ Variant MenuImpl::ParseXMLString(String buffer)
   }
   catch (parse_error &e)
   {
-    LogError("Unable to parse menus xml string on line {0} : {1}", Text::getLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
+    logError("Unable to parse menus xml string on line {0} : {1}", Text::getLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
     return false;
   }
 
@@ -197,7 +197,7 @@ bool MenuImpl::RemoveItem(String path)
     pParent = FindMenuItem(&parentPath);
     if (!pParent || !parentPath.empty())
     {
-      LogDebug(2, "Can't remove non-existent menu item \"{0}\"", path);
+      logDebug(2, "Can't remove non-existent menu item \"{0}\"", path);
       return false;
     }
 
