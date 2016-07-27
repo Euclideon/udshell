@@ -9,22 +9,16 @@ namespace ep {
 Array<const PropertyInfo> Menu::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY("menuData", GetMenuData, SetMenuData, "Heirarchical structure of menus", nullptr, 0),
+    EP_MAKE_PROPERTY("menuData", getMenuData, setMenuData, "Hierarchical structure of menus", nullptr, 0),
   };
 }
 Array<const MethodInfo> Menu::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(AddXMLItems, "Add menu items from an XML string"),
-    EP_MAKE_METHOD(RemoveItem, "Remove menu item"),
-    EP_MAKE_METHOD(AddItem, "Add a menu item with the given properties"),
-    EP_MAKE_METHOD(SetItemProperties, "Set properties for the given menu item"),
-  };
-}
-Array<const EventInfo> Menu::getEvents() const
-{
-  return{
-    EP_MAKE_EVENT(Changed, "The menu data has changed"),
+    EP_MAKE_METHOD(addXMLItems, "Add menu items from an XML string"),
+    EP_MAKE_METHOD(removeItem, "Remove menu item"),
+    EP_MAKE_METHOD(addItem, "Add a menu item with the given properties"),
+    EP_MAKE_METHOD(setItemProperties, "Set properties for the given menu item"),
   };
 }
 
@@ -129,7 +123,7 @@ bool MenuImpl::SetItemProperties(String path, Variant::VarMap properties)
   }
 
   SetMenuProperties(*pParent, properties);
-  pInstance->Changed.Signal();
+  pInstance->changed.Signal();
 
   return true;
 }
@@ -150,7 +144,7 @@ void MenuImpl::AddItem(String parentPath, Variant::VarMap properties)
   children.pushBack(subTree);
   *pChildren = Variant(std::move(children));
 
-  pInstance->Changed.Signal();
+  pInstance->changed.Signal();
 }
 
 Variant *MenuImpl::FindMenuItem(String *parentPath)
@@ -223,7 +217,7 @@ bool MenuImpl::RemoveItem(String path)
   }
   *pChildren = Variant(std::move(children));
 
-  pInstance->Changed.Signal();
+  pInstance->changed.Signal();
 
   return true;
 }
@@ -237,7 +231,7 @@ Variant MenuImpl::CreateMenuItem(Variant::VarMap properties)
   map.insert(KeyValuePair("image", ""));
   map.insert(KeyValuePair("checkable", false));
   map.insert(KeyValuePair("checked", false));
-  map.insert(KeyValuePair("exclusivegroup", false));
+  map.insert(KeyValuePair("exclusiveGroup", false));
   map.insert(KeyValuePair("enabled", true));
   map.insert(KeyValuePair("shortcut", ""));
   map.insert(KeyValuePair("command", ""));

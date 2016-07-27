@@ -64,7 +64,7 @@ Menu {
       if(menudata.checkable)
       {
         menuItem.checked = menudata.checked;
-        if(menudata.exclusivegroup)
+        if(menudata.exclusiveGroup)
         {
           if(items.length)
           {
