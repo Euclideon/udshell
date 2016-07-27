@@ -243,7 +243,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
     }
 
     mData.spUDNode->SetUDModel(mData.spUDModel);
-    mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
+    mData.spUDNode->setPosition(Double3::create(0, 0, 0));
 
     Double4x4 modelMat = mData.spUDModel->GetUDMatrix();
     Double3 modelCorner = mData.spUDModel->GetUDMatrix().axis.t.toVector3();
@@ -254,11 +254,11 @@ static void ViewerInit(String sender, String message, const Variant &data)
     mData.spSimpleCamera->SetMatrix(camMat);
   }
 
-  mData.spScene->GetRootNode()->AddChild(mData.spUDNode);
+  mData.spScene->GetRootNode()->addChild(mData.spUDNode);
 
 #if EP_DEBUG
     mData.spTestGeomNode = CreateTestModel(mData.spKernel);
-    mData.spScene->GetRootNode()->AddChild(mData.spTestGeomNode);
+    mData.spScene->GetRootNode()->addChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
 
   mData.spUpdateSub = mData.spKernel->updatePulse.Subscribe(Delegate<void(double)>(&Update));
@@ -271,9 +271,9 @@ static void ViewerInit(String sender, String message, const Variant &data)
 static void ViewerDeinit(String sender, String message, const Variant &data)
 {
   mData.spUpdateSub->Unsubscribe();
-  mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
+  mData.spScene->GetRootNode()->removeChild(mData.spUDNode);
 #if EP_DEBUG
-  mData.spScene->GetRootNode()->RemoveChild(mData.spTestGeomNode);
+  mData.spScene->GetRootNode()->removeChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
   if (mData.spCITimerSub)
     mData.spCITimerSub->Unsubscribe();

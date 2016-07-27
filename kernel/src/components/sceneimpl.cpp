@@ -46,7 +46,7 @@ bool SceneImpl::InputEvent(const ep::InputEvent &ev)
   //...
 
   // pass input to the hierarchy...
-  return rootNode->InputEvent(ev);
+  return rootNode->inputEvent(ev);
 }
 
 void SceneImpl::Update(double timeDelta)
@@ -55,7 +55,7 @@ void SceneImpl::Update(double timeDelta)
   //...
 
   // update the hierarchy...
-  if (rootNode->Update(timeDelta))
+  if (rootNode->update(timeDelta))
     MakeDirty();
 }
 
@@ -65,7 +65,7 @@ RenderableSceneRef SceneImpl::GetRenderScene()
     return spCache;
 
   RenderScene scene;
-  rootNode->DoRender(scene, rootNode->GetMatrix());
+  rootNode->doRender(scene, rootNode->getMatrix());
 
   spCache = Convert(scene, GetKernel()->getImpl()->GetRenderer().ptr());
 
@@ -245,12 +245,12 @@ void SceneImpl::LoadSceneFile(String filePath)
   NodeRef spNode;
   if (spSceneDS->GetNumResources() > 0)
   {
-    for (NodeRef &child : rootNode->Children())
-      child->Detach();
+    for (NodeRef &child : rootNode->children())
+      child->detach();
 
     spNode = spSceneDS->GetResourceAs<Node>(0);
 
-    rootNode->AddChild(spNode);
+    rootNode->addChild(spNode);
     AddModelsToResourceManager();
     pInstance->getMetadata()->Insert("url", filePath);
   }
@@ -269,7 +269,7 @@ void SceneImpl::AddModelsToResourceManager()
 
 void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)
 {
-  for (NodeRef &spChild : spNode->Children())
+  for (NodeRef &spChild : spNode->children())
   {
     BuildModelMap(spChild, modelMap);
 

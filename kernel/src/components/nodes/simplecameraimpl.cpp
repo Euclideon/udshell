@@ -289,7 +289,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
   pos += xAxis*tx*tmpSpeed;
   pos.z += tz*tmpSpeed;
 
-  pInstance->Super::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
+  pInstance->Super::setMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
 
   mouse.delta = {0 , 0};
 

@@ -16,7 +16,7 @@ Array<const PropertyInfo> SceneNode::getProperties() const
 void SceneNodeImpl::Render(RenderScene &spRenderScene, const Double4x4 &mat)
 {
   if (spScene)
-    spScene->GetRootNode()->DoRender(spRenderScene, mat);
+    spScene->GetRootNode()->doRender(spRenderScene, mat);
 
   // TODO: call Node::Render()?
 }

@@ -461,7 +461,7 @@ void Init(String sender, String message, const Variant &data)
       NodeRef rootNode = spDircubeScene->GetRootNode();
       if (rootNode)
       {
-        rootNode->AddChild(spTestGeomNode);
+        rootNode->addChild(spTestGeomNode);
       }
     }
   }

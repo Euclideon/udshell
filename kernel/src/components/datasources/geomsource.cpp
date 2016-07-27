@@ -123,8 +123,8 @@ void GeomSource::Create(StreamRef spSource)
     NodeRef spRoot = ParseNode(pScene, pScene->mRootNode, &world, numMeshes);
 
     // TODO: Massive hack !!!! Swizzle the matrix into ud space
-    const Double4x4 &mat = spRoot->GetMatrix();
-    spRoot->SetMatrix(Double4x4::create(mat.axis.x, mat.axis.z, -mat.axis.y, mat.axis.t));
+    const Double4x4 &mat = spRoot->getMatrix();
+    spRoot->setMatrix(Double4x4::create(mat.axis.x, mat.axis.z, -mat.axis.y, mat.axis.t));
 
     SetResource("scene0", spRoot);
   }
@@ -416,7 +416,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
 //  if (node.mParent)
 //    spNode->GetMetadata()->Insert("parent", FromAIString(node.mParent->mName));
 
-  spNode->SetMatrix(CopyAIMatrix(local));
+  spNode->setMatrix(CopyAIMatrix(local));
 
   // parse node mesh
   for (uint32_t i = 0; i<node.mNumMeshes; ++i)
@@ -429,7 +429,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       spGeomNode->SetModel(shared_pointer_cast<Model>(spMesh));
 
       // add geom node to world node (we could collapse this if there is only one mesh...)
-      spNode->AddChild(spGeomNode);
+      spNode->addChild(spGeomNode);
 
       LogDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], spMesh->getName());
     }
@@ -458,7 +458,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
         spUDNode->SetUDModel(component_cast<UDModel>(spUDModel));
 
         // add UDNode to world node (we could collapse this if there is only one model...)
-        spNode->AddChild(spUDNode);
+        spNode->addChild(spUDNode);
 
         LogDebug(4, "{1,*0}  UDModel {2}: {3} ({4})", depth, "", i, node.mXRefs[i], spUDModel->getName());
       }
@@ -474,7 +474,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   {
     NodeRef spChild = ParseNode(pScene, node.mChildren[i], &world, numMeshes, depth + 2);
     if (spChild)
-      spNode->AddChild(spChild);
+      spNode->addChild(spChild);
   }
 
   return spNode;
