@@ -17,13 +17,13 @@ class Lua : public Component
   EP_DECLARE_COMPONENT(ep, Lua, Component, EPKERNEL_PLUGINVERSION, "Lua VM", 0)
 public:
 
-  BroadcasterRef GetOutputBroadcaster() const { return spOutputBC; }
+  BroadcasterRef getOutputBroadcaster() const { return spOutputBC; }
 
-  Variant GetGlobal(Variant key) const;
-  void SetGlobal(Variant key, Variant value);
+  Variant getGlobal(Variant key) const;
+  void setGlobal(Variant key, Variant value);
 
-  void Execute(String code);
-  void Print(String str) const;
+  void execute(String code);
+  void print(String str) const;
 
 private:
   Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);

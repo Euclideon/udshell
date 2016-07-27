@@ -21,9 +21,9 @@ public:
   QObjectComponent(const ep::ComponentDesc *pType, ep::Kernel *pKernel, ep::SharedString uid, ep::Variant::VarMap initParams);
   virtual ~QObjectComponent();
 
-  QObject *GetQObject() const { return pQObject; }
+  QObject *getQObject() const { return pQObject; }
   template <class T>
-  T *GetQObject() const { return qobject_cast<T*>(pQObject); }
+  T *getQObject() const { return qobject_cast<T*>(pQObject); }
 
   const ep::PropertyDesc *getPropertyDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::getPropertyDesc(_name, enumerateFlags); }
   const ep::MethodDesc *getMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::getMethodDesc(_name, enumerateFlags); }
@@ -33,7 +33,7 @@ public:
 private:
   friend class QtKernel;
 
-  void AttachToGlue(Component *pGlue, ep::Variant::VarMap initParams) override final;
+  void attachToGlue(Component *pGlue, ep::Variant::VarMap initParams) override final;
 
   QObject *pQObject = nullptr;
   bool hasOwnership = false;

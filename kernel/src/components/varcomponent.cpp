@@ -16,7 +16,7 @@ const MethodDesc *VarComponent::getMethodDesc(String _name, EnumerateFlags enume
   {
     const Variant *pVal = map.get(_name);
     if (pVal)
-      return CacheMethodDesc(_name, _name, pVal->as<VarDelegate>());
+      return cacheMethodDesc(_name, _name, pVal->as<VarDelegate>());
   }
   // TODO: this assumes that GetMethodDesc will *never* be overridden somewhere above the glue's hierarchy
   return pThis->Component::getMethodDesc(_name, enumerateFlags);

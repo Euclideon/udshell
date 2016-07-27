@@ -22,7 +22,7 @@ protected:
   {
   }
 
-  PropertyDesc* CachePropertyDesc(String _name, String description, const VarDelegate &getter, const VarDelegate &setter) const
+  PropertyDesc* cachePropertyDesc(String _name, String description, const VarDelegate &getter, const VarDelegate &setter) const
   {
     PropertyDesc *pDesc = propertyCache.get(_name);
     if (pDesc)
@@ -48,7 +48,7 @@ protected:
     return pDesc;
   }
 
-  MethodDesc* CacheMethodDesc(String _name, String description, const VarDelegate &method) const
+  MethodDesc* cacheMethodDesc(String _name, String description, const VarDelegate &method) const
   {
     MethodDesc *pDesc = methodCache.get(_name);
     if (pDesc)
@@ -71,7 +71,7 @@ protected:
     return pDesc;
   }
 
-  virtual void AttachToGlue(Component *pGlue, Variant::VarMap initParams) { pThis = pGlue; }
+  virtual void attachToGlue(Component *pGlue, Variant::VarMap initParams) { pThis = pGlue; }
 
   Component *pThis;
 
