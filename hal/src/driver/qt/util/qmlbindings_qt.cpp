@@ -195,7 +195,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
 ep::DynamicComponentRef QmlComponentData::CreateComponent(ep::KernelRef spKernel, Variant::VarMap initParams)
 {
   // NOTE: we need to give QObjectComponent our 'this' pointer so it can do deferred QObject creation
-  return spKernel->createComponent<QObjectComponent>({ { "qmlcomponentdata", (int64_t)(size_t)this } });
+  return spKernel->createComponent<QObjectComponent>({ { "qmlComponentData", (int64_t)(size_t)this } });
 }
 
 // Creates a QML Item from the stored QQmlComponent

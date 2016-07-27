@@ -31,7 +31,7 @@ QObjectComponent::QObjectComponent(const ep::ComponentDesc *pType, ep::Kernel *p
   else
   {
     hasOwnership = true;
-    pQmlComponentData = (QmlComponentData*)(size_t)initParams["qmlcomponentdata"].asInt();
+    pQmlComponentData = (QmlComponentData*)(size_t)initParams["qmlComponentData"].asInt();
   }
 }
 
@@ -44,10 +44,10 @@ QObjectComponent::~QObjectComponent()
 // PRIVATE QOBJECTCOMPONENTS ONLY -----------------------------------------------------------------
 
 // Called by the Kernel following construction of the enclosing Glue Component
-void QObjectComponent::AttachToGlue(Component *pGlue, ep::Variant::VarMap initParams)
+void QObjectComponent::attachToGlue(Component *pGlue, ep::Variant::VarMap initParams)
 {
   using namespace ep;
-  Super::AttachToGlue(pGlue, initParams);
+  Super::attachToGlue(pGlue, initParams);
 
   // Create a new QObject instance from the stored QmlComponentData
   EPASSERT(pQmlComponentData, "Attempting to attach a public/instantiated QObjectComponent to a Glue Component");

@@ -138,7 +138,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
         {
           ep::ComponentRef spComponent = variant.asComponent();
           if (spComponent->isType("ep.QObjectComponent"))
-            pVariant->setValue(shared_pointer_cast<qt::QObjectComponent>(spComponent)->GetQObject());
+            pVariant->setValue(shared_pointer_cast<qt::QObjectComponent>(spComponent)->getQObject());
           else
           {
             QObject *pQObject = qt::BuildQtEPComponent::Create(std::move(spComponent));
@@ -363,7 +363,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
           // if the variant contains a qt::QObjectComponent then unpack this and give the direct QObject*
           if (spComponent->isType("ep.QObjectComponent"))
           {
-            pQObject = shared_pointer_cast<qt::QObjectComponent>(spComponent)->GetQObject();
+            pQObject = shared_pointer_cast<qt::QObjectComponent>(spComponent)->getQObject();
 
             // since QML will steal ownership, we need to restore the prev state (in case it was CppOwnership)
             // note that this is only important for SharedPtr<QObjectComponent>'s since we don't know who created
