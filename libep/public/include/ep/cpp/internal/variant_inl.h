@@ -1051,17 +1051,17 @@ struct AVLTreeAllocator<VariantAVLNode>
   AVLTreeAllocator() : nodes(1024) {} // TODO: Revisit this to see if 1024 is appropriate.
   using Node = VariantAVLNode;
 
-  Node *Alloc()
+  Node *_alloc()
   {
-    return nodes.Alloc();
+    return nodes._alloc();
   }
 
-  void Free(Node *pMem)
+  void _free(Node *pMem)
   {
-    nodes.Free(pMem);
+    nodes._free(pMem);
   }
 
-  static AVLTreeAllocator &Get() { return internal::GetAVLTreeAllocator(); }
+  static AVLTreeAllocator &get() { return internal::GetAVLTreeAllocator(); }
 
   FreeList<Node> nodes;
 };

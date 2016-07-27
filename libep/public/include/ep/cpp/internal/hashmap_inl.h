@@ -26,7 +26,7 @@ HashMap<K, V, HashPred>::~HashMap()
       while (ppTable[i])
       {
         Node *pNext = ppTable[i]->pNext;
-        pool.Delete(ppTable[i]);
+        pool.destroy(ppTable[i]);
         ppTable[i] = pNext;
       }
     }
@@ -53,7 +53,7 @@ void HashMap<K, V, HashPred>::clear()
     while (ppTable[i])
     {
       Node *pNext = ppTable[i]->pNext;
-      pool.Delete(ppTable[i]);
+      pool.destroy(ppTable[i]);
       ppTable[i] = pNext;
     }
   }
@@ -67,7 +67,7 @@ V& HashMap<K, V, HashPred>::insert(Key&& key, Val&& val)
   V *pVal = getValue(*ppBucket, key);
   if (pVal)
     EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
-  Node *pNode = pool.New(std::forward<Key>(key), std::forward<Val>(val));
+  Node *pNode = pool.create(std::forward<Key>(key), std::forward<Val>(val));
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
   return pNode->data.value;
@@ -117,7 +117,7 @@ V& HashMap<K, V, HashPred>::tryInsert(Key&& key, Delegate<V()> lazy)
   V *pVal = getValue(*ppBucket, key);
   if (pVal)
     return *pVal;
-  Node *pNode = pool.New(std::forward<Key>(key), lazy());
+  Node *pNode = pool.create(std::forward<Key>(key), lazy());
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
   return pNode->data.value;
@@ -134,7 +134,7 @@ V& HashMap<K, V, HashPred>::replace(Key&& key, Val&& val)
     *pVal = std::forward<Val>(val);
     return *pVal;
   }
-  Node *pNode = pool.New(std::forward<Key>(key), std::forward<Val>(val));
+  Node *pNode = pool.create(std::forward<Key>(key), std::forward<Val>(val));
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
   return pNode->data.value;
@@ -159,7 +159,7 @@ void HashMap<K, V, HashPred>::remove(const K &key)
     if (HashPred::eq((*ppBucket)->data.key, key))
     {
       Node *pNext = (*ppBucket)->pNext;
-      pool.Delete(*ppBucket);
+      pool.destroy(*ppBucket);
       *ppBucket = pNext;
     }
     else
@@ -244,7 +244,7 @@ auto HashMap<K, V, HashPred>::erase(Iterator it) -> typename HashMap<K, V, HashP
   }
 
   Node *pItem = it.pItem;
-  pool.Delete(pItem);
+  pool.destroy(pItem);
   return ++it;
 }
 

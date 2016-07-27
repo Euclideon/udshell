@@ -155,8 +155,8 @@ public:
 
   V& replace(K &&key, V &&val)
   {
-    Node *node = Allocator::Get().Alloc();
-    epscope(fail) { Allocator::Get().Free(node); };
+    Node *node = Allocator::get()._alloc();
+    epscope(fail) { Allocator::get()._free(node); };
     epConstruct(&node->kvp) KVP<K, V>(std::move(key), std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
@@ -165,8 +165,8 @@ public:
   }
   V& replace(const K &key, V &&val)
   {
-    Node *node = Allocator::Get().Alloc();
-    epscope(fail) { Allocator::Get().Free(node); };
+    Node *node = Allocator::get()._alloc();
+    epscope(fail) { Allocator::get()._free(node); };
     epConstruct(&node->kvp) KVP<K, V>(key, std::move(val));
     node->left = node->right = nullptr;
     node->height = 1;
@@ -175,8 +175,8 @@ public:
   }
   V& replace(K &&key, const V &val)
   {
-    Node *node = Allocator::Get().Alloc();
-    epscope(fail) { Allocator::Get().Free(node); };
+    Node *node = Allocator::get()._alloc();
+    epscope(fail) { Allocator::get()._free(node); };
     epConstruct(&node->kvp) KVP<K, V>(std::move(key), val);
     node->left = node->right = nullptr;
     node->height = 1;
@@ -185,8 +185,8 @@ public:
   }
   V& replace(const K &key, const V &val)
   {
-    Node *node = Allocator::Get().Alloc();
-    epscope(fail) { Allocator::Get().Free(node); };
+    Node *node = Allocator::get()._alloc();
+    epscope(fail) { Allocator::get()._free(node); };
     epConstruct(&node->kvp) KVP<K, V>(key, val);
     node->left = node->right = nullptr;
     node->height = 1;
@@ -196,8 +196,8 @@ public:
 
   V& replace(KVP<K, V> &&kvp)
   {
-    Node *node = Allocator::Get().Alloc();
-    epscope(fail) { Allocator::Get().Free(node); };
+    Node *node = Allocator::get()._alloc();
+    epscope(fail) { Allocator::get()._free(node); };
     epConstruct(&node->kvp) KVP<K, V>(std::move(kvp));
     node->left = node->right = nullptr;
     node->height = 1;
@@ -206,8 +206,8 @@ public:
   }
   V& replace(const KVP<K, V> &kvp)
   {
-    Node *node = Allocator::Get().Alloc();
-    epscope(fail) { Allocator::Get().Free(node); };
+    Node *node = Allocator::get()._alloc();
+    epscope(fail) { Allocator::get()._free(node); };
     epConstruct(&node->kvp) KVP<K, V>(kvp);
     node->left = node->right = nullptr;
     node->height = 1;
@@ -352,7 +352,7 @@ private:
     destroy(n->right);
 
     n->~Node();
-    Allocator::Get().Free(n);
+    Allocator::get()._free(n);
   }
 
   Node* insert(Node *n, Node *newnode)
@@ -376,7 +376,7 @@ private:
       newnode->height = n->height;
 
       n->~Node();
-      Allocator::Get().Free(n);
+      Allocator::get()._free(n);
 
       return newnode;
     }
@@ -479,7 +479,7 @@ private:
         }
 
         temp->~Node();
-        Allocator::Get().Free(temp);
+        Allocator::get()._free(temp);
 
         --numNodes;
       }
@@ -540,7 +540,7 @@ private:
     if (!pOld)
       return nullptr;
 
-    Node *pNew = Allocator::Get().Alloc();
+    Node *pNew = Allocator::get()._alloc();
     new(&pNew->kvp) KeyValuePair(pOld->kvp);
     pNew->height = pOld->height;
     pNew->left = clone(pOld->left);
@@ -707,19 +707,19 @@ struct AVLTreeNode
 template <typename Node>
 struct AVLTreeAllocator
 {
-  Node *Alloc()
+  Node *_alloc()
   {
     void *pMem = epAlloc(sizeof(Node));
     EPTHROW_IF_NULL(pMem, Result::AllocFailure, "AVLTreeAllocator failed");
     return (Node*)pMem;
   }
 
-  void Free(Node *pMem)
+  void _free(Node *pMem)
   {
     epFree(pMem);
   }
 
-  static AVLTreeAllocator& Get()
+  static AVLTreeAllocator& get()
   {
     static AVLTreeAllocator<Node> allocator;
     return allocator;

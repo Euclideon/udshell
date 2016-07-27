@@ -41,7 +41,7 @@ inline FreeList<ErrorState>& getErrorPool()
 
 ErrorState* _allocError(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pParent)
 {
-  ErrorState *pError = internal::getErrorPool().Alloc();
+  ErrorState *pError = internal::getErrorPool()._alloc();
   pError->error = error;
   epConstruct(&pError->message) SharedString(message);
   pError->function = function;
@@ -64,7 +64,7 @@ EPException::~EPException()
   {
     ErrorState *pPrev = pError->pPrior;
     pError->clear();
-    pool.Free(pError);
+    pool._free(pError);
     pError = pPrev;
   }
 }
@@ -89,7 +89,7 @@ void clearError()
   {
     ErrorState *pPrev = errorSystem.pError->pPrior;
     errorSystem.pError->clear();
-    pool.Free(errorSystem.pError);
+    pool._free(errorSystem.pError);
     errorSystem.pError = pPrev;
   }
 }
