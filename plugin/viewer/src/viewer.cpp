@@ -181,16 +181,16 @@ void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 
   double distX, distZ;
 
-  if (spCamera->IsOrtho())
+  if (spCamera->isOrtho())
   {
-    distX = spView->getAspectRatio() * spCamera->GetOrthoHeight() / 2;
-    distZ = spCamera->GetOrthoHeight() / 2;
+    distX = spView->getAspectRatio() * spCamera->getOrthoHeight() / 2;
+    distZ = spCamera->getOrthoHeight() / 2;
   }
   else
   {
     // Perspective projection
-    distX = dist * spView->getAspectRatio() * Tan(spCamera->GetFovY() / 2);
-    distZ = dist * Tan(spCamera->GetFovY() / 2);
+    distX = dist * spView->getAspectRatio() * Tan(spCamera->getFovY() / 2);
+    distZ = dist * Tan(spCamera->getFovY() / 2);
   }
 
   double mouseCameraX = x * 2 * distX / (displayDims.width - 1) - distX;

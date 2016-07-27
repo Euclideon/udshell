@@ -292,7 +292,7 @@ void SceneImpl::AddBookmarkFromCamera(String bmName, CameraRef camera)
   if (!bmName || !camera)
     return;
 
-  Double4x4 m = camera->GetCameraMatrix();
+  Double4x4 m = camera->getCameraMatrix();
   Bookmark bm = { m.axis.t.toVector3(), m.extractYPR() };
   KVP<SharedString, Bookmark> kvp(bmName, bm);
   bookmarks.insert(std::move(kvp));
