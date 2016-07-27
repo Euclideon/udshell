@@ -213,7 +213,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
   mData.spSimpleCamera = mData.spKernel->CreateComponent<SimpleCamera>();
   mData.spUDNode = mData.spKernel->CreateComponent<UDNode>();
 
-  mData.spView->SetUDRenderFlags(UDRenderFlags::ClearTargets);
+  mData.spView->setUDRenderFlags(UDRenderFlags::ClearTargets);
 
   mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
   mData.spSimpleCamera->SetSpeed(1.0);
@@ -221,11 +221,11 @@ static void ViewerInit(String sender, String message, const Variant &data)
   mData.spSimpleCamera->SetPerspective(EP_PIf / 3.f);
   mData.spSimpleCamera->SetDepthPlanes(0.0001f, 7500.f);
 
-  mData.spView->SetScene(mData.spScene);
-  mData.spView->SetCamera(mData.spSimpleCamera);
+  mData.spView->setScene(mData.spScene);
+  mData.spView->setCamera(mData.spSimpleCamera);
   mData.spKernel->SetFocusView(mData.spView);
 
-  mData.spView->Activate();
+  mData.spView->activate();
 
   ResourceManagerRef spResourceManager = mData.spKernel->GetResourceManager();
 

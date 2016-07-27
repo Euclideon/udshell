@@ -85,7 +85,7 @@ QtRenderView::~QtRenderView()
 {
   if (spView)
   {
-    spView->FrameReady.Unsubscribe(ep::Delegate<void()>(this, &QtRenderView::OnFrameReady));
+    spView->frameReady.Unsubscribe(ep::Delegate<void()>(this, &QtRenderView::OnFrameReady));
     spView->GetImpl<ep::ViewImpl>()->SetLatestFrame(nullptr);
   }
 }
@@ -101,7 +101,7 @@ void QtRenderView::attachView(const QVariant &view)
   spView = component_cast<View>(Variant(view).asComponent());
   spView->logDebug(2, "Attaching View Component '{0}' to Render Viewport", spView->getUid());
 
-  spView->FrameReady.Subscribe(Delegate<void()>(this, &QtRenderView::OnFrameReady));
+  spView->frameReady.Subscribe(Delegate<void()>(this, &QtRenderView::OnFrameReady));
 
   // TEMP HAX:
   QtApplication::Kernel()->SetFocusView(spView);
@@ -113,7 +113,7 @@ void QtRenderView::OnResize()
   int h = (int)height();
 
   if (spView && w > 0 && h > 0)
-    spView->Resize(w, h);
+    spView->resize(w, h);
 }
 
 void QtRenderView::OnVisibleChanged()
@@ -121,9 +121,9 @@ void QtRenderView::OnVisibleChanged()
   if (spView)
   {
     if (isVisible())
-      spView->Activate();
+      spView->activate();
     else
-      spView->Deactivate();
+      spView->deactivate();
   }
 }
 

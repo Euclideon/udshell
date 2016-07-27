@@ -427,7 +427,7 @@ void Init(String sender, String message, const Variant &data)
   spTopLevelUI->subscribe("newactivitysignal", Delegate<void(String)>(&NewActivity));
   spTopLevelUI->subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
 
-  spMainWindow->SetTopLevelUI(spTopLevelUI);
+  spMainWindow->setTopLevelUI(spTopLevelUI);
 
   Variant *pProject = data.getItem("--project");
   if (!pProject)

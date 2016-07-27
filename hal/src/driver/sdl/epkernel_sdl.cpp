@@ -99,7 +99,7 @@ void SDLKernel::EventLoop()
         case SDL_WINDOWEVENT_RESIZED:
           s_displayWidth = event.window.data1;
           s_displayHeight = event.window.data2;
-          GetImpl()->spFocusView->Resize(s_displayWidth, s_displayHeight);
+          GetImpl()->spFocusView->resize(s_displayWidth, s_displayHeight);
           glViewport(0, 0, s_displayWidth, s_displayHeight);
           break;
         }
@@ -237,7 +237,7 @@ ViewRef SDLKernel::SetFocusView(ViewRef spView)
   pKernelImpl->spFocusView = spView;
 
   if (pKernelImpl->spFocusView)
-    pKernelImpl->spFocusView->Resize(s_displayWidth, s_displayHeight);
+    pKernelImpl->spFocusView->resize(s_displayWidth, s_displayHeight);
   return spOld;
 }
 

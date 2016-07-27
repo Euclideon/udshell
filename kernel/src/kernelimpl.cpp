@@ -584,7 +584,7 @@ void KernelImpl::StreamerUpdate()
   // We need more than just a global active , we need an active per view.
   if (streamerStatus.active)
   {
-    SceneRef spScene = spFocusView->GetScene();
+    SceneRef spScene = spFocusView->getScene();
     if (spScene)
       spScene->MakeDirty();
   }
