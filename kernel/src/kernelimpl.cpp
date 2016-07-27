@@ -426,7 +426,7 @@ KernelImpl::~KernelImpl()
     for (const auto &c : instanceRegistry)
     {
       ++count;
-      DebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->getName(), c.value->RefCount());
+      DebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->getName(), c.value->refCount());
     }
     DebugFormat("{0} Unfreed Component(s)\n", count);
   }

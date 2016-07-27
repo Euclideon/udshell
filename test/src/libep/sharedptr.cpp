@@ -53,15 +53,15 @@ int NonRefCountedTestClass::test = 0;
 
 TEST(RefCounted, IncAndDec)
 {
-  RefCounted *pTestClass = RefCounted::New<sharedptr_test::TestClass>();
+  RefCounted *pTestClass = RefCounted::create<sharedptr_test::TestClass>();
   ASSERT_TRUE(pTestClass);
-  EXPECT_EQ(0, pTestClass->RefCount());
+  EXPECT_EQ(0, pTestClass->refCount());
   EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
 
-  EXPECT_EQ(1, pTestClass->IncRef());
-  EXPECT_EQ(1, pTestClass->RefCount());
+  EXPECT_EQ(1, pTestClass->incRef());
+  EXPECT_EQ(1, pTestClass->refCount());
 
-  EXPECT_EQ(0, pTestClass->DecRef());
+  EXPECT_EQ(0, pTestClass->decRef());
   EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::TestClass::test);
 }
 
@@ -150,7 +150,7 @@ TEST(SharedPtr, CreateAndDestroyFromUnique)
   {
     UniquePtr<sharedptr_test::TestClass> upTC = UniquePtr<sharedptr_test::TestClass>::create();
     ASSERT_TRUE(upTC.ptr() != nullptr);
-    EXPECT_EQ(1, upTC->RefCount());
+    EXPECT_EQ(1, upTC->refCount());
 
     SharedPtr<sharedptr_test::TestClass> spFromUnique = upTC;
     EXPECT_TRUE(spFromUnique.ptr() != nullptr);
@@ -164,7 +164,7 @@ TEST(SharedPtr, CreateAndDestroyFromUnique)
   {
     UniquePtr<sharedptr_test::TestClass> upTC = UniquePtr<sharedptr_test::TestClass>::create();
     ASSERT_TRUE(upTC.ptr() != nullptr);
-    EXPECT_EQ(1, upTC->RefCount());
+    EXPECT_EQ(1, upTC->refCount());
 
     SharedPtr<sharedptr_test::TestClass> spMoveFromUnique = std::move(upTC);
     EXPECT_TRUE(spMoveFromUnique.ptr() != nullptr);
@@ -178,9 +178,9 @@ TEST(SharedPtr, CreateAndDestroyFromUnique)
 TEST(SharedPtr, CreateAndDestroyFromRefCountedPointer)
 {
   {
-    sharedptr_test::TestClass *pTestClass = RefCounted::New<sharedptr_test::TestClass>();
+    sharedptr_test::TestClass *pTestClass = RefCounted::create<sharedptr_test::TestClass>();
     ASSERT_TRUE(pTestClass != nullptr);
-    EXPECT_EQ(0, pTestClass->RefCount());
+    EXPECT_EQ(0, pTestClass->refCount());
 
     // construct from refcounted ptr
     SharedPtr<sharedptr_test::TestClass> spFromPtr(pTestClass);
@@ -194,11 +194,11 @@ TEST(SharedPtr, CreateAndDestroyFromRefCountedPointer)
 TEST(SharedPtr, CreateAndDestroyFromSafe)
 {
   {
-    sharedptr_test::TestClass *pTestClass = RefCounted::New<sharedptr_test::TestClass>();
+    sharedptr_test::TestClass *pTestClass = RefCounted::create<sharedptr_test::TestClass>();
     SafePtr<sharedptr_test::TestClass> sfTC(pTestClass);
     ASSERT_TRUE(sfTC.ptr() != nullptr);
     EXPECT_TRUE(sfTC.ptr() == pTestClass);
-    EXPECT_EQ(0, sfTC->RefCount());
+    EXPECT_EQ(0, sfTC->refCount());
 
     // construct from safeptr
     SharedPtr<sharedptr_test::TestClass> spFromSafe = sfTC;
@@ -231,7 +231,7 @@ TEST(SharedPtr, Unique)
 
 TEST(SharedPtr, Deref)
 {
-  sharedptr_test::TestClass *pTestClass = RefCounted::New<sharedptr_test::TestClass>();
+  sharedptr_test::TestClass *pTestClass = RefCounted::create<sharedptr_test::TestClass>();
   SharedPtr<sharedptr_test::TestClass> spTest(pTestClass);
   EXPECT_EQ(pTestClass, spTest.operator->());
   EXPECT_EQ(pTestClass, spTest.ptr());
@@ -340,7 +340,7 @@ TEST(SharedPtr, AssignmentFromUnique)
 TEST(SharedPtr, AssignmentFromSafe)
 {
   // assignment from SafePtr
-  SafePtr<sharedptr_test::TestClass> safePtr(RefCounted::New<sharedptr_test::TestClass>());
+  SafePtr<sharedptr_test::TestClass> safePtr(RefCounted::create<sharedptr_test::TestClass>());
   SharedPtr<sharedptr_test::TestClass> spTest = nullptr;
 
   spTest = safePtr;
@@ -413,7 +413,7 @@ TEST(UniquePtr, CreateAndDestroy)
     // construct from create
     UniquePtr<sharedptr_test::TestClass> upTC = UniquePtr<sharedptr_test::TestClass>::create();
     ASSERT_TRUE(upTC.ptr() != nullptr);
-    EXPECT_EQ(1, upTC->RefCount());
+    EXPECT_EQ(1, upTC->refCount());
     EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
   }
   EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::TestClass::test);
@@ -425,7 +425,7 @@ TEST(UniquePtr, CreateAndDestroyConst)
     // construct from create
     UniquePtr<const sharedptr_test::TestClass> upTC = UniquePtr<const sharedptr_test::TestClass>::create();
     ASSERT_TRUE(upTC.ptr() != nullptr);
-    EXPECT_EQ(1, upTC->RefCount());
+    EXPECT_EQ(1, upTC->refCount());
     EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
   }
   EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::TestClass::test);
@@ -441,14 +441,14 @@ TEST(UniquePtr, CreateAndDestroyFromCopy)
     UniquePtr<sharedptr_test::TestClass> upCopy = std::move(upTC);
     EXPECT_TRUE(upCopy.ptr() != nullptr);
     EXPECT_TRUE(upTC.ptr() == nullptr);
-    EXPECT_EQ(1, upCopy->RefCount());
+    EXPECT_EQ(1, upCopy->refCount());
     EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
 
     // copy construction to const TestClass
     UniquePtr<const sharedptr_test::TestClass> upCopyConst = std::move(upCopy);
     EXPECT_TRUE(upCopyConst.ptr() != nullptr);
     EXPECT_TRUE(upCopy.ptr() == nullptr);
-    EXPECT_EQ(1, upCopyConst->RefCount());
+    EXPECT_EQ(1, upCopyConst->refCount());
     EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
   }
   EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::TestClass::test);
@@ -467,14 +467,14 @@ TEST(UniquePtr, CreateAndDestroyFromMove)
     EXPECT_TRUE(upTC.ptr() == nullptr);
     EXPECT_TRUE(upMove.ptr() != nullptr);
     EXPECT_TRUE(upMove.ptr() == pTest);
-    EXPECT_EQ(1, upMove->RefCount());
+    EXPECT_EQ(1, upMove->refCount());
     EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
 
     // move construction to const TestClass - this will discard upMove
     UniquePtr<const sharedptr_test::TestClass> upMoveConst = std::move(upMove);
     EXPECT_TRUE(upMove.ptr() == nullptr);
     EXPECT_TRUE(upMoveConst.ptr() == pTest);
-    EXPECT_EQ(1, upMoveConst->RefCount());
+    EXPECT_EQ(1, upMoveConst->refCount());
     EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
   }
   EXPECT_EQ(sharedptr_test::TESTCLASS_DESTROYED, sharedptr_test::TestClass::test);
@@ -482,18 +482,18 @@ TEST(UniquePtr, CreateAndDestroyFromMove)
 
 TEST(UniquePtr, CreateAndDestroyFromRefCountedPointer)
 {
-  sharedptr_test::TestClass *pTestClass = RefCounted::New<sharedptr_test::TestClass>();
+  sharedptr_test::TestClass *pTestClass = RefCounted::create<sharedptr_test::TestClass>();
   UniquePtr<sharedptr_test::TestClass> upFromPtr(pTestClass);
   ASSERT_TRUE(pTestClass != nullptr);
   ASSERT_TRUE(upFromPtr.ptr() != nullptr);
   EXPECT_EQ(pTestClass, upFromPtr.ptr());
-  EXPECT_EQ(1, pTestClass->RefCount());
+  EXPECT_EQ(1, pTestClass->refCount());
 
   SharedPtr<sharedptr_test::TestClass> spTest = upFromPtr;
   EXPECT_TRUE(upFromPtr.ptr() == nullptr);
   ASSERT_TRUE(spTest.ptr() != nullptr);
   EXPECT_EQ(pTestClass, spTest.ptr());
-  EXPECT_EQ(1, pTestClass->RefCount());
+  EXPECT_EQ(1, pTestClass->refCount());
 }
 
 TEST(UniquePtr, CreateAndDestroyFromNonRefCountedPointer)
@@ -526,7 +526,7 @@ TEST(UniquePtr, Reset)
 
 TEST(UniquePtr, Deref)
 {
-  sharedptr_test::TestClass *pTestClass = RefCounted::New<sharedptr_test::TestClass>();
+  sharedptr_test::TestClass *pTestClass = RefCounted::create<sharedptr_test::TestClass>();
   UniquePtr<sharedptr_test::TestClass> upTest(pTestClass);
   EXPECT_EQ(pTestClass, upTest.operator->());
   EXPECT_EQ(pTestClass, upTest.ptr());
@@ -546,13 +546,13 @@ TEST(UniquePtr, Assignment)
   upTest2 = std::move(upTest1);
   EXPECT_TRUE(upTest1.ptr() == nullptr);
   EXPECT_TRUE(upTest2.ptr() != nullptr);
-  EXPECT_EQ(1, upTest2->RefCount());
+  EXPECT_EQ(1, upTest2->refCount());
   EXPECT_EQ(sharedptr_test::TESTCLASS_CREATED, sharedptr_test::TestClass::test);
 
   // assignment to self should not kill or modify the pointer/refcount
   upTest2 = std::move(upTest2);
   EXPECT_TRUE(upTest2 != nullptr);
-  EXPECT_EQ(1, upTest2->RefCount());
+  EXPECT_EQ(1, upTest2->refCount());
 
   // assignment to SharedPtr
   SharedPtr<sharedptr_test::TestClass> spTest = upTest2;
@@ -581,7 +581,7 @@ TEST(UniquePtr, MoveAssignment)
   // move assignment to self should not kill or modify the pointer/refcount
   upMove = std::move(upMove);
   EXPECT_TRUE(upMove.ptr() != nullptr);
-  EXPECT_EQ(1, upMove->RefCount());
+  EXPECT_EQ(1, upMove->refCount());
 }
 
 TEST(UniquePtr, ComparisonOperators)

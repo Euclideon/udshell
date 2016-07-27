@@ -11,7 +11,7 @@ void DestroyOnMainThread(Kernel *pKernel, RefCounted *pInstance)
   {
     void Destroy()
     {
-      ((RefCounted*)this)->DecRef();
+      ((RefCounted*)this)->decRef();
     }
   };
 
