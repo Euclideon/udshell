@@ -9,7 +9,7 @@ namespace ep {
 Array<const PropertyInfo> SceneNode::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY("scene", GetScene, SetScene, "Scene instance", nullptr, 0),
+    EP_MAKE_PROPERTY("scene", getScene, setScene, "Scene instance", nullptr, 0),
   };
 }
 
