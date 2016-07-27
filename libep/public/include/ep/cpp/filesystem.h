@@ -37,10 +37,10 @@ namespace ep {
     Directory(String searchPattern);
     ~Directory();
 
-    bool Empty() const { return pDirectoryHandle == nullptr; }
+    bool empty() const { return pDirectoryHandle == nullptr; }
 
-    FindData GetFront() const { return fd; }
-    FindData PopFront();
+    FindData getFront() const { return fd; }
+    FindData popFront();
   };
 
   inline Variant epToVariant(FileTime time) { return time.ticks; }
