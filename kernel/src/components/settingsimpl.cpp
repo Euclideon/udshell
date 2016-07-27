@@ -8,9 +8,9 @@ namespace ep {
 Array<const MethodInfo> Settings::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(GetValue, "Get a setting"),
-    EP_MAKE_METHOD(SetValue, "Set a setting"),
-    EP_MAKE_METHOD(SaveSettings, "Save Settings to an XML file"),
+    EP_MAKE_METHOD(getValue, "Get a setting"),
+    EP_MAKE_METHOD(setValue, "Set a setting"),
+    EP_MAKE_METHOD(saveSettings, "Save Settings to an XML file"),
   };
 }
 

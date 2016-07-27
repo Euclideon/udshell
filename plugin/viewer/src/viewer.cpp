@@ -71,10 +71,10 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   {
     UDNodeRef spUDNode = pKernel->createComponent<UDNode>();
     spUDNode->setUDModel(spModel);
-    spScene->GetRootNode()->addChild(spUDNode);
-    spScene->MakeDirty();
+    spScene->getRootNode()->addChild(spUDNode);
+    spScene->makeDirty();
     spView->setEnablePicking(true);
-    spScene->AddBookmark(MutableString128(Format, "{0}_bookmark", Viewer::GetFileNameFromPath(model->asString())), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
+    spScene->addBookmark(MutableString128(Format, "{0}_bookmark", Viewer::GetFileNameFromPath(model->asString())), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
 
   spView->setUDRenderFlags(UDRenderFlags::ClearTargets);
@@ -112,7 +112,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   SetUI(spViewerUI);
 
   // Add bookmarks to UI
-  auto bmMap = spScene->GetBookmarkMap();
+  auto bmMap = spScene->getBookmarkMap();
   for (auto bm : bmMap)
     spUIBookmarks->call("createbookmark", bm.key);
 
@@ -214,8 +214,8 @@ void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 
   spUDNode->setMatrix(nodeMatrix);
 
-  spScene->GetRootNode()->addChild(spUDNode);
-  spScene->MakeDirty();
+  spScene->getRootNode()->addChild(spUDNode);
+  spScene->makeDirty();
 }
 
 void Viewer::StaticInit(ep::Kernel *pKernel)
@@ -268,7 +268,7 @@ void Viewer::CreateBookmark()
   // It would be nice if the QML could automatically update its bookmarks list from the internal bookmarks
   // Not sure how to do this currently
   Variant bookmarkName = spUIBookmarks->call("createbookmark", "");
-  spScene->AddBookmarkFromCamera(bookmarkName.asString(), spCamera);
+  spScene->addBookmarkFromCamera(bookmarkName.asString(), spCamera);
 }
 
 void Viewer::Activate()
@@ -284,7 +284,7 @@ void Viewer::Deactivate()
 void Viewer::Update(double timeStep)
 {
   if (spScene)
-    spScene->Update(timeStep);
+    spScene->update(timeStep);
 }
 
 Variant Viewer::save() const
@@ -375,7 +375,7 @@ void Viewer::CreatePlatformLogo()
 
   GeomNodeRef spGeomNode = pKernel->createComponent<GeomNode>();
   spGeomNode->setModel(spImageModel);
-  spScene->GetRootNode()->addChild(spGeomNode);
+  spScene->getRootNode()->addChild(spGeomNode);
   spImageNode = spGeomNode;
 
   spMaterial->setMaterialProperty("tex", spImage);
@@ -387,7 +387,7 @@ bool Viewer::InputHook(ep::InputEvent ev)
   {
     if (ev.key.state == 1 && ev.key.key == (int)ep::KeyCode::I) // if pressing down on the 'i' key then switch the logos visibility
     {
-      NodeRef spRootNode = spScene->GetRootNode();
+      NodeRef spRootNode = spScene->getRootNode();
       bool contains = spRootNode->children().exists(spImageNode);
 
       if (contains)
@@ -395,7 +395,7 @@ bool Viewer::InputHook(ep::InputEvent ev)
       else
         spRootNode->addChild(spImageNode);
 
-      spScene->MakeDirty();
+      spScene->makeDirty();
       return true; // we return true here so I is not used as input for another action
     }
   }

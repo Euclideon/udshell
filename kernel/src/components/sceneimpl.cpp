@@ -18,25 +18,25 @@ namespace ep {
 Array<const PropertyInfo> Scene::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO("rootNode", GetRootNode, "Scene root node", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("bookmarkMap", GetBookmarkMap, "Bookmark map", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("rootNode", getRootNode, "Scene root node", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("bookmarkMap", getBookmarkMap, "Bookmark map", nullptr, 0),
   };
 }
 Array<const MethodInfo> Scene::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(MakeDirty, "Force a dirty signal"),
-    EP_MAKE_METHOD(AddBookmarkFromCamera, "Add a Bookmark from Camera"),
-    EP_MAKE_METHOD(AddBookmark, "Add a Bookmark"),
-    EP_MAKE_METHOD(RemoveBookmark, "Remove a Bookmark"),
-    EP_MAKE_METHOD(RenameBookmark, "Rename a Bookmark"),
-    EP_MAKE_METHOD_EXPLICIT("FindBookmark", FindBookmark_Internal, "Find a Bookmark"),
+    EP_MAKE_METHOD(makeDirty, "Force a dirty signal"),
+    EP_MAKE_METHOD(addBookmarkFromCamera, "Add a Bookmark from Camera"),
+    EP_MAKE_METHOD(addBookmark, "Add a Bookmark"),
+    EP_MAKE_METHOD(removeBookmark, "Remove a Bookmark"),
+    EP_MAKE_METHOD(renameBookmark, "Rename a Bookmark"),
+    EP_MAKE_METHOD_EXPLICIT("findBookmark", findBookmarkInternal, "Find a Bookmark"),
   };
 }
 Array<const EventInfo> Scene::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Dirty, "Scene dirty event"),
+    EP_MAKE_EVENT(dirty, "Scene dirty event"),
   };
 }
 
