@@ -59,14 +59,14 @@ void TimerImpl::SetTimer(double d, TimerType tt)
 void TimerImpl::MessageCallback()
 {
   pInstance->elapsed.Signal();
-  pInstance->DecRef();
+  pInstance->decRef();
 }
 
 
 void TimerImpl::TimerCallback(HalTimer *pTimer, void *pParam)
 {
   TimerImpl* pThis = (TimerImpl*)pParam;
-  pThis->pInstance->IncRef();
+  pThis->pInstance->incRef();
   pThis->GetKernel()->dispatchToMainThread(MakeDelegate(pThis, &TimerImpl::MessageCallback));
 }
 

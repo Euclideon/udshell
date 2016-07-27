@@ -115,7 +115,7 @@ static void _Assert(String condition, String message, String file, int line)
 
 static void _DestroyComponent(Component *pInstance)
 {
-  pInstance->DecRef();
+  pInstance->decRef();
 }
 
 static void *_Find (String pattern, void *pHandle, void *pData)
