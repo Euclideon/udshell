@@ -613,30 +613,30 @@ private:
 template <typename SrcRange, typename To>
 class VarRangeAdapter
 {
-  using From = decltype(((SrcRange*)nullptr)->GetFront());
+  using From = decltype(((SrcRange*)nullptr)->getFront());
 
   SrcRange spRange;
 
 public:
   VarRangeAdapter(SrcRange r) : spRange(r) {}
 
-  RangeFeatures Features() const { return spRange->Features(); }
+  RangeFeatures features() const { return spRange->features(); }
 
-  bool Empty() const { return spRange->Empty(); }
-  size_t Length() const { return spRange->Length(); }
+  bool empty() const { return spRange->empty(); }
+  size_t length() const { return spRange->length(); }
 
   // TODO: this is potentially inefficient! check that these redundant constructions are optimised away
-  To GetFront() const { return Variant(spRange->GetFront()).as<To>(); }
-  void SetFront(const To &value) const { spRange->SetFront(Variant(value).as<From>()); }
-  To PopFront() { return Variant(spRange->PopFront()).as<To>(); }
-  void PopFront(size_t n) { spRange->PopFront(n); }
+  To getFront() const { return Variant(spRange->getFront()).as<To>(); }
+  void setFront(const To &value) const { spRange->setFront(Variant(value).as<From>()); }
+  To popFront() { return Variant(spRange->popFront()).as<To>(); }
+  void popFront(size_t n) { spRange->popFront(n); }
 
-  To GetBack() const { return Variant(spRange->GetBack()).as<To>(); }
-  void SetBack(const To &value) const { spRange->SetBack(Variant(value).as<From>()); }
-  To PopBack() { return Variant(spRange->PopBack()).as<To>(); }
-  void PopBack(size_t n) { spRange->PopBack(n); }
+  To getBack() const { return Variant(spRange->getBack()).as<To>(); }
+  void setBack(const To &value) const { spRange->setBack(Variant(value).as<From>()); }
+  To popBack() { return Variant(spRange->popBack()).as<To>(); }
+  void popBack(size_t n) { spRange->popBack(n); }
 
-  To At(size_t index) const { return Variant(spRange->At(index)).as<To>(); }
+  To at(size_t index) const { return Variant(spRange->at(index)).as<To>(); }
 };
 
 } // namespace internal
