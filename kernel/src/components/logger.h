@@ -70,7 +70,7 @@ struct LogLine
 {
   LogLine(int level, SharedString text, LogCategories category, SharedString componentID);
 
-  SharedString ToString(LogFormatSpecs format = LogDefaults::Format) const;
+  SharedString toString(LogFormatSpecs format = LogDefaults::Format) const;
 
   int level;
   SharedString text;
@@ -83,19 +83,19 @@ struct LogLine
 class LogFilter
 {
 public:
-  int GetLevel(LogCategories category) const;
-  void SetLevel(LogCategories categories, int level);
-  void EnableCategory(LogCategories categories);
-  void DisableCategory(LogCategories categories);
-  bool IsCategoryEnabled(LogCategories category) const;
-  Slice<SharedString> GetComponents() const;
-  void SetComponents(Slice<const String> comps);
-  void ResetFilter();
-  bool FilterLogLine(LogLine &line) const;
+  int getLevel(LogCategories category) const;
+  void setLevel(LogCategories categories, int level);
+  void enableCategory(LogCategories categories);
+  void disableCategory(LogCategories categories);
+  bool isCategoryEnabled(LogCategories category) const;
+  Slice<SharedString> getComponents() const;
+  void setComponents(Slice<const String> comps);
+  void resetFilter();
+  bool filterLogLine(LogLine &line) const;
 
   LogFilter()
   {
-    ResetFilter();
+    resetFilter();
   }
 protected:
   int levelsFilter[NUM_LOG_CATEGORIES];
@@ -125,13 +125,13 @@ class Logger : public Component
   EP_DECLARE_COMPONENT(ep, Logger, Component, EPKERNEL_PLUGINVERSION, "Logger desc...", 0)
 public:
 
-  void Log(int level, String text, LogCategories category = LogCategories::Debug, String componentUID = nullptr);
+  void log(int level, String text, LogCategories category = LogCategories::Debug, String componentUID = nullptr);
 
-  bool GetEnabled() const { return bEnabled; }
-  void SetEnabled(bool bEnable) { this->bEnabled = bEnable; }
+  bool getEnabled() const { return bEnabled; }
+  void setEnabled(bool bEnable) { this->bEnabled = bEnable; }
 
-  const Slice<LogLine> GetLog() const { return internalLog; }
-  LogLine *GetLogLine(int index) const
+  const Slice<LogLine> getLog() const { return internalLog; }
+  LogLine *getLogLine(int index) const
   {
     if (index >= 0 && index < (int)internalLog.length)
       return &internalLog[index];
@@ -139,38 +139,38 @@ public:
       return nullptr;
   }
 
-  void AddStream(StreamRef spStream, LogFormatSpecs format = LogDefaults::Format);
-  int RemoveStream(StreamRef spStream);
+  void addStream(StreamRef spStream, LogFormatSpecs format = LogDefaults::Format);
+  int removeStream(StreamRef spStream);
 
   // Stream helper functions
-  LogStream *GetLogStream(StreamRef spStream);
+  LogStream *getLogStream(StreamRef spStream);
   // Stream level filtering
-  int GetStreamLevel(StreamRef spStream, LogCategories category) const;
-  int SetStreamLevel(StreamRef spStream, LogCategories categories, int level);
-  Slice<SharedString> GetStreamComponents(StreamRef spStream) const;
-  int SetStreamComponents(StreamRef spStream, Slice<const String> comps);
-  int ResetStreamFilter(StreamRef spStream);
+  int getStreamLevel(StreamRef spStream, LogCategories category) const;
+  int setStreamLevel(StreamRef spStream, LogCategories categories, int level);
+  Slice<SharedString> getStreamComponents(StreamRef spStream) const;
+  int setStreamComponents(StreamRef spStream, Slice<const String> comps);
+  int resetStreamFilter(StreamRef spStream);
 
   // Logger level filtering
-  LogFilter &GetFilter() { return filter; }
-  int GetLevel(LogCategories category) const { return filter.GetLevel(category); }
-  void SetLevel(LogCategories categories, int level) { filter.SetLevel(categories, level); }
-  void EnableCategory(LogCategories categories) { filter.EnableCategory(categories); }
-  void DisableCategory(LogCategories categories) { filter.DisableCategory(categories); }
-  bool IsCategoryEnabled(LogCategories category) const { return filter.IsCategoryEnabled(category); }
-  Slice<SharedString> GetComponents() const { return filter.GetComponents(); }
-  void SetComponents(Slice<const String> comps) { filter.SetComponents(comps); }
-  void ResetFilter() { filter.ResetFilter(); }
+  LogFilter &getFilter() { return filter; }
+  int getLevel(LogCategories category) const { return filter.getLevel(category); }
+  void setLevel(LogCategories categories, int level) { filter.setLevel(categories, level); }
+  void enableCategory(LogCategories categories) { filter.enableCategory(categories); }
+  void disableCategory(LogCategories categories) { filter.disableCategory(categories); }
+  bool isCategoryEnabled(LogCategories category) const { return filter.isCategoryEnabled(category); }
+  Slice<SharedString> getComponents() const { return filter.getComponents(); }
+  void setComponents(Slice<const String> comps) { filter.setComponents(comps); }
+  void resetFilter() { filter.resetFilter(); }
 
   // TODO: Move these to the protected section once the refactor of Methods/Properties in Component is done.
-  void SetComponents_Arr(const Array<const String> &comps) { SetComponents(comps); }
-  int SetStreamComponents_Arr(StreamRef spStream, const Array<const String> &comps) { return SetStreamComponents(spStream, comps); }
+  void setComponents_Arr(const Array<const String> &comps) { setComponents(comps); }
+  int setStreamComponents_Arr(StreamRef spStream, const Array<const String> &comps) { return setStreamComponents(spStream, comps); }
 
-  Event<> Changed;
+  Event<> changed;
 protected:
   Logger(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   ~Logger() { bEnabled = false; }
-  LogStream *FindLogStream(StreamRef spStream) const;
+  LogStream *findLogStream(StreamRef spStream) const;
 
   Array<LogStream> streamList;
   LogFilter filter;
