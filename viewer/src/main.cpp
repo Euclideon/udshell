@@ -119,8 +119,8 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 
   // Material
   MaterialRef material = kernel->createComponent<Material>();
-  material->SetShader(ShaderType::VertexShader, vertexShader);
-  material->SetShader(ShaderType::PixelShader, pixelShader);
+  material->setShader(ShaderType::VertexShader, vertexShader);
+  material->setShader(ShaderType::PixelShader, pixelShader);
 #if 0
   material->SetTexture(0, texture);
 #endif // 0

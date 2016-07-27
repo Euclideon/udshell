@@ -175,19 +175,19 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
 
     aiColor4D color(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, color);
-    spMat->SetMaterialProperty("diffuse", CopyAIColor(color));
+    spMat->setMaterialProperty("diffuse", CopyAIColor(color));
 
     color = aiColor4D(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_AMBIENT, color);
-    spMat->SetMaterialProperty("ambient", CopyAIColor(color));
+    spMat->setMaterialProperty("ambient", CopyAIColor(color));
 
     color = aiColor4D(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_EMISSIVE, color);
-    spMat->SetMaterialProperty("emissive", CopyAIColor(color));
+    spMat->setMaterialProperty("emissive", CopyAIColor(color));
 
     color = aiColor4D(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_SPECULAR, color);
-    spMat->SetMaterialProperty("specular", CopyAIColor(color));
+    spMat->setMaterialProperty("specular", CopyAIColor(color));
 
     // TODO: foreach texture type...
     aiString texture;

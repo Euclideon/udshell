@@ -355,8 +355,8 @@ void Viewer::CreatePlatformLogo()
   }
 
   MaterialRef spMaterial = pKernel->createComponent<Material>();
-  spMaterial->SetShader(ShaderType::VertexShader, vertexShader);
-  spMaterial->SetShader(ShaderType::PixelShader, pixelShader);
+  spMaterial->setShader(ShaderType::VertexShader, vertexShader);
+  spMaterial->setShader(ShaderType::PixelShader, pixelShader);
 
   ArrayBufferRef spVertexBuffer = pKernel->createComponent<ArrayBuffer>();
   ArrayBufferRef spIndexBuffer = pKernel->createComponent<ArrayBuffer>();
@@ -378,7 +378,7 @@ void Viewer::CreatePlatformLogo()
   spScene->GetRootNode()->AddChild(spGeomNode);
   spImageNode = spGeomNode;
 
-  spMaterial->SetMaterialProperty("tex", spImage);
+  spMaterial->setMaterialProperty("tex", spImage);
 }
 
 bool Viewer::InputHook(ep::InputEvent ev)

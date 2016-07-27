@@ -8,18 +8,18 @@
 namespace ep {
 
 AVLTree<String, int> MaterialImpl::builtinProperties{
-  { "vertexshader", 0 },
-  { "pixelshader", 1 },
-  { "geometryshader", 2 },
-  { "tesselationcontrolshader", 3 },
-  { "tesselationevaluationshader", 4 },
-  { "computeshader", 5 },
-  { "blendmode", 6 },
-  { "cullmode", 7 },
-  { "depthfunc", 8 },
-  { "stencilstate", 9 },
-  { "frontstencilstate", 10 },
-  { "backstencilstate", 11 },
+  { "vertexShader", 0 },
+  { "pixelShader", 1 },
+  { "geometryShader", 2 },
+  { "tesselationControlShader", 3 },
+  { "tesselationEvaluationShader", 4 },
+  { "computeShader", 5 },
+  { "blendMode", 6 },
+  { "cullMode", 7 },
+  { "depthFunc", 8 },
+  { "stencilState", 9 },
+  { "frontStencilState", 10 },
+  { "backStencilState", 11 },
 };
 
 
@@ -45,28 +45,28 @@ void epFromVariant(const Variant &variant, ShaderProperty *p)
 Array<const PropertyInfo> Material::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY("vertexShader", GetVertexShader, SetVertexShader_Meta, "Vertex shader for rendering", nullptr, 0),
-    EP_MAKE_PROPERTY("pixelShader", GetPixelShader, SetPixelShader_Meta, "Pixel shader for rendering", nullptr, 0),
-    EP_MAKE_PROPERTY("geometryShader", GetGeometryShader, SetGeometryShader_Meta, "Geometry shader for rendering", nullptr, 0),
-    EP_MAKE_PROPERTY("tesselationControlShader", GetTesselationControlShader, SetTesselationControlShader_Meta, "Tesselation Control shader for rendering", nullptr, 0),
-    EP_MAKE_PROPERTY("tesselationEvaluationShader", GetTesselationEvaluationShader, SetTesselationEvaluationShader_Meta, "Tesselation Evaluation shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("vertexShader", getVertexShader, setVertexShader_Meta, "Vertex shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("pixelShader", getPixelShader, setPixelShader_Meta, "Pixel shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("geometryShader", getGeometryShader, setGeometryShader_Meta, "Geometry shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("tesselationControlShader", getTesselationControlShader, setTesselationControlShader_Meta, "Tesselation Control shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("tesselationEvaluationShader", getTesselationEvaluationShader, setTesselationEvaluationShader_Meta, "Tesselation Evaluation shader for rendering", nullptr, 0),
 
-    EP_MAKE_PROPERTY("blendMode", GetBlendMode, SetBlendMode, "Frame buffer blend mode", nullptr, 0),
-    EP_MAKE_PROPERTY("cullMode", GetCullMode, SetCullMode, "Back face cull mode", nullptr, 0),
-    EP_MAKE_PROPERTY("depthCompareFunc", GetDepthCompareFunc, SetDepthCompareFunc, "Depth compare function", nullptr, 0),
-    EP_MAKE_PROPERTY("stencilState", GetStencilState, SetStencilState, "Stencil state", nullptr, 0),
-    EP_MAKE_PROPERTY("frontStencilState", GetFrontStencilState, SetFrontStencilState, "Front-face stencil state", nullptr, 0),
-    EP_MAKE_PROPERTY("backStencilState", GetBackStencilState, SetBackStencilState, "Back-face stencil state", nullptr, 0),
+    EP_MAKE_PROPERTY("blendMode", getBlendMode, setBlendMode, "Frame buffer blend mode", nullptr, 0),
+    EP_MAKE_PROPERTY("cullMode", getCullMode, setCullMode, "Back face cull mode", nullptr, 0),
+    EP_MAKE_PROPERTY("depthCompareFunc", getDepthCompareFunc, setDepthCompareFunc, "Depth compare function", nullptr, 0),
+    EP_MAKE_PROPERTY("stencilState", getStencilState, setStencilState, "Stencil state", nullptr, 0),
+    EP_MAKE_PROPERTY("frontStencilState", getFrontStencilState, setFrontStencilState, "Front-face stencil state", nullptr, 0),
+    EP_MAKE_PROPERTY("backStencilState", getBackStencilState, setBackStencilState, "Back-face stencil state", nullptr, 0),
   };
 }
 
 Array<const MethodInfo> Material::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(GetMaterialProperty, "Get a material property"),
-    EP_MAKE_METHOD(SetMaterialProperty, "Set a material property")
-//      EP_MAKE_METHOD(GetTexture, "Gets the texture ArrayBuffer at the given index"),
-//      EP_MAKE_METHOD(SetTexture, "Sets the texture ArrayBuffer at the given index"),
+    EP_MAKE_METHOD(getMaterialProperty, "Get a material property"),
+    EP_MAKE_METHOD(setMaterialProperty, "Set a material property")
+//      EP_MAKE_METHOD(getTexture, "Gets the texture ArrayBuffer at the given index"),
+//      EP_MAKE_METHOD(setTexture, "Sets the texture ArrayBuffer at the given index"),
   };
 }
 
