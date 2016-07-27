@@ -288,19 +288,19 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
 
   // create logger and default streams
   spLogger = pInstance->createComponent<Logger>();
-  spLogger->DisableCategory(LogCategories::Trace);
+  spLogger->disableCategory(LogCategories::Trace);
 
   try
   {
     StreamRef spDebugFile = pInstance->createComponent<File>({ { "name", "logfile" }, { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
-    spLogger->AddStream(spDebugFile);
+    spLogger->addStream(spDebugFile);
     spDebugFile->writeLn("\n*** Logging started ***");
   }
   catch (...) {}
 
 #if EP_DEBUG
   StreamRef spStdIOStream = pInstance->createComponent<StdIOStream>({ { "output", StdIOStreamOutputs::StdDbg }, {"name", "debugout"} });
-  spLogger->AddStream(spStdIOStream);
+  spLogger->addStream(spStdIOStream);
 #endif
 
   // resource manager
@@ -922,7 +922,7 @@ void KernelImpl::Exec(String code)
 void KernelImpl::Log(int kind, int level, String text, String component) const
 {
   if (spLogger)
-    spLogger->Log(level, text, (LogCategories)kind, component);
+    spLogger->log(level, text, (LogCategories)kind, component);
 }
 
 const AVLTree<String, const ComponentDesc *> &KernelImpl::GetExtensionsRegistry() const

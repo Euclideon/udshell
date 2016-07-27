@@ -40,12 +40,12 @@ public:
   void dispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
 private:
-  static ComponentDescInl *MakeKernelDescriptor();
+  static ComponentDescInl *makeKernelDescriptor();
 
-  void EventLoop();
+  void eventLoop();
 };
 
-void SDLKernel::EventLoop()
+void SDLKernel::eventLoop()
 {
   SDL_Event event;
   while (SDL_PollEvent(&event))
@@ -110,7 +110,7 @@ void SDLKernel::EventLoop()
   }
 }
 
-ComponentDescInl *SDLKernel::MakeKernelDescriptor()
+ComponentDescInl *SDLKernel::makeKernelDescriptor()
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, Result::AllocFailure, "Memory allocation failed");
@@ -137,7 +137,7 @@ ComponentDescInl *SDLKernel::MakeKernelDescriptor()
   return pDesc;
 }
 SDLKernel::SDLKernel(Variant::VarMap commandLine)
-  : Kernel(SDLKernel::MakeKernelDescriptor(), commandLine)
+  : Kernel(SDLKernel::makeKernelDescriptor(), commandLine)
 {
   s_displayWidth = 1280;
   s_displayHeight = 720;
@@ -164,7 +164,7 @@ SDLKernel::~SDLKernel()
 {
   getImpl()->Shutdown();
   // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
-  EventLoop();
+  eventLoop();
 
   getImpl()->DeinitRender();
 
@@ -178,7 +178,7 @@ void SDLKernel::runMainLoop()
 
   while (!s_done)
   {
-    EventLoop();
+    eventLoop();
 
     // TODO: need to translate input polling into messages...
     epInput_Update();

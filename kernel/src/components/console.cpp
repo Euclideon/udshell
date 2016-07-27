@@ -12,29 +12,29 @@ namespace ep {
 Array<const PropertyInfo> Console::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY("filterComponents", GetFilterComponents, SetFilterComponents, "List of Components to filter the log text by", nullptr, 0),
-    EP_MAKE_PROPERTY("filterText", GetFilterText, SetFilterText, "Text string to filter console and log lines by", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("numConsoleLines", GetNumConsoleLines, "Number of console lines to output", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("historyLength", GetHistoryLength, "Number of lines in the input history", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("title", GetTitle, "The console page's title", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("hasInput", HasInput, "Bool specifies whether this console accepts input", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("outputLog", OutputLog, "Bool specifies whether this console outputs the application log", nullptr, 0),
+    EP_MAKE_PROPERTY("filterComponents", getFilterComponents, setFilterComponents, "List of Components to filter the log text by", nullptr, 0),
+    EP_MAKE_PROPERTY("filterText", getFilterText, setFilterText, "Text string to filter console and log lines by", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("numConsoleLines", getNumConsoleLines, "Number of console lines to output", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("historyLength", getHistoryLength, "Number of lines in the input history", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("title", getTitle, "The console page's title", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("hasInput", hasInput, "Bool specifies whether this console accepts input", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("outputLog", outputLog, "Bool specifies whether this console outputs the application log", nullptr, 0),
   };
 }
 Array<const MethodInfo> Console::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(GetFilterLevel, "Get the filter level for the given log category"),
-    EP_MAKE_METHOD(SetFilterLevel, "Set the filter level for the given log category"),
-    EP_MAKE_METHOD(IsFilterCategoryEnabled, "Returns whether the given log category is enabled in the filter"),
-    EP_MAKE_METHOD(EnableFilterCategory, "Enables the given log categories in the log filter"),
-    EP_MAKE_METHOD(DisableFilterCategory, "Disables the given log categories in the log filter"),
-    EP_MAKE_METHOD(RebuildOutput, "Rebuild output text and send to UI"),
-    EP_MAKE_METHOD(RelayInput, "Send input to the Kernel's input stream"),
-    EP_MAKE_METHOD(AppendHistory, "Add a line to the end of the input history"),
-    EP_MAKE_METHOD(GetHistoryLine, "Get the line at specified index from the input history. Negative numbers count from end."),
-    EP_MAKE_METHOD(AddBroadcaster, "Output the given broadcaster's text to the console"),
-    EP_MAKE_METHOD(RemoveBroadcaster, "Stop outputting the given broadcaster's text to the console"),
+    EP_MAKE_METHOD(getFilterLevel, "Get the filter level for the given log category"),
+    EP_MAKE_METHOD(setFilterLevel, "Set the filter level for the given log category"),
+    EP_MAKE_METHOD(isFilterCategoryEnabled, "Returns whether the given log category is enabled in the filter"),
+    EP_MAKE_METHOD(enableFilterCategory, "Enables the given log categories in the log filter"),
+    EP_MAKE_METHOD(disableFilterCategory, "Disables the given log categories in the log filter"),
+    EP_MAKE_METHOD(rebuildOutput, "Rebuild output text and send to UI"),
+    EP_MAKE_METHOD(relayInput, "Send input to the Kernel's input stream"),
+    EP_MAKE_METHOD(appendHistory, "Add a line to the end of the input history"),
+    EP_MAKE_METHOD(getHistoryLine, "Get the line at specified index from the input history. Negative numbers count from end."),
+    EP_MAKE_METHOD(addBroadcaster, "Output the given broadcaster's text to the console"),
+    EP_MAKE_METHOD(removeBroadcaster, "Stop outputting the given broadcaster's text to the console"),
   };
 }
 
@@ -118,37 +118,37 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
 
   spLogger = pKernel->getLogger();
   if (bOutputLog)
-    pKernel->getLogger()->Changed.Subscribe(this, &Console::OnLogChanged);
+    pKernel->getLogger()->changed.Subscribe(this, &Console::onLogChanged);
 }
 
 Console::~Console()
 {
   for (BroadcasterRef spBC : outputBCArray)
-    spBC->written.Unsubscribe(this, &Console::OnConsoleOutput);
+    spBC->written.Unsubscribe(this, &Console::onConsoleOutput);
 
   if(bOutputLog)
-    spLogger->Changed.Unsubscribe(this, &Console::OnLogChanged);
+    spLogger->changed.Unsubscribe(this, &Console::onLogChanged);
 }
 
-void Console::AddBroadcaster(BroadcasterRef spBC)
+void Console::addBroadcaster(BroadcasterRef spBC)
 {
   outputBCArray.pushBack(spBC);
-  spBC->written.Subscribe(this, &Console::OnConsoleOutput);
+  spBC->written.Subscribe(this, &Console::onConsoleOutput);
 }
 
-void Console::RemoveBroadcaster(BroadcasterRef spBC)
+void Console::removeBroadcaster(BroadcasterRef spBC)
 {
   outputBCArray.removeFirstSwapLast(spBC);
 }
 
-void Console::RebuildOutput()
+void Console::rebuildOutput()
 {
   filteredConsole = nullptr;
 
   for (size_t i = 0; i < consoleLines.length; i++)
   {
-    if (FilterTextLine(consoleLines[i].text)
-        && (consoleLines[i].logIndex == -1 || logFilter.FilterLogLine(*spLogger->GetLogLine(consoleLines[i].logIndex))))
+    if (filterTextLine(consoleLines[i].text)
+        && (consoleLines[i].logIndex == -1 || logFilter.filterLogLine(*spLogger->getLogLine(consoleLines[i].logIndex))))
       filteredConsole.pushBack((int)i);
   }
 
@@ -165,23 +165,23 @@ void Console::RebuildOutput()
   setOutputFunc((String)outText);
 }
 
-void Console::OnLogChanged()
+void Console::onLogChanged()
 {
-  Slice<LogLine> log = pKernel->getLogger()->GetLog();
+  Slice<LogLine> log = pKernel->getLogger()->getLog();
   LogLine &line = log.back();
 
-  consoleLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1, spLogger->GetLogLine((int)log.length - 1)->ordering));
+  consoleLines.pushBack(ConsoleLine(line.toString(), (int)log.length - 1, spLogger->getLogLine((int)log.length - 1)->ordering));
   ConsoleLine &cLine = consoleLines.back();
 
   // Do filtering
-  if (!logFilter.FilterLogLine(line) || !FilterTextLine(cLine.text))
+  if (!logFilter.filterLogLine(line) || !filterTextLine(cLine.text))
     return;
 
   filteredConsole.pushBack((int)consoleLines.length - 1);
   appendOutputFunc(cLine.text);
 }
 
-void Console::OnConsoleOutput(Slice<const void> buf)
+void Console::onConsoleOutput(Slice<const void> buf)
 {
   String readStr = (String &)buf;
 
@@ -191,7 +191,7 @@ void Console::OnConsoleOutput(Slice<const void> buf)
     if (!token.empty())
     {
       consoleLines.pushBack(ConsoleLine(token));
-      if (FilterTextLine(token))
+      if (filterTextLine(token))
       {
         filteredConsole.pushBack((int)consoleLines.length - 1);
 
@@ -201,12 +201,12 @@ void Console::OnConsoleOutput(Slice<const void> buf)
   }
 }
 
-void Console::RelayInput(String str)
+void Console::relayInput(String str)
 {
-  AppendHistory(str);
-  pKernel->getLogger()->Changed.Subscribe(this, &Console::OnLogChanged);
+  appendHistory(str);
+  pKernel->getLogger()->changed.Subscribe(this, &Console::onLogChanged);
   inputFunc(str);
-  pKernel->getLogger()->Changed.Unsubscribe(this, &Console::OnLogChanged);
+  pKernel->getLogger()->changed.Unsubscribe(this, &Console::onLogChanged);
 }
 
 Console::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)
@@ -219,11 +219,11 @@ Console::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)
 
 // Filter getter/setter helper functions
 
-String Console::GetFilterComponents() const
+String Console::getFilterComponents() const
 {
   MutableString<1024> str;
 
-  Array<SharedString> comps = logFilter.GetComponents();
+  Array<SharedString> comps = logFilter.getComponents();
   for (SharedString &c: comps)
   {
     if (c.length == 0)
@@ -238,7 +238,7 @@ String Console::GetFilterComponents() const
   return str;
 }
 
-void Console::SetFilterComponents(String str)
+void Console::setFilterComponents(String str)
 {
   String token;
   Array<String> comps;
@@ -255,11 +255,11 @@ void Console::SetFilterComponents(String str)
     }
   }
 
-  logFilter.SetComponents(comps);
-  RebuildOutput();
+  logFilter.setComponents(comps);
+  rebuildOutput();
 }
 
-bool Console::FilterTextLine(String line) const
+bool Console::filterTextLine(String line) const
 {
   if (!textFilter.empty() && line.findFirstIC(textFilter) == line.length)
     return false;
@@ -269,7 +269,7 @@ bool Console::FilterTextLine(String line) const
 
 // History functions
 
-void Console::AppendHistory(String str)
+void Console::appendHistory(String str)
 {
   history.concat(str);
 

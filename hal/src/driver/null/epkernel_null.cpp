@@ -70,10 +70,10 @@ public:
   void dispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
 private:
-  static ComponentDescInl *MakeKernelDescriptor();
+  static ComponentDescInl *makeKernelDescriptor();
 };
 
-ComponentDescInl *NullKernel::MakeKernelDescriptor()
+ComponentDescInl *NullKernel::makeKernelDescriptor()
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, Result::AllocFailure, "Memory allocation failed");
@@ -101,7 +101,7 @@ ComponentDescInl *NullKernel::MakeKernelDescriptor()
 }
 
 NullKernel::NullKernel(Variant::VarMap commandLine)
-  : Kernel(NullKernel::MakeKernelDescriptor(), commandLine)
+  : Kernel(NullKernel::makeKernelDescriptor(), commandLine)
 {
 
   // TODO: init stuff?
