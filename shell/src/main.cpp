@@ -106,12 +106,12 @@ void RemoveUIActivity(ActivityRef spActivity)
 
 void OnActivityChanged(String uid)
 {
-  auto spActiveActivity = spProject->GetActiveActivity();
+  auto spActiveActivity = spProject->getActiveActivity();
 
   if (spActiveActivity)
   {
-    spActiveActivity->Deactivate();
-    spProject->SetActiveActivity(nullptr);
+    spActiveActivity->deactivate();
+    spProject->setActiveActivity(nullptr);
   }
 
   if (uid.empty())
@@ -124,8 +124,8 @@ void OnActivityChanged(String uid)
     return;
   }
 
-  spProject->SetActiveActivity(spActivity);
-  spActivity->Activate();
+  spProject->setActiveActivity(spActivity);
+  spActivity->activate();
 }
 
 void InitProject()
@@ -142,9 +142,9 @@ void InitProject()
 
   // Enable shortcuts
   auto spCommandManager = spKernel->getCommandManager();
-  spCommandManager->EnableShortcut("saveproject");
-  spCommandManager->EnableShortcut("saveprojectas");
-  spCommandManager->EnableShortcut("newactivity");
+  spCommandManager->enableShortcut("saveproject");
+  spCommandManager->enableShortcut("saveprojectas");
+  spCommandManager->enableShortcut("newactivity");
 }
 
 void NewProject(String filePath)
@@ -156,7 +156,7 @@ void NewProject(String filePath)
 
   if (spProject)
   {
-    Array<ActivityRef> activities = spProject->GetActivities();
+    Array<ActivityRef> activities = spProject->getActivities();
     for (size_t i = 0; i < activities.length; i++)
       RemoveUIActivity(activities[i]);
 
@@ -165,7 +165,7 @@ void NewProject(String filePath)
   spProject = nullptr;
 
   spProject = spKernel->createComponent<Project>({ { "name", "project" } });
-  spProject->SetSrc(sFilePath);
+  spProject->setSrc(sFilePath);
 
   projectName = GetNameFromFilePath(sFilePath);
   spMainWindow->set("title", SharedString::format("{0} - {1}", projectName, appTitle));
@@ -189,11 +189,11 @@ void OpenProject(String filePath)
 
   if (spProject)
   {
-    Array<ActivityRef> activities = spProject->GetActivities();
+    Array<ActivityRef> activities = spProject->getActivities();
     for (size_t i = 0; i < activities.length; i++)
     {
       RemoveUIActivity(activities[i]);
-      spProject->RemoveActivity(activities[i]);
+      spProject->removeActivity(activities[i]);
     }
 
     spKernel->getResourceManager()->ClearResources();
@@ -208,7 +208,7 @@ void OpenProject(String filePath)
   // Load Activities from project file
   if (spProject)
   {
-    auto spActivities = spProject->GetActivities();
+    auto spActivities = spProject->getActivities();
     for (auto spActivity : spActivities)
       AddUIActivity(spActivity);
   }
@@ -219,13 +219,13 @@ void OpenProject(String filePath)
 void SaveProject()
 {
   if (spProject)
-    spProject->SaveProject();
+    spProject->saveProject();
 }
 
 void NewActivity(String typeID)
 {
   auto spActivity = component_cast<Activity>(spKernel->createComponent(typeID, nullptr));
-  spProject->AddActivity(spActivity);
+  spProject->addActivity(spActivity);
   AddUIActivity(spActivity);
 }
 
@@ -234,8 +234,8 @@ void SaveProjectAs(String filePath)
   projectName = GetNameFromFilePath(filePath);
   spMainWindow->set("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
-  spProject->SetSrc(filePath);
-  spProject->SaveProject();
+  spProject->setSrc(filePath);
+  spProject->saveProject();
 }
 
 Array<Variant::VarMap> GetActivitiesInfo()
@@ -320,7 +320,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   ArrayBufferRef indexBuffer = kernel->createComponent<ArrayBuffer>();
 
   // Generate Cube
-  PrimitiveGenerator::GenerateCube(vertexBuffer, indexBuffer);
+  PrimitiveGenerator::generateCube(vertexBuffer, indexBuffer);
 
   MetadataRef metadata = vertexBuffer->getMetadata();
   metadata->Get("attributeinfo")[0].insertItem("name", "a_position");

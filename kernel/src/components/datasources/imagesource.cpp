@@ -19,14 +19,14 @@ const char* GetFormatString(epImageFormat format)
 void ImageSource::Create(StreamRef spSource)
 {
   // allocate for file
-  int64_t len = spSource->Length();
+  int64_t len = spSource->length();
   void *pBuffer = epAlloc((size_t)len);
   EPTHROW_IF_NULL(pBuffer, Result::AllocFailure, "Memory allocation failed");
   epscope(exit) { epFree(pBuffer); };
 
   // read file from source
   Slice<void> buf(pBuffer, (size_t)len);
-  buf = spSource->Read(buf);
+  buf = spSource->read(buf);
   EPASSERT((int64_t)buf.length == len, "!");
 
   // load the image

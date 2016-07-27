@@ -19,7 +19,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
   {
     const Variant *useStreamer = initParams.get("useStreamer");
 
-    MutableString<260> filePath = File::UrlToNativePath(source->asString());
+    MutableString<260> filePath = File::urlToNativePath(source->asString());
 
     udOctree *pOctree = nullptr;
     udResult result = udOctree_Load(&pOctree, filePath.toStringz(), useStreamer && useStreamer->is(Variant::Type::Bool) ? useStreamer->asBool() : true, nullptr);

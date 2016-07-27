@@ -4,11 +4,9 @@
 #include "ep/cpp/component/broadcaster.h"
 #include "ep/cpp/kernel.h"
 #if defined(EP_WINDOWS)
+# pragma warning(disable:4996) //The POSIX name for this item is deprecated
 # include <io.h>
 # include <share.h>
-# define close _close
-# define read _read
-# define write _write
 # define lseek _lseeki64
 #elif defined(EP_LINUX)
 # include <unistd.h>
@@ -35,7 +33,7 @@ FileImpl::FileImpl(Component *_pInstance, Variant::VarMap initParams)
 
   int posixFlags = GetPosixOpenFlags(of);
 
-  MutableString<260> cPath = pInstance->UrlToNativePath(path->asString());
+  MutableString<260> cPath = pInstance->urlToNativePath(path->asString());
 
 #if defined(EP_WINDOWS)
   // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?
@@ -53,7 +51,7 @@ FileImpl::FileImpl(Component *_pInstance, Variant::VarMap initParams)
     EPTHROW_WARN(Result::File_OpenFailure, 2, "Failed to open {0}, flags {1}, errno {2}\n", cPath, posixFlags, errno);
 
   uint64_t curr = lseek(fd, 0L, SEEK_CUR);
-  pInstance->Stream::SetLength(lseek(fd, 0L, SEEK_END));
+  pInstance->Stream::setLength(lseek(fd, 0L, SEEK_END));
   lseek(fd, curr, SEEK_SET);
 }
 
@@ -126,9 +124,9 @@ Slice<void> FileImpl::Read(Slice<void> buffer)
 {
   int nRead;
 
-  lseek(fd, pInstance->Stream::GetPos(), SEEK_SET);
+  lseek(fd, pInstance->Stream::getPos(), SEEK_SET);
   nRead = read(fd, buffer.ptr, (unsigned int)buffer.length);
-  pInstance->Stream::SetPos(lseek(fd, 0L, SEEK_CUR));
+  pInstance->Stream::setPos(lseek(fd, 0L, SEEK_CUR));
 
   if (nRead == -1)
     return nullptr;
@@ -138,22 +136,22 @@ Slice<void> FileImpl::Read(Slice<void> buffer)
 
 size_t FileImpl::Write(Slice<const void> data)
 {
-  lseek(fd, pInstance->Stream::GetPos(), SEEK_SET);
+  lseek(fd, pInstance->Stream::getPos(), SEEK_SET);
   int written = write(fd, data.ptr, (unsigned int)data.length);
-  pInstance->Stream::SetPos(lseek(fd, 0L, SEEK_CUR));
-  pInstance->Stream::SetLength(Max(pInstance->Stream::GetPos(), pInstance->Stream::Length()));
+  pInstance->Stream::setPos(lseek(fd, 0L, SEEK_CUR));
+  pInstance->Stream::setLength(Max(pInstance->Stream::getPos(), pInstance->Stream::length()));
   if (written == -1)
     return 0;
 
-  pInstance->Broadcaster::Write(data);
+  pInstance->Broadcaster::write(data);
 
   return (size_t)written;
 }
 
 int64_t FileImpl::Seek(SeekOrigin rel, int64_t offset)
 {
-  int64_t pos = pInstance->Stream::GetPos();
-  int64_t length = pInstance->Stream::Length();
+  int64_t pos = pInstance->Stream::getPos();
+  int64_t length = pInstance->Stream::length();
 
   switch (rel)
   {
@@ -171,8 +169,8 @@ int64_t FileImpl::Seek(SeekOrigin rel, int64_t offset)
       break;
   }
 
-  pInstance->Stream::SetPos(pos);
-  pInstance->Stream::PosChanged.Signal();
+  pInstance->Stream::setPos(pos);
+  pInstance->Stream::posChanged.Signal();
 
   return pos;
 }

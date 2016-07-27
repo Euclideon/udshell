@@ -7,7 +7,7 @@ namespace ep {
 Array<const PropertyInfo> MemStream::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO("buffer", GetBuffer, "The Buffer component MemStream reads/writes to", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("buffer", getBuffer, "The Buffer component MemStream reads/writes to", nullptr, 0),
   };
 }
 
@@ -56,10 +56,10 @@ void MemStreamImpl::SetBuffer(BufferRef spNewBuffer)
   if (spBuffer)
   {
     spBuffer->unmap();
-    pInstance->Stream::SetPos(0);
+    pInstance->Stream::setPos(0);
   }
 
-  pInstance->Stream::SetLength(0);
+  pInstance->Stream::setLength(0);
   spBuffer = spNewBuffer;
 
   if (!spBuffer)
@@ -85,7 +85,7 @@ void MemStreamImpl::SetBuffer(BufferRef spNewBuffer)
     return; // TODO Error handling
   }
 
-  pInstance->Stream::SetLength(bufferSlice.length);
+  pInstance->Stream::setLength(bufferSlice.length);
 }
 
 Slice<void> MemStreamImpl::Read(Slice<void> buf)
@@ -94,14 +94,14 @@ Slice<void> MemStreamImpl::Read(Slice<void> buf)
     return 0;
 
   size_t bytes = buf.length;
-  int64_t pos = pInstance->Stream::GetPos();
-  int64_t length = pInstance->Stream::Length();
+  int64_t pos = pInstance->Stream::getPos();
+  int64_t length = pInstance->Stream::length();
 
   if (pos + bytes > (size_t)length)
     bytes = size_t(length - pos);
 
   memcpy(buf.ptr, (const char*)bufferSlice.ptr + pos, bytes);
-  pInstance->Stream::SetPos(pos + bytes);
+  pInstance->Stream::setPos(pos + bytes);
 
   return Slice<void>(buf.ptr, bytes);
 }
@@ -111,8 +111,8 @@ size_t MemStreamImpl::Write(Slice<const void> data)
   if (!(oFlags & OpenFlags::Write) || !spBuffer)
     return 0;
 
-  int64_t pos = pInstance->Stream::GetPos();
-  int64_t length = pInstance->Stream::Length();
+  int64_t pos = pInstance->Stream::getPos();
+  int64_t length = pInstance->Stream::length();
 
   if (pos + data.length > (size_t)length)
   {
@@ -120,21 +120,21 @@ size_t MemStreamImpl::Write(Slice<const void> data)
     spBuffer->resize(size_t(pos + data.length));
 
     bufferSlice = spBuffer->map();
-    pInstance->Stream::SetLength(bufferSlice.length);
+    pInstance->Stream::setLength(bufferSlice.length);
   }
 
   memcpy((char*)bufferSlice.ptr + pos, data.ptr, data.length);
-  pInstance->Stream::SetPos(pos + data.length);
+  pInstance->Stream::setPos(pos + data.length);
 
-  pInstance->Broadcaster::Write(data);
+  pInstance->Broadcaster::write(data);
 
   return data.length;
 }
 
 int64_t MemStreamImpl::Seek(SeekOrigin rel, int64_t offset)
 {
-  int64_t pos = pInstance->Stream::GetPos();
-  int64_t length = pInstance->Stream::Length();
+  int64_t pos = pInstance->Stream::getPos();
+  int64_t length = pInstance->Stream::length();
 
   switch (rel)
   {
@@ -152,8 +152,8 @@ int64_t MemStreamImpl::Seek(SeekOrigin rel, int64_t offset)
   if (pos > length)
     pos = length;
 
-  pInstance->Stream::SetPos(pos);
-  pInstance->Stream::PosChanged.Signal();
+  pInstance->Stream::setPos(pos);
+  pInstance->Stream::posChanged.Signal();
 
   return pos;
 }

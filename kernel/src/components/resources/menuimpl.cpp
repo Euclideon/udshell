@@ -261,7 +261,7 @@ void MenuImpl::SetMenuProperties(Variant &menu, Variant::VarMap properties)
     String itemName = item.key.asString();
 
     if (itemName.eq("command"))
-      *menu.getItem("shortcut") = GetKernel()->getCommandManager()->GetShortcut(item.value.asString());
+      *menu.getItem("shortcut") = GetKernel()->getCommandManager()->getShortcut(item.value.asString());
 
     if (itemName.eq("children"))
     {

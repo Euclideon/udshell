@@ -72,12 +72,12 @@ void GeomSource::Create(StreamRef spSource)
   const char *pExtension = nullptr; // TODO: get the file extension to help the assimp!
 
   // allocate for file
-  int64_t len = spSource->Length();
+  int64_t len = spSource->length();
   void *pBuffer = epAlloc((size_t)len);
 
   // read file from source
   Slice<void> buf(pBuffer, (size_t)len);
-  buf = spSource->Read(buf);
+  buf = spSource->read(buf);
   EPASSERT((int64_t)buf.length == len, "!");
 
   Assimp::Importer importer;
@@ -147,7 +147,7 @@ bool GeomSource::Write(const aiScene *pScene)
   try
   {
     StreamRef spFile = getKernel().createComponent<File>({ { "path", getURL() }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
-    spFile->Write(Slice<void>(pBlob->data, pBlob->size));
+    spFile->write(Slice<void>(pBlob->data, pBlob->size));
   }
   catch (EPException &)
   {

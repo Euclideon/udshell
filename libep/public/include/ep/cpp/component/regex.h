@@ -15,8 +15,8 @@ class Regex : public Component
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Regex, IRegex, Component, EPKERNEL_PLUGINVERSION, "Regular expression component via PCRE", 0)
 public:
 
-  virtual void CompilePattern(String pattern) { pImpl->CompilePattern(pattern); };
-  virtual Array<String> Match(String text) { return pImpl->Match(text); };
+  virtual void compilePattern(String pattern) { pImpl->CompilePattern(pattern); };
+  virtual Array<String> match(String text) { return pImpl->Match(text); };
 
 protected:
   Regex(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

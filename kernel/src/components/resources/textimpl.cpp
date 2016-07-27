@@ -180,7 +180,7 @@ void TextImpl::FormatXml(Variant root)
   Variant::VarMap rootElement = root.asAssocArray();
 
   StreamRef spOut = GetKernel()->createComponent<MemStream>({ { "buffer", ComponentRef(pInstance) }, { "flags", OpenFlags::Write } });
-  spOut->WriteLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+  spOut->writeLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 
   FormatXmlElement(spOut, rootElement, 0);
 }
@@ -192,7 +192,7 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
   String elemName = element.get("name")->asString();
   MutableString<1024> str;
   str.format("{'',*0}<{1}", depth * 2, elemName);
-  spOut->Write(str);
+  spOut->write(str);
 
   Variant *pAttributes = element.get("attributes");
   if (pAttributes && pAttributes->is(Variant::SharedPtrType::AssocArray))
@@ -202,7 +202,7 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
     for (auto attr : attributes)
     {
       str.format(" {0}=\"{1}\"", attr.key.asString(), attr.value.asSharedString());
-      spOut->Write(str);
+      spOut->write(str);
     }
 
     if (attributes.size() > 0)
@@ -219,7 +219,7 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
       {
         if (!hasChildren)
         {
-          spOut->Write(String(">\n"));
+          spOut->write(String(">\n"));
           hasChildren = true;
         }
 
@@ -229,7 +229,7 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
   }
 
   if(hasAttributes && !hasChildren)
-    spOut->Write(String(">\n"));
+    spOut->write(String(">\n"));
 
   Variant *pText = element.get("text");
   if (pText && pText->is(Variant::Type::String))
@@ -241,18 +241,18 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
     else
       str.format(">{0}</{1}>\n", pText->asSharedString(), elemName);
 
-    spOut->Write(str);
+    spOut->write(str);
   }
 
   if (!hasAttributes && !hasChildren)
   {
     if(!hasText)
-      spOut->Write(String(" />\n"));
+      spOut->write(String(" />\n"));
   }
   else
   {
     str.format("{'',*0}</{1}>\n", depth * 2, elemName);
-    spOut->Write(str);
+    spOut->write(str);
   }
 }
 

@@ -39,7 +39,7 @@ SettingsImpl::SettingsImpl(Component *pInstance, Variant::VarMap initParams)
 
   using namespace rapidxml;
   Variant rootElements;
-  TextRef spXMLBuffer = spSrc->LoadText();
+  TextRef spXMLBuffer = spSrc->loadText();
 
   try { rootElements = spXMLBuffer->ParseXml(); }
   catch (parse_error &e)
@@ -76,7 +76,7 @@ void SettingsImpl::SaveSettings()
 
   try {
     StreamRef spFile = GetKernel()->createComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
-    spFile->Save(spXMLBuffer);
+    spFile->save(spXMLBuffer);
   } catch (EPException &) {
     LogWarning(1, "Failed to open Settings file for writing: \"{0}\"", srcString);
     return;

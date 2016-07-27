@@ -17,18 +17,18 @@ namespace ep {
 Array<const PropertyInfo> Project::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY("activeActivity", GetActiveActivity, SetActiveActivity, "The currently active activity", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("activities", GetActivities, "The activities contained in the project", nullptr, 0),
-    EP_MAKE_PROPERTY("src", GetSrc, SetSrc, "The URL for the Project file", nullptr, 0)
+    EP_MAKE_PROPERTY("activeActivity", getActiveActivity, setActiveActivity, "The currently active activity", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("activities", getActivities, "The activities contained in the project", nullptr, 0),
+    EP_MAKE_PROPERTY("src", getSrc, setSrc, "The URL for the Project file", nullptr, 0)
   };
 }
 
 Array<const MethodInfo> Project::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(SaveProject, "Save Project to an XML file"),
-    EP_MAKE_METHOD(AddActivity, "Add an Activity to the Project"),
-    EP_MAKE_METHOD(RemoveActivity, "Remove an Activity from the Project"),
+    EP_MAKE_METHOD(saveProject, "Save Project to an XML file"),
+    EP_MAKE_METHOD(addActivity, "Add an Activity to the Project"),
+    EP_MAKE_METHOD(removeActivity, "Remove an Activity from the Project"),
   };
 }
 
@@ -62,7 +62,7 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
     return;
   }
 
-  TextRef spXMLBuffer = spSrc->LoadText();
+  TextRef spXMLBuffer = spSrc->loadText();
 
   using namespace rapidxml;
   Variant rootElements;
@@ -118,7 +118,7 @@ void ProjectImpl::SaveProject()
   try
   {
     StreamRef spFile = GetKernel()->createComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
-    spFile->Write(buffer);
+    spFile->write(buffer);
   }
   catch (EPException &)
   {

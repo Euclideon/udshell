@@ -294,7 +294,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   {
     StreamRef spDebugFile = pInstance->createComponent<File>({ { "name", "logfile" }, { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
     spLogger->AddStream(spDebugFile);
-    spDebugFile->WriteLn("\n*** Logging started ***");
+    spDebugFile->writeLn("\n*** Logging started ***");
   }
   catch (...) {}
 
@@ -565,13 +565,13 @@ void KernelImpl::RelayStdIO()
   {
     String str = stdOutCapture->GetCapture();
     if (!str.empty())
-      spStdOutBC->Write(str);
+      spStdOutBC->write(str);
   }
   if (stdErrCapture)
   {
     String str = stdErrCapture->GetCapture();
     if (!str.empty())
-      spStdErrBC->Write(str);
+      spStdErrBC->write(str);
   }
 }
 
