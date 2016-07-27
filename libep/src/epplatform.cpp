@@ -88,13 +88,13 @@ void *_epAlloc(size_t size, epAllocationFlags flags EP_IF_MEMORY_DEBUG(const cha
 
   if (ep::s_pInstance)
   {
-    return ep::s_pInstance->Alloc(size, flags, _pFile, _line);
+    return ep::s_pInstance->pAlloc(size, flags, _pFile, _line);
   }
   else
   {
     epInternalInit();
     if (ep::s_pInstance)
-      return ep::s_pInstance->Alloc(size, flags, _pFile, _line);
+      return ep::s_pInstance->pAlloc(size, flags, _pFile, _line);
   }
   return nullptr;
 }
@@ -103,13 +103,13 @@ void _epFree(void *pMemory)
 {
   if (ep::s_pInstance)
   {
-    ep::s_pInstance->Free(pMemory);
+    ep::s_pInstance->pFree(pMemory);
   }
   else
   {
     epInternalInit();
     if (ep::s_pInstance)
-      ep::s_pInstance->Free(pMemory);
+      ep::s_pInstance->pFree(pMemory);
   }
 }
 

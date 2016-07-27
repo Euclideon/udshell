@@ -36,17 +36,17 @@ const char * const Material::s_shaderNames[] = {
 // TODO: should move this to some other cpp?
 Directory::Directory(String searchPattern)
 {
-  pDirectoryHandle = s_pInstance->Find(searchPattern, nullptr, &fd);
+  pDirectoryHandle = s_pInstance->pFind(searchPattern, nullptr, &fd);
 }
 Directory::~Directory()
 {
   if (pDirectoryHandle)
-    s_pInstance->Find(nullptr, pDirectoryHandle, nullptr);
+    s_pInstance->pFind(nullptr, pDirectoryHandle, nullptr);
 }
 FindData Directory::popFront()
 {
   FindData t = fd;
-  pDirectoryHandle = s_pInstance->Find(nullptr, pDirectoryHandle, &fd);
+  pDirectoryHandle = s_pInstance->pFind(nullptr, pDirectoryHandle, &fd);
   return t;
 }
 
@@ -98,12 +98,12 @@ epKernel *epPlugin_GetKernel()
 
 void* epPlugin_Alloc(size_t size, epAllocationFlags flags, const char *pFile, int line)
 {
-  return ep::s_pInstance->Alloc(size, flags, pFile, line);
+  return ep::s_pInstance->pAlloc(size, flags, pFile, line);
 }
 
 void epPlugin_Free(void *pMem)
 {
-  ep::s_pInstance->Free(pMem);
+  ep::s_pInstance->pFree(pMem);
 }
 
 }
