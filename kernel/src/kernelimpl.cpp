@@ -314,7 +314,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
 
   // plugin manager
   spPluginManager = pInstance->createComponent<PluginManager>({ { "name", "pluginmanager" } });
-  spPluginManager->RegisterPluginLoader(pInstance->createComponent<NativePluginLoader>());
+  spPluginManager->registerPluginLoader(pInstance->createComponent<NativePluginLoader>());
 
   // Init capture and broadcast of stdout/stderr
   spStdOutBC = pInstance->createComponent<Broadcaster>({ { "name", "stdoutbc" } });
@@ -530,7 +530,7 @@ void KernelImpl::LoadPlugins(Slice<SharedString> files)
     {
       if (!filename)
         continue;
-      if (spPluginManager->LoadPlugin(filename))
+      if (spPluginManager->loadPlugin(filename))
       {
         pInstance->logInfo(2, "Loaded plugin {0}", filename);
         filename = nullptr;

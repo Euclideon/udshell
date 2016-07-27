@@ -13,8 +13,8 @@ class NativePluginLoader : public PluginLoader
   EP_DECLARE_COMPONENT(ep, NativePluginLoader, PluginLoader, EPKERNEL_PLUGINVERSION, "Loads native plugins", 0)
 public:
 
-  Slice<const String> GetSupportedExtensions() const override;
-  bool LoadPlugin(String filename) override;
+  Slice<const String> getSupportedExtensions() const override;
+  bool loadPlugin(String filename) override;
 
 protected:
   NativePluginLoader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
