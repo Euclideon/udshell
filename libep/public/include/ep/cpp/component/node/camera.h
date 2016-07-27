@@ -66,7 +66,7 @@ protected:
     pImpl = createImpl(initParams);
   }
 
-  virtual bool ViewportInputEvent(const ep::InputEvent &ev) { return pImpl->ViewportInputEvent(ev); }
+  virtual bool viewportInputEvent(const ep::InputEvent &ev) { return pImpl->ViewportInputEvent(ev); }
 
   bool inputEvent(const ep::InputEvent &ev) override { return pImpl->InputEvent(ev); }
   bool update(double timeStep) override { return pImpl->Update(timeStep); }
