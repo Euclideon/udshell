@@ -34,7 +34,7 @@ protected:
     pImpl = createImpl(initParams);
   }
 
-  void Render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
+  void render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
 
 private:
   Array<const PropertyInfo> getProperties() const;

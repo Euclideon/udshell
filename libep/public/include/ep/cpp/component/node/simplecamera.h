@@ -17,8 +17,8 @@ class SimpleCamera : public Camera
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, SimpleCamera, ISimpleCamera, Camera, EPKERNEL_PLUGINVERSION, "SimpleCamera desc...", 0)
 
 public:
-  void SetMatrix(const Double4x4 &_matrix) override { pImpl->SetMatrix(_matrix); }
-  void SetPosition(const Double3 &_pos) override { pImpl->SetPosition(_pos); }
+  void setMatrix(const Double4x4 &_matrix) override { pImpl->SetMatrix(_matrix); }
+  void setPosition(const Double3 &_pos) override { pImpl->SetPosition(_pos); }
 
   void SetOrientation(const Double3 &_ypr) { pImpl->SetOrientation(_ypr); }
   void SetSpeed(double _speed) { pImpl->SetSpeed(_speed); }
@@ -34,7 +34,7 @@ public:
 
 protected:
   bool ViewportInputEvent(const ep::InputEvent &ev) override { return pImpl->ViewportInputEvent(ev); }
-  bool Update(double timeStep) override { return pImpl->Update(timeStep); }
+  bool update(double timeStep) override { return pImpl->Update(timeStep); }
 
   SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Camera(pType, pKernel, uid, initParams)

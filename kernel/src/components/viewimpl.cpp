@@ -90,7 +90,7 @@ void ViewImpl::GoToBookmark(String bookmarkName)
     const Bookmark *pBM = spScene->FindBookmark(bookmarkName);
     if (pBM)
     {
-      spCamera->SetMatrix(Double4x4::rotationYPR(pBM->ypr, pBM->position));
+      spCamera->setMatrix(Double4x4::rotationYPR(pBM->ypr, pBM->position));
       OnDirty();
     }
   }

@@ -68,8 +68,8 @@ protected:
 
   virtual bool ViewportInputEvent(const ep::InputEvent &ev) { return pImpl->ViewportInputEvent(ev); }
 
-  bool InputEvent(const ep::InputEvent &ev) override { return pImpl->InputEvent(ev); }
-  bool Update(double timeStep) override { return pImpl->Update(timeStep); }
+  bool inputEvent(const ep::InputEvent &ev) override { return pImpl->InputEvent(ev); }
+  bool update(double timeStep) override { return pImpl->Update(timeStep); }
 
 private:
   Array<const PropertyInfo> getProperties() const;

@@ -68,7 +68,7 @@ Variant CameraImpl::Save() const
 {
   Variant::VarMap params;
 
-  params.insert(KeyValuePair("matrix", pInstance->GetMatrix()));
+  params.insert(KeyValuePair("matrix", pInstance->getMatrix()));
   if (bOrtho)
     params.insert(KeyValuePair("ortho", orthoHeight));
   else

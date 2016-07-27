@@ -71,7 +71,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   {
     UDNodeRef spUDNode = pKernel->createComponent<UDNode>();
     spUDNode->SetUDModel(spModel);
-    spScene->GetRootNode()->AddChild(spUDNode);
+    spScene->GetRootNode()->addChild(spUDNode);
     spScene->MakeDirty();
     spView->setEnablePicking(true);
     spScene->AddBookmark(MutableString128(Format, "{0}_bookmark", Viewer::GetFileNameFromPath(model->asString())), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
@@ -165,7 +165,7 @@ void Viewer::OnResourceDropped(String resourceUID, int x, int y)
 
 void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 {
-  const Double4x4 &cameraMatrix = spCamera->GetMatrix();
+  const Double4x4 &cameraMatrix = spCamera->getMatrix();
 
   Double4x4 udMat = spUDNode->GetUDModel()->GetUDMatrix();
 
@@ -212,9 +212,9 @@ void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 
   Double4x4 nodeMatrix = Double4x4::translation(nodePos.toVector3());
 
-  spUDNode->SetMatrix(nodeMatrix);
+  spUDNode->setMatrix(nodeMatrix);
 
-  spScene->GetRootNode()->AddChild(spUDNode);
+  spScene->GetRootNode()->addChild(spUDNode);
   spScene->MakeDirty();
 }
 
@@ -375,7 +375,7 @@ void Viewer::CreatePlatformLogo()
 
   GeomNodeRef spGeomNode = pKernel->createComponent<GeomNode>();
   spGeomNode->SetModel(spImageModel);
-  spScene->GetRootNode()->AddChild(spGeomNode);
+  spScene->GetRootNode()->addChild(spGeomNode);
   spImageNode = spGeomNode;
 
   spMaterial->setMaterialProperty("tex", spImage);
@@ -388,12 +388,12 @@ bool Viewer::InputHook(ep::InputEvent ev)
     if (ev.key.state == 1 && ev.key.key == (int)ep::KeyCode::I) // if pressing down on the 'i' key then switch the logos visibility
     {
       NodeRef spRootNode = spScene->GetRootNode();
-      bool contains = spRootNode->Children().exists(spImageNode);
+      bool contains = spRootNode->children().exists(spImageNode);
 
       if (contains)
-        spRootNode->RemoveChild(spImageNode);
+        spRootNode->removeChild(spImageNode);
       else
-        spRootNode->AddChild(spImageNode);
+        spRootNode->addChild(spImageNode);
 
       spScene->MakeDirty();
       return true; // we return true here so I is not used as input for another action
