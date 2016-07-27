@@ -9,10 +9,6 @@
 
 #include <stdio.h>
 
-#if defined(SendMessage)
-# undef SendMessage
-#endif
-
 namespace ep {
 
 class ComponentImpl : public BaseImpl<Component, IComponent>

@@ -79,12 +79,12 @@ public:
   QtKernel(ep::Variant::VarMap commandLine);
   virtual ~QtKernel();
 
-  void RunMainLoop() override final;
-  void Quit() override final;
+  void runMainLoop() override final;
+  void quit() override final;
 
-  ep::ViewRef SetFocusView(ep::ViewRef spView) override final;
-  void DispatchToMainThread(ep::MainThreadCallback callback) override final;
-  void DispatchToMainThreadAndWait(ep::MainThreadCallback callback) override final;
+  ep::ViewRef setFocusView(ep::ViewRef spView) override final;
+  void dispatchToMainThread(ep::MainThreadCallback callback) override final;
+  void dispatchToMainThreadAndWait(ep::MainThreadCallback callback) override final;
 
   bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
   bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
@@ -110,7 +110,7 @@ private:
   void FinishInit();
   void Shutdown();
 
-  void OnFatal(ep::String msg) override final;
+  void onFatal(ep::String msg) override final;
 
   void RegisterQml(ep::String file, ep::Variant::VarMap desc);
 

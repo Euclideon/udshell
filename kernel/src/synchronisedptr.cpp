@@ -15,7 +15,7 @@ void DestroyOnMainThread(Kernel *pKernel, RefCounted *pInstance)
     }
   };
 
-  pKernel->DispatchToMainThread(MakeDelegate((S*)pInstance, &S::Destroy));
+  pKernel->dispatchToMainThread(MakeDelegate((S*)pInstance, &S::Destroy));
 }
 
 } // namespace internal

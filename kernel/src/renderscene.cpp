@@ -246,8 +246,8 @@ Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   };
   uint32_t indices[4] = { 0, 1, 2, 3 };
 
-  spQuadVerts = pKernel->CreateComponent<ArrayBuffer>({ { "name", "quad_vb" } });
-  spQuadIndices = pKernel->CreateComponent<ArrayBuffer>({ { "name", "quad_ib" } });
+  spQuadVerts = pKernel->createComponent<ArrayBuffer>({ { "name", "quad_vb" } });
+  spQuadIndices = pKernel->createComponent<ArrayBuffer>({ { "name", "quad_ib" } });
   spQuadVerts->Allocate<Vertex>(4);
   auto buffer = spQuadVerts->Map<Vertex>();
   spQuadVerts->Unmap();
@@ -346,7 +346,7 @@ RenderShaderInputConfigRef Renderer::GetShaderInputConfig(Slice<ArrayBufferRef> 
 ArrayBufferRef Renderer::AllocRenderBuffer()
 {
   if (renderBufferPool.empty())
-    return pKernel->CreateComponent<ArrayBuffer>({ { "name", SharedString::format("udrenderbuffer{0}", numRenderBuffers++) } });
+    return pKernel->createComponent<ArrayBuffer>({ { "name", SharedString::format("udrenderbuffer{0}", numRenderBuffers++) } });
   return renderBufferPool.popBack();
 }
 
@@ -416,7 +416,7 @@ void Renderer::UDThread()
     }
 
     JobDone *done = epNew(JobDone, job);
-    pKernel->DispatchToMainThread(MakeDelegate(done, &JobDone::FinishJob));
+    pKernel->dispatchToMainThread(MakeDelegate(done, &JobDone::FinishJob));
   }
 
   udIncrementSemaphore(pUDTerminateSemaphore);

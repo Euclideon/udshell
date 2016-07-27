@@ -44,7 +44,7 @@ void* Component::createImplInternal(String componentType, Variant::VarMap initPa
 
 void Component::sendMessage(String target, String message, const Variant &data) const
 {
-  return pKernel->SendMessage(target, uid, message, data);
+  return pKernel->sendMessage(target, uid, message, data);
 }
 
 } // namespace ep

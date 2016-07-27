@@ -16,7 +16,7 @@ Array<const MethodInfo> Text::getMethods() const
     EP_MAKE_METHOD(FormatJson, "Format a heirarchical structure of KeyValuePairs as Json text"),
   };
 }
-Array<const StaticFuncInfo> Text::GetStaticFuncs() const
+Array<const StaticFuncInfo> Text::getStaticFuncs() const
 {
   return{
     EP_MAKE_STATICFUNC(XMLMapToComponentParams, "Convert a map representing a heirarchy of XML elements into 'Component Params' format, i.e. suitable as InitParams and for returning from Save()"),
@@ -179,7 +179,7 @@ void TextImpl::FormatXml(Variant root)
   }
   Variant::VarMap rootElement = root.asAssocArray();
 
-  StreamRef spOut = GetKernel()->CreateComponent<MemStream>({ { "buffer", ComponentRef(pInstance) }, { "flags", OpenFlags::Write } });
+  StreamRef spOut = GetKernel()->createComponent<MemStream>({ { "buffer", ComponentRef(pInstance) }, { "flags", OpenFlags::Write } });
   spOut->WriteLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 
   FormatXmlElement(spOut, rootElement, 0);

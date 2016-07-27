@@ -27,14 +27,14 @@ void QtFocusManager::push(QQuickItem *pQtItem)
 {
   if (!pQtItem)
   {
-    QtApplication::Kernel()->LogWarning(1, "QtFocusManager -- Can't push item onto focus stack. Item is null.");
+    QtApplication::Kernel()->logWarning(1, "QtFocusManager -- Can't push item onto focus stack. Item is null.");
     return;
   }
 
   QQuickWindow *pQtWindow = pQtItem->window();
   if (!pQtWindow)
   {
-    QtApplication::Kernel()->LogWarning(1, "QtFocusManager -- Can't push item onto focus stack. Item has no parent window.");
+    QtApplication::Kernel()->logWarning(1, "QtFocusManager -- Can't push item onto focus stack. Item has no parent window.");
     return;
   }
 
@@ -58,19 +58,19 @@ void QtFocusManager::pushActiveFocusItem(QQuickWindow *pQtWindow)
 
   if (!pQtWindow)
   {
-    QtApplication::Kernel()->LogWarning(1, "QtFocusManager -- Can't push active focus item onto focus stack. No window specified and no active window.");
+    QtApplication::Kernel()->logWarning(1, "QtFocusManager -- Can't push active focus item onto focus stack. No window specified and no active window.");
     return;
   }
 
   QQuickItem *pActiveQtItem = pQtWindow->activeFocusItem();
   if (pActiveQtItem == nullptr)
   {
-    QtApplication::Kernel()->LogWarning(1, "QtFocusManager -- Can't push item onto focus stack. Item is null.");
+    QtApplication::Kernel()->logWarning(1, "QtFocusManager -- Can't push item onto focus stack. Item is null.");
     return;
   }
   else if (pActiveQtItem == pQtWindow->contentItem())
   {
-    QtApplication::Kernel()->LogWarning(1, "QtFocusManager -- Can't push item onto focus stack. Pushing window's root content item to focus stack is not alloved.");
+    QtApplication::Kernel()->logWarning(1, "QtFocusManager -- Can't push item onto focus stack. Pushing window's root content item to focus stack is not alloved.");
     return;
   }
 
@@ -82,7 +82,7 @@ void QtFocusManager::setFocus(QQuickItem *pQtItem)
 {
   if (!pQtItem)
   {
-    QtApplication::Kernel()->LogWarning(1, "QtFocusManager -- Can't set focus to item. Item is null.");
+    QtApplication::Kernel()->logWarning(1, "QtFocusManager -- Can't set focus to item. Item is null.");
     return;
   }
 
@@ -97,7 +97,7 @@ QQuickItem * QtFocusManager::pop(QQuickWindow *pQtWindow)
 
   if (!pQtWindow || !stackMap.contains(pQtWindow))
   {
-    QtApplication::Kernel()->LogWarning(1, "QtFocusManager -- Can't pop item from window's focus stack. No window specified and no active window.");
+    QtApplication::Kernel()->logWarning(1, "QtFocusManager -- Can't pop item from window's focus stack. No window specified and no active window.");
     return nullptr;
   }
 
@@ -144,7 +144,7 @@ void QtFocusManager::clear(QQuickWindow *pQtWindow)
 
   if (!pQtWindow || !stackMap.contains(pQtWindow))
   {
-    QtApplication::Kernel()->LogWarning(1, "QtFocusManager -- Can't clear window's focus stack. Given window is null and there is no active window.");
+    QtApplication::Kernel()->logWarning(1, "QtFocusManager -- Can't clear window's focus stack. Given window is null and there is no active window.");
     return;
   }
 
@@ -170,7 +170,7 @@ void QtFocusManager::OnItemDestroyed(QObject *obj)
 
   if (!pQtWindow || !stackMap.contains(pQtWindow))
   {
-    QtApplication::Kernel()->LogWarning(2, "QtFocusManager -- Can't remove item from focus stack, because parent window of item not found.");
+    QtApplication::Kernel()->logWarning(2, "QtFocusManager -- Can't remove item from focus stack, because parent window of item not found.");
     return;
   }
 
@@ -210,7 +210,7 @@ void QtFocusManager::OnItemActiveFocusChanged(bool activeFocus)
   QQuickWindow *pQtWindow = pQtItem->window();
   if (!pQtWindow || !stackMap.contains(pQtWindow))
   {
-    QtApplication::Kernel()->LogWarning(2, "QtFocusManager -- Parent window of item on focus stack not found.");
+    QtApplication::Kernel()->logWarning(2, "QtFocusManager -- Parent window of item on focus stack not found.");
     return;
   }
 
@@ -219,7 +219,7 @@ void QtFocusManager::OnItemActiveFocusChanged(bool activeFocus)
   int itemIndex = stack.indexOf(pQtItem);
   if (itemIndex == -1)
   {
-    QtApplication::Kernel()->LogWarning(2, "QtFocusManager -- Unable to find Item in parent window's focus stack.");
+    QtApplication::Kernel()->logWarning(2, "QtFocusManager -- Unable to find Item in parent window's focus stack.");
     return;
   }
 

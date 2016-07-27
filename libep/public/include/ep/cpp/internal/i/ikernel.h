@@ -33,7 +33,7 @@ public:
 
   virtual void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) = 0;
 
-  virtual bool SendMessage(String target, String sender, String message, const Variant &data) = 0;
+  virtual bool sendMessage(String target, String sender, String message, const Variant &data) = 0;
 
   virtual void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) = 0;
   virtual bool HasMessageHandler(SharedString _name) = 0;

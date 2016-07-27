@@ -75,7 +75,7 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
 
     // Console input history file
     epscope(fail) { if (!spHistoryFile) LogError("Console -- Could not open history file \"{0}\"", historyFileName); };
-    spHistoryFile = pKernel->CreateComponent<File>({ { "path", historyFileName },{ "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
+    spHistoryFile = pKernel->createComponent<File>({ { "path", historyFileName },{ "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
 
     size_t len = (size_t)spHistoryFile->Length();
     Array<char> buffer(Reserve, len);
@@ -116,9 +116,9 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
     EPTHROW_ERROR(Result::InvalidArgument, "Missing or invalid 'bOutputLog'");
   bOutputLog = vBOutputLog->asBool();
 
-  spLogger = pKernel->GetLogger();
+  spLogger = pKernel->getLogger();
   if (bOutputLog)
-    pKernel->GetLogger()->Changed.Subscribe(this, &Console::OnLogChanged);
+    pKernel->getLogger()->Changed.Subscribe(this, &Console::OnLogChanged);
 }
 
 Console::~Console()
@@ -167,7 +167,7 @@ void Console::RebuildOutput()
 
 void Console::OnLogChanged()
 {
-  Slice<LogLine> log = pKernel->GetLogger()->GetLog();
+  Slice<LogLine> log = pKernel->getLogger()->GetLog();
   LogLine &line = log.back();
 
   consoleLines.pushBack(ConsoleLine(line.ToString(), (int)log.length - 1, spLogger->GetLogLine((int)log.length - 1)->ordering));
@@ -204,9 +204,9 @@ void Console::OnConsoleOutput(Slice<const void> buf)
 void Console::RelayInput(String str)
 {
   AppendHistory(str);
-  pKernel->GetLogger()->Changed.Subscribe(this, &Console::OnLogChanged);
+  pKernel->getLogger()->Changed.Subscribe(this, &Console::OnLogChanged);
   inputFunc(str);
-  pKernel->GetLogger()->Changed.Unsubscribe(this, &Console::OnLogChanged);
+  pKernel->getLogger()->Changed.Unsubscribe(this, &Console::OnLogChanged);
 }
 
 Console::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)

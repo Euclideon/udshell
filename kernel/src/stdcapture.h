@@ -56,7 +56,7 @@ public:
 
     if (result)
     {
-      ep::Kernel::GetInstance()->LogWarning(0, "Failed to open pipe {0}\n", errno);
+      ep::Kernel::getInstance()->logWarning(0, "Failed to open pipe {0}\n", errno);
       return false;
     }
 
@@ -135,7 +135,7 @@ public:
       bytesWritten = (ptrdiff_t)write(GetOldFd(), m_captured.ptr, (int)m_captured.length);
 
     if (bytesWritten != (ptrdiff_t)m_captured.length)
-      ep::Kernel::GetInstance()->LogWarning(0, "Not all bytes written when capture ended. Attempted {0} Actual {1}\n", m_captured.length, bytesWritten);
+      ep::Kernel::getInstance()->logWarning(0, "Not all bytes written when capture ended. Attempted {0} Actual {1}\n", m_captured.length, bytesWritten);
 
     return m_captured;
   }

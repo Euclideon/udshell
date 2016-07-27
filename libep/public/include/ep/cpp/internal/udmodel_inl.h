@@ -26,7 +26,7 @@ namespace ep {
   inline void UDModel::SetConstantData(UDConstantDataType type, const T &data)
   {
     static_assert(std::is_trivial<T>::value, "T is not a trivial type");
-    BufferRef spBuffer = Kernel::GetInstance()->CreateComponent<Buffer>();
+    BufferRef spBuffer = Kernel::getInstance()->createComponent<Buffer>();
     spBuffer->allocate(sizeof(T));
     Slice<void> buffer = spBuffer->map();
     EPASSERT_THROW(buffer, Result::Failure, "Failed to Map spBuffer");
@@ -39,7 +39,7 @@ namespace ep {
   inline void UDModel::SetConstantData(UDConstantDataType type, Slice<const T> data)
   {
     static_assert(std::is_trivial<T>::value, "T is not a trivial type");
-    ArrayBufferRef spBuffer = Kernel::GetInstance()->CreateComponent<ArrayBuffer>();
+    ArrayBufferRef spBuffer = Kernel::getInstance()->createComponent<ArrayBuffer>();
     spBuffer->allocateFromData(data);
     SetConstantData(type, spBuffer);
   }

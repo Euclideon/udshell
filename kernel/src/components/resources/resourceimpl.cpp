@@ -27,7 +27,7 @@ Array<const EventInfo> Resource::getEvents() const
 MetadataRef ResourceImpl::GetMetadata() const
 {
   if (!metadata)
-    (MetadataRef&)metadata = GetKernel()->CreateComponent<Metadata>();
+    (MetadataRef&)metadata = GetKernel()->createComponent<Metadata>();
   return metadata;
 }
 

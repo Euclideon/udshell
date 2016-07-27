@@ -38,7 +38,7 @@ public:
   template <typename CT, typename ...Args>
   static CT* CreateComponentInstance(Args ...args);
 
-  bool SendMessage(String target, String sender, String message, const Variant &data) override final;
+  bool sendMessage(String target, String sender, String message, const Variant &data) override final;
 
   void RegisterMessageHandler(SharedString name, MessageHandler messageHandler) override final;
   bool HasMessageHandler(SharedString _name) override final { return messageHandlers.get(_name) != nullptr; }
@@ -177,7 +177,7 @@ public:
 
   void ReceiveMessage(String sender, String message, const Variant &data);
 
-  int SendMessage(LuaState L);
+  int sendMessage(LuaState L);
 
   void Update();
   void StreamerUpdate();

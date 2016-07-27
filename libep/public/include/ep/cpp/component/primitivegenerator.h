@@ -48,7 +48,7 @@ protected:
   ~PrimitiveGenerator()
   {}
 
-  Array<const StaticFuncInfo> GetStaticFuncs() const;
+  Array<const StaticFuncInfo> getStaticFuncs() const;
 };
 
 }

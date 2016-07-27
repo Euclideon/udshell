@@ -33,7 +33,7 @@ class epPepperModule : public pp::Module
 public:
   epPepperModule();
   virtual ~epPepperModule();
-  virtual pp::Instance* CreateInstance(PP_Instance instance);
+  virtual pp::Instance* createInstance(PP_Instance instance);
 
   static epPepperModule *gpModule;
 };
@@ -76,7 +76,7 @@ UDTHREADLOCAL udNewPepperInstance* udNewPepperInstance::pThreadLocalInstance = N
 
 
 // ---------------------------------------------------------------------------------------
-Kernel *Kernel::CreateInstanceInternal(Slice<const KeyValuePair> commandLine)
+Kernel *Kernel::createInstanceInternal(Slice<const KeyValuePair> commandLine)
 {
   return udNewPepperInstance::pThreadLocalInstance;
 }
@@ -97,14 +97,14 @@ Result udNewPepperInstance::InitInternal()
 }
 
 // ---------------------------------------------------------------------------------------
-ViewRef Kernel::SetFocusView(ViewRef spView)
+ViewRef Kernel::setFocusView(ViewRef spView)
 {
   ViewRef spOld = spFocusView;
   spFocusView = spView;
   return spOld;
 }
 
-Result Kernel::RunMainLoop()
+Result Kernel::runMainLoop()
 {
 //  epNaClInstance *pInternal = (epNaClInstance*)pInstance;
 //
@@ -117,7 +117,7 @@ Result Kernel::RunMainLoop()
   return Result::Success;
 }
 
-Result Kernel::Quit()
+Result Kernel::quit()
 {
 //  epNaClInstance *pInternal = (epNaClInstance*)pInstance;
 //
@@ -375,7 +375,7 @@ void udNewPepperInstance::HandleMessage(const pp::Var& message)
 
     // TODO: js needs to be adapted to include the destination (ie, $webview)
     String msg = data.popToken(":");
-    SendMessage("$webview", "$js", msg, data);
+    sendMessage("$webview", "$js", msg, data);
   }
 }
 
@@ -716,7 +716,7 @@ epPepperModule::~epPepperModule()
 
 // ---------------------------------------------------------------------------------------
 // Author: Manu Evans, May 2015
-pp::Instance* epPepperModule::CreateInstance(PP_Instance instance)
+pp::Instance* epPepperModule::createInstance(PP_Instance instance)
 {
   return new udNewPepperInstance(instance);
 }

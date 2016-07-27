@@ -45,7 +45,7 @@ MenuImpl::MenuImpl(Component *pInstance, Variant::VarMap initParams)
 
 Variant MenuImpl::ParseXMLString(String buffer)
 {
-  auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
+  auto spXMLBuffer = GetKernel()->createComponent<Text>();
   spXMLBuffer->allocate(buffer.length + 1);
   spXMLBuffer->CopyBuffer(buffer);
   Slice<void> buf = spXMLBuffer->Map();
@@ -124,7 +124,7 @@ bool MenuImpl::SetItemProperties(String path, Variant::VarMap properties)
   Variant *pParent = FindMenuItem(&path);
   if (!pParent)
   {
-    GetKernel()->LogDebug(2, "Can't set properties of non-existent menu item \"{0}\"", path);
+    GetKernel()->logDebug(2, "Can't set properties of non-existent menu item \"{0}\"", path);
     return false;
   }
 
@@ -261,7 +261,7 @@ void MenuImpl::SetMenuProperties(Variant &menu, Variant::VarMap properties)
     String itemName = item.key.asString();
 
     if (itemName.eq("command"))
-      *menu.getItem("shortcut") = GetKernel()->GetCommandManager()->GetShortcut(item.value.asString());
+      *menu.getItem("shortcut") = GetKernel()->getCommandManager()->GetShortcut(item.value.asString());
 
     if (itemName.eq("children"))
     {

@@ -32,7 +32,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     if (udModel && udModel->is(Variant::SharedPtrType::Component))
       model = component_cast<UDModel>(udModel->asComponent());
     else
-      model = pKernel->CreateComponent<UDModel>();
+      model = pKernel->createComponent<UDModel>();
 
     UDModelImpl *pModelImpl = model->GetImpl<UDModelImpl>();
     pModelImpl->pOctree = pOctree;
@@ -118,7 +118,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
 
 void UDSource::StaticInit(ep::Kernel *pKernel)
 {
-  pKernel->RegisterExtensions(pKernel->GetComponentDesc(componentID()), extensions);
+  pKernel->registerExtensions(pKernel->getComponentDesc(componentID()), extensions);
 }
 
 } // namespace ep

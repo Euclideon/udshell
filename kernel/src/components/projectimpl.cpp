@@ -35,20 +35,20 @@ Array<const MethodInfo> Project::getMethods() const
 ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)
 {
-  spResourceManager = GetKernel()->GetResourceManager();
+  spResourceManager = GetKernel()->getResourceManager();
 
   const Variant *pSrc = initParams.get("src");
   StreamRef spSrc = nullptr;
 
   if (pSrc && pSrc->is(Variant::Type::String))
   {
-    spSrc = GetKernel()->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+    spSrc = GetKernel()->createComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
 
     // set $(ProjectDir)
     SetVars(pSrc->asString());
 
     // HACK: fix me later!!!
-    auto dir = GetKernel()->GetEnvironmentVar("ProjectDir");
+    auto dir = GetKernel()->getEnvironmentVar("ProjectDir");
 #if defined(EP_LINUX)
     if (chdir(dir.toStringz()) != 0)
       LogWarning(2, "Unable to change directory to {0}", dir);
@@ -88,7 +88,7 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
 
 void ProjectImpl::SaveProject()
 {
-  auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
+  auto spXMLBuffer = GetKernel()->createComponent<Text>();
   spXMLBuffer->reserve(10240);
 
   Variant::VarMap projectNode;
@@ -117,7 +117,7 @@ void ProjectImpl::SaveProject()
 
   try
   {
-    StreamRef spFile = GetKernel()->CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    StreamRef spFile = GetKernel()->createComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
     spFile->Write(buffer);
   }
   catch (EPException &)
@@ -188,7 +188,7 @@ void ProjectImpl::ParseActivity(Variant node)
     if (vParams.is(Variant::SharedPtrType::AssocArray))
       initParams = vParams.asAssocArray();
 
-    activities.pushBack(component_cast<Activity>(GetKernel()->CreateComponent(node["name"].asString(), initParams)));
+    activities.pushBack(component_cast<Activity>(GetKernel()->createComponent(node["name"].asString(), initParams)));
   }
   catch (EPException &)
   {
@@ -198,12 +198,12 @@ void ProjectImpl::ParseActivity(Variant node)
 
 void ProjectImpl::SetVars(String path)
 {
-  GetKernel()->SetEnvironmentVar("ProjectPath", path);
+  GetKernel()->setEnvironmentVar("ProjectPath", path);
   size_t s1 = path.findLast('/');
   size_t s2 = path.findLast('\\');
   if (s2 > s1 && s2 < path.length)
     s1 = s2;
-  GetKernel()->SetEnvironmentVar("ProjectDir", path.slice(0, s1));
+  GetKernel()->setEnvironmentVar("ProjectDir", path.slice(0, s1));
 }
 
 } // namespace ep

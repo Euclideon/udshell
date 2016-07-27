@@ -25,7 +25,7 @@ Array<const MethodInfo> Lua::getMethods() const
 Lua::Lua(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Component(pType, pKernel, uid, initParams)
 {
-  spOutputBC = pKernel->CreateComponent<Broadcaster>();
+  spOutputBC = pKernel->createComponent<Broadcaster>();
   pLua = epNew(LuaState, pKernel);
 }
 

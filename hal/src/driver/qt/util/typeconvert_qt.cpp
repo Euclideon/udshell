@@ -30,7 +30,7 @@ Variant epToVariant(QObject *pQObj)
   epDebugPrintf("TODO: epToVariant: Unsupported QObject conversion '%s'; we need a global pKernel pointer >_<\n", pQObj->metaObject()->className());
 
   // TODO: create generic QObjectComponent which thinly wraps a QObject
-//  pKernel->CreateComponent<QObjectComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
+//  pKernel->createComponent<QObjectComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
   return Variant(nullptr);
 }
 

@@ -67,7 +67,7 @@ RenderableSceneRef SceneImpl::GetRenderScene()
   RenderScene scene;
   rootNode->DoRender(scene, rootNode->GetMatrix());
 
-  spCache = Convert(scene, GetKernel()->GetImpl()->GetRenderer().ptr());
+  spCache = Convert(scene, GetKernel()->getImpl()->GetRenderer().ptr());
 
   bDirty = false;
   return spCache;
@@ -222,7 +222,7 @@ SceneImpl::SceneImpl(Component *_pInstance, Variant::VarMap initParams)
   : ImplSuper(_pInstance)
 {
   timeStep = 1.0 / 30.0;
-  rootNode = GetKernel()->CreateComponent<Node>();
+  rootNode = GetKernel()->createComponent<Node>();
 
   Variant *pSrc = initParams.get("url");
   if (pSrc && pSrc->is(Variant::Type::String))
@@ -239,8 +239,8 @@ SceneImpl::SceneImpl(Component *_pInstance, Variant::VarMap initParams)
 void SceneImpl::LoadSceneFile(String filePath)
 {
   GeomSourceRef spSceneDS;
-  epscope(fail) { if (!spSceneDS) GetKernel()->LogError("Failed to load scene file \"{0}\"", filePath); };
-  spSceneDS = GetKernel()->CreateComponent<GeomSource>({ { "src", filePath } });
+  epscope(fail) { if (!spSceneDS) GetKernel()->logError("Failed to load scene file \"{0}\"", filePath); };
+  spSceneDS = GetKernel()->createComponent<GeomSource>({ { "src", filePath } });
 
   NodeRef spNode;
   if (spSceneDS->GetNumResources() > 0)
@@ -259,7 +259,7 @@ void SceneImpl::LoadSceneFile(String filePath)
 void SceneImpl::AddModelsToResourceManager()
 {
   Variant::VarMap modelMap;
-  ResourceManagerRef spRM = GetKernel()->GetResourceManager();
+  ResourceManagerRef spRM = GetKernel()->getResourceManager();
 
   BuildModelMap(rootNode, modelMap);
 

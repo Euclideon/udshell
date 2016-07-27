@@ -67,7 +67,7 @@ void TimerImpl::TimerCallback(HalTimer *pTimer, void *pParam)
 {
   TimerImpl* pThis = (TimerImpl*)pParam;
   pThis->pInstance->IncRef();
-  pThis->GetKernel()->DispatchToMainThread(MakeDelegate(pThis, &TimerImpl::MessageCallback));
+  pThis->GetKernel()->dispatchToMainThread(MakeDelegate(pThis, &TimerImpl::MessageCallback));
 }
 
 } // namespace ep

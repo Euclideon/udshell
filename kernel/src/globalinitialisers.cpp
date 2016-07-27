@@ -26,7 +26,7 @@ namespace internal {
   // For the implementation of epInternalInit defined in this file to override
   // the weak version in epplatform.cpp at least one symbol from this file must
   // be referenced externally.  This has been implemented in kernelimpl.cpp inside
-  // CreateInstance().
+  // createInstance().
   void *GetStaticImplRegistry()
   {
     if (!KernelImpl::s_pStaticImplRegistry)

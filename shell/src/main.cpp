@@ -52,15 +52,15 @@ void DbgMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
     // TODO: replace this with something more robust - maybe a full logging system and status console
     switch (type) {
       case QtWarningMsg:
-        spKernel->LogWarning(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        spKernel->logWarning(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
       case QtCriticalMsg:
       case QtFatalMsg:
-        spKernel->LogError(SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        spKernel->logError(SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
       case QtDebugMsg:
       default:
-        spKernel->LogDebug(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
+        spKernel->logDebug(2, SharedString::format("Qt: {0} ({1}:{2}, {3})", msg.toUtf8().data(), context.file, context.line, context.function));
         break;
     }
   }
@@ -117,7 +117,7 @@ void OnActivityChanged(String uid)
   if (uid.empty())
     return;
 
-  ActivityRef spActivity = component_cast<Activity>(spKernel->FindComponent(uid));
+  ActivityRef spActivity = component_cast<Activity>(spKernel->findComponent(uid));
   if (!spActivity)
   {
     spKernel->logError("Unable to activate Activity \"{0}\". Component does not exist", uid);
@@ -141,7 +141,7 @@ void InitProject()
   spToolBar->SetItemProperties("New.../New Activity", { { "enabled", true } });
 
   // Enable shortcuts
-  auto spCommandManager = spKernel->GetCommandManager();
+  auto spCommandManager = spKernel->getCommandManager();
   spCommandManager->EnableShortcut("saveproject");
   spCommandManager->EnableShortcut("saveprojectas");
   spCommandManager->EnableShortcut("newactivity");
@@ -160,11 +160,11 @@ void NewProject(String filePath)
     for (size_t i = 0; i < activities.length; i++)
       RemoveUIActivity(activities[i]);
 
-    spKernel->GetResourceManager()->ClearResources();
+    spKernel->getResourceManager()->ClearResources();
   }
   spProject = nullptr;
 
-  spProject = spKernel->CreateComponent<Project>({ { "name", "project" } });
+  spProject = spKernel->createComponent<Project>({ { "name", "project" } });
   spProject->SetSrc(sFilePath);
 
   projectName = GetNameFromFilePath(sFilePath);
@@ -179,11 +179,11 @@ void OpenProject(String filePath)
 
   try
   {
-    spNewProject = spKernel->CreateComponent<Project>({ { "src", filePath } });
+    spNewProject = spKernel->createComponent<Project>({ { "src", filePath } });
   }
   catch (EPException &)
   {
-    spKernel->LogWarning(2, "Couldn't open project file \"{0}\"", MutableString256().urlDecode(filePath));
+    spKernel->logWarning(2, "Couldn't open project file \"{0}\"", MutableString256().urlDecode(filePath));
     return;
   }
 
@@ -196,7 +196,7 @@ void OpenProject(String filePath)
       spProject->RemoveActivity(activities[i]);
     }
 
-    spKernel->GetResourceManager()->ClearResources();
+    spKernel->getResourceManager()->ClearResources();
   }
 
   spProject = spNewProject;
@@ -224,7 +224,7 @@ void SaveProject()
 
 void NewActivity(String typeID)
 {
-  auto spActivity = component_cast<Activity>(spKernel->CreateComponent(typeID, nullptr));
+  auto spActivity = component_cast<Activity>(spKernel->createComponent(typeID, nullptr));
   spProject->AddActivity(spActivity);
   AddUIActivity(spActivity);
 }
@@ -242,7 +242,7 @@ Array<Variant::VarMap> GetActivitiesInfo()
 {
   Array<Variant::VarMap> infoArray;
 
-  Array<const ComponentDesc *> descs = spKernel->GetDerivedComponentDescs<Activity>(false);
+  Array<const ComponentDesc *> descs = spKernel->getDerivedComponentDescs<Activity>(false);
   for (auto desc : descs)
   {
     Variant::VarMap activityInfo;
@@ -279,7 +279,7 @@ void Deinit(String sender, String message, const Variant &data)
 static GeomNodeRef CreateTestModel(KernelRef kernel)
 {
   // Vertex Shader
-  ShaderRef vertexShader = kernel->CreateComponent<Shader>();
+  ShaderRef vertexShader = kernel->createComponent<Shader>();
   {
     vertexShader->SetType(ShaderType::VertexShader);
 
@@ -296,7 +296,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   }
 
   // Pixel Shader
-  ShaderRef pixelShader = kernel->CreateComponent<Shader>();
+  ShaderRef pixelShader = kernel->createComponent<Shader>();
   {
     pixelShader->SetType(ShaderType::PixelShader);
 
@@ -309,15 +309,15 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   }
 
   // Material
-  MaterialRef material = kernel->CreateComponent<Material>();
+  MaterialRef material = kernel->createComponent<Material>();
   material->SetShader(ShaderType::VertexShader, vertexShader);
   material->SetShader(ShaderType::PixelShader, pixelShader);
 #if 0
   material->SetTexture(0, texture);
 #endif // 0
 
-  ArrayBufferRef vertexBuffer = kernel->CreateComponent<ArrayBuffer>();
-  ArrayBufferRef indexBuffer = kernel->CreateComponent<ArrayBuffer>();
+  ArrayBufferRef vertexBuffer = kernel->createComponent<ArrayBuffer>();
+  ArrayBufferRef indexBuffer = kernel->createComponent<ArrayBuffer>();
 
   // Generate Cube
   PrimitiveGenerator::GenerateCube(vertexBuffer, indexBuffer);
@@ -326,7 +326,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   metadata->Get("attributeinfo")[0].insertItem("name", "a_position");
 
   // Colour Buffer
-  ArrayBufferRef colourBuffer = kernel->CreateComponent<ArrayBuffer>();
+  ArrayBufferRef colourBuffer = kernel->createComponent<ArrayBuffer>();
   {
     colourBuffer->allocateFromData(Slice<const Float4>{
       Float4{ 1.0f, 1.0f, 1.0f, 1.0f },
@@ -345,7 +345,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 
 #if 0
   // Texture
-  ArrayBufferRef texture = kernel->CreateComponent<ArrayBuffer>();
+  ArrayBufferRef texture = kernel->createComponent<ArrayBuffer>();
   {
     texture->Allocate("White", sizeof(uint32_t), { 32, 32 });
     Slice<void> data  = texture->Map();
@@ -354,7 +354,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   }
 #endif // 0
 
-  ModelRef model = kernel->CreateComponent<Model>();
+  ModelRef model = kernel->createComponent<Model>();
   model->setName("TestModel");
   model->AddVertexArray(vertexBuffer);
   model->AddVertexArray(colourBuffer);
@@ -362,7 +362,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   model->SetMaterial(material);
   model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), indexBuffer->getLength() });
 
-  GeomNodeRef geomNode = kernel->CreateComponent<GeomNode>();
+  GeomNodeRef geomNode = kernel->createComponent<GeomNode>();
   geomNode->SetModel(model);
 
   return geomNode;
@@ -381,41 +381,41 @@ void Register(String sender, String message, const Variant &data)
 
 void Init(String sender, String message, const Variant &data)
 {
-  epscope(fail) { if (!spMainWindow) spKernel->LogError("Error creating MainWindow UI Component\n"); };
-  spMainWindow = component_cast<Window>(spKernel->CreateComponent("ui.AppWindow"));
+  epscope(fail) { if (!spMainWindow) spKernel->logError("Error creating MainWindow UI Component\n"); };
+  spMainWindow = component_cast<Window>(spKernel->createComponent("ui.AppWindow"));
 
-  epscope(fail) { if (!spTopLevelUI) spKernel->LogError("Error creating top Level UI Component\n"); };
-  spTopLevelUI = component_cast<UIComponent>(spKernel->CreateComponent("ui.Main"));
+  epscope(fail) { if (!spTopLevelUI) spKernel->logError("Error creating top Level UI Component\n"); };
+  spTopLevelUI = component_cast<UIComponent>(spKernel->createComponent("ui.Main"));
 
-  epscope(fail) { if (!spMessageBox) spKernel->LogError("Error creating MessageBox UI Component\n"); };
-  spMessageBox = component_cast<UIComponent>(spKernel->CreateComponent("ui.MessageBox", Variant::VarMap{ { "name", "messagebox" } }));
+  epscope(fail) { if (!spMessageBox) spKernel->logError("Error creating MessageBox UI Component\n"); };
+  spMessageBox = component_cast<UIComponent>(spKernel->createComponent("ui.MessageBox", Variant::VarMap{ { "name", "messagebox" } }));
   spTopLevelUI->set("messageboxcomp", spMessageBox);
 
   UIComponentRef spConsole;
-  epscope(fail) { if (!spConsole) spKernel->LogError("Error creating Console UI Component\n"); };
-  spConsole = component_cast<UIComponent>(spKernel->CreateComponent("ui.Console"));
+  epscope(fail) { if (!spConsole) spKernel->logError("Error creating Console UI Component\n"); };
+  spConsole = component_cast<UIComponent>(spKernel->createComponent("ui.Console"));
   spTopLevelUI->set("uiconsole", spConsole);
 
   // Load menus
   String menusPath(":/menus.xml");
   MutableString<0> menuStr = ReadResourceFile(menusPath);
   if(menuStr.empty())
-    spKernel->LogWarning(2, "Menus XML file \"{0}\" does not exist.", menusPath);
+    spKernel->logWarning(2, "Menus XML file \"{0}\" does not exist.", menusPath);
 
-  spMenu = spKernel->CreateComponent<Menu>({ { "src", menuStr } });
+  spMenu = spKernel->createComponent<Menu>({ { "src", menuStr } });
   spTopLevelUI->set("menucomp", spMenu);
 
   // Load toolbar
   String toolBarPath(":/toolbar.xml");
   MutableString<0> toolBarStr = ReadResourceFile(toolBarPath);
   if (toolBarStr.empty())
-    spKernel->LogWarning(2, "Toolbar XML file \"{0}\" does not exist.", toolBarPath);
+    spKernel->logWarning(2, "Toolbar XML file \"{0}\" does not exist.", toolBarPath);
 
-  spToolBar = spKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
+  spToolBar = spKernel->createComponent<Menu>({ { "src", toolBarStr } });
   spTopLevelUI->set("toolbarcomp", spToolBar);
 
   // New Activity selector panel
-  auto spActivitySelector = component_cast<UIComponent>(spKernel->CreateComponent("ui.ActivitySelector"));
+  auto spActivitySelector = component_cast<UIComponent>(spKernel->createComponent("ui.ActivitySelector"));
   spActivitySelector->set("activitiesinfo", GetActivitiesInfo());
   spTopLevelUI->set("activityselector", spActivitySelector);
 
@@ -445,8 +445,8 @@ void Init(String sender, String message, const Variant &data)
 
   if (shutdownTest)
   {
-    spCITimer = spKernel->CreateComponent<Timer>({ { "countdown", 4 } });
-    spCITimerSub = spCITimer->Elapsed.Subscribe([]() { Kernel::GetInstance()->Quit(); });
+    spCITimer = spKernel->createComponent<Timer>({ { "countdown", 4 } });
+    spCITimerSub = spCITimer->Elapsed.Subscribe([]() { Kernel::getInstance()->quit(); });
   }
 
 #if EP_DEBUG
@@ -454,7 +454,7 @@ void Init(String sender, String message, const Variant &data)
 #endif // EP_DEBUG
   SceneRef spDircubeScene;
   {
-    ComponentRef spComp = spKernel->FindComponent("DirCubeScene");
+    ComponentRef spComp = spKernel->findComponent("DirCubeScene");
     if (spComp)
     {
       spDircubeScene = component_cast<Scene>(spComp);
@@ -528,13 +528,13 @@ int main(int argc, char *argv[])
   {
     // create a kernel
     int threadCount = epGetHardwareThreadCount() - 1;
-    spKernel = SharedPtr<Kernel>(Kernel::CreateInstance(epParseCommandLine(argc, argv), threadCount));
+    spKernel = SharedPtr<Kernel>(Kernel::createInstance(epParseCommandLine(argc, argv), threadCount));
 
-    spKernel->RegisterMessageHandler("register", &Register);
-    spKernel->RegisterMessageHandler("init", &Init);
-    spKernel->RegisterMessageHandler("deinit", &Deinit);
+    spKernel->registerMessageHandler("register", &Register);
+    spKernel->registerMessageHandler("init", &Init);
+    spKernel->registerMessageHandler("deinit", &Deinit);
 
-    spKernel->RunMainLoop();
+    spKernel->runMainLoop();
 
     spKernel = nullptr;
   }

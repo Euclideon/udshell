@@ -10,9 +10,9 @@ namespace internal {
 
 void Log(int type, int level, String text)
 {
-  Kernel *pK = Kernel::GetInstance();
+  Kernel *pK = Kernel::getInstance();
   if (pK)
-    pK->Log(type, level, text);
+    pK->log(type, level, text);
   else
     epDebugWrite(text.toStringz());
 }

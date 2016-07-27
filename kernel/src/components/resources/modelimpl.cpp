@@ -69,7 +69,7 @@ void ModelImpl::RemoveVertexArray(ArrayBufferRef spVertices)
 
 ResourceRef ModelImpl::Clone() const
 {
-  ModelRef spNewModel = GetKernel()->CreateComponent<Model>();
+  ModelRef spNewModel = GetKernel()->createComponent<Model>();
   ModelImpl* pImpl = spNewModel->GetImpl<ModelImpl>();
 
   pImpl->vertexArrays = vertexArrays;
