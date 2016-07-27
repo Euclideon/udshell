@@ -84,16 +84,16 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
   UIComponentRef spViewport;
   epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component\n"); };
-  spViewport = component_cast<UIComponent>(pKernel->CreateComponent("ui.viewport", Variant::VarMap{ { "view", spView } }));
+  spViewport = component_cast<UIComponent>(pKernel->CreateComponent("ui.Viewport", Variant::VarMap{ { "view", spView } }));
 
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
-  spViewerUI = component_cast<UIComponent>(pKernel->CreateComponent("viewer.mainui"));
+  spViewerUI = component_cast<UIComponent>(pKernel->CreateComponent("viewer.MainUI"));
   spViewerUI->Set("viewport", spViewport);
   spViewerUI->Subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
 
   epscope(fail) { if(!spUIBookmarks) pKernel->LogError("Error creating bookmarks UI Component\n"); };
-  spUIBookmarks = component_cast<UIComponent>(pKernel->CreateComponent("ui.bookmarksui"));
+  spUIBookmarks = component_cast<UIComponent>(pKernel->CreateComponent("ui.BookmarksUI"));
   spUIBookmarks->Set("view", spView);
   spViewerUI->Set("bookmarkscomp", spUIBookmarks);
 

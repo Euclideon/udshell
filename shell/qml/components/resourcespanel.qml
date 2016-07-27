@@ -17,7 +17,7 @@ Rectangle {
   color: Theme.toolPanelBgColor
 
   // TODO: Bug EP-66
-  //property var epTypeDesc: { "super": "ep.uicomponent", "id": "ui.resourcespanel" }
+  //property var epTypeDesc: { "id": "ui.ResourcesPanel", "super": "ep.UIComponent" }
   property var commandManager
   property var resourceManager
   property var messagebox

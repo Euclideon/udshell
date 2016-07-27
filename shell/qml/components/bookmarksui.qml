@@ -15,7 +15,7 @@ Rectangle {
   anchors.fill: parent
   color: Theme.toolPanelBgColor
 
-  property var epTypeDesc: { "super": "ep.uicomponent", "id": "ui.bookmarksui" }
+  property var epTypeDesc: { "id": "ui.BookmarksUI", "super": "ep.UIComponent" }
   property var commandManager
   property var messagebox
   property var view

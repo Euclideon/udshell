@@ -382,18 +382,18 @@ void Register(String sender, String message, const Variant &data)
 void Init(String sender, String message, const Variant &data)
 {
   epscope(fail) { if (!spMainWindow) spKernel->LogError("Error creating MainWindow UI Component\n"); };
-  spMainWindow = component_cast<Window>(spKernel->CreateComponent("ui.appwindow"));
+  spMainWindow = component_cast<Window>(spKernel->CreateComponent("ui.AppWindow"));
 
   epscope(fail) { if (!spTopLevelUI) spKernel->LogError("Error creating top Level UI Component\n"); };
-  spTopLevelUI = component_cast<UIComponent>(spKernel->CreateComponent("ui.main"));
+  spTopLevelUI = component_cast<UIComponent>(spKernel->CreateComponent("ui.Main"));
 
   epscope(fail) { if (!spMessageBox) spKernel->LogError("Error creating MessageBox UI Component\n"); };
-  spMessageBox = component_cast<UIComponent>(spKernel->CreateComponent("ui.messagebox", Variant::VarMap{ { "name", "messagebox" } }));
+  spMessageBox = component_cast<UIComponent>(spKernel->CreateComponent("ui.MessageBox", Variant::VarMap{ { "name", "messagebox" } }));
   spTopLevelUI->Set("messageboxcomp", spMessageBox);
 
   UIComponentRef spConsole;
   epscope(fail) { if (!spConsole) spKernel->LogError("Error creating Console UI Component\n"); };
-  spConsole = component_cast<UIComponent>(spKernel->CreateComponent("ui.console"));
+  spConsole = component_cast<UIComponent>(spKernel->CreateComponent("ui.Console"));
   spTopLevelUI->Set("uiconsole", spConsole);
 
   // Load menus
@@ -415,7 +415,7 @@ void Init(String sender, String message, const Variant &data)
   spTopLevelUI->Set("toolbarcomp", spToolBar);
 
   // New Activity selector panel
-  auto spActivitySelector = component_cast<UIComponent>(spKernel->CreateComponent("ui.activityselector"));
+  auto spActivitySelector = component_cast<UIComponent>(spKernel->CreateComponent("ui.ActivitySelector"));
   spActivitySelector->Set("activitiesinfo", GetActivitiesInfo());
   spTopLevelUI->Set("activityselector", spActivitySelector);
 

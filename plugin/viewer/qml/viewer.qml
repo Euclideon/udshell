@@ -13,7 +13,7 @@ FocusScope {
   anchors.topMargin: 4
   anchors.bottomMargin: 4
 
-  property var epTypeDesc: { "super": "ep.uicomponent", "id": "viewer.mainui" }
+  property var epTypeDesc: { "id": "viewer.MainUI", "super": "ep.UIComponent" }
   property var viewport
   property var sidebarcomp
   property var bookmarkscomp
@@ -44,7 +44,7 @@ FocusScope {
   //}
 
   Component.onCompleted: {
-    sidebarcomp = EPKernel.createComponent("ep.menu", {});
+    sidebarcomp = EPKernel.createComponent("ep.Menu", {});
     if (!sidebarcomp) {
       console.error("Unable to create Sidebar Component");
       return;

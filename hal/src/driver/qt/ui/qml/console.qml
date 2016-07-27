@@ -8,7 +8,7 @@ import Platform 0.1
 Item {
   id: consoleWin
 
-  property var epTypeDesc: { "id": "ui.console", "super": "ep.uicomponent" }
+  property var epTypeDesc: { "id": "ui.Console", "super": "ep.UIComponent" }
   property var tabs: []
 
   visible: false
@@ -40,7 +40,7 @@ Item {
     // Console Tab
     var tab1 = tv.addTab("Shell", consoleTab);
     tab1.active = true;
-    tab1.item.consolecomp = EPKernel.createComponent("ep.console", {"title" : "Shell", "setOutputFunc" : tab1.item.setOutText, "appendOutputFunc" : tab1.item.appendOutText, "hasInput" : true, "inputFunc" : function(str) { EPKernel.exec(str); }, "historyFileName" : "console.history", "outputLog" : false});
+    tab1.item.consolecomp = EPKernel.createComponent("ep.Console", {"title" : "Shell", "setOutputFunc" : tab1.item.setOutText, "appendOutputFunc" : tab1.item.appendOutText, "hasInput" : true, "inputFunc" : function(str) { EPKernel.exec(str); }, "historyFileName" : "console.history", "outputLog" : false});
     var lua = EPKernel.getLua();
     tab1.item.consolecomp.call("addbroadcaster", lua.get("outputbroadcaster"));
     tabs.push(tab1);
@@ -48,13 +48,13 @@ Item {
     // Log Tab
     var tab2 = tv.addTab("Log", consoleTab);
     tab2.active = true;
-    tab2.item.consolecomp = EPKernel.createComponent("ep.console", {"title" : "Log", "setOutputFunc" : tab2.item.setOutText, "appendOutputFunc" : tab2.item.appendOutText, "hasInput" : false, "outputLog" : true});
+    tab2.item.consolecomp = EPKernel.createComponent("ep.Console", {"title" : "Log", "setOutputFunc" : tab2.item.setOutText, "appendOutputFunc" : tab2.item.appendOutText, "hasInput" : false, "outputLog" : true});
     tabs.push(tab2);
 
     // StdOut/StdErr Tab
     var tab3 = tv.addTab("StdOut/StdErr", consoleTab);
     tab3.active = true;
-    tab3.item.consolecomp = EPKernel.createComponent("ep.console", {"title" : "StdOut/StdErr", "setOutputFunc" : tab3.item.setOutText, "appendOutputFunc" : tab3.item.appendOutText, "hasInput" : false, "outputLog" : false});
+    tab3.item.consolecomp = EPKernel.createComponent("ep.Console", {"title" : "StdOut/StdErr", "setOutputFunc" : tab3.item.setOutText, "appendOutputFunc" : tab3.item.appendOutText, "hasInput" : false, "outputLog" : false});
     tab3.item.consolecomp.call("addbroadcaster", EPKernel.getStdOutBroadcaster());
     tab3.item.consolecomp.call("addbroadcaster", EPKernel.getStdErrBroadcaster());
     tabs.push(tab3);

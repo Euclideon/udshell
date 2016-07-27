@@ -12,7 +12,7 @@ Rectangle {
   anchors.fill: parent
   color: Theme.windowBgColor
 
-  property var epTypeDesc: { "id": "ui.main", "super": "ep.uicomponent" }
+  property var epTypeDesc: { "id": "ui.Main", "super": "ep.UIComponent" }
   property var uiconsole
   property var messageboxcomp
   property var messagebox
@@ -246,7 +246,7 @@ Rectangle {
             activityqq.visible = true;
             activityqq.forceActiveFocus();
 
-            if (activity.get("type") == "ep.viewer")
+            if (activity.get("type") == "ep.Viewer")
               initViewerUI(activity);
             else
               initViewerUI(null);

@@ -101,7 +101,7 @@ Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::St
         typeDesc.insert("displayname", pId->asString());
 
       // id must be lowercase
-      *pId = ep::MutableString128(pId->asString()).toLower();
+      *pId = ep::MutableString128(pId->asString());
 
       if (!typeDesc.get("description"))
         typeDesc.insert("description", ep::SharedString::format("{0} based QML component - {1}", pSuper->asString(), filename));

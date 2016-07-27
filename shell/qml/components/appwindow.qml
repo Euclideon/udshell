@@ -9,8 +9,8 @@ Window {
   height: 540
 
   property var epTypeDesc: {
-    "super": "ep.window",
-    "id": "ui.appwindow",
+    "id": "ui.AppWindow",
+    "super": "ep.Window",
     "displayname": "UI.AppWindow",
     "description": "QML Based Application Window"
   }

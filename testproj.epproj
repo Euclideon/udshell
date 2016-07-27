@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
   <activities>
-    <ep.viewer>
+    <ep.Viewer>
       <camera>
         <farplane>7500</farplane>
         <helicoptermode>false</helicoptermode>
@@ -21,8 +21,8 @@
           </bookmark0>
         </bookmarks>
       </scene>
-    </ep.viewer>
-    <ep.viewer>
+    </ep.Viewer>
+    <ep.Viewer>
       <camera>
         <farplane>7500</farplane>
         <helicoptermode>false</helicoptermode>
@@ -36,6 +36,6 @@
         <name>DirCubeScene</name>
         <url>data/udscene.dae</url>
       </scene>
-    </ep.viewer>
+    </ep.Viewer>
   </activities>
 </project>
