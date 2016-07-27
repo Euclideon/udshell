@@ -49,7 +49,7 @@ namespace ep {
   {
     static_assert(std::is_trivial<T>::value, "T is not a trivial type");
     BufferRef spBuffer = getConstantData(type);
-    EPTHROW_IF(!spBuffer, Result::InvalidArgument, "There is no constant data set for {0}", type.StringOf());
+    EPTHROW_IF(!spBuffer, Result::InvalidArgument, "There is no constant data set for {0}", type.stringof());
 
     T data;
     Slice<void> buffer = spBuffer->mapForRead();

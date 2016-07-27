@@ -684,7 +684,7 @@ template<typename T,
 >::type* = nullptr>
 inline Variant epToVariant(T e)
 {
-  return Variant(e.v, e.Desc(), std::is_base_of<Bitfield, T>::value);
+  return Variant(e.v, e.desc(), std::is_base_of<Bitfield, T>::value);
 }
 
 // for arrays
@@ -792,7 +792,7 @@ inline void epFromVariant(const Variant &v, T *pE)
   {
     size_t val;
     const EnumDesc *pDesc = v.asEnum(&val);
-    EPASSERT_THROW(pDesc->name.eq(T::Name()), Result::InvalidType, "Incorrect type: enum type {0} can not convert to {1}", pDesc->name, T::Name());
+    EPASSERT_THROW(pDesc->name.eq(T::name()), Result::InvalidType, "Incorrect type: enum type {0} can not convert to {1}", pDesc->name, T::name());
     *pE = T((typename T::Type)val);
   }
   else if (v.is(Variant::Type::Int))
