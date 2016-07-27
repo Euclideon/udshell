@@ -64,11 +64,11 @@ SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initPar
   if (paramSpeed)
     SetSpeed(paramSpeed->asFloat());
 
-  const Variant *paramInvert = initParams.get("invertyaxis");
+  const Variant *paramInvert = initParams.get("invertYAxis");
   if (paramInvert)
     SetInvertedYAxis(paramInvert->asBool());
 
-  const Variant *paramHeli = initParams.get("helicoptermode");
+  const Variant *paramHeli = initParams.get("helicopterMode");
   if (paramHeli)
     SetHelicopterMode(paramHeli->asBool());
 }
@@ -310,8 +310,8 @@ Variant SimpleCameraImpl::Save() const
   Variant::VarMap params = var.asAssocArray();
 
   params.insert("speed", speed);
-  params.insert("invertyaxis", (invertedYAxis == -1.0 ? true : false));
-  params.insert("helicoptermode", helicopterMode);
+  params.insert("invertYAxis", (invertedYAxis == -1.0 ? true : false));
+  params.insert("helicopterMode", helicopterMode);
 
   return Variant(std::move(params));
 }
