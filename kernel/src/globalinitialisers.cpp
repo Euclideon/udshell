@@ -110,7 +110,7 @@ static void _Free(void *pMemory)
 
 static void _Assert(String condition, String message, String file, int line)
 {
-   IF_EPASSERT(AssertFailed(condition, message, file, line);)
+   IF_EPASSERT(assertFailed(condition, message, file, line);)
 }
 
 static void _DestroyComponent(Component *pInstance)

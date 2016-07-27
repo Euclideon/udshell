@@ -29,7 +29,7 @@ MutableString256 assertBuffer;
 
 } // namespace internal
 
-void AssertFailed(ep::String condition, ep::String message, ep::String file, int line)
+void assertFailed(ep::String condition, ep::String message, ep::String file, int line)
 {
   // TODO: Agree on formatting of assets
   if (ep::internal::gUnitTesting)
@@ -51,7 +51,7 @@ extern "C" {
 
 void epAssertFailed(const char *condition, const char *message, const char *file, int line)
 {
-  ep::AssertFailed(condition, message, file, line);
+  ep::assertFailed(condition, message, file, line);
 }
 
 void epDebugWrite(const char *pString)
