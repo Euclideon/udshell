@@ -323,7 +323,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   PrimitiveGenerator::GenerateCube(vertexBuffer, indexBuffer);
 
   MetadataRef metadata = vertexBuffer->getMetadata();
-  metadata->Get("attributeinfo")[0].insertItem("name", "a_position");
+  metadata->get("attributeInfo")[0].insertItem("name", "a_position");
 
   // Colour Buffer
   ArrayBufferRef colourBuffer = kernel->createComponent<ArrayBuffer>();
@@ -340,7 +340,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
       Float4{ 0.5f, 0.5f, 1.0f, 1.0f }
     });
     metadata = colourBuffer->getMetadata();
-    metadata->Get("attributeinfo")[0].insertItem("name", "a_color");
+    metadata->get("attributeInfo")[0].insertItem("name", "a_color");
   }
 
 #if 0

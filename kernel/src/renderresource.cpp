@@ -63,7 +63,7 @@ int GetElementTypeSize(String type)
 RenderArray::RenderArray(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, ArrayUsage usage)
   : RenderResource(pRenderer)
 {
-  SharedArray<ElementMetadata> attribs = spArrayBuffer->getMetadata()->Get("attributeinfo").as<SharedArray<ElementMetadata>>();
+  SharedArray<ElementMetadata> attribs = spArrayBuffer->getMetadata()->get("attributeInfo").as<SharedArray<ElementMetadata>>();
 
   Array<epArrayDataFormat> elements;
   for (const auto &elem : attribs)
@@ -451,7 +451,7 @@ RenderShaderInputConfig::RenderShaderInputConfig(Renderer *pRenderer, SharedArra
   Array<epArrayElement, 8> elementArray;
   for (size_t i = 0; i < vertexArrays.length; ++i)
   {
-    Variant varAttribs = vertexArrays[i]->getMetadata()->Get("attributeinfo");
+    Variant varAttribs = vertexArrays[i]->getMetadata()->get("attributeInfo");
     EPASSERT_THROW(varAttribs.isValid(), Result::Failure, "attribute info not present in buffer metadata");
     SharedArray<ElementMetadata> attribs = varAttribs.as<SharedArray<ElementMetadata>>();
 

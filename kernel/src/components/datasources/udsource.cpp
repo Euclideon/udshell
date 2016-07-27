@@ -49,7 +49,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
         const char *pValue;
         result = udOctree_GetMetadataByIndex(pOctree, i, &pName, &pValue, nullptr, nullptr);
         if (result == udR_Success && !String("ModelAttributes").eq(pName))
-          meta->Insert(pName, pValue);
+          meta->insert(pName, pValue);
       }
     }
 
@@ -76,7 +76,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
                                                       { pOri[0] + pExt[0], pOri[1] + pExt[1], pOri[2] + pExt[2] } });
 
       header.insert("maxOctreeDepth", headerData.maxOctreeDepth);
-      meta->Insert("octreeheader", std::move(header));
+      meta->insert("octreeHeader", std::move(header));
     }
 
     result = udOctree_GetLocalMatrixF64(pModelImpl->pOctree, pModelImpl->udmatrix.a);
@@ -112,7 +112,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     }
 
     if (varMetadata.length)
-      meta->Insert("attributeinfo", std::move(varMetadata));
+      meta->insert("attributeInfo", std::move(varMetadata));
   }
 }
 

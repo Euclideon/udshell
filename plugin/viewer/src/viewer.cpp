@@ -296,7 +296,7 @@ Variant Viewer::save() const
 
   if (spModel)
   {
-    Variant src = spModel->getMetadata()->Get("url");
+    Variant src = spModel->getMetadata()->get("url");
     if (src.is(Variant::Type::String))
     {
       String srcString = src.asString();
@@ -364,7 +364,7 @@ void Viewer::CreatePlatformLogo()
   PrimitiveGenerator::GenerateQuad(spVertexBuffer, spIndexBuffer);
 
   MetadataRef spMetadata = spVertexBuffer->getMetadata();
-  spMetadata->Get("attributeinfo")[0].insertItem("name", "a_position");
+  spMetadata->get("attributeInfo")[0].insertItem("name", "a_position");
 
   ModelRef spImageModel = pKernel->createComponent<Model>();
 

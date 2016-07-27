@@ -65,7 +65,7 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
   else
     elementMetadata.pushBack(ElementMetadata{ nullptr, et, ElementInfo::parse(et),  0 });
 
-  pInstance->getMetadata()->Insert("attributeinfo", elementMetadata);
+  pInstance->getMetadata()->insert("attributeInfo", elementMetadata);
 }
 
 bool ArrayBufferImpl::ReshapeInternal(Slice<const size_t> _shape, bool copy)

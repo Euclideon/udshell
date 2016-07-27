@@ -252,7 +252,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     Slice<Float3> verts((Float3*)mesh.mVertices, mesh.mNumVertices);
     ArrayBufferRef spVerts = getKernel().createComponent<ArrayBuffer>();
     spVerts->allocateFromData<Float3>(verts);
-    spVerts->getMetadata()->Get("attributeinfo")[0].insertItem("name", "a_position");
+    spVerts->getMetadata()->get("attributeInfo")[0].insertItem("name", "a_position");
 
     setResource(SharedString::concat("positions", i), spVerts);
 
@@ -265,7 +265,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       Slice<Float3> normals((Float3*)mesh.mNormals, mesh.mNumVertices);
       ArrayBufferRef spNormals = getKernel().createComponent<ArrayBuffer>();
       spNormals->allocateFromData<Float3>(normals);
-      spNormals->getMetadata()->Get("attributeinfo")[0].insertItem("name", "a_normal");
+      spNormals->getMetadata()->get("attributeInfo")[0].insertItem("name", "a_normal");
 
       setResource(SharedString::concat("normals", i), spNormals);
 
@@ -277,8 +277,8 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     {
       ArrayBufferRef spBinTan = getKernel().createComponent<ArrayBuffer>();
       spBinTan->allocate<BinTan>(mesh.mNumVertices);
-      spBinTan->getMetadata()->Get("attributeinfo")[0].insertItem("name", "a_binormal");
-      spBinTan->getMetadata()->Get("attributeinfo")[1].insertItem("name", "a_tangent");
+      spBinTan->getMetadata()->get("attributeInfo")[0].insertItem("name", "a_binormal");
+      spBinTan->getMetadata()->get("attributeInfo")[1].insertItem("name", "a_tangent");
 
       Slice<BinTan> bt = spBinTan->map<BinTan>();
       for (uint32_t j = 0; j<mesh.mNumVertices; ++j)
@@ -304,7 +304,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       ArrayBufferRef spUVs = getKernel().createComponent<ArrayBuffer>();
       spUVs->allocateFromData<Float3>(uvs);
-      spUVs->getMetadata()->Get("attributeinfo")[t].insertItem("name", SharedString::concat("a_uv", t));
+      spUVs->getMetadata()->get("attributeInfo")[t].insertItem("name", SharedString::concat("a_uv", t));
 
       setResource(SharedString::concat("uvs", i, "_", t), spUVs);
 
@@ -318,7 +318,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       ArrayBufferRef spColors = getKernel().createComponent<ArrayBuffer>();
       spColors->allocateFromData<Float4>(colors);
-      spColors->getMetadata()->Get("attributeinfo")[c].insertItem("name", SharedString::concat("a_color", c));
+      spColors->getMetadata()->get("attributeInfo")[c].insertItem("name", SharedString::concat("a_color", c));
 
       setResource(SharedString::concat("colors", i, "_", c), spColors);
 
