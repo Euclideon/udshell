@@ -264,7 +264,7 @@ void SceneImpl::AddModelsToResourceManager()
   BuildModelMap(rootNode, modelMap);
 
   for (auto kvp : modelMap)
-    spRM->AddResource(kvp.value.as<UDModelRef>());
+    spRM->addResource(kvp.value.as<UDModelRef>());
 }
 
 void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)

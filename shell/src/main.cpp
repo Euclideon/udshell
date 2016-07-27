@@ -160,7 +160,7 @@ void NewProject(String filePath)
     for (size_t i = 0; i < activities.length; i++)
       RemoveUIActivity(activities[i]);
 
-    spKernel->getResourceManager()->ClearResources();
+    spKernel->getResourceManager()->clearResources();
   }
   spProject = nullptr;
 
@@ -196,7 +196,7 @@ void OpenProject(String filePath)
       spProject->RemoveActivity(activities[i]);
     }
 
-    spKernel->getResourceManager()->ClearResources();
+    spKernel->getResourceManager()->clearResources();
   }
 
   spProject = spNewProject;
