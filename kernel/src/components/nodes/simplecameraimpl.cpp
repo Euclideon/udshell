@@ -295,7 +295,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
   if (stateChanged)
   {
-    pInstance->Changed.Signal(pos, ypr);
+    pInstance->changed.Signal(pos, ypr);
     stateChanged = false;
   }
 
