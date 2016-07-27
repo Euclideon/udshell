@@ -33,7 +33,7 @@ public:
   Event<Double3, Double3> Changed;
 
 protected:
-  bool ViewportInputEvent(const ep::InputEvent &ev) override { return pImpl->ViewportInputEvent(ev); }
+  bool viewportInputEvent(const ep::InputEvent &ev) override { return pImpl->ViewportInputEvent(ev); }
   bool update(double timeStep) override { return pImpl->Update(timeStep); }
 
   SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

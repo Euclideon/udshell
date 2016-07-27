@@ -118,7 +118,7 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
   if (!handled && spScene)
     handled = spScene->InputEvent(ev);
   if (!handled && spCamera)
-    handled = spCamera->ViewportInputEvent(ev);
+    handled = spCamera->viewportInputEvent(ev);
   return handled;
 }
 
