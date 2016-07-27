@@ -138,7 +138,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
 
     if (pDesc->propertyTree.get(propertyName))
     {
-      QtApplication::Kernel()->logWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.", propertyName);
+      QtApplication::kernel()->logWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.", propertyName);
       continue;
     }
 
@@ -159,7 +159,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     {
       if (pDesc->methodTree.get(name))
       {
-        QtApplication::Kernel()->logWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
+        QtApplication::kernel()->logWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
         continue;
       }
 
@@ -175,7 +175,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     {
       if (pDesc->eventTree.get(name))
       {
-        QtApplication::Kernel()->logWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
+        QtApplication::kernel()->logWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
         continue;
       }
 
@@ -322,7 +322,7 @@ void QtKernelQml::exec(QString str)
 
 QtFocusManager *QtKernelQml::getFocusManager() const
 {
-  return pKernel->GetFocusManager();
+  return pKernel->getFocusManager();
 }
 
 
@@ -883,7 +883,7 @@ QQuickWindow *QtGlobalEPSingleton::parentWindow(QQuickItem *pQuickItem) const
 {
   if (!pQuickItem)
   {
-    QtApplication::Kernel()->logError("Attempted to get parent window for null item");
+    QtApplication::kernel()->logError("Attempted to get parent window for null item");
     return nullptr;
   }
   return pQuickItem->window();

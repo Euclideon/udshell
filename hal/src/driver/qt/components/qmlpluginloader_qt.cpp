@@ -32,7 +32,7 @@ bool QmlPluginLoader::LoadPlugin(String filename)
   try {
     descMap = ParseTypeDescriptor(pQtKernel, filename);
     if (!descMap.empty())
-      pQtKernel->RegisterQml(filename, descMap);
+      pQtKernel->registerQml(filename, descMap);
   }
   catch (ep::EPException &e) {
     // if ParseTypeDescriptor threw, then we have an invalid type descriptor
@@ -85,7 +85,7 @@ Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::St
       if (braceStack != 0) EPTHROW(ep::Result::Failure, "Cannot Parse Type Descriptor: File contains malformed 'epTypeDesc' property map");
 
       // Evaluate the value of the property map using the JS engine
-      Variant result = epToVariant(pQtKernel->QmlEngine()->evaluate(fileData.mid(expStart, expEnd - expStart + 1)));
+      Variant result = epToVariant(pQtKernel->qmlEngine()->evaluate(fileData.mid(expStart, expEnd - expStart + 1)));
       if (result.is(Variant::Type::Error))
         EPTHROW(ep::Result::ScriptException, "Cannot Parse Type Descriptor: 'epTypeDesc' property map does not contain a valid javascript expression");
 

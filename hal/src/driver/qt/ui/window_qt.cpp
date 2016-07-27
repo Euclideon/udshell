@@ -29,13 +29,13 @@ bool QtWindowEventFilter::eventFilter(QObject *pObj, QEvent *pEvent)
       if (!pKeyEvent->isAutoRepeat())
       {
         QKeySequence seq(pKeyEvent->key() + pKeyEvent->modifiers());
-        return QtApplication::Kernel()->getCommandManager()->handleShortcutEvent(seq.toString().toUtf8().data());
+        return QtApplication::kernel()->getCommandManager()->handleShortcutEvent(seq.toString().toUtf8().data());
       }
       break;
     }
     case QEvent::Close:
     {
-      QtApplication::Kernel()->UnregisterWindow(pWindow);
+      QtApplication::kernel()->unregisterWindow(pWindow);
       break;
     }
     default:

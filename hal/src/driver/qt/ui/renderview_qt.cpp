@@ -50,7 +50,7 @@ public:
 
     if (pQtRenderView->dirty)
     {
-      spRenderableView = ep::SynchronisedPtr<ep::RenderableView>(pQtRenderView->spView->GetImpl<ep::ViewImpl>()->GetRenderableView(), QtApplication::Kernel());
+      spRenderableView = ep::SynchronisedPtr<ep::RenderableView>(pQtRenderView->spView->GetImpl<ep::ViewImpl>()->GetRenderableView(), QtApplication::kernel());
       pQtRenderView->dirty = false;
     }
   }
@@ -104,7 +104,7 @@ void QtRenderView::attachView(const QVariant &view)
   spView->frameReady.Subscribe(Delegate<void()>(this, &QtRenderView::OnFrameReady));
 
   // TEMP HAX:
-  QtApplication::Kernel()->setFocusView(spView);
+  QtApplication::kernel()->setFocusView(spView);
 }
 
 void QtRenderView::OnResize()
