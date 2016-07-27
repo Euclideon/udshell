@@ -14,7 +14,7 @@ class Resource : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Resource, IResource, Component, EPKERNEL_PLUGINVERSION, "Base resource", 0)
 public:
-  MetadataRef GetMetadata() const { return pImpl->GetMetadata(); }
+  MetadataRef getMetadata() const { return pImpl->GetMetadata(); }
 
   Variant save() const override { return pImpl->Save(); }
 
@@ -22,9 +22,9 @@ public:
   //! \return A copy of this resource.
   //! \remarks Note: This method throws; it is a stub for derived classes to implement.
   //! \see CloneResource
-  virtual ResourceRef Clone() const { EPTHROW(Result::InvalidCall, "Not implemented!"); }
+  virtual ResourceRef clone() const { EPTHROW(Result::InvalidCall, "Not implemented!"); }
 
-  Event<> Changed;
+  Event<> changed;
 
 protected:
   Resource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
@@ -46,7 +46,7 @@ private:
 //! \remarks Note: This method throws if the object has not implemented Clone.
 //! \see Resource::Clone
 template <typename T>
-inline SharedPtr<T> CloneResource(SharedPtr<T> inst)
+inline SharedPtr<T> cloneResource(SharedPtr<T> inst)
 {
   static_assert(std::is_base_of<Resource, T>::value, "Class must be derived off Resource");
   return component_cast<T>(inst->Clone());

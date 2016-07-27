@@ -77,7 +77,7 @@ protected:
     for (ShaderRef &s : shaders)
     {
       if (s)
-        s->Changed.Unsubscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
+        s->changed.Unsubscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
     }
   }
 

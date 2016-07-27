@@ -29,12 +29,12 @@ public:
       return;
 
     if (spMaterial)
-      spMaterial->Changed.Unsubscribe(this, &ModelImpl::OnArrayOrShaderChanged);
+      spMaterial->changed.Unsubscribe(this, &ModelImpl::OnArrayOrShaderChanged);
 
     spMaterial = _spMaterial;
 
     if (spMaterial)
-      spMaterial->Changed.Subscribe(this, &ModelImpl::OnArrayOrShaderChanged);
+      spMaterial->changed.Subscribe(this, &ModelImpl::OnArrayOrShaderChanged);
   }
 
   void AddVertexArray(ArrayBufferRef spVertices) override final;
