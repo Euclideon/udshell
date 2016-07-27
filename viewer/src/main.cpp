@@ -242,7 +242,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
       mData.spUDModel = spModelDS->GetResourceAs<UDModel>(0);
     }
 
-    mData.spUDNode->SetUDModel(mData.spUDModel);
+    mData.spUDNode->setUDModel(mData.spUDModel);
     mData.spUDNode->setPosition(Double3::create(0, 0, 0));
 
     Double4x4 modelMat = mData.spUDModel->GetUDMatrix();

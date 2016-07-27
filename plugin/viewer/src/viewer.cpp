@@ -70,7 +70,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   if (spModel)
   {
     UDNodeRef spUDNode = pKernel->createComponent<UDNode>();
-    spUDNode->SetUDModel(spModel);
+    spUDNode->setUDModel(spModel);
     spScene->GetRootNode()->addChild(spUDNode);
     spScene->MakeDirty();
     spView->setEnablePicking(true);
@@ -158,7 +158,7 @@ void Viewer::OnResourceDropped(String resourceUID, int x, int y)
   }
 
   UDNodeRef spUDNode = pKernel->createComponent<UDNode>();
-  spUDNode->SetUDModel(spUDModel);
+  spUDNode->setUDModel(spUDModel);
 
   AddSceneNodeAtViewPosition(spUDNode, x, y);
 }
@@ -167,7 +167,7 @@ void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 {
   const Double4x4 &cameraMatrix = spCamera->getMatrix();
 
-  Double4x4 udMat = spUDNode->GetUDModel()->GetUDMatrix();
+  Double4x4 udMat = spUDNode->getUDModel()->GetUDMatrix();
 
   Double3 modelMin = Double3::zero();
   Double3 modelMax = modelMin + Double3{ udMat.axis.x.x, udMat.axis.y.y, udMat.axis.z.z };
