@@ -90,7 +90,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   // Vertex Shader
   ShaderRef vertexShader = kernel->createComponent<Shader>();
   {
-    vertexShader->SetType(ShaderType::VertexShader);
+    vertexShader->setType(ShaderType::VertexShader);
 
     const char shaderText[] = "attribute vec3 a_position;\n"
                               "attribute vec4 a_color;\n"
@@ -101,20 +101,20 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
                               "  v_color = a_color;\n"
                               "  gl_Position = u_mfwvp * vec4(a_position, 1.0);\n"
                               "}\n";
-    vertexShader->SetCode(shaderText);
+    vertexShader->setCode(shaderText);
   }
 
   // Pixel Shader
   ShaderRef pixelShader = kernel->createComponent<Shader>();
   {
-    pixelShader->SetType(ShaderType::PixelShader);
+    pixelShader->setType(ShaderType::PixelShader);
 
     const char shaderText[] = "varying vec4 v_color;\n"
                               "void main()\n"
                               "{\n"
                               "  gl_FragColor = v_color;\n"
                               "}\n";
-    pixelShader->SetCode(shaderText);
+    pixelShader->setCode(shaderText);
   }
 
   // Material
