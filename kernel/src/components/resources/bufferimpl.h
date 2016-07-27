@@ -13,12 +13,12 @@ public:
   BufferImpl(Component *_pInstance, Variant::VarMap initParams)
     : ImplSuper(_pInstance)
   {
-    pInstance->changed.Subscribe(Delegate<void()>(this, &BufferImpl::OnBufferDirty));
+    pInstance->changed.subscribe(Delegate<void()>(this, &BufferImpl::OnBufferDirty));
   }
 
   ~BufferImpl()
   {
-    pInstance->changed.Unsubscribe(Delegate<void()>(this, &BufferImpl::OnBufferDirty));
+    pInstance->changed.unsubscribe(Delegate<void()>(this, &BufferImpl::OnBufferDirty));
   }
 
   bool Reserve(size_t size) override final;

@@ -58,7 +58,7 @@ void TimerImpl::SetTimer(double d, TimerType tt)
 
 void TimerImpl::MessageCallback()
 {
-  pInstance->elapsed.Signal();
+  pInstance->elapsed.signal();
   pInstance->decRef();
 }
 

@@ -40,7 +40,7 @@ void ResourceManagerImpl::AddResourceArray(Slice<const ResourceRef> resArray)
   for(auto &res : resArray)
     resources.insert(res->uid, res);
 
-  pInstance->added.Signal(resArray);
+  pInstance->added.signal(resArray);
 }
 
 void ResourceManagerImpl::RemoveResourceArray(Slice<const ResourceRef> resArray)
@@ -48,7 +48,7 @@ void ResourceManagerImpl::RemoveResourceArray(Slice<const ResourceRef> resArray)
   for (auto &res : resArray)
     resources.remove(res->uid);
 
-  pInstance->removed.Signal(resArray);
+  pInstance->removed.signal(resArray);
 }
 
 void ResourceManagerImpl::ClearResources()
@@ -59,7 +59,7 @@ void ResourceManagerImpl::ClearResources()
     resArray.pushBack(kvp.value);
   }
 
-  pInstance->removed.Signal(resArray);
+  pInstance->removed.signal(resArray);
 
   resources = nullptr;
 }

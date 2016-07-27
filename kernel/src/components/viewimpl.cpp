@@ -44,12 +44,12 @@ void ViewImpl::SetScene(SceneRef spNewScene)
     return;
 
   if (spScene)
-    spScene->dirty.Unsubscribe(this, &ViewImpl::OnDirty);
+    spScene->dirty.unsubscribe(this, &ViewImpl::OnDirty);
 
   spScene = spNewScene;
 
   if (spScene)
-    spScene->dirty.Subscribe(this, &ViewImpl::OnDirty);
+    spScene->dirty.subscribe(this, &ViewImpl::OnDirty);
 
   OnDirty();
 }
@@ -59,7 +59,7 @@ void ViewImpl::SetEnablePicking(bool enable)
   if (pickingEnabled != enable)
   {
     pickingEnabled = enable;
-    pInstance->enabledPickingChanged.Signal(pickingEnabled);
+    pInstance->enabledPickingChanged.signal(pickingEnabled);
   }
 }
 
@@ -104,7 +104,7 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
     {
       mousePosition.x = (uint32_t)ev.move.xAbsolute;
       mousePosition.y = (uint32_t)ev.move.yAbsolute;
-      pInstance->mousePositionChanged.Signal(mousePosition);
+      pInstance->mousePositionChanged.signal(mousePosition);
     }
   }
   else if (ev.deviceType == ep::InputDevice::Keyboard)
@@ -177,7 +177,7 @@ void ViewImpl::OnDirty()
   }
 
   // emit the dirty signal
-  pInstance->dirty.Signal();
+  pInstance->dirty.signal();
 }
 
 void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
@@ -216,7 +216,7 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
 
         EPASSERT(udNodePtr != nullptr, "No node for octree");
 
-        pInstance->pickFound.Signal(pickedPoint, udNodePtr);
+        pInstance->pickFound.signal(pickedPoint, udNodePtr);
       }
       else
       {
@@ -224,7 +224,7 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
         pickHighlightData = { nullptr, 0, };
       }
     }
-    pInstance->frameReady.Signal();
+    pInstance->frameReady.signal();
   }
 }
 

@@ -118,22 +118,22 @@ Console::Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, 
 
   spLogger = pKernel->getLogger();
   if (bOutputLog)
-    pKernel->getLogger()->changed.Subscribe(this, &Console::onLogChanged);
+    pKernel->getLogger()->changed.subscribe(this, &Console::onLogChanged);
 }
 
 Console::~Console()
 {
   for (BroadcasterRef spBC : outputBCArray)
-    spBC->written.Unsubscribe(this, &Console::onConsoleOutput);
+    spBC->written.unsubscribe(this, &Console::onConsoleOutput);
 
   if(bOutputLog)
-    spLogger->changed.Unsubscribe(this, &Console::onLogChanged);
+    spLogger->changed.unsubscribe(this, &Console::onLogChanged);
 }
 
 void Console::addBroadcaster(BroadcasterRef spBC)
 {
   outputBCArray.pushBack(spBC);
-  spBC->written.Subscribe(this, &Console::onConsoleOutput);
+  spBC->written.subscribe(this, &Console::onConsoleOutput);
 }
 
 void Console::removeBroadcaster(BroadcasterRef spBC)
@@ -204,9 +204,9 @@ void Console::onConsoleOutput(Slice<const void> buf)
 void Console::relayInput(String str)
 {
   appendHistory(str);
-  pKernel->getLogger()->changed.Subscribe(this, &Console::onLogChanged);
+  pKernel->getLogger()->changed.subscribe(this, &Console::onLogChanged);
   inputFunc(str);
-  pKernel->getLogger()->changed.Unsubscribe(this, &Console::onLogChanged);
+  pKernel->getLogger()->changed.unsubscribe(this, &Console::onLogChanged);
 }
 
 Console::ConsoleLine::ConsoleLine(String text, int logIndex, double ordering)

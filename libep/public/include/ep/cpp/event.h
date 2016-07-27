@@ -16,14 +16,14 @@ using SubscriptionRef = SharedPtr<Subscription>;
 class BaseEvent : public Safe
 {
 public:
-  bool HasSubscribers() const;
+  bool hasSubscribers() const;
 
 protected:
   friend class Subscription;
 
-  SubscriptionRef AddSubscription(const DelegateMementoRef &spM);
-  void RemoveSubscription(const DelegateMementoRef &spDelegate);
-  void RemoveSubscription(const SubscriptionRef &spSubscription);
+  SubscriptionRef addSubscription(const DelegateMementoRef &spM);
+  void removeSubscription(const DelegateMementoRef &spDelegate);
+  void removeSubscription(const SubscriptionRef &spSubscription);
 
   struct Subscriber
   {
@@ -45,42 +45,42 @@ public:
   enum { ParamCount = sizeof...(Args) };
 
   // subscribe
-  SubscriptionRef Subscribe(EvDelegate callback)
+  SubscriptionRef subscribe(EvDelegate callback)
   {
-    return AddSubscription(callback.GetMemento());
+    return addSubscription(callback.getMemento());
   }
-  SubscriptionRef Subscribe(const Event<Args...> &ev)
+  SubscriptionRef subscribe(const Event<Args...> &ev)
   {
-    return Subscribe(ev.GetDelegate());
+    return subscribe(ev.getDelegate());
   }
 
   template <class X, class Y>
-  SubscriptionRef Subscribe(Y *i, void(X::*f)(Args...))        { return Subscribe(EvDelegate(i, f)); }
+  SubscriptionRef subscribe(Y *i, void(X::*f)(Args...))        { return subscribe(EvDelegate(i, f)); }
   template <class X, class Y>
-  SubscriptionRef Subscribe(Y *i, void(X::*f)(Args...) const)  { return Subscribe(EvDelegate(i, f)); }
+  SubscriptionRef subscribe(Y *i, void(X::*f)(Args...) const)  { return subscribe(EvDelegate(i, f)); }
 
   // unsubscribe
-  void Unsubscribe(EvDelegate callback)
+  void unsubscribe(EvDelegate callback)
   {
-    RemoveSubscription(callback.GetMemento());
+    removeSubscription(callback.getMemento());
   }
-  void Unsubscribe(const Event<Args...> &ev)
+  void unsubscribe(const Event<Args...> &ev)
   {
-    Unsubscribe(ev.GetDelegate());
+    unsubscribe(ev.getDelegate());
   }
 
   template <class X, class Y>
-  void Unsubscribe(Y *i, void(X::*f)(Args...)) { Unsubscribe(EvDelegate(i, f)); }
+  void unsubscribe(Y *i, void(X::*f)(Args...)) { unsubscribe(EvDelegate(i, f)); }
   template <class X, class Y>
-  void Unsubscribe(Y *i, void(X::*f)(Args...) const) { Unsubscribe(EvDelegate(i, f)); }
+  void unsubscribe(Y *i, void(X::*f)(Args...) const) { unsubscribe(EvDelegate(i, f)); }
 
   // signal
-  void Signal(Args... args) const
+  void signal(Args... args) const
   {
     for (auto s : subscribers)
     {
       EvDelegate d;
-      d.SetMemento(s.spM);
+      d.setMemento(s.spM);
 
       try {
         d(args...);
@@ -93,9 +93,9 @@ public:
   }
 
   // misc
-  EvDelegate GetDelegate() const
+  EvDelegate getDelegate() const
   {
-    return EvDelegate(this, &Event::Signal);
+    return EvDelegate(this, &Event::signal);
   }
 };
 
@@ -103,7 +103,7 @@ public:
 class Subscription : public RefCounted
 {
 public:
-  void Unsubscribe();
+  void unsubscribe();
 
 private:
   template<typename T>
@@ -119,16 +119,16 @@ private:
 
 /*** implementation ***/
 
-inline void Subscription::Unsubscribe()
+inline void Subscription::unsubscribe()
 {
   if (pEv)
   {
-    pEv->RemoveSubscription(SubscriptionRef(this));
+    pEv->removeSubscription(SubscriptionRef(this));
     pEv = nullptr;
   }
 }
 
-inline SubscriptionRef BaseEvent::AddSubscription(const DelegateMementoRef &spM)
+inline SubscriptionRef BaseEvent::addSubscription(const DelegateMementoRef &spM)
 {
   for (auto &s : subscribers)
   {
@@ -141,11 +141,11 @@ inline SubscriptionRef BaseEvent::AddSubscription(const DelegateMementoRef &spM)
   return spS;
 }
 
-inline void BaseEvent::RemoveSubscription(const DelegateMementoRef &spDelegate)
+inline void BaseEvent::removeSubscription(const DelegateMementoRef &spDelegate)
 {
   for (size_t i = 0; i < subscribers.length; ++i)
   {
-    if (subscribers[i].spM->GetFastDelegate() == spDelegate->GetFastDelegate())
+    if (subscribers[i].spM->getFastDelegate() == spDelegate->getFastDelegate())
     {
       subscribers.removeSwapLast(i);
       return;
@@ -153,7 +153,7 @@ inline void BaseEvent::RemoveSubscription(const DelegateMementoRef &spDelegate)
   }
   epDebugWrite("Unsubscribe failed...?\n");
 }
-inline void BaseEvent::RemoveSubscription(const SubscriptionRef &spSubscription)
+inline void BaseEvent::removeSubscription(const SubscriptionRef &spSubscription)
 {
   for (size_t i = 0; i < subscribers.length; ++i)
   {
@@ -166,7 +166,7 @@ inline void BaseEvent::RemoveSubscription(const SubscriptionRef &spSubscription)
   epDebugWrite("Unsubscribe failed...?\n");
 }
 
-inline bool BaseEvent::HasSubscribers() const
+inline bool BaseEvent::hasSubscribers() const
 {
   return !subscribers.empty();
 }

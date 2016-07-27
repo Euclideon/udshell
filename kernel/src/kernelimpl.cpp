@@ -383,10 +383,10 @@ void KernelImpl::FinishInit()
 
   // make the kernel timers
   spStreamerTimer = pInstance->createComponent<Timer>({ { "interval", 0.033 } });
-  spStreamerTimer->elapsed.Subscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
+  spStreamerTimer->elapsed.subscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
 
   spUpdateTimer = pInstance->createComponent<Timer>({ { "interval", 0.016 } });
-  spUpdateTimer->elapsed.Subscribe(FastDelegate<void()>(this, &KernelImpl::Update));
+  spUpdateTimer->elapsed.subscribe(FastDelegate<void()>(this, &KernelImpl::Update));
 
   // call application init
   if (HasMessageHandler("init"))
@@ -442,9 +442,9 @@ void KernelImpl::Shutdown()
   // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
 
   if (spStreamerTimer)
-    spStreamerTimer->elapsed.Unsubscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
+    spStreamerTimer->elapsed.unsubscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
   if (spUpdateTimer)
-    spUpdateTimer->elapsed.Unsubscribe(FastDelegate<void()>(this, &KernelImpl::Update));
+    spUpdateTimer->elapsed.unsubscribe(FastDelegate<void()>(this, &KernelImpl::Update));
 
   // call application deinit
   if (HasMessageHandler("deinit"))
@@ -556,7 +556,7 @@ void KernelImpl::Update()
 
   RelayStdIO();
 
-  pInstance->updatePulse.Signal(sec);
+  pInstance->updatePulse.signal(sec);
 }
 
 void KernelImpl::RelayStdIO()

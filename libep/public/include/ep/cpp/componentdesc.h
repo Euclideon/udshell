@@ -306,7 +306,7 @@ private:
         Variant subscribe(Slice<const Variant> args)                                     \
         {                                                                                \
           auto d = args[0].as<decltype(This::Event)::EvDelegate>();                      \
-          return ((This*)(Component*)this)->Event.Subscribe(d);                          \
+          return ((This*)(Component*)this)->Event.subscribe(d);                          \
         }                                                                                \
       };                                                                                 \
       return VarMethod(&Shim::subscribe);                                                \

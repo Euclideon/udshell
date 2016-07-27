@@ -123,7 +123,7 @@ bool MenuImpl::SetItemProperties(String path, Variant::VarMap properties)
   }
 
   SetMenuProperties(*pParent, properties);
-  pInstance->changed.Signal();
+  pInstance->changed.signal();
 
   return true;
 }
@@ -144,7 +144,7 @@ void MenuImpl::AddItem(String parentPath, Variant::VarMap properties)
   children.pushBack(subTree);
   *pChildren = Variant(std::move(children));
 
-  pInstance->changed.Signal();
+  pInstance->changed.signal();
 }
 
 Variant *MenuImpl::FindMenuItem(String *parentPath)
@@ -217,7 +217,7 @@ bool MenuImpl::RemoveItem(String path)
   }
   *pChildren = Variant(std::move(children));
 
-  pInstance->changed.Signal();
+  pInstance->changed.signal();
 
   return true;
 }

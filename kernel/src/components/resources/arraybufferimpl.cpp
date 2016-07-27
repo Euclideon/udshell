@@ -43,7 +43,7 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
   elementSize = _elementSize;
   pInstance->Buffer::allocate(_elementSize*elements);
   if (alreadyAllocated)
-    pInstance->changed.Signal();
+    pInstance->changed.signal();
 
   // record element types as metadata
   Array<ElementMetadata,32> elementMetadata;

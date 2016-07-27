@@ -24,7 +24,7 @@ public:
 
   size_t Write(Slice<const void> data) override final
   {
-    pInstance->written.Signal(data);
+    pInstance->written.signal(data);
 
     return data.length;
   }

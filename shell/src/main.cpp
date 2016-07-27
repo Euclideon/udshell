@@ -446,7 +446,7 @@ void Init(String sender, String message, const Variant &data)
   if (shutdownTest)
   {
     spCITimer = spKernel->createComponent<Timer>({ { "countdown", 4 } });
-    spCITimerSub = spCITimer->elapsed.Subscribe([]() { Kernel::getInstance()->quit(); });
+    spCITimerSub = spCITimer->elapsed.subscribe([]() { Kernel::getInstance()->quit(); });
   }
 
 #if EP_DEBUG

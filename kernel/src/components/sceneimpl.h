@@ -45,7 +45,7 @@ public:
   void MakeDirty() override final
   {
     bDirty = true;
-    pInstance->dirty.Signal();
+    pInstance->dirty.signal();
   }
 
 protected:
