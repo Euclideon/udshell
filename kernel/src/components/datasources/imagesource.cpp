@@ -40,14 +40,14 @@ void ImageSource::Create(StreamRef spSource)
 
     // create image for each image element
     ArrayBufferRef spImage = getKernel().CreateComponent<ArrayBuffer>();
-    spImage->Allocate(GetFormatString(s.format), 4, Slice<const size_t>{ s.width, s.height });
+    spImage->allocate(GetFormatString(s.format), 4, Slice<const size_t>{ s.width, s.height });
 
     // write image to to the array buffer
-    Slice<void> mem = spImage->Map();
+    Slice<void> mem = spImage->map();
     EPASSERT(mem.length == s.width*s.height*4, "Wrong size?!");
 //    mem.copyTo(Slice<void>(s.pImage, s.width*s.height*4)); // TODO: use copyTo()...
     memcpy(mem.ptr, s.pImage, s.width*s.height*4);
-    spImage->Unmap();
+    spImage->unmap();
 
     // add resource
     SetResource(MutableString64(Concat, "image", i), spImage);

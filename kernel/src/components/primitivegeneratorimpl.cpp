@@ -23,10 +23,10 @@ void PrimitiveGeneratorImplStatic::GenerateQuad(ArrayBufferRef spVB, ArrayBuffer
     Float3{  1.0f,  1.0f, 0.0f },
   };
 
-  spVB->AllocateFromData(Slice<const Float3>(rawVB));
+  spVB->allocateFromData(Slice<const Float3>(rawVB));
 
-  Slice<Float3> vb = spVB->Map<Float3>();
-  epscope(exit) { spVB->Unmap(); };
+  Slice<Float3> vb = spVB->map<Float3>();
+  epscope(exit) { spVB->unmap(); };
 
   if (transformVertex)
   {
@@ -35,15 +35,15 @@ void PrimitiveGeneratorImplStatic::GenerateQuad(ArrayBufferRef spVB, ArrayBuffer
   }
 
   static const uint16_t rawIB[] = { 0, 1, 2, 3, 2, 1 };
-  spIB->AllocateFromData(Slice<const uint16_t>(rawIB));
+  spIB->allocateFromData(Slice<const uint16_t>(rawIB));
 }
 
 void PrimitiveGeneratorImplStatic::GenerateCube(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
 {
   // vertex buffer
-  spVB->Allocate<Float3>(8);
-  Slice<Float3> vb = spVB->Map<Float3>();
-  epscope(exit) { spVB->Unmap(); };
+  spVB->allocate<Float3>(8);
+  Slice<Float3> vb = spVB->map<Float3>();
+  epscope(exit) { spVB->unmap(); };
 
   vb[0] = Float3{-.5, .5, .5 };
   vb[1] = Float3{ .5, .5, .5 };
@@ -61,7 +61,7 @@ void PrimitiveGeneratorImplStatic::GenerateCube(ArrayBufferRef spVB, ArrayBuffer
   }
 
   // index buffer
-  spIB->AllocateFromData<uint16_t>(Slice<const uint16_t>
+  spIB->allocateFromData<uint16_t>(Slice<const uint16_t>
   {
     0,1,2, 1,3,2, // top
     2,3,6, 3,7,6, // front
@@ -79,13 +79,13 @@ void PrimitiveGeneratorImplStatic::GenerateSphere(ArrayBufferRef spVB, ArrayBuff
   size_t numVerts = 2 + numSegments*(numSlices-1);
   size_t numIndices = numSegments*(numSlices-1)*2*3;
 
-  spVB->Allocate<Float3>(numVerts);
-  spIB->Allocate<uint16_t>(numIndices);
+  spVB->allocate<Float3>(numVerts);
+  spIB->allocate<uint16_t>(numIndices);
 
-  Slice<Float3> vb = spVB->Map<Float3>();
-  epscope(exit) { spVB->Unmap(); };
-  Slice<uint16_t> ib = spIB->Map<uint16_t>();
-  epscope(exit) { spIB->Unmap(); };
+  Slice<Float3> vb = spVB->map<Float3>();
+  epscope(exit) { spVB->unmap(); };
+  Slice<uint16_t> ib = spIB->map<uint16_t>();
+  epscope(exit) { spIB->unmap(); };
 
   size_t v = 0;
   size_t i = 0;
@@ -162,13 +162,13 @@ void PrimitiveGeneratorImplStatic::GenerateCircle(ArrayBufferRef spVB, ArrayBuff
   size_t numVerts = completeRotation ? numSegments : numSegments + 1; // if not complete rotation add a extra vertex.
   size_t numIndices = numSegments * 2;
 
-  spVB->Allocate<Float3>(numVerts);
-  spIB->Allocate<uint16_t>(numIndices);
+  spVB->allocate<Float3>(numVerts);
+  spIB->allocate<uint16_t>(numIndices);
 
-  Slice<Float3> vb = spVB->Map<Float3>();
-  epscope(exit) { spVB->Unmap(); };
-  Slice<uint16_t> ib = spIB->Map<uint16_t>();
-  epscope(exit) { spIB->Unmap(); };
+  Slice<Float3> vb = spVB->map<Float3>();
+  epscope(exit) { spVB->unmap(); };
+  Slice<uint16_t> ib = spIB->map<uint16_t>();
+  epscope(exit) { spIB->unmap(); };
 
   size_t v = 0;
   for (size_t j = 0; j < numVerts; ++j)
@@ -205,13 +205,13 @@ void PrimitiveGeneratorImplStatic::GenerateDisc(ArrayBufferRef spVB, ArrayBuffer
   size_t numVerts = isDisc ? 2 * vertN : vertN + 1;
   size_t numIndices = isDisc ? numSegments * 3 * 2 : numSegments * 3;
 
-  spVB->Allocate<Float3>(numVerts);
-  spIB->Allocate<uint16_t>(numIndices);
+  spVB->allocate<Float3>(numVerts);
+  spIB->allocate<uint16_t>(numIndices);
 
-  Slice<Float3> vb = spVB->Map<Float3>();
-  epscope(exit) { spVB->Unmap(); };
-  Slice<uint16_t> ib = spIB->Map<uint16_t>();
-  epscope(exit) { spIB->Unmap(); };
+  Slice<Float3> vb = spVB->map<Float3>();
+  epscope(exit) { spVB->unmap(); };
+  Slice<uint16_t> ib = spIB->map<uint16_t>();
+  epscope(exit) { spIB->unmap(); };
 
   size_t v = 0, i = 0;
 
@@ -285,13 +285,13 @@ void PrimitiveGeneratorImplStatic::GenerateCylinder(ArrayBufferRef spVB, ArrayBu
   size_t numVerts = 2 + numSegments*(numSlices+1);
   size_t numIndices = numSegments*2*(numSlices+1)*3;
 
-  spVB->Allocate<Float3>(numVerts);
-  spIB->Allocate<uint16_t>(numIndices);
+  spVB->allocate<Float3>(numVerts);
+  spIB->allocate<uint16_t>(numIndices);
 
-  Slice<Float3> vb = spVB->Map<Float3>();
-  epscope(exit) { spVB->Unmap(); };
-  Slice<uint16_t> ib = spIB->Map<uint16_t>();
-  epscope(exit) { spIB->Unmap(); };
+  Slice<Float3> vb = spVB->map<Float3>();
+  epscope(exit) { spVB->unmap(); };
+  Slice<uint16_t> ib = spIB->map<uint16_t>();
+  epscope(exit) { spIB->unmap(); };
 
   size_t v = 0;
   size_t i = 0;
@@ -363,13 +363,13 @@ void PrimitiveGeneratorImplStatic::GenerateCone(ArrayBufferRef spVB, ArrayBuffer
   size_t numVerts = 2 + numSegments*numSlices;
   size_t numIndices = numSegments*numSlices*2*3;
 
-  spVB->Allocate<Float3>(numVerts);
-  spIB->Allocate<uint16_t>(numIndices);
+  spVB->allocate<Float3>(numVerts);
+  spIB->allocate<uint16_t>(numIndices);
 
-  Slice<Float3> vb = spVB->Map<Float3>();
-  epscope(exit) { spVB->Unmap(); };
-  Slice<uint16_t> ib = spIB->Map<uint16_t>();
-  epscope(exit) { spIB->Unmap(); };
+  Slice<Float3> vb = spVB->map<Float3>();
+  epscope(exit) { spVB->unmap(); };
+  Slice<uint16_t> ib = spIB->map<uint16_t>();
+  epscope(exit) { spIB->unmap(); };
 
   size_t v = 0;
   size_t i = 0;

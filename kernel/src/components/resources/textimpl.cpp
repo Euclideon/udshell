@@ -148,7 +148,7 @@ Variant TextImpl::ParseXml()
   Slice<const void> buffer = pInstance->MapForRead();
   epscope(exit)
   {
-    pInstance->Unmap();
+    pInstance->unmap();
     epFree(pNew);
   };
 
@@ -322,13 +322,13 @@ Variant TextImpl::ParseJson()
   // RapidXML requires buffer to be null terminated
   if (buffer[buffer.length - 1] != '\0')
   {
-    pInstance->Unmap();
-    pInstance->Resize(buffer.length + 1);
+    pInstance->unmap();
+    pInstance->resize(buffer.length + 1);
     Slice<void> write = pInstance->Map();
     write[buffer.length] = '\0';
     buffer = write;
   }
-  epscope(exit) { pInstance->Unmap(); };
+  epscope(exit) { pInstance->unmap(); };
 
   using namespace rapidjson;
 

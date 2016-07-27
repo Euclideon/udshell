@@ -46,11 +46,11 @@ MenuImpl::MenuImpl(Component *pInstance, Variant::VarMap initParams)
 Variant MenuImpl::ParseXMLString(String buffer)
 {
   auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
-  spXMLBuffer->Allocate(buffer.length + 1);
+  spXMLBuffer->allocate(buffer.length + 1);
   spXMLBuffer->CopyBuffer(buffer);
   Slice<void> buf = spXMLBuffer->Map();
   buf[buffer.length] = '\0';
-  spXMLBuffer->Unmap();
+  spXMLBuffer->unmap();
 
   using namespace rapidxml;
   Variant rootNode;

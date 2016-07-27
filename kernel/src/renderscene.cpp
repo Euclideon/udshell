@@ -83,10 +83,10 @@ void RenderableView::CreateResources()
 
 void RenderableView::RenderUD()
 {
-  Slice<uint32_t> colorBuffer = spColorBuffer->Map<uint32_t>();
-  epscope(exit) { spColorBuffer->Unmap(); };
-  Slice<float> depthBuffer = spDepthBuffer->Map<float>();
-  epscope(exit) { spDepthBuffer->Unmap(); };
+  Slice<uint32_t> colorBuffer = spColorBuffer->map<uint32_t>();
+  epscope(exit) { spColorBuffer->unmap(); };
+  Slice<float> depthBuffer = spDepthBuffer->map<float>();
+  epscope(exit) { spDepthBuffer->unmap(); };
 
   uint32_t colorPitch = renderWidth*sizeof(uint32_t);
   uint32_t depthPitch = renderWidth*sizeof(float);

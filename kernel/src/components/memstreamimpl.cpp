@@ -28,7 +28,7 @@ MemStreamImpl::MemStreamImpl(Component *pInstance, Variant::VarMap initParams)
   if (!buf)
   {
     inBuffer = GetKernel()->CreateComponent<Buffer>();
-    inBuffer->Reserve(DefaultBufferSize);
+    inBuffer->reserve(DefaultBufferSize);
   }
   else
   {
@@ -43,7 +43,7 @@ MemStreamImpl::MemStreamImpl(Component *pInstance, Variant::VarMap initParams)
 MemStreamImpl::~MemStreamImpl()
 {
   if (spBuffer)
-    spBuffer->Unmap();
+    spBuffer->unmap();
 }
 
 BufferRef MemStreamImpl::GetBuffer() const
@@ -55,7 +55,7 @@ void MemStreamImpl::SetBuffer(BufferRef spNewBuffer)
 {
   if (spBuffer)
   {
-    spBuffer->Unmap();
+    spBuffer->unmap();
     pInstance->Stream::SetPos(0);
   }
 
@@ -67,13 +67,13 @@ void MemStreamImpl::SetBuffer(BufferRef spNewBuffer)
 
   if (oFlags & OpenFlags::Write)
   {
-    bufferSlice = spBuffer->Map();
+    bufferSlice = spBuffer->map();
     if (bufferSlice == nullptr)
       LogError("Can't reserve Buffer for writing.");
   }
   else if (oFlags & OpenFlags::Read)
   {
-    auto map = spBuffer->MapForRead();
+    auto map = spBuffer->mapForRead();
     bufferSlice = Slice<void>(const_cast<void*>(map.ptr), map.length);
     if (!bufferSlice)
       LogError("Can't reserve Buffer for reading.");
@@ -116,10 +116,10 @@ size_t MemStreamImpl::Write(Slice<const void> data)
 
   if (pos + data.length > (size_t)length)
   {
-    spBuffer->Unmap();
-    spBuffer->Resize(size_t(pos + data.length));
+    spBuffer->unmap();
+    spBuffer->resize(size_t(pos + data.length));
 
-    bufferSlice = spBuffer->Map();
+    bufferSlice = spBuffer->map();
     pInstance->Stream::SetLength(bufferSlice.length);
   }
 

@@ -139,7 +139,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
                                  Vertex{ Float3{ 1.0f, 1.0f, 1.0f },   Float4{ 0.0f, 1.0f, 1.0f, 1.0f } },
                                  Vertex{ Float3{ 0.0f, 1.0f, 1.0f },   Float4{ 0.5f, 0.5f, 1.0f, 1.0f } } };
 
-    vertexBuffer->AllocateFromData(Slice<const Vertex>(vb));
+    vertexBuffer->allocateFromData(Slice<const Vertex>(vb));
     MetadataRef metadata = vertexBuffer->GetMetadata();
     metadata->Get("attributeinfo")[0].insertItem("name", "a_position");
     metadata->Get("attributeinfo")[1].insertItem("name", "a_color");
@@ -166,7 +166,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
                                  3, 0, 1,
                                  3, 1, 2
                               };
-  indexBuffer->AllocateFromData(Slice<const uint16_t>(ib));
+  indexBuffer->allocateFromData(Slice<const uint16_t>(ib));
 
 #if 0
   // Texture

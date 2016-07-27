@@ -218,7 +218,7 @@ static const ElementInfo binTanInfo[] = { { sizeof(Float3), { 3 }, ElementInfoFl
 template<> // TODO: Make this not in the gobal namespace!!!!!!!
 ep::SharedString stringof<ep::BinTan>()
 {
-  return ep::ElementInfo::BuildTypeString(ep::binTanInfo);
+  return ep::ElementInfo::buildTypeString(ep::binTanInfo);
 }
 
 namespace ep {
@@ -251,7 +251,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     // positions
     Slice<Float3> verts((Float3*)mesh.mVertices, mesh.mNumVertices);
     ArrayBufferRef spVerts = getKernel().CreateComponent<ArrayBuffer>();
-    spVerts->AllocateFromData<Float3>(verts);
+    spVerts->allocateFromData<Float3>(verts);
     spVerts->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_position");
 
     SetResource(SharedString::concat("positions", i), spVerts);
@@ -264,7 +264,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       Slice<Float3> normals((Float3*)mesh.mNormals, mesh.mNumVertices);
       ArrayBufferRef spNormals = getKernel().CreateComponent<ArrayBuffer>();
-      spNormals->AllocateFromData<Float3>(normals);
+      spNormals->allocateFromData<Float3>(normals);
       spNormals->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_normal");
 
       SetResource(SharedString::concat("normals", i), spNormals);
@@ -276,11 +276,11 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     if (mesh.HasTangentsAndBitangents())
     {
       ArrayBufferRef spBinTan = getKernel().CreateComponent<ArrayBuffer>();
-      spBinTan->Allocate<BinTan>(mesh.mNumVertices);
+      spBinTan->allocate<BinTan>(mesh.mNumVertices);
       spBinTan->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_binormal");
       spBinTan->GetMetadata()->Get("attributeinfo")[1].insertItem("name", "a_tangent");
 
-      Slice<BinTan> bt = spBinTan->Map<BinTan>();
+      Slice<BinTan> bt = spBinTan->map<BinTan>();
       for (uint32_t j = 0; j<mesh.mNumVertices; ++j)
       {
         bt[j].binormal.x = mesh.mBitangents[j].x;
@@ -290,7 +290,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
         bt[j].tangent.y = mesh.mTangents[j].y;
         bt[j].tangent.z = mesh.mTangents[j].z;
       }
-      spBinTan->Unmap();
+      spBinTan->unmap();
 
       SetResource(SharedString::concat("binormalstangents", i), spBinTan);
 
@@ -303,7 +303,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       Slice<Float3> uvs((Float3*)mesh.mTextureCoords[t], mesh.mNumVertices);
 
       ArrayBufferRef spUVs = getKernel().CreateComponent<ArrayBuffer>();
-      spUVs->AllocateFromData<Float3>(uvs);
+      spUVs->allocateFromData<Float3>(uvs);
       spUVs->GetMetadata()->Get("attributeinfo")[t].insertItem("name", SharedString::concat("a_uv", t));
 
       SetResource(SharedString::concat("uvs", i, "_", t), spUVs);
@@ -317,7 +317,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       Slice<Float4> colors((Float4*)mesh.mColors[c], mesh.mNumVertices);
 
       ArrayBufferRef spColors = getKernel().CreateComponent<ArrayBuffer>();
-      spColors->AllocateFromData<Float4>(colors);
+      spColors->allocateFromData<Float4>(colors);
       spColors->GetMetadata()->Get("attributeinfo")[c].insertItem("name", SharedString::concat("a_color", c));
 
       SetResource(SharedString::concat("colors", i, "_", c), spColors);
@@ -327,9 +327,9 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
     // indices (faces)
     ArrayBufferRef spIndices = getKernel().CreateComponent<ArrayBuffer>();
-    spIndices->Allocate<uint32_t>(mesh.mNumFaces * 3);
+    spIndices->allocate<uint32_t>(mesh.mNumFaces * 3);
 
-    Slice<uint32_t> indices = spIndices->Map<uint32_t>();
+    Slice<uint32_t> indices = spIndices->map<uint32_t>();
     uint32_t *pIndices = indices.ptr;
     for (uint32_t j = 0; j<mesh.mNumFaces; ++j)
     {
@@ -340,7 +340,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       *pIndices++ = f.mIndices[2];
     }
     EPASSERT(pIndices - indices.ptr == (ptrdiff_t)indices.length, "Wrong number of indices?!");
-    spIndices->Unmap();
+    spIndices->unmap();
 
     SetResource(SharedString::concat("indices", i), spIndices);
 
