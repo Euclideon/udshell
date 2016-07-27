@@ -20,20 +20,20 @@ inline void DebugFormat(ep::String format, Args... args)
 #if EPASSERT_ON
 
 namespace ep {
-void AssertFailed(ep::String condition, ep::String message, ep::String file, int line);
+void assertFailed(ep::String condition, ep::String message, ep::String file, int line);
 
 // C++ assert code uses our fancy variadic format() function
 namespace internal {
   extern MutableString256 assertBuffer;
-  inline void AssertTemplate(String condition, String file, int line)
+  inline void assertTemplate(String condition, String file, int line)
   {
-    AssertFailed(condition, nullptr, file, line);
+    assertFailed(condition, nullptr, file, line);
   }
   template<typename ...Args>
-  inline void AssertTemplate(String condition, String file, int line, String format, Args... args)
+  inline void assertTemplate(String condition, String file, int line, String format, Args... args)
   {
     assertBuffer.format(format, args...);
-    AssertFailed(condition, assertBuffer, file, line);
+    assertFailed(condition, assertBuffer, file, line);
   }
 } // namespace internal
 } // namespace ep
@@ -44,7 +44,7 @@ namespace internal {
 # if defined(IF_EPASSERT)
 #   undef IF_EPASSERT
 # endif
-# define EPASSERT(condition, ...) do { if (!(condition)) { ::ep::internal::AssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+# define EPASSERT(condition, ...) do { if (!(condition)) { ::ep::internal::assertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
 # define IF_EPASSERT(x) x
 
 # if defined(EPRELASSERT)
@@ -54,7 +54,7 @@ namespace internal {
 #   undef IF_EPRELASSERT
 # endif
 # if EPRELASSERT_ON
-#   define EPRELASSERT(condition, ...) do { if (!(condition)) { ::ep::internal::AssertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
+#   define EPRELASSERT(condition, ...) do { if (!(condition)) { ::ep::internal::assertTemplate(#condition, __FILE__, __LINE__, __VA_ARGS__); DebugBreak(); } } while (0)
 #   define IF_EPRELASSERT(x) x
 # else
 #   define EPRELASSERT(condition, ...) do {} while(0) // TODO: Make platform-specific __assume(condition)
