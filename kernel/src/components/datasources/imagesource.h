@@ -16,7 +16,7 @@ class ImageSource : public DataSource
   EP_DECLARE_COMPONENT(ep, ImageSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides images", 0)
 public:
 
-  Slice<const String> GetFileExtensions() const override
+  Slice<const String> getFileExtensions() const override
   {
     return extensions;
   }
@@ -31,7 +31,7 @@ protected:
   ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
-    StreamRef ref = OpenStream(*initParams.get("src"));
+    StreamRef ref = openStream(*initParams.get("src"));
     Create(ref);
   }
 

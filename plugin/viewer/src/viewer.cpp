@@ -57,10 +57,10 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
       DataSourceRef spModelDS;
       epscope(fail) { if (!spModelDS) pKernel->logError("Viewer -- Failed to load model\n"); };
       spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", true } });
-      if (spModelDS->GetNumResources() > 0)
+      if (spModelDS->getNumResources() > 0)
       {
         epscope(fail) { if (!spModel) pKernel->logError("Viewer -- Failed to load model. Not a UDModel\n"); };
-        spModel = spModelDS->GetResourceAs<UDModel>(0);
+        spModel = spModelDS->getResourceAs<UDModel>(0);
       }
     }
     else if (model->is(Variant::SharedPtrType::Component))
@@ -315,7 +315,7 @@ Variant Viewer::save() const
 void Viewer::CreatePlatformLogo()
 {
   DataSourceRef spImageSource = pKernel->createDataSourceFromFile("libep/doc/images/platform_logo.png");
-  ArrayBufferRef spImage = spImageSource->GetResourceAs<ArrayBuffer>("image0");
+  ArrayBufferRef spImage = spImageSource->getResourceAs<ArrayBuffer>("image0");
 
   // Vertex Shader
   ShaderRef vertexShader = pKernel->createComponent<Shader>();

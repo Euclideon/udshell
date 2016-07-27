@@ -23,36 +23,36 @@ class DataSource : public Component
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, DataSource, IDataSource, Component, EPKERNEL_PLUGINVERSION, "DataSource desc...", 0)
 
 public:
-  virtual Slice<const String> GetFileExtensions() const { return pImpl->GetFileExtensions(); }
+  virtual Slice<const String> getFileExtensions() const { return pImpl->GetFileExtensions(); }
 
-  virtual String GetURL() const { return pImpl->GetURL(); }
-  virtual void SetURL(String url) { pImpl->SetURL(url); }
+  virtual String getURL() const { return pImpl->GetURL(); }
+  virtual void setURL(String url) { pImpl->SetURL(url); }
 
-  virtual void Flush() { pImpl->Flush(); }
+  virtual void flush() { pImpl->Flush(); }
 
-  virtual size_t GetNumResources() const { return pImpl->GetNumResources(); }
-  virtual String GetResourceName(size_t index) const { return pImpl->GetResourceName(index); }
+  virtual size_t getNumResources() const { return pImpl->GetNumResources(); }
+  virtual String getResourceName(size_t index) const { return pImpl->GetResourceName(index); }
 
-  virtual ResourceRef GetResource(size_t index) const { return pImpl->GetResourceFromIndex(index); }
+  virtual ResourceRef getResource(size_t index) const { return pImpl->GetResourceFromIndex(index); }
 
-  virtual ResourceRef GetResource(String _name) const { return pImpl->GetResource(_name); }
-  virtual void SetResource(String _name, const ResourceRef &spResource) { pImpl->SetResource(_name, spResource); }
+  virtual ResourceRef getResource(String _name) const { return pImpl->GetResource(_name); }
+  virtual void setResource(String _name, const ResourceRef &spResource) { pImpl->SetResource(_name, spResource); }
 
   template<typename T>
-  SharedPtr<T> GetResourceAs(size_t index) const
+  SharedPtr<T> getResourceAs(size_t index) const
   {
-    return component_cast<T>(GetResource(index));
+    return component_cast<T>(getResource(index));
   }
   template<typename T>
-  SharedPtr<T> GetResourceAs(String _name) const
+  SharedPtr<T> getResourceAs(String _name) const
   {
-    return component_cast<T>(GetResource(_name));
+    return component_cast<T>(getResource(_name));
   }
 
-  size_t CountResources(String filterPattern) const { return pImpl->CountResources(filterPattern); } // TODO
+  size_t countResources(String filterPattern) const { return pImpl->CountResources(filterPattern); } // TODO
 
   template<typename ResType = Resource>
-  ResourceRef Get(size_t resourceIndex) const
+  ResourceRef get(size_t resourceIndex) const
   {
     return shared_pointer_cast<ResType>(GetResource(ResType::Name(), resourceIndex));
   }
@@ -66,15 +66,15 @@ protected:
     pImpl = createImpl(initParams);
   }
 
-  virtual StreamRef OpenStream(const Variant &source) { return pImpl->OpenStream(source); }
+  virtual StreamRef openStream(const Variant &source) { return pImpl->OpenStream(source); }
 
 private:
-  ResourceRef GetResourceByVariant(Variant index) const
+  ResourceRef getResourceByVariant(Variant index) const
   {
     if (index.is(Variant::Type::String))
-      return GetResource(index.asString());
+      return getResource(index.asString());
     else
-      return GetResource((size_t)index.asInt());
+      return getResource((size_t)index.asInt());
   }
 
   Array<const PropertyInfo> getProperties() const;

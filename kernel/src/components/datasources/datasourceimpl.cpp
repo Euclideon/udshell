@@ -9,18 +9,18 @@ namespace ep {
 Array<const PropertyInfo> DataSource::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO("numResources", GetNumResources, "Number of resources the data source provides", nullptr, 0),
-    EP_MAKE_PROPERTY("url", GetURL, SetURL, "The file or location of the DataSource", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("fileExtensions", GetFileExtensions, "The file extensions associated with the DataSource", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("numResources", getNumResources, "Number of resources the data source provides", nullptr, 0),
+    EP_MAKE_PROPERTY("url", getURL, setURL, "The file or location of the DataSource", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("fileExtensions", getFileExtensions, "The file extensions associated with the DataSource", nullptr, 0),
   };
 }
 Array<const MethodInfo> DataSource::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(GetResourceName, "Get a resource name by index"),
-    EP_MAKE_METHOD(GetResourceByVariant, "Get a resource by name or index"),
-    EP_MAKE_METHOD(SetResource, "Set a resource by name"),
-    EP_MAKE_METHOD(CountResources, "Count resources with a name prefix"),
+    EP_MAKE_METHOD(getResourceName, "Get a resource name by index"),
+    EP_MAKE_METHOD(getResourceByVariant, "Get a resource by name or index"),
+    EP_MAKE_METHOD(setResource, "Set a resource by name"),
+    EP_MAKE_METHOD(countResources, "Count resources with a name prefix"),
   };
 }
 

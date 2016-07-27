@@ -237,9 +237,9 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
     // TODO: enable streamer once we have a tick running to update the streamer
     DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", mData.filename },{ "useStreamer", false } });
-    if (spModelDS && spModelDS->GetNumResources() > 0)
+    if (spModelDS && spModelDS->getNumResources() > 0)
     {
-      mData.spUDModel = spModelDS->GetResourceAs<UDModel>(0);
+      mData.spUDModel = spModelDS->getResourceAs<UDModel>(0);
     }
 
     mData.spUDNode->SetUDModel(mData.spUDModel);
