@@ -69,7 +69,7 @@ void QObjectComponent::AttachToGlue(Component *pGlue, ep::Variant::VarMap initPa
   else
   {
     EPTHROW_IF(qobject_cast<QQuickItem*>(pQObject) == nullptr, Result::Failure, "UI based components must create a QQuickItem");
-    static_cast<ep::UIComponent*>(pThis)->PostInit(pQObject);
+    static_cast<ep::UIComponent*>(pThis)->postInit(pQObject);
   }
 
   // Construction is complete, so we don't need this anymore

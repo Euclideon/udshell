@@ -11,7 +11,7 @@ namespace ep {
 inline Array<const PropertyInfo> UIComponent::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO("uiHandle", GetUIHandle, "Platform specific UI handle", nullptr, 0)
+    EP_MAKE_PROPERTY_RO("uiHandle", getUIHandle, "Platform specific UI handle", nullptr, 0)
   };
 }
 

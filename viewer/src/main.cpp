@@ -361,7 +361,7 @@ int main(int argc, char* argv[])
     if (mData.shutdownTest)
     {
       mData.spCITimer = mData.spKernel->createComponent<Timer>({ { "countdown", 4 } });
-      mData.spCITimerSub = mData.spCITimer->Elapsed.Subscribe([]() { Kernel::getInstance()->quit(); });
+      mData.spCITimerSub = mData.spCITimer->elapsed.Subscribe([]() { Kernel::getInstance()->quit(); });
     }
 
     mData.spKernel->runMainLoop();
