@@ -847,7 +847,7 @@ void QtEPComponent::disconnectNotify(const QMetaMethod &signal)
   if (!signal.isValid())
   {
     for (auto conn : connectionMap)
-      conn.value.subscription->Unsubscribe();
+      conn.value.subscription->unsubscribe();
     connectionMap.clear();
   }
 
@@ -855,7 +855,7 @@ void QtEPComponent::disconnectNotify(const QMetaMethod &signal)
   if (receivers(QByteArray::number(QSIGNAL_CODE) + signal.methodSignature()) == 0)
   {
     auto conn = connectionMap.find(epFromQByteArray(signal.name()));
-    conn->subscription->Unsubscribe();
+    conn->subscription->unsubscribe();
     connectionMap.erase(conn);
   }
 }

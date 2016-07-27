@@ -170,7 +170,7 @@ int64_t FileImpl::Seek(SeekOrigin rel, int64_t offset)
   }
 
   pInstance->Stream::setPos(pos);
-  pInstance->Stream::posChanged.Signal();
+  pInstance->Stream::posChanged.signal();
 
   return pos;
 }

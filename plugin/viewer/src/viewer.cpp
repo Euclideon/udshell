@@ -273,12 +273,12 @@ void Viewer::createBookmark()
 
 void Viewer::activate()
 {
-  getKernel().updatePulse.Subscribe(Delegate<void(double)>(this, &Viewer::update));
+  getKernel().updatePulse.subscribe(Delegate<void(double)>(this, &Viewer::update));
 }
 
 void Viewer::deactivate()
 {
-  getKernel().updatePulse.Unsubscribe(Delegate<void(double)>(this, &Viewer::update));
+  getKernel().updatePulse.unsubscribe(Delegate<void(double)>(this, &Viewer::update));
 }
 
 void Viewer::update(double timeStep)

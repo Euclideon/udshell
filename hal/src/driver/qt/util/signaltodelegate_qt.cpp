@@ -130,7 +130,7 @@ SubscriptionRef QtSignalMapper::Subscribe(QObject *pSourceObj, const ep::VarDele
     EPTHROW_IF(!pConnection->connection, Result::Failure, "Signal Mapper connection failed: Cannot map signal '{0}'", signalName);
   }
 
-  return pConnection->event.AddSubscription(del);
+  return pConnection->event.addSubscription(del);
 }
 
 void QtSignalMapper::execute(void **args)
@@ -142,7 +142,7 @@ void QtSignalMapper::execute(void **args)
   EPASSERT_THROW(pConnection, Result::Failure, "Could not locate the calling instance in the Signal Mapper for Qt Event {0}", signalName);
 
   // If there's no more active subscribers for this instance, let's unregister
-  if (!pConnection->event.HasSubscribers())
+  if (!pConnection->event.hasSubscribers())
   {
     instanceMap.remove(pSender);
     return;
@@ -162,7 +162,7 @@ void QtSignalMapper::execute(void **args)
     else
       varArgs.pushBack(epToVariant(QVariant(type, args[i + 1])));
   }
-  pConnection->event.Signal(varArgs);
+  pConnection->event.signal(varArgs);
 }
 
 } // namespace qt

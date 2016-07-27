@@ -74,7 +74,7 @@ void Logger::log(int level, String text, LogCategories category, String componen
     {
       numLines++;
       internalLog.pushBack(LogLine(level, token, category, componentUID));
-      changed.Signal();
+      changed.signal();
     }
   }
 

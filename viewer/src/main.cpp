@@ -261,7 +261,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
     mData.spScene->getRootNode()->addChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
 
-  mData.spUpdateSub = mData.spKernel->updatePulse.Subscribe(Delegate<void(double)>(&Update));
+  mData.spUpdateSub = mData.spKernel->updatePulse.subscribe(Delegate<void(double)>(&Update));
 
   mData.spScene->makeDirty();
 }
@@ -270,13 +270,13 @@ static void ViewerInit(String sender, String message, const Variant &data)
 // Author: David Ely, September 2015
 static void ViewerDeinit(String sender, String message, const Variant &data)
 {
-  mData.spUpdateSub->Unsubscribe();
+  mData.spUpdateSub->unsubscribe();
   mData.spScene->getRootNode()->removeChild(mData.spUDNode);
 #if EP_DEBUG
   mData.spScene->getRootNode()->removeChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
   if (mData.spCITimerSub)
-    mData.spCITimerSub->Unsubscribe();
+    mData.spCITimerSub->unsubscribe();
 
   mData.spUDNode = nullptr;
   mData.spUDModel = nullptr;
@@ -361,7 +361,7 @@ int main(int argc, char* argv[])
     if (mData.shutdownTest)
     {
       mData.spCITimer = mData.spKernel->createComponent<Timer>({ { "countdown", 4 } });
-      mData.spCITimerSub = mData.spCITimer->elapsed.Subscribe([]() { Kernel::getInstance()->quit(); });
+      mData.spCITimerSub = mData.spCITimer->elapsed.subscribe([]() { Kernel::getInstance()->quit(); });
     }
 
     mData.spKernel->runMainLoop();

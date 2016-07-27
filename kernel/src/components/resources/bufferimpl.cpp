@@ -114,7 +114,7 @@ Slice<const void> BufferImpl::MapForRead()
 void BufferImpl::Unmap()
 {
   if (--mapDepth == 0 && !readMap)
-    pInstance->changed.Signal();
+    pInstance->changed.signal();
 }
 
 bool BufferImpl::CopyBuffer(BufferRef buf)
@@ -143,7 +143,7 @@ bool BufferImpl::CopySlice(Slice<const void> buf)
 
   memcpy(buffer.ptr, buf.ptr, buf.length);
 
-  pInstance->changed.Signal();
+  pInstance->changed.signal();
   return true; // TODO Error handling
 }
 

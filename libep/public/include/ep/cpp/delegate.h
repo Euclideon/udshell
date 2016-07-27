@@ -71,7 +71,7 @@ struct MethodPointer<R(Args...)>
 #endif
   }
 
-  epforceinline FastDelegateType GetDelegate(void *pThis) const
+  epforceinline FastDelegateType getDelegate(void *pThis) const
   {
     DelegateUnion u;
     u.ptrs[0] = pThis;
@@ -79,9 +79,9 @@ struct MethodPointer<R(Args...)>
     return u.d;
   }
 
-  epforceinline R Call(void *pThis, Args... args) const
+  epforceinline R call(void *pThis, Args... args) const
   {
-    return GetDelegate(pThis)(args...);
+    return getDelegate(pThis)(args...);
   }
 
   epforceinline explicit operator bool() const { return ptr != nullptr; }
@@ -107,7 +107,7 @@ private:
 class DelegateMemento : public RefCounted
 {
 public:
-  epforceinline FastDelegateMemento GetFastDelegate() const { return m; }
+  epforceinline FastDelegateMemento getFastDelegate() const { return m; }
 
 protected:
   template<typename Signature>
@@ -191,8 +191,8 @@ public:
     return d(args...);
   }
 
-  void SetMemento(DelegateMementoRef _m) { this->m = _m; }
-  DelegateMementoRef GetMemento() const { return m; }
+  void setMemento(DelegateMementoRef _m) { this->m = _m; }
+  DelegateMementoRef getMemento() const { return m; }
 
 protected:
   friend struct Variant;

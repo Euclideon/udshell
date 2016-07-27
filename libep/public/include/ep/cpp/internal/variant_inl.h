@@ -124,9 +124,9 @@ epforceinline Variant VarCall(FastDelegate<R(Args...)> f, Slice<const Variant> a
   return internal::MethodCallHack<R, Args...>::call(f, args, typename internal::GenSequence<sizeof...(Args)>::type());
 }
 
-inline ep::SubscriptionRef VarEvent::AddSubscription(const ep::VarDelegate &del)
+inline ep::SubscriptionRef VarEvent::addSubscription(const ep::VarDelegate &del)
 {
-  return BaseEvent::AddSubscription(del.GetMemento());
+  return BaseEvent::addSubscription(del.getMemento());
 }
 
 
@@ -571,7 +571,7 @@ protected:
   Variant to(Slice<const Variant> args) const
   {
     fastdelegate::FastDelegate<R(Args...)> d;
-    d.SetMemento(target->GetFastDelegate());
+    d.SetMemento(target->getFastDelegate());
     return ep::VarCall(d, args);
   }
 
@@ -590,7 +590,7 @@ protected:
 
   // *to* Variant::Delegate constructor
   VarDelegateMemento(const Delegate<R(Args...)> &d)
-    : target(d.GetMemento())
+    : target(d.getMemento())
   {
     VarDelegate::FastDelegateType shim(this, &VarDelegateMemento::to);
     m = shim.GetMemento();
@@ -598,7 +598,7 @@ protected:
 
   // *from* Variant::Delegate constructor
   VarDelegateMemento(const VarDelegate &d)
-    : target(d.GetMemento())
+    : target(d.getMemento())
   {
     FastDelegate<R(Args...)> shim(this, &VarDelegateMemento::from);
     m = shim.GetMemento();

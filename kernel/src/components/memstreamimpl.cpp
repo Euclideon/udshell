@@ -153,7 +153,7 @@ int64_t MemStreamImpl::Seek(SeekOrigin rel, int64_t offset)
     pos = length;
 
   pInstance->Stream::setPos(pos);
-  pInstance->Stream::posChanged.Signal();
+  pInstance->Stream::posChanged.signal();
 
   return pos;
 }

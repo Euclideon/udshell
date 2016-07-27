@@ -79,12 +79,12 @@ void MaterialImpl::SetShader(ShaderType type, ShaderRef spShader)
     return;
 
   if (shaders[type])
-    shaders[type]->changed.Unsubscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
+    shaders[type]->changed.unsubscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
 
   shaders[type] = spShader;
 
   if (spShader)
-    spShader->changed.Subscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
+    spShader->changed.subscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
 
   OnShaderChanged();
 }

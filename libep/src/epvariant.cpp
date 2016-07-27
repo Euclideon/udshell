@@ -655,7 +655,7 @@ VarRange Variant::getRange() const
   EPTHROW_ERROR(Result::InvalidType, "Invalid type!");
 }
 
-void VarEvent::Signal(Slice<const Variant> args)
+void VarEvent::signal(Slice<const Variant> args)
 {
   for (auto &s : subscribers)
   {
