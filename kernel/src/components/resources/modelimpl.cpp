@@ -27,8 +27,8 @@ void epFromVariant(const Variant &variant, RenderList *r)
 Array<const PropertyInfo> Model::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY("material", GetMaterial, SetMaterial, "The Model's Material", nullptr, 0),
-    EP_MAKE_PROPERTY("indexArray", GetIndexArray, SetIndexArray, "The Model's index buffer", nullptr, 0),
+    EP_MAKE_PROPERTY("material", getMaterial, setMaterial, "The Model's Material", nullptr, 0),
+    EP_MAKE_PROPERTY("indexArray", getIndexArray, setIndexArray, "The Model's index buffer", nullptr, 0),
   };
 }
 Array<const MethodInfo> Model::getMethods() const

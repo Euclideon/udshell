@@ -21,7 +21,7 @@ void GeomNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
 {
   GeomRenderJob &job = spScene.geom.pushBack();
   job.matrix = mat;
-  job.spMaterial = spModel->GetMaterial();
+  job.spMaterial = spModel->getMaterial();
 
   ModelImpl *pModelImpl = spModel->GetImpl<ModelImpl>();
   job.vertexArrays = pModelImpl->vertexArrays;

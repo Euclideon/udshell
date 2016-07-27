@@ -99,18 +99,18 @@ struct UDView;
 
 struct UDRender
 {
-  const Double4x4& GetMatrix() const;
-  const UDClipArea& GetClipArea() const;
-  UDModelFlags GetFlags() const;
-  uint32_t GetStartingRoot() const;
-  uint32_t GetAnimationFrame() const;
+  const Double4x4& getMatrix() const;
+  const UDClipArea& getClipArea() const;
+  UDModelFlags getFlags() const;
+  uint32_t getStartingRoot() const;
+  uint32_t getAnimationFrame() const;
 };
 
 struct UDRenderNode : public UDRender
 {
-  uint32_t GetNodeColor(UDNodeIndex nodeIndex) const;
+  uint32_t getNodeColor(UDNodeIndex nodeIndex) const;
   template <typename T>
-  const T& GetAttribute(UDNodeIndex nodeIndex, uint32_t attributeIndex) const;
+  const T& getAttribute(UDNodeIndex nodeIndex, uint32_t attributeIndex) const;
 
   // Deprecated
   enum UDStreamType
@@ -121,22 +121,22 @@ struct UDRenderNode : public UDRender
     LightingComposite
   };
   template <typename T>
-  const T& GetAttribute(UDNodeIndex nodeIndex, UDStreamType type) const;
+  const T& getAttribute(UDNodeIndex nodeIndex, UDStreamType type) const;
 };
 
 struct UDFilterVoxel : public UDRenderNode
 {
-  template <typename T> const T& GetConstantData() const;
+  template <typename T> const T& getConstantData() const;
 };
 
 struct UDRenderVoxel : public UDRenderNode
 {
-  template <typename T> const T& GetConstantData() const;
+  template <typename T> const T& getConstantData() const;
 };
 
 struct UDRenderPixel : public UDRender
 {
-  template <typename T> const T& GetConstantData() const;
+  template <typename T> const T& getConstantData() const;
 };
 
 using VoxelFilter = UDFilterResult(const UDFilterVoxel &voxel, UDNodeIndex nodeIndex, const UDRenderNodeInfo &nodeInfo);
@@ -148,56 +148,56 @@ class UDModel : public Resource
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, UDModel, IUDModel, Resource, EPKERNEL_PLUGINVERSION, "UD model resource", 0)
 public:
 
-  uint32_t GetStartingRoot() const { return pImpl->GetStartingRoot(); }
-  void SetStartingRoot(uint32_t root) { return pImpl->SetStartingRoot(root); }
+  uint32_t getStartingRoot() const { return pImpl->GetStartingRoot(); }
+  void setStartingRoot(uint32_t root) { return pImpl->SetStartingRoot(root); }
 
-  uint32_t GetAnimationFrame() const { return pImpl->GetAnimationFrame(); }
-  void SetAnimationFrame(uint32_t frame) { pImpl->SetAnimationFrame(frame); }
+  uint32_t getAnimationFrame() const { return pImpl->GetAnimationFrame(); }
+  void setAnimationFrame(uint32_t frame) { pImpl->SetAnimationFrame(frame); }
 
-  const Rect<uint32_t> &GetRenderClipRect() const { return pImpl->GetRenderClipRect(); }
-  void SetRenderClipRect(const Rect<uint32_t>& _rect) { pImpl->SetRenderClipRect(_rect); }
+  const Rect<uint32_t> &getRenderClipRect() const { return pImpl->GetRenderClipRect(); }
+  void setRenderClipRect(const Rect<uint32_t>& _rect) { pImpl->SetRenderClipRect(_rect); }
 
-  UDModelFlags GetRenderFlags() const { return pImpl->GetRenderFlags(); }
-  void SetRenderFlags(UDModelFlags flags) { pImpl->SetRenderFlags(flags); }
+  UDModelFlags getRenderFlags() const { return pImpl->GetRenderFlags(); }
+  void setRenderFlags(UDModelFlags flags) { pImpl->SetRenderFlags(flags); }
 
-  const Double4x4 &GetUDMatrix() const { return pImpl->GetUDMatrix(); }
-  void SetUDMatrix(const Double4x4 &matrix){ pImpl->SetUDMatrix(matrix); }
+  const Double4x4 &getUDMatrix() const { return pImpl->GetUDMatrix(); }
+  void setUDMatrix(const Double4x4 &matrix){ pImpl->SetUDMatrix(matrix); }
 
-  void SetVoxelFilter(VoxelFilter *pVoxelFilter)  { pImpl->SetVoxelFilter(pVoxelFilter); }
-  VoxelFilter* GetVoxelFilter() const { return pImpl->GetVoxelFilter(); }
+  void setVoxelFilter(VoxelFilter *pVoxelFilter)  { pImpl->SetVoxelFilter(pVoxelFilter); }
+  VoxelFilter* getVoxelFilter() const { return pImpl->GetVoxelFilter(); }
 
-  void SetVoxelShader(VoxelShader *pVoxelShader) { pImpl->SetVoxelShader(pVoxelShader); }
-  VoxelShader* GetVoxelShader() const { return pImpl->GetVoxelShader(); }
+  void setVoxelShader(VoxelShader *pVoxelShader) { pImpl->SetVoxelShader(pVoxelShader); }
+  VoxelShader* getVoxelShader() const { return pImpl->GetVoxelShader(); }
 
-  void SetPixelShader(PixelShader *pPixelShader) { pImpl->SetPixelShader(pPixelShader); }
-  PixelShader* GetPixelShader() const { return pImpl->GetPixelShader(); }
-
-  template <typename T>
-  void SetConstantData(UDConstantDataType type, const T &data);
+  void setPixelShader(PixelShader *pPixelShader) { pImpl->SetPixelShader(pPixelShader); }
+  PixelShader* getPixelShader() const { return pImpl->GetPixelShader(); }
 
   template <typename T>
-  void SetConstantData(UDConstantDataType type, Slice<const T> data);
+  void setConstantData(UDConstantDataType type, const T &data);
 
   template <typename T>
-  T GetConstantData(UDConstantDataType type);
+  void setConstantData(UDConstantDataType type, Slice<const T> data);
 
-  void SetConstantData(UDConstantDataType type, BufferRef buffer) { return pImpl->SetConstantData(type, buffer); }
-  BufferRef GetConstantData(UDConstantDataType type) const { return pImpl->GetConstantData(type); }
+  template <typename T>
+  T getConstantData(UDConstantDataType type);
 
-  void SetVoxelFilterConstantData(BufferRef buffer) { SetConstantData(UDConstantDataType::VoxelFilter, buffer); }
-  BufferRef GetVoxelFilterConstantData() const { return GetConstantData(UDConstantDataType::VoxelFilter); }
+  void setConstantData(UDConstantDataType type, BufferRef buffer) { return pImpl->SetConstantData(type, buffer); }
+  BufferRef getConstantData(UDConstantDataType type) const { return pImpl->GetConstantData(type); }
 
-  void SetVoxelShaderConstantData(BufferRef buffer) { SetConstantData(UDConstantDataType::VoxelShader, buffer); }
-  BufferRef GetVoxelShaderConstantData() const { return GetConstantData(UDConstantDataType::VoxelShader); }
+  void setVoxelFilterConstantData(BufferRef buffer) { setConstantData(UDConstantDataType::VoxelFilter, buffer); }
+  BufferRef getVoxelFilterConstantData() const { return getConstantData(UDConstantDataType::VoxelFilter); }
 
-  void SetPixelShaderConstantData(BufferRef buffer) { SetConstantData(UDConstantDataType::PixelShader, buffer); }
-  BufferRef GetPixelShaderConstantData() const { return GetConstantData(UDConstantDataType::PixelShader); }
+  void setVoxelShaderConstantData(BufferRef buffer) { setConstantData(UDConstantDataType::VoxelShader, buffer); }
+  BufferRef getVoxelShaderConstantData() const { return getConstantData(UDConstantDataType::VoxelShader); }
 
-  int64_t GetMemoryUsage() const { return pImpl->GetMemoryUsage(); }
+  void setPixelShaderConstantData(BufferRef buffer) { setConstantData(UDConstantDataType::PixelShader, buffer); }
+  BufferRef getPixelShaderConstantData() const { return getConstantData(UDConstantDataType::PixelShader); }
+
+  int64_t getMemoryUsage() const { return pImpl->GetMemoryUsage(); }
 
   // Deprecated
-  VarDelegate GetVarVoxelShader() const { return pImpl->GetVarVoxelShader(); }
-  void SetVarVoxelShader(VarDelegate del) { pImpl->SetVarVoxelShader(del); }
+  VarDelegate getVarVoxelShader() const { return pImpl->GetVarVoxelShader(); }
+  void setVarVoxelShader(VarDelegate del) { pImpl->SetVarVoxelShader(del); }
 
   EP_FRIENDS_WITH_IMPL(UDSource);
 protected:

@@ -10,16 +10,16 @@ static_assert(sizeof(internal::UDPrivateData) == sizeof(udOctree), "sizeof(inter
 Array<const PropertyInfo> UDModel::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY("startingRoot", GetStartingRoot, SetStartingRoot, "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", nullptr, 0),
-    EP_MAKE_PROPERTY("animationFrame", GetAnimationFrame, SetAnimationFrame, "Animation frame number. Only valid for models that support animation", nullptr, 0),
-    EP_MAKE_PROPERTY("renderClipRect", GetRenderClipRect, SetRenderClipRect, "Clipping Rect of the Screen", nullptr, 0),
-    EP_MAKE_PROPERTY("renderFlags", GetRenderFlags, SetRenderFlags, "UD Rendering Flags", nullptr, 0),
-    EP_MAKE_PROPERTY("udMatrix", GetUDMatrix, SetUDMatrix, "UD Matrix", nullptr, 0),
-    EP_MAKE_PROPERTY("voxelFilterConstantData", GetVoxelFilterConstantData, SetVoxelFilterConstantData, "Voxel Filter Constant Data", nullptr, 0),
-    EP_MAKE_PROPERTY("voxelShaderConstantData", GetVoxelShaderConstantData, SetVoxelShaderConstantData, "Voxel Shader Constant Data", nullptr, 0),
-    EP_MAKE_PROPERTY("pixelShaderConstantData", GetPixelShaderConstantData, SetPixelShaderConstantData, "Pixel Shader Constant Data", nullptr, 0),
-    EP_MAKE_PROPERTY("voxelShader", GetVarVoxelShader, SetVarVoxelShader, "Voxel Shader", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("memoryUsage", GetMemoryUsage, "Memory Usage", nullptr, 0),
+    EP_MAKE_PROPERTY("startingRoot", getStartingRoot, setStartingRoot, "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", nullptr, 0),
+    EP_MAKE_PROPERTY("animationFrame", getAnimationFrame, setAnimationFrame, "Animation frame number. Only valid for models that support animation", nullptr, 0),
+    EP_MAKE_PROPERTY("renderClipRect", getRenderClipRect, setRenderClipRect, "Clipping Rect of the Screen", nullptr, 0),
+    EP_MAKE_PROPERTY("renderFlags", getRenderFlags, setRenderFlags, "UD Rendering Flags", nullptr, 0),
+    EP_MAKE_PROPERTY("udMatrix", getUDMatrix, setUDMatrix, "UD Matrix", nullptr, 0),
+    EP_MAKE_PROPERTY("voxelFilterConstantData", getVoxelFilterConstantData, setVoxelFilterConstantData, "Voxel Filter Constant Data", nullptr, 0),
+    EP_MAKE_PROPERTY("voxelShaderConstantData", getVoxelShaderConstantData, setVoxelShaderConstantData, "Voxel Shader Constant Data", nullptr, 0),
+    EP_MAKE_PROPERTY("pixelShaderConstantData", getPixelShaderConstantData, setPixelShaderConstantData, "Pixel Shader Constant Data", nullptr, 0),
+    EP_MAKE_PROPERTY("voxelShader", getVarVoxelShader, setVarVoxelShader, "Voxel Shader", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("memoryUsage", getMemoryUsage, "Memory Usage", nullptr, 0),
   };
 }
 

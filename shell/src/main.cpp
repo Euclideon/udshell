@@ -356,11 +356,11 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 
   ModelRef model = kernel->createComponent<Model>();
   model->setName("TestModel");
-  model->AddVertexArray(vertexBuffer);
-  model->AddVertexArray(colourBuffer);
-  model->SetIndexArray(indexBuffer);
-  model->SetMaterial(material);
-  model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), indexBuffer->getLength() });
+  model->addVertexArray(vertexBuffer);
+  model->addVertexArray(colourBuffer);
+  model->setIndexArray(indexBuffer);
+  model->setMaterial(material);
+  model->setRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), indexBuffer->getLength() });
 
   GeomNodeRef geomNode = kernel->createComponent<GeomNode>();
   geomNode->setModel(model);
