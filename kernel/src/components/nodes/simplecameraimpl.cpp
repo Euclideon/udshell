@@ -11,16 +11,16 @@ Array<const PropertyInfo> SimpleCamera::getProperties() const
     // TODO: why are these write-only?
     EP_MAKE_PROPERTY_WO("matrix", setMatrix, "Local matrix", nullptr, 0),
     EP_MAKE_PROPERTY_WO("position", setPosition, "Local position", nullptr, 0),
-    EP_MAKE_PROPERTY_WO("orientation", SetOrientation, "Camera orientation (YPR)", nullptr, 0),
-    EP_MAKE_PROPERTY_WO("speed", SetSpeed, "Camera speed", nullptr, 0),
-    EP_MAKE_PROPERTY("helicopterMode", GetHelicopterMode, SetHelicopterMode, "Helicopter Mode", nullptr, 0),
-    EP_MAKE_PROPERTY("invertedYAxis", GetInvertedYAxis, SetInvertedYAxis, "Invert Y-axis", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("orientation", setOrientation, "Camera orientation (YPR)", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("speed", setSpeed, "Camera speed", nullptr, 0),
+    EP_MAKE_PROPERTY("helicopterMode", getHelicopterMode, setHelicopterMode, "Helicopter Mode", nullptr, 0),
+    EP_MAKE_PROPERTY("invertedYAxis", getInvertedYAxis, setInvertedYAxis, "Invert Y-axis", nullptr, 0),
   };
 }
 Array<const EventInfo> SimpleCamera::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Changed, "The camera changed")
+    EP_MAKE_EVENT(changed, "The camera changed")
   };
 }
 
@@ -64,11 +64,11 @@ SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initPar
   if (paramSpeed)
     SetSpeed(paramSpeed->asFloat());
 
-  const Variant *paramInvert = initParams.get("invertyaxis");
+  const Variant *paramInvert = initParams.get("invertYAxis");
   if (paramInvert)
     SetInvertedYAxis(paramInvert->asBool());
 
-  const Variant *paramHeli = initParams.get("helicoptermode");
+  const Variant *paramHeli = initParams.get("helicopterMode");
   if (paramHeli)
     SetHelicopterMode(paramHeli->asBool());
 }
@@ -295,7 +295,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
   if (stateChanged)
   {
-    pInstance->Changed.Signal(pos, ypr);
+    pInstance->changed.Signal(pos, ypr);
     stateChanged = false;
   }
 
@@ -310,8 +310,8 @@ Variant SimpleCameraImpl::Save() const
   Variant::VarMap params = var.asAssocArray();
 
   params.insert("speed", speed);
-  params.insert("invertyaxis", (invertedYAxis == -1.0 ? true : false));
-  params.insert("helicoptermode", helicopterMode);
+  params.insert("invertYAxis", (invertedYAxis == -1.0 ? true : false));
+  params.insert("helicopterMode", helicopterMode);
 
   return Variant(std::move(params));
 }
