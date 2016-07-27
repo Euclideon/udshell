@@ -1053,12 +1053,12 @@ struct AVLTreeAllocator<VariantAVLNode>
 
   Node *Alloc()
   {
-    return nodes.Alloc();
+    return nodes._alloc();
   }
 
   void Free(Node *pMem)
   {
-    nodes.Free(pMem);
+    nodes._free(pMem);
   }
 
   static AVLTreeAllocator &Get() { return internal::GetAVLTreeAllocator(); }

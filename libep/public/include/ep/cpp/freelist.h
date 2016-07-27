@@ -32,14 +32,14 @@ public:
   }
 
   template<typename... Args>
-  T* New(Args&&... args)
+  T* create(Args&&... args)
   {
-    T *pMem = Alloc();
-    epscope(fail) { Free(pMem); };
+    T *pMem = _alloc();
+    epscope(fail) { _free(pMem); };
     return epConstruct(pMem) T(std::forward<Args>(args)...);
   }
 
-  T* Alloc()
+  T* _alloc()
   {
     T *pNew = pFreeList;
     if (!pNew)
@@ -62,13 +62,13 @@ public:
     return pNew;
   }
 
-  void Delete(T *pItem)
+  void destroy(T *pItem)
   {
     pItem->~T();
-    Free(pItem);
+    _free(pItem);
   }
 
-  void Free(T *pItem)
+  void _free(T *pItem)
   {
     *(T**)pItem = pFreeList;
     pFreeList = pItem;
