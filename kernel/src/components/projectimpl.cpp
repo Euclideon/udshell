@@ -69,13 +69,13 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
 
   try
   {
-    rootElements = spXMLBuffer->ParseXml();
+    rootElements = spXMLBuffer->parseXml();
   }
   catch (parse_error &e)
   {
-    auto xmlBuff = spXMLBuffer->MapForRead();
+    auto xmlBuff = spXMLBuffer->mapForRead();
     epscope(exit) { spXMLBuffer->unmap(); };
-    EPTHROW_ERROR(Result::Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
+    EPTHROW_ERROR(Result::Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::getLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
   }
 
   Variant::VarMap projectNode = rootElements.asAssocArray();
@@ -99,9 +99,9 @@ void ProjectImpl::SaveProject()
 
   projectNode.insert("children", children);
 
-  spXMLBuffer->FormatXml(projectNode);
+  spXMLBuffer->formatXml(projectNode);
 
-  Slice<const void> buffer = spXMLBuffer->MapForRead();
+  Slice<const void> buffer = spXMLBuffer->mapForRead();
   epscope(exit) { spXMLBuffer->unmap(); };
   if (buffer.empty())
   {
@@ -134,7 +134,7 @@ Variant ProjectImpl::SaveActivities()
 
   for (ActivityRef activity : activities)
   {
-    Variant::VarMap node = Text::ComponentParamsToXMLMap(activity->save()).asAssocArray();
+    Variant::VarMap node = Text::componentParamsToXmlMap(activity->save()).asAssocArray();
     node.insert("name", activity->getType());
     children.pushBack(node);
   }
@@ -184,7 +184,7 @@ void ProjectImpl::ParseActivity(Variant node)
   try
   {
     Variant::VarMap initParams;
-    Variant vParams = Text::XMLMapToComponentParams(node);
+    Variant vParams = Text::xmlMapToComponentParams(node);
     if (vParams.is(Variant::SharedPtrType::AssocArray))
       initParams = vParams.asAssocArray();
 

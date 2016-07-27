@@ -41,12 +41,12 @@ SettingsImpl::SettingsImpl(Component *pInstance, Variant::VarMap initParams)
   Variant rootElements;
   TextRef spXMLBuffer = spSrc->LoadText();
 
-  try { rootElements = spXMLBuffer->ParseXml(); }
+  try { rootElements = spXMLBuffer->parseXml(); }
   catch (parse_error &e)
   {
-    auto xmlBuff = spXMLBuffer->MapForRead();
+    auto xmlBuff = spXMLBuffer->mapForRead();
     epscope(exit) { spXMLBuffer->unmap(); };
-    EPTHROW_ERROR(Result::Failure, "Unable to parse settings file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
+    EPTHROW_ERROR(Result::Failure, "Unable to parse settings file: {0} on line {1} : {2}", srcString, Text::getLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
   }
 
   Variant::VarMap settingsNode = rootElements.asAssocArray();
@@ -63,7 +63,7 @@ void SettingsImpl::SaveSettings()
   settingsNode.insert("name", "settings");
   for (auto setting : settings)
   {
-    Variant::VarMap node = Text::ComponentParamsToXMLMap(setting.value).asAssocArray();
+    Variant::VarMap node = Text::componentParamsToXmlMap(setting.value).asAssocArray();
     node.insert("name", setting.key);
     children.pushBack(node);
   }
@@ -72,7 +72,7 @@ void SettingsImpl::SaveSettings()
 
   auto spXMLBuffer = GetKernel()->createComponent<Text>();
   spXMLBuffer->reserve(10240); // TODO: this is not okay...
-  spXMLBuffer->FormatXml(settingsNode);
+  spXMLBuffer->formatXml(settingsNode);
 
   try {
     StreamRef spFile = GetKernel()->createComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
