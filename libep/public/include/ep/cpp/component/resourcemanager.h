@@ -53,45 +53,45 @@ class ResourceManager : public Component
 
 public:
   // Resource getter/setters
-  size_t GetNumResources() const { return pImpl->GetNumResources(); }
-  void AddResource(ResourceRef res) { pImpl->AddResource(res); }
-  void AddResourceArray(Slice<const ResourceRef> resArray) { pImpl->AddResourceArray(resArray); }
-  void RemoveResource(ResourceRef res) { return pImpl->RemoveResource(res); }
-  void RemoveResourceArray(Slice<const ResourceRef> resArray) { return pImpl->RemoveResourceArray(resArray); }
+  size_t getNumResources() const { return pImpl->GetNumResources(); }
+  void addResource(ResourceRef res) { pImpl->AddResource(res); }
+  void addResourceArray(Slice<const ResourceRef> resArray) { pImpl->AddResourceArray(resArray); }
+  void removeResource(ResourceRef res) { return pImpl->RemoveResource(res); }
+  void removeResourceArray(Slice<const ResourceRef> resArray) { return pImpl->RemoveResourceArray(resArray); }
 
-  void ClearResources() { pImpl->ClearResources(); }
-  ResourceRef GetResource(String key) const { return pImpl->GetResource(key); }
-  Array<ResourceRef> GetResourceArray() const { return pImpl->GetResourceArray(); }
+  void clearResources() { pImpl->ClearResources(); }
+  ResourceRef getResource(String key) const { return pImpl->GetResource(key); }
+  Array<ResourceRef> getResourceArray() const { return pImpl->GetResourceArray(); }
 
   template<typename CT>
-  SharedPtr<CT> GetResourceAs(String key) const
+  SharedPtr<CT> getResourceAs(String key) const
   {
-    return component_cast<CT>(GetResource(key));
+    return component_cast<CT>(getResource(key));
   }
 
   template<typename CT>
-  Array<ResourceRef> GetResourcesByType() const
+  Array<ResourceRef> getResourcesByType() const
   {
-    return GetResourcesByType(&CT::descriptor);
+    return getResourcesByType(&CT::descriptor);
   }
-  Array<ResourceRef> GetResourcesByType(const ep::ComponentDesc *pBase) const { return pImpl->GetResourcesByType(pBase); }
+  Array<ResourceRef> getResourcesByType(const ep::ComponentDesc *pBase) const { return pImpl->GetResourcesByType(pBase); }
 
   ResourceIterator begin() const { return pImpl->begin(); }
   ResourceIterator end() const { return pImpl->end(); }
 
-  Variant::VarMap GetExtensions() const { return pImpl->GetExtensions(); }
+  Variant::VarMap getExtensions() const { return pImpl->GetExtensions(); }
   // Resource loading/saving functions
-  DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams) { return pImpl->LoadResourcesFromFile(initParams); }
-  void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) { pImpl->SaveResourcesToFile(spDataSource, initParams); }
+  DataSourceRef loadResourcesFromFile(Variant::VarMap initParams) { return pImpl->LoadResourcesFromFile(initParams); }
+  void saveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) { pImpl->SaveResourcesToFile(spDataSource, initParams); }
 
   Variant save() const override { return pImpl->Save(); }
 
-  Event<Array<ResourceRef>> Added;
-  Event<Array<ResourceRef>> Removed;
+  Event<Array<ResourceRef>> added;
+  Event<Array<ResourceRef>> removed;
 
 protected:
-  void AddResourceArrayMethod(Array<const ResourceRef> resArray) { AddResourceArray(resArray); }
-  void RemoveResourceArrayMethod(Array<const ResourceRef> resArray) { RemoveResourceArray(resArray); }
+  void addResourceArrayMethod(Array<const ResourceRef> resArray) { addResourceArray(resArray); }
+  void removeResourceArrayMethod(Array<const ResourceRef> resArray) { removeResourceArray(resArray); }
 
   ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)

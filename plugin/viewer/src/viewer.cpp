@@ -56,7 +56,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
       DataSourceRef spModelDS;
       epscope(fail) { if (!spModelDS) pKernel->logError("Viewer -- Failed to load model\n"); };
-      spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", true } });
+      spModelDS = spResourceManager->loadResourcesFromFile({ { "src", modelSrc }, { "useStreamer", true } });
       if (spModelDS->getNumResources() > 0)
       {
         epscope(fail) { if (!spModel) pKernel->logError("Viewer -- Failed to load model. Not a UDModel\n"); };
@@ -149,7 +149,7 @@ void Viewer::OnResourceDropped(String resourceUID, int x, int y)
 
   try
   {
-    spUDModel = spResourceManager->GetResourceAs<UDModel>(resourceUID);
+    spUDModel = spResourceManager->getResourceAs<UDModel>(resourceUID);
   }
   catch(EPException &)
   {
