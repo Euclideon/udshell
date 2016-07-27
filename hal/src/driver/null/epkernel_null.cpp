@@ -63,11 +63,11 @@ public:
   NullKernel(Variant::VarMap commandLine);
   ~NullKernel();
 
-  void RunMainLoop() override final;
-  void Quit() override final;
+  void runMainLoop() override final;
+  void quit() override final;
 
-  void DispatchToMainThread(MainThreadCallback callback) override final;
-  void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
+  void dispatchToMainThread(MainThreadCallback callback) override final;
+  void dispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
 private:
   static ComponentDescInl *MakeKernelDescriptor();
@@ -110,21 +110,21 @@ NullKernel::NullKernel(Variant::VarMap commandLine)
   // create offscreen GL context
   CreateGLContext();
 
-  GetImpl()->InitRender();
+  getImpl()->InitRender();
 
   // this is usually performed at the start of mainloop...
   // but since daemon may not run a mainloop, it should happen here.
-  FinishInit();
+  finishInit();
 }
 
 NullKernel::~NullKernel()
 {
-  GetImpl()->Shutdown();
+  getImpl()->Shutdown();
 
-  GetImpl()->DeinitRender();
+  getImpl()->DeinitRender();
 }
 
-void NullKernel::RunMainLoop()
+void NullKernel::runMainLoop()
 {
   while (!s_done)
   {
@@ -135,22 +135,22 @@ void NullKernel::RunMainLoop()
   }
 }
 
-void NullKernel::Quit()
+void NullKernel::quit()
 {
   s_done = true;
 }
 
-void NullKernel::DispatchToMainThread(MainThreadCallback callback)
+void NullKernel::dispatchToMainThread(MainThreadCallback callback)
 {
   EPASSERT(false, "TODO");
 }
 
-void NullKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+void NullKernel::dispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   EPASSERT(false, "TODO");
 }
 
-Kernel* Kernel::CreateInstanceInternal(Variant::VarMap commandLine)
+Kernel* Kernel::createInstanceInternal(Variant::VarMap commandLine)
 {
   return KernelImpl::CreateComponentInstance<NullKernel>(commandLine);
 }

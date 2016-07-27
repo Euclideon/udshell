@@ -126,13 +126,13 @@ void ViewImpl::OnDirty()
 {
   if (renderWidth == 0 || renderHeight == 0)
   {
-    GetKernel()->LogWarning(1, "Render target has zero size! Unable to render...");
+    GetKernel()->logWarning(1, "Render target has zero size! Unable to render...");
     return;
   }
 
   if (spScene && spCamera)
   {
-    SharedPtr<Renderer> spRenderer = GetKernel()->GetImpl()->GetRenderer();
+    SharedPtr<Renderer> spRenderer = GetKernel()->getImpl()->GetRenderer();
 
     UniquePtr<RenderableView> spRenderView = UniquePtr<RenderableView>::create(spRenderer);
 

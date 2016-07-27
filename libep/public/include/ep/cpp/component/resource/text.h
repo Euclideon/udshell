@@ -47,7 +47,7 @@ protected:
   }
 
   Array<const MethodInfo> getMethods() const;
-  Array<const StaticFuncInfo> GetStaticFuncs() const;
+  Array<const StaticFuncInfo> getStaticFuncs() const;
 };
 
 } // namespace ep

@@ -70,7 +70,7 @@ static int PrintOutput(lua_State *L)
   LuaState &l = (LuaState&)L;
 
   Kernel *pKernel = l.kernel();
-  auto spLua = pKernel->GetLua();
+  auto spLua = pKernel->getLua();
 
   spLua->GetOutputBroadcaster()->Write(CreateStringFromArgs(L));
 
@@ -82,14 +82,14 @@ static int PrintError(lua_State *L)
   LuaState &l = (LuaState&)L;
 
   Kernel *pKernel = l.kernel();
-  auto spLua = pKernel->GetLua();
+  auto spLua = pKernel->getLua();
 
-  pKernel->LogError(CreateStringFromArgs(L));
+  pKernel->logError(CreateStringFromArgs(L));
 
   return 0;
 }
 
-static int SendMessage(lua_State *L)
+static int sendMessage(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
 
@@ -109,7 +109,7 @@ static int SendMessage(lua_State *L)
   if (numArgs >= 4)
     epConstruct(&args) Variant(Variant::luaGet(l, 4));
 
-  l.kernel()->SendMessage(target, sender, message, args);
+  l.kernel()->sendMessage(target, sender, message, args);
 
   // TODO: push result and return 1?
   return 0;  // number of results
@@ -142,7 +142,7 @@ static int CreateComponent(lua_State *L)
   ComponentRef c = nullptr;
   try
   {
-    l.pushComponent(l.kernel()->CreateComponent(type, init));
+    l.pushComponent(l.kernel()->createComponent(type, init));
   }
   catch (...)
   {
@@ -164,7 +164,7 @@ static int FindComponent(lua_State *L)
 
   String component = l.toString(1);
 
-  ComponentRef c = l.kernel()->FindComponent(component);
+  ComponentRef c = l.kernel()->findComponent(component);
 
   l.pushComponent(c);
   return 1;
@@ -188,9 +188,9 @@ LuaState::LuaState(Kernel *pKernel)
 
   lua_register(L, "print", (lua_CFunction)PrintOutput);
   lua_register(L, "printerror", (lua_CFunction)PrintError);
-  lua_register(L, "SendMessage", (lua_CFunction)SendMessage);
-  lua_register(L, "CreateComponent", (lua_CFunction)CreateComponent);
-  lua_register(L, "FindComponent", (lua_CFunction)FindComponent);
+  lua_register(L, "sendMessage", (lua_CFunction)sendMessage);
+  lua_register(L, "createComponent", (lua_CFunction)CreateComponent);
+  lua_register(L, "findComponent", (lua_CFunction)FindComponent);
 }
 
 LuaState::~LuaState()

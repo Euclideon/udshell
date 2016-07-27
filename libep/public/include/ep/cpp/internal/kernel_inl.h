@@ -50,7 +50,7 @@ namespace internal {
     {
       return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
         MutableString128 t(Format, "New: {0} - {1}", _pType->info.identifier, _uid);
-        _pKernel->LogDebug(4, t);
+        _pKernel->logDebug(4, t);
         void *pMem = epAlloc(sizeof(_ComponentType));
         EPTHROW_IF_NULL(pMem, Result::AllocFailure, "Memory allocation failed");
         epscope(fail) { if (pMem) epFree(pMem); };
@@ -64,7 +64,7 @@ namespace internal {
 }
 
 template<typename _ComponentType, typename ImplType, typename GlueType, typename StaticImpl>
-inline const ComponentDesc* Kernel::RegisterComponentType()
+inline const ComponentDesc* Kernel::registerComponentType()
 {
   // check the class has a 'super' member
   static_assert(internal::CreateHelper<_ComponentType>::HasDescriptor(), "Missing descriptor: needs 'EP_DECLARE_COMPONENT(Namespace, Name, SuperType, Version, Description, Flags)' declared at the top of _ComponentType");
@@ -92,19 +92,19 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
   pDesc->pSuperDesc = nullptr;
   if (!pDesc->info.identifier.eq("ep.Component"))
   {
-    pDesc->pSuperDesc = GetComponentDesc(pDesc->baseClass);
+    pDesc->pSuperDesc = getComponentDesc(pDesc->baseClass);
     EPTHROW_IF(!pDesc->pSuperDesc, Result::InvalidType, "Base Component '{0}' not registered", pDesc->baseClass);
     pDesc->PopulateFromDesc((const ep::ComponentDescInl*)pDesc->pSuperDesc);
   }
 
-  RegisterGlueType<GlueType>();
+  registerGlueType<GlueType>();
   CreateStaticImpl<StaticImpl, _ComponentType>::Do();
 
-  return RegisterComponentType(pDesc);
+  return registerComponentType(pDesc);
 }
 
 template<typename GlueType>
-inline void Kernel::RegisterGlueType()
+inline void Kernel::registerGlueType()
 {
   pImpl->RegisterGlueType(GlueType::componentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) -> ComponentRef {
     void *pMem = epAlloc(sizeof(GlueType));
@@ -116,7 +116,7 @@ inline void Kernel::RegisterGlueType()
   });
 }
 template<>
-inline void Kernel::RegisterGlueType<void>()
+inline void Kernel::registerGlueType<void>()
 {
 }
 
@@ -132,77 +132,77 @@ struct Kernel::CreateStaticImpl<void, T> { static inline void Do() {} };
 
 
 template<typename _ComponentType>
-Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(bool bIncludeBase)
+Array<const ep::ComponentDesc *> Kernel::getDerivedComponentDescs(bool bIncludeBase)
 {
   return pImpl->GetDerivedComponentDescsFromString(_ComponentType::componentID(), bIncludeBase);
 }
 
 template<typename T>
-SharedPtr<T> Kernel::CreateComponent(Variant::VarMap initParams)
+SharedPtr<T> Kernel::createComponent(Variant::VarMap initParams)
 {
-	return shared_pointer_cast<T>(CreateComponent(T::componentID(), initParams));
+	return shared_pointer_cast<T>(createComponent(T::componentID(), initParams));
 }
 
 template<typename T>
-SharedPtr<T> Kernel::CreateGlue(const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams)
+SharedPtr<T> Kernel::createGlue(const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams)
 {
-  return shared_pointer_cast<T>(CreateGlue(T::componentID(), _pType, _uid, spInstance, initParams));
+  return shared_pointer_cast<T>(createGlue(T::componentID(), _pType, _uid, spInstance, initParams));
 }
 
 // Inlines pipe through C API
 
-inline Kernel* Kernel::GetInstance()
+inline Kernel* Kernel::getInstance()
 {
   return s_pInstance ? s_pInstance->pKernelInstance : nullptr;
 }
 
 template<typename ...Args>
-inline void Kernel::LogError(String format, Args... args) const
+inline void Kernel::logError(String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(1<<0, 2, format);
+    log(1<<0, 2, format);
   else
-    Log(1<<0, 2, MutableString128(Format, format, args...));
+    log(1<<0, 2, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
-inline void Kernel::LogWarning(int level, String format, Args... args) const
+inline void Kernel::logWarning(int level, String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(1<<1, level, format);
+    log(1<<1, level, format);
   else
-    Log(1<<1, level, MutableString128(Format, format, args...));
+    log(1<<1, level, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
-inline void Kernel::LogDebug(int level, String format, Args... args) const
+inline void Kernel::logDebug(int level, String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(1<<2, level, format);
+    log(1<<2, level, format);
   else
-    Log(1<<2, level, MutableString128(Format, format, args...));
+    log(1<<2, level, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
-inline void Kernel::LogInfo(int level, String format, Args... args) const
+inline void Kernel::logInfo(int level, String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(1<<3, level, format);
+    log(1<<3, level, format);
   else
-    Log(1<<3, level, MutableString128(Format, format, args...));
+    log(1<<3, level, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
-inline void Kernel::LogScript(String format, Args... args) const
+inline void Kernel::logScript(String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(1<<4, 2, format);
+    log(1<<4, 2, format);
   else
-    Log(1<<4, 2, MutableString128(Format, format, args...));
+    log(1<<4, 2, MutableString128(Format, format, args...));
 }
 template<typename ...Args>
-inline void Kernel::LogTrace(String format, Args... args) const
+inline void Kernel::logTrace(String format, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    Log(1<<5, 2, format);
+    log(1<<5, 2, format);
   else
-    Log(1<<5, 2,MutableString128(Format, format, args...));
+    log(1<<5, 2,MutableString128(Format, format, args...));
 }
 
 } // namespace ep

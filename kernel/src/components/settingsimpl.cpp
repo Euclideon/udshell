@@ -25,7 +25,7 @@ SettingsImpl::SettingsImpl(Component *pInstance, Variant::VarMap initParams)
     srcString = pSrc->asString();
 
     try {
-      spSrc = GetKernel()->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+      spSrc = GetKernel()->createComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
     } catch (EPException &) {
       LogDebug(2, "Settings file \"{0}\" does not exist. Create new settings.", *pSrc);
       return;
@@ -70,12 +70,12 @@ void SettingsImpl::SaveSettings()
 
   settingsNode.insert("children", children);
 
-  auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
+  auto spXMLBuffer = GetKernel()->createComponent<Text>();
   spXMLBuffer->reserve(10240); // TODO: this is not okay...
   spXMLBuffer->FormatXml(settingsNode);
 
   try {
-    StreamRef spFile = GetKernel()->CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    StreamRef spFile = GetKernel()->createComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
     spFile->Save(spXMLBuffer);
   } catch (EPException &) {
     LogWarning(1, "Failed to open Settings file for writing: \"{0}\"", srcString);

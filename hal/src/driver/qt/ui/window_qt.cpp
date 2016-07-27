@@ -29,7 +29,7 @@ bool QtWindowEventFilter::eventFilter(QObject *pObj, QEvent *pEvent)
       if (!pKeyEvent->isAutoRepeat())
       {
         QKeySequence seq(pKeyEvent->key() + pKeyEvent->modifiers());
-        return QtApplication::Kernel()->GetCommandManager()->HandleShortcutEvent(seq.toString().toUtf8().data());
+        return QtApplication::Kernel()->getCommandManager()->HandleShortcutEvent(seq.toString().toUtf8().data());
       }
       break;
     }

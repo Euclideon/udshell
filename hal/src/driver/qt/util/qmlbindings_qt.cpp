@@ -138,7 +138,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
 
     if (pDesc->propertyTree.get(propertyName))
     {
-      QtApplication::Kernel()->LogWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.", propertyName);
+      QtApplication::Kernel()->logWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.", propertyName);
       continue;
     }
 
@@ -159,7 +159,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     {
       if (pDesc->methodTree.get(name))
       {
-        QtApplication::Kernel()->LogWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
+        QtApplication::Kernel()->logWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
         continue;
       }
 
@@ -175,7 +175,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     {
       if (pDesc->eventTree.get(name))
       {
-        QtApplication::Kernel()->LogWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
+        QtApplication::Kernel()->logWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
         continue;
       }
 
@@ -195,11 +195,11 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
 ep::DynamicComponentRef QmlComponentData::CreateComponent(ep::KernelRef spKernel, Variant::VarMap initParams)
 {
   // NOTE: we need to give QObjectComponent our 'this' pointer so it can do deferred QObject creation
-  return spKernel->CreateComponent<QObjectComponent>({ { "qmlcomponentdata", (int64_t)(size_t)this } });
+  return spKernel->createComponent<QObjectComponent>({ { "qmlcomponentdata", (int64_t)(size_t)this } });
 }
 
 // Creates a QML Item from the stored QQmlComponent
-QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent, ep::Variant::VarMap initParams)
+QObject *QmlComponentData::createInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent, ep::Variant::VarMap initParams)
 {
   using namespace ep;
 
@@ -268,7 +268,7 @@ QtEPComponent *QtKernelQml::findComponent(const QString &uid) const
   String uidString(byteArray.data(), byteArray.size());
 
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->FindComponent(uidString));
+  return BuildQtEPComponent::Create(pKernel->findComponent(uidString));
 }
 
 QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariant initParams)
@@ -279,7 +279,7 @@ QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariant initP
 
   try
   {
-    return BuildQtEPComponent::Create(pKernel->CreateComponent(typeString, epToVariant(initParams).asAssocArray()));
+    return BuildQtEPComponent::Create(pKernel->createComponent(typeString, epToVariant(initParams).asAssocArray()));
   }
   catch (ep::EPException &)
   {
@@ -291,33 +291,33 @@ QtEPComponent *QtKernelQml::getCommandManager() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->GetCommandManager());
+  return BuildQtEPComponent::Create(pKernel->getCommandManager());
 }
 
 QtEPComponent *QtKernelQml::getLua() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->GetLua());
+  return BuildQtEPComponent::Create(pKernel->getLua());
 }
 
 QtEPComponent *QtKernelQml::getStdOutBroadcaster() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->GetStdOutBroadcaster());
+  return BuildQtEPComponent::Create(pKernel->getStdOutBroadcaster());
 }
 
 QtEPComponent *QtKernelQml::getStdErrBroadcaster() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->GetStdErrBroadcaster());
+  return BuildQtEPComponent::Create(pKernel->getStdErrBroadcaster());
 }
 
 void QtKernelQml::exec(QString str)
 {
-  pKernel->Exec(String(str.toUtf8().data(), str.length()));
+  pKernel->exec(String(str.toUtf8().data(), str.length()));
 }
 
 QtFocusManager *QtKernelQml::getFocusManager() const
@@ -883,7 +883,7 @@ QQuickWindow *QtGlobalEPSingleton::parentWindow(QQuickItem *pQuickItem) const
 {
   if (!pQuickItem)
   {
-    QtApplication::Kernel()->LogError("Attempted to get parent window for null item");
+    QtApplication::Kernel()->logError("Attempted to get parent window for null item");
     return nullptr;
   }
   return pQuickItem->window();

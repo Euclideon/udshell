@@ -130,49 +130,49 @@ template<typename ...Args>
 inline void Component::logError(String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    pKernel->Log(1<<0, 2, text, uid);
+    pKernel->log(1<<0, 2, text, uid);
   else
-    pKernel->Log(1<<0, 2, MutableString128(Format, text, args...), uid);
+    pKernel->log(1<<0, 2, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::logWarning(int level, String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    pKernel->Log(1<<1, level, text, uid);
+    pKernel->log(1<<1, level, text, uid);
   else
-    pKernel->Log(1<<1, level, MutableString128(Format, text, args...), uid);
+    pKernel->log(1<<1, level, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::logDebug(int level, String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    pKernel->Log(1<<2, level, text, uid);
+    pKernel->log(1<<2, level, text, uid);
   else
-    pKernel->Log(1<<2, level, MutableString128(Format, text, args...), uid);
+    pKernel->log(1<<2, level, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::logInfo(int level, String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    pKernel->Log(1<<3, level, text, uid);
+    pKernel->log(1<<3, level, text, uid);
   else
-    pKernel->Log(1<<3, level, MutableString128(Format, text, args...), uid);
+    pKernel->log(1<<3, level, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::logScript(String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    pKernel->Log(1<<4, 2, text, uid);
+    pKernel->log(1<<4, 2, text, uid);
   else
-    pKernel->Log(1<<4, 2, MutableString128(Format, text, args...), uid);
+    pKernel->log(1<<4, 2, MutableString128(Format, text, args...), uid);
 }
 template<typename ...Args>
 inline void Component::logTrace(String text, Args... args) const
 {
   if (sizeof...(Args) == 0)
-    pKernel->Log(1<<5, 2, text, uid);
+    pKernel->log(1<<5, 2, text, uid);
   else
-    pKernel->Log(1<<5, 2, MutableString128(Format, text, args...), uid);
+    pKernel->log(1<<5, 2, MutableString128(Format, text, args...), uid);
 }
 
 } // namespace ep

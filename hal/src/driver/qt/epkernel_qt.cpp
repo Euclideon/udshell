@@ -132,14 +132,14 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   cmdArgc = (int)cmdArgv.length;
 
   // register Qt specific components
-  EPTHROW_IF_NULL(RegisterComponentType<QmlPluginLoader>(), ep::Result::Failure, "Unable to register QmlPluginLoader");
-  EPTHROW_IF_NULL(RegisterComponentType<QObjectComponent>(), ep::Result::Failure, "Unable to register QtComponent");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::UIComponent, QtUIComponentImpl, UIComponentGlue>()), ep::Result::Failure, "Unable to register UI Component");
-  EPTHROW_IF_NULL((RegisterComponentType<ep::Window, QtWindowImpl, WindowGlue>()), ep::Result::Failure, "Unable to register Window component");
+  EPTHROW_IF_NULL(registerComponentType<QmlPluginLoader>(), ep::Result::Failure, "Unable to register QmlPluginLoader");
+  EPTHROW_IF_NULL(registerComponentType<QObjectComponent>(), ep::Result::Failure, "Unable to register QtComponent");
+  EPTHROW_IF_NULL((registerComponentType<ep::UIComponent, QtUIComponentImpl, UIComponentGlue>()), ep::Result::Failure, "Unable to register UI Component");
+  EPTHROW_IF_NULL((registerComponentType<ep::Window, QtWindowImpl, WindowGlue>()), ep::Result::Failure, "Unable to register Window component");
 
   // create and register the qml loader
-  spQmlPluginLoader = CreateComponent<QmlPluginLoader>();
-  GetImpl()->spPluginManager->RegisterPluginLoader(spQmlPluginLoader);
+  spQmlPluginLoader = createComponent<QmlPluginLoader>();
+  getImpl()->spPluginManager->RegisterPluginLoader(spQmlPluginLoader);
 
   // TODO: control this with a command line switch...
   //qputenv("QSG_RENDER_LOOP", "single");
@@ -222,7 +222,7 @@ QtKernel::~QtKernel()
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::RunMainLoop()
+void QtKernel::runMainLoop()
 {
   // TODO: move finish init to the constructor???
   FinishInit();
@@ -232,7 +232,7 @@ void QtKernel::RunMainLoop()
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::Quit()
+void QtKernel::quit()
 {
   if (pTopLevelWindow)
     pTopLevelWindow->close();
@@ -330,11 +330,11 @@ void QtKernel::registerQmlComponents(String folderPath)
   // otherwise assume it's a file system path and pass it via the plugin manager
   else
   {
-     qmlFilenames = GetImpl()->ScanPluginFolder(folderPath, ep::Slice<const ep::String>{ ".qml" });
+     qmlFilenames = getImpl()->ScanPluginFolder(folderPath, ep::Slice<const ep::String>{ ".qml" });
   }
 
   pQmlEngine->addImportPath(epToQString(folderPath));
-  GetImpl()->LoadPlugins(qmlFilenames);
+  getImpl()->LoadPlugins(qmlFilenames);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -352,7 +352,7 @@ void QtKernel::RegisterQml(ep::String file, ep::Variant::VarMap typeDesc)
     { "new", ep::DynamicComponentDesc::NewInstanceFunc(data.ptr(), &QmlComponentData::CreateComponent) }
   };
 
-  GetImpl()->RegisterComponentTypeFromMap(typeInfo);
+  getImpl()->RegisterComponentTypeFromMap(typeInfo);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -374,7 +374,7 @@ ep::ComponentRef QtKernel::createQmlComponent(String file, Variant::VarMap initP
 
   // locate the nominated super
   String superTypeId = typeDesc["super"].asString();
-  const ComponentDescInl *pSuper = (const ComponentDescInl *)GetImpl()->GetComponentDesc(superTypeId);
+  const ComponentDescInl *pSuper = (const ComponentDescInl *)getImpl()->GetComponentDesc(superTypeId);
   EPTHROW_IF(!pSuper, Result::InvalidType, "Base Component '{0}' not registered", superTypeId);
 
   // generate unregistered component descriptor
@@ -409,10 +409,10 @@ ep::ComponentRef QtKernel::createQmlComponent(String file, Variant::VarMap initP
   MutableString64 newUid(Concat, pDesc->info.identifier, "_", serialNumber++);
 
   // create the new component (glue and instance)
-  pKernel->LogDebug(4, "New (Unregistered QML Component): {0} - {1}", pDesc->info.identifier, file);
+  pKernel->logDebug(4, "New (Unregistered QML Component): {0} - {1}", pDesc->info.identifier, file);
   QmlComponentData data(file, pQmlEngine);
   QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
-  ComponentRef spC = CreateGlue(pDesc->baseClass, pDesc, newUid, spInstance, initParams);
+  ComponentRef spC = createGlue(pDesc->baseClass, pDesc, newUid, spInstance, initParams);
   spInstance->AttachToGlue(spC.ptr(), initParams);
   pDesc->PopulateFromDesc(pSuper);
 
@@ -425,7 +425,7 @@ ep::ComponentRef QtKernel::createQmlComponent(String file, Variant::VarMap initP
 // ---------------------------------------------------------------------------------------
 void QtKernel::FinishInit()
 {
-  epscope(fail) { LogError("Error initialising renderer");  pApplication->quit(); };
+  epscope(fail) { logError("Error initialising renderer");  pApplication->quit(); };
 
   // create the offscreen surface
   pOffscreenSurface = new QOffscreenSurface();
@@ -442,7 +442,7 @@ void QtKernel::FinishInit()
   // update the format based on what we actually got (since it may differ)
   mainSurfaceFormat = pMainThreadContext->format();
 
-  LogDebug(2, "Created OpenGL context using version: {0}.{1} {2,?3}",
+  logDebug(2, "Created OpenGL context using version: {0}.{1} {2,?3}",
     mainSurfaceFormat.majorVersion(),
     mainSurfaceFormat.minorVersion(),
     (mainSurfaceFormat.profile() == QSurfaceFormat::CoreProfile ? "Core" : "Compatibility"),
@@ -451,7 +451,7 @@ void QtKernel::FinishInit()
   if (!pMainThreadContext->makeCurrent(pOffscreenSurface))
   {
     // TODO: handle error
-    LogError("Error making main GL Context current");
+    logError("Error making main GL Context current");
     pApplication->quit();
   }
 
@@ -470,17 +470,17 @@ void QtKernel::FinishInit()
   s_QtGLContext.pSurface = pOffscreenSurface;
 
   // init the HAL's render system
-  GetImpl()->InitRender();
+  getImpl()->InitRender();
 
   // app specific init
-  Kernel::FinishInit();
+  Kernel::finishInit();
 }
 
 // ---------------------------------------------------------------------------------------
 void QtKernel::Shutdown()
 {
   // shutdown the app then pump the message queue to flush jobs from UD render thread completion
-  GetImpl()->Shutdown();
+  getImpl()->Shutdown();
   pApplication->sendPostedEvents();
   pApplication->processEvents();
 
@@ -495,15 +495,15 @@ void QtKernel::Shutdown()
 
   try
   {
-    GetImpl()->DeinitRender();
+    getImpl()->DeinitRender();
   }
   catch (std::exception &e)
   {
-    LogError("Error cleaning up renderer, DeinitRender failed: {0}", e.what());
+    logError("Error cleaning up renderer, DeinitRender failed: {0}", e.what());
   }
   catch (...)
   {
-    LogError("Error cleaning up renderer, DeinitRender failed");
+    logError("Error cleaning up renderer, DeinitRender failed");
   }
 
   pMainThreadContext->makeCurrent(pOffscreenSurface);
@@ -516,17 +516,17 @@ void QtKernel::Shutdown()
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::OnFatal(ep::String msg)
+void QtKernel::onFatal(ep::String msg)
 {
   LogError(msg);
   QMessageBox::critical(nullptr, "Fatal Error!", epToQString(msg));
 }
 
 // ---------------------------------------------------------------------------------------
-ep::ViewRef QtKernel::SetFocusView(ep::ViewRef spView)
+ep::ViewRef QtKernel::setFocusView(ep::ViewRef spView)
 {
   using namespace ep;
-  KernelImpl *pKernelImpl = GetImpl();
+  KernelImpl *pKernelImpl = getImpl();
   if (!spView && pKernelImpl->spFocusView)
     pKernelImpl->spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
 
@@ -536,7 +536,7 @@ ep::ViewRef QtKernel::SetFocusView(ep::ViewRef spView)
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::DispatchToMainThread(ep::MainThreadCallback callback)
+void QtKernel::dispatchToMainThread(ep::MainThreadCallback callback)
 {
   // if we're on the main thread just execute the callback now
   if (OnMainThread())
@@ -547,7 +547,7 @@ void QtKernel::DispatchToMainThread(ep::MainThreadCallback callback)
 }
 
 // ---------------------------------------------------------------------------------------
-void QtKernel::DispatchToMainThreadAndWait(ep::MainThreadCallback callback)
+void QtKernel::dispatchToMainThreadAndWait(ep::MainThreadCallback callback)
 {
   // TODO: handle this gracefully? can we detect if the main thread is blocked??
   EPASSERT(!OnRenderThread(), "DispatchToMainThreadAndWait() should not be called on the Render Thread");
@@ -626,7 +626,7 @@ void QtKernelMediator::OnAppQuit()
 void QtKernelMediator::OnGLMessageLogged(const QOpenGLDebugMessage &debugMessage)
 {
   // TODO: improve the formatting/verbosity of this
-  pQtKernel->LogDebug(2, SharedString::concat("GL Message: ", debugMessage.message().toUtf8().data()));
+  pQtKernel->logDebug(2, SharedString::concat("GL Message: ", debugMessage.message().toUtf8().data()));
 }
 
 // ---------------------------------------------------------------------------------------
@@ -640,14 +640,14 @@ void QtKernelMediator::customEvent(QEvent *pEvent)
     try {
       d();
     } catch (std::exception &e) {
-      pQtKernel->LogError("Exception occurred in DispatchToMainThread handler: {0}", e.what());
+      pQtKernel->logError("Exception occurred in DispatchToMainThread handler: {0}", e.what());
     } catch (...) {
-      pQtKernel->LogError("Exception occurred in DispatchToMainThread handler: C++ Exception");
+      pQtKernel->logError("Exception occurred in DispatchToMainThread handler: C++ Exception");
     }
   }
   else
   {
-    pQtKernel->LogWarning(2, SharedString::concat("Unknown event received in Kernel: TYPE ", (int)pEvent->type()));
+    pQtKernel->logWarning(2, SharedString::concat("Unknown event received in Kernel: TYPE ", (int)pEvent->type()));
   }
 }
 
@@ -655,7 +655,7 @@ void QtKernelMediator::customEvent(QEvent *pEvent)
 
 namespace ep {
 
-Kernel* Kernel::CreateInstanceInternal(Variant::VarMap commandLine)
+Kernel* Kernel::createInstanceInternal(Variant::VarMap commandLine)
 {
   return KernelImpl::CreateComponentInstance<qt::QtKernel>(commandLine);
 }

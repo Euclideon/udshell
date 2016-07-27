@@ -36,8 +36,8 @@ public:
   ScreenPoint GetMousePosition() const override final { return mousePosition; }
 
   void Resize(int width, int height) override final;
-  void Activate() override final { GetKernel()->UpdatePulse.Subscribe(Delegate<void(double)>(this, &ViewImpl::Update)); }
-  void Deactivate() override final { GetKernel()->UpdatePulse.Unsubscribe(Delegate<void(double)>(this, &ViewImpl::Update)); }
+  void Activate() override final { GetKernel()->updatePulse.Subscribe(Delegate<void(double)>(this, &ViewImpl::Update)); }
+  void Deactivate() override final { GetKernel()->updatePulse.Unsubscribe(Delegate<void(double)>(this, &ViewImpl::Update)); }
   void GoToBookmark(String bookmarkName) override final;
 
   // TODO: Move this into the layer system once its implemented.

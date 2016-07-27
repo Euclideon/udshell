@@ -146,7 +146,7 @@ bool GeomSource::Write(const aiScene *pScene)
 
   try
   {
-    StreamRef spFile = getKernel().CreateComponent<File>({ { "path", GetURL() }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    StreamRef spFile = getKernel().createComponent<File>({ { "path", GetURL() }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
     spFile->Write(Slice<void>(pBlob->data, pBlob->size));
   }
   catch (EPException &)
@@ -171,7 +171,7 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
     LogDebug(4, "Material {0}: \"{1}\"", i, FromAIString(aiName));
 
     String _name = FromAIString(aiName);
-    MaterialRef spMat = getKernel().CreateComponent<Material>({ { "name", _name } });
+    MaterialRef spMat = getKernel().createComponent<Material>({ { "name", _name } });
 
     aiColor4D color(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, color);
@@ -233,7 +233,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     LogDebug(4, "Mesh {0}: {1}", i, FromAIString(mesh.mName));
 
     // create a model
-    ModelRef spMesh = getKernel().CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
+    ModelRef spMesh = getKernel().createComponent<Model>({ { "name", FromAIString(mesh.mName) } });
 
     // get material
     ResourceRef spMat = GetResource(SharedString::concat("material", mesh.mMaterialIndex));
@@ -250,7 +250,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
     // positions
     Slice<Float3> verts((Float3*)mesh.mVertices, mesh.mNumVertices);
-    ArrayBufferRef spVerts = getKernel().CreateComponent<ArrayBuffer>();
+    ArrayBufferRef spVerts = getKernel().createComponent<ArrayBuffer>();
     spVerts->allocateFromData<Float3>(verts);
     spVerts->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_position");
 
@@ -263,7 +263,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     {
 
       Slice<Float3> normals((Float3*)mesh.mNormals, mesh.mNumVertices);
-      ArrayBufferRef spNormals = getKernel().CreateComponent<ArrayBuffer>();
+      ArrayBufferRef spNormals = getKernel().createComponent<ArrayBuffer>();
       spNormals->allocateFromData<Float3>(normals);
       spNormals->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_normal");
 
@@ -275,7 +275,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     // binormals & tangents
     if (mesh.HasTangentsAndBitangents())
     {
-      ArrayBufferRef spBinTan = getKernel().CreateComponent<ArrayBuffer>();
+      ArrayBufferRef spBinTan = getKernel().createComponent<ArrayBuffer>();
       spBinTan->allocate<BinTan>(mesh.mNumVertices);
       spBinTan->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_binormal");
       spBinTan->GetMetadata()->Get("attributeinfo")[1].insertItem("name", "a_tangent");
@@ -302,7 +302,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     {
       Slice<Float3> uvs((Float3*)mesh.mTextureCoords[t], mesh.mNumVertices);
 
-      ArrayBufferRef spUVs = getKernel().CreateComponent<ArrayBuffer>();
+      ArrayBufferRef spUVs = getKernel().createComponent<ArrayBuffer>();
       spUVs->allocateFromData<Float3>(uvs);
       spUVs->GetMetadata()->Get("attributeinfo")[t].insertItem("name", SharedString::concat("a_uv", t));
 
@@ -316,7 +316,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     {
       Slice<Float4> colors((Float4*)mesh.mColors[c], mesh.mNumVertices);
 
-      ArrayBufferRef spColors = getKernel().CreateComponent<ArrayBuffer>();
+      ArrayBufferRef spColors = getKernel().createComponent<ArrayBuffer>();
       spColors->allocateFromData<Float4>(colors);
       spColors->GetMetadata()->Get("attributeinfo")[c].insertItem("name", SharedString::concat("a_color", c));
 
@@ -326,7 +326,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     }
 
     // indices (faces)
-    ArrayBufferRef spIndices = getKernel().CreateComponent<ArrayBuffer>();
+    ArrayBufferRef spIndices = getKernel().createComponent<ArrayBuffer>();
     spIndices->allocate<uint32_t>(mesh.mNumFaces * 3);
 
     Slice<uint32_t> indices = spIndices->map<uint32_t>();
@@ -380,8 +380,8 @@ void GeomSource::ParseXRefs(const aiScene *pScene)
     {
       // Load the UDDataSource
       UDSourceRef spModelDS;
-      epscope(fail) { if (!spModelDS) pKernel->LogError("GeomSource -- Failed to load UDModel \"{0}\"", url); };
-      spModelDS = getKernel().CreateComponent<UDSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
+      epscope(fail) { if (!spModelDS) pKernel->logError("GeomSource -- Failed to load UDModel \"{0}\"", url); };
+      spModelDS = getKernel().createComponent<UDSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
 
       UDModelRef spUDModel;
       if (spModelDS->GetNumResources() > 0)
@@ -411,7 +411,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   LogDebug(4, "{1,*0}  World Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", world.a1, world.b1, world.c1, world.a2, world.b2, world.c2, world.a3, world.b3, world.c3);
 
   // create bone from node
-  NodeRef spNode = getKernel().CreateComponent<Node>({{ "name", FromAIString(node.mName) }});
+  NodeRef spNode = getKernel().createComponent<Node>({{ "name", FromAIString(node.mName) }});
 
 //  if (node.mParent)
 //    spNode->GetMetadata()->Insert("parent", FromAIString(node.mParent->mName));
@@ -425,7 +425,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     if (spMesh)
     {
       // create geom node
-      GeomNodeRef spGeomNode = getKernel().CreateComponent<GeomNode>();
+      GeomNodeRef spGeomNode = getKernel().createComponent<GeomNode>();
       spGeomNode->SetModel(shared_pointer_cast<Model>(spMesh));
 
       // add geom node to world node (we could collapse this if there is only one mesh...)
@@ -454,7 +454,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       if (spUDModel)
       {
         // create UDNode
-        UDNodeRef spUDNode = getKernel().CreateComponent<UDNode>();
+        UDNodeRef spUDNode = getKernel().createComponent<UDNode>();
         spUDNode->SetUDModel(component_cast<UDModel>(spUDModel));
 
         // add UDNode to world node (we could collapse this if there is only one model...)
@@ -482,7 +482,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
 
 void GeomSource::StaticInit(ep::Kernel *pKernel)
 {
-  pKernel->RegisterExtensions(pKernel->GetComponentDesc(componentID()), extensions);
+  pKernel->registerExtensions(pKernel->getComponentDesc(componentID()), extensions);
 }
 
 } // namespace ep

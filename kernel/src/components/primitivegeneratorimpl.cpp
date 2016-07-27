@@ -3,7 +3,7 @@
 
 namespace ep {
 
-Array<const StaticFuncInfo> PrimitiveGenerator::GetStaticFuncs() const
+Array<const StaticFuncInfo> PrimitiveGenerator::getStaticFuncs() const
 {
   return{
     EP_MAKE_STATICFUNC(GenerateCube, "Generate a cube primitive"),

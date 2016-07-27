@@ -35,14 +35,14 @@ ComponentImpl::~ComponentImpl()
   pInstance->logDebug(4, "Destroy component: {0} ({1})", pInstance->uid, pInstance->name);
 
   // HAX: we take access to KernelImpl; low-level Component stuff
-  KernelImpl *pKernelImpl = GetKernel()->GetImpl();
+  KernelImpl *pKernelImpl = GetKernel()->getImpl();
   pKernelImpl->DestroyComponent(pInstance);
 }
 
 void ComponentImpl::SetName(SharedString name)
 {
   // HAX: we take access to KernelImpl; low-level Component stuff
-  KernelImpl *pKernelImpl = GetKernel()->GetImpl();
+  KernelImpl *pKernelImpl = GetKernel()->getImpl();
 
   if (name && pKernelImpl->namedInstanceRegistry.exists(name))
     EPTHROW_WARN(Result::AlreadyExists, 1, "Name is already in use");

@@ -66,7 +66,7 @@ void ResourceManagerImpl::ClearResources()
 
 Variant::VarMap ResourceManagerImpl::GetExtensions() const
 {
-  const AVLTree<String, const ep::ComponentDesc *> &extensionsRegistry = GetKernel()->GetExtensionsRegistry();
+  const AVLTree<String, const ep::ComponentDesc *> &extensionsRegistry = GetKernel()->getExtensionsRegistry();
   AVLTree<SharedString, Array<SharedString>> exts;
   Variant::VarMap map;
 
@@ -126,7 +126,7 @@ DataSourceRef ResourceManagerImpl::LoadResourcesFromFile(Variant::VarMap initPar
 
   DataSourceRef spDS;
   epscope(fail) { if (!spDS) LogWarning(2, "LoadResourcesFromFile - \"src\" file not found or not supported: {0}", src.asString()); };
-  spDS = GetKernel()->CreateDataSourceFromExtension(ext, initParams);
+  spDS = GetKernel()->createDataSourceFromExtension(ext, initParams);
 
   size_t numResources = spDS->GetNumResources();
   Array<ResourceRef> resArray(Reserve, numResources);

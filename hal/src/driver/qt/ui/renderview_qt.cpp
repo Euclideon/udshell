@@ -104,7 +104,7 @@ void QtRenderView::attachView(const QVariant &view)
   spView->frameReady.Subscribe(Delegate<void()>(this, &QtRenderView::OnFrameReady));
 
   // TEMP HAX:
-  QtApplication::Kernel()->SetFocusView(spView);
+  QtApplication::Kernel()->setFocusView(spView);
 }
 
 void QtRenderView::OnResize()
