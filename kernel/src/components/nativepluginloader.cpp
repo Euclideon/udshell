@@ -47,7 +47,7 @@ bool NativePluginLoader::LoadPlugin(String filename)
   HMODULE hDll = LoadLibraryW(widePath);
   if (hDll == NULL)
   {
-    LogError("Unable to load dll '{0}' - error code '{1}'", filename, (uint32_t)GetLastError());
+    logError("Unable to load dll '{0}' - error code '{1}'", filename, (uint32_t)GetLastError());
 
     // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
     // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
@@ -69,7 +69,7 @@ bool NativePluginLoader::LoadPlugin(String filename)
   void *hSo = dlopen(filename.toStringz(), RTLD_NOW);
   if (hSo == NULL)
   {
-    LogError("Unable to open library '{0}' - error '{1}'", filename, dlerror());
+    logError("Unable to open library '{0}' - error '{1}'", filename, dlerror());
 
     // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
     // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
@@ -90,7 +90,7 @@ bool NativePluginLoader::LoadPlugin(String filename)
 
   epUnused(pFuncName);
 
-  LogError("Platform has no shared-library support!");
+  logError("Platform has no shared-library support!");
 
 #endif
 
@@ -106,16 +106,16 @@ bool NativePluginLoader::LoadPlugin(String filename)
   }
   catch(std::exception &e)
   {
-    LogError("Unhandled exception from epPlugin_Init() while loading plugin {0}: {1}", filename, e.what());
+    logError("Unhandled exception from epPlugin_Init() while loading plugin {0}: {1}", filename, e.what());
   }
   catch(...)
   {
-    LogError("Unhandled C++ exception from epPlugin_Init() while loading plugin {0}!", filename);
+    logError("Unhandled C++ exception from epPlugin_Init() while loading plugin {0}!", filename);
   }
 
   if (!bSuccess)
   {
-    LogError("Failed to load plugin {0}!", filename);
+    logError("Failed to load plugin {0}!", filename);
 #if defined(EP_WINDOWS)
     FreeLibrary(hDll);
 #elif defined(EP_LINUX)

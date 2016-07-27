@@ -37,7 +37,7 @@ bool CommandManagerImpl::SetShortcut(String id, SharedString shortcut)
   Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
   {
-    LogWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\" - \"{1}\" doesn't exist", shortcut, id);
+    logWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\" - \"{1}\" doesn't exist", shortcut, id);
     return false;
   }
 
@@ -50,7 +50,7 @@ bool CommandManagerImpl::RegisterCommand(String id, Delegate<void(Variant::VarMa
 {
   if (commandRegistry.get(id))
   {
-    LogWarning(5, "Command registration failed - \"{0}\" already exists", id);
+    logWarning(5, "Command registration failed - \"{0}\" already exists", id);
     return false;
   }
 
@@ -67,7 +67,7 @@ bool CommandManagerImpl::RegisterCommand(String id, Delegate<void(Variant::VarMa
       if (!shortcut.cmpIC(comm.shortcut) && id.cmp(comm.id)
         && (activityTypeID.empty() || comm.activityType.empty() || activityTypeID.eq(comm.activityType)))
       {
-        LogWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\". Already bound to \"{2}\"", shortcut, id, comm.id);
+        logWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\". Already bound to \"{2}\"", shortcut, id, comm.id);
         return false;
       }
     }
@@ -205,7 +205,7 @@ bool CommandManagerImpl::SetFunction(String id, Delegate<void(Variant::VarMap)> 
   Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
   {
-    LogWarning(2, "Can't bind function to command \"{0}\", command doesn't exist", id);
+    logWarning(2, "Can't bind function to command \"{0}\", command doesn't exist", id);
     return false;
   }
 
@@ -220,7 +220,7 @@ bool CommandManagerImpl::SetScript(String id, String script)
   Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
   {
-    LogWarning(2, "Can't bind script to command \"{0}\", command doesn't exist", id);
+    logWarning(2, "Can't bind script to command \"{0}\", command doesn't exist", id);
     return false;
   }
 
@@ -244,7 +244,7 @@ bool CommandManagerImpl::SetActivityType(String commandID, String activityTypeID
   Command *pCommand = commandRegistry.get(commandID);
   if (!pCommand)
   {
-    LogWarning(2, "Can't bind activity type to command \"{0}\", command doesn't exist", commandID);
+    logWarning(2, "Can't bind activity type to command \"{0}\", command doesn't exist", commandID);
     return false;
   }
 

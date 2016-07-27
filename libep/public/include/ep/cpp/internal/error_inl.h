@@ -113,64 +113,64 @@ ScopeGuard<typename std::decay<Func>::type> operator +(ScopeGuardOnExit, Func&& 
 } // namespace internal
 
 // global log functions
-template<typename ...Args> inline void LogError(String text, Args... args)
+template<typename ...Args> inline void logError(String text, Args... args)
 {
   if (sizeof...(Args) == 0)
-    internal::Log(1<<0, 2, text);
+    internal::log(1<<0, 2, text);
   else
   {
     MutableString128 tmp(Format, text, args...);
-    internal::Log(1<<0, 2, tmp);
+    internal::log(1<<0, 2, tmp);
   }
 }
-template<typename ...Args> inline void LogWarning(int level, String text, Args... args)
+template<typename ...Args> inline void logWarning(int level, String text, Args... args)
 {
   if (sizeof...(Args) == 0)
-    internal::Log(1<<1, level, text);
+    internal::log(1<<1, level, text);
   else
   {
     MutableString128 tmp(Format, text, args...);
-    internal::Log(1<<1, level, tmp);
+    internal::log(1<<1, level, tmp);
   }
 }
-template<typename ...Args> inline void LogDebug(int level, String text, Args... args)
+template<typename ...Args> inline void logDebug(int level, String text, Args... args)
 {
   if (sizeof...(Args) == 0)
-    internal::Log(1<<2, level, text);
+    internal::log(1<<2, level, text);
   else
   {
     MutableString128 tmp(Format, text, args...);
-    internal::Log(1<<2, level, tmp);
+    internal::log(1<<2, level, tmp);
   }
 }
-template<typename ...Args> inline void LogInfo(int level, String text, Args... args)
+template<typename ...Args> inline void logInfo(int level, String text, Args... args)
 {
   if (sizeof...(Args) == 0)
-    internal::Log(1<<3, level, text);
+    internal::log(1<<3, level, text);
   else
   {
     MutableString128 tmp(Format, text, args...);
-    internal::Log(1<<3, level, tmp);
+    internal::log(1<<3, level, tmp);
   }
 }
-template<typename ...Args> inline void LogScript(String text, Args... args)
+template<typename ...Args> inline void logScript(String text, Args... args)
 {
   if (sizeof...(Args) == 0)
-    internal::Log(1<<4, 2, text);
+    internal::log(1<<4, 2, text);
   else
   {
     MutableString128 tmp(Format, text, args...);
-    internal::Log(1<<4, 2, tmp);
+    internal::log(1<<4, 2, tmp);
   }
 }
-template<typename ...Args> inline void LogTrace(String text, Args... args)
+template<typename ...Args> inline void logTrace(String text, Args... args)
 {
   if (sizeof...(Args) == 0)
-    internal::Log(1<<5, 2, text);
+    internal::log(1<<5, 2, text);
   else
   {
     MutableString128 tmp(Format, text, args...);
-    internal::Log(1<<5, 2, tmp);
+    internal::log(1<<5, 2, tmp);
   }
 }
 

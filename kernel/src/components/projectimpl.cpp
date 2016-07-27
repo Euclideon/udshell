@@ -51,14 +51,14 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
     auto dir = GetKernel()->getEnvironmentVar("ProjectDir");
 #if defined(EP_LINUX)
     if (chdir(dir.toStringz()) != 0)
-      LogWarning(2, "Unable to change directory to {0}", dir);
+      logWarning(2, "Unable to change directory to {0}", dir);
 #elif defined(EP_WINDOWS)
     _chdir(dir.toStringz());
 #endif
   }
   else
   {
-    LogDebug(3, "No \"src\" parameter. Creating empty project");
+    logDebug(3, "No \"src\" parameter. Creating empty project");
     return;
   }
 
@@ -105,13 +105,13 @@ void ProjectImpl::SaveProject()
   epscope(exit) { spXMLBuffer->unmap(); };
   if (buffer.empty())
   {
-    LogDebug(1, "SaveProject() -- Can't Map XML buffer for reading");
+    logDebug(1, "SaveProject() -- Can't Map XML buffer for reading");
     return;
   }
 
   if (srcString.empty())
   {
-    LogWarning(1, "Failed to Save Project. No project open");
+    logWarning(1, "Failed to Save Project. No project open");
     return;
   }
 
@@ -122,7 +122,7 @@ void ProjectImpl::SaveProject()
   }
   catch (EPException &)
   {
-    LogWarning(1, "Failed to open Project file for writing: \"{0}\"", srcString);
+    logWarning(1, "Failed to open Project file for writing: \"{0}\"", srcString);
     return;
   }
 }
@@ -192,7 +192,7 @@ void ProjectImpl::ParseActivity(Variant node)
   }
   catch (EPException &)
   {
-    LogError("Unable to load Activity from project file \"{0}\"", srcString);
+    logError("Unable to load Activity from project file \"{0}\"", srcString);
   }
 }
 

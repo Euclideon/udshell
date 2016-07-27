@@ -33,7 +33,7 @@ TimerImpl::TimerImpl(Component *pInstance, Variant::VarMap initParams)
   const Variant *pInterval = initParams.get("interval");
 
   if (pCountdown && pInterval)
-    LogWarning(1, "'countdown' and 'interval' both supplied to Timer initParams, 'interval' will be used.");
+    logWarning(1, "'countdown' and 'interval' both supplied to Timer initParams, 'interval' will be used.");
 
   if (pInterval)
     BeginInterval(pInterval->as<double>());

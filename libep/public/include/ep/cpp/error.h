@@ -7,11 +7,11 @@
 #include <utility>
 
 #define ConstructException(error, message, ...) ep::EPException(error, ep::MutableString<0>(ep::Format, ep::String(message), ##__VA_ARGS__), __PRETTY_FUNCTION__, __FILE__, __LINE__)
-#define AllocError(error, message, ...) ep::internal::_AllocError(error, ep::MutableString<0>(ep::Format, ep::String(message), ##__VA_ARGS__), __PRETTY_FUNCTION__, __FILE__, __LINE__, nullptr)
+#define allocError(error, message, ...) ep::internal::_allocError(error, ep::MutableString<0>(ep::Format, ep::String(message), ##__VA_ARGS__), __PRETTY_FUNCTION__, __FILE__, __LINE__, nullptr)
 
 #define EPTHROW(error, message, ...) throw ConstructException(error, message, ##__VA_ARGS__)
-#define EPTHROW_ERROR(error, message, ...) throw (ep::LogError(ep::String(message), ##__VA_ARGS__), ConstructException(error, message, ##__VA_ARGS__))
-#define EPTHROW_WARN(error, level, message, ...) throw (ep::LogWarning(level, ep::String(message), ##__VA_ARGS__), ConstructException(error, message, ##__VA_ARGS__))
+#define EPTHROW_ERROR(error, message, ...) throw (ep::logError(ep::String(message), ##__VA_ARGS__), ConstructException(error, message, ##__VA_ARGS__))
+#define EPTHROW_WARN(error, level, message, ...) throw (ep::logWarning(level, ep::String(message), ##__VA_ARGS__), ConstructException(error, message, ##__VA_ARGS__))
 
 #define EPTHROW_IF(condition, error, message, ...) { if(condition) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }
 #define EPTHROW_IF_NULL(condition, error, message, ...) { if((condition) == nullptr) { EPTHROW_ERROR(error, message, ##__VA_ARGS__); } }
@@ -54,16 +54,16 @@ enum class Result
   ScriptException,
 };
 
-template<typename ...Args> inline void LogError(String text, Args... args);
-template<typename ...Args> inline void LogWarning(int level, String text, Args... args);
-template<typename ...Args> inline void LogDebug(int level, String text, Args... args);
-template<typename ...Args> inline void LogInfo(int level, String text, Args... args);
-template<typename ...Args> inline void LogScript(String text, Args... args);
-template<typename ...Args> inline void LogTrace(String text, Args... args);
+template<typename ...Args> inline void logError(String text, Args... args);
+template<typename ...Args> inline void logWarning(int level, String text, Args... args);
+template<typename ...Args> inline void logDebug(int level, String text, Args... args);
+template<typename ...Args> inline void logInfo(int level, String text, Args... args);
+template<typename ...Args> inline void logScript(String text, Args... args);
+template<typename ...Args> inline void logTrace(String text, Args... args);
 
 struct ErrorState
 {
-  void Clear()
+  void clear()
   {
     message.~SharedString();
     message.ptr = nullptr;
@@ -134,7 +134,7 @@ private:
 };
 
 
-SharedString DumpError(ErrorState *pError);
+SharedString dumpError(ErrorState *pError);
 
 
 // helper to make a scope guard
@@ -145,8 +145,8 @@ ScopeGuard<typename std::decay<Func>::type> makeGuard(Func&& fn)
 }
 
 namespace internal {
-  ErrorState* _AllocError(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pParent);
-  void Log(int type, int level, String text);
+  ErrorState* _allocError(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pParent);
+  void log(int type, int level, String text);
 } // namespace internal
 
 } // namespace ep

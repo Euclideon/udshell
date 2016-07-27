@@ -543,7 +543,7 @@ void KernelImpl::LoadPlugins(Slice<SharedString> files)
   for (auto &filename : files)
   {
     if (filename)
-      LogWarning(2, "Could not load plugin '{0}'", filename);
+      logWarning(2, "Could not load plugin '{0}'", filename);
   }
 }
 
@@ -638,10 +638,10 @@ bool KernelImpl::sendMessage(String target, String sender, String message, const
       try {
         spComponent->receiveMessage(message, sender, data);
       } catch (std::exception &e) {
-        LogError("Message Handler {0} failed: {1}", target, e.what());
+        logError("Message Handler {0} failed: {1}", target, e.what());
         return false;
       } catch (...) {
-        LogError("Message Handler {0} failed: C++ exception", target);
+        logError("Message Handler {0} failed: C++ exception", target);
         return false;
       }
     }
@@ -660,10 +660,10 @@ bool KernelImpl::sendMessage(String target, String sender, String message, const
       try {
         ReceiveMessage(sender, message, data);
       } catch (std::exception &e) {
-        LogError("Message Handler {0} failed: {1}", target, e.what());
+        logError("Message Handler {0} failed: {1}", target, e.what());
         return false;
       } catch (...) {
-        LogError("Message Handler {0} failed: C++ exception", target);
+        logError("Message Handler {0} failed: C++ exception", target);
         return false;
       }
     }
@@ -682,10 +682,10 @@ bool KernelImpl::sendMessage(String target, String sender, String message, const
       try {
         pHandler->callback(sender, message, data);
       } catch (std::exception &e) {
-        LogError("Message Handler {0} failed: {1}", target, e.what());
+        logError("Message Handler {0} failed: {1}", target, e.what());
         return false;
       } catch (...) {
-        LogError("Message Handler {0} failed: C++ exception", target);
+        logError("Message Handler {0} failed: C++ exception", target);
         return false;
       }
     }
@@ -855,12 +855,12 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
   }
   catch (std::exception &e)
   {
-    LogWarning(3, "Create component failed: {0}", String(e.what()));
+    logWarning(3, "Create component failed: {0}", String(e.what()));
     throw;
   }
   catch (...)
   {
-    LogWarning(3, "Create component failed!");
+    logWarning(3, "Create component failed!");
     throw;
   }
 }
