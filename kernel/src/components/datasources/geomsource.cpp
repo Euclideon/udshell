@@ -426,7 +426,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
     {
       // create geom node
       GeomNodeRef spGeomNode = getKernel().createComponent<GeomNode>();
-      spGeomNode->SetModel(shared_pointer_cast<Model>(spMesh));
+      spGeomNode->setModel(shared_pointer_cast<Model>(spMesh));
 
       // add geom node to world node (we could collapse this if there is only one mesh...)
       spNode->addChild(spGeomNode);

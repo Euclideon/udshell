@@ -374,7 +374,7 @@ void Viewer::CreatePlatformLogo()
   spImageModel->SetRenderList(RenderList{ PrimType::Triangles, size_t(0), size_t(0), size_t(6) });
 
   GeomNodeRef spGeomNode = pKernel->createComponent<GeomNode>();
-  spGeomNode->SetModel(spImageModel);
+  spGeomNode->setModel(spImageModel);
   spScene->GetRootNode()->addChild(spGeomNode);
   spImageNode = spGeomNode;
 
