@@ -71,9 +71,9 @@ public:
   {
     MetadataRef spMeta = spResource->getMetadata();
 
-    Variant resUrl = spMeta->Get("url");
+    Variant resUrl = spMeta->get("url");
     if(!resUrl.is(Variant::Type::String))
-      spMeta->Insert("url", GetURL());
+      spMeta->insert("url", GetURL());
 
     resources.replace(_name, spResource);
   }

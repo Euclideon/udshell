@@ -14,10 +14,10 @@ SHARED_CLASS(UDModel);
 
 // UDModel Metadata
 // ----------------
-// "octreeheader" The octree header data (VarMap)
-// "attributeinfo" Array of attribute descriptors (Array<UDElementMetadata>)
+// "octreeHeader" The octree header data (VarMap)
+// "attributeInfo" Array of attribute descriptors (Array<UDElementMetadata>)
 
-// "octreeheader"
+// "octreeHeader"
 //  This is a VarMap containg the models header data.
 //   Key              Type
 //  ------------------------
@@ -29,7 +29,7 @@ SHARED_CLASS(UDModel);
 //  "boundingVolume"  BoundingVolume
 //  "maxOctreeDepth"  uint32_t
 
-// "attributeinfo"
+// "attributeInfo"
 //  This is an array of UDElementMetadatas. The attributes present in each node.
 
 EP_EXPLICIT_BITFIELD(UDModelFlags,
