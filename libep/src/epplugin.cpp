@@ -43,7 +43,7 @@ Directory::~Directory()
   if (pDirectoryHandle)
     s_pInstance->Find(nullptr, pDirectoryHandle, nullptr);
 }
-FindData Directory::PopFront()
+FindData Directory::popFront()
 {
   FindData t = fd;
   pDirectoryHandle = s_pInstance->Find(nullptr, pDirectoryHandle, &fd);
