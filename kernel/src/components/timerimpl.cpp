@@ -7,22 +7,22 @@ namespace ep {
 Array<const PropertyInfo> Timer::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO("duration", GetDuration, "The duration for the timer in seconds", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("timerType", GetTimerType, "The TimerType of this timer", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("duration", getDuration, "The duration for the timer in seconds", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("timerType", getTimerType, "The TimerType of this timer", nullptr, 0),
   };
 }
 Array<const MethodInfo> Timer::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(BeginInterval, "Begins an interval counter triggering at each given interval"),
-    EP_MAKE_METHOD(BeginCountdown, "Begins a countdown of the given duration"),
-    EP_MAKE_METHOD(Reset, "Resets the Timer"),
+    EP_MAKE_METHOD(beginInterval, "Begins an interval counter triggering at each given interval"),
+    EP_MAKE_METHOD(beginCountdown, "Begins a countdown of the given duration"),
+    EP_MAKE_METHOD(reset, "Resets the Timer"),
   };
 }
 Array<const EventInfo> Timer::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Elapsed, "Elapsed Event"),
+    EP_MAKE_EVENT(elapsed, "Elapsed Event"),
   };
 }
 
@@ -58,7 +58,7 @@ void TimerImpl::SetTimer(double d, TimerType tt)
 
 void TimerImpl::MessageCallback()
 {
-  pInstance->Elapsed.Signal();
+  pInstance->elapsed.Signal();
   pInstance->DecRef();
 }
 

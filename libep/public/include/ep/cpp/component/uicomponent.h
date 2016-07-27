@@ -13,9 +13,9 @@ class UIComponent : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, UIComponent, IUIComponent, Component, EPKERNEL_PLUGINVERSION, "Base UI Component", ComponentInfoFlags::Abstract)
 public:
-  Variant GetUIHandle() const { return pImpl->GetUIHandle(); }
+  Variant getUIHandle() const { return pImpl->GetUIHandle(); }
 
-  virtual void PostInit(void *pData) { pImpl->PostInit(pData); }
+  virtual void postInit(void *pData) { pImpl->PostInit(pData); }
 
 protected:
   UIComponent(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
