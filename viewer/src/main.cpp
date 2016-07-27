@@ -187,7 +187,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), size_t(EPARRAYSIZE(ib)) });
 
   GeomNodeRef geomNode = kernel->createComponent<GeomNode>();
-  geomNode->SetModel(model);
+  geomNode->setModel(model);
 
   return geomNode;
 }
