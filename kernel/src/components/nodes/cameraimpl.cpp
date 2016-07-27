@@ -4,7 +4,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Camera::GetProperties() const
+Array<const PropertyInfo> Camera::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("nearPlane", GetNearPlane, SetNearPlane, "Near depth plane", nullptr, 0),
@@ -16,7 +16,7 @@ Array<const PropertyInfo> Camera::GetProperties() const
     EP_MAKE_PROPERTY_RO("isOrtho", IsOrtho, "If the camera is in Orthographic mode", nullptr, 0),
   };
 }
-Array<const MethodInfo> Camera::GetMethods() const
+Array<const MethodInfo> Camera::getMethods() const
 {
   return{
     EP_MAKE_METHOD(SetDepthPlanes, "Set the near and far depth planes:\n  setdepthplanes(near, far)"),

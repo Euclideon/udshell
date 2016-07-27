@@ -96,12 +96,12 @@ MutableString256 GetNameFromFilePath(String path)
 
 void AddUIActivity(ActivityRef spActivity)
 {
-  spTopLevelUI->Call("addactivity", spActivity);
+  spTopLevelUI->call("addactivity", spActivity);
 }
 
 void RemoveUIActivity(ActivityRef spActivity)
 {
-  spTopLevelUI->Call("removeactivity", String(spActivity->uid));
+  spTopLevelUI->call("removeactivity", String(spActivity->uid));
 }
 
 void OnActivityChanged(String uid)
@@ -120,7 +120,7 @@ void OnActivityChanged(String uid)
   ActivityRef spActivity = component_cast<Activity>(spKernel->FindComponent(uid));
   if (!spActivity)
   {
-    spKernel->LogError("Unable to activate Activity \"{0}\". Component does not exist", uid);
+    spKernel->logError("Unable to activate Activity \"{0}\". Component does not exist", uid);
     return;
   }
 
@@ -168,7 +168,7 @@ void NewProject(String filePath)
   spProject->SetSrc(sFilePath);
 
   projectName = GetNameFromFilePath(sFilePath);
-  spMainWindow->Set("title", SharedString::format("{0} - {1}", projectName, appTitle));
+  spMainWindow->set("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   InitProject();
 }
@@ -200,10 +200,10 @@ void OpenProject(String filePath)
   }
 
   spProject = spNewProject;
-  spProject->SetName("project");
+  spProject->setName("project");
 
   projectName = GetNameFromFilePath(filePath);
-  spMainWindow->Set("title", SharedString::format("{0} - {1}", projectName, appTitle));
+  spMainWindow->set("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   // Load Activities from project file
   if (spProject)
@@ -232,7 +232,7 @@ void NewActivity(String typeID)
 void SaveProjectAs(String filePath)
 {
   projectName = GetNameFromFilePath(filePath);
-  spMainWindow->Set("title", SharedString::format("{0} - {1}", projectName, appTitle));
+  spMainWindow->set("title", SharedString::format("{0} - {1}", projectName, appTitle));
 
   spProject->SetSrc(filePath);
   spProject->SaveProject();
@@ -355,7 +355,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 #endif // 0
 
   ModelRef model = kernel->CreateComponent<Model>();
-  model->SetName("TestModel");
+  model->setName("TestModel");
   model->AddVertexArray(vertexBuffer);
   model->AddVertexArray(colourBuffer);
   model->SetIndexArray(indexBuffer);
@@ -373,9 +373,9 @@ void Register(String sender, String message, const Variant &data)
 {
 #if 0
   // NOTE: Use to test off disk
-  spKernel->Call("registerQmlComponents", "shell/qml");
+  spKernel->call("registerQmlComponents", "shell/qml");
 #else
-  spKernel->Call("registerQmlComponents", ":/EP");
+  spKernel->call("registerQmlComponents", ":/EP");
 #endif
 }
 
@@ -389,12 +389,12 @@ void Init(String sender, String message, const Variant &data)
 
   epscope(fail) { if (!spMessageBox) spKernel->LogError("Error creating MessageBox UI Component\n"); };
   spMessageBox = component_cast<UIComponent>(spKernel->CreateComponent("ui.MessageBox", Variant::VarMap{ { "name", "messagebox" } }));
-  spTopLevelUI->Set("messageboxcomp", spMessageBox);
+  spTopLevelUI->set("messageboxcomp", spMessageBox);
 
   UIComponentRef spConsole;
   epscope(fail) { if (!spConsole) spKernel->LogError("Error creating Console UI Component\n"); };
   spConsole = component_cast<UIComponent>(spKernel->CreateComponent("ui.Console"));
-  spTopLevelUI->Set("uiconsole", spConsole);
+  spTopLevelUI->set("uiconsole", spConsole);
 
   // Load menus
   String menusPath(":/menus.xml");
@@ -403,7 +403,7 @@ void Init(String sender, String message, const Variant &data)
     spKernel->LogWarning(2, "Menus XML file \"{0}\" does not exist.", menusPath);
 
   spMenu = spKernel->CreateComponent<Menu>({ { "src", menuStr } });
-  spTopLevelUI->Set("menucomp", spMenu);
+  spTopLevelUI->set("menucomp", spMenu);
 
   // Load toolbar
   String toolBarPath(":/toolbar.xml");
@@ -412,20 +412,20 @@ void Init(String sender, String message, const Variant &data)
     spKernel->LogWarning(2, "Toolbar XML file \"{0}\" does not exist.", toolBarPath);
 
   spToolBar = spKernel->CreateComponent<Menu>({ { "src", toolBarStr } });
-  spTopLevelUI->Set("toolbarcomp", spToolBar);
+  spTopLevelUI->set("toolbarcomp", spToolBar);
 
   // New Activity selector panel
   auto spActivitySelector = component_cast<UIComponent>(spKernel->CreateComponent("ui.ActivitySelector"));
-  spActivitySelector->Set("activitiesinfo", GetActivitiesInfo());
-  spTopLevelUI->Set("activityselector", spActivitySelector);
+  spActivitySelector->set("activitiesinfo", GetActivitiesInfo());
+  spTopLevelUI->set("activityselector", spActivitySelector);
 
   // Subscribe to UI events
-  spTopLevelUI->Subscribe("newprojectsignal", Delegate<void(String)>(&NewProject));
-  spTopLevelUI->Subscribe("openprojectsignal", Delegate<void(String)>(&OpenProject));
-  spTopLevelUI->Subscribe("saveprojectsignal", Delegate<void(void)>(&SaveProject));
-  spTopLevelUI->Subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
-  spTopLevelUI->Subscribe("newactivitysignal", Delegate<void(String)>(&NewActivity));
-  spTopLevelUI->Subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
+  spTopLevelUI->subscribe("newprojectsignal", Delegate<void(String)>(&NewProject));
+  spTopLevelUI->subscribe("openprojectsignal", Delegate<void(String)>(&OpenProject));
+  spTopLevelUI->subscribe("saveprojectsignal", Delegate<void(void)>(&SaveProject));
+  spTopLevelUI->subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
+  spTopLevelUI->subscribe("newactivitysignal", Delegate<void(String)>(&NewActivity));
+  spTopLevelUI->subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
 
   spMainWindow->SetTopLevelUI(spTopLevelUI);
 

@@ -26,7 +26,7 @@ public:
   void Activate() override;
   void Deactivate() override;
   void Update(double timeStep);
-  Variant Save() const override;
+  Variant save() const override;
 
   // TODO: Remove Temp hacks!
   SimpleCameraRef GetSimpleCamera() const { return spCamera; }
@@ -65,7 +65,7 @@ protected:
   NodeRef spImageNode;
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
+  Array<const PropertyInfo> getProperties() const;
 };
 
 } //namespace ep

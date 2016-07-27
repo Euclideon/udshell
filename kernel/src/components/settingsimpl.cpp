@@ -5,7 +5,7 @@
 
 namespace ep {
 
-Array<const MethodInfo> Settings::GetMethods() const
+Array<const MethodInfo> Settings::getMethods() const
 {
   return{
     EP_MAKE_METHOD(GetValue, "Get a setting"),

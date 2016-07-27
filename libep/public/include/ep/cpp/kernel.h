@@ -97,9 +97,9 @@ public:
   virtual void RunMainLoop() = 0;
   virtual void Quit() {}
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
-  Array<const EventInfo> GetEvents() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
+  Array<const EventInfo> getEvents() const;
   Array<const StaticFuncInfo> GetStaticFuncs() const;
 
 protected:
@@ -126,7 +126,7 @@ private:
 
   static Kernel* CreateInstanceInternal(Variant::VarMap commandLine);
 
-  void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) { return pImpl->CreateImpl(componentType, pInstance, initParams); }
+  void* createImpl(String componentType, Component *pInstance, Variant::VarMap initParams) { return pImpl->CreateImpl(componentType, pInstance, initParams); }
 
   static ComponentDescInl *MakeKernelDescriptor(ComponentDescInl *pType);
 };

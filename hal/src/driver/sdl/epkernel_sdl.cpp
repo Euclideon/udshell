@@ -115,9 +115,9 @@ ComponentDescInl *SDLKernel::MakeKernelDescriptor()
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, Result::AllocFailure, "Memory allocation failed");
 
-  pDesc->info = SDLKernel::ComponentInfo();
+  pDesc->info = SDLKernel::componentInfo();
   pDesc->info.flags = ComponentInfoFlags::Unregistered;
-  pDesc->baseClass = Kernel::ComponentID();
+  pDesc->baseClass = Kernel::componentID();
 
   pDesc->pInit = nullptr;
   pDesc->pCreateInstance = nullptr;
@@ -125,13 +125,13 @@ ComponentDescInl *SDLKernel::MakeKernelDescriptor()
   pDesc->pSuperDesc = nullptr;
 
   // build search trees
-  for (auto &p : SDLKernel::GetPropertiesImpl())
+  for (auto &p : SDLKernel::getPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : SDLKernel::GetMethodsImpl())
+  for (auto &m : SDLKernel::getMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : SDLKernel::GetEventsImpl())
+  for (auto &e : SDLKernel::getEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : SDLKernel::GetStaticFuncsImpl())
+  for (auto &f : SDLKernel::getStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   return pDesc;

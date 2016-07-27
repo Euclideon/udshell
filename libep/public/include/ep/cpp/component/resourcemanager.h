@@ -84,7 +84,7 @@ public:
   DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams) { return pImpl->LoadResourcesFromFile(initParams); }
   void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) { pImpl->SaveResourcesToFile(spDataSource, initParams); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
   Event<Array<ResourceRef>> Added;
   Event<Array<ResourceRef>> Removed;
@@ -96,13 +96,13 @@ protected:
   ResourceManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
-  Array<const EventInfo> GetEvents() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
+  Array<const EventInfo> getEvents() const;
 };
 
 } //namespace ep

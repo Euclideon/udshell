@@ -5,7 +5,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> ResourceManager::GetProperties() const
+Array<const PropertyInfo> ResourceManager::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("numResources", GetNumResources, "The number of Resources in the ResourceManager", nullptr, 0),
@@ -13,7 +13,7 @@ Array<const PropertyInfo> ResourceManager::GetProperties() const
     EP_MAKE_PROPERTY_RO("extensions", GetExtensions, "The file extensions supported by the ResourceManager orgnanised by DataSource type", nullptr, 0),
   };
 }
-Array<const MethodInfo> ResourceManager::GetMethods() const
+Array<const MethodInfo> ResourceManager::getMethods() const
 {
   return{
     EP_MAKE_METHOD(AddResource, "Add a Resource to the ResourceManager"),
@@ -26,7 +26,7 @@ Array<const MethodInfo> ResourceManager::GetMethods() const
     EP_MAKE_METHOD(SaveResourcesToFile, "Save Resources from the given DataSource to a file specified by the given File InitParams"),
   };
 }
-Array<const EventInfo> ResourceManager::GetEvents() const
+Array<const EventInfo> ResourceManager::getEvents() const
 {
   return{
     EP_MAKE_EVENT(Added, "Resources were added"),
@@ -91,7 +91,7 @@ Array<ResourceRef> ResourceManagerImpl::GetResourcesByType(const ep::ComponentDe
 
   for (auto kvp : resources)
   {
-    const ep::ComponentDesc *pDesc = kvp.value->GetDescriptor();
+    const ep::ComponentDesc *pDesc = kvp.value->getDescriptor();
 
     while (pDesc)
     {

@@ -7,7 +7,7 @@ namespace ep {
 static_assert(sizeof(internal::UDRenderPrivateData) == sizeof(udRenderModel), "sizeof(internal::UDRenderPrivateData) != sizeof(udRenderModel)");
 static_assert(sizeof(internal::UDPrivateData) == sizeof(udOctree), "sizeof(internal::UDPrivateData) != sizeof(udOctree)");
 
-Array<const PropertyInfo> UDModel::GetProperties() const
+Array<const PropertyInfo> UDModel::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("startingRoot", GetStartingRoot, SetStartingRoot, "Normally zero, optionally set the starting root number (used with ForceSingleRoot flag)", nullptr, 0),

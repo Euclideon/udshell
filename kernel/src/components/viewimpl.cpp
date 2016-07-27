@@ -4,7 +4,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> View::GetProperties() const
+Array<const PropertyInfo> View::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("camera", GetCamera, SetCamera, "Camera for viewport", nullptr, 0),
@@ -17,7 +17,7 @@ Array<const PropertyInfo> View::GetProperties() const
   };
 }
 
-Array<const MethodInfo> View::GetMethods() const
+Array<const MethodInfo> View::getMethods() const
 {
   return{
     EP_MAKE_METHOD(GoToBookmark, "Move the Camera to the specified Bookmark"),
@@ -27,7 +27,7 @@ Array<const MethodInfo> View::GetMethods() const
   };
 }
 
-Array<const EventInfo> View::GetEvents() const
+Array<const EventInfo> View::getEvents() const
 {
   return{
     EP_MAKE_EVENT(Dirty, "View dirty event"),

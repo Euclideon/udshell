@@ -13,17 +13,17 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Component::GetProperties() const
+Array<const PropertyInfo> Component::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO("uid", GetUid, "Component UID", nullptr, 0),
-    EP_MAKE_PROPERTY("name", GetName, SetName, "Component Name", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("type", GetType, "Component Type", nullptr, 0),
-//    EP_MAKE_PROPERTY_RO("displayName", GetDisplayName, "Component Display Name", nullptr, 0),  // TODO: add this back at some point?
-    EP_MAKE_PROPERTY_RO("description", GetDescription, "Component Description", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("uid", getUid, "Component UID", nullptr, 0),
+    EP_MAKE_PROPERTY("name", getName, setName, "Component Name", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("type", getType, "Component Type", nullptr, 0),
+//    EP_MAKE_PROPERTY_RO("displayName", getDisplayName, "Component Display Name", nullptr, 0),  // TODO: add this back at some point?
+    EP_MAKE_PROPERTY_RO("description", getDescription, "Component Description", nullptr, 0),
   };
 }
-Array<const MethodInfo> Component::GetMethods() const
+Array<const MethodInfo> Component::getMethods() const
 {
   return{
   };
@@ -32,7 +32,7 @@ Array<const MethodInfo> Component::GetMethods() const
 
 ComponentImpl::~ComponentImpl()
 {
-  pInstance->LogDebug(4, "Destroy component: {0} ({1})", pInstance->uid, pInstance->name);
+  pInstance->logDebug(4, "Destroy component: {0} ({1})", pInstance->uid, pInstance->name);
 
   // HAX: we take access to KernelImpl; low-level Component stuff
   KernelImpl *pKernelImpl = GetKernel()->GetImpl();
@@ -59,14 +59,14 @@ void ComponentImpl::ReceiveMessage(String message, String sender, const Variant 
   if (message.eqIC("set"))
   {
     Slice<Variant> arr = data.asArray();
-    pInstance->Set(arr[0].asString(), arr[1]);
+    pInstance->set(arr[0].asString(), arr[1]);
   }
   else if (message.eqIC("get"))
   {
     if (!sender.empty())
     {
-      Variant p = pInstance->Get(data.asString());
-      pInstance->SendMessage(sender, "val", p);
+      Variant p = pInstance->get(data.asString());
+      pInstance->sendMessage(sender, "val", p);
     }
   }
 }
@@ -205,12 +205,12 @@ void ComponentImpl::RemoveDynamicEvent(String _name)
 
 Variant ComponentImpl::Get(String property) const
 {
-  const PropertyDesc *pDesc = pInstance->GetPropertyDesc(property);
+  const PropertyDesc *pDesc = pInstance->getPropertyDesc(property);
   if (!pDesc || !pDesc->getter)
   {
     // TODO: throw in this case?
     const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is write-only" : "No property '{0}' for component '{1}'";
-    pInstance->LogWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    pInstance->logWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return Variant();
   }
   Variant r = pDesc->getter.get(pInstance);
@@ -219,12 +219,12 @@ Variant ComponentImpl::Get(String property) const
 }
 void ComponentImpl::Set(String property, const Variant &value)
 {
-  const PropertyDesc *pDesc = pInstance->GetPropertyDesc(property);
+  const PropertyDesc *pDesc = pInstance->getPropertyDesc(property);
   if (!pDesc || !pDesc->setter || pDesc->flags & epPF_Immutable)
   {
     // TODO: throw in this case?
     const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is read-only" : "No property '{0}' for component '{1}'";
-    pInstance->LogWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    pInstance->logWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return;
   }
 
@@ -237,14 +237,14 @@ void ComponentImpl::Set(String property, const Variant &value)
 
 Variant ComponentImpl::Call(String method, Slice<const Variant> args)
 {
-  const MethodDesc *pDesc = pInstance->GetMethodDesc(method);
+  const MethodDesc *pDesc = pInstance->getMethodDesc(method);
   if (!pDesc)
   {
-    const StaticFuncDesc *pFunc = pInstance->GetStaticFuncDesc(method);
+    const StaticFuncDesc *pFunc = pInstance->getStaticFuncDesc(method);
     if (!pFunc)
     {
       // TODO: throw in this case?
-      pInstance->LogWarning(1, "Method '{0}' not found!", method);
+      pInstance->logWarning(1, "Method '{0}' not found!", method);
       return Variant();
     }
     Variant r2 = pFunc->staticFunc.call(args);
@@ -258,10 +258,10 @@ Variant ComponentImpl::Call(String method, Slice<const Variant> args)
 
 SubscriptionRef ComponentImpl::Subscribe(String eventName, const VarDelegate &d)
 {
-  const EventDesc *pDesc = pInstance->GetEventDesc(eventName);
+  const EventDesc *pDesc = pInstance->getEventDesc(eventName);
   if (!pDesc)
   {
-    pInstance->LogWarning(2, "No event '{0}' for component '{1}'", eventName, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    pInstance->logWarning(2, "No event '{0}' for component '{1}'", eventName, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return nullptr;
   }
 

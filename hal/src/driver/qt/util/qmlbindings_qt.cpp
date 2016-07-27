@@ -65,7 +65,7 @@ public:
   Variant getter(Slice<const Variant>, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((ep::Component*)this)->getUserData();
     return Variant(pQObject->metaObject()->property(data.propertyId).read(pQObject));
   }
 
@@ -73,7 +73,7 @@ public:
   Variant setter(Slice<const Variant> args, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((ep::Component*)this)->getUserData();
     pQObject->metaObject()->property(data.propertyId).write(pQObject, args[0].as<QVariant>());
     return Variant();
   }
@@ -102,7 +102,7 @@ public:
 
     QVariant retVal;
     const QtMethodData &data = (const QtMethodData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((ep::Component*)this)->getUserData();
     pQObject->metaObject()->method(data.methodId).invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
       args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
 
@@ -113,7 +113,7 @@ public:
   Variant subscribe(Slice<const Variant> values, const RefCounted &_data)
   {
     const QtEventData &data = (const QtEventData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((ep::Component*)this)->getUserData();
 
     return Variant(data.signalMapper.Subscribe(pQObject, values[0].asDelegate()));
   }
@@ -217,7 +217,7 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
     {
       // TODO: better error information/handling
       foreach(const QQmlError &error, qmlComponent.errors())
-        pGlueComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+        pGlueComponent->logError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
       EPTHROW(Result::Failure, "Error compiling QML file");
     }
   }
@@ -239,7 +239,7 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
   {
     // TODO: better error information/handling
     foreach(const QQmlError &error, qmlComponent.errors())
-      pGlueComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+      pGlueComponent->logError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
     EPTHROW(Result::Failure, "Error creating QML Item");
   }
 
@@ -390,20 +390,20 @@ QtMetaObjectGenerator::QtMetaObjectGenerator(const ep::ComponentDesc *_pDesc)
     // TODO: update these when arg types are supported
     AddMethod(MethodType::Slot, "get", Slice<const SharedString>{ "propertyName" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
-        return pObj->pComponent->Get(varArgs[0].asString()).as<QVariant>();
+        return pObj->pComponent->get(varArgs[0].asString()).as<QVariant>();
       });
     AddMethod(MethodType::Slot, "set", Slice<const SharedString>{ "propertyName", "value" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
-        pObj->pComponent->Set(varArgs[0].asString(), varArgs[1]);
+        pObj->pComponent->set(varArgs[0].asString(), varArgs[1]);
         return QVariant();
       });
     AddMethod(MethodType::Slot, "call", Slice<const SharedString>{ "methodName", "arg0", "arg1", "arg2", "arg3", "arg4", "arg5", "arg6", "arg7", "arg8" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
-        return pObj->pComponent->Call(varArgs[0].asString(), varArgs.slice(1, varArgs.length)).as<QVariant>();
+        return pObj->pComponent->call(varArgs[0].asString(), varArgs.slice(1, varArgs.length)).as<QVariant>();
       }, 9);
     AddMethod(MethodType::Slot, "subscribe", Slice<const SharedString>{ "eventName", "delegate" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
-        return ep::Variant(pObj->pComponent->Subscribe(varArgs[0].asString(), varArgs[1].asDelegate())).as<QVariant>();
+        return ep::Variant(pObj->pComponent->subscribe(varArgs[0].asString(), varArgs[1].asDelegate())).as<QVariant>();
       });
     AddMethod(MethodType::Slot, "disconnectAll", nullptr,
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
@@ -682,8 +682,8 @@ const QMetaObject *QtEPComponent::metaObject() const
 {
   if (!pMetaObj && pComponent)
   {
-    pMetaObj = QtMetaObjectGenerator::Generate(pComponent->GetDescriptor());
-    EPASSERT_THROW(pMetaObj, ep::Result::Failure, "Unable to generate QMetaObject for component type '{0}'", pComponent->GetType());
+    pMetaObj = QtMetaObjectGenerator::Generate(pComponent->getDescriptor());
+    EPASSERT_THROW(pMetaObj, ep::Result::Failure, "Unable to generate QMetaObject for component type '{0}'", pComponent->getType());
   }
 
   return pMetaObj;
@@ -792,7 +792,7 @@ int QtEPComponent::MethodInvoke(const QMetaObject *pMO, int id, void **v)
     if ((id - QObject::staticMetaObject.methodCount() - QtMetaObjectGenerator::builtInOffset) < QtMetaObjectGenerator::builtInCount)
       retVal = QtMetaObjectGenerator::builtInMethods[methodName](this, varArgs);
     else
-      retVal = pComponent->Call(methodName, (Slice<const Variant>)varArgs).as<QVariant>();
+      retVal = pComponent->call(methodName, (Slice<const Variant>)varArgs).as<QVariant>();
 
     if (method.returnType() != QMetaType::Void)
       *(QVariant*)v[0] = retVal;
@@ -813,10 +813,10 @@ int QtEPComponent::PropertyInvoke(const QMetaObject *pMO, QMetaObject::Call call
     switch (call)
     {
       case QMetaObject::ReadProperty:
-        epFromVariant(pComponent->Get(prop.name()), (QVariant*)*v);
+        epFromVariant(pComponent->get(prop.name()), (QVariant*)*v);
         break;
       case QMetaObject::WriteProperty:
-        pComponent->Set(prop.name(), epToVariant(*(QVariant*)v[0]));
+        pComponent->set(prop.name(), epToVariant(*(QVariant*)v[0]));
         break;
       default:
         supported = false;
@@ -838,7 +838,7 @@ void QtEPComponent::connectNotify(const QMetaMethod &signal)
     return;
 
   Connection *pConn = &connectionMap.insert(signalName, Connection{ this, signal });
-  pConn->subscription = pComponent->Subscribe(signalName, ep::VarDelegate(pConn, &QtEPComponent::Connection::SignalRouter));
+  pConn->subscription = pComponent->subscribe(signalName, ep::VarDelegate(pConn, &QtEPComponent::Connection::SignalRouter));
 }
 
 void QtEPComponent::disconnectNotify(const QMetaMethod &signal)

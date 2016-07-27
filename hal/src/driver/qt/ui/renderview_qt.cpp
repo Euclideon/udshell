@@ -99,7 +99,7 @@ void QtRenderView::attachView(const QVariant &view)
 {
   using namespace ep;
   spView = component_cast<View>(Variant(view).asComponent());
-  spView->LogDebug(2, "Attaching View Component '{0}' to Render Viewport", spView->GetUid());
+  spView->logDebug(2, "Attaching View Component '{0}' to Render Viewport", spView->getUid());
 
   spView->FrameReady.Subscribe(Delegate<void()>(this, &QtRenderView::OnFrameReady));
 

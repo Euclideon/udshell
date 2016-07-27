@@ -4,14 +4,14 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Timer::GetProperties() const
+Array<const PropertyInfo> Timer::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("duration", GetDuration, "The duration for the timer in seconds", nullptr, 0),
     EP_MAKE_PROPERTY_RO("timerType", GetTimerType, "The TimerType of this timer", nullptr, 0),
   };
 }
-Array<const MethodInfo> Timer::GetMethods() const
+Array<const MethodInfo> Timer::getMethods() const
 {
   return{
     EP_MAKE_METHOD(BeginInterval, "Begins an interval counter triggering at each given interval"),
@@ -19,7 +19,7 @@ Array<const MethodInfo> Timer::GetMethods() const
     EP_MAKE_METHOD(Reset, "Resets the Timer"),
   };
 }
-Array<const EventInfo> Timer::GetEvents() const
+Array<const EventInfo> Timer::getEvents() const
 {
   return{
     EP_MAKE_EVENT(Elapsed, "Elapsed Event"),

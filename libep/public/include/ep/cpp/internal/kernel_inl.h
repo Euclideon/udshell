@@ -30,14 +30,14 @@ namespace internal {
   private:
     // TODO: these need to go somewhere else, instantiating this class for these functions instantiates the other functions too that should be specialised for IComponent and friends
     template <typename T>
-    static constexpr auto HasDescriptorImpl(T* t) -> decltype(T::ComponentInfo(), bool()) { return true; }
+    static constexpr auto HasDescriptorImpl(T* t) -> decltype(T::componentInfo(), bool()) { return true; }
     static constexpr bool HasDescriptorImpl(...) { return false; }
     template <typename T>
     static auto GetStaticInitImpl(T* t) -> decltype(T::StaticInit(nullptr), internal::ComponentDesc_InitComponentPtr()) { return &T::StaticInit; }
     static ComponentDescInl::InitComponent* GetStaticInitImpl(...) { return nullptr; }
 
     template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
-    static SharedString GetSuperImpl(T* t) { return T::ComponentID(); }
+    static SharedString GetSuperImpl(T* t) { return T::componentID(); }
     static SharedString GetSuperImpl(...) { return nullptr; }
 
     template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
@@ -71,7 +71,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
 
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
 
-  pDesc->info = _ComponentType::ComponentInfo();
+  pDesc->info = _ComponentType::componentInfo();
   pDesc->baseClass = internal::CreateHelper<_ComponentType>::GetSuper();
 
   pDesc->pInit = internal::CreateHelper<_ComponentType>::GetStaticInit();
@@ -79,13 +79,13 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
   pDesc->pCreateImpl = internal::CreateHelper<_ComponentType, ImplType>::GetCreateImpl();
 
   // build search trees
-  for (auto &p : _ComponentType::GetPropertiesImpl())
+  for (auto &p : _ComponentType::getPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : _ComponentType::GetMethodsImpl())
+  for (auto &m : _ComponentType::getMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : _ComponentType::GetEventsImpl())
+  for (auto &e : _ComponentType::getEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : _ComponentType::GetStaticFuncsImpl())
+  for (auto &f : _ComponentType::getStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   // setup the super class and populate from its meta
@@ -106,7 +106,7 @@ inline const ComponentDesc* Kernel::RegisterComponentType()
 template<typename GlueType>
 inline void Kernel::RegisterGlueType()
 {
-  pImpl->RegisterGlueType(GlueType::ComponentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) -> ComponentRef {
+  pImpl->RegisterGlueType(GlueType::componentID(), [](Kernel *_pKernel, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) -> ComponentRef {
     void *pMem = epAlloc(sizeof(GlueType));
     EPTHROW_IF_NULL(pMem, Result::AllocFailure, "Memory allocation failed");
     epscope(fail) { if (pMem) epFree(pMem); };
@@ -124,7 +124,7 @@ template<typename StaticImpl, typename ComponentType>
 struct Kernel::CreateStaticImpl {
   static inline void Do()
   {
-    internal::AddStaticImpl(ComponentType::ComponentID(), UniquePtr<StaticImpl>::create());
+    internal::AddStaticImpl(ComponentType::componentID(), UniquePtr<StaticImpl>::create());
   }
 };
 template<typename T>
@@ -134,19 +134,19 @@ struct Kernel::CreateStaticImpl<void, T> { static inline void Do() {} };
 template<typename _ComponentType>
 Array<const ep::ComponentDesc *> Kernel::GetDerivedComponentDescs(bool bIncludeBase)
 {
-  return pImpl->GetDerivedComponentDescsFromString(_ComponentType::ComponentID(), bIncludeBase);
+  return pImpl->GetDerivedComponentDescsFromString(_ComponentType::componentID(), bIncludeBase);
 }
 
 template<typename T>
 SharedPtr<T> Kernel::CreateComponent(Variant::VarMap initParams)
 {
-	return shared_pointer_cast<T>(CreateComponent(T::ComponentID(), initParams));
+	return shared_pointer_cast<T>(CreateComponent(T::componentID(), initParams));
 }
 
 template<typename T>
 SharedPtr<T> Kernel::CreateGlue(const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams)
 {
-  return shared_pointer_cast<T>(CreateGlue(T::ComponentID(), _pType, _uid, spInstance, initParams));
+  return shared_pointer_cast<T>(CreateGlue(T::componentID(), _pType, _uid, spInstance, initParams));
 }
 
 // Inlines pipe through C API

@@ -29,11 +29,11 @@ protected:
   Metadata(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : KVPStore(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
 
 private:
   void InsertMethod(const Variant &key, const Variant &value) { Insert(key, value); }

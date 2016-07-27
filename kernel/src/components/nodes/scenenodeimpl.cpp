@@ -6,7 +6,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> SceneNode::GetProperties() const
+Array<const PropertyInfo> SceneNode::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("scene", GetScene, SetScene, "Scene instance", nullptr, 0),

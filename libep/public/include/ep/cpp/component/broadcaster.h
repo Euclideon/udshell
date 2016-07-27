@@ -20,7 +20,7 @@ public:
   size_t WriteLn(String str) { return pImpl->WriteLn(str); }
   size_t WriteBuffer(BufferRef spData) { return pImpl->WriteBuffer(spData); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
   Event<Slice<const void>> Written;
 
@@ -28,7 +28,7 @@ protected:
   Broadcaster(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 };
 

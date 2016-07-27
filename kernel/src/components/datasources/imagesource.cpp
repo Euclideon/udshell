@@ -39,7 +39,7 @@ void ImageSource::Create(StreamRef spSource)
     epImageSurface &s = pImage->pSurfaces[i];
 
     // create image for each image element
-    ArrayBufferRef spImage = GetKernel().CreateComponent<ArrayBuffer>();
+    ArrayBufferRef spImage = getKernel().CreateComponent<ArrayBuffer>();
     spImage->Allocate(GetFormatString(s.format), 4, Slice<const size_t>{ s.width, s.height });
 
     // write image to to the array buffer
@@ -56,7 +56,7 @@ void ImageSource::Create(StreamRef spSource)
 
 void ImageSource::StaticInit(ep::Kernel *pKernel)
 {
-   pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
+   pKernel->RegisterExtensions(pKernel->GetComponentDesc(componentID()), extensions);
 }
 
 } // namespace ep

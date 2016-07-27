@@ -43,7 +43,7 @@ protected:
   PrimitiveGenerator(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
   ~PrimitiveGenerator()
   {}

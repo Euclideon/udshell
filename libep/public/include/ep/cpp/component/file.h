@@ -34,7 +34,7 @@ protected:
   File(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Stream(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 };
 

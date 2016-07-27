@@ -87,7 +87,7 @@ public:
   String GetURL() const override final { return url; }
   void SetURL(String _url) override final { url = _url; }
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   StreamRef OpenStream(const Variant &source) override final;

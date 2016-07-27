@@ -114,7 +114,7 @@ private:
 
   void RegisterQml(ep::String file, ep::Variant::VarMap desc);
 
-  ep::Array<const ep::MethodInfo> GetMethods() const
+  ep::Array<const ep::MethodInfo> getMethods() const
   {
     return{
       EP_MAKE_METHOD(registerQmlComponent, "Register a new QML Component type"),

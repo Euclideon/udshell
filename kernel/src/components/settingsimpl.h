@@ -30,7 +30,7 @@ protected:
   void ParseSettings(Variant node);
   void ParsePluginSettings(Variant node);
 
-  Array<const MethodInfo> GetMethods() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } //namespace ep

@@ -37,7 +37,7 @@ public:
 
   void CalculateWorldMatrix(Double4x4 *pMatrix) const override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   friend class Scene;

@@ -43,10 +43,10 @@ protected:
   Text(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Buffer(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
-  Array<const MethodInfo> GetMethods() const;
+  Array<const MethodInfo> getMethods() const;
   Array<const StaticFuncInfo> GetStaticFuncs() const;
 };
 

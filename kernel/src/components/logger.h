@@ -177,9 +177,9 @@ protected:
   Array<LogLine> internalLog;
   bool bEnabled = true, bLogging = false;
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
-  Array<const EventInfo> GetEvents() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
+  Array<const EventInfo> getEvents() const;
 };
 
 ptrdiff_t epStringify(Slice<char> buffer, String format, const LogLine &line, const VarArg *pArgs);

@@ -22,7 +22,7 @@ protected:
 
   Array<PluginLoaderRef> loaders;
 
-  Array<const MethodInfo> GetMethods() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } //namespace ep

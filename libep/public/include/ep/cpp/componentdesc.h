@@ -108,19 +108,19 @@ inline ComponentDesc::~ComponentDesc()
 
 
 // TODO: find alternative solution for this block of SFINAE madness!
-#define EP_SFINAE_META_GETTERS                                                                                                                                                                   \
-  template <typename T> static inline auto TryCallGetProperties(const T* t) -> decltype(t->GetProperties(), ep::Array<const ep::PropertyInfo>()) { return t->GetProperties(); }      \
-  static inline ep::Array<const ep::PropertyInfo> TryCallGetProperties(...) { return nullptr; }                                                                                                          \
-  static inline ep::Array<const ep::PropertyInfo> GetPropertiesImpl() { return TryCallGetProperties((This*)nullptr); }                                                                             \
-  template <typename T> static inline auto TryCallGetMethods(const T* t) -> decltype(t->GetMethods(), ep::Array<const ep::MethodInfo>()) { return t->GetMethods(); }                 \
-  static inline ep::Array<const ep::MethodInfo> TryCallGetMethods(...) { return nullptr; }                                                                                                               \
-  static inline ep::Array<const ep::MethodInfo> GetMethodsImpl() { return TryCallGetMethods((This*)nullptr); }                                                                                     \
-  template <typename T> static inline auto TryCallGetEvents(const T* t) -> decltype(t->GetEvents(), ep::Array<const ep::EventInfo>()) { return t->GetEvents(); }                     \
-  static inline ep::Array<const ep::EventInfo> TryCallGetEvents(...) { return nullptr; }                                                                                                                 \
-  static inline ep::Array<const ep::EventInfo> GetEventsImpl() { return TryCallGetEvents((This*)nullptr); }                                                                                        \
-  template <typename T> static inline auto TryCallGetStaticFuncs(const T* t) -> decltype(t->GetStaticFuncs(), ep::Array<const ep::StaticFuncInfo>()) { return t->GetStaticFuncs(); } \
-  static inline ep::Array<const ep::StaticFuncInfo> TryCallGetStaticFuncs(...) { return nullptr; }                                                                                                       \
-  static inline ep::Array<const ep::StaticFuncInfo> GetStaticFuncsImpl() { return TryCallGetStaticFuncs((This*)nullptr); }
+#define EP_SFINAE_META_GETTERS                                                                                                                                                       \
+  template <typename T> static inline auto tryCallGetProperties(const T* t) -> decltype(t->getProperties(), ep::Array<const ep::PropertyInfo>()) { return t->getProperties(); }      \
+  static inline ep::Array<const ep::PropertyInfo> tryCallGetProperties(...) { return nullptr; }                                                                                      \
+  static inline ep::Array<const ep::PropertyInfo> getPropertiesImpl() { return tryCallGetProperties((This*)nullptr); }                                                               \
+  template <typename T> static inline auto tryCallGetMethods(const T* t) -> decltype(t->getMethods(), ep::Array<const ep::MethodInfo>()) { return t->getMethods(); }                 \
+  static inline ep::Array<const ep::MethodInfo> tryCallGetMethods(...) { return nullptr; }                                                                                           \
+  static inline ep::Array<const ep::MethodInfo> getMethodsImpl() { return tryCallGetMethods((This*)nullptr); }                                                                       \
+  template <typename T> static inline auto tryCallGetEvents(const T* t) -> decltype(t->getEvents(), ep::Array<const ep::EventInfo>()) { return t->getEvents(); }                     \
+  static inline ep::Array<const ep::EventInfo> tryCallGetEvents(...) { return nullptr; }                                                                                             \
+  static inline ep::Array<const ep::EventInfo> getEventsImpl() { return tryCallGetEvents((This*)nullptr); }                                                                          \
+  template <typename T> static inline auto tryCallGetStaticFuncs(const T* t) -> decltype(t->getStaticFuncs(), ep::Array<const ep::StaticFuncInfo>()) { return t->getStaticFuncs(); } \
+  static inline ep::Array<const ep::StaticFuncInfo> tryCallGetStaticFuncs(...) { return nullptr; }                                                                                   \
+  static inline ep::Array<const ep::StaticFuncInfo> getStaticFuncsImpl() { return tryCallGetStaticFuncs((This*)nullptr); }
 
 
 // declare magic for a C++ component
@@ -132,8 +132,8 @@ public:                                                                         
   using This = Name;                                                                     \
   using Ref = ep::SharedPtr<This>;                                                       \
   using Impl = void;                                                                     \
-  static ep::SharedString ComponentID() { return ComponentInfo().identifier; }           \
-  static const ep::ComponentInfo& ComponentInfo()                                        \
+  static ep::SharedString componentID() { return componentInfo().identifier; }           \
+  static const ep::ComponentInfo& componentInfo()                                        \
   {                                                                                      \
     static const ep::ComponentInfo info                                                  \
     {                                                                                    \
@@ -161,8 +161,8 @@ public:                                                                         
   using This = Name;                                                                     \
   using Ref = ep::SharedPtr<This>;                                                       \
   using Impl = ep::BaseImpl<Name, Interface>;                                            \
-  static ep::SharedString ComponentID() { return ComponentInfo().identifier; }           \
-  static const ep::ComponentInfo& ComponentInfo()                                        \
+  static ep::SharedString componentID() { return componentInfo().identifier; }           \
+  static const ep::ComponentInfo& componentInfo()                                        \
   {                                                                                      \
     static const ep::ComponentInfo info                                                  \
     {                                                                                    \
@@ -178,10 +178,10 @@ public:                                                                         
   T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \
 private:                                                                                 \
   ep::UniquePtr<Impl> pImpl = nullptr;                                                   \
-  ep::UniquePtr<Impl> CreateImpl(ep::Variant::VarMap initParams)                         \
+  ep::UniquePtr<Impl> createImpl(ep::Variant::VarMap initParams)                         \
   {                                                                                      \
     using namespace ep;                                                                  \
-    return UniquePtr<Impl>((Impl*)CreateImplInternal(This::ComponentID(), initParams));  \
+    return UniquePtr<Impl>((Impl*)createImplInternal(This::componentID(), initParams));  \
   }                                                                                      \
   EP_SFINAE_META_GETTERS
 
@@ -198,7 +198,7 @@ public:                                                                         
   {                                                                                                                                 \
     static BaseStaticImpl<StaticInterface> *pStaticImpl = nullptr;                                                                  \
     if(!pStaticImpl)                                                                                                                \
-      pStaticImpl = static_cast<BaseStaticImpl<StaticInterface>*>(internal::GetStaticImpl(ComponentID()));                          \
+      pStaticImpl = static_cast<BaseStaticImpl<StaticInterface>*>(internal::GetStaticImpl(componentID()));                          \
     return static_cast<StaticInterface*>(pStaticImpl);                                                                              \
   }                                                                                                                                 \
 private:

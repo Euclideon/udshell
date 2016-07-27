@@ -16,7 +16,7 @@ class Resource : public Component
 public:
   MetadataRef GetMetadata() const { return pImpl->GetMetadata(); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
   //! A new \c Resource instance that is a copy of this resource.
   //! \return A copy of this resource.
@@ -30,13 +30,13 @@ protected:
   Resource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
-  Array<const EventInfo> GetEvents() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
+  Array<const EventInfo> getEvents() const;
 };
 
 //! A new \c Resource instance that is a copy of this resource.

@@ -25,10 +25,10 @@ public:
   template <class T>
   T *GetQObject() const { return qobject_cast<T*>(pQObject); }
 
-  const ep::PropertyDesc *GetPropertyDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::GetPropertyDesc(_name, enumerateFlags); }
-  const ep::MethodDesc *GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::GetMethodDesc(_name, enumerateFlags); }
-  const ep::EventDesc *GetEventDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::GetEventDesc(_name, enumerateFlags); }
-  const ep::StaticFuncDesc *GetStaticFuncDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::GetStaticFuncDesc(_name, enumerateFlags); }
+  const ep::PropertyDesc *getPropertyDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::getPropertyDesc(_name, enumerateFlags); }
+  const ep::MethodDesc *getMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::getMethodDesc(_name, enumerateFlags); }
+  const ep::EventDesc *getEventDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::getEventDesc(_name, enumerateFlags); }
+  const ep::StaticFuncDesc *getStaticFuncDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final { return pThis->Component::getStaticFuncDesc(_name, enumerateFlags); }
 
 private:
   friend class QtKernel;

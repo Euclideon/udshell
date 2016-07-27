@@ -204,11 +204,11 @@ protected:
   UDModel(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
+  Array<const PropertyInfo> getProperties() const;
 
 };
 

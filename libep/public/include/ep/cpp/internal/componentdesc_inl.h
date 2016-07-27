@@ -23,9 +23,9 @@ public:
   using Interface = I;
   using ImplSuper = BaseImpl<C, I>;
 
-  const ComponentDescInl* GetDescriptor() const { return (const ComponentDescInl*)pInstance->GetDescriptor(); }
+  const ComponentDescInl* GetDescriptor() const { return (const ComponentDescInl*)pInstance->getDescriptor(); }
   const ComponentDescInl* GetSuperDescriptor() const { return (const ComponentDescInl*)GetDescriptor()->pSuperDesc; }
-  Kernel* GetKernel() const { return &pInstance->GetKernel(); }
+  Kernel* GetKernel() const { return &pInstance->getKernel(); }
 
   C *pInstance;
 

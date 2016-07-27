@@ -51,14 +51,14 @@ protected:
   AVLTree<Variant, Variant, VariantCompare> metadata;
 };
 
-inline Array<const PropertyInfo> Metadata::GetProperties() const
+inline Array<const PropertyInfo> Metadata::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("numRecords", NumRecords, "Number of records in the metadata", nullptr, 0),
   };
 }
 
-inline Array<const MethodInfo> Metadata::GetMethods() const
+inline Array<const MethodInfo> Metadata::getMethods() const
 {
   return{
     EP_MAKE_METHOD_EXPLICIT("Insert", InsertMethod, "Insert a record"),

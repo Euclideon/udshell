@@ -132,7 +132,7 @@ public:
     }
   }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   friend class GeomNode;
@@ -140,7 +140,7 @@ protected:
   ArrayBuffer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Buffer(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
   bool ReshapeInternal(Slice<const size_t> shape, bool copy) { return pImpl->ReshapeInternal(shape, copy); }
@@ -161,8 +161,8 @@ private:
   bool Allocate(size_t) override final { EPASSERT_THROW(false, Result::InvalidCall, "Can't call Buffer::Allocate for ArrayBuffer!"); return false; }
   bool Resize(size_t) override final { EPASSERT_THROW(false, Result::InvalidCall, "Can't call Buffer::Resize for ArrayBuffer!"); return false; }
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 template<>
