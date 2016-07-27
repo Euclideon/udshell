@@ -5,19 +5,19 @@ namespace ep {
 Array<const PropertyInfo> Buffer::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO("empty", Empty, "Is the Buffer Empty", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("bufferSize", GetBufferSize, "The buffer's size", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("mapped", Mapped, "Is the Buffer Mapped", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("empty", empty, "Is the Buffer Empty", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("bufferSize", getBufferSize, "The buffer's size", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("mapped", mapped, "Is the Buffer Mapped", nullptr, 0),
   };
 }
 Array<const MethodInfo> Buffer::getMethods() const
 {
   return{
-    EP_MAKE_METHOD_EXPLICIT("CopyBuffer", CopyBufferMethod, "Copy the given Buffer to this Buffer"),
-    EP_MAKE_METHOD(Reserve, "Reserves the specified bytes of memory for the internal buffer"),
-    EP_MAKE_METHOD(Allocate, "Reserves the specified bytes of memory and sets BufferSize to the number of bytes allocated"),
-    EP_MAKE_METHOD(Resize, "Increase the logical size of the buffer, more memory will be allocated if necessary"),
-    EP_MAKE_METHOD(Free, "Free the internal buffer"),
+    EP_MAKE_METHOD_EXPLICIT("copyBuffer", copyBufferMethod, "Copy the given Buffer to this Buffer"),
+    EP_MAKE_METHOD(reserve, "Reserves the specified bytes of memory for the internal buffer"),
+    EP_MAKE_METHOD(allocate, "Reserves the specified bytes of memory and sets BufferSize to the number of bytes allocated"),
+    EP_MAKE_METHOD(resize, "Increase the logical size of the buffer, more memory will be allocated if necessary"),
+    EP_MAKE_METHOD(free, "Free the internal buffer"),
   };
 }
 
@@ -122,12 +122,12 @@ bool BufferImpl::CopyBuffer(BufferRef buf)
   if (mapDepth > 0)
     return false; // TODO Error handling
 
-  Slice<const void> mBuf = buf->MapForRead();
+  Slice<const void> mBuf = buf->mapForRead();
   EPASSERT(mBuf != nullptr, "Unable to map buffer!");
   if (mBuf != nullptr)
   {
     CopySlice(mBuf);
-    buf->Unmap();
+    buf->unmap();
   }
 
   return true; // TODO Error handling

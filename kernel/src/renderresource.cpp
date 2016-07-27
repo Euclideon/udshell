@@ -79,9 +79,9 @@ RenderArray::RenderArray(Renderer *pRenderer, ArrayBufferRef spArrayBuffer, Arra
     pArray = epVertex_CreateIndexBuffer(elements[0]);
   }
 
-  Slice<const void> data = spArrayBuffer->MapForRead();
+  Slice<const void> data = spArrayBuffer->mapForRead();
   epVertex_SetArrayBufferData(pArray, data.ptr, data.length);
-  spArrayBuffer->Unmap();
+  spArrayBuffer->unmap();
 }
 RenderArray::~RenderArray()
 {
@@ -91,7 +91,7 @@ RenderArray::~RenderArray()
 RenderTexture::RenderTexture(Renderer *pRenderer, ArrayBufferRef spArrayBuffer)
   : RenderResource(pRenderer)
 {
-  auto shape = spArrayBuffer->GetShape();
+  auto shape = spArrayBuffer->getShape();
 
   // TODO: we need to support cubemap, and array textures here (additional args?)
   switch (shape.length)
@@ -104,15 +104,15 @@ RenderTexture::RenderTexture(Renderer *pRenderer, ArrayBufferRef spArrayBuffer)
   }
 
   // TODO: support texture formats in a better-er way...
-  SharedString type = spArrayBuffer->GetElementType();
+  SharedString type = spArrayBuffer->getElementType();
   if (type.eq("u32")) format = epIF_BGRA8; // this makes the assumption that images of type uint32_t are BGRA (ie, as output by UD)
   else if (type.eq("u8[4]")) format = epIF_RGBA8; // array of bytes is interpreted as {R,G,B,A}, just like arrays of anything
   else if (type.eq("f32")) format = epIF_R_F32;
   else EPASSERT(false, "TODO: better system for handling texture formats!");
 
   // attempt to map the buffer
-  Slice<const void> colorBuffer = spArrayBuffer->MapForRead();
-  epscope(exit) { spArrayBuffer->Unmap(); };
+  Slice<const void> colorBuffer = spArrayBuffer->mapForRead();
+  epscope(exit) { spArrayBuffer->unmap(); };
 
   // copy the data into the texture
   pTexture = epTexture_CreateTexture(usage, shape[0], shape[1], 1, format);
@@ -130,9 +130,9 @@ RenderTexture::~RenderTexture()
 RenderConstantBuffer::RenderConstantBuffer(Renderer *pRenderer, BufferRef spBuffer)
   : RenderResource(pRenderer)
 {
-  Slice<const void> src = spBuffer->MapForRead();
+  Slice<const void> src = spBuffer->mapForRead();
   EPASSERT_THROW(src, Result::Failure, "Failed to Map Buffer for Reading");
-  epscope(exit) { spBuffer->Unmap(); };
+  epscope(exit) { spBuffer->unmap(); };
 
   pBuffer = epAlloc(src.length);
   EPASSERT_THROW(pBuffer, Result::AllocFailure, "Failed to allocate memory for UDConstantBuffer Cache");

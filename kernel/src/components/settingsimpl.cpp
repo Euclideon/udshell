@@ -45,7 +45,7 @@ SettingsImpl::SettingsImpl(Component *pInstance, Variant::VarMap initParams)
   catch (parse_error &e)
   {
     auto xmlBuff = spXMLBuffer->MapForRead();
-    epscope(exit) { spXMLBuffer->Unmap(); };
+    epscope(exit) { spXMLBuffer->unmap(); };
     EPTHROW_ERROR(Result::Failure, "Unable to parse settings file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
   }
 
@@ -71,7 +71,7 @@ void SettingsImpl::SaveSettings()
   settingsNode.insert("children", children);
 
   auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
-  spXMLBuffer->Reserve(10240); // TODO: this is not okay...
+  spXMLBuffer->reserve(10240); // TODO: this is not okay...
   spXMLBuffer->FormatXml(settingsNode);
 
   try {

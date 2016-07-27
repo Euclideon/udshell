@@ -104,7 +104,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
       md.info.flags |= descriptor.typeInfo & udATI_Signed ? ElementInfoFlags::Signed : 0;
       md.info.flags |= descriptor.typeInfo & udATI_Color ? ElementInfoFlags::Color : 0;
 
-      md.type = md.info.AsString();
+      md.type = md.info.asString();
 
       md.offset = 0;
       varMetadata.pushBack(md);

@@ -8,17 +8,17 @@ namespace ep {
 Array<const PropertyInfo> ArrayBuffer::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO("elementType", GetElementType, "Element type of the Array as a String", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("elementSize", GetElementSize, "The Array's element size", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("numDimensions", GetNumDimensions, "Number of dimensions", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("length", GetLength, "Number of Array elements", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("shape", GetShape, "The sizes of the Array's dimensions", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("elementType", getElementType, "Element type of the Array as a String", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("elementSize", getElementSize, "The Array's element size", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("numDimensions", getNumDimensions, "Number of dimensions", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("length", getLength, "Number of Array elements", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("shape", getShape, "The sizes of the Array's dimensions", nullptr, 0),
   };
 }
 Array<const MethodInfo> ArrayBuffer::getMethods() const
 {
   return{
-    EP_MAKE_METHOD_EXPLICIT("Allocate", AllocateMethod, "Allocates an Array of the given type, size and length. Length may be a single value or a list of dimensions"),
+    EP_MAKE_METHOD_EXPLICIT("allocate", allocateMethod, "Allocates an Array of the given type, size and length. Length may be a single value or a list of dimensions"),
   };
 }
 
@@ -39,9 +39,9 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
   }
 
   // alloc array
-  bool alreadyAllocated = !pInstance->Empty();
+  bool alreadyAllocated = !pInstance->empty();
   elementSize = _elementSize;
-  pInstance->Buffer::Allocate(_elementSize*elements);
+  pInstance->Buffer::allocate(_elementSize*elements);
   if (alreadyAllocated)
     pInstance->Changed.Signal();
 
@@ -57,13 +57,13 @@ void ArrayBufferImpl::Allocate(SharedString _elementType, size_t _elementSize, S
     et.tokenise([&](String t, size_t i) {
       t = t.trim();
 
-      elementMetadata.pushBack(ElementMetadata{ nullptr, t, ElementInfo::Parse(t), offset });
+      elementMetadata.pushBack(ElementMetadata{ nullptr, t, ElementInfo::parse(t), offset });
       // calculate offset
       offset += GetElementTypeSize(t);
     }, ",");
   }
   else
-    elementMetadata.pushBack(ElementMetadata{ nullptr, et, ElementInfo::Parse(et),  0 });
+    elementMetadata.pushBack(ElementMetadata{ nullptr, et, ElementInfo::parse(et),  0 });
 
   pInstance->GetMetadata()->Insert("attributeinfo", elementMetadata);
 }
@@ -76,7 +76,7 @@ bool ArrayBufferImpl::ReshapeInternal(Slice<const size_t> _shape, bool copy)
     elements *= _shape.ptr[i];
 
   // resize the buffer
-  pInstance->Buffer::ResizeInternal(elements*elementSize, copy);
+  pInstance->Buffer::resizeInternal(elements*elementSize, copy);
   if (copy)
   {
     // we only need to shuffle if the lesser significant dimensions changed size

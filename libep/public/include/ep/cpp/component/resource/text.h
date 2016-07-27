@@ -23,16 +23,16 @@ public:
   static Variant XMLMapToComponentParams(Variant node) { return GetStaticImpl()->XMLMapToComponentParams(node); }
   static Variant ComponentParamsToXMLMap(Variant map) { return GetStaticImpl()->ComponentParamsToXMLMap(map); }
 
-  void CopyBuffer(String text) { Buffer::CopyBuffer(text); }
+  void CopyBuffer(String text) { Buffer::copyBuffer(text); }
 
   Slice<char> Map()
   {
-    Slice<void> _buffer = Buffer::Map();
+    Slice<void> _buffer = Buffer::map();
     return Slice<char>((char*)_buffer.ptr, _buffer.length);
   }
   String MapForRead()
   {
-    Slice<const void> buffer = Buffer::MapForRead();
+    Slice<const void> buffer = Buffer::mapForRead();
     return String((const char*)buffer.ptr, buffer.length);
   }
 

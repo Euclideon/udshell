@@ -27,11 +27,11 @@ namespace ep {
   {
     static_assert(std::is_trivial<T>::value, "T is not a trivial type");
     BufferRef spBuffer = Kernel::GetInstance()->CreateComponent<Buffer>();
-    spBuffer->Allocate(sizeof(T));
-    Slice<void> buffer = spBuffer->Map();
+    spBuffer->allocate(sizeof(T));
+    Slice<void> buffer = spBuffer->map();
     EPASSERT_THROW(buffer, Result::Failure, "Failed to Map spBuffer");
     memcpy(buffer.ptr, &data, sizeof(T));
-    spBuffer->Unmap();
+    spBuffer->unmap();
     SetConstantData(type, spBuffer);
   }
 
@@ -40,7 +40,7 @@ namespace ep {
   {
     static_assert(std::is_trivial<T>::value, "T is not a trivial type");
     ArrayBufferRef spBuffer = Kernel::GetInstance()->CreateComponent<ArrayBuffer>();
-    spBuffer->AllocateFromData(data);
+    spBuffer->allocateFromData(data);
     SetConstantData(type, spBuffer);
   }
 
@@ -52,7 +52,7 @@ namespace ep {
     EPTHROW_IF(!spBuffer, Result::InvalidArgument, "There is no constant data set for {0}", type.StringOf());
 
     T data;
-    Slice<void> buffer = spBuffer->MapForRead();
+    Slice<void> buffer = spBuffer->mapForRead();
     EPASSERT_THROW(sizeof(T) == buffer.length, Result::InvalidType, "sizeof(T) differs from the buffer length");
     memcpy(&data, buffer.ptr, buffer.length);
     return data;

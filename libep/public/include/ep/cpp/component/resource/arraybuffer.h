@@ -23,9 +23,9 @@ struct ElementInfo
   SharedArray<size_t> dimensions; // TODO : Support aggregates, union dimensions with a SharedArray<ElementInfo>.
   ElementInfoFlags flags;
 
-  static ElementInfo Parse(String str);
-  SharedString AsString() const;
-  static SharedString BuildTypeString(Slice<const ElementInfo> elements);
+  static ElementInfo parse(String str);
+  SharedString asString() const;
+  static SharedString buildTypeString(Slice<const ElementInfo> elements);
 };
 
 struct ElementMetadata
@@ -44,37 +44,37 @@ class ArrayBuffer : public Buffer
 public:
 
   // array allocation
-  void Allocate(SharedString elementType, size_t elementSize, size_t length)
+  void allocate(SharedString elementType, size_t elementSize, size_t length)
   {
-    Allocate(elementType, elementSize, Slice<size_t>(&length, 1));
+    allocate(elementType, elementSize, Slice<size_t>(&length, 1));
   }
 
-  void Allocate(SharedString elementType, size_t elementSize, Slice<const size_t> shape)
+  void allocate(SharedString elementType, size_t elementSize, Slice<const size_t> shape)
   {
     pImpl->Allocate(elementType, elementSize, shape);
   }
 
   // strongly typed array allocation
   template<typename ElementType>
-  void Allocate(size_t length)
+  void allocate(size_t length)
   {
-    Allocate<ElementType>(Slice<size_t>(&length, 1));
+    allocate<ElementType>(Slice<size_t>(&length, 1));
   }
 
   template<typename ElementType>
-  void Allocate(Slice<const size_t> shape)
+  void allocate(Slice<const size_t> shape)
   {
-    Allocate(stringof<ElementType>(), sizeof(ElementType), shape);
+    allocate(stringof<ElementType>(), sizeof(ElementType), shape);
   }
 
   // allocate from existing data
   template<typename ElementType>
-  void AllocateFromData(Slice<const ElementType> data)
+  void allocateFromData(Slice<const ElementType> data)
   {
-    Allocate<ElementType>(data.length);
+    allocate<ElementType>(data.length);
 
     // initialise buffer
-    Slice<ElementType> buffer = Map<ElementType>();
+    Slice<ElementType> buffer = map<ElementType>();
     if (std::is_pod<ElementType>::value)
       memcpy(buffer.ptr, data.ptr, sizeof(ElementType)*data.length);
     else
@@ -82,43 +82,43 @@ public:
       for (size_t i = 0; i < data.length; ++i)
         epConstruct(buffer.ptr + i) ElementType(data.ptr[i]);
     }
-    Unmap();
+    unmap();
   }
 
-  bool Reshape(size_t elements) { return Reshape(Slice<size_t>(&elements, 1)); }
-  bool Reshape(Slice<const size_t> shape) { return ReshapeInternal(shape, true); }
+  bool reshape(size_t elements) { return reshape(Slice<size_t>(&elements, 1)); }
+  bool reshape(Slice<const size_t> shape) { return reshapeInternal(shape, true); }
 
-  SharedString GetElementType() const { return pImpl->GetElementType(); }
-  size_t GetElementSize() const { return pImpl->GetElementSize(); }
-  size_t GetNumDimensions() const { return pImpl->GetNumDimensions(); }
+  SharedString getElementType() const { return pImpl->GetElementType(); }
+  size_t getElementSize() const { return pImpl->GetElementSize(); }
+  size_t getNumDimensions() const { return pImpl->GetNumDimensions(); }
 
-  size_t GetLength() const { return pImpl->GetLength(); }
-  Slice<const size_t> GetShape() const { return pImpl->GetShape(); }
+  size_t getLength() const { return pImpl->GetLength(); }
+  Slice<const size_t> getShape() const { return pImpl->GetShape(); }
 
   // ArrayBuffer overrides the map functions
   template<typename T = void>
-  Slice<T> Map()
+  Slice<T> map()
   {
-    EPASSERT_THROW(stringof<T>().eq(GetElementType()), Result::InvalidType, "Incompatible type!");
-    Slice<void> _buffer = Buffer::Map();
+    EPASSERT_THROW(stringof<T>().eq(getElementType()), Result::InvalidType, "Incompatible type!");
+    Slice<void> _buffer = Buffer::map();
     return Slice<T>((T*)_buffer.ptr, _buffer.length/sizeof(T));
   }
 
   template<typename T = void>
-  Slice<const T> MapForRead()
+  Slice<const T> mapForRead()
   {
-    EPASSERT_THROW(stringof<T>().eq(GetElementType()), Result::InvalidType, "Incompatible type!");
-    Slice<const void> buffer = Buffer::MapForRead();
+    EPASSERT_THROW(stringof<T>().eq(getElementType()), Result::InvalidType, "Incompatible type!");
+    Slice<const void> buffer = Buffer::mapForRead();
     return Slice<const T>((const T*)buffer.ptr, buffer.length/sizeof(T));
   }
 
   template<typename T>
-  void SetData(Slice<const T> data)
+  void setData(Slice<const T> data)
   {
-    EPASSERT_THROW(stringof<T>().eq(GetElementType()), Result::InvalidType, "Incompatible type!");
+    EPASSERT_THROW(stringof<T>().eq(getElementType()), Result::InvalidType, "Incompatible type!");
 
-    Slice<T> buffer = Map<T>();
-    epscope(exit) { Unmap(); };
+    Slice<T> buffer = map<T>();
+    epscope(exit) { unmap(); };
 
     EPASSERT_THROW(buffer.length == data.length, Result::InvalidArgument, "Incorrect number of elements!");
 
@@ -143,33 +143,33 @@ protected:
     pImpl = createImpl(initParams);
   }
 
-  bool ReshapeInternal(Slice<const size_t> shape, bool copy) { return pImpl->ReshapeInternal(shape, copy); }
+  bool reshapeInternal(Slice<const size_t> shape, bool copy) { return pImpl->ReshapeInternal(shape, copy); }
 
 private:
-  void AllocateMethod(SharedString _elementType, size_t _elementSize, Variant length)
+  void allocateMethod(SharedString _elementType, size_t _elementSize, Variant length)
   {
     if (length.is(Variant::Type::Int))
     {
       size_t len = length.as<size_t>();
-      Allocate(_elementType, _elementSize, Slice<size_t>(&len, 1));
+      allocate(_elementType, _elementSize, Slice<size_t>(&len, 1));
     }
     else
-      Allocate(_elementType, _elementSize, length.as<Array<size_t>>());
+      allocate(_elementType, _elementSize, length.as<Array<size_t>>());
   }
 
   // Buffer's raw alloc/resize functions are hidden at this level of abstraction
-  bool Allocate(size_t) override final { EPASSERT_THROW(false, Result::InvalidCall, "Can't call Buffer::Allocate for ArrayBuffer!"); return false; }
-  bool Resize(size_t) override final { EPASSERT_THROW(false, Result::InvalidCall, "Can't call Buffer::Resize for ArrayBuffer!"); return false; }
+  bool allocate(size_t) override final { EPASSERT_THROW(false, Result::InvalidCall, "Can't call Buffer::Allocate for ArrayBuffer!"); return false; }
+  bool resize(size_t) override final { EPASSERT_THROW(false, Result::InvalidCall, "Can't call Buffer::Resize for ArrayBuffer!"); return false; }
 
   Array<const PropertyInfo> getProperties() const;
   Array<const MethodInfo> getMethods() const;
 };
 
 template<>
-inline Slice<void> ArrayBuffer::Map<void>() { return Buffer::Map(); }
+inline Slice<void> ArrayBuffer::map<void>() { return Buffer::map(); }
 
 template<>
-inline Slice<const void> ArrayBuffer::MapForRead<void>() { return Buffer::MapForRead(); }
+inline Slice<const void> ArrayBuffer::mapForRead<void>() { return Buffer::mapForRead(); }
 
 inline Variant epToVariant(const ElementInfo &e)
 {
@@ -227,7 +227,7 @@ inline void epFromVariant(const Variant &v, ElementMetadata *pE)
     pE->offset = pI->as<size_t>();
 }
 
-inline SharedString ElementInfo::AsString() const
+inline SharedString ElementInfo::asString() const
 {
   EPASSERT_THROW(size > 0, Result::Failure, "Invalid size");
 
@@ -256,7 +256,7 @@ inline SharedString ElementInfo::AsString() const
   return std::move(str);
 }
 
-inline ElementInfo ElementInfo::Parse(String s)
+inline ElementInfo ElementInfo::parse(String s)
 {
   ElementInfo info = ElementInfo{ 0, { 0 }, 0 };
   EPASSERT_THROW(s, Result::InvalidArgument, "String is empty");
@@ -309,7 +309,7 @@ inline ElementInfo ElementInfo::Parse(String s)
   return info;
 }
 
-inline SharedString ElementInfo::BuildTypeString(Slice<const ElementInfo> elements)
+inline SharedString ElementInfo::buildTypeString(Slice<const ElementInfo> elements)
 {
   bool first = true;
   MutableString<0> typeStr("{");
@@ -319,7 +319,7 @@ inline SharedString ElementInfo::BuildTypeString(Slice<const ElementInfo> elemen
       typeStr.append(",");
     else
       first = false;
-    typeStr.append(e.AsString());
+    typeStr.append(e.asString());
   }
   typeStr.append("}");
   return typeStr;

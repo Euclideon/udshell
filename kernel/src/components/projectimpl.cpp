@@ -74,7 +74,7 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
   catch (parse_error &e)
   {
     auto xmlBuff = spXMLBuffer->MapForRead();
-    epscope(exit) { spXMLBuffer->Unmap(); };
+    epscope(exit) { spXMLBuffer->unmap(); };
     EPTHROW_ERROR(Result::Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
   }
 
@@ -89,7 +89,7 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
 void ProjectImpl::SaveProject()
 {
   auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
-  spXMLBuffer->Reserve(10240);
+  spXMLBuffer->reserve(10240);
 
   Variant::VarMap projectNode;
   Array<Variant> children;
@@ -102,7 +102,7 @@ void ProjectImpl::SaveProject()
   spXMLBuffer->FormatXml(projectNode);
 
   Slice<const void> buffer = spXMLBuffer->MapForRead();
-  epscope(exit) { spXMLBuffer->Unmap(); };
+  epscope(exit) { spXMLBuffer->unmap(); };
   if (buffer.empty())
   {
     LogDebug(1, "SaveProject() -- Can't Map XML buffer for reading");

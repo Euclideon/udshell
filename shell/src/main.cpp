@@ -328,7 +328,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   // Colour Buffer
   ArrayBufferRef colourBuffer = kernel->CreateComponent<ArrayBuffer>();
   {
-    colourBuffer->AllocateFromData(Slice<const Float4>{
+    colourBuffer->allocateFromData(Slice<const Float4>{
       Float4{ 1.0f, 1.0f, 1.0f, 1.0f },
       Float4{ 1.0f, 0.0f, 0.0f, 1.0f },
       Float4{ 0.0f, 1.0f, 0.0f, 1.0f },
@@ -360,7 +360,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   model->AddVertexArray(colourBuffer);
   model->SetIndexArray(indexBuffer);
   model->SetMaterial(material);
-  model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), indexBuffer->GetLength() });
+  model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), indexBuffer->getLength() });
 
   GeomNodeRef geomNode = kernel->CreateComponent<GeomNode>();
   geomNode->SetModel(model);

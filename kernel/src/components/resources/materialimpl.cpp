@@ -235,7 +235,7 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
             TextRef spText = shared_pointer_cast<Text>(spC);
             String s = spText->MapForRead();
             spShader->SetCode(s);
-            spText->Unmap();
+            spText->unmap();
           }
         }
         else if (data.is(Variant::Type::String))

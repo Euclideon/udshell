@@ -5,9 +5,9 @@ namespace ep {
 
 size_t BroadcasterImpl::WriteBuffer(BufferRef spData)
 {
-  Slice<const void> buffer = spData->MapForRead();
+  Slice<const void> buffer = spData->mapForRead();
   size_t bytes = pInstance->Write(buffer);
-  spData->Unmap();
+  spData->unmap();
   return bytes;
 }
 
