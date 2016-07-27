@@ -239,7 +239,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     ResourceRef spMat = getResource(SharedString::concat("material", mesh.mMaterialIndex));
     if (spMat)
     {
-      spMesh->SetMaterial(component_cast<Material>(spMat));
+      spMesh->setMaterial(component_cast<Material>(spMat));
       LogDebug(4, "  Material: {0} ({1})", mesh.mMaterialIndex, spMat->getName());
     }
     else
@@ -256,7 +256,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
     setResource(SharedString::concat("positions", i), spVerts);
 
-    spMesh->AddVertexArray(spVerts);
+    spMesh->addVertexArray(spVerts);
 
     // normals
     if (mesh.HasNormals())
@@ -269,7 +269,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       setResource(SharedString::concat("normals", i), spNormals);
 
-      spMesh->AddVertexArray(spNormals);
+      spMesh->addVertexArray(spNormals);
     }
 
     // binormals & tangents
@@ -294,7 +294,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       setResource(SharedString::concat("binormalstangents", i), spBinTan);
 
-      spMesh->AddVertexArray(spBinTan);
+      spMesh->addVertexArray(spBinTan);
     }
 
     // UVs
@@ -308,7 +308,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       setResource(SharedString::concat("uvs", i, "_", t), spUVs);
 
-      spMesh->AddVertexArray(spUVs);
+      spMesh->addVertexArray(spUVs);
     }
 
     // Colors
@@ -322,7 +322,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
       setResource(SharedString::concat("colors", i, "_", c), spColors);
 
-      spMesh->AddVertexArray(spColors);
+      spMesh->addVertexArray(spColors);
     }
 
     // indices (faces)
@@ -344,7 +344,7 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
 
     setResource(SharedString::concat("indices", i), spIndices);
 
-    spMesh->SetIndexArray(spIndices);
+    spMesh->setIndexArray(spIndices);
 
     // add mesh resource
     setResource(SharedString::concat("mesh", i), spMesh);

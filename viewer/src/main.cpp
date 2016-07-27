@@ -181,10 +181,10 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 
   ModelRef model = kernel->createComponent<Model>();
   model->setName("TestModel");
-  model->AddVertexArray(vertexBuffer);
-  model->SetIndexArray(indexBuffer);
-  model->SetMaterial(material);
-  model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), size_t(EPARRAYSIZE(ib)) });
+  model->addVertexArray(vertexBuffer);
+  model->setIndexArray(indexBuffer);
+  model->setMaterial(material);
+  model->setRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), size_t(EPARRAYSIZE(ib)) });
 
   GeomNodeRef geomNode = kernel->createComponent<GeomNode>();
   geomNode->setModel(model);
@@ -245,8 +245,8 @@ static void ViewerInit(String sender, String message, const Variant &data)
     mData.spUDNode->setUDModel(mData.spUDModel);
     mData.spUDNode->setPosition(Double3::create(0, 0, 0));
 
-    Double4x4 modelMat = mData.spUDModel->GetUDMatrix();
-    Double3 modelCorner = mData.spUDModel->GetUDMatrix().axis.t.toVector3();
+    Double4x4 modelMat = mData.spUDModel->getUDMatrix();
+    Double3 modelCorner = mData.spUDModel->getUDMatrix().axis.t.toVector3();
     Double3 camPos = modelCorner + Double3{ modelMat.axis.x.x*2, modelMat.axis.y.y*2, modelMat.axis.z.z*2 };
 
     Double4x4 camMat = Double4x4::lookAt(camPos, modelCorner + Double3{ modelMat.axis.x.x / 2, modelMat.axis.y.y / 2, modelMat.axis.z.z / 2 });

@@ -17,18 +17,18 @@ public:
 
   ResourceRef clone() const override { return pImpl->Clone(); }
 
-  MaterialRef GetMaterial() const { return pImpl->GetMaterial(); }
-  void SetMaterial(MaterialRef spMaterial) { pImpl->SetMaterial(spMaterial); }
+  MaterialRef getMaterial() const { return pImpl->GetMaterial(); }
+  void setMaterial(MaterialRef spMaterial) { pImpl->SetMaterial(spMaterial); }
 
-  void AddVertexArray(ArrayBufferRef spVertices) { pImpl->AddVertexArray(spVertices); }
-  void RemoveVertexArray(ArrayBufferRef spVertices) { pImpl->RemoveVertexArray(spVertices); }
-  Array<ArrayBufferRef> GetVertexArrays() { return pImpl->GetVertexArrays(); }
+  void addVertexArray(ArrayBufferRef spVertices) { pImpl->AddVertexArray(spVertices); }
+  void removeVertexArray(ArrayBufferRef spVertices) { pImpl->RemoveVertexArray(spVertices); }
+  Array<ArrayBufferRef> getVertexArrays() { return pImpl->GetVertexArrays(); }
 
-  ArrayBufferRef GetIndexArray() const { return pImpl->GetIndexArray(); }
-  void SetIndexArray(ArrayBufferRef spIndices) { pImpl->SetIndexArray(spIndices); }
+  ArrayBufferRef getIndexArray() const { return pImpl->GetIndexArray(); }
+  void setIndexArray(ArrayBufferRef spIndices) { pImpl->SetIndexArray(spIndices); }
 
-  void SetRenderList(const RenderList &list) { pImpl->SetRenderList(list); }
-  const RenderList& GetRenderList() const { return pImpl->GetRenderList(); }
+  void setRenderList(const RenderList &list) { pImpl->SetRenderList(list); }
+  const RenderList& getRenderList() const { return pImpl->GetRenderList(); }
 
 protected:
   Model(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

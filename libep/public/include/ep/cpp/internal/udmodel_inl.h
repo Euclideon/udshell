@@ -23,7 +23,7 @@ namespace ep {
   }
 
   template <typename T>
-  inline void UDModel::SetConstantData(UDConstantDataType type, const T &data)
+  inline void UDModel::setConstantData(UDConstantDataType type, const T &data)
   {
     static_assert(std::is_trivial<T>::value, "T is not a trivial type");
     BufferRef spBuffer = Kernel::getInstance()->createComponent<Buffer>();
@@ -32,23 +32,23 @@ namespace ep {
     EPASSERT_THROW(buffer, Result::Failure, "Failed to Map spBuffer");
     memcpy(buffer.ptr, &data, sizeof(T));
     spBuffer->unmap();
-    SetConstantData(type, spBuffer);
+    setConstantData(type, spBuffer);
   }
 
   template <typename T>
-  inline void UDModel::SetConstantData(UDConstantDataType type, Slice<const T> data)
+  inline void UDModel::setConstantData(UDConstantDataType type, Slice<const T> data)
   {
     static_assert(std::is_trivial<T>::value, "T is not a trivial type");
     ArrayBufferRef spBuffer = Kernel::getInstance()->createComponent<ArrayBuffer>();
     spBuffer->allocateFromData(data);
-    SetConstantData(type, spBuffer);
+    setConstantData(type, spBuffer);
   }
 
   template <typename T>
-  inline T UDModel::GetConstantData(UDConstantDataType type)
+  inline T UDModel::getConstantData(UDConstantDataType type)
   {
     static_assert(std::is_trivial<T>::value, "T is not a trivial type");
-    BufferRef spBuffer = GetConstantData(type);
+    BufferRef spBuffer = getConstantData(type);
     EPTHROW_IF(!spBuffer, Result::InvalidArgument, "There is no constant data set for {0}", type.StringOf());
 
     T data;
@@ -58,58 +58,58 @@ namespace ep {
     return data;
   }
 
-  inline const Double4x4& UDRender::GetMatrix() const
+  inline const Double4x4& UDRender::getMatrix() const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return *reinterpret_cast<Double4x4*>(pContext->private0[3]);
   }
 
-  inline const UDClipArea& UDRender::GetClipArea() const
+  inline const UDClipArea& UDRender::getClipArea() const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return *reinterpret_cast<UDClipArea*>(pContext->private0[1]);
   }
 
-  inline UDModelFlags UDRender::GetFlags() const
+  inline UDModelFlags UDRender::getFlags() const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return UDModelFlags(pContext->private1[0]);
   }
 
-  inline uint32_t UDRender::GetStartingRoot() const
+  inline uint32_t UDRender::getStartingRoot() const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return pContext->private1[1];
   }
 
-  inline uint32_t UDRender::GetAnimationFrame() const
+  inline uint32_t UDRender::getAnimationFrame() const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return pContext->private1[2];
   }
 
   template <typename T>
-  inline const T &UDFilterVoxel::GetConstantData() const
+  inline const T &UDFilterVoxel::getConstantData() const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return *reinterpret_cast<T*>(pContext->private0[5]);
   }
 
   template <typename T>
-  inline const T &UDRenderVoxel::GetConstantData() const
+  inline const T &UDRenderVoxel::getConstantData() const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return *reinterpret_cast<T*>(pContext->private0[7]);
   }
 
   template <typename T>
-  inline const T &UDRenderPixel::GetConstantData() const
+  inline const T &UDRenderPixel::getConstantData() const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     return *reinterpret_cast<T*>(pContext->private0[9]);
   }
 
-  inline uint32_t UDRenderNode::GetNodeColor(UDNodeIndex nodeIndex) const
+  inline uint32_t UDRenderNode::getNodeColor(UDNodeIndex nodeIndex) const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     using GetNodeColor = uint32_t(internal::UDPrivateData *pInternal, UDNodeIndex nodeIndex);
@@ -122,7 +122,7 @@ namespace ep {
   }
 
   template <typename T>
-  inline const T& UDRenderNode::GetAttribute(UDNodeIndex nodeIndex, UDRenderNode::UDStreamType type) const
+  inline const T& UDRenderNode::getAttribute(UDNodeIndex nodeIndex, UDRenderNode::UDStreamType type) const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     using GetAttribute = const void *(internal::UDPrivateData *pInternal, UDNodeIndex nodeIndex, UDRenderNode::UDStreamType type);
@@ -135,7 +135,7 @@ namespace ep {
   }
 
   template <typename T>
-  inline const T& UDRenderNode::GetAttribute(UDNodeIndex nodeIndex, uint32_t attributeIndex) const
+  inline const T& UDRenderNode::getAttribute(UDNodeIndex nodeIndex, uint32_t attributeIndex) const
   {
     const UDRenderContext *pContext = reinterpret_cast<const UDRenderContext*>(this);
     using GetAttribute = const void *(internal::UDPrivateData *pInternal, UDNodeIndex nodeIndex, uint32_t index);

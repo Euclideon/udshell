@@ -74,7 +74,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     spScene->getRootNode()->addChild(spUDNode);
     spScene->makeDirty();
     spView->setEnablePicking(true);
-    spScene->addBookmark(MutableString128(Format, "{0}_bookmark", Viewer::getFileNameFromPath(model->asString())), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
+    spScene->addBookmark(MutableString128(Format, "{0}_bookmark", Viewer::getFileNameFromPath(model->asString())), { spModel->getUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
 
   spView->setUDRenderFlags(UDRenderFlags::ClearTargets);
@@ -167,7 +167,7 @@ void Viewer::addSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 {
   const Double4x4 &cameraMatrix = spCamera->getMatrix();
 
-  Double4x4 udMat = spUDNode->getUDModel()->GetUDMatrix();
+  Double4x4 udMat = spUDNode->getUDModel()->getUDMatrix();
 
   Double3 modelMin = Double3::zero();
   Double3 modelMax = modelMin + Double3{ udMat.axis.x.x, udMat.axis.y.y, udMat.axis.z.z };
@@ -368,10 +368,10 @@ void Viewer::createPlatformLogo()
 
   ModelRef spImageModel = pKernel->createComponent<Model>();
 
-  spImageModel->AddVertexArray(spVertexBuffer);
-  spImageModel->SetIndexArray(spIndexBuffer);
-  spImageModel->SetMaterial(spMaterial);
-  spImageModel->SetRenderList(RenderList{ PrimType::Triangles, size_t(0), size_t(0), size_t(6) });
+  spImageModel->addVertexArray(spVertexBuffer);
+  spImageModel->setIndexArray(spIndexBuffer);
+  spImageModel->setMaterial(spMaterial);
+  spImageModel->setRenderList(RenderList{ PrimType::Triangles, size_t(0), size_t(0), size_t(6) });
 
   GeomNodeRef spGeomNode = pKernel->createComponent<GeomNode>();
   spGeomNode->setModel(spImageModel);
