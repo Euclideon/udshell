@@ -21,8 +21,8 @@ namespace ep {
 Array<const PropertyInfo> Viewer::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO("simpleCamera", GetSimpleCamera, "The Viewer's SimpleCamera Component", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("view", GetView, "The Viewer's View Component", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("simpleCamera", getSimpleCamera, "The Viewer's SimpleCamera Component", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("view", getView, "The Viewer's View Component", nullptr, 0),
   };
 }
 
@@ -32,7 +32,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   ResourceManagerRef spResourceManager = pKernel->getResourceManager();
 
   spView = pKernel->createComponent<View>();
-  spView->setInputEventHook(Delegate<bool(ep::InputEvent)>(this, &Viewer::InputHook));
+  spView->setInputEventHook(Delegate<bool(ep::InputEvent)>(this, &Viewer::inputHook));
 
   Variant::VarMap sceneParams;
   const Variant *pSceneParams = initParams.get("scene");
@@ -74,7 +74,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     spScene->getRootNode()->addChild(spUDNode);
     spScene->makeDirty();
     spView->setEnablePicking(true);
-    spScene->addBookmark(MutableString128(Format, "{0}_bookmark", Viewer::GetFileNameFromPath(model->asString())), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
+    spScene->addBookmark(MutableString128(Format, "{0}_bookmark", Viewer::getFileNameFromPath(model->asString())), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
 
   spView->setUDRenderFlags(UDRenderFlags::ClearTargets);
@@ -90,7 +90,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   epscope(fail) { if(!spViewerUI) pKernel->logError("Error creating Viewer UI Component\n"); };
   spViewerUI = component_cast<UIComponent>(pKernel->createComponent("viewer.MainUI"));
   spViewerUI->set("viewport", spViewport);
-  spViewerUI->subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
+  spViewerUI->subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::onResourceDropped));
 
   epscope(fail) { if(!spUIBookmarks) pKernel->logError("Error creating bookmarks UI Component\n"); };
   spUIBookmarks = component_cast<UIComponent>(pKernel->createComponent("ui.BookmarksUI"));
@@ -119,7 +119,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 #if EP_DEBUG
   try
   {
-    CreatePlatformLogo();
+    createPlatformLogo();
   }
   catch (EPException ex)
   {
@@ -128,7 +128,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 #endif // EP_DEBUG
 }
 
-MutableString<260> Viewer::GetFileNameFromPath(String path) // TODO Move this to File after implising File
+MutableString<260> Viewer::getFileNameFromPath(String path) // TODO Move this to File after implising File
 {
   String fName = path.getRightAtLast("/", false);
   if (fName.empty())
@@ -142,7 +142,7 @@ MutableString<260> Viewer::GetFileNameFromPath(String path) // TODO Move this to
   return fName;
 }
 
-void Viewer::OnResourceDropped(String resourceUID, int x, int y)
+void Viewer::onResourceDropped(String resourceUID, int x, int y)
 {
   ResourceManagerRef spResourceManager = pKernel->getResourceManager();
   UDModelRef spUDModel;
@@ -160,10 +160,10 @@ void Viewer::OnResourceDropped(String resourceUID, int x, int y)
   UDNodeRef spUDNode = pKernel->createComponent<UDNode>();
   spUDNode->setUDModel(spUDModel);
 
-  AddSceneNodeAtViewPosition(spUDNode, x, y);
+  addSceneNodeAtViewPosition(spUDNode, x, y);
 }
 
-void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
+void Viewer::addSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
 {
   const Double4x4 &cameraMatrix = spCamera->getMatrix();
 
@@ -218,25 +218,25 @@ void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
   spScene->makeDirty();
 }
 
-void Viewer::StaticInit(ep::Kernel *pKernel)
+void Viewer::staticInit(ep::Kernel *pKernel)
 {
   auto spCommandManager = pKernel->getCommandManager();
 
-  spCommandManager->registerCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", componentID(), "Ctrl+Shift+B");
+  spCommandManager->registerCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::staticToggleBookmarksPanel), "", componentID(), "Ctrl+Shift+B");
   // TODO: Bug EP-66
   //spCommandManager->registerCommand("toggleresourcespanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleResourcesPanel), "", componentID(), "Ctrl+Shift+R");
-  spCommandManager->registerCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", componentID(), "Ctrl+B");
+  spCommandManager->registerCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::staticCreateBookmark), "", componentID(), "Ctrl+B");
 }
 
-void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)
+void Viewer::staticToggleBookmarksPanel(Variant::VarMap params)
 {
   Variant *pActivityVar = params.get("activity");
   ViewerRef spViewer = pActivityVar->as<ViewerRef>();
 
-  spViewer->ToggleBookmarksPanel();
+  spViewer->toggleBookmarksPanel();
 }
 
-void Viewer::ToggleBookmarksPanel()
+void Viewer::toggleBookmarksPanel()
 {
   getUI()->call("togglebookmarkspanel");
 }
@@ -255,14 +255,14 @@ void Viewer::ToggleResourcesPanel()
   GetUI()->Call("toggleresourcespanel");
 }*/
 
-void Viewer::StaticCreateBookmark(Variant::VarMap params)
+void Viewer::staticCreateBookmark(Variant::VarMap params)
 {
   Variant *pActivityVar = params.get("activity");
   ViewerRef spViewer = pActivityVar->as<ViewerRef>();
-  spViewer->CreateBookmark();
+  spViewer->createBookmark();
 }
 
-void Viewer::CreateBookmark()
+void Viewer::createBookmark()
 {
   // TODO: Here we have to update the bookmark list separately for the front-end UI and the internal bookmarks list.
   // It would be nice if the QML could automatically update its bookmarks list from the internal bookmarks
@@ -312,7 +312,7 @@ Variant Viewer::save() const
   return Variant(std::move(params));
 }
 
-void Viewer::CreatePlatformLogo()
+void Viewer::createPlatformLogo()
 {
   DataSourceRef spImageSource = pKernel->createDataSourceFromFile("libep/doc/images/platform_logo.png");
   ArrayBufferRef spImage = spImageSource->getResourceAs<ArrayBuffer>("image0");
@@ -381,7 +381,7 @@ void Viewer::CreatePlatformLogo()
   spMaterial->setMaterialProperty("tex", spImage);
 }
 
-bool Viewer::InputHook(ep::InputEvent ev)
+bool Viewer::inputHook(ep::InputEvent ev)
 {
   if (ev.eventType == ep::InputEvent::EventType::Key && ev.deviceType == ep::InputDevice::Keyboard) // if a key event happened on the keyboard
   {
