@@ -215,7 +215,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
   mData.spView->setUDRenderFlags(UDRenderFlags::ClearTargets);
 
-  mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
+  mData.spSimpleCamera->setPosition(Double3::create(0.5, -1.0, 0.5));
   mData.spSimpleCamera->SetSpeed(1.0);
   mData.spSimpleCamera->SetInvertedYAxis(true);
   mData.spSimpleCamera->SetPerspective(EP_PIf / 3.f);
@@ -251,7 +251,7 @@ static void ViewerInit(String sender, String message, const Variant &data)
 
     Double4x4 camMat = Double4x4::lookAt(camPos, modelCorner + Double3{ modelMat.axis.x.x / 2, modelMat.axis.y.y / 2, modelMat.axis.z.z / 2 });
 
-    mData.spSimpleCamera->SetMatrix(camMat);
+    mData.spSimpleCamera->setMatrix(camMat);
   }
 
   mData.spScene->GetRootNode()->addChild(mData.spUDNode);

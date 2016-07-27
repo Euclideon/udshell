@@ -78,7 +78,7 @@ public:
   void SetLatestFrame(UniquePtr<RenderableView> spFrame);
   void Update(double timeStep)
   {
-    if ((spCamera && spCamera->Update(timeStep)) || pickingEnabled)
+    if ((spCamera && spCamera->update(timeStep)) || pickingEnabled)
       OnDirty();
   }
 

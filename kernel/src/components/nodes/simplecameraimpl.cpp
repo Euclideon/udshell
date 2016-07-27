@@ -9,8 +9,8 @@ Array<const PropertyInfo> SimpleCamera::getProperties() const
 {
   return{
     // TODO: why are these write-only?
-    EP_MAKE_PROPERTY_WO("matrix", SetMatrix, "Local matrix", nullptr, 0),
-    EP_MAKE_PROPERTY_WO("position", SetPosition, "Local position", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("matrix", setMatrix, "Local matrix", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("position", setPosition, "Local position", nullptr, 0),
     EP_MAKE_PROPERTY_WO("orientation", SetOrientation, "Camera orientation (YPR)", nullptr, 0),
     EP_MAKE_PROPERTY_WO("speed", SetSpeed, "Camera speed", nullptr, 0),
     EP_MAKE_PROPERTY("helicopterMode", GetHelicopterMode, SetHelicopterMode, "Helicopter Mode", nullptr, 0),
