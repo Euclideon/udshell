@@ -22,8 +22,8 @@ class UDNode : public Node
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, UDNode, IUDNode, Node, EPKERNEL_PLUGINVERSION, "UD model node", 0)
 
 public:
-  UDModelRef GetUDModel() const { return pImpl->GetUDModel(); }
-  void SetUDModel(UDModelRef spModel) { pImpl->SetUDModel(spModel); }
+  UDModelRef getUDModel() const { return pImpl->GetUDModel(); }
+  void setUDModel(UDModelRef spModel) { pImpl->SetUDModel(spModel); }
 
   Variant save() const override { return pImpl->Save(); }
 

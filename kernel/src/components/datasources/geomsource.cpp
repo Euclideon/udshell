@@ -455,7 +455,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
       {
         // create UDNode
         UDNodeRef spUDNode = getKernel().createComponent<UDNode>();
-        spUDNode->SetUDModel(component_cast<UDModel>(spUDModel));
+        spUDNode->setUDModel(component_cast<UDModel>(spUDModel));
 
         // add UDNode to world node (we could collapse this if there is only one model...)
         spNode->addChild(spUDNode);

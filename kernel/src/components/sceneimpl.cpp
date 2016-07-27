@@ -280,7 +280,7 @@ void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)
 
     spUDNode = component_cast<UDNode>(spChild);
 
-    UDModelRef spUDModel = spUDNode->GetUDModel();
+    UDModelRef spUDModel = spUDNode->getUDModel();
     Variant filePath = spUDModel->getMetadata()->Get("url");
     if (filePath.is(Variant::Type::String))
       modelMap.replace(filePath, spUDModel);
