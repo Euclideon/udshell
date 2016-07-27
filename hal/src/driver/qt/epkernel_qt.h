@@ -38,7 +38,7 @@ class QtApplication : public QApplication
 public:
   QtApplication(QtKernel *pKern, int &argc, char ** argv) : QApplication(argc, argv), pKernel(pKern) {}
 
-  static QtKernel *Kernel() {
+  static QtKernel *kernel() {
     EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
     return static_cast<QtApplication*>(QtApplication::instance())->pKernel;
   }
@@ -56,13 +56,13 @@ public:
   QtKernelMediator(QtKernel *pKernel) : QObject(nullptr), pQtKernel(pKernel) {}
   ~QtKernelMediator() {}
 
-  void PostEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
+  void postEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
 
 public slots:
-  void OnGLContextCreated(QOpenGLContext *pContext);
-  void OnAppQuit();
-  void OnFirstRender();
-  void OnGLMessageLogged(const QOpenGLDebugMessage &debugMessage);
+  void onGLContextCreated(QOpenGLContext *pContext);
+  void onAppQuit();
+  void onFirstRender();
+  void onGLMessageLogged(const QOpenGLDebugMessage &debugMessage);
 
 private:
   void customEvent(QEvent *pEvent) override;
@@ -86,16 +86,16 @@ public:
   void dispatchToMainThread(ep::MainThreadCallback callback) override final;
   void dispatchToMainThreadAndWait(ep::MainThreadCallback callback) override final;
 
-  bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
-  bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
+  bool onMainThread() { return (mainThreadId == QThread::currentThreadId()); }
+  bool onRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
 
-  QQmlEngine *QmlEngine() const { return pQmlEngine; }
+  QQmlEngine *qmlEngine() const { return pQmlEngine; }
 
-  ep::Result RegisterWindow(QQuickWindow *pWindow);
-  void UnregisterWindow(QQuickWindow *pWindow);
-  QPointer<QQuickWindow> TopLevelWindow() { return pTopLevelWindow; }
+  ep::Result registerWindow(QQuickWindow *pWindow);
+  void unregisterWindow(QQuickWindow *pWindow);
+  QPointer<QQuickWindow> topLevelWindow() { return pTopLevelWindow; }
 
-  QtFocusManager *GetFocusManager() { return pFocusManager; }
+  QtFocusManager *getFocusManager() { return pFocusManager; }
 
   void registerQmlComponent(ep::String file);
   void registerQmlComponents(ep::String folderPath);
@@ -105,14 +105,14 @@ private:
   friend class QtKernelMediator;
   friend class QmlPluginLoader;
 
-  static ep::ComponentDescInl *MakeKernelDescriptor();
+  static ep::ComponentDescInl *makeKernelDescriptor();
 
-  void FinishInit();
-  void Shutdown();
+  void finishInit();
+  void shutdown();
 
   void onFatal(ep::String msg) override final;
 
-  void RegisterQml(ep::String file, ep::Variant::VarMap desc);
+  void registerQml(ep::String file, ep::Variant::VarMap desc);
 
   ep::Array<const ep::MethodInfo> getMethods() const
   {

@@ -51,7 +51,7 @@ void QObjectComponent::AttachToGlue(Component *pGlue, ep::Variant::VarMap initPa
 
   // Create a new QObject instance from the stored QmlComponentData
   EPASSERT(pQmlComponentData, "Attempting to attach a public/instantiated QObjectComponent to a Glue Component");
-  pQObject = pQmlComponentData->createInstance(static_cast<QtKernel*>(pKernel)->QmlEngine(), pThis, initParams);
+  pQObject = pQmlComponentData->createInstance(static_cast<QtKernel*>(pKernel)->qmlEngine(), pThis, initParams);
   pUserData = pQObject;
 
   // Populate the glue's descriptor with the meta from the QObject
