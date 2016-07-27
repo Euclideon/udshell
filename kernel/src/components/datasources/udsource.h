@@ -22,7 +22,7 @@ public:
     DeferredLoad = 1<<3,
   };
 
-  Slice<const String> GetFileExtensions() const override
+  Slice<const String> getFileExtensions() const override
   {
     return extensions;
   }

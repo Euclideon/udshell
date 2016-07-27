@@ -16,7 +16,7 @@ class ImageSource : public DataSource
   EP_DECLARE_COMPONENT(ep, ImageSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides images", 0)
 public:
 
-  Slice<const String> GetFileExtensions() const override
+  Slice<const String> getFileExtensions() const override
   {
     return extensions;
   }
