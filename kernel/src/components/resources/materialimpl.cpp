@@ -73,7 +73,7 @@ Array<const MethodInfo> Material::getMethods() const
 void MaterialImpl::SetShader(ShaderType type, ShaderRef spShader)
 {
   if (spShader)
-    EPASSERT_THROW(spShader->GetType() == type, Result::InvalidArgument, "Incorrect shader type!");
+    EPASSERT_THROW(spShader->getType() == type, Result::InvalidArgument, "Incorrect shader type!");
 
   if (shaders[type] == spShader)
     return;
@@ -120,7 +120,7 @@ void MaterialImpl::BuildShaderProgram()
   for (ShaderRef &s : Slice<ShaderRef>(shaders, NumShaders-1))
   {
     if (s)
-      renderShaders.pushBack(shared_pointer_cast<RenderShader>(s->GetRenderShader()));
+      renderShaders.pushBack(shared_pointer_cast<RenderShader>(s->getRenderShader()));
   }
 
   spShaderProgram = SharedPtr<RenderShaderProgram>::create(GetKernel()->getImpl()->GetRenderer().ptr(), renderShaders);
@@ -230,11 +230,11 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
           {
             // data is a text buffer object (presumably containing shader source)
             spShader = GetKernel()->createComponent<Shader>();
-            spShader->SetType(*pBuiltin);
+            spShader->setType(*pBuiltin);
 
             TextRef spText = shared_pointer_cast<Text>(spC);
             String s = spText->mapForRead();
-            spShader->SetCode(s);
+            spShader->setCode(s);
             spText->unmap();
           }
         }
@@ -242,8 +242,8 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
         {
           // data is a string buffer
           spShader = GetKernel()->createComponent<Shader>();
-          spShader->SetType(*pBuiltin);
-          spShader->SetCode(data.asString());
+          spShader->setType(*pBuiltin);
+          spShader->setCode(data.asString());
         }
         EPASSERT_THROW(spShader, Result::InvalidArgument, "Expected shader object or shader text");
 

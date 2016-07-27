@@ -320,7 +320,7 @@ void Viewer::CreatePlatformLogo()
   // Vertex Shader
   ShaderRef vertexShader = pKernel->createComponent<Shader>();
   {
-    vertexShader->SetType(ShaderType::VertexShader);
+    vertexShader->setType(ShaderType::VertexShader);
 
     const char shaderText[] = "attribute vec3 a_position;\n"
       "uniform mat4 u_mfwvp;\n"
@@ -329,13 +329,13 @@ void Viewer::CreatePlatformLogo()
       "  gl_Position = u_mfwvp == mat4(1.0) ? vec4(a_position, 1.0) : vec4(a_position, 1.0);\n"
       "  gl_TexCoord[0].xy = a_position.xy*0.5+0.5;\n"
       "}\n";
-    vertexShader->SetCode(shaderText);
+    vertexShader->setCode(shaderText);
   }
 
   // Pixel Shader
   ShaderRef pixelShader = pKernel->createComponent<Shader>();
   {
-    pixelShader->SetType(ShaderType::PixelShader);
+    pixelShader->setType(ShaderType::PixelShader);
 
     const char shaderText[] =
       "uniform sampler2D tex;\n"
@@ -351,7 +351,7 @@ void Viewer::CreatePlatformLogo()
 //       "  gl_FragColor = vec4(col.b, col.g, col.r, col.a);\n" // hack to swap r and b
       "  gl_FragColor = col;\n"
       "}\n";
-    pixelShader->SetCode(shaderText);
+    pixelShader->setCode(shaderText);
   }
 
   MaterialRef spMaterial = pKernel->createComponent<Material>();
