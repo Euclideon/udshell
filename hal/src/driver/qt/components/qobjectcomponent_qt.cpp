@@ -64,7 +64,7 @@ void QObjectComponent::AttachToGlue(Component *pGlue, ep::Variant::VarMap initPa
   if (pThis->isType("ep.Window"))
   {
     EPTHROW_IF(!pQObject->isWindowType(), Result::Failure, "Window component must create a QWindow based object");
-    static_cast<ep::Window*>(pThis)->PostInit(pQObject);
+    static_cast<ep::Window*>(pThis)->postInit(pQObject);
   }
   else
   {

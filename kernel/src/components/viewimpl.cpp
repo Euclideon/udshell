@@ -7,34 +7,34 @@ namespace ep {
 Array<const PropertyInfo> View::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY("camera", GetCamera, SetCamera, "Camera for viewport", nullptr, 0),
-    EP_MAKE_PROPERTY("scene", GetScene, SetScene, "Scene for viewport", nullptr, 0),
-    EP_MAKE_PROPERTY("enablePicking", GetEnablePicking, SetEnablePicking, "Enable Picking", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("mousePosition", GetMousePosition, "Mouse Position", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("aspectRatio", GetAspectRatio, "Aspect ratio", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("dimensions", GetDimensions, "The height and width of the View", nullptr, 0),
-    EP_MAKE_PROPERTY_RO("renderDimensions", GetRenderDimensions, "The resolution of the rendered content", nullptr, 0),
+    EP_MAKE_PROPERTY("camera", getCamera, setCamera, "Camera for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY("scene", getScene, setScene, "Scene for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY("enablePicking", getEnablePicking, setEnablePicking, "Enable Picking", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("mousePosition", getMousePosition, "Mouse Position", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("aspectRatio", getAspectRatio, "Aspect ratio", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("dimensions", getDimensions, "The height and width of the View", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("renderDimensions", getRenderDimensions, "The resolution of the rendered content", nullptr, 0),
   };
 }
 
 Array<const MethodInfo> View::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(GoToBookmark, "Move the Camera to the specified Bookmark"),
-    EP_MAKE_METHOD(Activate, "Activate the View, e.g. start rendering"),
-    EP_MAKE_METHOD(Deactivate, "Deactivate the View, e.g. stop rendering"),
-    EP_MAKE_METHOD(Resize, "Resize the View"),
+    EP_MAKE_METHOD(goToBookmark, "Move the Camera to the specified Bookmark"),
+    EP_MAKE_METHOD(activate, "Activate the View, e.g. start rendering"),
+    EP_MAKE_METHOD(deactivate, "Deactivate the View, e.g. stop rendering"),
+    EP_MAKE_METHOD(resize, "Resize the View"),
   };
 }
 
 Array<const EventInfo> View::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Dirty, "View dirty event"),
-    EP_MAKE_EVENT(FrameReady, "The next frame has finished rendering"),
-    EP_MAKE_EVENT(EnabledPickingChanged, "Enable Picking changed"),
-    EP_MAKE_EVENT(PickFound, "Pick found"),
-    EP_MAKE_EVENT(MousePositionChanged, "Mouse Position changed")
+    EP_MAKE_EVENT(dirty, "View dirty event"),
+    EP_MAKE_EVENT(frameReady, "The next frame has finished rendering"),
+    EP_MAKE_EVENT(enabledPickingChanged, "Enable Picking changed"),
+    EP_MAKE_EVENT(pickFound, "Pick found"),
+    EP_MAKE_EVENT(mousePositionChanged, "Mouse Position changed")
   };
 }
 
@@ -59,7 +59,7 @@ void ViewImpl::SetEnablePicking(bool enable)
   if (pickingEnabled != enable)
   {
     pickingEnabled = enable;
-    pInstance->EnabledPickingChanged.Signal(pickingEnabled);
+    pInstance->enabledPickingChanged.Signal(pickingEnabled);
   }
 }
 
@@ -104,7 +104,7 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
     {
       mousePosition.x = (uint32_t)ev.move.xAbsolute;
       mousePosition.y = (uint32_t)ev.move.yAbsolute;
-      pInstance->MousePositionChanged.Signal(mousePosition);
+      pInstance->mousePositionChanged.Signal(mousePosition);
     }
   }
   else if (ev.deviceType == ep::InputDevice::Keyboard)
@@ -177,7 +177,7 @@ void ViewImpl::OnDirty()
   }
 
   // emit the dirty signal
-  pInstance->Dirty.Signal();
+  pInstance->dirty.Signal();
 }
 
 void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
@@ -216,7 +216,7 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
 
         EPASSERT(udNodePtr != nullptr, "No node for octree");
 
-        pInstance->PickFound.Signal(pickedPoint, udNodePtr);
+        pInstance->pickFound.Signal(pickedPoint, udNodePtr);
       }
       else
       {
@@ -224,7 +224,7 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
         pickHighlightData = { nullptr, 0, };
       }
     }
-    pInstance->FrameReady.Signal();
+    pInstance->frameReady.Signal();
   }
 }
 

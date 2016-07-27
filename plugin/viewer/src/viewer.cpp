@@ -32,7 +32,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   ResourceManagerRef spResourceManager = pKernel->GetResourceManager();
 
   spView = pKernel->CreateComponent<View>();
-  spView->SetInputEventHook(Delegate<bool(ep::InputEvent)>(this, &Viewer::InputHook));
+  spView->setInputEventHook(Delegate<bool(ep::InputEvent)>(this, &Viewer::InputHook));
 
   Variant::VarMap sceneParams;
   const Variant *pSceneParams = initParams.get("scene");
@@ -73,14 +73,14 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
     spUDNode->SetUDModel(spModel);
     spScene->GetRootNode()->AddChild(spUDNode);
     spScene->MakeDirty();
-    spView->SetEnablePicking(true);
+    spView->setEnablePicking(true);
     spScene->AddBookmark(MutableString128(Format, "{0}_bookmark", Viewer::GetFileNameFromPath(model->asString())), { spModel->GetUDMatrix().axis.t.toVector3(), { 0, 0, 0 }});
   }
 
-  spView->SetUDRenderFlags(UDRenderFlags::ClearTargets);
+  spView->setUDRenderFlags(UDRenderFlags::ClearTargets);
 
-  spView->SetScene(spScene);
-  spView->SetCamera(spCamera);
+  spView->setScene(spScene);
+  spView->setCamera(spCamera);
 
   UIComponentRef spViewport;
   epscope(fail) { if (!spViewport) pKernel->LogError("Error creating Viewport Component\n"); };
@@ -177,19 +177,19 @@ void Viewer::AddSceneNodeAtViewPosition(UDNodeRef spUDNode, int x, int y)
   double dist = 2.0;
 
   // Map mouse coordinates to a point on the plane at y=dist
-  Dimensions<int> displayDims = spView->GetDimensions();
+  Dimensions<int> displayDims = spView->getDimensions();
 
   double distX, distZ;
 
   if (spCamera->IsOrtho())
   {
-    distX = spView->GetAspectRatio() * spCamera->GetOrthoHeight() / 2;
+    distX = spView->getAspectRatio() * spCamera->GetOrthoHeight() / 2;
     distZ = spCamera->GetOrthoHeight() / 2;
   }
   else
   {
     // Perspective projection
-    distX = dist * spView->GetAspectRatio() * Tan(spCamera->GetFovY() / 2);
+    distX = dist * spView->getAspectRatio() * Tan(spCamera->GetFovY() / 2);
     distZ = dist * Tan(spCamera->GetFovY() / 2);
   }
 
