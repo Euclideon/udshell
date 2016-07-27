@@ -278,7 +278,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
   while (ypr.x >= EP_2PI)
     ypr.x -= EP_2PI;
 
-  Double4x4 cam = pInstance->Super::GetCameraMatrix();
+  Double4x4 cam = pInstance->Super::getCameraMatrix();
 
   Double3 forward = cam.axis.y.toVector3();
   Double3 xAxis = cam.axis.x.toVector3();

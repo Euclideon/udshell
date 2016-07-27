@@ -118,7 +118,7 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
   if (!handled && spScene)
     handled = spScene->InputEvent(ev);
   if (!handled && spCamera)
-    handled = spCamera->ViewportInputEvent(ev);
+    handled = spCamera->viewportInputEvent(ev);
   return handled;
 }
 
@@ -140,8 +140,8 @@ void ViewImpl::OnDirty()
 
     spRenderView->spView = ViewRef(pInstance);
 
-    spRenderView->camera = spCamera->GetCameraMatrix();
-    spRenderView->projection = spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight);
+    spRenderView->camera = spCamera->getCameraMatrix();
+    spRenderView->projection = spCamera->getProjectionMatrix((double)displayWidth / (double)displayHeight);
 
     spRenderView->spScene = spScene->GetRenderScene();
 
@@ -272,8 +272,8 @@ DoubleRay3 ViewImpl::ScreenPointToWorldRay(Double2 screenPoint) const
 
   Dimensions<int> screenSize = GetDimensions();
 
-  Double4x4 viewMat = spCamera->GetViewMatrix();
-  Double4x4 projMat = spCamera->GetProjectionMatrix((double)screenSize.width / (double)screenSize.height);
+  Double4x4 viewMat = spCamera->getViewMatrix();
+  Double4x4 projMat = spCamera->getProjectionMatrix((double)screenSize.width / (double)screenSize.height);
 
   Double4x4 VP = projMat * viewMat;
   Double4x4 invVP = Inverse(VP);
