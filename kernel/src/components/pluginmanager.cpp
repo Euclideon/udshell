@@ -6,8 +6,8 @@ namespace ep {
 Array<const MethodInfo> PluginManager::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(RegisterPluginLoader, "Register a PluginLoader"),
-    EP_MAKE_METHOD(LoadPlugin, "Load a plugin with the given filename"),
+    EP_MAKE_METHOD(registerPluginLoader, "Register a PluginLoader"),
+    EP_MAKE_METHOD(loadPlugin, "Load a plugin with the given filename"),
   };
 }
 
@@ -17,19 +17,19 @@ PluginManager::PluginManager(const ComponentDesc *pType, Kernel *pKernel, Shared
 
 }
 
-void PluginManager::RegisterPluginLoader(PluginLoaderRef spLoader)
+void PluginManager::registerPluginLoader(PluginLoaderRef spLoader)
 {
   loaders.pushBack(spLoader);
 }
 
-bool PluginManager::LoadPlugin(String filename)
+bool PluginManager::loadPlugin(String filename)
 {
   String ext = filename.getRightAtLast('.');
   for (auto &loader : loaders)
   {
-    if (loader->GetSupportedExtensions().exists(ext))
+    if (loader->getSupportedExtensions().exists(ext))
     {
-      return loader->LoadPlugin(filename);
+      return loader->loadPlugin(filename);
     }
   }
   return false;

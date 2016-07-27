@@ -16,7 +16,7 @@ extern "C" {
 
 namespace ep {
 
-Slice<const String> NativePluginLoader::GetSupportedExtensions() const
+Slice<const String> NativePluginLoader::getSupportedExtensions() const
 {
 #if defined(EP_WINDOWS)
   static Array<const String> s_ext = { ".dll" };
@@ -28,7 +28,7 @@ Slice<const String> NativePluginLoader::GetSupportedExtensions() const
   return s_ext;
 }
 
-bool NativePluginLoader::LoadPlugin(String filename)
+bool NativePluginLoader::loadPlugin(String filename)
 {
   const char *pFuncName = "epPlugin_Init";
 

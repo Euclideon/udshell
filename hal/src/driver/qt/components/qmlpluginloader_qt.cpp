@@ -18,19 +18,19 @@ using ep::Variant;
 
 namespace qt {
 
-Slice<const String> QmlPluginLoader::GetSupportedExtensions() const
+Slice<const String> QmlPluginLoader::getSupportedExtensions() const
 {
   static ep::Array<const String> s_ext = { ".qml" };
   return s_ext;
 }
 
-bool QmlPluginLoader::LoadPlugin(String filename)
+bool QmlPluginLoader::loadPlugin(String filename)
 {
   QtKernel *pQtKernel = static_cast<QtKernel*>(pKernel);
   ep::Variant::VarMap descMap;
 
   try {
-    descMap = ParseTypeDescriptor(pQtKernel, filename);
+    descMap = parseTypeDescriptor(pQtKernel, filename);
     if (!descMap.empty())
       pQtKernel->registerQml(filename, descMap);
   }
@@ -47,7 +47,7 @@ bool QmlPluginLoader::LoadPlugin(String filename)
   return true;
 }
 
-Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::String filename)
+Variant::VarMap QmlPluginLoader::parseTypeDescriptor(QtKernel *pQtKernel, ep::String filename)
 {
   // Open and read the entire file
   QFile file(epToQString(filename));

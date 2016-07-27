@@ -139,7 +139,7 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
 
   // create and register the qml loader
   spQmlPluginLoader = createComponent<QmlPluginLoader>();
-  getImpl()->spPluginManager->RegisterPluginLoader(spQmlPluginLoader);
+  getImpl()->spPluginManager->registerPluginLoader(spQmlPluginLoader);
 
   // TODO: control this with a command line switch...
   //qputenv("QSG_RENDER_LOOP", "single");
@@ -299,7 +299,7 @@ void QtKernel::registerQmlComponent(String file)
 
   ep::Variant::VarMap typeDesc;
   try {
-    typeDesc = QmlPluginLoader::ParseTypeDescriptor(this, file);
+    typeDesc = QmlPluginLoader::parseTypeDescriptor(this, file);
   }
   catch (ep::EPException &e) {
     EPTHROW_ERROR(ep::Result::Failure, "Could not register QML file '{0}' as Component: \"{1}\"", file, e.what());
@@ -364,7 +364,7 @@ ep::ComponentRef QtKernel::createQmlComponent(String file, Variant::VarMap initP
   // verify that the qml file has a type descriptor property
   Variant::VarMap typeDesc;
   try {
-    typeDesc = QmlPluginLoader::ParseTypeDescriptor(this, file);
+    typeDesc = QmlPluginLoader::parseTypeDescriptor(this, file);
   }
   catch (ep::EPException &e) {
     EPTHROW_ERROR(Result::Failure, "Could not create QML Component from file '{0}': \"{1}\"", file, e.what());
