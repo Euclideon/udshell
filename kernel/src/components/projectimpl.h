@@ -46,8 +46,8 @@ namespace ep
     SharedString srcString = nullptr;
     ActivityRef spActiveActivity = nullptr;
 
-    Array<const PropertyInfo> GetProperties() const;
-    Array<const MethodInfo> GetMethods() const;
+    Array<const PropertyInfo> getProperties() const;
+    Array<const MethodInfo> getMethods() const;
   };
 
 } //namespace ep

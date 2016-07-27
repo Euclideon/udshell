@@ -9,7 +9,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Console::GetProperties() const
+Array<const PropertyInfo> Console::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("filterComponents", GetFilterComponents, SetFilterComponents, "List of Components to filter the log text by", nullptr, 0),
@@ -21,7 +21,7 @@ Array<const PropertyInfo> Console::GetProperties() const
     EP_MAKE_PROPERTY_RO("outputLog", OutputLog, "Bool specifies whether this console outputs the application log", nullptr, 0),
   };
 }
-Array<const MethodInfo> Console::GetMethods() const
+Array<const MethodInfo> Console::getMethods() const
 {
   return{
     EP_MAKE_METHOD(GetFilterLevel, "Get the filter level for the given log category"),

@@ -7,7 +7,7 @@
 
 namespace ep {
 
-Array<const MethodInfo> Text::GetMethods() const
+Array<const MethodInfo> Text::getMethods() const
 {
   return{
     EP_MAKE_METHOD(ParseXml, "Parse XML formatted text in buffer into a heirarchical structure of KeyValuePairs"),

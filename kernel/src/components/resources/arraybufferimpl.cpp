@@ -5,7 +5,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> ArrayBuffer::GetProperties() const
+Array<const PropertyInfo> ArrayBuffer::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("elementType", GetElementType, "Element type of the Array as a String", nullptr, 0),
@@ -15,7 +15,7 @@ Array<const PropertyInfo> ArrayBuffer::GetProperties() const
     EP_MAKE_PROPERTY_RO("shape", GetShape, "The sizes of the Array's dimensions", nullptr, 0),
   };
 }
-Array<const MethodInfo> ArrayBuffer::GetMethods() const
+Array<const MethodInfo> ArrayBuffer::getMethods() const
 {
   return{
     EP_MAKE_METHOD_EXPLICIT("Allocate", AllocateMethod, "Allocates an Array of the given type, size and length. Length may be a single value or a list of dimensions"),

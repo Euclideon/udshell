@@ -18,7 +18,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Viewer::GetProperties() const
+Array<const PropertyInfo> Viewer::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("simpleCamera", GetSimpleCamera, "The Viewer's SimpleCamera Component", nullptr, 0),
@@ -89,13 +89,13 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   UIComponentRef spViewerUI;
   epscope(fail) { if(!spViewerUI) pKernel->LogError("Error creating Viewer UI Component\n"); };
   spViewerUI = component_cast<UIComponent>(pKernel->CreateComponent("viewer.MainUI"));
-  spViewerUI->Set("viewport", spViewport);
-  spViewerUI->Subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
+  spViewerUI->set("viewport", spViewport);
+  spViewerUI->subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::OnResourceDropped));
 
   epscope(fail) { if(!spUIBookmarks) pKernel->LogError("Error creating bookmarks UI Component\n"); };
   spUIBookmarks = component_cast<UIComponent>(pKernel->CreateComponent("ui.BookmarksUI"));
-  spUIBookmarks->Set("view", spView);
-  spViewerUI->Set("bookmarkscomp", spUIBookmarks);
+  spUIBookmarks->set("view", spView);
+  spViewerUI->set("bookmarkscomp", spUIBookmarks);
 
   // TODO: Bug EP-66
   /*UIComponentRef spUIResources;
@@ -114,7 +114,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   // Add bookmarks to UI
   auto bmMap = spScene->GetBookmarkMap();
   for (auto bm : bmMap)
-    spUIBookmarks->Call("createbookmark", bm.key);
+    spUIBookmarks->call("createbookmark", bm.key);
 
 #if EP_DEBUG
   try
@@ -222,10 +222,10 @@ void Viewer::StaticInit(ep::Kernel *pKernel)
 {
   auto spCommandManager = pKernel->GetCommandManager();
 
-  spCommandManager->RegisterCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", ComponentID(), "Ctrl+Shift+B");
+  spCommandManager->RegisterCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleBookmarksPanel), "", componentID(), "Ctrl+Shift+B");
   // TODO: Bug EP-66
-  //spCommandManager->RegisterCommand("toggleresourcespanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleResourcesPanel), "", ComponentID(), "Ctrl+Shift+R");
-  spCommandManager->RegisterCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", ComponentID(), "Ctrl+B");
+  //spCommandManager->RegisterCommand("toggleresourcespanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleResourcesPanel), "", componentID(), "Ctrl+Shift+R");
+  spCommandManager->RegisterCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::StaticCreateBookmark), "", componentID(), "Ctrl+B");
 }
 
 void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)
@@ -238,7 +238,7 @@ void Viewer::StaticToggleBookmarksPanel(Variant::VarMap params)
 
 void Viewer::ToggleBookmarksPanel()
 {
-  GetUI()->Call("togglebookmarkspanel");
+  GetUI()->call("togglebookmarkspanel");
 }
 
 // TODO: Bug EP-66
@@ -252,7 +252,7 @@ void Viewer::ToggleBookmarksPanel()
 
 void Viewer::ToggleResourcesPanel()
 {
-  GetUI()->Call("toggleresourcespanel");
+  GetUI()->call("toggleresourcespanel");
 }*/
 
 void Viewer::StaticCreateBookmark(Variant::VarMap params)
@@ -267,18 +267,18 @@ void Viewer::CreateBookmark()
   // TODO: Here we have to update the bookmark list separately for the front-end UI and the internal bookmarks list.
   // It would be nice if the QML could automatically update its bookmarks list from the internal bookmarks
   // Not sure how to do this currently
-  Variant bookmarkName = spUIBookmarks->Call("createbookmark", "");
+  Variant bookmarkName = spUIBookmarks->call("createbookmark", "");
   spScene->AddBookmarkFromCamera(bookmarkName.asString(), spCamera);
 }
 
 void Viewer::Activate()
 {
-  GetKernel().UpdatePulse.Subscribe(Delegate<void(double)>(this, &Viewer::Update));
+  getKernel().UpdatePulse.Subscribe(Delegate<void(double)>(this, &Viewer::Update));
 }
 
 void Viewer::Deactivate()
 {
-  GetKernel().UpdatePulse.Unsubscribe(Delegate<void(double)>(this, &Viewer::Update));
+  getKernel().UpdatePulse.Unsubscribe(Delegate<void(double)>(this, &Viewer::Update));
 }
 
 void Viewer::Update(double timeStep)
@@ -287,12 +287,12 @@ void Viewer::Update(double timeStep)
     spScene->Update(timeStep);
 }
 
-Variant Viewer::Save() const
+Variant Viewer::save() const
 {
   Variant::VarMap params;
 
   if (spCamera)
-    params.insert("camera", spCamera->Save());
+    params.insert("camera", spCamera->save());
 
   if (spModel)
   {
@@ -307,7 +307,7 @@ Variant Viewer::Save() const
   }
 
   if (spScene)
-    params.insert("scene", spScene->Save());
+    params.insert("scene", spScene->save());
 
   return Variant(std::move(params));
 }
@@ -409,9 +409,9 @@ extern "C" bool epPluginAttach()
 
 #if 0
   // NOTE: Use to test off disk
-  Kernel::GetInstance()->Call("registerQmlComponents", "plugin/viewer/qml");
+  Kernel::GetInstance()->call("registerQmlComponents", "plugin/viewer/qml");
 #else
-  Kernel::GetInstance()->Call("registerQmlComponents", ":/viewer");
+  Kernel::GetInstance()->call("registerQmlComponents", ":/viewer");
 #endif
 
   return true;

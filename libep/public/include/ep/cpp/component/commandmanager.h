@@ -29,17 +29,17 @@ public:
   String GetActivityType(String commandID) const { return pImpl->GetActivityType(commandID); }
   bool SetActivityType(String commandID, String activityTypeID) { return pImpl->SetActivityType(commandID, activityTypeID); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   CommandManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
-  Array<const MethodInfo> GetMethods() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } //namespace ep

@@ -2,7 +2,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Buffer::GetProperties() const
+Array<const PropertyInfo> Buffer::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("empty", Empty, "Is the Buffer Empty", nullptr, 0),
@@ -10,7 +10,7 @@ Array<const PropertyInfo> Buffer::GetProperties() const
     EP_MAKE_PROPERTY_RO("mapped", Mapped, "Is the Buffer Mapped", nullptr, 0),
   };
 }
-Array<const MethodInfo> Buffer::GetMethods() const
+Array<const MethodInfo> Buffer::getMethods() const
 {
   return{
     EP_MAKE_METHOD_EXPLICIT("CopyBuffer", CopyBufferMethod, "Copy the given Buffer to this Buffer"),

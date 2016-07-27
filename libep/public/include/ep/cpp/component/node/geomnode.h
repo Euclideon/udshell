@@ -26,13 +26,13 @@ namespace ep
     GeomNode(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
       : Node(pType, pKernel, uid, initParams)
     {
-      pImpl = CreateImpl(initParams);
+      pImpl = createImpl(initParams);
     }
 
     void Render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
 
   private:
-    Array<const PropertyInfo> GetProperties() const;
+    Array<const PropertyInfo> getProperties() const;
   };
 
 } // namespace ep

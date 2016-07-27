@@ -14,7 +14,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Project::GetProperties() const
+Array<const PropertyInfo> Project::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("activeActivity", GetActiveActivity, SetActiveActivity, "The currently active activity", nullptr, 0),
@@ -23,7 +23,7 @@ Array<const PropertyInfo> Project::GetProperties() const
   };
 }
 
-Array<const MethodInfo> Project::GetMethods() const
+Array<const MethodInfo> Project::getMethods() const
 {
   return{
     EP_MAKE_METHOD(SaveProject, "Save Project to an XML file"),
@@ -134,8 +134,8 @@ Variant ProjectImpl::SaveActivities()
 
   for (ActivityRef activity : activities)
   {
-    Variant::VarMap node = Text::ComponentParamsToXMLMap(activity->Save()).asAssocArray();
-    node.insert("name", activity->GetType());
+    Variant::VarMap node = Text::ComponentParamsToXMLMap(activity->save()).asAssocArray();
+    node.insert("name", activity->getType());
     children.pushBack(node);
   }
 

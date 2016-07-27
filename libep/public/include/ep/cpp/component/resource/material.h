@@ -106,7 +106,7 @@ protected:
   Material(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
@@ -116,10 +116,10 @@ private:
   void SetTesselationControlShader_Meta(Variant shader) { SetMaterialProperty(s_shaderNames[ShaderType::TesselationControlShader], shader); }
   void SetTesselationEvaluationShader_Meta(Variant shader) { SetMaterialProperty(s_shaderNames[ShaderType::TesselationEvaluationShader], shader); }
 
-  const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetPropertyDesc(_name, enumerateFlags); }
+  const PropertyDesc *getPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override { return pImpl->GetPropertyDesc(_name, enumerateFlags); }
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
 
   static const char * const s_shaderNames[];
   static AVLTree<String, int> s_builtinProperties;

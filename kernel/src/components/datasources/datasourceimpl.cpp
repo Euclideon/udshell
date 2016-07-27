@@ -6,7 +6,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> DataSource::GetProperties() const
+Array<const PropertyInfo> DataSource::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("numResources", GetNumResources, "Number of resources the data source provides", nullptr, 0),
@@ -14,7 +14,7 @@ Array<const PropertyInfo> DataSource::GetProperties() const
     EP_MAKE_PROPERTY_RO("fileExtensions", GetFileExtensions, "The file extensions associated with the DataSource", nullptr, 0),
   };
 }
-Array<const MethodInfo> DataSource::GetMethods() const
+Array<const MethodInfo> DataSource::getMethods() const
 {
   return{
     EP_MAKE_METHOD(GetResourceName, "Get a resource name by index"),
@@ -40,11 +40,11 @@ StreamRef DataSourceImpl::OpenStream(const Variant &source)
   }
   else if ((spComp = source.as<ComponentRef>()))
   {
-    if (spComp->IsType<Stream>())
+    if (spComp->isType<Stream>())
     {
       spSource = shared_pointer_cast<Stream>(spComp);
     }
-    else if (spComp->IsType<Buffer>())
+    else if (spComp->isType<Buffer>())
     {
       BufferRef spBuffer = shared_pointer_cast<Buffer>(spComp);
       spSource = GetKernel()->CreateComponent<MemStream>({ { "buffer", spBuffer }, { "flags", FileOpenFlags::Read } });

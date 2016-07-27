@@ -3,7 +3,7 @@
 
 namespace ep {
 
-Array<const MethodInfo> PluginManager::GetMethods() const
+Array<const MethodInfo> PluginManager::getMethods() const
 {
   return{
     EP_MAKE_METHOD(RegisterPluginLoader, "Register a PluginLoader"),

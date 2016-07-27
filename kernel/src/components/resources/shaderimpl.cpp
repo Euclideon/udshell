@@ -4,7 +4,7 @@
 
 namespace ep {
 
-  Array<const PropertyInfo> Shader::GetProperties() const
+  Array<const PropertyInfo> Shader::getProperties() const
   {
     return{
       EP_MAKE_PROPERTY("code", GetCode, SetCode, "The code string to be compiled", nullptr, 0),

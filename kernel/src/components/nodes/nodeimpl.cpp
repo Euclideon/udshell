@@ -2,7 +2,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Node::GetProperties() const
+Array<const PropertyInfo> Node::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("matrix", GetMatrix, SetMatrix, "Local matrix", nullptr, 0),
@@ -11,14 +11,14 @@ Array<const PropertyInfo> Node::GetProperties() const
     EP_MAKE_PROPERTY_RO("children", Children, "Child nodes", nullptr, 0),
   };
 }
-Array<const MethodInfo> Node::GetMethods() const
+Array<const MethodInfo> Node::getMethods() const
 {
   return{
     EP_MAKE_METHOD(AddChild, "Add a child to the Node"),
     EP_MAKE_METHOD(RemoveChild, "Remove a child from the Node"),
     EP_MAKE_METHOD(Detach, "Detach the Node from its parent"),
     EP_MAKE_METHOD_EXPLICIT("CalculateWorldMatrix", CalculateWorldMatrixMethod, "Calculate the World Matrix of the Node"),
-    EP_MAKE_METHOD(Save, "Save the state of the Node"),
+    EP_MAKE_METHOD(save, "Save the state of the Node"),
   };
 }
 

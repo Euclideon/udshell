@@ -28,7 +28,7 @@ public:
   void SetHelicopterMode(bool bEnable) { pImpl->SetHelicopterMode(bEnable); }
   bool GetHelicopterMode() const { return pImpl->GetHelicopterMode(); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
   Event<Double3, Double3> Changed;
 
@@ -39,12 +39,12 @@ protected:
   SimpleCamera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Camera(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const EventInfo> GetEvents() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const EventInfo> getEvents() const;
 };
 
 } // namespace ep

@@ -48,13 +48,13 @@ public:
   // TODO: support async operations?
   // TODO: remove support for sync operations?
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   Stream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Broadcaster(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
   void SetPos(int64_t pos) { pImpl->SetPos(pos); }

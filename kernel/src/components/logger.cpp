@@ -7,13 +7,13 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Logger::GetProperties() const
+Array<const PropertyInfo> Logger::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("enabled", GetEnabled, SetEnabled, "Is Enabled", nullptr, 0),
   };
 }
-Array<const MethodInfo> Logger::GetMethods() const
+Array<const MethodInfo> Logger::getMethods() const
 {
   return{
     EP_MAKE_METHOD(Log, "Write a line to the log"),
@@ -34,7 +34,7 @@ Array<const MethodInfo> Logger::GetMethods() const
     EP_MAKE_METHOD_EXPLICIT("SetStreamComponents", SetStreamComponents_Arr, "Filter logging for the given stream to the specified component UIDs"),
   };
 }
-Array<const EventInfo> Logger::GetEvents() const
+Array<const EventInfo> Logger::getEvents() const
 {
   return{
     EP_MAKE_EVENT(Changed, "Log has been updated with a new entry"),

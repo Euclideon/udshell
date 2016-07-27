@@ -42,7 +42,7 @@ public:
   virtual bool InputEvent(const ep::InputEvent &ev) { return pImpl->InputEvent(ev); }
   virtual void Update(double timeDelta) { pImpl->Update(timeDelta); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
   // TODO: Consider creating an event for when bookmarks are successfully created
   void AddBookmarkFromCamera(String bmName, CameraRef camera) { pImpl->AddBookmarkFromCamera(bmName, camera); }
@@ -69,15 +69,15 @@ protected:
   Scene(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
   Variant FindBookmark_Internal(String bmName) const { return pImpl->FindBookmark_Internal(bmName); }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
-  Array<const EventInfo> GetEvents() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
+  Array<const EventInfo> getEvents() const;
 };
 
 };

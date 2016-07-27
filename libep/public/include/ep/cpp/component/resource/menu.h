@@ -22,14 +22,14 @@ public:
   bool RemoveItem(String path) { return pImpl->RemoveItem(path); }
   bool SetItemProperties(String path, Variant::VarMap properties) { return pImpl->SetItemProperties(path, properties); }
 
-  Variant Save() const { return pImpl->Save(); }
+  Variant save() const { return pImpl->Save(); }
 
   Event<> Changed;
 protected:
   Menu(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
   Variant ParseXMLString(String buffer) { return pImpl->ParseXMLString(buffer); }
@@ -39,9 +39,9 @@ protected:
   void SetMenuProperties(Variant &menu, Variant::VarMap properties) { pImpl->SetMenuProperties(menu, properties); }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
-  Array<const EventInfo> GetEvents() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
+  Array<const EventInfo> getEvents() const;
 };
 
 } // End namespace ep

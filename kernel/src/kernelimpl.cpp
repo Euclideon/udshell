@@ -68,7 +68,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Kernel::GetProperties() const
+Array<const PropertyInfo> Kernel::getProperties() const
 {
   return Array<const PropertyInfo>{
     EP_MAKE_PROPERTY_RO("resourceManager", GetResourceManager, "Resource manager", nullptr, 0),
@@ -77,13 +77,13 @@ Array<const PropertyInfo> Kernel::GetProperties() const
     EP_MAKE_PROPERTY_RO("stdErrBroadcaster", GetStdErrBroadcaster, "stderr broadcaster", nullptr, 0),
   };
 }
-Array<const MethodInfo> Kernel::GetMethods() const
+Array<const MethodInfo> Kernel::getMethods() const
 {
   return Array<const MethodInfo>{
     EP_MAKE_METHOD(Exec, "Execute Lua script")
   };
 }
-Array<const EventInfo> Kernel::GetEvents() const
+Array<const EventInfo> Kernel::getEvents() const
 {
   return Array<const EventInfo>{
     EP_MAKE_EVENT(UpdatePulse, "Periodic update signal")
@@ -103,9 +103,9 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, Result::AllocFailure, "Memory allocation failed");
 
-  pDesc->info = Kernel::ComponentInfo();
+  pDesc->info = Kernel::componentInfo();
   pDesc->info.flags = ComponentInfoFlags::Unregistered;
-  pDesc->baseClass = Component::ComponentID();
+  pDesc->baseClass = Component::componentID();
 
   pDesc->pInit = nullptr;
   pDesc->pCreateInstance = nullptr;
@@ -113,13 +113,13 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   pDesc->pSuperDesc = nullptr;
 
   // build search trees
-  for (auto &p : Kernel::GetPropertiesImpl())
+  for (auto &p : Kernel::getPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : Kernel::GetMethodsImpl())
+  for (auto &m : Kernel::getMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : Kernel::GetEventsImpl())
+  for (auto &e : Kernel::getEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : Kernel::GetStaticFuncsImpl())
+  for (auto &f : Kernel::getStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   if (pType)
@@ -168,7 +168,7 @@ namespace internal { void *GetStaticImplRegistry(); }
 Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCount)
 {
   // HACK: create the KernelImplStatic instance here!
-  ((HashMap<SharedString, UniquePtr<RefCounted>>*)internal::GetStaticImplRegistry())->insert(ComponentID(), UniquePtr<KernelImplStatic>::create());
+  ((HashMap<SharedString, UniquePtr<RefCounted>>*)internal::GetStaticImplRegistry())->insert(componentID(), UniquePtr<KernelImplStatic>::create());
 
   // set $(AppPath) to argv[0]
   String exe = commandLine[0].asString();
@@ -215,7 +215,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->RegisterComponentType<Component, ComponentImpl, ComponentGlue>();
 
   // HACK: update the descriptor with the base class (bootup chicken/egg)
-  const ComponentDescInl *pComponentBase = componentRegistry.get(Component::ComponentID())->pDesc;
+  const ComponentDescInl *pComponentBase = componentRegistry.get(Component::componentID())->pDesc;
   ComponentDescInl *pDesc = (ComponentDescInl*)pInstance->pType;
   while (pDesc->pSuperDesc)
   {
@@ -227,7 +227,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
 
   // HACK: fix up the base class since we have a kernel instance (bootup chicken/egg)
   (Kernel*&)pInstance->pKernel = pInstance;
-  pInstance->Component::pImpl = pInstance->Component::CreateImpl(initParams);
+  pInstance->Component::pImpl = pInstance->Component::createImpl(initParams);
 
   // register all the builtin component types
   pInstance->RegisterComponentType<DataSource, DataSourceImpl>();
@@ -426,7 +426,7 @@ KernelImpl::~KernelImpl()
     for (const auto &c : instanceRegistry)
     {
       ++count;
-      DebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->GetName(), c.value->RefCount());
+      DebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->getName(), c.value->RefCount());
     }
     DebugFormat("{0} Unfreed Component(s)\n", count);
   }
@@ -636,7 +636,7 @@ bool KernelImpl::SendMessage(String target, String sender, String message, const
     {
       ComponentRef spComponent(*ppComponent);
       try {
-        spComponent->ReceiveMessage(message, sender, data);
+        spComponent->receiveMessage(message, sender, data);
       } catch (std::exception &e) {
         LogError("Message Handler {0} failed: {1}", target, e.what());
         return false;
@@ -779,7 +779,7 @@ const ComponentDesc* KernelImpl::RegisterComponentTypeFromMap(Variant::VarMap ty
     DynamicComponentRef spInstance = pDesc->newInstance(KernelRef(_pKernel), initParams);
     ComponentRef spC = _pKernel->CreateGlue(pDesc->baseClass, _pType, _uid, spInstance, initParams);
     spInstance->AttachToGlue(spC.ptr(), initParams);
-    spC->pUserData = spInstance->GetUserData();
+    spC->pUserData = spInstance->getUserData();
     return spC;
   };
 

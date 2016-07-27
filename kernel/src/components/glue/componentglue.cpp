@@ -8,26 +8,26 @@ ComponentGlue::ComponentGlue(const ComponentDesc *_pType, Kernel *_pKernel, Shar
   spInstance = _spInstance;
 
   // assign delegates from spInstance...
-  save = spInstance->GetFunctionDelegate("Save");
-  receiveMessage = spInstance->GetFunctionDelegate("ReceiveMessage");
+  _save = spInstance->getFunctionDelegate("save");
+  _receiveMessage = spInstance->getFunctionDelegate("receiveMessage");
 }
 
 ComponentGlue::~ComponentGlue()
 {
 }
 
-Variant ComponentGlue::Save() const
+Variant ComponentGlue::save() const
 {
-  // TODO: are we meant to call Super::Save() and merge the output?
-  if (save)
-    return save(nullptr);
+  // TODO: are we meant to call Super::save() and merge the output?
+  if (_save)
+    return _save(nullptr);
   return Variant();
 }
 
-void ComponentGlue::ReceiveMessage(String message, String sender, const Variant &data)
+void ComponentGlue::receiveMessage(String message, String sender, const Variant &data)
 {
-  if (receiveMessage)
-    receiveMessage(Slice<const Variant>{ message, sender, data });
+  if (_receiveMessage)
+    _receiveMessage(Slice<const Variant>{ message, sender, data });
 
   // TODO: are we meant to pass to Super::?
 }

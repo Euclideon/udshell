@@ -93,9 +93,9 @@ ComponentDescInl *QtKernel::MakeKernelDescriptor()
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, ep::Result::AllocFailure, "Memory allocation failed");
 
-  pDesc->info = QtKernel::ComponentInfo();
+  pDesc->info = QtKernel::componentInfo();
   pDesc->info.flags = ep::ComponentInfoFlags::Unregistered;
-  pDesc->baseClass = Kernel::ComponentID();
+  pDesc->baseClass = Kernel::componentID();
 
   pDesc->pInit = nullptr;
   pDesc->pCreateInstance = nullptr;
@@ -103,13 +103,13 @@ ComponentDescInl *QtKernel::MakeKernelDescriptor()
   pDesc->pSuperDesc = nullptr;
 
   // build search trees
-  for (auto &p : QtKernel::GetPropertiesImpl())
+  for (auto &p : QtKernel::getPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : QtKernel::GetMethodsImpl())
+  for (auto &m : QtKernel::getMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : QtKernel::GetEventsImpl())
+  for (auto &e : QtKernel::getEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : QtKernel::GetStaticFuncsImpl())
+  for (auto &f : QtKernel::getStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   return pDesc;

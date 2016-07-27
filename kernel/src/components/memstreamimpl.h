@@ -35,7 +35,7 @@ protected:
   Slice<void> bufferSlice;
   OpenFlags oFlags;
 
-  Array<const PropertyInfo> GetProperties() const;
+  Array<const PropertyInfo> getProperties() const;
 };
 
 }

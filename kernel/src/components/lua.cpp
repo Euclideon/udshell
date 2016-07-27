@@ -6,13 +6,13 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Lua::GetProperties() const
+Array<const PropertyInfo> Lua::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("outputBroadcaster", GetOutputBroadcaster, "Output broadcaster used by the Lua print functions", nullptr, 0),
   };
 }
-Array<const MethodInfo> Lua::GetMethods() const
+Array<const MethodInfo> Lua::getMethods() const
 {
   return{
     EP_MAKE_METHOD(GetGlobal, "Get a value from the Lua global table"),

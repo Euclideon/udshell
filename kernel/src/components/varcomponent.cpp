@@ -10,7 +10,7 @@ VarComponent::VarComponent(const ComponentDesc *pType, Kernel *pKernel, SharedSt
 VarComponent::~VarComponent()
 {}
 
-const MethodDesc *VarComponent::GetMethodDesc(String _name, EnumerateFlags enumerateFlags) const
+const MethodDesc *VarComponent::getMethodDesc(String _name, EnumerateFlags enumerateFlags) const
 {
   if (!(enumerateFlags & EnumerateFlags::NoDynamic))
   {
@@ -19,7 +19,7 @@ const MethodDesc *VarComponent::GetMethodDesc(String _name, EnumerateFlags enume
       return CacheMethodDesc(_name, _name, pVal->as<VarDelegate>());
   }
   // TODO: this assumes that GetMethodDesc will *never* be overridden somewhere above the glue's hierarchy
-  return pThis->Component::GetMethodDesc(_name, enumerateFlags);
+  return pThis->Component::getMethodDesc(_name, enumerateFlags);
 }
 
 } // namespace ep

@@ -6,13 +6,13 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Menu::GetProperties() const
+Array<const PropertyInfo> Menu::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("menuData", GetMenuData, SetMenuData, "Heirarchical structure of menus", nullptr, 0),
   };
 }
-Array<const MethodInfo> Menu::GetMethods() const
+Array<const MethodInfo> Menu::getMethods() const
 {
   return{
     EP_MAKE_METHOD(AddXMLItems, "Add menu items from an XML string"),
@@ -21,7 +21,7 @@ Array<const MethodInfo> Menu::GetMethods() const
     EP_MAKE_METHOD(SetItemProperties, "Set properties for the given menu item"),
   };
 }
-Array<const EventInfo> Menu::GetEvents() const
+Array<const EventInfo> Menu::getEvents() const
 {
   return{
     EP_MAKE_EVENT(Changed, "The menu data has changed"),

@@ -28,7 +28,7 @@ public:
   void EnableShortcut(String commandID) override final { SetShortcutEnabled(commandID, true); }
   String GetActivityType(String commandID) const override final;
   bool SetActivityType(String commandID, String activityTypeID) override final;
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   String StripWhitespace(Slice<char> output, String input);

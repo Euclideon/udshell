@@ -15,14 +15,14 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Scene::GetProperties() const
+Array<const PropertyInfo> Scene::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("rootNode", GetRootNode, "Scene root node", nullptr, 0),
     EP_MAKE_PROPERTY_RO("bookmarkMap", GetBookmarkMap, "Bookmark map", nullptr, 0),
   };
 }
-Array<const MethodInfo> Scene::GetMethods() const
+Array<const MethodInfo> Scene::getMethods() const
 {
   return{
     EP_MAKE_METHOD(MakeDirty, "Force a dirty signal"),
@@ -33,7 +33,7 @@ Array<const MethodInfo> Scene::GetMethods() const
     EP_MAKE_METHOD_EXPLICIT("FindBookmark", FindBookmark_Internal, "Find a Bookmark"),
   };
 }
-Array<const EventInfo> Scene::GetEvents() const
+Array<const EventInfo> Scene::getEvents() const
 {
   return{
     EP_MAKE_EVENT(Dirty, "Scene dirty event"),
@@ -200,7 +200,7 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
 
       for (size_t i = 0; i < uniforms.length; i++) // set up textures
       {
-        if (uniforms[i].data.is(Variant::SharedPtrType::Component) && uniforms[i].data.asComponent()->IsType<ArrayBuffer>()) // if the uniform is a texture
+        if (uniforms[i].data.is(Variant::SharedPtrType::Component) && uniforms[i].data.asComponent()->isType<ArrayBuffer>()) // if the uniform is a texture
         {
           ArrayBufferRef spImage = uniforms[i].data.as<ArrayBufferRef>();
           RenderTextureRef spRenderTexture = shared_pointer_cast<RenderTexture>(pRenderer->GetRenderBuffer(spImage, Renderer::RenderResourceType::Texture)); // TODO: set texture parameters
@@ -275,7 +275,7 @@ void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)
 
     UDNodeRef spUDNode;
 
-    if (!spChild->IsType<UDNode>())
+    if (!spChild->isType<UDNode>())
       continue;
 
     spUDNode = component_cast<UDNode>(spChild);

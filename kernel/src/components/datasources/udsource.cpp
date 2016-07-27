@@ -118,7 +118,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
 
 void UDSource::StaticInit(ep::Kernel *pKernel)
 {
-  pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
+  pKernel->RegisterExtensions(pKernel->GetComponentDesc(componentID()), extensions);
 }
 
 } // namespace ep

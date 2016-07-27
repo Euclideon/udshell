@@ -42,7 +42,7 @@ void epFromVariant(const Variant &variant, ShaderProperty *p)
 }
 
 
-Array<const PropertyInfo> Material::GetProperties() const
+Array<const PropertyInfo> Material::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("vertexShader", GetVertexShader, SetVertexShader_Meta, "Vertex shader for rendering", nullptr, 0),
@@ -60,7 +60,7 @@ Array<const PropertyInfo> Material::GetProperties() const
   };
 }
 
-Array<const MethodInfo> Material::GetMethods() const
+Array<const MethodInfo> Material::getMethods() const
 {
   return{
     EP_MAKE_METHOD(GetMaterialProperty, "Get a material property"),
@@ -221,12 +221,12 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
         if (data.is(Variant::SharedPtrType::Component))
         {
           ComponentRef spC = data.asComponent();
-          if (spC->GetType().eq("ep.Shader"))
+          if (spC->getType().eq("ep.Shader"))
           {
             // data is a shader object
             spShader = shared_pointer_cast<Shader>(spC);
           }
-          else if (spC->GetType().eq("ep.Text"))
+          else if (spC->getType().eq("ep.Text"))
           {
             // data is a text buffer object (presumably containing shader source)
             spShader = GetKernel()->CreateComponent<Shader>();

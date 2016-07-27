@@ -5,7 +5,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> SimpleCamera::GetProperties() const
+Array<const PropertyInfo> SimpleCamera::getProperties() const
 {
   return{
     // TODO: why are these write-only?
@@ -17,7 +17,7 @@ Array<const PropertyInfo> SimpleCamera::GetProperties() const
     EP_MAKE_PROPERTY("invertedYAxis", GetInvertedYAxis, SetInvertedYAxis, "Invert Y-axis", nullptr, 0),
   };
 }
-Array<const EventInfo> SimpleCamera::GetEvents() const
+Array<const EventInfo> SimpleCamera::getEvents() const
 {
   return{
     EP_MAKE_EVENT(Changed, "The camera changed")
@@ -306,7 +306,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
 Variant SimpleCameraImpl::Save() const
 {
-  Variant var = pInstance->Super::Save();
+  Variant var = pInstance->Super::save();
   Variant::VarMap params = var.asAssocArray();
 
   params.insert("speed", speed);

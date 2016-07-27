@@ -40,13 +40,13 @@ public:
 
   void CalculateWorldMatrix(Double4x4 *pMatrix) const { pImpl->CalculateWorldMatrix(pMatrix); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   Node(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
   virtual bool InputEvent(const ep::InputEvent &ev) { return pImpl->InputEvent(ev); }
@@ -64,8 +64,8 @@ private:
   }
 
   void DoRender(RenderScene &spScene, const Double4x4 &mat) { pImpl->DoRender(spScene, mat); }
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } // namespace ep

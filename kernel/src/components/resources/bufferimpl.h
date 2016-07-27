@@ -36,7 +36,7 @@ public:
   bool CopyBuffer(BufferRef buffer) override final;
   bool CopySlice(Slice<const void> buffer) override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
   bool ResizeInternal(size_t size, bool copy) override final;
 

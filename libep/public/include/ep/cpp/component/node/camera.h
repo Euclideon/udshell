@@ -55,7 +55,7 @@ public:
   void SetFarPlane(double zFar) { pImpl->SetFarPlane(zFar); }
   double GetFarPlane() const { return pImpl->GetFarPlane(); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   EP_FRIENDS_WITH_IMPL(View);
@@ -63,7 +63,7 @@ protected:
   Camera(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Node(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
   virtual bool ViewportInputEvent(const ep::InputEvent &ev) { return pImpl->ViewportInputEvent(ev); }
@@ -72,8 +72,8 @@ protected:
   bool Update(double timeStep) override { return pImpl->Update(timeStep); }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } // namespace ep

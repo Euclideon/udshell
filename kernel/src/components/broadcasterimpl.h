@@ -27,7 +27,7 @@ public:
   size_t WriteLn(String str) override final;
   size_t WriteBuffer(BufferRef spData) override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 };
 
 }

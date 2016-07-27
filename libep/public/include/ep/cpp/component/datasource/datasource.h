@@ -57,13 +57,13 @@ public:
     return shared_pointer_cast<ResType>(GetResource(ResType::Name(), resourceIndex));
   }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   DataSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
   virtual StreamRef OpenStream(const Variant &source) { return pImpl->OpenStream(source); }
@@ -77,8 +77,8 @@ private:
       return GetResource((size_t)index.asInt());
   }
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 }

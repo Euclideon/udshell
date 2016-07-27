@@ -8,7 +8,7 @@
 
 namespace ep {
 
-Array<const PropertyInfo> UDNode::GetProperties() const
+Array<const PropertyInfo> UDNode::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY("udModel", GetUDModel, SetUDModel, "UDModel instance", nullptr, 0),

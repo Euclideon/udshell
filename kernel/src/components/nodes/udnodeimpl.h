@@ -30,7 +30,7 @@ public:
   UDModelRef GetUDModel() const override final { return spModel; }
   void SetUDModel(UDModelRef _spModel) override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   void Render(RenderScene &spScene, const Double4x4 &mat) override final;

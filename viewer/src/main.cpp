@@ -180,7 +180,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 #endif // 0
 
   ModelRef model = kernel->CreateComponent<Model>();
-  model->SetName("TestModel");
+  model->setName("TestModel");
   model->AddVertexArray(vertexBuffer);
   model->SetIndexArray(indexBuffer);
   model->SetMaterial(material);

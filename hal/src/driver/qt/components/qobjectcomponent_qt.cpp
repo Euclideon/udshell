@@ -55,13 +55,13 @@ void QObjectComponent::AttachToGlue(Component *pGlue, ep::Variant::VarMap initPa
   pUserData = pQObject;
 
   // Populate the glue's descriptor with the meta from the QObject
-  ComponentDescInl *pDesc = (ComponentDescInl*)pThis->GetDescriptor();
+  ComponentDescInl *pDesc = (ComponentDescInl*)pThis->getDescriptor();
   if (pDesc->info.flags & ComponentInfoFlags::Unpopulated)
   {
     internal::PopulateComponentDesc(pDesc, pQObject);
     pDesc->info.flags &= ~ComponentInfoFlags::Unpopulated;
   }
-  if (pThis->IsType("ep.Window"))
+  if (pThis->isType("ep.Window"))
   {
     EPTHROW_IF(!pQObject->isWindowType(), Result::Failure, "Window component must create a QWindow based object");
     static_cast<ep::Window*>(pThis)->PostInit(pQObject);

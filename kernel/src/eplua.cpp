@@ -467,7 +467,7 @@ void LuaState::pushComponent(const ComponentRef &c)
   }
 
   epConstruct(lua_newuserdata(L, sizeof(ComponentRef))) ComponentRef(c);
-  pushComponentMetatable(*c->GetDescriptor(), false);
+  pushComponentMetatable(*c->getDescriptor(), false);
   lua_setmetatable(L, -2);
 }
 
@@ -480,7 +480,7 @@ void LuaState::pushComponent(Component *pC)
   }
 
   epConstruct(lua_newuserdata(L, sizeof(Component*))) Component*(pC);
-  pushComponentMetatable(*pC->GetDescriptor(), true);
+  pushComponentMetatable(*pC->getDescriptor(), true);
   lua_setmetatable(L, -2);
 }
 
@@ -514,7 +514,7 @@ int LuaState::componentCleaner(lua_State* L)
 int LuaState::componentToString(lua_State* L)
 {
   ComponentRef *pComponent = (ComponentRef*)lua_touserdata(L, 1);
-  MutableString64 s(Concat, "@", (*pComponent)->GetUid());
+  MutableString64 s(Concat, "@", (*pComponent)->getUid());
   lua_pushlstring(L, s.ptr, s.length);
   return 1;
 }

@@ -5,7 +5,7 @@
 
 namespace ep {
 
-Array<const MethodInfo> CommandManager::GetMethods() const
+Array<const MethodInfo> CommandManager::getMethods() const
 {
   return{
     EP_MAKE_METHOD(SetShortcut, "Set the shortcut for the given command"),
@@ -123,7 +123,7 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
 
       if (!comm.activityType.empty())
       {
-        if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
+        if (spActiveActivity && comm.activityType.eq(spActiveActivity->getType()))
         {
           params.insert("activity", spActiveActivity);
 
@@ -175,7 +175,7 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
     {
       if (!comm.activityType.empty())
       {
-        if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
+        if (spActiveActivity && comm.activityType.eq(spActiveActivity->getType()))
         {
           params.insert("activity", spActiveActivity);
 

@@ -2,14 +2,14 @@
 
 namespace ep {
 
-Array<const PropertyInfo> KVPStore::GetProperties() const
+Array<const PropertyInfo> KVPStore::getProperties() const
 {
   return{
     EP_MAKE_PROPERTY_RO("numRecords", NumRecords, "Number of records in the metadata", nullptr, 0),
   };
 }
 
-Array<const MethodInfo> KVPStore::GetMethods() const
+Array<const MethodInfo> KVPStore::getMethods() const
 {
   return{
     EP_MAKE_METHOD_EXPLICIT("Insert", InsertMethod, "Insert a record"),
