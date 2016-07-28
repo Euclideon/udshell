@@ -20,10 +20,10 @@ protected:
   ~%{ActivityName}() { }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;    // Register Properties
-  Array<const MethodInfo> GetMethods() const;         // Register Methods
-  Array<const EventInfo> GetEvents() const;           // Register Events
-  Array<const StaticFuncInfo> GetStaticFuncs() const; // Register Static Methods
+  Array<const PropertyInfo> getProperties() const;    // Register Properties
+  Array<const MethodInfo> getMethods() const;         // Register Methods
+  Array<const EventInfo> getEvents() const;           // Register Events
+  Array<const StaticFuncInfo> getStaticFuncs() const; // Register Static Methods
 };
 
 } //namespace %{Namespace}

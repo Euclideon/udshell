@@ -14,22 +14,23 @@ SHARED_CLASS(%{ActivityName});
 class %{ActivityName} : public Activity
 {
   EP_DECLARE_COMPONENT(%{Namespace}, %{ActivityName}, Activity, EPKERNEL_PLUGINVERSION, "%{ActivityDescription}", 0);
+
 public:
-  void Activate() override final;
-  void Deactivate() override final;
-  void Update(double timeStep);
-  Variant Save() const override final;
+  void activate() override final;
+  void deactivate() override final;
+  void update(double timeStep);
+  Variant save() const override final;
 
 protected:
   %{ActivityName}(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
-  ~%{ActivityName}() { Deactivate(); }
-  
+  ~%{ActivityName}() { deactivate(); }
+
 private:
-  Array<const PropertyInfo> GetProperties() const;    // Register Properties
-  Array<const MethodInfo> GetMethods() const;         // Register Methods
-  Array<const EventInfo> GetEvents() const;           // Register Events
-  Array<const StaticFuncInfo> GetStaticFuncs() const; // Register Static Methods
-  
+  Array<const PropertyInfo> getProperties() const;    // Register Properties
+  Array<const MethodInfo> getMethods() const;         // Register Methods
+  Array<const EventInfo> getEvents() const;           // Register Events
+  Array<const StaticFuncInfo> getStaticFuncs() const; // Register Static Methods
+
   SceneRef spScene;
 };
 

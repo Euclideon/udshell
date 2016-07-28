@@ -10,11 +10,11 @@ FocusScope {
   anchors.topMargin: 4
   anchors.bottomMargin: 4
 
-  property var epTypeDesc: { "super": "ep.uicomponent", "id": "%{Namespace}.mainui" }
+  property var epTypeDesc: { "super": "ep.UIComponent", "id": "%{Namespace}.MainUI" }
   property var viewport
 
   onViewportChanged: viewport.uihandle.parent = viewPanel
-  
+
   Item {
     id: viewPanel
     anchors.fill: parent
