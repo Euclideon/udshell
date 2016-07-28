@@ -33,7 +33,7 @@ namespace internal {
     static constexpr auto HasDescriptorImpl(T* t) -> decltype(T::componentInfo(), bool()) { return true; }
     static constexpr bool HasDescriptorImpl(...) { return false; }
     template <typename T>
-    static auto GetStaticInitImpl(T* t) -> decltype(T::StaticInit(nullptr), internal::ComponentDesc_InitComponentPtr()) { return &T::StaticInit; }
+    static auto GetStaticInitImpl(T* t) -> decltype(T::staticInit(nullptr), internal::ComponentDesc_InitComponentPtr()) { return &T::staticInit; }
     static ComponentDescInl::InitComponent* GetStaticInitImpl(...) { return nullptr; }
 
     template <typename T, typename std::enable_if<!std::is_same<T, void>::value>::type* = nullptr>
@@ -45,7 +45,7 @@ namespace internal {
     static CreateFunc GetCreateImplImpl(...) { return nullptr; }
 
     template <typename T>
-    static auto GetCreateFuncImpl(T* t) -> decltype(T::CreateInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::CreateInstance; }
+    static auto GetCreateFuncImpl(T* t) -> decltype(T::createInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::createInstance; }
     static ComponentDescInl::CreateInstanceCallback* GetCreateFuncImpl(...)
     {
       return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {

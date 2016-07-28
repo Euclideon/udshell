@@ -20,7 +20,7 @@ Array<const PropertyInfo> SimpleCamera::getProperties() const
 Array<const EventInfo> SimpleCamera::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(changed, "The camera changed")
+    EP_MAKE_EVENT(repositioned, "The camera position and/or orientation has changed")
   };
 }
 
@@ -295,7 +295,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
   if (stateChanged)
   {
-    pInstance->changed.signal(pos, ypr);
+    pInstance->repositioned.signal(pos, ypr);
     stateChanged = false;
   }
 

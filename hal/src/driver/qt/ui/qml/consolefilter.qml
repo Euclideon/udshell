@@ -28,7 +28,7 @@ ColumnLayout {
       id: ftTextField
       Layout.preferredWidth: catLayout.implicitWidth - fcLabel.implicitWidth - filterText.spacing
 
-      onTextChanged: consolecomp.set("filtertext", ftTextField.text);
+      onTextChanged: consolecomp.filterText = ftTextField.text;
 
       Component.onCompleted: {
         filterWindow.consolecompChanged.connect(onConsoleChanged);
@@ -59,7 +59,7 @@ ColumnLayout {
         id: fcTextField
         Layout.preferredWidth: catLayout.implicitWidth - fcLabel.implicitWidth - filterComponents.spacing
 
-        onTextChanged: consolecomp.set("filtercomponents", fcTextField.text);
+        onTextChanged: consolecomp.filterComponents = fcTextField.text;
 
         Component.onCompleted: {
           filterWindow.consolecompChanged.connect(onConsoleChanged);
