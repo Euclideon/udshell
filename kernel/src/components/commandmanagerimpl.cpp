@@ -108,7 +108,7 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
   ActivityRef spActiveActivity = nullptr;
   ProjectRef spProject;
 
-  ComponentRef spComp = GetKernel()->findComponent("project");
+  ComponentRef spComp = getKernel()->findComponent("project");
   if (spComp)
   {
     spProject = component_cast<Project>(spComp);
@@ -130,7 +130,7 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
           if (comm.func)
             comm.func(params);
           else if (!comm.script.empty())
-            GetKernel()->exec(comm.script);
+            getKernel()->exec(comm.script);
           return true;
         }
       }
@@ -139,7 +139,7 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
         if (comm.func)
           comm.func(params);
         else if (!comm.script.empty())
-          GetKernel()->exec(comm.script);
+          getKernel()->exec(comm.script);
         return true;
       }
     }
@@ -158,7 +158,7 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
   ActivityRef spActiveActivity = nullptr;
   ProjectRef spProject;
 
-  ComponentRef spComp = GetKernel()->findComponent("project");
+  ComponentRef spComp = getKernel()->findComponent("project");
   if (spComp)
   {
     spProject = component_cast<Project>(spComp);
@@ -182,7 +182,7 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
           if (comm.func)
             comm.func(params);
           else if (!comm.script.empty())
-            GetKernel()->exec(comm.script);
+            getKernel()->exec(comm.script);
           return true;
         }
       }
@@ -191,7 +191,7 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
         if (comm.func)
           comm.func(params);
         else if (!comm.script.empty())
-          GetKernel()->exec(comm.script);
+          getKernel()->exec(comm.script);
         return true;
       }
     }

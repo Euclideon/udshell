@@ -179,7 +179,7 @@ void TextImpl::FormatXml(Variant root)
   }
   Variant::VarMap rootElement = root.asAssocArray();
 
-  StreamRef spOut = GetKernel()->createComponent<MemStream>({ { "buffer", ComponentRef(pInstance) }, { "flags", OpenFlags::Write } });
+  StreamRef spOut = getKernel()->createComponent<MemStream>({ { "buffer", ComponentRef(pInstance) }, { "flags", OpenFlags::Write } });
   spOut->writeLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 
   FormatXmlElement(spOut, rootElement, 0);

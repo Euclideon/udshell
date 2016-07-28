@@ -36,7 +36,7 @@ StreamRef DataSourceImpl::OpenStream(const Variant &source)
   if (source.is(Variant::Type::String))
   {
     // path or url?
-    spSource = GetKernel()->createComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
+    spSource = getKernel()->createComponent<File>({ { "path", source }, { "flags", FileOpenFlags::Read } });
   }
   else if ((spComp = source.as<ComponentRef>()))
   {
@@ -47,7 +47,7 @@ StreamRef DataSourceImpl::OpenStream(const Variant &source)
     else if (spComp->isType<Buffer>())
     {
       BufferRef spBuffer = shared_pointer_cast<Buffer>(spComp);
-      spSource = GetKernel()->createComponent<MemStream>({ { "buffer", spBuffer }, { "flags", FileOpenFlags::Read } });
+      spSource = getKernel()->createComponent<MemStream>({ { "buffer", spBuffer }, { "flags", FileOpenFlags::Read } });
     }
   }
 

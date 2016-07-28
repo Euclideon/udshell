@@ -27,7 +27,7 @@ MemStreamImpl::MemStreamImpl(Component *pInstance, Variant::VarMap initParams)
   const Variant *buf = initParams.get("buffer");
   if (!buf)
   {
-    inBuffer = GetKernel()->createComponent<Buffer>();
+    inBuffer = getKernel()->createComponent<Buffer>();
     inBuffer->reserve(DefaultBufferSize);
   }
   else

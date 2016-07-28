@@ -7,7 +7,7 @@ namespace ep
 
 BufferRef StreamImpl::ReadBuffer(size_t bytes)
 {
-  BufferRef spBuffer = GetKernel()->createComponent<Buffer>();
+  BufferRef spBuffer = getKernel()->createComponent<Buffer>();
   spBuffer->allocate(bytes);
 
   Slice<void> buffer = spBuffer->map();
@@ -27,7 +27,7 @@ BufferRef StreamImpl::Load()
   if (len < 0)
     return nullptr;
 
-  BufferRef spBuffer = GetKernel()->createComponent<Buffer>();
+  BufferRef spBuffer = getKernel()->createComponent<Buffer>();
   spBuffer->allocate((size_t)len);
 
   Slice<void> buffer = spBuffer->map();
@@ -49,7 +49,7 @@ TextRef StreamImpl::LoadText()
 
   len += 1; // for null terminator    TODO: Text::Allocate() should override to do this implicitly
 
-  TextRef spBuffer = GetKernel()->createComponent<Text>();
+  TextRef spBuffer = getKernel()->createComponent<Text>();
   spBuffer->allocate((size_t)len);
 
   Slice<char> buffer = spBuffer->map();
