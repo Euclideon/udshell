@@ -22,7 +22,7 @@ Rectangle {
 
   onToolbarcompChanged: {
     updatetoolbar();
-    toolbarcomp.subscribe("changed", updatetoolbar);
+    toolbarcomp.changed.connect(updatetoolbar);
   }
 
   function updatetoolbar() {

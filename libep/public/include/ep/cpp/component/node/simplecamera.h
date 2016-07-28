@@ -30,7 +30,7 @@ public:
 
   Variant save() const override { return pImpl->Save(); }
 
-  Event<Double3, Double3> changed;
+  Event<Double3, Double3> repositioned;
 
 protected:
   bool viewportInputEvent(const ep::InputEvent &ev) override { return pImpl->ViewportInputEvent(ev); }

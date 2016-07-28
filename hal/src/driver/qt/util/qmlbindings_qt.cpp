@@ -786,7 +786,7 @@ int QtEPComponent::MethodInvoke(const QMetaObject *pMO, int id, void **v)
     }
 
     QVariant retVal;
-    String methodName = epFromQByteArray(method.name());
+    auto methodName = epFromQByteArray(method.name());
 
     // Check if this is a built-in method, otherwise pipe it thru to the EPComponent system
     if ((id - QObject::staticMetaObject.methodCount() - QtMetaObjectGenerator::builtInOffset) < QtMetaObjectGenerator::builtInCount)
@@ -831,7 +831,7 @@ int QtEPComponent::PropertyInvoke(const QMetaObject *pMO, QMetaObject::Call call
 
 void QtEPComponent::connectNotify(const QMetaMethod &signal)
 {
-  ep::MutableString<0> signalName = epFromQByteArray(signal.name());
+  auto signalName = epFromQByteArray(signal.name());
 
   // Check if we already have an entry in the connection map
   if (connectionMap.get(signalName))
