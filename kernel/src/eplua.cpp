@@ -28,7 +28,7 @@ const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
 
 static udMutex *s_pLuaCallMutex = nullptr;
 
-const char* FgColor(ConsoleColor fg)
+const char* fgColor(ConsoleColor fg)
 {
   static const char *fg_codes[] = {
     "\x1b[39m", // default
@@ -37,7 +37,7 @@ const char* FgColor(ConsoleColor fg)
   };
   return fg_codes[(int)fg + 1];
 }
-const char* BgColor(ConsoleColor bg)
+const char* bgColor(ConsoleColor bg)
 {
   static const char *bg_codes[] = {
     "\x1b[49m", // default
@@ -689,10 +689,10 @@ int LuaState::help(lua_State* L)
   else
   {
     // general help
-    //FgColor(ConsoleColor::Cyan); // TODO: emit ansi color
+    //fgColor(ConsoleColor::Cyan); // TODO: emit ansi color
     l.print(pDesc->info.identifier);
 
-    //FgColor(); // TODO: emit ansi color
+    //fgColor(); // TODO: emit ansi color
     l.print(pDesc->info.description);
 
     MutableString64 buf;
@@ -700,7 +700,7 @@ int LuaState::help(lua_State* L)
     {
       l.print("\nProperties:");
 
-      //FgColor(ConsoleColor::Green); // TODO: emit ansi color
+      //fgColor(ConsoleColor::Green); // TODO: emit ansi color
       for (auto p : pCImpl->instanceProperties)
       {
         buf.sprintf("  %-16s - %s", (const char*)p.value.id.toStringz(), (const char*)p.value.description.toStringz());
@@ -715,10 +715,10 @@ int LuaState::help(lua_State* L)
 
     if (pCImpl->NumMethods() > 0)
     {
-      //FgColor(); // TODO: emit ansi color
+      //fgColor(); // TODO: emit ansi color
       l.print("\nMethods:");
 
-      //FgColor(ConsoleColor::Magenta); // TODO: emit ansi color
+      //fgColor(ConsoleColor::Magenta); // TODO: emit ansi color
       for (auto m : pCImpl->instanceMethods)
       {
 /*
@@ -759,10 +759,10 @@ int LuaState::help(lua_State* L)
 
     if (pCImpl->NumEvents() > 0)
     {
-      //FgColor(); // TODO: emit ansi color
+      //fgColor(); // TODO: emit ansi color
       l.print("\nEvents:");
 
-      //FgColor(ConsoleColor::Yellow); // TODO: emit ansi color
+      //fgColor(ConsoleColor::Yellow); // TODO: emit ansi color
       for (auto e : pCImpl->instanceEvents)
       {
         buf.sprintf("  %-16s - %s", (const char*)e.value.id.toStringz(), (const char*)e.value.description.toStringz());
@@ -775,7 +775,7 @@ int LuaState::help(lua_State* L)
       }
     }
 
-    //FgColor(); // TODO: emit ansi color
+    //fgColor(); // TODO: emit ansi color
   }
 
   return 0;

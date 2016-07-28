@@ -163,12 +163,12 @@ Kernel::~Kernel()
 // the weak version in epplatform.cpp at least one symbol from that file must
 // be referenced externally.  This has been implemented in below inside
 // createInstance().
-namespace internal { void *GetStaticImplRegistry(); }
+namespace internal { void *getStaticImplRegistry(); }
 
 Kernel* Kernel::createInstance(Variant::VarMap commandLine, int renderThreadCount)
 {
   // HACK: create the KernelImplStatic instance here!
-  ((HashMap<SharedString, UniquePtr<RefCounted>>*)internal::GetStaticImplRegistry())->insert(componentID(), UniquePtr<KernelImplStatic>::create());
+  ((HashMap<SharedString, UniquePtr<RefCounted>>*)internal::getStaticImplRegistry())->insert(componentID(), UniquePtr<KernelImplStatic>::create());
 
   // set $(AppPath) to argv[0]
   String exe = commandLine[0].asString();
@@ -563,13 +563,13 @@ void KernelImpl::RelayStdIO()
 {
   if (stdOutCapture)
   {
-    String str = stdOutCapture->GetCapture();
+    String str = stdOutCapture->getCapture();
     if (!str.empty())
       spStdOutBC->write(str);
   }
   if (stdErrCapture)
   {
-    String str = stdErrCapture->GetCapture();
+    String str = stdErrCapture->getCapture();
     if (!str.empty())
       spStdErrBC->write(str);
   }

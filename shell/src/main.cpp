@@ -527,8 +527,8 @@ int main(int argc, char *argv[])
   try
   {
     // create a kernel
-    int threadCount = epGetHardwareThreadCount() - 1;
-    spKernel = SharedPtr<Kernel>(Kernel::createInstance(epParseCommandLine(argc, argv), threadCount));
+    int threadCount = getHardwareThreadCount() - 1;
+    spKernel = SharedPtr<Kernel>(Kernel::createInstance(parseCommandLine(argc, argv), threadCount));
 
     spKernel->registerMessageHandler("register", &Register);
     spKernel->registerMessageHandler("init", &Init);
