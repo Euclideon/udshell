@@ -10,12 +10,12 @@ namespace ep {
 
 namespace internal {
 
-RefCounted* GetStaticImpl(String name)
+RefCounted* getStaticImpl(String name)
 {
   return (*(HashMap<SharedString, UniquePtr<RefCounted>>*)s_pInstance->pStaticImplRegistry)[name].ptr();
 }
 
-void AddStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl)
+void addStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl)
 {
   ((HashMap<SharedString, UniquePtr<RefCounted>>*)s_pInstance->pStaticImplRegistry)->insert(name, std::move(upImpl));
 }

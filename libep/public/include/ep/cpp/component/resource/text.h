@@ -20,8 +20,8 @@ public:
   Variant parseJson() { return pImpl->ParseJson(); }
   void formatJson(Variant root) { pImpl->FormatJson(root); }
 
-  static Variant xmlMapToComponentParams(Variant node) { return GetStaticImpl()->XMLMapToComponentParams(node); }
-  static Variant componentParamsToXmlMap(Variant map) { return GetStaticImpl()->ComponentParamsToXMLMap(map); }
+  static Variant xmlMapToComponentParams(Variant node) { return getStaticImpl()->XMLMapToComponentParams(node); }
+  static Variant componentParamsToXmlMap(Variant map) { return getStaticImpl()->ComponentParamsToXMLMap(map); }
 
   void copyBuffer(String text) { Buffer::copyBuffer(text); }
 
@@ -37,7 +37,7 @@ public:
   }
 
   // TODO: move this somewhere else!
-  static uint32_t getLineNumberFromByteIndex(String buffer, size_t index) { return GetStaticImpl()->GetLineNumberFromByteIndex(buffer, index); }
+  static uint32_t getLineNumberFromByteIndex(String buffer, size_t index) { return getStaticImpl()->GetLineNumberFromByteIndex(buffer, index); }
 
 protected:
   Text(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)

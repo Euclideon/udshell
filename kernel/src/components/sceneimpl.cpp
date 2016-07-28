@@ -93,7 +93,7 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
     {
       UDJob &job = cache->ud.pushBack();
       job.spModel = in.spModel;
-      UDModelImpl *pImpl = in.spModel->GetImpl<UDModelImpl>();
+      UDModelImpl *pImpl = in.spModel->getImpl<UDModelImpl>();
       pImpl->CopyRenderContext(&job.context);
       job.context.matrix = Mul(in.matrix, job.context.matrix);
 
@@ -145,7 +145,7 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
   {
     auto &out = cache->geom.pushBack();
     out.matrix = in.matrix;
-    MaterialImpl *pMatImpl = in.spMaterial->GetImpl<MaterialImpl>();
+    MaterialImpl *pMatImpl = in.spMaterial->getImpl<MaterialImpl>();
 
     out.stencilStates = pMatImpl->stencilStates;
     out.blendMode = pMatImpl->blendMode;

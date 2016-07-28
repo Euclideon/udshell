@@ -175,7 +175,7 @@ public:                                                                         
     return info;                                                                         \
   }                                                                                      \
   template <typename T>                                                                  \
-  T* GetImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \
+  T* getImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \
 private:                                                                                 \
   ep::UniquePtr<Impl> pImpl = nullptr;                                                   \
   ep::UniquePtr<Impl> createImpl(ep::Variant::VarMap initParams)                         \
@@ -194,11 +194,11 @@ private:                                                                        
 #define __EP_DECLARE_COMPONENT_STATIC_IMPL(Namespace, Name, Interface, StaticInterface, SuperType, Version, Description, Flags)     \
   __EP_DECLARE_COMPONENT_IMPL(Namespace, Name, Interface, SuperType, Version, Description, Flags)                                   \
 public:                                                                                                                             \
-  static StaticInterface* GetStaticImpl()                                                                                           \
+  static StaticInterface* getStaticImpl()                                                                                           \
   {                                                                                                                                 \
     static BaseStaticImpl<StaticInterface> *pStaticImpl = nullptr;                                                                  \
     if(!pStaticImpl)                                                                                                                \
-      pStaticImpl = static_cast<BaseStaticImpl<StaticInterface>*>(internal::GetStaticImpl(componentID()));                          \
+      pStaticImpl = static_cast<BaseStaticImpl<StaticInterface>*>(internal::getStaticImpl(componentID()));                          \
     return static_cast<StaticInterface*>(pStaticImpl);                                                                              \
   }                                                                                                                                 \
 private:

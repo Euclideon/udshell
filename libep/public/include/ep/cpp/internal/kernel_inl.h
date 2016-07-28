@@ -124,7 +124,7 @@ template<typename StaticImpl, typename ComponentType>
 struct Kernel::CreateStaticImpl {
   static inline void Do()
   {
-    internal::AddStaticImpl(ComponentType::componentID(), UniquePtr<StaticImpl>::create());
+    internal::addStaticImpl(ComponentType::componentID(), UniquePtr<StaticImpl>::create());
   }
 };
 template<typename T>

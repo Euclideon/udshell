@@ -25,7 +25,7 @@ public:
 
   void PostInit(void *pData) override final
   {
-    pInstance->ep::Component::GetImpl<ep::ComponentImpl>()->SetUserData(pData);
+    pInstance->ep::Component::getImpl<ep::ComponentImpl>()->SetUserData(pData);
   }
 };
 

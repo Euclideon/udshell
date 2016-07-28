@@ -270,7 +270,7 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
 ResourceRef MaterialImpl::Clone() const
 {
   MaterialRef spNewMat = GetKernel()->createComponent<Material>();
-  MaterialImpl* pImpl = spNewMat->GetImpl<MaterialImpl>();
+  MaterialImpl* pImpl = spNewMat->getImpl<MaterialImpl>();
 
   for (size_t i = 0; i < NumShaders; i++)
     pImpl->shaders[i] = shaders[i];
