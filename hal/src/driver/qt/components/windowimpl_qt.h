@@ -23,7 +23,7 @@ public:
     pInstance->ep::Component::getImpl<ep::ComponentImpl>()->SetUserData(pData);
 
     // register the window with the kernel
-    if (static_cast<QtKernel*>(GetKernel())->registerWindow((QQuickWindow*)pInstance->getUserData()) != ep::Result::Success)
+    if (static_cast<QtKernel*>(getKernel())->registerWindow((QQuickWindow*)pInstance->getUserData()) != ep::Result::Success)
       EPTHROW_ERROR(ep::Result::Failure, "Unable to register Window component with Kernel");
   }
 

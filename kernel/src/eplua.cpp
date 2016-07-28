@@ -674,7 +674,7 @@ int LuaState::help(lua_State* L)
 
   ComponentRef c = l.toComponent(1);
   ComponentImpl *pCImpl = (ComponentImpl*)c->pImpl.ptr();
-  const ComponentDescInl *pDesc = (const ComponentDescInl*)pCImpl->GetDescriptor();
+  const ComponentDescInl *pDesc = (const ComponentDescInl*)pCImpl->getDescriptor();
 
   MutableString256 buffer;
   if (numArgs > 1)

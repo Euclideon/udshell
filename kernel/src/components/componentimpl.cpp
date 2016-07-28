@@ -35,14 +35,14 @@ ComponentImpl::~ComponentImpl()
   pInstance->logDebug(4, "Destroy component: {0} ({1})", pInstance->uid, pInstance->name);
 
   // HAX: we take access to KernelImpl; low-level Component stuff
-  KernelImpl *pKernelImpl = GetKernel()->getImpl();
+  KernelImpl *pKernelImpl = getKernel()->getImpl();
   pKernelImpl->DestroyComponent(pInstance);
 }
 
 void ComponentImpl::SetName(SharedString name)
 {
   // HAX: we take access to KernelImpl; low-level Component stuff
-  KernelImpl *pKernelImpl = GetKernel()->getImpl();
+  KernelImpl *pKernelImpl = getKernel()->getImpl();
 
   if (name && pKernelImpl->namedInstanceRegistry.exists(name))
     EPTHROW_WARN(Result::AlreadyExists, 1, "Name is already in use");
@@ -81,9 +81,9 @@ Array<SharedString> ComponentImpl::EnumerateProperties(EnumerateFlags enumerateF
   }
   if (!(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    for (auto p : GetDescriptor()->propertyTree)
+    for (auto p : getDescriptor()->propertyTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->propertyTree.get(p.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->propertyTree.get(p.key))
         props.pushBack(p.key);
     }
   }
@@ -99,14 +99,14 @@ Array<SharedString> ComponentImpl::EnumerateFunctions(EnumerateFlags enumerateFl
   }
   if (!(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    for (auto f : GetDescriptor()->methodTree)
+    for (auto f : getDescriptor()->methodTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->methodTree.get(f.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->methodTree.get(f.key))
         functions.pushBack(f.key);
     }
-    for (auto sf : GetDescriptor()->staticFuncTree)
+    for (auto sf : getDescriptor()->staticFuncTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->staticFuncTree.get(sf.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->staticFuncTree.get(sf.key))
         functions.pushBack(sf.key);
     }
   }
@@ -122,9 +122,9 @@ Array<SharedString> ComponentImpl::EnumerateEvents(EnumerateFlags enumerateFlags
   }
   if (!(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    for (auto e : GetDescriptor()->eventTree)
+    for (auto e : getDescriptor()->eventTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->eventTree.get(e.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->eventTree.get(e.key))
         events.pushBack(e.key);
     }
   }
@@ -138,8 +138,8 @@ const PropertyDesc *ComponentImpl::GetPropertyDesc(String _name, EnumerateFlags 
     pDesc = instanceProperties.get(_name);
   if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->propertyTree.get(_name))
-      pDesc = ((const ComponentDescInl*)GetDescriptor())->propertyTree.get(_name);
+    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->propertyTree.get(_name))
+      pDesc = ((const ComponentDescInl*)getDescriptor())->propertyTree.get(_name);
   }
   return pDesc;
 }
@@ -150,8 +150,8 @@ const MethodDesc *ComponentImpl::GetMethodDesc(String _name, EnumerateFlags enum
     pDesc = instanceMethods.get(_name);
   if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->methodTree.get(_name))
-      pDesc = ((const ComponentDescInl*)GetDescriptor())->methodTree.get(_name);
+    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->methodTree.get(_name))
+      pDesc = ((const ComponentDescInl*)getDescriptor())->methodTree.get(_name);
   }
   return pDesc;
 }
@@ -162,15 +162,15 @@ const EventDesc *ComponentImpl::GetEventDesc(String _name, EnumerateFlags enumer
     pDesc = instanceEvents.get(_name);
   if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->eventTree.get(_name))
-      pDesc = ((const ComponentDescInl*)GetDescriptor())->eventTree.get(_name);
+    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->eventTree.get(_name))
+      pDesc = ((const ComponentDescInl*)getDescriptor())->eventTree.get(_name);
   }
   return pDesc;
 }
 const StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags) const
 {
-  if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->staticFuncTree.get(_name))
-    return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.get(_name);
+  if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->staticFuncTree.get(_name))
+    return ((const ComponentDescInl*)getDescriptor())->staticFuncTree.get(_name);
   return nullptr;
 }
 

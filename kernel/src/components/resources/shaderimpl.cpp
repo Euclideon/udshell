@@ -15,7 +15,7 @@ namespace ep {
 SharedPtr<RefCounted> ShaderImpl::GetRenderShader()
 {
   if (!spCachedShader)
-    spCachedShader = SharedPtr<RenderShader>::create(GetKernel()->getImpl()->GetRenderer().ptr(), code, (epShaderType)type.v);
+    spCachedShader = SharedPtr<RenderShader>::create(getKernel()->getImpl()->GetRenderer().ptr(), code, (epShaderType)type.v);
 
   return spCachedShader;
 }

@@ -123,7 +123,7 @@ void MaterialImpl::BuildShaderProgram()
       renderShaders.pushBack(shared_pointer_cast<RenderShader>(s->getRenderShader()));
   }
 
-  spShaderProgram = SharedPtr<RenderShaderProgram>::create(GetKernel()->getImpl()->GetRenderer().ptr(), renderShaders);
+  spShaderProgram = SharedPtr<RenderShaderProgram>::create(getKernel()->getImpl()->GetRenderer().ptr(), renderShaders);
 }
 
 void MaterialImpl::PopulateShaderProperties()
@@ -229,7 +229,7 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
           else if (spC->getType().eq("ep.Text"))
           {
             // data is a text buffer object (presumably containing shader source)
-            spShader = GetKernel()->createComponent<Shader>();
+            spShader = getKernel()->createComponent<Shader>();
             spShader->setType(*pBuiltin);
 
             TextRef spText = shared_pointer_cast<Text>(spC);
@@ -241,7 +241,7 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
         else if (data.is(Variant::Type::String))
         {
           // data is a string buffer
-          spShader = GetKernel()->createComponent<Shader>();
+          spShader = getKernel()->createComponent<Shader>();
           spShader->setType(*pBuiltin);
           spShader->setCode(data.asString());
         }
@@ -269,7 +269,7 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
 
 ResourceRef MaterialImpl::Clone() const
 {
-  MaterialRef spNewMat = GetKernel()->createComponent<Material>();
+  MaterialRef spNewMat = getKernel()->createComponent<Material>();
   MaterialImpl* pImpl = spNewMat->getImpl<MaterialImpl>();
 
   for (size_t i = 0; i < NumShaders; i++)
