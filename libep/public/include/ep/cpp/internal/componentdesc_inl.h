@@ -2,8 +2,8 @@ namespace ep {
 
 namespace internal {
 
-RefCounted* GetStaticImpl(String name);
-void AddStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl);
+RefCounted* getStaticImpl(String name);
+void addStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl);
 
 } // namespace internal
 

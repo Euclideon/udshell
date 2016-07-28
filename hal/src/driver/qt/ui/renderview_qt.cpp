@@ -50,7 +50,7 @@ public:
 
     if (pQtRenderView->dirty)
     {
-      spRenderableView = ep::SynchronisedPtr<ep::RenderableView>(pQtRenderView->spView->GetImpl<ep::ViewImpl>()->GetRenderableView(), QtApplication::kernel());
+      spRenderableView = ep::SynchronisedPtr<ep::RenderableView>(pQtRenderView->spView->getImpl<ep::ViewImpl>()->GetRenderableView(), QtApplication::kernel());
       pQtRenderView->dirty = false;
     }
   }
@@ -86,7 +86,7 @@ QtRenderView::~QtRenderView()
   if (spView)
   {
     spView->frameReady.unsubscribe(ep::Delegate<void()>(this, &QtRenderView::OnFrameReady));
-    spView->GetImpl<ep::ViewImpl>()->SetLatestFrame(nullptr);
+    spView->getImpl<ep::ViewImpl>()->SetLatestFrame(nullptr);
   }
 }
 
@@ -145,7 +145,7 @@ void QtRenderView::focusInEvent(QFocusEvent * event)
   ev.eventType = ep::InputEvent::EventType::Focus;
   ev.hasFocus = true;
 
-  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
     event->accept();
   else
     event->ignore();
@@ -159,7 +159,7 @@ void QtRenderView::focusOutEvent(QFocusEvent * event)
   ev.eventType = ep::InputEvent::EventType::Focus;
   ev.hasFocus = false;
 
-  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
     event->accept();
   else
     event->ignore();
@@ -178,7 +178,7 @@ void QtRenderView::keyPressEvent(QKeyEvent *pEv)
     ev.eventType = ep::InputEvent::EventType::Key;
     ev.key.key = (int)kc;
     ev.key.state = 1;
-    if (!spView || !spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+    if (!spView || !spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
       pEv->ignore();
   }
 }
@@ -196,7 +196,7 @@ void QtRenderView::keyReleaseEvent(QKeyEvent *pEv)
     ev.eventType = ep::InputEvent::EventType::Key;
     ev.key.key = (int)kc;
     ev.key.state = 0;
-    if (!spView || !spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+    if (!spView || !spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
       pEv->ignore();
   }
 }
@@ -225,7 +225,7 @@ void QtRenderView::mouseMoveEvent(QMouseEvent *pEv)
   mouseLastX = x;
   mouseLastY = y;
 
-  if (spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
     pEv->accept();
   else
     pEv->ignore();
@@ -242,7 +242,7 @@ void QtRenderView::mousePressEvent(QMouseEvent *pEv)
   ev.eventType = ep::InputEvent::EventType::Key;
   ev.key.key = GetMouseButton(pEv->button());
   ev.key.state = 1;
-  if (ev.key.key != ep::MouseControls::Max && spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (ev.key.key != ep::MouseControls::Max && spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
     pEv->accept();
   else
     pEv->ignore();
@@ -256,7 +256,7 @@ void QtRenderView::mouseReleaseEvent(QMouseEvent *pEv)
   ev.eventType = ep::InputEvent::EventType::Key;
   ev.key.key = GetMouseButton(pEv->button());
   ev.key.state = 0;
-  if (ev.key.key != ep::MouseControls::Max && spView && spView->GetImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (ev.key.key != ep::MouseControls::Max && spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
     pEv->accept();
   else
     pEv->ignore();
@@ -288,7 +288,7 @@ void QtRenderView::hoverMoveEvent(QHoverEvent *pEv)
   ev.move.yAbsolute = (float)y;
 
   if (spView)
-    spView->GetImpl<ep::ViewImpl>()->InputEvent(ev);
+    spView->getImpl<ep::ViewImpl>()->InputEvent(ev);
 }
 
 void QtRenderView::wheelEvent(QWheelEvent *pEv)

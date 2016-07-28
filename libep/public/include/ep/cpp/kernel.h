@@ -88,9 +88,9 @@ public:
 
 
   // static methods
-  static void setEnvironmentVar(String name, String value) { return GetStaticImpl()->SetEnvironmentVar(name, value); }
-  static MutableString<0> getEnvironmentVar(String name) { return GetStaticImpl()->GetEnvironmentVar(name); }
-  static MutableString<0> resolveString(String string, bool bRecursive = true) { return GetStaticImpl()->ResolveString(string, bRecursive); }
+  static void setEnvironmentVar(String name, String value) { return getStaticImpl()->SetEnvironmentVar(name, value); }
+  static MutableString<0> getEnvironmentVar(String name) { return getStaticImpl()->GetEnvironmentVar(name); }
+  static MutableString<0> resolveString(String string, bool bRecursive = true) { return getStaticImpl()->ResolveString(string, bRecursive); }
 
 
   // *** these are for internal use ***

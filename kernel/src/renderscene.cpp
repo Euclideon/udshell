@@ -303,7 +303,7 @@ Renderer::~Renderer()
 
 RenderResourceRef Renderer::GetRenderBuffer(const ArrayBufferRef &spArrayBuffer, RenderResourceType type)
 {
-  BufferImpl *pBuffer = spArrayBuffer->Super::GetImpl<BufferImpl>();
+  BufferImpl *pBuffer = spArrayBuffer->Super::getImpl<BufferImpl>();
 
   RenderResourceRef spRenderBuffer = shared_pointer_cast<RenderResource>(pBuffer->spCachedRenderData);
   if (!spRenderBuffer)
@@ -324,7 +324,7 @@ RenderResourceRef Renderer::GetRenderBuffer(const ArrayBufferRef &spArrayBuffer,
 
 RenderResourceRef Renderer::GetConstantBuffer(const BufferRef &spBuffer)
 {
-  BufferImpl *pBuffer = spBuffer->GetImpl<BufferImpl>();
+  BufferImpl *pBuffer = spBuffer->getImpl<BufferImpl>();
   RenderResourceRef spRenderBuffer = shared_pointer_cast<RenderResource>(pBuffer->spCachedRenderData);
   if (!spRenderBuffer)
   {
@@ -387,7 +387,7 @@ void Renderer::UDThread()
         job->CreateResources();
         // NOTE: we need to clear this pointer here to prevent circular referencing!
         job->spView = nullptr;
-        spView->GetImpl<ViewImpl>()->SetLatestFrame(std::move(job));
+        spView->getImpl<ViewImpl>()->SetLatestFrame(std::move(job));
       }
       epDelete(this);
     }

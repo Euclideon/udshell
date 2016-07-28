@@ -34,7 +34,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     else
       model = pKernel->createComponent<UDModel>();
 
-    UDModelImpl *pModelImpl = model->GetImpl<UDModelImpl>();
+    UDModelImpl *pModelImpl = model->getImpl<UDModelImpl>();
     pModelImpl->pOctree = pOctree;
 
     // Populate meta data

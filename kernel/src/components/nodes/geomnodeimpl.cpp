@@ -23,7 +23,7 @@ void GeomNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
   job.matrix = mat;
   job.spMaterial = spModel->getMaterial();
 
-  ModelImpl *pModelImpl = spModel->GetImpl<ModelImpl>();
+  ModelImpl *pModelImpl = spModel->getImpl<ModelImpl>();
   job.vertexArrays = pModelImpl->vertexArrays;
   job.spIndices = pModelImpl->spIndices;
   job.renderList = pModelImpl->renderList;

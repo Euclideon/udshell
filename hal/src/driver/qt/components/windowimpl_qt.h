@@ -20,7 +20,7 @@ public:
 
   void PostInit(void *pData) override final
   {
-    pInstance->ep::Component::GetImpl<ep::ComponentImpl>()->SetUserData(pData);
+    pInstance->ep::Component::getImpl<ep::ComponentImpl>()->SetUserData(pData);
 
     // register the window with the kernel
     if (static_cast<QtKernel*>(GetKernel())->registerWindow((QQuickWindow*)pInstance->getUserData()) != ep::Result::Success)
@@ -58,24 +58,24 @@ public:
   WindowGlue(const ep::ComponentDesc *_pType, ep::Kernel *_pKernel, ep::SharedString _uid, ep::ComponentRef _spInstance, ep::Variant::VarMap initParams)
     : Window(_pType, _pKernel, _uid, initParams)
   {
-    GetImpl<QtWindowImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
+    getImpl<QtWindowImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
   }
 
   /*const ep::PropertyDesc *GetPropertyDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
   {
-    return GetImpl<QtWindowImpl>()->spQObject->GetPropertyDesc(_name, enumerateFlags);
+    return getImpl<QtWindowImpl>()->spQObject->GetPropertyDesc(_name, enumerateFlags);
   }
   const ep::MethodDesc *GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
   {
-    return GetImpl<QtWindowImpl>()->spQObject->GetMethodDesc(_name, enumerateFlags);
+    return getImpl<QtWindowImpl>()->spQObject->GetMethodDesc(_name, enumerateFlags);
   }
   const ep::EventDesc *GetEventDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
   {
-    return GetImpl<QtWindowImpl>()->spQObject->GetEventDesc(_name, enumerateFlags);
+    return getImpl<QtWindowImpl>()->spQObject->GetEventDesc(_name, enumerateFlags);
   }
   const ep::StaticFuncDesc *GetStaticFuncDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
   {
-    return GetImpl<QtWindowImpl>()->spQObject->GetStaticFuncDesc(_name, enumerateFlags);
+    return getImpl<QtWindowImpl>()->spQObject->GetStaticFuncDesc(_name, enumerateFlags);
   }*/
 };
 

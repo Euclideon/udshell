@@ -415,7 +415,7 @@ ep::ComponentRef QtKernel::createQmlComponent(String file, Variant::VarMap initP
   pDesc->PopulateFromDesc(pSuper);
 
   // add to the component registry
-  GetImpl<KernelImpl>()->instanceRegistry.insert(spC->uid, spC.ptr());
+  getImpl<KernelImpl>()->instanceRegistry.insert(spC->uid, spC.ptr());
 
   return spC;
 }
@@ -526,7 +526,7 @@ ep::ViewRef QtKernel::setFocusView(ep::ViewRef spView)
   using namespace ep;
   KernelImpl *pKernelImpl = getImpl();
   if (!spView && pKernelImpl->spFocusView)
-    pKernelImpl->spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
+    pKernelImpl->spFocusView->getImpl<ViewImpl>()->SetLatestFrame(nullptr);
 
   ViewRef spOld = pKernelImpl->spFocusView;
   pKernelImpl->spFocusView = spView;
