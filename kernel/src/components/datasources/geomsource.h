@@ -28,35 +28,35 @@ public:
     return extensions;
   }
 
-  static Slice<const String> StaticGetFileExtensions() { return extensions; }
+  static Slice<const String> staticGetFileExtensions() { return extensions; }
 
 protected:
   static const Array<const String> extensions;
 
-  static void StaticInit(ep::Kernel *pKernel);
+  static void staticInit(ep::Kernel *pKernel);
 
   GeomSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
     StreamRef ref = openStream(*initParams.get("src"));
-    Create(ref);
+    create(ref);
   }
 
-  void Create(StreamRef spSource);
-  bool Write(const aiScene *pScene);
+  void create(StreamRef spSource);
+  bool write(const aiScene *pScene);
 
-  void ParseMaterials(const aiScene *pScene);
-  void ParseMeshes(const aiScene *pScene);
-  void ParseXRefs(const aiScene *pScene);
+  void parseMaterials(const aiScene *pScene);
+  void parseMeshes(const aiScene *pScene);
+  void parseXRefs(const aiScene *pScene);
 
   enum class XRefType {
     Unknown,
     UDModel,
   };
 
-  XRefType GetXRefType(String url);
+  XRefType getXRefType(String url);
 
-  NodeRef ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth = 0);
+  NodeRef parseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth = 0);
 };
 
 } // namespace ep

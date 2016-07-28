@@ -116,7 +116,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
   }
 }
 
-void UDSource::StaticInit(ep::Kernel *pKernel)
+void UDSource::staticInit(ep::Kernel *pKernel)
 {
   pKernel->registerExtensions(pKernel->getComponentDesc(componentID()), extensions);
 }

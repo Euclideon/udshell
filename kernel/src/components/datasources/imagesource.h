@@ -21,21 +21,21 @@ public:
     return extensions;
   }
 
-  static Slice<const String> StaticGetFileExtensions() { return extensions; }
+  static Slice<const String> staticGetFileExtensions() { return extensions; }
 
 protected:
   static const Array<const String> extensions;
 
-  static void StaticInit(ep::Kernel *pKernel);
+  static void staticInit(ep::Kernel *pKernel);
 
   ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
     StreamRef ref = openStream(*initParams.get("src"));
-    Create(ref);
+    create(ref);
   }
 
-  void Create(StreamRef spSource);
+  void create(StreamRef spSource);
 };
 
 } // namespace ep

@@ -16,7 +16,7 @@ const char* GetFormatString(epImageFormat format)
   EPTHROW(Result::Failure, "Image format not supported yet");
 }
 
-void ImageSource::Create(StreamRef spSource)
+void ImageSource::create(StreamRef spSource)
 {
   // allocate for file
   int64_t len = spSource->length();
@@ -54,7 +54,7 @@ void ImageSource::Create(StreamRef spSource)
   }
 }
 
-void ImageSource::StaticInit(ep::Kernel *pKernel)
+void ImageSource::staticInit(ep::Kernel *pKernel)
 {
    pKernel->registerExtensions(pKernel->getComponentDesc(componentID()), extensions);
 }
