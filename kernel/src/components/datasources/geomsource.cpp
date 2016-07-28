@@ -48,17 +48,17 @@ const Array<const String> GeomSource::extensions = {
   ".csm", // CharacterStudio Motion (*limited)
 };
 
-static inline String FromAIString(const aiString &name)
+static inline String fromAIString(const aiString &name)
 {
   return String(name.C_Str(), name.length);
 }
 
-static inline Float4 CopyAIColor(const aiColor4D &m)
+static inline Float4 copyAIColor(const aiColor4D &m)
 {
   return Float4::create(m.r, m.g, m.b, m.a);
 }
 
-static inline Double4x4 CopyAIMatrix(const aiMatrix4x4 &m)
+static inline Double4x4 copyAIMatrix(const aiMatrix4x4 &m)
 {
   // TODO: OH NO! swizzle into UD space!!
   return Double4x4::create(m.a1, m.b1, m.c1, m.d1,
@@ -67,7 +67,7 @@ static inline Double4x4 CopyAIMatrix(const aiMatrix4x4 &m)
                            m.a4, m.b4, m.c4, m.d4);
 }
 
-void GeomSource::Create(StreamRef spSource)
+void GeomSource::create(StreamRef spSource)
 {
   const char *pExtension = nullptr; // TODO: get the file extension to help the assimp!
 
@@ -107,20 +107,20 @@ void GeomSource::Create(StreamRef spSource)
     return; // TODO: some sort of error?
 
   // parse materials
-  ParseMaterials(pScene);
+  parseMaterials(pScene);
 
   // parse meshes
-  ParseMeshes(pScene);
+  parseMeshes(pScene);
 
   // parse xrefs
-  ParseXRefs(pScene);
+  parseXRefs(pScene);
 
   // parse the scene
   if (pScene->mRootNode)
   {
     aiMatrix4x4 world;
     size_t numMeshes = 0; // TODO this is not being used
-    NodeRef spRoot = ParseNode(pScene, pScene->mRootNode, &world, numMeshes);
+    NodeRef spRoot = parseNode(pScene, pScene->mRootNode, &world, numMeshes);
 
     // TODO: Massive hack !!!! Swizzle the matrix into ud space
     const Double4x4 &mat = spRoot->getMatrix();
@@ -132,7 +132,7 @@ void GeomSource::Create(StreamRef spSource)
   epFree(pBuffer);
 }
 
-bool GeomSource::Write(const aiScene *pScene)
+bool GeomSource::write(const aiScene *pScene)
 {
   Assimp::Exporter exporter;
   const aiExportDataBlob *pBlob;
@@ -159,7 +159,7 @@ bool GeomSource::Write(const aiScene *pScene)
   return true;
 }
 
-void GeomSource::ParseMaterials(const aiScene *pScene)
+void GeomSource::parseMaterials(const aiScene *pScene)
 {
   // copy all the materials
   for (uint32_t i = 0; i<pScene->mNumMaterials; ++i)
@@ -168,33 +168,33 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
 
     aiString aiName;
     aiMat.Get(AI_MATKEY_NAME, aiName);
-    logDebug(4, "Material {0}: \"{1}\"", i, FromAIString(aiName));
+    logDebug(4, "Material {0}: \"{1}\"", i, fromAIString(aiName));
 
-    String _name = FromAIString(aiName);
+    String _name = fromAIString(aiName);
     MaterialRef spMat = getKernel().createComponent<Material>({ { "name", _name } });
 
     aiColor4D color(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, color);
-    spMat->setMaterialProperty("diffuse", CopyAIColor(color));
+    spMat->setMaterialProperty("diffuse", copyAIColor(color));
 
     color = aiColor4D(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_AMBIENT, color);
-    spMat->setMaterialProperty("ambient", CopyAIColor(color));
+    spMat->setMaterialProperty("ambient", copyAIColor(color));
 
     color = aiColor4D(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_EMISSIVE, color);
-    spMat->setMaterialProperty("emissive", CopyAIColor(color));
+    spMat->setMaterialProperty("emissive", copyAIColor(color));
 
     color = aiColor4D(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_SPECULAR, color);
-    spMat->setMaterialProperty("specular", CopyAIColor(color));
+    spMat->setMaterialProperty("specular", copyAIColor(color));
 
     // TODO: foreach texture type...
     aiString texture;
     aiMat.Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), texture);
     if (texture.length > 0)
     {
-      logDebug(4, "  Texture: {0}", FromAIString(texture));
+      logDebug(4, "  Texture: {0}", fromAIString(texture));
 
       // TODO: try and load texture...
       //...
@@ -223,17 +223,17 @@ ep::SharedString stringof<ep::BinTan>()
 
 namespace ep {
 
-void GeomSource::ParseMeshes(const aiScene *pScene)
+void GeomSource::parseMeshes(const aiScene *pScene)
 {
   // copy all the meshes
   for (uint32_t i = 0; i<pScene->mNumMeshes; ++i)
   {
     aiMesh &mesh = *pScene->mMeshes[i];
 
-    logDebug(4, "Mesh {0}: {1}", i, FromAIString(mesh.mName));
+    logDebug(4, "Mesh {0}: {1}", i, fromAIString(mesh.mName));
 
     // create a model
-    ModelRef spMesh = getKernel().createComponent<Model>({ { "name", FromAIString(mesh.mName) } });
+    ModelRef spMesh = getKernel().createComponent<Model>({ { "name", fromAIString(mesh.mName) } });
 
     // get material
     ResourceRef spMat = getResource(SharedString::concat("material", mesh.mMaterialIndex));
@@ -351,10 +351,10 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
   }
 }
 
-GeomSource::XRefType GeomSource::GetXRefType(String url)
+GeomSource::XRefType GeomSource::getXRefType(String url)
 {
   String ext = url.getRightAtLast(".", true);
-  Slice<const String> udDSExts = UDSource::StaticGetFileExtensions();
+  Slice<const String> udDSExts = UDSource::staticGetFileExtensions();
   for (const String &udExt : udDSExts)
   {
     if (ext.eqIC(udExt))
@@ -364,17 +364,17 @@ GeomSource::XRefType GeomSource::GetXRefType(String url)
   return XRefType::Unknown;
 }
 
-void GeomSource::ParseXRefs(const aiScene *pScene)
+void GeomSource::parseXRefs(const aiScene *pScene)
 {
   for (uint32_t i = 0; i<pScene->mNumXRefs; ++i)
   {
     aiXRef &xref = *pScene->mXRefs[i];
-    String refName = String(FromAIString(xref.mName));
-    String url = FromAIString(xref.mUrl);
+    String refName = String(fromAIString(xref.mName));
+    String url = fromAIString(xref.mUrl);
 
     logDebug(4, "XRef {0}: {1} - \"{2}\"", i, refName, url);
 
-    XRefType type = GetXRefType(url);
+    XRefType type = getXRefType(url);
 
     if (type == XRefType::UDModel)
     {
@@ -395,12 +395,12 @@ void GeomSource::ParseXRefs(const aiScene *pScene)
   }
 }
 
-NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth)
+NodeRef GeomSource::parseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth)
 {
   aiNode &node = *pNode;
   const aiMatrix4x4 &parent = *pParent;
 
-  logDebug(4, "{1,*0}Node: {2}", depth, "", FromAIString(node.mName));
+  logDebug(4, "{1,*0}Node: {2}", depth, "", fromAIString(node.mName));
 
   aiMatrix4x4 &local = node.mTransformation;
   aiMatrix4x4 world = parent * local;
@@ -411,12 +411,12 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   logDebug(4, "{1,*0}  World Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", world.a1, world.b1, world.c1, world.a2, world.b2, world.c2, world.a3, world.b3, world.c3);
 
   // create bone from node
-  NodeRef spNode = getKernel().createComponent<Node>({{ "name", FromAIString(node.mName) }});
+  NodeRef spNode = getKernel().createComponent<Node>({{ "name", fromAIString(node.mName) }});
 
 //  if (node.mParent)
-//    spNode->GetMetadata()->Insert("parent", FromAIString(node.mParent->mName));
+//    spNode->GetMetadata()->Insert("parent", fromAIString(node.mParent->mName));
 
-  spNode->setMatrix(CopyAIMatrix(local));
+  spNode->setMatrix(copyAIMatrix(local));
 
   // parse node mesh
   for (uint32_t i = 0; i<node.mNumMeshes; ++i)
@@ -444,9 +444,9 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   for (uint32_t i = 0; i<node.mNumXRefs; ++i)
   {
     aiXRef &xref = *pScene->mXRefs[node.mXRefs[i]];
-    String url = FromAIString(xref.mUrl);
+    String url = fromAIString(xref.mUrl);
 
-    XRefType type = GetXRefType(url);
+    XRefType type = getXRefType(url);
 
     if (type == XRefType::UDModel)
     {
@@ -472,7 +472,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   // recurse children
   for (uint32_t i = 0; i<node.mNumChildren; ++i)
   {
-    NodeRef spChild = ParseNode(pScene, node.mChildren[i], &world, numMeshes, depth + 2);
+    NodeRef spChild = parseNode(pScene, node.mChildren[i], &world, numMeshes, depth + 2);
     if (spChild)
       spNode->addChild(spChild);
   }
@@ -480,7 +480,7 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   return spNode;
 }
 
-void GeomSource::StaticInit(ep::Kernel *pKernel)
+void GeomSource::staticInit(ep::Kernel *pKernel)
 {
   pKernel->registerExtensions(pKernel->getComponentDesc(componentID()), extensions);
 }
