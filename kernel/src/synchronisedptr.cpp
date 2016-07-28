@@ -5,17 +5,17 @@
 namespace ep {
 namespace internal {
 
-void DestroyOnMainThread(Kernel *pKernel, RefCounted *pInstance)
+void destroyOnMainThread(Kernel *pKernel, RefCounted *pInstance)
 {
   struct S
   {
-    void Destroy()
+    void destroy()
     {
       ((RefCounted*)this)->decRef();
     }
   };
 
-  pKernel->dispatchToMainThread(MakeDelegate((S*)pInstance, &S::Destroy));
+  pKernel->dispatchToMainThread(MakeDelegate((S*)pInstance, &S::destroy));
 }
 
 } // namespace internal

@@ -27,15 +27,15 @@ public:
     m_fd = fileno(stdStream);
     setvbuf(m_stream, NULL, _IONBF, 0);
 
-    BeginCapture();
+    beginCapture();
   }
 
   ~StdCapture()
   {
-    EndCapture();
+    endCapture();
   }
 
-  bool BeginCapture()
+  bool beginCapture()
   {
     if (m_capturing)
       return false;
@@ -72,12 +72,12 @@ public:
     return true;
   }
 
-  bool IsCapturing()
+  bool isCapturing()
   {
     return m_capturing;
   }
 
-  void EndCapture()
+  void endCapture()
   {
     if (!m_capturing)
       return;
@@ -98,7 +98,7 @@ public:
     m_capturing = false;
   }
 
-  String GetCapture()
+  String getCapture()
   {
     const int bufSize = 1025;
     char buf[bufSize] = { 0 };

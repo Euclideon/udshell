@@ -37,7 +37,7 @@ ep::SharedString stringof<Vertex>()
   return "{f32[3], f32[4]}";
 }
 
-static void ProcessCmdline(int argc, char *argv[]);
+static void processCmdline(int argc, char *argv[]);
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
@@ -347,13 +347,13 @@ int main(int argc, char* argv[])
   }
 
   using namespace ep;
-  mData.rendererThreadCount = epGetHardwareThreadCount() - 1;
-  ProcessCmdline(argc, argv);
+  mData.rendererThreadCount = getHardwareThreadCount() - 1;
+  processCmdline(argc, argv);
 
   Result result = Result::Success;
   try
   {
-    mData.spKernel = SharedPtr<Kernel>(Kernel::createInstance(epParseCommandLine(argc, argv), mData.rendererThreadCount));
+    mData.spKernel = SharedPtr<Kernel>(Kernel::createInstance(parseCommandLine(argc, argv), mData.rendererThreadCount));
 
     mData.spKernel->registerMessageHandler("init", &ViewerInit);
     mData.spKernel->registerMessageHandler("deinit", &ViewerDeinit);
@@ -383,7 +383,7 @@ int main(int argc, char* argv[])
 }
 
 // ---------------------------------------------------------------------------------------
-void ProcessCmdline(int argc, char *argv[])
+void processCmdline(int argc, char *argv[])
 {
   // TODO: port all this code to use udString
   for (int i = 1; i < argc; ++i)

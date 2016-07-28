@@ -10,7 +10,7 @@ class Kernel;
 
 namespace internal {
 
-void DestroyOnMainThread(Kernel *pKernel, RefCounted *pInstance);
+void destroyOnMainThread(Kernel *pKernel, RefCounted *pInstance);
 
 } // namespace internal
 
@@ -90,7 +90,7 @@ private:
 
   void destroy()
   {
-    internal::DestroyOnMainThread(pKernel, pInstance);
+    internal::destroyOnMainThread(pKernel, pInstance);
     pInstance = nullptr;
   }
 
