@@ -329,7 +329,7 @@ SharedString LogLine::toString(LogFormatSpecs format) const
     ((format & LogFormatSpecs::ComponentUID) ? componentUID : ""),
     ((format & (LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? ")" : ""),
     ((format & (LogFormatSpecs::Timestamp | LogFormatSpecs::Level | LogFormatSpecs::ComponentUID)) ? " " : ""),
-    ((format & LogFormatSpecs::Category) ? category.StringOf() : ""),
+    ((format & LogFormatSpecs::Category) ? category.stringof() : ""),
     ((format & LogFormatSpecs::Category) ? ": " : ""),
     text,
     format & LogFormatSpecs::Level
