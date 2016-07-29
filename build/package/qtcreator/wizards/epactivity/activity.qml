@@ -13,7 +13,7 @@ FocusScope {
   property var epTypeDesc: { "super": "ep.UIComponent", "id": "%{Namespace}.MainUI" }
   property var viewport
 
-  onViewportChanged: viewport.uihandle.parent = viewPanel
+  onViewportChanged: viewport.uiHandle.parent = viewPanel
 
   Item {
     id: viewPanel
