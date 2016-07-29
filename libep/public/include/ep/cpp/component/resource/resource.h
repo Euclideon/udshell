@@ -21,7 +21,7 @@ public:
   //! A new \c Resource instance that is a copy of this resource.
   //! \return A copy of this resource.
   //! \remarks Note: This method throws; it is a stub for derived classes to implement.
-  //! \see CloneResource
+  //! \see cloneResource
   virtual ResourceRef clone() const { EPTHROW(Result::InvalidCall, "Not implemented!"); }
 
   Event<> changed;
@@ -44,7 +44,7 @@ private:
 //! \param inst The instance to clone.
 //! \return A copy of inst.
 //! \remarks Note: This method throws if the object has not implemented Clone.
-//! \see Resource::Clone
+//! \see Resource::clone
 template <typename T>
 inline SharedPtr<T> cloneResource(SharedPtr<T> inst)
 {
