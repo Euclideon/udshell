@@ -12,7 +12,7 @@ namespace internal {
 
 RefCounted* getStaticImpl(String name)
 {
-  return (*(HashMap<SharedString, UniquePtr<RefCounted>>*)s_pInstance->pStaticImplRegistry)[name].ptr();
+  return (*(HashMap<SharedString, UniquePtr<RefCounted>>*)s_pInstance->pStaticImplRegistry)[name].get();
 }
 
 void addStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl)

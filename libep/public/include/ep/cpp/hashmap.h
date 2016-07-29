@@ -34,8 +34,21 @@ template <typename K, typename V, typename HashPred = Hash<K>>
 class HashMap
 {
 public:
+  using KeyType = K;
+  using ValueType = V;
+  using KeyValuePair = KVP<K, V>;
+
   HashMap(size_t tableSize = 0x2000, size_t itemBucketSize = 0x100);
   HashMap(HashMap &&rval);
+
+  HashMap(Slice<const KeyValuePair> arr)
+  {
+    for (auto &kvp : arr)
+      insert(kvp);
+  }
+  HashMap(std::initializer_list<KeyValuePair> init)
+    : HashMap(Slice<const KeyValuePair>(init.begin(), init.size()))
+  {}
 
   ~HashMap();
 
@@ -68,6 +81,8 @@ public:
 
   const V& operator[](const K &key) const;
   V& operator[](const K &key);
+  const V& at(const K &key) const { return operator[](key); }
+  V& at(const K &key) { return operator[](key); }
 
   bool exists(const K &key);
 

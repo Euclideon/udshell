@@ -53,6 +53,7 @@ struct Slice
 {
 public:
   typedef typename internal::ElementType<T>::Ty ET;
+  using ElementType = typename ET;
 
   size_t length;
   T *ptr;
@@ -70,9 +71,11 @@ public:
 
   // contents
   ET& operator[](ptrdiff_t i) const;
+  ET& at(ptrdiff_t i) const { return operator[](i); }
 
   Slice<T> slice(ptrdiff_t first, ptrdiff_t last) const;
 
+  T* data() const { return ptr; }
   size_t size() const { return length; }
   bool empty() const;
   explicit operator bool() const { return length != 0; }
@@ -94,11 +97,15 @@ public:
   // useful functions
   ET& front() const;
   ET& back() const;
+  void pop_front() { popFront(); }
+  void pop_back() { popBack(); }
+
   ET& popFront();
   ET& popBack();
-  Slice<T> get(ptrdiff_t n) const;
   Slice<T> pop(ptrdiff_t n);
-  Slice<T> strip(ptrdiff_t n) const;
+
+  Slice<T> take(ptrdiff_t n) const;
+  Slice<T> drop(ptrdiff_t n) const;
 
   bool exists(const ET &c, size_t *pIndex = nullptr) const;
   size_t findFirst(const ET &c) const;
@@ -175,6 +182,10 @@ struct Array : public Slice<T>
   template <typename... Things> Array<T, Count>& concat(Things&&... things);
 
   T& front() const;
+  T& back() const;
+  void pop_front();
+  void pop_back();
+
   T popFront();
   T popBack();
 
@@ -235,9 +246,9 @@ struct SharedArray : public Slice<T>
   template <typename U, size_t N> SharedArray(U(&arr)[N]);
   ~SharedArray();
 
-  size_t refcount() const;
+  size_t use_count() const;
 
-  SharedArray<T> clone() { return Array<T>(*this); }
+  Array<T> clone() { return Array<T>(*this); }
 
   // static constructors (make proper constructors?)
   template<typename... Things> static SharedArray<T> concat(Things&&... things);

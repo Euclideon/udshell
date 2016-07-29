@@ -23,6 +23,7 @@ public:
   using MapType = Tree;
   using KeyType = typename Tree::KeyType;
   using ValueType = typename Tree::ValueType;
+  using KeyValuePair = typename Tree::KeyValuePair;
   using Iterator = typename Tree::Iterator;
 
   SharedMap() {}
@@ -74,6 +75,8 @@ public:
   size_t size() const { return ptr ? ptr->tree.size() : 0; }
 
   bool empty() const { return ptr ? ptr->tree.empty() : true; }
+
+  void clear() { if(ptr) ptr->tree.clear(); }
 
   ValueType& insert(KeyType &&key, ValueType &&rval)
   {
@@ -200,6 +203,8 @@ public:
     EPASSERT_THROW(pV, Result::OutOfBounds, "Element not found: {0}", key);
     return *pV;
   }
+  const ValueType& at(const KeyType &key) const { return operator[](key); }
+  ValueType& at(const KeyType &key) { return operator[](key); }
 
   TreeRange<Tree> getRange() const { return ptr ? TreeRange<Tree>(ptr->tree) : TreeRange<Tree>(); }
 

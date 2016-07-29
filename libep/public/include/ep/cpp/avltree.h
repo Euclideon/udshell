@@ -52,7 +52,7 @@ struct AVLTree
 {
 public:
   using KeyType = K;
-  using ValueType = V;
+  using ValueType = V; // TODO: -> ElementType
   using KeyValuePair = KVP<K, V>;
 
   AVLTree() {}
@@ -243,6 +243,8 @@ public:
     EPASSERT_THROW(pV, Result::OutOfBounds, "Element not found: {0}", key);
     return *pV;
   }
+  const V& at(const K &key) const { return operator[](key); }
+  V& at(const K &key) { return operator[](key); }
 
   AVLTree<K, V>& operator =(const AVLTree<K, V> &rh)
   {
@@ -743,7 +745,7 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const AV
     if (!bFirst)
     {
       if (buffer)
-        offset += String(", ").copyTo(buffer.strip(offset));
+        offset += String(", ").copyTo(buffer.drop(offset));
       else
         offset += String(", ").length;
     }
@@ -751,13 +753,13 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const AV
       bFirst = false;
 
     if (buffer)
-      offset += epStringify(buffer.strip(offset), nullptr, kvp, nullptr);
+      offset += epStringify(buffer.drop(offset), nullptr, kvp, nullptr);
     else
       offset += epStringify(nullptr, nullptr, kvp, nullptr);
   }
 
   if (buffer)
-    offset += String(" }").copyTo(buffer.strip(offset));
+    offset += String(" }").copyTo(buffer.drop(offset));
   else
     offset += String(" }").length;
 

@@ -522,7 +522,7 @@ int LuaState::componentCompare(lua_State* L)
 {
   ComponentRef *pComponent1 = (ComponentRef*)lua_touserdata(L, 1);
   ComponentRef *pComponent2 = (ComponentRef*)lua_touserdata(L, 2);
-  lua_pushboolean(L, (*pComponent1).ptr() == (*pComponent2).ptr());
+  lua_pushboolean(L, (*pComponent1).get() == (*pComponent2).get());
   return 1;
 }
 
@@ -532,7 +532,7 @@ int LuaState::componentIndex(lua_State* L)
 
   // get component
   ComponentRef spC = l.toComponent(1);
-  ComponentImpl *pCImpl = (ComponentImpl*)spC->pImpl.ptr();
+  ComponentImpl *pCImpl = (ComponentImpl*)spC->pImpl.get();
 
   // get field name
   size_t len;
@@ -545,7 +545,7 @@ int LuaState::componentIndex(lua_State* L)
   {
     if (pProp->getter)
     {
-      Variant result(pProp->getter.get(spC.ptr()));
+      Variant result(pProp->getter.get(spC.get()));
       l.push(result);
       return 1;
     }
@@ -602,7 +602,7 @@ int LuaState::componentNewIndex(lua_State* L)
 
   // get component
   ComponentRef spC = l.toComponent(1);
-  ComponentImpl *pCImpl = (ComponentImpl*)spC->pImpl.ptr();
+  ComponentImpl *pCImpl = (ComponentImpl*)spC->pImpl.get();
 
   // get field name
   size_t len;
@@ -615,7 +615,7 @@ int LuaState::componentNewIndex(lua_State* L)
   {
     if (pProp->setter)
     {
-      pProp->setter.set(spC.ptr(), l.get(3));
+      pProp->setter.set(spC.get(), l.get(3));
       // TODO: put signal back
 //      spC->SignalPropertyChanged(pProp);
       return 0;
@@ -651,7 +651,7 @@ int LuaState::method(lua_State *L)
   for (int i = 0; i < numArgs; ++i)
     epConstruct(&pArgs[i]) Variant(Variant::luaGet(l, 2 + i));
 
-  Variant v(pM->call(c.ptr(), Slice<Variant>(pArgs, numArgs)));
+  Variant v(pM->call(c.get(), Slice<Variant>(pArgs, numArgs)));
 
   for (int i = 0; i < numArgs; ++i)
     pArgs[i].~Variant();
@@ -673,7 +673,7 @@ int LuaState::help(lua_State* L)
     return 0;
 
   ComponentRef c = l.toComponent(1);
-  ComponentImpl *pCImpl = (ComponentImpl*)c->pImpl.ptr();
+  ComponentImpl *pCImpl = (ComponentImpl*)c->pImpl.get();
   const ComponentDescInl *pDesc = (const ComponentDescInl*)pCImpl->getDescriptor();
 
   MutableString256 buffer;
@@ -971,7 +971,7 @@ public:
 
   void subscribe(const VarDelegate &d)
   {
-    desc.ev.subscribe(c.ptr(), d);
+    desc.ev.subscribe(c.get(), d);
   }
 
 private:

@@ -123,7 +123,7 @@ public:
 
   // constructors
   SharedPtr(const SharedPtr<T> &ptr)
-    : pInstance(acquire(ptr.ptr())) {}
+    : pInstance(acquire(ptr.get())) {}
   SharedPtr(SharedPtr<T> &&ptr)
     : pInstance(ptr.pInstance)
   {
@@ -133,7 +133,7 @@ public:
   // the U allows us to accept const
   template <class U>
   SharedPtr(const SharedPtr<U> &ptr)
-    : pInstance(acquire(ptr.ptr())) {}
+    : pInstance(acquire(ptr.get())) {}
   template <class U>
   SharedPtr(SharedPtr<U> &&ptr)
   {
@@ -148,7 +148,7 @@ public:
 
   template <class U>
   SharedPtr(const SafePtr<U> &ptr)
-    : SharedPtr<T>(ptr.ptr())
+    : SharedPtr<T>(ptr.get())
   {
   }
 
@@ -176,7 +176,7 @@ public:
     if (pInstance != ptr.pInstance)
     {
       T *pOld = pInstance;
-      pInstance = acquire(ptr.ptr());
+      pInstance = acquire(ptr.get());
       release(pOld);
     }
     return *this;
@@ -187,7 +187,7 @@ public:
     if (pInstance != ptr.pInstance)
     {
       T *pOld = pInstance;
-      pInstance = acquire(ptr.ptr());
+      pInstance = acquire(ptr.get());
       release(pOld);
     }
     return *this;
@@ -207,7 +207,7 @@ public:
   SharedPtr& operator=(SafePtr<U> &ptr)
   {
     T *pOld = pInstance;
-    pInstance = acquire(ptr.ptr());
+    pInstance = acquire(ptr.get());
     release(pOld);
     return *this;
   }
@@ -219,15 +219,15 @@ public:
     release(pOld);
   }
 
-  size_t count() const;
+  size_t use_count() const;
 
-  epforceinline bool unique() const { return count() == 1; }
+  epforceinline bool unique() const { return use_count() == 1; }
 
-  epforceinline explicit operator bool() const { return count() > 0; }
+  epforceinline explicit operator bool() const { return use_count() > 0; }
 
   T& operator*() const { return *pInstance; }
   T* operator->() const { return pInstance; }
-  T* ptr() const { return pInstance; }
+  T* get() const { return pInstance; }
 
 private:
   template<typename U> friend struct UniquePtr;
@@ -320,7 +320,7 @@ public:
   // underlying pointer operations:
   T& operator*() const { return *pInstance; }
   T* operator->() const { return pInstance; }
-  T* ptr() const { return pInstance; }
+  T* get() const { return pInstance; }
 
 private:
   template<typename U> friend struct SharedPtr;
@@ -338,7 +338,7 @@ class RefCounted : public Safe
   void destroy();
 
 public:
-  size_t refCount() const { return rc; }
+  size_t use_count() const { return rc; }
   size_t incRef() { return ++rc; }
   size_t decRef()
   {
@@ -421,9 +421,9 @@ inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<U> &ptr)
 }
 
 template<class T>
-epforceinline size_t SharedPtr<T>::count() const
+epforceinline size_t SharedPtr<T>::use_count() const
 {
-  return pInstance ? pInstance->refCount() : 0;
+  return pInstance ? pInstance->use_count() : 0;
 }
 
 template<class T>
@@ -497,27 +497,27 @@ template<class T, class U>
 SharedPtr<T> shared_pointer_cast(const SharedPtr<U> &ptr);
 
 // comparaison operators
-template<class T, class U> inline bool operator==(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() == r.ptr(); }
-template<class T, class U> inline bool operator!=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() != r.ptr(); }
-template<class T, class U> inline bool operator<=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() <= r.ptr(); }
-template<class T, class U> inline bool operator<(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() < r.ptr(); }
-template<class T, class U> inline bool operator>=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() >= r.ptr(); }
-template<class T, class U> inline bool operator>(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.ptr() > r.ptr(); }
-template<class T> inline bool operator==(const SharedPtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
-template<class T> inline bool operator!=(const SharedPtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
-template<class T> inline bool operator==(nullptr_t, const SharedPtr<T> &r) { return nullptr == r.ptr(); }
-template<class T> inline bool operator!=(nullptr_t, const SharedPtr<T> &r) { return nullptr != r.ptr(); }
+template<class T, class U> inline bool operator==(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.get() == r.get(); }
+template<class T, class U> inline bool operator!=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.get() != r.get(); }
+template<class T, class U> inline bool operator<=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.get() <= r.get(); }
+template<class T, class U> inline bool operator<(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.get() < r.get(); }
+template<class T, class U> inline bool operator>=(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.get() >= r.get(); }
+template<class T, class U> inline bool operator>(const SharedPtr<T> &l, const SharedPtr<U> &r) { return l.get() > r.get(); }
+template<class T> inline bool operator==(const SharedPtr<T> &l, nullptr_t) { return l.get() == nullptr; }
+template<class T> inline bool operator!=(const SharedPtr<T> &l, nullptr_t) { return l.get() != nullptr; }
+template<class T> inline bool operator==(nullptr_t, const SharedPtr<T> &r) { return nullptr == r.get(); }
+template<class T> inline bool operator!=(nullptr_t, const SharedPtr<T> &r) { return nullptr != r.get(); }
 
-template<class T, class U> inline bool operator==(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() == r.ptr(); }
-template<class T, class U> inline bool operator!=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() != r.ptr(); }
-template<class T, class U> inline bool operator<=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() <= r.ptr(); }
-template<class T, class U> inline bool operator<(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() < r.ptr(); }
-template<class T, class U> inline bool operator>=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() >= r.ptr(); }
-template<class T, class U> inline bool operator>(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.ptr() > r.ptr(); }
-template<class T> inline bool operator==(const UniquePtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
-template<class T> inline bool operator!=(const UniquePtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
-template<class T> inline bool operator==(nullptr_t, const UniquePtr<T> &r) { return nullptr == r.ptr(); }
-template<class T> inline bool operator!=(nullptr_t, const UniquePtr<T> &r) { return nullptr != r.ptr(); }
+template<class T, class U> inline bool operator==(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.get() == r.get(); }
+template<class T, class U> inline bool operator!=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.get() != r.get(); }
+template<class T, class U> inline bool operator<=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.get() <= r.get(); }
+template<class T, class U> inline bool operator<(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.get() < r.get(); }
+template<class T, class U> inline bool operator>=(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.get() >= r.get(); }
+template<class T, class U> inline bool operator>(const UniquePtr<T> &l, const UniquePtr<U> &r) { return l.get() > r.get(); }
+template<class T> inline bool operator==(const UniquePtr<T> &l, nullptr_t) { return l.get() == nullptr; }
+template<class T> inline bool operator!=(const UniquePtr<T> &l, nullptr_t) { return l.get() != nullptr; }
+template<class T> inline bool operator==(nullptr_t, const UniquePtr<T> &r) { return nullptr == r.get(); }
+template<class T> inline bool operator!=(nullptr_t, const UniquePtr<T> &r) { return nullptr != r.get(); }
 
 } // namespace ep
 

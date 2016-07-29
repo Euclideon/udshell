@@ -39,8 +39,8 @@ public:
   SafePtr(nullptr_t) {}
 
   explicit SafePtr(T *pInstance) : spProxy((internal::SafeProxy<T>*)internal::GetSafePtr(pInstance)) {}
-  explicit SafePtr(const SharedPtr<T> &spInstance) : spProxy((internal::SafeProxy<T>*)internal::GetSafePtr(spInstance.ptr())) {}
-  explicit SafePtr(const UniquePtr<T> &upInstance) : spProxy((internal::SafeProxy<T>*)internal::GetSafePtr(upInstance.ptr())) {}
+  explicit SafePtr(const SharedPtr<T> &spInstance) : spProxy((internal::SafeProxy<T>*)internal::GetSafePtr(spInstance.get())) {}
+  explicit SafePtr(const UniquePtr<T> &upInstance) : spProxy((internal::SafeProxy<T>*)internal::GetSafePtr(upInstance.get())) {}
 
   SafePtr& operator=(const SafePtr<T> &ptr)
   {
@@ -65,11 +65,11 @@ public:
     return *this;
   }
 
-  epforceinline explicit operator bool() const { return spProxy.count() > 0 && spProxy->pInstance; }
+  epforceinline explicit operator bool() const { return spProxy.use_count() > 0 && spProxy->pInstance; }
 
   epforceinline T& operator*() const { return *(T*)spProxy->pInstance; }
   epforceinline T* operator->() const { return (T*)spProxy->pInstance; }
-  epforceinline T* ptr() const { return spProxy ? (T*)spProxy->pInstance : (T*)nullptr; }
+  epforceinline T* get() const { return spProxy ? (T*)spProxy->pInstance : (T*)nullptr; }
 
   static_assert(std::is_base_of<Safe, T>::value, "T must inherit from Safe");
 
@@ -107,16 +107,16 @@ template <class T, class U>
 SafePtr<T> safe_pointer_cast(const SafePtr<U> &ptr);
 
 // comparaison operators
-template <class T, class U> inline bool operator==(const SafePtr<T> &l, const SafePtr<U> &r) { return l.ptr() == r.ptr(); }
-template <class T, class U> inline bool operator!=(const SafePtr<T> &l, const SafePtr<U> &r) { return l.ptr() != r.ptr(); }
-template <class T, class U> inline bool operator<=(const SafePtr<T> &l, const SafePtr<U> &r) { return l.ptr() <= r.ptr(); }
-template <class T, class U> inline bool operator<(const SafePtr<T> &l, const SafePtr<U> &r) { return l.ptr() < r.ptr(); }
-template <class T, class U> inline bool operator>=(const SafePtr<T> &l, const SafePtr<U> &r) { return l.ptr() >= r.ptr(); }
-template <class T, class U> inline bool operator>(const SafePtr<T> &l, const SafePtr<U> &r) { return l.ptr() > r.ptr(); }
-template <class T> inline bool operator==(const SafePtr<T> &l, nullptr_t) { return l.ptr() == nullptr; }
-template <class T> inline bool operator!=(const SafePtr<T> &l, nullptr_t) { return l.ptr() != nullptr; }
-template <class T> inline bool operator==(nullptr_t, const SafePtr<T> &r) { return nullptr == r.ptr(); }
-template <class T> inline bool operator!=(nullptr_t, const SafePtr<T> &r) { return nullptr != r.ptr(); }
+template <class T, class U> inline bool operator==(const SafePtr<T> &l, const SafePtr<U> &r) { return l.get() == r.get(); }
+template <class T, class U> inline bool operator!=(const SafePtr<T> &l, const SafePtr<U> &r) { return l.get() != r.get(); }
+template <class T, class U> inline bool operator<=(const SafePtr<T> &l, const SafePtr<U> &r) { return l.get() <= r.get(); }
+template <class T, class U> inline bool operator<(const SafePtr<T> &l, const SafePtr<U> &r) { return l.get() < r.get(); }
+template <class T, class U> inline bool operator>=(const SafePtr<T> &l, const SafePtr<U> &r) { return l.get() >= r.get(); }
+template <class T, class U> inline bool operator>(const SafePtr<T> &l, const SafePtr<U> &r) { return l.get() > r.get(); }
+template <class T> inline bool operator==(const SafePtr<T> &l, nullptr_t) { return l.get() == nullptr; }
+template <class T> inline bool operator!=(const SafePtr<T> &l, nullptr_t) { return l.get() != nullptr; }
+template <class T> inline bool operator==(nullptr_t, const SafePtr<T> &r) { return nullptr == r.get(); }
+template <class T> inline bool operator!=(nullptr_t, const SafePtr<T> &r) { return nullptr != r.get(); }
 
 } // namespace ep
 

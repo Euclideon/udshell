@@ -84,7 +84,7 @@ public:
   Event<double> updatePulse;
 
   // HACK: we might be able to make better paths to this
-  KernelImpl* getImpl() const { return (KernelImpl*)pImpl.ptr(); }
+  KernelImpl* getImpl() const { return (KernelImpl*)pImpl.get(); }
 
 
   // static methods

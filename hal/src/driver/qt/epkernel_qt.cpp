@@ -348,7 +348,7 @@ void QtKernel::registerQml(ep::String file, ep::Variant::VarMap typeDesc)
     { "flags", ep::ComponentInfoFlags::Unpopulated },
     { "super", typeDesc["super"].asSharedString() },
     { "userdata", (const SharedPtr<RefCounted>&)data },
-    { "new", ep::DynamicComponentDesc::NewInstanceFunc(data.ptr(), &QmlComponentData::CreateComponent) }
+    { "new", ep::DynamicComponentDesc::NewInstanceFunc(data.get(), &QmlComponentData::CreateComponent) }
   };
 
   getImpl()->RegisterComponentTypeFromMap(typeInfo);
@@ -411,11 +411,11 @@ ep::ComponentRef QtKernel::createQmlComponent(String file, Variant::VarMap initP
   QmlComponentData data(file, pQmlEngine);
   QObjectComponentRef spInstance = shared_pointer_cast<QObjectComponent>(data.CreateComponent(KernelRef(this)));
   ComponentRef spC = createGlue(pDesc->baseClass, pDesc, newUid, spInstance, initParams);
-  spInstance->attachToGlue(spC.ptr(), initParams);
+  spInstance->attachToGlue(spC.get(), initParams);
   pDesc->PopulateFromDesc(pSuper);
 
   // add to the component registry
-  getImpl<KernelImpl>()->instanceRegistry.insert(spC->uid, spC.ptr());
+  getImpl<KernelImpl>()->instanceRegistry.insert(spC->uid, spC.get());
 
   return spC;
 }

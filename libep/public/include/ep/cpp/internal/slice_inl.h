@@ -222,14 +222,6 @@ inline typename Slice<T>::ET& Slice<T>::popBack()
 }
 
 template<typename T>
-inline Slice<T> Slice<T>::get(ptrdiff_t n) const
-{
-  if (n < 0)
-    return slice(n, length);
-  else
-    return slice(0, n);
-}
-template<typename T>
 inline Slice<T> Slice<T>::pop(ptrdiff_t n)
 {
   if (n < 0)
@@ -243,8 +235,17 @@ inline Slice<T> Slice<T>::pop(ptrdiff_t n)
     return Slice<T>(ptr - n, n);
   }
 }
+
 template<typename T>
-inline Slice<T> Slice<T>::strip(ptrdiff_t n) const
+inline Slice<T> Slice<T>::take(ptrdiff_t n) const
+{
+  if (n < 0)
+    return slice(n, length);
+  else
+    return slice(0, n);
+}
+template<typename T>
+inline Slice<T> Slice<T>::drop(ptrdiff_t n) const
 {
   if (n < 0)
     return slice(0, n);
@@ -741,6 +742,29 @@ T& Array<T, Count>::front() const
   return this->ptr[0];
 }
 template <typename T, size_t Count>
+T& Array<T, Count>::back() const
+{
+  return this->ptr[length-1];
+}
+template <typename T, size_t Count>
+void Array<T, Count>::pop_front()
+{
+  // TODO: this should be removed and uses replaced with a udQueue type.
+  for (size_t i = 1; i < this->length; ++i)
+  {
+    this->ptr[i-1].~T();
+    epConstruct((void*)&this->ptr[i-1]) T(std::move(this->ptr[i]));
+  }
+  this->ptr[--this->length].~T();
+}
+template <typename T, size_t Count>
+void Array<T, Count>::pop_back()
+{
+  --this->length;
+  this->ptr[this->length].~T();
+}
+
+template <typename T, size_t Count>
 T Array<T, Count>::popFront()
 {
   // TODO: this should be removed and uses replaced with a udQueue type.
@@ -900,7 +924,7 @@ inline SharedArray<T>::~SharedArray()
 }
 
 template <typename T>
-size_t inline SharedArray<T>::refcount() const
+size_t inline SharedArray<T>::use_count() const
 {
   return this->ptr ? internal::GetSliceHeader(this->ptr)->refCount : 0;
 }

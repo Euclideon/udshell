@@ -123,7 +123,7 @@ void MaterialImpl::BuildShaderProgram()
       renderShaders.pushBack(shared_pointer_cast<RenderShader>(s->getRenderShader()));
   }
 
-  spShaderProgram = SharedPtr<RenderShaderProgram>::create(getKernel()->getImpl()->GetRenderer().ptr(), renderShaders);
+  spShaderProgram = SharedPtr<RenderShaderProgram>::create(getKernel()->getImpl()->GetRenderer().get(), renderShaders);
 }
 
 void MaterialImpl::PopulateShaderProperties()
