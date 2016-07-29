@@ -45,7 +45,7 @@ namespace internal {
     static CreateFunc GetCreateImplImpl(...) { return nullptr; }
 
     template <typename T>
-    static auto GetCreateFuncImpl(T* t) -> decltype(T::createInstance(), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::createInstance; }
+    static auto GetCreateFuncImpl(T* t) -> decltype(T::createInstance(nullptr, nullptr, 0, Variant::VarMap()), internal::ComponentDesc_CreateInstanceCallbackPtr()) { return &T::createInstance; }
     static ComponentDescInl::CreateInstanceCallback* GetCreateFuncImpl(...)
     {
       return [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
