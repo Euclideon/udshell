@@ -41,7 +41,7 @@ public:
   //! Sets the camera to have orthographic projection.
   //! \param orthoHeight The height of the orthographic projection volume.
   //! \return None.
-  //! \remarks Note: The width of the projection will be implied by \a orthoHeight * \a aspectRatio when calling \c GetProjectionMatrix().
+  //! \remarks Note: The width of the projection will be implied by \a orthoHeight * \a aspectRatio when calling \c getProjectionMatrix().
   //! \see setPerspective, getProjectionMatrix
   void setOrtho(double orthoHeight) { pImpl->SetOrtho(orthoHeight); }
 
