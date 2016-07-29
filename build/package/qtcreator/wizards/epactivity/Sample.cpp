@@ -78,25 +78,23 @@ Array<const StaticFuncInfo> %{ActivityName}::getStaticFuncs() const
   PrimitiveGenerator::generateCube(spVertexBuffer, spIndexBuffer);
 
   MetadataRef spMetadata = spVertexBuffer->getMetadata();
-  spMetadata->get("attributeinfo")[0].insertItem("name", "a_position");
+  spMetadata->get("attributeInfo")[0].insertItem("name", "a_position");
 
   // Colour Buffer
   ArrayBufferRef spColourBuffer = pKernel->createComponent<ArrayBuffer>();
-  {
-    spColourBuffer->allocateFromData(Slice<const Float4>{
-      Float4{ 1.0f, 1.0f, 1.0f, 1.0f },
-      Float4{ 1.0f, 0.0f, 0.0f, 1.0f },
-      Float4{ 0.0f, 1.0f, 0.0f, 1.0f },
-      Float4{ 0.0f, 0.0f, 1.0f, 1.0f },
+  spColourBuffer->allocateFromData(Slice<const Float4>{
+    Float4{ 1.0f, 1.0f, 1.0f, 1.0f },
+    Float4{ 1.0f, 0.0f, 0.0f, 1.0f },
+    Float4{ 0.0f, 1.0f, 0.0f, 1.0f },
+    Float4{ 0.0f, 0.0f, 1.0f, 1.0f },
 
-      Float4{ 1.0f, 1.0f, 0.0f, 1.0f },
-      Float4{ 1.0f, 0.0f, 1.0f, 1.0f },
-      Float4{ 0.0f, 1.0f, 1.0f, 1.0f },
-      Float4{ 0.5f, 0.5f, 1.0f, 1.0f }
-    });
-    spMetadata = spColourBuffer->getMetadata();
-    spMetadata->get("attributeinfo")[0].insertItem("name", "a_color");
-  }
+    Float4{ 1.0f, 1.0f, 0.0f, 1.0f },
+    Float4{ 1.0f, 0.0f, 1.0f, 1.0f },
+    Float4{ 0.0f, 1.0f, 1.0f, 1.0f },
+    Float4{ 0.5f, 0.5f, 1.0f, 1.0f }
+  });
+  spMetadata = spColourBuffer->getMetadata();
+  spMetadata->get("attributeInfo")[0].insertItem("name", "a_color");
 
   ModelRef spModel = pKernel->createComponent<Model>();
   spModel->addVertexArray(spVertexBuffer);
