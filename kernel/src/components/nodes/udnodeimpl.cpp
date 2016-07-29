@@ -8,22 +8,22 @@
 
 namespace ep {
 
-Array<const PropertyInfo> UDNode::GetProperties() const
+Array<const PropertyInfo> UDNode::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(UDModel, "UDModel instance", nullptr, 0),
+    EP_MAKE_PROPERTY("udModel", getUDModel, setUDModel, "UDModel instance", nullptr, 0),
   };
 }
 
 void UDNodeImpl::SetUDModel(UDModelRef _spModel)
 {
   if (spModel)
-    spModel->Changed.Unsubscribe(pInstance->Changed);
+    spModel->changed.unsubscribe(pInstance->changed);
 
   spModel = _spModel;
 
   if (spModel)
-    spModel->Changed.Subscribe(pInstance->Changed);
+    spModel->changed.subscribe(pInstance->changed);
 }
 
 void UDNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)

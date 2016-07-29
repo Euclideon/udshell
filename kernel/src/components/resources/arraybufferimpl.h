@@ -42,7 +42,7 @@ public:
     return Slice<const size_t>(shape, dimensions);
   }
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   friend class Renderer;

@@ -7,7 +7,7 @@ Item {
   // MessageBox types: "Message" or "Edit"
   // Icon types: "None", "About", "Error" or "Warning"
 
-  property var epTypeDesc: { "id": "ui.messagebox", "super": "ep.uicomponent" }
+  property var epTypeDesc: { "id": "ui.MessageBox", "super": "ep.UIComponent" }
   property string type: "Message"
   property string iconType: "None"
   property var callback

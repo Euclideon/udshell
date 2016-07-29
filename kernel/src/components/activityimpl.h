@@ -8,17 +8,17 @@
 
 namespace ep {
 
-inline Array<const PropertyInfo> Activity::GetProperties() const
+inline Array<const PropertyInfo> Activity::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(UI, "The top level UI compoment for this activity", nullptr, 0),
+    EP_MAKE_PROPERTY("ui", getUI, setUI, "The top level UI component for this activity", nullptr, 0),
   };
 }
-inline Array<const MethodInfo> Activity::GetMethods() const
+inline Array<const MethodInfo> Activity::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(Activate, "Set as the active activity"),
-    EP_MAKE_METHOD(Deactivate, "Unset as the active activity"),
+    EP_MAKE_METHOD(activate, "Set as the active activity"),
+    EP_MAKE_METHOD(deactivate, "Unset as the active activity"),
   };
 }
 
@@ -36,7 +36,7 @@ public:
   void Activate() override final {}
   void Deactivate() override final {}
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   UIComponentRef ui = nullptr;

@@ -4,37 +4,37 @@
 
 namespace ep {
 
-Array<const PropertyInfo> View::GetProperties() const
+Array<const PropertyInfo> View::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(Camera, "Camera for viewport", nullptr, 0),
-    EP_MAKE_PROPERTY(Scene, "Scene for viewport", nullptr, 0),
-    EP_MAKE_PROPERTY(EnablePicking, "Enable Picking", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(MousePosition, "Mouse Position", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(AspectRatio, "Aspect ratio", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Dimensions, "The height and width of the View", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(RenderDimensions, "The resolution of the rendered content", nullptr, 0),
+    EP_MAKE_PROPERTY("camera", getCamera, setCamera, "Camera for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY("scene", getScene, setScene, "Scene for viewport", nullptr, 0),
+    EP_MAKE_PROPERTY("enablePicking", getEnablePicking, setEnablePicking, "Enable Picking", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("mousePosition", getMousePosition, "Mouse Position", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("aspectRatio", getAspectRatio, "Aspect ratio", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("dimensions", getDimensions, "The height and width of the View", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("renderDimensions", getRenderDimensions, "The resolution of the rendered content", nullptr, 0),
   };
 }
 
-Array<const MethodInfo> View::GetMethods() const
+Array<const MethodInfo> View::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(GoToBookmark, "Move the Camera to the specified Bookmark"),
-    EP_MAKE_METHOD(Activate, "Activate the View, e.g. start rendering"),
-    EP_MAKE_METHOD(Deactivate, "Deactivate the View, e.g. stop rendering"),
-    EP_MAKE_METHOD(Resize, "Resize the View"),
+    EP_MAKE_METHOD(goToBookmark, "Move the Camera to the specified Bookmark"),
+    EP_MAKE_METHOD(activate, "Activate the View, e.g. start rendering"),
+    EP_MAKE_METHOD(deactivate, "Deactivate the View, e.g. stop rendering"),
+    EP_MAKE_METHOD(resize, "Resize the View"),
   };
 }
 
-Array<const EventInfo> View::GetEvents() const
+Array<const EventInfo> View::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Dirty, "View dirty event"),
-    EP_MAKE_EVENT(FrameReady, "The next frame has finished rendering"),
-    EP_MAKE_EVENT(EnabledPickingChanged, "Enable Picking changed"),
-    EP_MAKE_EVENT(PickFound, "Pick found"),
-    EP_MAKE_EVENT(MousePositionChanged, "Mouse Position changed")
+    EP_MAKE_EVENT(dirty, "View dirty event"),
+    EP_MAKE_EVENT(frameReady, "The next frame has finished rendering"),
+    EP_MAKE_EVENT(enabledPickingChanged, "Enable Picking changed"),
+    EP_MAKE_EVENT(pickFound, "Pick found"),
+    EP_MAKE_EVENT(mousePositionChanged, "Mouse Position changed")
   };
 }
 
@@ -44,12 +44,12 @@ void ViewImpl::SetScene(SceneRef spNewScene)
     return;
 
   if (spScene)
-    spScene->Dirty.Unsubscribe(this, &ViewImpl::OnDirty);
+    spScene->dirty.unsubscribe(this, &ViewImpl::OnDirty);
 
   spScene = spNewScene;
 
   if (spScene)
-    spScene->Dirty.Subscribe(this, &ViewImpl::OnDirty);
+    spScene->dirty.subscribe(this, &ViewImpl::OnDirty);
 
   OnDirty();
 }
@@ -59,7 +59,7 @@ void ViewImpl::SetEnablePicking(bool enable)
   if (pickingEnabled != enable)
   {
     pickingEnabled = enable;
-    pInstance->EnabledPickingChanged.Signal(pickingEnabled);
+    pInstance->enabledPickingChanged.signal(pickingEnabled);
   }
 }
 
@@ -87,10 +87,10 @@ void ViewImpl::GoToBookmark(String bookmarkName)
 {
   if (spScene && spCamera)
   {
-    const Bookmark *pBM = spScene->FindBookmark(bookmarkName);
+    const Bookmark *pBM = spScene->findBookmark(bookmarkName);
     if (pBM)
     {
-      spCamera->SetMatrix(Double4x4::rotationYPR(pBM->ypr, pBM->position));
+      spCamera->setMatrix(Double4x4::rotationYPR(pBM->ypr, pBM->position));
       OnDirty();
     }
   }
@@ -104,7 +104,7 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
     {
       mousePosition.x = (uint32_t)ev.move.xAbsolute;
       mousePosition.y = (uint32_t)ev.move.yAbsolute;
-      pInstance->MousePositionChanged.Signal(mousePosition);
+      pInstance->mousePositionChanged.signal(mousePosition);
     }
   }
   else if (ev.deviceType == ep::InputDevice::Keyboard)
@@ -116,9 +116,9 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
   bool handled = inputEventHook ? inputEventHook(ev) : false;
 
   if (!handled && spScene)
-    handled = spScene->InputEvent(ev);
+    handled = spScene->inputEvent(ev);
   if (!handled && spCamera)
-    handled = spCamera->ViewportInputEvent(ev);
+    handled = spCamera->viewportInputEvent(ev);
   return handled;
 }
 
@@ -126,13 +126,13 @@ void ViewImpl::OnDirty()
 {
   if (renderWidth == 0 || renderHeight == 0)
   {
-    GetKernel()->LogWarning(1, "Render target has zero size! Unable to render...");
+    getKernel()->logWarning(1, "Render target has zero size! Unable to render...");
     return;
   }
 
   if (spScene && spCamera)
   {
-    SharedPtr<Renderer> spRenderer = GetKernel()->GetImpl()->GetRenderer();
+    SharedPtr<Renderer> spRenderer = getKernel()->getImpl()->GetRenderer();
 
     UniquePtr<RenderableView> spRenderView = UniquePtr<RenderableView>::create(spRenderer);
 
@@ -140,10 +140,10 @@ void ViewImpl::OnDirty()
 
     spRenderView->spView = ViewRef(pInstance);
 
-    spRenderView->camera = spCamera->GetCameraMatrix();
-    spRenderView->projection = spCamera->GetProjectionMatrix((double)displayWidth / (double)displayHeight);
+    spRenderView->camera = spCamera->getCameraMatrix();
+    spRenderView->projection = spCamera->getProjectionMatrix((double)displayWidth / (double)displayHeight);
 
-    spRenderView->spScene = spScene->GetRenderScene();
+    spRenderView->spScene = spScene->getRenderScene();
 
     spRenderView->options = udRenderOptions{ sizeof(udRenderOptions), GetRenderableUDFlags(), nullptr, nullptr,
                                              nullptr, nullptr, nullptr, nullptr };
@@ -167,9 +167,9 @@ void ViewImpl::OnDirty()
     if (spRenderView->spScene->ud.length > 0)
     {
       spRenderView->spColorBuffer = spRenderer->AllocRenderBuffer();
-      spRenderView->spColorBuffer->Allocate<uint32_t>(Slice<const size_t>{ (size_t)renderWidth, (size_t)renderHeight });
+      spRenderView->spColorBuffer->allocate<uint32_t>(Slice<const size_t>{ (size_t)renderWidth, (size_t)renderHeight });
       spRenderView->spDepthBuffer = spRenderer->AllocRenderBuffer();
-      spRenderView->spDepthBuffer->Allocate<float>(Slice<const size_t>{ (size_t)renderWidth, (size_t)renderHeight });
+      spRenderView->spDepthBuffer->allocate<float>(Slice<const size_t>{ (size_t)renderWidth, (size_t)renderHeight });
       spRenderer->AddUDRenderJob(std::move(spRenderView));
     }
     else
@@ -177,7 +177,7 @@ void ViewImpl::OnDirty()
   }
 
   // emit the dirty signal
-  pInstance->Dirty.Signal();
+  pInstance->dirty.signal();
 }
 
 void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
@@ -216,7 +216,7 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
 
         EPASSERT(udNodePtr != nullptr, "No node for octree");
 
-        pInstance->PickFound.Signal(pickedPoint, udNodePtr);
+        pInstance->pickFound.signal(pickedPoint, udNodePtr);
       }
       else
       {
@@ -224,7 +224,7 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
         pickHighlightData = { nullptr, 0, };
       }
     }
-    pInstance->FrameReady.Signal();
+    pInstance->frameReady.signal();
   }
 }
 
@@ -272,8 +272,8 @@ DoubleRay3 ViewImpl::ScreenPointToWorldRay(Double2 screenPoint) const
 
   Dimensions<int> screenSize = GetDimensions();
 
-  Double4x4 viewMat = spCamera->GetViewMatrix();
-  Double4x4 projMat = spCamera->GetProjectionMatrix((double)screenSize.width / (double)screenSize.height);
+  Double4x4 viewMat = spCamera->getViewMatrix();
+  Double4x4 projMat = spCamera->getProjectionMatrix((double)screenSize.width / (double)screenSize.height);
 
   Double4x4 VP = projMat * viewMat;
   Double4x4 invVP = Inverse(VP);

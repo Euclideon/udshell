@@ -8,11 +8,11 @@
 namespace ep {
 namespace internal {
 
-void Log(int type, int level, String text)
+void log(int type, int level, String text)
 {
-  Kernel *pK = Kernel::GetInstance();
+  Kernel *pK = Kernel::getInstance();
   if (pK)
-    pK->Log(type, level, text);
+    pK->log(type, level, text);
   else
     epDebugWrite(text.toStringz());
 }
@@ -26,7 +26,7 @@ ErrorSystem::~ErrorSystem()
   epDelete((FreeList<ErrorState>*)pErrorPool);
 }
 
-inline ErrorSystem& GetErrorSystem()
+inline ErrorSystem& getErrorSystem()
 {
   static ErrorSystem *pSystem = nullptr;
   if (!pSystem)
@@ -34,14 +34,14 @@ inline ErrorSystem& GetErrorSystem()
   return *pSystem;
 }
 
-inline FreeList<ErrorState>& GetErrorPool()
+inline FreeList<ErrorState>& getErrorPool()
 {
-  return *(FreeList<ErrorState>*)GetErrorSystem().pErrorPool;
+  return *(FreeList<ErrorState>*)getErrorSystem().pErrorPool;
 }
 
-ErrorState* _AllocError(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pParent)
+ErrorState* _allocError(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pParent)
 {
-  ErrorState *pError = internal::GetErrorPool().Alloc();
+  ErrorState *pError = internal::getErrorPool()._alloc();
   pError->error = error;
   epConstruct(&pError->message) SharedString(message);
   pError->function = function;
@@ -54,47 +54,47 @@ ErrorState* _AllocError(Result error, const SharedString &message, const char *f
 } // namespace internal
 
 EPException::EPException(Result error, const SharedString &message, const char *function, const char *file, int line, ErrorState *pPrior)
-  : pError(internal::_AllocError(error, message, function, file, line, pPrior))
+  : pError(internal::_allocError(error, message, function, file, line, pPrior))
 {}
 
 EPException::~EPException()
 {
-  FreeList<ErrorState>& pool = internal::GetErrorPool();
+  FreeList<ErrorState>& pool = internal::getErrorPool();
   while (pError)
   {
     ErrorState *pPrev = pError->pPrior;
-    pError->Clear();
-    pool.Free(pError);
+    pError->clear();
+    pool._free(pError);
     pError = pPrev;
   }
 }
 
 
-ErrorState* _PushError(Result error, const SharedString &message, const char *function, const char *file, int line)
+ErrorState* _pushError(Result error, const SharedString &message, const char *function, const char *file, int line)
 {
-  internal::ErrorSystem& errorSystem = internal::GetErrorSystem();
-  errorSystem.pError = internal::_AllocError(error, message, function, file, line, errorSystem.pError);
+  internal::ErrorSystem& errorSystem = internal::getErrorSystem();
+  errorSystem.pError = internal::_allocError(error, message, function, file, line, errorSystem.pError);
   return errorSystem.pError;
 }
-ErrorState* GetError()
+ErrorState* getError()
 {
-  return internal::GetErrorSystem().pError;
+  return internal::getErrorSystem().pError;
 }
 
-void ClearError()
+void clearError()
 {
-  internal::ErrorSystem& errorSystem = internal::GetErrorSystem();
-  FreeList<ErrorState>& pool = internal::GetErrorPool();
+  internal::ErrorSystem& errorSystem = internal::getErrorSystem();
+  FreeList<ErrorState>& pool = internal::getErrorPool();
   while (errorSystem.pError)
   {
     ErrorState *pPrev = errorSystem.pError->pPrior;
-    errorSystem.pError->Clear();
-    pool.Free(errorSystem.pError);
+    errorSystem.pError->clear();
+    pool._free(errorSystem.pError);
     errorSystem.pError = pPrev;
   }
 }
 
-SharedString DumpError(ErrorState *pError)
+SharedString dumpError(ErrorState *pError)
 {
   MutableString<0> s(Reserve, 256);
   s = "Errors occurred!\n";

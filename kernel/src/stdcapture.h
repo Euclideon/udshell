@@ -1,16 +1,8 @@
 #ifdef _MSC_VER
 #include <io.h>
-#define popen _popen
-#define pclose _pclose
-#define stat _stat
-#define dup _dup
-#define dup2 _dup2
-#define fileno _fileno
-#define close _close
+#pragma warning(push)
+#pragma warning(disable:4996) //The POSIX name for this item is deprecated
 #define pipe _pipe
-#define read _read
-#define write _write
-#define eof _eof
 #else
 #include <unistd.h>
 #endif
@@ -35,15 +27,15 @@ public:
     m_fd = fileno(stdStream);
     setvbuf(m_stream, NULL, _IONBF, 0);
 
-    BeginCapture();
+    beginCapture();
   }
 
   ~StdCapture()
   {
-    EndCapture();
+    endCapture();
   }
 
-  bool BeginCapture()
+  bool beginCapture()
   {
     if (m_capturing)
       return false;
@@ -56,7 +48,7 @@ public:
 
     if (result)
     {
-      ep::Kernel::GetInstance()->LogWarning(0, "Failed to open pipe {0}\n", errno);
+      ep::Kernel::getInstance()->logWarning(0, "Failed to open pipe {0}\n", errno);
       return false;
     }
 
@@ -80,12 +72,12 @@ public:
     return true;
   }
 
-  bool IsCapturing()
+  bool isCapturing()
   {
     return m_capturing;
   }
 
-  void EndCapture()
+  void endCapture()
   {
     if (!m_capturing)
       return;
@@ -106,7 +98,7 @@ public:
     m_capturing = false;
   }
 
-  String GetCapture()
+  String getCapture()
   {
     const int bufSize = 1025;
     char buf[bufSize] = { 0 };
@@ -135,7 +127,7 @@ public:
       bytesWritten = (ptrdiff_t)write(GetOldFd(), m_captured.ptr, (int)m_captured.length);
 
     if (bytesWritten != (ptrdiff_t)m_captured.length)
-      ep::Kernel::GetInstance()->LogWarning(0, "Not all bytes written when capture ended. Attempted {0} Actual {1}\n", m_captured.length, bytesWritten);
+      ep::Kernel::getInstance()->logWarning(0, "Not all bytes written when capture ended. Attempted {0} Actual {1}\n", m_captured.length, bytesWritten);
 
     return m_captured;
   }
@@ -152,3 +144,9 @@ private:
 };
 
 } // end namespace ep
+
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#undef pipe
+#endif // _MSC_VER

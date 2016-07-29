@@ -32,20 +32,20 @@ public:
   SDLKernel(Variant::VarMap commandLine);
   ~SDLKernel();
 
-  void RunMainLoop() override final;
-  void Quit() override final;
+  void runMainLoop() override final;
+  void quit() override final;
 
-  ViewRef SetFocusView(ViewRef spView) override final;
-  void DispatchToMainThread(MainThreadCallback callback) override final;
-  void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
+  ViewRef setFocusView(ViewRef spView) override final;
+  void dispatchToMainThread(MainThreadCallback callback) override final;
+  void dispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
 private:
-  static ComponentDescInl *MakeKernelDescriptor();
+  static ComponentDescInl *makeKernelDescriptor();
 
-  void EventLoop();
+  void eventLoop();
 };
 
-void SDLKernel::EventLoop()
+void SDLKernel::eventLoop()
 {
   SDL_Event event;
   while (SDL_PollEvent(&event))
@@ -64,9 +64,9 @@ void SDLKernel::EventLoop()
         try {
           d();
         } catch (std::exception &e) {
-          LogError("Exception occurred in MainThreadCallback : {0}", e.what());
+          logError("Exception occurred in MainThreadCallback : {0}", e.what());
         } catch (...) {
-          LogError("Exception occurred in MainThreadCallback : C++ Exception");
+          logError("Exception occurred in MainThreadCallback : C++ Exception");
         }
       }
       else if (event.user.code == 1)
@@ -78,9 +78,9 @@ void SDLKernel::EventLoop()
         try {
           d();
         } catch (std::exception &e) {
-          LogError("Exception occurred in MainThreadCallback : {0}", e.what());
+          logError("Exception occurred in MainThreadCallback : {0}", e.what());
         } catch (...) {
-          LogError("Exception occurred in MainThreadCallback : C++ Exception");
+          logError("Exception occurred in MainThreadCallback : C++ Exception");
         }
         udIncrementSemaphore(pDispatch->pSem);
       }
@@ -99,7 +99,7 @@ void SDLKernel::EventLoop()
         case SDL_WINDOWEVENT_RESIZED:
           s_displayWidth = event.window.data1;
           s_displayHeight = event.window.data2;
-          GetImpl()->spFocusView->Resize(s_displayWidth, s_displayHeight);
+          getImpl()->spFocusView->resize(s_displayWidth, s_displayHeight);
           glViewport(0, 0, s_displayWidth, s_displayHeight);
           break;
         }
@@ -110,14 +110,14 @@ void SDLKernel::EventLoop()
   }
 }
 
-ComponentDescInl *SDLKernel::MakeKernelDescriptor()
+ComponentDescInl *SDLKernel::makeKernelDescriptor()
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, Result::AllocFailure, "Memory allocation failed");
 
-  pDesc->info = SDLKernel::ComponentInfo();
+  pDesc->info = SDLKernel::componentInfo();
   pDesc->info.flags = ComponentInfoFlags::Unregistered;
-  pDesc->baseClass = Kernel::ComponentID();
+  pDesc->baseClass = Kernel::componentID();
 
   pDesc->pInit = nullptr;
   pDesc->pCreateInstance = nullptr;
@@ -125,19 +125,19 @@ ComponentDescInl *SDLKernel::MakeKernelDescriptor()
   pDesc->pSuperDesc = nullptr;
 
   // build search trees
-  for (auto &p : SDLKernel::GetPropertiesImpl())
+  for (auto &p : SDLKernel::getPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : SDLKernel::GetMethodsImpl())
+  for (auto &m : SDLKernel::getMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : SDLKernel::GetEventsImpl())
+  for (auto &e : SDLKernel::getEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : SDLKernel::GetStaticFuncsImpl())
+  for (auto &f : SDLKernel::getStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   return pDesc;
 }
 SDLKernel::SDLKernel(Variant::VarMap commandLine)
-  : Kernel(SDLKernel::MakeKernelDescriptor(), commandLine)
+  : Kernel(SDLKernel::makeKernelDescriptor(), commandLine)
 {
   s_displayWidth = 1280;
   s_displayHeight = 720;
@@ -157,28 +157,28 @@ SDLKernel::SDLKernel(Variant::VarMap commandLine)
   EPTHROW_IF(!s_context, Result::Failure, "Failed to create SDL Window");
   epscope(fail) { SDL_GL_DeleteContext(s_context); };
 
-  GetImpl()->InitRender();
+  getImpl()->InitRender();
 }
 
 SDLKernel::~SDLKernel()
 {
-  GetImpl()->Shutdown();
+  getImpl()->Shutdown();
   // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
-  EventLoop();
+  eventLoop();
 
-  GetImpl()->DeinitRender();
+  getImpl()->DeinitRender();
 
   SDL_GL_DeleteContext(s_context);
   SDL_Quit();
 }
 
-void SDLKernel::RunMainLoop()
+void SDLKernel::runMainLoop()
 {
-  FinishInit();
+  finishInit();
 
   while (!s_done)
   {
-    EventLoop();
+    eventLoop();
 
     // TODO: need to translate input polling into messages...
     epInput_Update();
@@ -192,7 +192,7 @@ void SDLKernel::RunMainLoop()
       ie.deviceType = InputDevice::Mouse;
       ie.eventType = InputEvent::EventType::Move;
       ie.move = InputEvent::MoveEvent{ input.mouse[0][MouseControls::XDelta], input.mouse[0][MouseControls::YDelta], input.mouse[0][MouseControls::XAbsolute], input.mouse[0][MouseControls::YAbsolute] };
-      GetImpl()->spFocusView->GetImpl<ep::ViewImpl>()->InputEvent(ie);
+      getImpl()->spFocusView->getImpl<ep::ViewImpl>()->InputEvent(ie);
     }
 
     ie.deviceType = InputDevice::Mouse;
@@ -202,7 +202,7 @@ void SDLKernel::RunMainLoop()
       if (input.mouse[0][i] != prevInput.mouse[0][i])
       {
         ie.key = InputEvent::KeyEvent{ (int)i, (int)input.mouse[0][i] };
-        GetImpl()->spFocusView->GetImpl<ep::ViewImpl>()->InputEvent(ie);
+        getImpl()->spFocusView->getImpl<ep::ViewImpl>()->InputEvent(ie);
       }
     }
 
@@ -213,12 +213,12 @@ void SDLKernel::RunMainLoop()
       if (input.keys[0][i] != prevInput.keys[0][i])
       {
         ie.key = InputEvent::KeyEvent{ (int)i, (int)input.keys[0][i] };
-        GetImpl()->spFocusView->GetImpl<ep::ViewImpl>()->InputEvent(ie);
+        getImpl()->spFocusView->getImpl<ep::ViewImpl>()->InputEvent(ie);
       }
     }
 
     // render a frame (this could move to another thread!)
-    RenderableViewRef spRenderView = GetImpl()->spFocusView->GetImpl<ViewImpl>()->GetRenderableView();
+    RenderableViewRef spRenderView = getImpl()->spFocusView->getImpl<ViewImpl>()->GetRenderableView();
     if (spRenderView)
       spRenderView->RenderGPU();
 
@@ -226,22 +226,22 @@ void SDLKernel::RunMainLoop()
   }
 }
 
-ViewRef SDLKernel::SetFocusView(ViewRef spView)
+ViewRef SDLKernel::setFocusView(ViewRef spView)
 {
-  KernelImpl *pKernelImpl = GetImpl();
+  KernelImpl *pKernelImpl = getImpl();
 
   if (!spView)
-    pKernelImpl->spFocusView->GetImpl<ViewImpl>()->SetLatestFrame(nullptr);
+    pKernelImpl->spFocusView->getImpl<ViewImpl>()->SetLatestFrame(nullptr);
 
   ViewRef spOld = pKernelImpl->spFocusView;
   pKernelImpl->spFocusView = spView;
 
   if (pKernelImpl->spFocusView)
-    pKernelImpl->spFocusView->Resize(s_displayWidth, s_displayHeight);
+    pKernelImpl->spFocusView->resize(s_displayWidth, s_displayHeight);
   return spOld;
 }
 
-void SDLKernel::DispatchToMainThread(MainThreadCallback callback)
+void SDLKernel::dispatchToMainThread(MainThreadCallback callback)
 {
   FastDelegateMemento m = callback.GetMemento();
   void **ppPtrs = (void**)&m;
@@ -254,7 +254,7 @@ void SDLKernel::DispatchToMainThread(MainThreadCallback callback)
   e.user.data2 = ppPtrs[1];
   SDL_PushEvent(&e);
 }
-void SDLKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+void SDLKernel::dispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   DelegateWithSemaphore dispatch;
   dispatch.m = callback.GetMemento();
@@ -271,14 +271,14 @@ void SDLKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
   udDestroySemaphore(&dispatch.pSem);
 }
 
-void SDLKernel::Quit()
+void SDLKernel::quit()
 {
   s_done = true;
 }
 
 namespace ep {
 
-Kernel* Kernel::CreateInstanceInternal(Variant::VarMap commandLine)
+Kernel* Kernel::createInstanceInternal(Variant::VarMap commandLine)
 {
   return KernelImpl::CreateComponentInstance<SDLKernel>(commandLine);
 }

@@ -7,9 +7,8 @@ FocusScope {
 
   // Properties // ------------------------
   property var epTypeDesc: {
-    "super": "ep.uicomponent",
-    "id": "ui.viewport",
-    "displayname": "UI.Viewport",
+    "id": "ui.Viewport",
+    "super": "ep.UIComponent",
     "description": "QML Based Viewport"
   }
   property var view
@@ -20,7 +19,7 @@ FocusScope {
       view = initParams.view;
     else {
       console.log("Creating internal view component");
-      view = EPKernel.createComponent("ep.view", {});
+      view = EPKernel.createComponent("ep.View", {});
     }
   }
 

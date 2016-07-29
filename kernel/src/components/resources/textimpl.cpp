@@ -7,20 +7,20 @@
 
 namespace ep {
 
-Array<const MethodInfo> Text::GetMethods() const
+Array<const MethodInfo> Text::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(ParseXml, "Parse XML formatted text in buffer into a heirarchical structure of KeyValuePairs"),
-    EP_MAKE_METHOD(FormatXml, "Format a heirarchical structure of KeyValuePairs as XML text"),
-    EP_MAKE_METHOD(ParseJson, "Parse Json formatted text in buffer into a heirarchical structure of KeyValuePairs"),
-    EP_MAKE_METHOD(FormatJson, "Format a heirarchical structure of KeyValuePairs as Json text"),
+    EP_MAKE_METHOD(parseXml, "Parse XML formatted text in buffer into a hierarchical structure of KeyValuePairs"),
+    EP_MAKE_METHOD(formatXml, "Format a hierarchical structure of KeyValuePairs as XML text"),
+    EP_MAKE_METHOD(parseJson, "Parse Json formatted text in buffer into a hierarchical structure of KeyValuePairs"),
+    EP_MAKE_METHOD(formatJson, "Format a hierarchical structure of KeyValuePairs as Json text"),
   };
 }
-Array<const StaticFuncInfo> Text::GetStaticFuncs() const
+Array<const StaticFuncInfo> Text::getStaticFuncs() const
 {
   return{
-    EP_MAKE_STATICFUNC(XMLMapToComponentParams, "Convert a map representing a heirarchy of XML elements into 'Component Params' format, i.e. suitable as InitParams and for returning from Save()"),
-    EP_MAKE_STATICFUNC(ComponentParamsToXMLMap, "Convert a map in 'Component Params' format into a map representing a heirarchy of XML elements"),
+    EP_MAKE_STATICFUNC(xmlMapToComponentParams, "Convert a map representing a hierarchy of XML elements into 'Component Params' format, i.e. suitable as InitParams and for returning from Save()"),
+    EP_MAKE_STATICFUNC(componentParamsToXmlMap, "Convert a map in 'Component Params' format into a map representing a hierarchy of XML elements"),
   };
 }
 
@@ -145,10 +145,10 @@ static Variant ParseXMLNode(rapidxml::xml_node<> *node)
 Variant TextImpl::ParseXml()
 {
   char *pNew = nullptr;
-  Slice<const void> buffer = pInstance->MapForRead();
+  Slice<const void> buffer = pInstance->mapForRead();
   epscope(exit)
   {
-    pInstance->Unmap();
+    pInstance->unmap();
     epFree(pNew);
   };
 
@@ -174,13 +174,13 @@ void TextImpl::FormatXml(Variant root)
 {
   if (!root.is(Variant::SharedPtrType::AssocArray))
   {
-    LogWarning(2, "FormatXml -- parameter is not a Map");
+    logWarning(2, "FormatXml -- parameter is not a Map");
     return;
   }
   Variant::VarMap rootElement = root.asAssocArray();
 
-  StreamRef spOut = GetKernel()->CreateComponent<MemStream>({ { "buffer", ComponentRef(pInstance) }, { "flags", OpenFlags::Write } });
-  spOut->WriteLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+  StreamRef spOut = getKernel()->createComponent<MemStream>({ { "buffer", ComponentRef(pInstance) }, { "flags", OpenFlags::Write } });
+  spOut->writeLn("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 
   FormatXmlElement(spOut, rootElement, 0);
 }
@@ -192,7 +192,7 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
   String elemName = element.get("name")->asString();
   MutableString<1024> str;
   str.format("{'',*0}<{1}", depth * 2, elemName);
-  spOut->Write(str);
+  spOut->write(str);
 
   Variant *pAttributes = element.get("attributes");
   if (pAttributes && pAttributes->is(Variant::SharedPtrType::AssocArray))
@@ -202,7 +202,7 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
     for (auto attr : attributes)
     {
       str.format(" {0}=\"{1}\"", attr.key.asString(), attr.value.asSharedString());
-      spOut->Write(str);
+      spOut->write(str);
     }
 
     if (attributes.size() > 0)
@@ -219,7 +219,7 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
       {
         if (!hasChildren)
         {
-          spOut->Write(String(">\n"));
+          spOut->write(String(">\n"));
           hasChildren = true;
         }
 
@@ -229,7 +229,7 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
   }
 
   if(hasAttributes && !hasChildren)
-    spOut->Write(String(">\n"));
+    spOut->write(String(">\n"));
 
   Variant *pText = element.get("text");
   if (pText && pText->is(Variant::Type::String))
@@ -241,18 +241,18 @@ void TextImpl::FormatXmlElement(StreamRef spOut, Variant::VarMap element, int de
     else
       str.format(">{0}</{1}>\n", pText->asSharedString(), elemName);
 
-    spOut->Write(str);
+    spOut->write(str);
   }
 
   if (!hasAttributes && !hasChildren)
   {
     if(!hasText)
-      spOut->Write(String(" />\n"));
+      spOut->write(String(" />\n"));
   }
   else
   {
     str.format("{'',*0}</{1}>\n", depth * 2, elemName);
-    spOut->Write(str);
+    spOut->write(str);
   }
 }
 
@@ -317,18 +317,18 @@ static Variant ParseJsonNode(const rapidjson::Value& val)
 
 Variant TextImpl::ParseJson()
 {
-  Slice<const void> buffer = pInstance->MapForRead();
+  Slice<const void> buffer = pInstance->mapForRead();
 
   // RapidXML requires buffer to be null terminated
   if (buffer[buffer.length - 1] != '\0')
   {
-    pInstance->Unmap();
-    pInstance->Resize(buffer.length + 1);
-    Slice<void> write = pInstance->Map();
+    pInstance->unmap();
+    pInstance->resize(buffer.length + 1);
+    Slice<void> write = pInstance->map();
     write[buffer.length] = '\0';
     buffer = write;
   }
-  epscope(exit) { pInstance->Unmap(); };
+  epscope(exit) { pInstance->unmap(); };
 
   using namespace rapidjson;
 

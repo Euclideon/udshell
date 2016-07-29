@@ -437,7 +437,7 @@ String Variant::asString() const
     }
     case Type::SharedPtr:
       if ((SharedPtrType)length == SharedPtrType::Component)
-        return c->GetUid();
+        return c->getUid();
     default:
       EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
@@ -473,7 +473,7 @@ SharedString Variant::asSharedString() const
       return SharedString::format("{0}", asArray());
     case Type::SharedPtr:
       if ((SharedPtrType)length == SharedPtrType::Component)
-        return c->GetUid();
+        return c->getUid();
     default:
       EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
   }
@@ -655,7 +655,7 @@ VarRange Variant::getRange() const
   EPTHROW_ERROR(Result::InvalidType, "Invalid type!");
 }
 
-void VarEvent::Signal(Slice<const Variant> args)
+void VarEvent::signal(Slice<const Variant> args)
 {
   for (auto &s : subscribers)
   {

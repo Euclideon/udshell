@@ -13,17 +13,17 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Component::GetProperties() const
+Array<const PropertyInfo> Component::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(Uid, "Component UID", nullptr, 0),
-    EP_MAKE_PROPERTY(Name, "Component Name", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Type, "Component Type", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(DisplayName, "Component Display Name", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Description, "Component Description", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("uid", getUid, "Component UID", nullptr, 0),
+    EP_MAKE_PROPERTY("name", getName, setName, "Component Name", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("type", getType, "Component Type", nullptr, 0),
+//    EP_MAKE_PROPERTY_RO("displayName", getDisplayName, "Component Display Name", nullptr, 0),  // TODO: add this back at some point?
+    EP_MAKE_PROPERTY_RO("description", getDescription, "Component Description", nullptr, 0),
   };
 }
-Array<const MethodInfo> Component::GetMethods() const
+Array<const MethodInfo> Component::getMethods() const
 {
   return{
   };
@@ -32,17 +32,17 @@ Array<const MethodInfo> Component::GetMethods() const
 
 ComponentImpl::~ComponentImpl()
 {
-  pInstance->LogDebug(4, "Destroy component: {0} ({1})", pInstance->uid, pInstance->name);
+  pInstance->logDebug(4, "Destroy component: {0} ({1})", pInstance->uid, pInstance->name);
 
   // HAX: we take access to KernelImpl; low-level Component stuff
-  KernelImpl *pKernelImpl = GetKernel()->GetImpl();
+  KernelImpl *pKernelImpl = getKernel()->getImpl();
   pKernelImpl->DestroyComponent(pInstance);
 }
 
 void ComponentImpl::SetName(SharedString name)
 {
   // HAX: we take access to KernelImpl; low-level Component stuff
-  KernelImpl *pKernelImpl = GetKernel()->GetImpl();
+  KernelImpl *pKernelImpl = getKernel()->getImpl();
 
   if (name && pKernelImpl->namedInstanceRegistry.exists(name))
     EPTHROW_WARN(Result::AlreadyExists, 1, "Name is already in use");
@@ -59,14 +59,14 @@ void ComponentImpl::ReceiveMessage(String message, String sender, const Variant 
   if (message.eqIC("set"))
   {
     Slice<Variant> arr = data.asArray();
-    pInstance->Set(arr[0].asString(), arr[1]);
+    pInstance->set(arr[0].asString(), arr[1]);
   }
   else if (message.eqIC("get"))
   {
     if (!sender.empty())
     {
-      Variant p = pInstance->Get(data.asString());
-      pInstance->SendMessage(sender, "val", p);
+      Variant p = pInstance->get(data.asString());
+      pInstance->sendMessage(sender, "val", p);
     }
   }
 }
@@ -81,9 +81,9 @@ Array<SharedString> ComponentImpl::EnumerateProperties(EnumerateFlags enumerateF
   }
   if (!(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    for (auto p : GetDescriptor()->propertyTree)
+    for (auto p : getDescriptor()->propertyTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->propertyTree.get(p.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->propertyTree.get(p.key))
         props.pushBack(p.key);
     }
   }
@@ -99,14 +99,14 @@ Array<SharedString> ComponentImpl::EnumerateFunctions(EnumerateFlags enumerateFl
   }
   if (!(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    for (auto f : GetDescriptor()->methodTree)
+    for (auto f : getDescriptor()->methodTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->methodTree.get(f.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->methodTree.get(f.key))
         functions.pushBack(f.key);
     }
-    for (auto sf : GetDescriptor()->staticFuncTree)
+    for (auto sf : getDescriptor()->staticFuncTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->staticFuncTree.get(sf.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->staticFuncTree.get(sf.key))
         functions.pushBack(sf.key);
     }
   }
@@ -122,9 +122,9 @@ Array<SharedString> ComponentImpl::EnumerateEvents(EnumerateFlags enumerateFlags
   }
   if (!(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    for (auto e : GetDescriptor()->eventTree)
+    for (auto e : getDescriptor()->eventTree)
     {
-      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->eventTree.get(e.key))
+      if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->eventTree.get(e.key))
         events.pushBack(e.key);
     }
   }
@@ -138,8 +138,8 @@ const PropertyDesc *ComponentImpl::GetPropertyDesc(String _name, EnumerateFlags 
     pDesc = instanceProperties.get(_name);
   if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->propertyTree.get(_name))
-      pDesc = ((const ComponentDescInl*)GetDescriptor())->propertyTree.get(_name);
+    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->propertyTree.get(_name))
+      pDesc = ((const ComponentDescInl*)getDescriptor())->propertyTree.get(_name);
   }
   return pDesc;
 }
@@ -150,8 +150,8 @@ const MethodDesc *ComponentImpl::GetMethodDesc(String _name, EnumerateFlags enum
     pDesc = instanceMethods.get(_name);
   if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->methodTree.get(_name))
-      pDesc = ((const ComponentDescInl*)GetDescriptor())->methodTree.get(_name);
+    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->methodTree.get(_name))
+      pDesc = ((const ComponentDescInl*)getDescriptor())->methodTree.get(_name);
   }
   return pDesc;
 }
@@ -162,15 +162,15 @@ const EventDesc *ComponentImpl::GetEventDesc(String _name, EnumerateFlags enumer
     pDesc = instanceEvents.get(_name);
   if (!pDesc && !(enumerateFlags & EnumerateFlags::NoStatic))
   {
-    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->eventTree.get(_name))
-      pDesc = ((const ComponentDescInl*)GetDescriptor())->eventTree.get(_name);
+    if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->eventTree.get(_name))
+      pDesc = ((const ComponentDescInl*)getDescriptor())->eventTree.get(_name);
   }
   return pDesc;
 }
 const StaticFuncDesc *ComponentImpl::GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags) const
 {
-  if (!(enumerateFlags & EnumerateFlags::NoInherited) || !GetSuperDescriptor()->staticFuncTree.get(_name))
-    return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.get(_name);
+  if (!(enumerateFlags & EnumerateFlags::NoInherited) || !getSuperDescriptor()->staticFuncTree.get(_name))
+    return ((const ComponentDescInl*)getDescriptor())->staticFuncTree.get(_name);
   return nullptr;
 }
 
@@ -205,12 +205,12 @@ void ComponentImpl::RemoveDynamicEvent(String _name)
 
 Variant ComponentImpl::Get(String property) const
 {
-  const PropertyDesc *pDesc = pInstance->GetPropertyDesc(property);
+  const PropertyDesc *pDesc = pInstance->getPropertyDesc(property);
   if (!pDesc || !pDesc->getter)
   {
     // TODO: throw in this case?
     const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is write-only" : "No property '{0}' for component '{1}'";
-    pInstance->LogWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    pInstance->logWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return Variant();
   }
   Variant r = pDesc->getter.get(pInstance);
@@ -219,12 +219,12 @@ Variant ComponentImpl::Get(String property) const
 }
 void ComponentImpl::Set(String property, const Variant &value)
 {
-  const PropertyDesc *pDesc = pInstance->GetPropertyDesc(property);
+  const PropertyDesc *pDesc = pInstance->getPropertyDesc(property);
   if (!pDesc || !pDesc->setter || pDesc->flags & epPF_Immutable)
   {
     // TODO: throw in this case?
     const char *pMessage = pDesc ? "Property '{0}' for component '{1}' is read-only" : "No property '{0}' for component '{1}'";
-    pInstance->LogWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    pInstance->logWarning(2, pMessage, property, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return;
   }
 
@@ -237,14 +237,14 @@ void ComponentImpl::Set(String property, const Variant &value)
 
 Variant ComponentImpl::Call(String method, Slice<const Variant> args)
 {
-  const MethodDesc *pDesc = pInstance->GetMethodDesc(method);
+  const MethodDesc *pDesc = pInstance->getMethodDesc(method);
   if (!pDesc)
   {
-    const StaticFuncDesc *pFunc = pInstance->GetStaticFuncDesc(method);
+    const StaticFuncDesc *pFunc = pInstance->getStaticFuncDesc(method);
     if (!pFunc)
     {
       // TODO: throw in this case?
-      pInstance->LogWarning(1, "Method '{0}' not found!", method);
+      pInstance->logWarning(1, "Method '{0}' not found!", method);
       return Variant();
     }
     Variant r2 = pFunc->staticFunc.call(args);
@@ -258,10 +258,10 @@ Variant ComponentImpl::Call(String method, Slice<const Variant> args)
 
 SubscriptionRef ComponentImpl::Subscribe(String eventName, const VarDelegate &d)
 {
-  const EventDesc *pDesc = pInstance->GetEventDesc(eventName);
+  const EventDesc *pDesc = pInstance->getEventDesc(eventName);
   if (!pDesc)
   {
-    pInstance->LogWarning(2, "No event '{0}' for component '{1}'", eventName, pInstance->name.empty() ? pInstance->uid : pInstance->name);
+    pInstance->logWarning(2, "No event '{0}' for component '{1}'", eventName, pInstance->name.empty() ? pInstance->uid : pInstance->name);
     return nullptr;
   }
 

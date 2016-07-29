@@ -6,25 +6,19 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Menu::GetProperties() const
+Array<const PropertyInfo> Menu::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(MenuData, "Heirarchical structure of menus", nullptr, 0),
+    EP_MAKE_PROPERTY("menuData", getMenuData, setMenuData, "Hierarchical structure of menus", nullptr, 0),
   };
 }
-Array<const MethodInfo> Menu::GetMethods() const
+Array<const MethodInfo> Menu::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(AddXMLItems, "Add menu items from an XML string"),
-    EP_MAKE_METHOD(RemoveItem, "Remove menu item"),
-    EP_MAKE_METHOD(AddItem, "Add a menu item with the given properties"),
-    EP_MAKE_METHOD(SetItemProperties, "Set properties for the given menu item"),
-  };
-}
-Array<const EventInfo> Menu::GetEvents() const
-{
-  return{
-    EP_MAKE_EVENT(Changed, "The menu data has changed"),
+    EP_MAKE_METHOD(addXMLItems, "Add menu items from an XML string"),
+    EP_MAKE_METHOD(removeItem, "Remove menu item"),
+    EP_MAKE_METHOD(addItem, "Add a menu item with the given properties"),
+    EP_MAKE_METHOD(setItemProperties, "Set properties for the given menu item"),
   };
 }
 
@@ -45,23 +39,23 @@ MenuImpl::MenuImpl(Component *pInstance, Variant::VarMap initParams)
 
 Variant MenuImpl::ParseXMLString(String buffer)
 {
-  auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
-  spXMLBuffer->Allocate(buffer.length + 1);
-  spXMLBuffer->CopyBuffer(buffer);
-  Slice<void> buf = spXMLBuffer->Map();
+  auto spXMLBuffer = getKernel()->createComponent<Text>();
+  spXMLBuffer->allocate(buffer.length + 1);
+  spXMLBuffer->copyBuffer(buffer);
+  Slice<void> buf = spXMLBuffer->map();
   buf[buffer.length] = '\0';
-  spXMLBuffer->Unmap();
+  spXMLBuffer->unmap();
 
   using namespace rapidxml;
   Variant rootNode;
 
   try
   {
-    rootNode = spXMLBuffer->ParseXml();
+    rootNode = spXMLBuffer->parseXml();
   }
   catch (parse_error &e)
   {
-    LogError("Unable to parse menus xml string on line {0} : {1}", Text::GetLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
+    logError("Unable to parse menus xml string on line {0} : {1}", Text::getLineNumberFromByteIndex(buffer, (size_t)(e.where<char>() - buffer.ptr)), e.what());
     return false;
   }
 
@@ -124,12 +118,12 @@ bool MenuImpl::SetItemProperties(String path, Variant::VarMap properties)
   Variant *pParent = FindMenuItem(&path);
   if (!pParent)
   {
-    GetKernel()->LogDebug(2, "Can't set properties of non-existent menu item \"{0}\"", path);
+    getKernel()->logDebug(2, "Can't set properties of non-existent menu item \"{0}\"", path);
     return false;
   }
 
   SetMenuProperties(*pParent, properties);
-  pInstance->Changed.Signal();
+  pInstance->changed.signal();
 
   return true;
 }
@@ -150,7 +144,7 @@ void MenuImpl::AddItem(String parentPath, Variant::VarMap properties)
   children.pushBack(subTree);
   *pChildren = Variant(std::move(children));
 
-  pInstance->Changed.Signal();
+  pInstance->changed.signal();
 }
 
 Variant *MenuImpl::FindMenuItem(String *parentPath)
@@ -203,7 +197,7 @@ bool MenuImpl::RemoveItem(String path)
     pParent = FindMenuItem(&parentPath);
     if (!pParent || !parentPath.empty())
     {
-      LogDebug(2, "Can't remove non-existent menu item \"{0}\"", path);
+      logDebug(2, "Can't remove non-existent menu item \"{0}\"", path);
       return false;
     }
 
@@ -223,7 +217,7 @@ bool MenuImpl::RemoveItem(String path)
   }
   *pChildren = Variant(std::move(children));
 
-  pInstance->Changed.Signal();
+  pInstance->changed.signal();
 
   return true;
 }
@@ -237,7 +231,7 @@ Variant MenuImpl::CreateMenuItem(Variant::VarMap properties)
   map.insert(KeyValuePair("image", ""));
   map.insert(KeyValuePair("checkable", false));
   map.insert(KeyValuePair("checked", false));
-  map.insert(KeyValuePair("exclusivegroup", false));
+  map.insert(KeyValuePair("exclusiveGroup", false));
   map.insert(KeyValuePair("enabled", true));
   map.insert(KeyValuePair("shortcut", ""));
   map.insert(KeyValuePair("command", ""));
@@ -261,7 +255,7 @@ void MenuImpl::SetMenuProperties(Variant &menu, Variant::VarMap properties)
     String itemName = item.key.asString();
 
     if (itemName.eq("command"))
-      *menu.getItem("shortcut") = GetKernel()->GetCommandManager()->GetShortcut(item.value.asString());
+      *menu.getItem("shortcut") = getKernel()->getCommandManager()->getShortcut(item.value.asString());
 
     if (itemName.eq("children"))
     {

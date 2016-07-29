@@ -27,7 +27,7 @@ public:
   SceneRef GetScene() const override final { return spScene; }
   void SetScene(SceneRef _spScene) override final { spScene = _spScene; }
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   void Render(RenderScene &spRenderScene, const Double4x4 &mat) override final;

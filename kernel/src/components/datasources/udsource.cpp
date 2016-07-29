@@ -19,7 +19,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
   {
     const Variant *useStreamer = initParams.get("useStreamer");
 
-    MutableString<260> filePath = File::UrlToNativePath(source->asString());
+    MutableString<260> filePath = File::urlToNativePath(source->asString());
 
     udOctree *pOctree = nullptr;
     udResult result = udOctree_Load(&pOctree, filePath.toStringz(), useStreamer && useStreamer->is(Variant::Type::Bool) ? useStreamer->asBool() : true, nullptr);
@@ -32,13 +32,13 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     if (udModel && udModel->is(Variant::SharedPtrType::Component))
       model = component_cast<UDModel>(udModel->asComponent());
     else
-      model = pKernel->CreateComponent<UDModel>();
+      model = pKernel->createComponent<UDModel>();
 
-    UDModelImpl *pModelImpl = model->GetImpl<UDModelImpl>();
+    UDModelImpl *pModelImpl = model->getImpl<UDModelImpl>();
     pModelImpl->pOctree = pOctree;
 
     // Populate meta data
-    MetadataRef meta = model->GetMetadata();
+    MetadataRef meta = model->getMetadata();
     int32_t count;
     result = udOctree_GetMetadataCount(pOctree, &count);
     if (result == udR_Success)
@@ -49,7 +49,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
         const char *pValue;
         result = udOctree_GetMetadataByIndex(pOctree, i, &pName, &pValue, nullptr, nullptr);
         if (result == udR_Success && !String("ModelAttributes").eq(pName))
-          meta->Insert(pName, pValue);
+          meta->insert(pName, pValue);
       }
     }
 
@@ -76,12 +76,12 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
                                                       { pOri[0] + pExt[0], pOri[1] + pExt[1], pOri[2] + pExt[2] } });
 
       header.insert("maxOctreeDepth", headerData.maxOctreeDepth);
-      meta->Insert("octreeheader", std::move(header));
+      meta->insert("octreeHeader", std::move(header));
     }
 
     result = udOctree_GetLocalMatrixF64(pModelImpl->pOctree, pModelImpl->udmatrix.a);
     if (result == udR_Success)
-      SetResource(source->asString(), model);
+      setResource(source->asString(), model);
 
     Array<Variant> varMetadata;
 
@@ -104,7 +104,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
       md.info.flags |= descriptor.typeInfo & udATI_Signed ? ElementInfoFlags::Signed : 0;
       md.info.flags |= descriptor.typeInfo & udATI_Color ? ElementInfoFlags::Color : 0;
 
-      md.type = md.info.AsString();
+      md.type = md.info.asString();
 
       md.offset = 0;
       varMetadata.pushBack(md);
@@ -112,13 +112,13 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     }
 
     if (varMetadata.length)
-      meta->Insert("attributeinfo", std::move(varMetadata));
+      meta->insert("attributeInfo", std::move(varMetadata));
   }
 }
 
-void UDSource::StaticInit(ep::Kernel *pKernel)
+void UDSource::staticInit(ep::Kernel *pKernel)
 {
-  pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
+  pKernel->registerExtensions(pKernel->getComponentDesc(componentID()), extensions);
 }
 
 } // namespace ep

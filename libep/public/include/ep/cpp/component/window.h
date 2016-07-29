@@ -14,20 +14,20 @@ class Window : public Component
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Window, IWindow, Component, EPKERNEL_PLUGINVERSION, "UI Window", ComponentInfoFlags::Abstract)
 public:
-  void SetTopLevelUI(UIComponentRef spUIComponent) { pImpl->SetTopLevelUI(spUIComponent); }
-  UIComponentRef GetTopLevelUI() const { return pImpl->GetTopLevelUI(); }
+  void setTopLevelUI(UIComponentRef spUIComponent) { pImpl->SetTopLevelUI(spUIComponent); }
+  UIComponentRef getTopLevelUI() const { return pImpl->GetTopLevelUI(); }
 
-  void PostInit(void *pData) { pImpl->PostInit(pData); }
+  void postInit(void *pData) { pImpl->PostInit(pData); }
 
 protected:
   Window(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
+  Array<const PropertyInfo> getProperties() const;
 };
 
 } // namespace ep

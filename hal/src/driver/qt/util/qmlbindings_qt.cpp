@@ -65,7 +65,7 @@ public:
   Variant getter(Slice<const Variant>, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((ep::Component*)this)->getUserData();
     return Variant(pQObject->metaObject()->property(data.propertyId).read(pQObject));
   }
 
@@ -73,7 +73,7 @@ public:
   Variant setter(Slice<const Variant> args, const RefCounted &_data)
   {
     const QtPropertyData &data = (const QtPropertyData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((ep::Component*)this)->getUserData();
     pQObject->metaObject()->property(data.propertyId).write(pQObject, args[0].as<QVariant>());
     return Variant();
   }
@@ -102,7 +102,7 @@ public:
 
     QVariant retVal;
     const QtMethodData &data = (const QtMethodData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((ep::Component*)this)->getUserData();
     pQObject->metaObject()->method(data.methodId).invoke(pQObject, Qt::AutoConnection, Q_RETURN_ARG(QVariant, retVal),
       args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
 
@@ -113,7 +113,7 @@ public:
   Variant subscribe(Slice<const Variant> values, const RefCounted &_data)
   {
     const QtEventData &data = (const QtEventData&)_data;
-    QObject *pQObject = (QObject*)((ep::Component*)this)->GetUserData();
+    QObject *pQObject = (QObject*)((ep::Component*)this)->getUserData();
 
     return Variant(data.signalMapper.Subscribe(pQObject, values[0].asDelegate()));
   }
@@ -134,11 +134,11 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     static SharedString propertyDescStr("Qt Component Property");
     QMetaProperty property = pMetaObject->property(i);
 
-    SharedString propertyName = epFromQString(property.name()).toLower();
+    SharedString propertyName = epFromQString(property.name());
 
     if (pDesc->propertyTree.get(propertyName))
     {
-      QtApplication::Kernel()->LogWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.", propertyName);
+      QtApplication::kernel()->logWarning(1, "Property '{0}' already exists in parent component. Will be inaccessible outside of QML.", propertyName);
       continue;
     }
 
@@ -147,19 +147,19 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     auto setterShim = (property.isWritable() ? MethodShim(&QtShims::setter, data) : MethodShim(nullptr));
     uint32_t flags = (property.isConstant() ? (uint32_t)ep::PropertyFlags::epPF_Immutable : 0);
 
-    pDesc->propertyTree.insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyName, propertyDescStr, nullptr, flags }, getterShim, setterShim));
+    pDesc->propertyTree.insert(propertyName, PropertyDesc(PropertyInfo{ propertyName, propertyDescStr, nullptr, flags }, getterShim, setterShim));
   }
 
   for (int i = pMetaObject->methodOffset(); i < pMetaObject->methodCount(); ++i)
   {
     // Inject the methods
     QMetaMethod method = pMetaObject->method(i);
-    SharedString name = epFromQString(method.name()).toLower();
+    SharedString name = epFromQString(method.name());
     if (method.methodType() == QMetaMethod::Slot)
     {
       if (pDesc->methodTree.get(name))
       {
-        QtApplication::Kernel()->LogWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
+        QtApplication::kernel()->logWarning(1, "Method '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
         continue;
       }
 
@@ -175,7 +175,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
     {
       if (pDesc->eventTree.get(name))
       {
-        QtApplication::Kernel()->LogWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
+        QtApplication::kernel()->logWarning(1, "Event '{0}' already exists in parent component. Will be inaccessible outside of QML.", name);
         continue;
       }
 
@@ -184,7 +184,7 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
       auto data = SharedPtr<QtEventData>::create(i, name);
       auto shim = EventShim(&QtShims::subscribe, data);
 
-      pDesc->eventTree.insert(name, EventDesc(EventInfo{ name, name, eventDescStr }, shim));
+      pDesc->eventTree.insert(name, EventDesc(EventInfo{ name, eventDescStr }, shim));
     }
   }
 }
@@ -195,11 +195,11 @@ void PopulateComponentDesc(ep::ComponentDescInl *pDesc, QObject *pObject)
 ep::DynamicComponentRef QmlComponentData::CreateComponent(ep::KernelRef spKernel, Variant::VarMap initParams)
 {
   // NOTE: we need to give QObjectComponent our 'this' pointer so it can do deferred QObject creation
-  return spKernel->CreateComponent<QObjectComponent>({ { "qmlcomponentdata", (int64_t)(size_t)this } });
+  return spKernel->createComponent<QObjectComponent>({ { "qmlComponentData", (int64_t)(size_t)this } });
 }
 
 // Creates a QML Item from the stored QQmlComponent
-QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent, ep::Variant::VarMap initParams)
+QObject *QmlComponentData::createInstance(QQmlEngine *pQmlEngine, ep::Component *pGlueComponent, ep::Variant::VarMap initParams)
 {
   using namespace ep;
 
@@ -217,7 +217,7 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
     {
       // TODO: better error information/handling
       foreach(const QQmlError &error, qmlComponent.errors())
-        pGlueComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+        pGlueComponent->logError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
       EPTHROW(Result::Failure, "Error compiling QML file");
     }
   }
@@ -239,7 +239,7 @@ QObject *QmlComponentData::CreateInstance(QQmlEngine *pQmlEngine, ep::Component 
   {
     // TODO: better error information/handling
     foreach(const QQmlError &error, qmlComponent.errors())
-      pGlueComponent->LogError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
+      pGlueComponent->logError(SharedString::concat("QML Error: ", error.toString().toUtf8().data()));
     EPTHROW(Result::Failure, "Error creating QML Item");
   }
 
@@ -268,7 +268,7 @@ QtEPComponent *QtKernelQml::findComponent(const QString &uid) const
   String uidString(byteArray.data(), byteArray.size());
 
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->FindComponent(uidString));
+  return BuildQtEPComponent::Create(pKernel->findComponent(uidString));
 }
 
 QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariant initParams)
@@ -279,7 +279,7 @@ QtEPComponent *QtKernelQml::createComponent(const QString typeId, QVariant initP
 
   try
   {
-    return BuildQtEPComponent::Create(pKernel->CreateComponent(typeString, epToVariant(initParams).asAssocArray()));
+    return BuildQtEPComponent::Create(pKernel->createComponent(typeString, epToVariant(initParams).asAssocArray()));
   }
   catch (ep::EPException &)
   {
@@ -291,38 +291,38 @@ QtEPComponent *QtKernelQml::getCommandManager() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->GetCommandManager());
+  return BuildQtEPComponent::Create(pKernel->getCommandManager());
 }
 
 QtEPComponent *QtKernelQml::getLua() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->GetLua());
+  return BuildQtEPComponent::Create(pKernel->getLua());
 }
 
 QtEPComponent *QtKernelQml::getStdOutBroadcaster() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->GetStdOutBroadcaster());
+  return BuildQtEPComponent::Create(pKernel->getStdOutBroadcaster());
 }
 
 QtEPComponent *QtKernelQml::getStdErrBroadcaster() const
 {
   EPASSERT(pKernel, "No active kernel");
   // TODO: this should default to JS ownership but doublecheck!!
-  return BuildQtEPComponent::Create(pKernel->GetStdErrBroadcaster());
+  return BuildQtEPComponent::Create(pKernel->getStdErrBroadcaster());
 }
 
 void QtKernelQml::exec(QString str)
 {
-  pKernel->Exec(String(str.toUtf8().data(), str.length()));
+  pKernel->exec(String(str.toUtf8().data(), str.length()));
 }
 
 QtFocusManager *QtKernelQml::getFocusManager() const
 {
-  return pKernel->GetFocusManager();
+  return pKernel->getFocusManager();
 }
 
 
@@ -390,20 +390,20 @@ QtMetaObjectGenerator::QtMetaObjectGenerator(const ep::ComponentDesc *_pDesc)
     // TODO: update these when arg types are supported
     AddMethod(MethodType::Slot, "get", Slice<const SharedString>{ "propertyName" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
-        return pObj->pComponent->Get(varArgs[0].asString()).as<QVariant>();
+        return pObj->pComponent->get(varArgs[0].asString()).as<QVariant>();
       });
     AddMethod(MethodType::Slot, "set", Slice<const SharedString>{ "propertyName", "value" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
-        pObj->pComponent->Set(varArgs[0].asString(), varArgs[1]);
+        pObj->pComponent->set(varArgs[0].asString(), varArgs[1]);
         return QVariant();
       });
     AddMethod(MethodType::Slot, "call", Slice<const SharedString>{ "methodName", "arg0", "arg1", "arg2", "arg3", "arg4", "arg5", "arg6", "arg7", "arg8" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
-        return pObj->pComponent->Call(varArgs[0].asString(), varArgs.slice(1, varArgs.length)).as<QVariant>();
+        return pObj->pComponent->call(varArgs[0].asString(), varArgs.slice(1, varArgs.length)).as<QVariant>();
       }, 9);
     AddMethod(MethodType::Slot, "subscribe", Slice<const SharedString>{ "eventName", "delegate" },
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
-        return ep::Variant(pObj->pComponent->Subscribe(varArgs[0].asString(), varArgs[1].asDelegate())).as<QVariant>();
+        return ep::Variant(pObj->pComponent->subscribe(varArgs[0].asString(), varArgs[1].asDelegate())).as<QVariant>();
       });
     AddMethod(MethodType::Slot, "disconnectAll", nullptr,
       [](QtEPComponent *pObj, ep::Slice<const ep::Variant> varArgs) -> QVariant {
@@ -682,8 +682,8 @@ const QMetaObject *QtEPComponent::metaObject() const
 {
   if (!pMetaObj && pComponent)
   {
-    pMetaObj = QtMetaObjectGenerator::Generate(pComponent->GetDescriptor());
-    EPASSERT_THROW(pMetaObj, ep::Result::Failure, "Unable to generate QMetaObject for component type '{0}'", pComponent->GetType());
+    pMetaObj = QtMetaObjectGenerator::Generate(pComponent->getDescriptor());
+    EPASSERT_THROW(pMetaObj, ep::Result::Failure, "Unable to generate QMetaObject for component type '{0}'", pComponent->getType());
   }
 
   return pMetaObj;
@@ -786,13 +786,13 @@ int QtEPComponent::MethodInvoke(const QMetaObject *pMO, int id, void **v)
     }
 
     QVariant retVal;
-    String methodName = epFromQByteArray(method.name());
+    auto methodName = epFromQByteArray(method.name());
 
     // Check if this is a built-in method, otherwise pipe it thru to the EPComponent system
     if ((id - QObject::staticMetaObject.methodCount() - QtMetaObjectGenerator::builtInOffset) < QtMetaObjectGenerator::builtInCount)
       retVal = QtMetaObjectGenerator::builtInMethods[methodName](this, varArgs);
     else
-      retVal = pComponent->Call(methodName, (Slice<const Variant>)varArgs).as<QVariant>();
+      retVal = pComponent->call(methodName, (Slice<const Variant>)varArgs).as<QVariant>();
 
     if (method.returnType() != QMetaType::Void)
       *(QVariant*)v[0] = retVal;
@@ -813,10 +813,10 @@ int QtEPComponent::PropertyInvoke(const QMetaObject *pMO, QMetaObject::Call call
     switch (call)
     {
       case QMetaObject::ReadProperty:
-        epFromVariant(pComponent->Get(prop.name()), (QVariant*)*v);
+        epFromVariant(pComponent->get(prop.name()), (QVariant*)*v);
         break;
       case QMetaObject::WriteProperty:
-        pComponent->Set(prop.name(), epToVariant(*(QVariant*)v[0]));
+        pComponent->set(prop.name(), epToVariant(*(QVariant*)v[0]));
         break;
       default:
         supported = false;
@@ -831,14 +831,14 @@ int QtEPComponent::PropertyInvoke(const QMetaObject *pMO, QMetaObject::Call call
 
 void QtEPComponent::connectNotify(const QMetaMethod &signal)
 {
-  ep::MutableString<0> signalName = epFromQByteArray(signal.name());
+  auto signalName = epFromQByteArray(signal.name());
 
   // Check if we already have an entry in the connection map
   if (connectionMap.get(signalName))
     return;
 
   Connection *pConn = &connectionMap.insert(signalName, Connection{ this, signal });
-  pConn->subscription = pComponent->Subscribe(signalName, ep::VarDelegate(pConn, &QtEPComponent::Connection::SignalRouter));
+  pConn->subscription = pComponent->subscribe(signalName, ep::VarDelegate(pConn, &QtEPComponent::Connection::SignalRouter));
 }
 
 void QtEPComponent::disconnectNotify(const QMetaMethod &signal)
@@ -847,7 +847,7 @@ void QtEPComponent::disconnectNotify(const QMetaMethod &signal)
   if (!signal.isValid())
   {
     for (auto conn : connectionMap)
-      conn.value.subscription->Unsubscribe();
+      conn.value.subscription->unsubscribe();
     connectionMap.clear();
   }
 
@@ -855,7 +855,7 @@ void QtEPComponent::disconnectNotify(const QMetaMethod &signal)
   if (receivers(QByteArray::number(QSIGNAL_CODE) + signal.methodSignature()) == 0)
   {
     auto conn = connectionMap.find(epFromQByteArray(signal.name()));
-    conn->subscription->Unsubscribe();
+    conn->subscription->unsubscribe();
     connectionMap.erase(conn);
   }
 }
@@ -883,7 +883,7 @@ QQuickWindow *QtGlobalEPSingleton::parentWindow(QQuickItem *pQuickItem) const
 {
   if (!pQuickItem)
   {
-    QtApplication::Kernel()->LogError("Attempted to get parent window for null item");
+    QtApplication::kernel()->logError("Attempted to get parent window for null item");
     return nullptr;
   }
   return pQuickItem->window();

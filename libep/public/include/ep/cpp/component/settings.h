@@ -16,20 +16,20 @@ class Settings : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Settings, ISettings, Component, EPKERNEL_PLUGINVERSION, "Manage user settings", 0)
 public:
-  void SaveSettings() { pImpl->SaveSettings(); }
+  void saveSettings() { pImpl->SaveSettings(); }
 
-  virtual void SetValue(SharedString nameSpace, SharedString key, Variant value) { pImpl->SetValue(nameSpace, key, value); }
-  virtual const Variant GetValue (SharedString nameSpace, SharedString key) { return pImpl->GetValue(nameSpace, key); }
+  virtual void setValue(SharedString nameSpace, SharedString key, Variant value) { pImpl->SetValue(nameSpace, key, value); }
+  virtual const Variant getValue (SharedString nameSpace, SharedString key) { return pImpl->GetValue(nameSpace, key); }
 
 protected:
   Settings(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
   : Resource(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
-  Array<const MethodInfo> GetMethods() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } //namespace ep

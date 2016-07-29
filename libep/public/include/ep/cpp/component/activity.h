@@ -14,24 +14,24 @@ class Activity : public Component
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Activity, IActivity, Component, EPKERNEL_PLUGINVERSION, "Activity desc...", 0)
 public:
 
-  virtual void Activate() { pImpl->Activate(); }
-  virtual void Deactivate() { pImpl->Deactivate(); }
+  virtual void activate() { pImpl->Activate(); }
+  virtual void deactivate() { pImpl->Deactivate(); }
 
-  UIComponentRef GetUI() const { return pImpl->GetUI(); }
-  void SetUI(UIComponentRef ui) { pImpl->SetUI(ui); }
+  UIComponentRef getUI() const { return pImpl->GetUI(); }
+  void setUI(UIComponentRef ui) { pImpl->SetUI(ui); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   Activity(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } //namespace ep

@@ -19,63 +19,63 @@ class Console : public Component
   EP_DECLARE_COMPONENT(ep, Console, Component, EPKERNEL_PLUGINVERSION, "Console logging data component", 0)
 public:
 
-  void AddBroadcaster(BroadcasterRef spBC);
-  void RemoveBroadcaster(BroadcasterRef spBC);
-  bool IsLogOutputEnabled();
+  void addBroadcaster(BroadcasterRef spBC);
+  void removeBroadcaster(BroadcasterRef spBC);
+  bool isLogOutputEnabled();
 
-  void RelayInput(String str);
+  void relayInput(String str);
 
-  int GetNumConsoleLines() const { return (int)filteredConsole.length; }
+  int getNumConsoleLines() const { return (int)filteredConsole.length; }
 
-  void RebuildOutput();
+  void rebuildOutput();
 
-  LogFilter GetFilter() const { return logFilter; }
-  void SetFilter(LogFilter filter)
+  LogFilter getFilter() const { return logFilter; }
+  void setFilter(LogFilter filter)
   {
     logFilter = filter;
-    RebuildOutput();
+    rebuildOutput();
   };
 
   // Filter getter/setter helper functions
-  int GetFilterLevel(LogCategories category) const { return logFilter.GetLevel(category); }
-  void SetFilterLevel(LogCategories categories, int level)
+  int getFilterLevel(LogCategories category) const { return logFilter.getLevel(category); }
+  void setFilterLevel(LogCategories categories, int level)
   {
-    logFilter.SetLevel(categories, level);
-    RebuildOutput();
+    logFilter.setLevel(categories, level);
+    rebuildOutput();
   }
 
-  bool IsFilterCategoryEnabled(LogCategories category) const { return logFilter.IsCategoryEnabled(category); }
-  void EnableFilterCategory(LogCategories categories) { logFilter.EnableCategory(categories); RebuildOutput(); }
-  void DisableFilterCategory(LogCategories categories) { logFilter.DisableCategory(categories); RebuildOutput(); }
+  bool isFilterCategoryEnabled(LogCategories category) const { return logFilter.isCategoryEnabled(category); }
+  void enableFilterCategory(LogCategories categories) { logFilter.enableCategory(categories); rebuildOutput(); }
+  void disableFilterCategory(LogCategories categories) { logFilter.disableCategory(categories); rebuildOutput(); }
 
-  String GetFilterComponents() const;
-  void SetFilterComponents(String str);
+  String getFilterComponents() const;
+  void setFilterComponents(String str);
 
-  bool FilterTextLine(String line) const;
-  String GetFilterText() const { return textFilter; }
-  void SetFilterText(String str)
+  bool filterTextLine(String line) const;
+  String getFilterText() const { return textFilter; }
+  void setFilterText(String str)
   {
     textFilter = str;
-    RebuildOutput();
+    rebuildOutput();
   }
 
   // History
-  String GetHistoryLine(size_t lineNumber) const { return history[lineNumber]; }
-  void AppendHistory(String str);
-  size_t GetHistoryLength() const { return history.length; }
+  String getHistoryLine(size_t lineNumber) const { return history[lineNumber]; }
+  void appendHistory(String str);
+  size_t getHistoryLength() const { return history.length; }
 
-  bool OutputLog() const { return bOutputLog; }
-  bool HasInput() const { return bHasInput; }
-  String GetTitle() const { return title; }
+  bool outputLog() const { return bOutputLog; }
+  bool hasInput() const { return bHasInput; }
+  String getTitle() const { return title; }
 
 protected:
   Console(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
   virtual ~Console();
 
   //void ToggleVisible(Variant::VarMap params);
-  void OnLogChanged();
-  void OnConsoleOutput(Slice<const void> buf);
-  bool FilterLogLine(const LogLine &) const;
+  void onLogChanged();
+  void onConsoleOutput(Slice<const void> buf);
+  bool filterLogLine(const LogLine &) const;
 
   LogFilter logFilter;
   bool bOutputLogToConsole = false;
@@ -107,8 +107,8 @@ protected:
   Array<ConsoleLine> consoleLines;
   Array<int> filteredConsole;
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } // namespace ep

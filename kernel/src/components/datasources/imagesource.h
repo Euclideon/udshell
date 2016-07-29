@@ -16,26 +16,26 @@ class ImageSource : public DataSource
   EP_DECLARE_COMPONENT(ep, ImageSource, DataSource, EPKERNEL_PLUGINVERSION, "Provides images", 0)
 public:
 
-  Slice<const String> GetFileExtensions() const override
+  Slice<const String> getFileExtensions() const override
   {
     return extensions;
   }
 
-  static Slice<const String> StaticGetFileExtensions() { return extensions; }
+  static Slice<const String> staticGetFileExtensions() { return extensions; }
 
 protected:
   static const Array<const String> extensions;
 
-  static void StaticInit(ep::Kernel *pKernel);
+  static void staticInit(ep::Kernel *pKernel);
 
   ImageSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : DataSource(pType, pKernel, uid, initParams)
   {
-    StreamRef ref = OpenStream(*initParams.get("src"));
-    Create(ref);
+    StreamRef ref = openStream(*initParams.get("src"));
+    create(ref);
   }
 
-  void Create(StreamRef spSource);
+  void create(StreamRef spSource);
 };
 
 } // namespace ep

@@ -5,21 +5,22 @@
 
 namespace ep {
 
-Array<const PropertyInfo> SimpleCamera::GetProperties() const
+Array<const PropertyInfo> SimpleCamera::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_WO(Matrix, "Local matrix", nullptr, 0),
-    EP_MAKE_PROPERTY_WO(Position, "Local position", nullptr, 0),
-    EP_MAKE_PROPERTY_WO(Orientation, "Camera orientation (YPR)", nullptr, 0),
-    EP_MAKE_PROPERTY_WO(Speed, "Camera speed", nullptr, 0),
-    EP_MAKE_PROPERTY(HelicopterMode, "Helicopter Mode", nullptr, 0),
-    EP_MAKE_PROPERTY(InvertedYAxis, "InvertYAxis", nullptr, 0),
+    // TODO: why are these write-only?
+    EP_MAKE_PROPERTY_WO("matrix", setMatrix, "Local matrix", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("position", setPosition, "Local position", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("orientation", setOrientation, "Camera orientation (YPR)", nullptr, 0),
+    EP_MAKE_PROPERTY_WO("speed", setSpeed, "Camera speed", nullptr, 0),
+    EP_MAKE_PROPERTY("helicopterMode", getHelicopterMode, setHelicopterMode, "Helicopter Mode", nullptr, 0),
+    EP_MAKE_PROPERTY("invertedYAxis", getInvertedYAxis, setInvertedYAxis, "Invert Y-axis", nullptr, 0),
   };
 }
-Array<const EventInfo> SimpleCamera::GetEvents() const
+Array<const EventInfo> SimpleCamera::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Changed, "The camera changed")
+    EP_MAKE_EVENT(repositioned, "The camera position and/or orientation has changed")
   };
 }
 
@@ -63,11 +64,11 @@ SimpleCameraImpl::SimpleCameraImpl(Component *pInstance, Variant::VarMap initPar
   if (paramSpeed)
     SetSpeed(paramSpeed->asFloat());
 
-  const Variant *paramInvert = initParams.get("invertyaxis");
+  const Variant *paramInvert = initParams.get("invertYAxis");
   if (paramInvert)
     SetInvertedYAxis(paramInvert->asBool());
 
-  const Variant *paramHeli = initParams.get("helicoptermode");
+  const Variant *paramHeli = initParams.get("helicopterMode");
   if (paramHeli)
     SetHelicopterMode(paramHeli->asBool());
 }
@@ -277,7 +278,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
   while (ypr.x >= EP_2PI)
     ypr.x -= EP_2PI;
 
-  Double4x4 cam = pInstance->Super::GetCameraMatrix();
+  Double4x4 cam = pInstance->Super::getCameraMatrix();
 
   Double3 forward = cam.axis.y.toVector3();
   Double3 xAxis = cam.axis.x.toVector3();
@@ -288,13 +289,13 @@ bool SimpleCameraImpl::Update(double timeDelta)
   pos += xAxis*tx*tmpSpeed;
   pos.z += tz*tmpSpeed;
 
-  pInstance->Super::SetMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
+  pInstance->Super::setMatrix(Double4x4::rotationYPR(ypr.x, ypr.y, ypr.z, pos));
 
   mouse.delta = {0 , 0};
 
   if (stateChanged)
   {
-    pInstance->Changed.Signal(pos, ypr);
+    pInstance->repositioned.signal(pos, ypr);
     stateChanged = false;
   }
 
@@ -305,12 +306,12 @@ bool SimpleCameraImpl::Update(double timeDelta)
 
 Variant SimpleCameraImpl::Save() const
 {
-  Variant var = pInstance->Super::Save();
+  Variant var = pInstance->Super::save();
   Variant::VarMap params = var.asAssocArray();
 
   params.insert("speed", speed);
-  params.insert("invertyaxis", (invertedYAxis == -1.0 ? true : false));
-  params.insert("helicoptermode", helicopterMode);
+  params.insert("invertYAxis", (invertedYAxis == -1.0 ? true : false));
+  params.insert("helicopterMode", helicopterMode);
 
   return Variant(std::move(params));
 }

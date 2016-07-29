@@ -10,10 +10,10 @@
 
 namespace ep {
 
-Array<const PropertyInfo> GeomNode::GetProperties() const
+Array<const PropertyInfo> GeomNode::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(Model, "The Node's Model", nullptr, 0),
+    EP_MAKE_PROPERTY("model", getModel, setModel, "The Node's Model", nullptr, 0),
   };
 }
 
@@ -21,9 +21,9 @@ void GeomNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
 {
   GeomRenderJob &job = spScene.geom.pushBack();
   job.matrix = mat;
-  job.spMaterial = spModel->GetMaterial();
+  job.spMaterial = spModel->getMaterial();
 
-  ModelImpl *pModelImpl = spModel->GetImpl<ModelImpl>();
+  ModelImpl *pModelImpl = spModel->getImpl<ModelImpl>();
   job.vertexArrays = pModelImpl->vertexArrays;
   job.spIndices = pModelImpl->spIndices;
   job.renderList = pModelImpl->renderList;

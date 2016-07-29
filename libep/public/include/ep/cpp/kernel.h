@@ -14,121 +14,121 @@ class Kernel : public Component
 {
   __EP_DECLARE_COMPONENT_STATIC_IMPL(ep, Kernel, IKernel, IKernelStatic, Component, EPKERNEL_PLUGINVERSION, "Kernel instance", 0)
 public:
-  static Kernel* CreateInstance(Variant::VarMap commandLine, int renderThreadCount);
+  static Kernel* createInstance(Variant::VarMap commandLine, int renderThreadCount);
 
-  static Kernel* GetInstance();
+  static Kernel* getInstance();
 
-  void SendMessage(String target, String sender, String message, const Variant &data) { pImpl->SendMessage(target, sender, message, data); }
+  void sendMessage(String target, String sender, String message, const Variant &data) { pImpl->sendMessage(target, sender, message, data); }
 
   template<typename ComponentType, typename Impl = void, typename GlueType = void, typename StaticImpl = void>
-  const ComponentDesc* RegisterComponentType();
-  const ComponentDesc* RegisterComponentType(Variant::VarMap typeDesc) { return pImpl->RegisterComponentTypeFromMap(typeDesc); }
+  const ComponentDesc* registerComponentType();
+  const ComponentDesc* registerComponentType(Variant::VarMap typeDesc) { return pImpl->RegisterComponentTypeFromMap(typeDesc); }
 
-  const ComponentDesc* GetComponentDesc(String id) { return pImpl->GetComponentDesc(id); }
+  const ComponentDesc* getComponentDesc(String id) { return pImpl->GetComponentDesc(id); }
 
   template<typename CT>
-  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(bool bIncludeBase);
-  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(String id, bool bIncludeBase) { return pImpl->GetDerivedComponentDescsFromString(id, bIncludeBase); }
-  Array<const ep::ComponentDesc *> GetDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) { return pImpl->GetDerivedComponentDescs(pBase, bIncludeBase); }
+  Array<const ep::ComponentDesc *> getDerivedComponentDescs(bool bIncludeBase);
+  Array<const ep::ComponentDesc *> getDerivedComponentDescs(String id, bool bIncludeBase) { return pImpl->GetDerivedComponentDescsFromString(id, bIncludeBase); }
+  Array<const ep::ComponentDesc *> getDerivedComponentDescs(const ep::ComponentDesc *pBase, bool bIncludeBase) { return pImpl->GetDerivedComponentDescs(pBase, bIncludeBase); }
 
-  void RegisterMessageHandler(SharedString _name, MessageHandler messageHandler) { pImpl->RegisterMessageHandler(_name, messageHandler); }
-  bool HasMessageHandler(SharedString _name) { return pImpl->HasMessageHandler(_name); }
+  void registerMessageHandler(SharedString _name, MessageHandler messageHandler) { pImpl->RegisterMessageHandler(_name, messageHandler); }
+  bool hasMessageHandler(SharedString _name) { return pImpl->HasMessageHandler(_name); }
 
-  ComponentRef CreateComponent(String typeId, Variant::VarMap initParams = nullptr) { return pImpl->CreateComponent(typeId, initParams); }
+  ComponentRef createComponent(String typeId, Variant::VarMap initParams = nullptr) { return pImpl->CreateComponent(typeId, initParams); }
   template<typename T>
-  SharedPtr<T> CreateComponent(Variant::VarMap initParams = nullptr);
+  SharedPtr<T> createComponent(Variant::VarMap initParams = nullptr);
 
-  ComponentRef CreateGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) { return pImpl->CreateGlue(typeId, _pType, _uid, spInstance, initParams); }
+  ComponentRef createGlue(String typeId, const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams) { return pImpl->CreateGlue(typeId, _pType, _uid, spInstance, initParams); }
   template<typename T>
-  SharedPtr<T> CreateGlue(const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams);
+  SharedPtr<T> createGlue(const ComponentDesc *_pType, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams);
 
-  ComponentRef FindComponent(String _uid) const { return pImpl->FindComponent(_uid); }
+  ComponentRef findComponent(String _uid) const { return pImpl->FindComponent(_uid); }
 
   // synchronisation
-  virtual void DispatchToMainThread(MainThreadCallback callback) { pImpl->DispatchToMainThread(callback); }
-  virtual void DispatchToMainThreadAndWait(MainThreadCallback callback) { pImpl->DispatchToMainThreadAndWait(callback); }
+  virtual void dispatchToMainThread(MainThreadCallback callback) { pImpl->DispatchToMainThread(callback); }
+  virtual void dispatchToMainThreadAndWait(MainThreadCallback callback) { pImpl->DispatchToMainThreadAndWait(callback); }
 
-  LuaRef GetLua() const { return pImpl->GetLua(); }
-  void Exec(String code) { pImpl->Exec(code); }
+  LuaRef getLua() const { return pImpl->GetLua(); }
+  void exec(String code) { pImpl->Exec(code); }
 
-  LoggerRef GetLogger() const { return pImpl->GetLogger(); }
-  void Log(int kind, int level, String text, String component = nullptr) const { pImpl->Log(kind, level, text, component); }
-  template<typename ...Args> void LogError(String format, Args... args) const;
-  template<typename ...Args> void LogWarning(int level, String format, Args... args) const;
-  template<typename ...Args> void LogDebug(int level, String format, Args... args) const;
-  template<typename ...Args> void LogInfo(int level, String format, Args... args) const;
-  template<typename ...Args> void LogScript(String format, Args... args) const;
-  template<typename ...Args> void LogTrace(String format, Args... args) const;
+  LoggerRef getLogger() const { return pImpl->GetLogger(); }
+  void log(int kind, int level, String text, String component = nullptr) const { pImpl->Log(kind, level, text, component); }
+  template<typename ...Args> void logError(String format, Args... args) const;
+  template<typename ...Args> void logWarning(int level, String format, Args... args) const;
+  template<typename ...Args> void logDebug(int level, String format, Args... args) const;
+  template<typename ...Args> void logInfo(int level, String format, Args... args) const;
+  template<typename ...Args> void logScript(String format, Args... args) const;
+  template<typename ...Args> void logTrace(String format, Args... args) const;
 
   // Functions for resource management
-  ResourceManagerRef GetResourceManager() const { return pImpl->GetResourceManager(); }
+  ResourceManagerRef getResourceManager() const { return pImpl->GetResourceManager(); }
 
-  const AVLTree<String, const ComponentDesc *> &GetExtensionsRegistry() const { return pImpl->GetExtensionsRegistry(); }
-  void RegisterExtensions(const ComponentDesc *pDesc, Slice<const String> exts) { pImpl->RegisterExtensions(pDesc, exts); }
-  DataSourceRef CreateDataSourceFromExtension(String ext, Variant::VarMap initParams) { return pImpl->CreateDataSourceFromExtension(ext, initParams); }
-  DataSourceRef CreateDataSourceFromFile(String filePath) { return pImpl->CreateDataSourceFromExtension(filePath.getRightAtLast('.'), { { "src", filePath } }); }
+  const AVLTree<String, const ComponentDesc *> &getExtensionsRegistry() const { return pImpl->GetExtensionsRegistry(); }
+  void registerExtensions(const ComponentDesc *pDesc, Slice<const String> exts) { pImpl->RegisterExtensions(pDesc, exts); }
+  DataSourceRef createDataSourceFromExtension(String ext, Variant::VarMap initParams) { return pImpl->CreateDataSourceFromExtension(ext, initParams); }
+  DataSourceRef createDataSourceFromFile(String filePath) { return pImpl->CreateDataSourceFromExtension(filePath.getRightAtLast('.'), { { "src", filePath } }); }
 
   // stdio relaying functions
-  BroadcasterRef GetStdOutBroadcaster() const { return pImpl->GetStdOutBroadcaster(); }
-  BroadcasterRef GetStdErrBroadcaster() const { return pImpl->GetStdErrBroadcaster(); }
+  BroadcasterRef getStdOutBroadcaster() const { return pImpl->GetStdOutBroadcaster(); }
+  BroadcasterRef getStdErrBroadcaster() const { return pImpl->GetStdErrBroadcaster(); }
 
   // other functions
-  ViewRef GetFocusView() const { return pImpl->GetFocusView(); }
-  virtual ViewRef SetFocusView(ViewRef spView) { return pImpl->SetFocusView(spView); }
+  ViewRef getFocusView() const { return pImpl->GetFocusView(); }
+  virtual ViewRef setFocusView(ViewRef spView) { return pImpl->SetFocusView(spView); }
 
-  CommandManagerRef GetCommandManager() const { return pImpl->GetCommandManager(); }
+  CommandManagerRef getCommandManager() const { return pImpl->GetCommandManager(); }
 
-  SettingsRef GetSettings() const { return pImpl->GetSettings(); }
+  SettingsRef getSettings() const { return pImpl->GetSettings(); }
 
   // events
-  Event<double> UpdatePulse;
+  Event<double> updatePulse;
 
   // HACK: we might be able to make better paths to this
-  KernelImpl* GetImpl() const { return (KernelImpl*)pImpl.ptr(); }
+  KernelImpl* getImpl() const { return (KernelImpl*)pImpl.ptr(); }
 
 
   // static methods
-  static void SetEnvironmentVar(String name, String value) { return GetStaticImpl()->SetEnvironmentVar(name, value); }
-  static MutableString<0> GetEnvironmentVar(String name) { return GetStaticImpl()->GetEnvironmentVar(name); }
-  static MutableString<0> ResolveString(String string, bool bRecursive = true) { return GetStaticImpl()->ResolveString(string, bRecursive); }
+  static void setEnvironmentVar(String name, String value) { return getStaticImpl()->SetEnvironmentVar(name, value); }
+  static MutableString<0> getEnvironmentVar(String name) { return getStaticImpl()->GetEnvironmentVar(name); }
+  static MutableString<0> resolveString(String string, bool bRecursive = true) { return getStaticImpl()->ResolveString(string, bRecursive); }
 
 
   // *** these are for internal use ***
-  virtual void RunMainLoop() = 0;
-  virtual void Quit() {}
+  virtual void runMainLoop() = 0;
+  virtual void quit() {}
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
-  Array<const EventInfo> GetEvents() const;
-  Array<const StaticFuncInfo> GetStaticFuncs() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
+  Array<const EventInfo> getEvents() const;
+  Array<const StaticFuncInfo> getStaticFuncs() const;
 
 protected:
   Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine);
   ~Kernel();
 
   //! \cond
-  void FinishInit() { pImpl->FinishInit(); }
+  void finishInit() { pImpl->FinishInit(); }
   //! \endcond
 
   // HACK: This is a temporary method to let us handle fatals; this should probably be moved to a separate component
-  virtual void OnFatal(String epUnusedParam(msg)) {}
+  virtual void onFatal(String epUnusedParam(msg)) {}
 
 private:
   friend class Component;
   friend class ComponentImpl;
 
-  const ComponentDesc* RegisterComponentType(ComponentDescInl *pDesc) { return pImpl->RegisterComponentType(pDesc); }
+  const ComponentDesc* registerComponentType(ComponentDescInl *pDesc) { return pImpl->RegisterComponentType(pDesc); }
 
   template<typename GlueType>
-  void RegisterGlueType();
+  void registerGlueType();
   template<typename StaticImpl, typename ComponentType>
   struct CreateStaticImpl;
 
-  static Kernel* CreateInstanceInternal(Variant::VarMap commandLine);
+  static Kernel* createInstanceInternal(Variant::VarMap commandLine);
 
-  void* CreateImpl(String componentType, Component *pInstance, Variant::VarMap initParams) { return pImpl->CreateImpl(componentType, pInstance, initParams); }
+  void* createImpl(String componentType, Component *pInstance, Variant::VarMap initParams) { return pImpl->CreateImpl(componentType, pInstance, initParams); }
 
-  static ComponentDescInl *MakeKernelDescriptor(ComponentDescInl *pType);
+  static ComponentDescInl *makeKernelDescriptor(ComponentDescInl *pType);
 };
 
 } // namespace ep

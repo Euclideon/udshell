@@ -31,7 +31,7 @@ QObjectComponent::QObjectComponent(const ep::ComponentDesc *pType, ep::Kernel *p
   else
   {
     hasOwnership = true;
-    pQmlComponentData = (QmlComponentData*)(size_t)initParams["qmlcomponentdata"].asInt();
+    pQmlComponentData = (QmlComponentData*)(size_t)initParams["qmlComponentData"].asInt();
   }
 }
 
@@ -44,32 +44,32 @@ QObjectComponent::~QObjectComponent()
 // PRIVATE QOBJECTCOMPONENTS ONLY -----------------------------------------------------------------
 
 // Called by the Kernel following construction of the enclosing Glue Component
-void QObjectComponent::AttachToGlue(Component *pGlue, ep::Variant::VarMap initParams)
+void QObjectComponent::attachToGlue(Component *pGlue, ep::Variant::VarMap initParams)
 {
   using namespace ep;
-  Super::AttachToGlue(pGlue, initParams);
+  Super::attachToGlue(pGlue, initParams);
 
   // Create a new QObject instance from the stored QmlComponentData
   EPASSERT(pQmlComponentData, "Attempting to attach a public/instantiated QObjectComponent to a Glue Component");
-  pQObject = pQmlComponentData->CreateInstance(static_cast<QtKernel*>(pKernel)->QmlEngine(), pThis, initParams);
+  pQObject = pQmlComponentData->createInstance(static_cast<QtKernel*>(pKernel)->qmlEngine(), pThis, initParams);
   pUserData = pQObject;
 
   // Populate the glue's descriptor with the meta from the QObject
-  ComponentDescInl *pDesc = (ComponentDescInl*)pThis->GetDescriptor();
+  ComponentDescInl *pDesc = (ComponentDescInl*)pThis->getDescriptor();
   if (pDesc->info.flags & ComponentInfoFlags::Unpopulated)
   {
     internal::PopulateComponentDesc(pDesc, pQObject);
     pDesc->info.flags &= ~ComponentInfoFlags::Unpopulated;
   }
-  if (pThis->IsType("ep.window"))
+  if (pThis->isType("ep.Window"))
   {
     EPTHROW_IF(!pQObject->isWindowType(), Result::Failure, "Window component must create a QWindow based object");
-    static_cast<ep::Window*>(pThis)->PostInit(pQObject);
+    static_cast<ep::Window*>(pThis)->postInit(pQObject);
   }
   else
   {
     EPTHROW_IF(qobject_cast<QQuickItem*>(pQObject) == nullptr, Result::Failure, "UI based components must create a QQuickItem");
-    static_cast<ep::UIComponent*>(pThis)->PostInit(pQObject);
+    static_cast<ep::UIComponent*>(pThis)->postInit(pQObject);
   }
 
   // Construction is complete, so we don't need this anymore

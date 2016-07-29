@@ -38,7 +38,7 @@ class QtApplication : public QApplication
 public:
   QtApplication(QtKernel *pKern, int &argc, char ** argv) : QApplication(argc, argv), pKernel(pKern) {}
 
-  static QtKernel *Kernel() {
+  static QtKernel *kernel() {
     EPASSERT(qobject_cast<QtApplication*>(QtApplication::instance()), "No valid QtApplication instance");
     return static_cast<QtApplication*>(QtApplication::instance())->pKernel;
   }
@@ -56,13 +56,13 @@ public:
   QtKernelMediator(QtKernel *pKernel) : QObject(nullptr), pQtKernel(pKernel) {}
   ~QtKernelMediator() {}
 
-  void PostEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
+  void postEvent(QEvent *pEvent, int priority = Qt::NormalEventPriority);
 
 public slots:
-  void OnGLContextCreated(QOpenGLContext *pContext);
-  void OnAppQuit();
-  void OnFirstRender();
-  void OnGLMessageLogged(const QOpenGLDebugMessage &debugMessage);
+  void onGLContextCreated(QOpenGLContext *pContext);
+  void onAppQuit();
+  void onFirstRender();
+  void onGLMessageLogged(const QOpenGLDebugMessage &debugMessage);
 
 private:
   void customEvent(QEvent *pEvent) override;
@@ -79,47 +79,47 @@ public:
   QtKernel(ep::Variant::VarMap commandLine);
   virtual ~QtKernel();
 
-  void RunMainLoop() override final;
-  void Quit() override final;
+  void runMainLoop() override final;
+  void quit() override final;
 
-  ep::ViewRef SetFocusView(ep::ViewRef spView) override final;
-  void DispatchToMainThread(ep::MainThreadCallback callback) override final;
-  void DispatchToMainThreadAndWait(ep::MainThreadCallback callback) override final;
+  ep::ViewRef setFocusView(ep::ViewRef spView) override final;
+  void dispatchToMainThread(ep::MainThreadCallback callback) override final;
+  void dispatchToMainThreadAndWait(ep::MainThreadCallback callback) override final;
 
-  bool OnMainThread() { return (mainThreadId == QThread::currentThreadId()); }
-  bool OnRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
+  bool onMainThread() { return (mainThreadId == QThread::currentThreadId()); }
+  bool onRenderThread() { return (renderThreadId == QThread::currentThreadId()); }
 
-  QQmlEngine *QmlEngine() const { return pQmlEngine; }
+  QQmlEngine *qmlEngine() const { return pQmlEngine; }
 
-  ep::Result RegisterWindow(QQuickWindow *pWindow);
-  void UnregisterWindow(QQuickWindow *pWindow);
-  QPointer<QQuickWindow> TopLevelWindow() { return pTopLevelWindow; }
+  ep::Result registerWindow(QQuickWindow *pWindow);
+  void unregisterWindow(QQuickWindow *pWindow);
+  QPointer<QQuickWindow> topLevelWindow() { return pTopLevelWindow; }
 
-  QtFocusManager *GetFocusManager() { return pFocusManager; }
+  QtFocusManager *getFocusManager() { return pFocusManager; }
 
-  void RegisterQmlComponent(ep::String file);
-  void RegisterQmlComponents(ep::String folderPath);
-  ep::ComponentRef CreateQmlComponent(ep::String file, ep::Variant::VarMap initParams);
+  void registerQmlComponent(ep::String file);
+  void registerQmlComponents(ep::String folderPath);
+  ep::ComponentRef createQmlComponent(ep::String file, ep::Variant::VarMap initParams);
 
 private:
   friend class QtKernelMediator;
   friend class QmlPluginLoader;
 
-  static ep::ComponentDescInl *MakeKernelDescriptor();
+  static ep::ComponentDescInl *makeKernelDescriptor();
 
-  void FinishInit();
-  void Shutdown();
+  void finishInit();
+  void shutdown();
 
-  void OnFatal(ep::String msg) override final;
+  void onFatal(ep::String msg) override final;
 
-  void RegisterQml(ep::String file, ep::Variant::VarMap desc);
+  void registerQml(ep::String file, ep::Variant::VarMap desc);
 
-  ep::Array<const ep::MethodInfo> GetMethods() const
+  ep::Array<const ep::MethodInfo> getMethods() const
   {
     return{
-      EP_MAKE_METHOD(RegisterQmlComponent, "Register a new QML Component type"),
-      EP_MAKE_METHOD(RegisterQmlComponents, "Scans the path for valid QML components and registers them"),
-      EP_MAKE_METHOD(CreateQmlComponent, "Creates a new QML Component from file")
+      EP_MAKE_METHOD(registerQmlComponent, "Register a new QML Component type"),
+      EP_MAKE_METHOD(registerQmlComponents, "Scans the path for valid QML components and registers them"),
+      EP_MAKE_METHOD(createQmlComponent, "Creates a new QML Component from file")
     };
   }
 

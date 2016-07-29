@@ -14,68 +14,68 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Project::GetProperties() const
+Array<const PropertyInfo> Project::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(ActiveActivity, "The currently active activity", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Activities, "The activities contained in the project", nullptr, 0),
-    EP_MAKE_PROPERTY(Src, "The URL for the Project file", nullptr, 0)
+    EP_MAKE_PROPERTY("activeActivity", getActiveActivity, setActiveActivity, "The currently active activity", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("activities", getActivities, "The activities contained in the project", nullptr, 0),
+    EP_MAKE_PROPERTY("src", getSrc, setSrc, "The URL for the Project file", nullptr, 0)
   };
 }
 
-Array<const MethodInfo> Project::GetMethods() const
+Array<const MethodInfo> Project::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(SaveProject, "Save Project to an XML file"),
-    EP_MAKE_METHOD(AddActivity, "Add an Activity to the Project"),
-    EP_MAKE_METHOD(RemoveActivity, "Remove an Activity from the Project"),
+    EP_MAKE_METHOD(saveProject, "Save Project to an XML file"),
+    EP_MAKE_METHOD(addActivity, "Add an Activity to the Project"),
+    EP_MAKE_METHOD(removeActivity, "Remove an Activity from the Project"),
   };
 }
 
 ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
   : ImplSuper(pInstance)
 {
-  spResourceManager = GetKernel()->GetResourceManager();
+  spResourceManager = getKernel()->getResourceManager();
 
   const Variant *pSrc = initParams.get("src");
   StreamRef spSrc = nullptr;
 
   if (pSrc && pSrc->is(Variant::Type::String))
   {
-    spSrc = GetKernel()->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+    spSrc = getKernel()->createComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
 
     // set $(ProjectDir)
     SetVars(pSrc->asString());
 
     // HACK: fix me later!!!
-    auto dir = GetKernel()->GetEnvironmentVar("ProjectDir");
+    auto dir = getKernel()->getEnvironmentVar("ProjectDir");
 #if defined(EP_LINUX)
     if (chdir(dir.toStringz()) != 0)
-      LogWarning(2, "Unable to change directory to {0}", dir);
+      logWarning(2, "Unable to change directory to {0}", dir);
 #elif defined(EP_WINDOWS)
     _chdir(dir.toStringz());
 #endif
   }
   else
   {
-    LogDebug(3, "No \"src\" parameter. Creating empty project");
+    logDebug(3, "No \"src\" parameter. Creating empty project");
     return;
   }
 
-  TextRef spXMLBuffer = spSrc->LoadText();
+  TextRef spXMLBuffer = spSrc->loadText();
 
   using namespace rapidxml;
   Variant rootElements;
 
   try
   {
-    rootElements = spXMLBuffer->ParseXml();
+    rootElements = spXMLBuffer->parseXml();
   }
   catch (parse_error &e)
   {
-    auto xmlBuff = spXMLBuffer->MapForRead();
-    epscope(exit) { spXMLBuffer->Unmap(); };
-    EPTHROW_ERROR(Result::Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
+    auto xmlBuff = spXMLBuffer->mapForRead();
+    epscope(exit) { spXMLBuffer->unmap(); };
+    EPTHROW_ERROR(Result::Failure, "Unable to parse project file: {0} on line {1} : {2}", srcString, Text::getLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
   }
 
   Variant::VarMap projectNode = rootElements.asAssocArray();
@@ -88,8 +88,8 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
 
 void ProjectImpl::SaveProject()
 {
-  auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
-  spXMLBuffer->Reserve(10240);
+  auto spXMLBuffer = getKernel()->createComponent<Text>();
+  spXMLBuffer->reserve(10240);
 
   Variant::VarMap projectNode;
   Array<Variant> children;
@@ -99,30 +99,30 @@ void ProjectImpl::SaveProject()
 
   projectNode.insert("children", children);
 
-  spXMLBuffer->FormatXml(projectNode);
+  spXMLBuffer->formatXml(projectNode);
 
-  Slice<const void> buffer = spXMLBuffer->MapForRead();
-  epscope(exit) { spXMLBuffer->Unmap(); };
+  Slice<const void> buffer = spXMLBuffer->mapForRead();
+  epscope(exit) { spXMLBuffer->unmap(); };
   if (buffer.empty())
   {
-    LogDebug(1, "SaveProject() -- Can't Map XML buffer for reading");
+    logDebug(1, "SaveProject() -- Can't Map XML buffer for reading");
     return;
   }
 
   if (srcString.empty())
   {
-    LogWarning(1, "Failed to Save Project. No project open");
+    logWarning(1, "Failed to Save Project. No project open");
     return;
   }
 
   try
   {
-    StreamRef spFile = GetKernel()->CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
-    spFile->Write(buffer);
+    StreamRef spFile = getKernel()->createComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    spFile->write(buffer);
   }
   catch (EPException &)
   {
-    LogWarning(1, "Failed to open Project file for writing: \"{0}\"", srcString);
+    logWarning(1, "Failed to open Project file for writing: \"{0}\"", srcString);
     return;
   }
 }
@@ -134,8 +134,8 @@ Variant ProjectImpl::SaveActivities()
 
   for (ActivityRef activity : activities)
   {
-    Variant::VarMap node = Text::ComponentParamsToXMLMap(activity->Save()).asAssocArray();
-    node.insert("name", activity->GetType());
+    Variant::VarMap node = Text::componentParamsToXmlMap(activity->save()).asAssocArray();
+    node.insert("name", activity->getType());
     children.pushBack(node);
   }
 
@@ -184,26 +184,26 @@ void ProjectImpl::ParseActivity(Variant node)
   try
   {
     Variant::VarMap initParams;
-    Variant vParams = Text::XMLMapToComponentParams(node);
+    Variant vParams = Text::xmlMapToComponentParams(node);
     if (vParams.is(Variant::SharedPtrType::AssocArray))
       initParams = vParams.asAssocArray();
 
-    activities.pushBack(component_cast<Activity>(GetKernel()->CreateComponent(node["name"].asString(), initParams)));
+    activities.pushBack(component_cast<Activity>(getKernel()->createComponent(node["name"].asString(), initParams)));
   }
   catch (EPException &)
   {
-    LogError("Unable to load Activity from project file \"{0}\"", srcString);
+    logError("Unable to load Activity from project file \"{0}\"", srcString);
   }
 }
 
 void ProjectImpl::SetVars(String path)
 {
-  GetKernel()->SetEnvironmentVar("ProjectPath", path);
+  getKernel()->setEnvironmentVar("ProjectPath", path);
   size_t s1 = path.findLast('/');
   size_t s2 = path.findLast('\\');
   if (s2 > s1 && s2 < path.length)
     s1 = s2;
-  GetKernel()->SetEnvironmentVar("ProjectDir", path.slice(0, s1));
+  getKernel()->setEnvironmentVar("ProjectDir", path.slice(0, s1));
 }
 
 } // namespace ep

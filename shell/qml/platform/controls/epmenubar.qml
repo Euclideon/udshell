@@ -22,7 +22,7 @@ Item {
   function updatemenubar() {
     clearAll();
 
-    var menudata = menucomp.get("menudata");
+    var menudata = menucomp.menuData;
 
     if(menudata)
     {

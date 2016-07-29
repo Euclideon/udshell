@@ -68,44 +68,44 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Kernel::GetProperties() const
+Array<const PropertyInfo> Kernel::getProperties() const
 {
   return Array<const PropertyInfo>{
-    EP_MAKE_PROPERTY_RO(ResourceManager, "Resource manager", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(CommandManager, "Command manager", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(StdOutBroadcaster, "stdout broadcaster", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(StdErrBroadcaster, "stderr broadcaster", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("resourceManager", getResourceManager, "Resource manager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("commandManager", getCommandManager, "Command manager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("stdOutBroadcaster", getStdOutBroadcaster, "stdout broadcaster", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("stdErrBroadcaster", getStdErrBroadcaster, "stderr broadcaster", nullptr, 0),
   };
 }
-Array<const MethodInfo> Kernel::GetMethods() const
+Array<const MethodInfo> Kernel::getMethods() const
 {
   return Array<const MethodInfo>{
-    EP_MAKE_METHOD(Exec, "Execute Lua script")
+    EP_MAKE_METHOD(exec, "Execute Lua script")
   };
 }
-Array<const EventInfo> Kernel::GetEvents() const
+Array<const EventInfo> Kernel::getEvents() const
 {
   return Array<const EventInfo>{
-    EP_MAKE_EVENT(UpdatePulse, "Periodic update signal")
+    EP_MAKE_EVENT(updatePulse, "Periodic update signal")
   };
 }
-Array<const StaticFuncInfo> Kernel::GetStaticFuncs() const
+Array<const StaticFuncInfo> Kernel::getStaticFuncs() const
 {
   return Array<const StaticFuncInfo>{
-    EP_MAKE_STATICFUNC(GetEnvironmentVar, "Get an environment variable"),
-    EP_MAKE_STATICFUNC(SetEnvironmentVar, "Set an environment variable")
+    EP_MAKE_STATICFUNC(getEnvironmentVar, "Get an environment variable"),
+    EP_MAKE_STATICFUNC(setEnvironmentVar, "Set an environment variable")
   };
 }
 
 
-ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
+ComponentDescInl *Kernel::makeKernelDescriptor(ComponentDescInl *pType)
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, Result::AllocFailure, "Memory allocation failed");
 
-  pDesc->info = Kernel::ComponentInfo();
+  pDesc->info = Kernel::componentInfo();
   pDesc->info.flags = ComponentInfoFlags::Unregistered;
-  pDesc->baseClass = Component::ComponentID();
+  pDesc->baseClass = Component::componentID();
 
   pDesc->pInit = nullptr;
   pDesc->pCreateInstance = nullptr;
@@ -113,13 +113,13 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   pDesc->pSuperDesc = nullptr;
 
   // build search trees
-  for (auto &p : Kernel::GetPropertiesImpl())
+  for (auto &p : Kernel::getPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : Kernel::GetMethodsImpl())
+  for (auto &m : Kernel::getMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : Kernel::GetEventsImpl())
+  for (auto &e : Kernel::getEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : Kernel::GetStaticFuncsImpl())
+  for (auto &f : Kernel::getStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   if (pType)
@@ -132,11 +132,11 @@ ComponentDescInl *Kernel::MakeKernelDescriptor(ComponentDescInl *pType)
   return pDesc;
 }
 Kernel::Kernel(ComponentDescInl *_pType, Variant::VarMap commandLine)
-  : Component(Kernel::MakeKernelDescriptor(_pType), nullptr, "ep.kernel0", commandLine)
+  : Component(Kernel::makeKernelDescriptor(_pType), nullptr, "ep.Kernel0", commandLine)
 {
   // alloc impl
   pImpl = UniquePtr<Impl>(epNew(KernelImpl, this, commandLine));
-  GetImpl()->StartInit(commandLine);
+  getImpl()->StartInit(commandLine);
 }
 
 Kernel::~Kernel()
@@ -162,26 +162,26 @@ Kernel::~Kernel()
 // For the implementation of epInternalInit defined in globalinitialisers to override
 // the weak version in epplatform.cpp at least one symbol from that file must
 // be referenced externally.  This has been implemented in below inside
-// CreateInstance().
-namespace internal { void *GetStaticImplRegistry(); }
+// createInstance().
+namespace internal { void *getStaticImplRegistry(); }
 
-Kernel* Kernel::CreateInstance(Variant::VarMap commandLine, int renderThreadCount)
+Kernel* Kernel::createInstance(Variant::VarMap commandLine, int renderThreadCount)
 {
   // HACK: create the KernelImplStatic instance here!
-  ((HashMap<SharedString, UniquePtr<RefCounted>>*)internal::GetStaticImplRegistry())->insert(ComponentID(), UniquePtr<KernelImplStatic>::create());
+  ((HashMap<SharedString, UniquePtr<RefCounted>>*)internal::getStaticImplRegistry())->insert(componentID(), UniquePtr<KernelImplStatic>::create());
 
   // set $(AppPath) to argv[0]
   String exe = commandLine[0].asString();
 #if defined(EP_WINDOWS)
-  Kernel::SetEnvironmentVar("AppPath", exe.getLeftAtLast('\\', true));
+  Kernel::setEnvironmentVar("AppPath", exe.getLeftAtLast('\\', true));
 #else
-  Kernel::SetEnvironmentVar("AppPath", exe.getLeftAtLast('/', true));
+  Kernel::setEnvironmentVar("AppPath", exe.getLeftAtLast('/', true));
 #endif
 
   if (!commandLine.get("renderThreadCount"))
     commandLine.insert("renderThreadCount", renderThreadCount);
 
-  return CreateInstanceInternal(commandLine);
+  return createInstanceInternal(commandLine);
 }
 
 KernelImpl::VarAVLTreeAllocator* KernelImpl::s_pVarAVLAllocator;
@@ -212,10 +212,10 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   WrangleEnvironmentVariables();
 
   // register the base Component type
-  pInstance->RegisterComponentType<Component, ComponentImpl, ComponentGlue>();
+  pInstance->registerComponentType<Component, ComponentImpl, ComponentGlue>();
 
   // HACK: update the descriptor with the base class (bootup chicken/egg)
-  const ComponentDescInl *pComponentBase = componentRegistry.get(Component::ComponentID())->pDesc;
+  const ComponentDescInl *pComponentBase = componentRegistry.get(Component::componentID())->pDesc;
   ComponentDescInl *pDesc = (ComponentDescInl*)pInstance->pType;
   while (pDesc->pSuperDesc)
   {
@@ -227,105 +227,105 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
 
   // HACK: fix up the base class since we have a kernel instance (bootup chicken/egg)
   (Kernel*&)pInstance->pKernel = pInstance;
-  pInstance->Component::pImpl = pInstance->Component::CreateImpl(initParams);
+  pInstance->Component::pImpl = pInstance->Component::createImpl(initParams);
 
   // register all the builtin component types
-  pInstance->RegisterComponentType<DataSource, DataSourceImpl>();
-  pInstance->RegisterComponentType<Broadcaster, BroadcasterImpl>();
-  pInstance->RegisterComponentType<Stream, StreamImpl>();
-  pInstance->RegisterComponentType<File, FileImpl, void, FileImplStatic>();
-  pInstance->RegisterComponentType<StdIOStream>();
-  pInstance->RegisterComponentType<MemStream, MemStreamImpl>();
-  pInstance->RegisterComponentType<Regex, RegexImpl>();
-  pInstance->RegisterComponentType<Logger>();
-  pInstance->RegisterComponentType<PluginManager>();
-  pInstance->RegisterComponentType<PluginLoader>();
-  pInstance->RegisterComponentType<NativePluginLoader>();
-  pInstance->RegisterComponentType<ResourceManager, ResourceManagerImpl>();
-  pInstance->RegisterComponentType<CommandManager, CommandManagerImpl>();
-  pInstance->RegisterComponentType<Project, ProjectImpl>();
-  pInstance->RegisterComponentType<Timer, TimerImpl>();
-  pInstance->RegisterComponentType<Settings, SettingsImpl>();
-  pInstance->RegisterComponentType<Lua>();
-  pInstance->RegisterComponentType<View, ViewImpl>();
-  pInstance->RegisterComponentType<Activity, ActivityImpl>();
-  pInstance->RegisterComponentType<Console>();
-  pInstance->RegisterComponentType<PrimitiveGenerator, PrimitiveGeneratorImpl, void, PrimitiveGeneratorImplStatic>();
+  pInstance->registerComponentType<DataSource, DataSourceImpl>();
+  pInstance->registerComponentType<Broadcaster, BroadcasterImpl>();
+  pInstance->registerComponentType<Stream, StreamImpl>();
+  pInstance->registerComponentType<File, FileImpl, void, FileImplStatic>();
+  pInstance->registerComponentType<StdIOStream>();
+  pInstance->registerComponentType<MemStream, MemStreamImpl>();
+  pInstance->registerComponentType<Regex, RegexImpl>();
+  pInstance->registerComponentType<Logger>();
+  pInstance->registerComponentType<PluginManager>();
+  pInstance->registerComponentType<PluginLoader>();
+  pInstance->registerComponentType<NativePluginLoader>();
+  pInstance->registerComponentType<ResourceManager, ResourceManagerImpl>();
+  pInstance->registerComponentType<CommandManager, CommandManagerImpl>();
+  pInstance->registerComponentType<Project, ProjectImpl>();
+  pInstance->registerComponentType<Timer, TimerImpl>();
+  pInstance->registerComponentType<Settings, SettingsImpl>();
+  pInstance->registerComponentType<Lua>();
+  pInstance->registerComponentType<View, ViewImpl>();
+  pInstance->registerComponentType<Activity, ActivityImpl>();
+  pInstance->registerComponentType<Console>();
+  pInstance->registerComponentType<PrimitiveGenerator, PrimitiveGeneratorImpl, void, PrimitiveGeneratorImplStatic>();
 
   // resources
-  pInstance->RegisterComponentType<Resource, ResourceImpl>();
-  pInstance->RegisterComponentType<Buffer, BufferImpl>();
-  pInstance->RegisterComponentType<ArrayBuffer, ArrayBufferImpl>();
-  pInstance->RegisterComponentType<UDModel, UDModelImpl>();
-  pInstance->RegisterComponentType<Shader, ShaderImpl>();
-  pInstance->RegisterComponentType<Material, MaterialImpl>();
-  pInstance->RegisterComponentType<Model, ModelImpl>();
-  pInstance->RegisterComponentType<Text, TextImpl, void, TextImplStatic>();
-  pInstance->RegisterComponentType<Menu, MenuImpl>();
-  pInstance->RegisterComponentType<KVPStore>();
-  pInstance->RegisterComponentType<Metadata, MetadataImpl>();
-  pInstance->RegisterComponentType<Scene, SceneImpl>();
+  pInstance->registerComponentType<Resource, ResourceImpl>();
+  pInstance->registerComponentType<Buffer, BufferImpl>();
+  pInstance->registerComponentType<ArrayBuffer, ArrayBufferImpl>();
+  pInstance->registerComponentType<UDModel, UDModelImpl>();
+  pInstance->registerComponentType<Shader, ShaderImpl>();
+  pInstance->registerComponentType<Material, MaterialImpl>();
+  pInstance->registerComponentType<Model, ModelImpl>();
+  pInstance->registerComponentType<Text, TextImpl, void, TextImplStatic>();
+  pInstance->registerComponentType<Menu, MenuImpl>();
+  pInstance->registerComponentType<KVPStore>();
+  pInstance->registerComponentType<Metadata, MetadataImpl>();
+  pInstance->registerComponentType<Scene, SceneImpl>();
 
   // nodes
-  pInstance->RegisterComponentType<Node, NodeImpl>();
-  pInstance->RegisterComponentType<SceneNode, SceneImpl>();
-  pInstance->RegisterComponentType<Camera, CameraImpl>();
-  pInstance->RegisterComponentType<SimpleCamera, SimpleCameraImpl>();
-  pInstance->RegisterComponentType<GeomNode, GeomNodeImpl>();
-  pInstance->RegisterComponentType<UDNode, UDNodeImpl>();
+  pInstance->registerComponentType<Node, NodeImpl>();
+  pInstance->registerComponentType<SceneNode, SceneImpl>();
+  pInstance->registerComponentType<Camera, CameraImpl>();
+  pInstance->registerComponentType<SimpleCamera, SimpleCameraImpl>();
+  pInstance->registerComponentType<GeomNode, GeomNodeImpl>();
+  pInstance->registerComponentType<UDNode, UDNodeImpl>();
 
   // data sources
-  pInstance->RegisterComponentType<ImageSource>();
-  pInstance->RegisterComponentType<GeomSource>();
-  pInstance->RegisterComponentType<UDSource>();
+  pInstance->registerComponentType<ImageSource>();
+  pInstance->registerComponentType<GeomSource>();
+  pInstance->registerComponentType<UDSource>();
 
   // dynamic components
-  pInstance->RegisterComponentType<DynamicComponent>();
-  pInstance->RegisterComponentType<VarComponent>();
+  pInstance->registerComponentType<DynamicComponent>();
+  pInstance->registerComponentType<VarComponent>();
 
   // init the HAL
   EPTHROW_RESULT(epHAL_Init(), "epHAL_Init() failed");
 
   // create logger and default streams
-  spLogger = pInstance->CreateComponent<Logger>();
-  spLogger->DisableCategory(LogCategories::Trace);
+  spLogger = pInstance->createComponent<Logger>();
+  spLogger->disableCategory(LogCategories::Trace);
 
   try
   {
-    StreamRef spDebugFile = pInstance->CreateComponent<File>({ { "name", "logfile" }, { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
-    spLogger->AddStream(spDebugFile);
-    spDebugFile->WriteLn("\n*** Logging started ***");
+    StreamRef spDebugFile = pInstance->createComponent<File>({ { "name", "logfile" }, { "path", "epKernel.log" }, { "flags", FileOpenFlags::Append | FileOpenFlags::Read | FileOpenFlags::Write | FileOpenFlags::Create | FileOpenFlags::Text } });
+    spLogger->addStream(spDebugFile);
+    spDebugFile->writeLn("\n*** Logging started ***");
   }
   catch (...) {}
 
 #if EP_DEBUG
-  StreamRef spStdIOStream = pInstance->CreateComponent<StdIOStream>({ { "output", StdIOStreamOutputs::StdDbg }, {"name", "debugout"} });
-  spLogger->AddStream(spStdIOStream);
+  StreamRef spStdIOStream = pInstance->createComponent<StdIOStream>({ { "output", StdIOStreamOutputs::StdDbg }, {"name", "debugout"} });
+  spLogger->addStream(spStdIOStream);
 #endif
 
   // resource manager
-  spResourceManager = pInstance->CreateComponent<ResourceManager>({ { "name", "resourcemanager" } });
+  spResourceManager = pInstance->createComponent<ResourceManager>({ { "name", "resourcemanager" } });
 
   // command manager
-  spCommandManager = pInstance->CreateComponent<CommandManager>({ { "name", "commandmanager" } });
+  spCommandManager = pInstance->createComponent<CommandManager>({ { "name", "commandmanager" } });
 
   // settings
-  spSettings = pInstance->CreateComponent<Settings>({ { "name", "settings" }, { "src", "settings.epset" } });
+  spSettings = pInstance->createComponent<Settings>({ { "name", "settings" }, { "src", "settings.epset" } });
 
   // plugin manager
-  spPluginManager = pInstance->CreateComponent<PluginManager>({ { "name", "pluginmanager" } });
-  spPluginManager->RegisterPluginLoader(pInstance->CreateComponent<NativePluginLoader>());
+  spPluginManager = pInstance->createComponent<PluginManager>({ { "name", "pluginmanager" } });
+  spPluginManager->registerPluginLoader(pInstance->createComponent<NativePluginLoader>());
 
   // Init capture and broadcast of stdout/stderr
-  spStdOutBC = pInstance->CreateComponent<Broadcaster>({ { "name", "stdoutbc" } });
+  spStdOutBC = pInstance->createComponent<Broadcaster>({ { "name", "stdoutbc" } });
   stdOutCapture = epNew(StdCapture, stdout);
   epscope(fail) { epDelete(stdOutCapture); };
-  spStdErrBC = pInstance->CreateComponent<Broadcaster>({ { "name", "stderrbc" } });
+  spStdErrBC = pInstance->createComponent<Broadcaster>({ { "name", "stderrbc" } });
   stdErrCapture = epNew(StdCapture, stderr);
   epscope(fail) { epDelete(stdErrCapture); };
 
   // create lua VM
-  spLua = pInstance->CreateComponent<Lua>();
+  spLua = pInstance->createComponent<Lua>();
 
   bKernelCreated = true; // TODO: remove this?
 }
@@ -342,10 +342,10 @@ void KernelImpl::FinishInit()
   if (HasMessageHandler("register"))
   {
     // TODO: Crash handler?
-    if (!SendMessage("$register", "#", "register", nullptr))
+    if (!sendMessage("$register", "#", "register", nullptr))
     {
-      pInstance->OnFatal("Fatal error encountered during application register phase.\nSee epKernel.log for details.\n\nExiting...");
-      pInstance->Quit();
+      pInstance->onFatal("Fatal error encountered during application register phase.\nSee epKernel.log for details.\n\nExiting...");
+      pInstance->quit();
     }
   }
 
@@ -353,7 +353,7 @@ void KernelImpl::FinishInit()
   Array<const String> pluginPaths;
 
   // search env vars for extra plugin paths
-  SharedString pluginPathsVar = Kernel::GetEnvironmentVar("PluginDirs");
+  SharedString pluginPathsVar = Kernel::getEnvironmentVar("PluginDirs");
 #if defined(EP_WINDOWS)
   String delimiters = ";";
 #else
@@ -382,20 +382,20 @@ void KernelImpl::FinishInit()
   LoadAllPlugins(pluginPaths);
 
   // make the kernel timers
-  spStreamerTimer = pInstance->CreateComponent<Timer>({ { "interval", 0.033 } });
-  spStreamerTimer->Elapsed.Subscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
+  spStreamerTimer = pInstance->createComponent<Timer>({ { "interval", 0.033 } });
+  spStreamerTimer->elapsed.subscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
 
-  spUpdateTimer = pInstance->CreateComponent<Timer>({ { "interval", 0.016 } });
-  spUpdateTimer->Elapsed.Subscribe(FastDelegate<void()>(this, &KernelImpl::Update));
+  spUpdateTimer = pInstance->createComponent<Timer>({ { "interval", 0.016 } });
+  spUpdateTimer->elapsed.subscribe(FastDelegate<void()>(this, &KernelImpl::Update));
 
   // call application init
   if (HasMessageHandler("init"))
   {
     // TODO: Crash handler?
-    if (!SendMessage("$init", "#", "init", commandLineArgs))
+    if (!sendMessage("$init", "#", "init", commandLineArgs))
     {
-      pInstance->OnFatal("Fatal error encountered during application init phase.\nSee epKernel.log for details.\n\nExiting...");
-      pInstance->Quit();
+      pInstance->onFatal("Fatal error encountered during application init phase.\nSee epKernel.log for details.\n\nExiting...");
+      pInstance->quit();
     }
   }
 }
@@ -426,7 +426,7 @@ KernelImpl::~KernelImpl()
     for (const auto &c : instanceRegistry)
     {
       ++count;
-      DebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->GetName(), c.value->RefCount());
+      DebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->getName(), c.value->refCount());
     }
     DebugFormat("{0} Unfreed Component(s)\n", count);
   }
@@ -442,15 +442,15 @@ void KernelImpl::Shutdown()
   // TODO: Consider whether or not to catch exceptions and then continuing the deinit path or just do nothing.
 
   if (spStreamerTimer)
-    spStreamerTimer->Elapsed.Unsubscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
+    spStreamerTimer->elapsed.unsubscribe(FastDelegate<void()>(this, &KernelImpl::StreamerUpdate));
   if (spUpdateTimer)
-    spUpdateTimer->Elapsed.Unsubscribe(FastDelegate<void()>(this, &KernelImpl::Update));
+    spUpdateTimer->elapsed.unsubscribe(FastDelegate<void()>(this, &KernelImpl::Update));
 
   // call application deinit
   if (HasMessageHandler("deinit"))
-    SendMessage("$deinit", "#", "deinit", nullptr);
+    sendMessage("$deinit", "#", "deinit", nullptr);
 
-  pInstance->SetFocusView(nullptr);
+  pInstance->setFocusView(nullptr);
 
   spUpdateTimer = nullptr;
   spStreamerTimer = nullptr;
@@ -471,7 +471,7 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const 
   EPFind find;
   Array<SharedString> pluginFilenames;
 
-  SharedString path = Kernel::ResolveString(folderPath);
+  SharedString path = Kernel::resolveString(folderPath);
 
   if (!HalDirectory_FindFirst(&find, path.toStringz(), &findData))
     return nullptr;
@@ -497,7 +497,7 @@ Array<SharedString> KernelImpl::ScanPluginFolder(String folderPath, Slice<const 
       }
       if (valid)
       {
-        pInstance->LogInfo(2, "  Found {0}", filename);
+        pInstance->logInfo(2, "  Found {0}", filename);
         pluginFilenames.pushBack(filename);
       }
     }
@@ -512,7 +512,7 @@ void KernelImpl::LoadAllPlugins(Slice<const String> folderPaths)
 {
   for (auto path : folderPaths)
   {
-    pInstance->LogInfo(2, "Scanning {0} for plugins...", path);
+    pInstance->logInfo(2, "Scanning {0} for plugins...", path);
     Array<SharedString> pluginFilenames = ScanPluginFolder(path);
     LoadPlugins(pluginFilenames);
   }
@@ -530,9 +530,9 @@ void KernelImpl::LoadPlugins(Slice<SharedString> files)
     {
       if (!filename)
         continue;
-      if (spPluginManager->LoadPlugin(filename))
+      if (spPluginManager->loadPlugin(filename))
       {
-        pInstance->LogInfo(2, "Loaded plugin {0}", filename);
+        pInstance->logInfo(2, "Loaded plugin {0}", filename);
         filename = nullptr;
         --numRemaining;
       }
@@ -543,7 +543,7 @@ void KernelImpl::LoadPlugins(Slice<SharedString> files)
   for (auto &filename : files)
   {
     if (filename)
-      LogWarning(2, "Could not load plugin '{0}'", filename);
+      logWarning(2, "Could not load plugin '{0}'", filename);
   }
 }
 
@@ -556,22 +556,22 @@ void KernelImpl::Update()
 
   RelayStdIO();
 
-  pInstance->UpdatePulse.Signal(sec);
+  pInstance->updatePulse.signal(sec);
 }
 
 void KernelImpl::RelayStdIO()
 {
   if (stdOutCapture)
   {
-    String str = stdOutCapture->GetCapture();
+    String str = stdOutCapture->getCapture();
     if (!str.empty())
-      spStdOutBC->Write(str);
+      spStdOutBC->write(str);
   }
   if (stdErrCapture)
   {
-    String str = stdErrCapture->GetCapture();
+    String str = stdErrCapture->getCapture();
     if (!str.empty())
-      spStdErrBC->Write(str);
+      spStdErrBC->write(str);
   }
 }
 
@@ -584,9 +584,9 @@ void KernelImpl::StreamerUpdate()
   // We need more than just a global active , we need an active per view.
   if (streamerStatus.active)
   {
-    SceneRef spScene = spFocusView->GetScene();
+    SceneRef spScene = spFocusView->getScene();
     if (spScene)
-      spScene->MakeDirty();
+      spScene->makeDirty();
   }
 }
 
@@ -623,7 +623,7 @@ Array<const ComponentDesc *> KernelImpl::GetDerivedComponentDescs(const Componen
   return derivedDescs;
 }
 
-bool KernelImpl::SendMessage(String target, String sender, String message, const Variant &data)
+bool KernelImpl::sendMessage(String target, String sender, String message, const Variant &data)
 {
   EPASSERT_THROW(!target.empty(), Result::InvalidArgument, "target was empty");
 
@@ -636,12 +636,12 @@ bool KernelImpl::SendMessage(String target, String sender, String message, const
     {
       ComponentRef spComponent(*ppComponent);
       try {
-        spComponent->ReceiveMessage(message, sender, data);
+        spComponent->receiveMessage(message, sender, data);
       } catch (std::exception &e) {
-        LogError("Message Handler {0} failed: {1}", target, e.what());
+        logError("Message Handler {0} failed: {1}", target, e.what());
         return false;
       } catch (...) {
-        LogError("Message Handler {0} failed: C++ exception", target);
+        logError("Message Handler {0} failed: C++ exception", target);
         return false;
       }
     }
@@ -660,10 +660,10 @@ bool KernelImpl::SendMessage(String target, String sender, String message, const
       try {
         ReceiveMessage(sender, message, data);
       } catch (std::exception &e) {
-        LogError("Message Handler {0} failed: {1}", target, e.what());
+        logError("Message Handler {0} failed: {1}", target, e.what());
         return false;
       } catch (...) {
-        LogError("Message Handler {0} failed: C++ exception", target);
+        logError("Message Handler {0} failed: C++ exception", target);
         return false;
       }
     }
@@ -682,10 +682,10 @@ bool KernelImpl::SendMessage(String target, String sender, String message, const
       try {
         pHandler->callback(sender, message, data);
       } catch (std::exception &e) {
-        LogError("Message Handler {0} failed: {1}", target, e.what());
+        logError("Message Handler {0} failed: {1}", target, e.what());
         return false;
       } catch (...) {
-        LogError("Message Handler {0} failed: C++ exception", target);
+        logError("Message Handler {0} failed: C++ exception", target);
         return false;
       }
     }
@@ -760,7 +760,7 @@ const ComponentDesc* KernelImpl::RegisterComponentTypeFromMap(Variant::VarMap ty
   pDesc->info.nameSpace = pDesc->info.identifier.slice(0, offset);
   pDesc->info.name = pDesc->info.identifier.slice(offset+1, pDesc->info.identifier.length);
 
-  pDesc->info.displayName = typeDesc["name"].asSharedString();
+//  pDesc->info.displayName = typeDesc["name"].asSharedString(); // TODO: add this back at some point?
   pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = EP_APIVERSION;
   Variant *pVar = typeDesc.get("version");
@@ -774,12 +774,12 @@ const ComponentDesc* KernelImpl::RegisterComponentTypeFromMap(Variant::VarMap ty
   pDesc->pCreateImpl = nullptr;
   pDesc->pCreateInstance = [](const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, Variant::VarMap initParams) -> ComponentRef {
     MutableString128 t(Format, "New (From VarMap): {0} - {1}", _pType->info.identifier, _uid);
-    _pKernel->LogDebug(4, t);
+    _pKernel->logDebug(4, t);
     const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)_pType;
     DynamicComponentRef spInstance = pDesc->newInstance(KernelRef(_pKernel), initParams);
-    ComponentRef spC = _pKernel->CreateGlue(pDesc->baseClass, _pType, _uid, spInstance, initParams);
-    spInstance->AttachToGlue(spC.ptr(), initParams);
-    spC->pUserData = spInstance->GetUserData();
+    ComponentRef spC = _pKernel->createGlue(pDesc->baseClass, _pType, _uid, spInstance, initParams);
+    spInstance->attachToGlue(spC.ptr(), initParams);
+    spC->pUserData = spInstance->getUserData();
     return spC;
   };
 
@@ -855,12 +855,12 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
   }
   catch (std::exception &e)
   {
-    LogWarning(3, "Create component failed: {0}", String(e.what()));
+    logWarning(3, "Create component failed: {0}", String(e.what()));
     throw;
   }
   catch (...)
   {
-    LogWarning(3, "Create component failed!");
+    logWarning(3, "Create component failed!");
     throw;
   }
 }
@@ -916,13 +916,13 @@ void KernelImpl::DeinitRender()
 
 void KernelImpl::Exec(String code)
 {
-  spLua->Execute(code);
+  spLua->execute(code);
 }
 
 void KernelImpl::Log(int kind, int level, String text, String component) const
 {
   if (spLogger)
-    spLogger->Log(level, text, (LogCategories)kind, component);
+    spLogger->log(level, text, (LogCategories)kind, component);
 }
 
 const AVLTree<String, const ComponentDesc *> &KernelImpl::GetExtensionsRegistry() const

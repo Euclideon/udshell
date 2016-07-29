@@ -5,12 +5,12 @@
 
 namespace ep {
 
-Array<const MethodInfo> Settings::GetMethods() const
+Array<const MethodInfo> Settings::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(GetValue, "Get a setting"),
-    EP_MAKE_METHOD(SetValue, "Set a setting"),
-    EP_MAKE_METHOD(SaveSettings, "Save Settings to an XML file"),
+    EP_MAKE_METHOD(getValue, "Get a setting"),
+    EP_MAKE_METHOD(setValue, "Set a setting"),
+    EP_MAKE_METHOD(saveSettings, "Save Settings to an XML file"),
   };
 }
 
@@ -25,28 +25,28 @@ SettingsImpl::SettingsImpl(Component *pInstance, Variant::VarMap initParams)
     srcString = pSrc->asString();
 
     try {
-      spSrc = GetKernel()->CreateComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
+      spSrc = getKernel()->createComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
     } catch (EPException &) {
-      LogDebug(2, "Settings file \"{0}\" does not exist. Create new settings.", *pSrc);
+      logDebug(2, "Settings file \"{0}\" does not exist. Create new settings.", *pSrc);
       return;
     }
   }
   else
   {
-    LogDebug(3, "No \"src\" parameter. Create empty settings");
+    logDebug(3, "No \"src\" parameter. Create empty settings");
     return;
   }
 
   using namespace rapidxml;
   Variant rootElements;
-  TextRef spXMLBuffer = spSrc->LoadText();
+  TextRef spXMLBuffer = spSrc->loadText();
 
-  try { rootElements = spXMLBuffer->ParseXml(); }
+  try { rootElements = spXMLBuffer->parseXml(); }
   catch (parse_error &e)
   {
-    auto xmlBuff = spXMLBuffer->MapForRead();
-    epscope(exit) { spXMLBuffer->Unmap(); };
-    EPTHROW_ERROR(Result::Failure, "Unable to parse settings file: {0} on line {1} : {2}", srcString, Text::GetLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
+    auto xmlBuff = spXMLBuffer->mapForRead();
+    epscope(exit) { spXMLBuffer->unmap(); };
+    EPTHROW_ERROR(Result::Failure, "Unable to parse settings file: {0} on line {1} : {2}", srcString, Text::getLineNumberFromByteIndex(xmlBuff, (size_t)(e.where<char>() - xmlBuff.ptr)), e.what());
   }
 
   Variant::VarMap settingsNode = rootElements.asAssocArray();
@@ -63,22 +63,22 @@ void SettingsImpl::SaveSettings()
   settingsNode.insert("name", "settings");
   for (auto setting : settings)
   {
-    Variant::VarMap node = Text::ComponentParamsToXMLMap(setting.value).asAssocArray();
+    Variant::VarMap node = Text::componentParamsToXmlMap(setting.value).asAssocArray();
     node.insert("name", setting.key);
     children.pushBack(node);
   }
 
   settingsNode.insert("children", children);
 
-  auto spXMLBuffer = GetKernel()->CreateComponent<Text>();
-  spXMLBuffer->Reserve(10240); // TODO: this is not okay...
-  spXMLBuffer->FormatXml(settingsNode);
+  auto spXMLBuffer = getKernel()->createComponent<Text>();
+  spXMLBuffer->reserve(10240); // TODO: this is not okay...
+  spXMLBuffer->formatXml(settingsNode);
 
   try {
-    StreamRef spFile = GetKernel()->CreateComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
-    spFile->Save(spXMLBuffer);
+    StreamRef spFile = getKernel()->createComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    spFile->save(spXMLBuffer);
   } catch (EPException &) {
-    LogWarning(1, "Failed to open Settings file for writing: \"{0}\"", srcString);
+    logWarning(1, "Failed to open Settings file for writing: \"{0}\"", srcString);
     return;
   }
 }
@@ -148,7 +148,7 @@ void SettingsImpl::SetValue(SharedString pluginkey, SharedString key, Variant va
     }
     //if not an AVLTree return pluginkey already use for a global setting
     else
-      LogWarning(0, "\"{0}\" is already used for a global setting", pluginkey);
+      logWarning(0, "\"{0}\" is already used for a global setting", pluginkey);
   }
   else
   {

@@ -4,23 +4,23 @@ using namespace ep;
 
 namespace %{Namespace} {
 
-Array<const PropertyInfo> %{ActivityName}::GetProperties() const
+Array<const PropertyInfo> %{ActivityName}::getProperties() const
 {
   return { };
 }
 
-Array<const ep::MethodInfo> %{ActivityName}::GetMethods() const
+Array<const ep::MethodInfo> %{ActivityName}::getMethods() const
 {
   return { };
 }
 
 
-Array<const EventInfo> %{ActivityName}::GetEvents() const
+Array<const EventInfo> %{ActivityName}::getEvents() const
 {
   return { };
 }
 
-Array<const StaticFuncInfo> %{ActivityName}::GetStaticFuncs() const
+Array<const StaticFuncInfo> %{ActivityName}::getStaticFuncs() const
 {
   return { };
 }
@@ -33,7 +33,7 @@ Array<const StaticFuncInfo> %{ActivityName}::GetStaticFuncs() const
 
 extern "C" bool epPluginAttach()
 {
-  Kernel::GetInstance()->RegisterComponentType<%{ActivityName}>();
+  Kernel::getInstance()->registerComponentType<%{ActivityName}>();
   return true;
 }
 

@@ -23,37 +23,37 @@ class Viewer : public Activity
   EP_DECLARE_COMPONENT(ep, Viewer, Activity, EPKERNEL_PLUGINVERSION, "View UD data files", 0);
 public:
 
-  void Activate() override;
-  void Deactivate() override;
-  void Update(double timeStep);
-  Variant Save() const override;
+  void activate() override;
+  void deactivate() override;
+  void update(double timeStep);
+  Variant save() const override;
 
   // TODO: Remove Temp hacks!
-  SimpleCameraRef GetSimpleCamera() const { return spCamera; }
-  ViewRef GetView() const { return spView; }
+  SimpleCameraRef getSimpleCamera() const { return spCamera; }
+  ViewRef getView() const { return spView; }
 
-  static MutableString<260> GetFileNameFromPath(String path);
+  static MutableString<260> getFileNameFromPath(String path);
 
 protected:
   Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
-  void CreatePlatformLogo();
-  bool InputHook(ep::InputEvent ev);
+  void createPlatformLogo();
+  bool inputHook(ep::InputEvent ev);
 
-  ~Viewer() { Deactivate(); }
+  ~Viewer() { deactivate(); }
 
-  static void StaticInit(ep::Kernel *pKernel);
+  static void staticInit(ep::Kernel *pKernel);
   // TODO: Bug EP-66
   //void ToggleResourcesPanel();
-  void ToggleBookmarksPanel();
-  void CreateBookmark();
+  void toggleBookmarksPanel();
+  void createBookmark();
 
-  void OnResourceDropped(String resourceUID, int x, int y);
-  void AddSceneNodeAtViewPosition(UDNodeRef node, int x, int y);
+  void onResourceDropped(String resourceUID, int x, int y);
+  void addSceneNodeAtViewPosition(UDNodeRef node, int x, int y);
 
   // Static functions for CommandManager callbacks
-  static void StaticToggleBookmarksPanel(Variant::VarMap params);
-  static void StaticCreateBookmark(Variant::VarMap params);
+  static void staticToggleBookmarksPanel(Variant::VarMap params);
+  static void staticCreateBookmark(Variant::VarMap params);
   // TODO: Bug EP-66
   //static void StaticToggleResourcesPanel(Variant::VarMap params);
 
@@ -65,7 +65,7 @@ protected:
   NodeRef spImageNode;
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
+  Array<const PropertyInfo> getProperties() const;
 };
 
 } //namespace ep

@@ -36,7 +36,7 @@ public:
   // TODO: support async operations?
   // TODO: remove support for sync operations?
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   void SetPos(int64_t _pos) override final { pos = _pos; }

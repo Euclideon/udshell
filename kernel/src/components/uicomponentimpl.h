@@ -8,10 +8,10 @@
 
 namespace ep {
 
-inline Array<const PropertyInfo> UIComponent::GetProperties() const
+inline Array<const PropertyInfo> UIComponent::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(UIHandle, "Platform specific UI handle", nullptr, 0)
+    EP_MAKE_PROPERTY_RO("uiHandle", getUIHandle, "Platform specific UI handle", nullptr, 0)
   };
 }
 
@@ -25,7 +25,7 @@ public:
 
   void PostInit(void *pData) override final
   {
-    pInstance->ep::Component::GetImpl<ep::ComponentImpl>()->SetUserData(pData);
+    pInstance->ep::Component::getImpl<ep::ComponentImpl>()->SetUserData(pData);
   }
 };
 

@@ -335,12 +335,12 @@ private:
 // ref counting base class
 class RefCounted : public Safe
 {
-  void Destroy();
+  void destroy();
 
 public:
-  size_t RefCount() const { return rc; }
-  size_t IncRef() { return ++rc; }
-  size_t DecRef()
+  size_t refCount() const { return rc; }
+  size_t incRef() { return ++rc; }
+  size_t decRef()
   {
     if (rc == 1)
     {
@@ -353,7 +353,7 @@ public:
   }
 
   template<typename T, typename... Args>
-  static T* New(Args... args)
+  static T* create(Args... args)
   {
     static_assert(std::is_base_of<RefCounted, T>::value, "T does not derive from RefCounted");
     void *pMem = epAlloc(sizeof(T));
@@ -423,7 +423,7 @@ inline SharedPtr<T>& SharedPtr<T>::operator=(UniquePtr<U> &ptr)
 template<class T>
 epforceinline size_t SharedPtr<T>::count() const
 {
-  return pInstance ? pInstance->RefCount() : 0;
+  return pInstance ? pInstance->refCount() : 0;
 }
 
 template<class T>
@@ -431,7 +431,7 @@ epforceinline T* SharedPtr<T>::acquire(T *pI)
 {
   auto *pRC = (RefCounted*)pI; // we have already validated in constructors that T is RefCounted
   if (pRC)
-    pRC->IncRef();
+    pRC->incRef();
   return pI;
 }
 template<class T>
@@ -439,7 +439,7 @@ inline void SharedPtr<T>::release(T *pI)
 {
   auto *pRC = (RefCounted*)pI;
   if (pRC)
-    pRC->DecRef();
+    pRC->decRef();
 }
 
 namespace internal {
@@ -470,7 +470,7 @@ namespace internal {
   epforceinline void Acquire<T, true>::acquire(T *ptr)
   {
     if (ptr)
-      ptr->IncRef();
+      ptr->incRef();
   }
 
   template<class T>
@@ -484,7 +484,7 @@ namespace internal {
     if (ptr)
     {
       using U = typename std::remove_const<T>::type;
-      const_cast<U*>(ptr)->DecRef();
+      const_cast<U*>(ptr)->decRef();
     }
   }
 

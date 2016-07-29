@@ -19,22 +19,22 @@ class ComponentGlue final : public Component
 public:
   ComponentGlue(const ComponentDesc *_pType, Kernel *_pKernel, SharedString _uid, ComponentRef spInstance, Variant::VarMap initParams);
 
-  Variant Save() const override;
+  Variant save() const override;
 
 protected:
   ~ComponentGlue();
 
-  void ReceiveMessage(String message, String sender, const Variant &data) override;
+  void receiveMessage(String message, String sender, const Variant &data) override;
 
-  const PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->GetPropertyDesc(_name, enumerateFlags); }
-  const MethodDesc *GetMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->GetMethodDesc(_name, enumerateFlags); }
-  const EventDesc *GetEventDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final  { return spInstance->GetEventDesc(_name, enumerateFlags); }
-  const StaticFuncDesc *GetStaticFuncDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final  { return spInstance->GetStaticFuncDesc(_name, enumerateFlags); }
+  const PropertyDesc *getPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->getPropertyDesc(_name, enumerateFlags); }
+  const MethodDesc *getMethodDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->getMethodDesc(_name, enumerateFlags); }
+  const EventDesc *getEventDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final  { return spInstance->getEventDesc(_name, enumerateFlags); }
+  const StaticFuncDesc *getStaticFuncDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final  { return spInstance->getStaticFuncDesc(_name, enumerateFlags); }
 
   ComponentRef spInstance;
 
-  VarDelegate save;
-  VarDelegate receiveMessage;
+  VarDelegate _save;
+  VarDelegate _receiveMessage;
 };
 
 } // namespace ep

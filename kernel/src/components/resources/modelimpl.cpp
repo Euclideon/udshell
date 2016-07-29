@@ -24,14 +24,14 @@ void epFromVariant(const Variant &variant, RenderList *r)
   r->numVertices = variant["numVertices"].as<size_t>();
 }
 
-Array<const PropertyInfo> Model::GetProperties() const
+Array<const PropertyInfo> Model::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(Material, "The Model's Material", nullptr, 0),
-    EP_MAKE_PROPERTY(IndexArray, "The Model's index buffer", nullptr, 0),
+    EP_MAKE_PROPERTY("material", getMaterial, setMaterial, "The Model's Material", nullptr, 0),
+    EP_MAKE_PROPERTY("indexArray", getIndexArray, setIndexArray, "The Model's index buffer", nullptr, 0),
   };
 }
-Array<const MethodInfo> Model::GetMethods() const
+Array<const MethodInfo> Model::getMethods() const
 {
   return{
 //    EP_MAKE_METHOD(SetVertexArray, "Set the Vertex buffer given an array of vertices and an array of attributes"), // TODO: Add this when we support passing slice to function
@@ -69,8 +69,8 @@ void ModelImpl::RemoveVertexArray(ArrayBufferRef spVertices)
 
 ResourceRef ModelImpl::Clone() const
 {
-  ModelRef spNewModel = GetKernel()->CreateComponent<Model>();
-  ModelImpl* pImpl = spNewModel->GetImpl<ModelImpl>();
+  ModelRef spNewModel = getKernel()->createComponent<Model>();
+  ModelImpl* pImpl = spNewModel->getImpl<ModelImpl>();
 
   pImpl->vertexArrays = vertexArrays;
   pImpl->spIndices = spIndices;

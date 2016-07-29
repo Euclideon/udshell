@@ -16,43 +16,43 @@ public:
 
   //! Get the currently configured timer duration.
   //! \return The duration of the timer in seconds.
-  //! \see GetTimerType
-  double GetDuration() const { return pImpl->GetDuration(); };
+  //! \see getTimerType
+  double getDuration() const { return pImpl->GetDuration(); };
 
   //! Get the currently configured timer type.
   //! \return The type of the timer.
-  //! \see GetDuration
-  TimerType GetTimerType() const { return pImpl->GetTimerType(); }
+  //! \see getDuration
+  TimerType getTimerType() const { return pImpl->GetTimerType(); }
 
   //! Reset the timer using the currently configured settings.
   //! \return None.
-  void Reset() { pImpl->Reset(); }
+  void reset() { pImpl->Reset(); }
 
   //! Begin an interval counter. The \c Elapsed signal will trigger each \a interval seconds.
   //! \param interval The timer interval in seconds.
   //! \return None.
-  //! \see BeginCountdown
-  void BeginInterval(double interval) { pImpl->BeginInterval(interval); }
+  //! \see beginCountdown
+  void beginInterval(double interval) { pImpl->BeginInterval(interval); }
 
   //! Begin a countdown. The \c Elapsed signal will trigger after the countdown completes.
   //! \param duration The countdown duration in seconds.
   //! \return None.
-  //! \see BeginInterval
-  void BeginCountdown(double duration) { pImpl->BeginCountdown(duration); }
+  //! \see beginInterval
+  void beginCountdown(double duration) { pImpl->BeginCountdown(duration); }
 
   //! Event that triggers when the timer elapses.
-  Event<> Elapsed;
+  Event<> elapsed;
 
 private:
   Timer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
-  Array<const EventInfo> GetEvents() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
+  Array<const EventInfo> getEvents() const;
 };
 
 } // namespace ep

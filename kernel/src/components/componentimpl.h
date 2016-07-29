@@ -9,10 +9,6 @@
 
 #include <stdio.h>
 
-#if defined(SendMessage)
-# undef SendMessage
-#endif
-
 namespace ep {
 
 class ComponentImpl : public BaseImpl<Component, IComponent>
@@ -60,10 +56,10 @@ protected:
   void ReceiveMessage(String message, String sender, const Variant &data) override final;
 
   // property access
-  size_t NumProperties() const { return instanceProperties.size() + ((const ComponentDescInl*)GetDescriptor())->propertyTree.size(); }
-  size_t NumMethods() const { return instanceMethods.size() + ((const ComponentDescInl*)GetDescriptor())->methodTree.size(); }
-  size_t NumEvents() const { return instanceEvents.size() + ((const ComponentDescInl*)GetDescriptor())->eventTree.size(); }
-  size_t NumStaticFuncs() const { return ((const ComponentDescInl*)GetDescriptor())->staticFuncTree.size(); }
+  size_t NumProperties() const { return instanceProperties.size() + ((const ComponentDescInl*)getDescriptor())->propertyTree.size(); }
+  size_t NumMethods() const { return instanceMethods.size() + ((const ComponentDescInl*)getDescriptor())->methodTree.size(); }
+  size_t NumEvents() const { return instanceEvents.size() + ((const ComponentDescInl*)getDescriptor())->eventTree.size(); }
+  size_t NumStaticFuncs() const { return ((const ComponentDescInl*)getDescriptor())->staticFuncTree.size(); }
 
   // TODO: these substantially inflate the size of ComponentImpl and are almost always nullptr
   // ...should we move them to a separate allocation?

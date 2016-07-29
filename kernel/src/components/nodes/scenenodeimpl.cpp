@@ -6,17 +6,17 @@
 
 namespace ep {
 
-Array<const PropertyInfo> SceneNode::GetProperties() const
+Array<const PropertyInfo> SceneNode::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY(Scene, "Scene instance", nullptr, 0),
+    EP_MAKE_PROPERTY("scene", getScene, setScene, "Scene instance", nullptr, 0),
   };
 }
 
 void SceneNodeImpl::Render(RenderScene &spRenderScene, const Double4x4 &mat)
 {
   if (spScene)
-    spScene->GetRootNode()->DoRender(spRenderScene, mat);
+    spScene->getRootNode()->doRender(spRenderScene, mat);
 
   // TODO: call Node::Render()?
 }

@@ -5,21 +5,21 @@
 
 namespace ep {
 
-Array<const MethodInfo> CommandManager::GetMethods() const
+Array<const MethodInfo> CommandManager::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(SetShortcut, "Set the shortcut for the given command"),
-    EP_MAKE_METHOD(GetShortcut, "Get the shortcut for the given command"),
-    EP_MAKE_METHOD(RegisterCommand, "register a command and assign it a function, script and/or shortcut"),
-    EP_MAKE_METHOD(UnregisterCommand, "remove a command from the command manager"),
-    EP_MAKE_METHOD(HandleShortcutEvent, "execute the command attached to the given shortcut"),
-    EP_MAKE_METHOD(RunCommand, "call the function or script attached to the given command"),
-    EP_MAKE_METHOD(SetFunction, "Assign a callback function to the given command"),
-    EP_MAKE_METHOD(SetScript, "Assign a script string to the given command"),
-    EP_MAKE_METHOD(SetActivityType, "Set the activity type associated with the given command"),
-    EP_MAKE_METHOD(GetActivityType, "Get the activity type associated with the given command"),
-    EP_MAKE_METHOD(EnableShortcut, "Enable shortcut for the given command"),
-    EP_MAKE_METHOD(DisableShortcut, "Disable shortcut for the given command"),
+    EP_MAKE_METHOD(setShortcut, "Set the shortcut for the given command"),
+    EP_MAKE_METHOD(getShortcut, "Get the shortcut for the given command"),
+    EP_MAKE_METHOD(registerCommand, "register a command and assign it a function, script and/or shortcut"),
+    EP_MAKE_METHOD(unregisterCommand, "remove a command from the command manager"),
+    EP_MAKE_METHOD(handleShortcutEvent, "execute the command attached to the given shortcut"),
+    EP_MAKE_METHOD(runCommand, "call the function or script attached to the given command"),
+    EP_MAKE_METHOD(setFunction, "Assign a callback function to the given command"),
+    EP_MAKE_METHOD(setScript, "Assign a script string to the given command"),
+    EP_MAKE_METHOD(setActivityType, "Set the activity type associated with the given command"),
+    EP_MAKE_METHOD(getActivityType, "Get the activity type associated with the given command"),
+    EP_MAKE_METHOD(enableShortcut, "Enable shortcut for the given command"),
+    EP_MAKE_METHOD(disableShortcut, "Disable shortcut for the given command"),
   };
 }
 
@@ -37,7 +37,7 @@ bool CommandManagerImpl::SetShortcut(String id, SharedString shortcut)
   Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
   {
-    LogWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\" - \"{1}\" doesn't exist", shortcut, id);
+    logWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\" - \"{1}\" doesn't exist", shortcut, id);
     return false;
   }
 
@@ -50,7 +50,7 @@ bool CommandManagerImpl::RegisterCommand(String id, Delegate<void(Variant::VarMa
 {
   if (commandRegistry.get(id))
   {
-    LogWarning(5, "Command registration failed - \"{0}\" already exists", id);
+    logWarning(5, "Command registration failed - \"{0}\" already exists", id);
     return false;
   }
 
@@ -67,7 +67,7 @@ bool CommandManagerImpl::RegisterCommand(String id, Delegate<void(Variant::VarMa
       if (!shortcut.cmpIC(comm.shortcut) && id.cmp(comm.id)
         && (activityTypeID.empty() || comm.activityType.empty() || activityTypeID.eq(comm.activityType)))
       {
-        LogWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\". Already bound to \"{2}\"", shortcut, id, comm.id);
+        logWarning(2, "Can't bind shortcut \"{0}\" to command \"{1}\". Already bound to \"{2}\"", shortcut, id, comm.id);
         return false;
       }
     }
@@ -108,11 +108,11 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
   ActivityRef spActiveActivity = nullptr;
   ProjectRef spProject;
 
-  ComponentRef spComp = GetKernel()->FindComponent("project");
+  ComponentRef spComp = getKernel()->findComponent("project");
   if (spComp)
   {
     spProject = component_cast<Project>(spComp);
-    spActiveActivity = spProject->GetActiveActivity();
+    spActiveActivity = spProject->getActiveActivity();
   }
 
   for (auto kvp : commandRegistry)
@@ -123,14 +123,14 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
 
       if (!comm.activityType.empty())
       {
-        if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
+        if (spActiveActivity && comm.activityType.eq(spActiveActivity->getType()))
         {
           params.insert("activity", spActiveActivity);
 
           if (comm.func)
             comm.func(params);
           else if (!comm.script.empty())
-            GetKernel()->Exec(comm.script);
+            getKernel()->exec(comm.script);
           return true;
         }
       }
@@ -139,7 +139,7 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
         if (comm.func)
           comm.func(params);
         else if (!comm.script.empty())
-          GetKernel()->Exec(comm.script);
+          getKernel()->exec(comm.script);
         return true;
       }
     }
@@ -158,11 +158,11 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
   ActivityRef spActiveActivity = nullptr;
   ProjectRef spProject;
 
-  ComponentRef spComp = GetKernel()->FindComponent("project");
+  ComponentRef spComp = getKernel()->findComponent("project");
   if (spComp)
   {
     spProject = component_cast<Project>(spComp);
-    spActiveActivity = spProject->GetActiveActivity();
+    spActiveActivity = spProject->getActiveActivity();
   }
 
   Variant::VarMap params;
@@ -175,14 +175,14 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
     {
       if (!comm.activityType.empty())
       {
-        if (spActiveActivity && comm.activityType.eq(spActiveActivity->GetType()))
+        if (spActiveActivity && comm.activityType.eq(spActiveActivity->getType()))
         {
           params.insert("activity", spActiveActivity);
 
           if (comm.func)
             comm.func(params);
           else if (!comm.script.empty())
-            GetKernel()->Exec(comm.script);
+            getKernel()->exec(comm.script);
           return true;
         }
       }
@@ -191,7 +191,7 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
         if (comm.func)
           comm.func(params);
         else if (!comm.script.empty())
-          GetKernel()->Exec(comm.script);
+          getKernel()->exec(comm.script);
         return true;
       }
     }
@@ -205,7 +205,7 @@ bool CommandManagerImpl::SetFunction(String id, Delegate<void(Variant::VarMap)> 
   Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
   {
-    LogWarning(2, "Can't bind function to command \"{0}\", command doesn't exist", id);
+    logWarning(2, "Can't bind function to command \"{0}\", command doesn't exist", id);
     return false;
   }
 
@@ -220,7 +220,7 @@ bool CommandManagerImpl::SetScript(String id, String script)
   Command *pCommand = commandRegistry.get(id);
   if (!pCommand)
   {
-    LogWarning(2, "Can't bind script to command \"{0}\", command doesn't exist", id);
+    logWarning(2, "Can't bind script to command \"{0}\", command doesn't exist", id);
     return false;
   }
 
@@ -244,7 +244,7 @@ bool CommandManagerImpl::SetActivityType(String commandID, String activityTypeID
   Command *pCommand = commandRegistry.get(commandID);
   if (!pCommand)
   {
-    LogWarning(2, "Can't bind activity type to command \"{0}\", command doesn't exist", commandID);
+    logWarning(2, "Can't bind activity type to command \"{0}\", command doesn't exist", commandID);
     return false;
   }
 

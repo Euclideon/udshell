@@ -13,7 +13,7 @@ FocusScope {
   anchors.topMargin: 4
   anchors.bottomMargin: 4
 
-  property var epTypeDesc: { "super": "ep.uicomponent", "id": "viewer.mainui" }
+  property var epTypeDesc: { "id": "viewer.MainUI", "super": "ep.UIComponent" }
   property var viewport
   property var sidebarcomp
   property var bookmarkscomp
@@ -24,11 +24,11 @@ FocusScope {
   signal resourcedropped(string uid, int x, int y)
 
   function togglebookmarkspanel() {
-    toolPanelSlot.toggleVisible(bookmarkscomp.get("uihandle"));
+    toolPanelSlot.toggleVisible(bookmarkscomp.uiHandle);
   }
 
   onBookmarkscompChanged: {
-    var bookmarksqq = bookmarkscomp.get("uihandle");
+    var bookmarksqq = bookmarkscomp.uiHandle;
     toolPanelSlot.addPanel(bookmarksqq, 200);
   }
 
@@ -44,7 +44,7 @@ FocusScope {
   //}
 
   Component.onCompleted: {
-    sidebarcomp = EPKernel.createComponent("ep.menu", {});
+    sidebarcomp = EPKernel.createComponent("ep.Menu", {});
     if (!sidebarcomp) {
       console.error("Unable to create Sidebar Component");
       return;
@@ -60,19 +60,19 @@ FocusScope {
     };
     sidebarcomp.call("additem", "", resourcesPanelButton);*/
 
-    var bookMarksButton = {
+    var bookmarksButton = {
       "name" : "Toggle Bookmarks Panel",
       "type" : "button",
       "command" : "togglebookmarkspanel",
       "description" : "Toggles open/closed the Bookmarks panel",
       "image" : "qrc:/images/icon_bookmark_24.png",
     };
-    sidebarcomp.call("additem", "", bookMarksButton);
+    sidebarcomp.addItem("", bookmarksButton);
 
     sideBar.toolbarcomp = sidebarcomp;
   }
 
-  onViewportChanged: viewport.get("uihandle").parent = viewPanel
+  onViewportChanged: viewport.uiHandle.parent = viewPanel
 
   // HACK: We have to set both of these because of inconsistent behaviour in TabView
   focus: true
@@ -80,7 +80,7 @@ FocusScope {
 
   onActiveFocusChanged: {
     if(activeFocus)
-      viewport.get("uihandle").forceActiveFocus();
+      viewport.uiHandle.forceActiveFocus();
   }
 
   RowLayout {
@@ -117,7 +117,7 @@ FocusScope {
             if (drag.keys.indexOf("text/uri-list") > -1) {
               if (drag.hasText && (drag.proposedAction == Qt.MoveAction || drag.proposedAction == Qt.CopyAction)) {
                 var resourceManager = EPKernel.findComponent("resourcemanager");
-                var exts = resourceManager.get("extensions");
+                var exts = resourceManager.extensions;
                 var udDSExts = exts.uddatasource; // TODO Currently the scene only supports UDDataSources. Add GeomSource extensions, when they become available. Also ImageSource and maybe others?
 
                 var urls = drag.text.trim().split("\n");
@@ -143,11 +143,11 @@ FocusScope {
                   var resourceManager = EPKernel.findComponent("resourcemanager");
 
                   for(var i = 0; i < urls.length; i++) {
-                    var dataSource = resourceManager.call("loadresourcesfromfile", {"src" : urls[i], "useStreamer" : true });
+                    var dataSource = resourceManager.loadResourcesFromFile({"src" : urls[i], "useStreamer" : true });
 
                     if(dataSource) {
-                      var resource = dataSource.call("getresourcebyvariant", 0);
-                      resourcedropped(resource.get("uid"), drop.x, drop.y);
+                      var resource = dataSource.getResourceByVariant(0);
+                      resourcedropped(resource.uid, drop.x, drop.y);
                     }
                   }
 

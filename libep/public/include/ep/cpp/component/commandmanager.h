@@ -16,30 +16,30 @@ class CommandManager : public Component
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, CommandManager, ICommandManager, Component, EPKERNEL_PLUGINVERSION, "Registers commands accessed by string id and associated with a function or script and an optional shortcut", 0)
 
 public:
-  bool RegisterCommand(String id, Delegate<void(Variant::VarMap)> func, String script, String activityTypeID, String shortcut = nullptr) { return pImpl->RegisterCommand(id, func, script, activityTypeID, shortcut); }
-  void UnregisterCommand(String id) { pImpl->UnregisterCommand(id); }
-  bool HandleShortcutEvent(String shortcut) { return pImpl->HandleShortcutEvent(shortcut); }
-  bool RunCommand(String id, Variant::VarMap params = nullptr) { return pImpl->RunCommand(id, params); }
-  void DisableShortcut(String commandID) { pImpl->DisableShortcut(commandID); }
-  void EnableShortcut(String commandID) { pImpl->EnableShortcut(commandID); }
-  bool SetFunction(String id, Delegate<void(Variant::VarMap)> func) { return pImpl->SetFunction(id, func); }
-  bool SetScript(String id, String script) { return pImpl->SetScript(id, script); }
-  SharedString GetShortcut(String id) const { return pImpl->GetShortcut(id); }
-  bool SetShortcut(String id, SharedString shortcut) { return pImpl->SetShortcut(id, shortcut); }
-  String GetActivityType(String commandID) const { return pImpl->GetActivityType(commandID); }
-  bool SetActivityType(String commandID, String activityTypeID) { return pImpl->SetActivityType(commandID, activityTypeID); }
+  bool registerCommand(String id, Delegate<void(Variant::VarMap)> func, String script, String activityTypeID, String shortcut = nullptr) { return pImpl->RegisterCommand(id, func, script, activityTypeID, shortcut); }
+  void unregisterCommand(String id) { pImpl->UnregisterCommand(id); }
+  bool handleShortcutEvent(String shortcut) { return pImpl->HandleShortcutEvent(shortcut); }
+  bool runCommand(String id, Variant::VarMap params = nullptr) { return pImpl->RunCommand(id, params); }
+  void enableShortcut(String commandID) { pImpl->EnableShortcut(commandID); }
+  void disableShortcut(String commandID) { pImpl->DisableShortcut(commandID); }
+  bool setFunction(String id, Delegate<void(Variant::VarMap)> func) { return pImpl->SetFunction(id, func); }
+  bool setScript(String id, String script) { return pImpl->SetScript(id, script); }
+  SharedString getShortcut(String id) const { return pImpl->GetShortcut(id); }
+  bool setShortcut(String id, SharedString shortcut) { return pImpl->SetShortcut(id, shortcut); }
+  String getActivityType(String commandID) const { return pImpl->GetActivityType(commandID); }
+  bool setActivityType(String commandID, String activityTypeID) { return pImpl->SetActivityType(commandID, activityTypeID); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   CommandManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
 private:
-  Array<const MethodInfo> GetMethods() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } //namespace ep

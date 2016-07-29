@@ -87,7 +87,7 @@ inline void UDModelImpl::SetStartingRoot(uint32_t root)
   if (root != startingRoot)
   {
     startingRoot = root;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 
@@ -96,7 +96,7 @@ inline void UDModelImpl::SetAnimationFrame(uint32_t frame)
   if (frame != animationFrame)
   {
     animationFrame = frame;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 
@@ -107,7 +107,7 @@ inline void UDModelImpl::SetRenderClipRect(const Rect<uint32_t>& _rect)
   {
     rectSet = true;
     rect = _rect;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 
@@ -116,7 +116,7 @@ inline void UDModelImpl::SetRenderFlags(UDModelFlags flags)
   if (flags != renderFlags)
   {
     renderFlags = flags;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 
@@ -125,7 +125,7 @@ inline void UDModelImpl::SetUDMatrix(const Double4x4 &mat)
   if (mat != udmatrix)
   {
     udmatrix = mat;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 
@@ -134,7 +134,7 @@ inline void UDModelImpl::SetVoxelFilter(VoxelFilter *pFilter)
   if (pFilter != pVoxelFilter)
   {
     pVoxelFilter = pFilter;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 
@@ -146,7 +146,7 @@ inline void UDModelImpl::SetVoxelShader(VoxelShader *pShader)
       varVoxelShader = nullptr;
 
     pVoxelShader = pShader;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 
@@ -158,7 +158,7 @@ inline void UDModelImpl::SetVarVoxelShader(VarDelegate varShader)
       pVoxelShader = nullptr;
 
     varVoxelShader = varShader;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 
@@ -167,7 +167,7 @@ inline void UDModelImpl::SetPixelShader(PixelShader *pShader)
   if (pShader != pPixelShader)
   {
     pPixelShader = pShader;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 inline void UDModelImpl::SetConstantData(UDConstantDataType type, BufferRef buffer)
@@ -175,7 +175,7 @@ inline void UDModelImpl::SetConstantData(UDConstantDataType type, BufferRef buff
   if (buffer != constantBuffers[type])
   {
     constantBuffers[type] = buffer;
-    pInstance->Changed.Signal();
+    pInstance->changed.signal();
   }
 }
 

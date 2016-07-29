@@ -30,7 +30,7 @@ Variant epToVariant(QObject *pQObj)
   epDebugPrintf("TODO: epToVariant: Unsupported QObject conversion '%s'; we need a global pKernel pointer >_<\n", pQObj->metaObject()->className());
 
   // TODO: create generic QObjectComponent which thinly wraps a QObject
-//  pKernel->CreateComponent<QObjectComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
+//  pKernel->createComponent<QObjectComponent>({ { "object" }, { (int64_t)(size_t)pQObj } });
   return Variant(nullptr);
 }
 
@@ -137,8 +137,8 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
         case Variant::SharedPtrType::Component:
         {
           ep::ComponentRef spComponent = variant.asComponent();
-          if (spComponent->IsType("ep.qobjectcomponent"))
-            pVariant->setValue(shared_pointer_cast<qt::QObjectComponent>(spComponent)->GetQObject());
+          if (spComponent->isType("ep.QObjectComponent"))
+            pVariant->setValue(shared_pointer_cast<qt::QObjectComponent>(spComponent)->getQObject());
           else
           {
             QObject *pQObject = qt::BuildQtEPComponent::Create(std::move(spComponent));
@@ -155,7 +155,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
           using namespace qt;
           QtDelegate *del = new QtDelegate(variant.asDelegate());
 
-          QJSValue jsDel = QtApplication::Kernel()->QmlEngine()->newQObject(del);
+          QJSValue jsDel = QtApplication::kernel()->qmlEngine()->newQObject(del);
           if (jsDel.hasProperty("call"))
             pVariant->setValue(jsDel.property("call"));
 
@@ -174,7 +174,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
 
         case Variant::SharedPtrType::AssocArray:
         {
-          QJSValue jsMap = qt::QtApplication::Kernel()->QmlEngine()->newObject();
+          QJSValue jsMap = qt::QtApplication::kernel()->qmlEngine()->newObject();
           Variant::VarMap aa = variant.asAssocArray();
           for (auto v : aa)
           {
@@ -207,7 +207,7 @@ void epFromVariant(const Variant &variant, QVariant *pVariant)
     case Variant::Type::Array:
     {
       uint length = (uint)variant.arrayLen();
-      QJSValue jsArray = qt::QtApplication::Kernel()->QmlEngine()->newArray(length);
+      QJSValue jsArray = qt::QtApplication::kernel()->qmlEngine()->newArray(length);
       Slice<Variant> varr = variant.asArray();
       for (uint i = 0; i < length; ++i)
       {
@@ -267,7 +267,7 @@ Variant epToVariant(const QJSValue &v)
       .arg(v.property("message").toString())
       .arg(v.property("stack").toString());
 
-    return Variant(AllocError(ep::Result::ScriptException, qt::epFromQString(errorStr)));
+    return Variant(allocError(ep::Result::ScriptException, qt::epFromQString(errorStr)));
   }
   else if (v.isObject())
   {
@@ -339,7 +339,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
       using namespace qt;
 
       uint length = (uint)variant.arrayLen();
-      QJSValue val = QtApplication::Kernel()->QmlEngine()->newArray(length);
+      QJSValue val = QtApplication::kernel()->qmlEngine()->newArray(length);
       Slice<Variant> varr = variant.asArray();
       for (uint i = 0; i < length; ++i)
       {
@@ -361,9 +361,9 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
           QQmlEngine::ObjectOwnership ownership = QQmlEngine::JavaScriptOwnership;
 
           // if the variant contains a qt::QObjectComponent then unpack this and give the direct QObject*
-          if (spComponent->IsType("ep.qobjectcomponent"))
+          if (spComponent->isType("ep.QObjectComponent"))
           {
-            pQObject = shared_pointer_cast<qt::QObjectComponent>(spComponent)->GetQObject();
+            pQObject = shared_pointer_cast<qt::QObjectComponent>(spComponent)->getQObject();
 
             // since QML will steal ownership, we need to restore the prev state (in case it was CppOwnership)
             // note that this is only important for SharedPtr<QObjectComponent>'s since we don't know who created
@@ -375,7 +375,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
             pQObject = qt::BuildQtEPComponent::Create(std::move(spComponent));
           }
 
-          *pJSValue = qt::QtApplication::Kernel()->QmlEngine()->newQObject(pQObject);
+          *pJSValue = qt::QtApplication::kernel()->qmlEngine()->newQObject(pQObject);
           if (ownership != QQmlEngine::JavaScriptOwnership)
             QQmlEngine::setObjectOwnership(pQObject, ownership);
 
@@ -386,7 +386,7 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
         {
           using namespace qt;
 
-          *pJSValue = QtApplication::Kernel()->QmlEngine()->newObject();
+          *pJSValue = QtApplication::kernel()->qmlEngine()->newObject();
           Variant::VarMap aa = variant.asAssocArray();
           for (auto v : aa)
           {

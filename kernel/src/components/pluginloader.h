@@ -13,25 +13,25 @@ class PluginLoader : public Component
   EP_DECLARE_COMPONENT(ep, PluginLoader, Component, EPKERNEL_PLUGINVERSION, "PluginLoader desc...", 0)
 public:
 
-  virtual Slice<const String> GetSupportedExtensions() const { return nullptr; }
-  virtual bool LoadPlugin(String filename) { return false; }
+  virtual Slice<const String> getSupportedExtensions() const { return nullptr; }
+  virtual bool loadPlugin(String filename) { return false; }
 
 protected:
   PluginLoader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Component(pType, pKernel, uid, initParams)
   {}
 
-  Array<const PropertyInfo> GetProperties() const
+  Array<const PropertyInfo> getProperties() const
   {
     return{
-      EP_MAKE_PROPERTY_RO(SupportedExtensions, "List of file extension strings handled by this PluginLoader", nullptr, 0),
+      EP_MAKE_PROPERTY_RO("supportedExtensions", getSupportedExtensions, "List of file extension strings handled by this PluginLoader", nullptr, 0),
     };
   }
 
-  Array<const MethodInfo> GetMethods() const
+  Array<const MethodInfo> getMethods() const
   {
     return{
-      EP_MAKE_METHOD(LoadPlugin, "Load a plugin with the given filename"),
+      EP_MAKE_METHOD(loadPlugin, "Load a plugin with the given filename"),
     };
   }
 };

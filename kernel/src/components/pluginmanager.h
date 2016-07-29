@@ -14,15 +14,15 @@ class PluginManager : public Component
   EP_DECLARE_COMPONENT(ep, PluginManager, Component, EPKERNEL_PLUGINVERSION, "PluginManager desc...", 0)
 public:
 
-  void RegisterPluginLoader(PluginLoaderRef spLoader);
-  bool LoadPlugin(String filename);
+  void registerPluginLoader(PluginLoaderRef spLoader);
+  bool loadPlugin(String filename);
 
 protected:
   PluginManager(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams);
 
   Array<PluginLoaderRef> loaders;
 
-  Array<const MethodInfo> GetMethods() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } //namespace ep

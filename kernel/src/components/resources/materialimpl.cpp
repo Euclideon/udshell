@@ -8,18 +8,18 @@
 namespace ep {
 
 AVLTree<String, int> MaterialImpl::builtinProperties{
-  { "vertexshader", 0 },
-  { "pixelshader", 1 },
-  { "geometryshader", 2 },
-  { "tesselationcontrolshader", 3 },
-  { "tesselationevaluationshader", 4 },
-  { "computeshader", 5 },
-  { "blendmode", 6 },
-  { "cullmode", 7 },
-  { "depthfunc", 8 },
-  { "stencilstate", 9 },
-  { "frontstencilstate", 10 },
-  { "backstencilstate", 11 },
+  { "vertexShader", 0 },
+  { "pixelShader", 1 },
+  { "geometryShader", 2 },
+  { "tesselationControlShader", 3 },
+  { "tesselationEvaluationShader", 4 },
+  { "computeShader", 5 },
+  { "blendMode", 6 },
+  { "cullMode", 7 },
+  { "depthFunc", 8 },
+  { "stencilState", 9 },
+  { "frontStencilState", 10 },
+  { "backStencilState", 11 },
 };
 
 
@@ -42,51 +42,49 @@ void epFromVariant(const Variant &variant, ShaderProperty *p)
 }
 
 
-Array<const PropertyInfo> Material::GetProperties() const
+Array<const PropertyInfo> Material::getProperties() const
 {
-#define EP_MAKE_PROPERTY_METASET(FuncName, desc) EP_MAKE_PROPERTY_EXPLICIT(#FuncName, desc, EP_MAKE_GETTER(Get##FuncName), EP_MAKE_SETTER(Set##FuncName##_Meta), nullptr, 0)
-
   return{
-    EP_MAKE_PROPERTY_METASET(VertexShader, "Vertex shader for rendering"),
-    EP_MAKE_PROPERTY_METASET(PixelShader, "Pixel shader for rendering"),
-    EP_MAKE_PROPERTY_METASET(GeometryShader, "Geometry shader for rendering"),
-    EP_MAKE_PROPERTY_METASET(TesselationControlShader, "Tesselation Control shader for rendering"),
-    EP_MAKE_PROPERTY_METASET(TesselationEvaluationShader, "Tesselation Evaluation shader for rendering"),
+    EP_MAKE_PROPERTY("vertexShader", getVertexShader, setVertexShader_Meta, "Vertex shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("pixelShader", getPixelShader, setPixelShader_Meta, "Pixel shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("geometryShader", getGeometryShader, setGeometryShader_Meta, "Geometry shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("tesselationControlShader", getTesselationControlShader, setTesselationControlShader_Meta, "Tesselation Control shader for rendering", nullptr, 0),
+    EP_MAKE_PROPERTY("tesselationEvaluationShader", getTesselationEvaluationShader, setTesselationEvaluationShader_Meta, "Tesselation Evaluation shader for rendering", nullptr, 0),
 
-    EP_MAKE_PROPERTY(BlendMode, "Frame buffer blend mode", nullptr, 0),
-    EP_MAKE_PROPERTY(CullMode, "Back face cull mode", nullptr, 0),
-    EP_MAKE_PROPERTY(DepthCompareFunc, "Depth compare function", nullptr, 0),
-    EP_MAKE_PROPERTY(StencilState, "Stencil state", nullptr, 0),
-    EP_MAKE_PROPERTY(FrontStencilState, "Front-face stencil state", nullptr, 0),
-    EP_MAKE_PROPERTY(BackStencilState, "Back-face stencil state", nullptr, 0),
+    EP_MAKE_PROPERTY("blendMode", getBlendMode, setBlendMode, "Frame buffer blend mode", nullptr, 0),
+    EP_MAKE_PROPERTY("cullMode", getCullMode, setCullMode, "Back face cull mode", nullptr, 0),
+    EP_MAKE_PROPERTY("depthCompareFunc", getDepthCompareFunc, setDepthCompareFunc, "Depth compare function", nullptr, 0),
+    EP_MAKE_PROPERTY("stencilState", getStencilState, setStencilState, "Stencil state", nullptr, 0),
+    EP_MAKE_PROPERTY("frontStencilState", getFrontStencilState, setFrontStencilState, "Front-face stencil state", nullptr, 0),
+    EP_MAKE_PROPERTY("backStencilState", getBackStencilState, setBackStencilState, "Back-face stencil state", nullptr, 0),
   };
 }
 
-Array<const MethodInfo> Material::GetMethods() const
+Array<const MethodInfo> Material::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(GetMaterialProperty, "Get a material property"),
-    EP_MAKE_METHOD(SetMaterialProperty, "Set a material property")
-//      EP_MAKE_METHOD(GetTexture, "Gets the texture ArrayBuffer at the given index"),
-//      EP_MAKE_METHOD(SetTexture, "Sets the texture ArrayBuffer at the given index"),
+    EP_MAKE_METHOD(getMaterialProperty, "Get a material property"),
+    EP_MAKE_METHOD(setMaterialProperty, "Set a material property")
+//      EP_MAKE_METHOD(getTexture, "Gets the texture ArrayBuffer at the given index"),
+//      EP_MAKE_METHOD(setTexture, "Sets the texture ArrayBuffer at the given index"),
   };
 }
 
 void MaterialImpl::SetShader(ShaderType type, ShaderRef spShader)
 {
   if (spShader)
-    EPASSERT_THROW(spShader->GetType() == type, Result::InvalidArgument, "Incorrect shader type!");
+    EPASSERT_THROW(spShader->getType() == type, Result::InvalidArgument, "Incorrect shader type!");
 
   if (shaders[type] == spShader)
     return;
 
   if (shaders[type])
-    shaders[type]->Changed.Unsubscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
+    shaders[type]->changed.unsubscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
 
   shaders[type] = spShader;
 
   if (spShader)
-    spShader->Changed.Subscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
+    spShader->changed.subscribe(Delegate<void()>(this, &MaterialImpl::OnShaderChanged));
 
   OnShaderChanged();
 }
@@ -122,10 +120,10 @@ void MaterialImpl::BuildShaderProgram()
   for (ShaderRef &s : Slice<ShaderRef>(shaders, NumShaders-1))
   {
     if (s)
-      renderShaders.pushBack(shared_pointer_cast<RenderShader>(s->GetRenderShader()));
+      renderShaders.pushBack(shared_pointer_cast<RenderShader>(s->getRenderShader()));
   }
 
-  spShaderProgram = SharedPtr<RenderShaderProgram>::create(GetKernel()->GetImpl()->GetRenderer().ptr(), renderShaders);
+  spShaderProgram = SharedPtr<RenderShaderProgram>::create(getKernel()->getImpl()->GetRenderer().ptr(), renderShaders);
 }
 
 void MaterialImpl::PopulateShaderProperties()
@@ -165,7 +163,7 @@ const PropertyDesc *MaterialImpl::GetPropertyDesc(String _name, EnumerateFlags e
 {
   return &dynamicPropertyCache.tryInsert(_name, [&]() {
     return PropertyDesc(
-      { _name, _name, _name, nullptr, 0 },
+      { _name, _name, nullptr, 0 },
       MethodShim(&MaterialImpl::Get, SharedPtr<DynamicPropertyData>::create(_name)),
       MethodShim(&MaterialImpl::Set, SharedPtr<DynamicPropertyData>::create(_name))
     );
@@ -223,29 +221,29 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
         if (data.is(Variant::SharedPtrType::Component))
         {
           ComponentRef spC = data.asComponent();
-          if (spC->GetType().eq("ep.shader"))
+          if (spC->getType().eq("ep.Shader"))
           {
             // data is a shader object
             spShader = shared_pointer_cast<Shader>(spC);
           }
-          else if (spC->GetType().eq("ep.text"))
+          else if (spC->getType().eq("ep.Text"))
           {
             // data is a text buffer object (presumably containing shader source)
-            spShader = GetKernel()->CreateComponent<Shader>();
-            spShader->SetType(*pBuiltin);
+            spShader = getKernel()->createComponent<Shader>();
+            spShader->setType(*pBuiltin);
 
             TextRef spText = shared_pointer_cast<Text>(spC);
-            String s = spText->MapForRead();
-            spShader->SetCode(s);
-            spText->Unmap();
+            String s = spText->mapForRead();
+            spShader->setCode(s);
+            spText->unmap();
           }
         }
         else if (data.is(Variant::Type::String))
         {
           // data is a string buffer
-          spShader = GetKernel()->CreateComponent<Shader>();
-          spShader->SetType(*pBuiltin);
-          spShader->SetCode(data.asString());
+          spShader = getKernel()->createComponent<Shader>();
+          spShader->setType(*pBuiltin);
+          spShader->setCode(data.asString());
         }
         EPASSERT_THROW(spShader, Result::InvalidArgument, "Expected shader object or shader text");
 
@@ -271,8 +269,8 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
 
 ResourceRef MaterialImpl::Clone() const
 {
-  MaterialRef spNewMat = GetKernel()->CreateComponent<Material>();
-  MaterialImpl* pImpl = spNewMat->GetImpl<MaterialImpl>();
+  MaterialRef spNewMat = getKernel()->createComponent<Material>();
+  MaterialImpl* pImpl = spNewMat->getImpl<MaterialImpl>();
 
   for (size_t i = 0; i < NumShaders; i++)
     pImpl->shaders[i] = shaders[i];

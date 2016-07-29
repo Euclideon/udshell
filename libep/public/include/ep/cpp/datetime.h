@@ -26,9 +26,9 @@ public:
   DateTime();
   DateTime(time_t ti);
 
-  MutableString64 ToString(String format = nullptr) const;
-  time_t ToTimeStamp() const;
-  int16_t GetAbsoluteYear() const;
+  MutableString64 toString(String format = nullptr) const;
+  time_t toTimeStamp() const;
+  int16_t getAbsoluteYear() const;
 
   bool operator< (DateTime other) const { return (uint64_t &)*this < (uint64_t &)other; }
   bool operator> (DateTime other) const { return (uint64_t &)*this > (uint64_t &)other; }
@@ -38,9 +38,9 @@ public:
   bool operator!=(DateTime other) const { return (uint64_t &)*this != (uint64_t &)other; }
 
 protected:
-  void TimeStampToDateTime(time_t ti);
-  void TmToDateTime(tm *pTm);
-  tm DateTimeToTm() const;
+  void timeStampToDateTime(time_t ti);
+  void tmToDateTime(tm *pTm);
+  tm dateTimeToTm() const;
 
   friend Variant epToVariant(const DateTime& dt);
   friend void epFromVariant(const Variant &variant, DateTime *pDt);

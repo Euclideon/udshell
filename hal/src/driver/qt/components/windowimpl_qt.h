@@ -20,16 +20,16 @@ public:
 
   void PostInit(void *pData) override final
   {
-    pInstance->ep::Component::GetImpl<ep::ComponentImpl>()->SetUserData(pData);
+    pInstance->ep::Component::getImpl<ep::ComponentImpl>()->SetUserData(pData);
 
     // register the window with the kernel
-    if (static_cast<QtKernel*>(GetKernel())->RegisterWindow((QQuickWindow*)pInstance->GetUserData()) != ep::Result::Success)
+    if (static_cast<QtKernel*>(getKernel())->registerWindow((QQuickWindow*)pInstance->getUserData()) != ep::Result::Success)
       EPTHROW_ERROR(ep::Result::Failure, "Unable to register Window component with Kernel");
   }
 
   void SetTopLevelUI(ep::UIComponentRef spUIComponent) override final
   {
-    QQuickWindow *pQtWindow = (QQuickWindow*)pInstance->GetUserData();
+    QQuickWindow *pQtWindow = (QQuickWindow*)pInstance->getUserData();
 
     // if there's an existing top level ui, then detach
     foreach(QQuickItem *pChild, pQtWindow->contentItem()->childItems())
@@ -41,7 +41,7 @@ public:
     }
     else
     {
-      QQuickItem *pUI = (QQuickItem*)(spUIComponent->GetUserData());
+      QQuickItem *pUI = (QQuickItem*)(spUIComponent->getUserData());
       EPTHROW_IF(!pUI, ep::Result::InvalidArgument, "The top level UI component does not contain a valid UI");
 
       pUI->setParentItem(pQtWindow->contentItem());
@@ -58,24 +58,24 @@ public:
   WindowGlue(const ep::ComponentDesc *_pType, ep::Kernel *_pKernel, ep::SharedString _uid, ep::ComponentRef _spInstance, ep::Variant::VarMap initParams)
     : Window(_pType, _pKernel, _uid, initParams)
   {
-    GetImpl<QtWindowImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
+    getImpl<QtWindowImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
   }
 
   /*const ep::PropertyDesc *GetPropertyDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
   {
-    return GetImpl<QtWindowImpl>()->spQObject->GetPropertyDesc(_name, enumerateFlags);
+    return getImpl<QtWindowImpl>()->spQObject->GetPropertyDesc(_name, enumerateFlags);
   }
   const ep::MethodDesc *GetMethodDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
   {
-    return GetImpl<QtWindowImpl>()->spQObject->GetMethodDesc(_name, enumerateFlags);
+    return getImpl<QtWindowImpl>()->spQObject->GetMethodDesc(_name, enumerateFlags);
   }
   const ep::EventDesc *GetEventDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
   {
-    return GetImpl<QtWindowImpl>()->spQObject->GetEventDesc(_name, enumerateFlags);
+    return getImpl<QtWindowImpl>()->spQObject->GetEventDesc(_name, enumerateFlags);
   }
   const ep::StaticFuncDesc *GetStaticFuncDesc(ep::String _name, ep::EnumerateFlags enumerateFlags = 0) const override final
   {
-    return GetImpl<QtWindowImpl>()->spQObject->GetStaticFuncDesc(_name, enumerateFlags);
+    return getImpl<QtWindowImpl>()->spQObject->GetStaticFuncDesc(_name, enumerateFlags);
   }*/
 };
 

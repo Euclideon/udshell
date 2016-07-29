@@ -18,28 +18,28 @@ namespace ep
     EP_DECLARE_COMPONENT_WITH_IMPL(ep, Project, IProject, Component, EPKERNEL_PLUGINVERSION, "Contains the state of a project", 0)
   public:
 
-    void SaveProject() { pImpl->SaveProject(); }
+    void saveProject() { pImpl->SaveProject(); }
 
-    virtual Slice<ActivityRef> GetActivities() const { return pImpl->GetActivities(); }
-    virtual void AddActivity(ActivityRef activity) { pImpl->AddActivity(activity); }
-    virtual void RemoveActivity(ActivityRef activity) { pImpl->RemoveActivity(activity); }
+    virtual Slice<ActivityRef> getActivities() const { return pImpl->GetActivities(); }
+    virtual void addActivity(ActivityRef activity) { pImpl->AddActivity(activity); }
+    virtual void removeActivity(ActivityRef activity) { pImpl->RemoveActivity(activity); }
 
-    virtual void SetSrc(String src) { pImpl->SetSrc(src); }
-    virtual String GetSrc() const { return pImpl->GetSrc(); }
+    virtual void setSrc(String src) { pImpl->SetSrc(src); }
+    virtual String getSrc() const { return pImpl->GetSrc(); }
 
-    virtual ActivityRef GetActiveActivity() const { return pImpl->GetActiveActivity(); }
-    virtual void SetActiveActivity(ActivityRef activity) { pImpl->SetActiveActivity(activity); }
+    virtual ActivityRef getActiveActivity() const { return pImpl->GetActiveActivity(); }
+    virtual void setActiveActivity(ActivityRef activity) { pImpl->SetActiveActivity(activity); }
 
   protected:
     Project(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
       : Resource(pType, pKernel, uid, initParams)
     {
-      pImpl = CreateImpl(initParams);
+      pImpl = createImpl(initParams);
     }
 
   private:
-    Array<const PropertyInfo> GetProperties() const;
-    Array<const MethodInfo> GetMethods() const;
+    Array<const PropertyInfo> getProperties() const;
+    Array<const MethodInfo> getMethods() const;
   };
 
 } //namespace ep

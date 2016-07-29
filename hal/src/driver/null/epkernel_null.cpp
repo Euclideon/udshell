@@ -63,24 +63,24 @@ public:
   NullKernel(Variant::VarMap commandLine);
   ~NullKernel();
 
-  void RunMainLoop() override final;
-  void Quit() override final;
+  void runMainLoop() override final;
+  void quit() override final;
 
-  void DispatchToMainThread(MainThreadCallback callback) override final;
-  void DispatchToMainThreadAndWait(MainThreadCallback callback) override final;
+  void dispatchToMainThread(MainThreadCallback callback) override final;
+  void dispatchToMainThreadAndWait(MainThreadCallback callback) override final;
 
 private:
-  static ComponentDescInl *MakeKernelDescriptor();
+  static ComponentDescInl *makeKernelDescriptor();
 };
 
-ComponentDescInl *NullKernel::MakeKernelDescriptor()
+ComponentDescInl *NullKernel::makeKernelDescriptor()
 {
   ComponentDescInl *pDesc = epNew(ComponentDescInl);
   EPTHROW_IF_NULL(pDesc, Result::AllocFailure, "Memory allocation failed");
 
-  pDesc->info = NullKernel::ComponentInfo();
+  pDesc->info = NullKernel::componentInfo();
   pDesc->info.flags = ep::ComponentInfoFlags::Unregistered;
-  pDesc->baseClass = Kernel::ComponentID();
+  pDesc->baseClass = Kernel::componentID();
 
   pDesc->pInit = nullptr;
   pDesc->pCreateInstance = nullptr;
@@ -88,20 +88,20 @@ ComponentDescInl *NullKernel::MakeKernelDescriptor()
   pDesc->pSuperDesc = nullptr;
 
   // build search trees
-  for (auto &p : NullKernel::GetPropertiesImpl())
+  for (auto &p : NullKernel::getPropertiesImpl())
     pDesc->propertyTree.insert(p.id, { p, p.pGetterMethod, p.pSetterMethod });
-  for (auto &m : NullKernel::GetMethodsImpl())
+  for (auto &m : NullKernel::getMethodsImpl())
     pDesc->methodTree.insert(m.id, { m, m.pMethod });
-  for (auto &e : NullKernel::GetEventsImpl())
+  for (auto &e : NullKernel::getEventsImpl())
     pDesc->eventTree.insert(e.id, { e, e.pSubscribe });
-  for (auto &f : NullKernel::GetStaticFuncsImpl())
+  for (auto &f : NullKernel::getStaticFuncsImpl())
     pDesc->staticFuncTree.insert(f.id, { f, (void*)f.pCall });
 
   return pDesc;
 }
 
 NullKernel::NullKernel(Variant::VarMap commandLine)
-  : Kernel(NullKernel::MakeKernelDescriptor(), commandLine)
+  : Kernel(NullKernel::makeKernelDescriptor(), commandLine)
 {
 
   // TODO: init stuff?
@@ -110,21 +110,21 @@ NullKernel::NullKernel(Variant::VarMap commandLine)
   // create offscreen GL context
   CreateGLContext();
 
-  GetImpl()->InitRender();
+  getImpl()->InitRender();
 
   // this is usually performed at the start of mainloop...
   // but since daemon may not run a mainloop, it should happen here.
-  FinishInit();
+  finishInit();
 }
 
 NullKernel::~NullKernel()
 {
-  GetImpl()->Shutdown();
+  getImpl()->Shutdown();
 
-  GetImpl()->DeinitRender();
+  getImpl()->DeinitRender();
 }
 
-void NullKernel::RunMainLoop()
+void NullKernel::runMainLoop()
 {
   while (!s_done)
   {
@@ -135,22 +135,22 @@ void NullKernel::RunMainLoop()
   }
 }
 
-void NullKernel::Quit()
+void NullKernel::quit()
 {
   s_done = true;
 }
 
-void NullKernel::DispatchToMainThread(MainThreadCallback callback)
+void NullKernel::dispatchToMainThread(MainThreadCallback callback)
 {
   EPASSERT(false, "TODO");
 }
 
-void NullKernel::DispatchToMainThreadAndWait(MainThreadCallback callback)
+void NullKernel::dispatchToMainThreadAndWait(MainThreadCallback callback)
 {
   EPASSERT(false, "TODO");
 }
 
-Kernel* Kernel::CreateInstanceInternal(Variant::VarMap commandLine)
+Kernel* Kernel::createInstanceInternal(Variant::VarMap commandLine)
 {
   return KernelImpl::CreateComponentInstance<NullKernel>(commandLine);
 }

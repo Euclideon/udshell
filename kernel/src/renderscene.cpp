@@ -83,10 +83,10 @@ void RenderableView::CreateResources()
 
 void RenderableView::RenderUD()
 {
-  Slice<uint32_t> colorBuffer = spColorBuffer->Map<uint32_t>();
-  epscope(exit) { spColorBuffer->Unmap(); };
-  Slice<float> depthBuffer = spDepthBuffer->Map<float>();
-  epscope(exit) { spDepthBuffer->Unmap(); };
+  Slice<uint32_t> colorBuffer = spColorBuffer->map<uint32_t>();
+  epscope(exit) { spColorBuffer->unmap(); };
+  Slice<float> depthBuffer = spDepthBuffer->map<float>();
+  epscope(exit) { spDepthBuffer->unmap(); };
 
   uint32_t colorPitch = renderWidth*sizeof(uint32_t);
   uint32_t depthPitch = renderWidth*sizeof(float);
@@ -246,8 +246,8 @@ Renderer::Renderer(Kernel *pKernel, int renderThreadCount)
   };
   uint32_t indices[4] = { 0, 1, 2, 3 };
 
-  spQuadVerts = pKernel->CreateComponent<ArrayBuffer>({ { "name", "quad_vb" } });
-  spQuadIndices = pKernel->CreateComponent<ArrayBuffer>({ { "name", "quad_ib" } });
+  spQuadVerts = pKernel->createComponent<ArrayBuffer>({ { "name", "quad_vb" } });
+  spQuadIndices = pKernel->createComponent<ArrayBuffer>({ { "name", "quad_ib" } });
   spQuadVerts->Allocate<Vertex>(4);
   auto buffer = spQuadVerts->Map<Vertex>();
   spQuadVerts->Unmap();
@@ -303,7 +303,7 @@ Renderer::~Renderer()
 
 RenderResourceRef Renderer::GetRenderBuffer(const ArrayBufferRef &spArrayBuffer, RenderResourceType type)
 {
-  BufferImpl *pBuffer = spArrayBuffer->Super::GetImpl<BufferImpl>();
+  BufferImpl *pBuffer = spArrayBuffer->Super::getImpl<BufferImpl>();
 
   RenderResourceRef spRenderBuffer = shared_pointer_cast<RenderResource>(pBuffer->spCachedRenderData);
   if (!spRenderBuffer)
@@ -324,7 +324,7 @@ RenderResourceRef Renderer::GetRenderBuffer(const ArrayBufferRef &spArrayBuffer,
 
 RenderResourceRef Renderer::GetConstantBuffer(const BufferRef &spBuffer)
 {
-  BufferImpl *pBuffer = spBuffer->GetImpl<BufferImpl>();
+  BufferImpl *pBuffer = spBuffer->getImpl<BufferImpl>();
   RenderResourceRef spRenderBuffer = shared_pointer_cast<RenderResource>(pBuffer->spCachedRenderData);
   if (!spRenderBuffer)
   {
@@ -346,7 +346,7 @@ RenderShaderInputConfigRef Renderer::GetShaderInputConfig(Slice<ArrayBufferRef> 
 ArrayBufferRef Renderer::AllocRenderBuffer()
 {
   if (renderBufferPool.empty())
-    return pKernel->CreateComponent<ArrayBuffer>({ { "name", SharedString::format("udrenderbuffer{0}", numRenderBuffers++) } });
+    return pKernel->createComponent<ArrayBuffer>({ { "name", SharedString::format("udrenderbuffer{0}", numRenderBuffers++) } });
   return renderBufferPool.popBack();
 }
 
@@ -387,7 +387,7 @@ void Renderer::UDThread()
         job->CreateResources();
         // NOTE: we need to clear this pointer here to prevent circular referencing!
         job->spView = nullptr;
-        spView->GetImpl<ViewImpl>()->SetLatestFrame(std::move(job));
+        spView->getImpl<ViewImpl>()->SetLatestFrame(std::move(job));
       }
       epDelete(this);
     }
@@ -416,7 +416,7 @@ void Renderer::UDThread()
     }
 
     JobDone *done = epNew(JobDone, job);
-    pKernel->DispatchToMainThread(MakeDelegate(done, &JobDone::FinishJob));
+    pKernel->dispatchToMainThread(MakeDelegate(done, &JobDone::FinishJob));
   }
 
   udIncrementSemaphore(pUDTerminateSemaphore);

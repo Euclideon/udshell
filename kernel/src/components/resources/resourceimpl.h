@@ -20,7 +20,7 @@ public:
 
   MetadataRef GetMetadata() const override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   MetadataRef metadata = nullptr;

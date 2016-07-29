@@ -115,7 +115,7 @@ inline size_t UTF8Len(const char16_t *pStr)
   while (*pStr)
   {
     size_t srcLen;
-    len += UTF8SequenceLength(pStr, &srcLen);
+    len += utf8SequenceLength(pStr, &srcLen);
     pStr += srcLen;
   }
   return len;
@@ -125,7 +125,7 @@ inline size_t UTF8Len(const char32_t *pStr)
   size_t len = 0;
   while (*pStr)
   {
-    len += UTF8SequenceLength(pStr);
+    len += utf8SequenceLength(pStr);
     ++pStr;
   }
   return len;
@@ -205,7 +205,7 @@ template<typename C>
 inline char32_t BaseString<C>::frontChar() const
 {
   char32_t r;
-  UTFDecode(this->ptr, &r);
+  utfDecode(this->ptr, &r);
   return r;
 }
 template<>
@@ -215,7 +215,7 @@ inline char32_t BaseString<char>::backChar() const
   while ((*pLast & 0xC) == 0x80)
     --pLast;
   char32_t r;
-  UTFDecode(pLast, &r);
+  utfDecode(pLast, &r);
   return r;
 }
 template<>
@@ -225,7 +225,7 @@ inline char32_t BaseString<char16_t>::backChar() const
   if (back >= 0xD800 && (back & 0xFC00) == 0xDC00)
   {
     char32_t r;
-    UTFDecode(ptr + length-2, &r);
+    utfDecode(ptr + length-2, &r);
     return r;
   }
   return back;
@@ -240,7 +240,7 @@ template<typename C>
 inline char32_t BaseString<C>::popFrontChar()
 {
   char32_t r;
-  size_t codeUnits = UTFDecode(this->ptr, &r);
+  size_t codeUnits = utfDecode(this->ptr, &r);
   this->ptr += codeUnits;
   this->length -= codeUnits;
   return r;
@@ -252,7 +252,7 @@ inline char32_t BaseString<char>::popBackChar()
   while ((ptr[length - numChars] & 0xC) == 0x80)
     --numChars;
   char32_t r;
-  UTFDecode(ptr + length - numChars, &r);
+  utfDecode(ptr + length - numChars, &r);
   length -= numChars;
   return r;
 }
@@ -263,7 +263,7 @@ inline char32_t BaseString<char16_t>::popBackChar()
   if (back >= 0xD800 && (back & 0xFC00) == 0xDC00)
   {
     char32_t r;
-    UTFDecode(ptr + --length, &r);
+    utfDecode(ptr + --length, &r);
     return r;
   }
   return back;

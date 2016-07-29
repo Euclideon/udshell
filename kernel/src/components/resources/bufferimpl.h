@@ -13,12 +13,12 @@ public:
   BufferImpl(Component *_pInstance, Variant::VarMap initParams)
     : ImplSuper(_pInstance)
   {
-    pInstance->Changed.Subscribe(Delegate<void()>(this, &BufferImpl::OnBufferDirty));
+    pInstance->changed.subscribe(Delegate<void()>(this, &BufferImpl::OnBufferDirty));
   }
 
   ~BufferImpl()
   {
-    pInstance->Changed.Unsubscribe(Delegate<void()>(this, &BufferImpl::OnBufferDirty));
+    pInstance->changed.unsubscribe(Delegate<void()>(this, &BufferImpl::OnBufferDirty));
   }
 
   bool Reserve(size_t size) override final;
@@ -36,7 +36,7 @@ public:
   bool CopyBuffer(BufferRef buffer) override final;
   bool CopySlice(Slice<const void> buffer) override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
   bool ResizeInternal(size_t size, bool copy) override final;
 

@@ -29,7 +29,7 @@ public:
   UIComponentGlue(const ep::ComponentDesc *_pType, ep::Kernel *_pKernel, ep::SharedString _uid, ep::ComponentRef _spInstance, ep::Variant::VarMap initParams)
     : UIComponent(_pType, _pKernel, _uid, initParams)
   {
-    GetImpl<QtUIComponentImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
+    getImpl<QtUIComponentImpl>()->spQObject = ep::shared_pointer_cast<QObjectComponent>(_spInstance);
   }
 
   /*const ep::PropertyDesc *GetPropertyDesc(String _name, EnumerateFlags enumerateFlags = 0) const override final { return spInstance->GetPropertyDesc(_name, enumerateFlags); }

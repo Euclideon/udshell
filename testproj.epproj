@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
   <activities>
-    <ep.viewer>
+    <ep.Viewer>
       <camera>
-        <farplane>7500</farplane>
-        <helicoptermode>false</helicoptermode>
-        <invertyaxis>true</invertyaxis>
+        <farPlane>7500</farPlane>
+        <helicopterMode>false</helicopterMode>
+        <invertYAxis>true</invertYAxis>
         <matrix>[1, 0, 0, 0, -0, 1, 0, 0, 0, -0, 1, 0, -995.76999999999998, -1004.79, -237.18000000000001, 1]</matrix>
-        <nearplane>0.0001</nearplane>
+        <nearPlane>0.0001</nearPlane>
         <perspective>1.0471975512</perspective>
         <speed>1</speed>
       </camera>
@@ -21,14 +21,14 @@
           </bookmark0>
         </bookmarks>
       </scene>
-    </ep.viewer>
-    <ep.viewer>
+    </ep.Viewer>
+    <ep.Viewer>
       <camera>
-        <farplane>7500</farplane>
-        <helicoptermode>false</helicoptermode>
-        <invertyaxis>true</invertyaxis>
+        <farPlane>7500</farPlane>
+        <helicopterMode>false</helicopterMode>
+        <invertYAxis>true</invertYAxis>
         <matrix>[1, 0, 0, 0, -0, 1, 0, 0, 0, -0, 1, 0, 0.59999999999999998, -2.553059046268463, 0.51000000000000001, 1]</matrix>
-        <nearplane>0.0001</nearplane>
+        <nearPlane>0.0001</nearPlane>
         <perspective>1.0471975512</perspective>
         <speed>1</speed>
       </camera>
@@ -36,6 +36,6 @@
         <name>DirCubeScene</name>
         <url>data/udscene.dae</url>
       </scene>
-    </ep.viewer>
+    </ep.Viewer>
   </activities>
 </project>

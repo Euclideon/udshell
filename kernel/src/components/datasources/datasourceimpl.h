@@ -69,11 +69,11 @@ public:
 
   void SetResource(String _name, const ResourceRef &spResource) override final
   {
-    MetadataRef spMeta = spResource->GetMetadata();
+    MetadataRef spMeta = spResource->getMetadata();
 
-    Variant resUrl = spMeta->Get("url");
+    Variant resUrl = spMeta->get("url");
     if(!resUrl.is(Variant::Type::String))
-      spMeta->Insert("url", GetURL());
+      spMeta->insert("url", GetURL());
 
     resources.replace(_name, spResource);
   }
@@ -87,7 +87,7 @@ public:
   String GetURL() const override final { return url; }
   void SetURL(String _url) override final { url = _url; }
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   StreamRef OpenStream(const Variant &source) override final;

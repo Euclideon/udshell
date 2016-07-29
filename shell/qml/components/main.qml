@@ -12,7 +12,7 @@ Rectangle {
   anchors.fill: parent
   color: Theme.windowBgColor
 
-  property var epTypeDesc: { "id": "ui.main", "super": "ep.uicomponent" }
+  property var epTypeDesc: { "id": "ui.Main", "super": "ep.UIComponent" }
   property var uiconsole
   property var messageboxcomp
   property var messagebox
@@ -36,12 +36,12 @@ Rectangle {
   signal newactivitysignal(string id)
 
   onMessageboxcompChanged: {
-    messagebox = messageboxcomp.get("uihandle");
+    messagebox = messageboxcomp.uiHandle;
     messagebox.parent = topLevel;
   }
 
   onUiconsoleChanged: {
-    var uiconsoleqq = uiconsole.get("uihandle");
+    var uiconsoleqq = uiconsole.uiHandle;
     uiconsoleqq.parent = consolePanel;
   }
 
@@ -54,31 +54,31 @@ Rectangle {
   }
 
   onActivityselectorChanged: {
-    activityselector.get("uihandle").parent = this;
+    activityselector.uiHandle.parent = this;
   }
 
   function showhideconsolepanel() {
     if(uiconsole) {
-       var uiconsoleqq = uiconsole.get("uihandle");
+       var uiconsoleqq = uiconsole.uiHandle;
        uiconsoleqq.togglevisible();
     }
   }
 
   Component.onCompleted: {
     var commandManager = EPKernel.getCommandManager();
-    commandManager.call("registercommand", "newproject", newproject, "", "", "Ctrl+N");
-    commandManager.call("registercommand", "openproject", openproject, "", "", "Ctrl+O");
+    commandManager.registerCommand("newproject", newproject, "", "", "Ctrl+N");
+    commandManager.registerCommand("openproject", openproject, "", "", "Ctrl+O");
 
-    commandManager.call("registercommand", "saveproject", saveproject, "", "", "Ctrl+S");
-    commandManager.call("registercommand", "saveprojectas", saveprojectas, "", "", "F12");
-    commandManager.call("registercommand", "newactivity", newactivity, "", "", "Ctrl+A");
+    commandManager.registerCommand("saveproject", saveproject, "", "", "Ctrl+S");
+    commandManager.registerCommand("saveprojectas", saveprojectas, "", "", "F12");
+    commandManager.registerCommand("newactivity", newactivity, "", "", "Ctrl+A");
 
-    commandManager.call("registercommand", "showhideconsolepanel", showhideconsolepanel, "", "", "`");
+    commandManager.registerCommand("showhideconsolepanel", showhideconsolepanel, "", "", "`");
 
     // Disable these shortcuts, they will get enabled when a project is created or opened
-    commandManager.call("disableshortcut", "saveproject");
-    commandManager.call("disableshortcut", "saveprojectas");
-    commandManager.call("disableshortcut", "newactivity");
+    commandManager.disableShortcut("saveproject");
+    commandManager.disableShortcut("saveprojectas");
+    commandManager.disableShortcut("newactivity");
   }
 
   function cameraupdated(pos, ypr)
@@ -115,13 +115,13 @@ Rectangle {
 
   function initViewerUI(activity) {
     if(simplecamera)
-      subscriptions.changed.unsubscribe();
+      simplecamera.repositioned.disconnect(cameraupdated);
 
     if(view)
     {
-      subscriptions.mousepositionchanged.unsubscribe();
-      subscriptions.enabledpickingchanged.unsubscribe();
-      subscriptions.pickfound.unsubscribe();
+      view.mousePositionChanged.disconnect(viewmouseupdated);
+      view.enabledPickingChanged.disconnect(viewpickingenabledchanged);
+      view.pickFound.disconnect(viewpickfound);
     }
 
 
@@ -132,15 +132,15 @@ Rectangle {
       return;
     }
 
-    simplecamera = activity.get("simplecamera");
+    simplecamera = activity.simpleCamera;
     if(simplecamera)
-      subscriptions.changed = simplecamera.subscribe("changed", cameraupdated);
+      simplecamera.repositioned.connect(cameraupdated);
 
-    view = activity.get("view");
+    view = activity.view;
     if(view) {
-      subscriptions.mousepositionchanged = view.subscribe("mousepositionchanged", viewmouseupdated);
-      subscriptions.enabledpickingchanged = view.subscribe("enabledpickingchanged", viewpickingenabledchanged);
-      subscriptions.pickfound = view.subscribe("pickfound", viewpickfound);
+      view.mousePositionChanged.connect(viewmouseupdated);
+      view.enabledPickingChanged.connect(viewpickingenabledchanged);
+      view.pickFound.connect(viewpickfound);
     }
   }
 
@@ -148,17 +148,17 @@ Rectangle {
     if(activityTabs.count == 0)
       activityTabs.visible = true;
 
-    var title = activity.get("uid");
+    var title = activity.uid;
     title = title.charAt(0).toUpperCase() + title.slice(1);
 
-    var ui = activity.get("ui");
+    var ui = activity.ui;
 
     var tab = activityTabs.addTab(title);
     tablist.push(tab);
     activitylist.push(activity);
     activityuilist.push(ui);
     tablist.push(tab);
-    ui.get("uihandle").parent = tab;
+    ui.uiHandle.parent = tab;
 
     activityTabs.currentIndex = activityTabs.count - 1;
   }
@@ -166,7 +166,7 @@ Rectangle {
   function removeactivity(uid) {
     for(var i = 0; i < activitylist.length; i++)
     {
-      if(activitylist[i].get("uid") == uid)
+      if(activitylist[i].uid == uid)
       {
         activitylist.splice(i, 1);
         activityuilist.splice(i, 1);
@@ -181,14 +181,6 @@ Rectangle {
       activityTabs.visible = false;
       activityTabs.currentIndex = -1;
     }
-  }
-
-  QtObject {
-    id: subscriptions
-    property var changed
-    property var mousepositionchanged
-    property var enabledpickingchanged
-    property var pickfound
   }
 
   ColumnLayout {
@@ -235,18 +227,18 @@ Rectangle {
         }
 
         onCurrentIndexChanged: {
-          if(count > 0 && activitylist[currentIndex].get("uid") != lastId)
+          if(count > 0 && activitylist[currentIndex].uid != lastId)
           {
-            var activityId = activitylist[currentIndex].get("uid");
+            var activityId = activitylist[currentIndex].uid;
             lastId = activityId
             activitychanged(activityId);
             var activity = activitylist[currentIndex];
-            var activityqq = activityuilist[currentIndex].get("uihandle");
+            var activityqq = activityuilist[currentIndex].uiHandle;
             activityqq.visible = false; // Trigger an onVisibleChanged signal
             activityqq.visible = true;
             activityqq.forceActiveFocus();
 
-            if (activity.get("type") == "ep.viewer")
+            if (activity.type == "ep.Viewer")
               initViewerUI(activity);
             else
               initViewerUI(null);
@@ -272,7 +264,7 @@ Rectangle {
         Button {
           id: consoleButton
           text: "Console"
-          onClicked: uiconsole.get("uihandle").togglevisible();
+          onClicked: uiconsole.uiHandle.togglevisible();
           style: bottomBarButtonStyle
         }
         Text {
@@ -435,7 +427,7 @@ Rectangle {
                   fillMode: Image.PreserveAspectFit
                 }
               }
-              onClicked: removeactivity(activitylist[styleData.index].get("uid"))
+              onClicked: removeactivity(activitylist[styleData.index].uid)
             }
           }
         }
@@ -469,7 +461,7 @@ Rectangle {
   }
 
   function newactivity() {
-    activityselector.call("show", newActivitySelected);
+    activityselector.uiHandle.show(newActivitySelected);
   }
 
   function newActivitySelected(id) {

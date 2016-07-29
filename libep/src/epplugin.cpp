@@ -10,12 +10,12 @@ namespace ep {
 
 namespace internal {
 
-RefCounted* GetStaticImpl(String name)
+RefCounted* getStaticImpl(String name)
 {
   return (*(HashMap<SharedString, UniquePtr<RefCounted>>*)s_pInstance->pStaticImplRegistry)[name].ptr();
 }
 
-void AddStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl)
+void addStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl)
 {
   ((HashMap<SharedString, UniquePtr<RefCounted>>*)s_pInstance->pStaticImplRegistry)->insert(name, std::move(upImpl));
 }
@@ -25,28 +25,28 @@ void AddStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl)
 Instance *s_pInstance = nullptr;
 
 const char * const Material::s_shaderNames[] = {
-  "vertexshader",
-  "pixelshader",
-  "geometryshader",
-  "tesselationcontrolshader",
-  "tesselationevaluationshader",
-  "computeshader"
+  "vertexShader",
+  "pixelShader",
+  "geometryShader",
+  "tesselationControlShader",
+  "tesselationEvaluationShader",
+  "computeShader"
 };
 
 // TODO: should move this to some other cpp?
 Directory::Directory(String searchPattern)
 {
-  pDirectoryHandle = s_pInstance->Find(searchPattern, nullptr, &fd);
+  pDirectoryHandle = s_pInstance->pFind(searchPattern, nullptr, &fd);
 }
 Directory::~Directory()
 {
   if (pDirectoryHandle)
-    s_pInstance->Find(nullptr, pDirectoryHandle, nullptr);
+    s_pInstance->pFind(nullptr, pDirectoryHandle, nullptr);
 }
-FindData Directory::PopFront()
+FindData Directory::popFront()
 {
   FindData t = fd;
-  pDirectoryHandle = s_pInstance->Find(nullptr, pDirectoryHandle, &fd);
+  pDirectoryHandle = s_pInstance->pFind(nullptr, pDirectoryHandle, &fd);
   return t;
 }
 
@@ -98,12 +98,12 @@ epKernel *epPlugin_GetKernel()
 
 void* epPlugin_Alloc(size_t size, epAllocationFlags flags, const char *pFile, int line)
 {
-  return ep::s_pInstance->Alloc(size, flags, pFile, line);
+  return ep::s_pInstance->pAlloc(size, flags, pFile, line);
 }
 
 void epPlugin_Free(void *pMem)
 {
-  ep::s_pInstance->Free(pMem);
+  ep::s_pInstance->pFree(pMem);
 }
 
 }

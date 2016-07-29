@@ -4,11 +4,9 @@
 # include <unistd.h>
 #endif
 
-using ep::Array;
-using ep::KeyValuePair;
-using ep::String;
+namespace ep {
 
-Array<const KeyValuePair> epParseCommandLine(const char *pCommandLine)
+Array<const KeyValuePair> parseCommandLine(const char *pCommandLine)
 {
   Array<const KeyValuePair> output(ep::Concat, KeyValuePair(nullptr, nullptr)); // TODO: populate argv[0] with the exe path
 
@@ -34,7 +32,7 @@ Array<const KeyValuePair> epParseCommandLine(const char *pCommandLine)
   return output;
 }
 
-Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
+Array<const KeyValuePair> parseCommandLine(int argc, char *argv[])
 {
   Array<const KeyValuePair> output(ep::Reserve, argc);
 
@@ -61,7 +59,7 @@ Array<const KeyValuePair> epParseCommandLine(int argc, char *argv[])
   return output;
 }
 
-Array<const KeyValuePair> epParseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
+Array<const KeyValuePair> parseCommandLine(uint32_t argc, const char* argn[], const char* argv[])
 {
   Array<const KeyValuePair> output(ep::Reserve, argc);
 
@@ -71,7 +69,7 @@ Array<const KeyValuePair> epParseCommandLine(uint32_t argc, const char* argn[], 
   return output;
 }
 
-int epGetHardwareThreadCount()
+int getHardwareThreadCount()
 {
 #if defined(EP_WINDOWS)
   DWORD_PTR processMask;
@@ -93,3 +91,5 @@ int epGetHardwareThreadCount()
 
   return 1;
 }
+
+} // namespace ep

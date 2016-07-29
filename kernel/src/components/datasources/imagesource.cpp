@@ -16,17 +16,17 @@ const char* GetFormatString(epImageFormat format)
   EPTHROW(Result::Failure, "Image format not supported yet");
 }
 
-void ImageSource::Create(StreamRef spSource)
+void ImageSource::create(StreamRef spSource)
 {
   // allocate for file
-  int64_t len = spSource->Length();
+  int64_t len = spSource->length();
   void *pBuffer = epAlloc((size_t)len);
   EPTHROW_IF_NULL(pBuffer, Result::AllocFailure, "Memory allocation failed");
   epscope(exit) { epFree(pBuffer); };
 
   // read file from source
   Slice<void> buf(pBuffer, (size_t)len);
-  buf = spSource->Read(buf);
+  buf = spSource->read(buf);
   EPASSERT((int64_t)buf.length == len, "!");
 
   // load the image
@@ -39,24 +39,24 @@ void ImageSource::Create(StreamRef spSource)
     epImageSurface &s = pImage->pSurfaces[i];
 
     // create image for each image element
-    ArrayBufferRef spImage = GetKernel().CreateComponent<ArrayBuffer>();
-    spImage->Allocate(GetFormatString(s.format), 4, Slice<const size_t>{ s.width, s.height });
+    ArrayBufferRef spImage = getKernel().createComponent<ArrayBuffer>();
+    spImage->allocate(GetFormatString(s.format), 4, Slice<const size_t>{ s.width, s.height });
 
     // write image to to the array buffer
-    Slice<void> mem = spImage->Map();
+    Slice<void> mem = spImage->map();
     EPASSERT(mem.length == s.width*s.height*4, "Wrong size?!");
 //    mem.copyTo(Slice<void>(s.pImage, s.width*s.height*4)); // TODO: use copyTo()...
     memcpy(mem.ptr, s.pImage, s.width*s.height*4);
-    spImage->Unmap();
+    spImage->unmap();
 
     // add resource
-    SetResource(MutableString64(Concat, "image", i), spImage);
+    setResource(MutableString64(Concat, "image", i), spImage);
   }
 }
 
-void ImageSource::StaticInit(ep::Kernel *pKernel)
+void ImageSource::staticInit(ep::Kernel *pKernel)
 {
-   pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
+   pKernel->registerExtensions(pKernel->getComponentDesc(componentID()), extensions);
 }
 
 } // namespace ep

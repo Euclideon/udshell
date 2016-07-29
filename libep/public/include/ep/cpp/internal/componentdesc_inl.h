@@ -2,8 +2,8 @@ namespace ep {
 
 namespace internal {
 
-RefCounted* GetStaticImpl(String name);
-void AddStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl);
+RefCounted* getStaticImpl(String name);
+void addStaticImpl(SharedString name, UniquePtr<RefCounted> upImpl);
 
 } // namespace internal
 
@@ -23,9 +23,9 @@ public:
   using Interface = I;
   using ImplSuper = BaseImpl<C, I>;
 
-  const ComponentDescInl* GetDescriptor() const { return (const ComponentDescInl*)pInstance->GetDescriptor(); }
-  const ComponentDescInl* GetSuperDescriptor() const { return (const ComponentDescInl*)GetDescriptor()->pSuperDesc; }
-  Kernel* GetKernel() const { return &pInstance->GetKernel(); }
+  const ComponentDescInl* getDescriptor() const { return (const ComponentDescInl*)pInstance->getDescriptor(); }
+  const ComponentDescInl* getSuperDescriptor() const { return (const ComponentDescInl*)getDescriptor()->pSuperDesc; }
+  Kernel* getKernel() const { return &pInstance->getKernel(); }
 
   C *pInstance;
 
@@ -154,23 +154,23 @@ struct EventDesc : public EventInfo
 inline Variant MethodShim::get(Component *pThis) const
 {
   if (data)
-    return methodWithData.Call(pThis, nullptr, *data);
+    return methodWithData.call(pThis, nullptr, *data);
   else
-    return method.Call(pThis, nullptr);
+    return method.call(pThis, nullptr);
 }
 inline Variant MethodShim::set(Component *pThis, const Variant &value) const
 {
   if (data)
-    return methodWithData.Call(pThis, Slice<const Variant>(&value, 1), *data);
+    return methodWithData.call(pThis, Slice<const Variant>(&value, 1), *data);
   else
-    return method.Call(pThis, Slice<const Variant>(&value, 1));
+    return method.call(pThis, Slice<const Variant>(&value, 1));
 }
 inline Variant MethodShim::call(Component *pThis, Slice<const Variant> args) const
 {
   if (data)
-    return methodWithData.Call(pThis, args, *data);
+    return methodWithData.call(pThis, args, *data);
   else
-    return method.Call(pThis, args);
+    return method.call(pThis, args);
 }
 inline VarDelegate MethodShim::getDelegate(Component *pThis) const
 {
@@ -197,11 +197,11 @@ inline VarDelegate MethodShim::getDelegate(Component *pThis) const
     };
 
     // indirect delegate carries metadata
-    auto d = methodWithData.GetDelegate(pThis);
+    auto d = methodWithData.getDelegate(pThis);
     return VarDelegate(SharedPtr<MethodDelegate>::create(d, data));
   }
   else
-    return method.GetDelegate(pThis);
+    return method.getDelegate(pThis);
 }
 
 inline Variant StaticFuncShim::call(Slice<const Variant> args) const
@@ -223,9 +223,9 @@ inline Variant EventShim::subscribe(Component *pThis, const VarDelegate &handler
 {
   Variant v(handler);
   if (data)
-    return subscribeWithDataFunc.Call(pThis, Slice<const Variant>(&v, 1), *data);
+    return subscribeWithDataFunc.call(pThis, Slice<const Variant>(&v, 1), *data);
   else
-    return subscribeFunc.Call(pThis, Slice<const Variant>(&v, 1));
+    return subscribeFunc.call(pThis, Slice<const Variant>(&v, 1));
 }
 
 // Internal Component Descriptor struct

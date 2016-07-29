@@ -22,14 +22,14 @@ protected:
   {
   }
 
-  PropertyDesc* CachePropertyDesc(String _name, String description, const VarDelegate &getter, const VarDelegate &setter) const
+  PropertyDesc* cachePropertyDesc(String _name, String description, const VarDelegate &getter, const VarDelegate &setter) const
   {
     PropertyDesc *pDesc = propertyCache.get(_name);
     if (pDesc)
     {
       // update the delegates to the one we just got
-      pDesc->setter.data = setter.GetMemento();
-      pDesc->getter.data = getter.GetMemento();
+      pDesc->setter.data = setter.getMemento();
+      pDesc->getter.data = getter.getMemento();
     }
     else
     {
@@ -43,18 +43,18 @@ protected:
       };
 
       pDesc = &propertyCache.insert(_name, PropertyDesc({ _name, _name, description },
-        MethodShim(&Shim::call, getter.GetMemento()), MethodShim(&Shim::call, setter.GetMemento())));
+        MethodShim(&Shim::call, getter.getMemento()), MethodShim(&Shim::call, setter.getMemento())));
     }
     return pDesc;
   }
 
-  MethodDesc* CacheMethodDesc(String _name, String description, const VarDelegate &method) const
+  MethodDesc* cacheMethodDesc(String _name, String description, const VarDelegate &method) const
   {
     MethodDesc *pDesc = methodCache.get(_name);
     if (pDesc)
     {
       // update the delegate to the one we just got
-      pDesc->method.data = method.GetMemento();
+      pDesc->method.data = method.getMemento();
     }
     else
     {
@@ -66,12 +66,12 @@ protected:
           return ((VarDelegate&)data)(args);
         }
       };
-      pDesc = &methodCache.insert(_name, MethodDesc({ _name, description, nullptr }, MethodShim(&Shim::call, method.GetMemento())));
+      pDesc = &methodCache.insert(_name, MethodDesc({ _name, description, nullptr }, MethodShim(&Shim::call, method.getMemento())));
     }
     return pDesc;
   }
 
-  virtual void AttachToGlue(Component *pGlue, Variant::VarMap initParams) { pThis = pGlue; }
+  virtual void attachToGlue(Component *pGlue, Variant::VarMap initParams) { pThis = pGlue; }
 
   Component *pThis;
 

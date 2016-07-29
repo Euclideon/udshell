@@ -39,7 +39,7 @@ RowLayout {
     onClicked: {
       if(split) {
         if(command)
-          commandManager.call("runcommand", command, null);
+          commandManager.runCommand(command, null);
       }
       else if(dropdown.visible) {
         menu.toggleVisible();

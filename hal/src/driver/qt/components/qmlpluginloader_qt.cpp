@@ -18,36 +18,36 @@ using ep::Variant;
 
 namespace qt {
 
-Slice<const String> QmlPluginLoader::GetSupportedExtensions() const
+Slice<const String> QmlPluginLoader::getSupportedExtensions() const
 {
   static ep::Array<const String> s_ext = { ".qml" };
   return s_ext;
 }
 
-bool QmlPluginLoader::LoadPlugin(String filename)
+bool QmlPluginLoader::loadPlugin(String filename)
 {
   QtKernel *pQtKernel = static_cast<QtKernel*>(pKernel);
   ep::Variant::VarMap descMap;
 
   try {
-    descMap = ParseTypeDescriptor(pQtKernel, filename);
+    descMap = parseTypeDescriptor(pQtKernel, filename);
     if (!descMap.empty())
-      pQtKernel->RegisterQml(filename, descMap);
+      pQtKernel->registerQml(filename, descMap);
   }
   catch (ep::EPException &e) {
     // if ParseTypeDescriptor threw, then we have an invalid type descriptor
     if (descMap.empty())
-      LogWarning(2, "Could not register QML file '{0}' as Component: \"{1}\"", filename, e.what());
+      logWarning(2, "Could not register QML file '{0}' as Component: \"{1}\"", filename, e.what());
     // if RegisterQml threw, then it might be due to the super not yet being loaded - hence we should try again
     else
-      LogDebug(2, "Failed attempt to register QML file '{0}' as Component: \"{1}\"", filename, e.what());
+      logDebug(2, "Failed attempt to register QML file '{0}' as Component: \"{1}\"", filename, e.what());
     return descMap.empty();
   }
 
   return true;
 }
 
-Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::String filename)
+Variant::VarMap QmlPluginLoader::parseTypeDescriptor(QtKernel *pQtKernel, ep::String filename)
 {
   // Open and read the entire file
   QFile file(epToQString(filename));
@@ -85,7 +85,7 @@ Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::St
       if (braceStack != 0) EPTHROW(ep::Result::Failure, "Cannot Parse Type Descriptor: File contains malformed 'epTypeDesc' property map");
 
       // Evaluate the value of the property map using the JS engine
-      Variant result = epToVariant(pQtKernel->QmlEngine()->evaluate(fileData.mid(expStart, expEnd - expStart + 1)));
+      Variant result = epToVariant(pQtKernel->qmlEngine()->evaluate(fileData.mid(expStart, expEnd - expStart + 1)));
       if (result.is(Variant::Type::Error))
         EPTHROW(ep::Result::ScriptException, "Cannot Parse Type Descriptor: 'epTypeDesc' property map does not contain a valid javascript expression");
 
@@ -97,11 +97,8 @@ Variant::VarMap QmlPluginLoader::ParseTypeDescriptor(QtKernel *pQtKernel, ep::St
       if (!pId) EPTHROW(ep::Result::Failure, "Invalid Type Descriptor: Does not contain 'id' key");
       if (!pSuper) EPTHROW(ep::Result::Failure, "Invalid Type Descriptor: Does not contain 'super' key");
 
-      if (!typeDesc.get("displayname"))
-        typeDesc.insert("displayname", pId->asString());
-
       // id must be lowercase
-      *pId = ep::MutableString128(pId->asString()).toLower();
+      *pId = ep::MutableString128(pId->asString());
 
       if (!typeDesc.get("description"))
         typeDesc.insert("description", ep::SharedString::format("{0} based QML component - {1}", pSuper->asString(), filename));

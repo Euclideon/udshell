@@ -5,6 +5,10 @@
 #include "ep/cpp/component/resource/resource.h"
 #include "ep/cpp/internal/i/ibuffer.h"
 
+#ifdef free
+# undef free
+#endif
+
 namespace ep {
 
 SHARED_CLASS(Buffer);
@@ -14,41 +18,41 @@ class Buffer : public Resource
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Buffer, IBuffer, Resource, EPKERNEL_PLUGINVERSION, "Binary buffer object", 0)
 public:
 
-  bool Reserve(size_t bytes) { return pImpl->Reserve(bytes); }
-  virtual bool Allocate(size_t bytes) { return pImpl->Allocate(bytes); }
-  bool Free() { return pImpl->Free(); }
+  bool reserve(size_t bytes) { return pImpl->Reserve(bytes); }
+  virtual bool allocate(size_t bytes) { return pImpl->Allocate(bytes); }
+  bool free() { return pImpl->Free(); }
 
-  virtual bool Resize(size_t bytes) { return ResizeInternal(bytes, true); }
+  virtual bool resize(size_t bytes) { return resizeInternal(bytes, true); }
 
-  bool Empty() const { return pImpl->Empty(); }
-  size_t GetBufferSize() const { return pImpl->GetBufferSize(); }
+  bool empty() const { return pImpl->Empty(); }
+  size_t getBufferSize() const { return pImpl->GetBufferSize(); }
 
-  Slice<void> Map() { return pImpl->Map(); }
-  Slice<const void> MapForRead() { return pImpl->MapForRead(); }
-  void Unmap() { pImpl->Unmap(); }
+  Slice<void> map() { return pImpl->Map(); }
+  Slice<const void> mapForRead() { return pImpl->MapForRead(); }
+  void unmap() { pImpl->Unmap(); }
 
-  bool Mapped() const { return pImpl->Mapped(); }
+  bool mapped() const { return pImpl->Mapped(); }
 
-  bool CopyBuffer(BufferRef buffer) { return pImpl->CopyBuffer(buffer); }
-  bool CopyBuffer(Slice<const void> buffer) { return pImpl->CopySlice(buffer); }
+  bool copyBuffer(BufferRef buffer) { return pImpl->CopyBuffer(buffer); }
+  bool copyBuffer(Slice<const void> buffer) { return pImpl->CopySlice(buffer); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   Buffer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
-  virtual ~Buffer() { Free(); }
+  virtual ~Buffer() { free(); }
 
-  bool ResizeInternal(size_t bytes, bool copy) { return pImpl->ResizeInternal(bytes, copy); }
+  bool resizeInternal(size_t bytes, bool copy) { return pImpl->ResizeInternal(bytes, copy); }
 
 private:
-  bool CopyBufferMethod(BufferRef _buffer) { return CopyBuffer(_buffer); };
+  bool copyBufferMethod(BufferRef _buffer) { return copyBuffer(_buffer); };
 
-  Array<const PropertyInfo> GetProperties() const;
-  Array<const MethodInfo> GetMethods() const;
+  Array<const PropertyInfo> getProperties() const;
+  Array<const MethodInfo> getMethods() const;
 };
 
 } // namespace ep

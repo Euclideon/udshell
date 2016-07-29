@@ -198,8 +198,8 @@ private:
 class VarEvent : public ep::BaseEvent
 {
 public:
-  ep::SubscriptionRef AddSubscription(const ep::VarDelegate &del);
-  void Signal(ep::Slice<const ep::Variant> args);
+  ep::SubscriptionRef addSubscription(const ep::VarDelegate &del);
+  void signal(ep::Slice<const ep::Variant> args);
 };
 
 namespace internal {

@@ -20,14 +20,14 @@ struct Instance
   void *pTreeAllocator;
   void *pWeakRegistry;
 
-  void*(*Alloc)(size_t size, epAllocationFlags flags, const char *pFile, int line);
-  void(*Free)(void *pMemory);
+  void*(*pAlloc)(size_t size, epAllocationFlags flags, const char *pFile, int line);
+  void(*pFree)(void *pMemory);
 
-  void(*AssertFailed)(String condition, String message, String file, int line);
+  void(*pAssertFailed)(String condition, String message, String file, int line);
 
-  void(*DestroyComponent)(Component *pInstance);
+  void(*pDestroyComponent)(Component *pInstance);
 
-  void*(*Find)(String pattern, void *pHandle, void *pData);
+  void*(*pFind)(String pattern, void *pHandle, void *pData);
 };
 
 extern Instance *s_pInstance;

@@ -19,7 +19,7 @@ void* GetSafePtr(void *pAlloc)
 {
   auto pRegistry = GetWeakRefRegistry();
   if (pRegistry)
-    return pRegistry->tryInsert(pAlloc, [&]() { return RefCounted::New<SafeProxy<void>>(pAlloc); });
+    return pRegistry->tryInsert(pAlloc, [&]() { return RefCounted::create<SafeProxy<void>>(pAlloc); });
   return nullptr;
 }
 
@@ -39,7 +39,7 @@ void NullifySafePtr(void *pAlloc)
 
 } // namespace internal
 
-void RefCounted::Destroy()
+void RefCounted::destroy()
 {
   delete this;
 }

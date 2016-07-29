@@ -22,7 +22,7 @@ public:
   bool RemoveItem(String path) override final;
   bool SetItemProperties(String path, Variant::VarMap properties) override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   Variant ParseXMLString(String buffer) override final;

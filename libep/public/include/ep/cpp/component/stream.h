@@ -25,40 +25,40 @@ class Stream : public Broadcaster
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Stream, IStream, Broadcaster, EPKERNEL_PLUGINVERSION, "Stream desc...", 0)
 
 public:
-  virtual int Flush() { return pImpl->Flush(); }
+  virtual int flush() { return pImpl->Flush(); }
 
-  virtual int64_t Length() const { return pImpl->Length(); }
+  virtual int64_t length() const { return pImpl->Length(); }
 
-  virtual int64_t GetPos() const { return pImpl->GetPos(); }
-  virtual int64_t Seek(SeekOrigin rel, int64_t offset) { return pImpl->Seek(rel, offset); }
+  virtual int64_t getPos() const { return pImpl->GetPos(); }
+  virtual int64_t seek(SeekOrigin rel, int64_t offset) { return pImpl->Seek(rel, offset); }
 
   // TODO: Add efficient Slice<void> support to Variant, so that this component can be shared property?
 
-  virtual Slice<void> Read(Slice<void> buffer) { return pImpl->Read(buffer); }
+  virtual Slice<void> read(Slice<void> buffer) { return pImpl->Read(buffer); }
 
-  String ReadLn(Slice<char> buf) { return pImpl->ReadLn(buf); }
-  BufferRef ReadBuffer(size_t bytes) { return pImpl->ReadBuffer(bytes); }
+  String readLn(Slice<char> buf) { return pImpl->ReadLn(buf); }
+  BufferRef readBuffer(size_t bytes) { return pImpl->ReadBuffer(bytes); }
 
-  BufferRef Load() { return pImpl->Load(); }
-  TextRef LoadText() { return pImpl->LoadText(); }
-  void Save(BufferRef spBuffer) { return pImpl->SaveBuffer(spBuffer); }
+  BufferRef load() { return pImpl->Load(); }
+  TextRef loadText() { return pImpl->LoadText(); }
+  void save(BufferRef spBuffer) { return pImpl->SaveBuffer(spBuffer); }
 
-  Event<> PosChanged;
+  Event<> posChanged;
 
   // TODO: support async operations?
   // TODO: remove support for sync operations?
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   Stream(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Broadcaster(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
-  void SetPos(int64_t pos) { pImpl->SetPos(pos); }
-  void SetLength(int64_t length) { pImpl->SetLength(length); }
+  void setPos(int64_t pos) { pImpl->SetPos(pos); }
+  void setLength(int64_t length) { pImpl->SetLength(length); }
 };
 
 }

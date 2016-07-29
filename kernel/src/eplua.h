@@ -35,8 +35,8 @@ enum class ConsoleColor
   White
 };
 
-const char* FgColor(ConsoleColor fg = ConsoleColor::Default);
-const char* BgColor(ConsoleColor bg = ConsoleColor::Default);
+const char* fgColor(ConsoleColor fg = ConsoleColor::Default);
+const char* bgColor(ConsoleColor bg = ConsoleColor::Default);
 
 
 enum class LuaType : int

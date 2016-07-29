@@ -48,10 +48,10 @@ inline String StripAssignment(String str)
     NAME(Type _v) : v(_v) {}                                                      \
     NAME(ep::String s) : v(Invalid)                                               \
     {                                                                             \
-      ep::Slice<const ep::String> keys = Keys();                                  \
-      for(size_t i = 0; i < keys.length; ++i)                                     \
+      ep::Slice<const ep::String> _keys = keys();                                 \
+      for(size_t i = 0; i < _keys.length; ++i)                                    \
       {                                                                           \
-        if (keys.ptr[i].eq(s))                                                    \
+        if (_keys.ptr[i].eq(s))                                                   \
         {                                                                         \
           v = (Type)i;                                                            \
           break;                                                                  \
@@ -61,28 +61,28 @@ inline String StripAssignment(String str)
                                                                                   \
     operator Type() const { return v; }                                           \
                                                                                   \
-    ep::String StringOf() const                                                   \
+    ep::String stringof() const                                                   \
     {                                                                             \
-      return v == -1 ? "Invalid" : Keys()[v];                                     \
+      return v == -1 ? "Invalid" : keys()[v];                                     \
     }                                                                             \
                                                                                   \
-    static ep::String Name()                                                      \
+    static ep::String name()                                                      \
     {                                                                             \
-      static ep::String name(#NAME);                                              \
-      return name;                                                                \
+      static ep::String s_name(#NAME);                                            \
+      return s_name;                                                              \
     }                                                                             \
-    static ep::Slice<const ep::String> Keys()                                     \
+    static ep::Slice<const ep::String> keys()                                     \
     {                                                                             \
       using namespace ep;                                                         \
-      static Array<const String> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) };     \
-      return keys;                                                                \
+      static Array<const String> s_keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) };   \
+      return s_keys;                                                              \
     }                                                                             \
-    static const ep::EnumDesc* Desc()                                             \
+    static const ep::EnumDesc* desc()                                             \
     {                                                                             \
       using namespace ep;                                                         \
-      static const EnumDesc desc = { Name(), Keys(),                              \
-        [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.StringOf(); } };\
-      return &desc;                                                               \
+      static const EnumDesc s_desc = { name(), keys(),                            \
+        [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.stringof(); } };\
+      return &s_desc;                                                             \
     }                                                                             \
   };                                                                              \
   inline NAME epGetValAsEnum(NAME::EnumKeys e)                                    \
@@ -106,10 +106,10 @@ inline String StripAssignment(String str)
     NAME(Type _v) : v(_v) {}                                                      \
     NAME(ep::String s)                                                            \
     {                                                                             \
-      ep::Slice<const ep::String> keys = Keys();                                  \
-      for(size_t i = 0; i < keys.length; ++i)                                     \
+      ep::Slice<const ep::String> _keys = keys();                                 \
+      for(size_t i = 0; i < _keys.length; ++i)                                    \
       {                                                                           \
-        if (keys.ptr[i].eq(s))                                                    \
+        if (_keys.ptr[i].eq(s))                                                   \
         {                                                                         \
           v = 1<<i;                                                               \
           break;                                                                  \
@@ -123,7 +123,7 @@ inline String StripAssignment(String str)
     NAME& operator &=(NAME rh) { v = v & rh.v; return *this; }                    \
     NAME& operator ^=(NAME rh) { v = v ^ rh.v; return *this; }                    \
                                                                                   \
-    ep::MutableString64 StringOf() const                                          \
+    ep::MutableString64 stringof() const                                          \
     {                                                                             \
       ep::MutableString64 r;                                                      \
       for(size_t i = 0; i < 32; ++i)                                              \
@@ -132,29 +132,29 @@ inline String StripAssignment(String str)
         {                                                                         \
           if (r.length > 0)                                                       \
             r.concat("|");                                                        \
-          r.concat(Keys()[i]);                                                    \
+          r.concat(keys()[i]);                                                    \
         }                                                                         \
       }                                                                           \
       return r;                                                                   \
     }                                                                             \
                                                                                   \
-    static ep::String Name()                                                      \
+    static ep::String name()                                                      \
     {                                                                             \
       static ep::String name = #NAME;                                             \
       return name;                                                                \
     }                                                                             \
-    static ep::Slice<const ep::String> Keys()                                     \
+    static ep::Slice<const ep::String> keys()                                     \
     {                                                                             \
       using namespace ep;                                                         \
-      static Array<const String> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) };     \
-      return keys;                                                                \
+      static Array<const String> s_keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) };   \
+      return s_keys;                                                              \
     }                                                                             \
-    static const ep::EnumDesc* Desc()                                             \
+    static const ep::EnumDesc* desc()                                             \
     {                                                                             \
       using namespace ep;                                                         \
-      static const EnumDesc desc = { Name(), Keys(),                              \
-        [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.StringOf(); } };\
-      return &desc;                                                               \
+      static const EnumDesc s_desc = { name(), keys(),                            \
+        [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.stringof(); } };\
+      return &s_desc;                                                             \
     }                                                                             \
   };                                                                              \
   inline NAME epGetValAsEnum(NAME::EnumKeys e)                                    \
@@ -178,10 +178,10 @@ inline String StripAssignment(String str)
     NAME(Type _v) : v(_v) {}                                                      \
     NAME(ep::String s)                                                            \
     {                                                                             \
-      ep::Slice<const ep::String> keys = Keys();                                  \
-      for(size_t i = 0; i < keys.length; ++i)                                     \
+      ep::Slice<const ep::String> _keys = keys();                                 \
+      for(size_t i = 0; i < _keys.length; ++i)                                    \
       {                                                                           \
-        if (keys.ptr[i].eq(s))                                                    \
+        if (_keys.ptr[i].eq(s))                                                   \
         {                                                                         \
           v = 1<<i;                                                               \
           break;                                                                  \
@@ -195,7 +195,7 @@ inline String StripAssignment(String str)
     NAME& operator &=(NAME rh) { v = v & rh.v; return *this; }                    \
     NAME& operator ^=(NAME rh) { v = v ^ rh.v; return *this; }                    \
                                                                                   \
-    ep::MutableString64 StringOf() const                                          \
+    ep::MutableString64 stringof() const                                          \
     {                                                                             \
       ep::MutableString64 r;                                                      \
       for(size_t i = 0; i < 32; ++i)                                              \
@@ -204,29 +204,29 @@ inline String StripAssignment(String str)
         {                                                                         \
           if (r.length > 0)                                                       \
             r.concat("|");                                                        \
-          r.concat(Keys()[i]);                                                    \
+          r.concat(keys()[i]);                                                    \
         }                                                                         \
       }                                                                           \
       return r;                                                                   \
     }                                                                             \
                                                                                   \
-    static ep::String Name()                                                      \
+    static ep::String name()                                                      \
     {                                                                             \
       static ep::String name = #NAME;                                             \
       return name;                                                                \
     }                                                                             \
-    static ep::Slice<const ep::String> Keys()                                     \
+    static ep::Slice<const ep::String> keys()                                     \
     {                                                                             \
       using namespace ep;                                                         \
       static Array<const String> keys = { FOR_EACH(STRINGIFY, __VA_ARGS__) };     \
       return keys;                                                                \
     }                                                                             \
-    static const ep::EnumDesc* Desc()                                             \
+    static const ep::EnumDesc* desc()                                             \
     {                                                                             \
       using namespace ep;                                                         \
-      static const EnumDesc desc = { Name(), Keys(),                              \
-        [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.StringOf(); } };\
-      return &desc;                                                               \
+      static const EnumDesc s_desc = { name(), keys(),                            \
+        [](size_t _v, MutableString64 &s) { NAME e((Type)_v); s = e.stringof(); } };\
+      return &s_desc;                                                             \
     }                                                                             \
   };                                                                              \
   inline NAME epGetValAsEnum(NAME::EnumKeys e)                                    \

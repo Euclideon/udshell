@@ -15,28 +15,28 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Scene::GetProperties() const
+Array<const PropertyInfo> Scene::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(RootNode, "Scene root node", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(BookmarkMap, "Bookmark map", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("rootNode", getRootNode, "Scene root node", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("bookmarkMap", getBookmarkMap, "Bookmark map", nullptr, 0),
   };
 }
-Array<const MethodInfo> Scene::GetMethods() const
+Array<const MethodInfo> Scene::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(MakeDirty, "Force a dirty signal"),
-    EP_MAKE_METHOD(AddBookmarkFromCamera, "Add a Bookmark from Camera"),
-    EP_MAKE_METHOD(AddBookmark, "Add a Bookmark"),
-    EP_MAKE_METHOD(RemoveBookmark, "Remove a Bookmark"),
-    EP_MAKE_METHOD(RenameBookmark, "Rename a Bookmark"),
-    EP_MAKE_METHOD_EXPLICIT("FindBookmark", FindBookmark_Internal, "Find a Bookmark"),
+    EP_MAKE_METHOD(makeDirty, "Force a dirty signal"),
+    EP_MAKE_METHOD(addBookmarkFromCamera, "Add a Bookmark from Camera"),
+    EP_MAKE_METHOD(addBookmark, "Add a Bookmark"),
+    EP_MAKE_METHOD(removeBookmark, "Remove a Bookmark"),
+    EP_MAKE_METHOD(renameBookmark, "Rename a Bookmark"),
+    EP_MAKE_METHOD_EXPLICIT("findBookmark", findBookmarkInternal, "Find a Bookmark"),
   };
 }
-Array<const EventInfo> Scene::GetEvents() const
+Array<const EventInfo> Scene::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Dirty, "Scene dirty event"),
+    EP_MAKE_EVENT(dirty, "Scene dirty event"),
   };
 }
 
@@ -46,7 +46,7 @@ bool SceneImpl::InputEvent(const ep::InputEvent &ev)
   //...
 
   // pass input to the hierarchy...
-  return rootNode->InputEvent(ev);
+  return rootNode->inputEvent(ev);
 }
 
 void SceneImpl::Update(double timeDelta)
@@ -55,7 +55,7 @@ void SceneImpl::Update(double timeDelta)
   //...
 
   // update the hierarchy...
-  if (rootNode->Update(timeDelta))
+  if (rootNode->update(timeDelta))
     MakeDirty();
 }
 
@@ -65,9 +65,9 @@ RenderableSceneRef SceneImpl::GetRenderScene()
     return spCache;
 
   RenderScene scene;
-  rootNode->DoRender(scene, rootNode->GetMatrix());
+  rootNode->doRender(scene, rootNode->getMatrix());
 
-  spCache = Convert(scene, GetKernel()->GetImpl()->GetRenderer().ptr());
+  spCache = Convert(scene, getKernel()->getImpl()->GetRenderer().ptr());
 
   bDirty = false;
   return spCache;
@@ -93,7 +93,7 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
     {
       UDJob &job = cache->ud.pushBack();
       job.spModel = in.spModel;
-      UDModelImpl *pImpl = in.spModel->GetImpl<UDModelImpl>();
+      UDModelImpl *pImpl = in.spModel->getImpl<UDModelImpl>();
       pImpl->CopyRenderContext(&job.context);
       job.context.matrix = Mul(in.matrix, job.context.matrix);
 
@@ -145,7 +145,7 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
   {
     auto &out = cache->geom.pushBack();
     out.matrix = in.matrix;
-    MaterialImpl *pMatImpl = in.spMaterial->GetImpl<MaterialImpl>();
+    MaterialImpl *pMatImpl = in.spMaterial->getImpl<MaterialImpl>();
 
     out.stencilStates = pMatImpl->stencilStates;
     out.blendMode = pMatImpl->blendMode;
@@ -200,7 +200,7 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
 
       for (size_t i = 0; i < uniforms.length; i++) // set up textures
       {
-        if (uniforms[i].data.is(Variant::SharedPtrType::Component) && uniforms[i].data.asComponent()->IsType<ArrayBuffer>()) // if the uniform is a texture
+        if (uniforms[i].data.is(Variant::SharedPtrType::Component) && uniforms[i].data.asComponent()->isType<ArrayBuffer>()) // if the uniform is a texture
         {
           ArrayBufferRef spImage = uniforms[i].data.as<ArrayBufferRef>();
           RenderTextureRef spRenderTexture = shared_pointer_cast<RenderTexture>(pRenderer->GetRenderBuffer(spImage, Renderer::RenderResourceType::Texture)); // TODO: set texture parameters
@@ -222,7 +222,7 @@ SceneImpl::SceneImpl(Component *_pInstance, Variant::VarMap initParams)
   : ImplSuper(_pInstance)
 {
   timeStep = 1.0 / 30.0;
-  rootNode = GetKernel()->CreateComponent<Node>();
+  rootNode = getKernel()->createComponent<Node>();
 
   Variant *pSrc = initParams.get("url");
   if (pSrc && pSrc->is(Variant::Type::String))
@@ -239,49 +239,49 @@ SceneImpl::SceneImpl(Component *_pInstance, Variant::VarMap initParams)
 void SceneImpl::LoadSceneFile(String filePath)
 {
   GeomSourceRef spSceneDS;
-  epscope(fail) { if (!spSceneDS) GetKernel()->LogError("Failed to load scene file \"{0}\"", filePath); };
-  spSceneDS = GetKernel()->CreateComponent<GeomSource>({ { "src", filePath } });
+  epscope(fail) { if (!spSceneDS) getKernel()->logError("Failed to load scene file \"{0}\"", filePath); };
+  spSceneDS = getKernel()->createComponent<GeomSource>({ { "src", filePath } });
 
   NodeRef spNode;
-  if (spSceneDS->GetNumResources() > 0)
+  if (spSceneDS->getNumResources() > 0)
   {
-    for (NodeRef &child : rootNode->Children())
-      child->Detach();
+    for (NodeRef &child : rootNode->children())
+      child->detach();
 
-    spNode = spSceneDS->GetResourceAs<Node>(0);
+    spNode = spSceneDS->getResourceAs<Node>(0);
 
-    rootNode->AddChild(spNode);
+    rootNode->addChild(spNode);
     AddModelsToResourceManager();
-    pInstance->GetMetadata()->Insert("url", filePath);
+    pInstance->getMetadata()->insert("url", filePath);
   }
 }
 
 void SceneImpl::AddModelsToResourceManager()
 {
   Variant::VarMap modelMap;
-  ResourceManagerRef spRM = GetKernel()->GetResourceManager();
+  ResourceManagerRef spRM = getKernel()->getResourceManager();
 
   BuildModelMap(rootNode, modelMap);
 
   for (auto kvp : modelMap)
-    spRM->AddResource(kvp.value.as<UDModelRef>());
+    spRM->addResource(kvp.value.as<UDModelRef>());
 }
 
 void SceneImpl::BuildModelMap(NodeRef spNode, Variant::VarMap &modelMap)
 {
-  for (NodeRef &spChild : spNode->Children())
+  for (NodeRef &spChild : spNode->children())
   {
     BuildModelMap(spChild, modelMap);
 
     UDNodeRef spUDNode;
 
-    if (!spChild->IsType<UDNode>())
+    if (!spChild->isType<UDNode>())
       continue;
 
     spUDNode = component_cast<UDNode>(spChild);
 
-    UDModelRef spUDModel = spUDNode->GetUDModel();
-    Variant filePath = spUDModel->GetMetadata()->Get("url");
+    UDModelRef spUDModel = spUDNode->getUDModel();
+    Variant filePath = spUDModel->getMetadata()->get("url");
     if (filePath.is(Variant::Type::String))
       modelMap.replace(filePath, spUDModel);
   }
@@ -292,7 +292,7 @@ void SceneImpl::AddBookmarkFromCamera(String bmName, CameraRef camera)
   if (!bmName || !camera)
     return;
 
-  Double4x4 m = camera->GetCameraMatrix();
+  Double4x4 m = camera->getCameraMatrix();
   Bookmark bm = { m.axis.t.toVector3(), m.extractYPR() };
   KVP<SharedString, Bookmark> kvp(bmName, bm);
   bookmarks.insert(std::move(kvp));
@@ -371,7 +371,7 @@ Variant SceneImpl::Save() const
 {
   Variant::VarMap map;
 
-  Variant url = pInstance->GetMetadata()->Get("url");
+  Variant url = pInstance->getMetadata()->get("url");
   if (url.is(Variant::Type::String))
   {
     String urlString = url.asString();

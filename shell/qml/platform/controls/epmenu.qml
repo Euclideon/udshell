@@ -27,7 +27,7 @@ Menu {
       onTriggered: {
         if(command)
         {
-          commandManager.call("runcommand", command, null);
+          commandManager.runCommand(command, null);
         }
       }
     }
@@ -64,7 +64,7 @@ Menu {
       if(menudata.checkable)
       {
         menuItem.checked = menudata.checked;
-        if(menudata.exclusivegroup)
+        if(menudata.exclusiveGroup)
         {
           if(items.length)
           {

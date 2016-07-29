@@ -9,7 +9,12 @@
 #include "ep/cpp/component/resource/buffer.h"
 
 namespace ep {
-
+inline Array<const EventInfo> Broadcaster::getEvents() const
+{
+  return{
+    EP_MAKE_EVENT(written, "Data was written")
+  };
+}
 class BroadcasterImpl : public BaseImpl<Broadcaster, IBroadcaster>
 {
 public:
@@ -19,7 +24,7 @@ public:
 
   size_t Write(Slice<const void> data) override final
   {
-    pInstance->Written.Signal(data);
+    pInstance->written.signal(data);
 
     return data.length;
   }
@@ -27,7 +32,7 @@ public:
   size_t WriteLn(String str) override final;
   size_t WriteBuffer(BufferRef spData) override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 };
 
 }

@@ -15,10 +15,10 @@ class QmlPluginLoader : public ep::PluginLoader
   EP_DECLARE_COMPONENT(ep, QmlPluginLoader, PluginLoader, EPKERNEL_PLUGINVERSION, "Loads QML plugins", 0)
 public:
 
-  ep::Slice<const ep::String> GetSupportedExtensions() const override;
-  bool LoadPlugin(ep::String filename) override;
+  ep::Slice<const ep::String> getSupportedExtensions() const override;
+  bool loadPlugin(ep::String filename) override;
 
-  static ep::Variant::VarMap ParseTypeDescriptor(QtKernel *pQtKernel, ep::String filename);
+  static ep::Variant::VarMap parseTypeDescriptor(QtKernel *pQtKernel, ep::String filename);
 
 protected:
   QmlPluginLoader(const ep::ComponentDesc *pType, ep::Kernel *pKernel, ep::SharedString uid, ep::Variant::VarMap initParams)

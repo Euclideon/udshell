@@ -42,7 +42,7 @@ public:
   DataSourceRef LoadResourcesFromFile(Variant::VarMap initParams) override final;
   void SaveResourcesToFile(DataSourceRef spDataSource, Variant::VarMap initParams) override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   AVLTree<String, ResourceRef> resources;

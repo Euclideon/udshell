@@ -22,44 +22,44 @@ extern "C" {
 namespace ep {
 namespace internal {
 
-  // HACK !!! (GCC and Clang)
-  // For the implementation of epInternalInit defined in this file to override
-  // the weak version in epplatform.cpp at least one symbol from this file must
-  // be referenced externally.  This has been implemented in kernelimpl.cpp inside
-  // CreateInstance().
-  void *GetStaticImplRegistry()
-  {
-    if (!KernelImpl::s_pStaticImplRegistry)
-      KernelImpl::s_pStaticImplRegistry = epNew(KernelImpl::StaticImplRegistryMap);
-    return KernelImpl::s_pStaticImplRegistry;
-  }
+// HACK !!! (GCC and Clang)
+// For the implementation of epInternalInit defined in this file to override
+// the weak version in epplatform.cpp at least one symbol from this file must
+// be referenced externally.  This has been implemented in kernelimpl.cpp inside
+// createInstance().
+void *getStaticImplRegistry()
+{
+  if (!KernelImpl::s_pStaticImplRegistry)
+    KernelImpl::s_pStaticImplRegistry = epNew(KernelImpl::StaticImplRegistryMap);
+  return KernelImpl::s_pStaticImplRegistry;
+}
 
-  static void *GetVarAVLAllocator()
-  {
-    if (!KernelImpl::s_pVarAVLAllocator)
-      KernelImpl::s_pVarAVLAllocator = epNew(KernelImpl::VarAVLTreeAllocator);
-    return KernelImpl::s_pVarAVLAllocator;
-  }
+static void *getVarAVLAllocator()
+{
+  if (!KernelImpl::s_pVarAVLAllocator)
+    KernelImpl::s_pVarAVLAllocator = epNew(KernelImpl::VarAVLTreeAllocator);
+  return KernelImpl::s_pVarAVLAllocator;
+}
 
-  static void *GetWeakRefRegistry()
-  {
-    if (!KernelImpl::s_pWeakRefRegistry)
-      KernelImpl::s_pWeakRefRegistry = epNew(KernelImpl::WeakRefRegistryMap, 65536);
-    return KernelImpl::s_pWeakRefRegistry;
-  }
+static void *getWeakRefRegistry()
+{
+  if (!KernelImpl::s_pWeakRefRegistry)
+    KernelImpl::s_pWeakRefRegistry = epNew(KernelImpl::WeakRefRegistryMap, 65536);
+  return KernelImpl::s_pWeakRefRegistry;
+}
 
-  static void Destroy()
-  {
-    epDelete(KernelImpl::s_pVarAVLAllocator);
-    epDelete(KernelImpl::s_pStaticImplRegistry);
-    epDelete(KernelImpl::s_pWeakRefRegistry);
-  }
+static void destroy()
+{
+  epDelete(KernelImpl::s_pVarAVLAllocator);
+  epDelete(KernelImpl::s_pStaticImplRegistry);
+  epDelete(KernelImpl::s_pWeakRefRegistry);
+}
 
-  static ErrorSystem* GetErrorSystem()
-  {
-    static ErrorSystem errorSystem;
-    return &errorSystem;
-  }
+static ErrorSystem* getErrorSystem()
+{
+  static ErrorSystem errorSystem;
+  return &errorSystem;
+}
 
 struct GlobalInstanceInitializer
 {
@@ -67,13 +67,13 @@ struct GlobalInstanceInitializer
 
   ~GlobalInstanceInitializer()
   {
-    Destroy();
+    destroy();
   }
 };
 
 static GlobalInstanceInitializer EP_INIT_PRIORITY(101) globalInstanceInitializer;
 
-static void TranslateFindData(const EPFindData &fd, FindData *pFD)
+static void translateFindData(const EPFindData &fd, FindData *pFD)
 {
   pFD->filename = (const char*)fd.pFilename;
   pFD->path = (const char*)fd.pSystemPath;
@@ -86,7 +86,7 @@ static void TranslateFindData(const EPFindData &fd, FindData *pFD)
   pFD->writeTime.ticks = fd.writeTime.ticks;
 }
 
-static void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, int line)
+static void *_alloc(size_t size, epAllocationFlags flags, const char * pFile, int line)
 {
 #if defined(EP_COMPILER_VISUALC)
 # if __EP_MEMORY_DEBUG__
@@ -102,23 +102,23 @@ static void *_Alloc(size_t size, epAllocationFlags flags, const char * pFile, in
   return pMemory;
 }
 
-static void _Free(void *pMemory)
+static void _free(void *pMemory)
 {
   if (pMemory)
     free(pMemory);
 }
 
-static void _Assert(String condition, String message, String file, int line)
+static void _assert(String condition, String message, String file, int line)
 {
-   IF_EPASSERT(AssertFailed(condition, message, file, line);)
+   IF_EPASSERT(assertFailed(condition, message, file, line);)
 }
 
-static void _DestroyComponent(Component *pInstance)
+static void _destroyComponent(Component *pInstance)
 {
-  pInstance->DecRef();
+  pInstance->decRef();
 }
 
-static void *_Find (String pattern, void *pHandle, void *pData)
+static void *_find (String pattern, void *pHandle, void *pData)
 {
   EPFind *pFind = (EPFind*)pHandle;
   FindData *pFD = (FindData*)pData;
@@ -128,7 +128,7 @@ static void *_Find (String pattern, void *pHandle, void *pData)
     EPFindData fd;
     if (HalDirectory_FindFirst(find, pattern.toStringz(), &fd))
     {
-      internal::TranslateFindData(fd, pFD);
+      internal::translateFindData(fd, pFD);
       return find;
     }
     else
@@ -142,7 +142,7 @@ static void *_Find (String pattern, void *pHandle, void *pData)
     EPFindData fd;
     if (HalDirectory_FindNext(pFind, &fd))
     {
-      internal::TranslateFindData(fd, pFD);
+      internal::translateFindData(fd, pFD);
       return pHandle;
     }
     else
@@ -170,24 +170,24 @@ static Instance s_instance =
   nullptr,
   nullptr,
   nullptr,
-  internal::_Alloc,
-  internal::_Free,
-  internal::_Assert,
-  internal::_DestroyComponent,
-  internal::_Find
+  internal::_alloc,
+  internal::_free,
+  internal::_assert,
+  internal::_destroyComponent,
+  internal::_find
 };
 
 GlobalInstanceInitializer::GlobalInstanceInitializer()
 {
   epInternalInit();
-  ep::internal::s_instance.pErrorSystem = ep::internal::GetErrorSystem();
-  ep::internal::s_instance.pStaticImplRegistry = ep::internal::GetStaticImplRegistry();
-  ep::internal::s_instance.pTreeAllocator = ep::internal::GetVarAVLAllocator(),
-  ep::internal::s_instance.pWeakRegistry = ep::internal::GetWeakRefRegistry();
+  ep::internal::s_instance.pErrorSystem = ep::internal::getErrorSystem();
+  ep::internal::s_instance.pStaticImplRegistry = ep::internal::getStaticImplRegistry();
+  ep::internal::s_instance.pTreeAllocator = ep::internal::getVarAVLAllocator(),
+  ep::internal::s_instance.pWeakRegistry = ep::internal::getWeakRefRegistry();
 }
 
 } // namespace internal
-} //namespace ep
+} // namespace ep
 
 extern "C" {
 

@@ -4,25 +4,25 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Timer::GetProperties() const
+Array<const PropertyInfo> Timer::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(Duration, "The duration for the timer in seconds", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(TimerType, "The TimerType of this timer", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("duration", getDuration, "The duration for the timer in seconds", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("timerType", getTimerType, "The TimerType of this timer", nullptr, 0),
   };
 }
-Array<const MethodInfo> Timer::GetMethods() const
+Array<const MethodInfo> Timer::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(BeginInterval, "Begins an interval counter triggering at each given interval"),
-    EP_MAKE_METHOD(BeginCountdown, "Begins a countdown of the given duration"),
-    EP_MAKE_METHOD(Reset, "Resets the Timer"),
+    EP_MAKE_METHOD(beginInterval, "Begins an interval counter triggering at each given interval"),
+    EP_MAKE_METHOD(beginCountdown, "Begins a countdown of the given duration"),
+    EP_MAKE_METHOD(reset, "Resets the Timer"),
   };
 }
-Array<const EventInfo> Timer::GetEvents() const
+Array<const EventInfo> Timer::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Elapsed, "Elapsed Event"),
+    EP_MAKE_EVENT(elapsed, "Elapsed Event"),
   };
 }
 
@@ -33,7 +33,7 @@ TimerImpl::TimerImpl(Component *pInstance, Variant::VarMap initParams)
   const Variant *pInterval = initParams.get("interval");
 
   if (pCountdown && pInterval)
-    LogWarning(1, "'countdown' and 'interval' both supplied to Timer initParams, 'interval' will be used.");
+    logWarning(1, "'countdown' and 'interval' both supplied to Timer initParams, 'interval' will be used.");
 
   if (pInterval)
     BeginInterval(pInterval->as<double>());
@@ -58,16 +58,16 @@ void TimerImpl::SetTimer(double d, TimerType tt)
 
 void TimerImpl::MessageCallback()
 {
-  pInstance->Elapsed.Signal();
-  pInstance->DecRef();
+  pInstance->elapsed.signal();
+  pInstance->decRef();
 }
 
 
 void TimerImpl::TimerCallback(HalTimer *pTimer, void *pParam)
 {
   TimerImpl* pThis = (TimerImpl*)pParam;
-  pThis->pInstance->IncRef();
-  pThis->GetKernel()->DispatchToMainThread(MakeDelegate(pThis, &TimerImpl::MessageCallback));
+  pThis->pInstance->incRef();
+  pThis->getKernel()->dispatchToMainThread(MakeDelegate(pThis, &TimerImpl::MessageCallback));
 }
 
 } // namespace ep

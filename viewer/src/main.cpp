@@ -37,7 +37,7 @@ ep::SharedString stringof<Vertex>()
   return "{f32[3], f32[4]}";
 }
 
-static void ProcessCmdline(int argc, char *argv[]);
+static void processCmdline(int argc, char *argv[]);
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
@@ -88,9 +88,9 @@ static struct
 static GeomNodeRef CreateTestModel(KernelRef kernel)
 {
   // Vertex Shader
-  ShaderRef vertexShader = kernel->CreateComponent<Shader>();
+  ShaderRef vertexShader = kernel->createComponent<Shader>();
   {
-    vertexShader->SetType(ShaderType::VertexShader);
+    vertexShader->setType(ShaderType::VertexShader);
 
     const char shaderText[] = "attribute vec3 a_position;\n"
                               "attribute vec4 a_color;\n"
@@ -101,32 +101,32 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
                               "  v_color = a_color;\n"
                               "  gl_Position = u_mfwvp * vec4(a_position, 1.0);\n"
                               "}\n";
-    vertexShader->SetCode(shaderText);
+    vertexShader->setCode(shaderText);
   }
 
   // Pixel Shader
-  ShaderRef pixelShader = kernel->CreateComponent<Shader>();
+  ShaderRef pixelShader = kernel->createComponent<Shader>();
   {
-    pixelShader->SetType(ShaderType::PixelShader);
+    pixelShader->setType(ShaderType::PixelShader);
 
     const char shaderText[] = "varying vec4 v_color;\n"
                               "void main()\n"
                               "{\n"
                               "  gl_FragColor = v_color;\n"
                               "}\n";
-    pixelShader->SetCode(shaderText);
+    pixelShader->setCode(shaderText);
   }
 
   // Material
-  MaterialRef material = kernel->CreateComponent<Material>();
-  material->SetShader(ShaderType::VertexShader, vertexShader);
-  material->SetShader(ShaderType::PixelShader, pixelShader);
+  MaterialRef material = kernel->createComponent<Material>();
+  material->setShader(ShaderType::VertexShader, vertexShader);
+  material->setShader(ShaderType::PixelShader, pixelShader);
 #if 0
   material->SetTexture(0, texture);
 #endif // 0
 
   // Vertex Buffer
-  ArrayBufferRef vertexBuffer = kernel->CreateComponent<ArrayBuffer>();
+  ArrayBufferRef vertexBuffer = kernel->createComponent<ArrayBuffer>();
   {
 
     static const Vertex vb[] = { Vertex{ Float3{ 0.0f, 0.0f, 0.0f },   Float4{ 1.0f, 1.0f, 1.0f, 1.0f } },
@@ -139,14 +139,14 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
                                  Vertex{ Float3{ 1.0f, 1.0f, 1.0f },   Float4{ 0.0f, 1.0f, 1.0f, 1.0f } },
                                  Vertex{ Float3{ 0.0f, 1.0f, 1.0f },   Float4{ 0.5f, 0.5f, 1.0f, 1.0f } } };
 
-    vertexBuffer->AllocateFromData(Slice<const Vertex>(vb));
-    MetadataRef metadata = vertexBuffer->GetMetadata();
-    metadata->Get("attributeinfo")[0].insertItem("name", "a_position");
-    metadata->Get("attributeinfo")[1].insertItem("name", "a_color");
+    vertexBuffer->allocateFromData(Slice<const Vertex>(vb));
+    MetadataRef metadata = vertexBuffer->getMetadata();
+    metadata->get("attributeInfo")[0].insertItem("name", "a_position");
+    metadata->get("attributeInfo")[1].insertItem("name", "a_color");
   }
 
   // Index Buffer
-  ArrayBufferRef indexBuffer = kernel->CreateComponent<ArrayBuffer>();
+  ArrayBufferRef indexBuffer = kernel->createComponent<ArrayBuffer>();
   static const uint16_t ib[] = {
                                  0, 4, 5,
                                  0, 5, 1,
@@ -166,11 +166,11 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
                                  3, 0, 1,
                                  3, 1, 2
                               };
-  indexBuffer->AllocateFromData(Slice<const uint16_t>(ib));
+  indexBuffer->allocateFromData(Slice<const uint16_t>(ib));
 
 #if 0
   // Texture
-  ArrayBufferRef texture = kernel->CreateComponent<ArrayBuffer>();
+  ArrayBufferRef texture = kernel->createComponent<ArrayBuffer>();
   {
     texture->Allocate("White", sizeof(uint32_t), { 32, 32 });
     Slice<void> data  = texture->Map();
@@ -179,15 +179,15 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   }
 #endif // 0
 
-  ModelRef model = kernel->CreateComponent<Model>();
-  model->SetName("TestModel");
-  model->AddVertexArray(vertexBuffer);
-  model->SetIndexArray(indexBuffer);
-  model->SetMaterial(material);
-  model->SetRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), size_t(EPARRAYSIZE(ib)) });
+  ModelRef model = kernel->createComponent<Model>();
+  model->setName("TestModel");
+  model->addVertexArray(vertexBuffer);
+  model->setIndexArray(indexBuffer);
+  model->setMaterial(material);
+  model->setRenderList(RenderList { PrimType::Triangles, size_t(0), size_t(0), size_t(EPARRAYSIZE(ib)) });
 
-  GeomNodeRef geomNode = kernel->CreateComponent<GeomNode>();
-  geomNode->SetModel(model);
+  GeomNodeRef geomNode = kernel->createComponent<GeomNode>();
+  geomNode->setModel(model);
 
   return geomNode;
 }
@@ -196,7 +196,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 void Update(double delta)
 {
   if (mData.spScene)
-    mData.spScene->Update(delta);
+    mData.spScene->update(delta);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -208,26 +208,26 @@ static void ViewerInit(String sender, String message, const Variant &data)
   if (mData.filename.beginsWithIC("~"))
     mData.filename = MutableString256(Format, "{0}{1}", getenv("HOME"), mData.filename.slice(1, mData.filename.length));
 #endif // defined(EP_LINUX)
-  mData.spView = mData.spKernel->CreateComponent<View>();
-  mData.spScene = mData.spKernel->CreateComponent<Scene>();
-  mData.spSimpleCamera = mData.spKernel->CreateComponent<SimpleCamera>();
-  mData.spUDNode = mData.spKernel->CreateComponent<UDNode>();
+  mData.spView = mData.spKernel->createComponent<View>();
+  mData.spScene = mData.spKernel->createComponent<Scene>();
+  mData.spSimpleCamera = mData.spKernel->createComponent<SimpleCamera>();
+  mData.spUDNode = mData.spKernel->createComponent<UDNode>();
 
-  mData.spView->SetUDRenderFlags(UDRenderFlags::ClearTargets);
+  mData.spView->setUDRenderFlags(UDRenderFlags::ClearTargets);
 
-  mData.spSimpleCamera->SetPosition(Double3::create(0.5, -1.0, 0.5));
-  mData.spSimpleCamera->SetSpeed(1.0);
-  mData.spSimpleCamera->SetInvertedYAxis(true);
-  mData.spSimpleCamera->SetPerspective(EP_PIf / 3.f);
-  mData.spSimpleCamera->SetDepthPlanes(0.0001f, 7500.f);
+  mData.spSimpleCamera->setPosition(Double3::create(0.5, -1.0, 0.5));
+  mData.spSimpleCamera->setSpeed(1.0);
+  mData.spSimpleCamera->setInvertedYAxis(true);
+  mData.spSimpleCamera->setPerspective(EP_PIf / 3.f);
+  mData.spSimpleCamera->setDepthPlanes(0.0001f, 7500.f);
 
-  mData.spView->SetScene(mData.spScene);
-  mData.spView->SetCamera(mData.spSimpleCamera);
-  mData.spKernel->SetFocusView(mData.spView);
+  mData.spView->setScene(mData.spScene);
+  mData.spView->setCamera(mData.spSimpleCamera);
+  mData.spKernel->setFocusView(mData.spView);
 
-  mData.spView->Activate();
+  mData.spView->activate();
 
-  ResourceManagerRef spResourceManager = mData.spKernel->GetResourceManager();
+  ResourceManagerRef spResourceManager = mData.spKernel->getResourceManager();
 
   if (spResourceManager)
   {
@@ -236,47 +236,47 @@ static void ViewerInit(String sender, String message, const Variant &data)
       mData.filename = pFile->asString();
 
     // TODO: enable streamer once we have a tick running to update the streamer
-    DataSourceRef spModelDS = spResourceManager->LoadResourcesFromFile({ { "src", mData.filename },{ "useStreamer", false } });
-    if (spModelDS && spModelDS->GetNumResources() > 0)
+    DataSourceRef spModelDS = spResourceManager->loadResourcesFromFile({ { "src", mData.filename },{ "useStreamer", false } });
+    if (spModelDS && spModelDS->getNumResources() > 0)
     {
-      mData.spUDModel = spModelDS->GetResourceAs<UDModel>(0);
+      mData.spUDModel = spModelDS->getResourceAs<UDModel>(0);
     }
 
-    mData.spUDNode->SetUDModel(mData.spUDModel);
-    mData.spUDNode->SetPosition(Double3::create(0, 0, 0));
+    mData.spUDNode->setUDModel(mData.spUDModel);
+    mData.spUDNode->setPosition(Double3::create(0, 0, 0));
 
-    Double4x4 modelMat = mData.spUDModel->GetUDMatrix();
-    Double3 modelCorner = mData.spUDModel->GetUDMatrix().axis.t.toVector3();
+    Double4x4 modelMat = mData.spUDModel->getUDMatrix();
+    Double3 modelCorner = mData.spUDModel->getUDMatrix().axis.t.toVector3();
     Double3 camPos = modelCorner + Double3{ modelMat.axis.x.x*2, modelMat.axis.y.y*2, modelMat.axis.z.z*2 };
 
     Double4x4 camMat = Double4x4::lookAt(camPos, modelCorner + Double3{ modelMat.axis.x.x / 2, modelMat.axis.y.y / 2, modelMat.axis.z.z / 2 });
 
-    mData.spSimpleCamera->SetMatrix(camMat);
+    mData.spSimpleCamera->setMatrix(camMat);
   }
 
-  mData.spScene->GetRootNode()->AddChild(mData.spUDNode);
+  mData.spScene->getRootNode()->addChild(mData.spUDNode);
 
 #if EP_DEBUG
     mData.spTestGeomNode = CreateTestModel(mData.spKernel);
-    mData.spScene->GetRootNode()->AddChild(mData.spTestGeomNode);
+    mData.spScene->getRootNode()->addChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
 
-  mData.spUpdateSub = mData.spKernel->UpdatePulse.Subscribe(Delegate<void(double)>(&Update));
+  mData.spUpdateSub = mData.spKernel->updatePulse.subscribe(Delegate<void(double)>(&Update));
 
-  mData.spScene->MakeDirty();
+  mData.spScene->makeDirty();
 }
 
 // ---------------------------------------------------------------------------------------
 // Author: David Ely, September 2015
 static void ViewerDeinit(String sender, String message, const Variant &data)
 {
-  mData.spUpdateSub->Unsubscribe();
-  mData.spScene->GetRootNode()->RemoveChild(mData.spUDNode);
+  mData.spUpdateSub->unsubscribe();
+  mData.spScene->getRootNode()->removeChild(mData.spUDNode);
 #if EP_DEBUG
-  mData.spScene->GetRootNode()->RemoveChild(mData.spTestGeomNode);
+  mData.spScene->getRootNode()->removeChild(mData.spTestGeomNode);
 #endif // EP_DEBUG
   if (mData.spCITimerSub)
-    mData.spCITimerSub->Unsubscribe();
+    mData.spCITimerSub->unsubscribe();
 
   mData.spUDNode = nullptr;
   mData.spUDModel = nullptr;
@@ -347,24 +347,24 @@ int main(int argc, char* argv[])
   }
 
   using namespace ep;
-  mData.rendererThreadCount = epGetHardwareThreadCount() - 1;
-  ProcessCmdline(argc, argv);
+  mData.rendererThreadCount = getHardwareThreadCount() - 1;
+  processCmdline(argc, argv);
 
   Result result = Result::Success;
   try
   {
-    mData.spKernel = SharedPtr<Kernel>(Kernel::CreateInstance(epParseCommandLine(argc, argv), mData.rendererThreadCount));
+    mData.spKernel = SharedPtr<Kernel>(Kernel::createInstance(parseCommandLine(argc, argv), mData.rendererThreadCount));
 
-    mData.spKernel->RegisterMessageHandler("init", &ViewerInit);
-    mData.spKernel->RegisterMessageHandler("deinit", &ViewerDeinit);
+    mData.spKernel->registerMessageHandler("init", &ViewerInit);
+    mData.spKernel->registerMessageHandler("deinit", &ViewerDeinit);
 
     if (mData.shutdownTest)
     {
-      mData.spCITimer = mData.spKernel->CreateComponent<Timer>({ { "countdown", 4 } });
-      mData.spCITimerSub = mData.spCITimer->Elapsed.Subscribe([]() { Kernel::GetInstance()->Quit(); });
+      mData.spCITimer = mData.spKernel->createComponent<Timer>({ { "countdown", 4 } });
+      mData.spCITimerSub = mData.spCITimer->elapsed.subscribe([]() { Kernel::getInstance()->quit(); });
     }
 
-    mData.spKernel->RunMainLoop();
+    mData.spKernel->runMainLoop();
 
     mData.spKernel = nullptr;
   }
@@ -383,7 +383,7 @@ int main(int argc, char* argv[])
 }
 
 // ---------------------------------------------------------------------------------------
-void ProcessCmdline(int argc, char *argv[])
+void processCmdline(int argc, char *argv[])
 {
   // TODO: port all this code to use udString
   for (int i = 1; i < argc; ++i)

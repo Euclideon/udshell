@@ -5,32 +5,32 @@
 
 namespace ep {
 
-Array<const PropertyInfo> ResourceManager::GetProperties() const
+Array<const PropertyInfo> ResourceManager::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(NumResources, "The number of Resources in the ResourceManager", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(ResourceArray, "An array populated with the ResourceManager's resources", nullptr, 0),
-    EP_MAKE_PROPERTY_RO(Extensions, "The file extensions supported by the ResourceManager orgnanised by DataSource type", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("numResources", getNumResources, "The number of Resources in the ResourceManager", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("resourceArray", getResourceArray, "An array populated with the ResourceManager's resources", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("extensions", getExtensions, "The file extensions supported by the ResourceManager orgnanised by DataSource type", nullptr, 0),
   };
 }
-Array<const MethodInfo> ResourceManager::GetMethods() const
+Array<const MethodInfo> ResourceManager::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(AddResource, "Add a Resource to the ResourceManager"),
-    EP_MAKE_METHOD_EXPLICIT("AddResourceArray", AddResourceArrayMethod, "Add an Array of Resources to the ResourceManager"),
-    EP_MAKE_METHOD(RemoveResource, "Remove the specified Resource"),
-    EP_MAKE_METHOD_EXPLICIT("RemoveResourceArray", RemoveResourceArrayMethod, "Remove an Array Resources from the ResourceManager"),
-    EP_MAKE_METHOD(ClearResources, "Remove all resources"),
-    EP_MAKE_METHOD(GetResource, "Get Resource by UID"),
-    EP_MAKE_METHOD(LoadResourcesFromFile, "Create a DataSource containing Resources from the file specified by the given File InitParams"),
-    EP_MAKE_METHOD(SaveResourcesToFile, "Save Resources from the given DataSource to a file specified by the given File InitParams"),
+    EP_MAKE_METHOD(addResource, "Add a Resource to the ResourceManager"),
+    EP_MAKE_METHOD_EXPLICIT("addResourceArray", addResourceArrayMethod, "Add an Array of Resources to the ResourceManager"),
+    EP_MAKE_METHOD(removeResource, "Remove the specified Resource"),
+    EP_MAKE_METHOD_EXPLICIT("removeResourceArray", removeResourceArrayMethod, "Remove an Array Resources from the ResourceManager"),
+    EP_MAKE_METHOD(clearResources, "Remove all resources"),
+    EP_MAKE_METHOD(getResource, "Get Resource by UID"),
+    EP_MAKE_METHOD(loadResourcesFromFile, "Create a DataSource containing Resources from the file specified by the given File InitParams"),
+    EP_MAKE_METHOD(saveResourcesToFile, "Save Resources from the given DataSource to a file specified by the given File InitParams"),
   };
 }
-Array<const EventInfo> ResourceManager::GetEvents() const
+Array<const EventInfo> ResourceManager::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Added, "Resources were added"),
-    EP_MAKE_EVENT(Removed, "Resources were removed"),
+    EP_MAKE_EVENT(added, "Resources were added"),
+    EP_MAKE_EVENT(removed, "Resources were removed"),
   };
 }
 
@@ -40,7 +40,7 @@ void ResourceManagerImpl::AddResourceArray(Slice<const ResourceRef> resArray)
   for(auto &res : resArray)
     resources.insert(res->uid, res);
 
-  pInstance->Added.Signal(resArray);
+  pInstance->added.signal(resArray);
 }
 
 void ResourceManagerImpl::RemoveResourceArray(Slice<const ResourceRef> resArray)
@@ -48,7 +48,7 @@ void ResourceManagerImpl::RemoveResourceArray(Slice<const ResourceRef> resArray)
   for (auto &res : resArray)
     resources.remove(res->uid);
 
-  pInstance->Removed.Signal(resArray);
+  pInstance->removed.signal(resArray);
 }
 
 void ResourceManagerImpl::ClearResources()
@@ -59,14 +59,14 @@ void ResourceManagerImpl::ClearResources()
     resArray.pushBack(kvp.value);
   }
 
-  pInstance->Removed.Signal(resArray);
+  pInstance->removed.signal(resArray);
 
   resources = nullptr;
 }
 
 Variant::VarMap ResourceManagerImpl::GetExtensions() const
 {
-  const AVLTree<String, const ep::ComponentDesc *> &extensionsRegistry = GetKernel()->GetExtensionsRegistry();
+  const AVLTree<String, const ep::ComponentDesc *> &extensionsRegistry = getKernel()->getExtensionsRegistry();
   AVLTree<SharedString, Array<SharedString>> exts;
   Variant::VarMap map;
 
@@ -91,7 +91,7 @@ Array<ResourceRef> ResourceManagerImpl::GetResourcesByType(const ep::ComponentDe
 
   for (auto kvp : resources)
   {
-    const ep::ComponentDesc *pDesc = kvp.value->GetDescriptor();
+    const ep::ComponentDesc *pDesc = kvp.value->getDescriptor();
 
     while (pDesc)
     {
@@ -125,13 +125,13 @@ DataSourceRef ResourceManagerImpl::LoadResourcesFromFile(Variant::VarMap initPar
     EPTHROW_WARN(Result::InvalidArgument, 2, "LoadResourcesFromFile - \"src\" parameter is invalid");
 
   DataSourceRef spDS;
-  epscope(fail) { if (!spDS) LogWarning(2, "LoadResourcesFromFile - \"src\" file not found or not supported: {0}", src.asString()); };
-  spDS = GetKernel()->CreateDataSourceFromExtension(ext, initParams);
+  epscope(fail) { if (!spDS) logWarning(2, "LoadResourcesFromFile - \"src\" file not found or not supported: {0}", src.asString()); };
+  spDS = getKernel()->createDataSourceFromExtension(ext, initParams);
 
-  size_t numResources = spDS->GetNumResources();
+  size_t numResources = spDS->getNumResources();
   Array<ResourceRef> resArray(Reserve, numResources);
   for (size_t i = 0; i < numResources; i++)
-    resArray.pushBack(spDS->GetResource(i));
+    resArray.pushBack(spDS->getResource(i));
 
   AddResourceArray(resArray);
 

@@ -22,22 +22,22 @@ class Shader : public Resource
 {
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, Shader, IShader, Resource, EPKERNEL_PLUGINVERSION, "Shader desc...", 0)
 public:
-  SharedString GetCode() const { return pImpl->GetCode(); }
-  void SetCode(SharedString code) { pImpl->SetCode(code); }
+  SharedString getCode() const { return pImpl->GetCode(); }
+  void setCode(SharedString code) { pImpl->SetCode(code); }
 
-  void SetType(ShaderType type) { pImpl->SetType(type); }
-  ShaderType GetType() const { return pImpl->GetType(); }
+  void setType(ShaderType type) { pImpl->SetType(type); }
+  ShaderType getType() const { return pImpl->GetType(); }
 
-  SharedPtr<RefCounted> GetRenderShader() { return pImpl->GetRenderShader(); }
+  SharedPtr<RefCounted> getRenderShader() { return pImpl->GetRenderShader(); }
 
 protected:
   Shader(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Resource(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
-  Array<const PropertyInfo> GetProperties() const;
+  Array<const PropertyInfo> getProperties() const;
 };
 
 } // namespace ep

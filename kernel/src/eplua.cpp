@@ -28,7 +28,7 @@ const char *const s_luaTypes[LUA_NUMTAGS + 1] = {
 
 static udMutex *s_pLuaCallMutex = nullptr;
 
-const char* FgColor(ConsoleColor fg)
+const char* fgColor(ConsoleColor fg)
 {
   static const char *fg_codes[] = {
     "\x1b[39m", // default
@@ -37,7 +37,7 @@ const char* FgColor(ConsoleColor fg)
   };
   return fg_codes[(int)fg + 1];
 }
-const char* BgColor(ConsoleColor bg)
+const char* bgColor(ConsoleColor bg)
 {
   static const char *bg_codes[] = {
     "\x1b[49m", // default
@@ -70,9 +70,9 @@ static int PrintOutput(lua_State *L)
   LuaState &l = (LuaState&)L;
 
   Kernel *pKernel = l.kernel();
-  auto spLua = pKernel->GetLua();
+  auto spLua = pKernel->getLua();
 
-  spLua->GetOutputBroadcaster()->Write(CreateStringFromArgs(L));
+  spLua->getOutputBroadcaster()->write(CreateStringFromArgs(L));
 
   return 0;
 }
@@ -82,14 +82,14 @@ static int PrintError(lua_State *L)
   LuaState &l = (LuaState&)L;
 
   Kernel *pKernel = l.kernel();
-  auto spLua = pKernel->GetLua();
+  auto spLua = pKernel->getLua();
 
-  pKernel->LogError(CreateStringFromArgs(L));
+  pKernel->logError(CreateStringFromArgs(L));
 
   return 0;
 }
 
-static int SendMessage(lua_State *L)
+static int sendMessage(lua_State *L)
 {
   LuaState &l = (LuaState&)L;
 
@@ -109,7 +109,7 @@ static int SendMessage(lua_State *L)
   if (numArgs >= 4)
     epConstruct(&args) Variant(Variant::luaGet(l, 4));
 
-  l.kernel()->SendMessage(target, sender, message, args);
+  l.kernel()->sendMessage(target, sender, message, args);
 
   // TODO: push result and return 1?
   return 0;  // number of results
@@ -142,7 +142,7 @@ static int CreateComponent(lua_State *L)
   ComponentRef c = nullptr;
   try
   {
-    l.pushComponent(l.kernel()->CreateComponent(type, init));
+    l.pushComponent(l.kernel()->createComponent(type, init));
   }
   catch (...)
   {
@@ -164,7 +164,7 @@ static int FindComponent(lua_State *L)
 
   String component = l.toString(1);
 
-  ComponentRef c = l.kernel()->FindComponent(component);
+  ComponentRef c = l.kernel()->findComponent(component);
 
   l.pushComponent(c);
   return 1;
@@ -188,9 +188,9 @@ LuaState::LuaState(Kernel *pKernel)
 
   lua_register(L, "print", (lua_CFunction)PrintOutput);
   lua_register(L, "printerror", (lua_CFunction)PrintError);
-  lua_register(L, "SendMessage", (lua_CFunction)SendMessage);
-  lua_register(L, "CreateComponent", (lua_CFunction)CreateComponent);
-  lua_register(L, "FindComponent", (lua_CFunction)FindComponent);
+  lua_register(L, "sendMessage", (lua_CFunction)sendMessage);
+  lua_register(L, "createComponent", (lua_CFunction)CreateComponent);
+  lua_register(L, "findComponent", (lua_CFunction)FindComponent);
 }
 
 LuaState::~LuaState()
@@ -425,8 +425,8 @@ void LuaState::pushDescriptor(const ComponentDescInl &desc)
   lua_setfield(L, -2, "name");
   pushString(desc.info.identifier);
   lua_setfield(L, -2, "identifier");
-  pushString(desc.info.displayName);
-  lua_setfield(L, -2, "displayname");
+//  pushString(desc.info.displayName); // TODO: add this back at some point?
+//  lua_setfield(L, -2, "displayname");
   pushString(desc.info.description);
   lua_setfield(L, -2, "description");
 
@@ -443,8 +443,8 @@ void LuaState::pushDescriptor(const ComponentDescInl &desc)
 
     pushString(p.value.id);
     lua_setfield(L, -2, "id");
-    pushString(p.value.displayName);
-    lua_setfield(L, -2, "displayname");
+//    pushString(p.value.displayName); // TODO: add this back at some point?
+//    lua_setfield(L, -2, "displayname");
     pushString(p.value.description);
     lua_setfield(L, -2, "description");
 
@@ -467,7 +467,7 @@ void LuaState::pushComponent(const ComponentRef &c)
   }
 
   epConstruct(lua_newuserdata(L, sizeof(ComponentRef))) ComponentRef(c);
-  pushComponentMetatable(*c->GetDescriptor(), false);
+  pushComponentMetatable(*c->getDescriptor(), false);
   lua_setmetatable(L, -2);
 }
 
@@ -480,7 +480,7 @@ void LuaState::pushComponent(Component *pC)
   }
 
   epConstruct(lua_newuserdata(L, sizeof(Component*))) Component*(pC);
-  pushComponentMetatable(*pC->GetDescriptor(), true);
+  pushComponentMetatable(*pC->getDescriptor(), true);
   lua_setmetatable(L, -2);
 }
 
@@ -514,7 +514,7 @@ int LuaState::componentCleaner(lua_State* L)
 int LuaState::componentToString(lua_State* L)
 {
   ComponentRef *pComponent = (ComponentRef*)lua_touserdata(L, 1);
-  MutableString64 s(Concat, "@", (*pComponent)->GetUid());
+  MutableString64 s(Concat, "@", (*pComponent)->getUid());
   lua_pushlstring(L, s.ptr, s.length);
   return 1;
 }
@@ -674,7 +674,7 @@ int LuaState::help(lua_State* L)
 
   ComponentRef c = l.toComponent(1);
   ComponentImpl *pCImpl = (ComponentImpl*)c->pImpl.ptr();
-  const ComponentDescInl *pDesc = (const ComponentDescInl*)pCImpl->GetDescriptor();
+  const ComponentDescInl *pDesc = (const ComponentDescInl*)pCImpl->getDescriptor();
 
   MutableString256 buffer;
   if (numArgs > 1)
@@ -689,10 +689,10 @@ int LuaState::help(lua_State* L)
   else
   {
     // general help
-    //FgColor(ConsoleColor::Cyan); // TODO: emit ansi color
+    //fgColor(ConsoleColor::Cyan); // TODO: emit ansi color
     l.print(pDesc->info.identifier);
 
-    //FgColor(); // TODO: emit ansi color
+    //fgColor(); // TODO: emit ansi color
     l.print(pDesc->info.description);
 
     MutableString64 buf;
@@ -700,7 +700,7 @@ int LuaState::help(lua_State* L)
     {
       l.print("\nProperties:");
 
-      //FgColor(ConsoleColor::Green); // TODO: emit ansi color
+      //fgColor(ConsoleColor::Green); // TODO: emit ansi color
       for (auto p : pCImpl->instanceProperties)
       {
         buf.sprintf("  %-16s - %s", (const char*)p.value.id.toStringz(), (const char*)p.value.description.toStringz());
@@ -715,10 +715,10 @@ int LuaState::help(lua_State* L)
 
     if (pCImpl->NumMethods() > 0)
     {
-      //FgColor(); // TODO: emit ansi color
+      //fgColor(); // TODO: emit ansi color
       l.print("\nMethods:");
 
-      //FgColor(ConsoleColor::Magenta); // TODO: emit ansi color
+      //fgColor(ConsoleColor::Magenta); // TODO: emit ansi color
       for (auto m : pCImpl->instanceMethods)
       {
 /*
@@ -759,10 +759,10 @@ int LuaState::help(lua_State* L)
 
     if (pCImpl->NumEvents() > 0)
     {
-      //FgColor(); // TODO: emit ansi color
+      //fgColor(); // TODO: emit ansi color
       l.print("\nEvents:");
 
-      //FgColor(ConsoleColor::Yellow); // TODO: emit ansi color
+      //fgColor(ConsoleColor::Yellow); // TODO: emit ansi color
       for (auto e : pCImpl->instanceEvents)
       {
         buf.sprintf("  %-16s - %s", (const char*)e.value.id.toStringz(), (const char*)e.value.description.toStringz());
@@ -775,7 +775,7 @@ int LuaState::help(lua_State* L)
       }
     }
 
-    //FgColor(); // TODO: emit ansi color
+    //fgColor(); // TODO: emit ansi color
   }
 
   return 0;

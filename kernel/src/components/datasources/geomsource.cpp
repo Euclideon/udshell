@@ -48,17 +48,17 @@ const Array<const String> GeomSource::extensions = {
   ".csm", // CharacterStudio Motion (*limited)
 };
 
-static inline String FromAIString(const aiString &name)
+static inline String fromAIString(const aiString &name)
 {
   return String(name.C_Str(), name.length);
 }
 
-static inline Float4 CopyAIColor(const aiColor4D &m)
+static inline Float4 copyAIColor(const aiColor4D &m)
 {
   return Float4::create(m.r, m.g, m.b, m.a);
 }
 
-static inline Double4x4 CopyAIMatrix(const aiMatrix4x4 &m)
+static inline Double4x4 copyAIMatrix(const aiMatrix4x4 &m)
 {
   // TODO: OH NO! swizzle into UD space!!
   return Double4x4::create(m.a1, m.b1, m.c1, m.d1,
@@ -67,17 +67,17 @@ static inline Double4x4 CopyAIMatrix(const aiMatrix4x4 &m)
                            m.a4, m.b4, m.c4, m.d4);
 }
 
-void GeomSource::Create(StreamRef spSource)
+void GeomSource::create(StreamRef spSource)
 {
   const char *pExtension = nullptr; // TODO: get the file extension to help the assimp!
 
   // allocate for file
-  int64_t len = spSource->Length();
+  int64_t len = spSource->length();
   void *pBuffer = epAlloc((size_t)len);
 
   // read file from source
   Slice<void> buf(pBuffer, (size_t)len);
-  buf = spSource->Read(buf);
+  buf = spSource->read(buf);
   EPASSERT((int64_t)buf.length == len, "!");
 
   Assimp::Importer importer;
@@ -107,32 +107,32 @@ void GeomSource::Create(StreamRef spSource)
     return; // TODO: some sort of error?
 
   // parse materials
-  ParseMaterials(pScene);
+  parseMaterials(pScene);
 
   // parse meshes
-  ParseMeshes(pScene);
+  parseMeshes(pScene);
 
   // parse xrefs
-  ParseXRefs(pScene);
+  parseXRefs(pScene);
 
   // parse the scene
   if (pScene->mRootNode)
   {
     aiMatrix4x4 world;
     size_t numMeshes = 0; // TODO this is not being used
-    NodeRef spRoot = ParseNode(pScene, pScene->mRootNode, &world, numMeshes);
+    NodeRef spRoot = parseNode(pScene, pScene->mRootNode, &world, numMeshes);
 
     // TODO: Massive hack !!!! Swizzle the matrix into ud space
-    const Double4x4 &mat = spRoot->GetMatrix();
-    spRoot->SetMatrix(Double4x4::create(mat.axis.x, mat.axis.z, -mat.axis.y, mat.axis.t));
+    const Double4x4 &mat = spRoot->getMatrix();
+    spRoot->setMatrix(Double4x4::create(mat.axis.x, mat.axis.z, -mat.axis.y, mat.axis.t));
 
-    SetResource("scene0", spRoot);
+    setResource("scene0", spRoot);
   }
 
   epFree(pBuffer);
 }
 
-bool GeomSource::Write(const aiScene *pScene)
+bool GeomSource::write(const aiScene *pScene)
 {
   Assimp::Exporter exporter;
   const aiExportDataBlob *pBlob;
@@ -140,18 +140,18 @@ bool GeomSource::Write(const aiScene *pScene)
   pBlob = exporter.ExportToBlob(pScene, "collada", aiProcess_ConvertToLeftHanded);
   if(!pBlob)
   {
-    LogDebug(1, "Unable to export Assimp scene to collada");
+    logDebug(1, "Unable to export Assimp scene to collada");
     return false;
   }
 
   try
   {
-    StreamRef spFile = GetKernel().CreateComponent<File>({ { "path", GetURL() }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
-    spFile->Write(Slice<void>(pBlob->data, pBlob->size));
+    StreamRef spFile = getKernel().createComponent<File>({ { "path", getURL() }, { "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });
+    spFile->write(Slice<void>(pBlob->data, pBlob->size));
   }
   catch (EPException &)
   {
-    LogWarning(1, "Failed to open collada file for writing: \"{0}\"", GetURL());
+    logWarning(1, "Failed to open collada file for writing: \"{0}\"", getURL());
     exporter.FreeBlob();
     return false;
   }
@@ -159,7 +159,7 @@ bool GeomSource::Write(const aiScene *pScene)
   return true;
 }
 
-void GeomSource::ParseMaterials(const aiScene *pScene)
+void GeomSource::parseMaterials(const aiScene *pScene)
 {
   // copy all the materials
   for (uint32_t i = 0; i<pScene->mNumMaterials; ++i)
@@ -168,40 +168,40 @@ void GeomSource::ParseMaterials(const aiScene *pScene)
 
     aiString aiName;
     aiMat.Get(AI_MATKEY_NAME, aiName);
-    LogDebug(4, "Material {0}: \"{1}\"", i, FromAIString(aiName));
+    logDebug(4, "Material {0}: \"{1}\"", i, fromAIString(aiName));
 
-    String _name = FromAIString(aiName);
-    MaterialRef spMat = GetKernel().CreateComponent<Material>({ { "name", _name } });
+    String _name = fromAIString(aiName);
+    MaterialRef spMat = getKernel().createComponent<Material>({ { "name", _name } });
 
     aiColor4D color(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, color);
-    spMat->SetMaterialProperty("diffuse", CopyAIColor(color));
+    spMat->setMaterialProperty("diffuse", copyAIColor(color));
 
     color = aiColor4D(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_AMBIENT, color);
-    spMat->SetMaterialProperty("ambient", CopyAIColor(color));
+    spMat->setMaterialProperty("ambient", copyAIColor(color));
 
     color = aiColor4D(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_EMISSIVE, color);
-    spMat->SetMaterialProperty("emissive", CopyAIColor(color));
+    spMat->setMaterialProperty("emissive", copyAIColor(color));
 
     color = aiColor4D(1.f, 1.f, 1.f, 1.f);
     aiMat.Get(AI_MATKEY_COLOR_SPECULAR, color);
-    spMat->SetMaterialProperty("specular", CopyAIColor(color));
+    spMat->setMaterialProperty("specular", copyAIColor(color));
 
     // TODO: foreach texture type...
     aiString texture;
     aiMat.Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), texture);
     if (texture.length > 0)
     {
-      LogDebug(4, "  Texture: {0}", FromAIString(texture));
+      logDebug(4, "  Texture: {0}", fromAIString(texture));
 
       // TODO: try and load texture...
       //...
     }
 
     // add resource
-    SetResource(SharedString::concat("material", i), spMat);
+    setResource(SharedString::concat("material", i), spMat);
   }
 }
 
@@ -218,69 +218,69 @@ static const ElementInfo binTanInfo[] = { { sizeof(Float3), { 3 }, ElementInfoFl
 template<> // TODO: Make this not in the gobal namespace!!!!!!!
 ep::SharedString stringof<ep::BinTan>()
 {
-  return ep::ElementInfo::BuildTypeString(ep::binTanInfo);
+  return ep::ElementInfo::buildTypeString(ep::binTanInfo);
 }
 
 namespace ep {
 
-void GeomSource::ParseMeshes(const aiScene *pScene)
+void GeomSource::parseMeshes(const aiScene *pScene)
 {
   // copy all the meshes
   for (uint32_t i = 0; i<pScene->mNumMeshes; ++i)
   {
     aiMesh &mesh = *pScene->mMeshes[i];
 
-    LogDebug(4, "Mesh {0}: {1}", i, FromAIString(mesh.mName));
+    logDebug(4, "Mesh {0}: {1}", i, fromAIString(mesh.mName));
 
     // create a model
-    ModelRef spMesh = GetKernel().CreateComponent<Model>({ { "name", FromAIString(mesh.mName) } });
+    ModelRef spMesh = getKernel().createComponent<Model>({ { "name", fromAIString(mesh.mName) } });
 
     // get material
-    ResourceRef spMat = GetResource(SharedString::concat("material", mesh.mMaterialIndex));
+    ResourceRef spMat = getResource(SharedString::concat("material", mesh.mMaterialIndex));
     if (spMat)
     {
-      spMesh->SetMaterial(component_cast<Material>(spMat));
-      LogDebug(4, "  Material: {0} ({1})", mesh.mMaterialIndex, spMat->GetName());
+      spMesh->setMaterial(component_cast<Material>(spMat));
+      logDebug(4, "  Material: {0} ({1})", mesh.mMaterialIndex, spMat->getName());
     }
     else
     {
       // unknown material!
-      LogWarning(2, "  Material: Unknown material!");
+      logWarning(2, "  Material: Unknown material!");
     }
 
     // positions
     Slice<Float3> verts((Float3*)mesh.mVertices, mesh.mNumVertices);
-    ArrayBufferRef spVerts = GetKernel().CreateComponent<ArrayBuffer>();
-    spVerts->AllocateFromData<Float3>(verts);
-    spVerts->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_position");
+    ArrayBufferRef spVerts = getKernel().createComponent<ArrayBuffer>();
+    spVerts->allocateFromData<Float3>(verts);
+    spVerts->getMetadata()->get("attributeInfo")[0].insertItem("name", "a_position");
 
-    SetResource(SharedString::concat("positions", i), spVerts);
+    setResource(SharedString::concat("positions", i), spVerts);
 
-    spMesh->AddVertexArray(spVerts);
+    spMesh->addVertexArray(spVerts);
 
     // normals
     if (mesh.HasNormals())
     {
 
       Slice<Float3> normals((Float3*)mesh.mNormals, mesh.mNumVertices);
-      ArrayBufferRef spNormals = GetKernel().CreateComponent<ArrayBuffer>();
-      spNormals->AllocateFromData<Float3>(normals);
-      spNormals->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_normal");
+      ArrayBufferRef spNormals = getKernel().createComponent<ArrayBuffer>();
+      spNormals->allocateFromData<Float3>(normals);
+      spNormals->getMetadata()->get("attributeInfo")[0].insertItem("name", "a_normal");
 
-      SetResource(SharedString::concat("normals", i), spNormals);
+      setResource(SharedString::concat("normals", i), spNormals);
 
-      spMesh->AddVertexArray(spNormals);
+      spMesh->addVertexArray(spNormals);
     }
 
     // binormals & tangents
     if (mesh.HasTangentsAndBitangents())
     {
-      ArrayBufferRef spBinTan = GetKernel().CreateComponent<ArrayBuffer>();
-      spBinTan->Allocate<BinTan>(mesh.mNumVertices);
-      spBinTan->GetMetadata()->Get("attributeinfo")[0].insertItem("name", "a_binormal");
-      spBinTan->GetMetadata()->Get("attributeinfo")[1].insertItem("name", "a_tangent");
+      ArrayBufferRef spBinTan = getKernel().createComponent<ArrayBuffer>();
+      spBinTan->allocate<BinTan>(mesh.mNumVertices);
+      spBinTan->getMetadata()->get("attributeInfo")[0].insertItem("name", "a_binormal");
+      spBinTan->getMetadata()->get("attributeInfo")[1].insertItem("name", "a_tangent");
 
-      Slice<BinTan> bt = spBinTan->Map<BinTan>();
+      Slice<BinTan> bt = spBinTan->map<BinTan>();
       for (uint32_t j = 0; j<mesh.mNumVertices; ++j)
       {
         bt[j].binormal.x = mesh.mBitangents[j].x;
@@ -290,11 +290,11 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
         bt[j].tangent.y = mesh.mTangents[j].y;
         bt[j].tangent.z = mesh.mTangents[j].z;
       }
-      spBinTan->Unmap();
+      spBinTan->unmap();
 
-      SetResource(SharedString::concat("binormalstangents", i), spBinTan);
+      setResource(SharedString::concat("binormalstangents", i), spBinTan);
 
-      spMesh->AddVertexArray(spBinTan);
+      spMesh->addVertexArray(spBinTan);
     }
 
     // UVs
@@ -302,13 +302,13 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     {
       Slice<Float3> uvs((Float3*)mesh.mTextureCoords[t], mesh.mNumVertices);
 
-      ArrayBufferRef spUVs = GetKernel().CreateComponent<ArrayBuffer>();
-      spUVs->AllocateFromData<Float3>(uvs);
-      spUVs->GetMetadata()->Get("attributeinfo")[t].insertItem("name", SharedString::concat("a_uv", t));
+      ArrayBufferRef spUVs = getKernel().createComponent<ArrayBuffer>();
+      spUVs->allocateFromData<Float3>(uvs);
+      spUVs->getMetadata()->get("attributeInfo")[t].insertItem("name", SharedString::concat("a_uv", t));
 
-      SetResource(SharedString::concat("uvs", i, "_", t), spUVs);
+      setResource(SharedString::concat("uvs", i, "_", t), spUVs);
 
-      spMesh->AddVertexArray(spUVs);
+      spMesh->addVertexArray(spUVs);
     }
 
     // Colors
@@ -316,20 +316,20 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
     {
       Slice<Float4> colors((Float4*)mesh.mColors[c], mesh.mNumVertices);
 
-      ArrayBufferRef spColors = GetKernel().CreateComponent<ArrayBuffer>();
-      spColors->AllocateFromData<Float4>(colors);
-      spColors->GetMetadata()->Get("attributeinfo")[c].insertItem("name", SharedString::concat("a_color", c));
+      ArrayBufferRef spColors = getKernel().createComponent<ArrayBuffer>();
+      spColors->allocateFromData<Float4>(colors);
+      spColors->getMetadata()->get("attributeInfo")[c].insertItem("name", SharedString::concat("a_color", c));
 
-      SetResource(SharedString::concat("colors", i, "_", c), spColors);
+      setResource(SharedString::concat("colors", i, "_", c), spColors);
 
-      spMesh->AddVertexArray(spColors);
+      spMesh->addVertexArray(spColors);
     }
 
     // indices (faces)
-    ArrayBufferRef spIndices = GetKernel().CreateComponent<ArrayBuffer>();
-    spIndices->Allocate<uint32_t>(mesh.mNumFaces * 3);
+    ArrayBufferRef spIndices = getKernel().createComponent<ArrayBuffer>();
+    spIndices->allocate<uint32_t>(mesh.mNumFaces * 3);
 
-    Slice<uint32_t> indices = spIndices->Map<uint32_t>();
+    Slice<uint32_t> indices = spIndices->map<uint32_t>();
     uint32_t *pIndices = indices.ptr;
     for (uint32_t j = 0; j<mesh.mNumFaces; ++j)
     {
@@ -340,21 +340,21 @@ void GeomSource::ParseMeshes(const aiScene *pScene)
       *pIndices++ = f.mIndices[2];
     }
     EPASSERT(pIndices - indices.ptr == (ptrdiff_t)indices.length, "Wrong number of indices?!");
-    spIndices->Unmap();
+    spIndices->unmap();
 
-    SetResource(SharedString::concat("indices", i), spIndices);
+    setResource(SharedString::concat("indices", i), spIndices);
 
-    spMesh->SetIndexArray(spIndices);
+    spMesh->setIndexArray(spIndices);
 
     // add mesh resource
-    SetResource(SharedString::concat("mesh", i), spMesh);
+    setResource(SharedString::concat("mesh", i), spMesh);
   }
 }
 
-GeomSource::XRefType GeomSource::GetXRefType(String url)
+GeomSource::XRefType GeomSource::getXRefType(String url)
 {
   String ext = url.getRightAtLast(".", true);
-  Slice<const String> udDSExts = UDSource::StaticGetFileExtensions();
+  Slice<const String> udDSExts = UDSource::staticGetFileExtensions();
   for (const String &udExt : udDSExts)
   {
     if (ext.eqIC(udExt))
@@ -364,79 +364,79 @@ GeomSource::XRefType GeomSource::GetXRefType(String url)
   return XRefType::Unknown;
 }
 
-void GeomSource::ParseXRefs(const aiScene *pScene)
+void GeomSource::parseXRefs(const aiScene *pScene)
 {
   for (uint32_t i = 0; i<pScene->mNumXRefs; ++i)
   {
     aiXRef &xref = *pScene->mXRefs[i];
-    String refName = String(FromAIString(xref.mName));
-    String url = FromAIString(xref.mUrl);
+    String refName = String(fromAIString(xref.mName));
+    String url = fromAIString(xref.mUrl);
 
-    LogDebug(4, "XRef {0}: {1} - \"{2}\"", i, refName, url);
+    logDebug(4, "XRef {0}: {1} - \"{2}\"", i, refName, url);
 
-    XRefType type = GetXRefType(url);
+    XRefType type = getXRefType(url);
 
     if (type == XRefType::UDModel)
     {
       // Load the UDDataSource
       UDSourceRef spModelDS;
-      epscope(fail) { if (!spModelDS) pKernel->LogError("GeomSource -- Failed to load UDModel \"{0}\"", url); };
-      spModelDS = GetKernel().CreateComponent<UDSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
+      epscope(fail) { if (!spModelDS) pKernel->logError("GeomSource -- Failed to load UDModel \"{0}\"", url); };
+      spModelDS = getKernel().createComponent<UDSource>({ {"name", refName }, {"src", url}, {"useStreamer", true} });
 
       UDModelRef spUDModel;
-      if (spModelDS->GetNumResources() > 0)
-        spUDModel = spModelDS->GetResourceAs<UDModel>(0);
+      if (spModelDS->getNumResources() > 0)
+        spUDModel = spModelDS->getResourceAs<UDModel>(0);
 
       // add UDModel resource
-      SetResource(SharedString::concat("udmodel", i), spUDModel);
+      setResource(SharedString::concat("udmodel", i), spUDModel);
     }
     else
-      LogWarning(2, "GeomSource -- Unsupported XRef type \"{0}\"", url);
+      logWarning(2, "GeomSource -- Unsupported XRef type \"{0}\"", url);
   }
 }
 
-NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth)
+NodeRef GeomSource::parseNode(const aiScene *pScene, aiNode *pNode, const aiMatrix4x4 *pParent, size_t &numMeshes, int depth)
 {
   aiNode &node = *pNode;
   const aiMatrix4x4 &parent = *pParent;
 
-  LogDebug(4, "{1,*0}Node: {2}", depth, "", FromAIString(node.mName));
+  logDebug(4, "{1,*0}Node: {2}", depth, "", fromAIString(node.mName));
 
   aiMatrix4x4 &local = node.mTransformation;
   aiMatrix4x4 world = parent * local;
 
-  LogDebug(4, "{1,*0}  Local Position: %.2f,%.2f,%.2f", depth, "", local.a4, local.b4, local.c4);
-  LogDebug(4, "{1,*0}  Local Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", local.a1, local.b1, local.c1, local.a2, local.b2, local.c2, local.a3, local.b3, local.c3);
-  LogDebug(4, "{1,*0}  World Position: %.2f,%.2f,%.2f", depth, "", world.a4, world.b4, world.c4);
-  LogDebug(4, "{1,*0}  World Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", world.a1, world.b1, world.c1, world.a2, world.b2, world.c2, world.a3, world.b3, world.c3);
+  logDebug(4, "{1,*0}  Local Position: %.2f,%.2f,%.2f", depth, "", local.a4, local.b4, local.c4);
+  logDebug(4, "{1,*0}  Local Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", local.a1, local.b1, local.c1, local.a2, local.b2, local.c2, local.a3, local.b3, local.c3);
+  logDebug(4, "{1,*0}  World Position: %.2f,%.2f,%.2f", depth, "", world.a4, world.b4, world.c4);
+  logDebug(4, "{1,*0}  World Orientation: [%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f],[%.1f,%.1f,%.1f]", depth, "", world.a1, world.b1, world.c1, world.a2, world.b2, world.c2, world.a3, world.b3, world.c3);
 
   // create bone from node
-  NodeRef spNode = GetKernel().CreateComponent<Node>({{ "name", FromAIString(node.mName) }});
+  NodeRef spNode = getKernel().createComponent<Node>({{ "name", fromAIString(node.mName) }});
 
 //  if (node.mParent)
-//    spNode->GetMetadata()->Insert("parent", FromAIString(node.mParent->mName));
+//    spNode->GetMetadata()->Insert("parent", fromAIString(node.mParent->mName));
 
-  spNode->SetMatrix(CopyAIMatrix(local));
+  spNode->setMatrix(copyAIMatrix(local));
 
   // parse node mesh
   for (uint32_t i = 0; i<node.mNumMeshes; ++i)
   {
-    ResourceRef spMesh = GetResource(SharedString::concat("mesh", node.mMeshes[i]));
+    ResourceRef spMesh = getResource(SharedString::concat("mesh", node.mMeshes[i]));
     if (spMesh)
     {
       // create geom node
-      GeomNodeRef spGeomNode = GetKernel().CreateComponent<GeomNode>();
-      spGeomNode->SetModel(shared_pointer_cast<Model>(spMesh));
+      GeomNodeRef spGeomNode = getKernel().createComponent<GeomNode>();
+      spGeomNode->setModel(shared_pointer_cast<Model>(spMesh));
 
       // add geom node to world node (we could collapse this if there is only one mesh...)
-      spNode->AddChild(spGeomNode);
+      spNode->addChild(spGeomNode);
 
-      LogDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], spMesh->GetName());
+      logDebug(4, "{1,*0}  Mesh {2}: {3} ({4})", depth, "", i, node.mMeshes[i], spMesh->getName());
     }
     else
     {
       // unknown mesh!
-      LogWarning(2, "{1,*0}  Mesh {2}: {3} Unknown mesh!!", depth, "", i, node.mMeshes[i]);
+      logWarning(2, "{1,*0}  Mesh {2}: {3} Unknown mesh!!", depth, "", i, node.mMeshes[i]);
     }
   }
 
@@ -444,45 +444,45 @@ NodeRef GeomSource::ParseNode(const aiScene *pScene, aiNode *pNode, const aiMatr
   for (uint32_t i = 0; i<node.mNumXRefs; ++i)
   {
     aiXRef &xref = *pScene->mXRefs[node.mXRefs[i]];
-    String url = FromAIString(xref.mUrl);
+    String url = fromAIString(xref.mUrl);
 
-    XRefType type = GetXRefType(url);
+    XRefType type = getXRefType(url);
 
     if (type == XRefType::UDModel)
     {
-      ResourceRef spUDModel = GetResource(SharedString::concat("udmodel", node.mXRefs[i]));
+      ResourceRef spUDModel = getResource(SharedString::concat("udmodel", node.mXRefs[i]));
       if (spUDModel)
       {
         // create UDNode
-        UDNodeRef spUDNode = GetKernel().CreateComponent<UDNode>();
-        spUDNode->SetUDModel(component_cast<UDModel>(spUDModel));
+        UDNodeRef spUDNode = getKernel().createComponent<UDNode>();
+        spUDNode->setUDModel(component_cast<UDModel>(spUDModel));
 
         // add UDNode to world node (we could collapse this if there is only one model...)
-        spNode->AddChild(spUDNode);
+        spNode->addChild(spUDNode);
 
-        LogDebug(4, "{1,*0}  UDModel {2}: {3} ({4})", depth, "", i, node.mXRefs[i], spUDModel->GetName());
+        logDebug(4, "{1,*0}  UDModel {2}: {3} ({4})", depth, "", i, node.mXRefs[i], spUDModel->getName());
       }
       else
-        LogWarning(2, "GeomSource -- Node references UDModel which does not exist");
+        logWarning(2, "GeomSource -- Node references UDModel which does not exist");
     }
     else
-      LogWarning(2, "GeomSource -- Unsupported XRef type \"{0}\" in node", url);
+      logWarning(2, "GeomSource -- Unsupported XRef type \"{0}\" in node", url);
   }
 
   // recurse children
   for (uint32_t i = 0; i<node.mNumChildren; ++i)
   {
-    NodeRef spChild = ParseNode(pScene, node.mChildren[i], &world, numMeshes, depth + 2);
+    NodeRef spChild = parseNode(pScene, node.mChildren[i], &world, numMeshes, depth + 2);
     if (spChild)
-      spNode->AddChild(spChild);
+      spNode->addChild(spChild);
   }
 
   return spNode;
 }
 
-void GeomSource::StaticInit(ep::Kernel *pKernel)
+void GeomSource::staticInit(ep::Kernel *pKernel)
 {
-  pKernel->RegisterExtensions(pKernel->GetComponentDesc(ComponentID()), extensions);
+  pKernel->registerExtensions(pKernel->getComponentDesc(componentID()), extensions);
 }
 
 } // namespace ep

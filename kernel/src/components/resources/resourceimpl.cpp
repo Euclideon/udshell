@@ -4,30 +4,30 @@
 
 namespace ep {
 
-Array<const PropertyInfo> Resource::GetProperties() const
+Array<const PropertyInfo> Resource::getProperties() const
 {
   return{
-    EP_MAKE_PROPERTY_RO(Metadata, "Number of records in the metadata", nullptr, 0),
+    EP_MAKE_PROPERTY_RO("metadata", getMetadata, "Number of records in the metadata", nullptr, 0),
   };
 }
-Array<const MethodInfo> Resource::GetMethods() const
+Array<const MethodInfo> Resource::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(Save, "Save the state of the Resource"),
-    EP_MAKE_METHOD(Clone, "Make a shallow clone of this object"),
+    EP_MAKE_METHOD(save, "Save the state of the Resource"),
+    EP_MAKE_METHOD(clone, "Make a shallow clone of this object"),
   };
 }
-Array<const EventInfo> Resource::GetEvents() const
+Array<const EventInfo> Resource::getEvents() const
 {
   return{
-    EP_MAKE_EVENT(Changed, "The Resource has been modified"),
+    EP_MAKE_EVENT(changed, "The Resource has been modified"),
   };
 }
 
 MetadataRef ResourceImpl::GetMetadata() const
 {
   if (!metadata)
-    (MetadataRef&)metadata = GetKernel()->CreateComponent<Metadata>();
+    (MetadataRef&)metadata = getKernel()->createComponent<Metadata>();
   return metadata;
 }
 

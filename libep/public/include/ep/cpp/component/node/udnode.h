@@ -22,22 +22,22 @@ class UDNode : public Node
   EP_DECLARE_COMPONENT_WITH_IMPL(ep, UDNode, IUDNode, Node, EPKERNEL_PLUGINVERSION, "UD model node", 0)
 
 public:
-  UDModelRef GetUDModel() const { return pImpl->GetUDModel(); }
-  void SetUDModel(UDModelRef spModel) { pImpl->SetUDModel(spModel); }
+  UDModelRef getUDModel() const { return pImpl->GetUDModel(); }
+  void setUDModel(UDModelRef spModel) { pImpl->SetUDModel(spModel); }
 
-  Variant Save() const override { return pImpl->Save(); }
+  Variant save() const override { return pImpl->Save(); }
 
 protected:
   UDNode(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
     : Node(pType, pKernel, uid, initParams)
   {
-    pImpl = CreateImpl(initParams);
+    pImpl = createImpl(initParams);
   }
 
-  void Render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
+  void render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
 
 private:
-  Array<const PropertyInfo> GetProperties() const;
+  Array<const PropertyInfo> getProperties() const;
 };
 
 } // namespace ep

@@ -527,7 +527,7 @@ ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, ep::BaseString<
     for (size_t i = 0; i<s.length; )
     {
       size_t l = 0;
-      secLen += ep::UTF8SequenceLength(s.ptr + i, &l);
+      secLen += ep::utf8SequenceLength(s.ptr + i, &l);
       i += l;
     }
   }
@@ -562,7 +562,7 @@ ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, ep::BaseString<
     while (s)
     {
       char32_t c = s.popFrontChar();
-      offset += ep::UTFEncode(c, pBuffer + offset);
+      offset += ep::utfEncode(c, pBuffer + offset);
     }
   }
 

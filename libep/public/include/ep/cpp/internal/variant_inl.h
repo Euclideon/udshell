@@ -37,9 +37,9 @@ struct VarCallHack
     } catch (EPException &e) {
       return Variant(e.claim());
     } catch (std::exception &e) {
-      return Variant(AllocError(Result::CppException, e.what()));
+      return Variant(allocError(Result::CppException, e.what()));
     } catch (...) {
-      return Variant(AllocError(Result::CppException, "C++ exception"));
+      return Variant(allocError(Result::CppException, "C++ exception"));
     }
   }
 };
@@ -55,9 +55,9 @@ struct VarCallHack<void, Args...>
     } catch (EPException &e) {
       return Variant(e.claim());
     } catch (std::exception &e) {
-      return Variant(AllocError(Result::CppException, e.what()));
+      return Variant(allocError(Result::CppException, e.what()));
     } catch (...) {
-      return Variant(AllocError(Result::CppException, "C++ exception"));
+      return Variant(allocError(Result::CppException, "C++ exception"));
     }
   }
 };
@@ -73,9 +73,9 @@ struct MethodCallHack
     } catch (EPException &e) {
       return Variant(e.claim());
     } catch (std::exception &e) {
-      return Variant(AllocError(Result::CppException, e.what()));
+      return Variant(allocError(Result::CppException, e.what()));
     } catch (...) {
-      return Variant(AllocError(Result::CppException, "C++ exception"));
+      return Variant(allocError(Result::CppException, "C++ exception"));
     }
   }
 };
@@ -91,9 +91,9 @@ struct MethodCallHack<void, Args...>
     } catch (EPException &e) {
       return Variant(e.claim());
     } catch (std::exception &e) {
-      return Variant(AllocError(Result::CppException, e.what()));
+      return Variant(allocError(Result::CppException, e.what()));
     } catch (...) {
-      return Variant(AllocError(Result::CppException, "C++ exception"));
+      return Variant(allocError(Result::CppException, "C++ exception"));
     }
   }
 };
@@ -124,9 +124,9 @@ epforceinline Variant VarCall(FastDelegate<R(Args...)> f, Slice<const Variant> a
   return internal::MethodCallHack<R, Args...>::call(f, args, typename internal::GenSequence<sizeof...(Args)>::type());
 }
 
-inline ep::SubscriptionRef VarEvent::AddSubscription(const ep::VarDelegate &del)
+inline ep::SubscriptionRef VarEvent::addSubscription(const ep::VarDelegate &del)
 {
-  return BaseEvent::AddSubscription(del.GetMemento());
+  return BaseEvent::addSubscription(del.getMemento());
 }
 
 
@@ -571,7 +571,7 @@ protected:
   Variant to(Slice<const Variant> args) const
   {
     fastdelegate::FastDelegate<R(Args...)> d;
-    d.SetMemento(target->GetFastDelegate());
+    d.SetMemento(target->getFastDelegate());
     return ep::VarCall(d, args);
   }
 
@@ -590,7 +590,7 @@ protected:
 
   // *to* Variant::Delegate constructor
   VarDelegateMemento(const Delegate<R(Args...)> &d)
-    : target(d.GetMemento())
+    : target(d.getMemento())
   {
     VarDelegate::FastDelegateType shim(this, &VarDelegateMemento::to);
     m = shim.GetMemento();
@@ -598,7 +598,7 @@ protected:
 
   // *from* Variant::Delegate constructor
   VarDelegateMemento(const VarDelegate &d)
-    : target(d.GetMemento())
+    : target(d.getMemento())
   {
     FastDelegate<R(Args...)> shim(this, &VarDelegateMemento::from);
     m = shim.GetMemento();
@@ -613,30 +613,30 @@ private:
 template <typename SrcRange, typename To>
 class VarRangeAdapter
 {
-  using From = decltype(((SrcRange*)nullptr)->GetFront());
+  using From = decltype(((SrcRange*)nullptr)->getFront());
 
   SrcRange spRange;
 
 public:
   VarRangeAdapter(SrcRange r) : spRange(r) {}
 
-  RangeFeatures Features() const { return spRange->Features(); }
+  RangeFeatures features() const { return spRange->features(); }
 
-  bool Empty() const { return spRange->Empty(); }
-  size_t Length() const { return spRange->Length(); }
+  bool empty() const { return spRange->empty(); }
+  size_t length() const { return spRange->length(); }
 
   // TODO: this is potentially inefficient! check that these redundant constructions are optimised away
-  To GetFront() const { return Variant(spRange->GetFront()).as<To>(); }
-  void SetFront(const To &value) const { spRange->SetFront(Variant(value).as<From>()); }
-  To PopFront() { return Variant(spRange->PopFront()).as<To>(); }
-  void PopFront(size_t n) { spRange->PopFront(n); }
+  To getFront() const { return Variant(spRange->getFront()).as<To>(); }
+  void setFront(const To &value) const { spRange->setFront(Variant(value).as<From>()); }
+  To popFront() { return Variant(spRange->popFront()).as<To>(); }
+  void popFront(size_t n) { spRange->popFront(n); }
 
-  To GetBack() const { return Variant(spRange->GetBack()).as<To>(); }
-  void SetBack(const To &value) const { spRange->SetBack(Variant(value).as<From>()); }
-  To PopBack() { return Variant(spRange->PopBack()).as<To>(); }
-  void PopBack(size_t n) { spRange->PopBack(n); }
+  To getBack() const { return Variant(spRange->getBack()).as<To>(); }
+  void setBack(const To &value) const { spRange->setBack(Variant(value).as<From>()); }
+  To popBack() { return Variant(spRange->popBack()).as<To>(); }
+  void popBack(size_t n) { spRange->popBack(n); }
 
-  To At(size_t index) const { return Variant(spRange->At(index)).as<To>(); }
+  To at(size_t index) const { return Variant(spRange->at(index)).as<To>(); }
 };
 
 } // namespace internal
@@ -684,7 +684,7 @@ template<typename T,
 >::type* = nullptr>
 inline Variant epToVariant(T e)
 {
-  return Variant(e.v, e.Desc(), std::is_base_of<Bitfield, T>::value);
+  return Variant(e.v, e.desc(), std::is_base_of<Bitfield, T>::value);
 }
 
 // for arrays
@@ -792,7 +792,7 @@ inline void epFromVariant(const Variant &v, T *pE)
   {
     size_t val;
     const EnumDesc *pDesc = v.asEnum(&val);
-    EPASSERT_THROW(pDesc->name.eq(T::Name()), Result::InvalidType, "Incorrect type: enum type {0} can not convert to {1}", pDesc->name, T::Name());
+    EPASSERT_THROW(pDesc->name.eq(T::name()), Result::InvalidType, "Incorrect type: enum type {0} can not convert to {1}", pDesc->name, T::name());
     *pE = T((typename T::Type)val);
   }
   else if (v.is(Variant::Type::Int))
@@ -1051,17 +1051,17 @@ struct AVLTreeAllocator<VariantAVLNode>
   AVLTreeAllocator() : nodes(1024) {} // TODO: Revisit this to see if 1024 is appropriate.
   using Node = VariantAVLNode;
 
-  Node *Alloc()
+  Node *_alloc()
   {
-    return nodes.Alloc();
+    return nodes._alloc();
   }
 
-  void Free(Node *pMem)
+  void _free(Node *pMem)
   {
-    nodes.Free(pMem);
+    nodes._free(pMem);
   }
 
-  static AVLTreeAllocator &Get() { return internal::GetAVLTreeAllocator(); }
+  static AVLTreeAllocator &get() { return internal::GetAVLTreeAllocator(); }
 
   FreeList<Node> nodes;
 };

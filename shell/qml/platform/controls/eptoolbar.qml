@@ -22,13 +22,13 @@ Rectangle {
 
   onToolbarcompChanged: {
     updatetoolbar();
-    toolbarcomp.subscribe("changed", updatetoolbar);
+    toolbarcomp.changed.connect(updatetoolbar);
   }
 
   function updatetoolbar() {
     clearAll();
 
-    var toolBarData = toolbarcomp.get("menudata");
+    var toolBarData = toolbarcomp.menuData;
 
     if(toolBarData)
     {

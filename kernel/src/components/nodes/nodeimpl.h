@@ -37,7 +37,7 @@ public:
 
   void CalculateWorldMatrix(Double4x4 *pMatrix) const override final;
 
-  Variant Save() const override final { return pInstance->Super::Save(); }
+  Variant Save() const override final { return pInstance->Super::save(); }
 
 protected:
   friend class Scene;
@@ -48,7 +48,7 @@ protected:
   void Render(RenderScene &spScene, const Double4x4 &mat) override final { }
   void DoRender(RenderScene & spScene, const Double4x4 & mat) override final;
 
-  void OnChildChanged() const { pInstance->Changed.Signal(); }
+  void OnChildChanged() const { pInstance->changed.signal(); }
 
   Node *pParent = nullptr;
   Array<NodeRef, 3> children;
