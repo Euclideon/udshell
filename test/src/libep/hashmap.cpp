@@ -1,4 +1,5 @@
 #include "eptest.h"
+#include "traits.h"
 #include "ep/cpp/hashmap.h"
 
 using ep::Hash;
@@ -70,6 +71,12 @@ int FindInstances(const ep::KVP<K, V> *keyTable, size_t tableSize, const ep::Has
 }
 
 } // namespace hashmap_test
+
+// Traits
+
+DEFINE_TEST_CONTAINER_KEYED(ep::HashMap, ep::SharedString)
+using MyTypes = typename ::testing::Types<testTraits::Types>;
+INSTANTIATE_TYPED_TEST_CASE_P(HashMap, Traits_HasSizeTest, MyTypes);
 
 // ------------------------------- Hash Tests ----------------------------------------------
 
