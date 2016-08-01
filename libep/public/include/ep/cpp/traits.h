@@ -32,18 +32,13 @@ struct Or { static constexpr bool value = A || Or<More...>::value; using type = 
 template <bool A>
 struct Or<A> { static constexpr bool value = A; using type = typename BoolType<value>::type; };
 
-template <bool A, bool... More>
-struct Xor { static constexpr bool value = A ^^ Xor<More...>::value; using type = typename BoolType<value>::type; };
-template <bool A>
-struct Xor<A> { static constexpr bool value = A; using type = typename BoolType<value>::type; };
-
 namespace internal {
 
   template <typename T, typename U>
   struct decay_equiv : std::is_same<typename std::decay<T>::type, U>::type {};
 
   template <typename T>
-  class IsContainerImpl
+  class HasSizeImpl
   {
     // T::ElementType, empty(), size(), *** range() ***?
     METHOD_EXISTS(A, size)
@@ -129,8 +124,7 @@ template <typename T>
 using ElementType = typename std::decay<decltype(std::declval<T>().front())>::type; // TODO: more work!
 
 template <typename T>
-using IsContainer = typename internal::IsContainerImpl<T>::type;
-
+using HasSize = typename internal::HasSizeImpl<T>::type;
 template <typename T>
 using HasFront = typename internal::HasFrontImpl<T>::type;
 template <typename T>
@@ -142,6 +136,9 @@ template <typename T>
 using Growable = typename internal::GrowableImpl<T>::type;
 template <typename T>
 using Shrinkable = typename internal::ShrinkableImpl<T>::type;
+
+template <typename T>
+using IsContainer = typename HasSize<T>::type;
 
 template <typename T>
 using IsMutable = typename And<Growable<T>::value, Shrinkable<T>::value>::type;
@@ -164,20 +161,16 @@ public:
 };
 
 
-// ordered           slice, array, sharedarray, string, mutablestring, sharedstring
-// sorted            avltree, sharedmap<avltree>
-// refcounted        refcounted, sharedarray, sharedstring, sharedmap
-// keyed             sharedmap<>, avltree, hashmap
-
-
-
 // range concepts:
 
-// finite
-// forward
-// reverse
-// bidirectional
-// randomaccessible
+template <typename T>
+using IsInputRange = typename And<HasFront<T>::value, Shrinkable<T>::value>::type;
+template <typename T>
+using IsForwardRange = typename And<IsInputRange<T>::value, HasSize<T>::value>::type;
+template <typename T>
+using IsReverseRange = typename And<HasBack<T>::value, Shrinkable<T>::value, HasSize<T>::value>::type;
+template <typename T>
+using IsBidirectionalRange = typename And<IsForwardRange<T>::value, IsReverseRange<T>::value>::type;
 
 } // namespace ep
 

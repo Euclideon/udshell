@@ -52,8 +52,8 @@ template<typename T>
 struct Slice
 {
 public:
-  typedef typename internal::ElementType<T>::Ty ET;
-  using ElementType = typename ET;
+  using ET = typename internal::ElementType<T>::Ty;
+  using ElementType = ET;
 
   size_t length;
   T *ptr;
@@ -183,14 +183,17 @@ struct Array : public Slice<T>
 
   T& front() const;
   T& back() const;
+  template <typename U> void push_front(U &&item);
+  template <typename U> void push_back(U &&item);
   void pop_front();
   void pop_back();
 
+  T& pushFront();
+  T& pushBack();
+  template <typename U> T& pushFront(U &&item);
+  template <typename U> T& pushBack(U &&item);
   T popFront();
   T popBack();
-
-  T& pushBack();
-  template <typename U> Array<T, Count>& pushBack(U &&item);
 
   void remove(size_t i);
   void remove(const T *pItem);

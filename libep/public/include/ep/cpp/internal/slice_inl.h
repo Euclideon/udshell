@@ -728,15 +728,6 @@ inline Array<T, Count>& Array<T, Count>::operator =(Slice<U> rh)
 }
 
 template <typename T, size_t Count>
-template <typename U>
-inline Array<T, Count>& Array<T, Count>::pushBack(U &&item)
-{
-  reserve(this->length + 1);
-  epConstruct((void*)&(this->ptr[this->length++])) T(std::forward<U>(item));
-  return *this;
-}
-
-template <typename T, size_t Count>
 T& Array<T, Count>::front() const
 {
   return this->ptr[0];
@@ -744,8 +735,29 @@ T& Array<T, Count>::front() const
 template <typename T, size_t Count>
 T& Array<T, Count>::back() const
 {
-  return this->ptr[length-1];
+  return this->ptr[this->length-1];
 }
+
+template <typename T, size_t Count>
+template <typename U>
+void Array<T, Count>::push_front(U &&item)
+{
+  reserve(this->length + 1);
+  for (size_t i = this->length++; i > 0; --i)
+  {
+    epConstruct((void*)&this->ptr[i]) T(std::move(this->ptr[i-1]));
+    this->ptr[i-1].~T();
+  }
+  epConstruct((void*)this->ptr) T(std::forward<U>(item));
+}
+template <typename T, size_t Count>
+template <typename U>
+void Array<T, Count>::push_back(U &&item)
+{
+  reserve(this->length + 1);
+  epConstruct((void*)&(this->ptr[this->length++])) T(std::forward<U>(item));
+}
+
 template <typename T, size_t Count>
 void Array<T, Count>::pop_front()
 {
@@ -762,6 +774,40 @@ void Array<T, Count>::pop_back()
 {
   --this->length;
   this->ptr[this->length].~T();
+}
+
+template <typename T, size_t Count>
+inline T& Array<T, Count>::pushFront()
+{
+  reserve(this->length + 1);
+  for (size_t i = this->length++; i > 0; --i)
+  {
+    epConstruct((void*)&this->ptr[i]) T(std::move(this->ptr[i-1]));
+    this->ptr[i-1].~T();
+  }
+  epConstruct((void*)this->ptr) T();
+  return this->ptr[0];
+}
+template <typename T, size_t Count>
+inline T& Array<T, Count>::pushBack()
+{
+  reserve(this->length + 1);
+  epConstruct((void*)&(this->ptr[this->length])) T();
+  return this->ptr[this->length++];
+}
+template <typename T, size_t Count>
+template <typename U>
+inline T& Array<T, Count>::pushFront(U &&item)
+{
+  push_front(std::forward<U>(item));
+  return this->ptr[0];
+}
+template <typename T, size_t Count>
+template <typename U>
+inline T& Array<T, Count>::pushBack(U &&item)
+{
+  push_back(std::forward<U>(item));
+  return this->ptr[this->length-1];
 }
 
 template <typename T, size_t Count>
@@ -784,14 +830,6 @@ T Array<T, Count>::popBack()
   T copy(std::move(this->ptr[this->length]));
   this->ptr[this->length].~T();
   return copy;
-}
-
-template <typename T, size_t Count>
-inline T& Array<T, Count>::pushBack()
-{
-  reserve(this->length + 1);
-  epConstruct((void*)&(this->ptr[this->length])) T();
-  return this->ptr[this->length++];
 }
 
 template <typename T, size_t Count>
