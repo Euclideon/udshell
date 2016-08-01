@@ -220,6 +220,14 @@ public:
   }
 
   size_t use_count() const;
+  size_t incRef() { return pInstance->incRef(); }
+  size_t decRef()
+  {
+    size_t rc = pInstance->decRef();
+    if (rc == 0)
+      pInstance = nullptr;
+    return rc;
+  }
 
   epforceinline bool unique() const { return use_count() == 1; }
 
