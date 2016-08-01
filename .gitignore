@@ -20,6 +20,8 @@
 *.vcxproj
 *.vcxproj.filters
 *.visualdproj
+*.VC.opendb
+*.VC.db
 
 *.exe
 *.lib
