@@ -1,4 +1,5 @@
 #include "eptest.h"
+#include "traits/shared.h"
 #include "ep/cpp/platform.h"
 // TODO: fill out these tests
 
@@ -7,6 +8,26 @@ using ep::SharedArray;
 using ep::MutableString;
 using ep::SharedString;
 using ep::Slice;
+
+
+struct TestStruct
+{
+  using Type = SharedString;
+  using ConstType = SharedString;
+
+  static SharedString create()
+  {
+    return "Hello";
+  }
+};
+
+using MyTypes = typename ::testing::Types<TestStruct>;
+INSTANTIATE_TYPED_TEST_CASE_P(SharedString_SharedTrait, Traits_Shared, MyTypes);
+
+
+static_assert(ep::IsShared<TestStruct::Type>::value == true, "ep::IsShared failed!");
+static_assert(ep::IsShared<TestStruct::ConstType>::value == true, "ep::IsShared failed!");
+
 
 void receivesString(String)
 {

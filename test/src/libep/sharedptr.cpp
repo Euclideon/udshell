@@ -1,5 +1,5 @@
 #include "eptest.h"
-#include "traits.h"
+#include "traits/shared.h"
 #include "ep/cpp/sharedptr.h"
 
 using ep::RefCounted;
@@ -49,6 +49,26 @@ int NonRefCountedTestClass::test = 0;
 
 };
 
+// Traits
+
+struct TestStruct
+{
+  using Type = SharedPtr<sharedptr_test::TestClass>;
+  using ConstType = SharedPtr<const sharedptr_test::TestClass>;
+
+  static SharedPtr<sharedptr_test::TestClass> create()
+  {
+    return SharedPtr<sharedptr_test::TestClass>::create();
+  }
+};
+
+using MyTypes = typename ::testing::Types<TestStruct>;
+INSTANTIATE_TYPED_TEST_CASE_P(SharedPtr_SharedTrait, Traits_Shared, MyTypes);
+
+
+static_assert(ep::IsShared<TestStruct::Type>::value == true, "ep::IsShared failed!");
+static_assert(ep::IsShared<TestStruct::ConstType>::value == true, "ep::IsShared failed!");
+
 
 // ------------------------------- RefCounted Tests ----------------------------------------------
 
@@ -73,14 +93,11 @@ TEST(SharedPtr, CreateNullPointer)
 {
   // default construction is null
   SharedPtr<sharedptr_test::TestClass> spDefault;
-  EXPECT_TRUE(!spDefault);
   EXPECT_TRUE(spDefault.get() == nullptr);
-  EXPECT_EQ(0, spDefault.use_count());
 
   // explicit null construction
   SharedPtr<sharedptr_test::TestClass> spNull = nullptr;
   EXPECT_TRUE(spNull.get() == nullptr);
-  EXPECT_EQ(0, spNull.use_count());
 }
 
 TEST(SharedPtr, CreateAndDestroy)
@@ -218,16 +235,6 @@ TEST(SharedPtr, Reset)
   spTest.reset();
   EXPECT_EQ(0, spTest.use_count());
   EXPECT_TRUE(!spTest); // Bool test
-}
-
-TEST(SharedPtr, Unique)
-{
-  SharedPtr<sharedptr_test::TestClass> spTest = SharedPtr<sharedptr_test::TestClass>::create();
-  EXPECT_EQ(1, spTest.use_count());
-  EXPECT_EQ(true, spTest.unique());
-  SharedPtr<sharedptr_test::TestClass> spTest2 = spTest;
-  EXPECT_EQ(2, spTest.use_count());
-  EXPECT_EQ(false, spTest.unique());
 }
 
 TEST(SharedPtr, Deref)

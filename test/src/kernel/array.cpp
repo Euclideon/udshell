@@ -1,10 +1,31 @@
 #include "eptest.h"
+#include "traits/shared.h"
 #include "ep/cpp/platform.h"
 // TODO: fill out these tests
 
 using ep::Slice;
 using ep::Array;
 using ep::SharedArray;
+
+
+struct TestStruct
+{
+  using Type = SharedArray<int>;
+  using ConstType = SharedArray<const int>;
+
+  static SharedArray<int> create()
+  {
+    return SharedArray<int>({ 1, 2, 3 });
+  }
+};
+
+using MyTypes = typename ::testing::Types<TestStruct>;
+INSTANTIATE_TYPED_TEST_CASE_P(SharedArray_SharedTrait, Traits_Shared, MyTypes);
+
+
+static_assert(ep::IsShared<TestStruct::Type>::value == true, "ep::IsShared failed!");
+static_assert(ep::IsShared<TestStruct::ConstType>::value == true, "ep::IsShared failed!");
+
 
 // TODO: these tests are old and should be deprecated!!
 TEST(EPSliceTest, Deprecated)
