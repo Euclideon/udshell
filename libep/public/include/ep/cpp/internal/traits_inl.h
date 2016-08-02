@@ -122,7 +122,7 @@ namespace internal {
     // RandomAccessible => insert(K, E)
     METHOD_EXISTS(A, push_front, ElementType<U>)
     METHOD_EXISTS(B, push_back, ElementType<U>)
-    METHOD_EXISTS(C, insert, typename U::KeyType, ElementType<U>)
+    METHOD_EXISTS(C, insert, KeyType<U>, ElementType<U>)
   public:
     static constexpr bool value = Or<DECLTYPE_VALUE(A), DECLTYPE_VALUE(B), DECLTYPE_VALUE(C)>::value;
     using type = typename BoolType<value>::type;
@@ -135,7 +135,7 @@ namespace internal {
     // RandomAccessible => remove(K)
     METHOD_EXISTS(A, pop_front)
     METHOD_EXISTS(B, pop_back)
-    METHOD_EXISTS(C, remove, typename U::KeyType)
+    METHOD_EXISTS(C, remove, KeyType<U>)
   public:
     static constexpr bool value = Or<DECLTYPE_VALUE(A), DECLTYPE_VALUE(B), DECLTYPE_VALUE(C)>::value;
     using type = typename BoolType<value>::type;

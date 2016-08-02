@@ -35,6 +35,19 @@
   };                                                                    \
   }
 
+#define DEFINE_TEST_CONTAINER_TREE(Container, TreeType, KeyType)                 \
+  namespace testTraits {                                                         \
+  struct Types {                                                                 \
+    using DefaultType = typename Container<TreeType<KeyType, int>>;              \
+    using HoldsInt = typename Container<TreeType<KeyType, int>>;                 \
+    using HoldsFloat = typename Container<TreeType<KeyType, float>>;             \
+    using HoldsDouble = typename Container<TreeType<KeyType, double>>;           \
+    using HoldsBool = typename Container<TreeType<KeyType, bool>>;               \
+    using HoldsChar = typename Container<TreeType<KeyType, char>>;               \
+    using HoldsString = typename Container<TreeType<KeyType, ep::SharedString>>; \
+  };                                                                             \
+  }
+
 
 namespace testTraits {
 
@@ -42,13 +55,27 @@ namespace testTraits {
 template <typename Container, typename Value, typename std::enable_if<ep::IsKeyed<Container>::value>::type* = nullptr>
 auto value(Value &&val)
 {
-  return Container::KeyValuePair(ep::SharedString::format("test_{0}", val), val);
+  return typename Container::KeyValuePair(ep::SharedString::format("test_{0}", val), val);
 }
 
 template <typename Container, typename Value, typename std::enable_if<!ep::IsKeyed<Container>::value>::type* = nullptr>
 Value value(Value &&val)
 {
   return val;
+}
+
+
+// Key ...
+template <typename Container, typename Value, typename std::enable_if<ep::IsKeyed<Container>::value>::type* = nullptr>
+auto key(Value &&val)
+{
+  return typename Container::KeyType(ep::SharedString::format("test_{0}", val));
+}
+
+template <typename Container, typename Value, typename std::enable_if<!ep::IsKeyed<Container>::value>::type* = nullptr>
+Value key(Value &&val)
+{
+  static_assert(sizeof(Container) != 0, "Called testTraits::key(...) on a non keyed container");
 }
 
 

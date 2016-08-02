@@ -1,3 +1,7 @@
+#pragma once
+#if !defined(_EP_HAS_SIZE_H)
+#define _EP_HAS_SIZE_H
+
 #include "../traits.h"
 
 template <typename T>
@@ -26,3 +30,5 @@ TYPED_TEST_P(Traits_HasSizeTest, SizeAndEmpty)
 
 
 REGISTER_TYPED_TEST_CASE_P(Traits_HasSizeTest, SizeAndEmpty);
+
+#endif // _EP_HAS_SIZE_H
