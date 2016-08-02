@@ -1,5 +1,4 @@
-#include "gtest/gtest.h"
-#include "ep/cpp/platform.h"
+#include "eptest.h"
 
 namespace ep {
 namespace internal {

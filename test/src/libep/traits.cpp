@@ -1,5 +1,5 @@
 #include "eptest.h"
-#include "traits.h"
+#include "traits/hassize.h"
 #include "ep/cpp/traits.h"
 #include "ep/cpp/slice.h"
 

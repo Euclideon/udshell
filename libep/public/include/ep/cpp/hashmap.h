@@ -38,16 +38,21 @@ public:
   using ValueType = V;
   using KeyValuePair = KVP<K, V>;
 
-  HashMap(size_t tableSize = 0x2000, size_t itemBucketSize = 0x100);
+  enum { DefaultTableSize = 0x2000 };
+  enum { DefaultItemBucketSize = 0x100 };
+
+  HashMap(size_t tableSize = DefaultTableSize, size_t itemBucketSize = DefaultItemBucketSize);
   HashMap(HashMap &&rval);
 
-  HashMap(Slice<const KeyValuePair> arr)
+  HashMap(Slice<const KeyValuePair> arr, size_t tableSize = DefaultTableSize, size_t itemBucketSize = DefaultItemBucketSize)
+    : HashMap(tableSize, itemBucketSize)
   {
     for (auto &kvp : arr)
       insert(kvp);
   }
-  HashMap(std::initializer_list<KeyValuePair> init)
-    : HashMap(Slice<const KeyValuePair>(init.begin(), init.size()))
+
+  HashMap(std::initializer_list<KeyValuePair> init, size_t tableSize = DefaultTableSize, size_t itemBucketSize = DefaultItemBucketSize)
+    : HashMap(Slice<const KeyValuePair>(init.begin(), init.size()), tableSize, itemBucketSize)
   {}
 
   ~HashMap();

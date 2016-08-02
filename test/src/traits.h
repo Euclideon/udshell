@@ -53,13 +53,19 @@ Value value(Value &&val)
 
 
 // Add Item ...
-template <typename Container, typename Item, typename std::enable_if<ep::HasFront<Container>::value && ep::Growable<Container>::value>::type* = nullptr>
+template <typename Container, typename Item, typename std::enable_if<ep::HasBack<Container>::value && ep::Growable<Container>::value>::type* = nullptr>
 void addItem(Container &container, Item &&item)
 {
-  container.pushFront(std::move(value<Container>(item)));
+  container.push_back(std::move(value<Container>(item)));
 }
 
-template <typename Container, typename Item, typename std::enable_if<ep::RandomAccessible<Container>::value && ep::Growable<Container>::value>::type* = nullptr>
+template <typename Container, typename Item, typename std::enable_if<!ep::HasBack<Container>::value && ep::HasFront<Container>::value && ep::Growable<Container>::value>::type* = nullptr>
+void addItem(Container &container, Item &&item)
+{
+  container.push_front(std::move(value<Container>(item)));
+}
+
+template <typename Container, typename Item, typename std::enable_if<!ep::HasBack<Container>::value && !ep::HasFront<Container>::value && ep::RandomAccessible<Container>::value && ep::Growable<Container>::value>::type* = nullptr>
 void addItem(Container &container, Item &&item)
 {
   container.insert(std::move(value<Container>(item)));
@@ -68,41 +74,10 @@ void addItem(Container &container, Item &&item)
 template <typename Container, typename Item, typename std::enable_if<!ep::Growable<Container>::value>::type* = nullptr>
 void addItem(Container &container, Item &&item)
 {
-  EPASSERT(false, "Called testTraits::addItem(...) on a non growable container");
+  static_assert(sizeof(Container) != 0, "Called testTraits::addItem(...) on a non growable container");
 }
 
 } // namespace traits
-
-
-
-// ------------------------------- HasSize Trait ----------------------------------------------
-
-template <typename T>
-class Traits_HasSizeTest : public ::testing::Test { };
-TYPED_TEST_CASE_P(Traits_HasSizeTest);
-
-
-TYPED_TEST_P(Traits_HasSizeTest, SizeAndEmpty)
-{
-  // Verify we have the trait
-  EXPECT_TRUE(ep::HasSize<TypeParam::HoldsInt>::value);
-
-  // Default container is empty
-  TypeParam::HoldsInt container;
-  EXPECT_EQ(0, container.size());
-  EXPECT_TRUE(container.empty());
-
-  // If we have the growable trait, then attempt to add
-  if (ep::Growable<TypeParam::HoldsInt>::value)
-  {
-    testTraits::addItem(container, 10);
-    EXPECT_EQ(1, container.size());
-    EXPECT_FALSE(container.empty());
-  }
-}
-
-
-REGISTER_TYPED_TEST_CASE_P(Traits_HasSizeTest, SizeAndEmpty);
 
 
 #endif  // _EP_TEST_TRAITS_H

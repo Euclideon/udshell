@@ -1,4 +1,5 @@
-#include "gtest/gtest.h"
+#include "eptest.h"
+#include "traits.h"
 #include "ep/cpp/sharedptr.h"
 
 using ep::RefCounted;

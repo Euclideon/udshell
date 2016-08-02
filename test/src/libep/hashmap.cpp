@@ -1,5 +1,5 @@
 #include "eptest.h"
-#include "traits.h"
+#include "traits/hassize.h"
 #include "ep/cpp/hashmap.h"
 
 using ep::Hash;

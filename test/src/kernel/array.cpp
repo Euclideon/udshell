@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "eptest.h"
 #include "ep/cpp/platform.h"
 // TODO: fill out these tests
 

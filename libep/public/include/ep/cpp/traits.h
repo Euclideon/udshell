@@ -17,6 +17,28 @@
 
 namespace ep {
 
+namespace internal {
+
+  template <typename T, typename U>
+  struct decay_equiv : std::is_same<typename std::decay<T>::type, U>::type {};
+
+  template <typename T> class KeyTypeImpl;
+  template <typename T> class IndexTypeImpl;
+
+  template <typename T> class HasFrontImpl;
+  template <typename T> class HasBackImpl;
+  template <typename T> class RandomAccessibleImpl;
+
+  template <typename T, bool hasFront, bool hasBack, bool hasAt> struct ElementTypeImpl;
+
+  template <typename T> class HasSizeImpl;
+
+  template <typename T> struct GrowableImpl;
+  template <typename T> struct ShrinkableImpl;
+
+} // namespace internal
+
+
 template <bool b>
 struct BoolType { using type = std::false_type; };
 template <>
@@ -32,80 +54,21 @@ struct Or { static constexpr bool value = A || Or<More...>::value; using type = 
 template <bool A>
 struct Or<A> { static constexpr bool value = A; using type = typename BoolType<value>::type; };
 
-namespace internal {
 
-  template <typename T, typename U>
-  struct decay_equiv : std::is_same<typename std::decay<T>::type, U>::type {};
+template <typename T>
+using KeyType = typename internal::KeyTypeImpl<T>::type;
+template <typename T>
+using IndexType = typename internal::IndexTypeImpl<T>::type;
 
-  template <typename T>
-  class HasSizeImpl
-  {
-    // T::ElementType, empty(), size(), *** range() ***?
-    METHOD_EXISTS(A, size)
-    METHOD_EXISTS(B, empty)
-  public:
-    static constexpr bool value = And<DECLTYPE_VALUE(A), DECLTYPE_VALUE(B)>::value;
-    using type = typename BoolType<value>::type;
-  };
+template <typename T>
+using HasFront = typename internal::HasFrontImpl<T>::type;
+template <typename T>
+using HasBack = typename internal::HasBackImpl<T>::type;
+template <typename T>
+using RandomAccessible = typename internal::RandomAccessibleImpl<T>::type;
 
-  template <typename T>
-  class HasFrontImpl
-  {
-    // front()
-    METHOD_EXISTS(Impl, front)
-  public:
-    static constexpr bool value = DECLTYPE_VALUE(Impl);
-    using type = typename BoolType<value>::type;
-  };
-  template <typename T>
-  class HasBackImpl
-  {
-    // back()
-    METHOD_EXISTS(Impl, back)
-  public:
-    static constexpr bool value = DECLTYPE_VALUE(Impl);
-    using type = typename BoolType<value>::type;
-  };
-  template <typename T>
-  class RandomAccessibleImpl
-  {
-    // get(K), decltype(get(K)) == T::ElementType, operator[](K)
-    METHOD_EXISTS(A, get, typename T::KeyType)
-    METHOD_EXISTS(B, operator[], typename T::KeyType)
-  public:
-    static constexpr bool value = And<DECLTYPE_VALUE(A), DECLTYPE_VALUE(B)>::value;
-    using type = typename BoolType<value>::type;
-  };
-
-  template <typename T>
-  struct GrowableImpl
-  {
-    // HasFront => pushFront(E)
-    // HasBack => pushBack(E)
-    // RandomAccessible => insert(K, E)
-    METHOD_EXISTS(A, pushFront, ElementType<U>)
-    METHOD_EXISTS(B, pushBack, ElementType<U>)
-    METHOD_EXISTS(C, insert, typename U::KeyType, ElementType<U>)
-  public:
-    static constexpr bool value = Or<DECLTYPE_VALUE(A), DECLTYPE_VALUE(B), DECLTYPE_VALUE(C)>::value;
-    using type = typename BoolType<value>::type;
-  };
-  template <typename T>
-  struct ShrinkableImpl
-  {
-    // HasFront => popFront()
-    // HasBack => popBack()
-    // RandomAccessible => remove(K)
-    METHOD_EXISTS(A, popFront)
-    METHOD_EXISTS(B, popBack)
-    METHOD_EXISTS(C, remove, typename U::KeyType)
-  public:
-    static constexpr bool value = Or<DECLTYPE_VALUE(A), DECLTYPE_VALUE(B), DECLTYPE_VALUE(C)>::value;
-    using type = typename BoolType<value>::type;
-  };
-
-} // namespace internal
-
+template <typename T>
+using ElementType = typename internal::ElementTypeImpl<T, HasFront<T>::value, HasBack<T>::value, RandomAccessible<T>::value>::type;
 
 template <typename T>
 struct IsShared
@@ -121,16 +84,7 @@ public:
 // container concepts:
 
 template <typename T>
-using ElementType = typename std::decay<decltype(std::declval<T>().front())>::type; // TODO: more work!
-
-template <typename T>
 using HasSize = typename internal::HasSizeImpl<T>::type;
-template <typename T>
-using HasFront = typename internal::HasFrontImpl<T>::type;
-template <typename T>
-using HasBack = typename internal::HasBackImpl<T>::type;
-template <typename T>
-using RandomAccessible = typename internal::RandomAccessibleImpl<T>::type;
 
 template <typename T>
 using Growable = typename internal::GrowableImpl<T>::type;
@@ -162,7 +116,6 @@ public:
 
 
 // range concepts:
-
 template <typename T>
 using IsInputRange = typename And<HasFront<T>::value, Shrinkable<T>::value>::type;
 template <typename T>
@@ -173,5 +126,7 @@ template <typename T>
 using IsBidirectionalRange = typename And<IsForwardRange<T>::value, IsReverseRange<T>::value>::type;
 
 } // namespace ep
+
+#include "ep/cpp/internal/traits_inl.h"
 
 #endif // __EP_TRAITS
