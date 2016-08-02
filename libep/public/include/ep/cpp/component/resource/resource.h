@@ -49,7 +49,7 @@ template <typename T>
 inline SharedPtr<T> cloneResource(SharedPtr<T> inst)
 {
   static_assert(std::is_base_of<Resource, T>::value, "Class must be derived off Resource");
-  return component_cast<T>(inst->Clone());
+  return component_cast<T>(inst->clone());
 }
 
 }
