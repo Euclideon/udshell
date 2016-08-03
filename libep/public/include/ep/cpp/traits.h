@@ -97,11 +97,13 @@ using IsContainer = typename HasSize<T>::type;
 template <typename T>
 using IsMutable = typename And<Growable<T>::value, Shrinkable<T>::value>::type;
 
+#if 0 // TODO: consider testing with AVLTree::PredFunctor
 template <typename T>
 struct IsSorted
 {
-  // T::IsSorted == true
+  T::IsSorted == true
 };
+#endif // 0
 
 template <typename T>
 struct IsKeyed

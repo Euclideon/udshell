@@ -8,9 +8,9 @@
 namespace ep {
 namespace internal {
 
-template<typename T> struct ElementType { typedef T Ty; };
-template<> struct ElementType<void> { typedef uint8_t Ty; };
-template<> struct ElementType<const void> { typedef const uint8_t Ty; };
+template<typename T> struct SliceElementType { typedef T Ty; };
+template<> struct SliceElementType<void> { typedef uint8_t Ty; };
+template<> struct SliceElementType<const void> { typedef const uint8_t Ty; };
 
 struct SliceHeader
 {
@@ -52,7 +52,7 @@ template<typename T>
 struct Slice
 {
 public:
-  using ET = typename internal::ElementType<T>::Ty;
+  using ET = typename internal::SliceElementType<T>::Ty;
   using ElementType = ET;
 
   size_t length;

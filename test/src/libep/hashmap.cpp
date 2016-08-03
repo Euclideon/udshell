@@ -1,5 +1,7 @@
 #include "eptest.h"
 #include "traits/hassize.h"
+#include "traits/isgrowable.h"
+#include "traits/isshrinkable.h"
 #include "ep/cpp/hashmap.h"
 
 using ep::Hash;
@@ -72,11 +74,36 @@ int FindInstances(const ep::KVP<K, V> *keyTable, size_t tableSize, const ep::Has
 
 } // namespace hashmap_test
 
+
+using TestHashMap = HashMap<ep::SharedString, int>;
+using TestHashMapCIP = HashMap<ep::SharedString, const int*>;
+
+static_assert(std::is_same<ep::IndexType<TestHashMap>, ep::SharedString>::value == true, "ep::IndexType failed!");
+
+static_assert(std::is_same<ep::ElementType<TestHashMap>, int>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<TestHashMapCIP>, const int*>::value == true, "ep::ElementType failed!");
+
+static_assert(ep::HasFront<TestHashMap>::value == false, "ep::HasFront failed!");
+static_assert(ep::HasBack<TestHashMap>::value == false, "ep::HasBack failed!");
+static_assert(ep::RandomAccessible<TestHashMap>::value == true, "ep::RandomAccessible failed!");
+
+static_assert(ep::HasSize<TestHashMap>::value == true, "ep::HasSize failed!");
+static_assert(ep::IsContainer<TestHashMap>::value == true, "ep::IsContainer failed!");
+
+static_assert(ep::Growable<TestHashMap>::value == true, "ep::Growable failed!");
+static_assert(ep::Shrinkable<TestHashMap>::value == true, "ep::Shrinkable failed!");
+static_assert(ep::IsMutable< TestHashMap>::value == true, "ep::IsMutable failed!");
+
+static_assert(ep::IsKeyed<TestHashMap>::value == true, "ep::IsKeyed failed!");
 // Traits
 
 DEFINE_TEST_CONTAINER_KEYED(ep::HashMap, ep::SharedString)
 using MyTypes = typename ::testing::Types<testTraits::Types>;
 INSTANTIATE_TYPED_TEST_CASE_P(HashMap, Traits_HasSizeTest, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(HashMap, Traits_IsGrowable, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(HashMap, Traits_IsShrinkable, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(HashMap, Traits_IsGrowable_RandomAccessible, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(HashMap, Traits_IsShrinkable_RandomAccessible, MyTypes);
 
 // ------------------------------- Hash Tests ----------------------------------------------
 
