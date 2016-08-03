@@ -238,18 +238,22 @@ struct SharedArray : public Slice<T>
   // constructors
   SharedArray();
   SharedArray(nullptr_t);
-  template <typename... Items> SharedArray(Concat_T, Items&&... items);
-  SharedArray(std::initializer_list<typename SharedArray<T>::ET> list);
+  SharedArray(std::initializer_list<T> list);
   SharedArray(const SharedArray<T> &rcslice);
   SharedArray(SharedArray<T> &&rval);
-  template <typename U, size_t Len> SharedArray(const Array<U, Len> &arr);
   template <typename U, size_t Len> SharedArray(Array<U, Len> &&rval);
   template <typename U> SharedArray(U *ptr, size_t length);
   template <typename U> SharedArray(Slice<U> slice);
   template <typename U, size_t N> SharedArray(U(&arr)[N]);
+
+  template <typename... Items> SharedArray(Concat_T, Items&&... items);
+
   ~SharedArray();
 
   size_t use_count() const;
+  size_t incRef();
+  size_t decRef();
+  bool unique() const { return use_count() == 1; }
 
   Array<T> clone() { return Array<T>(*this); }
 

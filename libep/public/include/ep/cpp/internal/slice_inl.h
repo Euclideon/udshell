@@ -573,6 +573,7 @@ inline Array<T, Count>::Array(Array<T, Count> &&rval)
     // we can copy large buffers efficiently!
     this->ptr = rval.ptr;
     rval.ptr = nullptr;
+    rval.length = 0;
   }
   else
   {
@@ -884,7 +885,7 @@ inline SharedArray<T>::SharedArray(Concat_T, Items&&... items)
 }
 
 template<typename T>
-inline SharedArray<T>::SharedArray(std::initializer_list<typename SharedArray<T>::ET> list)
+inline SharedArray<T>::SharedArray(std::initializer_list<T> list)
   : SharedArray<T>(list.begin(), list.size())
 {}
 
@@ -900,13 +901,9 @@ inline SharedArray<T>::SharedArray(SharedArray<T> &&rval)
   : Slice<T>(rval)
 {
   rval.ptr = nullptr;
+  rval.length = 0;
 }
 
-template <typename T>
-template <typename U, size_t Len>
-inline SharedArray<T>::SharedArray(const Array<U, Len> &arr)
-  : SharedArray<T>(Slice<T>(arr))
-{}
 template <typename T>
 template <typename U, size_t Len>
 inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
@@ -917,9 +914,10 @@ inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
     this->ptr = rval.ptr;
     this->length = rval.length;
     rval.ptr = nullptr;
+    rval.length = 0;
   }
   else
-    epConstruct(this) SharedArray<T>(Slice<T>(rval));
+    epConstruct(this) SharedArray<T>(rval.ptr, rval.length);
 }
 
 template <typename T>
@@ -966,6 +964,24 @@ size_t inline SharedArray<T>::use_count() const
 {
   return this->ptr ? internal::GetSliceHeader(this->ptr)->refCount : 0;
 }
+template <typename T>
+size_t inline SharedArray<T>::incRef()
+{
+  return this->ptr ? ++internal::GetSliceHeader(this->ptr)->refCount : 0;
+}
+template <typename T>
+size_t inline SharedArray<T>::decRef()
+{
+  size_t &rc = internal::GetSliceHeader(this->ptr)->refCount;
+  if (rc == 1)
+  {
+    destroy();
+    this->ptr = nullptr;
+    this->length = 0;
+    return 0;
+  }
+  return --rc;
+}
 
 template <typename T>
 inline void SharedArray<T>::destroy()
@@ -1002,7 +1018,7 @@ template <typename U>
 inline SharedArray<T>& SharedArray<T>::operator =(Slice<U> rh)
 {
   if (this->ptr != rh.ptr)
-    *this = SharedArray(rh);
+    *this = SharedArray(rh.ptr, rh.length);
   return *this;
 }
 

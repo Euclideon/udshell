@@ -30,7 +30,7 @@ ptrdiff_t epStringify(ep::Slice<char> buffer, ep::String format, ep::Slice<T> ar
     if (buffer.length < (size_t)len)
       return -len;
 
-    buffer[0] = '['; buffer.popFront();
+    buffer[0] = '['; buffer.pop_front();
     for (size_t i = 0; i < arr.length; ++i)
     {
       if (i > 0)
@@ -662,7 +662,7 @@ inline SharedString::SharedString(U *ptr, size_t length)
 {}
 template <typename U>
 inline SharedString::SharedString(Slice<U> slice)
-  : SharedArray<const char>(slice)
+  : SharedArray<const char>(slice.ptr, slice.length)
 {}
 
 inline SharedString::SharedString(const char *pString)

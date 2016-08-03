@@ -1,5 +1,5 @@
 #include "eptest.h"
-#include "traits.h"
+#include "traits/shared.h"
 #include "ep/cpp/platform.h"
 // TODO: fill out these tests
 
@@ -46,6 +46,24 @@ static_assert(ep::IsMutable<SharedString>::value == false, "ep::IsMutable failed
 
 static_assert(ep::IsKeyed<MutableString<0>>::value == false, "ep::IsKeyed failed!");
 static_assert(ep::IsKeyed<SharedString>::value == false, "ep::IsKeyed failed!");
+
+static_assert(ep::IsShared<TestStruct::Type>::value == true, "ep::IsShared failed!");
+static_assert(ep::IsShared<TestStruct::ConstType>::value == true, "ep::IsShared failed!");
+
+
+struct TestStruct
+{
+  using Type = SharedString;
+  using ConstType = SharedString;
+
+  static SharedString create()
+  {
+    return "Hello";
+  }
+};
+
+using MyTypes = typename ::testing::Types<TestStruct>;
+INSTANTIATE_TYPED_TEST_CASE_P(SharedString_SharedTrait, Traits_Shared, MyTypes);
 
 
 void receivesString(String)
