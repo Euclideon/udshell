@@ -22,7 +22,13 @@ TYPED_TEST_P(Traits_HasSizeTest, SizeAndEmpty)
     EXPECT_EQ(1, container.size());
     EXPECT_FALSE(container.empty());
   }
-}
 
+  // Initialise from an initializer list and verify the size
+  testTraits::ValueArray<TypeParam::HoldsChar, 10> values{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
+  TypeParam::HoldsChar initContainer = values.create();
+
+  EXPECT_EQ(10, initContainer.size());
+  EXPECT_FALSE(initContainer.empty());
+}
 
 REGISTER_TYPED_TEST_CASE_P(Traits_HasSizeTest, SizeAndEmpty);

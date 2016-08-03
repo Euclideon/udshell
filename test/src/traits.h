@@ -38,6 +38,31 @@
 
 namespace testTraits {
 
+// Helper to initialise a plain array of elements (that matches the element type of container/range T)
+// and then create a new container/range for that type
+template <typename T, size_t Size>
+struct ValueArray
+{
+public:
+  template <typename Type = T, typename std::enable_if<ep::IsKeyed<Type>::value>::type* = nullptr>
+  T create()
+  {
+    T::KeyValuePair pairs[Size];
+    for (int i = 0; i < Size; ++i)
+      pairs[i] = T::KeyValuePair(ep::SharedString::format("test_{0}", values[i]), values[i]);
+
+    return T(pairs);
+  }
+  template <typename Type = T, typename std::enable_if<!ep::IsKeyed<Type>::value>::type* = nullptr>
+  T create()
+  {
+    return T(values, Size);
+  }
+
+  ep::ElementType<T> values[Size];
+};
+
+
 // Value ...
 template <typename Container, typename Value, typename std::enable_if<ep::IsKeyed<Container>::value>::type* = nullptr>
 auto value(Value &&val)
@@ -77,7 +102,7 @@ void addItem(Container &container, Item &&item)
   static_assert(sizeof(Container) != 0, "Called testTraits::addItem(...) on a non growable container");
 }
 
-} // namespace traits
+} // namespace testTraits
 
 
 #endif  // _EP_TEST_TRAITS_H
