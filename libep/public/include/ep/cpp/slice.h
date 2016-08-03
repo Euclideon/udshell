@@ -263,6 +263,13 @@ struct SharedArray : public Slice<T>
 
 private:
   void destroy();
+
+  // hide a bunch of functions from slice
+  void pop_front();
+  void pop_back();
+  ET& popFront();
+  ET& popBack();
+  Slice<T> pop(ptrdiff_t n);
 };
 
 } // namespace ep

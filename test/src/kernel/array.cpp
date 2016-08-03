@@ -1,10 +1,53 @@
 #include "eptest.h"
+#include "traits.h"
 #include "ep/cpp/platform.h"
 // TODO: fill out these tests
 
 using ep::Slice;
 using ep::Array;
 using ep::SharedArray;
+
+
+static_assert(std::is_same<ep::IndexType<Slice<int>>, size_t>::value == true, "ep::IndexType failed!");
+static_assert(std::is_same<ep::IndexType<Array<int>>, size_t>::value == true, "ep::IndexType failed!");
+static_assert(std::is_same<ep::IndexType<SharedArray<int>>, size_t>::value == true, "ep::IndexType failed!");
+
+static_assert(std::is_same<ep::ElementType<Slice<int>>, int>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<Array<int>>, int>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<SharedArray<int>>, int>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<Slice<const int*>>, const int*>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<Array<const int*>>, const int*>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<SharedArray<const int*>>, const int*>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<Slice<void>>, uint8_t>::value == true, "ep::ElementType failed!");
+
+static_assert(ep::HasFront<Slice<int>>::value == true, "ep::HasFront failed!");
+static_assert(ep::HasFront<Array<int>>::value == true, "ep::HasFront failed!");
+static_assert(ep::HasFront<SharedArray<int>>::value == true, "ep::HasFront failed!");
+static_assert(ep::HasBack<Slice<int>>::value == true, "ep::HasBack failed!");
+static_assert(ep::HasBack<Array<int>>::value == true, "ep::HasBack failed!");
+static_assert(ep::HasBack<SharedArray<int>>::value == true, "ep::HasBack failed!");
+
+static_assert(ep::RandomAccessible<Slice<int>>::value == true, "ep::RandomAccessible failed!");
+static_assert(ep::RandomAccessible<Array<int>>::value == true, "ep::RandomAccessible failed!");
+static_assert(ep::RandomAccessible<SharedArray<int>>::value == true, "ep::RandomAccessible failed!");
+
+static_assert(ep::HasSize<Slice<int>>::value == true, "ep::HasSize failed!");
+static_assert(ep::HasSize<Array<int>>::value == true, "ep::HasSize failed!");
+static_assert(ep::HasSize<SharedArray<int>>::value == true, "ep::HasSize failed!");
+
+static_assert(ep::IsContainer<Array<int>>::value == true, "ep::IsContainer failed!");
+static_assert(ep::IsContainer<SharedArray<int>>::value == true, "ep::IsContainer failed!");
+
+static_assert(ep::Growable<Array<int>>::value == true, "ep::Growable failed!");
+static_assert(ep::Growable<SharedArray<int>>::value == false, "ep::Growable failed!");
+static_assert(ep::Shrinkable<Array<int>>::value == true, "ep::Shrinkable failed!");
+static_assert(ep::Shrinkable<SharedArray<int>>::value == false, "ep::Shrinkable failed!");
+static_assert(ep::IsMutable<Array<int>>::value == true, "ep::IsMutable failed!");
+static_assert(ep::IsMutable<SharedArray<int>>::value == false, "ep::IsMutable failed!");
+
+static_assert(ep::IsKeyed<Array<int>>::value == false, "ep::IsKeyed failed!");
+static_assert(ep::IsKeyed<SharedArray<int>>::value == false, "ep::IsKeyed failed!");
+
 
 // TODO: these tests are old and should be deprecated!!
 TEST(EPSliceTest, Deprecated)
