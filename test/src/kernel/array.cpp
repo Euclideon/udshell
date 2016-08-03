@@ -1,11 +1,69 @@
 #include "eptest.h"
+#include "traits/hassize.h"
+#include "traits/isgrowable.h"
+#include "traits/isshrinkable.h"
 #include "traits/shared.h"
 #include "ep/cpp/platform.h"
-// TODO: fill out these tests
 
 using ep::Slice;
 using ep::Array;
 using ep::SharedArray;
+
+
+struct TestSlice
+{
+  using Type = Slice<int>;
+  using ConstType = Slice<const int>;
+
+  using DefaultType = Slice<int>;
+  using HoldsChar = Slice<char>;
+
+  static Slice<int> create()
+  {
+    static int x[] = { 1, 2, 3 };
+    return Slice<int>(x, EPARRAYSIZE(x));
+  }
+};
+struct TestArray
+{
+  using Type = Array<int>;
+  using ConstType = Array<const int>;
+
+  using DefaultType = Array<int>;
+  using HoldsChar = Array<char>;
+
+  static Array<int> create()
+  {
+    return Array<int>({ 1, 2, 3 });
+  }
+};
+struct TestSharedArray
+{
+  using Type = SharedArray<int>;
+  using ConstType = SharedArray<const int>;
+
+  using DefaultType = SharedArray<int>;
+  using HoldsChar = SharedArray<char>;
+
+  static SharedArray<int> create()
+  {
+    return SharedArray<int>({ 1, 2, 3 });
+  }
+};
+
+//DEFINE_TEST_CONTAINER(ep::Array)
+
+using AllArrays = typename ::testing::Types<TestSlice, TestArray, TestSharedArray>;
+using Containers = typename ::testing::Types<TestArray, TestSharedArray>;
+using MutableContainers = typename ::testing::Types<TestArray>;
+using SharedTypes = typename ::testing::Types<TestSharedArray>;
+
+INSTANTIATE_TYPED_TEST_CASE_P(Array, Traits_HasSizeTest, AllArrays);
+INSTANTIATE_TYPED_TEST_CASE_P(Array, Traits_IsGrowable, MutableContainers);
+INSTANTIATE_TYPED_TEST_CASE_P(Array, Traits_IsShrinkable, MutableContainers);
+//INSTANTIATE_TYPED_TEST_CASE_P(Array, Traits_IsGrowable_RandomAccessible, MyTypes);
+//INSTANTIATE_TYPED_TEST_CASE_P(Array, Traits_IsShrinkable_RandomAccessible, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(SharedArray, Traits_Shared, SharedTypes);
 
 
 static_assert(std::is_same<ep::IndexType<Slice<int>>, size_t>::value == true, "ep::IndexType failed!");
@@ -49,21 +107,6 @@ static_assert(ep::IsKeyed<Array<int>>::value == false, "ep::IsKeyed failed!");
 static_assert(ep::IsKeyed<SharedArray<int>>::value == false, "ep::IsKeyed failed!");
 
 static_assert(ep::IsShared<SharedArray<int>>::value == true, "ep::IsShared failed!");
-
-
-struct TestStruct
-{
-  using Type = SharedArray<int>;
-  using ConstType = SharedArray<const int>;
-
-  static SharedArray<int> create()
-  {
-    return SharedArray<int>({ 1, 2, 3 });
-  }
-};
-
-using MyTypes = typename ::testing::Types<TestStruct>;
-INSTANTIATE_TYPED_TEST_CASE_P(SharedArray_SharedTrait, Traits_Shared, MyTypes);
 
 
 // TODO: these tests are old and should be deprecated!!

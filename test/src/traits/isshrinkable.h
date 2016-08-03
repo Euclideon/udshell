@@ -12,7 +12,7 @@ TYPED_TEST_CASE_P(Traits_IsShrinkable);
 
 TYPED_TEST_P(Traits_IsShrinkable, Shrinkable)
 {
-  EXPECT_TRUE(ep::Shrinkable<typename TypeParam::HoldsInt>::value);
+  EXPECT_TRUE(ep::Shrinkable<typename TypeParam::DefaultType>::value);
 }
 
 template <typename T>
@@ -21,10 +21,10 @@ TYPED_TEST_CASE_P(Traits_IsShrinkable_HasFront);
 
 TYPED_TEST_P(Traits_IsShrinkable_HasFront, PopFront)
 {
-  EXPECT_TRUE(ep::Shrinkable<typename TypeParam::HoldsInt>::value && ep::HasFront<typename TypeParam::HoldsInt>::value);
+  EXPECT_TRUE(ep::Shrinkable<typename TypeParam::DefaultType>::value && ep::HasFront<typename TypeParam::DefaultType>::value);
 
   // Default container is empty
-  typename TypeParam::HoldsInt container = { 0, 1 };
+  typename TypeParam::DefaultType container = { 0, 1 };
   EXPECT_TRUE((std::is_same<ep::ElementType<decltype(container)>, int>::value));
 
   EXPECT_EQ(0, container.front());
@@ -40,10 +40,10 @@ TYPED_TEST_CASE_P(Traits_IsShrinkable_HasBack);
 
 TYPED_TEST_P(Traits_IsShrinkable_HasBack, PopBack)
 {
-  EXPECT_TRUE(ep::Growable<typename TypeParam::HoldsInt>::value && ep::HasBack<typename TypeParam::HoldsInt>::value);
+  EXPECT_TRUE(ep::Growable<typename TypeParam::DefaultType>::value && ep::HasBack<typename TypeParam::DefaultType>::value);
 
   // Default container is empty
-  typename TypeParam::HoldsInt container = { 0, 1 };
+  typename TypeParam::DefaultType container = { 0, 1 };
   EXPECT_TRUE((std::is_same<ep::ElementType<decltype(container)>, int>::value));
 
   EXPECT_EQ(1, container.back());
@@ -58,16 +58,16 @@ TYPED_TEST_CASE_P(Traits_IsShrinkable_RandomAccessible);
 
 TYPED_TEST_P(Traits_IsShrinkable_RandomAccessible, Remove)
 {
-  EXPECT_TRUE(ep::Growable<typename TypeParam::HoldsInt>::value && ep::RandomAccessible<typename TypeParam::HoldsInt>::value);
+  EXPECT_TRUE(ep::Growable<typename TypeParam::DefaultType>::value && ep::RandomAccessible<typename TypeParam::DefaultType>::value);
 
   // Default container is empty
-  typename TypeParam::HoldsInt container = { testTraits::value<typename TypeParam::HoldsInt>(0), testTraits::value<typename TypeParam::HoldsInt>(1) };
+  typename TypeParam::DefaultType container = { testTraits::value<typename TypeParam::DefaultType>(0), testTraits::value<typename TypeParam::DefaultType>(1) };
   EXPECT_TRUE((std::is_same<ep::ElementType<decltype(container)>, int>::value));
 
-  EXPECT_EQ(0, container.at(testTraits::key<typename TypeParam::HoldsInt>(0)));
+  EXPECT_EQ(0, container.at(testTraits::key<typename TypeParam::DefaultType>(0)));
 
-  container.remove(testTraits::key<typename TypeParam::HoldsInt>(0));
-  EXPECT_EQ(1, container.at(testTraits::key<typename TypeParam::HoldsInt>(1)));
+  container.remove(testTraits::key<typename TypeParam::DefaultType>(0));
+  EXPECT_EQ(1, container.at(testTraits::key<typename TypeParam::DefaultType>(1)));
 }
 
 REGISTER_TYPED_TEST_CASE_P(Traits_IsShrinkable, Shrinkable);

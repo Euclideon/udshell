@@ -432,7 +432,7 @@ struct epTheTypeIs;
 
 #define EXPAND(X) X
 
-#ifdef _MSC_VER
+#ifdef EP_COMPILER_VISUALC
 # define NUM_ARGS(...)  INTERNAL_EXPAND_ARGS_PRIVATE(INTERNAL_ARGS_AUGMENTER(__VA_ARGS__))
 # define INTERNAL_ARGS_AUGMENTER(...) unused, __VA_ARGS__
 # define INTERNAL_EXPAND(x) x

@@ -6,6 +6,6 @@
 
 // !! TEMP EXAMPLE OF USAGE
 
-DEFINE_TEST_CONTAINER(ep::Slice)
-using MyTypes = typename ::testing::Types<testTraits::Types>;
-INSTANTIATE_TYPED_TEST_CASE_P(Slice, Traits_HasSizeTest, MyTypes);
+//DEFINE_TEST_CONTAINER(ep::Slice)
+//using MyTypes = typename ::testing::Types<testTraits::Types>;
+//INSTANTIATE_TYPED_TEST_CASE_P(Slice, Traits_HasSizeTest, MyTypes);

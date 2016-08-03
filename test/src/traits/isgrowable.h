@@ -12,7 +12,7 @@ TYPED_TEST_CASE_P(Traits_IsGrowable);
 
 TYPED_TEST_P(Traits_IsGrowable, Growable)
 {
-  EXPECT_TRUE(ep::Growable<typename TypeParam::HoldsInt>::value);
+  EXPECT_TRUE(ep::Growable<typename TypeParam::DefaultType>::value);
 }
 
 template <typename T>
@@ -21,10 +21,10 @@ TYPED_TEST_CASE_P(Traits_IsGrowable_HasFront);
 
 TYPED_TEST_P(Traits_IsGrowable_HasFront, PushFront)
 {
-  EXPECT_TRUE(ep::Growable<typename TypeParam::HoldsInt>::value && ep::HasFront<typename TypeParam::HoldsInt>::value);
+  EXPECT_TRUE(ep::Growable<typename TypeParam::DefaultType>::value && ep::HasFront<typename TypeParam::DefaultType>::value);
 
   // Default container is empty
-  typename TypeParam::HoldsInt container;
+  typename TypeParam::DefaultType container;
   EXPECT_TRUE((std::is_same<ep::ElementType<decltype(container)>, int>::value));
 
   container.push_front(1);
@@ -37,10 +37,10 @@ TYPED_TEST_CASE_P(Traits_IsGrowable_HasBack);
 
 TYPED_TEST_P(Traits_IsGrowable_HasBack, PushBack)
 {
-  EXPECT_TRUE(ep::Growable<typename TypeParam::HoldsInt>::value && ep::HasBack<typename TypeParam::HoldsInt>::value);
+  EXPECT_TRUE(ep::Growable<typename TypeParam::DefaultType>::value && ep::HasBack<typename TypeParam::DefaultType>::value);
 
   // Default container is empty
-  typename TypeParam::HoldsInt container;
+  typename TypeParam::DefaultType container;
   EXPECT_TRUE((std::is_same<ep::ElementType<decltype(container)>, int>::value));
 
   container.push_back(1);
@@ -53,14 +53,14 @@ TYPED_TEST_CASE_P(Traits_IsGrowable_RandomAccessible);
 
 TYPED_TEST_P(Traits_IsGrowable_RandomAccessible, Insert)
 {
-  EXPECT_TRUE(ep::Growable<typename TypeParam::HoldsInt>::value && ep::RandomAccessible<typename TypeParam::HoldsInt>::value);
+  EXPECT_TRUE(ep::Growable<typename TypeParam::DefaultType>::value && ep::RandomAccessible<typename TypeParam::DefaultType>::value);
 
   // Default container is empty
-  typename TypeParam::HoldsInt container;
+  typename TypeParam::DefaultType container;
   EXPECT_TRUE((std::is_same<ep::ElementType<decltype(container)>, int>::value));
 
-  container.insert(testTraits::value<typename TypeParam::HoldsInt>(1));
-  EXPECT_EQ(1, container.at(testTraits::key<typename TypeParam::HoldsInt>(1)));
+  container.insert(testTraits::value<typename TypeParam::DefaultType>(1));
+  EXPECT_EQ(1, container.at(testTraits::key<typename TypeParam::DefaultType>(1)));
 }
 
 REGISTER_TYPED_TEST_CASE_P(Traits_IsGrowable, Growable);
