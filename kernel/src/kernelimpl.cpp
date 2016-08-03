@@ -46,6 +46,7 @@
 #include "components/primitivegeneratorimpl.h"
 #include "components/projectimpl.h"
 #include "components/settingsimpl.h"
+#include "components/freetype.h"
 #include "components/fileimpl.h"
 #include "components/memstreamimpl.h"
 #include "components/socketimpl.h"
@@ -252,6 +253,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->registerComponentType<Project, ProjectImpl>();
   pInstance->registerComponentType<Timer, TimerImpl>();
   pInstance->registerComponentType<Settings, SettingsImpl>();
+  pInstance->registerComponentType<FreeType>();
   pInstance->registerComponentType<Lua>();
   pInstance->registerComponentType<View, ViewImpl>();
   pInstance->registerComponentType<Activity, ActivityImpl>();

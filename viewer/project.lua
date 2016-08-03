@@ -26,25 +26,25 @@ project "epviewer"
 	defines { "GLEW_STATIC" }
 
 	configuration { "windows" }
-		links { "ws2_32.lib", "winmm.lib", "opengl32.lib", "glu32.lib" }
+		links { "ws2_32.lib", "winmm.lib", "opengl32.lib", "glu32.lib", "freetype265.lib" }
  		includedirs { "../ud/3rdParty/sdl2/include", "../up/3rdParty/GL/glew/include" }
 	configuration { "windows", "x64" }
 		links { "assimp-ep64.lib" }
-		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64", "../ud/3rdparty/sdl2/lib/x64" }
+		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64", "../ud/3rdparty/sdl2/lib/x64", "../3rdparty/freetype/lib/windows/x64" }
 		postbuildcommands {
 			"{COPY} ud/3rdParty/sdl2/lib/x64/SDL2.dll .",
 			"{COPY} 3rdparty/assimp-3.1.1/lib/windows/x64/assimp-ep64.dll ."
 		}
 	configuration { "windows", "x86" }
 		links { "assimp-ep32.lib" }
-		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32", "../ud/3rdparty/sdl2/lib/x86" }
+		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32", "../ud/3rdparty/sdl2/lib/x86", "../3rdparty/freetype/lib/windows/x32" }
 		postbuildcommands {
 			"{COPY} ud/3rdParty/sdl2/lib/x86/SDL2.dll .",
 			"{COPY} 3rdparty/assimp-3.1.1/lib/windows/x32/assimp-ep32.dll ."
 		}
 
 	configuration { "linux" }
-		links { "assimp-ep", "GL", "dl" }
+		links { "assimp-ep", "GL", "dl", "freetype" }
 		libdirs { "../bin/amd64" }
 		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell" }
 		linkoptions { "-Wl,-rpath=../bin/amd64" }

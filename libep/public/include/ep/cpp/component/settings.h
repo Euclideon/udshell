@@ -2,7 +2,6 @@
 #ifndef EP_SETTINGS_H
 #define EP_SETTINGS_H
 
-//#include "ep/cpp/component/settings.h"
 #include "ep/cpp/internal/i/isettings.h"
 
 #include "ep/cpp/component/resource/resource.h"
