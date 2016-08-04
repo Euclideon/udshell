@@ -45,7 +45,7 @@ public:
     alloc();
     new(&ptr->tree) Tree(std::move(map));
   }
-  SharedMap(Slice<const typename Tree::KeyValuePair> arr)
+  SharedMap(Slice<const KeyValuePair> arr)
   {
     alloc();
     for (auto &kvp : arr)
@@ -57,8 +57,8 @@ public:
     for (size_t i = 0; i < arr.length; ++i)
       ptr->tree.insert(i, arr[i]);
   }
-  SharedMap(std::initializer_list<typename Tree::KeyValuePair> init)
-    : SharedMap(Slice<const typename Tree::KeyValuePair>(init.begin(), init.size()))
+  SharedMap(std::initializer_list<KeyValuePair> init)
+    : SharedMap(Slice<const KeyValuePair>(init.begin(), init.size()))
   {}
 
   SharedMap& operator =(const SharedMap &rh)

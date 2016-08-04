@@ -12,40 +12,40 @@
 #define DEFINE_TEST_CONTAINER(Container)                                \
   namespace testTraits {                                                \
   struct Types {                                                        \
-    using DefaultType = typename Container<int>;                        \
-    using HoldsInt = typename Container<int>;                           \
-    using HoldsFloat = typename Container<float>;                       \
-    using HoldsDouble = typename Container<double>;                     \
-    using HoldsBool = typename Container<bool>;                         \
-    using HoldsChar = typename Container<char>;                         \
-    using HoldsString = typename Container<ep::SharedString>;           \
+    using DefaultType = Container<int>;                                 \
+    using HoldsInt = Container<int>;                                    \
+    using HoldsFloat = Container<float>;                                \
+    using HoldsDouble = Container<double>;                              \
+    using HoldsBool = Container<bool>;                                  \
+    using HoldsChar = Container<char>;                                  \
+    using HoldsString = Container<ep::SharedString>;                    \
   };                                                                    \
   }
 
 #define DEFINE_TEST_CONTAINER_KEYED(Container, KeyType)                 \
   namespace testTraits {                                                \
   struct Types {                                                        \
-    using DefaultType = typename Container<KeyType, int>;               \
-    using HoldsInt = typename Container<KeyType, int>;                  \
-    using HoldsFloat = typename Container<KeyType, float>;              \
-    using HoldsDouble = typename Container<KeyType, double>;            \
-    using HoldsBool = typename Container<KeyType, bool>;                \
-    using HoldsChar = typename Container<KeyType, char>;                \
-    using HoldsString = typename Container<KeyType, ep::SharedString>;  \
+    using DefaultType = Container<KeyType, int>;                        \
+    using HoldsInt = Container<KeyType, int>;                           \
+    using HoldsFloat = Container<KeyType, float>;                       \
+    using HoldsDouble = Container<KeyType, double>;                     \
+    using HoldsBool = Container<KeyType, bool>;                         \
+    using HoldsChar = Container<KeyType, char>;                         \
+    using HoldsString = Container<KeyType, ep::SharedString>;           \
   };                                                                    \
   }
 
-#define DEFINE_TEST_CONTAINER_TREE(Container, TreeType, KeyType)                 \
-  namespace testTraits {                                                         \
-  struct Types {                                                                 \
-    using DefaultType = typename Container<TreeType<KeyType, int>>;              \
-    using HoldsInt = typename Container<TreeType<KeyType, int>>;                 \
-    using HoldsFloat = typename Container<TreeType<KeyType, float>>;             \
-    using HoldsDouble = typename Container<TreeType<KeyType, double>>;           \
-    using HoldsBool = typename Container<TreeType<KeyType, bool>>;               \
-    using HoldsChar = typename Container<TreeType<KeyType, char>>;               \
-    using HoldsString = typename Container<TreeType<KeyType, ep::SharedString>>; \
-  };                                                                             \
+#define DEFINE_TEST_CONTAINER_TREE(Container, TreeType, KeyType)        \
+  namespace testTraits {                                                \
+  struct Types {                                                        \
+    using DefaultType = Container<TreeType<KeyType, int>>;              \
+    using HoldsInt = Container<TreeType<KeyType, int>>;                 \
+    using HoldsFloat = Container<TreeType<KeyType, float>>;             \
+    using HoldsDouble = Container<TreeType<KeyType, double>>;           \
+    using HoldsBool = Container<TreeType<KeyType, bool>>;               \
+    using HoldsChar = Container<TreeType<KeyType, char>>;               \
+    using HoldsString = Container<TreeType<KeyType, ep::SharedString>>; \
+  };                                                                    \
   }
 
 
@@ -60,11 +60,11 @@ public:
   template <typename Type = T, typename std::enable_if<ep::IsKeyed<Type>::value>::type* = nullptr>
   T create()
   {
-    T::KeyValuePair pairs[Size];
+    typename T::KeyValuePair pairs[Size];
     for (int i = 0; i < Size; ++i)
-      pairs[i] = T::KeyValuePair(ep::SharedString::format("test_{0}", values[i]), values[i]);
+      pairs[i] = typename T::KeyValuePair(ep::SharedString::format("test_{0}", values[i]), values[i]);
 
-    return T(pairs);
+    return T(ep::Slice<const typename T::KeyValuePair>(pairs));
   }
   template <typename Type = T, typename std::enable_if<!ep::IsKeyed<Type>::value>::type* = nullptr>
   T create()
@@ -78,7 +78,7 @@ public:
 
 // Value ...
 template <typename Container, typename Value, typename std::enable_if<ep::IsKeyed<Container>::value>::type* = nullptr>
-auto value(Value &&val)
+auto value(Value &&val) -> typename Container::KeyValuePair
 {
   return typename Container::KeyValuePair(ep::SharedString::format("test_{0}", val), val);
 }
@@ -92,15 +92,15 @@ Value value(Value &&val)
 
 // Key ...
 template <typename Container, typename Value, typename std::enable_if<ep::IsKeyed<Container>::value>::type* = nullptr>
-auto key(Value &&val)
+auto key(Value &&val) -> typename Container::KeyType
 {
   return typename Container::KeyType(ep::SharedString::format("test_{0}", val));
 }
 
 template <typename Container, typename Value, typename std::enable_if<!ep::IsKeyed<Container>::value>::type* = nullptr>
-Value key(Value &&val)
+Value key(Value && epUnusedParam(val))
 {
-  static_assert(sizeof(Container) != 0, "Called testTraits::key(...) on a non keyed container");
+  EPASSERT(sizeof(Container) == 0, "Called testTraits::key(...) on a non keyed container");
 }
 
 
@@ -124,9 +124,9 @@ void addItem(Container &container, Item &&item)
 }
 
 template <typename Container, typename Item, typename std::enable_if<!ep::Growable<Container>::value>::type* = nullptr>
-void addItem(Container &container, Item &&item)
+void addItem(Container & epUnusedParam(container), Item && epUnusedParam(item))
 {
-  static_assert(sizeof(Container) != 0, "Called testTraits::addItem(...) on a non growable container");
+  EPASSERT(sizeof(Container) == 0, "Called testTraits::addItem(...) on a non growable container");
 }
 
 } // namespace testTraits

@@ -48,8 +48,7 @@ static_assert(ep::IsMutable<SharedArray<int>>::value == false, "ep::IsMutable fa
 static_assert(ep::IsKeyed<Array<int>>::value == false, "ep::IsKeyed failed!");
 static_assert(ep::IsKeyed<SharedArray<int>>::value == false, "ep::IsKeyed failed!");
 
-static_assert(ep::IsShared<TestStruct::Type>::value == true, "ep::IsShared failed!");
-static_assert(ep::IsShared<TestStruct::ConstType>::value == true, "ep::IsShared failed!");
+static_assert(ep::IsShared<SharedArray<int>>::value == true, "ep::IsShared failed!");
 
 
 struct TestStruct

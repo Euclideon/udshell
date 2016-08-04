@@ -153,6 +153,8 @@ Dst slice_cast(Src src);
 template <typename T, size_t Count = 0>
 struct Array : public Slice<T>
 {
+  using ElementType = typename Slice<T>::ElementType;
+
   // constructors
   Array();
   Array(nullptr_t);
@@ -235,6 +237,8 @@ private:
 template <typename T>
 struct SharedArray : public Slice<T>
 {
+  using ElementType = typename Slice<T>::ElementType;
+
   // constructors
   SharedArray();
   SharedArray(nullptr_t);
@@ -271,8 +275,8 @@ private:
   // hide a bunch of functions from slice
   void pop_front();
   void pop_back();
-  ET& popFront();
-  ET& popBack();
+  ElementType& popFront();
+  ElementType& popBack();
   Slice<T> pop(ptrdiff_t n);
 };
 

@@ -1,3 +1,7 @@
+#pragma once
+#if !defined(_EP_SHARED_H)
+#define _EP_SHARED_H
+
 #include "../traits.h"
 
 template <typename T>
@@ -8,13 +12,13 @@ TYPED_TEST_CASE_P(Traits_Shared);
 TYPED_TEST_P(Traits_Shared, CreateNull)
 {
   // default construction is null
-  TypeParam::Type spDefault;
+  typename TypeParam::Type spDefault;
   ASSERT_FALSE(spDefault);
   EXPECT_TRUE(!spDefault);
   EXPECT_EQ(0, spDefault.use_count());
 
   // explicit null construction
-  TypeParam::Type spNull = nullptr;
+  typename TypeParam::Type spNull = nullptr;
   ASSERT_FALSE(spNull);
   EXPECT_TRUE(!spNull);
   EXPECT_EQ(0, spNull.use_count());
@@ -44,14 +48,14 @@ TYPED_TEST_P(Traits_Shared, CopyAssign)
 {
   auto obj = TypeParam::create();
 
-  TypeParam::Type copy = obj;
+  typename TypeParam::Type copy = obj;
   EXPECT_TRUE(copy != nullptr);
   EXPECT_TRUE(copy == obj);
   EXPECT_EQ(2, copy.use_count());
   EXPECT_EQ(2, obj.use_count());
 
   {
-    TypeParam::Type copy2 = copy;
+    typename TypeParam::Type copy2 = copy;
     EXPECT_TRUE(copy2 != nullptr);
     EXPECT_TRUE(copy2 == copy);
     EXPECT_TRUE(copy2 == obj);
@@ -72,7 +76,7 @@ TYPED_TEST_P(Traits_Shared, MoveAssign)
 {
   auto obj = TypeParam::create();
 
-  TypeParam::Type copy = std::move(obj);
+  typename TypeParam::Type copy = std::move(obj);
 
   EXPECT_TRUE(copy != nullptr);
   EXPECT_TRUE(copy != obj);
@@ -81,7 +85,7 @@ TYPED_TEST_P(Traits_Shared, MoveAssign)
   EXPECT_EQ(0, obj.use_count());
 
   {
-    TypeParam::Type copy2 = std::move(copy);
+    typename TypeParam::Type copy2 = std::move(copy);
 
     EXPECT_TRUE(copy2 != nullptr);
     EXPECT_TRUE(copy2 != copy);
@@ -99,25 +103,25 @@ TYPED_TEST_P(Traits_Shared, ConstPromotion)
   auto obj = TypeParam::create();
 
   // TODO: this needs to work for SharedArray, and SharedString!!
-//  TypeParam::ConstType copy = obj;
+//  typename TypeParam::ConstType copy = obj;
 //
 //  EXPECT_TRUE(copy != nullptr);
 //  EXPECT_TRUE(copy == obj);
 //  EXPECT_EQ(2, copy.use_count());
 //
-//  const TypeParam::Type copy2 = obj;
+//  const typename TypeParam::Type copy2 = obj;
 //
 //  EXPECT_TRUE(copy2 != nullptr);
 //  EXPECT_TRUE(copy2 == obj);
 //  EXPECT_EQ(3, copy2.use_count());
 //
-//  const TypeParam::ConstType copy3 = copy;
+//  const typename TypeParam::ConstType copy3 = copy;
 //
 //  EXPECT_TRUE(copy3 != nullptr);
 //  EXPECT_TRUE(copy3 == copy);
 //  EXPECT_EQ(4, copy3.use_count());
 //
-//  const TypeParam::ConstType copy4 = copy2;
+//  const typename TypeParam::ConstType copy4 = copy2;
 //
 //  EXPECT_TRUE(copy4 != nullptr);
 //  EXPECT_TRUE(copy4 == copy2);
@@ -131,7 +135,7 @@ TYPED_TEST_P(Traits_Shared, Unique)
   EXPECT_TRUE(obj.unique());
 
   {
-    TypeParam::Type copy = obj;
+    typename TypeParam::Type copy = obj;
     EXPECT_FALSE(copy.unique());
   }
 
@@ -140,3 +144,5 @@ TYPED_TEST_P(Traits_Shared, Unique)
 
 
 REGISTER_TYPED_TEST_CASE_P(Traits_Shared, CreateNull, IncAndDec, CopyAssign, MoveAssign, ConstPromotion, Unique);
+
+#endif // _EP_SHARED_H

@@ -32,7 +32,7 @@ static_assert(ep::IsKeyed<TestMAP>::value == true, "ep::IsKeyed failed!");
 
 // Traits
 
-DEFINE_TEST_CONTAINER_TREE(SharedMap, AVLTree, ep::SharedString)
+DEFINE_TEST_CONTAINER_TREE(SharedMap, AVLTree, SharedString)
 using MyTypes = typename ::testing::Types<testTraits::Types>;
 INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_HasSizeTest, MyTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_IsGrowable, MyTypes);

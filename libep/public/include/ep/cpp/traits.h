@@ -12,7 +12,7 @@
   template <typename> static std::false_type Name(...);
 
 #define METHOD_EXISTS_RETURN(Name, Method, ReturnType, ...) \
-  template <typename U> static auto Name(int) -> decltype(std::enable_if<ep::internal::decay_equiv<decltype(std::declval<U>().Method(FOR_EACH_COMMA_SEP(DECLVAL_T, __VA_ARGS__))), ReturnType>::value, int>::type(), std::true_type()); \
+  template <typename U> static auto Name(int) -> decltype(typename std::enable_if<ep::internal::decay_equiv<decltype(std::declval<U>().Method(FOR_EACH_COMMA_SEP(DECLVAL_T, __VA_ARGS__))), ReturnType>::value, int>::type(), std::true_type()); \
   template <typename> static std::false_type Name(...);
 
 namespace ep {

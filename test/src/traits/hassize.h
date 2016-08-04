@@ -12,15 +12,15 @@ TYPED_TEST_CASE_P(Traits_HasSizeTest);
 TYPED_TEST_P(Traits_HasSizeTest, SizeAndEmpty)
 {
   // Verify we have the trait
-  EXPECT_TRUE(ep::HasSize<TypeParam::HoldsInt>::value);
+  EXPECT_TRUE(ep::HasSize<typename TypeParam::HoldsInt>::value);
 
   // Default container is empty
-  TypeParam::HoldsInt container;
+  typename TypeParam::HoldsInt container;
   EXPECT_EQ(0, container.size());
   EXPECT_TRUE(container.empty());
 
   // If we have the growable trait, then attempt to add
-  if (ep::Growable<TypeParam::HoldsInt>::value)
+  if (ep::Growable<typename TypeParam::HoldsInt>::value)
   {
     testTraits::addItem(container, 10);
     EXPECT_EQ(1, container.size());
@@ -28,8 +28,8 @@ TYPED_TEST_P(Traits_HasSizeTest, SizeAndEmpty)
   }
 
   // Initialise from an initializer list and verify the size
-  testTraits::ValueArray<TypeParam::HoldsChar, 10> values{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
-  TypeParam::HoldsChar initContainer = values.create();
+  testTraits::ValueArray<typename TypeParam::HoldsChar, 10> values{ { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' } };
+  typename TypeParam::HoldsChar initContainer = values.create();
 
   EXPECT_EQ(10, initContainer.size());
   EXPECT_FALSE(initContainer.empty());

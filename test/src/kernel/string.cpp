@@ -47,8 +47,7 @@ static_assert(ep::IsMutable<SharedString>::value == false, "ep::IsMutable failed
 static_assert(ep::IsKeyed<MutableString<0>>::value == false, "ep::IsKeyed failed!");
 static_assert(ep::IsKeyed<SharedString>::value == false, "ep::IsKeyed failed!");
 
-static_assert(ep::IsShared<TestStruct::Type>::value == true, "ep::IsShared failed!");
-static_assert(ep::IsShared<TestStruct::ConstType>::value == true, "ep::IsShared failed!");
+static_assert(ep::IsShared<SharedString>::value == true, "ep::IsShared failed!");
 
 
 struct TestStruct
