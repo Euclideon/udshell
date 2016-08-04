@@ -355,6 +355,8 @@ private:
 
     n->~Node();
     Allocator::get()._free(n);
+
+    --numNodes;
   }
 
   Node* insert(Node *n, Node *newnode)
