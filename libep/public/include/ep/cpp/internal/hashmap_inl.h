@@ -59,19 +59,59 @@ void HashMap<K, V, HashPred>::clear()
   }
 }
 
+
 template <typename K, typename V, typename HashPred>
-template <typename Key, typename Val>
-V& HashMap<K, V, HashPred>::insert(Key&& key, Val&& val)
+V& HashMap<K, V, HashPred>::insert(const K &key, const V &val)
 {
   Node **ppBucket = getBucket(key);
   V *pVal = getValue(*ppBucket, key);
   if (pVal)
     EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
-  Node *pNode = pool.create(std::forward<Key>(key), std::forward<Val>(val));
+  Node *pNode = pool.create(key, val);
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
   return pNode->data.value;
 }
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::insert(const K &key, V &&val)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+    EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
+  Node *pNode = pool.create(key, std::move(val));
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::insert(K &&key, const V &val)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+    EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
+  Node *pNode = pool.create(std::move(key), val);
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::insert(K &&key, V &&val)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+    EPTHROW_ERROR(Result::AlreadyExists, "Key already exists");
+  Node *pNode = pool.create(std::move(key), std::move(val));
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
 template <typename K, typename V, typename HashPred>
 V& HashMap<K, V, HashPred>::insert(KVP<K, V> &&v)
 {
@@ -83,62 +123,161 @@ V& HashMap<K, V, HashPred>::insert(const KVP<K, V> &v)
   return insert(v.key, v.value);
 }
 
+
 template <typename K, typename V, typename HashPred>
-template <typename Key>
-V& HashMap<K, V, HashPred>::tryInsert(Key&& key, V&& val)
+V& HashMap<K, V, HashPred>::tryInsert(const K &key, const V &val)
 {
   Node **ppBucket = getBucket(key);
   V *pVal = getValue(*ppBucket, key);
   if (pVal)
     return *pVal;
-  Node *pNode = pool.New(std::forward<Key>(key), std::move(val));
-  pNode->pNext = *ppBucket;
-  *ppBucket = pNode;
-  return pNode->data.value;
-}
-template <typename K, typename V, typename HashPred>
-template <typename Key>
-V& HashMap<K, V, HashPred>::tryInsert(Key&& key, const V& val)
-{
-  Node **ppBucket = getBucket(key);
-  V *pVal = getValue(*ppBucket, key);
-  if (pVal)
-    return *pVal;
-  Node *pNode = pool.New(std::forward<Key>(key), val);
-  pNode->pNext = *ppBucket;
-  *ppBucket = pNode;
-  return pNode->data.value;
-}
-template <typename K, typename V, typename HashPred>
-template <typename Key>
-V& HashMap<K, V, HashPred>::tryInsert(Key&& key, Delegate<V()> lazy)
-{
-  Node **ppBucket = getBucket(key);
-  V *pVal = getValue(*ppBucket, key);
-  if (pVal)
-    return *pVal;
-  Node *pNode = pool.create(std::forward<Key>(key), lazy());
+  Node *pNode = pool.create(key, val);
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
   return pNode->data.value;
 }
 
 template <typename K, typename V, typename HashPred>
-template <typename Key, typename Val>
-V& HashMap<K, V, HashPred>::replace(Key&& key, Val&& val)
+V& HashMap<K, V, HashPred>::tryInsert(const K &key, V &&val)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+    return *pVal;
+  Node *pNode = pool.create(key, std::move(val));
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::tryInsert(K &&key, const V &val)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+    return *pVal;
+  Node *pNode = pool.create(std::move(key), val);
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::tryInsert(K &&key, V &&val)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+    return *pVal;
+  Node *pNode = pool.create(std::move(key), std::move(val));
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::tryInsert(KVP<K, V> &&v)
+{
+  return tryInsert(std::move(v.key), std::move(v.value));
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::tryInsert(const KVP<K, V> &v)
+{
+  return tryInsert(v.key, v.value);
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::tryInsert(const K& key, Delegate<V()> lazy)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+    return *pVal;
+  Node *pNode = pool.create(key, lazy());
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::tryInsert(K &&key, Delegate<V()> lazy)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+    return *pVal;
+  Node *pNode = pool.create(std::move(key), lazy());
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::replace(const K &key, const V &val)
 {
   Node **ppBucket = getBucket(key);
   V *pVal = getValue(*ppBucket, key);
   if (pVal)
   {
-    *pVal = std::forward<Val>(val);
+    *pVal = val;
     return *pVal;
   }
-  Node *pNode = pool.create(std::forward<Key>(key), std::forward<Val>(val));
+  Node *pNode = pool.create(key, val);
   pNode->pNext = *ppBucket;
   *ppBucket = pNode;
   return pNode->data.value;
 }
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::replace(const K &key, V &&val)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+  {
+    *pVal = std::move(val);
+    return *pVal;
+  }
+  Node *pNode = pool.create(key, std::move(val));
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::replace(K &&key, const V &val)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+  {
+    *pVal = val;
+    return *pVal;
+  }
+  Node *pNode = pool.create(std::move(key), val);
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
+template <typename K, typename V, typename HashPred>
+V& HashMap<K, V, HashPred>::replace(K &&key, V &&val)
+{
+  Node **ppBucket = getBucket(key);
+  V *pVal = getValue(*ppBucket, key);
+  if (pVal)
+  {
+    *pVal = std::move(val);
+    return *pVal;
+  }
+  Node *pNode = pool.create(std::move(key), std::move(val));
+  pNode->pNext = *ppBucket;
+  *ppBucket = pNode;
+  return pNode->data.value;
+}
+
 template <typename K, typename V, typename HashPred>
 V& HashMap<K, V, HashPred>::replace(KVP<K, V> &&v)
 {

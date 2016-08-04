@@ -4,6 +4,7 @@
 #include "traits/isshrinkable.h"
 #include "ep/cpp/avltree.h"
 #include "ep/cpp/map.h"
+#include "maptests.h"
 
 using ep::AVLTree;
 using ep::SharedMap;
@@ -32,11 +33,15 @@ static_assert(ep::IsKeyed<TestMAP>::value == true, "ep::IsKeyed failed!");
 
 // Traits
 
-DEFINE_TEST_CONTAINER_TREE(SharedMap, AVLTree, SharedString)
+DEFINE_MAP_TEST_CONTAINER_TREE(SharedMap, AVLTree, SharedString)
 using MyTypes = typename ::testing::Types<testTraits::Types>;
 INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_HasSizeTest, MyTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_IsGrowable, MyTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_IsShrinkable, MyTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_IsGrowable_RandomAccessible, MyTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_IsShrinkable_RandomAccessible, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Maps_Coverage, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Maps_InsertAndRemoveTest, MyTypes);
+// TODO: Enable this once find() and remove are implemented
+//INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Maps_Iterators, MyTypes);
 
