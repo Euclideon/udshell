@@ -34,6 +34,7 @@ static_assert(ep::HasSize<ep::BaseString<char>>::value == true, "ep::HasSize fai
 static_assert(ep::HasSize<MutableString<0>>::value == true, "ep::HasSize failed!");
 static_assert(ep::HasSize<SharedString>::value == true, "ep::HasSize failed!");
 
+static_assert(ep::IsContainer<ep::BaseString<char>>::value == false, "ep::IsContainer failed!");
 static_assert(ep::IsContainer<MutableString<0>>::value == true, "ep::IsContainer failed!");
 static_assert(ep::IsContainer<SharedString>::value == true, "ep::IsContainer failed!");
 

@@ -1,4 +1,5 @@
 #include "eptest.h"
+#include "traits.h"
 #include "traits/hassize.h"
 #include "traits/isgrowable.h"
 #include "traits/isshrinkable.h"

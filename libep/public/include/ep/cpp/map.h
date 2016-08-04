@@ -228,6 +228,10 @@ private:
   }
 };
 
+// Range retrieval
+template <typename Tree>
+TreeRange<SharedMap<Tree>> range(const SharedMap<Tree> &input) { return input.getRange(); }
+
 } // namespace ep
 
 #endif // _EPMAP_HPP

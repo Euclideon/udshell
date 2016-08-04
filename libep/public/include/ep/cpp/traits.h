@@ -32,6 +32,7 @@ namespace internal {
   template <typename T, bool hasFront, bool hasBack, bool hasAt> struct ElementTypeImpl;
 
   template <typename T> class HasSizeImpl;
+  template <typename T> class ContainerImpl;
 
   template <typename T> struct GrowableImpl;
   template <typename T> struct ShrinkableImpl;
@@ -92,7 +93,7 @@ template <typename T>
 using Shrinkable = typename internal::ShrinkableImpl<T>::type;
 
 template <typename T>
-using IsContainer = typename HasSize<T>::type;
+using IsContainer = typename internal::ContainerImpl<T>::type;
 
 template <typename T>
 using IsMutable = typename And<Growable<T>::value, Shrinkable<T>::value>::type;
@@ -126,6 +127,14 @@ template <typename T>
 using IsReverseRange = typename And<HasBack<T>::value, Shrinkable<T>::value, HasSize<T>::value>::type;
 template <typename T>
 using IsBidirectionalRange = typename And<IsForwardRange<T>::value, IsReverseRange<T>::value>::type;
+
+// Visual Studio crashes if range<T>() doesn't exist but this is too greedy on GCC...
+// This should only get hit if the type doesn't specialise range
+#ifdef EP_COMPILER_VISUALC
+
+template <typename T> void range(T input) { static_assert(sizeof(T) == 0, "Type T does not support ep::range()"); }
+
+#endif
 
 } // namespace ep
 

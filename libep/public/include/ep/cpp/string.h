@@ -331,6 +331,12 @@ private:
 
 //! \endcond
 
+
+// Range retrieval
+template <typename T> BaseString<T> range(BaseString<T> input) { return input; }
+template <size_t Size> String range(const MutableString<Size> &input) { return String(input); }
+inline String range(const SharedString &input) { return String(input); }
+
 } // namespace ep
 
 #endif // _EP_STRING_HPP

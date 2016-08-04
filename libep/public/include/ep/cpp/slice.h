@@ -4,6 +4,7 @@
 
 #include <initializer_list>
 #include <functional>
+#include "ep/cpp/traits.h"
 
 namespace ep {
 namespace internal {
@@ -279,6 +280,12 @@ private:
   ElementType& popBack();
   Slice<T> pop(ptrdiff_t n);
 };
+
+
+// Range retrieval
+template <typename T> Slice<T> range(Slice<T> input) { return Slice<T>(input); }
+template <typename T> Slice<T> range(const SharedArray<T> &input) { return Slice<T>(input); }
+template <typename T, size_t N> Slice<T> range(const Array<T, N> &input) { return Slice<T>(input); }
 
 } // namespace ep
 

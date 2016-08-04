@@ -35,6 +35,7 @@ static_assert(ep::HasSize<Slice<int>>::value == true, "ep::HasSize failed!");
 static_assert(ep::HasSize<Array<int>>::value == true, "ep::HasSize failed!");
 static_assert(ep::HasSize<SharedArray<int>>::value == true, "ep::HasSize failed!");
 
+static_assert(ep::IsContainer<ep::Slice<int>>::value == false, "ep::IsContainer failed!");
 static_assert(ep::IsContainer<Array<int>>::value == true, "ep::IsContainer failed!");
 static_assert(ep::IsContainer<SharedArray<int>>::value == true, "ep::IsContainer failed!");
 
