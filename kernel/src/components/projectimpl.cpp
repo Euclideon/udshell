@@ -42,10 +42,11 @@ ProjectImpl::ProjectImpl(Component *pInstance, Variant::VarMap initParams)
 
   if (pSrc && pSrc->is(Variant::Type::String))
   {
+    srcString = pSrc->asString();
     spSrc = getKernel()->createComponent<File>({ { "path", *pSrc },{ "flags", FileOpenFlags::Read | FileOpenFlags::Text } });
 
     // set $(ProjectDir)
-    SetVars(pSrc->asString());
+    SetVars(srcString);
 
     // HACK: fix me later!!!
     auto dir = getKernel()->getEnvironmentVar("ProjectDir");
