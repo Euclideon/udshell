@@ -115,6 +115,18 @@ namespace internal {
   };
 
   template <typename T>
+  class ContainerImpl
+  {
+    // IsContainer => ep::range(T) defined and doesn't return T or void
+    using RetType = typename std::decay<decltype(range(std::declval<T>()))>::type;
+    template <typename U> static auto isContainer(int) -> decltype(typename std::enable_if<ep::And<!ep::internal::decay_equiv<RetType, U>::value, !std::is_same<RetType, void>::value>::value, int>::type(), std::true_type());
+    template <typename> static std::false_type isContainer(...);
+  public:
+    static constexpr bool value = DECLTYPE_VALUE(isContainer);
+    using type = typename BoolType<value>::type;
+  };
+
+  template <typename T>
   struct GrowableImpl
   {
     // HasFront => pushFront(E)
@@ -142,4 +154,5 @@ namespace internal {
   };
 
 } // namespace internal
+
 } // namespace ep

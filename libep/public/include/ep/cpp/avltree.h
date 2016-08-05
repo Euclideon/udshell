@@ -768,6 +768,10 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const AV
   return offset;
 }
 
+// Range retrieval
+template <typename K, typename V, typename P, typename A>
+TreeRange<AVLTree<K, V, P, A>> range(const AVLTree<K, V, P, A> &input) { return TreeRange<AVLTree<K, V, P, A>>(input); }
+
 } // namespace ep
 
 #endif // _EPAVLTREE_HPP

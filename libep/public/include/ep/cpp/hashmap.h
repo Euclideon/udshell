@@ -5,6 +5,7 @@
 #include "ep/cpp/keyvaluepair.h"
 #include "ep/cpp/freelist.h"
 #include "ep/cpp/delegate.h"
+#include "ep/cpp/range.h"
 
 #include <functional>
 
@@ -155,6 +156,11 @@ inline uint32_t HashPointer(void *pPtr)
   return (uint32_t)r;
 #endif // EP_32BIT
 }
+
+
+// Range retrieval
+template <typename K, typename V, typename HashPred>
+TreeRange<HashMap<K, V, HashPred>> range(const HashMap<K, V, HashPred> &input) { return TreeRange<HashMap<K, V, HashPred>>(input); }
 
 } // namespace ep
 
