@@ -61,7 +61,7 @@ public:
   T create()
   {
     typename T::KeyValuePair pairs[Size];
-    for (int i = 0; i < Size; ++i)
+    for (size_t i = 0; i < Size; ++i)
       pairs[i] = typename T::KeyValuePair(ep::SharedString::format("test_{0}", values[i]), values[i]);
 
     return T(ep::Slice<const typename T::KeyValuePair>(pairs));

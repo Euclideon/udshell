@@ -63,22 +63,32 @@ public:
 
   void clear();
 
-  template <typename Key, typename Val>
-  V& insert(Key&& key, Val&& val);
+  V& insert(const K &key, const V &val);
+  V& insert(const K &key, V &&val);
+  V& insert(K &&key, const V &val);
+  V& insert(K &&key, V &&val);
+
   V& insert(KVP<K, V> &&v);
   V& insert(const KVP<K, V> &v);
 
-  template <typename Key>
-  V& tryInsert(Key&& key, V&& val);
-  template <typename Key>
-  V& tryInsert(Key&& key, const V& val);
-  template <typename Key>
-  V& tryInsert(Key&& key, Delegate<V()> lazyValue);
+  V& tryInsert(const K &key, const V &val);
+  V& tryInsert(const K &key, V &&val);
+  V& tryInsert(K &&key, const V &val);
+  V& tryInsert(K &&key, V &&val);
 
-  template <typename Key, typename Val>
-  V& replace(Key&& key, Val&& val);
-  V& replace(KVP<K, V> &&v);
+  V& tryInsert(KVP<K, V> &&v);
+  V& tryInsert(const KVP<K, V> &v);
+
+  V& tryInsert(const K &key, Delegate<V()> lazyValue);
+  V& tryInsert(K &&key, Delegate<V()> lazyValue);
+
+  V& replace(const K &key, const V &val);
+  V& replace(const K &key, V &&val);
+  V& replace(K &&key, const V &val);
+  V& replace(K&& key, V&& val);
+
   V& replace(const KVP<K, V> &v);
+  V& replace(KVP<K, V> &&v);
 
   void remove(const K &key);
 

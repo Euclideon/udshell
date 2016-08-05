@@ -3,6 +3,7 @@
 #include "traits/isgrowable.h"
 #include "traits/isshrinkable.h"
 #include "ep/cpp/avltree.h"
+#include "maptests.h"
 
 using ep::AVLTree;
 using ep::SharedString;
@@ -31,11 +32,15 @@ static_assert(ep::IsMutable< TestAVLTree>::value == true, "ep::IsMutable failed!
 static_assert(ep::IsKeyed<TestAVLTree>::value == true, "ep::IsKeyed failed!");
 
 
-DEFINE_TEST_CONTAINER_KEYED(ep::AVLTree, ep::SharedString)
+DEFINE_MAP_TEST_CONTAINER_KEYED(ep::AVLTree, ep::SharedString)
 using MyTypes = typename ::testing::Types<testTraits::Types>;
 INSTANTIATE_TYPED_TEST_CASE_P(AVLTree, Traits_HasSizeTest, MyTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(AVLTree, Traits_IsGrowable, MyTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(AVLTree, Traits_IsShrinkable, MyTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(AVLTree, Traits_IsGrowable_RandomAccessible, MyTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(AVLTree, Traits_IsShrinkable_RandomAccessible, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(AVLTree, Maps_Coverage, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(AVLTree, Maps_InsertAndRemoveTest, MyTypes);
+// TODO: Enable this once find() and remove are implemented
+//INSTANTIATE_TYPED_TEST_CASE_P(AVLTree, Maps_Iterators, MyTypes);
 
