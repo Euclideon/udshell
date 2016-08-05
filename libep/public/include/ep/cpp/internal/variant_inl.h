@@ -735,6 +735,11 @@ inline Variant epToVariant(const Vector4<F> &v)
   return std::move(a);
 }
 template<typename F>
+inline Variant epToVariant(const Quaternion<F> &q)
+{
+  return epToVariant((const Vector4<F>&)q);
+}
+template<typename F>
 inline Variant epToVariant(const Matrix4x4<F> &m)
 {
   Array<Variant> a(Reserve, 16);
@@ -819,6 +824,11 @@ inline void epFromVariant(const Variant &v, Vector2<U> *pR)
     }
     EPTHROW_ERROR(Result::InvalidArgument, "Incorrect number of elements");
   }
+  else if (v.is(Variant::Type::String))
+  {
+    v.as<Array<U, 2>>().copyTo(Slice<U>(&pR->x, 2));
+    return;
+  }
   else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     auto aa = v.asAssocArray();
@@ -849,6 +859,11 @@ inline void epFromVariant(const Variant &v, Vector3<U> *pR)
       return;
     }
     EPTHROW_ERROR(Result::InvalidArgument, "Incorrect number of elements");
+  }
+  else if (v.is(Variant::Type::String))
+  {
+    v.as<Array<U, 3>>().copyTo(Slice<U>(&pR->x, 3));
+    return;
   }
   else if (v.is(Variant::SharedPtrType::AssocArray))
   {
@@ -882,6 +897,11 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
     }
     EPTHROW_ERROR(Result::InvalidArgument, "Incorrect number of elements");
   }
+  else if (v.is(Variant::Type::String))
+  {
+    v.as<Array<U, 4>>().copyTo(Slice<U>(&pR->x, 4));
+    return;
+  }
   else if (v.is(Variant::SharedPtrType::AssocArray))
   {
     auto aa = v.asAssocArray();
@@ -899,6 +919,11 @@ inline void epFromVariant(const Variant &v, Vector4<U> *pR)
     pR->x = aa["x"].as<U>();
   }
   EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
+}
+template<typename U>
+inline void epFromVariant(const Variant &v, Quaternion<U> *pR)
+{
+  return epFromVariant(v, (Vector4<U>*)pR);
 }
 template<typename U>
 inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
@@ -927,6 +952,11 @@ inline void epFromVariant(const Variant &v, Matrix4x4<U> *pR)
       return;
     }
     EPTHROW_ERROR(Result::InvalidArgument, "Incorrect number of elements");
+  }
+  else if (v.is(Variant::Type::String))
+  {
+    v.as<Array<U, 16>>().copyTo(Slice<U>(pR->a, 16));
+    return;
   }
   EPTHROW_ERROR(Result::InvalidType, "Wrong type!");
 }
@@ -957,19 +987,6 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
       pArr->pushBack(a[i].as<U>());
     return;
   }
-  else if (v.is(Variant::SharedPtrType::AssocArray))
-  {
-    size_t len = v.assocArraySeriesLen();
-    if (len > 0)
-    {
-      Variant::VarMap m = v.asAssocArray();
-      pArr->reserve(len);
-      size_t start = m.get(0) ? 0 : 1;
-      for (size_t i = 0; i < len; ++i)
-        pArr->pushBack(m.get(start + i)->as<U>());
-    }
-    return;
-  }
   else if (v.is(Variant::Type::String))
   {
     String s = v.asString();
@@ -987,6 +1004,19 @@ inline void epFromVariant(const Variant &v, Array<U, Len> *pArr)
       return;
     }
     EPTHROW_ERROR(Result::InvalidArgument, "String does not look like an array, ie: \"[x, y, z]\"");
+  }
+  else if (v.is(Variant::SharedPtrType::AssocArray))
+  {
+    size_t len = v.assocArraySeriesLen();
+    if (len > 0)
+    {
+      Variant::VarMap m = v.asAssocArray();
+      pArr->reserve(len);
+      size_t start = m.get(0) ? 0 : 1;
+      for (size_t i = 0; i < len; ++i)
+        pArr->pushBack(m.get(start + i)->as<U>());
+    }
+    return;
   }
   else if (v.is(Variant::Type::Null))
     return;
