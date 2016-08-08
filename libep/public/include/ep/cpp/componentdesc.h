@@ -175,7 +175,7 @@ public:                                                                         
     return info;                                                                         \
   }                                                                                      \
   template <typename T>                                                                  \
-  T* getImpl() const { return static_cast<T*>(pImpl.ptr()); }                            \
+  T* getImpl() const { return static_cast<T*>(pImpl.get()); }                            \
 private:                                                                                 \
   ep::UniquePtr<Impl> pImpl = nullptr;                                                   \
   ep::UniquePtr<Impl> createImpl(ep::Variant::VarMap initParams)                         \

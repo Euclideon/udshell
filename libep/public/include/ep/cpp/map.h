@@ -3,7 +3,7 @@
 #define _EPMAP_HPP
 
 #include "ep/cpp/range.h"
-
+#include "ep/cpp/delegate.h"
 namespace ep {
 
 template <typename Tree> struct SharedMap;
@@ -23,6 +23,7 @@ public:
   using MapType = Tree;
   using KeyType = typename Tree::KeyType;
   using ValueType = typename Tree::ValueType;
+  using KeyValuePair = typename Tree::KeyValuePair;
   using Iterator = typename Tree::Iterator;
 
   SharedMap() {}
@@ -44,7 +45,7 @@ public:
     alloc();
     new(&ptr->tree) Tree(std::move(map));
   }
-  SharedMap(Slice<const typename Tree::KeyValuePair> arr)
+  SharedMap(Slice<const KeyValuePair> arr)
   {
     alloc();
     for (auto &kvp : arr)
@@ -56,8 +57,8 @@ public:
     for (size_t i = 0; i < arr.length; ++i)
       ptr->tree.insert(i, arr[i]);
   }
-  SharedMap(std::initializer_list<typename Tree::KeyValuePair> init)
-    : SharedMap(Slice<const typename Tree::KeyValuePair>(init.begin(), init.size()))
+  SharedMap(std::initializer_list<KeyValuePair> init)
+    : SharedMap(Slice<const KeyValuePair>(init.begin(), init.size()))
   {}
 
   SharedMap& operator =(const SharedMap &rh)
@@ -74,6 +75,8 @@ public:
   size_t size() const { return ptr ? ptr->tree.size() : 0; }
 
   bool empty() const { return ptr ? ptr->tree.empty() : true; }
+
+  void clear() { if(ptr) ptr->tree.clear(); }
 
   ValueType& insert(KeyType &&key, ValueType &&rval)
   {
@@ -113,26 +116,60 @@ public:
     return ptr->tree.insert(v);
   }
 
-  template <typename Key>
-  ValueType& tryInsert(Key&& key, ValueType&& val)
+  ValueType& tryInsert(const KeyType &key, const ValueType &val)
   {
     if (!ptr)
       alloc();
-    return ptr->tree.tryInsert(std::forward<Key>(key), std::move(val));
+    return ptr->tree.tryInsert(key, val);
   }
-  template <typename Key>
-  ValueType& tryInsert(Key&& key, const ValueType& val)
+
+  ValueType& tryInsert(KeyType &&key, const ValueType &val)
   {
     if (!ptr)
       alloc();
-    return ptr->tree.tryInsert(std::forward<Key>(key), val);
+    return ptr->tree.tryInsert(std::move(key), val);
   }
-  template <typename Key>
-  ValueType& tryInsert(Key&& key, std::function<ValueType()> lazyValue)
+
+  ValueType& tryInsert(const KeyType &key, ValueType &&val)
   {
     if (!ptr)
       alloc();
-    return ptr->tree.tryInsert(std::forward<Key>(key), lazyValue);
+    return ptr->tree.tryInsert(key, std::move(val));
+  }
+
+  ValueType& tryInsert(KeyType &&key, ValueType &&val)
+  {
+    if (!ptr)
+      alloc();
+    return ptr->tree.tryInsert(std::move(key), std::move(val));
+  }
+
+  ValueType& tryInsert(const KVP<KeyType, ValueType> &kvp)
+  {
+    if (!ptr)
+      alloc();
+    return ptr->tree.tryInsert(kvp.key, kvp.value);
+  }
+
+  ValueType& tryInsert(KVP<KeyType, ValueType> &&kvp)
+  {
+    if (!ptr)
+      alloc();
+    return ptr->tree.tryInsert(std::move(kvp.key), std::move(kvp.value));
+  }
+
+  ValueType& tryInsert(const KeyType &key, Delegate<ValueType()> lazyValue)
+  {
+    if (!ptr)
+      alloc();
+    return ptr->tree.tryInsert(key, lazyValue());
+  }
+
+  ValueType& tryInsert(KeyType&& key, Delegate<ValueType()> lazyValue)
+  {
+    if (!ptr)
+      alloc();
+    return ptr->tree.tryInsert(std::move(key), lazyValue());
   }
 
   ValueType& replace(KeyType &&key, ValueType &&rval)
@@ -201,6 +238,14 @@ public:
     return *pV;
   }
 
+  const ValueType& at(const KeyType &key) const { return operator[](key); }
+  ValueType& at(const KeyType &key) { return operator[](key); }
+
+  bool exists(const KeyType &key)
+  {
+    return ptr ? ptr->tree.exists(key) : false;
+  }
+
   TreeRange<Tree> getRange() const { return ptr ? TreeRange<Tree>(ptr->tree) : TreeRange<Tree>(); }
 
   Iterator begin() const { return ptr ? ptr->tree.begin() : ptr->tree.end(); }
@@ -222,6 +267,10 @@ private:
     ptr = SharedPtr<Node>::create();
   }
 };
+
+// Range retrieval
+template <typename Tree>
+TreeRange<SharedMap<Tree>> range(const SharedMap<Tree> &input) { return input.getRange(); }
 
 } // namespace ep
 

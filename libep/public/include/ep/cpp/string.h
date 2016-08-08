@@ -37,6 +37,8 @@ struct VarArg;
 template<typename C>
 struct BaseString : public Slice<const C>
 {
+  using ElementType = typename Slice<const C>::ElementType;
+
   // constructors
   BaseString();
   BaseString(const C *ptr, size_t length);
@@ -126,6 +128,8 @@ typedef BaseString<char32_t> DString;
 template<size_t Size = 0>
 struct MutableString : public Array<char, Size>
 {
+  using ElementType = typename Array<char, Size>::ElementType;
+
   // constructors
   MutableString();
   MutableString(const MutableString<Size> &rh);
@@ -217,6 +221,8 @@ typedef MutableString<256 - sizeof(Slice<char>)> MutableString256;
 // useful in situations where std::string would usually be found, but without the endless allocation and copying or linkage problems
 struct SharedString : public SharedArray<const char>
 {
+  using ElementType = typename SharedArray<const char>::ElementType;
+
   // constructors
   SharedString();
   SharedString(const SharedString &val);
@@ -324,6 +330,12 @@ private:
 };
 
 //! \endcond
+
+
+// Range retrieval
+template <typename T> BaseString<T> range(BaseString<T> input) { return input; }
+template <size_t Size> String range(const MutableString<Size> &input) { return String(input); }
+inline String range(const SharedString &input) { return String(input); }
 
 } // namespace ep
 

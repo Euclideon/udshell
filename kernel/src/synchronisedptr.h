@@ -25,7 +25,7 @@ public:
   SynchronisedPtr() {}
   template <class U>
   explicit SynchronisedPtr(const SharedPtr<U> &p, Kernel *pKernel)
-    : pInstance((T*)p.acquire(p.ptr()))
+    : pInstance((T*)p.acquire(p.get()))
     , pKernel(pKernel)
   {
     EPASSERT(pKernel, "SynchronisedPtr must have a valid Kernel pointer!");
@@ -83,7 +83,7 @@ public:
   // underlying pointer operations :
   T& operator*() const { return *pInstance; }
   T* operator->() const { return pInstance; }
-  T* ptr() const { return pInstance; }
+  T* get() const { return pInstance; }
 
 private:
   template<typename U> friend struct SynchronisedPtr;

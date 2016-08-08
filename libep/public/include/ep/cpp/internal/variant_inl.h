@@ -213,7 +213,7 @@ inline Variant::Variant(size_t val, const EnumDesc *pDesc, bool isBitfield)
 }
 inline Variant::Variant(SharedPtr<RefCounted> &&spC, SharedPtrType type)
 {
-  if (spC.ptr())
+  if (spC.get())
   {
     t = (size_t)Type::SharedPtr;
     ownsContent = 1;
@@ -249,7 +249,7 @@ inline Variant::Variant(RefCounted *pRef, SharedPtrType type, bool _ownsContent)
   }
 }
 inline Variant::Variant(const SharedPtr<RefCounted> &spRC, SharedPtrType type, bool _ownsContent)
-  : Variant(spRC.ptr(), type, _ownsContent)
+  : Variant(spRC.get(), type, _ownsContent)
 {}
 inline Variant::Variant(VarDelegate &&d)
   : Variant(std::move((SharedPtr<RefCounted>&)d.m), SharedPtrType::Delegate)
@@ -261,7 +261,7 @@ inline Variant::Variant(ComponentRef &&spC)
   : Variant(std::move((SharedPtr<RefCounted>&)spC), SharedPtrType::Component)
 {}
 inline Variant::Variant(const ComponentRef &spC)
-  : Variant((RefCounted*)spC.ptr(), SharedPtrType::Component)
+  : Variant((RefCounted*)spC.get(), SharedPtrType::Component)
 {}
 inline Variant::Variant(SubscriptionRef &&spS)
   : Variant(std::move((SharedPtr<RefCounted>&)spS), SharedPtrType::Subscription)

@@ -222,14 +222,6 @@ inline typename Slice<T>::ET& Slice<T>::popBack()
 }
 
 template<typename T>
-inline Slice<T> Slice<T>::get(ptrdiff_t n) const
-{
-  if (n < 0)
-    return slice(n, length);
-  else
-    return slice(0, n);
-}
-template<typename T>
 inline Slice<T> Slice<T>::pop(ptrdiff_t n)
 {
   if (n < 0)
@@ -243,8 +235,17 @@ inline Slice<T> Slice<T>::pop(ptrdiff_t n)
     return Slice<T>(ptr - n, n);
   }
 }
+
 template<typename T>
-inline Slice<T> Slice<T>::strip(ptrdiff_t n) const
+inline Slice<T> Slice<T>::take(ptrdiff_t n) const
+{
+  if (n < 0)
+    return slice(n, length);
+  else
+    return slice(0, n);
+}
+template<typename T>
+inline Slice<T> Slice<T>::drop(ptrdiff_t n) const
 {
   if (n < 0)
     return slice(0, n);
@@ -572,6 +573,7 @@ inline Array<T, Count>::Array(Array<T, Count> &&rval)
     // we can copy large buffers efficiently!
     this->ptr = rval.ptr;
     rval.ptr = nullptr;
+    rval.length = 0;
   }
   else
   {
@@ -727,19 +729,88 @@ inline Array<T, Count>& Array<T, Count>::operator =(Slice<U> rh)
 }
 
 template <typename T, size_t Count>
-template <typename U>
-inline Array<T, Count>& Array<T, Count>::pushBack(U &&item)
-{
-  reserve(this->length + 1);
-  epConstruct((void*)&(this->ptr[this->length++])) T(std::forward<U>(item));
-  return *this;
-}
-
-template <typename T, size_t Count>
 T& Array<T, Count>::front() const
 {
   return this->ptr[0];
 }
+template <typename T, size_t Count>
+T& Array<T, Count>::back() const
+{
+  return this->ptr[this->length-1];
+}
+
+template <typename T, size_t Count>
+template <typename U>
+void Array<T, Count>::push_front(U &&item)
+{
+  reserve(this->length + 1);
+  for (size_t i = this->length++; i > 0; --i)
+  {
+    epConstruct((void*)&this->ptr[i]) T(std::move(this->ptr[i-1]));
+    this->ptr[i-1].~T();
+  }
+  epConstruct((void*)this->ptr) T(std::forward<U>(item));
+}
+template <typename T, size_t Count>
+template <typename U>
+void Array<T, Count>::push_back(U &&item)
+{
+  reserve(this->length + 1);
+  epConstruct((void*)&(this->ptr[this->length++])) T(std::forward<U>(item));
+}
+
+template <typename T, size_t Count>
+void Array<T, Count>::pop_front()
+{
+  // TODO: this should be removed and uses replaced with a udQueue type.
+  for (size_t i = 1; i < this->length; ++i)
+  {
+    this->ptr[i-1].~T();
+    epConstruct((void*)&this->ptr[i-1]) T(std::move(this->ptr[i]));
+  }
+  this->ptr[--this->length].~T();
+}
+template <typename T, size_t Count>
+void Array<T, Count>::pop_back()
+{
+  --this->length;
+  this->ptr[this->length].~T();
+}
+
+template <typename T, size_t Count>
+inline T& Array<T, Count>::pushFront()
+{
+  reserve(this->length + 1);
+  for (size_t i = this->length++; i > 0; --i)
+  {
+    epConstruct((void*)&this->ptr[i]) T(std::move(this->ptr[i-1]));
+    this->ptr[i-1].~T();
+  }
+  epConstruct((void*)this->ptr) T();
+  return this->ptr[0];
+}
+template <typename T, size_t Count>
+inline T& Array<T, Count>::pushBack()
+{
+  reserve(this->length + 1);
+  epConstruct((void*)&(this->ptr[this->length])) T();
+  return this->ptr[this->length++];
+}
+template <typename T, size_t Count>
+template <typename U>
+inline T& Array<T, Count>::pushFront(U &&item)
+{
+  push_front(std::forward<U>(item));
+  return this->ptr[0];
+}
+template <typename T, size_t Count>
+template <typename U>
+inline T& Array<T, Count>::pushBack(U &&item)
+{
+  push_back(std::forward<U>(item));
+  return this->ptr[this->length-1];
+}
+
 template <typename T, size_t Count>
 T Array<T, Count>::popFront()
 {
@@ -760,14 +831,6 @@ T Array<T, Count>::popBack()
   T copy(std::move(this->ptr[this->length]));
   this->ptr[this->length].~T();
   return copy;
-}
-
-template <typename T, size_t Count>
-inline T& Array<T, Count>::pushBack()
-{
-  reserve(this->length + 1);
-  epConstruct((void*)&(this->ptr[this->length])) T();
-  return this->ptr[this->length++];
 }
 
 template <typename T, size_t Count>
@@ -822,7 +885,7 @@ inline SharedArray<T>::SharedArray(Concat_T, Items&&... items)
 }
 
 template<typename T>
-inline SharedArray<T>::SharedArray(std::initializer_list<typename SharedArray<T>::ET> list)
+inline SharedArray<T>::SharedArray(std::initializer_list<T> list)
   : SharedArray<T>(list.begin(), list.size())
 {}
 
@@ -838,13 +901,9 @@ inline SharedArray<T>::SharedArray(SharedArray<T> &&rval)
   : Slice<T>(rval)
 {
   rval.ptr = nullptr;
+  rval.length = 0;
 }
 
-template <typename T>
-template <typename U, size_t Len>
-inline SharedArray<T>::SharedArray(const Array<U, Len> &arr)
-  : SharedArray<T>(Slice<T>(arr))
-{}
 template <typename T>
 template <typename U, size_t Len>
 inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
@@ -855,9 +914,10 @@ inline SharedArray<T>::SharedArray(Array<U, Len> &&rval)
     this->ptr = rval.ptr;
     this->length = rval.length;
     rval.ptr = nullptr;
+    rval.length = 0;
   }
   else
-    epConstruct(this) SharedArray<T>(Slice<T>(rval));
+    epConstruct(this) SharedArray<T>(rval.ptr, rval.length);
 }
 
 template <typename T>
@@ -900,9 +960,27 @@ inline SharedArray<T>::~SharedArray()
 }
 
 template <typename T>
-size_t inline SharedArray<T>::refcount() const
+size_t inline SharedArray<T>::use_count() const
 {
   return this->ptr ? internal::GetSliceHeader(this->ptr)->refCount : 0;
+}
+template <typename T>
+size_t inline SharedArray<T>::incRef()
+{
+  return this->ptr ? ++internal::GetSliceHeader(this->ptr)->refCount : 0;
+}
+template <typename T>
+size_t inline SharedArray<T>::decRef()
+{
+  size_t &rc = internal::GetSliceHeader(this->ptr)->refCount;
+  if (rc == 1)
+  {
+    destroy();
+    this->ptr = nullptr;
+    this->length = 0;
+    return 0;
+  }
+  return --rc;
 }
 
 template <typename T>
@@ -940,7 +1018,7 @@ template <typename U>
 inline SharedArray<T>& SharedArray<T>::operator =(Slice<U> rh)
 {
   if (this->ptr != rh.ptr)
-    *this = SharedArray(rh);
+    *this = SharedArray(rh.ptr, rh.length);
   return *this;
 }
 

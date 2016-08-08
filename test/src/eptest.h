@@ -1,7 +1,7 @@
 #pragma once
 #if !defined(_EP_TEST_H)
 #define _EP_TEST_H
-#include "ep/c/platform.h"
+#include "ep/cpp/platform.h"
 #include "gtest/gtest.h"
 
 #if EP_DEBUG

@@ -151,8 +151,8 @@ private:
   };
 
   QtEPComponent() : QObject(nullptr), pComponent(nullptr) {}
-  QtEPComponent(const ep::ComponentRef &spComponent) : QObject(nullptr), spComponent(spComponent) { pComponent = spComponent.ptr(); }
-  QtEPComponent(ep::ComponentRef &&rval) : QObject(nullptr), spComponent(std::move(rval)) { pComponent = spComponent.ptr(); }
+  QtEPComponent(const ep::ComponentRef &spComponent) : QObject(nullptr), spComponent(spComponent) { pComponent = spComponent.get(); }
+  QtEPComponent(ep::ComponentRef &&rval) : QObject(nullptr), spComponent(std::move(rval)) { pComponent = spComponent.get(); }
   QtEPComponent(const QtEPComponent &val)
     : QObject(val.parent()), pMetaObj(val.pMetaObj), spComponent(ep::ComponentRef(val.pComponent)), pComponent(val.pComponent)
   {

@@ -5,6 +5,7 @@
 #include "ep/cpp/keyvaluepair.h"
 #include "ep/cpp/freelist.h"
 #include "ep/cpp/delegate.h"
+#include "ep/cpp/range.h"
 
 #include <functional>
 
@@ -34,8 +35,26 @@ template <typename K, typename V, typename HashPred = Hash<K>>
 class HashMap
 {
 public:
-  HashMap(size_t tableSize = 0x2000, size_t itemBucketSize = 0x100);
+  using KeyType = K;
+  using ValueType = V;
+  using KeyValuePair = KVP<K, V>;
+
+  enum { DefaultTableSize = 0x2000 };
+  enum { DefaultItemBucketSize = 0x100 };
+
+  HashMap(size_t tableSize = DefaultTableSize, size_t itemBucketSize = DefaultItemBucketSize);
   HashMap(HashMap &&rval);
+
+  HashMap(Slice<const KeyValuePair> arr, size_t tableSize = DefaultTableSize, size_t itemBucketSize = DefaultItemBucketSize)
+    : HashMap(tableSize, itemBucketSize)
+  {
+    for (auto &kvp : arr)
+      insert(kvp);
+  }
+
+  HashMap(std::initializer_list<KeyValuePair> init, size_t tableSize = DefaultTableSize, size_t itemBucketSize = DefaultItemBucketSize)
+    : HashMap(Slice<const KeyValuePair>(init.begin(), init.size()), tableSize, itemBucketSize)
+  {}
 
   ~HashMap();
 
@@ -44,22 +63,32 @@ public:
 
   void clear();
 
-  template <typename Key, typename Val>
-  V& insert(Key&& key, Val&& val);
+  V& insert(const K &key, const V &val);
+  V& insert(const K &key, V &&val);
+  V& insert(K &&key, const V &val);
+  V& insert(K &&key, V &&val);
+
   V& insert(KVP<K, V> &&v);
   V& insert(const KVP<K, V> &v);
 
-  template <typename Key>
-  V& tryInsert(Key&& key, V&& val);
-  template <typename Key>
-  V& tryInsert(Key&& key, const V& val);
-  template <typename Key>
-  V& tryInsert(Key&& key, Delegate<V()> lazyValue);
+  V& tryInsert(const K &key, const V &val);
+  V& tryInsert(const K &key, V &&val);
+  V& tryInsert(K &&key, const V &val);
+  V& tryInsert(K &&key, V &&val);
 
-  template <typename Key, typename Val>
-  V& replace(Key&& key, Val&& val);
-  V& replace(KVP<K, V> &&v);
+  V& tryInsert(KVP<K, V> &&v);
+  V& tryInsert(const KVP<K, V> &v);
+
+  V& tryInsert(const K &key, Delegate<V()> lazyValue);
+  V& tryInsert(K &&key, Delegate<V()> lazyValue);
+
+  V& replace(const K &key, const V &val);
+  V& replace(const K &key, V &&val);
+  V& replace(K &&key, const V &val);
+  V& replace(K&& key, V&& val);
+
   V& replace(const KVP<K, V> &v);
+  V& replace(KVP<K, V> &&v);
 
   void remove(const K &key);
 
@@ -68,6 +97,8 @@ public:
 
   const V& operator[](const K &key) const;
   V& operator[](const K &key);
+  const V& at(const K &key) const { return operator[](key); }
+  V& at(const K &key) { return operator[](key); }
 
   bool exists(const K &key);
 
@@ -135,6 +166,11 @@ inline uint32_t HashPointer(void *pPtr)
   return (uint32_t)r;
 #endif // EP_32BIT
 }
+
+
+// Range retrieval
+template <typename K, typename V, typename HashPred>
+TreeRange<HashMap<K, V, HashPred>> range(const HashMap<K, V, HashPred> &input) { return TreeRange<HashMap<K, V, HashPred>>(input); }
 
 } // namespace ep
 

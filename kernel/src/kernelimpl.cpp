@@ -426,7 +426,7 @@ KernelImpl::~KernelImpl()
     for (const auto &c : instanceRegistry)
     {
       ++count;
-      DebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->getName(), c.value->refCount());
+      DebugFormat("Unfreed Component: {0} ({1}) refCount {2} \n", c.key, c.value->getName(), c.value->use_count());
     }
     DebugFormat("{0} Unfreed Component(s)\n", count);
   }
@@ -778,7 +778,7 @@ const ComponentDesc* KernelImpl::RegisterComponentTypeFromMap(Variant::VarMap ty
     const DynamicComponentDesc *pDesc = (const DynamicComponentDesc*)_pType;
     DynamicComponentRef spInstance = pDesc->newInstance(KernelRef(_pKernel), initParams);
     ComponentRef spC = _pKernel->createGlue(pDesc->baseClass, _pType, _uid, spInstance, initParams);
-    spInstance->attachToGlue(spC.ptr(), initParams);
+    spInstance->attachToGlue(spC.get(), initParams);
     spC->pUserData = spInstance->getUserData();
     return spC;
   };
@@ -846,7 +846,7 @@ ComponentRef KernelImpl::CreateComponent(String typeId, Variant::VarMap initPara
     ComponentRef spComponent(pDesc->pCreateInstance(pDesc, pInstance, newUid, initParams));
 
     // add to the component registry
-    instanceRegistry.insert(spComponent->uid, spComponent.ptr());
+    instanceRegistry.insert(spComponent->uid, spComponent.get());
 
     // TODO: inform partner kernels that I created a component
     //...

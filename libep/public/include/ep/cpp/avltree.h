@@ -5,6 +5,7 @@
 #include "ep/cpp/platform.h"
 #include "ep/cpp/keyvaluepair.h"
 #include "ep/cpp/range.h"
+#include "ep/cpp/delegate.h"
 
 namespace ep {
 
@@ -52,7 +53,7 @@ struct AVLTree
 {
 public:
   using KeyType = K;
-  using ValueType = V;
+  using ValueType = V; // TODO: -> ElementType
   using KeyValuePair = KVP<K, V>;
 
   AVLTree() {}
@@ -128,29 +129,68 @@ public:
     return replace(kvp);
   }
 
-  template <typename Key>
-  V& tryInsert(Key&& key, V&& val)
+  V& tryInsert(const K &key, const V &val)
   {
     V *v = get(key);
     if (v)
       return *v;
-    return replace(std::forward<Key>(key), std::move(val));
+    return replace(key, val);
   }
-  template <typename Key>
-  V& tryInsert(Key&& key, const V& val)
+
+  V& tryInsert(const K &key, V &&val)
   {
     V *v = get(key);
     if (v)
       return *v;
-    return replace(std::forward<Key>(key), val);
+    return replace(key, std::move(val));
   }
-  template <typename Key>
-  V& tryInsert(Key&& key, std::function<V()> lazy)
+
+  V& tryInsert(K &&key, const V &val)
   {
     V *v = get(key);
     if (v)
       return *v;
-    return replace(std::forward<Key>(key), lazy());
+    return replace(std::move(key), val);
+  }
+
+  V& tryInsert(K &&key, V &&val)
+  {
+    V *v = get(key);
+    if (v)
+      return *v;
+    return replace(std::move(key), std::move(val));
+  }
+
+  V& tryInsert(const K &key, Delegate<V()> lazy)
+  {
+    V *v = get(key);
+    if (v)
+      return *v;
+    return replace(key, lazy());
+  }
+
+  V& tryInsert(K &&key, Delegate<V()> lazy)
+  {
+    V *v = get(key);
+    if (v)
+      return *v;
+    return replace(std::move(key), lazy());
+  }
+
+  V& tryInsert(const KVP<K,V> &kvp)
+  {
+    V *v = get(kvp.key);
+    if (v)
+      return *v;
+    return replace(kvp.key, kvp.value);
+  }
+
+  V& tryInsert(KVP<K, V> &&kvp)
+  {
+    V *v = get(kvp.key);
+    if (v)
+      return *v;
+    return replace(std::move(kvp.key), std::move(kvp.value));
   }
 
   V& replace(K &&key, V &&val)
@@ -242,6 +282,13 @@ public:
     V *pV = get(key);
     EPASSERT_THROW(pV, Result::OutOfBounds, "Element not found: {0}", key);
     return *pV;
+  }
+  const V& at(const K &key) const { return operator[](key); }
+  V& at(const K &key) { return operator[](key); }
+
+  bool exists(const K &key)
+  {
+    return get(key) != nullptr;
   }
 
   AVLTree<K, V>& operator =(const AVLTree<K, V> &rh)
@@ -353,6 +400,8 @@ private:
 
     n->~Node();
     Allocator::get()._free(n);
+
+    --numNodes;
   }
 
   Node* insert(Node *n, Node *newnode)
@@ -743,7 +792,7 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const AV
     if (!bFirst)
     {
       if (buffer)
-        offset += String(", ").copyTo(buffer.strip(offset));
+        offset += String(", ").copyTo(buffer.drop(offset));
       else
         offset += String(", ").length;
     }
@@ -751,18 +800,22 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), const AV
       bFirst = false;
 
     if (buffer)
-      offset += epStringify(buffer.strip(offset), nullptr, kvp, nullptr);
+      offset += epStringify(buffer.drop(offset), nullptr, kvp, nullptr);
     else
       offset += epStringify(nullptr, nullptr, kvp, nullptr);
   }
 
   if (buffer)
-    offset += String(" }").copyTo(buffer.strip(offset));
+    offset += String(" }").copyTo(buffer.drop(offset));
   else
     offset += String(" }").length;
 
   return offset;
 }
+
+// Range retrieval
+template <typename K, typename V, typename P, typename A>
+TreeRange<AVLTree<K, V, P, A>> range(const AVLTree<K, V, P, A> &input) { return TreeRange<AVLTree<K, V, P, A>>(input); }
 
 } // namespace ep
 

@@ -4,13 +4,14 @@
 
 #include <initializer_list>
 #include <functional>
+#include "ep/cpp/traits.h"
 
 namespace ep {
 namespace internal {
 
-template<typename T> struct ElementType { typedef T Ty; };
-template<> struct ElementType<void> { typedef uint8_t Ty; };
-template<> struct ElementType<const void> { typedef const uint8_t Ty; };
+template<typename T> struct SliceElementType { typedef T Ty; };
+template<> struct SliceElementType<void> { typedef uint8_t Ty; };
+template<> struct SliceElementType<const void> { typedef const uint8_t Ty; };
 
 struct SliceHeader
 {
@@ -52,7 +53,8 @@ template<typename T>
 struct Slice
 {
 public:
-  typedef typename internal::ElementType<T>::Ty ET;
+  using ET = typename internal::SliceElementType<T>::Ty;
+  using ElementType = ET;
 
   size_t length;
   T *ptr;
@@ -70,9 +72,11 @@ public:
 
   // contents
   ET& operator[](ptrdiff_t i) const;
+  ET& at(ptrdiff_t i) const { return operator[](i); }
 
   Slice<T> slice(ptrdiff_t first, ptrdiff_t last) const;
 
+  T* data() const { return ptr; }
   size_t size() const { return length; }
   bool empty() const;
   explicit operator bool() const { return length != 0; }
@@ -94,11 +98,15 @@ public:
   // useful functions
   ET& front() const;
   ET& back() const;
+  void pop_front() { popFront(); }
+  void pop_back() { popBack(); }
+
   ET& popFront();
   ET& popBack();
-  Slice<T> get(ptrdiff_t n) const;
   Slice<T> pop(ptrdiff_t n);
-  Slice<T> strip(ptrdiff_t n) const;
+
+  Slice<T> take(ptrdiff_t n) const;
+  Slice<T> drop(ptrdiff_t n) const;
 
   bool exists(const ET &c, size_t *pIndex = nullptr) const;
   size_t findFirst(const ET &c) const;
@@ -146,6 +154,8 @@ Dst slice_cast(Src src);
 template <typename T, size_t Count = 0>
 struct Array : public Slice<T>
 {
+  using ElementType = typename Slice<T>::ElementType;
+
   // constructors
   Array();
   Array(nullptr_t);
@@ -175,11 +185,18 @@ struct Array : public Slice<T>
   template <typename... Things> Array<T, Count>& concat(Things&&... things);
 
   T& front() const;
+  T& back() const;
+  template <typename U> void push_front(U &&item);
+  template <typename U> void push_back(U &&item);
+  void pop_front();
+  void pop_back();
+
+  T& pushFront();
+  T& pushBack();
+  template <typename U> T& pushFront(U &&item);
+  template <typename U> T& pushBack(U &&item);
   T popFront();
   T popBack();
-
-  T& pushBack();
-  template <typename U> Array<T, Count>& pushBack(U &&item);
 
   void remove(size_t i);
   void remove(const T *pItem);
@@ -221,23 +238,29 @@ private:
 template <typename T>
 struct SharedArray : public Slice<T>
 {
+  using ElementType = typename Slice<T>::ElementType;
+
   // constructors
   SharedArray();
   SharedArray(nullptr_t);
-  template <typename... Items> SharedArray(Concat_T, Items&&... items);
-  SharedArray(std::initializer_list<typename SharedArray<T>::ET> list);
+  SharedArray(std::initializer_list<T> list);
   SharedArray(const SharedArray<T> &rcslice);
   SharedArray(SharedArray<T> &&rval);
-  template <typename U, size_t Len> SharedArray(const Array<U, Len> &arr);
   template <typename U, size_t Len> SharedArray(Array<U, Len> &&rval);
   template <typename U> SharedArray(U *ptr, size_t length);
   template <typename U> SharedArray(Slice<U> slice);
   template <typename U, size_t N> SharedArray(U(&arr)[N]);
+
+  template <typename... Items> SharedArray(Concat_T, Items&&... items);
+
   ~SharedArray();
 
-  size_t refcount() const;
+  size_t use_count() const;
+  size_t incRef();
+  size_t decRef();
+  bool unique() const { return use_count() == 1; }
 
-  SharedArray<T> clone() { return Array<T>(*this); }
+  Array<T> clone() { return Array<T>(*this); }
 
   // static constructors (make proper constructors?)
   template<typename... Things> static SharedArray<T> concat(Things&&... things);
@@ -249,7 +272,20 @@ struct SharedArray : public Slice<T>
 
 private:
   void destroy();
+
+  // hide a bunch of functions from slice
+  void pop_front();
+  void pop_back();
+  ElementType& popFront();
+  ElementType& popBack();
+  Slice<T> pop(ptrdiff_t n);
 };
+
+
+// Range retrieval
+template <typename T> Slice<T> range(Slice<T> input) { return Slice<T>(input); }
+template <typename T> Slice<T> range(const SharedArray<T> &input) { return Slice<T>(input); }
+template <typename T, size_t N> Slice<T> range(const Array<T, N> &input) { return Slice<T>(input); }
 
 } // namespace ep
 

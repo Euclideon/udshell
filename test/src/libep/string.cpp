@@ -1,12 +1,110 @@
-#include "gtest/gtest.h"
+#include "eptest.h"
+#include "traits/hassize.h"
+#include "traits/isgrowable.h"
+#include "traits/isshrinkable.h"
+#include "traits/shared.h"
 #include "ep/cpp/platform.h"
-// TODO: fill out these tests
 
 using ep::String;
 using ep::SharedArray;
 using ep::MutableString;
 using ep::SharedString;
 using ep::Slice;
+
+
+struct TestString
+{
+  using Type = String;
+  using ConstType = String;
+
+  using DefaultType = String;
+  using HoldsChar = String;
+
+  static String create()
+  {
+    return "Hello";
+  }
+};
+struct TestMutableString
+{
+  using Type = MutableString<0>;
+  using ConstType = MutableString<0>;
+
+  using DefaultType = MutableString<0>;
+  using HoldsChar = MutableString<0>;
+
+  static MutableString<0> create()
+  {
+    return "Hello";
+  }
+};
+struct TestSharedString
+{
+  using Type = SharedString;
+  using ConstType = SharedString;
+
+  using DefaultType = SharedString;
+  using HoldsChar = SharedString;
+
+  static SharedString create()
+  {
+    return "Hello";
+  }
+};
+
+using AllStrings = typename ::testing::Types<TestString, TestMutableString, TestSharedString>;
+using Containers = typename ::testing::Types<TestMutableString, TestSharedString>;
+using MutableContainers = typename ::testing::Types<TestMutableString>;
+using SharedTypes = typename ::testing::Types<TestSharedString>;
+
+INSTANTIATE_TYPED_TEST_CASE_P(String, Traits_HasSizeTest, AllStrings);
+INSTANTIATE_TYPED_TEST_CASE_P(String, Traits_IsGrowable, MutableContainers);
+INSTANTIATE_TYPED_TEST_CASE_P(String, Traits_IsShrinkable, MutableContainers);
+//INSTANTIATE_TYPED_TEST_CASE_P(String, Traits_IsGrowable_RandomAccessible, MyTypes);
+//INSTANTIATE_TYPED_TEST_CASE_P(String, Traits_IsShrinkable_RandomAccessible, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(SharedString_SharedTrait, Traits_Shared, SharedTypes);
+
+
+static_assert(std::is_same<ep::IndexType<ep::BaseString<char>>, size_t>::value == true, "ep::IndexType failed!");
+static_assert(std::is_same<ep::IndexType<MutableString<0>>, size_t>::value == true, "ep::IndexType failed!");
+static_assert(std::is_same<ep::IndexType<SharedString>, size_t>::value == true, "ep::IndexType failed!");
+
+static_assert(std::is_same<ep::ElementType<ep::BaseString<char>>, char>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<ep::BaseString<char16_t>>, char16_t>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<MutableString<0>>, char>::value == true, "ep::ElementType failed!");
+static_assert(std::is_same<ep::ElementType<SharedString>, char>::value == true, "ep::ElementType failed!");
+
+static_assert(ep::HasFront<ep::BaseString<char>>::value == true, "ep::HasFront failed!");
+static_assert(ep::HasFront<MutableString<0>>::value == true, "ep::HasFront failed!");
+static_assert(ep::HasFront<SharedString>::value == true, "ep::HasFront failed!");
+static_assert(ep::HasBack<ep::BaseString<char>>::value == true, "ep::HasBack failed!");
+static_assert(ep::HasBack<MutableString<0>>::value == true, "ep::HasBack failed!");
+static_assert(ep::HasBack<SharedString>::value == true, "ep::HasBack failed!");
+
+static_assert(ep::RandomAccessible<ep::BaseString<char>>::value == true, "ep::RandomAccessible failed!");
+static_assert(ep::RandomAccessible<MutableString<0>>::value == true, "ep::RandomAccessible failed!");
+static_assert(ep::RandomAccessible<SharedString>::value == true, "ep::RandomAccessible failed!");
+
+static_assert(ep::HasSize<ep::BaseString<char>>::value == true, "ep::HasSize failed!");
+static_assert(ep::HasSize<MutableString<0>>::value == true, "ep::HasSize failed!");
+static_assert(ep::HasSize<SharedString>::value == true, "ep::HasSize failed!");
+
+static_assert(ep::IsContainer<ep::BaseString<char>>::value == false, "ep::IsContainer failed!");
+static_assert(ep::IsContainer<MutableString<0>>::value == true, "ep::IsContainer failed!");
+static_assert(ep::IsContainer<SharedString>::value == true, "ep::IsContainer failed!");
+
+static_assert(ep::Growable<MutableString<0>>::value == true, "ep::Growable failed!");
+static_assert(ep::Growable<SharedString>::value == false, "ep::Growable failed!");
+static_assert(ep::Shrinkable<MutableString<0>>::value == true, "ep::Shrinkable failed!");
+static_assert(ep::Shrinkable<SharedString>::value == false, "ep::Shrinkable failed!");
+static_assert(ep::IsMutable<MutableString<0>>::value == true, "ep::IsMutable failed!");
+static_assert(ep::IsMutable<SharedString>::value == false, "ep::IsMutable failed!");
+
+static_assert(ep::IsKeyed<MutableString<0>>::value == false, "ep::IsKeyed failed!");
+static_assert(ep::IsKeyed<SharedString>::value == false, "ep::IsKeyed failed!");
+
+static_assert(ep::IsShared<SharedString>::value == true, "ep::IsShared failed!");
+
 
 void receivesString(String)
 {

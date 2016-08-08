@@ -51,8 +51,8 @@ ptrdiff_t epStringify(Slice<char> buffer, String epUnusedParam(format), KVPRef<K
   if (buffer)
   {
     offset += epStringifyTemplate(buffer, nullptr, kvp.key, nullptr);
-    offset += String(": ").copyTo(buffer.strip(offset));
-    offset += epStringifyTemplate(buffer.strip(offset), nullptr, kvp.value, nullptr);
+    offset += String(": ").copyTo(buffer.drop(offset));
+    offset += epStringifyTemplate(buffer.drop(offset), nullptr, kvp.value, nullptr);
   }
   else
   {
