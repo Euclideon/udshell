@@ -25,7 +25,7 @@ AVLTree<String, int> MaterialImpl::builtinProperties{
 
 Variant epToVariant(const ShaderProperty &p)
 {
-  Variant::VarMap map;
+  Variant::VarMap::MapType map;
   map.insert("type", p.type);
   map.insert("data", p.data);
   map.insert("current", p.current);

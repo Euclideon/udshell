@@ -626,26 +626,6 @@ Variant* Variant::getItem(Variant key) const
   return nullptr;
 }
 
-Variant& Variant::insertItem(Variant key, Variant value)
-{
-  if (is(Type::Array))
-  {
-    if(key.is(Type::Int))
-    {
-      size_t index = key.as<size_t>();
-      if(index < length)
-      {
-        a[index] = value;
-        return a[index];
-      }
-    }
-    EPTHROW(Result::OutOfBounds, "Variant is array, and key is out of bounds");
-  }
-  EPASSERT_THROW(is(SharedPtrType::AssocArray), Result::InvalidType, "Variant is not a map");
-
-  return aa->tree.insert(key, value);
-}
-
 VarRange Variant::getRange() const
 {
   if (is(Type::Array))
@@ -654,6 +634,61 @@ VarRange Variant::getRange() const
     return ((VarMap&)aa).getRange();
   EPTHROW_ERROR(Result::InvalidType, "Invalid type!");
 }
+
+bool Variant::unique()
+{
+  if ((Type)t == Type::SharedPtr && ownsContent)
+    return sp->unique();
+  else if ((Type)t == Type::SmallString)
+    return true;
+  else if ((Type)t == Type::String && ownsContent)
+  {
+    String str(s, length);
+    return ((SharedString&)str).unique();
+  }
+  else if ((Type)t == Type::Array && ownsContent)
+  {
+    Slice<Variant> arr(a, length);
+    return ((VarArray&)arr).unique();
+  }
+  return false;
+}
+
+MutableString<> Variant::claimString()
+{
+  if ((Type)t == Type::SmallString)
+  {
+    uint8_t *pBuffer = (uint8_t*)this;
+    MutableString<> result((char*)pBuffer + 1, pBuffer[0] >> 4);
+    new(this) Variant(); // initialise to void
+    return result;
+  }
+
+  EPTHROW_IF((Type)t != Type::String || !ownsContent, Result::InvalidType, "Variant is not a unique string!");
+
+  String str(s, length);
+  MutableString<> result = ((SharedString&)str).claim();
+  new(this) Variant(); // initialise to void
+  return result;
+}
+Array<Variant> Variant::claimArray()
+{
+  EPTHROW_IF((Type)t != Type::Array || !ownsContent, Result::InvalidType, "Variant is not a unique array!");
+
+  Array<Variant> arr(a, length);
+  Array<Variant> sa = ((VarArray&)arr).claim();
+  new(this) Variant(); // initialise to void
+  return sa;
+}
+Variant::VarMap::MapType Variant::claimMap()
+{
+  EPTHROW_IF((Type)t != Type::SharedPtr || (SharedPtrType)length != SharedPtrType::AssocArray || !ownsContent, Result::InvalidType, "Variant is not a unique map!");
+
+  VarMap::MapType tree = ((VarMap&)aa).claim();
+  new(this) Variant(); // initialise to void
+  return tree;
+}
+
 
 void VarEvent::signal(Slice<const Variant> args)
 {

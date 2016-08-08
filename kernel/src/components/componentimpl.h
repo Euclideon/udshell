@@ -39,7 +39,7 @@ public:
   Variant Call(String method, Slice<const Variant> args) override final;
   SubscriptionRef Subscribe(String eventName, const VarDelegate &delegate) override final;
 
-  Variant Save() const override final { return Variant(Variant::VarMap()); }
+  Variant Save() const override final { return Variant::VarMap(); }
 
   void AddDynamicProperty(const PropertyInfo &property, const MethodShim *pGetter, const MethodShim *pSetter) override final;
   void AddDynamicMethod(const MethodInfo &method, const MethodShim *pMethod) override final;

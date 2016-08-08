@@ -134,7 +134,7 @@ public:
 
 inline Variant epToVariant(const StencilState &e)
 {
-  Variant::VarMap r;
+  Variant::VarMap::MapType r;
   if (e.compare != CompareFunc::Disabled)
   {
     r.insert("compare", e.compare);

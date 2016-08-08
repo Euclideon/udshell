@@ -260,7 +260,14 @@ struct SharedArray : public Slice<T>
   size_t decRef();
   bool unique() const { return use_count() == 1; }
 
+  Array<T> claim();
   Array<T> clone() { return Array<T>(*this); }
+
+  // comparison
+  bool operator ==(SharedArray<T> rh) const;
+  bool operator !=(SharedArray<T> rh) const;
+
+  explicit operator bool() const;
 
   // static constructors (make proper constructors?)
   template<typename... Things> static SharedArray<T> concat(Things&&... things);

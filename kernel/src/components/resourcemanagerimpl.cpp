@@ -68,7 +68,7 @@ Variant::VarMap ResourceManagerImpl::GetExtensions() const
 {
   const AVLTree<String, const ep::ComponentDesc *> &extensionsRegistry = getKernel()->getExtensionsRegistry();
   AVLTree<SharedString, Array<SharedString>> exts;
-  Variant::VarMap map;
+  Variant::VarMap::MapType map;
 
   for (auto kvp : extensionsRegistry)
   {
@@ -82,7 +82,7 @@ Variant::VarMap ResourceManagerImpl::GetExtensions() const
   for (auto item : exts)
     map.insert(item.key, item.value);
 
-  return map;
+  return std::move(map);
 }
 
 Array<ResourceRef> ResourceManagerImpl::GetResourcesByType(const ep::ComponentDesc *pBase) const

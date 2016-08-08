@@ -49,7 +49,7 @@ public:
 
   ScreenPoint getMousePosition() const { return pImpl->GetMousePosition(); }
 
-  void goToBookmark(String bookmarkName) { pImpl->GoToBookmark(bookmarkName); }
+  void gotoBookmark(String bookmarkName) { pImpl->GoToBookmark(bookmarkName); }
   void activate() { pImpl->Activate(); }
   void deactivate() { pImpl->Deactivate(); }
   void resize(int width, int height) { pImpl->Resize(width, height); }

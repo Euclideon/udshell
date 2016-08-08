@@ -109,6 +109,10 @@ namespace map_test {
     using HoldsChar = Container<KeyType, char>;                                             \
     using HoldsString = Container<KeyType, ep::SharedString>;                               \
     using HoldsTestValue = Container<KeyType, map_test::TestValueType<HoldsInt>>;           \
+    static DefaultType create()                                                             \
+    {                                                                                       \
+      return DefaultType({ { KeyType(), 10 } });                                            \
+    }                                                                                       \
   };                                                                                        \
   }
 
@@ -123,6 +127,10 @@ namespace map_test {
     using HoldsChar = Container<TreeType<KeyType, char>>;                                   \
     using HoldsString = Container<TreeType<KeyType, ep::SharedString>>;                     \
     using HoldsTestValue = Container<TreeType<KeyType, map_test::TestValueType<HoldsInt>>>; \
+    static DefaultType create()                                                             \
+    {                                                                                       \
+      return DefaultType({ { KeyType(), 10 } });                                            \
+    }                                                                                       \
   };                                                                                        \
   }
 

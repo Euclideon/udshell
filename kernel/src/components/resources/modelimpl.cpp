@@ -8,7 +8,7 @@ namespace ep {
 
 Variant epToVariant(const RenderList &r)
 {
-  Variant::VarMap map;
+  Variant::VarMap::MapType map;
   map.insert("type", r.type.v);
   map.insert("firstVertex", r.firstVertex);
   map.insert("firstIndex", r.firstIndex);

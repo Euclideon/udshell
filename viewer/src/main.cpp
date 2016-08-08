@@ -141,8 +141,8 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
 
     vertexBuffer->allocateFromData(Slice<const Vertex>(vb));
     MetadataRef metadata = vertexBuffer->getMetadata();
-    metadata->get("attributeInfo")[0].insertItem("name", "a_position");
-    metadata->get("attributeInfo")[1].insertItem("name", "a_color");
+    metadata->insertAt("a_position", "attributeInfo", 0, "name");
+    metadata->insertAt("a_color", "attributeInfo", 1, "name");
   }
 
   // Index Buffer

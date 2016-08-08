@@ -12,7 +12,7 @@ SHARED_CLASS(Node);
 SHARED_CLASS(RenderableScene);
 SHARED_CLASS(Camera);
 
-using BookmarkMap = SharedMap<AVLTree<SharedString, Bookmark>>;
+using BookmarkMap = AVLTree<SharedString, Bookmark>;
 
 class IScene
 {

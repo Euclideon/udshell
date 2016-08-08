@@ -53,7 +53,7 @@ int NonRefCountedTestClass::test = 0;
 
 struct TestStruct
 {
-  using Type = SharedPtr<sharedptr_test::TestClass>;
+  using DefaultType = SharedPtr<sharedptr_test::TestClass>;
   using ConstType = SharedPtr<const sharedptr_test::TestClass>;
 
   static SharedPtr<sharedptr_test::TestClass> create()
@@ -63,10 +63,10 @@ struct TestStruct
 };
 
 using MyTypes = typename ::testing::Types<TestStruct>;
-INSTANTIATE_TYPED_TEST_CASE_P(SharedPtr_SharedTrait, Traits_Shared, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(SharedPtr, Traits_Shared, MyTypes);
 
 
-static_assert(ep::IsShared<TestStruct::Type>::value == true, "ep::IsShared failed!");
+static_assert(ep::IsShared<TestStruct::DefaultType>::value == true, "ep::IsShared failed!");
 static_assert(ep::IsShared<TestStruct::ConstType>::value == true, "ep::IsShared failed!");
 
 

@@ -57,22 +57,22 @@ SettingsImpl::SettingsImpl(Component *pInstance, Variant::VarMap initParams)
 
 void SettingsImpl::SaveSettings()
 {
-  Variant::VarMap settingsNode;
+  Variant::VarMap::MapType settingsNode;
   Array<Variant> children;
 
   settingsNode.insert("name", "settings");
   for (auto setting : settings)
   {
-    Variant::VarMap node = Text::componentParamsToXmlMap(setting.value).asAssocArray();
+    Variant::VarMap::MapType node = Text::componentParamsToXmlMap(setting.value).claimMap();
     node.insert("name", setting.key);
-    children.pushBack(node);
+    children.pushBack(std::move(node));
   }
 
   settingsNode.insert("children", children);
 
   auto spXMLBuffer = getKernel()->createComponent<Text>();
   spXMLBuffer->reserve(10240); // TODO: this is not okay...
-  spXMLBuffer->formatXml(settingsNode);
+  spXMLBuffer->formatXml(std::move(settingsNode));
 
   try {
     StreamRef spFile = getKernel()->createComponent<File>({ { "path", String(srcString) },{ "flags", FileOpenFlags::Create | FileOpenFlags::Write | FileOpenFlags::Text } });

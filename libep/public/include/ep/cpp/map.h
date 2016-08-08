@@ -34,12 +34,6 @@ public:
   SharedMap(SharedMap &&rval)
     : ptr(std::move(rval.ptr))
   {}
-//  SharedMap(const Tree &map) // TODO: consider; do we want deep-copying constructors?
-//  {
-//    alloc();
-//    for (auto &&kvp : map)
-//      ptr->tree.insert(kvp.key, kvp.value);
-//  }
   SharedMap(Tree &&map)
   {
     alloc();
@@ -78,99 +72,28 @@ public:
 
   void clear() { if(ptr) ptr->tree.clear(); }
 
-  ValueType& insert(KeyType &&key, ValueType &&rval)
+  size_t use_count() const { return ptr.use_count(); }
+  size_t incRef() { return ptr.incRef(); }
+  size_t decRef() { return ptr.decRef(); }
+  bool unique() const { return ptr.unique(); }
+
+  bool operator == (const SharedMap &rh) const { return ptr == rh.ptr; }
+  bool operator != (const SharedMap &rh) const { return ptr != rh.ptr; }
+
+  explicit operator bool() const { return ptr.operator bool(); }
+
+  MapType claim()
   {
-    if (!ptr)
-      alloc();
-    return ptr->tree.insert(std::move(key), std::move(rval));
+    EPTHROW_IF(!unique(), Result::InvalidCall, "SharedMap must be unique!");
+    return std::move(ptr->tree);
   }
-  ValueType& insert(const KeyType &key, ValueType &&rval)
+  MapType clone()
   {
-    if (!ptr)
-      alloc();
-    return ptr->tree.insert(key, std::move(rval));
-  }
-  ValueType& insert(KeyType &&key, const ValueType &v)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.insert(std::move(key), v);
-  }
-  ValueType& insert(const KeyType &key, const ValueType &v)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.insert(key, v);
+    if(ptr)
+      return MapType(ptr->tree);
+    return MapType();
   }
 
-  ValueType& insert(KVP<KeyType, ValueType> &&kvp)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.insert(std::move(kvp));
-  }
-  ValueType& insert(const KVP<KeyType, ValueType> &v)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.insert(v);
-  }
-
-  ValueType& tryInsert(const KeyType &key, const ValueType &val)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.tryInsert(key, val);
-  }
-
-  ValueType& tryInsert(KeyType &&key, const ValueType &val)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.tryInsert(std::move(key), val);
-  }
-
-  ValueType& tryInsert(const KeyType &key, ValueType &&val)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.tryInsert(key, std::move(val));
-  }
-
-  ValueType& tryInsert(KeyType &&key, ValueType &&val)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.tryInsert(std::move(key), std::move(val));
-  }
-
-  ValueType& tryInsert(const KVP<KeyType, ValueType> &kvp)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.tryInsert(kvp.key, kvp.value);
-  }
-
-  ValueType& tryInsert(KVP<KeyType, ValueType> &&kvp)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.tryInsert(std::move(kvp.key), std::move(kvp.value));
-  }
-
-  ValueType& tryInsert(const KeyType &key, Delegate<ValueType()> lazyValue)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.tryInsert(key, lazyValue());
-  }
-
-  ValueType& tryInsert(KeyType&& key, Delegate<ValueType()> lazyValue)
-  {
-    if (!ptr)
-      alloc();
-    return ptr->tree.tryInsert(std::move(key), lazyValue());
-  }
 
   ValueType& replace(KeyType &&key, ValueType &&rval)
   {
@@ -208,12 +131,6 @@ public:
     if (!ptr)
       alloc();
     return ptr->tree.replace(v);
-  }
-
-  void remove(const KeyType &key)
-  {
-    if (ptr)
-      ptr->tree.remove(key);
   }
 
   const ValueType* get(const KeyType &key) const

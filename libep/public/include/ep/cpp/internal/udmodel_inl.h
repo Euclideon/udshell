@@ -5,8 +5,9 @@ namespace ep {
     Variant v = epToVariant(*static_cast<const ElementMetadata*>(&e));
     if (e.blend != UDAttributeBlend::None)
     {
-      Variant::VarMap r = v.asAssocArray();
-      r.insert("blend", e.blend);
+      Variant::VarMap::MapType map = v.claimMap();
+      map.insert("blend", e.blend);
+      v = std::move(map);
     }
     // v is a mutable reference to the VarMap
     return v;

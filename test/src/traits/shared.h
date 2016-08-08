@@ -12,13 +12,13 @@ TYPED_TEST_CASE_P(Traits_Shared);
 TYPED_TEST_P(Traits_Shared, CreateNull)
 {
   // default construction is null
-  typename TypeParam::Type spDefault;
+  typename TypeParam::DefaultType spDefault;
   ASSERT_FALSE(spDefault);
   EXPECT_TRUE(!spDefault);
   EXPECT_EQ(0, spDefault.use_count());
 
   // explicit null construction
-  typename TypeParam::Type spNull = nullptr;
+  typename TypeParam::DefaultType spNull = nullptr;
   ASSERT_FALSE(spNull);
   EXPECT_TRUE(!spNull);
   EXPECT_EQ(0, spNull.use_count());
@@ -48,14 +48,14 @@ TYPED_TEST_P(Traits_Shared, CopyAssign)
 {
   auto obj = TypeParam::create();
 
-  typename TypeParam::Type copy = obj;
+  typename TypeParam::DefaultType copy = obj;
   EXPECT_TRUE(copy != nullptr);
   EXPECT_TRUE(copy == obj);
   EXPECT_EQ(2, copy.use_count());
   EXPECT_EQ(2, obj.use_count());
 
   {
-    typename TypeParam::Type copy2 = copy;
+    typename TypeParam::DefaultType copy2 = copy;
     EXPECT_TRUE(copy2 != nullptr);
     EXPECT_TRUE(copy2 == copy);
     EXPECT_TRUE(copy2 == obj);
@@ -76,7 +76,7 @@ TYPED_TEST_P(Traits_Shared, MoveAssign)
 {
   auto obj = TypeParam::create();
 
-  typename TypeParam::Type copy = std::move(obj);
+  typename TypeParam::DefaultType copy = std::move(obj);
 
   EXPECT_TRUE(copy != nullptr);
   EXPECT_TRUE(copy != obj);
@@ -85,7 +85,7 @@ TYPED_TEST_P(Traits_Shared, MoveAssign)
   EXPECT_EQ(0, obj.use_count());
 
   {
-    typename TypeParam::Type copy2 = std::move(copy);
+    typename TypeParam::DefaultType copy2 = std::move(copy);
 
     EXPECT_TRUE(copy2 != nullptr);
     EXPECT_TRUE(copy2 != copy);
@@ -135,7 +135,7 @@ TYPED_TEST_P(Traits_Shared, Unique)
   EXPECT_TRUE(obj.unique());
 
   {
-    typename TypeParam::Type copy = obj;
+    typename TypeParam::DefaultType copy = obj;
     EXPECT_FALSE(copy.unique());
   }
 

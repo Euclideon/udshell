@@ -26,7 +26,7 @@ Array<const StaticFuncInfo> Text::getStaticFuncs() const
 
 Variant TextImplStatic::ComponentParamsToXMLMap(Variant map)
 {
-  Variant::VarMap node;
+  Variant::VarMap::MapType node;
   Array<Variant> childNodes;
 
   if (map.is(Variant::SharedPtrType::AssocArray))
@@ -40,9 +40,9 @@ Variant TextImplStatic::ComponentParamsToXMLMap(Variant map)
         node.insert("attributes", child.value.asAssocArray());
       else
       {
-        Variant::VarMap childNode = ComponentParamsToXMLMap(child.value).asAssocArray();
+        Variant::VarMap::MapType childNode = ComponentParamsToXMLMap(child.value).claimMap();
         childNode.insert("name", child.key);
-        childNodes.pushBack(childNode);
+        childNodes.pushBack(std::move(childNode));
       }
     }
 
@@ -55,16 +55,16 @@ Variant TextImplStatic::ComponentParamsToXMLMap(Variant map)
       node.insert("text", str);
   }
 
-  return node;
+  return std::move(node);
 }
 
 Variant TextImplStatic::XMLMapToComponentParams(Variant node)
 {
   bool hasAttributes = false, hasChildren = false;
-  Variant::VarMap map;
+  Variant::VarMap::MapType map;
 
   if (!node.is(Variant::SharedPtrType::AssocArray))
-    return map;
+    return std::move(map);
 
   Variant::VarMap element = node.asAssocArray();
 
@@ -104,20 +104,20 @@ Variant TextImplStatic::XMLMapToComponentParams(Variant node)
       return pText->asString();
   }
 
-  return map;
+  return std::move(map);
 }
 
 static Variant ParseXMLNode(rapidxml::xml_node<> *node)
 {
   using namespace rapidxml;
 
-  Variant::VarMap attributes;
+  Variant::VarMap::MapType attributes;
   Array<Variant> children;
-  Variant::VarMap outNode;
+  Variant::VarMap::MapType outNode;
   String text = "";
 
   if (!node)
-    return outNode;
+    return std::move(outNode);
 
   // Add the node's attributes as an element _attributes
 
@@ -305,10 +305,10 @@ static Variant ParseJsonNode(const rapidjson::Value& val)
     case Type::kObjectType:
     {
       auto j = val.MemberEnd();
-      Variant::VarMap map;
+      Variant::VarMap::MapType map;
       for (auto i = val.MemberBegin(); i != j; ++i)
         map.insert(ParseJsonNode(i->name), ParseJsonNode(i->value));
-      return map;
+      return std::move(map);
     }
     default:
       EPASSERT_THROW(false, Result::Failure, "Unknown error!");

@@ -44,7 +44,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   const Variant *pCam = initParams.get("camera");
   if (pCam && pCam->is(Variant::SharedPtrType::AssocArray))
     cameraParams = pCam->asAssocArray();
-  spCamera = pKernel->createComponent<SimpleCamera>(Variant::VarMap(cameraParams));
+  spCamera = pKernel->createComponent<SimpleCamera>(cameraParams);
 
   const Variant *model = initParams.get("model");
   if (model)
@@ -289,7 +289,7 @@ void Viewer::update(double timeStep)
 
 Variant Viewer::save() const
 {
-  Variant::VarMap params;
+  Variant::VarMap::MapType params;
 
   if (spCamera)
     params.insert("camera", spCamera->save());
@@ -364,7 +364,7 @@ void Viewer::createPlatformLogo()
   PrimitiveGenerator::generateQuad(spVertexBuffer, spIndexBuffer);
 
   MetadataRef spMetadata = spVertexBuffer->getMetadata();
-  spMetadata->get("attributeInfo")[0].insertItem("name", "a_position");
+  spMetadata->insertAt("a_position", "attributeInfo", 0, "name");
 
   ModelRef spImageModel = pKernel->createComponent<Model>();
 

@@ -271,7 +271,7 @@ Variant epToVariant(const QJSValue &v)
   }
   else if (v.isObject())
   {
-    Variant::VarMap varMap;
+    Variant::VarMap::MapType varMap;
     QJSValueIterator i(v);
     while (i.hasNext())
     {
@@ -281,7 +281,7 @@ Variant epToVariant(const QJSValue &v)
       QJSValue value = i.value();
       varMap.insert(ep::KeyValuePair(Variant(qt::epFromQString(name)), epToVariant(value)));
     }
-    return Variant(std::move(varMap));
+    return std::move(varMap);
   }
   else if (v.isDate())
   {
@@ -415,14 +415,14 @@ void epFromVariant(const Variant &variant, QJSValue *pJSValue)
 
 Variant epToVariant(const QVariantMap &varMap)
 {
-  Variant::VarMap v;
+  Variant::VarMap::MapType v;
   QVariantMap::const_iterator i = varMap.begin();
   while (i != varMap.end())
   {
     v.insert(ep::KeyValuePair(Variant(qt::epFromQString(i.key())), epToVariant(i.value())));
     ++i;
   }
-  return Variant(std::move(v));
+  return std::move(v);
 }
 
 #else

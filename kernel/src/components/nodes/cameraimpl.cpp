@@ -66,7 +66,7 @@ Double4x4 CameraImpl::GetProjectionMatrix(double aspectRatio) const
 
 Variant CameraImpl::Save() const
 {
-  Variant::VarMap params;
+  Variant::VarMap::MapType params;
 
   params.insert(KeyValuePair("matrix", pInstance->getMatrix()));
   if (bOrtho)

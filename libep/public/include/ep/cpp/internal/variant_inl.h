@@ -282,6 +282,10 @@ inline Variant::Variant(const VarRange &spR)
   : Variant((const SharedPtr<RefCounted>&)spR, SharedPtrType::Range)
 {}
 
+inline Variant::Variant(VarMap::MapType &&aa)
+  : Variant(VarMap(std::move(aa)))
+{}
+
 template<size_t Len>
 inline Variant::Variant(const MutableString<Len> &s)
   : Variant((String)s)
@@ -759,7 +763,7 @@ inline Variant epToVariant(const Delegate<R(Args...)> &d)
 template<typename K, typename V, typename Pred>
 inline Variant epToVariant(const AVLTree<K, V, Pred> &tree)
 {
-  Variant::VarMap m;
+  Variant::VarMap::MapType m;
   for (auto item : tree)
     m.insert(item.key, item.value);
   return std::move(m);
@@ -768,7 +772,7 @@ inline Variant epToVariant(const AVLTree<K, V, Pred> &tree)
 template<typename Tree>
 inline Variant epToVariant(const SharedMap<Tree> &map)
 {
-  Variant::VarMap m;
+  Variant::VarMap::MapType m;
   for (auto item : map)
     m.insert(item.key, item.value);
   return std::move(m);

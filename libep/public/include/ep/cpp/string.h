@@ -256,7 +256,16 @@ struct SharedString : public SharedArray<const char>
   // contents
   String slice(ptrdiff_t first, ptrdiff_t last) const                                 { return ((String*)this)->slice(first, last); }
 
+  MutableString<> claim();
+  template <size_t N = 0>
+  MutableString<N> clone()                                                            { return MutableString<N>(*this); }
+
   // comparison
+  bool operator ==(SharedString rh) const;
+  bool operator !=(SharedString rh) const;
+
+  explicit operator bool() const;
+
   bool eq(String rh) const                                                            { return ((String*)this)->eq(rh); }
   bool eqIC(String rh) const                                                          { return ((String*)this)->eqIC(rh); }
   bool beginsWith(String rh) const                                                    { return ((String*)this)->beginsWith(rh); }

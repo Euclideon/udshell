@@ -111,6 +111,7 @@ public:
   Variant(Slice<KeyValuePair> aa);
   Variant(const VarMap &aa);
   Variant(VarMap &&aa);
+  Variant(VarMap::MapType &&aa);
 
   template<typename T> Variant(T &&rval);
 
@@ -157,11 +158,16 @@ public:
   Variant& operator[](size_t i) const;
   Variant& operator[](String key) const;
   Variant* getItem(Variant key) const;
-  Variant& insertItem(Variant key, Variant value);
 
   VarRange getRange() const;
 
   void throwError();
+
+  bool unique();
+
+  MutableString<> claimString();
+  Array<Variant> claimArray();
+  VarMap::MapType claimMap();
 
   // TODO: these shouldn't be part of the public API!
   void luaPush(LuaState &l) const;

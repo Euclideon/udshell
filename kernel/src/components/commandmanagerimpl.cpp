@@ -125,10 +125,11 @@ bool CommandManagerImpl::RunCommand(String id, Variant::VarMap params)
       {
         if (spActiveActivity && comm.activityType.eq(spActiveActivity->getType()))
         {
-          params.insert("activity", spActiveActivity);
+          auto map = params.clone(); // HACK: clone the map? >_<
+          map.insert("activity", spActiveActivity);
 
           if (comm.func)
-            comm.func(params);
+            comm.func(std::move(map));
           else if (!comm.script.empty())
             getKernel()->exec(comm.script);
           return true;
@@ -177,10 +178,11 @@ bool CommandManagerImpl::HandleShortcutEvent(String shortcut)
       {
         if (spActiveActivity && comm.activityType.eq(spActiveActivity->getType()))
         {
-          params.insert("activity", spActiveActivity);
+          auto map = params.clone(); // HACK: clone the map? >_<
+          map.insert("activity", spActiveActivity);
 
           if (comm.func)
-            comm.func(params);
+            comm.func(std::move(map));
           else if (!comm.script.empty())
             getKernel()->exec(comm.script);
           return true;
