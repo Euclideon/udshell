@@ -196,14 +196,14 @@ Rectangle {
 
     Loader { sourceComponent: separator; Layout.fillWidth: true }
 
-    EPToolBar {
-      id: toolBar
-      Layout.fillWidth: true
-      color: Theme.windowToolBarBgColor
-      Layout.preferredHeight: Theme.windowToolBarSize
-    }
-
-    Loader { sourceComponent: separator; Layout.fillWidth: true }
+    //EPToolBar {
+    //  id: toolBar
+    //  Layout.fillWidth: true
+    //  color: Theme.windowToolBarBgColor
+    //  Layout.preferredHeight: Theme.windowToolBarSize
+    //}
+    //
+    //Loader { sourceComponent: separator; Layout.fillWidth: true }
 
     Item {
       Layout.fillWidth: true
@@ -238,10 +238,7 @@ Rectangle {
             activityqq.visible = true;
             activityqq.forceActiveFocus();
 
-            if (activity.type == "ep.Viewer")
-              initViewerUI(activity);
-            else
-              initViewerUI(null);
+            initViewerUI(activity);
           }
           else
           {
