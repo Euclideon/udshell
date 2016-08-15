@@ -54,34 +54,38 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     }
 
     udOctreeHeaderData headerData;
-    result = udOctree_GetHeaderData(pOctree, &headerData);
-    if (result == udR_Success)
-    {
-      Variant::VarMap::MapType header;
-      header.insert("scale", headerData.scale);
-      header.insert("unitMeterScale", headerData.unitMeterScale);
-
-      double *pPivot = headerData.pivotOrigin;
-      header.insert("pivotOrigin", Double3{ pPivot[0], pPivot[1], pPivot[2] });
-
-      double *pBias = headerData.sourceBias;
-      header.insert("sourceBias", Double3{ pBias[0], pBias[1], pBias[2] });
-
-      double *pScale = headerData.sourceScale;
-      header.insert("sourceScale", Double3{ pScale[0], pScale[1], pScale[2] });
-
-      double *pOri = headerData.boundingBoxOrigin;
-      double *pExt = headerData.boundingBoxExtents;
-      header.insert("boundingVolume", BoundingVolume{ { pOri[0], pOri[1], pOri[2] },
-                                                      { pOri[0] + pExt[0], pOri[1] + pExt[1], pOri[2] + pExt[2] } });
-
-      header.insert("maxOctreeDepth", headerData.maxOctreeDepth);
-      meta->insert("octreeHeader", std::move(header));
-    }
-
     result = udOctree_GetLocalMatrixF64(pModelImpl->pOctree, pModelImpl->udmatrix.a);
-    if (result == udR_Success)
-      setResource(source->asString(), model);
+    EPASSERT_THROW(result == udR_Success, Result::Failure, "Failed to get udmodel's local matrix");
+
+    result = udOctree_GetHeaderData(pOctree, &headerData);
+    EPASSERT_THROW(result == udR_Success, Result::Failure, "Failed to get udmodel's header data");
+
+    Variant::VarMap::MapType header;
+    header.insert("scaledRange", headerData.scale);
+
+    double *pBias = headerData.sourceBias;
+    header.insert("baseOffset", Double3{ pBias[0], pBias[1], pBias[2] });
+
+    double *pScale = headerData.sourceScale;
+    header.insert("nonUniformScale", Double3{ pScale[0], pScale[1], pScale[2] });
+
+    double *pOri = headerData.boundingBoxOrigin;
+    double *pExt = headerData.boundingBoxExtents;
+
+    Double3 centre = (pModelImpl->udmatrix * Double4{ pOri[0], pOri[1], pOri[2], 1.0 }).toVector3();
+    Double3 extents = (pModelImpl->udmatrix * Double4{ pExt[0], pExt[1], pExt[2], 0.0 }).toVector3();
+
+    header.insert("boundingVolume", BoundingVolume { centre - extents, centre + extents } );
+
+    double *pPivot = headerData.pivotOrigin;
+    header.insert("pivot", (pModelImpl->udmatrix * Double4{ pPivot[0], pPivot[1], pPivot[2], 1.0 }).toVector3());
+
+    header.insert("unitMeterScale", headerData.unitMeterScale);
+    header.insert("maxOctreeDepth", headerData.maxOctreeDepth);
+
+    meta->insert("octreeHeader", std::move(header));
+
+    setResource(source->asString(), model);
 
     Array<Variant> attribInfo;
 

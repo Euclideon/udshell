@@ -112,6 +112,7 @@ public:
 
   bool pickingEnabled = false;
   udRenderPick udPick = { sizeof(udRenderPick) };
+  udRenderHighlight udPickHighlight = { nullptr, 0, 0 };
 
   RenderableSceneRef spScene = nullptr;
 

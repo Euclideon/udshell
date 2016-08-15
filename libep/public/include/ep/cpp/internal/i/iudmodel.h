@@ -48,7 +48,7 @@ using IPixelShader = uint32_t(const UDRenderPixel &context, const UDView &view, 
 namespace internal {
 struct UDRenderPrivateData
 {
-  size_t private0[10] = { 0, 0, 0, 0, 0,
+  size_t private0[11] = { 0, 0, 0, 0, 0, 0,
                           0, 0, 0, 0, 0 };
   uint32_t private1[3] = { 0, 0, 0 };
 };
@@ -58,7 +58,7 @@ struct UDPrivateData
   uint8_t debugName[256];
   uint32_t private0[3];
   size_t private1[3];
-  struct { uint32_t data[3]; } private2;
+  struct { uint32_t data[12]; } private2;
   size_t private3[11];
   volatile int32_t private4;
 };
