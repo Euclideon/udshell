@@ -35,7 +35,7 @@ static WindowRef spMainWindow;
 static UIComponentRef spTopLevelUI;
 static UIComponentRef spMessageBox;
 static MenuRef spMenu;
-static MenuRef spToolBar;
+//static MenuRef spToolBar;
 static ProjectRef spProject;
 static TimerRef spCITimer;
 static SubscriptionRef spCITimerSub;
@@ -136,9 +136,9 @@ void InitProject()
   spMenu->setItemProperties("File/New.../New Activity", { { "enabled", true } });
 
   // Enable toolbar buttons
-  spToolBar->setItemProperties("Save Project", { { "enabled", true } });
-  spToolBar->setItemProperties("Save Project As...", { { "enabled", true } });
-  spToolBar->setItemProperties("New.../New Activity", { { "enabled", true } });
+  //spToolBar->setItemProperties("Save Project", { { "enabled", true } });
+  //spToolBar->setItemProperties("Save Project As...", { { "enabled", true } });
+  //spToolBar->setItemProperties("New.../New Activity", { { "enabled", true } });
 
   // Enable shortcuts
   auto spCommandManager = spKernel->getCommandManager();
@@ -266,7 +266,7 @@ void Deinit(String sender, String message, const Variant &data)
   spProject = nullptr;
   spTopLevelUI = nullptr;
   spMenu = nullptr;
-  spToolBar = nullptr;
+  //spToolBar = nullptr;
   spMessageBox = nullptr;
 
   spCITimerSub = nullptr;
@@ -406,13 +406,13 @@ void Init(String sender, String message, const Variant &data)
   spTopLevelUI->set("menucomp", spMenu);
 
   // Load toolbar
-  String toolBarPath(":/toolbar.xml");
+  /*String toolBarPath(":/toolbar.xml");
   MutableString<0> toolBarStr = ReadResourceFile(toolBarPath);
   if (toolBarStr.empty())
     spKernel->logWarning(2, "Toolbar XML file \"{0}\" does not exist.", toolBarPath);
 
   spToolBar = spKernel->createComponent<Menu>({ { "src", toolBarStr } });
-  spTopLevelUI->set("toolbarcomp", spToolBar);
+  spTopLevelUI->set("toolbarcomp", spToolBar);*/
 
   // New Activity selector panel
   auto spActivitySelector = component_cast<UIComponent>(spKernel->createComponent("ui.ActivitySelector"));

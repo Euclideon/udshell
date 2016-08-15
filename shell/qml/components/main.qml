@@ -17,7 +17,7 @@ Rectangle {
   property var messageboxcomp
   property var messagebox
   property var menucomp
-  property var toolbarcomp
+  //property var toolbarcomp
   property var simplecamera: null
   property var view: null
   property var activityselector
@@ -49,9 +49,9 @@ Rectangle {
     menuBar.menucomp = menucomp;
   }
 
-  onToolbarcompChanged: {
-    toolBar.toolbarcomp = toolbarcomp;
-  }
+  //onToolbarcompChanged: {
+    //toolBar.toolbarcomp = toolbarcomp;
+  //}
 
   onActivityselectorChanged: {
     activityselector.uiHandle.parent = this;
