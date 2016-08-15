@@ -13,11 +13,13 @@ FocusScope {
   anchors.topMargin: 4
   anchors.bottomMargin: 4
 
+  // HACK: We have to set both of these because of inconsistent behaviour in TabView
+  focus: true
+  activeFocusOnTab: true
+
   property var epTypeDesc: { "id": "viewer.MainUI", "super": "ep.UIComponent" }
   property var viewport
-  property var sidebarcomp
   property var bookmarkscomp
-  property var bookmarksqq
   // TODO: Bug EP-66
   //property var resourcespanel
 
@@ -28,8 +30,7 @@ FocusScope {
   }
 
   onBookmarkscompChanged: {
-    var bookmarksqq = bookmarkscomp.uiHandle;
-    toolPanelSlot.addPanel(bookmarksqq, 200);
+    toolPanelSlot.addPanel(bookmarkscomp.uiHandle, 200);
   }
 
   // TODO: Bug EP-66
@@ -44,7 +45,7 @@ FocusScope {
   //}
 
   Component.onCompleted: {
-    sidebarcomp = EPKernel.createComponent("ep.Menu", {});
+    var sidebarcomp = EPKernel.createComponent("ep.Menu", {});
     if (!sidebarcomp) {
       console.error("Unable to create Sidebar Component");
       return;
@@ -73,10 +74,6 @@ FocusScope {
   }
 
   onViewportChanged: viewport.uiHandle.parent = viewPanel
-
-  // HACK: We have to set both of these because of inconsistent behaviour in TabView
-  focus: true
-  activeFocusOnTab: true
 
   onActiveFocusChanged: {
     if(activeFocus)

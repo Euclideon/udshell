@@ -16,16 +16,10 @@ Rectangle {
   color: Theme.toolPanelBgColor
 
   property var epTypeDesc: { "id": "ui.BookmarksUI", "super": "ep.UIComponent" }
-  property var commandManager
-  property var messagebox
   property var view
 
-  Component.onCompleted: {
-    commandManager = EPKernel.getCommandManager();
-    messagebox = EPKernel.findComponent("messagebox");
-  }
-
-  function createbookmark(name) {
+  function createbookmark(name)
+  {
     if(!name)
     {
       var highestID = 0;
@@ -48,6 +42,16 @@ Rectangle {
     listView.currentIndex = bookmarks.insertOrdered({"name" : name});
 
     return name;
+  }
+
+  Component.onCompleted: {
+    internal.messageBox = EPKernel.findComponent("messagebox");
+  }
+
+  QtObject
+  {
+    id: internal
+    property var messageBox
   }
 
   EPListModel {
@@ -106,7 +110,7 @@ Rectangle {
         onItemSelected: view.gotoBookmark(listView.selectedItemData.name);
 
         function showRenameBookmarkEditBox() {
-          messagebox.show( {
+          internal.messageBox.show( {
             "title": "Rename Bookmark",
             "text": "Enter new Bookmark name",
             "callback": renameBookmarkCallback,
@@ -127,7 +131,7 @@ Rectangle {
               for(var i = 0; i < bookmarks.count; i++) {
                 if(bookmarks.get(i).name == retValues.editText && listView.rightClickIndex != i)
                 {
-                  messagebox.show( {
+                  internal.messageBox.show( {
                     "title": "Error renaming Bookmark",
                     "text": "A Bookmark with that name already exists",
                     "callback": showRenameBookmarkEditBox

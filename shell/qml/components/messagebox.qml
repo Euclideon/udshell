@@ -4,31 +4,19 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.2
 
 Item {
-  // MessageBox types: "Message" or "Edit"
-  // Icon types: "None", "About", "Error" or "Warning"
-
   property var epTypeDesc: { "id": "ui.MessageBox", "super": "ep.UIComponent" }
-  property string type: "Message"
-  property string iconType: "None"
-  property var callback
-  property var validator
-  property string editText: type == "Edit" ? loader.item.editText : ""
-  property var buttons: []
-
-  readonly property var mbTypes: ["Message", "Edit"]
-  readonly property var icons: {"About":"qrc:/images/icon_about_16.png", "Error":"qrc:/images/icon_error_16.png", "Warning":"qrc:/images/icon_warning_16.png"}
 
   function show(params) {
-    if(params.title != undefined)
+    if (params.title != undefined)
       messageBox.title = params.title;
     else
       messageBox.title = "";
 
-    type = "Message";
-    if(params.type != undefined) {
-      for(var i = 0; i < mbTypes.length; i++) {
-        if(mbTypes[i].toUpperCase() == params.type.toUpperCase()) {
-          type = mbTypes[i];
+    internal.type = "Message";
+    if (params.type != undefined) {
+      for(var i = 0; i < internal.mbTypes.length; i++) {
+        if (internal.mbTypes[i].toUpperCase() == params.type.toUpperCase()) {
+          internal.type = internal.mbTypes[i];
           break;
         }
       }
@@ -40,39 +28,39 @@ Item {
       message.text = "";
 
     if(params.buttons != undefined)
-      buttons = params.buttons;
+      internal.buttons = params.buttons;
     else {
-      if(type == "Message")
-        buttons = ["OK"];
+      if (internal.type == "Message")
+        internal.buttons = ["OK"];
       else
-        buttons = ["OK", "Cancel"];
+        internal.buttons = ["OK", "Cancel"];
     }
 
-    callback = params.callback
+    internal.callback = params.callback
 
-    iconType = "None";
+    internal.iconType = "None";
     if(params.iconType != undefined) {
-      for (var key in icons) {
+      for (var key in internal.icons) {
         if (key.toUpperCase() == params.iconType.toUpperCase()) {
-          iconType = key;
+          internal.iconType = key;
           break;
         }
       }
     }
 
-    if(type == "Edit") {
-      validator = params.validator;
+    if (internal.type == "Edit") {
+      internal.validator = params.validator;
 
       if(params.initEditText != undefined) {
         loader.item.editText = params.initEditText;
         loader.item.edit.selectAll();
       }
 
-      validate(loader.item.editText);
+      internal.validate(loader.item.editText);
     }
 
-    if(icons[iconType] != undefined) {
-      icon.source = icons[iconType];
+    if (internal.icons[internal.iconType] != undefined) {
+      icon.source = internal.icons[internal.iconType];
       icon.visible = true
     }
     else
@@ -81,14 +69,36 @@ Item {
     messageBox.visible = true;
   }
 
-  function validate(text) {
-    if(validator && !validator(text)) {
-      for(var i = 0; i < buttonRepeater.count - 1; i++)
-        buttonRepeater.itemAt(i).enabled = false;
+  QtObject
+  {
+    id: internal
+
+    // MessageBox types: "Message" or "Edit"
+    // Icon types: "None", "About", "Error" or "Warning"
+    property string type: "Message"
+    property string iconType: "None"
+    property var callback
+    property var validator
+    property string editText: type == "Edit" ? loader.item.editText : ""
+    property var buttons: []
+
+    readonly property var mbTypes: ["Message", "Edit"]
+    readonly property var icons: {
+      "About": "qrc:/images/icon_about_16.png",
+      "Error": "qrc:/images/icon_error_16.png",
+      "Warning": "qrc:/images/icon_warning_16.png"
     }
-    else {
-      for(var i = 0; i < buttonRepeater.count - 1; i++)
-        buttonRepeater.itemAt(i).enabled = true;
+
+    function validate(text)
+    {
+      if (internal.validator && !internal.validator(text)) {
+        for(var i = 0; i < buttonRepeater.count - 1; i++)
+          buttonRepeater.itemAt(i).enabled = false;
+      }
+      else {
+        for(var i = 0; i < buttonRepeater.count - 1; i++)
+          buttonRepeater.itemAt(i).enabled = true;
+      }
     }
   }
 
@@ -112,11 +122,11 @@ Item {
       var returnMap = {};
       returnMap["buttonIndex"] = -1;
       returnMap["buttonLabel"] = "close";
-      if(type == mbTypeEdit)
+      if (internal.type == mbTypeEdit)
         returnMap["editText"] = "";
 
-      if(callback)
-        callback(returnMap);
+      if (internal.callback)
+        internal.callback(returnMap);
     }
 
     ColumnLayout {
@@ -160,8 +170,8 @@ Item {
       Loader {
         id: loader
         Layout.fillWidth: true
-        visible: type == "Edit" ? true : false
-        sourceComponent: type == "Edit" ? editComponent : null
+        visible: internal.type == "Edit" ? true : false
+        sourceComponent: internal.type == "Edit" ? editComponent : null
 
         Component {
           id: editComponent
@@ -187,7 +197,7 @@ Item {
               }
 
               onTextChanged: {
-                validate(text);
+                internal.validate(text);
               }
 
               Keys.onPressed: {
@@ -213,7 +223,7 @@ Item {
 
         Repeater {
           id: buttonRepeater
-          model: buttons
+          model: internal.buttons
           Button {
             text: modelData
             onClicked: {
@@ -221,11 +231,11 @@ Item {
               var returnMap = {};
               returnMap["buttonIndex"] = index;
               returnMap["buttonLabel"] = modelData;
-              if(type == "Edit")
-                returnMap["editText"] = editText;
+              if (internal.type == "Edit")
+                returnMap["editText"] = internal.editText;
 
-              if(callback)
-                callback(returnMap);
+              if (internal.callback)
+                internal.callback(returnMap);
             }
           }
         }

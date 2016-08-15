@@ -8,10 +8,9 @@ import Platform.Controls 0.1
 Item {
   property var epTypeDesc: { "id": "ui.ActivitySelector", "super": "ep.UIComponent" }
   property var activitiesinfo: []
-  property var callback
 
   function show(cb) {
-    callback = cb;
+    internal.callback = cb;
 
     infoModel.clear();
     for(var i = 0; i < activitiesinfo.length; i++) {
@@ -25,6 +24,12 @@ Item {
     listView.currentIndex = -1;
 
     win.show();
+  }
+
+  QtObject
+  {
+    id: internal
+    property var callback
   }
 
   EPListModel {
