@@ -75,25 +75,23 @@ chmod +x install.sh
 
 cd ..
 
-
-# make .tar.bz2
-echo "Packing $PACKAGE_NAME.tar.bz2..."
-
-tar -cvjSf $PACKAGE_NAME.tar.bz2 $PACKAGE_NAME/
-
-cp $PACKAGE_NAME.tar.bz2 $PACKAGE_PATH
-
-
-# make .deb
 if [ $2 == "deb" ]; then
-  echo "Generate $PACKAGE_NAME.deb..."
+  # make .tar.bz2
+  echo "Packing $PACKAGE_NAME.tar.bz2..."
 
+  tar -cvjSf $PACKAGE_NAME.tar.bz2 $PACKAGE_NAME/
+  cp $PACKAGE_NAME.tar.bz2 $PACKAGE_PATH
+
+#  echo "Generate $PACKAGE_NAME.deb..."
   # TODO
 fi
-
-# make .rpm
 if [ $2 == "rpm" ]; then
-  echo "Generate $PACKAGE_NAME.rpm..."
+  # make .tar.gz
+  echo "Packing $PACKAGE_NAME.tar.gz..."
 
+  tar -cvzSf $PACKAGE_NAME.tar.gz $PACKAGE_NAME/
+  cp $PACKAGE_NAME.tar.gz $PACKAGE_PATH
+
+#  echo "Generate $PACKAGE_NAME.rpm..."
   # TODO
 fi
