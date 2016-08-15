@@ -48,75 +48,83 @@ windows_shell_releasedev_32:
 
 ubuntu_shell_debug_gcc:
   stage: build
+  image: gitlab.euclideon.local:4567/docker-images/qt-xenial:5.6-v1
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - "./build/build.sh epshell Debug x64 merge"
   tags:
     - linux
-    - deb
+    - docker
 
 ubuntu_shell_releasedev_gcc:
   stage: build
+  image: gitlab.euclideon.local:4567/docker-images/qt-xenial:5.6-v1
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - "./build/build.sh epshell ReleaseDev x64 merge"
   tags:
     - linux
-    - deb
+    - docker
 
 ubuntu_shell_debug_clang:
   stage: build
+  image: gitlab.euclideon.local:4567/docker-images/qt-xenial:5.6-v1
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - "./build/build.sh epshell DebugClang x64 merge"
   tags:
     - linux
-    - deb
+    - docker
 
 ubuntu_shell_releasedev_clang:
   stage: build
+  image: gitlab.euclideon.local:4567/docker-images/qt-xenial:5.6-v1
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - "./build/build.sh epshell ReleaseDevClang x64 merge"
   tags:
     - linux
-    - deb
+    - docker
 
 rpm_shell_debug_gcc:
   stage: build
+  image: gitlab.euclideon.local:4567/docker-images/qt-centos7:5.6-v1
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - "./build/build.sh epshell Debug x64 merge"
   tags:
     - linux
-    - rpm
+    - docker
 
 rpm_shell_releasedev_gcc:
   stage: build
+  image: gitlab.euclideon.local:4567/docker-images/qt-centos7:5.6-v1
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - "./build/build.sh epshell ReleaseDev x64 merge"
   tags:
     - linux
-    - rpm
+    - docker
 
 rpm_shell_debug_clang:
   stage: build
+  image: gitlab.euclideon.local:4567/docker-images/qt-centos7:5.6-v1
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - "./build/build.sh epshell DebugClang x64 merge"
   tags:
     - linux
-    - rpm
+    - docker
 
 rpm_shell_releasedev_clang:
   stage: build
+  image: gitlab.euclideon.local:4567/docker-images/qt-centos7:5.6-v1
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - "./build/build.sh epshell ReleaseDevClang x64 merge"
   tags:
     - linux
-    - rpm
+    - docker
 
 build_docs:
   stage: build
@@ -129,12 +137,14 @@ build_docs:
 
 collate_builds:
   stage: postbuild
+  image: gitlab.euclideon.local:4567/docker-images/dev-xenial:v1
   only:
     - master
     - tags
   script: "./build/collate.sh"
   tags:
-    - ubuntu
+    - linux
+    - docker
 
 win64_dongleprotect:
   stage: dongleprotect
@@ -196,6 +206,7 @@ win32_packaging:
 
 trusty_packaging:
   stage: package
+  image: gitlab.euclideon.local:4567/docker-images/qt-xenial:5.6-v1
   only:
     - master
     - tags
@@ -203,10 +214,12 @@ trusty_packaging:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - ./build/packagelinux.sh trusty deb
   tags:
-    - deb
+    - linux
+    - docker
 
 centos7_packaging:
   stage: package
+  image: gitlab.euclideon.local:4567/docker-images/qt-centos7:5.6-v1
   only:
     - master
     - tags
@@ -214,19 +227,23 @@ centos7_packaging:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - ./build/packagelinux.sh centos7 rpm
   tags:
-    - rpm
+    - linux
+    - docker
 
 update_latest:
   stage: finalise
+  image: gitlab.euclideon.local:4567/docker-images/dev-xenial:v1
   only:
     - master
     - tags
   script: "./build/updatelatest.sh"
   tags:
     - linux
+    - docker
 
 update_merge_requests:
   stage: finalise
+  image: gitlab.euclideon.local:4567/docker-images/qt-xenial:5.6-v1
   script:
     - export QTDIR=~/dev/Qt/5.6/gcc_64
     - export PATH=$QTDIR/bin:$PATH
@@ -234,9 +251,11 @@ update_merge_requests:
     - "bin/premake/premake5 --ci_project_id=$CI_PROJECT_ID --ci_build_ref_name=$CI_BUILD_REF_NAME --trigger_token=7b183a6a00a2405e30f5af529deb82 gitlab"
   tags:
     - linux
+    - docker
 
 cleanup:
   stage: clean
+  image: gitlab.euclideon.local:4567/docker-images/dev-xenial:v1
   only:
     - master
     - tags
@@ -244,3 +263,4 @@ cleanup:
   script: "./build/cleanup.sh"
   tags:
     - linux
+    - docker
