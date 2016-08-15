@@ -429,8 +429,15 @@ QtMetaObjectGenerator::QtMetaObjectGenerator(const ep::ComponentDesc *_pDesc)
   // ------------- Signals
   signalList.reserve(pDesc->eventTree.size());
   for (auto e : pDesc->eventTree)
+  {
+    // If we have an event called "destroyed" it will conflict with the event from QObject and could potentially lead to unexpected behaviour
+    // Essentially (from QML) the event may fire if either the QObject signal fires *or* the EP event fires - depending on the parameter list.
+    if (e.key.eq("destroyed"))
+      QtApplication::kernel()->logWarning(3, "Component Type '{0}' contains event 'destroyed'. Potential ambiguity with Qt's built-in event.", pDesc->info.identifier);
+
     if (!pDesc->pSuperDesc || !static_cast<const ep::ComponentDescInl*>(pDesc->pSuperDesc)->eventTree.get(e.key))
       AddSignal(&e.value);
+  }
 
   // Signals are inserted before slots so we need to keep track of the offset if this is the top level component (and hence has built-ins)
   if (!pDesc->pSuperDesc)
@@ -833,12 +840,16 @@ void QtEPComponent::connectNotify(const QMetaMethod &signal)
 {
   auto signalName = epFromQByteArray(signal.name());
 
-  // Check if we already have an entry in the connection map
-  if (connectionMap.get(signalName))
-    return;
-
-  Connection *pConn = &connectionMap.insert(signalName, Connection{ this, signal });
-  pConn->subscription = pComponent->subscribe(signalName, ep::VarDelegate(pConn, &QtEPComponent::Connection::SignalRouter));
+  // QObject has a signal called destroyed - if we get a connect for it check if we've overridden it...
+  if (!signalName.eq("destroyed") || pComponent->getEventDesc(signalName))
+  {
+    // if connectionMap already has an entry we are already connected
+    if (!connectionMap.get(signalName))
+    {
+      Connection *pConn = &connectionMap.insert(signalName, Connection{ this, signal });
+      pConn->subscription = pComponent->subscribe(signalName, ep::VarDelegate(pConn, &QtEPComponent::Connection::SignalRouter));
+    }
+  }
 }
 
 void QtEPComponent::disconnectNotify(const QMetaMethod &signal)
