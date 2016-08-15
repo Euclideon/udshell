@@ -43,8 +43,8 @@ cp build/package/windows/qt.conf $WIN32_ROOT/
 cp $PACKAGE_PATH/docs/libep-docs.chm $WIN32_ROOT/
 cp -R build/package/qtcreator/wizards/* $WIN32_ROOT/qtcreator/
 
-# arrange trusty package
-echo "Collating Ubuntu trusty package..."
+# arrange xenial package
+echo "Collating Ubuntu xenial package..."
 mkdir -p $UBUNTU_ROOT/include
 mkdir -p $UBUNTU_ROOT/lib
 mkdir -p $UBUNTU_ROOT/plugins
