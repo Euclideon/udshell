@@ -5,35 +5,28 @@
 #include "ep/cpp/component/node/node.h"
 #include "ep/cpp/internal/i/igeomnode.h"
 
-#include "ep/cpp/component/resource/resource.h"
+namespace ep {
 
-namespace ep
+class GeomNode : public Node
 {
+  EP_DECLARE_COMPONENT_WITH_IMPL(ep, GeomNode, IGeomNode, Node, EPKERNEL_PLUGINVERSION, "GeomNode desc...", 0)
+public:
 
-  SHARED_CLASS(Model);
-  SHARED_CLASS(GeomNode);
-  SHARED_CLASS(RenderScene);
+  ModelRef getModel() const { return pImpl->GetModel(); }
+  void setModel(ModelRef _spModel) { pImpl->SetModel(_spModel); }
 
-  class GeomNode : public Node
+protected:
+  GeomNode(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
+    : Node(pType, pKernel, uid, initParams)
   {
-    EP_DECLARE_COMPONENT_WITH_IMPL(ep, GeomNode, IGeomNode, Node, EPKERNEL_PLUGINVERSION, "GeomNode desc...", 0)
-  public:
+    pImpl = createImpl(initParams);
+  }
 
-    virtual ModelRef getModel() const { return pImpl->GetModel(); }
-    virtual void setModel(ModelRef _spModel) { pImpl->SetModel(_spModel); }
+  void render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
 
-  protected:
-    GeomNode(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Variant::VarMap initParams)
-      : Node(pType, pKernel, uid, initParams)
-    {
-      pImpl = createImpl(initParams);
-    }
-
-    void render(RenderScene &spScene, const Double4x4 &mat) override { pImpl->Render(spScene, mat); }
-
-  private:
-    Array<const PropertyInfo> getProperties() const;
-  };
+private:
+  Array<const PropertyInfo> getProperties() const;
+};
 
 } // namespace ep
 
