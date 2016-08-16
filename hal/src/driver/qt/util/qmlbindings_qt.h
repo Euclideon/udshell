@@ -227,15 +227,15 @@ struct BuildQtEPComponent
 
 } // namespace qt
 
-// This ensures qobject_cast works with our fake QtTestComponent objects
+// This ensures qobject_cast works with our fake QtEPComponent objects
 template <> inline qt::QtEPComponent *qobject_cast<qt::QtEPComponent*>(const QObject *o)
 {
-  void *result = o ? const_cast<QObject *>(o)->qt_metacast("QtTestComponent") : 0;
+  void *result = o ? const_cast<QObject *>(o)->qt_metacast("QtEPComponent") : 0;
   return (qt::QtEPComponent*)(result);
 }
 template <> inline qt::QtEPComponent *qobject_cast<qt::QtEPComponent*>(QObject *o)
 {
-  void *result = o ? o->qt_metacast("QtTestComponent") : 0;
+  void *result = o ? o->qt_metacast("QtEPComponent") : 0;
   return (qt::QtEPComponent*)(result);
 }
 
