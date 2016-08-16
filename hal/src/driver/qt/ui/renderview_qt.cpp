@@ -14,7 +14,7 @@
 
 #include "driver/qt/epkernel_qt.h"
 #include "driver/qt/ui/renderview_qt.h"
-#include "driver/qt/util/typeconvert_qt.h"
+#include "driver/qt/util/qmlbindings_qt.h"
 
 ep::KeyCode qtKeyToEPKey(Qt::Key qk);
 
@@ -74,9 +74,9 @@ ep::MouseControls GetMouseButton(Qt::MouseButton button)
 QtRenderView::QtRenderView(QQuickItem *pParent)
   : QQuickFramebufferObject(pParent)
 {
-  QObject::connect(this, &QQuickItem::widthChanged, this, &QtRenderView::OnResize);
-  QObject::connect(this, &QQuickItem::heightChanged, this, &QtRenderView::OnResize);
-  QObject::connect(this, &QQuickItem::visibleChanged, this, &QtRenderView::OnVisibleChanged);
+  QObject::connect(this, &QQuickItem::widthChanged, this, &QtRenderView::onResize);
+  QObject::connect(this, &QQuickItem::heightChanged, this, &QtRenderView::onResize);
+  QObject::connect(this, &QQuickItem::visibleChanged, this, &QtRenderView::onVisibleChanged);
 
   setMirrorVertically(true);
 }
@@ -85,7 +85,7 @@ QtRenderView::~QtRenderView()
 {
   if (spView)
   {
-    spView->frameReady.unsubscribe(ep::Delegate<void()>(this, &QtRenderView::OnFrameReady));
+    spView->frameReady.unsubscribe(ep::Delegate<void()>(this, &QtRenderView::onFrameReady));
     spView->getImpl<ep::ViewImpl>()->SetLatestFrame(nullptr);
   }
 }
@@ -95,19 +95,33 @@ QQuickFramebufferObject::Renderer *QtRenderView::createRenderer() const
   return new QtFboRenderer(this);
 }
 
-void QtRenderView::attachView(const QVariant &view)
+void QtRenderView::setView(const QVariant &view)
 {
   using namespace ep;
-  spView = component_cast<View>(Variant(view).asComponent());
-  spView->logDebug(2, "Attaching View Component '{0}' to Render Viewport", spView->getUid());
+  ViewRef newView = component_cast<View>(Variant(view).asComponent());
 
-  spView->frameReady.subscribe(Delegate<void()>(this, &QtRenderView::OnFrameReady));
+  if (spView != newView)
+  {
+    if (spView)
+    {
+      spView->frameReady.unsubscribe(ep::Delegate<void()>(this, &QtRenderView::onFrameReady));
+      spView->getImpl<ep::ViewImpl>()->SetLatestFrame(nullptr);
+    }
 
-  // TEMP HAX:
-  QtApplication::kernel()->setFocusView(spView);
+    spView = newView;
+
+    if (spView)
+    {
+      spView->logDebug(2, "Attaching View Component '{0}' to Render Viewport", spView->getUid());
+      spView->frameReady.subscribe(Delegate<void()>(this, &QtRenderView::onFrameReady));
+    }
+
+    // TEMP HAX:
+    QtApplication::kernel()->setFocusView(spView);
+  }
 }
 
-void QtRenderView::OnResize()
+void QtRenderView::onResize()
 {
   int w = (int)width();
   int h = (int)height();
@@ -116,7 +130,7 @@ void QtRenderView::OnResize()
     spView->resize(w, h);
 }
 
-void QtRenderView::OnVisibleChanged()
+void QtRenderView::onVisibleChanged()
 {
   if (spView)
   {
