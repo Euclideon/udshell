@@ -128,7 +128,7 @@ Item {
             anchors.right: parent.right
             anchors.bottomMargin: 5
             focus: true
-            source: "consolefilter.qml"
+            source: "qrc:/EP/Platform/consolefilter.qml"
             onOpened: {
               contentItem.consolecomp = tv.getTab(tv.currentIndex).item.consolecomp;
             }

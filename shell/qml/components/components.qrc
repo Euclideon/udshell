@@ -3,8 +3,10 @@
     <file>activityselector.qml</file>
     <file>appwindow.qml</file>
     <file>bookmarksui.qml</file>
+    <file>console.qml</file>
     <file>main.qml</file>
     <file>messagebox.qml</file>
     <file>resourcespanel.qml</file>
+    <file>viewport.qml</file>
   </qresource>
 </RCC>
