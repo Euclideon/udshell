@@ -11,9 +11,11 @@ Item {
   enabled: false
   anchors.fill: parent
 
+  // Properties // ------------------------------------------------------------
   property var epTypeDesc: { "id": "ui.Console", "super": "ep.UIComponent" }
 
-  function togglevisible()
+  // Methods // ---------------------------------------------------------------
+  function toggleVisible()
   {
     if(!consoleWin.visible)
     {
@@ -34,6 +36,7 @@ Item {
     consoleWin.visible = !consoleWin.visible;
   }
 
+  // Event Handlers // --------------------------------------------------------
   Component.onCompleted: {
     // Console Tab
     var tab1 = tv.addTab("Shell", consoleTab);
@@ -58,12 +61,14 @@ Item {
     internal.tabs.push(tab3);
   }
 
+  // Internal // --------------------------------------------------------------
   QtObject
   {
     id: internal
     property var tabs: []
   }
 
+  // Item Tree // -------------------------------------------------------------
   FontLoader { id: fixedFont; name: "Courier" }
 
   ColumnLayout {

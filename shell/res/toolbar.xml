@@ -1,9 +1,9 @@
 <root>
   <button name="New..." split="false" description="Create a new Project or Activity">
-    <menuitem name="New Project" command="newproject" description="Create a new project file" image="qrc:/images/icon_new_32.png" />
-    <menuitem name="New Activity" command="newactivity" enabled="false" description="Start a new activity" image="qrc:/images/icon_new_32.png" />
+    <menuitem name="New Project" command="newProject" description="Create a new project file" image="qrc:/images/icon_new_32.png" />
+    <menuitem name="New Activity" command="newActivity" enabled="false" description="Start a new activity" image="qrc:/images/icon_new_32.png" />
   </button>
-  <button name="Open Project" command="openproject" description="Open a project file" image="qrc:/images/icon_open_32.png" />
-  <button name="Save Project" command="saveproject" enabled="false" description="Save the current project" image="qrc:/images/icon_save_32.png" />
-  <button name="Save Project As..." command="saveprojectas" enabled="false" description="Save the current project with a new name" image="qrc:/images/icon_save_as_32.png" />
+  <button name="Open Project" command="openProject" description="Open a project file" image="qrc:/images/icon_open_32.png" />
+  <button name="Save Project" command="saveProject" enabled="false" description="Save the current project" image="qrc:/images/icon_save_32.png" />
+  <button name="Save Project As..." command="saveProjectAs" enabled="false" description="Save the current project with a new name" image="qrc:/images/icon_save_as_32.png" />
 </root>

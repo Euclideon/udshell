@@ -6,7 +6,7 @@ FocusScope
   id: viewport
   anchors.fill: parent
 
-  // Properties // ------------------------
+  // Properties // ------------------------------------------------------------
   property var epTypeDesc: {
     "id": "ui.Viewport",
     "super": "ep.UIComponent",
@@ -14,7 +14,7 @@ FocusScope
   }
   property alias view: renderView.view
 
-  // Methods // ---------------------------
+  // Methods // ---------------------------------------------------------------
   function epInitComponent(initParams)
   {
     if ("view" in initParams)
@@ -26,7 +26,7 @@ FocusScope
     }
   }
 
-  // Item Tree // ------------------------
+  // Item Tree // -------------------------------------------------------------
   EPRenderView
   {
     id: renderView

@@ -7,28 +7,31 @@ import Platform 0.1
 import Platform.Controls 0.1
 import Platform.Themes 0.1
 
-Rectangle {
+Rectangle
+{
   id: topLevel
   anchors.fill: parent
   color: Theme.windowBgColor
 
+  // Properties // ------------------------------------------------------------
   property var epTypeDesc: { "id": "ui.Main", "super": "ep.UIComponent" }
-  property var uiconsole
-  property var messageboxcomp
-  property var messagebox
-  property var menucomp
+  property var uiConsole
+  property var messageBox
+  property var menu
   //property var toolbarcomp
-  property var activityselector
+  property var activitySelector
 
-  signal activitychanged(string uid)
+  // Events // ----------------------------------------------------------------
+  signal activityChanged(string uid)
 
-  signal newprojectsignal(string path)
-  signal openprojectsignal(string path)
-  signal saveprojectsignal()
-  signal saveprojectassignal(string path)
-  signal newactivitysignal(string id)
+  signal newProjectSelected(string path)
+  signal openProjectSelected(string path)
+  signal saveProjectAsSelected(string path)
+  signal saveProjectSelected()
+  signal newActivitySelected(string id)
 
-  function addactivity(activity)
+  // Methods // ---------------------------------------------------------------
+  function addActivity(activity)
   {
     if(activityTabs.count == 0)
       activityTabs.visible = true;
@@ -48,7 +51,7 @@ Rectangle {
     activityTabs.currentIndex = activityTabs.count - 1;
   }
 
-  function removeactivity(uid)
+  function removeActivity(uid)
   {
     for(var i = 0; i < internal.activityList.length; i++)
     {
@@ -69,44 +72,47 @@ Rectangle {
     }
   }
 
-  onMessageboxcompChanged: {
-    messagebox = messageboxcomp.uiHandle;
-    messagebox.parent = topLevel;
+  // Event Handlers // --------------------------------------------------------
+  onMessageBoxChanged: {
+    if (messageBox)
+      messageBox.uiHandle.parent = topLevel;
   }
 
-  onUiconsoleChanged: {
-    uiconsole.uiHandle.parent = consolePanel;
+  onUiConsoleChanged: {
+    if (uiConsole)
+      uiConsole.uiHandle.parent = consolePanel;
   }
 
-  onMenucompChanged: {
-    menuBar.menucomp = menucomp;
+  onMenuChanged: {
+    menuBar.menucomp = menu;
   }
 
   //onToolbarcompChanged: {
     //toolBar.toolbarcomp = toolbarcomp;
   //}
 
-  onActivityselectorChanged: {
-    activityselector.uiHandle.parent = this;
+  onActivitySelectorChanged: {
+    if (activitySelector)
+      activitySelector.uiHandle.parent = topLevel;
   }
 
   Component.onCompleted: {
     var commandManager = EPKernel.getCommandManager();
-    commandManager.registerCommand("newproject", internal.newProject, "", "", "Ctrl+N");
-    commandManager.registerCommand("openproject", internal.openProject, "", "", "Ctrl+O");
+    commandManager.registerCommand("newProject", internal.showNewProjectDialog, "", "", "Ctrl+N");
+    commandManager.registerCommand("openProject", internal.showOpenProjectDialog, "", "", "Ctrl+O");
 
-    commandManager.registerCommand("saveproject", internal.saveProject, "", "", "Ctrl+S");
-    commandManager.registerCommand("saveprojectas", internal.saveProjectAs, "", "", "F12");
-    commandManager.registerCommand("newactivity", internal.newActivity, "", "", "Ctrl+A");
-
-    commandManager.registerCommand("showhideconsolepanel", internal.showHideConsolePanel, "", "", "`");
+    commandManager.registerCommand("saveProject", saveProjectSelected, "", "", "Ctrl+S");
+    commandManager.registerCommand("saveProjectAs", internal.showSaveProjectAsDialog, "", "", "F12");
+    commandManager.registerCommand("newActivity", function() { activitySelector.uiHandle.show(newActivitySelected); }, "", "", "Ctrl+A");
+    commandManager.registerCommand("showHideConsolePanel", function() { if (uiConsole) uiConsole.toggleVisible(); }, "", "", "`");
 
     // Disable these shortcuts, they will get enabled when a project is created or opened
-    commandManager.disableShortcut("saveproject");
-    commandManager.disableShortcut("saveprojectas");
-    commandManager.disableShortcut("newactivity");
+    commandManager.disableShortcut("saveProject");
+    commandManager.disableShortcut("saveProjectAs");
+    commandManager.disableShortcut("newActivity");
   }
 
+  // Internal // --------------------------------------------------------------
   QtObject
   {
     id: internal
@@ -116,12 +122,6 @@ Rectangle {
     property var activityUIList: []
     property var tabList: [] // Store a strong reference to the tabs to stop TabView from garbage collecting them
     property var fileDialog
-
-    function showHideConsolePanel()
-    {
-      if (uiconsole)
-         uiconsole.togglevisible();
-    }
 
     function cameraUpdated(pos, ypr)
     {
@@ -157,104 +157,71 @@ Rectangle {
 
     function initViewerUI(activity)
     {
-      if (internal.simpleCamera)
-        internal.simpleCamera.repositioned.disconnect(cameraUpdated);
+      if (simpleCamera)
+        simpleCamera.repositioned.disconnect(cameraUpdated);
 
-      if(internal.view)
+      if(view)
       {
-        internal.view.mousePositionChanged.disconnect(viewMouseUpdated);
-        internal.view.enabledPickingChanged.disconnect(viewPickingEnabledChanged);
-        internal.view.pickFound.disconnect(viewPickFound);
+        view.mousePositionChanged.disconnect(viewMouseUpdated);
+        view.enabledPickingChanged.disconnect(viewPickingEnabledChanged);
+        view.pickFound.disconnect(viewPickFound);
       }
 
       if(!activity)
       {
-        internal.simpleCamera = null;
-        internal.view = null;
+        simpleCamera = null;
+        view = null;
         return;
       }
 
-      internal.simpleCamera = activity.simpleCamera;
-      if (internal.simpleCamera)
-        internal.simpleCamera.repositioned.connect(cameraUpdated);
+      simpleCamera = activity.simpleCamera;
+      if (simpleCamera)
+        simpleCamera.repositioned.connect(cameraUpdated);
 
-      internal.view = activity.view;
-      if (internal.view)
+      view = activity.view;
+      if (view)
       {
-        internal.view.mousePositionChanged.connect(viewMouseUpdated);
-        internal.view.enabledPickingChanged.connect(viewPickingEnabledChanged);
-        internal.view.pickFound.connect(viewPickFound);
+        view.mousePositionChanged.connect(viewMouseUpdated);
+        view.enabledPickingChanged.connect(viewPickingEnabledChanged);
+        view.pickFound.connect(viewPickFound);
       }
     }
 
-    function newActivity()
+    function showNewProjectDialog()
     {
-      activityselector.uiHandle.show(newActivitySelected);
+      fileDialog = fileDialogComp.createObject(topLevel);
+      fileDialog.title = "Select project location and enter a name for the new project";
+      fileDialog.onAccepted.connect(function(){ fileDialog.destroy(); newProjectSelected(fileDialog.fileUrl); });
+      fileDialog.selectMultiple = false;
+      fileDialog.selectExisting = false;
+      fileDialog.nameFilters = ["*.epproj"];
+      fileDialog.visible = true;
     }
 
-    function newActivitySelected(id)
+    function showOpenProjectDialog()
     {
-      newactivitysignal(id);
+      fileDialog = fileDialogComp.createObject(topLevel);
+      fileDialog.title = "Select a Euclideon Platform Project file to open";
+      fileDialog.onAccepted.connect(function(){ fileDialog.destroy(); openProjectSelected(fileDialog.fileUrl); });
+      fileDialog.selectMultiple = false;
+      fileDialog.selectExisting = true;
+      fileDialog.nameFilters = ["*.epproj"];
+      fileDialog.visible = true;
     }
 
-    function newProject()
+    function showSaveProjectAsDialog()
     {
-      internal.fileDialog = fileDialogComp.createObject(topLevel);
-      internal.fileDialog.title = "Select project location and enter a name for the new project";
-      internal.fileDialog.onAccepted.connect(newProjectAccepted);
-      internal.fileDialog.selectMultiple = false;
-      internal.fileDialog.selectExisting = false;
-      internal.fileDialog.nameFilters = ["*.epproj"];
-      internal.fileDialog.visible = true;
-    }
-
-    function newProjectAccepted()
-    {
-      internal.fileDialog.destroy();
-      newprojectsignal(internal.fileDialog.fileUrl);
-    }
-
-    function openProject()
-    {
-      internal.fileDialog = fileDialogComp.createObject(topLevel);
-      internal.fileDialog.title = "Select a Euclideon Platform Project file to open";
-      internal.fileDialog.onAccepted.connect(openProjectAccepted);
-      internal.fileDialog.selectMultiple = false;
-      internal.fileDialog.selectExisting = true;
-      internal.fileDialog.nameFilters = ["*.epproj"];
-      internal.fileDialog.visible = true;
-    }
-
-    function openProjectAccepted()
-    {
-      internal.fileDialog.destroy();
-      openprojectsignal(internal.fileDialog.fileUrl);
-
-    }
-
-    function saveProject()
-    {
-      saveprojectsignal();
-    }
-
-    function saveProjectAs()
-    {
-      internal.fileDialog = fileDialogComp.createObject(topLevel);
-      internal.fileDialog.title = "Select project location and enter a name for the project";
-      internal.fileDialog.onAccepted.connect(saveProjectAsAccepted);
-      internal.fileDialog.selectMultiple = false;
-      internal.fileDialog.selectExisting = false;
-      internal.fileDialog.nameFilters = ["*.epproj"];
-      internal.fileDialog.visible = true;
-    }
-
-    function saveProjectAsAccepted()
-    {
-      internal.fileDialog.destroy();
-      saveprojectassignal(internal.fileDialog.fileUrl);
+      fileDialog = fileDialogComp.createObject(topLevel);
+      fileDialog.title = "Select project location and enter a name for the project";
+      fileDialog.onAccepted.connect(function(){ fileDialog.destroy(); saveProjectAsSelected(fileDialog.fileUrl); });
+      fileDialog.selectMultiple = false;
+      fileDialog.selectExisting = false;
+      fileDialog.nameFilters = ["*.epproj"];
+      fileDialog.visible = true;
     }
   }
 
+  // Item Tree // -------------------------------------------------------------
   ColumnLayout {
     id: topLevelColumn
     anchors.fill: parent
@@ -303,7 +270,7 @@ Rectangle {
           {
             var activityId = internal.activityList[currentIndex].uid;
             lastId = activityId
-            activitychanged(activityId);
+            activityChanged(activityId);
             var activity = internal.activityList[currentIndex];
             var activityqq = internal.activityUIList[currentIndex].uiHandle;
             activityqq.visible = false; // Trigger an onVisibleChanged signal
@@ -315,7 +282,7 @@ Rectangle {
           else
           {
             lastId = "";
-            activitychanged(null);
+            activityChanged(null);
 
             internal.initViewerUI(null);
           }
@@ -333,7 +300,7 @@ Rectangle {
         Button {
           id: consoleButton
           text: "Console"
-          onClicked: uiconsole.togglevisible();
+          onClicked: uiConsole.toggleVisible();
           style: bottomBarButtonStyle
         }
         Text {
@@ -496,7 +463,7 @@ Rectangle {
                   fillMode: Image.PreserveAspectFit
                 }
               }
-              onClicked: removeactivity(internal.activityList[styleData.index].uid)
+              onClicked: removeActivity(internal.activityList[styleData.index].uid)
             }
           }
         }

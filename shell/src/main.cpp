@@ -96,15 +96,15 @@ MutableString256 GetNameFromFilePath(String path)
 
 void AddUIActivity(ActivityRef spActivity)
 {
-  spTopLevelUI->call("addactivity", spActivity);
+  spTopLevelUI->call("addActivity", spActivity);
 }
 
 void RemoveUIActivity(ActivityRef spActivity)
 {
-  spTopLevelUI->call("removeactivity", String(spActivity->uid));
+  spTopLevelUI->call("removeActivity", String(spActivity->uid));
 }
 
-void OnActivityChanged(String uid)
+void onActivityChanged(String uid)
 {
   auto spActiveActivity = spProject->getActiveActivity();
 
@@ -142,12 +142,12 @@ void InitProject()
 
   // Enable shortcuts
   auto spCommandManager = spKernel->getCommandManager();
-  spCommandManager->enableShortcut("saveproject");
-  spCommandManager->enableShortcut("saveprojectas");
-  spCommandManager->enableShortcut("newactivity");
+  spCommandManager->enableShortcut("saveProject");
+  spCommandManager->enableShortcut("saveProjectAs");
+  spCommandManager->enableShortcut("newActivity");
 }
 
-void NewProject(String filePath)
+void newProject(String filePath)
 {
   MutableString256 sFilePath = filePath;
 
@@ -173,7 +173,7 @@ void NewProject(String filePath)
   InitProject();
 }
 
-void OpenProject(String filePath)
+void openProject(String filePath)
 {
   ProjectRef spNewProject;
 
@@ -216,20 +216,20 @@ void OpenProject(String filePath)
   InitProject();
 }
 
-void SaveProject()
+void saveProject()
 {
   if (spProject)
     spProject->saveProject();
 }
 
-void NewActivity(String typeID)
+void newActivity(String typeID)
 {
   auto spActivity = component_cast<Activity>(spKernel->createComponent(typeID, nullptr));
   spProject->addActivity(spActivity);
   AddUIActivity(spActivity);
 }
 
-void SaveProjectAs(String filePath)
+void saveProjectAs(String filePath)
 {
   projectName = GetNameFromFilePath(filePath);
   spMainWindow->set("title", SharedString::format("{0} - {1}", projectName, appTitle));
@@ -389,12 +389,12 @@ void Init(String sender, String message, const Variant &data)
 
   epscope(fail) { if (!spMessageBox) spKernel->logError("Error creating MessageBox UI Component\n"); };
   spMessageBox = component_cast<UIComponent>(spKernel->createComponent("ui.MessageBox", Variant::VarMap{ { "name", "messagebox" } }));
-  spTopLevelUI->set("messageboxcomp", spMessageBox);
+  spTopLevelUI->set("messageBox", spMessageBox);
 
   UIComponentRef spConsole;
   epscope(fail) { if (!spConsole) spKernel->logError("Error creating Console UI Component\n"); };
   spConsole = component_cast<UIComponent>(spKernel->createComponent("ui.Console"));
-  spTopLevelUI->set("uiconsole", spConsole);
+  spTopLevelUI->set("uiConsole", spConsole);
 
   // Load menus
   String menusPath(":/menus.xml");
@@ -403,7 +403,7 @@ void Init(String sender, String message, const Variant &data)
     spKernel->logWarning(2, "Menus XML file \"{0}\" does not exist.", menusPath);
 
   spMenu = spKernel->createComponent<Menu>({ { "src", menuStr } });
-  spTopLevelUI->set("menucomp", spMenu);
+  spTopLevelUI->set("menu", spMenu);
 
   // Load toolbar
   /*String toolBarPath(":/toolbar.xml");
@@ -416,16 +416,16 @@ void Init(String sender, String message, const Variant &data)
 
   // New Activity selector panel
   auto spActivitySelector = component_cast<UIComponent>(spKernel->createComponent("ui.ActivitySelector"));
-  spActivitySelector->set("activitiesinfo", GetActivitiesInfo());
-  spTopLevelUI->set("activityselector", spActivitySelector);
+  spActivitySelector->set("activitiesInfo", GetActivitiesInfo());
+  spTopLevelUI->set("activitySelector", spActivitySelector);
 
   // Subscribe to UI events
-  spTopLevelUI->subscribe("newprojectsignal", Delegate<void(String)>(&NewProject));
-  spTopLevelUI->subscribe("openprojectsignal", Delegate<void(String)>(&OpenProject));
-  spTopLevelUI->subscribe("saveprojectsignal", Delegate<void(void)>(&SaveProject));
-  spTopLevelUI->subscribe("saveprojectassignal", Delegate<void(String)>(&SaveProjectAs));
-  spTopLevelUI->subscribe("newactivitysignal", Delegate<void(String)>(&NewActivity));
-  spTopLevelUI->subscribe("activitychanged", Delegate<void(String)>(&OnActivityChanged));
+  spTopLevelUI->subscribe("newProjectSelected", Delegate<void(String)>(&newProject));
+  spTopLevelUI->subscribe("openProjectSelected", Delegate<void(String)>(&openProject));
+  spTopLevelUI->subscribe("saveProjectSelected", Delegate<void(void)>(&saveProject));
+  spTopLevelUI->subscribe("saveProjectAsSelected", Delegate<void(String)>(&saveProjectAs));
+  spTopLevelUI->subscribe("newActivitySelected", Delegate<void(String)>(&newActivity));
+  spTopLevelUI->subscribe("activityChanged", Delegate<void(String)>(&onActivityChanged));
 
   spMainWindow->setTopLevelUI(spTopLevelUI);
 
@@ -434,12 +434,12 @@ void Init(String sender, String message, const Variant &data)
     pProject = data.getItem("-p");
   if (pProject)
   {
-    OpenProject(pProject->asString());
+    openProject(pProject->asString());
   }
   else
   {
 #ifdef _DEBUG
-    OpenProject("testproj.epproj");
+    openProject("testproj.epproj");
 #endif
   }
 

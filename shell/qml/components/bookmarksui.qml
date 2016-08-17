@@ -10,15 +10,18 @@ import Platform.Themes 0.1
   * After creating this component, you need to pass it a View component, e.g. SetProperty("view", spView);
   */
 
-Rectangle {
+Rectangle
+{
   id: bookmarksui
   anchors.fill: parent
   color: Theme.toolPanelBgColor
 
+  // Properties // ------------------------------------------------------------
   property var epTypeDesc: { "id": "ui.BookmarksUI", "super": "ep.UIComponent" }
   property var view
 
-  function createbookmark(name)
+  // Methods // ---------------------------------------------------------------
+  function createBookmark(name)
   {
     if(!name)
     {
@@ -48,12 +51,14 @@ Rectangle {
     internal.messageBox = EPKernel.findComponent("messagebox");
   }
 
+  // Internal // --------------------------------------------------------------
   QtObject
   {
     id: internal
     property var messageBox
   }
 
+  // Item Tree // -------------------------------------------------------------
   EPListModel {
     id: bookmarks
     sortColumnName: "name"
@@ -74,7 +79,7 @@ Rectangle {
           id: addBookmarkButton
           iconSource: "qrc:/images/icon_bookmark_addnew_24.png"
           onClicked: {
-            var bmName = bookmarksui.createbookmark("");
+            var bmName = bookmarksui.createBookmark("");
             var spScene = view.scene;
             spScene.addBookmarkFromCamera(bmName, view.camera);
           }

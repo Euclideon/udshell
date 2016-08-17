@@ -3,10 +3,14 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.2
 
-Item {
+Item
+{
+  // Properties // ------------------------------------------------------------
   property var epTypeDesc: { "id": "ui.MessageBox", "super": "ep.UIComponent" }
 
-  function show(params) {
+  // Methods // ---------------------------------------------------------------
+  function show(params)
+  {
     if (params.title != undefined)
       messageBox.title = params.title;
     else
@@ -69,6 +73,7 @@ Item {
     messageBox.visible = true;
   }
 
+  // Internal // --------------------------------------------------------------
   QtObject
   {
     id: internal
@@ -102,6 +107,7 @@ Item {
     }
   }
 
+  // Item Tree // -------------------------------------------------------------
   Window {
     id: messageBox
 
