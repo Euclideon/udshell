@@ -1,3 +1,4 @@
+
 #include "renderscene.h"
 #include "renderresource.h"
 #include "ep/cpp/component/resource/arraybuffer.h"
@@ -108,8 +109,10 @@ void RenderableView::RenderUD()
     if (pickingEnabled)
       options.pick = &udPick;
 
+    Float4 c = clearColor * 255.0 + Float4::create(0.5);
+    uint32_t color8 = (uint8_t(c.w) << 24) | (uint8_t(c.x) << 16) |( uint8_t(c.y) << 8) | uint8_t(c.z);
     // allocate render buffers
-    udRender_SetTarget(pRenderView, udRTT_Color32, colorBuffer.ptr, colorPitch, 0xFF202080);
+    udRender_SetTarget(pRenderView, udRTT_Color32, colorBuffer.ptr, colorPitch, color8);
     udRender_SetTarget(pRenderView, udRTT_Depth32, depthBuffer.ptr, depthPitch, 0x3F800000);
 
     // render UD
@@ -127,10 +130,19 @@ void RenderableView::RenderGPU()
 //  if (spView->pPreRenderCallback)
 //    spView->pPreRenderCallback(spView, spScene);
 
+  epRenderState_SetDepthMask(true);
+  epRenderState_SetColorMask(0xFF, 0xFF, 0xFF, 0xFF);
+
+  epGPU_Clear(epC_Color | epC_Depth, &clearColor.x, 1.0, 0);
+
   if (spColorBuffer && spColorTexture)
   {
     // TODO: wait for the sync point to be processed - re-think this whole thing
     epGPU_WaitSync(&pSyncPoint);
+
+    epRenderState_SetCullMode(false, epF_CCW);
+    epRenderState_SetDepthCompare(true, epCF_Always);
+    epRenderState_SetBlendMode(false, epBM_Alpha);
 
     epShader_SetCurrent(spRenderer->s_shader);
 
@@ -146,12 +158,6 @@ void RenderableView::RenderGPU()
 
     epGPU_RenderIndices(spRenderer->s_shader, spRenderer->s_pPosUV, &spRenderer->s_pQuadVB, spRenderer->s_pQuadIB, epPT_TriangleFan, 4);
   }
-  else
-  {
-    // clear the backbuffer
-    ep::Double4 color = { 0, 0, 1, 0 };
-    epGPU_Clear(&color.x, -1.0, 0);
-  }
 
   // render geometry
   Double4x4 vp = Mul(projection, Inverse(camera));
@@ -159,8 +165,9 @@ void RenderableView::RenderGPU()
   {
     Double4x4 wvp = Mul(vp, job.matrix);
 
-    // TODO : Better texture support (support for TextureSampler type)
-    // TODO : Renderstate
+    epRenderState_SetCullMode(job.cullMode != CullMode::None, (epFace)job.cullMode.v);
+    epRenderState_SetDepthCompare(job.depthCompareFunc != CompareFunc::Disabled, (epCompareFunc)job.depthCompareFunc.v);
+    epRenderState_SetBlendMode(job.blendMode != BlendMode::None, (epBlendMode)job.blendMode.v);
 
     job.spProgram->Use();
     if (job.setViewProjectionUniform)
@@ -393,7 +400,7 @@ void Renderer::UDThread()
         job->CreateResources();
         // NOTE: we need to clear this pointer here to prevent circular referencing!
         job->spView = nullptr;
-        spView->getImpl<ViewImpl>()->SetLatestFrame(std::move(job));
+        spView->getImpl<ViewImpl>()->setLatestFrame(std::move(job));
       }
       epDelete(this);
     }

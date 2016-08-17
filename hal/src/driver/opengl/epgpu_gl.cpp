@@ -59,12 +59,25 @@ struct epVertexDataFormatGL
 
 // ***************************************************************************************
 // Author: Manu Evans, Nov 2015
-void epGPU_Clear(double color[4], double depth, int stencil)
+void epGPU_Clear(uint32_t clearBits, float *pColor, float depth, int stencil)
 {
-  glClearColor((GLclampf)color[0], (GLclampf)color[1], (GLclampf)color[2], (GLclampf)color[3]);
-  glClearDepth(depth);
-  glClearStencil(stencil);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  GLbitfield mask = 0;
+  if (clearBits & epC_Color)
+  {
+    mask |= GL_COLOR_BUFFER_BIT;
+    glClearColor(pColor[0], pColor[1], pColor[2], pColor[3]);
+  }
+  if (clearBits & epC_Depth)
+  {
+    mask |= GL_DEPTH_BUFFER_BIT;
+    glClearDepthf(depth);
+  }
+  if (clearBits & epC_Stencil)
+  {
+    mask |= GL_STENCIL_BUFFER_BIT;
+    glClearStencil(stencil);
+  }
+  glClear(mask);
 }
 
 // ***************************************************************************************
@@ -193,6 +206,77 @@ void epGPU_Deinit()
 {
 }
 
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetDepthCompare(bool enable, epCompareFunc func)
+{
+  if (enable)
+  {
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_NEVER + (GLenum)func);
+  }
+  else
+  {
+    glDisable(GL_DEPTH_TEST);
+  }
+}
+
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetCullMode(bool enable, epFace mode)
+{
+  if (enable)
+  {
+    static int s_lookup[] =
+    {
+      GL_FRONT,
+      GL_BACK,
+      GL_FRONT_AND_BACK
+    };
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
+    glCullFace(s_lookup[mode]);
+  }
+  else
+  {
+    glDisable(GL_CULL_FACE);
+  }
+}
+
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetBlendMode(bool enable, epBlendMode mode)
+{
+  if (enable)
+  {
+    glEnable(GL_BLEND);
+    if (mode == epBM_Alpha)
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    else
+      glBlendFunc(GL_ONE, GL_ONE);
+  }
+  else
+  {
+    glDisable(GL_BLEND);
+  }
+}
+
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetColorMask(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+  glColorMask(r, g, b, a);
+}
+
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetDepthMask(bool flag)
+{
+  glDepthMask(flag ? GL_TRUE : GL_FALSE);
+}
+
+
 #else
 EPEMPTYFILE
 #endif // EPRENDER_DRIVER == EPDRIVER_OPENGL
+

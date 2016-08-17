@@ -60,9 +60,6 @@ public:
   CompareFunc GetDepthCompareFunc() const { return depthCompareFunc; }
   void SetDepthCompareFunc(CompareFunc func) { depthCompareFunc = func;}
 
-  StencilState GetStencilState(TriangleFace face) const { return stencilStates[face]; }
-  void SetStencilState(TriangleFace face, const StencilState &state) { stencilStates[face] = state; }
-
   ArrayBufferRef GetTexture(int index) const { return textures[index]; }
   void SetTexture(int index, ArrayBufferRef spArray) { textures[index] = spArray; }
 
@@ -102,8 +99,6 @@ protected:
   ShaderRef shaders[NumShaders];
   Array<ArrayBufferRef, 1> textures;
 
-  // TODO: Change stencilStates to store just front and back and then make setting the default state set both.
-  StencilState stencilStates[TriangleFace::Back+1];
   BlendMode blendMode = BlendMode::Alpha;
   CullMode cullMode = CullMode::CCW;
   CompareFunc depthCompareFunc = CompareFunc::LessEqual;

@@ -30,6 +30,9 @@ public:
     if (spRenderableView)
       spRenderableView->RenderGPU();
 
+    // Qt doesn't reset the cull mode
+    epRenderState_SetCullMode(false, epF_CCW);
+
     if (m_item->window())
         m_item->window()->resetOpenGLState();
   }
@@ -39,8 +42,7 @@ public:
     // TODO: Set up appropriate format
     QOpenGLFramebufferObjectFormat format;
     //format.setInternalTextureFormat(GL_RGBA8);
-    //format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-    //format.setSamples(4);
+    format.setAttachment(QOpenGLFramebufferObject::Depth);
     return new QOpenGLFramebufferObject(size, format);
   }
 
@@ -50,7 +52,7 @@ public:
 
     if (pQtRenderView->dirty)
     {
-      spRenderableView = ep::SynchronisedPtr<ep::RenderableView>(pQtRenderView->spView->getImpl<ep::ViewImpl>()->GetRenderableView(), QtApplication::kernel());
+      spRenderableView = ep::SynchronisedPtr<ep::RenderableView>(pQtRenderView->spView->getImpl<ep::ViewImpl>()->getRenderableView(), QtApplication::kernel());
       pQtRenderView->dirty = false;
     }
   }
@@ -86,7 +88,7 @@ QtRenderView::~QtRenderView()
   if (spView)
   {
     spView->frameReady.unsubscribe(ep::Delegate<void()>(this, &QtRenderView::onFrameReady));
-    spView->getImpl<ep::ViewImpl>()->SetLatestFrame(nullptr);
+    spView->getImpl<ep::ViewImpl>()->setLatestFrame(nullptr);
   }
 }
 
@@ -105,7 +107,7 @@ void QtRenderView::setView(const QVariant &view)
     if (spView)
     {
       spView->frameReady.unsubscribe(ep::Delegate<void()>(this, &QtRenderView::onFrameReady));
-      spView->getImpl<ep::ViewImpl>()->SetLatestFrame(nullptr);
+      spView->getImpl<ep::ViewImpl>()->setLatestFrame(nullptr);
     }
 
     spView = newView;
@@ -159,7 +161,7 @@ void QtRenderView::focusInEvent(QFocusEvent * event)
   ev.eventType = ep::InputEvent::EventType::Focus;
   ev.hasFocus = true;
 
-  if (spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (spView && spView->getImpl<ep::ViewImpl>()->inputEvent(ev))
     event->accept();
   else
     event->ignore();
@@ -173,7 +175,7 @@ void QtRenderView::focusOutEvent(QFocusEvent * event)
   ev.eventType = ep::InputEvent::EventType::Focus;
   ev.hasFocus = false;
 
-  if (spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (spView && spView->getImpl<ep::ViewImpl>()->inputEvent(ev))
     event->accept();
   else
     event->ignore();
@@ -192,7 +194,7 @@ void QtRenderView::keyPressEvent(QKeyEvent *pEv)
     ev.eventType = ep::InputEvent::EventType::Key;
     ev.key.key = (int)kc;
     ev.key.state = 1;
-    if (!spView || !spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
+    if (!spView || !spView->getImpl<ep::ViewImpl>()->inputEvent(ev))
       pEv->ignore();
   }
 }
@@ -210,7 +212,7 @@ void QtRenderView::keyReleaseEvent(QKeyEvent *pEv)
     ev.eventType = ep::InputEvent::EventType::Key;
     ev.key.key = (int)kc;
     ev.key.state = 0;
-    if (!spView || !spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
+    if (!spView || !spView->getImpl<ep::ViewImpl>()->inputEvent(ev))
       pEv->ignore();
   }
 }
@@ -239,7 +241,7 @@ void QtRenderView::mouseMoveEvent(QMouseEvent *pEv)
   mouseLastX = x;
   mouseLastY = y;
 
-  if (spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (spView && spView->getImpl<ep::ViewImpl>()->inputEvent(ev))
     pEv->accept();
   else
     pEv->ignore();
@@ -256,7 +258,7 @@ void QtRenderView::mousePressEvent(QMouseEvent *pEv)
   ev.eventType = ep::InputEvent::EventType::Key;
   ev.key.key = GetMouseButton(pEv->button());
   ev.key.state = 1;
-  if (ev.key.key != ep::MouseControls::Max && spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (ev.key.key != ep::MouseControls::Max && spView && spView->getImpl<ep::ViewImpl>()->inputEvent(ev))
     pEv->accept();
   else
     pEv->ignore();
@@ -270,7 +272,7 @@ void QtRenderView::mouseReleaseEvent(QMouseEvent *pEv)
   ev.eventType = ep::InputEvent::EventType::Key;
   ev.key.key = GetMouseButton(pEv->button());
   ev.key.state = 0;
-  if (ev.key.key != ep::MouseControls::Max && spView && spView->getImpl<ep::ViewImpl>()->InputEvent(ev))
+  if (ev.key.key != ep::MouseControls::Max && spView && spView->getImpl<ep::ViewImpl>()->inputEvent(ev))
     pEv->accept();
   else
     pEv->ignore();
@@ -302,7 +304,7 @@ void QtRenderView::hoverMoveEvent(QHoverEvent *pEv)
   ev.move.yAbsolute = (float)y;
 
   if (spView)
-    spView->getImpl<ep::ViewImpl>()->InputEvent(ev);
+    spView->getImpl<ep::ViewImpl>()->inputEvent(ev);
 }
 
 void QtRenderView::wheelEvent(QWheelEvent *pEv)

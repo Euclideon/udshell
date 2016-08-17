@@ -147,7 +147,6 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
     out.matrix = in.matrix;
     MaterialImpl *pMatImpl = in.spMaterial->getImpl<MaterialImpl>();
 
-    out.stencilStates = pMatImpl->stencilStates;
     out.blendMode = pMatImpl->blendMode;
     out.cullMode = pMatImpl->cullMode;
     out.depthCompareFunc = pMatImpl->depthCompareFunc;

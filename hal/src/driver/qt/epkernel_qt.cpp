@@ -519,7 +519,7 @@ ep::ViewRef QtKernel::setFocusView(ep::ViewRef spView)
   using namespace ep;
   KernelImpl *pKernelImpl = getImpl();
   if (!spView && pKernelImpl->spFocusView)
-    pKernelImpl->spFocusView->getImpl<ViewImpl>()->SetLatestFrame(nullptr);
+    pKernelImpl->spFocusView->getImpl<ViewImpl>()->setLatestFrame(nullptr);
 
   ViewRef spOld = pKernelImpl->spFocusView;
   pKernelImpl->spFocusView = spView;

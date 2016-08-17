@@ -12,6 +12,7 @@ Array<const PropertyInfo> View::getProperties() const
     EP_MAKE_PROPERTY("enablePicking", getEnablePicking, setEnablePicking, "Enable Picking", nullptr, 0),
     EP_MAKE_PROPERTY_RO("mousePosition", getMousePosition, "Mouse Position", nullptr, 0),
     EP_MAKE_PROPERTY_RO("aspectRatio", getAspectRatio, "Aspect ratio", nullptr, 0),
+    EP_MAKE_PROPERTY("clearColor", getClearColor, setClearColor, "Clear Color", nullptr, 0),
     EP_MAKE_PROPERTY_RO("dimensions", getDimensions, "The height and width of the View", nullptr, 0),
     EP_MAKE_PROPERTY_RO("renderDimensions", getRenderDimensions, "The resolution of the rendered content", nullptr, 0),
   };
@@ -38,23 +39,23 @@ Array<const EventInfo> View::getEvents() const
   };
 }
 
-void ViewImpl::SetScene(SceneRef spNewScene)
+void ViewImpl::setScene(SceneRef spNewScene)
 {
   if (spScene == spNewScene)
     return;
 
   if (spScene)
-    spScene->dirty.unsubscribe(this, &ViewImpl::OnDirty);
+    spScene->dirty.unsubscribe(this, &ViewImpl::onDirty);
 
   spScene = spNewScene;
 
   if (spScene)
-    spScene->dirty.subscribe(this, &ViewImpl::OnDirty);
+    spScene->dirty.subscribe(this, &ViewImpl::onDirty);
 
-  OnDirty();
+  onDirty();
 }
 
-void ViewImpl::SetEnablePicking(bool enable)
+void ViewImpl::setEnablePicking(bool enable)
 {
   if (pickingEnabled != enable)
   {
@@ -63,7 +64,7 @@ void ViewImpl::SetEnablePicking(bool enable)
   }
 }
 
-void ViewImpl::Resize(int width, int height)
+void ViewImpl::resize(int width, int height)
 {
   int oldRenderWidth = renderWidth;
   int oldRenderHeight = renderHeight;
@@ -80,10 +81,10 @@ void ViewImpl::Resize(int width, int height)
 
   // dirty the viewport if the resize affected the render buffers
   if (oldRenderWidth != renderWidth || oldRenderHeight != renderHeight)
-    OnDirty();
+    onDirty();
 }
 
-void ViewImpl::GoToBookmark(String bookmarkName)
+void ViewImpl::gotoBookmark(String bookmarkName)
 {
   if (spScene && spCamera)
   {
@@ -91,12 +92,12 @@ void ViewImpl::GoToBookmark(String bookmarkName)
     if (pBM)
     {
       spCamera->setMatrix(Double4x4::rotationYPR(pBM->ypr, pBM->position));
-      OnDirty();
+      onDirty();
     }
   }
 }
 
-bool ViewImpl::InputEvent(const ep::InputEvent &ev)
+bool ViewImpl::inputEvent(const ep::InputEvent &ev)
 {
   if (ev.deviceType == InputDevice::Mouse)
   {
@@ -110,7 +111,7 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
   else if (ev.deviceType == ep::InputDevice::Keyboard)
   {
     if ((KeyCode)ev.key.key == KeyCode::P && ev.key.state == 0)
-      SetEnablePicking(!pickingEnabled);
+      setEnablePicking(!pickingEnabled);
   }
 
   bool handled = inputEventHook ? inputEventHook(ev) : false;
@@ -122,7 +123,7 @@ bool ViewImpl::InputEvent(const ep::InputEvent &ev)
   return handled;
 }
 
-void ViewImpl::OnDirty()
+void ViewImpl::onDirty()
 {
   if (renderWidth == 0 || renderHeight == 0)
   {
@@ -143,9 +144,11 @@ void ViewImpl::OnDirty()
     spRenderView->camera = spCamera->getCameraMatrix();
     spRenderView->projection = spCamera->getProjectionMatrix((double)displayWidth / (double)displayHeight);
 
+    spRenderView->clearColor = clearColor;
+
     spRenderView->spScene = spScene->getRenderScene();
 
-    spRenderView->options = udRenderOptions{ sizeof(udRenderOptions), GetRenderableUDFlags(), nullptr, nullptr,
+    spRenderView->options = udRenderOptions{ sizeof(udRenderOptions), getRenderableUDFlags(), nullptr, nullptr,
                                              nullptr, nullptr, nullptr, nullptr };
 
     spRenderView->displayWidth = displayWidth;
@@ -173,14 +176,14 @@ void ViewImpl::OnDirty()
       spRenderer->AddUDRenderJob(std::move(spRenderView));
     }
     else
-      SetLatestFrame(std::move(spRenderView));
+      setLatestFrame(std::move(spRenderView));
   }
 
   // emit the dirty signal
   pInstance->dirty.signal();
 }
 
-void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
+void ViewImpl::setLatestFrame(UniquePtr<RenderableView> spFrame)
 {
   spLatestFrame = spFrame;
   if (spLatestFrame)
@@ -228,10 +231,10 @@ void ViewImpl::SetLatestFrame(UniquePtr<RenderableView> spFrame)
   }
 }
 
-Double3 ViewImpl::ScreenToNDCPoint(Double2 screenPixel, double z) const
+Double3 ViewImpl::screenToNDCPoint(Double2 screenPixel, double z) const
 {
   // TODO: this presumes OpenGl clip space
-  Dimensions<int> screenSize = GetDimensions();
+  Dimensions<int> screenSize = getDimensions();
 
   double glPixelX = double(screenPixel.x) / (screenSize.width * 0.5) - 1.0;
   double glPixelY = -(double(screenPixel.y) / (screenSize.height * 0.5) - 1.0);
@@ -239,10 +242,10 @@ Double3 ViewImpl::ScreenToNDCPoint(Double2 screenPixel, double z) const
   return Double3{ glPixelX, glPixelY, z * 2.0 - 1.0 };
 }
 
-Double3 ViewImpl::NDCToScreenPoint(Double3 ndcPoint) const
+Double3 ViewImpl::ndcToScreenPoint(Double3 ndcPoint) const
 {
   // TODO: this presumes OpenGl clip space
-  Dimensions<int> screenSize = GetDimensions();
+  Dimensions<int> screenSize = getDimensions();
 
   double pixelX = (ndcPoint.x * 0.5 + 0.5) * screenSize.width;
   double pixelY = (-ndcPoint.y * 0.5 + 0.5) * screenSize.height;
@@ -250,27 +253,27 @@ Double3 ViewImpl::NDCToScreenPoint(Double3 ndcPoint) const
   return Double3{ pixelX, pixelY, ndcPoint.z * 0.5 + 0.5 };
 }
 
-Double3 ViewImpl::UnprojectScreenPoint(const Double4x4 &invProj, Double2 screenPixel, double z) const
+Double3 ViewImpl::unprojectScreenPoint(const Double4x4 &invProj, Double2 screenPixel, double z) const
 {
-  Double3 ndcPoint = ScreenToNDCPoint(screenPixel, z);
+  Double3 ndcPoint = screenToNDCPoint(screenPixel, z);
 
   Double4 unprojectedPoint = invProj * Double4::create(ndcPoint, 1);
   return unprojectedPoint.toVector3() / unprojectedPoint.w;
 }
 
-Double3 ViewImpl::ProjectToScreenPoint(const Double4x4 &proj, Double3 point) const
+Double3 ViewImpl::projectToScreenPoint(const Double4x4 &proj, Double3 point) const
 {
   Double4 clipPoint = proj * Double4::create(point, 1);
   Double3 ndcPoint = clipPoint.toVector3() / clipPoint.w;
 
-  return NDCToScreenPoint(ndcPoint);
+  return ndcToScreenPoint(ndcPoint);
 }
 
-DoubleRay3 ViewImpl::ScreenPointToWorldRay(Double2 screenPoint) const
+DoubleRay3 ViewImpl::screenPointToWorldRay(Double2 screenPoint) const
 {
   EPTHROW_IF_NULL(spCamera, Result::InvalidCall, "This function needs the camera to be available");
 
-  Dimensions<int> screenSize = GetDimensions();
+  Dimensions<int> screenSize = getDimensions();
 
   Double4x4 viewMat = spCamera->getViewMatrix();
   Double4x4 projMat = spCamera->getProjectionMatrix((double)screenSize.width / (double)screenSize.height);
@@ -278,7 +281,7 @@ DoubleRay3 ViewImpl::ScreenPointToWorldRay(Double2 screenPoint) const
   Double4x4 VP = projMat * viewMat;
   Double4x4 invVP = Inverse(VP);
 
-  Double2 ndcPoint = ScreenToNDCPoint(screenPoint).toVector2(); // screen to clip point
+  Double2 ndcPoint = screenToNDCPoint(screenPoint).toVector2(); // screen to clip point
 
   Double4 worldLinePoint1 = invVP * Double4::create(ndcPoint, -1, 1); // start at the near plane
   Double4 worldLinePoint2 = invVP * Double4::create(ndcPoint, 1, 1);  // go to the end plane

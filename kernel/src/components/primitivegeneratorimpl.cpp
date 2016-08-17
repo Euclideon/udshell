@@ -17,10 +17,10 @@ Array<const StaticFuncInfo> PrimitiveGenerator::getStaticFuncs() const
 void PrimitiveGeneratorImplStatic::GenerateQuad(ArrayBufferRef spVB, ArrayBufferRef spIB, Delegate<Float3(Float3)> transformVertex)
 {
   static const Float3 rawVB[] = {
-    Float3{ -1.0f, -1.0f, 0.0f },
-    Float3{  1.0f, -1.0f, 0.0f },
     Float3{ -1.0f,  1.0f, 0.0f },
     Float3{  1.0f,  1.0f, 0.0f },
+    Float3{ -1.0f, -1.0f, 0.0f },
+    Float3{  1.0f, -1.0f, 0.0f }
   };
 
   spVB->allocateFromData(Slice<const Float3>(rawVB));
@@ -34,7 +34,7 @@ void PrimitiveGeneratorImplStatic::GenerateQuad(ArrayBufferRef spVB, ArrayBuffer
       v = transformVertex(v);
   }
 
-  static const uint16_t rawIB[] = { 0, 1, 2, 3, 2, 1 };
+  static const uint16_t rawIB[] = { 0, 1, 2, 1, 3, 2 };
   spIB->allocateFromData(Slice<const uint16_t>(rawIB));
 }
 
@@ -68,7 +68,7 @@ void PrimitiveGeneratorImplStatic::GenerateCube(ArrayBufferRef spVB, ArrayBuffer
     3,1,7, 1,5,7, // right
     1,0,5, 0,4,5, // back
     0,2,4, 2,6,4, // left
-    7,6,4, 7,4,5  // bottom
+    7,4,6, 7,5,4  // bottom
   });
 }
 
