@@ -740,6 +740,26 @@ inline SharedString& SharedString::operator =(const char *pString)
   return *this;
 }
 
+inline MutableString<> SharedString::claim()
+{
+  EPTHROW_IF(!unique(), Result::InvalidCall, "SharedString must be unique!");
+  return std::move((MutableString<>&)*this);
+}
+
+inline bool SharedString::operator ==(SharedString rh) const
+{
+  return this->ptr == rh.ptr && this->length == rh.length;
+}
+inline bool SharedString::operator !=(SharedString rh) const
+{
+  return this->ptr != rh.ptr || this->length != rh.length;
+}
+
+inline SharedString::operator bool() const
+{
+  return this->ptr != nullptr && this->length > 0;
+}
+
 inline CString<char> SharedString::toStringz() const
 {
   return ((String*)this)->toStringz();

@@ -1153,7 +1153,7 @@ ep::Variant ep::Variant::luaGet(LuaState &l, int idx)
       int pos = idx < 0 ? idx-1 : idx;
 
       // alloc for table
-      VarMap m;
+      VarMap::MapType m;
 
       // populate the table
       l.pushNil();  // first key

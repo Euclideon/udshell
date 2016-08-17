@@ -245,7 +245,7 @@ Array<Variant::VarMap> GetActivitiesInfo()
   Array<const ComponentDesc *> descs = spKernel->getDerivedComponentDescs<Activity>(false);
   for (auto desc : descs)
   {
-    Variant::VarMap activityInfo;
+    Variant::VarMap::MapType activityInfo;
     activityInfo.insert("namespace", desc->info.nameSpace);
     activityInfo.insert("typename", desc->info.name);
     activityInfo.insert("identifier", desc->info.identifier);
@@ -323,7 +323,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
   PrimitiveGenerator::generateCube(vertexBuffer, indexBuffer);
 
   MetadataRef metadata = vertexBuffer->getMetadata();
-  metadata->get("attributeInfo")[0].insertItem("name", "a_position");
+  metadata->insertAt("a_position", "attributeInfo", 0, "name");
 
   // Colour Buffer
   ArrayBufferRef colourBuffer = kernel->createComponent<ArrayBuffer>();
@@ -340,7 +340,7 @@ static GeomNodeRef CreateTestModel(KernelRef kernel)
       Float4{ 0.5f, 0.5f, 1.0f, 1.0f }
     });
     metadata = colourBuffer->getMetadata();
-    metadata->get("attributeInfo")[0].insertItem("name", "a_color");
+    metadata->insertAt("a_color", "attributeInfo", 0, "name");
   }
 
 #if 0

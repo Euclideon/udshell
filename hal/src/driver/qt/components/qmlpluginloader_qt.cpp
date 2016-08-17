@@ -89,7 +89,7 @@ Variant::VarMap QmlPluginLoader::parseTypeDescriptor(QtKernel *pQtKernel, ep::St
       if (result.is(Variant::Type::Error))
         EPTHROW(ep::Result::ScriptException, "Cannot Parse Type Descriptor: 'epTypeDesc' property map does not contain a valid javascript expression");
 
-      Variant::VarMap typeDesc = result.asAssocArray();
+      Variant::VarMap::MapType typeDesc = result.claimMap();
 
       // id and super must be present
       Variant *pId = typeDesc.get("id");
@@ -106,7 +106,7 @@ Variant::VarMap QmlPluginLoader::parseTypeDescriptor(QtKernel *pQtKernel, ep::St
       if (!typeDesc.get("version"))
         typeDesc.insert("version", (int)EPKERNEL_PLUGINVERSION);
 
-      return typeDesc;
+      return std::move(typeDesc);
     }
     else
     {

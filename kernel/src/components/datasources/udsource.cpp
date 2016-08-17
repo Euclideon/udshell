@@ -57,7 +57,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     result = udOctree_GetHeaderData(pOctree, &headerData);
     if (result == udR_Success)
     {
-      Variant::VarMap header;
+      Variant::VarMap::MapType header;
       header.insert("scale", headerData.scale);
       header.insert("unitMeterScale", headerData.unitMeterScale);
 
@@ -83,7 +83,7 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     if (result == udR_Success)
       setResource(source->asString(), model);
 
-    Array<Variant> varMetadata;
+    Array<Variant> attribInfo;
 
     for (udStreamType i = udST_RawAttributeFirst; i <= udST_RawAttributeLast; i = udStreamType(i + 1))
     {
@@ -107,12 +107,14 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
       md.type = md.info.asString();
 
       md.offset = 0;
-      varMetadata.pushBack(md);
-      varMetadata[size_t(i - udST_RawAttributeFirst)].insertItem("blend", UDAttributeBlend(descriptor.blendType));
+      Variant v(md);
+      Variant::VarMap::MapType map = v.claimMap();
+      map.insert("blend", UDAttributeBlend(descriptor.blendType));
+      attribInfo.pushBack(std::move(map));
     }
 
-    if (varMetadata.length)
-      meta->insert("attributeInfo", std::move(varMetadata));
+    if (attribInfo.length)
+      meta->insert("attributeInfo", std::move(attribInfo));
   }
 }
 

@@ -20,7 +20,7 @@ Array<const PropertyInfo> View::getProperties() const
 Array<const MethodInfo> View::getMethods() const
 {
   return{
-    EP_MAKE_METHOD(goToBookmark, "Move the Camera to the specified Bookmark"),
+    EP_MAKE_METHOD(gotoBookmark, "Move the Camera to the specified Bookmark"),
     EP_MAKE_METHOD(activate, "Activate the View, e.g. start rendering"),
     EP_MAKE_METHOD(deactivate, "Deactivate the View, e.g. stop rendering"),
     EP_MAKE_METHOD(resize, "Resize the View"),

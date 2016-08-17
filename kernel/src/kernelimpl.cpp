@@ -179,7 +179,11 @@ Kernel* Kernel::createInstance(Variant::VarMap commandLine, int renderThreadCoun
 #endif
 
   if (!commandLine.get("renderThreadCount"))
-    commandLine.insert("renderThreadCount", renderThreadCount);
+  {
+    auto map = commandLine.clone();
+    map.insert("renderThreadCount", renderThreadCount);
+    commandLine = std::move(map);
+  }
 
   return createInstanceInternal(commandLine);
 }

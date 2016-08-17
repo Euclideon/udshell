@@ -173,7 +173,7 @@ inline Slice<const void> ArrayBuffer::mapForRead<void>() { return Buffer::mapFor
 
 inline Variant epToVariant(const ElementInfo &e)
 {
-  Variant::VarMap r;
+  Variant::VarMap::MapType r;
   r.insert("flags", e.flags);
   r.insert("size", e.size);
   r.insert("dimensions", e.dimensions);
@@ -197,7 +197,7 @@ inline void epFromVariant(const Variant &v, ElementInfo *pE)
 
 inline Variant epToVariant(const ElementMetadata &e)
 {
-  Variant::VarMap r;
+  Variant::VarMap::MapType r;
   if (e.name)
     r.insert("name", e.name);
   if (e.type)

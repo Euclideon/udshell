@@ -73,11 +73,11 @@ Variant MenuImpl::ParseXMLString(String buffer)
 
 Variant MenuImpl::ParseXMLMenu(Variant inMenu)
 {
-  Variant::VarMap menu;
+  Variant::VarMap::MapType menu;
   Array<Variant> menuChildren;
 
   if (!inMenu.is(Variant::SharedPtrType::AssocArray))
-    return menu;
+    return std::move(menu);
   Variant::VarMap inMap = inMenu.asAssocArray();
 
   Variant *pName = inMap.get("name");
@@ -102,7 +102,7 @@ Variant MenuImpl::ParseXMLMenu(Variant inMenu)
     menu.insert("children", menuChildren);
   }
 
-  return menu;
+  return std::move(menu);
 }
 
 void MenuImpl::AddXMLItems(String parentPath, String xmlStr)
@@ -224,7 +224,7 @@ bool MenuImpl::RemoveItem(String path)
 
 Variant MenuImpl::CreateMenuItem(Variant::VarMap properties)
 {
-  Variant::VarMap map;
+  Variant::VarMap::MapType map;
   map.insert(KeyValuePair("type", ""));
   map.insert(KeyValuePair("name", ""));
   map.insert(KeyValuePair("description", ""));
@@ -238,7 +238,7 @@ Variant MenuImpl::CreateMenuItem(Variant::VarMap properties)
   map.insert(KeyValuePair("split", true));
   map.insert(KeyValuePair("children", Array<Variant>()));
 
-  Variant varMap(map);
+  Variant varMap(std::move(map));
 
   SetMenuProperties(varMap, properties);
 

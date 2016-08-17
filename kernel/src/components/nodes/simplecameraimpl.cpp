@@ -307,7 +307,7 @@ bool SimpleCameraImpl::Update(double timeDelta)
 Variant SimpleCameraImpl::Save() const
 {
   Variant var = pInstance->Super::save();
-  Variant::VarMap params = var.asAssocArray();
+  Variant::VarMap::MapType params = var.claimMap();
 
   params.insert("speed", speed);
   params.insert("invertYAxis", (invertedYAxis == -1.0 ? true : false));

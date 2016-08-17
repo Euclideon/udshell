@@ -92,7 +92,7 @@ void ProjectImpl::SaveProject()
   auto spXMLBuffer = getKernel()->createComponent<Text>();
   spXMLBuffer->reserve(10240);
 
-  Variant::VarMap projectNode;
+  Variant::VarMap::MapType projectNode;
   Array<Variant> children;
 
   projectNode.insert("name", "project");
@@ -130,20 +130,20 @@ void ProjectImpl::SaveProject()
 
 Variant ProjectImpl::SaveActivities()
 {
-  Variant::VarMap activitiesNode;
+  Variant::VarMap::MapType activitiesNode;
   Array<Variant> children;
 
   for (ActivityRef activity : activities)
   {
-    Variant::VarMap node = Text::componentParamsToXmlMap(activity->save()).asAssocArray();
+    Variant::VarMap::MapType node = Text::componentParamsToXmlMap(activity->save()).claimMap();
     node.insert("name", activity->getType());
-    children.pushBack(node);
+    children.pushBack(std::move(node));
   }
 
   activitiesNode.insert("name", "activities");
   activitiesNode.insert("children", children);
 
-  return activitiesNode;
+  return std::move(activitiesNode);
 }
 
 void ProjectImpl::ParseProject(Variant node)

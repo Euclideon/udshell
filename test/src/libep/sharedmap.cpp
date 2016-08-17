@@ -2,6 +2,7 @@
 #include "traits/hassize.h"
 #include "traits/isgrowable.h"
 #include "traits/isshrinkable.h"
+#include "traits/shared.h"
 #include "ep/cpp/avltree.h"
 #include "ep/cpp/map.h"
 #include "maptests.h"
@@ -25,10 +26,6 @@ static_assert(ep::RandomAccessible<TestMAP>::value == true, "ep::RandomAccessibl
 static_assert(ep::HasSize<TestMAP>::value == true, "ep::HasSize failed!");
 static_assert(ep::IsContainer<TestMAP>::value == true, "ep::IsContainer failed!");
 
-static_assert(ep::Growable<TestMAP>::value == true, "ep::Growable failed!");
-static_assert(ep::Shrinkable<TestMAP>::value == true, "ep::Shrinkable failed!");
-static_assert(ep::IsMutable< TestMAP>::value == true, "ep::IsMutable failed!");
-
 static_assert(ep::IsKeyed<TestMAP>::value == true, "ep::IsKeyed failed!");
 
 // Traits
@@ -36,12 +33,11 @@ static_assert(ep::IsKeyed<TestMAP>::value == true, "ep::IsKeyed failed!");
 DEFINE_MAP_TEST_CONTAINER_TREE(SharedMap, AVLTree, SharedString)
 using MyTypes = typename ::testing::Types<testTraits::Types>;
 INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_HasSizeTest, MyTypes);
-INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_IsGrowable, MyTypes);
-INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_IsShrinkable, MyTypes);
-INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_IsGrowable_RandomAccessible, MyTypes);
-INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_IsShrinkable_RandomAccessible, MyTypes);
-INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Maps_Coverage, MyTypes);
-INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Maps_InsertAndRemoveTest, MyTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Traits_Shared, MyTypes);
+
+//INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Maps_Coverage, MyTypes);
+
 // TODO: Enable this once find() and remove are implemented
 //INSTANTIATE_TYPED_TEST_CASE_P(SharedMap, Maps_Iterators, MyTypes);
+
 

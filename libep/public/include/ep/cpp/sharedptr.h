@@ -359,6 +359,7 @@ public:
     }
     return --rc;
   }
+  bool unique() const { return rc == 1; }
 
   template<typename T, typename... Args>
   static T* create(Args... args)

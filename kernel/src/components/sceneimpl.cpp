@@ -352,24 +352,23 @@ void SceneImpl::LoadBookmarks(Variant::VarMap bm)
 
 Variant SceneImpl::SaveBookmarks() const
 {
-  Variant::VarMap bookmarksSave;
+  Variant::VarMap::MapType bookmarksSave;
 
   size_t index = 0;
   for (auto bm : bookmarks)
   {
-    Variant bmVar = bm.value;
-    Variant::VarMap bmSave = bmVar.asAssocArray();
+    Variant::VarMap::MapType bmSave = Variant(bm.value).claimMap();
     bmSave.insert("name", bm.key);
     bookmarksSave.insert(MutableString<16>(Format, "bookmark{0}", index), std::move(bmSave));
     index++;
   }
 
-  return bookmarksSave;
+  return std::move(bookmarksSave);
 }
 
 Variant SceneImpl::Save() const
 {
-  Variant::VarMap map;
+  Variant::VarMap::MapType map;
 
   Variant url = pInstance->getMetadata()->get("url");
   if (url.is(Variant::Type::String))
@@ -382,7 +381,7 @@ Variant SceneImpl::Save() const
   if(!bookmarks.empty())
     map.insert("bookmarks", SaveBookmarks());
 
-  return map;
+  return std::move(map);
 }
 
 }  // namespace ep

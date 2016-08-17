@@ -960,17 +960,17 @@ inline SharedArray<T>::~SharedArray()
 }
 
 template <typename T>
-size_t inline SharedArray<T>::use_count() const
+inline size_t SharedArray<T>::use_count() const
 {
   return this->ptr ? internal::GetSliceHeader(this->ptr)->refCount : 0;
 }
 template <typename T>
-size_t inline SharedArray<T>::incRef()
+inline size_t SharedArray<T>::incRef()
 {
   return this->ptr ? ++internal::GetSliceHeader(this->ptr)->refCount : 0;
 }
 template <typename T>
-size_t inline SharedArray<T>::decRef()
+inline size_t SharedArray<T>::decRef()
 {
   size_t &rc = internal::GetSliceHeader(this->ptr)->refCount;
   if (rc == 1)
@@ -981,6 +981,30 @@ size_t inline SharedArray<T>::decRef()
     return 0;
   }
   return --rc;
+}
+
+template <typename T>
+inline Array<T> SharedArray<T>::claim()
+{
+  EPTHROW_IF(!unique(), Result::InvalidCall, "SharedArray must be unique!");
+  return std::move((Array<T>&)*this);
+}
+
+template <typename T>
+inline bool SharedArray<T>::operator ==(SharedArray<T> rh) const
+{
+  return this->ptr == rh.ptr && this->length == rh.length;
+}
+template <typename T>
+inline bool SharedArray<T>::operator !=(SharedArray<T> rh) const
+{
+  return this->ptr != rh.ptr || this->length != rh.length;
+}
+
+template <typename T>
+inline SharedArray<T>::operator bool() const
+{
+  return this->ptr != nullptr && this->length > 0;
 }
 
 template <typename T>
