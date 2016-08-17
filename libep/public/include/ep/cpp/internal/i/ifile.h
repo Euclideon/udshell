@@ -4,8 +4,7 @@
 
 #include "ep/cpp/component/stream.h"
 
-namespace ep
-{
+namespace ep {
 
 SHARED_CLASS(File);
 

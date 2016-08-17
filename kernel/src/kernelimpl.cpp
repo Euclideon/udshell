@@ -48,6 +48,7 @@
 #include "components/settingsimpl.h"
 #include "components/fileimpl.h"
 #include "components/memstreamimpl.h"
+#include "components/socketimpl.h"
 
 #include "components/dynamiccomponent.h"
 #include "components/varcomponent.h"
@@ -236,6 +237,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->registerComponentType<File, FileImpl, void, FileImplStatic>();
   pInstance->registerComponentType<StdIOStream>();
   pInstance->registerComponentType<MemStream, MemStreamImpl>();
+  pInstance->registerComponentType<Socket, SocketImpl>();
   pInstance->registerComponentType<Regex, RegexImpl>();
   pInstance->registerComponentType<Logger>();
   pInstance->registerComponentType<PluginManager>();
