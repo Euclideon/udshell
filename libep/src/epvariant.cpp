@@ -660,7 +660,7 @@ MutableString<> Variant::claimString()
   {
     uint8_t *pBuffer = (uint8_t*)this;
     MutableString<> result((char*)pBuffer + 1, pBuffer[0] >> 4);
-    new(this) Variant(); // initialise to void
+    *this = Variant();
     return result;
   }
 
@@ -668,7 +668,7 @@ MutableString<> Variant::claimString()
 
   String str(s, length);
   MutableString<> result = ((SharedString&)str).claim();
-  new(this) Variant(); // initialise to void
+  *this = Variant();
   return result;
 }
 Array<Variant> Variant::claimArray()
@@ -677,7 +677,7 @@ Array<Variant> Variant::claimArray()
 
   Array<Variant> arr(a, length);
   Array<Variant> sa = ((VarArray&)arr).claim();
-  new(this) Variant(); // initialise to void
+  *this = Variant();
   return sa;
 }
 Variant::VarMap::MapType Variant::claimMap()
@@ -685,7 +685,7 @@ Variant::VarMap::MapType Variant::claimMap()
   EPTHROW_IF((Type)t != Type::SharedPtr || (SharedPtrType)length != SharedPtrType::AssocArray || !ownsContent, Result::InvalidType, "Variant is not a unique map!");
 
   VarMap::MapType tree = ((VarMap&)aa).claim();
-  new(this) Variant(); // initialise to void
+  *this = Variant();
   return tree;
 }
 
