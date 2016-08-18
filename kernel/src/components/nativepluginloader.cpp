@@ -4,11 +4,10 @@
 #include "ep/cpp/plugin.h"
 #include "ep/cpp/component/component.h"
 
-#if defined(EP_LINUX)
-# include <dlfcn.h>
-#endif
+#include "hal/library.h"
 
 extern "C" {
+  typedef bool (epPlugin_GetInfoProc)(ep::PluginInfo *pInfo);
   typedef bool (epPlugin_InitProc)(ep::Instance *pPlugin);
 }
 
@@ -30,76 +29,49 @@ Slice<const String> NativePluginLoader::getSupportedExtensions() const
 
 bool NativePluginLoader::loadPlugin(String filename)
 {
-  const char *pFuncName = "epPlugin_Init";
-
-  epPlugin_InitProc *pInit = nullptr;
-
-#if defined(EP_WINDOWS)
-
-  // Convert UTF-8 to UTF-16 -- TODO use UD helper functions or add some to hal?
-  int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, filename.ptr, (int)filename.length, nullptr, 0);
-  wchar_t *widePath = (wchar_t*)alloca(sizeof(wchar_t) * (len + 1));
-  if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, filename.ptr, (int)filename.length, widePath, len) == 0)
-    return false;
-  widePath[len] = 0;
-
-  // try and load library
-  HMODULE hDll = LoadLibraryW(widePath);
-  if (hDll == NULL)
+  epLibrary libHandle;
+  if (!epLibrary_Open(&libHandle, filename.toStringz()))
   {
-    logError("Unable to load dll '{0}' - error code '{1}'", filename, (uint32_t)GetLastError());
+    logError("Failed to load plugin '{0}': '{1}'", filename, epLibrary_GetLastError());
 
     // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
     // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
     return true;
   }
 
-  pInit = (epPlugin_InitProc*)GetProcAddress(hDll, pFuncName);
+  epPlugin_GetInfoProc *pGetInfo = (epPlugin_GetInfoProc*)epLibrary_GetFunction(libHandle, "epPlugin_GetInfo");
+  epPlugin_InitProc *pInit = (epPlugin_InitProc*)epLibrary_GetFunction(libHandle, "epPlugin_Init");
+
+  // If there's no init function then assume it's not a plugin and ignore
   if (!pInit)
   {
-    FreeLibrary(hDll);
+    logDebug(2, "Detected library '{0}' is not a valid Platform Plugin. Ignoring...", filename);
+    epLibrary_Close(libHandle);
 
-    // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
+    // TODO: we return true to prevent reloading the plugin in the case that this dll is invalid - this is only valid if there's a dependency issue
     // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
     return true;
   }
 
-#elif defined(EP_LINUX)
-
-  void *hSo = dlopen(filename.toStringz(), RTLD_NOW);
-  if (hSo == NULL)
+  // Check that the plugin is compatible
+  // The first (pre-epPlugin_GetInfo) API version was 0.9.0
+  PluginInfo info = { "0.9.0" };
+  if (!pGetInfo || pGetInfo(&info))
   {
-    logError("Unable to open library '{0}' - error '{1}'", filename, dlerror());
+    if (!epVersionIsCompatible(info.apiVersion, EP_APIVERSION))
+    {
+      logWarning(2, "Failed to load plugin '{0}': Plugin version '{1}' is incompatible. Version '{2}' is required.", filename, info.apiVersion, EP_APIVERSION);
+      epLibrary_Close(libHandle);
 
-    // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
-    // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
-    return true;
+      // TODO: we return true to prevent reloading the plugin in the case that this dll is invalid - this is only valid if there's a dependency issue
+      // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
+      return true;
+    }
   }
 
-  pInit = (epPlugin_InitProc*)dlsym(hSo, pFuncName);
-  if (!pInit)
-  {
-    dlclose(hSo);
-
-    // TODO: we return true to prevent reloading the plugin - this is only valid if there's a dependency issue
-    // this should probably be reworked (and potentially throw?) once dependency info is defined somewhere
-    return true;
-  }
-
-#else
-
-  epUnused(pFuncName);
-
-  logError("Platform has no shared-library support!");
-
-#endif
-
-  if (!pInit)
-    return true;
-
-  // initialise the plugin
   bool bSuccess = false;
 
+  // Try to initialise the plugin
   try
   {
     bSuccess = pInit(s_pInstance);
@@ -116,11 +88,7 @@ bool NativePluginLoader::loadPlugin(String filename)
   if (!bSuccess)
   {
     logError("Failed to load plugin {0}!", filename);
-#if defined(EP_WINDOWS)
-    FreeLibrary(hDll);
-#elif defined(EP_LINUX)
-    dlclose(hSo);
-#endif
+    epLibrary_Close(libHandle);
   }
 
   // TODO: add plugin to plugin registry

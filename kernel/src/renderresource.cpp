@@ -147,7 +147,7 @@ RenderConstantBuffer::~RenderConstantBuffer()
 RenderShader::RenderShader(Renderer *pRenderer, SharedString code, epShaderType type)
   : RenderResource(pRenderer), type(type)
 {
-  pShader = epShader_CreateShader(code.toStringz(), code.length, type);
+  pShader = epShader_CreateShader(code.ptr, code.length, type);
 }
 RenderShader::~RenderShader()
 {

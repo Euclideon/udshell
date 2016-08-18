@@ -13,7 +13,7 @@ class Component;
 
 struct Instance
 {
-  int apiVersion;
+  const char *apiVersion;
   Kernel *pKernelInstance;
   void *pErrorSystem;
   void *pStaticImplRegistry;
@@ -28,6 +28,12 @@ struct Instance
   void(*pDestroyComponent)(Component *pInstance);
 
   void*(*pFind)(String pattern, void *pHandle, void *pData);
+};
+
+struct PluginInfo
+{
+  const char *apiVersion;
+  // ...
 };
 
 extern Instance *s_pInstance;
