@@ -10,22 +10,19 @@ import Platform.Themes 0.1
   * After creating this component, you need to pass it a View component, e.g. SetProperty("view", spView);
   */
 
-Rectangle {
+Rectangle
+{
   id: bookmarksui
   anchors.fill: parent
   color: Theme.toolPanelBgColor
 
+  // Properties // ------------------------------------------------------------
   property var epTypeDesc: { "id": "ui.BookmarksUI", "super": "ep.UIComponent" }
-  property var commandManager
-  property var messagebox
   property var view
 
-  Component.onCompleted: {
-    commandManager = EPKernel.getCommandManager();
-    messagebox = EPKernel.findComponent("messagebox");
-  }
-
-  function createbookmark(name) {
+  // Methods // ---------------------------------------------------------------
+  function createBookmark(name)
+  {
     if(!name)
     {
       var highestID = 0;
@@ -50,6 +47,18 @@ Rectangle {
     return name;
   }
 
+  Component.onCompleted: {
+    internal.messageBox = EPKernel.findComponent("messagebox");
+  }
+
+  // Internal // --------------------------------------------------------------
+  QtObject
+  {
+    id: internal
+    property var messageBox
+  }
+
+  // Item Tree // -------------------------------------------------------------
   EPListModel {
     id: bookmarks
     sortColumnName: "name"
@@ -70,7 +79,7 @@ Rectangle {
           id: addBookmarkButton
           iconSource: "qrc:/images/icon_bookmark_addnew_24.png"
           onClicked: {
-            var bmName = bookmarksui.createbookmark("");
+            var bmName = bookmarksui.createBookmark("");
             var spScene = view.scene;
             spScene.addBookmarkFromCamera(bmName, view.camera);
           }
@@ -106,7 +115,7 @@ Rectangle {
         onItemSelected: view.gotoBookmark(listView.selectedItemData.name);
 
         function showRenameBookmarkEditBox() {
-          messagebox.show( {
+          internal.messageBox.show( {
             "title": "Rename Bookmark",
             "text": "Enter new Bookmark name",
             "callback": renameBookmarkCallback,
@@ -127,7 +136,7 @@ Rectangle {
               for(var i = 0; i < bookmarks.count; i++) {
                 if(bookmarks.get(i).name == retValues.editText && listView.rightClickIndex != i)
                 {
-                  messagebox.show( {
+                  internal.messageBox.show( {
                     "title": "Error renaming Bookmark",
                     "text": "A Bookmark with that name already exists",
                     "callback": showRenameBookmarkEditBox

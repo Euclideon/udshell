@@ -663,7 +663,7 @@ const QMetaObject QtEPComponent::staticMetaObject = {
 void QtEPComponent::qt_static_metacall(QObject *pObj, QMetaObject::Call call, int id, void **v)
 {
   QtEPComponent *pC = qobject_cast<QtEPComponent*>(pObj);
-  EPASSERT(pC != 0, "QObject is not of type QtTestComponent");
+  EPASSERT(pC != 0, "QObject is not of type QtEPComponent");
 
   const QMetaObject *pMO = pC->metaObject();
   while (pMO->methodOffset() > id)
@@ -699,7 +699,7 @@ const QMetaObject *QtEPComponent::metaObject() const
 // MOC function - used internally by qobject_cast
 void *QtEPComponent::qt_metacast(const char *cname)
 {
-  if (!qstrcmp(cname, "QtTestComponent"))
+  if (!qstrcmp(cname, "QtEPComponent"))
     return (void*)this;
   return QObject::qt_metacast(cname);
 }

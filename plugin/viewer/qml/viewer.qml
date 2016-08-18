@@ -13,23 +13,29 @@ FocusScope {
   anchors.topMargin: 4
   anchors.bottomMargin: 4
 
+  // HACK: We have to set both of these because of inconsistent behaviour in TabView
+  focus: true
+  activeFocusOnTab: true
+
+  // Properties // ------------------------------------------------------------
   property var epTypeDesc: { "id": "viewer.MainUI", "super": "ep.UIComponent" }
   property var viewport
-  property var sidebarcomp
-  property var bookmarkscomp
-  property var bookmarksqq
+  property var bookmarks
   // TODO: Bug EP-66
   //property var resourcespanel
 
-  signal resourcedropped(string uid, int x, int y)
+  // Events // ----------------------------------------------------------------
+  signal resourceDropped(string uid, int x, int y)
 
-  function togglebookmarkspanel() {
-    toolPanelSlot.toggleVisible(bookmarkscomp.uiHandle);
+  // Methods // ---------------------------------------------------------------
+  function toggleBookmarksPanel()
+  {
+    toolPanelSlot.toggleVisible(bookmarks.uiHandle);
   }
 
-  onBookmarkscompChanged: {
-    var bookmarksqq = bookmarkscomp.uiHandle;
-    toolPanelSlot.addPanel(bookmarksqq, 200);
+  // Event Handlers // --------------------------------------------------------
+  onBookmarksChanged: {
+    toolPanelSlot.addPanel(bookmarks.uiHandle, 200);
   }
 
   // TODO: Bug EP-66
@@ -44,7 +50,7 @@ FocusScope {
   //}
 
   Component.onCompleted: {
-    sidebarcomp = EPKernel.createComponent("ep.Menu", {});
+    var sidebarcomp = EPKernel.createComponent("ep.Menu", {});
     if (!sidebarcomp) {
       console.error("Unable to create Sidebar Component");
       return;
@@ -63,7 +69,7 @@ FocusScope {
     var bookmarksButton = {
       "name" : "Toggle Bookmarks Panel",
       "type" : "button",
-      "command" : "togglebookmarkspanel",
+      "command" : "toggleBookmarksPanel",
       "description" : "Toggles open/closed the Bookmarks panel",
       "image" : "qrc:/images/icon_bookmark_24.png",
     };
@@ -74,15 +80,12 @@ FocusScope {
 
   onViewportChanged: viewport.uiHandle.parent = viewPanel
 
-  // HACK: We have to set both of these because of inconsistent behaviour in TabView
-  focus: true
-  activeFocusOnTab: true
-
   onActiveFocusChanged: {
     if(activeFocus)
       viewport.uiHandle.forceActiveFocus();
   }
 
+  // Item Tree // -------------------------------------------------------------
   RowLayout {
     id: mainLayout
     spacing: 4
@@ -147,7 +150,7 @@ FocusScope {
 
                     if(dataSource) {
                       var resource = dataSource.getResourceByVariant(0);
-                      resourcedropped(resource.uid, drop.x, drop.y);
+                      resourceDropped(resource.uid, drop.x, drop.y);
                     }
                   }
 
@@ -156,7 +159,7 @@ FocusScope {
               }
             }
             else if(drop.keys.indexOf("RMResource") > -1)
-              resourcedropped(drop.source.payload.uid, drop.x, drop.y);
+              resourceDropped(drop.source.payload.uid, drop.x, drop.y);
           }
         }
       }

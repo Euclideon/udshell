@@ -5,3 +5,4 @@ Console 0.1 console.qml
 ConsoleFilter 0.1 consolefilter.qml
 PopupOKCancel 0.1 popupokcancel.qml
 Popup 0.1 popup.qml
+typeinfo plugin.qmltypes

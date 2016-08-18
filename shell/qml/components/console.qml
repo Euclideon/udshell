@@ -7,15 +7,15 @@ import Platform 0.1
 
 Item {
   id: consoleWin
-
-  property var epTypeDesc: { "id": "ui.Console", "super": "ep.UIComponent" }
-  property var tabs: []
-
   visible: false
   enabled: false
   anchors.fill: parent
 
-  function togglevisible()
+  // Properties // ------------------------------------------------------------
+  property var epTypeDesc: { "id": "ui.Console", "super": "ep.UIComponent" }
+
+  // Methods // ---------------------------------------------------------------
+  function toggleVisible()
   {
     if(!consoleWin.visible)
     {
@@ -36,6 +36,7 @@ Item {
     consoleWin.visible = !consoleWin.visible;
   }
 
+  // Event Handlers // --------------------------------------------------------
   Component.onCompleted: {
     // Console Tab
     var tab1 = tv.addTab("Shell", consoleTab);
@@ -43,13 +44,13 @@ Item {
     tab1.item.consolecomp = EPKernel.createComponent("ep.Console", {"title" : "Shell", "setOutputFunc" : tab1.item.setOutText, "appendOutputFunc" : tab1.item.appendOutText, "hasInput" : true, "inputFunc" : function(str) { EPKernel.exec(str); }, "historyFileName" : "console.history", "outputLog" : false});
     var lua = EPKernel.getLua();
     tab1.item.consolecomp.addBroadcaster(lua.outputBroadcaster);
-    tabs.push(tab1);
+    internal.tabs.push(tab1);
 
     // Log Tab
     var tab2 = tv.addTab("Log", consoleTab);
     tab2.active = true;
     tab2.item.consolecomp = EPKernel.createComponent("ep.Console", {"title" : "Log", "setOutputFunc" : tab2.item.setOutText, "appendOutputFunc" : tab2.item.appendOutText, "hasInput" : false, "outputLog" : true});
-    tabs.push(tab2);
+    internal.tabs.push(tab2);
 
     // StdOut/StdErr Tab
     var tab3 = tv.addTab("StdOut/StdErr", consoleTab);
@@ -57,9 +58,17 @@ Item {
     tab3.item.consolecomp = EPKernel.createComponent("ep.Console", {"title" : "StdOut/StdErr", "setOutputFunc" : tab3.item.setOutText, "appendOutputFunc" : tab3.item.appendOutText, "hasInput" : false, "outputLog" : false});
     tab3.item.consolecomp.addBroadcaster(EPKernel.getStdOutBroadcaster());
     tab3.item.consolecomp.addBroadcaster(EPKernel.getStdErrBroadcaster());
-    tabs.push(tab3);
+    internal.tabs.push(tab3);
   }
 
+  // Internal // --------------------------------------------------------------
+  QtObject
+  {
+    id: internal
+    property var tabs: []
+  }
+
+  // Item Tree // -------------------------------------------------------------
   FontLoader { id: fixedFont; name: "Courier" }
 
   ColumnLayout {
@@ -124,7 +133,7 @@ Item {
             anchors.right: parent.right
             anchors.bottomMargin: 5
             focus: true
-            source: "consolefilter.qml"
+            source: "qrc:/EP/Platform/consolefilter.qml"
             onOpened: {
               contentItem.consolecomp = tv.getTab(tv.currentIndex).item.consolecomp;
             }

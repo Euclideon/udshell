@@ -90,12 +90,12 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   epscope(fail) { if(!spViewerUI) pKernel->logError("Error creating Viewer UI Component\n"); };
   spViewerUI = component_cast<UIComponent>(pKernel->createComponent("viewer.MainUI"));
   spViewerUI->set("viewport", spViewport);
-  spViewerUI->subscribe("resourcedropped", Delegate<void(String, int, int)>(this, &Viewer::onResourceDropped));
+  spViewerUI->subscribe("resourceDropped", Delegate<void(String, int, int)>(this, &Viewer::onResourceDropped));
 
   epscope(fail) { if(!spUIBookmarks) pKernel->logError("Error creating bookmarks UI Component\n"); };
   spUIBookmarks = component_cast<UIComponent>(pKernel->createComponent("ui.BookmarksUI"));
   spUIBookmarks->set("view", spView);
-  spViewerUI->set("bookmarkscomp", spUIBookmarks);
+  spViewerUI->set("bookmarks", spUIBookmarks);
 
   // TODO: Bug EP-66
   /*UIComponentRef spUIResources;
@@ -114,7 +114,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
   // Add bookmarks to UI
   auto bmMap = spScene->getBookmarkMap();
   for (auto bm : bmMap)
-    spUIBookmarks->call("createbookmark", bm.key);
+    spUIBookmarks->call("createBookmark", bm.key);
 
 #if EP_DEBUG
   try
@@ -222,10 +222,10 @@ void Viewer::staticInit(ep::Kernel *pKernel)
 {
   auto spCommandManager = pKernel->getCommandManager();
 
-  spCommandManager->registerCommand("togglebookmarkspanel", Delegate<void(Variant::VarMap)>(&Viewer::staticToggleBookmarksPanel), "", componentID(), "Ctrl+Shift+B");
+  spCommandManager->registerCommand("toggleBookmarksPanel", Delegate<void(Variant::VarMap)>(&Viewer::staticToggleBookmarksPanel), "", componentID(), "Ctrl+Shift+B");
   // TODO: Bug EP-66
   //spCommandManager->registerCommand("toggleresourcespanel", Delegate<void(Variant::VarMap)>(&Viewer::StaticToggleResourcesPanel), "", componentID(), "Ctrl+Shift+R");
-  spCommandManager->registerCommand("createbookmark", Delegate<void(Variant::VarMap)>(&Viewer::staticCreateBookmark), "", componentID(), "Ctrl+B");
+  spCommandManager->registerCommand("createBookmark", Delegate<void(Variant::VarMap)>(&Viewer::staticCreateBookmark), "", componentID(), "Ctrl+B");
 }
 
 void Viewer::staticToggleBookmarksPanel(Variant::VarMap params)
@@ -238,7 +238,7 @@ void Viewer::staticToggleBookmarksPanel(Variant::VarMap params)
 
 void Viewer::toggleBookmarksPanel()
 {
-  getUI()->call("togglebookmarkspanel");
+  getUI()->call("toggleBookmarksPanel");
 }
 
 // TODO: Bug EP-66
@@ -267,7 +267,7 @@ void Viewer::createBookmark()
   // TODO: Here we have to update the bookmark list separately for the front-end UI and the internal bookmarks list.
   // It would be nice if the QML could automatically update its bookmarks list from the internal bookmarks
   // Not sure how to do this currently
-  Variant bookmarkName = spUIBookmarks->call("createbookmark", "");
+  Variant bookmarkName = spUIBookmarks->call("createBookmark", "");
   spScene->addBookmarkFromCamera(bookmarkName.asString(), spCamera);
 }
 

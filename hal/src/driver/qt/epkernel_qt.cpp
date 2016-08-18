@@ -23,9 +23,6 @@
 #include <QMessageBox>
 
 
-// Init the kernel's qrc file resources - this has to happen from the global namespace
-inline void initResources() { Q_INIT_RESOURCE(kernel); }
-
 namespace qt {
 
 static QObject *qtKernelQmlSingletonProvider(QQmlEngine *pEngine, QJSEngine *pScriptEngine)
@@ -184,10 +181,6 @@ QtKernel::QtKernel(Variant::VarMap commandLine)
   EPTHROW_IF(qRegisterMetaType<QtFocusManager*>("QtFocusManager*") == -1, ep::Result::Failure, "qRegisterMetaType<QtFocusManager *> Failed");
   EPTHROW_IF(qmlRegisterSingletonType<QtKernelQml>("Platform", 0, 1, "EPKernel", qtKernelQmlSingletonProvider) == -1, ep::Result::Failure, "qmlRegisterSingletonType<QtKernelQml> Failed");
   EPTHROW_IF(qmlRegisterSingletonType<QtGlobalEPSingleton>("Platform", 0, 1, "EP", qtGlobalEPSingletonProvider) == -1, ep::Result::Failure, "qmlRegisterSingletonType<QtGlobalEPSingleton> Failed");
-
-  // load in the kernel qml resources
-  initResources();
-  registerQmlComponents(":/kernel");
 
   // create focus manager;
   pFocusManager = new QtFocusManager();

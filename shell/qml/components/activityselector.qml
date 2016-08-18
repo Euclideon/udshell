@@ -5,20 +5,23 @@ import QtQuick.Window 2.2
 import QtQuick.Layouts 1.2
 import Platform.Controls 0.1
 
-Item {
+Item
+{
+  // Properties // ------------------------------------------------------------
   property var epTypeDesc: { "id": "ui.ActivitySelector", "super": "ep.UIComponent" }
-  property var activitiesinfo: []
-  property var callback
+  property var activitiesInfo: []
 
-  function show(cb) {
-    callback = cb;
+  // Methods // ---------------------------------------------------------------
+  function show(cb)
+  {
+    internal.callback = cb;
 
     infoModel.clear();
-    for(var i = 0; i < activitiesinfo.length; i++) {
-      var text = "<font size=\"6\" color=\"lightskyblue\">" + activitiesinfo[i].name + "</font><br><br>" + activitiesinfo[i].description + "<br>";
+    for(var i = 0; i < activitiesInfo.length; i++) {
+      var text = "<font size=\"6\" color=\"lightskyblue\">" + activitiesInfo[i].name + "</font><br><br>" + activitiesInfo[i].description + "<br>";
 
-      activitiesinfo[i]["formattedText"] = text;
-      infoModel.append(activitiesinfo[i]);
+      activitiesInfo[i]["formattedText"] = text;
+      infoModel.append(activitiesInfo[i]);
     }
     //infoModel.sort();
 
@@ -27,6 +30,14 @@ Item {
     win.show();
   }
 
+  // Internal // --------------------------------------------------------------
+  QtObject
+  {
+    id: internal
+    property var callback
+  }
+
+  // Item Tree // -------------------------------------------------------------
   EPListModel {
     id: infoModel
   }
@@ -77,7 +88,7 @@ Item {
 
               onClicked: {
                 win.close();
-                callback(listView.selectedItemData.identifier);
+                internal.callback(listView.selectedItemData.identifier);
               }
             }
 

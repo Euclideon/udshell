@@ -2,6 +2,7 @@
 #define RENDERVIEW_H
 
 #include "driver/qt/epqt.h"
+#include "driver/qt/util/typeconvert_qt.h"
 
 #include "ep/cpp/component/view.h"
 
@@ -20,13 +21,16 @@ public:
   QtRenderView(QQuickItem *pParent = 0);
   virtual ~QtRenderView();
 
+  Q_PROPERTY(QVariant view READ getView WRITE setView)
+
   Renderer *createRenderer() const override;
 
-  Q_INVOKABLE void attachView(const QVariant &view);
+  QVariant getView() const { return ep::Variant(spView).as<QVariant>(); }
+  void setView(const QVariant &view);
 
 private slots:
-  void OnResize();
-  void OnVisibleChanged();
+  void onResize();
+  void onVisibleChanged();
 
 private:
   // TODO: Avoid this crap
@@ -46,7 +50,7 @@ private:
   void hoverMoveEvent(QHoverEvent *) override;
   void wheelEvent(QWheelEvent *) override;
 
-  void OnFrameReady()
+  void onFrameReady()
   {
     dirty = true;
     update();

@@ -25,6 +25,8 @@ OBJECTS_DIR = $${PWD}/int/.obj/$${TOOLSET}
 RCC_DIR = $${PWD}/int/.rcc/$${TOOLSET}
 UI_DIR = $${PWD}/int/.ui/$${TOOLSET}
 
+QML_IMPORT_PATH += $${PWD}/qml
+
 CONFIG += c++11 qml_debug
 
 SOURCES += src/main.cpp
@@ -35,6 +37,7 @@ INCLUDEPATH += ../libep/public/include \
 
 RESOURCES += res/res.qrc \
              qml/components/components.qrc \
+             qml/platform/platform.qrc \
              qml/platform/controls/controls.qrc \
              qml/platform/themes/themes.qrc \
 
