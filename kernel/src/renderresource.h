@@ -104,6 +104,7 @@ public:
 
   void Use();
   void setUniform(size_t i, Variant v);
+  void setTexture(size_t textureIndex, size_t uniformIndex, RenderTexture *pTexture);
 
   epShaderProgram *pProgram;
   bool uniformsAssigned;

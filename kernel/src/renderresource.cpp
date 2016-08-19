@@ -222,17 +222,26 @@ SharedString RenderShaderProgram::getUniformTypeString(size_t i)
 }
 
 template <typename T>
-inline Variant GetShaderElement(epShaderProgram *pProgram, size_t param)
+static Variant getProgramData(epShaderProgram *pProgram, size_t location, size_t size)
 {
-  T data;
-  epShader_GetProgramData(pProgram, param, &data);
-  return data;
+  if (size > 1)
+  {
+    Array<T, 16> data(Alloc, size);
+    epShader_GetProgramData(pProgram, location, data.getBuffer().ptr);
+    return data;
+  }
+  else
+  {
+    T data;
+    epShader_GetProgramData(pProgram, location, &data);
+    return data;
+  }
 }
 
 Variant RenderShaderProgram::getUniform(size_t i)
 {
   epShaderElement t = epShader_GetUniformType(pProgram, i);
-  EPASSERT(t.type >= epSET_Int && t.type <= epSET_Double && t.samplerType == epSST_Default ? t.m == 1 && t.n == 1 && t.type == epSET_Float : true, "Invalid type");
+  EPASSERT(t.type >= epSET_Int && t.type <= epSET_Double && t.samplerType != epSST_None ? t.m == 1 && t.n == 1 && t.type == epSET_Float : true, "Invalid type");
 
   if (t.m == 1)
   {
@@ -242,52 +251,52 @@ Variant RenderShaderProgram::getUniform(size_t i)
         switch (t.type)
         {
           case epSET_Int:
-            return GetShaderElement<int>(pProgram, i);
+            return getProgramData<int>(pProgram, t.location, t.arrayLength);
           case epSET_Uint:
-            return GetShaderElement<uint32_t>(pProgram, i);
+            return getProgramData<uint32_t>(pProgram, t.location, t.arrayLength);
           case epSET_Float:
-            return t.samplerType == epSST_Default ? nullptr : GetShaderElement<float>(pProgram, i);
+            return t.samplerType != epSST_None ? nullptr : getProgramData<float>(pProgram, t.location, t.arrayLength);
           case epSET_Double:
-            return GetShaderElement<double>(pProgram, i);
+            return getProgramData<double>(pProgram, t.location, t.arrayLength);
         }
         break;
       case 2:
         switch (t.type)
         {
           case epSET_Int:
-            return GetShaderElement<Vector2<int>>(pProgram, i);
+            return getProgramData<Vector2<int>>(pProgram, t.location, t.arrayLength);
           case epSET_Uint:
-            return GetShaderElement<Vector2<uint32_t>>(pProgram, i);
+            return getProgramData<Vector2<uint32_t>>(pProgram, t.location, t.arrayLength);
           case epSET_Float:
-            return GetShaderElement<Vector2<float>>(pProgram, i);
+            return getProgramData<Vector2<float>>(pProgram, t.location, t.arrayLength);
           case epSET_Double:
-            return GetShaderElement<Vector2<double>>(pProgram, i);
+            return getProgramData<Vector2<double>>(pProgram, t.location, t.arrayLength);
         }
         break;
       case 3:
         switch (t.type)
         {
           case epSET_Int:
-            return GetShaderElement<Vector3<int>>(pProgram, i);
+            return getProgramData<Vector3<int>>(pProgram, t.location, t.arrayLength);
           case epSET_Uint:
-            return GetShaderElement<Vector3<uint32_t>>(pProgram, i);
+            return getProgramData<Vector3<uint32_t>>(pProgram, t.location, t.arrayLength);
           case epSET_Float:
-            return GetShaderElement<Vector3<float>>(pProgram, i);
+            return getProgramData<Vector3<float>>(pProgram, t.location, t.arrayLength);
           case epSET_Double:
-            return GetShaderElement<Vector3<double>>(pProgram, i);
+            return getProgramData<Vector3<double>>(pProgram, t.location, t.arrayLength);
         }
         break;
       case 4:
         switch (t.type)
         {
           case epSET_Int:
-            return GetShaderElement<Vector4<int>>(pProgram, i);
+            return getProgramData<Vector4<int>>(pProgram, t.location, t.arrayLength);
           case epSET_Uint:
-            return GetShaderElement<Vector4<uint32_t>>(pProgram, i);
+            return getProgramData<Vector4<uint32_t>>(pProgram, t.location, t.arrayLength);
           case epSET_Float:
-            return GetShaderElement<Vector4<float>>(pProgram, i);
+            return getProgramData<Vector4<float>>(pProgram, t.location, t.arrayLength);
           case epSET_Double:
-            return GetShaderElement<Vector4<double>>(pProgram, i);
+            return getProgramData<Vector4<double>>(pProgram, t.location, t.arrayLength);
         }
       default:
         EPTHROW(Result::Failure, "vector length {0} not supported", t.n);
@@ -304,9 +313,9 @@ Variant RenderShaderProgram::getUniform(size_t i)
         case epSET_Uint:
           EPTHROW(Result::Failure, "Integer Matrix types not supported.");
         case epSET_Float:
-          return GetShaderElement<Matrix4x4<float>>(pProgram, i);
+          return getProgramData<Matrix4x4<float>>(pProgram, t.location, t.arrayLength);
         case epSET_Double:
-          return GetShaderElement<Matrix4x4<double>>(pProgram, i);
+          return getProgramData<Matrix4x4<double>>(pProgram, t.location, t.arrayLength);
       }
     }
     else
@@ -327,13 +336,34 @@ void RenderShaderProgram::Use()
   epShader_SetCurrent(pProgram);
 }
 
+template <typename T>
+static void setProgramData(size_t location, size_t size, const Variant &v)
+{
+  if (size > 1)
+  {
+    EPTHROW_IF(size > v.arrayLen(), Result::OutOfBounds, "Uniform array has insufficient length!");
+    Array<T, 16> arr(Reserve, size);
+    for (size_t j = 0; j < size; ++j)
+      arr.push_back(v[j].as<T>());
+    epShader_SetProgramData(location, arr.ptr, size);
+  }
+  else
+    epShader_SetProgramData(location, v.as<T>());
+}
+
+void RenderShaderProgram::setTexture(size_t textureIndex, size_t uniformIndex, RenderTexture *pTexture)
+{
+  epShaderElement t = epShader_GetUniformType(pProgram, uniformIndex);
+  epShader_SetProgramData(textureIndex, t.location, pTexture->pTexture);
+}
+
 void RenderShaderProgram::setUniform(size_t i, Variant v)
 {
   epShaderElement t = epShader_GetUniformType(pProgram, i);
   epShaderElementType et = (epShaderElementType)t.type;
-  EPASSERT(et >= epSET_Int && et <= epSET_Double && t.samplerType == epSST_Default ? t.m == 1 && t.n == 1 && t.type == epSET_Float : true, "Invalid type");
+  EPASSERT(et >= epSET_Int && et <= epSET_Double && t.samplerType != epSST_None ? t.m == 1 && t.n == 1 && t.type == epSET_Float : true, "Invalid type");
 
-  if (t.samplerType == epSST_Default)
+  if (t.samplerType != epSST_None)
     return;
 
   if (t.m == 1)
@@ -345,16 +375,16 @@ void RenderShaderProgram::setUniform(size_t i, Variant v)
         switch (et)
         {
           case epSET_Int:
-            epShader_SetProgramData(i, v.as<int>());
+            setProgramData<int>(t.location, t.arrayLength, v);
             return;
           case epSET_Uint:
-            epShader_SetProgramData(i, v.as<uint32_t>());
+            setProgramData<uint32_t>(t.location, t.arrayLength, v);
             return;
           case epSET_Float:
-            epShader_SetProgramData(i, v.as<float>());
+            setProgramData<float>(t.location, t.arrayLength, v);
             return;
           case epSET_Double:
-            epShader_SetProgramData(i, v.as<double>());
+            setProgramData<double>(t.location, t.arrayLength, v);
             return;
         }
       }
@@ -363,16 +393,16 @@ void RenderShaderProgram::setUniform(size_t i, Variant v)
         switch (et)
         {
           case epSET_Int:
-            epShader_SetProgramData(i, v.as<Vector2<int>>());
+            setProgramData<Vector2<int>>(t.location, t.arrayLength, v);
             return;
           case epSET_Uint:
-            epShader_SetProgramData(i, v.as<Vector2<uint32_t>>());
+            setProgramData<Vector2<uint32_t>>(t.location, t.arrayLength, v);
             return;
           case epSET_Float:
-            epShader_SetProgramData(i, v.as<Vector2<float>>());
+            setProgramData<Vector2<float>>(t.location, t.arrayLength, v);
             return;
           case epSET_Double:
-            epShader_SetProgramData(i, v.as<Vector2<double>>());
+            setProgramData<Vector2<double>>(t.location, t.arrayLength, v);
             return;
         }
       }
@@ -380,36 +410,36 @@ void RenderShaderProgram::setUniform(size_t i, Variant v)
       {
         switch (t.type)
         {
-        case epSET_Int:
-          epShader_SetProgramData(i, v.as<Vector3<int>>());
-          return;
-        case epSET_Uint:
-          epShader_SetProgramData(i, v.as<Vector3<uint32_t>>());
-          return;
-        case epSET_Float:
-          epShader_SetProgramData(i, v.as<Vector3<float>>());
-          return;
-        case epSET_Double:
-          epShader_SetProgramData(i, v.as<Vector3<double>>());
-          return;
+          case epSET_Int:
+            setProgramData<Vector3<int>>(t.location, t.arrayLength, v);
+            return;
+          case epSET_Uint:
+            setProgramData<Vector3<uint32_t>>(t.location, t.arrayLength, v);
+            return;
+          case epSET_Float:
+            setProgramData<Vector3<float>>(t.location, t.arrayLength, v);
+            return;
+          case epSET_Double:
+            setProgramData<Vector3<double>>(t.location, t.arrayLength, v);
+            return;
         }
       }
       case 4:
       {
         switch (t.type)
         {
-        case epSET_Int:
-          epShader_SetProgramData(i, v.as<Vector4<int>>());
-          return;
-        case epSET_Uint:
-          epShader_SetProgramData(i, v.as<Vector4<uint32_t>>());
-          return;
-        case epSET_Float:
-          epShader_SetProgramData(i, v.as<Vector4<float>>());
-          return;
-        case epSET_Double:
-          epShader_SetProgramData(i, v.as<Vector4<double>>());
-          return;
+          case epSET_Int:
+            setProgramData<Vector4<int>>(t.location, t.arrayLength, v);
+            return;
+          case epSET_Uint:
+            setProgramData<Vector4<uint32_t>>(t.location, t.arrayLength, v);
+            return;
+          case epSET_Float:
+            setProgramData<Vector4<float>>(t.location, t.arrayLength, v);
+            return;
+          case epSET_Double:
+            setProgramData<Vector4<double>>(t.location, t.arrayLength, v);
+            return;
         }
       }
       default:
@@ -426,11 +456,12 @@ void RenderShaderProgram::setUniform(size_t i, Variant v)
         case epSET_Int:
         case epSET_Uint:
           EPTHROW(Result::Failure, "Integer Matrix types not supported.");
+          return;
         case epSET_Float:
-          epShader_SetProgramData(i, v.as<Matrix4x4<float>>());
+          setProgramData<Matrix4x4<float>>(t.location, t.arrayLength, v);
           return;
         case epSET_Double:
-          epShader_SetProgramData(i, v.as<Matrix4x4<double>>());
+          setProgramData<Matrix4x4<double>>(t.location, t.arrayLength, v);
           return;
       }
     }
