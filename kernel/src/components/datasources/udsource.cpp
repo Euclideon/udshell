@@ -78,7 +78,8 @@ UDSource::UDSource(const ComponentDesc *pType, Kernel *pKernel, SharedString uid
     header.insert("boundingVolume", BoundingVolume { centre - extents, centre + extents } );
 
     double *pPivot = headerData.pivotOrigin;
-    header.insert("pivot", (pModelImpl->udmatrix * Double4{ pPivot[0], pPivot[1], pPivot[2], 1.0 }).toVector3());
+    pModelImpl->pivot = (pModelImpl->udmatrix * Double4{ pPivot[0], pPivot[1], pPivot[2], 1.0 }).toVector3();
+    header.insert("pivot", pModelImpl->pivot);
 
     header.insert("unitMeterScale", headerData.unitMeterScale);
     header.insert("maxOctreeDepth", headerData.maxOctreeDepth);

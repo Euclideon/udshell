@@ -94,6 +94,9 @@ public:
   virtual const Double4x4 &GetUDMatrix() const = 0;
   virtual void SetUDMatrix(const Double4x4 &matrix) = 0;
 
+  virtual Double3 getPivot() const = 0;
+  virtual void setPivot(Double3 pivot) = 0;
+
   virtual void SetVoxelFilter(IVoxelFilter *pVoxelShader) = 0;
   virtual IVoxelFilter* GetVoxelFilter() const = 0;
 

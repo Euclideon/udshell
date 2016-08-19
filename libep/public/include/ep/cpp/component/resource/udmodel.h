@@ -163,6 +163,9 @@ public:
   const Double4x4 &getUDMatrix() const { return pImpl->GetUDMatrix(); }
   void setUDMatrix(const Double4x4 &matrix){ pImpl->SetUDMatrix(matrix); }
 
+  Double3 getPivot() const { return pImpl->getPivot(); }
+  void setPivot(Double3 pivot) { return pImpl->setPivot(pivot); }
+
   void setVoxelFilter(VoxelFilter *pVoxelFilter)  { pImpl->SetVoxelFilter(pVoxelFilter); }
   VoxelFilter* getVoxelFilter() const { return pImpl->GetVoxelFilter(); }
 
