@@ -28,7 +28,7 @@ namespace ep {
 
 struct RenderableTexture
 {
-  int uniformIndex;
+  size_t uniformIndex;
   RenderTextureRef texture;
 
   // TODO: fill out with TextureSampler members for texture options
@@ -74,6 +74,11 @@ struct GeomJob
   // TODO : Hack until we standardise the shader inputs provide by ep.
   RenderShaderProperty viewProjection;
   bool setViewProjectionUniform;
+
+  RenderShaderProperty viewRenderSize;
+  bool setViewRenderSize;
+  RenderShaderProperty viewDisplaySize;
+  bool setViewDisplaySize;
 };
 
 class RenderableScene : public RefCounted

@@ -138,6 +138,7 @@ void MaterialImpl::PopulateShaderProperties()
                       spShaderProgram->getUniformTypeString(i),
                       spShaderProgram->getUniform(i),
                       { spShaderProgram->getUniformType(i) },
+                      i,
                       true,
                       false
                     }

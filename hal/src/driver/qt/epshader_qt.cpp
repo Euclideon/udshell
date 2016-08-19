@@ -75,9 +75,13 @@ void epShader_DestroyShader(epShader **ppShader)
 }
 
 // ***************************************************************************************
-static inline epShaderElement ConvertToShaderElementType(size_t type, uint32_t location)
+static epShaderElement ConvertToShaderElementType(size_t type, uint32_t length, uint32_t location)
 {
-  epShaderElement uniformType = { 0, 0 , 0, location, 0, 0, 0 };
+  epShaderElement uniformType;
+  (uint64_t&)uniformType = 0;
+  uniformType.arrayLength = length;
+  uniformType.location = location;
+
   switch (type)
   {
     case GL_FLOAT:
@@ -318,14 +322,187 @@ static inline epShaderElement ConvertToShaderElementType(size_t type, uint32_t l
       uniformType.type = epSET_Double;
       break;
     }
+    case GL_SAMPLER_1D:
+    case GL_SAMPLER_1D_SHADOW:
+    case GL_SAMPLER_1D_ARRAY:
+    case GL_SAMPLER_1D_ARRAY_SHADOW:
     case GL_SAMPLER_2D:
+    case GL_SAMPLER_2D_RECT:
+    case GL_SAMPLER_2D_SHADOW:
+    case GL_SAMPLER_2D_RECT_SHADOW:
+    case GL_SAMPLER_2D_ARRAY:
+    case GL_SAMPLER_2D_ARRAY_SHADOW:
+    case GL_SAMPLER_3D:
+    case GL_SAMPLER_CUBE:
+    case GL_SAMPLER_CUBE_SHADOW:
+    case GL_SAMPLER_CUBE_MAP_ARRAY:
+    case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
+    case GL_SAMPLER_BUFFER:
+    case GL_INT_SAMPLER_1D:
+    case GL_INT_SAMPLER_1D_ARRAY:
+    case GL_INT_SAMPLER_2D:
+    case GL_INT_SAMPLER_2D_MULTISAMPLE:
+    case GL_INT_SAMPLER_2D_ARRAY:
+    case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+    case GL_INT_SAMPLER_2D_RECT:
+    case GL_INT_SAMPLER_3D:
+    case GL_INT_SAMPLER_CUBE:
+    case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
+    case GL_INT_SAMPLER_BUFFER:
+    case GL_UNSIGNED_INT_SAMPLER_1D:
+    case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+    case GL_UNSIGNED_INT_SAMPLER_2D:
+    case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+    case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+    case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+    case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+    case GL_UNSIGNED_INT_SAMPLER_3D:
+    case GL_UNSIGNED_INT_SAMPLER_CUBE:
+    case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
+    case GL_UNSIGNED_INT_SAMPLER_BUFFER:
     {
       uniformType.m = 1;
       uniformType.n = 1;
-      uniformType.type = epSET_Float; // TODO: find element types
-      uniformType.samplerType = epSST_Default; // TODO: find texture type
-      uniformType.samplerDimensions = epSSD_2D; // TODO: find texture dimensions
-      break;
+      switch (type)
+      {
+        case GL_SAMPLER_1D:
+        case GL_SAMPLER_1D_SHADOW:
+        case GL_SAMPLER_1D_ARRAY:
+        case GL_SAMPLER_1D_ARRAY_SHADOW:
+        case GL_SAMPLER_2D:
+        case GL_SAMPLER_2D_RECT:
+        case GL_SAMPLER_2D_SHADOW:
+        case GL_SAMPLER_2D_RECT_SHADOW:
+        case GL_SAMPLER_2D_ARRAY:
+        case GL_SAMPLER_2D_ARRAY_SHADOW:
+        case GL_SAMPLER_3D:
+        case GL_SAMPLER_CUBE:
+        case GL_SAMPLER_CUBE_SHADOW:
+        case GL_SAMPLER_CUBE_MAP_ARRAY:
+        case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
+        case GL_SAMPLER_BUFFER:
+          uniformType.type = epSET_Float; break;
+        case GL_INT_SAMPLER_1D:
+        case GL_INT_SAMPLER_1D_ARRAY:
+        case GL_INT_SAMPLER_2D:
+        case GL_INT_SAMPLER_2D_MULTISAMPLE:
+        case GL_INT_SAMPLER_2D_ARRAY:
+        case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+        case GL_INT_SAMPLER_2D_RECT:
+        case GL_INT_SAMPLER_3D:
+        case GL_INT_SAMPLER_CUBE:
+        case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
+        case GL_INT_SAMPLER_BUFFER:
+          uniformType.type = epSET_Int; break;
+        case GL_UNSIGNED_INT_SAMPLER_1D:
+        case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D:
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+        case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+        case GL_UNSIGNED_INT_SAMPLER_3D:
+        case GL_UNSIGNED_INT_SAMPLER_CUBE:
+        case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_BUFFER:
+          uniformType.type = epSET_Uint; break;
+      }
+      switch (type)
+      {
+        case GL_SAMPLER_1D:
+        case GL_SAMPLER_1D_ARRAY:
+        case GL_SAMPLER_2D:
+        case GL_SAMPLER_2D_ARRAY:
+        case GL_SAMPLER_3D:
+        case GL_SAMPLER_CUBE:
+        case GL_SAMPLER_CUBE_MAP_ARRAY:
+        case GL_INT_SAMPLER_1D:
+        case GL_INT_SAMPLER_1D_ARRAY:
+        case GL_INT_SAMPLER_2D:
+        case GL_INT_SAMPLER_2D_ARRAY:
+        case GL_INT_SAMPLER_3D:
+        case GL_INT_SAMPLER_CUBE:
+        case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_1D:
+        case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D:
+        case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_3D:
+        case GL_UNSIGNED_INT_SAMPLER_CUBE:
+        case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
+          uniformType.samplerType = epSST_Default; break;
+        case GL_SAMPLER_2D_RECT:
+        case GL_INT_SAMPLER_2D_RECT:
+        case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+          uniformType.samplerType = epSST_Rect; break;
+        case GL_SAMPLER_1D_SHADOW:
+        case GL_SAMPLER_1D_ARRAY_SHADOW:
+        case GL_SAMPLER_2D_SHADOW:
+        case GL_SAMPLER_2D_ARRAY_SHADOW:
+        case GL_SAMPLER_CUBE_SHADOW:
+        case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
+          uniformType.samplerType = epSST_Shadow; break;
+        case GL_SAMPLER_2D_RECT_SHADOW:
+          uniformType.samplerType = epSST_ShadowRect; break;
+        case GL_INT_SAMPLER_2D_MULTISAMPLE:
+        case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+          uniformType.samplerType = epSST_Multisample; break;
+        case GL_SAMPLER_BUFFER:
+        case GL_INT_SAMPLER_BUFFER:
+        case GL_UNSIGNED_INT_SAMPLER_BUFFER:
+          uniformType.samplerType = epSST_Buffer; break;
+      }
+      switch (type)
+      {
+        case GL_SAMPLER_1D:
+        case GL_SAMPLER_1D_SHADOW:
+        case GL_INT_SAMPLER_1D:
+        case GL_UNSIGNED_INT_SAMPLER_1D:
+          uniformType.samplerDimensions = epSSD_1D; break;
+        case GL_SAMPLER_1D_ARRAY:
+        case GL_SAMPLER_1D_ARRAY_SHADOW:
+        case GL_INT_SAMPLER_1D_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+          uniformType.samplerDimensions = epSSD_1DArray; break;
+        case GL_SAMPLER_2D:
+        case GL_SAMPLER_2D_RECT:
+        case GL_SAMPLER_2D_SHADOW:
+        case GL_SAMPLER_2D_RECT_SHADOW:
+        case GL_INT_SAMPLER_2D:
+        case GL_INT_SAMPLER_2D_MULTISAMPLE:
+        case GL_INT_SAMPLER_2D_RECT:
+        case GL_UNSIGNED_INT_SAMPLER_2D:
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+        case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+          uniformType.samplerDimensions = epSSD_2D; break;
+        case GL_SAMPLER_2D_ARRAY:
+        case GL_SAMPLER_2D_ARRAY_SHADOW:
+        case GL_INT_SAMPLER_2D_ARRAY:
+        case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+          uniformType.samplerDimensions = epSSD_2DArray; break;
+        case GL_SAMPLER_3D:
+        case GL_INT_SAMPLER_3D:
+        case GL_UNSIGNED_INT_SAMPLER_3D:
+          uniformType.samplerDimensions = epSSD_3D; break;
+        case GL_SAMPLER_CUBE:
+        case GL_SAMPLER_CUBE_SHADOW:
+        case GL_INT_SAMPLER_CUBE:
+        case GL_UNSIGNED_INT_SAMPLER_CUBE:
+          uniformType.samplerDimensions = epSSD_Cube; break;
+        case GL_SAMPLER_CUBE_MAP_ARRAY:
+        case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
+        case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
+          uniformType.samplerDimensions = epSSD_CubeArray; break;
+        case GL_SAMPLER_BUFFER:
+        case GL_INT_SAMPLER_BUFFER:
+        case GL_UNSIGNED_INT_SAMPLER_BUFFER:
+          uniformType.samplerDimensions = epSSD_Buffer; break;
+      }
     }
   }
 
@@ -401,7 +578,7 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *shaders[], size_t arrayL
       GLenum type;
       pProgram->pAttributes[i].pName = pStrings;
       funcs.glGetActiveAttrib(program, i, pEnd - pStrings, &length, &size, &type, pProgram->pAttributes[i].pName);
-      pProgram->pAttributes[i].elementType = ConvertToShaderElementType(type, pQtProgram->attributeLocation(pProgram->pAttributes[i].pName));
+      pProgram->pAttributes[i].elementType = ConvertToShaderElementType(type, size, pQtProgram->attributeLocation(pProgram->pAttributes[i].pName));
       pStrings += length + 1;
     }
 
@@ -412,7 +589,13 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *shaders[], size_t arrayL
       GLenum type;
       pProgram->pUniforms[i].pName = pStrings;
       funcs.glGetActiveUniform(program, i, pEnd - pStrings, &length, &size, &type, pProgram->pUniforms[i].pName);
-      pProgram->pUniforms[i].elementType = ConvertToShaderElementType(type, pQtProgram->uniformLocation(pProgram->pUniforms[i].pName));
+      if (size > 1)
+      {
+        // array uniforms seem to have "[0]" attached to the end of the uniform names!
+        length -= 3;
+        pProgram->pUniforms[i].pName[length] = '\0';
+      }
+      pProgram->pUniforms[i].elementType = ConvertToShaderElementType(type, size, pQtProgram->uniformLocation(pProgram->pUniforms[i].pName));
       pStrings += length + 1;
     }
   }
@@ -489,6 +672,8 @@ void epShader_GetElementTypeString(epShaderElement t, char *pBuffer, size_t size
     return;
   }
 
+  size_t length = 3;
+
   switch (t.type)
   {
     case epSET_Int:
@@ -504,7 +689,10 @@ void epShader_GetElementTypeString(epShaderElement t, char *pBuffer, size_t size
     case epSET_Float:
     {
       if (t.samplerType == epSST_Default)
+      {
+        length = 7;
         memcpy(pBuffer, "sampler", 7);
+      }
       else
         memcpy(pBuffer, "f32", 3);
       break;
@@ -518,8 +706,6 @@ void epShader_GetElementTypeString(epShaderElement t, char *pBuffer, size_t size
       EPASSERT(0, "Invalid element type");
       break;
   }
-
-  size_t length = 3;
 
   if (t.m > 1)
   {
@@ -718,121 +904,92 @@ void epShader_SetCurrent(epShaderProgram *pProgram)
 // ***************************************************************************************
 void epShader_SetProgramData(size_t param, bool value)
 {
-  s_QtGLContext.pFunc->glUniform1i((int)param, value ? 1 : 0);
+  s_QtGLContext.pFunc->glUniform1i((GLint)param, value ? 1 : 0);
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(size_t param, int value)
+void epShader_SetProgramData(size_t param, const int *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform1i((int)param, value);
+  s_QtGLContext.pFunc->glUniform1iv((GLint)param, (GLsizei)count, pValues);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, uint32_t value)
+void epShader_SetProgramData(size_t param, const ep::Vector2<int> *pValues, size_t count)
 {
-   s_QtGLContext.pFunc->glUniform1i((int)param, (int)value);
+  s_QtGLContext.pFunc->glUniform2iv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, float value)
+void epShader_SetProgramData(size_t param, const ep::Vector3<int> *pValues, size_t count)
 {
-  if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniform1fv((int)param, 1, &value);
+  s_QtGLContext.pFunc->glUniform3iv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, double value)
+void epShader_SetProgramData(size_t param, const ep::Vector4<int> *pValues, size_t count)
 {
-  if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniform1dv((int)param, 1, &value);
+  s_QtGLContext.pFunc->glUniform4iv((GLint)param, (GLsizei)count, &pValues->x);
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector2<int> &value)
+void epShader_SetProgramData(size_t param, const uint32_t *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform2iv((int)param, 1, &value.x);
+  s_QtGLContext.pFunc->glUniform1iv((GLint)param, (GLsizei)count, (GLint*)pValues);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector3<int> &value)
+void epShader_SetProgramData(size_t param, const ep::Vector2<uint32_t> *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform3iv((int)param, 1, &value.x);
+  s_QtGLContext.pFunc->glUniform2iv((GLint)param, (GLsizei)count, (GLint*)&pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector4<int> &value)
+void epShader_SetProgramData(size_t param, const ep::Vector3<uint32_t> *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform4iv((int)param, 1, &value.x);
+  s_QtGLContext.pFunc->glUniform3iv((GLint)param, (GLsizei)count, (GLint*)&pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector2<uint32_t> &value)
+void epShader_SetProgramData(size_t param, const ep::Vector4<uint32_t> *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform2iv((int)param, 1, (int*)&value.x);
+  s_QtGLContext.pFunc->glUniform4iv((GLint)param, (GLsizei)count, (GLint*)&pValues->x);
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector3<uint32_t> &value)
+void epShader_SetProgramData(size_t param, const float *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform3iv((int)param, 1, (int*)&value.x);
+  s_QtGLContext.pFunc->glUniform1fv((GLint)param, (GLsizei)count, pValues);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector4<uint32_t> &value)
+void epShader_SetProgramData(size_t param, const ep::Vector2<float> *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform4iv((int)param, 1, (int*)&value.x);
+  s_QtGLContext.pFunc->glUniform2fv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float2 &value)
+void epShader_SetProgramData(size_t param, const ep::Vector3<float> *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform2fv((int)param, 1, &value.x);
+  s_QtGLContext.pFunc->glUniform3fv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float3 &value)
+void epShader_SetProgramData(size_t param, const ep::Vector4<float> *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform3fv((int)param, 1, &value.x);
+  s_QtGLContext.pFunc->glUniform4fv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float4 &value)
+void epShader_SetProgramData(size_t param, const ep::Matrix4x4<float> *pValues, size_t count)
 {
-  s_QtGLContext.pFunc->glUniform4fv((int)param, 1, &value.x);
+  s_QtGLContext.pFunc->glUniformMatrix4fv((GLint)param, (GLsizei)count, (GLboolean)false, &pValues->a[0]);
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float4x4 &value)
-{
-  s_QtGLContext.pFunc->glUniformMatrix4fv((int)param, 1, 0, &value.a[0]);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double2 &value)
+void epShader_SetProgramData(size_t param, const double *pValues, size_t count)
 {
   if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniform2dv((int)param, 1, &value.x);
+    s_QtGLContext.pFunc4_0_Core->glUniform1dv((GLint)param, (GLsizei)count, pValues);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double3 &value)
+void epShader_SetProgramData(size_t param, const ep::Vector2<double> *pValues, size_t count)
 {
   if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniform3dv((int)param, 1, &value.x);
+    s_QtGLContext.pFunc4_0_Core->glUniform2dv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double4 &value)
+void epShader_SetProgramData(size_t param, const ep::Vector3<double> *pValues, size_t count)
 {
   if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniform4dv((int)param, 1, &value.x);
+    s_QtGLContext.pFunc4_0_Core->glUniform3dv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double4x4 &value)
+void epShader_SetProgramData(size_t param, const ep::Vector4<double> *pValues, size_t count)
 {
   if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniformMatrix4dv((int)param, 1, GLboolean(0), &value.a[0]);
+    s_QtGLContext.pFunc4_0_Core->glUniform4dv((GLint)param, (GLsizei)count, &pValues->x);
+}
+void epShader_SetProgramData(size_t param, const ep::Matrix4x4<double> *pValues, size_t count)
+{
+  if (s_QtGLContext.pFunc4_0_Core)
+    s_QtGLContext.pFunc4_0_Core->glUniformMatrix4dv((GLint)param, (GLsizei)count, (GLboolean)false, &pValues->a[0]);
 }
 
 // ***************************************************************************************
@@ -842,78 +999,6 @@ void epShader_SetProgramData(size_t textureUnit, size_t param, struct epTexture 
 
   // TODO: Use QOpenGLShaderProgram instead?
   s_QtGLContext.pFunc->glUniform1i((int)param, (int)textureUnit);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const int *pValues, size_t count)
-{
-  s_QtGLContext.pFunc->glUniform1iv((int)param, (GLsizei)count, pValues);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const float *pValues, size_t count)
-{
-  s_QtGLContext.pFunc->glUniform1fv((int)param, (GLsizei)count, pValues);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const double *pValue, size_t count)
-{
-  if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniform1dv((int)param, (GLsizei)count, pValue);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float2 *pValues, size_t count)
-{
-  s_QtGLContext.pFunc->glUniform2fv((int)param, (GLsizei)count, &pValues->x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float3 *pValues, size_t count)
-{
-  s_QtGLContext.pFunc->glUniform3fv((int)param, (GLsizei)count, &pValues->x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float4 *pValues, size_t count)
-{
-  s_QtGLContext.pFunc->glUniform4fv((int)param, (GLsizei)count, &pValues->x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float4x4 *pValues, size_t count)
-{
-  if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc->glUniformMatrix4fv((int)param, (GLsizei)count, 0, &pValues->a[0]);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double2 *pValues, size_t count)
-{
-  if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniform2dv((int)param, (GLsizei)count, &pValues->x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double3 *pValues, size_t count)
-{
-  if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniform3dv((int)param, (GLsizei)count, &pValues->x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double4 *pValues, size_t count)
-{
-  if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniform4dv((int)param, (GLsizei)count, &pValues->x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double4x4 *pValues, size_t count)
-{
-  if (s_QtGLContext.pFunc4_0_Core)
-    s_QtGLContext.pFunc4_0_Core->glUniformMatrix4dv((int)param, (GLsizei)count, 0, &pValues->a[0]);
 }
 
 #else

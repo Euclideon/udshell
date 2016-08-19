@@ -82,7 +82,7 @@ struct StencilState
 struct RenderShaderProperty
 {
   Variant data;
-  int index;
+  size_t index;
 };
 
 struct RenderList
@@ -115,7 +115,7 @@ EP_EXPLICIT_BITFIELD(UDRenderFlags,
   PixelApproxOpt = 1024,
   DoNotRenderCubes = 128,
   RenderPoints = 8192
-  );
+);
 
 struct UDRenderJob
 {

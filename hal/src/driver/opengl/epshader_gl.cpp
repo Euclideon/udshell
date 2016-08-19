@@ -79,9 +79,13 @@ void epShader_DestroyShader(epShader **ppShader)
 }
 
 // ***************************************************************************************
-static inline epShaderElement ConvertToShaderElementType(size_t type, uint32_t location)
+static epShaderElement ConvertToShaderElementType(size_t type, uint32_t length, uint32_t location)
 {
-  epShaderElement uniformType = { 0, 0 , 0, location, 0, 0, 0 };
+  epShaderElement uniformType;
+  (uint64_t&)uniformType = 0;
+  uniformType.arrayLength = length;
+  uniformType.location = location;
+
   switch (type)
   {
   case GL_FLOAT:
@@ -322,13 +326,187 @@ static inline epShaderElement ConvertToShaderElementType(size_t type, uint32_t l
     uniformType.type = epSET_Double;
     break;
   }
+  case GL_SAMPLER_1D:
+  case GL_SAMPLER_1D_SHADOW:
+  case GL_SAMPLER_1D_ARRAY:
+  case GL_SAMPLER_1D_ARRAY_SHADOW:
   case GL_SAMPLER_2D:
+  case GL_SAMPLER_2D_RECT:
+  case GL_SAMPLER_2D_SHADOW:
+  case GL_SAMPLER_2D_RECT_SHADOW:
+  case GL_SAMPLER_2D_ARRAY:
+  case GL_SAMPLER_2D_ARRAY_SHADOW:
+  case GL_SAMPLER_3D:
+  case GL_SAMPLER_CUBE:
+  case GL_SAMPLER_CUBE_SHADOW:
+  case GL_SAMPLER_CUBE_MAP_ARRAY:
+  case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
+  case GL_SAMPLER_BUFFER:
+  case GL_INT_SAMPLER_1D:
+  case GL_INT_SAMPLER_1D_ARRAY:
+  case GL_INT_SAMPLER_2D:
+  case GL_INT_SAMPLER_2D_MULTISAMPLE:
+  case GL_INT_SAMPLER_2D_ARRAY:
+  case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+  case GL_INT_SAMPLER_2D_RECT:
+  case GL_INT_SAMPLER_3D:
+  case GL_INT_SAMPLER_CUBE:
+  case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
+  case GL_INT_SAMPLER_BUFFER:
+  case GL_UNSIGNED_INT_SAMPLER_1D:
+  case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+  case GL_UNSIGNED_INT_SAMPLER_2D:
+  case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+  case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+  case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+  case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+  case GL_UNSIGNED_INT_SAMPLER_3D:
+  case GL_UNSIGNED_INT_SAMPLER_CUBE:
+  case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
+  case GL_UNSIGNED_INT_SAMPLER_BUFFER:
   {
     uniformType.m = 1;
     uniformType.n = 1;
-    uniformType.type = epSET_Float; // TODO: find element types
-    uniformType.samplerType = epSST_Default; // TODO: find texture type
-    uniformType.samplerDimensions = epSSD_2D; // TODO: find texture dimensions
+    switch (type)
+    {
+      case GL_SAMPLER_1D:
+      case GL_SAMPLER_1D_SHADOW:
+      case GL_SAMPLER_1D_ARRAY:
+      case GL_SAMPLER_1D_ARRAY_SHADOW:
+      case GL_SAMPLER_2D:
+      case GL_SAMPLER_2D_RECT:
+      case GL_SAMPLER_2D_SHADOW:
+      case GL_SAMPLER_2D_RECT_SHADOW:
+      case GL_SAMPLER_2D_ARRAY:
+      case GL_SAMPLER_2D_ARRAY_SHADOW:
+      case GL_SAMPLER_3D:
+      case GL_SAMPLER_CUBE:
+      case GL_SAMPLER_CUBE_SHADOW:
+      case GL_SAMPLER_CUBE_MAP_ARRAY:
+      case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
+      case GL_SAMPLER_BUFFER:
+        uniformType.type = epSET_Float; break;
+      case GL_INT_SAMPLER_1D:
+      case GL_INT_SAMPLER_1D_ARRAY:
+      case GL_INT_SAMPLER_2D:
+      case GL_INT_SAMPLER_2D_MULTISAMPLE:
+      case GL_INT_SAMPLER_2D_ARRAY:
+      case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+      case GL_INT_SAMPLER_2D_RECT:
+      case GL_INT_SAMPLER_3D:
+      case GL_INT_SAMPLER_CUBE:
+      case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
+      case GL_INT_SAMPLER_BUFFER:
+        uniformType.type = epSET_Int; break;
+      case GL_UNSIGNED_INT_SAMPLER_1D:
+      case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_2D:
+      case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+      case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+      case GL_UNSIGNED_INT_SAMPLER_3D:
+      case GL_UNSIGNED_INT_SAMPLER_CUBE:
+      case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_BUFFER:
+        uniformType.type = epSET_Uint; break;
+    }
+    switch (type)
+    {
+      case GL_SAMPLER_1D:
+      case GL_SAMPLER_1D_ARRAY:
+      case GL_SAMPLER_2D:
+      case GL_SAMPLER_2D_ARRAY:
+      case GL_SAMPLER_3D:
+      case GL_SAMPLER_CUBE:
+      case GL_SAMPLER_CUBE_MAP_ARRAY:
+      case GL_INT_SAMPLER_1D:
+      case GL_INT_SAMPLER_1D_ARRAY:
+      case GL_INT_SAMPLER_2D:
+      case GL_INT_SAMPLER_2D_ARRAY:
+      case GL_INT_SAMPLER_3D:
+      case GL_INT_SAMPLER_CUBE:
+      case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_1D:
+      case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_2D:
+      case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_3D:
+      case GL_UNSIGNED_INT_SAMPLER_CUBE:
+      case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
+        uniformType.samplerType = epSST_Default; break;
+      case GL_SAMPLER_2D_RECT:
+      case GL_INT_SAMPLER_2D_RECT:
+      case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+        uniformType.samplerType = epSST_Rect; break;
+      case GL_SAMPLER_1D_SHADOW:
+      case GL_SAMPLER_1D_ARRAY_SHADOW:
+      case GL_SAMPLER_2D_SHADOW:
+      case GL_SAMPLER_2D_ARRAY_SHADOW:
+      case GL_SAMPLER_CUBE_SHADOW:
+      case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
+        uniformType.samplerType = epSST_Shadow; break;
+      case GL_SAMPLER_2D_RECT_SHADOW:
+        uniformType.samplerType = epSST_ShadowRect; break;
+      case GL_INT_SAMPLER_2D_MULTISAMPLE:
+      case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+      case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+        uniformType.samplerType = epSST_Multisample; break;
+      case GL_SAMPLER_BUFFER:
+      case GL_INT_SAMPLER_BUFFER:
+      case GL_UNSIGNED_INT_SAMPLER_BUFFER:
+        uniformType.samplerType = epSST_Buffer; break;
+    }
+    switch (type)
+    {
+      case GL_SAMPLER_1D:
+      case GL_SAMPLER_1D_SHADOW:
+      case GL_INT_SAMPLER_1D:
+      case GL_UNSIGNED_INT_SAMPLER_1D:
+        uniformType.samplerDimensions = epSSD_1D; break;
+      case GL_SAMPLER_1D_ARRAY:
+      case GL_SAMPLER_1D_ARRAY_SHADOW:
+      case GL_INT_SAMPLER_1D_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+        uniformType.samplerDimensions = epSSD_1DArray; break;
+      case GL_SAMPLER_2D:
+      case GL_SAMPLER_2D_RECT:
+      case GL_SAMPLER_2D_SHADOW:
+      case GL_SAMPLER_2D_RECT_SHADOW:
+      case GL_INT_SAMPLER_2D:
+      case GL_INT_SAMPLER_2D_MULTISAMPLE:
+      case GL_INT_SAMPLER_2D_RECT:
+      case GL_UNSIGNED_INT_SAMPLER_2D:
+      case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+      case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+        uniformType.samplerDimensions = epSSD_2D; break;
+      case GL_SAMPLER_2D_ARRAY:
+      case GL_SAMPLER_2D_ARRAY_SHADOW:
+      case GL_INT_SAMPLER_2D_ARRAY:
+      case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+        uniformType.samplerDimensions = epSSD_2DArray; break;
+      case GL_SAMPLER_3D:
+      case GL_INT_SAMPLER_3D:
+      case GL_UNSIGNED_INT_SAMPLER_3D:
+        uniformType.samplerDimensions = epSSD_3D; break;
+      case GL_SAMPLER_CUBE:
+      case GL_SAMPLER_CUBE_SHADOW:
+      case GL_INT_SAMPLER_CUBE:
+      case GL_UNSIGNED_INT_SAMPLER_CUBE:
+        uniformType.samplerDimensions = epSSD_Cube; break;
+      case GL_SAMPLER_CUBE_MAP_ARRAY:
+      case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
+      case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
+      case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
+        uniformType.samplerDimensions = epSSD_CubeArray; break;
+      case GL_SAMPLER_BUFFER:
+      case GL_INT_SAMPLER_BUFFER:
+      case GL_UNSIGNED_INT_SAMPLER_BUFFER:
+        uniformType.samplerDimensions = epSSD_Buffer; break;
+    }
     break;
   }
   }
@@ -407,7 +585,7 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *shaders[], size_t arrayL
     GLenum type;
     pProgram->pAttributes[i].pName = pStrings;
     glGetActiveAttrib(program, i, 128, &length, &size, &type, pProgram->pAttributes[i].pName);
-    pProgram->pAttributes[i].elementType = ConvertToShaderElementType(type, glGetAttribLocation(program, pProgram->pAttributes[i].pName));
+    pProgram->pAttributes[i].elementType = ConvertToShaderElementType(type, size, glGetAttribLocation(program, pProgram->pAttributes[i].pName));
     pStrings += length + 1;
   }
 
@@ -418,7 +596,13 @@ epShaderProgram* epShader_CreateShaderProgram(epShader *shaders[], size_t arrayL
     GLenum type;
     pProgram->pUniforms[i].pName = pStrings;
     glGetActiveUniform(program, i, 128, &length, &size, &type, pProgram->pUniforms[i].pName);
-    pProgram->pUniforms[i].elementType = ConvertToShaderElementType(type, glGetUniformLocation(program, pProgram->pUniforms[i].pName));
+    if (size > 1)
+    {
+      // array uniforms seem to have "[0]" attached to the end of the uniform names!
+      length -= 3;
+      pProgram->pUniforms[i].pName[length] = '\0';
+    }
+    pProgram->pUniforms[i].elementType = ConvertToShaderElementType(type, size, glGetUniformLocation(program, pProgram->pUniforms[i].pName));
     pStrings += length + 1;
   }
 
@@ -479,6 +663,8 @@ void epShader_GetElementTypeString(epShaderElement t, char *pBuffer, size_t size
     return;
   }
 
+  size_t length = 3;
+
   switch (t.type)
   {
   case epSET_Int:
@@ -494,7 +680,10 @@ void epShader_GetElementTypeString(epShaderElement t, char *pBuffer, size_t size
   case epSET_Float:
   {
     if (t.samplerType == epSST_Default)
+    {
+      length = 7;
       memcpy(pBuffer, "sampler", 7);
+    }
     else
       memcpy(pBuffer, "f32", 3);
     break;
@@ -508,8 +697,6 @@ void epShader_GetElementTypeString(epShaderElement t, char *pBuffer, size_t size
     EPASSERT(0, "Invalid element type");
     break;
   }
-
-  size_t length = 3;
 
   if (t.m > 1)
   {
@@ -696,120 +883,89 @@ void epShader_SetCurrent(epShaderProgram *pProgram)
 }
 
 // ***************************************************************************************
-// Author: Manu Evans, May 2015
 void epShader_SetProgramData(size_t param, bool value)
 {
-  glUniform1i((int)param, value ? 1 : 0);
+  glUniform1i((GLint)param, value ? 1 : 0);
 }
 
 // ***************************************************************************************
-// Author: Manu Evans, May 2015
-void epShader_SetProgramData(size_t param, int value)
+void epShader_SetProgramData(size_t param, const int *pValues, size_t count)
 {
-  glUniform1i((int)param, value);
+  glUniform1iv((GLint)param, (GLsizei)count, pValues);
+}
+void epShader_SetProgramData(size_t param, const ep::Vector2<int> *pValues, size_t count)
+{
+  glUniform2iv((GLint)param, (GLsizei)count, &pValues->x);
+}
+void epShader_SetProgramData(size_t param, const ep::Vector3<int> *pValues, size_t count)
+{
+  glUniform3iv((GLint)param, (GLsizei)count, &pValues->x);
+}
+void epShader_SetProgramData(size_t param, const ep::Vector4<int> *pValues, size_t count)
+{
+  glUniform4iv((GLint)param, (GLsizei)count, &pValues->x);
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(size_t param, uint32_t value)
+void epShader_SetProgramData(size_t param, const uint32_t *pValues, size_t count)
 {
-  glUniform1i((int)param, (int)value);
+  glUniform1iv((GLint)param, (GLsizei)count, (GLint*)pValues);
+}
+void epShader_SetProgramData(size_t param, const ep::Vector2<uint32_t> *pValues, size_t count)
+{
+  glUniform2iv((GLint)param, (GLsizei)count, (GLint*)&pValues->x);
+}
+void epShader_SetProgramData(size_t param, const ep::Vector3<uint32_t> *pValues, size_t count)
+{
+  glUniform3iv((GLint)param, (GLsizei)count, (GLint*)&pValues->x);
+}
+void epShader_SetProgramData(size_t param, const ep::Vector4<uint32_t> *pValues, size_t count)
+{
+  glUniform4iv((GLint)param, (GLsizei)count, (GLint*)&pValues->x);
 }
 
 // ***************************************************************************************
-// Author: Manu Evans, May 2015
-void epShader_SetProgramData(size_t param, float value)
+void epShader_SetProgramData(size_t param, const float *pValues, size_t count)
 {
-  glUniform1f((int)param, value);
+  glUniform1fv((GLint)param, (GLsizei)count, pValues);
+}
+void epShader_SetProgramData(size_t param, const ep::Vector2<float> *pValues, size_t count)
+{
+  glUniform2fv((GLint)param, (GLsizei)count, &pValues->x);
+}
+void epShader_SetProgramData(size_t param, const ep::Vector3<float> *pValues, size_t count)
+{
+  glUniform3fv((GLint)param, (GLsizei)count, &pValues->x);
+}
+void epShader_SetProgramData(size_t param, const ep::Vector4<float> *pValues, size_t count)
+{
+  glUniform4fv((GLint)param, (GLsizei)count, &pValues->x);
+}
+void epShader_SetProgramData(size_t param, const ep::Matrix4x4<float> *pValues, size_t count)
+{
+  glUniformMatrix4fv((GLint)param, (GLsizei)count, (GLboolean)false, &pValues->a[0]);
 }
 
 // ***************************************************************************************
-void epShader_SetProgramData(size_t param, double value)
+void epShader_SetProgramData(size_t param, const double *pValues, size_t count)
 {
-  glUniform1dv((int)param, 1, &value);
+  glUniform1dv((GLint)param, (GLsizei)count, pValues);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector2<int> &value)
+void epShader_SetProgramData(size_t param, const ep::Vector2<double> *pValues, size_t count)
 {
-  glUniform2iv((int)param, 1, &value.x);
+  glUniform2dv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector3<int> &value)
+void epShader_SetProgramData(size_t param, const ep::Vector3<double> *pValues, size_t count)
 {
-  glUniform3iv((int)param, 1, &value.x);
+  glUniform3dv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector4<int> &value)
+void epShader_SetProgramData(size_t param, const ep::Vector4<double> *pValues, size_t count)
 {
-  glUniform4iv((int)param, 1, &value.x);
+  glUniform4dv((GLint)param, (GLsizei)count, &pValues->x);
 }
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector2<uint32_t> &value)
+void epShader_SetProgramData(size_t param, const ep::Matrix4x4<double> *pValues, size_t count)
 {
-  glUniform2iv((int)param, 1, (int*)&value.x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector3<uint32_t> &value)
-{
-  glUniform3iv((int)param, 1, (int*)&value.x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Vector4<uint32_t> &value)
-{
-  glUniform4iv((int)param, 1, (int*)&value.x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float2 &value)
-{
-  glUniform2fv((int)param, 1, &value.x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float3 &value)
-{
-  glUniform3fv((int)param, 1, &value.x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Float4 &value)
-{
-  glUniform4fv((int)param, 1, &value.x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double2 &value)
-{
-  glUniform2dv((int)param, 1, &value.x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double3 &value)
-{
-  glUniform3dv((int)param, 1, &value.x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double4 &value)
-{
-  glUniform4dv((int)param, 1, &value.x);
-}
-
-// ***************************************************************************************
-void epShader_SetProgramData(size_t param, const ep::Double4x4 &value)
-{
-  glUniformMatrix4dv((int)param, 1, GLboolean(0), &value.a[0]);
-}
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-void epShader_SetProgramData(size_t param, const ep::Float4x4 &value)
-{
-  glUniformMatrix4fv((int)param, 1, 0, &value.a[0]);
+  glUniformMatrix4dv((GLint)param, (GLsizei)count, (GLboolean)false, &pValues->a[0]);
 }
 
 // ***************************************************************************************
@@ -819,42 +975,6 @@ void epShader_SetProgramData(size_t textureUnit, size_t param, struct epTexture 
   glActiveTexture(GL_TEXTURE0 + (int)textureUnit);
   glBindTexture(s_textureType[pTexture->type], pTexture->texture);
   glUniform1i((int)param, (int)textureUnit);
-}
-
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-void epShader_SetProgramData(int param, const int *pValues, size_t count)
-{
-  if(param < 0)
-    return;
-  glUniform1iv(param, (GLsizei)count, pValues);
-}
-
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-void epShader_SetProgramData(int param, const float *pValues, size_t count)
-{
-  if(param < 0)
-    return;
-  glUniform1fv(param, (GLsizei)count, pValues);
-}
-
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-void epShader_SetProgramData(int param, const ep::Float4 *pValues, size_t count)
-{
-  if(param < 0)
-    return;
-  glUniform4fv(param, (GLsizei)count, (GLfloat*)pValues);
-}
-
-// ***************************************************************************************
-// Author: Manu Evans, May 2015
-void epShader_SetProgramData(int param, const ep::Float4x4 *pValues, size_t count)
-{
-  if(param < 0)
-    return;
-  glUniformMatrix4fv(param, (GLsizei)count, 0, (GLfloat*)pValues);
 }
 
 #else

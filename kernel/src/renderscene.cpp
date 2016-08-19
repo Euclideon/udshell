@@ -165,20 +165,23 @@ void RenderableView::RenderGPU()
     job.spProgram->Use();
     if (job.setViewProjectionUniform)
       job.spProgram->setUniform(job.viewProjection.index, Float4x4::create(wvp));
-
+    if (job.setViewRenderSize)
+      job.spProgram->setUniform(job.viewRenderSize.index, Float4::create((float)renderWidth, (float)renderHeight, 1.f/(float)renderWidth, 1.f/(float)renderHeight));
+    if (job.setViewDisplaySize)
+      job.spProgram->setUniform(job.viewDisplaySize.index, Float4::create((float)displayWidth, (float)displayHeight, 1.f/(float)displayWidth, 1.f/(float)displayHeight));
 
     for (size_t i = 0; i < job.uniforms.length; ++i)
       job.spProgram->setUniform(job.uniforms[i].index, job.uniforms[i].data);
 
     for (size_t i = 0; i < job.textures.length; i++)
-      epShader_SetProgramData(i, job.textures[i].uniformIndex, job.textures[i].texture->pTexture);
+      job.spProgram->setTexture(i, job.textures[i].uniformIndex, job.textures[i].texture.get());
 
     if (job.index)
       epGPU_RenderIndices(job.spProgram->pProgram, job.spShaderInputConfig->pConfig, job.epArrays.ptr, job.index->pArray,
                           job.primType, job.numVertices, job.firstIndex, job.firstVertex);
     else
-      epGPU_RenderRanges(job.spProgram->pProgram, job.spShaderInputConfig->pConfig, job.epArrays.ptr, job.primType,
-                         job.vertexRanges.ptr, job.vertexRanges.length);
+      epGPU_RenderVertices(job.spProgram->pProgram, job.spShaderInputConfig->pConfig, job.epArrays.ptr, job.primType,
+                           job.numVertices, job.firstVertex);
   }
 
 //  if (pPostRenderCallback)
@@ -338,7 +341,10 @@ RenderResourceRef Renderer::GetConstantBuffer(const BufferRef &spBuffer)
 RenderShaderInputConfigRef Renderer::GetShaderInputConfig(Slice<ArrayBufferRef> arrays, const RenderShaderProgramRef &spShaderProgram, Delegate<void(SharedPtr<RefCounted>)> retainShaderInputConfig)
 {
   RenderShaderInputConfigRef spShaderInputConfig = SharedPtr<RenderShaderInputConfig>::create(this, arrays, spShaderProgram);
-  retainShaderInputConfig(spShaderInputConfig);
+  if (retainShaderInputConfig)
+    retainShaderInputConfig(spShaderInputConfig);
+  else
+    logWarning(2, "No function to cache GPU shader input configuration set!");
 
   return spShaderInputConfig;
 }

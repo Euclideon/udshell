@@ -24,8 +24,10 @@ struct ShaderProperty
   union
   {
     epShaderElement element;
-    uint32_t elemData;
+    uint64_t elemData;
   };
+
+  size_t uniformIndex;
 
   bool current;
   bool dirty;

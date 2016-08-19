@@ -32,10 +32,10 @@ enum epShaderSamplerType
   epSST_None,
   epSST_Default,
   epSST_Shadow,
-  epSST_Multisample,
-  epSST_Buffer,
   epSST_Rect,
-  epSST_ShadowRect
+  epSST_ShadowRect,
+  epSST_Multisample,
+  epSST_Buffer // TODO: is this a sampler 'type', or a 'dimensions'?
 };
 
 enum epShaderSamplerDimensions
@@ -46,18 +46,20 @@ enum epShaderSamplerDimensions
   epSSD_2DArray,
   epSSD_Cube,
   epSSD_CubeArray,
-  epSSD_3D
+  epSSD_3D,
+  epSSD_Buffer // TODO: is this a sampler 'type', or a 'dimensions'?
 };
 
 struct epShaderElement
 {
-  uint32_t n : 3;
-  uint32_t m : 3;
-  uint32_t type : 3;
-  uint32_t location : 16; // opengls max attribute and uniform values are within 16 bits
-  uint32_t samplerType : 3;
-  uint32_t samplerDimensions : 3;
-  uint32_t reserved: 1;
+  uint64_t n : 3; // n > 1 => element is vector
+  uint64_t m : 3; // m > 1 => element is matrix
+  uint64_t type : 3;
+  uint64_t samplerType : 3;
+  uint64_t samplerDimensions : 3;
+  uint64_t arrayLength : 24;
+  uint64_t location : 16; // opengls max attribute and uniform values are within 16 bits
+  uint64_t reserved : 9;
 };
 
 epShader* epShader_CreateShaderFromFile(const char *pFilename, epShaderType type);
@@ -111,50 +113,62 @@ void epShader_GetProgramData(epShaderProgram *pProgram, size_t param, int *pValu
 void epShader_GetProgramData(epShaderProgram *pProgram, size_t param, float *pValue, size_t);
 void epShader_GetProgramData(epShaderProgram *pProgram, size_t param, double *pValue, size_t);
 
+
 int epShader_FindShaderParameter(epShaderProgram *pProgram, const char *pName);
 int epShader_FindShaderAttribute(epShaderProgram *pProgram, const char *pName);
 
 void epShader_SetCurrent(epShaderProgram *pProgram);
 
+
 void epShader_SetProgramData(size_t param, bool value);
-void epShader_SetProgramData(size_t param, int value);
-void epShader_SetProgramData(size_t param, uint32_t value);
-void epShader_SetProgramData(size_t param, float value);
-void epShader_SetProgramData(size_t param, double value);
 
-void epShader_SetProgramData(size_t param, const ep::Vector2<int> &value);
-void epShader_SetProgramData(size_t param, const ep::Vector3<int> &value);
-void epShader_SetProgramData(size_t param, const ep::Vector4<int> &value);
+void epShader_SetProgramData(size_t param, const int *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector2<int> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector3<int> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector4<int> *value, size_t count);
 
-void epShader_SetProgramData(size_t param, const ep::Vector2<uint32_t> &value);
-void epShader_SetProgramData(size_t param, const ep::Vector3<uint32_t> &value);
-void epShader_SetProgramData(size_t param, const ep::Vector4<uint32_t> &value);
+void epShader_SetProgramData(size_t param, const uint32_t *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector2<uint32_t> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector3<uint32_t> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector4<uint32_t> *value, size_t count);
 
-void epShader_SetProgramData(size_t param, const ep::Float2 &value);
-void epShader_SetProgramData(size_t param, const ep::Float3 &value);
-void epShader_SetProgramData(size_t param, const ep::Float4 &value);
-void epShader_SetProgramData(size_t param, const ep::Float4x4 &value);
+void epShader_SetProgramData(size_t param, const float *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector2<float> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector3<float> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector4<float> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Matrix4x4<float> *value, size_t count);
 
-void epShader_SetProgramData(size_t param, const ep::Double2 &value);
-void epShader_SetProgramData(size_t param, const ep::Double3 &value);
-void epShader_SetProgramData(size_t param, const ep::Double4 &value);
-void epShader_SetProgramData(size_t param, const ep::Double4x4 &value);
+void epShader_SetProgramData(size_t param, const double *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector2<double> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector3<double> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Vector4<double> *value, size_t count);
+void epShader_SetProgramData(size_t param, const ep::Matrix4x4<double> *value, size_t count);
 
 void epShader_SetProgramData(size_t textureUnit, size_t param, struct epTexture *pTexture);
 
-void epShader_SetProgramData(size_t param, const int *pValues, size_t count);
-void epShader_SetProgramData(size_t param, const float *pValues, size_t count);
-void epShader_SetProgramData(size_t param, const double *pValues, size_t count);
+// TODO: sampler arrays?
 
+// inlines for single element
+inline void epShader_SetProgramData(size_t param, int value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector2<int> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector3<int> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector4<int> &value) { epShader_SetProgramData(param, &value, 1); }
 
-void epShader_SetProgramData(size_t param, const ep::Float2 *pValue, size_t count);
-void epShader_SetProgramData(size_t param, const ep::Float3 *pValue, size_t count);
-void epShader_SetProgramData(size_t param, const ep::Float4 *pValues, size_t count);
-void epShader_SetProgramData(size_t param, const ep::Float4x4 *pValues, size_t count);
+inline void epShader_SetProgramData(size_t param, uint32_t value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector2<uint32_t> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector3<uint32_t> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector4<uint32_t> &value) { epShader_SetProgramData(param, &value, 1); }
 
-void epShader_SetProgramData(size_t param, const ep::Double2 *pValue, size_t count);
-void epShader_SetProgramData(size_t param, const ep::Double3 *pValue, size_t count);
-void epShader_SetProgramData(size_t param, const ep::Double4 *pValues, size_t count);
-void epShader_SetProgramData(size_t param, const ep::Double4x4 *pValues, size_t count);
+inline void epShader_SetProgramData(size_t param, float value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector2<float> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector3<float> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector4<float> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Matrix4x4<float> &value) { epShader_SetProgramData(param, &value, 1); }
+
+inline void epShader_SetProgramData(size_t param, double value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector2<double> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector3<double> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Vector4<double> &value) { epShader_SetProgramData(param, &value, 1); }
+inline void epShader_SetProgramData(size_t param, const ep::Matrix4x4<double> &value) { epShader_SetProgramData(param, &value, 1); }
 
 #endif // EPSHADER_H

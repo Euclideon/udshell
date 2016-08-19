@@ -159,6 +159,8 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
 
     out.spProgram = pMatImpl->spShaderProgram;
     out.setViewProjectionUniform = false;
+    out.setViewRenderSize = false;
+    out.setViewDisplaySize = false;
 
     if (in.spShaderInputConfig)
       out.spShaderInputConfig = shared_pointer_cast<RenderShaderInputConfig>(in.spShaderInputConfig);
@@ -176,7 +178,8 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
       out.epArrays[stream] = out.arrays[stream]->pArray;
     }
 
-    out.index = shared_pointer_cast<RenderArray>(pRenderer->GetRenderBuffer(in.spIndices, Renderer::RenderResourceType::IndexArray));
+    if (in.spIndices)
+      out.index = shared_pointer_cast<RenderArray>(pRenderer->GetRenderBuffer(in.spIndices, Renderer::RenderResourceType::IndexArray));
 
     Array<RenderShaderProperty> uniforms(Reserve, pMatImpl->uniforms.size());
     for (auto kvp : pMatImpl->uniforms)
@@ -186,11 +189,21 @@ RenderableSceneRef SceneImpl::Convert(RenderScene &scene, Renderer *pRenderer)
         // TODO: Create mechanism for uniforms that are provided by the system. (projection, view, back buffer dimensions etc)
         if (kvp.key.eq("u_mfwvp"))
         {
-          out.viewProjection = RenderShaderProperty{ kvp.value.data, (int)kvp.value.element.location };
+          out.viewProjection = RenderShaderProperty{ kvp.value.data, kvp.value.uniformIndex };
           out.setViewProjectionUniform = true;
         }
+        else if (kvp.key.eq("u_viewRenderSize"))
+        {
+          out.viewRenderSize = RenderShaderProperty{ kvp.value.data, kvp.value.uniformIndex };
+          out.setViewRenderSize= true;
+        }
+        else if (kvp.key.eq("u_viewDisplaySize"))
+        {
+          out.viewDisplaySize = RenderShaderProperty{ kvp.value.data, kvp.value.uniformIndex };
+          out.setViewDisplaySize = true;
+        }
         else
-          uniforms.pushBack(RenderShaderProperty{ kvp.value.data, (int)kvp.value.element.location } );
+          uniforms.pushBack(RenderShaderProperty{ kvp.value.data, kvp.value.uniformIndex } );
       }
     }
 
