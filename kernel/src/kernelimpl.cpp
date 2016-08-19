@@ -47,6 +47,8 @@
 #include "components/projectimpl.h"
 #include "components/settingsimpl.h"
 #include "components/freetype.h"
+#include "components/datasources/fontsource.h"
+#include "components/resources/fontimpl.h"
 #include "components/fileimpl.h"
 #include "components/memstreamimpl.h"
 #include "components/socketimpl.h"
@@ -273,6 +275,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->registerComponentType<KVPStore>();
   pInstance->registerComponentType<Metadata, MetadataImpl>();
   pInstance->registerComponentType<Scene, SceneImpl>();
+  pInstance->registerComponentType<Font, FontImpl>();
 
   // nodes
   pInstance->registerComponentType<Node, NodeImpl>();
@@ -286,6 +289,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->registerComponentType<ImageSource>();
   pInstance->registerComponentType<GeomSource>();
   pInstance->registerComponentType<UDSource>();
+  pInstance->registerComponentType<FontSource>();
 
   // dynamic components
   pInstance->registerComponentType<DynamicComponent>();

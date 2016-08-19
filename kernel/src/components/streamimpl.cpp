@@ -33,10 +33,13 @@ BufferRef StreamImpl::Load()
   Slice<void> buffer = spBuffer->map();
   if (!buffer)
     return nullptr;
-  epscope(exit) { spBuffer->unmap(); };
+  {
+    epscope(fail) { spBuffer->unmap(); };
 
-  pInstance->seek(SeekOrigin::Begin, 0);
-  pInstance->read(buffer);
+    pInstance->seek(SeekOrigin::Begin, 0);
+    pInstance->read(buffer);
+  }
+  spBuffer->unmap();
 
   return spBuffer;
 }
