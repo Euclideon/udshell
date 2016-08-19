@@ -480,6 +480,11 @@ template<> struct Variant_Construct <uint16_t>  { epforceinline static Variant c
 template<> struct Variant_Construct <int32_t>   { epforceinline static Variant construct(int32_t i)       { return Variant((int64_t)i); } };
 template<> struct Variant_Construct <uint32_t>  { epforceinline static Variant construct(uint32_t i)      { return Variant((int64_t)(uint64_t)i); } };
 template<> struct Variant_Construct <uint64_t>  { epforceinline static Variant construct(uint64_t i)      { return Variant((int64_t)i); } };
+#if defined(EP_COMPILER_VISUALC)
+// Note: MSVC seems to treat 'long' as a distinct type, Clang and GCC seems to treat it as alias of int64_t
+template<> struct Variant_Construct <long>      { epforceinline static Variant construct(long i)          { return Variant((int64_t)i); } };
+template<> struct Variant_Construct <unsigned long> { epforceinline static Variant construct(unsigned long i) { return Variant((int64_t)(uint64_t)i); } };
+#endif
 template<> struct Variant_Construct <char*>     { epforceinline static Variant construct(const char *s)   { return Variant(String(s)); } };
 template<size_t N>
 struct Variant_Construct <char[N]>              { epforceinline static Variant construct(const char (&s)[N]) { return Variant(String(s, N-1)); } };
