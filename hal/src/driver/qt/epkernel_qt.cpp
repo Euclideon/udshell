@@ -386,7 +386,7 @@ ep::ComponentRef QtKernel::createQmlComponent(String file, Variant::VarMap initP
 
   pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = pSuper->info.epVersion;
-  pDesc->info.pluginVersion = typeDesc["version"].as<int>();
+  pDesc->info.pluginVersion = typeDesc["version"].asSharedString();
   pDesc->info.flags = ComponentInfoFlags::Unregistered | ComponentInfoFlags::Unpopulated;
 
   pDesc->pInit = nullptr;

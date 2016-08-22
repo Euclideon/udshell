@@ -78,8 +78,8 @@ EP_BITFIELD(ComponentInfoFlags,
 
 struct ComponentInfo
 {
-  int epVersion;
-  int pluginVersion;
+  SharedString epVersion;
+  SharedString pluginVersion;
 
   SharedString nameSpace;   // namespace
   SharedString name;        // name
