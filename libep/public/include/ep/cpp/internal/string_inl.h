@@ -426,7 +426,7 @@ inline BaseString<C> BaseString<C>::trim() const
   size_t first = 0, last = this->length;
   if (Front)
   {
-    while (epIsWhitespace(this->ptr[first]) && first < this->length)
+    while (first < this->length && epIsWhitespace(this->ptr[first]))
       ++first;
   }
   if (Back)
