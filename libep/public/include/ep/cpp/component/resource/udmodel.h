@@ -21,12 +21,12 @@ SHARED_CLASS(UDModel);
 //  This is a VarMap containg the models header data.
 //   Key              Type
 //  ------------------------
-//  "scale"           double
-//  "unitMeterScale   double
-//  "pivotOrigin"     Double3
-//  "sourceBias"      Double3
-//  "sourceScale"     Double3
+//  "scaledRange"     double
+//  "baseOffset"      Double3
+//  "nonUniformScale" Double3
 //  "boundingVolume"  BoundingVolume
+//  "pivot"           Double3
+//  "unitMeterScale   double
 //  "maxOctreeDepth"  uint32_t
 
 // "attributeInfo"
@@ -162,6 +162,9 @@ public:
 
   const Double4x4 &getUDMatrix() const { return pImpl->GetUDMatrix(); }
   void setUDMatrix(const Double4x4 &matrix){ pImpl->SetUDMatrix(matrix); }
+
+  Double3 getPivot() const { return pImpl->getPivot(); }
+  void setPivot(Double3 pivot) { return pImpl->setPivot(pivot); }
 
   void setVoxelFilter(VoxelFilter *pVoxelFilter)  { pImpl->SetVoxelFilter(pVoxelFilter); }
   VoxelFilter* getVoxelFilter() const { return pImpl->GetVoxelFilter(); }

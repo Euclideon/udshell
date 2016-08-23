@@ -107,7 +107,17 @@ void RenderableView::RenderUD()
     udRender_SetMatrixF64(pRenderView, udRMT_Camera, camera.a);
 
     if (pickingEnabled)
-      options.pick = &udPick;
+    {
+      options.pPickArray = &udPick;
+      options.pickArrayCount = 1;
+      options.pHighlight = &udPickHighlight;
+    }
+    else
+    {
+      options.pPickArray = nullptr;
+      options.pickArrayCount = 0;
+      options.pHighlight = nullptr;
+    }
 
     Float4 c = clearColor * 255.0 + Float4::create(0.5);
     uint32_t color8 = (uint8_t(c.w) << 24) | (uint8_t(c.x) << 16) |( uint8_t(c.y) << 8) | uint8_t(c.z);

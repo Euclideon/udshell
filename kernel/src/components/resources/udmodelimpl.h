@@ -41,6 +41,9 @@ public:
   const Double4x4 &GetUDMatrix() const override final { return udmatrix; }
   void SetUDMatrix(const Double4x4 &mat) override final;
 
+  Double3 getPivot() const override final { return pivot; }
+  void setPivot(Double3 pvt) override final { pivot = pvt; }
+
   VoxelFilter* GetVoxelFilter() const override final { return pVoxelFilter; }
   void SetVoxelFilter(VoxelFilter *pFilter) override final;
 
@@ -66,6 +69,7 @@ private:
   VarDelegate varVoxelShader;
 
   Double4x4 udmatrix;
+  Double3 pivot;
   Rect<uint32_t> rect;
   udOctree *pOctree = nullptr;
 

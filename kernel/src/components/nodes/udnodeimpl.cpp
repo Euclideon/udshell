@@ -32,7 +32,11 @@ void UDNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
   {
     UDRenderJob &job = spScene.ud.pushBack();
     job.spModel = spModel;
-    job.matrix = mat;
+    const Double3 &p = spModel->getPivot();
+    job.matrix = Double4x4::create( 1.0,  0.0,  0.0, 0.0,
+                                    0.0,  1.0,  0.0, 0.0,
+                                    0.0,  0.0,  1.0, 0.0,
+                                   -p.x, -p.y, -p.z, 1.0) * mat;
     job.udNodePtr = NodeRef(pInstance);
   }
 }

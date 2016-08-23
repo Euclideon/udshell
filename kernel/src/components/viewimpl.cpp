@@ -148,7 +148,7 @@ void ViewImpl::onDirty()
 
     spRenderView->spScene = spScene->getRenderScene();
 
-    spRenderView->options = udRenderOptions{ sizeof(udRenderOptions), getRenderableUDFlags(), nullptr, nullptr,
+    spRenderView->options = udRenderOptions{ sizeof(udRenderOptions), getRenderableUDFlags(), 0, nullptr, nullptr,
                                              nullptr, nullptr, nullptr, nullptr };
 
     spRenderView->displayWidth = displayWidth;
@@ -161,9 +161,9 @@ void ViewImpl::onDirty()
       spRenderView->pickingEnabled = true;
       spRenderView->udPick.x = mousePosition.x;
       spRenderView->udPick.y = mousePosition.y;
-      spRenderView->udPick.highlightIndex = pickHighlightData.highlightIndex;
-      spRenderView->udPick.highlightModel = pickHighlightData.highlightModel;
-      spRenderView->udPick.highlightColor = 0xFFC0C000;
+      spRenderView->udPickHighlight.nodeIndex = pickHighlightData.highlightIndex;
+      spRenderView->udPickHighlight.pModel = pickHighlightData.highlightModel;
+      spRenderView->udPickHighlight.color = 0xFFC0C000;
     }
 
     // if there are ud jobs, we'll need to send it to the UD render thread
@@ -200,9 +200,10 @@ void ViewImpl::setLatestFrame(UniquePtr<RenderableView> spFrame)
           1.0
         };
 
-        pickedPoint = (reinterpret_cast<const UDRenderContext*>(pick.model)->matrix * transPos).toVector3();
+        pickedPoint = (reinterpret_cast<const UDRenderContext*>(pick.pModel)->matrix * transPos).toVector3();
 
-        pickHighlightData = { pick.model, pick.nodeIndex };
+        pickHighlightData.highlightModel = pick.pModel;
+        pickHighlightData.highlightIndex = pick.nodeIndex;
 
         NodeRef udNodePtr = nullptr;
 
@@ -210,7 +211,7 @@ void ViewImpl::setLatestFrame(UniquePtr<RenderableView> spFrame)
         {
           const udRenderModel* prModel = reinterpret_cast<const udRenderModel*>(&job.context);
 
-          if (prModel == pick.model)
+          if (prModel == pick.pModel)
           {
             udNodePtr = job.udNodePtr;
             break;
@@ -224,7 +225,7 @@ void ViewImpl::setLatestFrame(UniquePtr<RenderableView> spFrame)
       else
       {
         pickedPoint = { 0 , 0, 0 };
-        pickHighlightData = { nullptr, 0, };
+        pickHighlightData.highlightModel = nullptr;
       }
     }
     pInstance->frameReady.signal();
