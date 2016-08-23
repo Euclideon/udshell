@@ -27,6 +27,7 @@ void GeomNodeImpl::Render(RenderScene &spScene, const Double4x4 &mat)
   job.vertexArrays = pModelImpl->vertexArrays;
   job.spIndices = pModelImpl->spIndices;
   job.renderList = pModelImpl->renderList;
+  job.spShaderInputConfig = pModelImpl->spVertexFormatCache;
 
   job.retainShaderInputConfig = Delegate<void(SharedPtr<RefCounted>)>(pModelImpl, &ModelImpl::RetainShaderInputConfig);
 }
