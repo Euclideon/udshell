@@ -75,12 +75,25 @@ struct epSyncPoint
 
 // ***************************************************************************************
 // Author: Manu Evans, Nov 2015
-void epGPU_Clear(double color[4], double depth, int stencil)
+void epGPU_Clear(uint32_t clearBits, float *pColor, float depth, int stencil)
 {
-  s_QtGLContext.pFunc->glClearColor(color[0], color[1], color[2], color[3]);
-  s_QtGLContext.pFunc->glClearDepthf(depth);
-  s_QtGLContext.pFunc->glClearStencil(stencil);
-  s_QtGLContext.pFunc->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  GLbitfield mask = 0;
+  if (clearBits & epC_Color)
+  {
+    mask |= GL_COLOR_BUFFER_BIT;
+    s_QtGLContext.pFunc->glClearColor(pColor[0], pColor[1], pColor[2], pColor[3]);
+  }
+  if (clearBits & epC_Depth)
+  {
+    mask |= GL_DEPTH_BUFFER_BIT;
+    s_QtGLContext.pFunc->glClearDepthf(depth);
+  }
+  if (clearBits & epC_Stencil)
+  {
+    mask |= GL_STENCIL_BUFFER_BIT;
+    s_QtGLContext.pFunc->glClearStencil(stencil);
+  }
+  s_QtGLContext.pFunc->glClear(mask);
 }
 
 // ***************************************************************************************
@@ -249,6 +262,75 @@ void epGPU_Deinit()
 
   s_QtGLContext.pContext = nullptr;
   s_QtGLContext.pSurface = nullptr;
+}
+
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetDepthCompare(bool enable, epCompareFunc func)
+{
+  if (enable)
+  {
+    s_QtGLContext.pFunc->glEnable(GL_DEPTH_TEST);
+    s_QtGLContext.pFunc->glDepthFunc(GL_NEVER + (GLenum)func);
+  }
+  else
+  {
+    s_QtGLContext.pFunc->glDisable(GL_DEPTH_TEST);
+  }
+}
+
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetDepthMask(bool flag)
+{
+  s_QtGLContext.pFunc->glDepthMask(flag ? GL_TRUE : GL_FALSE);
+}
+
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetCullMode(bool enable, epFace mode)
+{
+  if (enable)
+  {
+    static int s_lookup[] =
+    {
+      GL_FRONT,
+      GL_BACK,
+      GL_FRONT_AND_BACK
+    };
+    s_QtGLContext.pFunc->glEnable(GL_CULL_FACE);
+    s_QtGLContext.pFunc->glFrontFace(GL_CW);
+    s_QtGLContext.pFunc->glCullFace(s_lookup[mode]);
+  }
+  else
+  {
+    s_QtGLContext.pFunc->glDisable(GL_CULL_FACE);
+  }
+}
+
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetBlendMode(bool enable, epBlendMode mode)
+{
+  if (enable)
+  {
+    s_QtGLContext.pFunc->glEnable(GL_BLEND);
+    if (mode == epBM_Alpha)
+      s_QtGLContext.pFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    else
+      s_QtGLContext.pFunc->glBlendFunc(GL_ONE, GL_ONE);
+  }
+  else
+  {
+    s_QtGLContext.pFunc->glDisable(GL_BLEND);
+  }
+}
+
+// ***************************************************************************************
+// Author: David Ely, August 2016
+void epRenderState_SetColorMask(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+  s_QtGLContext.pFunc->glColorMask(r, g, b, a);
 }
 
 #else

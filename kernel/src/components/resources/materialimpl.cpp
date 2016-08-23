@@ -16,10 +16,7 @@ AVLTree<String, int> MaterialImpl::builtinProperties{
   { "computeShader", 5 },
   { "blendMode", 6 },
   { "cullMode", 7 },
-  { "depthFunc", 8 },
-  { "stencilState", 9 },
-  { "frontStencilState", 10 },
-  { "backStencilState", 11 },
+  { "depthFunc", 8 }
 };
 
 
@@ -54,9 +51,6 @@ Array<const PropertyInfo> Material::getProperties() const
     EP_MAKE_PROPERTY("blendMode", getBlendMode, setBlendMode, "Frame buffer blend mode", nullptr, 0),
     EP_MAKE_PROPERTY("cullMode", getCullMode, setCullMode, "Back face cull mode", nullptr, 0),
     EP_MAKE_PROPERTY("depthCompareFunc", getDepthCompareFunc, setDepthCompareFunc, "Depth compare function", nullptr, 0),
-    EP_MAKE_PROPERTY("stencilState", getStencilState, setStencilState, "Stencil state", nullptr, 0),
-    EP_MAKE_PROPERTY("frontStencilState", getFrontStencilState, setFrontStencilState, "Front-face stencil state", nullptr, 0),
-    EP_MAKE_PROPERTY("backStencilState", getBackStencilState, setBackStencilState, "Back-face stencil state", nullptr, 0),
   };
 }
 
@@ -190,9 +184,6 @@ Variant MaterialImpl::GetMaterialProperty(String property) const
       case 6: return GetBlendMode(); break;
       case 7: return GetCullMode(); break;
       case 8: return GetDepthCompareFunc(); break;
-      case 9: return GetStencilState(TriangleFace::Default);
-      case 10: return GetStencilState(TriangleFace::Front);
-      case 11: return GetStencilState(TriangleFace::Back);
       default:
         EPASSERT(false, "Unreachable?!");
     }
@@ -254,9 +245,6 @@ void MaterialImpl::SetMaterialProperty(String property, Variant data)
       case 6: SetBlendMode(data.as<BlendMode>()); break;
       case 7: SetCullMode(data.as<CullMode>()); break;
       case 8: SetDepthCompareFunc(data.as<CompareFunc>()); break;
-      case 9: SetStencilState(TriangleFace::Default, data.as<StencilState>());
-      case 10: SetStencilState(TriangleFace::Front, data.as<StencilState>());
-      case 11: SetStencilState(TriangleFace::Back, data.as<StencilState>());
       default:
         EPASSERT(false, "Unreachable?!");
     }
@@ -275,9 +263,6 @@ ResourceRef MaterialImpl::Clone() const
 
   for (size_t i = 0; i < NumShaders; i++)
     pImpl->shaders[i] = shaders[i];
-
-  for (size_t i = 0; i < (TriangleFace::Back + 1); i++)
-    pImpl->stencilStates[i] = stencilStates[i];
 
   pImpl->textures = textures;
   pImpl->blendMode = blendMode;

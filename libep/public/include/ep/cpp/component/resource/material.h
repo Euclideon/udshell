@@ -84,19 +84,6 @@ public:
   CompareFunc getDepthCompareFunc() const { return getMaterialProperty("depthFunc").as<CompareFunc>(); }
   void setDepthCompareFunc(CompareFunc func) { setMaterialProperty("depthFunc", func); }
 
-  StencilState getStencilState() const { return getMaterialProperty("stencilState").as<StencilState>(); }
-  void setStencilState(const StencilState &state) { return setMaterialProperty("stencilState", state); }
-
-  StencilState getFrontStencilState() const { return getMaterialProperty("frontStencilState").as<StencilState>(); }
-  void setFrontStencilState(const StencilState &state) { return setMaterialProperty("frontStencilState", state); }
-
-  StencilState getBackStencilState() const { return getMaterialProperty("backStencilState").as<StencilState>(); }
-  void setBackStencilState(const StencilState &state) { return setMaterialProperty("backStencilState", state); }
-
-//  // Textures
-//  ArrayBufferRef GetTexture(int index) const { return GetMaterialProperty(index); }
-//  void SetTexture(int index, ArrayBufferRef spArray) { SetMaterialProperty(index, spArray); }
-
 #if 0 // TODO: When ranges are implemented
   const ShaderPropertyRange& getShaderUniformsRange() const { return pImpl->GetShaderUniformsRange(); }
   const ShaderPropertyRange& getShaderAttributesRange() const { return pImpl->GetShaderAttributesRange(); }

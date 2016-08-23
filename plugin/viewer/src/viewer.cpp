@@ -33,6 +33,7 @@ Viewer::Viewer(const ComponentDesc *pType, Kernel *pKernel, SharedString uid, Va
 
   spView = pKernel->createComponent<View>();
   spView->setInputEventHook(Delegate<bool(ep::InputEvent)>(this, &Viewer::inputHook));
+  spView->setClearColor(Float4{ 0.0, 0.125, 1.0, 1.0 });
 
   Variant::VarMap sceneParams;
   const Variant *pSceneParams = initParams.get("scene");

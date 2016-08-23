@@ -192,7 +192,7 @@ void SDLKernel::runMainLoop()
       ie.deviceType = InputDevice::Mouse;
       ie.eventType = InputEvent::EventType::Move;
       ie.move = InputEvent::MoveEvent{ input.mouse[0][MouseControls::XDelta], input.mouse[0][MouseControls::YDelta], input.mouse[0][MouseControls::XAbsolute], input.mouse[0][MouseControls::YAbsolute] };
-      getImpl()->spFocusView->getImpl<ep::ViewImpl>()->InputEvent(ie);
+      getImpl()->spFocusView->getImpl<ep::ViewImpl>()->inputEvent(ie);
     }
 
     ie.deviceType = InputDevice::Mouse;
@@ -202,7 +202,7 @@ void SDLKernel::runMainLoop()
       if (input.mouse[0][i] != prevInput.mouse[0][i])
       {
         ie.key = InputEvent::KeyEvent{ (int)i, (int)input.mouse[0][i] };
-        getImpl()->spFocusView->getImpl<ep::ViewImpl>()->InputEvent(ie);
+        getImpl()->spFocusView->getImpl<ep::ViewImpl>()->inputEvent(ie);
       }
     }
 
@@ -213,12 +213,12 @@ void SDLKernel::runMainLoop()
       if (input.keys[0][i] != prevInput.keys[0][i])
       {
         ie.key = InputEvent::KeyEvent{ (int)i, (int)input.keys[0][i] };
-        getImpl()->spFocusView->getImpl<ep::ViewImpl>()->InputEvent(ie);
+        getImpl()->spFocusView->getImpl<ep::ViewImpl>()->inputEvent(ie);
       }
     }
 
     // render a frame (this could move to another thread!)
-    RenderableViewRef spRenderView = getImpl()->spFocusView->getImpl<ViewImpl>()->GetRenderableView();
+    RenderableViewRef spRenderView = getImpl()->spFocusView->getImpl<ViewImpl>()->getRenderableView();
     if (spRenderView)
       spRenderView->RenderGPU();
 
@@ -231,7 +231,7 @@ ViewRef SDLKernel::setFocusView(ViewRef spView)
   KernelImpl *pKernelImpl = getImpl();
 
   if (!spView)
-    pKernelImpl->spFocusView->getImpl<ViewImpl>()->SetLatestFrame(nullptr);
+    pKernelImpl->spFocusView->getImpl<ViewImpl>()->setLatestFrame(nullptr);
 
   ViewRef spOld = pKernelImpl->spFocusView;
   pKernelImpl->spFocusView = spView;

@@ -48,7 +48,6 @@ struct GeomJob
 {
   Double4x4 matrix;
 
-  Array<StencilState, 2> stencilStates;
   BlendMode blendMode;
   CullMode cullMode;
   CompareFunc depthCompareFunc;
@@ -105,6 +104,8 @@ public:
 
   Double4x4 camera;
   Double4x4 projection;
+
+  Float4 clearColor;
 
   int displayWidth, displayHeight;
   int renderWidth, renderHeight;
