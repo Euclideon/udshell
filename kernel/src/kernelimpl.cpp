@@ -38,6 +38,7 @@
 #include "components/nodes/cameraimpl.h"
 #include "components/nodes/simplecameraimpl.h"
 #include "components/nodes/geomnodeimpl.h"
+#include "components/nodes/textnodeimpl.h"
 #include "components/sceneimpl.h"
 #include "components/datasources/datasourceimpl.h"
 #include "components/broadcasterimpl.h"
@@ -46,6 +47,9 @@
 #include "components/primitivegeneratorimpl.h"
 #include "components/projectimpl.h"
 #include "components/settingsimpl.h"
+#include "components/freetype.h"
+#include "components/datasources/fontsource.h"
+#include "components/resources/fontimpl.h"
 #include "components/fileimpl.h"
 #include "components/memstreamimpl.h"
 #include "components/socketimpl.h"
@@ -252,6 +256,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->registerComponentType<Project, ProjectImpl>();
   pInstance->registerComponentType<Timer, TimerImpl>();
   pInstance->registerComponentType<Settings, SettingsImpl>();
+  pInstance->registerComponentType<FreeType>();
   pInstance->registerComponentType<Lua>();
   pInstance->registerComponentType<View, ViewImpl>();
   pInstance->registerComponentType<Activity, ActivityImpl>();
@@ -271,6 +276,7 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->registerComponentType<KVPStore>();
   pInstance->registerComponentType<Metadata, MetadataImpl>();
   pInstance->registerComponentType<Scene, SceneImpl>();
+  pInstance->registerComponentType<Font, FontImpl>();
 
   // nodes
   pInstance->registerComponentType<Node, NodeImpl>();
@@ -279,11 +285,13 @@ void KernelImpl::StartInit(Variant::VarMap initParams)
   pInstance->registerComponentType<SimpleCamera, SimpleCameraImpl>();
   pInstance->registerComponentType<GeomNode, GeomNodeImpl>();
   pInstance->registerComponentType<UDNode, UDNodeImpl>();
+  pInstance->registerComponentType<TextNode, TextNodeImpl>();
 
   // data sources
   pInstance->registerComponentType<ImageSource>();
   pInstance->registerComponentType<GeomSource>();
   pInstance->registerComponentType<UDSource>();
+  pInstance->registerComponentType<FontSource>();
 
   // dynamic components
   pInstance->registerComponentType<DynamicComponent>();

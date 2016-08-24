@@ -20,6 +20,7 @@ project "epkernel"
 	includedirs { "../3rdparty/assimp-3.1.1/include" }
 	includedirs { "../3rdparty/rapidxml-1.13" }
 	includedirs { "../3rdparty/rapidjson-1.0.2/include" }
+	includedirs { "../3rdparty/freetype/include" }
 
 
 	filter { "system:windows" }

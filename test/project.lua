@@ -28,18 +28,18 @@ project "eptest"
 	defines { "GLEW_STATIC" }
 
 	configuration { "windows" }
-		links { "ws2_32.lib", "winmm.lib", "opengl32.lib", "glu32.lib" }
+		links { "ws2_32.lib", "winmm.lib", "opengl32.lib", "glu32.lib", "freetype265.lib" }
 
 	configuration { "windows", "x64" }
 		links { "assimp-ep64.lib" }
-		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64" }
+		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64", "../3rdparty/freetype/lib/windows/x64" }
 	configuration { "windows", "x86" }
 		links { "assimp-ep32.lib" }
-		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32" }
+		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32", "../3rdparty/freetype/lib/windows/x32" }
 
 	configuration { "linux" }
 		libdirs { "../bin/amd64" }
-		links { "assimp-ep", "GL", "dl" }
+		links { "assimp-ep", "GL", "dl", "freetype" }
 		linkoptions { "-Wl,-rpath=../bin/amd64,-rpath=bin/amd64" }
 
 	configuration {}

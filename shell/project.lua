@@ -38,12 +38,12 @@ project "epshell"
 		qtsuffix "d"
 
 	configuration { "windows" }
-		links { "ws2_32.lib", "winmm.lib" }
+		links { "ws2_32.lib", "winmm.lib", "freetype265.lib" }
 		disablewarnings { "4481", "4127" } -- silence some Qt warnings
 
 	configuration { "windows", "x64" }
 		links { "assimp-ep64.lib" }
-		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64" }
+		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x64", "../3rdparty/freetype/lib/windows/x64" }
 		local qtdir = os.getenv("QTDIR") or os.getenv("QT_DIR")
 		if qtdir ~= nil then
 			debugenvs { "PATH=" .. qtdir .. "\\bin;%PATH%" }
@@ -62,11 +62,11 @@ project "epshell"
 			end
 		end
 		links { "assimp-ep32.lib" }
-		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32" }
+		libdirs { "../3rdparty/assimp-3.1.1/lib/windows/x32", "../3rdparty/freetype/lib/windows/x32" }
 
 	configuration { "linux" }
 		libdirs { "../bin/amd64" }
-		links { "assimp-ep", "dl" }
+		links { "assimp-ep", "dl", "freetype" }
 		linkoptions { "-Wl,-rpath=/opt/Euclideon/Shell" }
 		linkoptions { "-Wl,-rpath=bin/amd64" }
 

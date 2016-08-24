@@ -3,10 +3,8 @@
 #define _EP_IGEOMNODE_HPP
 
 #include "ep/cpp/component/component.h"
-#include "ep/cpp/input.h"
 
-namespace ep
-{
+namespace ep {
 
 SHARED_CLASS(Model);
 SHARED_CLASS(GeomNode);

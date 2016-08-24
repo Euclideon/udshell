@@ -20,6 +20,25 @@ namespace ep {
     T y;
     T width;
     T height;
+
+    void expandToInclude(T _x, T _y)
+    {
+      if (_x < x)
+      {
+        width += x - _x;
+        x = _x;
+      }
+      else if(_x > x + width)
+        width += _x - (x + width);
+
+      if (_y < y)
+      {
+        height += y - _y;
+        y = _y;
+      }
+      else if (_y > y + height)
+        height += _y - (y + height);
+    }
   };
 
   template<typename T>
