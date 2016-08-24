@@ -85,6 +85,11 @@ bool epPluginAttach()
 }
 #endif
 
+EP_EXPORT void epPlugin_GetInfo(ep::PluginInfo *pInfo)
+{
+  pInfo->apiVersion = EP_APIVERSION;
+}
+
 EP_EXPORT bool epPlugin_Init(ep::Instance *pPlugin)
 {
   ep::s_pInstance = pPlugin;

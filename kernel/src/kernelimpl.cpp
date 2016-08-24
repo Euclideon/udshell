@@ -770,7 +770,7 @@ const ComponentDesc* KernelImpl::RegisterComponentTypeFromMap(Variant::VarMap ty
   pDesc->info.description = typeDesc["description"].asSharedString();
   pDesc->info.epVersion = EP_APIVERSION;
   Variant *pVar = typeDesc.get("version");
-  pDesc->info.pluginVersion = pVar ? pVar->as<int>() : EPKERNEL_PLUGINVERSION;
+  pDesc->info.pluginVersion = pVar ? pVar->asSharedString() : EPKERNEL_PLUGINVERSION;
   pVar = typeDesc.get("flags");
   pDesc->info.flags = pVar ? pVar->as<ComponentInfoFlags>() : ComponentInfoFlags();
 

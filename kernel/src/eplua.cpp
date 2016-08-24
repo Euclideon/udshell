@@ -415,9 +415,9 @@ void LuaState::pushDescriptor(const ComponentDescInl &desc)
 {
   lua_createtable(L, 0, 6);
 
-  pushInt(desc.info.epVersion);
+  pushString(desc.info.epVersion);
   lua_setfield(L, -2, "apiversion");
-  pushInt(desc.info.pluginVersion);
+  pushString(desc.info.pluginVersion);
   lua_setfield(L, -2, "pluginversion");
   pushString(desc.info.nameSpace);
   lua_setfield(L, -2, "namespace");

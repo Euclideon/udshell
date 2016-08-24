@@ -104,7 +104,7 @@ Variant::VarMap QmlPluginLoader::parseTypeDescriptor(QtKernel *pQtKernel, ep::St
         typeDesc.insert("description", ep::SharedString::format("{0} based QML component - {1}", pSuper->asString(), filename));
 
       if (!typeDesc.get("version"))
-        typeDesc.insert("version", (int)EPKERNEL_PLUGINVERSION);
+        typeDesc.insert("version", EPKERNEL_PLUGINVERSION);
 
       return std::move(typeDesc);
     }
