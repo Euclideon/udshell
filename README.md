@@ -1,12 +1,8 @@
-## Here lies Euclideon Platform - R.I.P ##
+## Euclideon Platform (Discontinued) ##
 
--*"very good design, beautiful coding."*
-
-So close, yet so far away >_<
+> [Update 2020] This project as it stands references non-opensource projects and will not build out of the box. Some of the udPlatform files _may_ be available in the [udCore](https://github.com/Euclideon/udCore) repository. Various Dinkey protection files were removed from the history that contained secret keys.
 
 ### Overview ###
-
--*"ep build a big framework for us, let the app design so simply"*
 
 This repository contains the source to the Euclideon Platform series of projects.
 These include:
@@ -19,8 +15,6 @@ These include:
  * *daemon* - Headless service host application; servers, RPC, script/cmd line (Application)
 
 ### Build Instructions ###
-
--*"very professional"*
 
 #### Setup ####
 
@@ -51,9 +45,7 @@ Studio project files. Visual Studio users should make sure to select 'shell',
 
 ### Where we're at ###
 
--*"I like it, perfect design"*
-
-At the time of death, EP is in a fairly capable prototype state.
+At the time of discontinuation, EP is in a fairly capable prototype state.
 
  * Infrastructure and supporting libs (containers, math, etc) are mostly
    stabilised
@@ -74,33 +66,21 @@ At the time of death, EP is in a fairly capable prototype state.
 
 ### Planned future development ###
 
--*"this is the best coding I ever seen!"*
-
  * **Renderer improvements** - Rejig renderer to pull frames on demand rather than
 have kernel push new frames for rendering when the renderer may-not be ready to
 accept them. This will improve performance, and resolve various subtle problems
 relating to scene dirty-state propagation.
-
  * **Compositor** - Implement a compositing API, allowing flexibility of complex
 rendering setups involving layered UD/Geom sub-scenes and introducing
 user-supplied post-effects. This is particularly useful for niche visualisation
 tasks.
-
  * **Viewport gizmos** - A preliminary branch exists introducing a 'gizmo' API,
 allowing users to produce components intended to interact with nodes in the
 viewports/scenes. Includes initial implementations of translation/rotation/scaling
 gizmos.
-
  * **GDAL integration** - Geolocation services are a requirement for geospatial
 products.
-
  * **Undo/redo system** - This speaks for itself; a framework should exist for
 managing a stack of destructive operations.
-
  * **Produce more out-of-the-box UI components** - Eg, a decent tree-view, general
 property inspector, etc; UI components which may be shared among application UIs.
-
-
-There are also a roadmap in Jira
-(http://jira/secure/RapidBoard.jspa?rapidView=34&view=planning.nodetail) with the
-most recent plan to reach Geoverse-Platform.
